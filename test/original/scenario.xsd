@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:element name="scenario">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="demography" type="demography" />
+				<xs:element name="monitoring" type="monitoring" />
+				<xs:element name="interventions" type="interventions" />
+				<xs:element name="healthSystem" type="healthSystem" />
+				<!-- TODO: add casemanagement here -->
+				<xs:element name="entoData" type="entoData" />
+				<xs:element name="parameters" type="parameters" />
+			</xs:sequence>
+			<xs:attribute name="analysisNo" type="xs:int" />
+			<xs:attribute name="maximumAgeYrs" type="xs:double"
+				use="required" />
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<xs:attribute name="popSize" type="xs:int" use="required" />
+			<xs:attribute name="simulationDuration" type="xs:int"
+				use="required" />
+			<xs:attribute name="modelVersion" type="xs:int"
+				use="required" />
+			<xs:attribute name="wuID" type="xs:int" use="required" />
+			<xs:attribute name="assimMode" type="xs:int" use="required" />
+			<xs:attribute name="mode" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:int">
+						<xs:enumeration value="1" />
+						<xs:enumeration value="2" />
+						<xs:enumeration value="3" />
+						<xs:enumeration value="4" />
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+
+	<!--Parameters-->
+	<xs:complexType name="parameter">
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="number" type="xs:int" use="required" />
+		<xs:attribute name="value" type="xs:double" use="required" />
+		<xs:attribute name="include" type="xs:boolean" />
+	</xs:complexType>
+	<xs:complexType name="parameters">
+		<xs:sequence>
+			<xs:element name="parameter" type="parameter"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="interval" type="xs:int" use="required" />
+		<xs:attribute name="iseed" type="xs:int" use="required" />
+		<xs:attribute name="delta" type="xs:double" use="required" />
+		<xs:attribute name="nspore" type="xs:int" use="required" />
+		<xs:attribute name="latentp" type="xs:int" use="required" />
+	</xs:complexType>
+	<xs:complexType name="inputValue">
+		<xs:attribute name="value" type="xs:double" use="required" />
+	</xs:complexType>
+
+	<!--Demography-->
+	<xs:complexType name="demography">
+		<xs:sequence>
+			<xs:element name="ageGroup" type="ageGroup" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<!--Entomology-->
+	<xs:complexType name="EIRDaily">
+		<xs:simpleContent>
+			<xs:extension base="xs:double">
+				<xs:attribute name="origin" type="xs:string" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	<xs:complexType name="anopheles">
+		<xs:sequence>
+			<xs:element name="eir">
+				<xs:complexType>
+					<xs:attribute name="a0" type="xs:double"
+						use="required" />
+					<xs:attribute name="a1" type="xs:double"
+						use="required" />
+					<xs:attribute name="a2" type="xs:double"
+						use="required" />
+					<xs:attribute name="b1" type="xs:double"
+						use="required" />
+					<xs:attribute name="b2" type="xs:double"
+						use="required" />
+					<xs:attribute name="EIRRotateAngle" type="xs:double"
+						use="required" />
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="mosq">
+				<xs:complexType>
+					<xs:attribute name="mosqRestDuration" type="xs:int"
+						use="required" />
+					<xs:attribute name="mosqSeekingDeathRate"
+						type="xs:double" use="required" />
+					<xs:attribute name="mosqSeekingDuration"
+						type="xs:double" use="required" />
+					<xs:attribute name="mosqProbBiting" type="xs:double"
+						use="required" />
+					<xs:attribute name="mosqProbFindRestSite"
+						type="xs:double" use="required" />
+					<xs:attribute name="mosqProbResting"
+						type="xs:double" use="required" />
+					<xs:attribute name="mosqProbOvipositing"
+						type="xs:double" use="required" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="mosquito" type="xs:string" use="required" />
+		<xs:attribute name="useNv0Guess" type="xs:boolean"
+			use="required" />
+	</xs:complexType>
+	<xs:complexType name="entoData">
+		<xs:sequence>
+			<xs:element name="EIRDaily" type="EIRDaily" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:element name="anopheles" type="anopheles" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="inputType" use="required">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:enumeration value="EIR" />
+					<xs:enumeration value="Fourier" />
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<!--Monitoring-->
+	<xs:complexType name="monitoring">
+		<xs:sequence>
+			<xs:element name="surveys">
+				<xs:complexType>
+					<xs:sequence maxOccurs="unbounded">
+						<xs:element name="surveyTime" type="xs:int" />
+					</xs:sequence>
+					<xs:attribute name="detectionLimit" type="xs:double"
+						use="required" />
+					<xs:attribute name="summaryOption" type="xs:int"
+						use="required" />
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ageGroup" type="ageGroup" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+
+	<!-- ageGroup -->
+	<xs:complexType name="ageGroup">
+		<xs:sequence>
+			<xs:element name="group" type="groupBounds"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="lowerbound" type="xs:double" />
+	</xs:complexType>
+	<!-- We use a groupBound, it gives the upperbound and the poppercent, the poppercent
+		is optional -->
+	<xs:complexType name="groupBounds">
+		<xs:attribute name="poppercent" type="xs:double" use="optional" />
+		<xs:attribute name="upperbound" type="xs:double" use="optional" />
+	</xs:complexType>
+
+	<!--Interventions-->
+	<xs:complexType name="interventions">
+		<xs:sequence>
+			<xs:element name="vaccineDescription"
+				type="vaccineDescription" minOccurs="0" maxOccurs="3" />
+			<xs:element name="iptiDescription" type="iptDescription"
+				minOccurs="0" maxOccurs="1" />
+			<xs:element name="ITNDescription" type="ITNDescription"
+				minOccurs="0" />
+			<xs:element name="continuous" type="continuous"
+				minOccurs="0" />
+			<xs:element name="timed" type="timed" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+	<xs:complexType name="continuous">
+		<xs:sequence>
+			<xs:element name="vaccine" type="ageSpecific" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:element name="ITN" type="ageSpecific" minOccurs="0"
+				maxOccurs="unbounded" />
+			<xs:element name="ipti" type="ageSpecific" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="timed">
+		<xs:sequence>
+			<xs:element name="intervention" type="intervention"
+				maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="IRS" />
+	<xs:complexType name="mass">
+		<xs:attribute name="maxAge" type="xs:double" />
+		<xs:attribute name="minAge" type="xs:double" />
+		<xs:attribute name="coverage" type="xs:double" />
+	</xs:complexType>
+	<xs:complexType name="ageSpecific">
+		<xs:attribute name="targetAgeYrs" type="xs:double" />
+		<xs:attribute name="coverage" type="xs:double" />
+	</xs:complexType>
+	<xs:complexType name="intervention">
+		<xs:sequence>
+			<xs:element name="changeHS" type="healthSystem"
+				minOccurs="0" />
+			<xs:element name="MDA" type="mass" minOccurs="0" />
+			<xs:element name="IRS" type="IRS" minOccurs="0" />
+			<xs:element name="vaccinate" type="mass" minOccurs="0" />
+			<xs:element name="ITN" type="mass" minOccurs="0" />
+			<xs:element name="ipti" type="mass" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute name="time" type="xs:int" use="required" />
+	</xs:complexType>
+	<xs:complexType name="vaccineDescription">
+		<xs:sequence>
+			<xs:element name="halfLifeYrs" type="inputValue" />
+			<xs:element name="efficacyB" type="inputValue" />
+			<xs:element name="initialEfficacy" type="inputValue"
+				minOccurs="1" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="vaccineType" type="xs:int" use="required" />
+	</xs:complexType>
+	<xs:complexType name="iptDescription">
+		<xs:sequence>
+			<xs:element name="infGenotype" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:attribute name="name" type="xs:string"
+						use="required" />
+					<xs:attribute name="freq" type="xs:double"
+						use="required" />
+					<xs:attribute name="ACR" type="xs:double"
+						use="required" />
+					<xs:attribute name="proph" type="xs:int"
+						use="required" />
+					<xs:attribute name="tolPeriod" type="xs:int"
+						use="required" />
+					<xs:attribute name="atten" type="xs:int"
+						use="required" />
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="iptiEffect" type="xs:int" use="required" />
+	</xs:complexType>
+	<xs:complexType name="ITNDescription">
+		<xs:sequence>
+			<xs:element name="halfLifeYrs" type="inputValue" />
+			<xs:element name="pu0" type="inputValue" />
+			<xs:element name="pu1" type="inputValue" />
+			<xs:element name="sporogonyGonotrophy" type="inputValue" />
+		</xs:sequence>
+	</xs:complexType>
+	<!--HealthSystem-->
+	<xs:complexType name="healthSystem">
+		<xs:sequence>
+			<xs:element name="drugRegimen">
+				<xs:complexType>
+					<xs:attribute name="firstLine" type="xs:string"
+						use="required" />
+					<xs:attribute name="secondLine" type="xs:string"
+						use="required" />
+					<xs:attribute name="inpatient" type="xs:string"
+						use="required" />
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="initialACR" type="treatmentDetails" />
+			<xs:element name="compliance" type="treatmentDetails" />
+			<xs:element name="nonCompliersEffective"
+				type="treatmentDetails" />
+			<xs:element name="pSeekOfficialCareUncomplicated1"
+				type="inputValue" />
+			<xs:element name="pSelfTreatUncomplicated"
+				type="inputValue" />
+			<xs:element name="pSeekOfficialCareUncomplicated2"
+				type="inputValue" />
+			<xs:element name="pSeekOfficialCareSevere"
+				type="inputValue" />
+			<xs:element name="pSequelaeInpatient" type="byAgeItems" />
+			<xs:element name="CFR" type="ageGroups" />
+		</xs:sequence>
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<xs:attribute name="healthSystemMemory" type="xs:int"
+			use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="treatmentDetails">
+		<xs:sequence>
+			<xs:element name="CQ" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="SP" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="AQ" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="SPAQ" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="ACT" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="QN" type="inputValue" minOccurs="0"
+				maxOccurs="1" />
+			<xs:element name="selfTreatment" type="inputValue" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="ageGroups">
+		<xs:sequence>
+			<xs:element name="group" type="group" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="group">
+		<xs:attribute name="cfr" type="xs:double" use="required" />
+		<xs:attribute name="lowerbound" type="xs:double" use="required" />
+	</xs:complexType>
+
+	<xs:complexType name="byAgeItems">
+		<xs:sequence>
+			<xs:element name="item" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:complexContent>
+						<xs:extension base="inputValue">
+							<xs:attribute name="maxAgeYrs"
+								type="xs:double" />
+						</xs:extension>
+					</xs:complexContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+</xs:schema>
