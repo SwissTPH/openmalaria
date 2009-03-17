@@ -542,8 +542,6 @@
                   name="vaccineDescription" type="vaccineDescription" />
       <xs:element maxOccurs="1" minOccurs="0"
                   name="iptiDescription" type="iptDescription" />
-      <xs:element minOccurs="0" name="ITNDescription"
-                  type="ITNDescription" />
       <xs:element minOccurs="0" name="continuous"
                   type="continuous">
         <xs:annotation>
@@ -800,36 +798,6 @@
         <xs:appinfo />
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="ITNDescription">
-    <xs:sequence>
-      <xs:element name="halfLifeYrs" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>
-            Half life of drug effect
-          </xs:documentation>
-          <xs:appinfo>units:Years;min:0;max:100;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="pu0" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>To be replaced</xs:documentation>
-          <xs:appinfo>units:To be replaced;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="pu1" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>To be replaced</xs:documentation>
-          <xs:appinfo>units:To be replaced;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="sporogonyGonotrophy" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>To be replaced</xs:documentation>
-          <xs:appinfo>units:To be replaced;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
   </xs:complexType>
   <!--HealthSystem-->
   <xs:complexType name="healthSystem">

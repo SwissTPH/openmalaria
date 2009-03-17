@@ -17,13 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-
+using namespace std;
 #include "inputData.h"
 #include "scenario.hxx"
 
 #include <iostream>
 #include <map>
-using namespace std;
+
+const int SCHEMA_VERSION = 3;
+
 /** @brief The xml data structure. */
 const Scenario* scenario;
 const Monitoring * monitoring;
@@ -79,8 +81,8 @@ bool createDocument(const char * lXmlFile) {
   //Parses the document
   try {
     scenario = (parseScenario (lXmlFile)).release();
-    if (scenario->getSchemaVersion() != 2) {
-      cerr << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator." << endl;
+    if (scenario->getSchemaVersion() != SCHEMA_VERSION) {
+      cerr << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION << endl;
       throw 0;
     }
     
