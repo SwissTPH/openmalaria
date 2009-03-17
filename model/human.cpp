@@ -45,48 +45,54 @@
 #define isnan(x) ((x) != (x))
 #endif
 
-double smuY;
-double sigma_i;
-double initPyroThres;
-double Ystar2_13;
-double alpha14;
-double Ystar1_26;
-double sevMal_21;
-double critAgeComorb_30;
-double comorbintercept_24;
-double indirRiskCoFactor_18;
-double immPenalty_22;
-double asexImmRemain;
-double immEffectorRemain;
-double rateMultiplier_31;
-double densityExponent_32;
-double BaselineAvailabilityShapeParam;
-double detectionlimit;
+double Human::smuY;
+double Human::sigma_i;
+double Human::initPyroThres;
+double Human::Ystar2_13;
+double Human::alpha14;
+double Human::Ystar1_26;
+double Human::sevMal_21;
+double Human::critAgeComorb_30;
+double Human::comorbintercept_24;
+double Human::indirRiskCoFactor_18;
+double Human::immPenalty_22;
+double Human::asexImmRemain;
+double Human::immEffectorRemain;
+double Human::rateMultiplier_31;
+double Human::densityExponent_32;
+double Human::BaselineAvailabilityShapeParam;
+double Human::detectionlimit;
+double Human::baseEntoAvailability;
+double Human::baseProbMosqSurvivalBiting;
+double Human::baseProbMosqSurvivalResting;
 
-void initHumanParameters () {
+const double Human::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+
+void Human::initHumanParameters () {	// static
   /*
-
     Init parameters that are common to all humans
-
   */
-
+  
+  baseEntoAvailability = 1.0;		// FIXME: get from xml
+  baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
+  baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
   double densitybias;
-  smuY=-log(0.5)/(daysInYear/interval*get_parameter(25));
-  sigma_i=sqrt(get_parameter(6));
-  initPyroThres=get_parameter(28);
-  Ystar2_13=get_parameter(13);
-  alpha14=get_parameter(14);
-  indirRiskCoFactor_18=(1-exp(-get_parameter(18)));
-  sevMal_21=get_parameter(21);
-  immPenalty_22=1-exp(get_parameter(22));
-  comorbintercept_24=1-exp(-get_parameter(24));
-  Ystar1_26=get_parameter(26);
-  immEffectorRemain=exp(-get_parameter(23));
-  asexImmRemain=exp(-get_parameter(27));
-  critAgeComorb_30=get_parameter(30);
-  if ( isOptionIncluded(modelVersion, MuellerMorbidityModel)) {
-    rateMultiplier_31=get_parameter(31);
-    densityExponent_32=get_parameter(32);
+  smuY=-log(0.5)/(daysInYear/Global::interval*getParameter(Params::Y_STAR_HALF_LIFE));
+  sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
+  initPyroThres=getParameter(Params::Y_STAR_0);
+  Ystar2_13=getParameter(Params::Y_STAR_SQ);
+  alpha14=getParameter(Params::ALPHA);
+  indirRiskCoFactor_18=(1-exp(-getParameter(Params::INDIRECT_RISK_COFACTOR)));
+  sevMal_21=getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
+  immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
+  comorbintercept_24=1-exp(-getParameter(Params::COMORBIDITY_INTERCEPT));
+  Ystar1_26=getParameter(Params::Y_STAR_1);
+  immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
+  asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+  critAgeComorb_30=getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
+  if (Global::modelVersion & MUELLER_MORBIDITY_MODEL) {
+    rateMultiplier_31=getParameter(Params::MUELLER_RATE_MULTIPLIER);
+    densityExponent_32=getParameter(Params::MUELLER_DENSITY_EXPONENT);
   }
   /*
     TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
@@ -94,28 +100,33 @@ void initHumanParameters () {
     add an attribute to scenario.xml densityQuantification="malariaTherapy|garki|other"
   */
   if (( get_analysis_no() <  22) || ( get_analysis_no() >  30)) {
-    densitybias=get_parameter(15);
+    densitybias=getParameter(Params::DENSITY_BIAS_NON_GARKI);
   }
   else {
-    densitybias=get_parameter(20);
+    densitybias=getParameter(Params::DENSITY_BIAS_GARKI);
   }
   detectionlimit=get_detectionlimit()*densitybias;
-  BaselineAvailabilityShapeParam=get_parameter(16);
+  BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
 }
 
+// Testing Ctor
 Human::Human() {
   _withinHostModel = new OldWithinHostModel(this);
-  if (isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     _drugs = list<Drug*>();
     _proxy = new DrugProxy(this);
   }
 }
 
-
-Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simulationTime) 
-  : _simulationTime(simulationTime), _caseManagement(caseManagement) {
- 
-  int i;
+// Create new human
+Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int simulationTime) 
+  : _simulationTime(simulationTime), _caseManagement(caseManagement)
+{
+  //FIXME: should be partially random:
+  _entoAvailability = baseEntoAvailability;
+  _probMosqSurvivalBiting = baseProbMosqSurvivalBiting;
+  _probMosqSurvivalResting = baseProbMosqSurvivalResting;
+  
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
   _cumulativeEIRa=0.0;
@@ -139,21 +150,20 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
   _pyrogenThres=initPyroThres;
   _TBVEfficacy=0.0;
   _totalDensity=0.0;
-  for ( i=1;i<=4; i++) {
+  for (int i=1;i<=4; i++) {
     _ylag[i-1]=0.0;
   }
-  _ITN=false;/* bool */;
   _latestEvent.setTime(missing_value);
   _latestEvent.setCaseManagement(caseManagement);
   _lastSPDose=missing_value;
   _lastIptiOrPlacebo=missing_value;
-  if (isOptionIncluded(modelVersion, negativeBinomialMassAction)) {
+  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
   }
-  else if( isOptionIncluded(modelVersion, lognormalMassAction)) {
+  else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
     _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
   }
-  else if (isOptionIncluded(modelVersion, transHet)) {
+  else if (Global::modelVersion & TRANS_HET) {
     _BaselineAvailabilityToMosquitoes=0.2;
     if (W_UNIFORM() < 0.5) {            
       _BaselineAvailabilityToMosquitoes=1.8;
@@ -162,7 +172,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
   else {
     _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
   }
-  if (isOptionIncluded(modelVersion, comorbHet)) {
+  if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
     if (W_UNIFORM() < 0.5) {            
       _comorbidityFactor=1.8;
@@ -171,7 +181,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
   else {
     _comorbidityFactor=1.0;
   }
-  if (isOptionIncluded(modelVersion, treatHet)) {
+  if (Global::modelVersion & TREAT_HET) {
     _treatmentSeekingFactor=0.2;
     if (W_UNIFORM() < 0.5) {            
       _treatmentSeekingFactor=1.8;
@@ -180,7 +190,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
   else {
     _treatmentSeekingFactor=1.0;
   }
-  if (isOptionIncluded(modelVersion, transTreatHet)) {
+  if (Global::modelVersion & TRANS_TREAT_HET) {
     _treatmentSeekingFactor=0.2;
     _BaselineAvailabilityToMosquitoes=1.8;
     if (W_UNIFORM()<0.5) {
@@ -188,7 +198,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
       _BaselineAvailabilityToMosquitoes=0.2;
     }
   }
-  if (isOptionIncluded(modelVersion, comorbTreatHet)) {
+  if (Global::modelVersion & COMORB_TREAT_HET) {
     _comorbidityFactor=0.2;
     _treatmentSeekingFactor=1.8;
     if (W_UNIFORM()<0.5) {
@@ -196,7 +206,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
       _comorbidityFactor=1.8;
     }
   }
-  if (isOptionIncluded(modelVersion,comorbTransHet)) {
+  if (Global::modelVersion & COMORB_TRANS_HET) {
     _BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     if (W_UNIFORM()<0.5) {
@@ -204,7 +214,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
       _comorbidityFactor=0.2;
     }
   }  
-  if (isOptionIncluded(modelVersion,tripleHet)) {
+  if (Global::modelVersion & TRIPLE_HET) {
     _BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
@@ -214,17 +224,18 @@ Human::Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simula
       _treatmentSeekingFactor=1.8;
     }
   }  
-  if (isOptionIncluded(modelVersion, includesPKPD)) { 
+  if (Global::modelVersion & INCLUDES_PK_PD) { 
     _drugs = list<Drug*>();
     _proxy = new DrugProxy(this);
   }
   _withinHostModel = new OldWithinHostModel(this);
 }
 
-Human::Human(istream& funit, CaseManagement* caseManagement, int simulationTime) 
-  : _simulationTime(simulationTime), _caseManagement(caseManagement) {
-  
-  if (isOptionIncluded(modelVersion, includesPKPD)) { 
+// Load human from checkpoint
+Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime) 
+  : _simulationTime(simulationTime), _caseManagement(caseManagement)
+{
+  if (Global::modelVersion & INCLUDES_PK_PD) { 
     _drugs = list<Drug*>();
     _proxy = new DrugProxy(this);
   }
@@ -245,7 +256,7 @@ Human::~Human(){
     Simulation::gMainSummary->report(_latestEvent);
   }  
   clearAllInfections();
-  if (isOptionIncluded(modelVersion, includesPKPD)) { // treatInfections() 
+  if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
     list<Drug*>::const_iterator it;
     for(it=_drugs.begin(); it!=_drugs.end(); it++) {
       delete (*it);
@@ -267,12 +278,12 @@ void Human::readFromFile(fstream& funit){
 
 }
 
-void Human::updateInfection(double adultEIR, double availability, double expectedNumberOfInfections){
+void Human::updateInfection(double expectedInfectionRate, double expectedNumberOfInfections){
 
-  introduceInfections(adultEIR, availability, expectedNumberOfInfections); 
+  introduceInfections(expectedInfectionRate, expectedNumberOfInfections); 
   clearOldInfections();
 
-  if ( mymodf(_simulationTime*interval, 5) ==  0) {
+  if ((_simulationTime*Global::interval) % 5 ==  0) {
     for (int i=1;i<=3; i++) {
       _ylag[4-i]=_ylag[3-i];
     }
@@ -285,7 +296,7 @@ void Human::updateInfection(double adultEIR, double availability, double expecte
 
 void Human::treatInfections(){
 
-  if (isOptionIncluded(modelVersion, includesPKPD)) { // treatInfections() 
+  if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
     treatAllInfections();
     _proxy->decayDrugs();
   }
@@ -298,7 +309,7 @@ void Human::clearOldInfections(){
   std::list<Infection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
     enddate=(*iter)->getEndDate();
-    //enddate=(*iter)->iData.startdate+(*iter)->iData.duration/interval;
+    //enddate=(*iter)->iData.startdate+(*iter)->iData.duration/Global::interval;
     if (_simulationTime >= enddate) {
       delete *iter;
       iter=infections.erase(iter);
@@ -327,7 +338,7 @@ void Human::treatAllInfections(){
   }
 }
 
-void Human::introduceInfections(double adultEIR, double availability, double expectedNumberOfInfections){
+void Human::introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections){
   double pInfectedstep;
   int Ninf;
   int i;
@@ -336,11 +347,12 @@ void Human::introduceInfections(double adultEIR, double availability, double exp
   //forgotten
   
   //Update pre-erythrocytic immunity
-  if (isOptionIncluded(modelVersion,transHet) || isOptionIncluded(modelVersion,comorbTransHet) || isOptionIncluded(modelVersion,transTreatHet) || isOptionIncluded(modelVersion, tripleHet)) {
-    _cumulativeEIRa+=(double)(interval*availability*adultEIR*(_BaselineAvailabilityToMosquitoes));
+  if (Global::modelVersion & 
+      (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
+    _cumulativeEIRa+=(double)(Global::interval*expectedInfectionRate*(_BaselineAvailabilityToMosquitoes));
   }
   else {
-    _cumulativeEIRa+=(double)interval*availability*adultEIR;
+    _cumulativeEIRa+=(double)Global::interval*expectedInfectionRate;
   }
 
   if ( expectedNumberOfInfections >  0.0000001) {
@@ -362,22 +374,19 @@ void Human::introduceInfections(double adultEIR, double availability, double exp
 void Human::update(int simulationTime, TransmissionModel* transmissionModel){
 
   _simulationTime = simulationTime;
-  double availabilityUpdate = transmissionModel->getRelativeAvailability(getAgeInYears());
+  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, *this);
+  
   updateInterventionStatus(); 
   updateImmuneStatus();
-  updateInfection(transmissionModel->calculateEIR(_simulationTime),
-                        transmissionModel->getRelativeAvailability(getAgeInYears()),
-                        transmissionModel->getExpectedNumberOfInfections(getPEVEfficacy(),
-                                                                         getBaselineAvailabilityToMosquitoes(),
-                                                                         getCumulativeEIRa(),
-                                                                         availabilityUpdate*transmissionModel->calculateEIR(_simulationTime)));
+  updateInfection(expectedInfectionRate,
+                  transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
-  setWeight(transmissionModel->getWeight(getAgeInYears()));
+  setWeight(120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())]);
   treatInfections();
 
 }
 
-void Human::setCaseManagement(CaseManagement* caseManagement){
+void Human::setCaseManagement(CaseManagementModel* caseManagement){
   _caseManagement=caseManagement;
 }
 
@@ -405,23 +414,41 @@ void Human::updateImmuneStatus(){
 }
 
 void Human::doCM(int entrypoint){
- 
   //TODO: implement age-specificity of drug dosing
+  //TODO: move to separate module, get array of case managements in init.
+  /*
+  double ageyrs = getAgeInYears();
+  const CaseManagements::CaseManagementSequence managements = getCaseManagements().getCaseManagement();
+  if (managements == NULL) return;
+  const CaseManagement* caseManagement = NULL;
+  for (CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
+    if (ageyrs < it->getMaxAge() &&
+        !it->getMinAge().present() || it->getMinAge().get() <= ageyrs)
+      caseManagement = &*it;
+  if (caseManagement == NULL) {
+    cerr << "No case management for age " << ageyrs << endl;
+    throw 0;
+  }
+  
   int decisionID;
-  int nMedicate;
-  int medicateID;
-  int time;
-  double qty;
-  //char name;
-  double ageyrs= getAgeInYears();
-  decisionID=get_decision_id(entrypoint, ageyrs);
-  nMedicate=get_n_medicate(decisionID, ageyrs);
+  if (entrypoint == 1) {
+    decisionID = caseManagement.getUc1().getDecision();
+  } else if (entrypoint == 2) {
+    decisionID = caseManagement.getUc2().getDecision();
+  } else if (entrypoint == 3) {
+    decisionID = caseManagement.getSev().getDecision();
+  } else if (entrypoint == 4) {
+    decisionID = caseManagement.getNmf().getDecision();
+  }
+  
+  //FIXME: build list of decisions by ID and use
+  caseManagement.getDecisions()->getDecision(decisionID-1)->getNumMedicates();  int nMedicate=get_n_medicate(decisionID, ageyrs);
   if ( nMedicate ==  0) {
     return ;
   }
-  for ( medicateID=1;medicateID<=nMedicate; medicateID++) {
-    qty=get_cmp_qty(decisionID, medicateID, ageyrs);
-    time=get_cmp_time(decisionID, medicateID, ageyrs);
+  for (int medicateID=1;medicateID<=nMedicate; medicateID++) {
+    double qty=get_cmp_qty(decisionID, medicateID, ageyrs);
+    int time=get_cmp_time(decisionID, medicateID, ageyrs);
     //name=get_cmp_name(decisionID, medicateID, ageyrs);
     //call medicate(current,name,qty,time)
     cout << entrypoint;
@@ -429,7 +456,7 @@ void Human::doCM(int entrypoint){
     //cout << name;
     cout << qty;
     cout << time << endl;
-  }
+  }*/
 }
 
 void Human::medicate(string drugName, double qty, int time) {
@@ -443,10 +470,9 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   short drugEffect;
   // agegroup
   int agegrp;
-  int fortnight;
-  fortnight= round(14.0/interval);
+  int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
   //TODOConversion
-  //fortnight= (int)(14.0/interval);
+  //fortnight= (int)(14.0/Global::interval);
   //fortnight=3;
   agegrp=ageGroup();
   //	Countdown to indirect mortality
@@ -457,13 +483,13 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   if (! iDeath) {
     drugEffect=this->defineEvent();
     if ( drugEffect) {
-      if (! IPT) {
-        if (! isOptionIncluded(modelVersion, includesPKPD)) {
+      if (!IPTIntervention::IPT) {
+        if (!(Global::modelVersion & INCLUDES_PK_PD)) {
           clearAllInfections();
         }
       }
       // TODO: maybe all this IPT stuff should be put in a different module
-      if ( IPT) {
+      if (IPTIntervention::IPT) {
         if ( _latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
           clearAllInfections();
         }
@@ -479,6 +505,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
             symbolic constants
           */
         }
+# define iptiEffect IPTIntervention::iptiEffect
         else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
           clearAllInfections();
           _lastSPDose=_simulationTime+1;
@@ -492,7 +519,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
         else {
           _lastSPDose=_simulationTime+1;
           clearAllInfections();
-          // SPAction will first act at the beginning of the next interval
+          // SPAction will first act at the beginning of the next Global::interval
         }
       }
     }
@@ -502,46 +529,24 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
 }
 
 void Human::vaccinate(){
-  
-  double a;
   //Index to look up initial efficacy relevant for this dose.
-  int effIndex;
-  _lastVaccineDose=_lastVaccineDose+1;
-  effIndex=std::min(_numberOfInitEff, _lastVaccineDose);
-  if ( isOptionIncluded(vaccineType, preerythrocytic_reduces_h)) {
-    if ( PEVInitialMeanEfficacy[effIndex - 1] <  1) {
-      a=PEVefficacyB*PEVInitialMeanEfficacy[effIndex - 1]/(1.0-PEVInitialMeanEfficacy[effIndex - 1]);
-      _PEVEfficacy=(W_BETA(a, (PEVefficacyB)));
-    }
-    else {
-      _PEVEfficacy=1;
-    }
-  }
-  if ( isOptionIncluded(vaccineType, erythrocytic_reduces_y)) {
-    if ( BSVInitialMeanEfficacy[effIndex - 1] <  1) {
-      a=BSVefficacyB*BSVInitialMeanEfficacy[effIndex - 1]/(1.0-BSVInitialMeanEfficacy[effIndex - 1]);
-      _BSVEfficacy=(W_BETA(a, (BSVefficacyB)));
-    }
-    else {
-      _BSVEfficacy=1;
-    }
-  }
-  if ( isOptionIncluded(vaccineType, transmission_blocking_reduces_k)) {
-    if ( TBVInitialMeanEfficacy[effIndex - 1] <  1) {
-      a=TBVefficacyB*TBVInitialMeanEfficacy[effIndex - 1]/(1.0-TBVInitialMeanEfficacy[effIndex - 1]);
-      _TBVEfficacy=(W_BETA(a, (TBVefficacyB)));
-    }
-    else {
-      _TBVEfficacy=1;
-    }
-  }
+  if (Vaccine::PEV.active)
+    _PEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
+  
+  if (Vaccine::BSV.active)
+    _BSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
+  
+  if (Vaccine::TBV.active)
+    _TBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
+  
+  ++_lastVaccineDose;
 }
 
 void Human::updateInterventionStatus(){
    
   int agetstep;
   int nextDose;
-  if ( vaccineType >  0) {
+  if (Vaccine::anyVaccine) {
     agetstep=_simulationTime-_dateOfBirth;
     /*
       Update the effect of the vaccine
@@ -550,9 +555,9 @@ void Human::updateInterventionStatus(){
       of a delay until the vaccine has reached max. efficacy.
     */
     if ( _lastVaccineDose >  0) {
-      _PEVEfficacy=_PEVEfficacy*exp(-PEVdecay);
-      _TBVEfficacy=_TBVEfficacy*exp(-TBVdecay);
-      _BSVEfficacy=_BSVEfficacy*exp(-BSVdecay);
+      _PEVEfficacy *= Vaccine::PEV.decay;
+      _TBVEfficacy *= Vaccine::TBV.decay;
+      _BSVEfficacy *= Vaccine::BSV.decay;
     }
     /*
       Determine eligibility for vaccination
@@ -562,91 +567,38 @@ void Human::updateInterventionStatus(){
     */
     if ( Simulation::timeStep >  0) {
       nextDose=_lastVaccineDose+1;
-      if (nextDose<=_numberOfEpiDoses){
-        if ( (W_UNIFORM()) <  vaccineCoverage[nextDose - 1] &&  targetagetstep[nextDose - 1] ==  agetstep) {
+      if (nextDose<=Vaccine::_numberOfEpiDoses){
+        if (W_UNIFORM() <  Vaccine::vaccineCoverage[nextDose - 1] && 
+            Vaccine::targetagetstep[nextDose - 1] ==  agetstep) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
         }
       }
     }
   }
-  if ( ITN) {
-    if ( (W_UNIFORM()) <  ITNdecay) {
-      _ITN=false;/* bool */;
-    }
-  }
-  if ( IPT) {
+  if (IPTIntervention::IPT) {
     if ( Simulation::timeStep >  0) {
-      if (iptiEffect==14) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=42 && (modIntervalsPerYear(_simulationTime)-1)<60) {
-          // assumes 5-day intervals and Niakhar seasonality
+      // assumes 5-day intervals and Niakhar seasonality
+      static int IPT_MIN_INTERVAL[9] = { 42, 48, 54, 60, 66, 36, 30, 24, 18 };
+      static int IPT_MAX_INTERVAL[9] = { 60, 66, 72, 78, 82, 54, 48, 42, 42 };
+      
+      if (iptiEffect >= 14 && iptiEffect <= 22) {
+        int yearInterval = (Global::modIntervalsPerYear(_simulationTime)-1);
+        if (yearInterval >= IPT_MIN_INTERVAL[iptiEffect-14] &&
+            yearInterval <  IPT_MAX_INTERVAL[iptiEffect-14])
           setLastSPDose();
-        }
-      }
-      else if (iptiEffect==15) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=48 && (modIntervalsPerYear(_simulationTime)-1)<66) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-      else if (iptiEffect==16) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=54 && (modIntervalsPerYear(_simulationTime)-1)<72) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-      else if (iptiEffect==17) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=60 && (modIntervalsPerYear(_simulationTime)-1)<78) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-      else if (iptiEffect==18) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=66 && (modIntervalsPerYear(_simulationTime)-1)<82) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-     else if (iptiEffect==19) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=36 && (modIntervalsPerYear(_simulationTime)-1)<54) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-     else if (iptiEffect==20) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=30 && (modIntervalsPerYear(_simulationTime)-1)<48) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-     else if (iptiEffect==21) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=24 && (modIntervalsPerYear(_simulationTime)-1)<42) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-     else if (iptiEffect==22) {
-        if ((modIntervalsPerYear(_simulationTime)-1)>=18 && (modIntervalsPerYear(_simulationTime)-1)<42) {
-          // assumes 5-day intervals and Niakhar seasonality
-          setLastSPDose();
-        }
-      }
-      else {
+      } else
         setLastSPDose();
-      }
     }
   }
 }
 
 void Human::setLastSPDose() {
-  double rnum;
-  int agetstep;
-  int i;
-  agetstep=_simulationTime-_dateOfBirth;
-  for ( i=1;i<=numberOfIPTiDoses; i++) {
-    if ( iptiTargetagetstep[i - 1] == agetstep) {
-      rnum=W_UNIFORM();
-      if ( (rnum) <  iptiCoverage[i - 1]) {
+  int agetstep=_simulationTime-_dateOfBirth;
+  for (int i=1;i<=IPTIntervention::numberOfIPTiDoses; i++) {
+    if (IPTIntervention::iptiTargetagetstep[i - 1] == agetstep) {
+      double rnum=W_UNIFORM();
+      if ( (rnum) <  IPTIntervention::iptiCoverage[i - 1]) {
         _lastIptiOrPlacebo=_simulationTime;
         /*
           iptiEffect denotes treatment or placebo group
@@ -662,9 +614,10 @@ void Human::setLastSPDose() {
 }
 
 void Human::summarize(){
-    
   double age = getAgeInYears();
-  if (get_is_ipti() == 1 && _simulationTime-_tLastTreatment >= 1 && _simulationTime-_tLastTreatment <=  4) {
+  if (getInterventions().getIptiDescription().present() &&
+      _simulationTime-_tLastTreatment >= 1 &&
+      _simulationTime-_tLastTreatment <=  4) {
     return ;
   }
   Simulation::gMainSummary->addToHost(age,1);
@@ -695,11 +648,11 @@ int Human::ageGroup() const{
 }
 
 double Human::getAgeInYears() const{
-  return 1.0*((_simulationTime-_dateOfBirth)*interval)/daysInYear;
+  return 1.0*((_simulationTime-_dateOfBirth)*Global::interval)/daysInYear;
 }
 
 double Human::getAgeInYears(int time) const{
-  return 1.0*((time-_dateOfBirth)*interval)/daysInYear;
+  return 1.0*((time-_dateOfBirth)*Global::interval)/daysInYear;
 }
 
 double Human::Ystar(){
@@ -710,7 +663,7 @@ double Human::Ystar(){
   double valYstar=_pyrogenThres;
   //Numerical approximation to equation 2, AJTMH p.57
   for ( i=1;i<=n; i++) {
-    valYstar=valYstar+_totalDensity*alpha14*interval*delt/((Ystar1_26+_totalDensity)*(Ystar2_13+valYstar))-smuY*valYstar*delt;
+    valYstar=valYstar+_totalDensity*alpha14*Global::interval*delt/((Ystar1_26+_totalDensity)*(Ystar2_13+valYstar))-smuY*valYstar*delt;
   }
   return valYstar;
 }
@@ -733,7 +686,7 @@ double Human::infectiousness(){
     lagged variables only every 5 days and cannot compute infectiousness
     for the first 20 days of the simulation
   */
-  if (( agetstep*interval >  20) && ( _simulationTime*interval >  20)) {
+  if (( agetstep*Global::interval >  20) && ( _simulationTime*Global::interval >  20)) {
     x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
     if ( x <  0.001) {
       transmit=0.0;
@@ -768,14 +721,14 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   else {
     entrypoint=Diagnosis::NON_MALARIA_FEVER;
   }
-  if ( isOptionIncluded(modelVersion, caseManagementV2)) {
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
     returnValue=true;
   }
   else {
     nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
     //call doCM(nextRegimen,0.1)
     if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
-      if (isOptionIncluded(modelVersion, includesPKPD)){
+      if (Global::modelVersion & INCLUDES_PK_PD){
         _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
         /*
           TODO: uncomplicatedEvent forces a call of pk PD model
@@ -831,7 +784,7 @@ bool Human::severeMalaria(){
   if (getAgeInYears() >= 5.0) {
     isAdult=1;
   }
-  if ( isOptionIncluded(modelVersion, caseManagementV2)) {
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
     returnValue=true;      
   }
   /*
@@ -959,15 +912,15 @@ bool Human::defineEvent(){
   double ageYears;
   bool valdefineEvent =false;
   ageYears=getAgeInYears();
-  if ( isOptionIncluded(modelVersion, predeterminedEpisodes)) {
+  if (Global::modelVersion & PREDETERMINED_EPISODES) {
     prEpisode=0;
     if ( _timeStepMaxDensity > _pyrogenThres) {
       prEpisode=1;
     }
   }
   else {
-    if ( isOptionIncluded(modelVersion, MuellerMorbidityModel)) {
-      IncidenceDensity=rateMultiplier_31*(pow(_totalDensity, densityExponent_32))/(1.0*intervalsPerYear);
+    if (Global::modelVersion & MUELLER_MORBIDITY_MODEL) {
+      IncidenceDensity=rateMultiplier_31*(pow(_totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
       prEpisode=1-exp(-IncidenceDensity);
     }
     else {
@@ -1003,14 +956,14 @@ bool Human::defineEvent(){
       }
     }
     // Penalizing immunity for clinical episodes	
-    if ( isOptionIncluded(modelVersion, penalisationEpisodes)) {
+    if (Global::modelVersion & PENALISATION_EPISODES) {
       _cumulativeY=(double)_cumulativeYlag+(-(immPenalty_22*(_cumulativeY-_cumulativeYlag)));
       if (_cumulativeY <  0) {
         _cumulativeY=0.0;
       }
     }
   }
-  else if( isOptionIncluded(modelVersion, nonMalariaFevers)) {
+  else if(Global::modelVersion & NON_MALARIA_FEVERS) {
     prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
     if ((W_UNIFORM()) < prNonMalariaFever){
       valdefineEvent=uncomplicatedEvent(false);
@@ -1028,8 +981,22 @@ list<Drug*>* Human::getDrugs() {
   return &_drugs;
 }
 
-ostream& operator<<(ostream& out, const Human& human){
+double Human::entoAvailability () {
+  return _entoAvailability
+      * entoInterventionITN.availability()
+      * entoInterventionIRS.availability();
+}
+double Human::probMosqSurvivalBiting () {
+  return _probMosqSurvivalBiting
+      * entoInterventionITN.probMosqBiting();
+}
+double Human::probMosqSurvivalResting () {
+  return _probMosqSurvivalResting
+      * entoInterventionIRS.probMosqSurvivalResting();
+}
 
+
+ostream& operator<<(ostream& out, const Human& human){
   out << human._cumulativeInfections << endl; 
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
@@ -1056,7 +1023,6 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._ylag[1] << endl; 
   out << human._ylag[2] << endl; 
   out << human._ylag[3] << endl; 
-  out << boolalpha << human._ITN << endl; 
   out << human._lastSPDose << endl; 
   out << human._lastIptiOrPlacebo << endl; 
   out << human._comorbidityFactor << endl;  
@@ -1064,11 +1030,16 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._latestEvent;   
   out << *human._withinHostModel;
+  out << human._entoAvailability << endl;
+  out << human._probMosqSurvivalBiting << endl;
+  out << human._probMosqSurvivalResting << endl;
+  out << human.entoInterventionITN;
+  out << human.entoInterventionIRS;
 
     for(std::list<Infection*>::const_iterator iter=human.infections.begin(); iter != human.infections.end(); iter++)
       out << **iter;
      
-  if (isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     out << *(human._proxy);
     out << human._drugs.size() << endl;
     list<Drug*>::const_iterator it;
@@ -1081,7 +1052,6 @@ ostream& operator<<(ostream& out, const Human& human){
 }
 
 istream& operator>>(istream& in, Human& human){
-
   in >> human._cumulativeInfections; 
   in >> human._dateOfBirth; 
   in >> human._doomed; 
@@ -1108,7 +1078,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._ylag[1]; 
   in >> human._ylag[2]; 
   in >> human._ylag[3]; 
-  in >> boolalpha >> human._ITN; 
   in >> human._lastSPDose; 
   in >> human._lastIptiOrPlacebo; 
   in >> human._comorbidityFactor;  
@@ -1116,6 +1085,11 @@ istream& operator>>(istream& in, Human& human){
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._latestEvent;
   in >> *(human._withinHostModel);
+  in >> human._entoAvailability;
+  in >> human._probMosqSurvivalBiting;
+  in >> human._probMosqSurvivalResting;
+  in >> human.entoInterventionITN;
+  in >> human.entoInterventionIRS;
 
   for(int i=0;i<human._MOI;++i) {
     Infection* infection = new Infection();
@@ -1123,7 +1097,7 @@ istream& operator>>(istream& in, Human& human){
     human.infections.push_back(infection);
   }
 
-  if (isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     int numDrugs;
     in >> *(human._proxy);
     in >> numDrugs;

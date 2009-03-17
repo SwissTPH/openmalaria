@@ -23,46 +23,15 @@
 #include <fstream>
 #include <vector>
 
-/*
-  This is the maximum age of an individual that the simulation program can handle.
-  Max age for a scenario is given in the  the xml file.
-*/
-const int maxLifetimeDays= 32855;
-const int ngroups= 20;
-
-//a0 and a1 are the lower and upper age limits for the field data demography agegroups
-extern double a0[ngroups];
-extern double a1[ngroups];
-extern double perc[ngroups];
-//demography variables used in estimating the smooth curve
-extern double M1[ngroups];
-extern double M2[ngroups];
-extern double M[ngroups];
-extern double pred[ngroups];
-//parameters defining smooth curve of target age-distribution
-extern double mu0;
-extern double mu1;
-extern double alpha0;
-extern double alpha1;
-extern double rho;
-/*
-  target cumulative percentage of population by age
-  TODO5D
-*/
-extern double *cumpc;
-extern int cumpcX;
-
-extern int IDCounter; 
-
 // Forward declarations
 class Human;
-class CaseManagement;
+class CaseManagementModel;
 class TransmissionModel;
+class Mass;
 
 //! The simulated human population
 class Population{
-
- public:
+public:
 
   Population();
   Population(TransmissionModel* transmissionModel, int _populationSize);
@@ -103,7 +72,7 @@ class Population{
   /*!   
        \param time Current time (in tsteps) 
   */
-  void massIPTiTreatment(int time);
+  void massIPTiTreatment(const Mass&, int time);
 
   //!   Clear human collection.
   void clear();
@@ -112,7 +81,7 @@ class Population{
   /*!
      \param time Current time (in tsteps)
   */
-  void vaccinatePopulation(int time);
+  void vaccinatePopulation(const Mass&, int time);
   
   //! Initialise human list
   void initialiseHumanList();
@@ -133,15 +102,66 @@ class Population{
   /*!  
     \param time Current time (in tsteps)
   */
-  void massTreatment(int time);
+  void massTreatment(const Mass&, int time);
 
   //! remove human from the list
-  short outmigrate(Human *current, int Nsize, int *survivsSoFar, int *nCounter, int *pCounter, int *k, double yage);
- 
-  //! estimates parameters describing smooth demography target population
-  double setDemoParameters (double param1, double param2);
+  short outmigrate(Human *current, int Nsize, int &survivsSoFar);
 
- private:
+  //! updates counters of hosts and patently infected hosts in the 20 -25 year age bracket
+  void updateMaternalMalariaCounters(Human *current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter);
+  
+  // Static:
+  /** For input values for alpha1 and mu1, the fit to field data (residualSS)
+   * is calculated and returned function called iteratively by
+   * estimateRemovalRates. */
+  static double setDemoParameters (double param1, double param2);
+  
+private:
+  /** This is the maximum age of an individual that the simulation program can
+   * handle. Max age for a scenario is given in the  the xml file. */
+  static const int maxLifetimeDays= 32855;
+  static const int ngroups= 20;
+
+  /** The bounds for each age group and percentage of population in this age
+   * group for the field data demography age groups.
+   * 
+   * ageGroupBounds[i] is the lower-bound for group i, ageGroupBounds[i+1] is
+   * the group's upper bound. ageGroupPercent[i] is the percentage of the
+   * population in age group i.
+   * 
+   * Set by estimateRemovalRates() and used internally (by
+   * setDemoParameters()). */
+  //@{
+  static double ageGroupBounds[ngroups+1];
+  static double ageGroupPercent[ngroups];
+  //@}
+  /** Demography variables used in estimating the smooth curve.
+   * 
+   * Only used in setDemoParameters() calculations. */
+  //@{
+  static double M1[ngroups];
+  static double M2[ngroups];
+  static double M[ngroups];
+  static double pred[ngroups];
+  //@}
+  /** Parameters defining smooth curve of target age-distribution.
+   * 
+   * Set by estimateRemovalRates() (via setDemoParameters()) and used by
+   * setupPyramid(). Checkpointed. */
+  //@{
+  static double mu0;
+  static double mu1;
+  static double alpha0;
+  static double alpha1;
+  static double rho;
+  //@}
+  
+  /// Target cumulative percentage of population by age
+  //TODO5D
+  static double *cumpc;
+
+  /// ID passed to last Human created. Checkpointed.
+  static int IDCounter;
 
   //! Size of the human population   
   int _populationSize;
@@ -150,10 +170,13 @@ class Population{
   TransmissionModel* _transmissionModel;
 
   //! Case Management System model
-  CaseManagement* _caseManagement;
+  CaseManagementModel* _caseManagement;
   
-  //The simulated human population
+  /// The simulated human population
   std::list<Human*> _population;
+  
+  /// Iterator type of _population
+  typedef std::list<Human*>::iterator HumanIter;
 
   //! max lifespan in intervals
   int _maxTimestepsPerLife;
@@ -164,9 +187,6 @@ class Population{
   */
   int _workUnitIdentifier;
   
-  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
-  std::vector<double> matArray;
-
   /*!
     annAvgKappa is the overall proportion of mosquitoes that get infected allowing for the different densities
     in different seasons (approximating relative mosquito density with the EIR)
@@ -177,7 +197,6 @@ class Population{
   double _sumAnnualKappa;
 
   void init();
-
 };
 
 #endif

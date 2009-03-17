@@ -22,18 +22,17 @@
 #include <vector>
 
 //! Models of treatment seeking and referral
-class CaseManagement{
+class CaseManagementModel{
 
  public:
 
   //!Read caseManagement parameters from input file and allocate data structures.
-  CaseManagement();
-  ~CaseManagement();
-
-  /*!
-    Linear interpolation to get age-specific hospital case fatality rates
-    ageyears: age of person in years
-  */
+  CaseManagementModel();
+  ~CaseManagementModel();
+  
+  /*! Linear interpolation to get age-specific hospital case fatality rates
+   * 
+   * @param ageyears Age of person in years */
   double caseFatality(double ageyears);
 
   /*! Calculate the case fatality rate in the community as a function of the
@@ -50,19 +49,23 @@ class CaseManagement{
 
   int getCaseManagementMemory() const;
   double getRiskFromMaternalInfection() const;
-  void setRiskFromMaternalInfection(double risk);
 
   double getProbabilityGetsTreatment(int regimen) const;
   double getProbabilityParasitesCleared(int regimen) const;
   double getCureRate(int regimen) const;
   double getProbabilitySequelaeTreated(int regimen) const;
   double getProbabilitySequelaeUntreated(int regimen) const;
+  void setRiskFromMaternalInfection(int nCounter, int pCounter);
 
- private:
-
-  double _probGetsTreatment[3];
-  double _probParasitesCleared[3];
-  double _cureRate[3];
+private:
+  /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
+  //@{
+  void setParasiteCaseParameters ();
+  //@}
+  
+  double probGetsTreatment[3];
+  double probParasitesCleared[3];
+  double cureRate[3];
   int _caseManagementMemory;
   /*
     Probability for a newborn to die (indirect death) because the mother is infected.
@@ -71,18 +74,35 @@ class CaseManagement{
   double _riskFromMaternalInfection;
   //log odds ratio of case-fatality in community compared to hospital
   double _oddsRatioThreshold;
-  /*
-    pSequelaeTreated is the probability that the patient has sequelae conditional on hospital
-    treatment for severe disease. pSequelaeUntreated is the probability that the patient has 
-    sequelae conditional if they don^t receive hospital treatment for severe disease.
-  */
-  double _probSequelaeTreated[2];
-  double _probSequelaeUntreated[2];
-  //shortcut logical: if there is only one CFR group, and the CFR is 0, set this to .true.
+  
+  /// Age bounds of probSequelae* parameters
+  //@{
+  static const int NUM_SEQUELAE_AGE_GROUPS = 2;
+  static const int SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS];
+  //@}
+  
+  /** pSequelaeTreated is the probability that the patient has sequelae
+   * conditional on hospital treatment for severe disease. */
+  double probSequelaeTreated[2];
+  /** pSequelaeUntreated is the probability that the patient has sequelae
+   * conditional if they don't receive hospital treatment for severe disease.
+   */
+  double probSequelaeUntreated[2];
+
+  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
+  std::vector<double> _prevalenceByGestationalAge;
+
+  /// shortcut: if there is only one CFR group, and the CFR is 0, set this to true.
   bool _noMortality;
-  //The next 2 arrays contain the age-specific case-fatality rates.
+  
+  /// Age-specific bounds and case-fatality rates.
+  //@{
+  /// Age groups have the bounds [_inputAge[i], _inputAge[i+1])
   std::vector<double> _inputAge;
+  /** Case fatality rate for age groups; last entry is a copy of the previous
+   * entry. */
   std::vector<double> _caseFatalityRate;
+  //@}
 
   //! Reads in the Case Fatality percentages from the XML.
   /*! This replaces the reading from CaseFatalityByAge.csv.Note that we could

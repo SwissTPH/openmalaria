@@ -25,6 +25,7 @@
 #define INPUTDATABOINC_H
 
 #include "Constant.h"
+#include "scenario.hxx"
 #include <string>
 class Anopheles;
 
@@ -39,6 +40,35 @@ bool createDocument(const char *);
 * Some elements in memory have been created. This function deletes the object in memory
 */
 void cleanDocument();
+
+/// Get the Monitoring xml object
+const Monitoring& getMonitoring();
+/// Get the Interventions xml object
+const Interventions& getInterventions();
+/// Get the EntoData xml object
+const EntoData& getEntoData();
+/// Get the Demography xml object
+const Demography& getDemography();
+/// Get the CaseManagements xml object
+const CaseManagements& getCaseMangements();
+/// Get the HealthSystem xml object
+const HealthSystem& getHealthSystem();
+
+// Change xml data for certain interventions
+void changeEntoData (const EntoData*);
+void changeHealthSystem (const HealthSystem*);
+
+/// Get the intervention from interventions->timed with time time.
+/// @returns NULL if not available
+const Intervention* getInterventionByTime(int time);
+
+/// Get a parameter from the parameter list. i should be less than Params::MAX.
+double getParameter (size_t i);
+
+// Other parameter-getters
+// WARNING: not all these functions may exist
+
+double get_parameter(int); 
 
 double get_detectionlimit(); 
 double get_eir_daily(int); 
@@ -56,24 +86,11 @@ double get_maximum_ageyrs();
 double get_lowerbound(); 
 int get_number_of_agegroups(); 
 double get_upperbound(int ); 
-int get_intervention(int ); 
-double get_maxage_mda(int ); 
-double get_minage_mda(int ); 
-double get_coverage_mda(int ); 
-double get_maxage_ipti(int ); 
-double get_minage_ipti(int ); 
-double get_coverage_ipti(int ); 
-double get_maxage_vaccine(int ); 
-double get_minage_vaccine(int ); 
-double get_coverage_mass_vaccine(int ); 
 int get_analysis_no(); 
 int get_populationsize(); 
 double get_growthrate(); 
 
 int get_simulation_duration(); 
-double get_p_gets_treatment(int ); 
-double get_curerate(int ); 
-double get_p_parasites_cleared(int ); 
 double get_p_sequelae(int ); 
 int get_number_of_cfrgroups(); 
 double get_cfr_lb(int ); 
@@ -97,11 +114,9 @@ double get_demo_lowerbound();
 double get_demo_upperbound(int ); 
 double get_popperc(int); 
 
-double get_parameter(int); 
-int get_num_parameters(); 
 double get_delta(); 
-double get_latentp(); 
-double get_nspore(); 
+int get_latentp(); 
+int get_EipDuration();
 int get_interval(); 
 double get_ipti_effect(); 
 double get_genotype_freq(int ); 

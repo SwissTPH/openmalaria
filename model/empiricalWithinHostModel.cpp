@@ -108,24 +108,24 @@ return newDensity;
 }
 
 double EmpiricalWithinHostModel::sampleSubPatentValue(double mu, double sigma, double upperBound){
-double returnValue=999999.9;
-double nonInflatedValue=99999.9;
-while (nonInflatedValue>upperBound) {
-  nonInflatedValue=W_GAUSS(mu, sigma);
-}
-while (returnValue>upperBound) {
-  returnValue=getInflatedDensity(nonInflatedValue);
-}
-return nonInflatedValue;
+  double nonInflatedValue;
+  do {
+    nonInflatedValue=W_GAUSS(mu, sigma);
+  } while (nonInflatedValue>upperBound);
+  double returnValue;
+  do {
+    returnValue=getInflatedDensity(nonInflatedValue);
+  } while (returnValue>upperBound);
+  return nonInflatedValue;
 }
 
 double EmpiricalWithinHostModel::samplePatentValue(double mu, double sigma, double lowerBound){
-double returnValue=-999999.9;
-while (returnValue<lowerBound) {
-  double nonInflatedValue=W_GAUSS(mu, sigma);
-  returnValue=getInflatedDensity(nonInflatedValue);
-}
-return returnValue;
+  double returnValue;
+  do {
+    double nonInflatedValue=W_GAUSS(mu, sigma);
+    returnValue=getInflatedDensity(nonInflatedValue);
+  } while (returnValue<lowerBound);
+  return returnValue;
 }
 
 double EmpiricalWithinHostModel::inverseBoxCoxTransform(double transformedValue){

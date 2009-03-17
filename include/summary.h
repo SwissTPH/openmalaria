@@ -230,7 +230,6 @@ class Summary {
   vector< vector<int> > _numNonMalariaFever; 
   //! Time intervals for all surveys specified in the XML
   vector<int> _surveysTimeIntervals; 
-  int _surveyX;
   int _summaryOption; //!< Binary encoded list of outputs of interest
   //! Assimilator mode
   /*! 0 for fitting give the complete output for fitting mode 1 for predictions
@@ -244,7 +243,6 @@ class Summary {
   //! Upper boundary of agegroups, in years.
   //! Upperbound is lowerbound for the next older agegroup
   vector<double> _upperbound; 
-  int _upperboundX;    
   //! Index for the time dimention of the summary arrays
   /*! To store events that happen between to surveys.Survey is always the
       (one-based) index of the previous survey plus one, ie. 1 before the first

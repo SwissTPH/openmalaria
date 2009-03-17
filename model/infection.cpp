@@ -43,7 +43,7 @@ Infection::Infection() {
 }
 
 Infection::~Infection() {
-  //if ( isOptionIncluded(modelVersion, includesPKPD)) {
+  //if (modelVersion & INCLUDES_PK_PD) {
   //  delete _proteome;
   //}
 }
@@ -54,12 +54,12 @@ void Infection::initParameters(){
   int i;
   int j;
   double meanlogdens;
-  cumulativeYstar=(float)get_parameter(7);
-  cumulativeHstar=(float)get_parameter(8);
-  alpha_m=1-exp(-get_parameter(9));
-  decayM=get_parameter(10);
-  sigma0sq=get_parameter(11);
-  xNuStar=get_parameter(12);
+  cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
+  cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
+  alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
+  decayM=getParameter(Params::DECAY_M);
+  sigma0sq=getParameter(Params::SIGMA0_SQ);
+  xNuStar=getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
   string densities_filename;
   int retval = boinc_resolve_filename_s("densities.csv",densities_filename);
@@ -122,13 +122,14 @@ Infection::Infection(int lastSPdose, int simulationTime){
     _duration=infectionDuration();
     _cumulativeExposureJ=0.0;
     _gType.ID=0;
-    if ( IPT) {
+    if (IPTIntervention::IPT) {
         uniformRandomVariable=(W_UNIFORM());
         lowerIntervalBound=0.0;
-        upperIntervalBound=genotypeFreq[1 - 1];
+        upperIntervalBound=IPTIntervention::genotypeFreq[0];
         //This Loop assigns the infection a genotype according to its frequency
-        for ( genotypeCounter=1;genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
-            if ( uniformRandomVariable > lowerIntervalBound && uniformRandomVariable < upperIntervalBound){
+        for (genotypeCounter=1; genotypeCounter<=IPTIntervention::numberOfGenoTypes; genotypeCounter++){
+            if (uniformRandomVariable > lowerIntervalBound &&
+                uniformRandomVariable < upperIntervalBound){
                 _gType.ID=genotypeCounter;
             }
             lowerIntervalBound=upperIntervalBound;
@@ -136,8 +137,8 @@ Infection::Infection(int lastSPdose, int simulationTime){
             The loop should never come into this else-part (exits before), so the if statement is not necessary.
             For safety reason we do it nevertheless
             */
-            if ( genotypeCounter !=  numberOfGenoTypes) {
-                upperIntervalBound=upperIntervalBound+genotypeFreq[genotypeCounter+1 - 1];
+            if ( genotypeCounter !=  IPTIntervention::numberOfGenoTypes) {
+              upperIntervalBound = upperIntervalBound + IPTIntervention::genotypeFreq[genotypeCounter];
             }
             else {
               upperIntervalBound=1.0;
@@ -150,12 +151,13 @@ Infection::Infection(int lastSPdose, int simulationTime){
         The time window starts after the prophylactic period ended (during the prophylactic
         period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
         */
-        if (simulationTime-lastSPdose > genotypeProph[_gType.ID-1] && simulationTime-lastSPdose <= genotypeProph[_gType.ID-1]+genotypeTolPeriod[_gType.ID-1]){
+        if (simulationTime-lastSPdose > IPTIntervention::genotypeProph[_gType.ID-1] &&
+            simulationTime-lastSPdose <= IPTIntervention::genotypeProph[_gType.ID-1] + IPTIntervention::genotypeTolPeriod[_gType.ID-1]){
           _SPattenuate=true;
         }
     }
     //This should probably be inside an IF
-    if ( isOptionIncluded(modelVersion, includesPKPD)) {
+    if (Global::modelVersion & INCLUDES_PK_PD) {
       _proteome = ProteomeManager::getManager()->getInfection();
     }
     else {
@@ -168,7 +170,7 @@ void Infection::writeInfectionToFile(fstream& funit){
 }
 
 int Infection::getEndDate(){
-return _startdate+_duration/interval;
+  return _startdate+_duration/Global::interval;
 }
 
 double Infection::determineWithinHostDensity(){
@@ -187,7 +189,10 @@ double Infection::determineWithinHostDensity(){
     if ( density <  0.02) {
         _duration=-99;
     }
-    valdetermineWithinHostDensity=mymodf(density*8.0, 20000.0);
+    // FIXME: was:
+    // valdetermineWithinHostDensity=mymodf(density*8.0, 20000.0);
+    // This is equivalent, but modulo (%) is not a useful operator on non-integers!
+    valdetermineWithinHostDensity=int(density*8.0) % 20000;
     return valdetermineWithinHostDensity;
 }
 
@@ -234,7 +239,7 @@ ostream& operator<<(ostream& out, const Infection& infection){
   out << infection._density << endl; 
   out << infection._cumulativeExposureJ << endl; 
   out << infection._gType.ID << endl; 
-  if ( isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     out << infection._proteome->getProteomeID() << endl; 
   }
   return out << boolalpha << infection._SPattenuate << endl; 
@@ -248,7 +253,7 @@ istream& operator>>(istream& in, Infection& infection){
   in >> infection._density; 
   in >> infection._cumulativeExposureJ; 
   in >> infection._gType.ID; 
-  if ( isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     in >> proteomeID; 
     infection._proteome = ProteomeManager::getManager()->getProteome(proteomeID);
   }
@@ -276,9 +281,9 @@ void Infection::determineDensities(int simulationTime, double cumulativeY, doubl
     //effect of age-dependent maternal immunity (named Dm in AJTM)
     double dA;
     //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-    infage=1+simulationTime-_startdate-nearbyint(latentp);
+    infage=1+simulationTime-_startdate-Global::latentp;
     if ( infage >  0) {
-        iduration=_duration/interval;
+      iduration=_duration/Global::interval;
         if ( iduration >  maxDur) {
             iduration=maxDur;
         }
@@ -326,13 +331,13 @@ void Infection::determineDensities(int simulationTime, double cumulativeY, doubl
         meanlog=log(y)-stdlog*stdlog/2.0;
         *timeStepMaxDensity =0.0;
         if ( stdlog >  0.0000001) {
-            if ( interval >  1) {
+          if ( Global::interval >  1) {
                 normp=W_UNIFORM();
                 /*
                 sample the maximum density over the T-1 remaining days in the
                 time interval, (where T is the duration of the time interval)
                 */
-                normp=pow(normp, 1.0*1/(interval-1));
+                normp=pow(normp, 1.0*1/(Global::interval-1));
                 /*
                 To mimic sampling T-1 repeated values, we transform the sampling
                 distribution and use only one sampled value, which has the sampling

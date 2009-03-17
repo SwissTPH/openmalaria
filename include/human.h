@@ -24,63 +24,15 @@
 #include <list>
 #include "infection.h"
 #include "withinHostModel.h"
-
-extern double smuY;
-//Standard dev innate immunity for densities
-extern double sigma_i;
-//Pyrogenic threshold at birth (Y*0)
-extern double initPyroThres;
-// Ystar2: critical value in determining increase in pyrogenic threshold
-extern double Ystar2_13;
-//alpha: factor determining increase in pyrogenic threshold
-extern double alpha14;
-//Ystar1: critical value of parasite density in determing increase in pyrog t
-extern double Ystar1_26;
-//sevMal: critical density for severe malaria episode (Y*B1)
-extern double sevMal_21;
-//Critical age for co-morbidity (for both severe and indirect)
-extern double critAgeComorb_30;
-//comorbidity prevalence at birth as a risk factor for severe
-extern double comorbintercept_24;
-//comorbidity prevalence at birth as a risk factor for indirect
-extern double indirRiskCoFactor_18;
-// contribution of parasite densities to acquired immunity in the presence of fever
-extern double immPenalty_22;
-/*
-  Remaining immunity against asexual parasites(after time step, each of 2 components y and h)
-  This variable decays the effectors cumulativeH and cumulativeY in a way that their
-  effects on densities (1-Dh and 1-Dy) decay exponentially.
-*/
-extern double asexImmRemain;
-/*
-  Remaining immunity against asexual parasites(after each time step, each of 2 components y and h)
-  This variable decays the effectors cumulativeH and cumulativeY exponentially.
-*/
-extern double immEffectorRemain;
-/*
-  Shape constant of (Gamma) distribution of availability
-  real, parameter :: BaselineAvailabilityGammaShapeParam =1.0
-*/
-extern double rateMultiplier_31;
-extern double densityExponent_32;
-extern double BaselineAvailabilityShapeParam;
-/*
-  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-  TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-  The density bias allows the detection limit for microscopy to be higher for other sites
-*/
-extern double detectionlimit;
+#include "EntoIntervention.h"
 
 // Forward declaration
-class CaseManagement;
+class CaseManagementModel;
 class TransmissionModel;
 
 //! Model of a human individual 
 class Human {
-
-
  public:
-
 
   //! Constructor which does not need random numbers. Only for testing.
   Human();
@@ -91,14 +43,14 @@ class Human {
       \param ID unique identifier
       \param dob date of birth in time steps
   */
-  Human(int ID, int dateOfBirth, CaseManagement* caseManagement, int simulationTime);
+  Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int simulationTime);
 
   //!  Initialise all variables of a human datatype including infectionlist
   //! and druglist
   /*
     \param funit IO unit
   */
-  Human(istream& funit, CaseManagement* caseManagement, int simulationTime);
+  Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime);
 
   ~Human();
 
@@ -126,12 +78,13 @@ class Human {
 
   void updateTime(int simulationTime) { _simulationTime = simulationTime; };
   
-  void updateInfection(double adultEIR, double availability, double expectedNumberOfInfections);
+  void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
 
   void determineClinicalStatus();
 
   void treatInfections();
 
+  /** Presumably this is the body mass? */
   void setWeight(double weight){ _weight=weight; };
   double getWeight(){ return _weight; };
 
@@ -217,9 +170,6 @@ class Human {
 
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
 
-  //! Return if human has an insecticide treated net
-  bool hasInsecticideTreatedNet() {return _ITN;}
-
   //! Set doomed
   void setDoomed(int doomed) { _doomed = doomed;}
 
@@ -227,19 +177,48 @@ class Human {
   void updateCumulativeEIRa(double value) { _cumulativeEIRa+=value; };
 
   //! Set a new caseManagement. Used if the changeHS intervention is called.
-  void setCaseManagement(CaseManagement* caseManagement);
+  void setCaseManagement(CaseManagementModel* caseManagement);
 
   list<Drug*>* getDrugs();
+  
+  /** Availability of host to mosquitoes (α_i). */
+  double entoAvailability ();
+  /** Probability of a mosquito succesfully biting a host (P_B_i). */
+  double probMosqSurvivalBiting ();
+  /** Probability of a mosquito succesfully finding a resting
+   * place and resting (P_C_i * P_D_i). */
+  double probMosqSurvivalResting ();
 
   WithinHostModel* _withinHostModel;
  
- private:
   
+  /* static public */
+  
+  static void initHumanParameters ();
+  
+/*
+  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
+  TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
+  The density bias allows the detection limit for microscopy to be higher for other sites
+*/
+  static double detectionlimit;
+  
+  /* Shape constant of (Gamma) distribution of availability
+  real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
+  static double BaselineAvailabilityShapeParam;
+  
+  /* nwtgrps is the number of age groups for which expected weights are read in
+  for use in the age adjustment of the EIR.
+  It is used both by Human and TransmissionModel. */
+  static const int nwtgrps= 27; 
+
+private:
+  /* local private */
 
   // Time from start of the simulation
   int _simulationTime;
   
-  CaseManagement* _caseManagement;
+  CaseManagementModel* _caseManagement;
   std::list<Infection*> infections;
 
   int _currentWHSlot;
@@ -293,8 +272,6 @@ class Human {
   double _pyrogenThres;
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
-  //!has an ITN (Insecticide treated net)
-  bool _ITN;
   //!Maximum parasite density during the previous 5-day interval
   double _timeStepMaxDensity;
   //!Baseline availability to mosquitoes
@@ -306,7 +283,17 @@ class Human {
   Event _latestEvent;
   list<Drug*> _drugs;
   DrugProxy* _proxy;
-
+  
+  /// Rate/probabilities before interventions. See functions.
+  double _entoAvailability;
+  double _probMosqSurvivalBiting;
+  double _probMosqSurvivalResting;
+  
+  /// Intervention: an ITN (active if netEffectiveness > 0)
+  EntoInterventionITN entoInterventionITN;
+  /// Intervention: IRS (active if insecticide != 0)
+  EntoInterventionIRS entoInterventionIRS;
+  
   //! Create a new infection requires that the human is allocated and current
   void newInfection();
 
@@ -341,7 +328,7 @@ class Human {
   bool severeMalaria();
   
   //! Introduce new infections via a stochastic process
-  void introduceInfections(double adultEIR, double availability, double expectedNumberOfInfections);
+  void introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections);
 
   //! docu 
   void computeFinalConc(Drug drg, int hl);
@@ -376,6 +363,55 @@ class Human {
   void writeDrugs(fstream& funit);
 
 
+  /* Static private */
+  
+  static double smuY;
+//Standard dev innate immunity for densities
+  static double sigma_i;
+//Pyrogenic threshold at birth (Y*0)
+  static double initPyroThres;
+// Ystar2: critical value in determining increase in pyrogenic threshold
+  static double Ystar2_13;
+//alpha: factor determining increase in pyrogenic threshold
+  static double alpha14;
+//Ystar1: critical value of parasite density in determing increase in pyrog t
+  static double Ystar1_26;
+//sevMal: critical density for severe malaria episode (Y*B1)
+  static double sevMal_21;
+//Critical age for co-morbidity (for both severe and indirect)
+  static double critAgeComorb_30;
+//comorbidity prevalence at birth as a risk factor for severe
+  static double comorbintercept_24;
+//comorbidity prevalence at birth as a risk factor for indirect
+  static double indirRiskCoFactor_18;
+// contribution of parasite densities to acquired immunity in the presence of fever
+  static double immPenalty_22;
+/*
+  Remaining immunity against asexual parasites(after time step, each of 2 components y and h)
+  This variable decays the effectors cumulativeH and cumulativeY in a way that their
+  effects on densities (1-Dh and 1-Dy) decay exponentially.
+*/
+  static double asexImmRemain;
+/*
+  Remaining immunity against asexual parasites(after each time step, each of 2 components y and h)
+  This variable decays the effectors cumulativeH and cumulativeY exponentially.
+*/
+  static double immEffectorRemain;
+  
+  static double rateMultiplier_31;
+  static double densityExponent_32;
+  
+  //! Relative weights by age group
+  /** Relative weights, based on data in InputTables\wt_bites.csv 
+  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
+  thesis). The original source was anthropometric studies by Inez Azevedo Reads
+  in weights by age group. The weights are expressed as proportions of 0.5*those
+  in the reference age group. */
+  static const double wtprop[nwtgrps];
+  
+  static double baseEntoAvailability;
+  static double baseProbMosqSurvivalBiting;
+  static double baseProbMosqSurvivalResting;
 };
 
 //Start DrugAction declarations
@@ -385,7 +421,6 @@ extern int currentWHSlot;
   Current WH time slot
   End DrugAction declarations
 */
-void initHumanParameters ();
 void initDrugAction();
 
 #endif

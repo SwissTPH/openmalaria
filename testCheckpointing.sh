@@ -1,7 +1,8 @@
 #!/bin/sh
-rm test/sandbox/* 2>/dev/null
-cp model/openMalaria test/sandbox
-cd test/sandbox && cp ../original/* . 2>/dev/null
+rm -rf test/checkpointing 2>/dev/null
+mkdir -p test/checkpointing
+cp model/openMalaria test/checkpointing/openMalaria
+cd test/checkpointing && cp ../original/* . 2>/dev/null
 cp scenario2.xml scenario.xml
 echo "Running scenario2.xml to create init_data.xml"
 ./openMalaria  > /dev/null
@@ -25,9 +26,14 @@ if [ -e checkpoint ]
   echo "Running checkpointTest.xml from checkpoint"
   ./openMalaria  > /dev/null
   wait
-  test -e output.txt && ../original/compareOutputsFloat.py originalCheckpointTest.txt output.txt 1
+  if [ -e output.txt ]
+  then
+  ../original/compareOutputsFloat.py originalCheckpointTest.txt output.txt 1
+  else
+  echo "openMalaria crashed/didn't create output.txt"
+  fi
 else
 echo "No checkpoint file found, testing of checkpointing not possible"
-  exit
+cat stderr.txt
+exit
 fi
-

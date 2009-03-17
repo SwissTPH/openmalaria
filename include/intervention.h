@@ -6,148 +6,101 @@
 #include <stdio.h>
 #include <math.h>
 #include "global.h"
-const int no_intervention= 0;
-const int irs_intervention= 1;
-const int mda_intervention= 2;
-const int vaccine_intervention= 3;
-const int change_eir_intervention= 4;
-const int change_hs_intervention= 5;
-const int ipti_intervention= 6;
-const int preerythrocytic_reduces_h= 1;
-const int erythrocytic_reduces_y= 2;
-const int transmission_blocking_reduces_k= 3;
 
-/*
-  Vaccine specific parameters
-  The vaccine type, as binary encoded number
-*/
-extern int vaccineType;
- 
+// Forward declare: doesn't need to be known about here
+class VaccineDescription;
 
-   /*
-Target age for EPI-like vaccination, in time steps
-TODO: Should be an integer?
-*/
-extern double *targetagetstep;
-extern int targetagetstepX;
-   //Coverage , as a proportion of the poulation in the target age range
-extern double *vaccineCoverage;
-extern int vaccineCoverageX;
+/** Vaccine intervention parameters.
+ * 
+ * Used to represent PEV, BSV and TBV vaccines. */
+class Vaccine {
+public:
+  // Static:
+  /// Set parameters from xml
+  static void initParameters ();
+  /// Free memory
+  static void clearParameters ();
+  
+  /// True if any types of vaccine are in use.
+  static bool anyVaccine;
+  
+  /*! Common to all vaccine types. Number of vaccine doses that are given
+   * either through EPI or as EPI Boosters. */
+  static int _numberOfEpiDoses;
+  
+   /** Target age for EPI-like vaccination, in time steps
+    * TODO: Should be an integer? */
+  static double *targetagetstep;
+   ///Coverage , as a proportion of the poulation in the target age range
+  static double *vaccineCoverage;
+  
+  /// Preerythrocytic reduces h vaccine parameters
+  static Vaccine PEV;
+  /// Erythrocytic reduces y vaccine parameters
+  static Vaccine BSV;
+  /// Transmission blocking reduces k vaccine parameters
+  static Vaccine TBV;
+  
+  //Non-static:
+  Vaccine() : active(false), decay(1.0) {}
+  
+  /// True if this vaccine is in use
+  bool active;
+  
+  /** Get the efficacy of the vaccine.
+   * 
+   * @param numPrevDoses The number of prior vaccinations of the individual. */
+  double getEfficacy (int numPrevDoses);
+  
+  /// exp(-Decay rate)
+  double decay;
+private:
+  /** Per-type initialization
+   * @returns decay */
+  void initVaccine (const VaccineDescription* vd);
+  
+  /* Vaccine type specific parameters
+   * Initial mean efficacy, definition depends on vaccine type */
+  vector<double> initialMeanEfficacy;
+  // Distribution of efficacies among individuals, parameter to sample from beta dist.
+  double efficacyB;
+};
 
-/*
-Vaccine type specific parameters
-Initial mean efficacy, definition depends on vaccine type
-*/
-extern double *PEVInitialMeanEfficacy;
-extern int PEVInitialMeanEfficacyX;
-   extern double *BSVInitialMeanEfficacy;
-extern int BSVInitialMeanEfficacyX;
-   extern double *TBVInitialMeanEfficacy;
-extern int TBVInitialMeanEfficacyX;
-   //Distribution of efficacies among individuals, parameter to sample from beta dist.
-extern double PEVefficacyB;
-   extern double BSVefficacyB;
-   extern double TBVefficacyB;
-   //Decay rate
-extern double PEVdecay;
-   extern double BSVdecay;
-   extern double TBVdecay;
-   /*
-
-ITN specific parameters
-ITNs present or not
-*/
-extern short ITN;
-
-//decay of ITNs
-extern double ITNdecay;
-extern double Pu0;
-extern double Pu1;
-extern double c;
-extern double z;
-
-/*
-IPT specific parameters
-IPT present or not
-*/
-extern short IPT;
-   //Number of IPTi doses
-extern int numberOfIPTiDoses;
+/** Other intervention parameters: IPT, genotypes.
+ * 
+ * Currently all are static - they apply to the simulation as a whole. */
+class IPTIntervention {
+public:
+  /* IPT specific parameters */
+  //IPT present or not
+  static short IPT;
+  //Number of IPTi doses
+  static int numberOfIPTiDoses;
    //Target age for IPTi doses, in time steps
-extern int *iptiTargetagetstep;
-extern int iptiTargetagetstepX;
+  static int *iptiTargetagetstep;
    //Coverage , as a proportion of the poulation in the target age range
-extern double *iptiCoverage;
-extern int iptiCoverageX;
+  static double *iptiCoverage;
    //Values   
-extern double iptiEffect;
+  static int iptiEffect;
    /*
-These are actually not IPTi related values but related
-to the genotypes: Since the genotype variability was first studied in a IPTi intervention,
-they are defined here. (Logically, they belong to infection.f)
-*/
-extern int numberOfGenoTypes;
-   extern double *genotypeFreq;
-extern int genotypeFreqX;
-   extern double *genotypeACR;
-extern int genotypeACRX;
-   extern int *genotypeProph;
-extern int genotypeProphX;
-   extern int *genotypeTolPeriod;
-extern int genotypeTolPeriodX;
-   extern double *genotypeAtten;
-extern int genotypeAttenX;
-
-  /*!
-      Commen to all vaccine types. Number of vaccine doses that are given either
-      through EPI or as EPI Boosters
+  These are actually not IPTi related values but related
+  to the genotypes: Since the genotype variability was first studied in a IPTi intervention,
+  they are defined here. (Logically, they belong to infection.f)
    */
- extern int _numberOfEpiDoses;
+  static int numberOfGenoTypes;
+  static double *genotypeFreq;
+  static double *genotypeACR;
+  static int *genotypeProph;
+  static int *genotypeTolPeriod;
+  static double *genotypeAtten;
 
-  /*!
-    Number of initial efficacy values in the XML. If more than this number or
-    doses are given, we assume the vaccine efficacy goes to the last defined
-    initial efficacy.
-  */
-extern int _numberOfInitEff;
-
-// Initialization routines
-void initInterventionParameters ();
-  void initVaccineParameters ();
-  void initITNParameters ();
-  void initIPTIParameters ();
+  // Initialization routines
+  static void initParameters ();
+  static void initIPTIParameters ();
   
   // Destruction routines
-  void clearVaccineParameters ();
-  void clearITNParameters ();
-  void clearIPTIParameters ();
-void clearInterventionParameters ();
-
-
-class Intervention{
-
- public:
-
-  //end IPTi things
-  Intervention();
-  ~Intervention();
-
- private:
- 
-
-   /*!
-      Commen to all vaccine types. Number of vaccine doses that are given either
-      through EPI or as EPI Boosters
-   */
-  int _numberOfEpiDoses;
-
-  /*!
-    Number of initial efficacy values in the XML. If more than this number or
-    doses are given, we assume the vaccine efficacy goes to the last defined
-    initial efficacy.
-  */
-  int _numberOfInitEff;
-
+  static void clearParameters ();
+  static void clearIPTIParameters ();
 };
 
 #endif

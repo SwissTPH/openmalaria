@@ -83,7 +83,7 @@ void update_shmem() {
 
 void add_kappa(double *kappa){
 	if (!shmem) return;
-	memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(double));
+	memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
 }
 
 #else
@@ -172,39 +172,39 @@ void stop_cp_timer(){
 
 
 int main2(int argc, char* argv[]){
-	//Function to test output given by boinc
-	int retval =0;	
-        
-	const int MAX_LENGTH = 1000;
-	char scenario [MAX_LENGTH];
+  try {
+    //Function to test output given by boinc
+    int retval =0;	
+    
+    const int MAX_LENGTH = 1000;
+    char scenario [MAX_LENGTH];
 
 //Call the initialisation of boinc
 #ifdef _WIN32	
-	boinc_get_init_data(dataBOINC);
+    boinc_get_init_data(dataBOINC);
 #endif
-	
-     string scenario_name = "scenario.xml";
-        
-     if (argc == 2){ 
-     
-       scenario_name = argv[1];
+    
+    string scenario_name = "scenario.xml";
+    
+    if (argc == 2){
+      scenario_name = argv[1];
 
-       fstream scenario_file(scenario_name.c_str(),fstream::in);
-       if (scenario_file.is_open()){
-          scenario_file.close();
-       }
-       else {
+      fstream scenario_file(scenario_name.c_str(),fstream::in);
+      if (scenario_file.is_open()){
+        scenario_file.close();
+      }
+      else {
         cout << "Error: " << scenario_name << " file does not exist" << endl;
         exit(-1);
-       }
+      }
     }
   
-  //Resolve the scenario filename
-  retval = boinc_resolve_filename(scenario_name.c_str(),scenario,MAX_LENGTH);
- 	if (retval){
-          cerr << "APP. boinc_resolve_filename failed \n";
-          boinc_finish(retval);
- 	}
+    //Resolve the scenario filename
+    retval = boinc_resolve_filename(scenario_name.c_str(),scenario,MAX_LENGTH);
+    if (retval){
+      cerr << "APP. boinc_resolve_filename failed \n";
+      boinc_finish(retval);
+    }
 
 	//Change it and read it with boinc
 	bool succeeded;
@@ -229,7 +229,6 @@ int main2(int argc, char* argv[]){
 	boinc_register_timer_callback(update_shmem);
 #endif
 
-  
 	GSL_SETUP();	
   Simulation* simulation = new Simulation();
 	simulation->start();
@@ -245,14 +244,18 @@ int main2(int argc, char* argv[]){
 		cerr << "APP. boinc_finish() failed \n";
 		exit(retval);
 	}
+  } catch (...) {
+    cerr << "Error occurred." << endl;
+    return -1;
+  }
 
-	//Unreachable
-	return 0;
+  return 0;
 }
 #if (defined(_WIN32) && defined(_NO_GRAPHICS)) || !defined(_WIN32) || defined(_GRAPHICS_6)
+/** main() - initializes BOINC and calls main2. */
 int main(int argc, char* argv[]){
 	int retval;
-	retval = boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
+        retval = boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
 	//Call the initialisation of boinc
 	retval = boinc_init();
 	if (retval){

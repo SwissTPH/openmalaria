@@ -2,7 +2,6 @@
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.61)
 AC_INIT([malariaModel],[0.9])
-AC_CONFIG_SRCDIR([parser/ageGroup.cpp])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
@@ -105,7 +104,7 @@ AC_FUNC_ERROR_AT_LINE
 
 AC_CONFIG_FILES([Makefile
                  model/Makefile
-                 parser/Makefile
+                 xsdcxx/Makefile
                  graphics/Makefile])
 
 AC_OUTPUT

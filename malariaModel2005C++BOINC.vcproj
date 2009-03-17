@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="malariaModel"
-	ProjectGUID="{AF51EAB3-3474-4123-AEA1-729E0AB3670A}"
+	Name="malariaModelBOINC"
+	ProjectGUID="{76910420-B336-468B-8B89-B5D62D71B2F3}"
 	RootNamespace="malariaModel"
 	>
 	<Platforms>
@@ -43,10 +43,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="D:\data\workspace\boinc\lib;D:\data\workspace\boinc\api;xsdcxx;include"
+				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\CodeSynthesis XSD 3.2\xerces-c-3.0.1\src&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\Debug/"
@@ -75,11 +75,11 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
-				AdditionalDependencies="xerces-c_static_3D.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib"
+				AdditionalDependencies="xerces-c_static_3D.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib"
 				OutputFile=".\Debug/malariaModel.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\Debug;.\lib"
+				AdditionalLibraryDirectories="..\boinc\win_build\Build\Win32\Debug;.\Debug;.\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBCMT.LIB"
 				DelayLoadDLLs=""
@@ -93,7 +93,6 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
-				UseFAT32Workaround="true"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -145,8 +144,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include"
-				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;WITHOUT_BOINC;XERCES_STATIC_LIBRARY"
+				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;"
+				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
 				StringPooling="false"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="false"
@@ -173,11 +172,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xerces-c_static_3D.lib gsl_mt.lib cblas_mt.lib delayimp.lib"
+				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib"
 				OutputFile=".\Release/malariacontrol_6.12_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories=".\Release;.\lib"
+				AdditionalLibraryDirectories="..\boinc\win_build\Build\Win32\Release;.\Release;.\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs="GDI32.dll;OPENGL32.dll;GLU32.dll"

@@ -49,28 +49,28 @@ Summary* Simulation::gMainSummary;
 int Simulation::timeStep;
 
 Simulation::Simulation(){
-  
   //initialize input variables and allocate memory, correct order is important.
-  if (isOptionIncluded(modelVersion, noVectorControl)){
-    _transmissionModel = new NoVectorControl();
-  }
-  else{
-    _transmissionModel = new VectorControl();
-  }
-  validateInput();
-   gMainSummary = new Summary();
-  initGlobal();
+  validateInput();		// only checks get_mode() currently
+  gMainSummary = new Summary();	// currently won't affect anything else
+  Global::initGlobal();
   Infection::initParameters();
 
-  _transmissionModel->initEntoParameters();
+  if (Global::modelVersion & VECTOR_CONTROL)
+    _transmissionModel = new VectorControl();
+  else
+    _transmissionModel = new NoVectorControl();
+  
   gMainSummary->initSummaryParameters();
   _population = new Population(_transmissionModel, get_populationsize());
-  initHumanParameters();
-  initInterventionParameters();
-  simulationMode=equilibriumMode;
+  EntoInterventionITN::initParameters();
+  EntoInterventionIRS::initParameters();
+  Human::initHumanParameters();
+  IPTIntervention::initParameters();
+  Vaccine::initParameters();
+  Global::simulationMode=equilibriumMode;
   simulationDuration=get_simulation_duration();
-  relTimeInMainSim=simulationDuration/(1.0*simulationDuration+maxAgeIntervals);
-  if ( isOptionIncluded(modelVersion, includesPKPD)) {
+  relTimeInMainSim=simulationDuration/(1.0*simulationDuration+Global::maxAgeIntervals);
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
     initDrugModule(5*24*60, 24*60);
   }
@@ -78,15 +78,13 @@ Simulation::Simulation(){
 }
 
 Simulation::~Simulation(){
-
   //free memory
   gMainSummary->clearSummaryParameters();
-  clearInterventionParameters();
+  IPTIntervention::clearParameters();
+  Vaccine::clearParameters();
   delete gMainSummary;
-  clearGlobalParameters();
-  _transmissionModel->clearTransmissionModelParameters();
   delete _population;
-
+  delete _transmissionModel;  
 }
 
 int Simulation::start(){
@@ -95,8 +93,8 @@ int Simulation::start(){
     readCheckpoint();
   }
   else {
-    _population->estimateRemovalRates();
     simulationTime=0;
+    _population->estimateRemovalRates();
     _population->initialiseHumanList();
   }
   _population->setupPyramid(isCheckpoint());
@@ -120,11 +118,8 @@ void Simulation::mainSimulation(){
   //TODO5D
   timeStep=0;
   gMainSummary->initialiseSummaries();
-  simulationMode=get_mode();
-  //The default mode should be dynamicEIR
-  if ( simulationMode ==  missing_value) {
-    simulationMode=dynamicEIR;
-  }
+  Global::simulationMode=get_mode();
+  
   while( timeStep <=  simulationDuration) {
     _population->implementIntervention(timeStep);
     //Calculate the current progress
@@ -146,11 +141,11 @@ void Simulation::updateOneLifespan () {
 
   double progress;
 
-  while( simulationTime <  maxAgeIntervals) {
-    progress=simulationTime*1.0/(maxAgeIntervals)*(1-relTimeInMainSim);
+  while( simulationTime <  Global::maxAgeIntervals) {
+    progress=simulationTime*1.0/(Global::maxAgeIntervals)*(1-relTimeInMainSim);
     //Here we have to call the checkpoint and to inform about the fraction done
     boinc_fraction_done(progress);
-    if ( boinc_time_to_checkpoint()) {
+    if (boinc_time_to_checkpoint()) {
       writeCheckpoint();
       boinc_checkpoint_completed();
       cout << "ewcpt" << simulationTime << endl;
@@ -163,11 +158,6 @@ void Simulation::updateOneLifespan () {
 
 void Simulation::validateInput(){
   //all input validation goes here
-
-  if ( get_mode() ==  missing_value) {
-    cout << "Sim Mode missing" << endl;
-    throw 0;
-  }
 }
 
 
@@ -210,7 +200,7 @@ void Simulation::writeCheckpoint(){
    
   f_checkpoint.precision(20);
   f_checkpoint << simulationTime << endl ;
-  if ( isOptionIncluded(modelVersion, includesPKPD)) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
     f_checkpoint << ProteomeManager::getManager();
   }
   _population->writeLists(f_checkpoint);
@@ -246,7 +236,7 @@ void Simulation::readCheckpoint(){
       f_checkpoint.open(checkpoint_0_name, ios::in | ios::binary);
     }
     f_checkpoint >> simulationTime;
-    if ( isOptionIncluded(modelVersion, includesPKPD)) {
+    if (Global::modelVersion & INCLUDES_PK_PD) {
       ProteomeManager* manager = ProteomeManager::getManager();
       f_checkpoint >> *manager;
     }

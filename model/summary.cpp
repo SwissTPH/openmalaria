@@ -44,7 +44,6 @@ Summary::Summary() : _surveyPeriod(0)  {
 //   _surveyPeriod=1;
 //   numberOfSurveys=get_number_of_surveys();
 //   _surveysTimeIntervals.resize(numberOfSurveys+1);
-//   _surveyX = numberOfSurveys+1;
 
 //   for (i=0;i<numberOfSurveys; i++) {
 //     _surveysTimeIntervals[i]=get_time_of_survey(i+1);
@@ -119,24 +118,21 @@ Summary::Summary() : _surveyPeriod(0)  {
 }
 
 void Summary::initSummaryParameters () {
-//Read all summary parameters from the input file and allocate datastructures.
-
-  int i;
-
-  _numOfAgeGroups=get_number_of_agegroups()+1;
+  //Read all summary parameters from the input file and allocate datastructures.
+  const AgeGroup::GroupSequence& groups = getMonitoring().getAgeGroup().getGroup();
+  _numOfAgeGroups = groups.size()+1;
   _upperbound.resize(_numOfAgeGroups);
-  _upperboundX = _numOfAgeGroups;
   _lowerbound=get_lowerbound();
   /*
     note that the last age group includes individuals who are
     either younger than Lowerbound or older than the last Upperbound
   */
 
-  for (i=0;i<_numOfAgeGroups-1; i++) {
-    _upperbound[i]=(get_upperbound(i));
+  for (int i=0;i<_numOfAgeGroups-1; i++) {
+    _upperbound[i] = groups[i].getUpperbound();
   }
   _upperbound[_numOfAgeGroups-1]=9999;
-  _nonMalariaMortality=get_parameter(19);
+  _nonMalariaMortality=getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
 
 }
 
@@ -154,7 +150,6 @@ void Summary::initialiseSummaries () {
 
   numberOfSurveys=get_number_of_surveys();
   _surveysTimeIntervals.resize(numberOfSurveys+1);
-  _surveyX = numberOfSurveys+1;
 
   for (i=0;i<numberOfSurveys; i++) {
     _surveysTimeIntervals[i]=get_time_of_survey(i);
@@ -513,10 +508,10 @@ double Summary::infantAllCauseMort(){
   double infantProductLimit;
   double valinfantAllCauseMort;
   infantProductLimit=1.0;
-  intervalSurviv = (double*)malloc(((intervalsPerYear))*sizeof(double));
-  for ( i=0;i<intervalsPerYear; i++) {
-    intervalSurviv[i]=(infantIntervalsAtRisk[i]-infantDeaths[i]);
-    intervalSurviv[i]=intervalSurviv[i]/(infantIntervalsAtRisk[i]);
+  intervalSurviv = (double*)malloc(((Global::intervalsPerYear))*sizeof(double));
+  for ( i=0;i<Global::intervalsPerYear; i++) {
+    intervalSurviv[i]=(Global::infantIntervalsAtRisk[i]-Global::infantDeaths[i]);
+    intervalSurviv[i]=intervalSurviv[i]/(Global::infantIntervalsAtRisk[i]);
     infantProductLimit=infantProductLimit*intervalSurviv[i];
   }
   free(intervalSurviv);

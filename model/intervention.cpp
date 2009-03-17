@@ -1,5 +1,3 @@
-#include "intervention.h"
-#include "inputData.h"
 /*
 
  This file is part of OpenMalaria.
@@ -21,258 +19,178 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
-/*
 
-Initializing intervention data.
+#include "intervention.h"
+#include "inputData.h"
+#include "GSLWrapper.h"
+#include <iostream>
 
-TODO: now that we have enums in the c code, merge these constant with the c code
-Encoding them as 2powers was not consistent with the summaryOption constants.
-Check the binary encoding works
-*/
-   int vaccineType;
+enum VaccineType {
+  preerythrocytic_reduces_h = 1,
+  erythrocytic_reduces_y = 2,
+  transmission_blocking_reduces_k= 3,
+};
+
+bool Vaccine::anyVaccine = false;
+double *Vaccine::targetagetstep;
+double *Vaccine::vaccineCoverage;
+int Vaccine::_numberOfEpiDoses = 0;
+Vaccine Vaccine::PEV;
+Vaccine Vaccine::BSV;
+Vaccine Vaccine::TBV;
+
+short IPTIntervention::IPT;
+int IPTIntervention::numberOfIPTiDoses;
+int *IPTIntervention::iptiTargetagetstep;
+double *IPTIntervention::iptiCoverage;
+int IPTIntervention::iptiEffect;
+int IPTIntervention::numberOfGenoTypes;
+double *IPTIntervention::genotypeFreq;
+double *IPTIntervention::genotypeACR;
+int *IPTIntervention::genotypeProph;
+int *IPTIntervention::genotypeTolPeriod;
+double *IPTIntervention::genotypeAtten;
+
+
+double Vaccine::getEfficacy (int numPrevDoses) {
+  /* If initialMeanEfficacy.size or more doses have already been given, use
+   * the last efficacy. */
+  if (numPrevDoses >= initialMeanEfficacy.size())
+    numPrevDoses = initialMeanEfficacy.size() - 1;
+  if (initialMeanEfficacy[numPrevDoses] <  1) {
+    double a = efficacyB * initialMeanEfficacy[numPrevDoses] / (1.0-initialMeanEfficacy[numPrevDoses]);
+    return W_BETA(a, efficacyB);
+  }
+  else
+    return 1.0;
+}
+
+void Vaccine::initParameters() {
+  const VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
+  const Interventions& interventions = getInterventions();
+  const Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
+  for (Interventions::VaccineDescriptionConstIterator i = vaccDesc.begin();
+       i != vaccDesc.end(); i++) {
+    int type = i->getVaccineType();
+    if (type == preerythrocytic_reduces_h)
+      VdPEV = &(*i);
+    else if (type == erythrocytic_reduces_y)
+      VdBSV = &(*i);
+    else if (type == transmission_blocking_reduces_k)
+      VdTBV = &(*i);
+    
+    anyVaccine = true;
+  }
+  if (!anyVaccine) return;
+
+  //Read in vaccine specifications
+  PEV.initVaccine (VdPEV);
+  BSV.initVaccine (VdBSV);
+  TBV.initVaccine (VdTBV);
   
- 
-   double *targetagetstep;
-     int targetagetstepX;
-   double *vaccineCoverage;
-     int vaccineCoverageX;
-   double *PEVInitialMeanEfficacy;
-     int PEVInitialMeanEfficacyX;
-   double *BSVInitialMeanEfficacy;
-     int BSVInitialMeanEfficacyX;
-   double *TBVInitialMeanEfficacy;
-     int TBVInitialMeanEfficacyX;
-   double PEVefficacyB;
-   double BSVefficacyB;
-   double TBVefficacyB;
-   double PEVdecay;
-   double BSVdecay;
-   double TBVdecay;
-   short ITN;
-   double ITNdecay;
-   double Pu0;
-   double Pu1;
-   double c;
-   double z;
-   short IPT;
-   int numberOfIPTiDoses;
-   int *iptiTargetagetstep;
-     int iptiTargetagetstepX;
-   double *iptiCoverage;
-     int iptiCoverageX;
-   double iptiEffect;
-   int numberOfGenoTypes;
-   double *genotypeFreq;
-     int genotypeFreqX;
-   double *genotypeACR;
-     int genotypeACRX;
-   int *genotypeProph;
-     int genotypeProphX;
-   int *genotypeTolPeriod;
-     int genotypeTolPeriodX;
-   double *genotypeAtten;
-     int genotypeAttenX;
-
-
-
-  /*!
-      Commen to all vaccine types. Number of vaccine doses that are given either
-      through EPI or as EPI Boosters
-   */
- int _numberOfEpiDoses;
-
-  /*!
-    Number of initial efficacy values in the XML. If more than this number or
-    doses are given, we assume the vaccine efficacy goes to the last defined
-    initial efficacy.
-  */
- int _numberOfInitEff;
-
-// Intervention::Intervention() {
-
-//     int isIpti;
-//     isIpti=get_is_ipti();
-//     if ( isIpti ==  1) {
-//         IPT=1/* bool */;
-//     }
-//     else {
-//         IPT=0/* bool */;
-//     }
-//     vaccineType=get_vaccine_type();
-//     if ( vaccineType >  0) {
-//         initVaccineParameters();
-//     }
-//     if ( ITN) {
-//         initITNParameters();
-//     }
-//     if ( IPT) {
-//         initIPTIParameters();
-//     }
-// }
-
-void initVaccineParameters(){
-
-    //Read in vaccine specifications
-    _numberOfEpiDoses=get_number_of_epi_doses();
-    _numberOfInitEff=get_number_of_init_eff();
-    if ( get_vaccine_halflife_yrs(preerythrocytic_reduces_h) >  0) {
-        PEVdecay=log(2.0)/((get_vaccine_halflife_yrs(preerythrocytic_reduces_h))*daysInYear/(1.0*interval));
-    }
-    else {
-        PEVdecay=0;
-    }
-    if ( get_vaccine_halflife_yrs(erythrocytic_reduces_y) >  0) {
-        BSVdecay=log(2.0)/((get_vaccine_halflife_yrs(erythrocytic_reduces_y))*daysInYear/(1.0*interval));
-    }
-    else {
-        BSVdecay=0;
-    }
-    if ( get_vaccine_halflife_yrs(transmission_blocking_reduces_k) >  0) {
-        TBVdecay=log(2.0)/((get_vaccine_halflife_yrs(transmission_blocking_reduces_k))*daysInYear/(1.0*interval));
-    }
-    else {
-        TBVdecay=0;
-    }
-    PEVefficacyB=get_efficacy_b(preerythrocytic_reduces_h);
-    BSVefficacyB=get_efficacy_b(erythrocytic_reduces_y);
-    TBVefficacyB=get_efficacy_b(transmission_blocking_reduces_k);
-    PEVInitialMeanEfficacy = (double*)malloc(((_numberOfInitEff))*sizeof(double));
-    PEVInitialMeanEfficacyX = _numberOfInitEff;
-    BSVInitialMeanEfficacy = (double*)malloc(((_numberOfInitEff))*sizeof(double));
-    BSVInitialMeanEfficacyX = _numberOfInitEff;
-    TBVInitialMeanEfficacy = (double*)malloc(((_numberOfInitEff))*sizeof(double));
-    TBVInitialMeanEfficacyX = _numberOfInitEff;
+  if (interventions.getContinuous().present())
+    _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
+  if (_numberOfEpiDoses) {
     targetagetstep = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
-    targetagetstepX = _numberOfEpiDoses;
     vaccineCoverage = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
-    vaccineCoverageX = _numberOfEpiDoses;
-    for ( int i=0;i<_numberOfInitEff; i++) {
-        PEVInitialMeanEfficacy[i]=get_efficacy(preerythrocytic_reduces_h, i);
-        BSVInitialMeanEfficacy[i]=get_efficacy(erythrocytic_reduces_y, i);
-        TBVInitialMeanEfficacy[i]=get_efficacy(transmission_blocking_reduces_k, i);
+    const Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
+    for (int i=0;i<_numberOfEpiDoses; i++) {
+      if (i >= cVS.size()) {
+        cerr << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous" << endl;
+        throw 0;
+      }
+      targetagetstep[i] = floor(cVS[i].getTargetAgeYrs() * daysInYear/(double)Global::interval);
+      vaccineCoverage[i] = cVS[i].getCoverage();
     }
-    for ( int i=0;i<_numberOfEpiDoses; i++) {
-        targetagetstep[i]=floor(get_target_age_yrs(i)*daysInYear/(1.0*interval));
-        vaccineCoverage[i]=get_coverage_epi_vaccine(i);
-    }
+  }
 }
 
-void initITNParameters () {
-
-    //TODO: Get ITN from the cpp code (and the other parameters)
-    ITN=0/* bool */;
-    if ( ITN) {
-        Pu0=get_pu0();
-        Pu1=get_pu1();
-        c=get_sporogony_gonotrophy();
-    }
+void Vaccine::initVaccine (const VaccineDescription* vd) {
+  if (vd != NULL) {
+    active = true;
+    
+    // set efficacyB:
+    efficacyB = vd->getEfficacyB().getValue();
+    
+    // set initialMeanEfficacy:
+    const VaccineDescription::InitialEfficacySequence ies = vd->getInitialEfficacy();
+    initialMeanEfficacy.resize (ies.size());
+    for (int i = 0; i < initialMeanEfficacy.size(); ++i)
+      initialMeanEfficacy[i] = ies[i].getValue();
+    
+    // now, if halfLifeYrs > 0, calculate delay:
+    double halfLifeYrs = vd->getHalfLifeYrs().getValue();
+    if (halfLifeYrs <= 0)
+      decay = 1.0;
+    else
+      decay = exp(-log(2.0) / (halfLifeYrs * daysInYear / (double)Global::interval));
+  }
 }
 
-void initIPTIParameters () {
-    //TODO: 
+void Vaccine::clearParameters () {
+  if (!Vaccine::anyVaccine)
+    return;
+  
+  if (_numberOfEpiDoses == 0)
+    return;
+  free(targetagetstep);
+  free(vaccineCoverage);
+}
 
-    int i;
-    numberOfGenoTypes=get_number_of_genotypes();
-    iptiEffect=get_ipti_effect();
-    genotypeFreq = (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-    genotypeFreqX = numberOfGenoTypes;
-    genotypeACR = (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-    genotypeACRX = numberOfGenoTypes;
-    genotypeProph = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-    genotypeProphX = numberOfGenoTypes;
-    genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-    genotypeTolPeriodX = numberOfGenoTypes;
-    genotypeAtten = (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-    genotypeAttenX = numberOfGenoTypes;
-    for ( i=1;i<=numberOfGenoTypes; i++) {
-        genotypeFreq[i - 1]=get_genotype_freq(i);
-        genotypeACR[i - 1]=get_genotype_acr(i);
-        genotypeProph[i - 1]=get_genotype_proph(i);
-        genotypeTolPeriod[i - 1]=get_genotype_tolperiod(i);
-        genotypeAtten[i - 1]=get_genotype_atten(i);
-    }
-    numberOfIPTiDoses=get_number_of_ipti_doses();
+void IPTIntervention::initParameters () {
+  const Interventions& xmlInterventions = getInterventions();
+  IPT = xmlInterventions.getIptiDescription().present();
+  if (!IPT)
+    return;
+  
+  // --- IptiDescription begin ---
+  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  
+  const IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
+  numberOfGenoTypes = genotypes.size();
+  genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  genotypeProph	= (int*)malloc(((numberOfGenoTypes))*sizeof(int));
+  genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
+  genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  
+  size_t i = 0;
+  for (IptDescription::InfGenotypeConstIterator it = genotypes.begin(); it != genotypes.end(); ++it, ++i) {
+    genotypeFreq[i]	= it->getFreq();
+    genotypeACR[i]	= it->getACR();
+    genotypeProph[i]	= it->getProph();
+    genotypeTolPeriod[i]= it->getTolPeriod();
+    genotypeAtten[i]	= it->getAtten();
+  }
+  
+  iptiEffect = xmlIPTI.getIptiEffect();
+  // --- IptiDescription end ---
+  
+  if (xmlInterventions.getContinuous().present()) {
+    const Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
+    numberOfIPTiDoses = xmlIpti.size();
+    
     iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
-    iptiTargetagetstepX = numberOfIPTiDoses;
     iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
-    iptiCoverageX = numberOfIPTiDoses;
-    for ( i=0;i<numberOfIPTiDoses; i++) {
-        iptiTargetagetstep[i]=(int)floor(get_ipti_target_age_yrs(i)*daysInYear/(1.0*interval));
-        iptiCoverage[i]=get_ipti_coverage(i);
+    for (int i=0;i<numberOfIPTiDoses; i++) {
+      iptiTargetagetstep[i] = floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval));
+      iptiCoverage[i] = xmlIpti[i].getCoverage();
     }
+  } else
+    numberOfIPTiDoses = 0;
 }
 
-void clearVaccineParameters () {
-
-    free(PEVInitialMeanEfficacy);
-    free(BSVInitialMeanEfficacy);
-    free(TBVInitialMeanEfficacy);
-    free(targetagetstep);
-    free(vaccineCoverage);
-}
-
-void clearITNParameters () {
-    //TODO if so
-
-}
-
-void clearIPTIParameters () {
-
-    free(genotypeFreq);
-    free(genotypeACR);
-    free(genotypeProph);
-    free(genotypeTolPeriod);
-    free(genotypeAtten);
+void IPTIntervention::clearParameters () {
+  if (!IPT)
+    return;
+  
+  free(genotypeFreq);
+  free(genotypeACR);
+  free(genotypeProph);
+  free(genotypeTolPeriod);
+  free(genotypeAtten);
+  if (numberOfIPTiDoses) {
     free(iptiTargetagetstep);
     free(iptiCoverage);
+  }
 }
-
-void initInterventionParameters () {
-
-    int isIpti;
-    isIpti=get_is_ipti();
-    if ( isIpti ==  1) {
-        IPT=1/* bool */;
-    }
-    else {
-        IPT=0/* bool */;
-    }
-    vaccineType=get_vaccine_type();
-    if ( vaccineType >  0) {
-        initVaccineParameters();
-    }
-    if ( ITN) {
-        initITNParameters();
-    }
-    if ( IPT) {
-        initIPTIParameters();
-    }
-}
-
-void clearInterventionParameters () {
-
-    if ( vaccineType >  0) {
-        clearVaccineParameters();
-    }
-    if ( ITN) {
-        clearITNParameters();
-    }
-    if ( IPT) {
-        clearIPTIParameters();
-    }
-}
-
-
-// Intervention::~Intervention() {
-
-//     if ( vaccineType >  0) {
-//         clearVaccineParameters();
-//     }
-//     if ( ITN) {
-//         clearITNParameters();
-//     }
-//     if ( IPT) {
-//         clearIPTIParameters();
-//     }
-// }
-

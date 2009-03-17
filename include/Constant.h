@@ -17,32 +17,259 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-
-
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
-//Error constants
-enum error{
-	MISSING_VALUE = -99999
+/** Flags signalling which versions of some models to use. */
+enum ModelVersion {
+  /** @brief Clinical episodes reduce the level of acquired immunity
+   * 
+   * Effective cumulative exposure to blood stage parasites is reduced during a
+   * clinical episode, so that clinical episodes have a negative effect on
+   * blood stage immunity.
+   * 
+   * Default: Clinical events have no effect on immune status except
+   * secondarily via effects of treatment. */
+  PENALISATION_EPISODES = 1 << 1,
+  
+  /** @brief Baseline availability of humans is sampled from a gamma distribution
+   * Infections introduced by mass action with negative binomial
+   * variation in numbers of infection and no acquired preerythrocytic immunity.
+   * 
+   * Default: New infections are introduced via a Poisson process as described
+   * in AJTMH 75 (suppl 2) pp11-18. */
+  NEGATIVE_BINOMIAL_MASS_ACTION = 1 << 2,
+  
+  /** @brief Not currently implemented */
+  attenuationAsexualDensity= 3,
+  
+  /** @brief Baseline availability of humans is sampled from a log normal distribution
+   * 
+   * Infections introduced by mass action with log normal variation in
+   * infection rate with no acquired preerythrocytic immunity.
+   * 
+   * Default: New infections are introduced via a Poisson process as described
+   * in AJTMH 75 (suppl 2) pp11-18. */
+  LOGNORMAL_MASS_ACTION = 1 << 4,
+  
+  /** Infections introduced by mass action with log normal variation in
+   * infection rate modulated by preerythrocytic immunity.
+   * 
+   * Default: New infections are introduced via a Poisson process as described
+   * in AJTMH 75 (suppl 2) pp11-18. */
+  LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM = 1 << 5,
+  
+  /// BugFix in previous versions.  This option is not currently implemented.
+  // @{
+  maxDensCorrection= 6,
+  innateMaxDens= 7,
+  maxDensReset= 8,
+  //@}
+  
+  /** @brief Parasite densities are predicted from an autoregressive process
+   *
+   * Default: Parasite densities are determined from the descriptive model
+   * given in AJTMH 75 (suppl 2) pp19-31 .*/
+  WITHIN_HOST_PARASITE = 1 << 9,
+  
+  /** Clinical episodes occur if parasitaemia exceeds the pyrogenic threshold.
+   * 
+   * Default: Clinical episodes are a stochastic function as described in AJTMH
+   * 75 (suppl 2) pp56-62. */
+  PREDETERMINED_EPISODES = 1 << 10,
+  
+  /** @brief The morbidity model includes simulation of non-malaria fevers
+   * 
+   * Default: Non-malaria fevers are not simulated. */
+  NON_MALARIA_FEVERS = 1 << 11,
+  
+  /** @brief Pharmacokinetic and pharmacodynamics of drugs are simulated
+   * 
+   * Default: Drugs have all or nothing effects (except in certain IPTi
+   * models). */
+  INCLUDES_PK_PD = 1 << 12,
+  
+  /** @brief Use revised case management model
+   * 
+   * Default: use the Tediosi et al case management model (Case management as
+   * described in AJTMH 75 (suppl 2) pp90-103. */
+  CASE_MANAGEMENT_V2 = 1 << 13,
+  
+  /** @brief Clinical episodes occur in response to a simple parasite density trigger
+   * 
+   * Default: Use the Ross et al morbidity model (Clinical episodes are a
+   * stochastic function as described in AJTMH 75 (suppl 2) pp56-62). */
+  MUELLER_MORBIDITY_MODEL = 1 << 14,
+  
+  /** @brief Simple heterogeneity
+   * 
+   * Defaults: No heterogeneity. */
+  // @{
+  /// @brief Allow simple heterogeneity in transmission
+  TRANS_HET = 1 << 15,
+  /// @brief Allow simple heterogeneity in comorbidity
+  COMORB_HET = 1 << 16,
+  /// @brief Allow simple heterogeneity in treatment seeking
+  TREAT_HET = 1 << 17,
+  /// @brief Allow correlated heterogeneities in transmission and comorbidity
+  COMORB_TRANS_HET = 1 << 18,
+  /// @brief Allow correlated heterogeneities in transmission and treatment seeking
+  TRANS_TREAT_HET = 1 << 19,
+  /// @brief Allow correlated heterogeneities comorbidity and treatment seeking
+  COMORB_TREAT_HET = 1 << 20,
+  /// @brief Allow correlated heterogeneities in transmission, comorbidity and treatment seeking
+  TRIPLE_HET = 1 << 21,
+  // @}
+  
+  // NOTE: This shouldn't be used yet. Previously, the noVectorControl constant was defined.
+  //const int noVectorControl = 22;  vector control is opt-in, not opt-out:
+  /** @brief Simulate the mosquito life-cycle.
+   * 
+   * Use VectorControl as the TransmissionModel.
+   * 
+   * Default: use NoVectorControl. */
+  VECTOR_CONTROL = 1 << 23,
+  
+  // Used by tests; should be 1 plus highest left-shift value of 1
+  NUM_VERSIONS = 24,
 };
 
-//Constants defining the different ITN types
-enum InterventionType{
-	NO_INTERVENTION = 0,
-	IRS_INTERVENTION = 1,
-	MDA_INTERVENTION = 2,
-	VACCINE_INTERVENTION = 3,
-	CHANGE_EIR_INTERVENTION = 4,
-	CHANGE_HS_INTERVENTION = 5,
-	IPTi_INTERVENTION = 6
+namespace Diagnosis {
+  enum Value { NON_MALARIA_FEVER,
+               UNCOMPLICATED_MALARIA,
+               SEVERE_MALARIA,
+               INDIRECT_MALARIA_DEATH };
+}
+
+namespace Outcome {
+/*
+  Possibilities for outcomes are:
+  for non-treated
+*/
+  enum Value {
+    
+    // non treatedsimulationMode
+    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED,
+    //for outpatients
+    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS,
+    //for inpatients
+    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS,
+    //for non-treated
+    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_NON_TREATED,
+    //for outpatients
+    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS,
+    //for inpatients
+    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS,
+    //for non-treated
+    PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED,
+    //for inpatients
+    PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS,
+    //for non-treated
+    PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED,
+    //for inpatients
+    PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS,
+    //for non-treated
+    PATIENT_DIES_NON_TREATED,
+    //for inpatients
+    PATIENT_DIES_INPATIENTS,
+    INDIRECT_DEATH,
+    //for outpatients in models of pk/pD
+    PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS
+  };
+}
+
+namespace Params {
+  enum Params {
+    /// Used in NoVectorControl
+    //@{
+    NEG_LOG_ONE_MINUS_SINF = 1,
+    E_STAR = 2,
+    SIMM = 3,
+    X_STAR_P = 4,
+    GAMMA_P = 5,
+    //@}
+    
+    SIGMA_I_SQ = 6,			///< Used in Human
+    
+    /// Used in Infection
+    //@{
+    CUMULATIVE_Y_STAR = 7,
+    CUMULATIVE_H_STAR = 8,
+    NEG_LOG_ONE_MINUS_ALPHA_M = 9,
+    DECAY_M = 10,
+    SIGMA0_SQ = 11,
+    X_NU_STAR = 12,
+    //@}
+    
+    /// Used in Human
+    //@{
+    Y_STAR_SQ = 13,
+    ALPHA = 14,
+    DENSITY_BIAS_NON_GARKI = 15,
+    BASELINE_AVAILABILITY_SHAPE = 16,	///< Also used in TransmissionModel
+    //@}
+    
+    LOG_ODDS_RATIO_CF_COMMUNITY = 17,	///< Used in CaseManagementModel
+    INDIRECT_RISK_COFACTOR = 18,	///< Used in Human
+    NON_MALARIA_INFANT_MORTALITY = 19,	///< Used in Summary
+    
+    /// Used in Human
+    //@{
+    DENSITY_BIAS_GARKI = 20,
+    SEVERE_MALARIA_THRESHHOLD = 21,
+    IMMUNITY_PENALTY = 22,
+    IMMUNE_EFFECTOR_DECAY = 23,
+    COMORBIDITY_INTERCEPT = 24,
+    Y_STAR_HALF_LIFE = 25,
+    Y_STAR_1 = 26,
+    ASEXUAL_IMMUNITY_DECAY = 27,
+    Y_STAR_0 = 28,
+    
+    CRITICAL_AGE_FOR_COMORBIDITY = 30,
+    MUELLER_RATE_MULTIPLIER = 31,
+    MUELLER_DENSITY_EXPONENT = 32,
+    //@}
+    
+    MAX
+  };
+}
+
+/// Any chance we can get rid of this?
+const int  missing_value= -99999;
+
+/// Days in a year. Should be a multiple of interval.
+const int daysInYear= 365;
+
+/** There are 3 simulation modes.
+ * 
+ * TODO: Add simulation mode for entomological model.
+   This probably needs to be done soon. */
+enum SimulationMode {
+  /** Equilibrium mode
+   * 
+   * This is used for the warm-up period and if we want to separate direct
+   * effect of an intervention from indirect effects via transmission
+   * intensity. The seasonal pattern and intensity of the EIR do not change
+   * over years. */
+  equilibriumMode = 2,
+  /** Transient EIR known
+   * 
+   * This is used to simulate an intervention that changes EIR, and where we
+   * have measurements of the EIR over time during the intervention period. */
+  transientEIRknown = 3,
+  /** EIRchanges
+   * 
+   * The EIR changes dynamically during the intervention phase as a function of
+   * the characteristics of the interventions. */
+  dynamicEIR = 4
 };
 
-//Constants used for the different ages of interventions
-enum ageMDA{	
-	MAX_AGE = 999,
-	MIN_AGE = 0,
-	COMPLIANCE = 1
-};
+/// The mean of the base line availability, is used by both human.f and entomology.f
+const double BaselineAvailabilityMean= 1.0;
+
+/** The relative risk of non malaria fever is used in human.f
+ * TODO: This is currently set arbitrarily to 1.0, but should be defined in the
+ * .xml */
+const double RelativeRiskNonMalariaFever= 1.0;
 
 #endif

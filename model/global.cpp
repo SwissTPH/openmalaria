@@ -25,6 +25,7 @@
 #include "global.h"
 #include "inputData.h"
 #include <cmath>
+#include <iostream>
 
 /*
 Contains global variables and constants and utility functions that are used in different modules.
@@ -33,63 +34,82 @@ Constants (parameter)
 
 */
 
-int modelVersion;
-int interval;
-int intervalsPerYear;
-int maxAgeIntervals;
-int simulationMode;
-double latentp;
+ModelVersion Global::modelVersion;
+int Global::interval;
+int Global::intervalsPerYear;
+int Global::maxAgeIntervals;
+int Global::simulationMode;
+int Global::latentp;
 
-vector<int> infantIntervalsAtRisk;
-int infantIntervalsAtRiskSize;
-vector<int> infantDeaths;
-int infantDeathsSize;
+vector<int> Global::infantIntervalsAtRisk;
+vector<int> Global::infantDeaths;
 
-void initGlobal () {
-
-    modelVersion=get_model_version();
-    interval=get_interval();
-    //exit if days in year is not divisible by interval
-    if ( mymodf(daysInYear, interval) !=  0) {
-        exit(-12);
+void Global::setModelVersion () {
+  modelVersion = (ModelVersion) get_model_version();
+  /* To print flags as binary:
+  cerr << "Model version: ";
+  for (int i = 24; i >= 0; --i)
+    cerr << ((modelVersion >> i) & 1);
+  cerr << endl; */
+  
+  // Or'd flags of incompatibility triangle from
+  // "description of variables for interface" excel sheet
+  const int INCOMPATIBLITITIES[NUM_VERSIONS] = {
+    0,
+    WITHIN_HOST_PARASITE | INCLUDES_PK_PD,	// 1
+    LOGNORMAL_MASS_ACTION | LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM,	// 2
+    WITHIN_HOST_PARASITE | INCLUDES_PK_PD | TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,	// 3
+    LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM,	// 4
+    TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,	// 5
+    WITHIN_HOST_PARASITE | INCLUDES_PK_PD | TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,	// 6
+    WITHIN_HOST_PARASITE | INCLUDES_PK_PD,	// 7
+    WITHIN_HOST_PARASITE,	// 8
+    0,	// 9
+    0,	// 10
+    MUELLER_MORBIDITY_MODEL,	// 11
+    0,	// 12
+    0,	// 13
+    0,	// 14
+    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 15
+    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 16
+    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 17
+    TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 18
+    COMORB_TREAT_HET | TRIPLE_HET,	// 19
+    TRIPLE_HET,	// 20
+    0,	// 21
+    0,
+    0
+  };
+  
+  for (size_t i = 0; i < NUM_VERSIONS; ++i)
+    if (((modelVersion >> i) & 1) &&
+          modelVersion & INCOMPATIBLITITIES[i]) {
+      cerr << "Incompatible model versions: flag " << i << " is incompatible with other flags." << endl;
+      throw 0;
     }
-    intervalsPerYear=daysInYear/interval;
-    infantDeathsSize = intervalsPerYear;
-    infantDeaths.resize(infantDeathsSize);
-    infantIntervalsAtRiskSize = intervalsPerYear;
-    infantIntervalsAtRisk.resize(infantIntervalsAtRiskSize);
-    latentp=get_latentp();
-    maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
+  if (modelVersion &
+      (1<<attenuationAsexualDensity | 1<<maxDensCorrection | 1<<innateMaxDens | 1<<maxDensReset))
+    cerr << "Warning: model version used is deprecated" << endl;
 }
 
-void clearGlobalParameters () {
+void Global::initGlobal () {
+  setModelVersion();
+  interval=get_interval();
+  if (daysInYear % interval !=  0) {
+    cerr << "daysInYear not a multiple of interval" << endl;
+    exit(-12);
+  }
+  intervalsPerYear = daysInYear/interval;
+  infantDeaths.resize(intervalsPerYear);
+  infantIntervalsAtRisk.resize(intervalsPerYear);
+  latentp=get_latentp();
+  maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
 }
 
-int modIntervalsPerYear (int i) {
-
-    int valmodIntervalsPerYear;
-    valmodIntervalsPerYear= i % intervalsPerYear;
+int Global::modIntervalsPerYear (int i) {
+    int valmodIntervalsPerYear = i % intervalsPerYear;
     if ( valmodIntervalsPerYear ==  0) {
         valmodIntervalsPerYear=intervalsPerYear;
     }
     return valmodIntervalsPerYear;
 }
-
-double mymodf(double d1, double d2) {
-    //return modf(d1, &d2);
-    return (int)d1 % (int)d2;
-}
-
-#ifdef _WIN32
-int nearbyint(double x){
-	return (int) x;
-}
-int round(double x){
-	double intpart;
-	if (modf(x,&intpart)>=.5)
-		return x>=0.0?(int)ceil(x):(int)floor(x);
-	else
-		return x<0.0?(int)ceil(x):(int)floor(x);
-}
-#endif
-

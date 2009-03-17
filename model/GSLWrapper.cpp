@@ -27,12 +27,9 @@ using namespace std;
 #include <gsl/gsl_randist.h>
 #include "GSLWrapper.h"
 #include "inputData.h"
+#include "population.h"
 
 #include "boinc_bridge.h"
-
-#ifdef __cplusplus
-//#include "setDemo.h"
-#endif
 
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;
@@ -58,19 +55,13 @@ double W_BETA(double a, double b){
 double W_GAUSS(double mean, double std){
   return gsl_ran_gaussian(generator,std)+mean;
 }
- 
-#ifndef __cplusplus 
-extern "C" double setDemoParameters(double, double);
-#else
-extern double setDemoParameters(double, double);
-#endif 
 
 double  wCalcRSS(const gsl_vector *v, void* params){
   double x, y;  
   x = gsl_vector_get(v, 0);
   y = gsl_vector_get(v, 1);
 
-  return  setDemoParameters(x,y); 
+  return Population::setDemoParameters(x,y); 
 }
 
 double w_minimize_calc_rss(double *param1,double *param2){

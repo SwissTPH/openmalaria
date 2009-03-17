@@ -28,7 +28,7 @@
   Summary for clinical events during a caseManagementMemory period, in one individual.
   time in 5 day intervals
 */
-class CaseManagement;
+class CaseManagementModel;
 
 class Event{
  
@@ -62,7 +62,7 @@ class Event{
 
   int getTime() const {return _time;};
   void setTime(int time) {_time=time;};
-  void setCaseManagement(CaseManagement* caseManagement) {_caseManagement=caseManagement;};
+  void setCaseManagement(CaseManagementModel* caseManagement) {_caseManagement=caseManagement;};
   int getDiagnosis() const {return _diagnosis;};
   int getAgeGroup() const {return _ageGroup;};
   int getSurveyPeriod() const {return _surveyPeriod;};
@@ -82,8 +82,8 @@ class Event{
   int _outcome;
   //! The total(!) number of clinical events that occured during this caseManagementMemory period
   int _recurrence;
-  //! CaseManagement model
-  CaseManagement* _caseManagement;
+  //! CaseManagementModel model
+  CaseManagementModel* _caseManagement;
 
 };
 

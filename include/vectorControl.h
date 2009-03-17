@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef Hmod_VectorControl
+#define Hmod_VectorControl
 /* This file should contain the headers of all routines that we write in the C
  * program.
  */ 
@@ -37,18 +39,43 @@
 #include <gsl/gsl_multiroots.h>
 #include "transmissionModel.h"
 
+//#define VectorControl_PRINT_calMosqEmergeRate
+//#define VectorControl_PRINT_CalcInitMosqEmergeRate
+//#define VectorControl_PRINT_CalcUpsilonOneHost
+//#define VectorControl_PRINT_CalcSvDiff
+//#define VectorControl_PRINT_CalcLambda
+//#define VectorControl_PRINT_CalcXP
+//#define VectorControl_PRINT_CalcSpectralRadius
+//#define VectorControl_PRINT_CalcInv1minusA
+
+
 //! Transmission models, Chitnis et al
-class VectorControl :
-public TransmissionModel { 
-
- public:
-
-  VectorControl() {};
-  ~VectorControl() {};
-	
-  //! initialise the main simulation 
+class VectorControl : public TransmissionModel {
+public:
+  VectorControl();
+  ~VectorControl();
+  
+  /** Initialise the main simulation.
+   * 
+   * Calculates mosquito emergence rate.
+   * 
+   * \param populationSize The total number of hosts.
+   * 
+   * Emergence rate calculations assume only one type of host; i.e. it calculates
+   * the rate for a stable situation before interventions are introduced. */
   void initMainSimulation (int populationSize); 
 
+  //! get the number of infections for a specific human at a given time step 
+  virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR);
+
+  /** Calculates EIR (in adults).
+   * 
+   * \param simulationTime Time since start of simulation . */
+  virtual double calculateEIR(int simulationTime, Human& host); 
+
+  /** Need something like this called every interval. */
+  virtual void advancePeriod (int simulationTime);
+  
   //maxDurIntPhaseEIR is the maximum number of days for which an
   //intervention phase EIR is specified
   static const int ifCalcMosqEmergeRate = 0;	// TODO: Move to XML.
@@ -56,12 +83,73 @@ public TransmissionModel {
   // But we can set it to 0 to allow the program to run faster by 
   // skipping EntoModel.cpp.
 
- private:
+private:
+  /* Parameters from model */
+  
+  /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
+   * Units: Animals per day. */
+  double mosqEmergeRate[daysInYear];
 
-  int _populationSize;
-
-  double mosqEmergeRate[daysInYear]; // Note that this is of size daysInYear and not intervalsPerYear.
- 
+  /** Death rate of mosquitoes while host-seeking (μ_vA).
+   * Unit: animals/day. */
+  double mosqSeekingDeathRate;	// FIXME: varies over time
+  
+  /** Duration of host-seeking per day; the maximum fraction of a day that a
+   * mosquito would spend seeking (θ_d). */
+  double mosqSeekingDuration;	// FIXME: varies over time
+  
+  // NOTE: K_vi = P_vi * (host infected) ?
+  /** Probability of an infected host infecting a mosquito and that mosquito
+   * becoming infective (assuming it survives), per bite.
+   * Assumed constant for all hosts. */
+  double P_vi;
+  
+  /** Probability of a mosquito successfully laying eggs after resting (P_E_i).
+   * 
+   * Currently assumed constant, although NC's non-autonomous model provides
+   * an alternative. */
+  double probMosqEggLaying;
+  
+  /** Duration of resting period for mosquito (τ).
+   * Units: days. */
+  int mosqRestDuration;
+  
+  /* Partial (derived) parameters from model */
+  
+  /** Number of days for which data must be stored to calculate N_v, O_v and
+   * S_v.
+   * 
+   * Should equal EIPDuration + mosqRestDuration to allow values up to
+   * θ_s + τ - 1 days back, plus current day. */
+  int N_v_length;
+  
+  /** @brief Probability of a mosquito not finding a host one night.
+   * NOTE: should length be N_v_length? */
+  double *P_A;
+  
+  /** @brief P_df and P_dif per-day.
+   * NOTE: should length be N_v_length?
+   * 
+   * P_df is the probability of a mosquito finding a host and completing a
+   * feeding cycle without being killed.
+   * 
+   * P_dif is the probability of a mosquito finding a host, getting infected,
+   * and successfully completing a feeding cycle. */
+  double *P_df, *P_dif;
+  
+  /** Number of host-seeking mosquitos each day; respectively: total number,
+   * infected (dela, and infective.
+   * Index for each day is day % N_v_length.
+   * Length: N_v_length (longer than needed for S_v, but simplifyies code) */
+  double *N_v, *O_v, *S_v;
+  
+  /** Per time-step partial calculation of EIR.
+   *
+   * See comment in advancePeriod(). */
+  double partialEIR;
+  
+  /* Functions */
+  
   //! This subroutine converts vectors of length intervalsPerYear to daysInYear. 
   /*! 
     we expect to put the following this into VectorControl class 
@@ -74,9 +162,6 @@ public TransmissionModel {
     subroutine a general subroutine that converts from a given 
     length to another given length. 
  
-    TODO: the former documentation said ShortArray should be of type real while FullArray 
-    should be of type real*8. 
- 
     Note: We also assume that: 
     daysInYear = interval*intervalsPerYear. 
 	 
@@ -86,152 +171,64 @@ public TransmissionModel {
   */ 
   void convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray); 
 	
-  //! previously tested Fortran C Communcation 
-  /*! 
-    This subroutine tests the communication between Fortran and C. 
-    We pass an array to C, ask C to add 1 to all the elements and 
-    print the new array from Fortran. 
- 
-    We also pass two matrices to C: A & B. 
-    A is a (defined) 2 x 3 matrix 
-    B is a (defined) 3 x 2 matrix. 
-    In C, we then evaluate 
-    C = AB (2 x 2) 
-    D = A + B^T (2 x 3) 
- 
-    We see if C returns to Fortran what we would expect. 
-    TODO: when can we scrap this? 
-  */ 
+  /*! get mosquito emergence rates 
+   *
+   * This routine passes the basic entomological parameters (that are already
+   * been read, the EIR, and the human infectivity to mosquitoes (all for one
+   * type of host) and calculate the mosquito emergence.
+   * 
+   * \param populationSize
+   * 	Number of hosts of each type.
+   * 	Units: Animals. 
+   * 	$N_i$ in model. Matrix of size $n \times \theta_p$.
+   * 	We assume that the size of the one group in initialization is
+   * 	fixed over the cycle.
+   * 	Mathematically, we require this parameter to be a positive
+   * 	real number, so although this will typically be a natural 
+   * 	number, it is not restricted to being one. */
+  void calMosqEmergeRate (int populationSize); 
 
-  void testFortranCCommunication (); 
- private:
-  int i;
-  //! get mosquito emergence rates 
-  /*! 
-    TODO: This function will initializes the system but is not yet implemented. 
-    This routine passes the basic entomological parameters (that are already been read, the EIR, and the human infectivity to mosquitoes (all for one type of host) and calculate the mosquito emergenc
-    For now, we call testFortranCCommunication to see how well we can pass arrays and matrices between the two. 
-    \sa testFortranCCommunication() 
-  */ 
-  void calMosqEmergeRate (); 
 
+/** calcInitMosqEmergeRate() calculates the mosquito emergence rate given
+   * all other parameters.
+   *
+   * We use a periodic version of the model described in "A Mathematical Model 
+   * for the Dynamics of Malaria in Mosquitoes Feeding on a Heteregeneous Host
+   * Population". The periodic model still needs to be written as a paper. We will
+   * change these comments to refer to the approprirate paper when it is ready.
+   *
+   * The entomological model has a number of input parameters, including the
+   * mosquito emergence rate, $N_{v0}$, and a number of output parameters, 
+   * including the entomological inoculation rate, $\Xi_i$. The model produces
+   * equations for $\Xi_i$ as a function of $N_{v0}$ and the other parameters.
+   * However, in this function, we assume that all parameters, except $N_{v0}$ 
+   * are known, and $\Xi_i$ is known. We then use these parameters, with $\Xi_i$ 
+   * to calculate $N_{v0}$. The equations for $\Xi_i$ are linear in terms of 
+   * $N_{v0}$ so there is a unique solution for $N_{v0}$. 
+   *
+   * This routine first shows the existence of a unique globally asymptotically 
+   * stable periodic orbit for the system of equations describing the periodically
+   * forced entomological model (for a given set of parameter values, including the
+   * mosquito emergence rate). It then compares the number of infectious host-seeking
+   * mosquitoes for this periodic orbit to the the number of infectious host-seeking
+   * mosquitoes that would result in the given EIR. The routine then iteratively finds
+   * the emergence rate that matches the given EIR.
+   * 
+   * However, we cannot write these equations in the form Ax=b, so we use
+   * a root-finding algorithm to calculate $N_{v0}$.
+   *
+   * This function has a dummy return of 0.
+   * 
+   * All parameters are IN parameters. */
+  double CalcInitMosqEmergeRate(int populationSize,
+                                int EIPDuration,
+                                int nHostTypesInit, int nMalHostTypesInit,
+                                double hostAvailabilityRateInit,
+                                double mosqProbBiting,
+                                double mosqProbFindRestSite,
+                                double mosqProbResting,
+                                double mosqProbOvipositing,
+                                double* FHumanInfectivityInitVector,
+                                double* FEIRInitVector);
 };
-
-
-//! Formerly tested fortran C interactions, also calculates mosquito emergence rate
-/*! 
-
-  testFortranCInteractions() passes test arrays and matrices between C and
-  Fortran to see if we can get the communication to work correctly. For now
-  we aim to pass an array from Fortran to C, add 1 to all elements of the 
-  array, and read the new array in Fortran, while saving a copy of the
-  original array in C. 
-
-  We also pass two matrices from Fortran to C:
-  A is a (defined) 2 x 3 matrix
-  B is a (defined) 3 x 2 matrix.
-  In C, we then evaluate:
-  C = AB (2 x 2)
-  D = A + B^T (2 x 3)
-  We see if C returns to Fortran what we would expect.
-  TODO: presumably much of this is redundant
-  \return The mosquito emergence rate which is as follows
-  Units: Mosquitoes/Time
-  $N_{v0}$ in model. Vector of length $\theta_p$.
-  \sa mosqEmergeRateInitEstimate[]
-*/
-double TestFortranCInteractions(int* AnnualPeriodPtr, int* nsporePtr,
-                                int* FTestArray, int* testArraySizePtr, 
-                                double* FAMatrix, int* AMatrixColLengthPtr, int* AMatrixRowLengthPtr, 
-                                double* FBMatrix, int* BMatrixColLengthPtr, int* BMatrixRowLengthPtr, 
-                                double* FCMatrix, int* CMatrixColLengthPtr, int* CMatrixRowLengthPtr, 
-                                double* FDMatrix, int* DMatrixColLengthPtr, int* DMatrixRowLengthPtr);
-
-double CalcInitMosqEmergeRate(double* FMosqEmergeRateVector, int daysInYearPtr,
-                              int mosqRestDurationPtr, int EIPDurationPtr, int nHostTypesInitPtr,
-                              int nMalHostTypesInitPtr, double popSizeInitPtr, 
-                              double hostAvailabilityRateInitPtr, double mosqSeekingDeathRatePtr,
-                              double mosqSeekingDurationPtr, double mosqProbBitingPtr,
-                              double mosqProbFindRestSitePtr, double mosqProbRestingPtr,
-                              double mosqProbOvipositingPtr, double* FHumanInfectivityInitVector,
-                              double* FEIRInitVector, double* FMosqEmergeRateInitEstimateVector,
-                              char fnametestentopar[]);
-
-void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr, 
-                        double* PAiPtr, int thetap, int eta, int mt, int tau, 
-                        int thetas, int n, int m, double Ni, double alphai, 
-                        double muvA, double thetad, double PBi, double PCi, double PDi, 
-                        double PEi, gsl_vector* Kvi, char fntestentopar[]);
-
-int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
-
-// NOTE: Unused
-//static int staticCalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f,void* obj);
-
-void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR, 
-                gsl_matrix** Upsilon, gsl_vector* Nv0, gsl_matrix* inv1Xtp, 
-                int eta, int mt, int thetap, char fntestentopar[]);
-
-void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, int eta,
-                int thetap, char fntestentopar[]);
-
-void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon, 
-            gsl_vector** Lambda, gsl_matrix* inv1Xtp, int eta,
-            int thetap, char fntestentopar[]);
-
-void CalcPSTS(double* sumkplusPtr, double* sumklplus, int thetas,
-              int tau, double PA, double Pdf);
-
-void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, int t, int s, int n);
-
-double CalcSpectralRadius(gsl_matrix* A, int n, char fntestentopar[]);
-
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, int n, char fntestentopar[]);
-
-void CalSvfromEIRdata(gsl_vector* Sv, double PAi, double PBi, double Ni, 
-                      gsl_vector* Xii);
-
-double binomial(int n, int k);
-
-
-void CalcCGSLVectorFromCArray(gsl_vector* CGSLVector, double* CArray, 
-                              int Length);
-
-void CalcCArrayFromCGSLVector(gsl_vector* CGSLVector, double* CArray, 
-                              int Length);
-
-void CalcCGSLMatrixFromFortranArray(gsl_matrix* CMatrix, double* FArray, 
-                                    int ColLength, int RowLength);
-
-void CalcFortranArrayFromCGSLMatrix(gsl_matrix* CMatrix, double* FArray, 
-                                    int ColLength, int RowLength);
-
-void CalcCGSLVectorFromFortranArray(gsl_vector* CVector, double* FArray, 
-                                    int Length);
-
-void CalcFortranArrayFromCGSLVector(gsl_vector* CVector, double* FArray, 
-                                    int Length);
-
-void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
-                             int thetap, char fnrootfindingstate[]);
-
-void PrintParameters(char fntestentopar[], int thetap, int tau, int thetas, 
-                     int n, int m, double Ni, double alphai, double muvA, 
-                     double thetad, double PBi, double PCi, double PDi, double PEi, 
-                     gsl_vector* Kvi, gsl_vector* Xii, gsl_vector* Nv0guess);
-
-void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, int thetap,
-                  int eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
-                  gsl_vector* Pduf);
-
-void PrintXP(gsl_vector** xp, int eta, int thetap, char fntestentopar[]);
-
-void PrintLambda(gsl_vector** Lambda, int eta, char fntestentopar[]);
-
-void PrintEigenvalues(char fntestentopar[], gsl_vector_complex* eval, int n);
-
-void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A, 
-                 int RowLength, int ColLength);
-
-
-void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, int n);
+#endif

@@ -50,9 +50,9 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
   //effect of age-dependent maternal immunity (named Dm in AJTM)
   double dA;
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  infage=1+_human->getSimulationTime()-inf->getStartDate()-nearbyint(latentp);
+  infage=1+_human->getSimulationTime()-inf->getStartDate()-Global::latentp;
   if ( infage >  0) {
-    iduration=inf->getDuration()/interval;
+    iduration=inf->getDuration()/Global::interval;
     if ( iduration >  maxDur) {
       iduration=maxDur;
     }
@@ -100,13 +100,13 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
     meanlog=log(y)-stdlog*stdlog/2.0;
     timeStepMaxDensity = 0.0;
     if ( stdlog >  0.0000001) {
-      if ( interval >  1) {
+      if ( Global::interval >  1) {
 	normp=W_UNIFORM();
 	/*
 	  sample the maximum density over the T-1 remaining days in the
 	  time interval, (where T is the duration of the time interval)
 	*/
-	normp=pow(normp, 1.0*1/(interval-1));
+        normp=pow(normp, 1.0*1/(Global::interval-1));
 	/*
 	  To mimic sampling T-1 repeated values, we transform the sampling
 	  distribution and use only one sampled value, which has the sampling
@@ -150,20 +150,20 @@ void OldWithinHostModel::calculateDensities() {
     cumulativeh=_human->getCumulativeh();
     cumulativeY=_human->getCumulativeY();
     // IPTi SP dosec lears infections at the time that blood-stage parasites appear     
-    if ( IPT) {
+    if (IPTIntervention::IPT) {
       SPAction();
     }
     std::list<Infection*>::iterator i;
     for(i=_human->getInfections()->begin(); i!=_human->getInfections()->end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
       timeStepMaxDensity=_human->getTimeStepMaxDensity();
-      if ( isOptionIncluded(modelVersion, withinHostParasite)) {
+      if (Global::modelVersion & WITHIN_HOST_PARASITE) {
         (*i)->setDensity((*i)->determineWithinHostDensity());
         timeStepMaxDensity=std::max((double)(*i)->getDensity(), timeStepMaxDensity);
         _human->setTimeStepMaxDensity(timeStepMaxDensity);
       }
       else {
-        if ( isOptionIncluded(modelVersion, maxDensReset)) {
+        if ( isOptionIncluded(Global::modelVersion, maxDensReset)) {
           timeStepMaxDensity=0.0;
         }
 	calculateDensity(*i);
@@ -174,23 +174,23 @@ void OldWithinHostModel::calculateDensities() {
           Possibly a better model version ensuring that the effect of variation in innate immunity
           is reflected in case incidence would have the following here:
         */
-        if ( isOptionIncluded(modelVersion, innateMaxDens)) {
+        if ( isOptionIncluded(Global::modelVersion, innateMaxDens)) {
           timeStepMaxDensity=(double)timeStepMaxDensity*exp(-_human->getInnateImmunity());
         }
         //Include here the effect of blood stage vaccination
-        if ( isOptionIncluded(vaccineType, erythrocytic_reduces_y)) {
+        if (Vaccine::BSV.active) {
           (*i)->setDensity((*i)->getDensity()*(1-_human->getBSVEfficacy()));
           timeStepMaxDensity=(double)timeStepMaxDensity*(1-_human->getBSVEfficacy());
         }
         // Include here the effect of attenuated infections by SP concentrations
-        if ( isOptionIncluded(modelVersion, attenuationAsexualDensity)) {
-          if ( IPT &&  (*i)->getSPattenuate() ==  1) {
-            (*i)->setDensity((*i)->getDensity()/genotypeAtten[(*i)->getGenoTypeID() - 1]);
-            timeStepMaxDensity=(double)timeStepMaxDensity/genotypeAtten[(*i)->getGenoTypeID() - 1];
-            _SPattenuationt=(int)std::max(_SPattenuationt*1.0, ((*i)->getStartDate()+((*i)->getDuration()/interval)*genotypeAtten[(*i)->getGenoTypeID() - 1]));
+        if ( isOptionIncluded(Global::modelVersion, attenuationAsexualDensity)) {
+          if ( IPTIntervention::IPT &&  (*i)->getSPattenuate() ==  1) {
+            (*i)->setDensity((*i)->getDensity()/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]);
+            timeStepMaxDensity=(double)timeStepMaxDensity/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1];
+            _SPattenuationt=(int)std::max(_SPattenuationt*1.0, ((*i)->getStartDate()+((*i)->getDuration()/Global::interval) * IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]));
           }
         }
-        if ( isOptionIncluded(modelVersion, maxDensCorrection)) {
+        if ( isOptionIncluded(Global::modelVersion, maxDensCorrection)) {
           _human->setTimeStepMaxDensity(std::max(timeStepMaxDensity, _human->getTimeStepMaxDensity()));
         }
         else {
@@ -199,18 +199,18 @@ void OldWithinHostModel::calculateDensities() {
       }
       _human->setTotalDensity(_human->getTotalDensity()+(*i)->getDensity());
       //Compute the proportion of parasites remaining after innate blood stage effect
-      if ( (*i)->getDensity() >  detectionlimit) {
+      if ( (*i)->getDensity() > Human::detectionlimit) {
         _human->setPatentInfections(_human->getPatentInfections()+1);
       }
       if ( (*i)->getStartDate() == (_human->getSimulationTime()-1)) {
         _human->setCumulativeh(_human->getCumulativeh()+1);
       }
       (*i)->setDensity(std::min(maxDens, (*i)->getDensity()));
-      (*i)->setCumulativeExposureJ((*i)->getCumulativeExposureJ()+interval*(*i)->getDensity());
-      _human->setCumulativeY(_human->getCumulativeY()+interval*(*i)->getDensity());
+      (*i)->setCumulativeExposureJ((*i)->getCumulativeExposureJ()+Global::interval*(*i)->getDensity());
+      _human->setCumulativeY(_human->getCumulativeY()+Global::interval*(*i)->getDensity());
     }
-    if ( isOptionIncluded(modelVersion, attenuationAsexualDensity)) {
-      if ( IPT &&  _SPattenuationt > _human->getSimulationTime() &&  _human->getTotalDensity() <  10) {
+    if ( isOptionIncluded(Global::modelVersion, attenuationAsexualDensity)) {
+      if ( IPTIntervention::IPT &&  _SPattenuationt > _human->getSimulationTime() &&  _human->getTotalDensity() <  10) {
         _human->setTotalDensity(10);
         _human->setCumulativeY(_human->getCumulativeY()+10);
       }
@@ -229,9 +229,10 @@ void OldWithinHostModel::SPAction(){
   double rnum;
   std::list<Infection*>::iterator i=_human->getInfections()->begin();
   while(i != _human->getInfections()->end()){
-    if ( 1+_human->getSimulationTime()-(*i)->getStartDate()-nearbyint(latentp) > 0){
+    if ( 1+_human->getSimulationTime()-(*i)->getStartDate()-Global::latentp > 0){
       rnum=W_UNIFORM();
-      if ((rnum<=genotypeACR[(*i)->getGenoTypeID()-1]) && (_human->getSimulationTime()-_human->getLastSPDose() <= genotypeProph[(*i)->getGenoTypeID()-1])){
+      if ((rnum<=IPTIntervention::genotypeACR[(*i)->getGenoTypeID()-1]) &&
+           (_human->getSimulationTime() - _human->getLastSPDose() <= IPTIntervention::genotypeProph[(*i)->getGenoTypeID()-1])) {
         delete *i;
         i=_human->getInfections()->erase(i);
         _human->setMOI(_human->getMOI()-1);

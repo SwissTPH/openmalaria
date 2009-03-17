@@ -40,10 +40,11 @@ static const char* const checkpoint_1_name = "checkpoint1";
 
 //! Main simulation class
 class Simulation{
-
- public: 
+public: 
  
-  //Time since start of the simulation (TODO: Temporary step in refactoring. This variable should not be public"
+  //Time since start of the simulation (TODO: Temporary step in refactoring.
+  // This variable should not be public.)
+  // Units: interval * 1 day?
   static int simulationTime;
   
   //Time counter during the main simulation. 
