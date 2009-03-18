@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-using namespace std;
+
 #include "inputData.h"
 #include "scenario.hxx"
 
@@ -39,7 +39,7 @@ const Parameters * parameters;
 
 // Initialized (derived) values:
 double parameterValues[Params::MAX];
-map<int,const Intervention*> timedInterventions;
+std::map<int,const Intervention*> timedInterventions;
 
 // Initialization functions:
 
@@ -52,7 +52,7 @@ void initParameterValues() {
   for (Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
     int i = it->getNumber();
     if (i < 0 || i >= Params::MAX)
-      cerr << "Warning: parameter with invalid index; ignoring." << endl;
+      std::cerr << "Warning: parameter with invalid index; ignoring." << std::endl;
     else
       parameterValues[i] = it->getValue();
   }
@@ -65,7 +65,7 @@ void initTimedInterventions() {
   for (Timed::InterventionConstIterator it (interventionSeq.begin()); it != interventionSeq.end(); ++it) {
     int time = it->getTime();
     if (timedInterventions.count(time)) {
-      cerr << "Error: multiple timed interventions with time " << time << endl;
+      std::cerr << "Error: multiple timed interventions with time " << time << std::endl;
       throw 0;
     }
     timedInterventions[time] = &(*it);
@@ -82,7 +82,7 @@ bool createDocument(const char * lXmlFile) {
   try {
     scenario = (parseScenario (lXmlFile)).release();
     if (scenario->getSchemaVersion() != SCHEMA_VERSION) {
-      cerr << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION << endl;
+      std::cerr << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION << std::endl;
       throw 0;
     }
     
@@ -101,7 +101,7 @@ bool createDocument(const char * lXmlFile) {
   }
   catch (const xml_schema::Exception& e)
   {
-    cerr << e << endl;
+    std::cerr << e << std::endl;
     return false;
   }
   return true;
@@ -193,7 +193,7 @@ double get_lowerbound(){
 }
 
 const Intervention* getInterventionByTime(int time){
-  map<int,const Intervention*>::iterator i = timedInterventions.find (time);
+  std::map<int,const Intervention*>::iterator i = timedInterventions.find (time);
   if (i != timedInterventions.end())
     return i->second;
   else

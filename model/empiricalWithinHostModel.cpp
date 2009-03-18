@@ -1,6 +1,7 @@
 #include "empiricalWithinHostModel.h"
 #include "GSLWrapper.h"
 #include <iostream>
+#include <sstream>
 
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(){

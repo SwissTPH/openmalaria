@@ -221,7 +221,7 @@
 	</References>
 	<Files>
 		<Filter
-			Name="Resource Files"
+			Name="headers"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
@@ -238,6 +238,10 @@
 			</File>
 			<File
 				RelativePath=".\include\drug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\empiricalWithinHostModel.h"
 				>
 			</File>
 			<File
@@ -281,6 +285,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\oldWithinHostModel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\openMalaria.h"
 				>
 			</File>
@@ -309,11 +317,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\timer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\transmissionModel.h"
 				>
 			</File>
 			<File
 				RelativePath=".\include\vectorControl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\VectorControlInternal.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\withinHostModel.h"
 				>
 			</File>
 		</Filter>
@@ -356,6 +376,10 @@
 			</File>
 			<File
 				RelativePath=".\model\drug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\empiricalWithinHostModel.cpp"
 				>
 			</File>
 			<File
@@ -451,11 +475,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\timer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\transmissionModel.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\vectorControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\VectorControlInternal.cpp"
 				>
 			</File>
 			<File
