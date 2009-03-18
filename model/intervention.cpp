@@ -34,7 +34,7 @@ enum VaccineType {
 bool Vaccine::anyVaccine = false;
 double *Vaccine::targetagetstep;
 double *Vaccine::vaccineCoverage;
-int Vaccine::_numberOfEpiDoses = 0;
+size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
 Vaccine Vaccine::BSV;
 Vaccine Vaccine::TBV;
@@ -55,7 +55,7 @@ double *IPTIntervention::genotypeAtten;
 double Vaccine::getEfficacy (int numPrevDoses) {
   /* If initialMeanEfficacy.size or more doses have already been given, use
    * the last efficacy. */
-  if (numPrevDoses >= initialMeanEfficacy.size())
+  if (numPrevDoses >= (int)initialMeanEfficacy.size())
     numPrevDoses = initialMeanEfficacy.size() - 1;
   if (initialMeanEfficacy[numPrevDoses] <  1) {
     double a = efficacyB * initialMeanEfficacy[numPrevDoses] / (1.0-initialMeanEfficacy[numPrevDoses]);
@@ -94,7 +94,7 @@ void Vaccine::initParameters() {
     targetagetstep = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
     vaccineCoverage = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
     const Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
-    for (int i=0;i<_numberOfEpiDoses; i++) {
+    for (size_t i=0;i<_numberOfEpiDoses; i++) {
       if (i >= cVS.size()) {
         cerr << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous" << endl;
         throw 0;
@@ -115,7 +115,7 @@ void Vaccine::initVaccine (const VaccineDescription* vd) {
     // set initialMeanEfficacy:
     const VaccineDescription::InitialEfficacySequence ies = vd->getInitialEfficacy();
     initialMeanEfficacy.resize (ies.size());
-    for (int i = 0; i < initialMeanEfficacy.size(); ++i)
+    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
       initialMeanEfficacy[i] = ies[i].getValue();
     
     // now, if halfLifeYrs > 0, calculate delay:

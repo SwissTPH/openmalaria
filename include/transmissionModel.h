@@ -141,7 +141,7 @@ protected:
   int EIPDuration;
   
   //! Number of age groups for which the surface area calculations apply 
-  static const int nages= 22;
+  static const size_t nages= 22;
 
   // NOTE: perhaps all these age-specific constants should be moved to Human. It depends which part of the simulation each class is meant to simulate...
   //! average number of bites for each age as a proportion of the maximum

@@ -24,29 +24,10 @@
  */ 
 
 /* We also include library headers here. */ 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_sf.h>
-#include <gsl/gsl_eigen.h>
-#include <gsl/gsl_complex.h>
-#include <gsl/gsl_complex_math.h>
-#include <gsl/gsl_multiroots.h>
 #include "transmissionModel.h"
 
 //#define VectorControl_PRINT_calMosqEmergeRate
 //#define VectorControl_PRINT_CalcInitMosqEmergeRate
-//#define VectorControl_PRINT_CalcUpsilonOneHost
-//#define VectorControl_PRINT_CalcSvDiff
-//#define VectorControl_PRINT_CalcLambda
-//#define VectorControl_PRINT_CalcXP
-//#define VectorControl_PRINT_CalcSpectralRadius
-//#define VectorControl_PRINT_CalcInv1minusA
 
 
 //! Transmission models, Chitnis et al

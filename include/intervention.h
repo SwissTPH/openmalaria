@@ -26,7 +26,7 @@ public:
   
   /*! Common to all vaccine types. Number of vaccine doses that are given
    * either through EPI or as EPI Boosters. */
-  static int _numberOfEpiDoses;
+  static size_t _numberOfEpiDoses;
   
    /** Target age for EPI-like vaccination, in time steps
     * TODO: Should be an integer? */

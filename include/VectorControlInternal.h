@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,36 @@
  */
 
 /// This is a header for VectorControl's functions which are only used internally.
+
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_multiroots.h>
+
+//#define VectorControl_PRINT_CalcUpsilonOneHost
+//#define VectorControl_PRINT_CalcSvDiff
+//#define VectorControl_PRINT_CalcLambda
+//#define VectorControl_PRINT_CalcXP
+//#define VectorControl_PRINT_CalcSpectralRadius
+//#define VectorControl_PRINT_CalcInv1minusA
+
+
+/***************************************************************************
+ *********************** STRUCTURE DEFINITIONS *****************************
+ ***************************************************************************/
+
+// Structure that contains the parameters for the function used in the 
+// root-finding algorithm to find the emergence rate that matches the 
+// number of infectious host-seeking mosquitoes.
+struct SvDiffParams
+{
+  gsl_vector* S_vFromEIR;
+  gsl_matrix** Upsilon;
+  gsl_matrix* inv1Xtp;
+  size_t eta;
+  size_t mt;
+  size_t thetap;
+};
+
 
 
 /** CalcUpsilonOneHost returns a pointer to an array of thetap 
@@ -56,8 +86,8 @@
  * Upsilon, PAPtr, and PAiPtr are OUT parameters.
  * All other parameters are IN parameters. */
 void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr, 
-                        double* PAiPtr, int thetap, int eta, int mt, int tau, 
-                        int thetas, int n, int m, double Ni, double alphai, 
+                        double* PAiPtr, size_t thetap, size_t eta, size_t mt, size_t tau, 
+                        size_t thetas, size_t n, size_t m, double Ni, double alphai, 
                         double muvA, double thetad, double PBi, double PCi, double PDi, 
                         double PEi, gsl_vector* Kvi, char fntestentopar[]);
 
@@ -80,7 +110,7 @@ void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
 int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
 
 // NOTE: Unused
-//static int staticCalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f,void* obj);
+//static size_t staticCalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f,void* obj);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -96,7 +126,7 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
  * All other parameters are IN parameters. */
 void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR, 
                 gsl_matrix** Upsilon, gsl_vector* Nv0, gsl_matrix* inv1Xtp, 
-                int eta, int mt, int thetap, char fntestentopar[]);
+                size_t eta, size_t mt, size_t thetap, char fntestentopar[]);
 
 /** CalcLambda() returns a pointer to an array of thetap 
  * GSL vectors.
@@ -117,8 +147,8 @@ void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR,
  * 
  * Lambda is an OUT parameter.
  * All other parameters are IN parameters. */
-void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, int eta,
-                int thetap, char fntestentopar[]);
+void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, size_t eta,
+                size_t thetap, char fntestentopar[]);
 
 /** CalcXP returns a pointer to an array of thetap 
  * GSL vectors.
@@ -139,8 +169,8 @@ void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, int eta,
  * xp is an OUT parameter.
  * All other parameters are IN parameters. */
 void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon, 
-            gsl_vector** Lambda, gsl_matrix* inv1Xtp, int eta,
-            int thetap, char fntestentopar[]);
+            gsl_vector** Lambda, gsl_matrix* inv1Xtp, size_t eta,
+            size_t thetap, char fntestentopar[]);
 
 
 /** CalcPSTS() calculates probabilities of surviving the extrinsic
@@ -155,8 +185,8 @@ void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon,
  * 
  * sumkplusPtr and sumklplus are OUT parameters.
  * All other parameters are IN parameter. */
-void CalcPSTS(double* sumkplusPtr, double* sumklplus, int thetas,
-              int tau, double PA, double Pdf);
+void CalcPSTS(double* sumkplusPtr, double* sumklplus, size_t thetas,
+              size_t tau, double PA, double Pdf);
 
 /** FuncX() calculates X(t,s).
  *
@@ -171,7 +201,7 @@ void CalcPSTS(double* sumkplusPtr, double* sumklplus, int thetas,
  * 
  * X is an OUT parameter.
  * All other parameters are IN parameters. */
-void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, int t, int s, int n);
+void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, size_t t, size_t s, size_t n);
 
 /** CalcSpectralRadius() calculates the spectral radius of a given matrix.
  *
@@ -180,7 +210,7 @@ void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, int t, int s, int n);
  * that is, the eigenvalue with the largest absolute value.
  * 
  * A, n, and fntestentopar are IN parameters. */
-double CalcSpectralRadius(gsl_matrix* A, int n, char fntestentopar[]);
+double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[]);
 
 /** CalcInv1minusA() calculates the inverse of (I-A) where A is a 
  * given matrix.
@@ -191,7 +221,7 @@ double CalcSpectralRadius(gsl_matrix* A, int n, char fntestentopar[]);
  * 
  * A, n, and fntestentopar are IN parameters.
  * inv1A is an OUT parameter. */
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, int n, char fntestentopar[]);
+void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n, char fntestentopar[]);
 
 /** CalcSvfromEIRdata() calculates Sv, given the EIR.
  *
@@ -223,25 +253,25 @@ double binomial(int n, int k);
  Printing routines below. Most are only optionally compiled in.
 ******************************************************************************/
 void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
-                             int thetap, char fnrootfindingstate[]);
+                             size_t thetap, char fnrootfindingstate[]);
 
-void PrintParameters(char fntestentopar[], int thetap, int tau, int thetas, 
-                     int n, int m, double Ni, double alphai, double muvA, 
+void PrintParameters(char fntestentopar[], size_t thetap, size_t tau, size_t thetas, 
+                     size_t n, size_t m, double Ni, double alphai, double muvA, 
                      double thetad, double PBi, double PCi, double PDi, double PEi, 
                      gsl_vector* Kvi, gsl_vector* Xii, gsl_vector* Nv0guess);
 
-void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, int thetap,
-                  int eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
+void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, size_t thetap,
+                  size_t eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
                   gsl_vector* Pduf);
 
-void PrintXP(gsl_vector** xp, int eta, int thetap, char fntestentopar[]);
+void PrintXP(gsl_vector** xp, size_t eta, size_t thetap, char fntestentopar[]);
 
-void PrintLambda(gsl_vector** Lambda, int eta, char fntestentopar[]);
+void PrintLambda(gsl_vector** Lambda, size_t eta, char fntestentopar[]);
 
-void PrintEigenvalues(char fntestentopar[], gsl_vector_complex* eval, int n);
+void PrintEigenvalues(char fntestentopar[], gsl_vector_complex* eval, size_t n);
 
 void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A, 
-                 int RowLength, int ColLength);
+                 size_t RowLength, size_t ColLength);
 
 
-void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, int n);
+void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, size_t n);

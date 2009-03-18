@@ -254,8 +254,8 @@ void Population::newHuman(int dob){
 }
 
 void Population::update1(){
-  int nCounter;	//NCounter is the number of indivs per demogr age group
-  int pCounter;	//PCounter is the number with patent infections, needed for prev in 20-25y
+  int nCounter=0;	//NCounter is the number of indivs per demogr age group
+  int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y
   //Nsize is the population size at time t allowing population growth
   int Nsize = (int)(_populationSize * exp(rho*Simulation::simulationTime));
   int survivsSoFar = 0;

@@ -76,7 +76,7 @@ double TransmissionModel::getRelativeAvailability(double ageyrs) {
 }
 
 void TransmissionModel::initAgeExposureConversion(){
-  for (int i=0; i<nages; i++) {
+  for (size_t i=0; i<nages; i++) {
     ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
   }
 

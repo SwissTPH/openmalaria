@@ -542,8 +542,7 @@ void Human::vaccinate(){
   ++_lastVaccineDose;
 }
 
-void Human::updateInterventionStatus(){
-   
+void Human::updateInterventionStatus() {
   int agetstep;
   int nextDose;
   if (Vaccine::anyVaccine) {
@@ -567,7 +566,7 @@ void Human::updateInterventionStatus(){
     */
     if ( Simulation::timeStep >  0) {
       nextDose=_lastVaccineDose+1;
-      if (nextDose<=Vaccine::_numberOfEpiDoses){
+      if (nextDose <= (int)Vaccine::_numberOfEpiDoses){
         if (W_UNIFORM() <  Vaccine::vaccineCoverage[nextDose - 1] && 
             Vaccine::targetagetstep[nextDose - 1] ==  agetstep) {
           vaccinate();
