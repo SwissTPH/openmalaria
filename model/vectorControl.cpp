@@ -127,8 +127,7 @@ void VectorControl::advancePeriod (int simulationTime) {
   
   
   // Per Global::interval (hosts don't update per day):
-  double totalAvailability = 0;// FIXME: =popSize * alpha*sum_host(host.relativeAvailability);
-  double leaveHostRate = totalAvailability + mosqSeekingDeathRate;
+  double totalAvailability = 0;// FIXME: =popSize * sum_host(host.entoAvailability);
   
   // Summed per day:
   partialEIR = 0.0;
@@ -143,7 +142,8 @@ void VectorControl::advancePeriod (int simulationTime) {
     size_t t1   = (t - 1) % N_v_length;
     size_t ttau = (t - mosqRestDuration) % N_v_length;
     
-    
+    double leaveHostRate = totalAvailability + mosqSeekingDeathRate;
+  
     // Probability of a mosquito not finding a host this day:
     P_A[t] = exp(-leaveHostRate * mosqSeekingDuration);
     
@@ -153,10 +153,11 @@ void VectorControl::advancePeriod (int simulationTime) {
     // NC's non-autonomous model provides two methods for calculating P_df;
     // here we assume P_E is constant.
     P_df[t] =0//FIXME: =sum_host (host.entoAvailability * host.probMosqSurvivalBiting * host.probMosqSurvivalResting)
-     * P_Ai_base * probMosqEggLaying;
+        * P_Ai_base * probMosqEggLaying;
     P_dif[t] =0//FIXME: =sum_host (host.entoAvailability * host.probMosqSurvivalBiting * host.probMosqSurvivalResting * host.K_vi)
-     * P_Ai_base * probMosqEggLaying;
+        * P_Ai_base * probMosqEggLaying;
     
+      
     //FIXME: formulas need adjusting for NC's non-autonomous model
     N_v[t] = mosqEmergeRate[day%daysInYear]
         + P_A[t]  * N_v[t1]

@@ -24,6 +24,7 @@
 #include "human.h"
 #include "infection.h"
 #include "oldWithinHostModel.h"
+#include "simulation.h"
 
 using namespace std;
 
@@ -50,7 +51,7 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
   //effect of age-dependent maternal immunity (named Dm in AJTM)
   double dA;
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  infage=1+_human->getSimulationTime()-inf->getStartDate()-Global::latentp;
+  infage=1+Simulation::simulationTime-inf->getStartDate()-Global::latentp;
   if ( infage >  0) {
     iduration=inf->getDuration()/Global::interval;
     if ( iduration >  maxDur) {
@@ -167,7 +168,7 @@ void OldWithinHostModel::calculateDensities() {
           timeStepMaxDensity=0.0;
         }
 	calculateDensity(*i);
-        //(*i)->determineDensities(_human->getSimulationTime(), _human->getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
+        //(*i)->determineDensities(Simulation::simulationTime, _human->getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
         (*i)->setDensity((double)(*i)->getDensity()*exp(-_human->getInnateImmunity()));
 
         /*
@@ -202,7 +203,7 @@ void OldWithinHostModel::calculateDensities() {
       if ( (*i)->getDensity() > Human::detectionlimit) {
         _human->setPatentInfections(_human->getPatentInfections()+1);
       }
-      if ( (*i)->getStartDate() == (_human->getSimulationTime()-1)) {
+      if ( (*i)->getStartDate() == (Simulation::simulationTime-1)) {
         _human->setCumulativeh(_human->getCumulativeh()+1);
       }
       (*i)->setDensity(std::min(maxDens, (*i)->getDensity()));
@@ -210,7 +211,7 @@ void OldWithinHostModel::calculateDensities() {
       _human->setCumulativeY(_human->getCumulativeY()+Global::interval*(*i)->getDensity());
     }
     if ( isOptionIncluded(Global::modelVersion, attenuationAsexualDensity)) {
-      if ( IPTIntervention::IPT &&  _SPattenuationt > _human->getSimulationTime() &&  _human->getTotalDensity() <  10) {
+      if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  _human->getTotalDensity() <  10) {
         _human->setTotalDensity(10);
         _human->setCumulativeY(_human->getCumulativeY()+10);
       }
@@ -229,10 +230,10 @@ void OldWithinHostModel::SPAction(){
   double rnum;
   std::list<Infection*>::iterator i=_human->getInfections()->begin();
   while(i != _human->getInfections()->end()){
-    if ( 1+_human->getSimulationTime()-(*i)->getStartDate()-Global::latentp > 0){
+    if ( 1+Simulation::simulationTime-(*i)->getStartDate()-Global::latentp > 0){
       rnum=W_UNIFORM();
       if ((rnum<=IPTIntervention::genotypeACR[(*i)->getGenoTypeID()-1]) &&
-           (_human->getSimulationTime() - _human->getLastSPDose() <= IPTIntervention::genotypeProph[(*i)->getGenoTypeID()-1])) {
+           (Simulation::simulationTime - _human->getLastSPDose() <= IPTIntervention::genotypeProph[(*i)->getGenoTypeID()-1])) {
         delete *i;
         i=_human->getInfections()->erase(i);
         _human->setMOI(_human->getMOI()-1);

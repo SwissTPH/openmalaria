@@ -32,92 +32,109 @@ class TransmissionModel;
 
 //! Model of a human individual 
 class Human {
- public:
-
+public:
+  
+  /// Constructors
+  //@{
   //! Constructor which does not need random numbers. Only for testing.
   Human();
 
-  //!  Initialise all variables of a human datatype including infectionlist
-  //!  and druglist
-  /*  
-      \param ID unique identifier
-      \param dob date of birth in time steps
-  */
+  /** Initialise all variables of a human datatype including infectionlist and
+   * druglist.
+   * 
+   * \param ID unique identifier
+   * \param dateOfBirth date of birth in time steps */
   Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int simulationTime);
 
-  //!  Initialise all variables of a human datatype including infectionlist
-  //! and druglist
-  /*
-    \param funit IO unit
-  */
+  /**  Initialise all variables of a human datatype including infectionlist and
+   * and druglist.
+   * \param funit IO unit */
   Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime);
-
+  //@}
+  
+  /// Destructor
   ~Human();
-
+  
+  /// Checkpointing functions
+  //@{
   friend ostream& operator<<(ostream& out, const Human& human);
   friend istream& operator>>(istream& in, Human& human);
 
-  void update(int simulationTime, TransmissionModel* transmissionModel);
-
-   //! Reads out from a file the state data of the current human
-  /* 
-     \param funit io unit number 
-  */
+  /** Reads out from a file the state data of the current human.
+   * \param funit io unit number */
   void readFromFile(fstream& funit);
+  //@}
   
-  //! Clears all infections in an individual
-  void clearAllInfections();
-
-  /*! Apply interventions to this human if eligible. Calculate the remaining
-      efficacy of the latest vaccination if vaccinated before */
-  void updateInterventionStatus();
-
+  /// Functions not called from within Human but calling functions in Human
+  //@{
+  /// Updates an individual for a time-step.
+  void update(int simulationTime, TransmissionModel* transmissionModel);
+  
+  //! Summarize the state of a human individual.
+  void summarize();
+  //@}
+  
+  /// updateInfection related functions
+  //@{
+  void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
+  //@}
+  
+  /// treatInfections related functions
+  //@{
+  void treatInfections();
+  //@}
+  
+  /// updateImmuneStatus related functions
+  //@{
   /*! Until now, this only includes decay of immunity against
       asexual blood stages */
   void updateImmuneStatus();
-
-  void updateTime(int simulationTime) { _simulationTime = simulationTime; };
+  //@}
   
-  void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
-
+  /// determineClinicalStatus related functions
+  //@{
   void determineClinicalStatus();
-
-  void treatInfections();
-
-  /** Presumably this is the body mass? */
-  void setWeight(double weight){ _weight=weight; };
-  double getWeight(){ return _weight; };
-
+  
+  //! Clears all infections in an individual
+  void clearAllInfections();
+  
   //! docu 
   void medicate(string drugName, double qty, int time);
-
-  /*! Determine if this human experiences a clinical event, and if so, which
-    type of event */
-  void determineClinicalEvent();
+  //@}
+  
+  /// updateInterventionStatus related functions
+  //@{
+  /*! Apply interventions to this human if eligible. Calculate the remaining
+      efficacy of the latest vaccination if vaccinated before */
+  void updateInterventionStatus();
   
   /*! 
     Update the number of doses and the date of the most recent vaccination in
     this human */
   void vaccinate();
-
-  //! Summarize the state of a human individual.
-  void summarize();
-
+  //@}
+  
+  /// Functions used internally by more than one category above
+  /// (excluding update and summarize)
+  //@{
   //! Determines the age group of a human
   int ageGroup() const;
-
+  
   //! Get the age in years, based on an input reference time.
   double getAgeInYears(int time) const;
 
-  double getCumulativeYlag() const {return _cumulativeYlag;}
-  void setCumulativeYlag(double lag) {_cumulativeYlag = lag;}
-
+  //! Get the age in years, based on current simulationTime in human.
+  double getAgeInYears() const;
+  //@}
+  
+  /// Other functions not called within Human
+  //@{
   //! Get the PEV Efficacy
   double getPEVEfficacy() {return _PEVEfficacy;} 
-
+  
   //! Get the Availability to mosquitoes
   double getBaselineAvailabilityToMosquitoes() {return _BaselineAvailabilityToMosquitoes;};
-
+  
   double getProbTransmissionToMosquito() {return _ptransmit;};
 
   //! Get the cumulative EIRa
@@ -128,53 +145,25 @@ class Human {
 
   //! Returns the date of birth
   int getDateOfBirth() {return _dateOfBirth;};
-
-  double getProbabilityOfInfection() { return _pinfected;};
-
-  //! Get the age in years, based on current simulationTime in human.
-  double getAgeInYears() const;
-
-  double getTimeStepMaxDensity() const {return _timeStepMaxDensity;}
-  void setTimeStepMaxDensity(double timeStepMaxDensity){_timeStepMaxDensity = timeStepMaxDensity;}
-  int getSimulationTime() const {return _simulationTime;}
+  
+  /** Presumably this is the body mass? */
+  double getWeight(){ return _weight; };
+  
   double getTotalDensity() const {return _totalDensity;}
-  void setTotalDensity(double totalDensity) {_totalDensity=totalDensity;}
-  double getCumulativeh() const {return _cumulativeh;}
-  void setCumulativeh(double cumulativeh) {_cumulativeh = cumulativeh;}
+  
   double getCumulativeY() const {return _cumulativeY;}
-  void setCumulativeY(double cumulativeY) {_cumulativeY = cumulativeY;}
-  void setPTransmit(double pTransmit) {_ptransmit = pTransmit;}
-  void setPyrogenThres(double pyrogenThres) {_pyrogenThres = pyrogenThres;}
-  double getInnateImmunity() const {return _innateImmunity;}
-  int getPatentInfections() const {return _patentinfections;}
-  void setPatentInfections(int patentinfections) {_patentinfections=patentinfections;}
-  double getBSVEfficacy() {return _BSVEfficacy;}
-  int getMOI() const {return _MOI;}
-  void setMOI(int MOI) {_MOI=MOI;}
-  std::list<Infection*>* getInfections() { return &infections;}
-  int getLastIPTIorPlacebo() {return _lastIptiOrPlacebo;};
+  
   void setLastIPTIorPlacebo(int last) {_lastIptiOrPlacebo = last;};
-  int getLastSPDose() const {return _lastSPDose;};
+  
   void setSPDose(int dose) {_lastSPDose=dose;};
-
-
-  /*!  Determines the probability that the individual transmits to a feeding
-    mosquito */
-  double infectiousness();
 
   //! Returns Cumulative Infections
   int getCumulativeInfections() {return _cumulativeInfections;};
-
-  //! Determine the current pyrogenic threshold.
-  double Ystar();
 
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
 
   //! Set doomed
   void setDoomed(int doomed) { _doomed = doomed;}
-
-  //! Update the cumulative EIRa
-  void updateCumulativeEIRa(double value) { _cumulativeEIRa+=value; };
 
   //! Set a new caseManagement. Used if the changeHS intervention is called.
   void setCaseManagement(CaseManagementModel* caseManagement);
@@ -188,12 +177,48 @@ class Human {
   /** Probability of a mosquito succesfully finding a resting
    * place and resting (P_C_i * P_D_i). */
   double probMosqSurvivalResting ();
+  //@}
+  
+  /// Functions only used by oldWithinHostModel.cpp
+  //@{
+  double getTimeStepMaxDensity() const {return _timeStepMaxDensity;}
+  void setTimeStepMaxDensity(double timeStepMaxDensity){_timeStepMaxDensity = timeStepMaxDensity;}
+  
+  void setTotalDensity(double totalDensity) {_totalDensity=totalDensity;}
+  
+  double getCumulativeh() const {return _cumulativeh;}
+  void setCumulativeh(double cumulativeh) {_cumulativeh = cumulativeh;}
+  
+  void setCumulativeY(double cumulativeY) {_cumulativeY = cumulativeY;}
+  
+  void setPTransmit(double pTransmit) {_ptransmit = pTransmit;}
+  
+  void setPyrogenThres(double pyrogenThres) {_pyrogenThres = pyrogenThres;}
+  
+  double getInnateImmunity() const {return _innateImmunity;}
+  
+  int getPatentInfections() const {return _patentinfections;}
+  void setPatentInfections(int patentinfections) {_patentinfections=patentinfections;}
+  
+  double getBSVEfficacy() {return _BSVEfficacy;}
+  
+  int getMOI() const {return _MOI;}
+  void setMOI(int MOI) {_MOI=MOI;}
+  
+  std::list<Infection*>* getInfections() { return &infections;}
+  
+  int getLastSPDose() const {return _lastSPDose;};
+  
+  /*!  Determines the probability that the individual transmits to a feeding
+    mosquito */
+  double infectiousness();
 
-  WithinHostModel* _withinHostModel;
- 
+  //! Determine the current pyrogenic threshold.
+  double Ystar();
+  //@}
   
-  /* static public */
-  
+  /// static public
+  //@{
   static void initHumanParameters ();
   
 /*
@@ -211,9 +236,12 @@ class Human {
   for use in the age adjustment of the EIR.
   It is used both by Human and TransmissionModel. */
   static const int nwtgrps= 27; 
+  //@}
 
 private:
-  /* local private */
+  ///Private variables
+  //@{
+  WithinHostModel* _withinHostModel;
 
   // Time from start of the simulation
   int _simulationTime;
@@ -293,16 +321,23 @@ private:
   EntoInterventionITN entoInterventionITN;
   /// Intervention: IRS (active if insecticide != 0)
   EntoInterventionIRS entoInterventionIRS;
+  //@}
   
+  /// updateInfection related functions
+  //@{
   //! Create a new infection requires that the human is allocated and current
   void newInfection();
 
   /*!  Clears all infections which have expired (their startdate+duration is less
       than the current time). */
   void clearOldInfections();
-
+  //@}
+  
+  /// treatInfections related functions
+  //@{
   //! Treats all infections in an individual
   void treatAllInfections();
+  //@}
 
   /*!  SP drug action applies to each infection depending on genotype and when
     the individual had their last dose of SP */

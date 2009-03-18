@@ -339,9 +339,6 @@ void Human::treatAllInfections(){
 }
 
 void Human::introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections){
-  double pInfectedstep;
-  int Ninf;
-  int i;
   //TODO: this code does not allow for variations in baseline availability
   //this is only likely to be relevant in some models but should not be
   //forgotten
@@ -355,24 +352,22 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
     _cumulativeEIRa+=(double)Global::interval*expectedInfectionRate;
   }
 
-  if ( expectedNumberOfInfections >  0.0000001) {
-    Ninf=W_POISSON(expectedNumberOfInfections);
-    if ( Ninf >  0) {
-      for ( i=1;i<=Ninf; i++) {
+  if (expectedNumberOfInfections > 0.0000001) {
+    int Ninf = W_POISSON(expectedNumberOfInfections);
+    if (Ninf > 0) {
+      for (int i=1;i<=Ninf; i++) {
         newInfection();
       }
     }
   }
 
-  pInfectedstep=1-exp(-expectedNumberOfInfections);
-  _pinfected=1.0-(1.0-pInfectedstep)*(1.0-_pinfected);
-  _pinfected=std::min(_pinfected, 1.0);
-  _pinfected=std::max(_pinfected, 0.0);
-
+  double pInfectedstep = 1.0 - exp(-expectedNumberOfInfections);
+  _pinfected = 1.0 - (1.0-pInfectedstep) * (1.0-_pinfected);
+  _pinfected = std::min(_pinfected, 1.0);
+  _pinfected = std::max(_pinfected, 0.0);
 }
 
-void Human::update(int simulationTime, TransmissionModel* transmissionModel){
-
+void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   _simulationTime = simulationTime;
   double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, *this);
   
@@ -381,17 +376,15 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel){
   updateInfection(expectedInfectionRate,
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
-  setWeight(120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())]);
+  _weight = 120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())];
   treatInfections();
-
 }
 
-void Human::setCaseManagement(CaseManagementModel* caseManagement){
+void Human::setCaseManagement(CaseManagementModel* caseManagement) {
   _caseManagement=caseManagement;
 }
 
 void Human::newInfection(){
-   
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections=_cumulativeInfections+1;
@@ -642,8 +635,7 @@ void initDrugAction () {
 
 
 int Human::ageGroup() const{
-  double ageyears=getAgeInYears();
-  return Simulation::gMainSummary->ageGroup(ageyears);
+  return Simulation::gMainSummary->ageGroup(getAgeInYears());
 }
 
 double Human::getAgeInYears() const{
