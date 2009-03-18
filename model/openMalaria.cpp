@@ -41,8 +41,7 @@ using namespace std;
 #else
 #define _GRAPHICS_6
 #define _NO_GRAPHICS
-#include <pthread.h>
-#endif
+#endif	// _WIN32
 
 #include "boinc_bridge.h"
 
@@ -59,115 +58,24 @@ UC_SHMEM* shmem;
 struct APP_INIT_DATA dataBOINC;
 #endif
 
-#ifdef __cplusplus
 #include "simulation.h"
-#endif
-
-#ifndef __cplusplus
-extern "C" {
-  void simulate();
-  void add_kappa(double*);
-  void start_cp_timer();
-  void stop_cp_timer();
-}
-#endif
 
 #if (defined(_GRAPHICS_6))
 void update_shmem() {
-	if (!shmem) return;
-	shmem->fraction_done = boinc_get_fraction_done();
-	shmem->cpu_time = boinc_worker_thread_cpu_time();
-	shmem->update_time = dtime();
-	boinc_get_status(&shmem->status);
+  if (!shmem) return;
+  shmem->fraction_done = boinc_get_fraction_done();
+  shmem->cpu_time = boinc_worker_thread_cpu_time();
+  shmem->update_time = dtime();
+  boinc_get_status(&shmem->status);
 }
 
 void add_kappa(double *kappa){
-	if (!shmem) return;
-	memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
+  if (!shmem) return;
+  memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
 }
 
 #else
-void add_kappa(double *kappa){
-#ifdef _WIN32
-	//add_and_copy_data(kappa);
-#endif
-}
-#endif
-
-bool finishedCP=false;
-
-#ifdef _WIN32
-
-	HANDLE timer_threadCP;
-    DWORD timer_threadId;
-    DWORD thread_result;
-
-DWORD WINAPI write_cp_timer(PVOID arg) {
-	int counter=0;
-	while (counter<10800){
-	Sleep(1000);
-	if(finishedCP){
-		return 0;
-	}
-	counter++;
-	}
-	//Checkpoint write timed out
-	cerr<<"cpw_to\n";
-	exit(-6);
-	//return 0;
-}
-
-void start_cp_timer(){
-	finishedCP=false;
-	//setup windows thread
-    timer_threadCP = CreateThread(NULL, 0, write_cp_timer, NULL,0, &timer_threadId);
-}
-
-void stop_cp_timer(){
-	finishedCP=true;
-    if (WaitForSingleObject(timer_threadCP, INFINITE) != WAIT_OBJECT_0) {
-        perror("Thread join failed");
-        exit(EXIT_FAILURE);
-    }
-    // Retrieve the code returned by the thread.
-    GetExitCodeThread(timer_threadCP, &thread_result);
-}
-
-#else
-//Pthread version
-int res;
-pthread_t timer_thread;
-void *thread_result;
-
-void *write_cp_timer(void *arg) {
-    int counter=0;
-	while (counter<10800){
-		sleep(1);
-		if(finishedCP){
-			return 0;
-		}
-		counter++;
-	}
-	//Checkpoint write timed out
-	cerr<<"cpw_to\n";
-	exit(-6);
-	//return 0;
-}
-
-void start_cp_timer(){
-	finishedCP=false;
-	//setup pthread
-	res = pthread_create(&timer_thread, NULL, write_cp_timer, NULL);
-}
-
-void stop_cp_timer(){
-	finishedCP=true;
-    res = pthread_join(timer_thread, &thread_result);
-    if (res != 0) {
-        perror("Thread join failed");
-        exit(EXIT_FAILURE);
-    }
-}
+void add_kappa(double *kappa){}
 #endif
 
 
@@ -207,43 +115,43 @@ int main2(int argc, char* argv[]){
     }
 
 	//Change it and read it with boinc
-	bool succeeded;
-	succeeded = createDocument(scenario);
-	if (!succeeded){
-		cerr << "APP. createDocument failed \n";
-		boinc_finish(-1);
-		exit(-1);
-	}
+    bool succeeded;
+    succeeded = createDocument(scenario);
+    if (!succeeded){
+      cerr << "APP. createDocument failed \n";
+      boinc_finish(-1);
+      exit(-1);
+    }
 
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
 	// create shared mem segment for graphics, and arrange to update it.
 	//"malariacontrol" is a hard coded shared mem key, could be better
-	shmem = (UC_SHMEM*)boinc_graphics_make_shmem("malariacontrol", sizeof(UC_SHMEM));
-	if (!shmem) {
-		fprintf(stderr, "failed to create graphics shared mem segment\n");
-		}
-	else{
-		fprintf(stderr, "graphics shared mem segment created\n");
-	}
-	update_shmem();
-	boinc_register_timer_callback(update_shmem);
+    shmem = (UC_SHMEM*)boinc_graphics_make_shmem("malariacontrol", sizeof(UC_SHMEM));
+    if (!shmem) {
+      fprintf(stderr, "failed to create graphics shared mem segment\n");
+    }
+    else{
+      fprintf(stderr, "graphics shared mem segment created\n");
+    }
+    update_shmem();
+    boinc_register_timer_callback(update_shmem);
 #endif
 
-	GSL_SETUP();	
-  Simulation* simulation = new Simulation();
-	simulation->start();
-  delete simulation;
-	GSL_TEARDOWN();
+    GSL_SETUP();	
+    Simulation* simulation = new Simulation();
+    simulation->start();
+    delete simulation;
+    GSL_TEARDOWN();
 	
   
 	//Now we can exit with boinc. The function does not return
 
-	cleanDocument();
-	retval = boinc_finish(0);	
-	if (retval){
-		cerr << "APP. boinc_finish() failed \n";
-		exit(retval);
-	}
+    cleanDocument();
+    retval = boinc_finish(0);	
+    if (retval){
+      cerr << "APP. boinc_finish() failed \n";
+      exit(retval);
+    }
   } catch (...) {
     cerr << "Error occurred." << endl;
     return -1;
@@ -251,31 +159,25 @@ int main2(int argc, char* argv[]){
 
   return 0;
 }
-#if (defined(_WIN32) && defined(_NO_GRAPHICS)) || !defined(_WIN32) || defined(_GRAPHICS_6)
+
 /** main() - initializes BOINC and calls main2. */
 int main(int argc, char* argv[]){
-	int retval;
-        retval = boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
-	//Call the initialisation of boinc
-	retval = boinc_init();
-	if (retval){
-		cerr << "APP. boinc_init() failed \n";
-		exit(retval);
-	}		
-	cout << "boinc initialized\n"; 
-	main2(0,NULL);
+  int retval =
+      boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
+  //Call the initialisation of boinc
+  retval = boinc_init();
+  if (retval){
+    cerr << "APP. boinc_init() failed \n";
+    exit(retval);
+  }		
+  cout << "boinc initialized\n"; 
+  main2(0,NULL);
 }
-#endif
 
-#if (!(defined(_GRAPHICS_6)))
+
+#if !(defined(_GRAPHICS_6))
 void worker(){
-	main2(0, (char **) NULL);
-	return;
-	}
-#endif
-
-//Graphic stuff
-extern "C" {
-	void graphic_progress_(int* num,int* numtotal){	}
+  main2(0, (char **) NULL);
+  return;
 }
-
+#endif

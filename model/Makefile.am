@@ -1,6 +1,6 @@
 noinst_PROGRAMS = openMalaria
 openMalaria_SOURCES =	global.cpp drug.cpp proteome.cpp infection.cpp withinHostModel.cpp oldWithinHostModel.cpp intervention.cpp \
-			summary.cpp event.cpp human.cpp transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp population.cpp simulation.cpp caseManagement.cpp EntoIntervention.cpp GSLWrapper.cpp openMalaria.cpp
+			summary.cpp event.cpp human.cpp transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp population.cpp simulation.cpp caseManagement.cpp EntoIntervention.cpp GSLWrapper.cpp openMalaria.cpp timer.cpp
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a
 

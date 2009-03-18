@@ -21,10 +21,6 @@
 #ifndef GSL_WRAPPER_H
 #define GSL_WRAPPER_H
 
-#ifndef __cplusplus 
-extern "C" {
-#endif
-
 double W_BETA(double a, double b);
 double W_GAUSS(double mean, double std);
 double w_minimize_calc_rss(double* par1, double* par2);
@@ -38,9 +34,6 @@ void load_rng_state(int seedFileNumber);
 double W_UNIFORM();
 double SETDEMOPARAMETERS(double *param1,double*param2);
 
-#ifndef __cplusplus 
-}
-#endif
 void  GSL_SETUP();
 void  GSL_TEARDOWN();
 

@@ -21,7 +21,7 @@
 */
 #include "population.h"
 #include "GSLWrapper.h"
-#include "openMalaria.h"
+#include "timer.h"
 #include "inputData.h"
 #include "ShmStruct.h"
 #include "human.h"
