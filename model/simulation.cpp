@@ -21,7 +21,7 @@
 
 #include "simulation.h"
 
-#include "boinc_bridge.h"
+#include "boincWrapper.h"
 
 #include "inputData.h"
 #include "GSLWrapper.h"
@@ -126,7 +126,7 @@ void Simulation::mainSimulation(){
     _population->implementIntervention(timeStep);
     //Calculate the current progress
     progress=relTimeInMainSim*(timeStep*1.0/simulationDuration)+(1-relTimeInMainSim);
-    boinc_fraction_done(progress);
+    boincWrapper_fraction_done(progress);
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
     ++simulationTime;
     ++timeStep;
@@ -146,10 +146,10 @@ void Simulation::updateOneLifespan () {
   while( simulationTime <  Global::maxAgeIntervals) {
     progress=simulationTime*1.0/(Global::maxAgeIntervals)*(1-relTimeInMainSim);
     //Here we have to call the checkpoint and to inform about the fraction done
-    boinc_fraction_done(progress);
-    if (boinc_time_to_checkpoint()) {
+    boincWrapper_fraction_done(progress);
+    if (boincWrapper_time_to_checkpoint()) {
       writeCheckpoint();
-      boinc_checkpoint_completed();
+      boincWrapper_checkpoint_completed();
       cout << "ewcpt" << simulationTime << endl;
     }
     ++simulationTime;

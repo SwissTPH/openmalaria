@@ -24,10 +24,9 @@
 #include "summary.h"
 #include "inputData.h"
 
-#include "boinc_bridge.h"
-
 #include <iostream>
 #include "event.h"
+#include "boincWrapper.h"
 
 Summary::Summary() : _surveyPeriod(0)  {
 
@@ -396,7 +395,7 @@ void Summary::printHosts(ostream& out) {
 void Summary::writeSummaryArrays () {
 
   string output_filename;
-  if (boinc_resolve_filename_s("output.txt",output_filename)){
+  if (boincWrapper_resolve_filename_s("output.txt",output_filename)){
     cerr << "APP. boinc_resolve_filename failed: output.txt\n";
     exit(-1);
   }

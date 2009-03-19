@@ -28,8 +28,7 @@ using namespace std;
 #include "GSLWrapper.h"
 #include "inputData.h"
 #include "population.h"
-
-#include "boinc_bridge.h"
+#include "boincWrapper.h"
 
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;
@@ -177,7 +176,7 @@ void load_rng_state(int seedFileNumber){
   sprintf(seedFileNumber_string,"%i",seedFileNumber);
   seed_file_name.append(seedFileNumber_string);
   cerr << "load_rng " << seed_file_name << "\n";
-  boinc_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
+  boincWrapper_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
   if ((f = fopen(resolved_name, "rb"))!=NULL){
   gsl_rng_fread(f, generator);
   fclose (f);
@@ -196,7 +195,7 @@ void save_rng_state(int seedFileNumber){
   char seedFileNumber_string [MAX_LENGTH];
   sprintf(seedFileNumber_string,"%i",seedFileNumber);
   seed_file_name.append(seedFileNumber_string);
-  boinc_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
+  boincWrapper_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
   f = fopen(resolved_name, "wb");
   gsl_rng_fwrite(f, generator);
   fclose (f);
