@@ -31,18 +31,15 @@ public:
   /// Sets parameters in Global.
   static void initGlobal ();
   
-  /// Sets modelVersion, checking for incompatible versions.
-  static void setModelVersion ();
-  
   static int modIntervalsPerYear (int i);
 
   /// Variables that must be checkpointed.
   //@{
 
-/** Model version defines which implementations of hard-coded options should be
- * used. The integer value of modelVersion passed from the .xml is converted to
- * binary with each bit corresponding to a different dichotomous option.  The
- * original default model is modelVersion=0 */
+  /** Model version defines which implementations of hard-coded options should be
+   * used. The integer value of modelVersion passed from the .xml is converted to
+   * binary with each bit corresponding to a different dichotomous option.  The
+   * original default model is modelVersion=0 */
   static ModelVersion modelVersion;
   //@}
   
@@ -66,6 +63,10 @@ public:
   static vector<int> infantDeaths;
   static vector<int> infantIntervalsAtRisk;
   //@}
+  
+private:
+  /// Sets modelVersion, checking for incompatible versions.
+  static void setModelVersion ();
 };
 
 inline int isOptionIncluded (int allOptions, int option) {

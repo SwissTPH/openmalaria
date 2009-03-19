@@ -124,8 +124,8 @@ const EntoData& getEntoData() {
 const Demography& getDemography() {
   return *demography;
 }
-const CaseManagements& getCaseMangements() {
-  return *caseManagements;
+const CaseManagements* getCaseManagements() {
+  return caseManagements;
 }
 const HealthSystem& getHealthSystem() {
   return *healthSystem;

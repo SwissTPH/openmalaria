@@ -396,48 +396,72 @@ void Human::updateImmuneStatus(){
 
 void Human::doCM(int entrypoint){
   //TODO: implement age-specificity of drug dosing
-  //TODO: move to separate module, get array of case managements in init.
-  /*
+  //TODO: This is a rough and quick implementation, which could perhaps be improved.
+  
   double ageyrs = getAgeInYears();
-  const CaseManagements::CaseManagementSequence managements = getCaseManagements().getCaseManagement();
-  if (managements == NULL) return;
+  if (getCaseManagements() == NULL) return;
+  const CaseManagements::CaseManagementSequence managements = getCaseManagements()->getCaseManagement();
+  if (managements.size() == 0) return;
   const CaseManagement* caseManagement = NULL;
   for (CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
-    if (ageyrs < it->getMaxAge() &&
-        !it->getMinAge().present() || it->getMinAge().get() <= ageyrs)
+    if (ageyrs < it->getMaxAgeYrs() &&
+        !it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageyrs)
       caseManagement = &*it;
   if (caseManagement == NULL) {
     cerr << "No case management for age " << ageyrs << endl;
     throw 0;
   }
   
-  int decisionID;
+  const CaseType::EndPointSequence* caseTypeSeq;
   if (entrypoint == 1) {
-    decisionID = caseManagement.getUc1().getDecision();
+    caseTypeSeq = &caseManagement->getUc1().getEndPoint();
   } else if (entrypoint == 2) {
-    decisionID = caseManagement.getUc2().getDecision();
+    caseTypeSeq = &caseManagement->getUc2().getEndPoint();
   } else if (entrypoint == 3) {
-    decisionID = caseManagement.getSev().getDecision();
+    caseTypeSeq = &caseManagement->getSev().getEndPoint();
   } else if (entrypoint == 4) {
-    decisionID = caseManagement.getNmf().getDecision();
+    caseTypeSeq = &caseManagement->getNmf().getEndPoint();
+  } else {
+    cerr << "invalid entrypoint" << endl;
+    throw 0;
+  }
+  double randCum = W_UNIFORM();
+  int decisionID = -1;
+  for (CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
+    randCum -= it->getP();
+    if (randCum < 0) {
+      decisionID = it->getDecision();
+      break;
+    }
+  }
+  if (decisionID < 0) {
+    cerr << "Sum of probabilities of case management end-points for some severity type less than 1" << endl;
+    throw 0;
   }
   
   //FIXME: build list of decisions by ID and use
-  caseManagement.getDecisions()->getDecision(decisionID-1)->getNumMedicates();  int nMedicate=get_n_medicate(decisionID, ageyrs);
-  if ( nMedicate ==  0) {
-    return ;
+  const Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
+  if (decisions.size() < decisionID) {
+    cerr << "A decision for a case-management end-point doesn't exist (number "<<decisionID<<")!" << endl;
+    return;
   }
-  for (int medicateID=1;medicateID<=nMedicate; medicateID++) {
-    double qty=get_cmp_qty(decisionID, medicateID, ageyrs);
-    int time=get_cmp_time(decisionID, medicateID, ageyrs);
-    //name=get_cmp_name(decisionID, medicateID, ageyrs);
+  const Decision::MedicateSequence& medicates = decisions[decisionID-1].getMedicate();
+  if (medicates.size() == 0)
+    return;
+  
+  for (int medicateID=0;medicateID<medicates.size(); medicateID++) {
+    double qty=medicates[medicateID].getQty();
+    int time=medicates[medicateID].getTime();
+    string name=medicates[medicateID].getName();
+    /* Do whatever with these ...
     //call medicate(current,name,qty,time)
     cout << entrypoint;
     cout << ageyrs;
     //cout << name;
     cout << qty;
     cout << time << endl;
-  }*/
+    */
+  }
 }
 
 void Human::medicate(string drugName, double qty, int time) {

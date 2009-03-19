@@ -50,7 +50,7 @@ const EntoData& getEntoData();
 /// Get the Demography xml object
 const Demography& getDemography();
 /// Get the CaseManagements xml object
-const CaseManagements& getCaseMangements();
+const CaseManagements* getCaseManagements();
 /// Get the HealthSystem xml object
 const HealthSystem& getHealthSystem();
 
