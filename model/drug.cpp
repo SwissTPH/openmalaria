@@ -22,7 +22,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "infection.h"
+#include "Infection.h"
 #include "human.h"
 #include "drug.h"
 

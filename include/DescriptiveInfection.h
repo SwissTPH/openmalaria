@@ -19,12 +19,11 @@
 
 */
 
-#ifndef Hmod_infection
-#define Hmod_infection
+#ifndef Hmod_DescriptiveInfection
+#define Hmod_DescriptiveInfection
 #include <fcntl.h>
-#include "global.h"
-#include "proteome.h"
 #include "intervention.h"
+#include "Infection.h"
 #include <fstream>
 
 typedef struct genotype genotype;
@@ -42,39 +41,30 @@ struct genotype {
 //!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
 };
 
-//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?
-const int maxDur=84;
-
-//The maximum parasite density we allow per Infection. Higher values are set to maxDens.
-const double maxDens=2000000;
-
 
 //!  Models of infection.
 /*!
   Models related to the within-host dynamics of infections.
 */
-class Infection{
+class DescriptiveInfection : public Infection {
   //! Proteome (used in a different situation than genotype) 
   ProteomeInstance* _proteome; 
 
  //TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
   public:
 
-   Infection();
-  ~Infection();
+   DescriptiveInfection();
+  ~DescriptiveInfection();
 
   //! Constructor
   /*!
     \param lastSPdose Time interval of last SP Dose.
   */
-  Infection(int lastSPdose, int simulationTime);
- 
-  friend ostream& operator<<(ostream& out, const Infection& infection);
-  friend istream& operator>>(istream& in, Infection& infection);
-
-  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
-  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
-
+  DescriptiveInfection(int lastSPdose, int simulationTime);
+  
+  void write (ostream& out);
+  void read (istream& in);
+  
   //! Init constants common to all Phase A (AJTMH 75(2)) infections.
   /*!
     Init constants common to all infections modeled via the original (AJTMH 75(2)
@@ -189,9 +179,6 @@ class Infection{
 
 
 };
-
-//TODO
-double sampleFromLogNormal (double normp, double meanlog, double stdlog);
 
 #endif
 

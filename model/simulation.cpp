@@ -34,6 +34,7 @@
 #include "intervention.h"
 #include <stdio.h>
 #include "global.h"
+#include "DescriptiveInfection.h"
 /*
 
   Defines the duration of the simulation runs and the pre-timestep call-sequence for both the
@@ -53,7 +54,8 @@ Simulation::Simulation(){
   validateInput();		// only checks get_mode() currently
   gMainSummary = new Summary();	// currently won't affect anything else
   Global::initGlobal();
-  Infection::initParameters();
+  //FIXME: when multiple types exist, should happen through Infections
+  DescriptiveInfection::initParameters();
 
   if (Global::modelVersion & VECTOR_CONTROL)
     _transmissionModel = new VectorControl();

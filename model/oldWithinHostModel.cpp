@@ -22,9 +22,10 @@
 
 #include "GSLWrapper.h"
 #include "human.h"
-#include "infection.h"
+#include "Infection.h"
 #include "oldWithinHostModel.h"
 #include "simulation.h"
+#include "intervention.h"
 
 using namespace std;
 

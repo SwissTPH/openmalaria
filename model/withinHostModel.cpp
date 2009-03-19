@@ -21,7 +21,7 @@
 */
 
 #include "human.h"
-#include "infection.h"
+#include "Infection.h"
 #include "withinHostModel.h"
 
 using namespace std;

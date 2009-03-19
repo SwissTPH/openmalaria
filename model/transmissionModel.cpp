@@ -24,7 +24,7 @@
 #include <math.h> 
 #include "global.h" 
 #include <gsl/gsl_vector.h> 
-#include "infection.h" 
+#include "Infection.h" 
 #include "intervention.h" 
 #include <iostream>
 #include "inputData.h"

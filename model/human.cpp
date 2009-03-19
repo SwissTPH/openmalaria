@@ -34,6 +34,7 @@
 #include "intervention.h"
 #include "transmissionModel.h"
 #include "oldWithinHostModel.h"
+#include "DescriptiveInfection.h"
 
 
 /*
@@ -388,7 +389,7 @@ void Human::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections=_cumulativeInfections+1;
-    infections.push_back(new Infection(_lastSPDose, _simulationTime));
+    infections.push_back(new DescriptiveInfection(_lastSPDose, _simulationTime));
     _MOI=_MOI+1;
   }
 }
@@ -964,7 +965,7 @@ bool Human::defineEvent(){
 }
 
 
-double Human::calculateSelectionCoefficient (Infection inf) {
+double Human::calculateSelectionCoefficient (Infection& inf) {
   return 1.0;
 }
 
@@ -1028,7 +1029,7 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human.entoInterventionIRS;
 
     for(std::list<Infection*>::const_iterator iter=human.infections.begin(); iter != human.infections.end(); iter++)
-      out << **iter;
+      (*iter)->write (out);
      
   if (Global::modelVersion & INCLUDES_PK_PD) {
     out << *(human._proxy);
@@ -1083,8 +1084,8 @@ istream& operator>>(istream& in, Human& human){
   in >> human.entoInterventionIRS;
 
   for(int i=0;i<human._MOI;++i) {
-    Infection* infection = new Infection();
-    in >> *infection;
+    Infection* infection = new DescriptiveInfection();
+    infection->read(in);
     human.infections.push_back(infection);
   }
 

@@ -22,7 +22,7 @@
 #include "global.h"
 #include "event.h"
 #include <list>
-#include "infection.h"
+#include "Infection.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
 
@@ -378,7 +378,7 @@ private:
   double computeExponentialDecay(double c, int hl, int t);
 
   //! docu
-  double calculateSelectionCoefficient(Infection inf);
+  double calculateSelectionCoefficient(Infection& inf);
 
   void clearInfection(Infection *iCurrent);
 

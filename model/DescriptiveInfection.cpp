@@ -19,7 +19,7 @@
 
 */
 
-#include "infection.h"
+#include "DescriptiveInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <iostream>
@@ -31,24 +31,22 @@
 
 //static (class) variables
 
-float Infection::cumulativeYstar;
-float Infection::cumulativeHstar;
-double Infection::meanLogParasiteCount[maxDur*maxDur];
-double Infection::alpha_m;
-double Infection::decayM;
-double Infection::sigma0sq;
-double Infection::xNuStar;
+double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
+double DescriptiveInfection::alpha_m;
+double DescriptiveInfection::decayM;
+double DescriptiveInfection::sigma0sq;
+double DescriptiveInfection::xNuStar;
 
-Infection::Infection() {
+DescriptiveInfection::DescriptiveInfection() {
 }
 
-Infection::~Infection() {
+DescriptiveInfection::~DescriptiveInfection() {
   //if (modelVersion & INCLUDES_PK_PD) {
   //  delete _proteome;
   //}
 }
 
-void Infection::initParameters(){
+void DescriptiveInfection::initParameters(){
   //Empirical description of single Malaria infections in naive individuals
   //counter variables, i stands for 5 day time interval, j for duration of infection
   int i;
@@ -111,7 +109,7 @@ void Infection::initParameters(){
 
 }
 
-Infection::Infection(int lastSPdose, int simulationTime){
+DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
     int genotypeCounter;
     double uniformRandomVariable;
     double lowerIntervalBound;
@@ -165,15 +163,15 @@ Infection::Infection(int lastSPdose, int simulationTime){
     }
 }
 
-void Infection::writeInfectionToFile(fstream& funit){
-  funit << *this;
+void DescriptiveInfection::writeInfectionToFile(fstream& funit){
+  write(funit);
 }
 
-int Infection::getEndDate(){
+int DescriptiveInfection::getEndDate(){
   return _startdate+_duration/Global::interval;
 }
 
-double Infection::determineWithinHostDensity(){
+double DescriptiveInfection::determineWithinHostDensity(){
     // TODO: this is the insertion point for the within host model
 
     double density;
@@ -218,7 +216,7 @@ double sampleFromLogNormal(double normp, double meanlog, double stdlog){
     return valsampleFromLogNormal;
 }
 
-int Infection::infectionDuration(){
+int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
     double sdlogdur=0.80000001192092895508;
@@ -228,42 +226,37 @@ int Infection::infectionDuration(){
     return valinfectionDuration;
 }
 
-ProteomeInstance* Infection::getProteome() const {
+ProteomeInstance* DescriptiveInfection::getProteome() const {
   return _proteome;
 }
 
-ostream& operator<<(ostream& out, const Infection& infection){
-  
-  out << infection._duration << endl; 
-  out << infection._startdate << endl; 
-  out << infection._density << endl; 
-  out << infection._cumulativeExposureJ << endl; 
-  out << infection._gType.ID << endl; 
+void DescriptiveInfection::write (ostream& out) {
+  out << _duration << endl; 
+  out << _startdate << endl; 
+  out << _density << endl; 
+  out << _cumulativeExposureJ << endl; 
+  out << _gType.ID << endl; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << infection._proteome->getProteomeID() << endl; 
+    out << _proteome->getProteomeID() << endl; 
   }
-  return out << boolalpha << infection._SPattenuate << endl; 
-
+  out << boolalpha << _SPattenuate << endl; 
 }
 
-istream& operator>>(istream& in, Infection& infection){
+void DescriptiveInfection::read (istream& in) {
   int proteomeID;
-  in >> infection._duration; 
-  in >> infection._startdate; 
-  in >> infection._density; 
-  in >> infection._cumulativeExposureJ; 
-  in >> infection._gType.ID; 
+  in >> _duration; 
+  in >> _startdate; 
+  in >> _density; 
+  in >> _cumulativeExposureJ; 
+  in >> _gType.ID; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
     in >> proteomeID; 
-    infection._proteome = ProteomeManager::getManager()->getProteome(proteomeID);
+    _proteome = ProteomeManager::getManager()->getProteome(proteomeID);
   }
-  in >> boolalpha >> infection._SPattenuate; 
-
-  return in;
-
+  in >> boolalpha >> _SPattenuate; 
 }
 
-void Infection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity){
+void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity){
 
     int iduration;
     int infage;

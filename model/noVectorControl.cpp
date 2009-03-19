@@ -21,6 +21,7 @@
 #include "inputData.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
+#include "intervention.h"
 
 //static (class) variables
 const double NoVectorControl::susceptibility= 0.702;
