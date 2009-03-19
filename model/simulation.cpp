@@ -28,8 +28,6 @@
 #include "caseManagement.h"
 #include "transmissionModel.h"
 #include "population.h"
-#include "noVectorControl.h"
-#include "vectorControl.h"
 #include "summary.h"
 #include "intervention.h"
 #include <stdio.h>
@@ -57,10 +55,7 @@ Simulation::Simulation(){
   //FIXME: when multiple types exist, should happen through Infections
   DescriptiveInfection::initParameters();
 
-  if (Global::modelVersion & VECTOR_CONTROL)
-    _transmissionModel = new VectorControl();
-  else
-    _transmissionModel = new NoVectorControl();
+  _transmissionModel = TransmissionModel::createTransmissionModel();
   
   gMainSummary->initSummaryParameters();
   _population = new Population(_transmissionModel, get_populationsize());

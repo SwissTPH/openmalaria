@@ -31,6 +31,7 @@
 #include "transmissionModel.h"
 #include "summary.h"
 #include <math.h>
+#include "ShmStruct.h"
 
 using namespace std;
 

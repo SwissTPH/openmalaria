@@ -379,7 +379,7 @@
   <xs:complexType name="entoData">
     <xs:annotation>
       <xs:documentation>
-        Data for entomodel: TODO: choice element
+        Data for entomodel
       </xs:documentation>
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>

@@ -17,6 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+
+#ifndef Hmod_ShmStruct
+#define Hmod_ShmStruct
+
 #include "boinc_bridge.h"
 
 #define KappaArraySize 12
@@ -27,3 +31,7 @@ struct UC_SHMEM {
 	BOINC_STATUS status;
 	double KappaArray[KappaArraySize];
 };
+
+void add_kappa(double *kappa);
+
+#endif

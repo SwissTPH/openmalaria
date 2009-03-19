@@ -14,7 +14,10 @@
  
 //! Abstract base class, defines behaviour of transmission models
 class TransmissionModel{ 
-public: 
+public:
+  /// Creates a derived class
+  static TransmissionModel* createTransmissionModel ();
+  
   //! Reads all entomological parameters from the input datafile. 
   TransmissionModel();
   //!Deallocate memory for TransmissionModel parameters and clean up

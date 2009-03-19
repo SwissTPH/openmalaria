@@ -19,5 +19,3 @@
 
 void start_cp_timer();
 void stop_cp_timer();
-void add_kappa(double *kappa);
-
