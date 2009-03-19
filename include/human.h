@@ -25,7 +25,7 @@
 #include "Infection.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
-#include "MorbidityModel.h"
+#include "morbidityModel.h"
 
 // Forward declaration
 class CaseManagementModel;
