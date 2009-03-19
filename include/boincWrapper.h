@@ -18,7 +18,11 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-// A wrapper around BOINC. This header should not include any BOINC headers!
+/**@brief A wrapper around BOINC. This header should not include any BOINC headers!
+ * 
+ * The purpose of this is to avoid most other source files from having to
+ * include BOINC headers, since these have caused some wierd issues with the
+ * MSVC++ compiler. */
 
 #ifndef Hmod_boincWrapper
 #define Hmod_boincWrapper
