@@ -35,7 +35,7 @@ int boincWrapper_checkpoint_completed(void) {
 }
 
 int boincWrapper_resolve_filename(const char* name, char* outName, int len) {
-  return boincWrapper_resolve_filename (name, outName, len);
+  return boinc_resolve_filename (name, outName, len);
 }
 
 int boincWrapper_resolve_filename_s(const char* name, std::string& outName) {

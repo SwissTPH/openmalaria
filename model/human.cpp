@@ -227,6 +227,7 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
     _proxy = new DrugProxy(this);
   }
   _withinHostModel = new OldWithinHostModel(this);
+  _morbidityModel=MorbidityModel::createMorbidityModel();
   // Reading human from file
   funit >> *this;
   _latestEvent.setCaseManagement(caseManagement);
@@ -235,7 +236,6 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
     cout << "E MOI" << endl;
     exit(-3);
   }
-
 }
 
 Human::~Human(){
@@ -988,8 +988,8 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human.entoInterventionITN;
   out << human.entoInterventionIRS;
 
-    for(std::list<Infection*>::const_iterator iter=human.infections.begin(); iter != human.infections.end(); iter++)
-      (*iter)->write (out);
+  for(std::list<Infection*>::const_iterator iter=human.infections.begin(); iter != human.infections.end(); iter++)
+    (*iter)->write (out);
      
   if (Global::modelVersion & INCLUDES_PK_PD) {
     out << *(human._proxy);
@@ -1062,7 +1062,4 @@ istream& operator>>(istream& in, Human& human){
   }
 
   return in;
-
 }
-
-
