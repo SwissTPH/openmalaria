@@ -25,6 +25,7 @@
 #include "Infection.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
+#include "MorbidityModel.h"
 
 // Forward declaration
 class CaseManagementModel;
@@ -193,8 +194,6 @@ public:
   
   void setPTransmit(double pTransmit) {_ptransmit = pTransmit;}
   
-  void setPyrogenThres(double pyrogenThres) {_pyrogenThres = pyrogenThres;}
-  
   double getInnateImmunity() const {return _innateImmunity;}
   
   int getPatentInfections() const {return _patentinfections;}
@@ -213,8 +212,6 @@ public:
     mosquito */
   double infectiousness();
 
-  //! Determine the current pyrogenic threshold.
-  double Ystar();
   //@}
   
   /// static public
@@ -248,6 +245,8 @@ private:
   
   CaseManagementModel* _caseManagement;
   std::list<Infection*> infections;
+
+  MorbidityModel* _morbidityModel;
 
   int _currentWHSlot;
   double _weight;
@@ -296,8 +295,6 @@ private:
   double _pinfected;
   //!probability that a mosquito will become infected if feeds on individual
   double _ptransmit;
-  //!critical density for fever (clinical episodes)
-  double _pyrogenThres;
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval
@@ -400,17 +397,8 @@ private:
 
   /* Static private */
   
-  static double smuY;
 //Standard dev innate immunity for densities
   static double sigma_i;
-//Pyrogenic threshold at birth (Y*0)
-  static double initPyroThres;
-// Ystar2: critical value in determining increase in pyrogenic threshold
-  static double Ystar2_13;
-//alpha: factor determining increase in pyrogenic threshold
-  static double alpha14;
-//Ystar1: critical value of parasite density in determing increase in pyrog t
-  static double Ystar1_26;
 //sevMal: critical density for severe malaria episode (Y*B1)
   static double sevMal_21;
 //Critical age for co-morbidity (for both severe and indirect)
@@ -432,9 +420,6 @@ private:
   This variable decays the effectors cumulativeH and cumulativeY exponentially.
 */
   static double immEffectorRemain;
-  
-  static double rateMultiplier_31;
-  static double densityExponent_32;
   
   //! Relative weights by age group
   /** Relative weights, based on data in InputTables\wt_bites.csv 

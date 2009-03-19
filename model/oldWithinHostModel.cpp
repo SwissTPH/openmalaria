@@ -219,7 +219,6 @@ void OldWithinHostModel::calculateDensities() {
     }
   }
   _human->setPTransmit(_human->infectiousness());
-  _human->setPyrogenThres(_human->Ystar());
 }
 
 void OldWithinHostModel::SPAction(){

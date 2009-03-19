@@ -237,6 +237,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\DescriptiveInfection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\drug.h"
 				>
 			</File>
@@ -277,6 +281,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\morbidityModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\muellerMorbidityModel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\Names.h"
 				>
 			</File>
@@ -297,7 +309,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\predetMorbidityModel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\proteome.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\pyrogenMorbidityModel.h"
 				>
 			</File>
 			<File
@@ -375,6 +395,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\model\DescriptiveInfection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\drug.cpp"
 				>
 			</File>
@@ -429,6 +453,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\model\morbidityModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\muellerMorbidityModel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\noVectorControl.cpp"
 				>
 			</File>
@@ -442,6 +474,10 @@
 			</File>
 			<File
 				RelativePath=".\model\population.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\predetMorbidityModel.cpp"
 				>
 			</File>
 			<File
@@ -465,6 +501,10 @@
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\model\pyrogenMorbidityModel.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\model\simulation.cpp"

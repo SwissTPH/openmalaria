@@ -46,12 +46,8 @@
 #define isnan(x) ((x) != (x))
 #endif
 
-double Human::smuY;
+
 double Human::sigma_i;
-double Human::initPyroThres;
-double Human::Ystar2_13;
-double Human::alpha14;
-double Human::Ystar1_26;
 double Human::sevMal_21;
 double Human::critAgeComorb_30;
 double Human::comorbintercept_24;
@@ -59,8 +55,6 @@ double Human::indirRiskCoFactor_18;
 double Human::immPenalty_22;
 double Human::asexImmRemain;
 double Human::immEffectorRemain;
-double Human::rateMultiplier_31;
-double Human::densityExponent_32;
 double Human::BaselineAvailabilityShapeParam;
 double Human::detectionlimit;
 double Human::baseEntoAvailability;
@@ -78,23 +72,14 @@ void Human::initHumanParameters () {	// static
   baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
   baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
   double densitybias;
-  smuY=-log(0.5)/(daysInYear/Global::interval*getParameter(Params::Y_STAR_HALF_LIFE));
   sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
-  initPyroThres=getParameter(Params::Y_STAR_0);
-  Ystar2_13=getParameter(Params::Y_STAR_SQ);
-  alpha14=getParameter(Params::ALPHA);
   indirRiskCoFactor_18=(1-exp(-getParameter(Params::INDIRECT_RISK_COFACTOR)));
   sevMal_21=getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
   immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
   comorbintercept_24=1-exp(-getParameter(Params::COMORBIDITY_INTERCEPT));
-  Ystar1_26=getParameter(Params::Y_STAR_1);
   immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
   asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
   critAgeComorb_30=getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
-  if (Global::modelVersion & MUELLER_MORBIDITY_MODEL) {
-    rateMultiplier_31=getParameter(Params::MUELLER_RATE_MULTIPLIER);
-    densityExponent_32=getParameter(Params::MUELLER_DENSITY_EXPONENT);
-  }
   /*
     TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
     or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
@@ -113,6 +98,7 @@ void Human::initHumanParameters () {	// static
 // Testing Ctor
 Human::Human() {
   _withinHostModel = new OldWithinHostModel(this);
+  _morbidityModel=MorbidityModel::createMorbidityModel();
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _drugs = list<Drug*>();
     _proxy = new DrugProxy(this);
@@ -148,7 +134,6 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   _PEVEfficacy=0.0;
   _pinfected=0.0;
   _ptransmit=0.0;
-  _pyrogenThres=initPyroThres;
   _TBVEfficacy=0.0;
   _totalDensity=0.0;
   for (int i=1;i<=4; i++) {
@@ -230,6 +215,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
     _proxy = new DrugProxy(this);
   }
   _withinHostModel = new OldWithinHostModel(this);
+  _morbidityModel=MorbidityModel::createMorbidityModel();
 }
 
 // Load human from checkpoint
@@ -266,6 +252,7 @@ Human::~Human(){
     delete _proxy;
   }
   delete _withinHostModel;
+  delete _morbidityModel;
 }
 
 void Human::readFromFile(fstream& funit){
@@ -625,8 +612,8 @@ void Human::summarize(){
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
   }
   Simulation::gMainSummary->addToExpectedInfected(age, _pinfected);
-  Simulation::gMainSummary->addToPyrogenicThreshold(age, _pyrogenThres);
-  Simulation::gMainSummary->addToSumX(age, log(_pyrogenThres+1.0));
+  Simulation::gMainSummary->addToPyrogenicThreshold(age, _morbidityModel->getPyrogenThres());
+  Simulation::gMainSummary->addToSumX(age, log(_morbidityModel->getPyrogenThres()+1.0));
 }
 
 void initDrugAction () {
@@ -647,18 +634,6 @@ double Human::getAgeInYears(int time) const{
   return 1.0*((time-_dateOfBirth)*Global::interval)/daysInYear;
 }
 
-double Human::Ystar(){
-  int i;
-  //Number of categories in the numerical approx. below
-  const int n= 11;
-  const double delt= 1.0/n;
-  double valYstar=_pyrogenThres;
-  //Numerical approximation to equation 2, AJTMH p.57
-  for ( i=1;i<=n; i++) {
-    valYstar=valYstar+_totalDensity*alpha14*Global::interval*delt/((Ystar1_26+_totalDensity)*(Ystar2_13+valYstar))-smuY*valYstar*delt;
-  }
-  return valYstar;
-}
 
 double Human::infectiousness(){
   double transmit;
@@ -896,7 +871,6 @@ bool Human::defineEvent(){
   //double q0;
   double prSevereEpisode;
   double prEpisode;
-  double IncidenceDensity;
   double prNonMalariaFever;
   double indirectRisk;
   double pCoinfection;
@@ -904,21 +878,7 @@ bool Human::defineEvent(){
   double ageYears;
   bool valdefineEvent =false;
   ageYears=getAgeInYears();
-  if (Global::modelVersion & PREDETERMINED_EPISODES) {
-    prEpisode=0;
-    if ( _timeStepMaxDensity > _pyrogenThres) {
-      prEpisode=1;
-    }
-  }
-  else {
-    if (Global::modelVersion & MUELLER_MORBIDITY_MODEL) {
-      IncidenceDensity=rateMultiplier_31*(pow(_totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
-      prEpisode=1-exp(-IncidenceDensity);
-    }
-    else {
-      prEpisode=1-1/(1+(_timeStepMaxDensity/_pyrogenThres));
-    }
-  }
+  prEpisode=_morbidityModel->getPEpisode(_timeStepMaxDensity,_totalDensity);
   //Fixed severe threshold
   severeMalThreshold=sevMal_21+1;
   prSevereEpisode=1-1/(1+_timeStepMaxDensity/severeMalThreshold);
@@ -1007,8 +967,7 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._innateImmunity << endl; 
   out << human._PEVEfficacy << endl; 
   out << human._pinfected << endl; 
-  out << human._ptransmit << endl; 
-  out << human._pyrogenThres << endl; 
+  out << human._ptransmit << endl;  
   out << human._TBVEfficacy << endl; 
   out << human._totalDensity << endl; 
   out << human._ylag[0] << endl; 
@@ -1022,6 +981,7 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._latestEvent;   
   out << *human._withinHostModel;
+  human._morbidityModel->write(out);
   out << human._entoAvailability << endl;
   out << human._probMosqSurvivalBiting << endl;
   out << human._probMosqSurvivalResting << endl;
@@ -1063,7 +1023,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._PEVEfficacy; 
   in >> human._pinfected; 
   in >> human._ptransmit; 
-  in >> human._pyrogenThres; 
   in >> human._TBVEfficacy; 
   in >> human._totalDensity; 
   in >> human._ylag[0]; 
@@ -1077,6 +1036,7 @@ istream& operator>>(istream& in, Human& human){
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._latestEvent;
   in >> *(human._withinHostModel);
+  human._morbidityModel->read(in);
   in >> human._entoAvailability;
   in >> human._probMosqSurvivalBiting;
   in >> human._probMosqSurvivalResting;

@@ -2,6 +2,7 @@
 #include "GSLWrapper.h"
 #include <iostream>
 #include <sstream>
+#include <fstream>
 
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(){
