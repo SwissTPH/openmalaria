@@ -273,9 +273,9 @@ private:
   //!multiplicity of infection
   int _MOI;
   //!Total asexual blood stage density
-  double _totalDensity;
+  double _totalDensity;		// possibly move to WithinHostModel
   //!Number of infections with densities above the limit of detection
-  int _patentinfections;
+  int _patentinfections;	//TODO: move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;
   //!cumulativeY from previous timestep
@@ -298,7 +298,7 @@ private:
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval
-  double _timeStepMaxDensity;
+  double _timeStepMaxDensity;	// WithinHostModel, used by Morbidity
   //!Baseline availability to mosquitoes
   double _comorbidityFactor; 
   //! comorbidity factor for heterogeneity 

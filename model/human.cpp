@@ -122,6 +122,11 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   _cumulativeY=0.0;
   _cumulativeYlag=0.0;
   _dateOfBirth=dateOfBirth;
+  if (_dateOfBirth > simulationTime) {
+    // This test may be totally unnecessary; it was done in oldWithinHostModel
+    cerr << "date of birth in future!" << endl;
+    throw 0;
+  }
   _doomed=0;
   _timeStepMaxDensity=0.0;
   _ID=ID;

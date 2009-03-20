@@ -34,20 +34,11 @@ OldWithinHostModel::OldWithinHostModel(Human *human) : WithinHostModel(human) {
 }
 
 void OldWithinHostModel::calculateDensity(Infection *inf) {
-  double ageyears =  _human->getAgeInYears(); 
-
-  double y;
-  double logy;
-  //effect of cumulative Parasite density (named Dy in AJTM)
-  double dY;
-  //effect of number of infections experienced since birth (named Dh in AJTM)
-  double dH;
-  //effect of age-dependent maternal immunity (named Dm in AJTM)
-  double dA;
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+Simulation::simulationTime-inf->getStartDate()-Global::latentp;
   
   if ( infage >  0) {
+    double y;
     if ( infage <=  maxDur) {
       int iduration=inf->getDuration()/Global::interval;
       if ( iduration >  maxDur)
@@ -60,6 +51,13 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
     if ( y <  1.0)
       y=1.0;
     
+    //effect of cumulative Parasite density (named Dy in AJTM)
+    double dY;
+    //effect of number of infections experienced since birth (named Dh in AJTM)
+    double dH;
+    //effect of age-dependent maternal immunity (named Dm in AJTM)
+    double dA;
+    
     if ( cumulativeh <=  1.0) {
       dY=1;
       dH=1;
@@ -68,15 +66,10 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
       //TODO: compare this with the asex paper
       dY=1 / (1+(cumulativeY-inf->getCumulativeExposureJ())/inf->getCumulativeYstar());
     }
-    //Can this happen or is it just for security ?
-    if ( ageyears <=  0.0)
-      dA=1-inf->getAlpha_m();
-    else
-      dA=1-inf->getAlpha_m()*exp(-inf->getDecayM()*ageyears);
+    dA=1 - inf->getAlpha_m() * exp(-inf->getDecayM() * _human->getAgeInYears());
     
-    double survival=dY*dH*dA;
-    survival=std::min(survival, 1.0);
-    logy=log(y)*(survival);
+    double survival=min (dY*dH*dA, 1.0);
+    double logy=log(y)*survival;
     /*
       The expected parasite density in the non naive host. 
       As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
@@ -125,12 +118,10 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
   else {
     inf->setDensity(0.0);
   }
-
-
 }
 
 void OldWithinHostModel::calculateDensities() {
-  double ageyears = _human->getAgeInYears();
+  //double ageyears = _human->getAgeInYears();
   _human->setPTransmit(0);
   _human->setPatentInfections(0);
   _human->setTotalDensity(0.0);
@@ -248,22 +239,3 @@ void OldWithinHostModel::write(ostream& out) const {
   out << cumulativeh << endl;
   out << timeStepMaxDensity << endl;
 }
-
-/*
-ostream& operator<<(ostream& out, const OldWithinHostModel &model) {
-  out << model._SPattenuationt << endl;
-  out << model.cumulativeY << endl;
-  out << model.cumulativeh << endl;
-  out << model.timeStepMaxDensity << endl;
-  return out;
-}
-
-istream& operator>>(istream& in, OldWithinHostModel &model) {
-  in >> model._SPattenuationt;
-  in >> model.cumulativeY;
-  in >> model.cumulativeh;
-  in >> model.timeStepMaxDensity;
-  return in;
-}
-*/
-
