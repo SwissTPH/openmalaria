@@ -71,6 +71,7 @@ class Dose {
   In the future this will probably become abstract and subclasses be implemented.
  */
 class Drug {
+  //BEGIN Drug-type fields (same for all drugs of same type)
   //! The drug abbreviated name, used for registry lookups.
   string abbreviation;
   //! The drug name.
@@ -92,7 +93,7 @@ class Drug {
   vector<double>* pdParameters;
   //! Fast data structure to know the PD param per proteome
   map<int,double>* proteomePDParameters;
-  
+  //END
 
 
   //Below here, fields should only be instantiated for humans.

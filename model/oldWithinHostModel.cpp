@@ -36,15 +36,8 @@ OldWithinHostModel::OldWithinHostModel(Human *human) : WithinHostModel(human) {
 void OldWithinHostModel::calculateDensity(Infection *inf) {
   double ageyears =  _human->getAgeInYears(); 
 
-  int iduration;
-  int infage;
-  double survival;
-  double normp;
   double y;
   double logy;
-  double stdlog;
-  double meanlog;
-  double varlog;
   //effect of cumulative Parasite density (named Dy in AJTM)
   double dY;
   //effect of number of infections experienced since birth (named Dh in AJTM)
@@ -52,38 +45,36 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
   //effect of age-dependent maternal immunity (named Dm in AJTM)
   double dA;
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  infage=1+Simulation::simulationTime-inf->getStartDate()-Global::latentp;
+  int infage=1+Simulation::simulationTime-inf->getStartDate()-Global::latentp;
+  
   if ( infage >  0) {
-    iduration=inf->getDuration()/Global::interval;
-    if ( iduration >  maxDur) {
-      iduration=maxDur;
-    }
     if ( infage <=  maxDur) {
+      int iduration=inf->getDuration()/Global::interval;
+      if ( iduration >  maxDur)
+        iduration=maxDur;
+      
       y=(float)exp(inf->getMeanLogParasiteCount(infage - 1 + (iduration - 1)*maxDur));
-    }
-    else {
+    } else {
       y=(float)exp(inf->getMeanLogParasiteCount(maxDur - 1 + (maxDur - 1)*maxDur));
     }
-    if ( y <  1.0) {
+    if ( y <  1.0)
       y=1.0;
-    }
+    
     if ( cumulativeh <=  1.0) {
       dY=1;
       dH=1;
-    }
-    else {
-      dH=1/(1+(cumulativeh-1.0)/inf->getCumulativeHstar());
+    } else {
+      dH=1 / (1+(cumulativeh-1.0)/inf->getCumulativeHstar());
       //TODO: compare this with the asex paper
-      dY=1/(1+(cumulativeY-inf->getCumulativeExposureJ())/inf->getCumulativeYstar());
+      dY=1 / (1+(cumulativeY-inf->getCumulativeExposureJ())/inf->getCumulativeYstar());
     }
     //Can this happen or is it just for security ?
-    if ( ageyears <=  0.0) {
+    if ( ageyears <=  0.0)
       dA=1-inf->getAlpha_m();
-    }
-    else {
+    else
       dA=1-inf->getAlpha_m()*exp(-inf->getDecayM()*ageyears);
-    }
-    survival=dY*dH*dA;
+    
+    double survival=dY*dH*dA;
     survival=std::min(survival, 1.0);
     logy=log(y)*(survival);
     /*
@@ -92,18 +83,18 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
     */
     y=exp(logy);
     //Perturb y using a lognormal 
-    varlog=inf->getSigma0sq()/(1+(cumulativeh/inf->getXNuStar()));
-    stdlog=sqrt(varlog);
+    double varlog=inf->getSigma0sq()/(1+(cumulativeh/inf->getXNuStar()));
+    double stdlog=sqrt(varlog);
     /*
       This code samples from a log normal distribution with mean equal to the predicted density
       n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
       the log of the predicted density.  If we really did the latter then this bias correction is not needed.
     */
-    meanlog=log(y)-stdlog*stdlog/2.0;
+    double meanlog=log(y)-stdlog*stdlog/2.0;
     timeStepMaxDensity = 0.0;
     if ( stdlog >  0.0000001) {
       if ( Global::interval >  1) {
-	normp=W_UNIFORM();
+	double normp=W_UNIFORM();
 	/*
 	  sample the maximum density over the T-1 remaining days in the
 	  time interval, (where T is the duration of the time interval)
@@ -121,8 +112,7 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
 	timeStepMaxDensity = sampleFromLogNormal(normp, meanlog, stdlog);
       }
       //calculate the expected density on the day of sampling
-      normp=W_UNIFORM();
-      y=(float)sampleFromLogNormal(normp, meanlog, stdlog);
+      y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
       timeStepMaxDensity = std::max( y, timeStepMaxDensity);
     }
     if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
@@ -140,10 +130,7 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
 }
 
 void OldWithinHostModel::calculateDensities() {
-  double ageyears;
-
-
-  ageyears=_human->getAgeInYears();
+  double ageyears = _human->getAgeInYears();
   _human->setPTransmit(0);
   _human->setPatentInfections(0);
   _human->setTotalDensity(0.0);

@@ -721,7 +721,7 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   }
   else {
     nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    doCM(0);
+    //doCM(0);
     if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
       if (Global::modelVersion & INCLUDES_PK_PD){
         _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
@@ -788,7 +788,7 @@ bool Human::severeMalaria(){
     do we want to change this section of code rather than just introducing the new alternative (TS))
   */ 
   nextRegimen=_caseManagement->getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
-  doCM(0);
+  //doCM(0);
   p2=_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
   p3=_caseManagement->getCureRate(nextRegimen-1);
   p4=_caseManagement->caseFatality(getAgeInYears());
