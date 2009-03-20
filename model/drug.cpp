@@ -47,8 +47,9 @@ void initDrugModule(int _withinHostTimestep, int _simulatorTimestep){
   withinHostTimestep = _withinHostTimestep;
   simulatorTimestep  = _simulatorTimestep;
   Mutation* crt76 = manager->getMutation(string("CRT"), 76, 'T');
-  Drug* s = new Drug("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
-  registry->addDrug(s);
+  Drug* s;
+  // = new Drug("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
+  //registry->addDrug(s);
   s = new Drug("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
   vector<Mutation*> crt76L = vector<Mutation*>();
   crt76L.push_back(crt76);
@@ -305,11 +306,11 @@ void Drug::parseProteomeInstances(ProteomeManager* manager) {
   vector<ProteomeInstance*>::const_iterator it;
   int numRules = requiredMutations.size();
   for (it=instances.begin(); it !=instances.end(); it++) {
-    //cout << " Here goes instance";
+    //cerr << " Here goes instance";
     for(int rule=0; rule<numRules; rule++) {
       if ((*it)->hasMutations(requiredMutations[rule])) {
         proteomePDParameters[(*it)->getProteomeID()] = pdParameters[rule];
-        //cout << " rule: " << rule << "\n";
+        //cerr << " rule: " << rule << "\n";
         break;
       }
     }
@@ -330,6 +331,7 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) 
   /* We ignore time for now (as it is only relevant for ACTs).
    *   As such, no doses are created, but concentration is updated.
    */
+  //cerr << "Medicating with: " << _drugAbbrev << " " << _qty << "\n";
   list<Drug*>* drugs = human->getDrugs();
   Drug* myDrug = 0;
   list<Drug*>::iterator it;
@@ -409,18 +411,23 @@ void DrugRegistry::addDrug(Drug* _drug) throw(int) {
   // In this case the good behaviour is HAVING an exception
   //   (We don't want to add a drug if it already exists)
   try {
-    getDrug(_drug->getAbbreviation());
-    throw(1); //Element exists, we throw
+    delete getDrug(_drug->getAbbreviation());
   }
   catch (int i) {
     drugs.push_back(_drug);
+    return;
   }
+  throw(1); //Element exists, we throw
 }
 
 Drug* DrugRegistry::getDrug(string _abbreviation) throw(int) {
   vector<Drug*>::iterator i;
   for(i=drugs.begin(); i!=drugs.end(); ++i) {
-    if ((**i).getAbbreviation() == _abbreviation) return (*i);
+    if ((**i).getAbbreviation() == _abbreviation) {
+        Drug* myDrug = *i;
+        Drug* cloneDrug  = new Drug(*myDrug);
+        return cloneDrug;
+    }
   }
   throw(1);
 }

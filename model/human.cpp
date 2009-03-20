@@ -395,6 +395,8 @@ void Human::updateImmuneStatus(){
 }
 
 void Human::doCM(int entrypoint){
+  if (0) return; //to be removed
+  /*
   //TODO: implement age-specificity of drug dosing
   //TODO: This is a rough and quick implementation, which could perhaps be improved.
   
@@ -454,14 +456,16 @@ void Human::doCM(int entrypoint){
     int time=medicates[medicateID].getTime();
     string name=medicates[medicateID].getName();
     /* Do whatever with these ...
-    //call medicate(current,name,qty,time)
+    medicate(name,qty,time);
     cout << entrypoint;
     cout << ageyrs;
     //cout << name;
     cout << qty;
     cout << time << endl;
-    */
+    * /
   }
+  */
+  medicate("CQ", 500, 0);
 }
 
 void Human::medicate(string drugName, double qty, int time) {
@@ -717,7 +721,7 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   }
   else {
     nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    //call doCM(nextRegimen,0.1)
+    doCM(0);
     if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
       if (Global::modelVersion & INCLUDES_PK_PD){
         _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
@@ -784,7 +788,7 @@ bool Human::severeMalaria(){
     do we want to change this section of code rather than just introducing the new alternative (TS))
   */ 
   nextRegimen=_caseManagement->getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
-  //call doCM(nextRegimen,0.1)
+  doCM(0);
   p2=_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
   p3=_caseManagement->getCureRate(nextRegimen-1);
   p4=_caseManagement->caseFatality(getAgeInYears());
