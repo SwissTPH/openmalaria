@@ -41,7 +41,7 @@ enum ModelVersion {
   NEGATIVE_BINOMIAL_MASS_ACTION = 1 << 2,
   
   /** @brief Not currently implemented */
-  attenuationAsexualDensity= 3,
+  ATTENUATION_ASEXUAL_DENSITY = 1 << 3,
   
   /** @brief Baseline availability of humans is sampled from a log normal distribution
    * 
@@ -61,9 +61,9 @@ enum ModelVersion {
   
   /// BugFix in previous versions.  This option is not currently implemented.
   // @{
-  maxDensCorrection= 6,
-  innateMaxDens= 7,
-  maxDensReset= 8,
+  MAX_DENS_CORRECTION = 1 << 6,
+  INNATE_MAX_DENS = 1 << 7,
+  MAX_DENS_RESET = 1 << 8,
   //@}
   
   /** @brief Parasite densities are predicted from an autoregressive process

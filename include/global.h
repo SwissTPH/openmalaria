@@ -70,14 +70,7 @@ private:
 };
 
 inline int isOptionIncluded (int allOptions, int option) {
-
-  /*
-    This is called soooo many timesthat performance optimization at the cost of readability is justified.
-    isOptionIncluded=iand(shiftl(1,Option),AllOptions).gt.0
-    return AllOptions AND ShiftLeft(1,Option Bits)
-  */
   return allOptions & (1 << option);
-
 };
 
 #endif

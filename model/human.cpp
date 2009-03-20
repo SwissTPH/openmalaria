@@ -410,7 +410,7 @@ void Human::doCM(int entrypoint){
   const CaseManagement* caseManagement = NULL;
   for (CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
     if (ageyrs < it->getMaxAgeYrs() &&
-        !it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageyrs)
+        (!it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageyrs))
       caseManagement = &*it;
   if (caseManagement == NULL) {
     cerr << "No case management for age " << ageyrs << endl;
@@ -446,7 +446,7 @@ void Human::doCM(int entrypoint){
   
   //FIXME: build list of decisions by ID and use
   const Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
-  if (decisions.size() < decisionID) {
+  if ((int)decisions.size() < decisionID) {
     cerr << "A decision for a case-management end-point doesn't exist (number "<<decisionID<<")!" << endl;
     return;
   }
@@ -454,7 +454,7 @@ void Human::doCM(int entrypoint){
   if (medicates.size() == 0)
     return;
   
-  for (int medicateID=0;medicateID<medicates.size(); medicateID++) {
+  for (size_t medicateID=0;medicateID<medicates.size(); medicateID++) {
     double qty=medicates[medicateID].getQty();
     int time=medicates[medicateID].getTime();
     string name=medicates[medicateID].getName();
@@ -710,7 +710,7 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   }
   else {
     nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    doCM(0);
+    //doCM(1);	//FIXME: is this running as well as old case-management code?
     if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
       if (Global::modelVersion & INCLUDES_PK_PD){
         _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
@@ -777,7 +777,7 @@ bool Human::severeMalaria(){
     do we want to change this section of code rather than just introducing the new alternative (TS))
   */ 
   nextRegimen=_caseManagement->getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
-  doCM(0);
+  //doCM(3);	//FIXME: is this running as well as old case-management code?
   p2=_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
   p3=_caseManagement->getCureRate(nextRegimen-1);
   p4=_caseManagement->caseFatality(getAgeInYears());

@@ -31,6 +31,7 @@ if [ -e checkpoint ]
   ../original/compareOutputsFloat.py originalCheckpointTest.txt output.txt 1
   else
   echo "openMalaria crashed/didn't create output.txt"
+  cat stderr.txt
   fi
 else
 echo "No checkpoint file found, testing of checkpointing not possible"

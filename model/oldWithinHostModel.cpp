@@ -143,7 +143,7 @@ void OldWithinHostModel::calculateDensities() {
         _human->setTimeStepMaxDensity(timeStepMaxDensity);
       }
       else {
-        if ( isOptionIncluded(Global::modelVersion, maxDensReset)) {
+        if (Global::modelVersion & MAX_DENS_RESET) {
           timeStepMaxDensity=0.0;
         }
 	calculateDensity(*i);
@@ -154,7 +154,7 @@ void OldWithinHostModel::calculateDensities() {
           Possibly a better model version ensuring that the effect of variation in innate immunity
           is reflected in case incidence would have the following here:
         */
-        if ( isOptionIncluded(Global::modelVersion, innateMaxDens)) {
+        if (Global::modelVersion & INNATE_MAX_DENS) {
           timeStepMaxDensity=(double)timeStepMaxDensity*exp(-_human->getInnateImmunity());
         }
         //Include here the effect of blood stage vaccination
@@ -163,14 +163,14 @@ void OldWithinHostModel::calculateDensities() {
           timeStepMaxDensity=(double)timeStepMaxDensity*(1-_human->getBSVEfficacy());
         }
         // Include here the effect of attenuated infections by SP concentrations
-        if ( isOptionIncluded(Global::modelVersion, attenuationAsexualDensity)) {
+        if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
           if ( IPTIntervention::IPT &&  (*i)->getSPattenuate() ==  1) {
             (*i)->setDensity((*i)->getDensity()/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]);
             timeStepMaxDensity=(double)timeStepMaxDensity/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1];
             _SPattenuationt=(int)std::max(_SPattenuationt*1.0, ((*i)->getStartDate()+((*i)->getDuration()/Global::interval) * IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]));
           }
         }
-        if ( isOptionIncluded(Global::modelVersion, maxDensCorrection)) {
+        if (Global::modelVersion & MAX_DENS_CORRECTION) {
           _human->setTimeStepMaxDensity(std::max(timeStepMaxDensity, _human->getTimeStepMaxDensity()));
         }
         else {
@@ -189,7 +189,7 @@ void OldWithinHostModel::calculateDensities() {
       (*i)->setCumulativeExposureJ((*i)->getCumulativeExposureJ()+Global::interval*(*i)->getDensity());
       _human->setCumulativeY(_human->getCumulativeY()+Global::interval*(*i)->getDensity());
     }
-    if ( isOptionIncluded(Global::modelVersion, attenuationAsexualDensity)) {
+    if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
       if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  _human->getTotalDensity() <  10) {
         _human->setTotalDensity(10);
         _human->setCumulativeY(_human->getCumulativeY()+10);
