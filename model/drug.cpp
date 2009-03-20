@@ -102,12 +102,14 @@ Drug::Drug(const Drug &_original) {
   abbreviation = _original.abbreviation;
   absorptionFactor = _original.absorptionFactor;
   halfLife = _original.halfLife;
+  requiredMutations = _original.requiredMutations;
+  pdParameters = _original.pdParameters;
+  proteomePDParameters = _original.proteomePDParameters;
+
   human = 0;
-  doses = vector<Dose*>();
   _concentration = 0;
-  requiredMutations = vector<vector<Mutation*> >();
-  pdParameters = vector<double>();
-  proteomePDParameters = map<int,double>();
+  doses = vector<Dose*>();
+  onHuman = true;
 }
 
 Drug::Drug(string _name, string _abbreviation,
@@ -116,12 +118,14 @@ Drug::Drug(string _name, string _abbreviation,
   abbreviation = _abbreviation;
   absorptionFactor = _absorptionFactor;
   halfLife = _halfLife;
+  requiredMutations=new vector<vector<Mutation*> >();
+  pdParameters=new vector<double>();
+  proteomePDParameters=new map<int,double>();
+
   human = 0;
   doses = vector<Dose*>();
   _concentration = 0;
-  requiredMutations = vector<vector<Mutation*> >();
-  pdParameters = vector<double>();
-  proteomePDParameters = map<int,double>();
+  onHuman = false;
 }
 
 Drug::~Drug() {
@@ -151,7 +155,7 @@ istream& operator>>(istream& in, Drug& drug) {
   in >> drug.absorptionFactor;
   in >> drug.halfLife; 
   in >> numRules;
-  drug.requiredMutations = vector< vector<Mutation*> >();
+  drug.requiredMutations = new vector< vector<Mutation*> >();
   for (i=0; i<numRules; i++) {
     vector <Mutation*> rule = vector<Mutation*>();
     int numMuts;
@@ -167,23 +171,23 @@ istream& operator>>(istream& in, Drug& drug) {
       rule.push_back(
           manager->getMutation(proteinName, position, allele));
     }
-    drug.requiredMutations.push_back(rule);
+    drug.requiredMutations->push_back(rule);
   }
   in >> numRules;
-  drug.pdParameters = vector<double>();
+  drug.pdParameters = new vector<double>();
   for (i=0; i<numRules; i++) {
     double parameter;
     in >> parameter;
-    drug.pdParameters.push_back(parameter);
+    drug.pdParameters->push_back(parameter);
   }
   in >> numCachedRules;
-  drug.proteomePDParameters = map<int, double>();
+  drug.proteomePDParameters = new map<int, double>();
   for (i=0; i<numCachedRules; i++) {
     int proteomeID;
     double parameter;
     in >> proteomeID;
     in >> parameter;
-    drug.proteomePDParameters[proteomeID] = parameter;
+    (*drug.proteomePDParameters)[proteomeID] = parameter;
   }
   in >> drug._concentration;
   in >> drug._nextConcentration;
@@ -209,8 +213,8 @@ ostream& operator<<(ostream& out, const Drug& drug) {
   out << drug.abbreviation << endl;
   out << drug.absorptionFactor << endl;
   out << drug.halfLife << endl; 
-  out << drug.requiredMutations.size() << endl;
-  for (itRM=drug.requiredMutations.begin(); itRM!=drug.requiredMutations.end(); itRM++) {
+  out << drug.requiredMutations->size() << endl;
+  for (itRM=drug.requiredMutations->begin(); itRM!=drug.requiredMutations->end(); itRM++) {
     vector<Mutation*>::const_iterator itM;
     out << (*itRM).size() << endl;
     for (itM=(*itRM).begin(); itM!=(*itRM).end(); itM++) {
@@ -219,12 +223,12 @@ ostream& operator<<(ostream& out, const Drug& drug) {
       out << (*itM)->getAllele() << endl;
     }
   }
-  out << drug.pdParameters.size() << endl;
-  for (itPP=drug.pdParameters.begin(); itPP!=drug.pdParameters.end(); itPP++) {
+  out << drug.pdParameters->size() << endl;
+  for (itPP=drug.pdParameters->begin(); itPP!=drug.pdParameters->end(); itPP++) {
     out << *itPP << endl ;
   }
-  out << drug.proteomePDParameters.size() << endl;
-  for (itPPD=drug.proteomePDParameters.begin(); itPPD!=drug.proteomePDParameters.end(); itPPD++) {
+  out << drug.proteomePDParameters->size() << endl;
+  for (itPPD=drug.proteomePDParameters->begin(); itPPD!=drug.proteomePDParameters->end(); itPPD++) {
     out << (*itPPD).first << endl ;
     out << (*itPPD).second << endl ;
   }
@@ -272,7 +276,7 @@ void Drug::addConcentration(double concentration) {
 double Drug::calculateDrugFactor(Infection* infection) const {
   //Returning an average of 2 points
   //The wackiness below is because of const requirements (which operator[] on maps does not supply)
-  double param = (*(proteomePDParameters.find(infection->getProteome()->getProteomeID()))).second;
+  double param = (*(proteomePDParameters->find(infection->getProteome()->getProteomeID()))).second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
   return (startFactor + endFactor)/2;
@@ -297,19 +301,19 @@ Drug Drug::use(Human* human) {
 }
 
 void Drug::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
-  requiredMutations.push_back(ruleRequiredMutations);
-  pdParameters.push_back(pdFactor);
+  requiredMutations->push_back(ruleRequiredMutations);
+  pdParameters->push_back(pdFactor);
 }
 
 void Drug::parseProteomeInstances(ProteomeManager* manager) {
   vector<ProteomeInstance*> instances = manager->getInstances();
   vector<ProteomeInstance*>::const_iterator it;
-  int numRules = requiredMutations.size();
+  int numRules = requiredMutations->size();
   for (it=instances.begin(); it !=instances.end(); it++) {
     //cerr << " Here goes instance";
     for(int rule=0; rule<numRules; rule++) {
-      if ((*it)->hasMutations(requiredMutations[rule])) {
-        proteomePDParameters[(*it)->getProteomeID()] = pdParameters[rule];
+      if ((*it)->hasMutations((*requiredMutations)[rule])) {
+        (*proteomePDParameters)[(*it)->getProteomeID()] = (*pdParameters)[rule];
         //cerr << " rule: " << rule << "\n";
         break;
       }
