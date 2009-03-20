@@ -87,11 +87,11 @@ class Drug {
    * The order is important, the first one takes precedence
    *   (a map cannot impement this).
    */
-  vector< vector<Mutation*> > requiredMutations;
+  vector< vector<Mutation*> >* requiredMutations;
   //! PD parameters (check requiredMutations)
-  vector<double> pdParameters;
+  vector<double>* pdParameters;
   //! Fast data structure to know the PD param per proteome
-  map<int,double> proteomePDParameters;
+  map<int,double>* proteomePDParameters;
   
 
 
@@ -105,6 +105,8 @@ class Drug {
   double _concentration;
   //! Drug concentration on the next cycle.
   double _nextConcentration;
+  //!Used on human (reference to original drug structure)
+  bool onHuman;
 
 
   public:
