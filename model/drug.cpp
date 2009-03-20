@@ -20,11 +20,13 @@
 
 */
 
-#include <iostream>
-#include <cmath>
 #include "Infection.h"
 #include "human.h"
 #include "drug.h"
+
+#include <iostream>
+#include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -347,6 +349,10 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) 
   }
   if (myDrug==0) {
     myDrug = registry->getDrug(_drugAbbrev);
+    if (myDrug == NULL) {
+      cerr << "prescribed non-existant drug " << _drugAbbrev << endl;
+      return;
+    }
     drugs->push_back(myDrug);
   }
   myDrug->addConcentration(_qty*myDrug->getAbsorptionFactor()/human->getWeight());
@@ -412,16 +418,13 @@ DrugRegistry* DrugRegistry::getRegistry() {
 }
 
 void DrugRegistry::addDrug(Drug* _drug) throw(int) {
-  // In this case the good behaviour is HAVING an exception
-  //   (We don't want to add a drug if it already exists)
-  try {
-    delete getDrug(_drug->getAbbreviation());
-  }
-  catch (int i) {
+  // Check drug doesn't already exist
+  if (find (drugs.begin(), drugs.end(), _drug) == drugs.end()) {
     drugs.push_back(_drug);
-    return;
+  } else {	//Element exists, we throw
+    cerr << "Drug already in registry: " << _drug->getAbbreviation() << endl;
+    throw(1);
   }
-  throw(1); //Element exists, we throw
 }
 
 Drug* DrugRegistry::getDrug(string _abbreviation) throw(int) {
@@ -433,7 +436,7 @@ Drug* DrugRegistry::getDrug(string _abbreviation) throw(int) {
         return cloneDrug;
     }
   }
-  throw(1);
+  return NULL;
 }
 
 
