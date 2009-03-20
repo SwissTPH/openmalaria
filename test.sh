@@ -8,7 +8,7 @@ if [ $numberOfdllsNeeded -ne $numberOfdllsExpected ]
 	then echo "you probably don't have all project specific libraries statically linked, please check before BOINC deployment!"
 fi
 
-rm -rf test/sandbox 2>/dev/null
+rm -rf test/sandbox/* 2>/dev/null
 mkdir -p test/sandbox
 cp model/openMalaria test/sandbox/openMalaria
 strip test/sandbox/openMalaria

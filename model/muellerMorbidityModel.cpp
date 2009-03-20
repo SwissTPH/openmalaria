@@ -33,9 +33,8 @@ void MuellerMorbidityModel::init(){
 }
 
 double MuellerMorbidityModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
- double incidenceDensity=rateMultiplier_31*(pow(totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
-   return 1-exp(-incidenceDensity);
-  return 0;
+  double incidenceDensity=rateMultiplier_31*(pow(totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
+  return 1-exp(-incidenceDensity);
 }
 
 void MuellerMorbidityModel::read(istream& in) {

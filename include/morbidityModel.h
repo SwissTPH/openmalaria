@@ -27,9 +27,7 @@
 
 using namespace std;
 
-/*! Morbidity Model abstract base class.
- * Dont forget to create friend << and >> for subclasses.
- */
+/*! Morbidity Model abstract base class. */
 class MorbidityModel {    
 
   public:
@@ -38,7 +36,6 @@ class MorbidityModel {
     virtual double getPyrogenThres();
     virtual void write(ostream& out) const=0;
     virtual void read(istream& in)=0;
-
 };
 
 #endif

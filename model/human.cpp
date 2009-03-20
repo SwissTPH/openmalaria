@@ -400,8 +400,6 @@ void Human::updateImmuneStatus(){
 }
 
 void Human::doCM(int entrypoint){
-  if (0) return; //to be removed
-  /*
   //TODO: implement age-specificity of drug dosing
   //TODO: This is a rough and quick implementation, which could perhaps be improved.
   
@@ -460,17 +458,8 @@ void Human::doCM(int entrypoint){
     double qty=medicates[medicateID].getQty();
     int time=medicates[medicateID].getTime();
     string name=medicates[medicateID].getName();
-    /* Do whatever with these ...
     medicate(name,qty,time);
-    cout << entrypoint;
-    cout << ageyrs;
-    //cout << name;
-    cout << qty;
-    cout << time << endl;
-    * /
   }
-  */
-  medicate("CQ", 500, 0);
 }
 
 void Human::medicate(string drugName, double qty, int time) {
@@ -478,24 +467,19 @@ void Human::medicate(string drugName, double qty, int time) {
 }
 
 void Human::determineClinicalStatus(){ //TODO: this function should not do case management
-  //indirect death
-  short iDeath;
-  //indicates if this individual was treated successfully (ie parasites cleared)
-  short drugEffect;
-  // agegroup
-  int agegrp;
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
   //TODOConversion
   //fortnight= (int)(14.0/Global::interval);
   //fortnight=3;
-  agegrp=ageGroup();
   //	Countdown to indirect mortality
   if ( _doomed <  0) {
     _doomed--;
   }
-  iDeath=_latestEvent.indirectDeath(_simulationTime, _dateOfBirth, agegrp, _doomed);
+  //indirect death
+  bool iDeath=_latestEvent.indirectDeath(_simulationTime, _dateOfBirth, ageGroup(), _doomed);
   if (! iDeath) {
-    drugEffect=this->defineEvent();
+  //indicates if this individual was treated successfully (ie parasites cleared)
+    bool drugEffect=this->defineEvent();
     if ( drugEffect) {
       if (!IPTIntervention::IPT) {
         if (!(Global::modelVersion & INCLUDES_PK_PD)) {
@@ -726,7 +710,7 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   }
   else {
     nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    //doCM(0);
+    doCM(0);
     if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
       if (Global::modelVersion & INCLUDES_PK_PD){
         _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
@@ -826,6 +810,22 @@ bool Human::severeMalaria(){
     if (q(5).lt.1) stop
     NOT TREATED
   */
+  
+  if (q[8] < 1.0) {
+    cout << "SM: ONE" << endl;
+
+    cout << prandom;
+    cout << q[0];
+    cout << q[1];
+    cout << q[2];
+    cout << q[3];
+    cout << q[4];
+    cout << q[5];
+    cout << q[6];
+    cout << q[7];
+    cout << q[8] << endl;
+  }
+  
   if ( q[0] >  prandom) {
     _latestEvent.update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
     _doomed  = 4;
@@ -870,70 +870,43 @@ bool Human::severeMalaria(){
     returnValue=true;
     Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
   }
-  else if( q[8] >=  prandom) {
+  else // assume true, so we don't get another else case (DH): if( q[8] >=  prandom)
+  {
     _latestEvent.update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
     _tLastTreatment = _simulationTime;
     _latestRegimen = nextRegimen;
     returnValue=true;      
     Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
   }
-  else {
-    cout << "SM: ONE" << endl;
-
-    cout << prandom;
-    cout << q[0];
-    cout << q[1];
-    cout << q[2];
-    cout << q[3];
-    cout << q[4];
-    cout << q[5];
-    cout << q[6];
-    cout << q[7];
-    cout << q[8] << endl;
-    
-    _latestEvent.update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
-    _tLastTreatment = _simulationTime;
-    _latestRegimen = nextRegimen;
-    returnValue=true;        
-    Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
-  }
   return returnValue;
 }
 
 bool Human::defineEvent(){
-  //double q0;
-  double prSevereEpisode;
-  double prEpisode;
-  double prNonMalariaFever;
-  double indirectRisk;
-  double pCoinfection;
-  double severeMalThreshold;
-  double ageYears;
   bool valdefineEvent =false;
-  ageYears=getAgeInYears();
-  prEpisode=_morbidityModel->getPEpisode(_timeStepMaxDensity,_totalDensity);
+  double ageYears=getAgeInYears();
+  double prEpisode=_morbidityModel->getPEpisode(_timeStepMaxDensity,_totalDensity);
+  
   //Fixed severe threshold
-  severeMalThreshold=sevMal_21+1;
-  prSevereEpisode=1-1/(1+_timeStepMaxDensity/severeMalThreshold);
+  double severeMalThreshold=sevMal_21+1;
+  double prSevereEpisode=1-1/(1+_timeStepMaxDensity/severeMalThreshold);
+  
   //Decide whether a clinical episode occurs and if so, which type
-  pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
-  pCoinfection=pCoinfection*_comorbidityFactor;
+  double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
+  pCoinfection*=_comorbidityFactor;
+  
   if ((W_UNIFORM())< prEpisode) {
-    if ((W_UNIFORM())< prSevereEpisode){
+    if (W_UNIFORM() < prSevereEpisode ||	// severe
+        W_UNIFORM() < pCoinfection)		// coinfection
       valdefineEvent=severeMalaria();
-    }
-    else if( (W_UNIFORM()) < pCoinfection) {
-      valdefineEvent=severeMalaria();
-    }
-    else {
-      valdefineEvent=uncomplicatedEvent(true);
-    }
+    else
+      valdefineEvent=uncomplicatedEvent(true);	// uncomplicated
+    
     /*
       Indirect mortality	
       IndirectRisk is the probability of dying from indirect effects of malaria
       conditional on not having an acute attack of malaria
     */
-    indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
+    double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk=indirectRisk*_comorbidityFactor;
     if ( (W_UNIFORM()) < indirectRisk) {
       if (_doomed ==  0) {
@@ -949,7 +922,7 @@ bool Human::defineEvent(){
     }
   }
   else if(Global::modelVersion & NON_MALARIA_FEVERS) {
-    prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
+    double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
     if ((W_UNIFORM()) < prNonMalariaFever){
       valdefineEvent=uncomplicatedEvent(false);
     }

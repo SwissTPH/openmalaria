@@ -1,5 +1,5 @@
 #!/bin/sh
-rm -rf test/checkpointing 2>/dev/null
+rm -rf test/checkpointing/* 2>/dev/null
 mkdir -p test/checkpointing
 cp model/openMalaria test/checkpointing/openMalaria
 cd test/checkpointing && cp ../original/* . 2>/dev/null
