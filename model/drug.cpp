@@ -21,7 +21,6 @@
 */
 
 #include "Infection.h"
-#include "human.h"
 #include "drug.h"
 
 #include <iostream>
@@ -108,7 +107,6 @@ Drug::Drug(const Drug &_original) {
   pdParameters = _original.pdParameters;
   proteomePDParameters = _original.proteomePDParameters;
 
-  human = 0;
   _concentration = 0;
   doses = vector<Dose*>();
   onHuman = true;
@@ -124,14 +122,12 @@ Drug::Drug(string _name, string _abbreviation,
   pdParameters=new vector<double>();
   proteomePDParameters=new map<int,double>();
 
-  human = 0;
   doses = vector<Dose*>();
   _concentration = 0;
   onHuman = false;
 }
 
 Drug::~Drug() {
-  //We do not free human. That is OK.
   //We don't need to clear mutations as they are pointers to canonics, right?
   //delete requiredMutations;
   //delete pdParams;
@@ -250,7 +246,6 @@ Drug& Drug::operator=(const Drug &rhs) {
   this->pdParameters = rhs.pdParameters;
   this->proteomePDParameters = rhs.proteomePDParameters;
 
-  this->human = human; //Maybe human should be copied? Probably not
   this->doses = doses; //Maybe list should be (shallow) copied? not know...
   this->_concentration = _concentration;
   this->_nextConcentration = _nextConcentration;
@@ -295,10 +290,9 @@ void Drug::decay() {
 }
 
 
-Drug Drug::use(Human* human) {
+Drug Drug::use() {
   // To be removed?
   Drug usedDrug = Drug(*this);
-  human = human;
   return usedDrug;
 }
 

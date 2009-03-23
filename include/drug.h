@@ -134,7 +134,7 @@ class Drug {
   void decay();
 
   //! A new instance is returned for usage
-  Drug use(Human* _human);
+  Drug use();
 
   //! Adds a PD Rule.
   /*! The order of rule adding is important! The first add should be the
