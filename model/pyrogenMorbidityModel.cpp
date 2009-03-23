@@ -39,9 +39,10 @@ void PyrogenMorbidityModel::init(){
   Ystar1_26=getParameter(Params::Y_STAR_1);
 }
 
-PyrogenMorbidityModel::PyrogenMorbidityModel(){
-  _pyrogenThres= initPyroThres;
-}
+PyrogenMorbidityModel::PyrogenMorbidityModel(double cF) :
+     MorbidityModel (cF), _pyrogenThres (initPyroThres)
+{}
+
 double PyrogenMorbidityModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
   updatePyrogenThres(totalDensity);
   return 1-1/(1+(timeStepMaxDensity/_pyrogenThres));;
@@ -65,9 +66,11 @@ void PyrogenMorbidityModel::updatePyrogenThres(double totalDensity){
 }
 
 void PyrogenMorbidityModel::read(istream& in) {
+  in >> _comorbidityFactor;
   in >> _pyrogenThres;
 }
 
 void PyrogenMorbidityModel::write(ostream& out) const {
+  out << _comorbidityFactor << endl;
   out << _pyrogenThres << endl;
 }

@@ -32,12 +32,11 @@ using namespace std;
 /*! Predetermined episodes morbidity model.
  */
 class PredetMorbidityModel : public PyrogenMorbidityModel {
-  private:
-
-  public:
-
-  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+public:
+  PredetMorbidityModel (double cF) :
+    PyrogenMorbidityModel(cF) {}
   
+  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 };
 
 #endif

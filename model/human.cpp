@@ -48,10 +48,6 @@
 
 
 double Human::sigma_i;
-double Human::sevMal_21;
-double Human::critAgeComorb_30;
-double Human::comorbintercept_24;
-double Human::indirRiskCoFactor_18;
 double Human::immPenalty_22;
 double Human::asexImmRemain;
 double Human::immEffectorRemain;
@@ -76,13 +72,9 @@ void Human::initHumanParameters () {	// static
   baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
   double densitybias;
   sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
-  indirRiskCoFactor_18=(1-exp(-getParameter(Params::INDIRECT_RISK_COFACTOR)));
-  sevMal_21=getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
   immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
-  comorbintercept_24=1-exp(-getParameter(Params::COMORBIDITY_INTERCEPT));
   immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
   asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
-  critAgeComorb_30=getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
   /*
     TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
     or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
@@ -101,7 +93,7 @@ void Human::initHumanParameters () {	// static
 // Testing Ctor
 Human::Human() {
   _withinHostModel = new OldWithinHostModel();
-  _morbidityModel=MorbidityModel::createMorbidityModel();
+  _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
 }
 
 // Create new human
@@ -162,6 +154,10 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   else {
     _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
   }
+  
+  // Stored in morbidity model, not Human, now. Initialization looks somewhat entwined though..
+  double _comorbidityFactor;
+  
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
     if (W_UNIFORM() < 0.5) {            
@@ -215,7 +211,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
     }
   }  
   _withinHostModel = new OldWithinHostModel();
-  _morbidityModel=MorbidityModel::createMorbidityModel();
+  _morbidityModel=MorbidityModel::createMorbidityModel(_comorbidityFactor);
 }
 
 // Load human from checkpoint
@@ -223,7 +219,7 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
   : _simulationTime(simulationTime), _caseManagement(caseManagement)
 {
   _withinHostModel = new OldWithinHostModel();
-  _morbidityModel=MorbidityModel::createMorbidityModel();
+  _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
   // Reading human from file
   funit >> *this;
   _latestEvent.setCaseManagement(caseManagement);
@@ -464,7 +460,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   bool iDeath=_latestEvent.indirectDeath(_simulationTime, _dateOfBirth, ageGroup(), _doomed);
   if (! iDeath) {
   //indicates if this individual was treated successfully (ie parasites cleared)
-    bool drugEffect=this->defineEvent();
+    bool drugEffect = defineEvent();
     if ( drugEffect) {
       if (!IPTIntervention::IPT) {
         if (!(Global::modelVersion & INCLUDES_PK_PD)) {
@@ -863,36 +859,21 @@ bool Human::severeMalaria(){
 
 bool Human::defineEvent(){
   bool valdefineEvent =false;
-  double ageYears=getAgeInYears();
-  double prEpisode=_morbidityModel->getPEpisode(_timeStepMaxDensity,_totalDensity);
   
-  //Fixed severe threshold
-  double severeMalThreshold=sevMal_21+1;
-  double prSevereEpisode=1-1/(1+_timeStepMaxDensity/severeMalThreshold);
+  Morbidity::Infection event = _morbidityModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity);
   
-  //Decide whether a clinical episode occurs and if so, which type
-  double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
-  pCoinfection*=_comorbidityFactor;
-  
-  if ((W_UNIFORM())< prEpisode) {
-    if (W_UNIFORM() < prSevereEpisode ||	// severe
-        W_UNIFORM() < pCoinfection)		// coinfection
+  if (event & Morbidity::MALARIA) {
+    if (event & Morbidity::COMPLICATED)
       valdefineEvent=severeMalaria();
-    else
-      valdefineEvent=uncomplicatedEvent(true);	// uncomplicated
+    else if (event == Morbidity::UNCOMPLICATED)
+      valdefineEvent=uncomplicatedEvent(true);
     
-    /*
-      Indirect mortality	
-      IndirectRisk is the probability of dying from indirect effects of malaria
-      conditional on not having an acute attack of malaria
-    */
-    double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
-    indirectRisk=indirectRisk*_comorbidityFactor;
-    if ( (W_UNIFORM()) < indirectRisk) {
-      if (_doomed ==  0) {
-        _doomed=-1;
-      }
-    }
+    //NOTE: was integrated into infectionEvent, but changes order of W_UNIFORM() calls, changing test results.
+    // Need to decide - reintegrate or keep separate
+    //if ((event & Morbidity::INDIRECT_MORTALITY) && _doomed == 0)
+    if (_morbidityModel->indirectDeath(getAgeInYears()) && _doomed == 0)
+      _doomed=-1;
+    
     // Penalizing immunity for clinical episodes	
     if (Global::modelVersion & PENALISATION_EPISODES) {
       _cumulativeY=(double)_cumulativeYlag+(-(immPenalty_22*(_cumulativeY-_cumulativeYlag)));
@@ -900,12 +881,8 @@ bool Human::defineEvent(){
         _cumulativeY=0.0;
       }
     }
-  }
-  else if(Global::modelVersion & NON_MALARIA_FEVERS) {
-    double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
-    if ((W_UNIFORM()) < prNonMalariaFever){
-      valdefineEvent=uncomplicatedEvent(false);
-    }
+  } else if(event & Morbidity::NON_MALARIA) {
+    return uncomplicatedEvent(false);
   }
   return valdefineEvent;
 }
@@ -958,7 +935,6 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._ylag[3] << endl; 
   out << human._lastSPDose << endl; 
   out << human._lastIptiOrPlacebo << endl; 
-  out << human._comorbidityFactor << endl;  
   out << human._treatmentSeekingFactor << endl; 
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._latestEvent;   
@@ -1008,7 +984,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._ylag[3]; 
   in >> human._lastSPDose; 
   in >> human._lastIptiOrPlacebo; 
-  in >> human._comorbidityFactor;  
   in >> human._treatmentSeekingFactor; 
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._latestEvent;

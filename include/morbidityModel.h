@@ -27,18 +27,77 @@
 
 using namespace std;
 
+namespace Morbidity {
+  /** Types of infection; correspond roughly to those in doCM.
+   * 
+   * The following are flags:
+   * @enum NON_MALARIA = non-malaria infection
+   * @enum MALARIA = malaria infection
+   * @enum INDIRECT_MORTALITY = Death caused by indirect effects of malaria
+   * @enum COMPLICATED = Severe malaria or a coinfection
+   * 
+   * The following are possible output values:
+   * @enum NONE = no infection
+   * @enum NON_MALARIA = non-malaria infection
+   * 
+   * The following output values (malaria infections) may additionally have
+   * flag INDIRECT_MORTALITY set:
+   * @enum UNCOMPLICATED
+   * @enum SEVERE
+   * @enum COINFECTION
+   */
+  enum Infection {
+    NONE		= 0,
+    
+    NON_MALARIA		= 0x1,
+    MALARIA		= 0x2,
+    
+    // Flags indicating morbidity severity:
+    INDIRECT_MORTALITY	= 0x4,
+    COMPLICATED		= 0x8,
+    
+    UNCOMPLICATED	= MALARIA | 0x10,
+    
+    SEVERE		= MALARIA | COMPLICATED | 0x10,
+    COINFECTION		= MALARIA | COMPLICATED | 0x20,
+  };
+}
+
 /*! Morbidity Model abstract base class. */
 class MorbidityModel {
 public:
-  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
-  virtual double getPyrogenThres();
-  virtual void write(ostream& out) const=0;
-  virtual void read(istream& in)=0;
-  
-  // Static:
+  // static:
   /// Calls static init on all MorbidityModels.
   static void initModels();
-  static MorbidityModel* createMorbidityModel();
+  
+  /** Create a sub-class instance, dependant on global options.
+   * 
+   * @param cF = Comorbidity factor (currently set in Human). */
+  static MorbidityModel* createMorbidityModel(double cF);
+  
+  // non-static
+  MorbidityModel(double cF);
+  Morbidity::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
+  bool indirectDeath(double ageYears);
+  virtual double getPyrogenThres();
+  virtual void write(ostream& out) const;
+  virtual void read(istream& in);
+  
+private:	// static
+  //comorbidity prevalence at birth as a risk factor for indirect
+  static double indirRiskCoFactor_18;
+  //sevMal: critical density for severe malaria episode (Y*B1)
+  static double sevMal_21;
+  //Critical age for co-morbidity (for both severe and indirect)
+  static double critAgeComorb_30;
+  //comorbidity prevalence at birth as a risk factor for severe
+  static double comorbintercept_24;
+  
+protected:	// non-static
+  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
+  
+  //! comorbidity factor for heterogeneity 
+  double _comorbidityFactor; 
 };
 
 #endif

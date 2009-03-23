@@ -39,7 +39,7 @@ protected:
     virtual void updatePyrogenThres(double totalDensity);
 
 public:
-  PyrogenMorbidityModel();
+  PyrogenMorbidityModel(double cF);
   virtual double getPyrogenThres();
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;

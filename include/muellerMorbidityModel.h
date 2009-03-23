@@ -33,9 +33,10 @@ using namespace std;
 */
 class MuellerMorbidityModel : public MorbidityModel {
 public:
+  MuellerMorbidityModel(double cF) :
+    MorbidityModel(cF) {}
+  
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
-  void write(ostream& out) const;
-  void read(istream& in);
 
   // Static:
   static void init();

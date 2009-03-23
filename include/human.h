@@ -301,8 +301,6 @@ private:
   //!Maximum parasite density during the previous 5-day interval
   double _timeStepMaxDensity;	// WithinHostModel, used by Morbidity
   //!Baseline availability to mosquitoes
-  double _comorbidityFactor; 
-  //! comorbidity factor for heterogeneity 
   double _treatmentSeekingFactor;
   //! treatment seeking for heterogeneity
   double _BaselineAvailabilityToMosquitoes;
@@ -397,14 +395,6 @@ private:
   
 //Standard dev innate immunity for densities
   static double sigma_i;
-//sevMal: critical density for severe malaria episode (Y*B1)
-  static double sevMal_21;
-//Critical age for co-morbidity (for both severe and indirect)
-  static double critAgeComorb_30;
-//comorbidity prevalence at birth as a risk factor for severe
-  static double comorbintercept_24;
-//comorbidity prevalence at birth as a risk factor for indirect
-  static double indirRiskCoFactor_18;
 // contribution of parasite densities to acquired immunity in the presence of fever
   static double immPenalty_22;
 /*

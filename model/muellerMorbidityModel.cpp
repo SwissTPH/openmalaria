@@ -36,11 +36,3 @@ double MuellerMorbidityModel::getPEpisode(double timeStepMaxDensity, double tota
   double incidenceDensity=rateMultiplier_31*(pow(totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
   return 1-exp(-incidenceDensity);
 }
-
-void MuellerMorbidityModel::read(istream& in) {
-  //Empty
-}
-
-void MuellerMorbidityModel::write(ostream& out) const {
- //Empty
-}
