@@ -27,7 +27,7 @@
 #include <list>
 #include <map>
 #include <vector>
-//#include "global.h"
+#include "global.h"
 #include "proteome.h"
 
 using namespace std;

@@ -1,4 +1,3 @@
-#include <stdlib.h>
 /*
 
  This file is part of OpenMalaria.

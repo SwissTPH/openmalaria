@@ -126,7 +126,7 @@ private:
   
   /** Per time-step partial calculation of EIR.
    *
-   * See comment in advancePeriod(). */
+   * See comment in advancePeriod() for details of how the EIR is calculated. */
   double partialEIR;
   
   /* Functions */
