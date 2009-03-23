@@ -32,13 +32,13 @@ using namespace std;
 /*! Mueller morbidity model.
 */
 class MuellerMorbidityModel : public MorbidityModel {
-
 public:
-
-  static void init();
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;
   void read(istream& in);
+
+  // Static:
+  static void init();
 
 private:
   static double rateMultiplier_31;

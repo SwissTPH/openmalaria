@@ -39,13 +39,14 @@ protected:
     virtual void updatePyrogenThres(double totalDensity);
 
 public:
-  static void init();
   PyrogenMorbidityModel();
   virtual double getPyrogenThres();
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;
   void read(istream& in);
   
+  // Static:
+  static void init();
 
 private:
   // Ystar2: critical value in determining increase in pyrogenic threshold

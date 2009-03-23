@@ -64,6 +64,9 @@ double Human::baseProbMosqSurvivalResting;
 const double Human::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 
 void Human::initHumanParameters () {	// static
+  // Init models used by humans:
+  MorbidityModel::initModels();
+  
   /*
     Init parameters that are common to all humans
   */

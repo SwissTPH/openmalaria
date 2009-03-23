@@ -29,19 +29,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 using namespace std;
 
 
+void MorbidityModel::initModels() {
+  // Perhaps not all models are used, but currently this initialization is fast
+  // anyway:
+  
+  PyrogenMorbidityModel::init();
+  //no separate init:
+  //PredetMorbidityModel::init();
+  MuellerMorbidityModel::init();
+}
+
 MorbidityModel* MorbidityModel::createMorbidityModel(){
   if (Global::modelVersion & PREDETERMINED_EPISODES) {
-    PredetMorbidityModel::init();
     return new PredetMorbidityModel();
   }
   else {
     if (Global::modelVersion & MUELLER_MORBIDITY_MODEL) {
-      MuellerMorbidityModel::init();
       return new MuellerMorbidityModel();
-
     }
     else {
-      PyrogenMorbidityModel::init();
       return new PyrogenMorbidityModel();
     }
   }

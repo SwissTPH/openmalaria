@@ -28,14 +28,17 @@
 using namespace std;
 
 /*! Morbidity Model abstract base class. */
-class MorbidityModel {    
-
-  public:
-    static MorbidityModel* createMorbidityModel();
-    virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
-    virtual double getPyrogenThres();
-    virtual void write(ostream& out) const=0;
-    virtual void read(istream& in)=0;
+class MorbidityModel {
+public:
+  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
+  virtual double getPyrogenThres();
+  virtual void write(ostream& out) const=0;
+  virtual void read(istream& in)=0;
+  
+  // Static:
+  /// Calls static init on all MorbidityModels.
+  static void initModels();
+  static MorbidityModel* createMorbidityModel();
 };
 
 #endif
