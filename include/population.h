@@ -105,10 +105,10 @@ public:
   void massTreatment(const Mass&, int time);
 
   //! remove human from the list
-  short outmigrate(Human *current, int Nsize, int &survivsSoFar);
+  short outmigrate(Human& current, int Nsize, int &survivsSoFar);
 
   //! updates counters of hosts and patently infected hosts in the 20 -25 year age bracket
-  void updateMaternalMalariaCounters(Human *current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter);
+  void updateMaternalMalariaCounters(Human& current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter);
   
   // Static:
   /** For input values for alpha1 and mu1, the fit to field data (residualSS)
@@ -173,10 +173,10 @@ private:
   CaseManagementModel* _caseManagement;
   
   /// The simulated human population
-  std::list<Human*> _population;
+  std::list<Human> _population;
   
   /// Iterator type of _population
-  typedef std::list<Human*>::iterator HumanIter;
+  typedef std::list<Human>::iterator HumanIter;
 
   //! max lifespan in intervals
   int _maxTimestepsPerLife;

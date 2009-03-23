@@ -29,11 +29,11 @@
 
 using namespace std;
 
-OldWithinHostModel::OldWithinHostModel(Human *human) : WithinHostModel(human) {
+OldWithinHostModel::OldWithinHostModel() : WithinHostModel() {
   _SPattenuationt = 0;
 }
 
-void OldWithinHostModel::calculateDensity(Infection *inf) {
+void OldWithinHostModel::calculateDensity(Infection *inf, double ageYears) {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+Simulation::simulationTime-inf->getStartDate()-Global::latentp;
   
@@ -66,7 +66,7 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
       //TODO: compare this with the asex paper
       dY=1 / (1+(cumulativeY-inf->getCumulativeExposureJ())/inf->getCumulativeYstar());
     }
-    dA=1 - inf->getAlpha_m() * exp(-inf->getDecayM() * _human->getAgeInYears());
+    dA=1 - inf->getAlpha_m() * exp(-inf->getDecayM() * ageYears);
     
     double survival=min (dY*dH*dA, 1.0);
     double logy=log(y)*survival;
@@ -120,47 +120,49 @@ void OldWithinHostModel::calculateDensity(Infection *inf) {
   }
 }
 
-void OldWithinHostModel::calculateDensities() {
-  //double ageyears = _human->getAgeInYears();
-  _human->setPTransmit(0);
-  _human->setPatentInfections(0);
-  _human->setTotalDensity(0.0);
-  _human->setTimeStepMaxDensity(0.0);
-  if ( _human->getCumulativeInfections() >  0) {
-    cumulativeh=_human->getCumulativeh();
-    cumulativeY=_human->getCumulativeY();
+// NOTE: refering back to human so much isn't good programming practice. Could
+// some variables be stored locally?
+void OldWithinHostModel::calculateDensities(Human& human) {
+  double ageyears = human.getAgeInYears();
+  human.setPTransmit(0);
+  human.setPatentInfections(0);
+  human.setTotalDensity(0.0);
+  human.setTimeStepMaxDensity(0.0);
+  if ( human.getCumulativeInfections() >  0) {
+    cumulativeh=human.getCumulativeh();
+    cumulativeY=human.getCumulativeY();
     // IPTi SP dosec lears infections at the time that blood-stage parasites appear     
     if (IPTIntervention::IPT) {
-      SPAction();
+      SPAction(human);
     }
     std::list<Infection*>::iterator i;
-    for(i=_human->getInfections()->begin(); i!=_human->getInfections()->end(); i++){
+    for(i=human.getInfections()->begin(); i!=human.getInfections()->end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
-      timeStepMaxDensity=_human->getTimeStepMaxDensity();
+      timeStepMaxDensity=human.getTimeStepMaxDensity();
       if (Global::modelVersion & WITHIN_HOST_PARASITE) {
         (*i)->setDensity((*i)->determineWithinHostDensity());
         timeStepMaxDensity=std::max((double)(*i)->getDensity(), timeStepMaxDensity);
-        _human->setTimeStepMaxDensity(timeStepMaxDensity);
+        human.setTimeStepMaxDensity(timeStepMaxDensity);
       }
       else {
         if (Global::modelVersion & MAX_DENS_RESET) {
           timeStepMaxDensity=0.0;
         }
-	calculateDensity(*i);
-        //(*i)->determineDensities(Simulation::simulationTime, _human->getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
-        (*i)->setDensity((double)(*i)->getDensity()*exp(-_human->getInnateImmunity()));
+	calculateDensity(*i, ageyears);
+        //(*i)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
+        (*i)->setDensity((double)(*i)->getDensity()*exp(-human.getInnateImmunity()));
 
         /*
           Possibly a better model version ensuring that the effect of variation in innate immunity
           is reflected in case incidence would have the following here:
         */
         if (Global::modelVersion & INNATE_MAX_DENS) {
-          timeStepMaxDensity=(double)timeStepMaxDensity*exp(-_human->getInnateImmunity());
+          timeStepMaxDensity=(double)timeStepMaxDensity*exp(-human.getInnateImmunity());
         }
         //Include here the effect of blood stage vaccination
         if (Vaccine::BSV.active) {
-          (*i)->setDensity((*i)->getDensity()*(1-_human->getBSVEfficacy()));
-          timeStepMaxDensity=(double)timeStepMaxDensity*(1-_human->getBSVEfficacy());
+          (*i)->setDensity((*i)->getDensity()*(1-human.getBSVEfficacy()));
+          timeStepMaxDensity=(double)timeStepMaxDensity*(1-human.getBSVEfficacy());
         }
         // Include here the effect of attenuated infections by SP concentrations
         if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
@@ -171,50 +173,50 @@ void OldWithinHostModel::calculateDensities() {
           }
         }
         if (Global::modelVersion & MAX_DENS_CORRECTION) {
-          _human->setTimeStepMaxDensity(std::max(timeStepMaxDensity, _human->getTimeStepMaxDensity()));
+          human.setTimeStepMaxDensity(std::max(timeStepMaxDensity, human.getTimeStepMaxDensity()));
         }
         else {
-          _human->setTimeStepMaxDensity(timeStepMaxDensity);
+          human.setTimeStepMaxDensity(timeStepMaxDensity);
         }
       }
-      _human->setTotalDensity(_human->getTotalDensity()+(*i)->getDensity());
+      human.setTotalDensity(human.getTotalDensity()+(*i)->getDensity());
       //Compute the proportion of parasites remaining after innate blood stage effect
       if ( (*i)->getDensity() > Human::detectionlimit) {
-        _human->setPatentInfections(_human->getPatentInfections()+1);
+        human.setPatentInfections(human.getPatentInfections()+1);
       }
       if ( (*i)->getStartDate() == (Simulation::simulationTime-1)) {
-        _human->setCumulativeh(_human->getCumulativeh()+1);
+        human.setCumulativeh(human.getCumulativeh()+1);
       }
       (*i)->setDensity(std::min(maxDens, (*i)->getDensity()));
       (*i)->setCumulativeExposureJ((*i)->getCumulativeExposureJ()+Global::interval*(*i)->getDensity());
-      _human->setCumulativeY(_human->getCumulativeY()+Global::interval*(*i)->getDensity());
+      human.setCumulativeY(human.getCumulativeY()+Global::interval*(*i)->getDensity());
     }
     if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
-      if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  _human->getTotalDensity() <  10) {
-        _human->setTotalDensity(10);
-        _human->setCumulativeY(_human->getCumulativeY()+10);
+      if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  human.getTotalDensity() <  10) {
+        human.setTotalDensity(10);
+        human.setCumulativeY(human.getCumulativeY()+10);
       }
     }
   }
-  _human->setPTransmit(_human->infectiousness());
+  human.setPTransmit(human.infectiousness());
 }
 
-void OldWithinHostModel::SPAction(){
+void OldWithinHostModel::SPAction(Human& human){
  
   /*TODO if we want to look at presumptive SP treatment with the PkPD model we
     need to add some code here that will be conditionally implemented depending on the
     model version.*/
 
   double rnum;
-  std::list<Infection*>::iterator i=_human->getInfections()->begin();
-  while(i != _human->getInfections()->end()){
+  std::list<Infection*>::iterator i=human.getInfections()->begin();
+  while(i != human.getInfections()->end()){
     if ( 1+Simulation::simulationTime-(*i)->getStartDate()-Global::latentp > 0){
       rnum=W_UNIFORM();
       if ((rnum<=IPTIntervention::genotypeACR[(*i)->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - _human->getLastSPDose() <= IPTIntervention::genotypeProph[(*i)->getGenoTypeID()-1])) {
+           (Simulation::simulationTime - human.getLastSPDose() <= IPTIntervention::genotypeProph[(*i)->getGenoTypeID()-1])) {
         delete *i;
-        i=_human->getInfections()->erase(i);
-        _human->setMOI(_human->getMOI()-1);
+        i=human.getInfections()->erase(i);
+        human.setMOI(human.getMOI()-1);
       }
       else{
         i++;

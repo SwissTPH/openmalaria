@@ -40,37 +40,37 @@ void EntoInterventionIRS::initParameters () {
 
 /* ----- Main functionality ----- */
 
-double EntoInterventionITN::decay () {
+double EntoInterventionITN::decay () const {
   int age = Simulation::simulationTime - dateOfUse;
   
   return exp(-pow((double)age * weibullDecayLambdaInv, weibullDecayk));
 }
 
-double EntoInterventionITN::availability() {
+double EntoInterventionITN::availability() const {
   // FIXME: number depends on net
   double E = 0.0;
   return 1.0 - (1.0 - E)*decay();
 }
 
-double EntoInterventionITN::probMosqBiting() {
+double EntoInterventionITN::probMosqBiting() const {
   // FIXME: number depends on net
   double E = 0.0;
   return 1.0 - (1.0 - E)*decay();
 }
 
-double EntoInterventionIRS::decay () {
+double EntoInterventionIRS::decay () const {
   int age = Simulation::simulationTime - dateOfUse;
   
   return exp (-age * decayLambdaInv);
 }
 
-double EntoInterventionIRS::availability() {
+double EntoInterventionIRS::availability() const {
   //FIXME: number depends on insecticide
   double scareConst = 0;	// probability of scaring mosquito off
   return 1.0 - scareConst * decay();
 }
 
-double EntoInterventionIRS::probMosqSurvivalResting() {
+double EntoInterventionIRS::probMosqSurvivalResting() const {
   //FIXME: number depends on insecticide
   double killConst = 0;		// probability of killing mosquito
   return 1.0 - killConst * decay();

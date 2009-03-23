@@ -20,28 +20,9 @@
 
 */
 
-#include "human.h"
-#include "Infection.h"
 #include "withinHostModel.h"
 
 using namespace std;
-
-
-WithinHostModel::WithinHostModel(Human* human) {
-  _human = human;
-}
-
-void WithinHostModel::calculateDensity(Infection *inf) {
-}
-
-void WithinHostModel::calculateDensities() {
-}
-
-void WithinHostModel::write(ostream& out) const {
-}
-
-void WithinHostModel::read(istream& in) {
-}
 
 ostream& operator<<(ostream& out, const WithinHostModel &model) {
   model.write(out);

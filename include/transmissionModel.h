@@ -38,6 +38,9 @@ public:
 
   //! initialise the main simulation
   virtual void initMainSimulation (int populationSize)=0; 
+  
+  /// Needs to be called each step of the simulation
+  virtual void advancePeriod (const std::list<Human>& population, int simulationTime) {}
 
   //TODO: at least the following should be made private
   //protected: 

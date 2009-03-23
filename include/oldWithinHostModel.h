@@ -44,18 +44,20 @@ class OldWithinHostModel : public WithinHostModel {
   void write(ostream& out) const;
   void read(istream& in);
 
-  void SPAction();
+  /*!  SP drug action applies to each infection depending on genotype and when
+    the individual had their last dose of SP */
+  void SPAction(Human&);
 
-  void calculateDensity(Infection *inf);
+  void calculateDensity(Infection *inf, double);
 
   public:
-  OldWithinHostModel(Human *human);
+  OldWithinHostModel();
 
   friend ostream& operator<<(ostream& out, const WithinHostModel &model);
   friend istream& operator>>(istream& in, WithinHostModel &model);
 
 
-  void calculateDensities();
+  void calculateDensities(Human&);
 
 };
 

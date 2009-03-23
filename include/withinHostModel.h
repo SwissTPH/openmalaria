@@ -29,26 +29,23 @@
 using namespace std;
 
 class Human;
-class Infection;
 
 /*! Within Host Model abstract class.
  * Dont forget to create friend << and >> for subclasses.
  */
 class WithinHostModel {
   protected:
-  Human* _human;
-  virtual void write(ostream& out) const;
-  virtual void read(istream& in);
+    virtual void write(ostream& out) const =0;
+    virtual void read(istream& in) =0;
 
   public:
-  virtual void calculateDensity(Infection *inf);
-  WithinHostModel(Human *human);
+    WithinHostModel() {}
 
-  friend ostream& operator<<(ostream& out, const WithinHostModel &model);
-  friend istream& operator>>(istream& in, WithinHostModel &model);
+    friend ostream& operator<<(ostream& out, const WithinHostModel &model);
+    friend istream& operator>>(istream& in, WithinHostModel &model);
 
 
-  virtual void calculateDensities();
+    virtual void calculateDensities(Human&) =0;
 
 };
 

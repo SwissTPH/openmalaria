@@ -54,8 +54,8 @@ public:
    * \param simulationTime Time since start of simulation . */
   virtual double calculateEIR(int simulationTime, Human& host); 
 
-  /** Need something like this called every interval. */
-  virtual void advancePeriod (int simulationTime);
+  /** This needs to be called every interval. */
+  virtual void advancePeriod (const std::list<Human>& population, int simulationTime);
   
   //maxDurIntPhaseEIR is the maximum number of days for which an
   //intervention phase EIR is specified

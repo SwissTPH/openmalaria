@@ -204,7 +204,7 @@ void Population::writeLists (fstream& funit) {
   start_cp_timer();
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    funit << **iter;
+    funit << *iter;
   }
 
   //Finished writing lists
@@ -238,7 +238,7 @@ void Population::readLists (fstream& funit) {
   int indCounter = 0;	// Number of individuals read from checkpoint
   while(!(funit.eof()||_populationSize==indCounter)){
       //continue: Fortran cont is probably not C cont
-    _population.push_back(new Human(funit, _caseManagement, Simulation::simulationTime));
+    _population.push_back(Human(funit, _caseManagement, Simulation::simulationTime));
     indCounter++;
   }
   if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){
@@ -249,12 +249,13 @@ void Population::readLists (fstream& funit) {
 
 void Population::newHuman(int dob){
   ++IDCounter;
-  // TO DO Check memory leaks
-  _population.push_back(new Human(IDCounter, dob,  _caseManagement, Simulation::simulationTime));
-  //delete human;
+  _population.push_back(Human(IDCounter, dob,  _caseManagement, Simulation::simulationTime));
 }
 
 void Population::update1(){
+  //NOTE: this needs to be called somewhere; possibly where its called will affect the results slightly.
+  _transmissionModel->advancePeriod (_population, Simulation::simulationTime);
+  
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
   int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y
   //Nsize is the population size at time t allowing population growth
@@ -281,34 +282,34 @@ void Population::update1(){
   HumanIter last = _population.end();
   --last;
   for (HumanIter iter = _population.begin(); iter != _population.end();){
-    int agetstep = Simulation::simulationTime-(*iter)->getDateOfBirth();
-    double ageYears = (*iter)->getAgeInYears(Simulation::simulationTime);
+    int agetstep = Simulation::simulationTime-iter->getDateOfBirth();
+    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
     //First eliminate those who die or who are too old
     if (agetstep > Global::maxAgeIntervals) {
-      (*iter)->setDoomed(1);
+      iter->setDoomed(1);
     }
-    if ((*iter)->getDoomed() > 0){
-      delete *iter;
+    if (iter->getDoomed() > 0){
+      iter->destroy();
       iter=_population.erase(iter);
       continue;
     } else {	//else update the individual
       ++survivsSoFar;
       // UPDATE HUMAN
-      (*iter)->update(Simulation::simulationTime,_transmissionModel);
-      double availability = (*iter)->getBaselineAvailabilityToMosquitoes() * _transmissionModel->getRelativeAvailability(ageYears);
+      iter->update(Simulation::simulationTime,_transmissionModel);
+      double availability = iter->getBaselineAvailabilityToMosquitoes() * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
-      sumWt_kappa += availability*(*iter)->getProbTransmissionToMosquito();
+      sumWt_kappa += availability*iter->getProbTransmissionToMosquito();
       
       //  update array for the infant death rates     
       if (agetstep <= Global::intervalsPerYear){
-        updateInfantArrays(agetstep-1, (*iter)->getDoomed());
+        updateInfantArrays(agetstep-1, iter->getDoomed());
       }
-      int ia = (*iter)->ageGroup() - 1;
+      int ia = iter->ageGroup() - 1;
       /*
       TODO: ptransmit should depend on bednet usage
       kappaByAge and nByAge are used in the screensaver only
       */
-      kappaByAge[ia] += (*iter)->getProbTransmissionToMosquito();
+      kappaByAge[ia] += iter->getProbTransmissionToMosquito();
       ++nByAge[ia];
         
       /*
@@ -320,9 +321,9 @@ void Population::update1(){
       //std::cout  << "before om if" <<iter->hData.dob<<" "<<iter->hData.ID<<std::endl;  
       if (iter == last ||	// Last human
           // Copy iter, increment, and compare getDateOfBirth:
-          (*++HumanIter(iter))->getDateOfBirth() != (*iter)->getDateOfBirth())
+          (++HumanIter(iter))->getDateOfBirth() != iter->getDateOfBirth())
         if (outmigrate(*iter, Nsize, survivsSoFar)) {
-          delete *iter;
+          iter->destroy();
           iter = _population.erase(iter);
           continue;
         }
@@ -382,7 +383,7 @@ void Population::update1(){
 
 void Population::newSurvey () {
   for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
-    (*iter)->summarize();
+    iter->summarize();
   }
   Simulation::gMainSummary->setNumTransmittingHosts(_transmissionModel->kappa[Global::modIntervalsPerYear(Simulation::simulationTime) - 1]);
   Simulation::gMainSummary->setAnnualAverageKappa(_annualAverageKappa);
@@ -400,7 +401,7 @@ void Population::implementIntervention (int time) {
     delete _caseManagement;
     _caseManagement = new CaseManagementModel();
     for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
-      (*iter)->setCaseManagement(_caseManagement);
+      iter->setCaseManagement(_caseManagement);
     }
     
     //TODO: Do we also need to re-init the kappa array?
@@ -441,10 +442,10 @@ void Population::massTreatment(const Mass& mass, int time){
     */
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = (*iter)->getAgeInYears(Simulation::simulationTime);
-    if (( (*iter)->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
+    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+    if (( iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if ( (W_UNIFORM()) < compliance) {
-        (*iter)->clearAllInfections();
+        iter->clearAllInfections();
       }
     }
         /*
@@ -452,7 +453,7 @@ void Population::massTreatment(const Mass& mass, int time){
     of pre-erythrocytic immunity
     TODO: inside the above conditional?
         */
-    (*iter)->setProbabilityOfInfection(0.0);
+    iter->setProbabilityOfInfection(0.0);
 
   }
 }
@@ -465,17 +466,17 @@ void Population::massIPTiTreatment(const Mass& mass, int time){
   
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = (*iter)->getAgeInYears(Simulation::simulationTime);
-    if (((*iter)->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
+    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+    if ((iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if ((W_UNIFORM()) < compliance){
-        (*iter)->setLastIPTIorPlacebo(Simulation::simulationTime);
+        iter->setLastIPTIorPlacebo(Simulation::simulationTime);
           /*
         *            iptiEffect denotes treatment or placebo group
         *                       and also the treatment given when sick (trial-dependent)
           *                                 */
         if (IPTIntervention::iptiEffect >= 10){
-          (*iter)->setSPDose(Simulation::simulationTime);
-          Simulation::gMainSummary->reportIPTDose((*iter)->ageGroup());
+          iter->setSPDose(Simulation::simulationTime);
+          Simulation::gMainSummary->reportIPTDose(iter->ageGroup());
         }
       }
     }
@@ -484,8 +485,9 @@ void Population::massIPTiTreatment(const Mass& mass, int time){
 
 void Population::clear() {
   HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter)
-    delete *iter;
+  for(iter=_population.begin(); iter != _population.end(); ++iter){
+    iter->destroy();
+  }
   _population.clear();
 }
 
@@ -496,18 +498,18 @@ void Population::vaccinatePopulation(const Mass& mass, int time){
   double compliance = mass.getCoverage();
 
   for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = (*iter)->getAgeInYears(Simulation::simulationTime);
+    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
     if ((ageYears > minAge) && (ageYears < maxAge)) {
       if ((W_UNIFORM()) < compliance){
-        (*iter)->vaccinate();
-        Simulation::gMainSummary->reportMassVaccination((*iter)->ageGroup());
+        iter->vaccinate();
+        Simulation::gMainSummary->reportMassVaccination(iter->ageGroup());
       }
     }
   }
 }
 
 
-short Population::outmigrate(Human *current, int Nsize, int &survivsSoFar){
+short Population::outmigrate(Human& current, int Nsize, int &survivsSoFar){
   /*
     
   TODO: I had to extract this from update1 because the surrounding conditional
@@ -520,7 +522,7 @@ short Population::outmigrate(Human *current, int Nsize, int &survivsSoFar){
   int outmigrs;
   double targetPop;
   bool valoutmigrate=false;
-  j=_maxTimestepsPerLife-(Simulation::simulationTime-current->getDateOfBirth());
+  j=_maxTimestepsPerLife-(Simulation::simulationTime-current.getDateOfBirth());
   targetPop=cumpc[j-1] * Nsize;	//target population in age group of current human
     /*
   Actual number of people so far = Survivsofar
@@ -532,14 +534,14 @@ short Population::outmigrate(Human *current, int Nsize, int &survivsSoFar){
   outmigrs=min(outmigrs,1);
   if (outmigrs >= 1){
     --survivsSoFar;
-    //std::cout <<" outmigrate "<<current->hData.dob<<"
-  //"<<current->hData.ID<<std::endl;
+    //std::cout <<" outmigrate "<<current.hData.dob<<"
+  //"<<current.hData.ID<<std::endl;
     valoutmigrate=true;
   }
   return valoutmigrate;
 }
 
-void Population::updateMaternalMalariaCounters(Human *current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter){
+void Population::updateMaternalMalariaCounters(Human& current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter){
   /* updates the counts of the number of individuals of child bearing age
      and the numbers of these with patent parasitemia */
   
@@ -549,7 +551,7 @@ void Population::updateMaternalMalariaCounters(Human *current, bool &isAtRiskOfF
     isAtRiskOfFirstPregnancy = true;
   }
   nCounter ++;
-  if (current->getTotalDensity() > Human::detectionlimit){
+  if (current.getTotalDensity() > Human::detectionlimit){
     pCounter ++;
   }
 }

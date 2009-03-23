@@ -328,9 +328,16 @@ void Drug::parseProteomeInstances(ProteomeManager* manager) {
  * DrugProxy code
  */
 
-DrugProxy::DrugProxy(Human* _human) {
-  human = _human;
+DrugProxy::DrugProxy() {
   registry = DrugRegistry::getRegistry();
+}
+
+void DrugProxy::destroy() {
+  list<Drug*>::const_iterator it;
+  for(it=_drugs.begin(); it!=_drugs.end(); it++) {
+    delete (*it);
+  }
+  _drugs.clear();
 }
 
 void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) {
@@ -338,10 +345,9 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) 
    *   As such, no doses are created, but concentration is updated.
    */
   //cerr << "Medicating with: " << _drugAbbrev << " " << _qty << "\n";
-  list<Drug*>* drugs = human->getDrugs();
   Drug* myDrug = 0;
   list<Drug*>::iterator it;
-  for (it=drugs->begin(); it!=drugs->end(); it++) {
+  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
     if ((*it)->getAbbreviation() == _drugAbbrev) {
       myDrug = (*it);
       break;
@@ -353,16 +359,16 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) 
       cerr << "prescribed non-existant drug " << _drugAbbrev << endl;
       return;
     }
-    drugs->push_back(myDrug);
+    _drugs.push_back(myDrug);
   }
-  myDrug->addConcentration(_qty*myDrug->getAbsorptionFactor()/human->getWeight());
+  myDrug->addConcentration(_qty*myDrug->getAbsorptionFactor()/weight);
 }
 
 double DrugProxy::calculateDrugsFactor(Infection* _infection) {
   //We will choose for now the smallest (ie, most impact)
   list<Drug*>::const_iterator it;
   double factor = 1; //no effect
-  for (it=human->getDrugs()->begin(); it!=human->getDrugs()->end(); it++) {
+  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
     double drugFactor;
     drugFactor = (*it)->calculateDrugFactor(_infection);
     if (drugFactor< factor) {
@@ -374,19 +380,27 @@ double DrugProxy::calculateDrugsFactor(Infection* _infection) {
 
 void DrugProxy::decayDrugs() {
   list<Drug*>::iterator it;
-  for (it=human->getDrugs()->begin(); it!=human->getDrugs()->end(); it++) {
+  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
     (*it)->decay();
   }
 }
 
-ostream& operator<<(ostream& out, const DrugProxy& proxy) {
-  //This will be needed in the future
-  return out;
+void DrugProxy::write (ostream& out) const {
+  out << _drugs.size() << endl;
+  list<Drug*>::const_iterator it;
+  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
+    out << **it;
+  }
 }
 
-istream& operator>>(istream& in, DrugProxy& proxy) {
-  //This will be needed in the future
-  return in;
+void DrugProxy::read (istream& in) {
+  int numDrugs;
+  in >> numDrugs;
+  for (int i=0; i<numDrugs; i++) {
+    Drug* drug = new Drug("", "", 0, 0);
+    in >> *drug;
+    _drugs.push_back(drug);
+  }
 }
 
 

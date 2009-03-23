@@ -18,14 +18,15 @@
  */
 #ifndef Hmod_human
 #define Hmod_human
-#include "drug.h"
 #include "global.h"
 #include "event.h"
-#include <list>
 #include "Infection.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
 #include "morbidityModel.h"
+#include "drug.h"
+
+#include <list>
 
 // Forward declaration
 class CaseManagementModel;
@@ -53,8 +54,15 @@ public:
   Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime);
   //@}
   
-  /// Destructor
-  ~Human();
+  /** Destructor
+   * 
+   * NOTE: this destructor does nothing to allow shallow copying to the
+   * population list. Human::destroy() does the real freeing and must be
+   * called explicitly. */
+  ~Human() {}
+  
+  /// The real destructor
+  void destroy();
   
   /// Checkpointing functions
   //@{
@@ -147,9 +155,6 @@ public:
   //! Returns the date of birth
   int getDateOfBirth() {return _dateOfBirth;};
   
-  /** Presumably this is the body mass? */
-  double getWeight(){ return _weight; };
-  
   double getTotalDensity() const {return _totalDensity;}
   
   double getCumulativeY() const {return _cumulativeY;}
@@ -169,15 +174,13 @@ public:
   //! Set a new caseManagement. Used if the changeHS intervention is called.
   void setCaseManagement(CaseManagementModel* caseManagement);
 
-  list<Drug*>* getDrugs();
-  
   /** Availability of host to mosquitoes (α_i). */
-  double entoAvailability ();
+  double entoAvailability () const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqSurvivalBiting ();
+  double probMosqSurvivalBiting () const;
   /** Probability of a mosquito succesfully finding a resting
    * place and resting (P_C_i * P_D_i). */
-  double probMosqSurvivalResting ();
+  double probMosqSurvivalResting () const;
   //@}
   
   /// Functions only used by oldWithinHostModel.cpp
@@ -248,8 +251,6 @@ private:
 
   MorbidityModel* _morbidityModel;
 
-  int _currentWHSlot;
-  double _weight;
   //!Total asexual blood stage density
   double _ylag[4];
   //!last SP Dose given
@@ -306,8 +307,9 @@ private:
   //! treatment seeking for heterogeneity
   double _BaselineAvailabilityToMosquitoes;
   Event _latestEvent;
-  list<Drug*> _drugs;
-  DrugProxy* _proxy;
+  
+  /// Encapsulates drug code for each human
+  DrugProxy _proxy;
   
   /// Rate/probabilities before interventions. See functions.
   double _entoAvailability;
@@ -335,10 +337,6 @@ private:
   //! Treats all infections in an individual
   void treatAllInfections();
   //@}
-
-  /*!  SP drug action applies to each infection depending on genotype and when
-    the individual had their last dose of SP */
-  void SPAction();
 
   //! Determines eligibility and gives IPTi SP or placebo doses 
   void setLastSPDose();
@@ -434,15 +432,4 @@ private:
   static double baseProbMosqSurvivalResting;
 };
 
-//Start DrugAction declarations
-extern Human * currentHuman;
-extern int currentWHSlot;
-/*
-  Current WH time slot
-  End DrugAction declarations
-*/
-void initDrugAction();
-
 #endif
-
-

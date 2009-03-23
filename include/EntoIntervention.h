@@ -42,14 +42,14 @@ public:
   virtual void read(istream& in);
   
   /** Multiplier for host's availability to mosquitos. */
-  virtual double availability() =0;
+  virtual double availability() const =0;
   
 protected:
   /** Gives a multiplier in the range [0,1] describing how
    * effective the intervention still is depending on its age.
    * 
    * Age is determined to be Simulation::simulationTime - dateOfUse. */
-  virtual double decay() =0;
+  virtual double decay() const =0;
   
   /** simulationTime - dateOfUse is the age of the intervention.
    * 
@@ -72,13 +72,13 @@ public:
   void write(ostream& out) const;
   void read(istream& in);
   
-  double availability();
+  double availability() const;
   
   /** Multiplies the chance of a mosquito biting the host. */
-  double probMosqBiting();
+  double probMosqBiting() const;
   
 protected:
-  double decay();
+  double decay() const;
   
   // Alternately, could store brand/tdateOfUseype.
   
@@ -106,13 +106,13 @@ public:
   /** Set some static values from XML. */
   static void initParameters();
   
-  double availability();
+  double availability() const;
   
   /** Multiplies the chance of a mosquito resting succesfully. */
-  double probMosqSurvivalResting();
+  double probMosqSurvivalResting() const;
   
 private:
-  double decay();
+  double decay() const;
   
   /** Decay constant (see decay()). */
   static double decayLambdaInv;

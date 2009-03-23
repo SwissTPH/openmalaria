@@ -97,12 +97,8 @@ void Human::initHumanParameters () {	// static
 
 // Testing Ctor
 Human::Human() {
-  _withinHostModel = new OldWithinHostModel(this);
+  _withinHostModel = new OldWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel();
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _drugs = list<Drug*>();
-    _proxy = new DrugProxy(this);
-  }
 }
 
 // Create new human
@@ -215,11 +211,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
       _treatmentSeekingFactor=1.8;
     }
   }  
-  if (Global::modelVersion & INCLUDES_PK_PD) { 
-    _drugs = list<Drug*>();
-    _proxy = new DrugProxy(this);
-  }
-  _withinHostModel = new OldWithinHostModel(this);
+  _withinHostModel = new OldWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel();
 }
 
@@ -227,11 +219,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
 Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime) 
   : _simulationTime(simulationTime), _caseManagement(caseManagement)
 {
-  if (Global::modelVersion & INCLUDES_PK_PD) { 
-    _drugs = list<Drug*>();
-    _proxy = new DrugProxy(this);
-  }
-  _withinHostModel = new OldWithinHostModel(this);
+  _withinHostModel = new OldWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel();
   // Reading human from file
   funit >> *this;
@@ -243,18 +231,13 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
   }
 }
 
-Human::~Human(){
+void Human::destroy() {
   if (_latestEvent.getTime() !=  missing_value){
     Simulation::gMainSummary->report(_latestEvent);
-  }  
+  }
   clearAllInfections();
   if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
-    list<Drug*>::const_iterator it;
-    for(it=_drugs.begin(); it!=_drugs.end(); it++) {
-      delete (*it);
-    }
-    _drugs.clear();
-    delete _proxy;
+    _proxy.destroy();
   }
   delete _withinHostModel;
   delete _morbidityModel;
@@ -284,14 +267,14 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
   _ylag[0]=_totalDensity;
   _cumulativeYlag = _cumulativeY;
 
-  _withinHostModel->calculateDensities();
+  _withinHostModel->calculateDensities(*this);
 }
 
 void Human::treatInfections(){
 
   if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
     treatAllInfections();
-    _proxy->decayDrugs();
+    _proxy.decayDrugs();
   }
 
 }
@@ -327,7 +310,7 @@ void Human::clearAllInfections(){
 void Human::treatAllInfections(){
   std::list<Infection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    (*i)->setDensity((*i)->getDensity()*exp(-_proxy->calculateDrugsFactor((*i))));
+    (*i)->setDensity((*i)->getDensity()*exp(-_proxy.calculateDrugsFactor((*i))));
   }
 }
 
@@ -369,7 +352,7 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   updateInfection(expectedInfectionRate,
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
-  _weight = 120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())];
+  _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())]);
   treatInfections();
 }
 
@@ -463,7 +446,7 @@ void Human::doCM(int entrypoint){
 }
 
 void Human::medicate(string drugName, double qty, int time) {
-  _proxy->medicate(drugName, qty, time);
+  _proxy.medicate(drugName, qty, time);
 }
 
 void Human::determineClinicalStatus(){ //TODO: this function should not do case management
@@ -631,11 +614,6 @@ void Human::summarize(){
   Simulation::gMainSummary->addToExpectedInfected(age, _pinfected);
   Simulation::gMainSummary->addToPyrogenicThreshold(age, _morbidityModel->getPyrogenThres());
   Simulation::gMainSummary->addToSumX(age, log(_morbidityModel->getPyrogenThres()+1.0));
-}
-
-void initDrugAction () {
-  //Part of this will be auto generated
-
 }
 
 
@@ -935,20 +913,16 @@ double Human::calculateSelectionCoefficient (Infection& inf) {
   return 1.0;
 }
 
-list<Drug*>* Human::getDrugs() {
-  return &_drugs;
-}
-
-double Human::entoAvailability () {
+double Human::entoAvailability () const {
   return _entoAvailability
       * entoInterventionITN.availability()
       * entoInterventionIRS.availability();
 }
-double Human::probMosqSurvivalBiting () {
+double Human::probMosqSurvivalBiting () const {
   return _probMosqSurvivalBiting
       * entoInterventionITN.probMosqBiting();
 }
-double Human::probMosqSurvivalResting () {
+double Human::probMosqSurvivalResting () const {
   return _probMosqSurvivalResting
       * entoInterventionIRS.probMosqSurvivalResting();
 }
@@ -998,12 +972,7 @@ ostream& operator<<(ostream& out, const Human& human){
     (*iter)->write (out);
      
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << *(human._proxy);
-    out << human._drugs.size() << endl;
-    list<Drug*>::const_iterator it;
-    for (it=human._drugs.begin(); it!=human._drugs.end(); it++) {
-      out << **it;
-    }
+    human._proxy.write (out);
   }
   return out;
 
@@ -1056,15 +1025,7 @@ istream& operator>>(istream& in, Human& human){
   }
 
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    int numDrugs;
-    in >> *(human._proxy);
-    in >> numDrugs;
-    for (int i=0; i<numDrugs; i++) {
-      Drug* drug = new Drug("", "", 0, 0);
-      in >> *drug;
-      human._drugs.push_back(drug);
-    }
-    
+    human._proxy.read (in);
   }
 
   return in;

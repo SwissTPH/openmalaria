@@ -95,7 +95,7 @@ double VectorControl::calculateEIR(int simulationTime, Human& host) {
 
 
 // Per 5-day step:
-void VectorControl::advancePeriod (int simulationTime) {
+void VectorControl::advancePeriod (const std::list<Human>& population, int simulationTime) {
   /* Largely equations correspond to Nakul Chitnis's model in
     "A mathematic model for the dynamics of malaria in
     mosquitoes feeding on a heterogeneous host population"
@@ -125,9 +125,11 @@ void VectorControl::advancePeriod (int simulationTime) {
     EIR = partialEIR * α_i * P_B_i
   */
   
-  
   // Per Global::interval (hosts don't update per day):
-  double totalAvailability = 0;// FIXME: =popSize * sum_host(host.entoAvailability);
+  double totalAvailability = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+    totalAvailability += h->entoAvailability();
+  
   
   // Summed per day:
   partialEIR = 0.0;
@@ -150,14 +152,19 @@ void VectorControl::advancePeriod (int simulationTime) {
     double P_Ai_base = (1.0 - P_A[t]) / leaveHostRate;
       // NOTE: already have kappa array - is same?
     
-    // NC's non-autonomous model provides two methods for calculating P_df;
-    // here we assume P_E is constant.
-    P_df[t] =0//FIXME: =sum_host (host.entoAvailability * host.probMosqSurvivalBiting * host.probMosqSurvivalResting)
-        * P_Ai_base * probMosqEggLaying;
-    P_dif[t] =0//FIXME: =sum_host (host.entoAvailability * host.probMosqSurvivalBiting * host.probMosqSurvivalResting * host.K_vi)
-        * P_Ai_base * probMosqEggLaying;
+    // NC's non-autonomous model provides two methods for calculating P_df and
+    // P_dif; here we assume that P_E is constant.
+    double sum = 0.0;
+    double sum_dif = 0.0;
+    for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+      double prod = h->entoAvailability() * h->probMosqSurvivalBiting() * h->probMosqSurvivalResting();
+      sum += prod;
+      sum_dif += prod;//FIXME: * h->K_vi();
+    }
+    P_df[t] = sum * P_Ai_base * probMosqEggLaying;
+    P_dif[t] = sum_dif * P_Ai_base * probMosqEggLaying;
     
-      
+    
     //FIXME: formulas need adjusting for NC's non-autonomous model
     N_v[t] = mosqEmergeRate[day%daysInYear]
         + P_A[t]  * N_v[t1]
@@ -166,20 +173,20 @@ void VectorControl::advancePeriod (int simulationTime) {
         + P_A[t]  * O_v[t1]
         + P_df[t] * O_v[ttau];
     
-    double S_sum = 0.0;	// Sums making S_v[t] in eqn. (3c)
+    sum = 0.0;	// Sums making S_v[t] in eqn. (3c)
     int k_p = EIPDuration/mosqRestDuration - 1;		// k_+
     for (int j = 0; j <= k_p; ++j) {
       int temp = EIPDuration-(j+1)*mosqRestDuration;
-      S_sum += gsl_sf_choose(temp+j, j)
+      sum += gsl_sf_choose(temp+j, j)
           * gsl_pow_int(P_A[t] , temp)
           * gsl_pow_int(P_df[t], j);
     }
     size_t ts = (t - EIPDuration) % N_v_length;
-    S_v[t] = P_dif[t] * S_sum * N_v[ts] - O_v[ts]
+    S_v[t] = P_dif[t] * sum * N_v[ts] - O_v[ts]
         + P_A[t]  * S_v[t1]
         + P_df[t] * S_v[ttau];	// + second sum:
     
-    S_sum = 0.0;
+    sum = 0.0;
     for (int l = 1; l < mosqRestDuration; ++l) {
       double S_subsum = 0.0;
       k_p = (EIPDuration+l)/mosqRestDuration - 2;	// k_l+
@@ -190,9 +197,9 @@ void VectorControl::advancePeriod (int simulationTime) {
             * gsl_pow_int(P_df[t], j);
       }
       ts = (t - EIPDuration - l) % N_v_length;
-      S_sum += S_subsum * (N_v[ts] - O_v[ts]);
+      sum += S_subsum * (N_v[ts] - O_v[ts]);
     }
-    S_v[t] += S_sum * P_df[t];
+    S_v[t] += sum * P_df[t];
     
     partialEIR += S_v[t] * P_Ai_base;
   }

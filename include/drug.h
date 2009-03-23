@@ -27,7 +27,7 @@
 #include <list>
 #include <map>
 #include <vector>
-#include "global.h"
+//#include "global.h"
 #include "proteome.h"
 
 using namespace std;
@@ -182,11 +182,15 @@ class DrugRegistry {
  *    3. Can decide as to sinergy among drugs
  */
 class DrugProxy {
-  Human* human;
+  list<Drug*> _drugs;
   DrugRegistry* registry;
+  double weight;	// human's weight
 
   public:
-  DrugProxy(Human* _human);
+  DrugProxy();
+  /// Destructor. NOTE: could it be a normal dtor?
+  void destroy();
+  
   //! Medicates an individual.
   /*! \param drugName - The drug abbreviation.
    *  \param qty      - the quantity (which units?).
@@ -198,8 +202,12 @@ class DrugProxy {
   double calculateDrugsFactor(Infection* _infection);
   void decayDrugs();
 
-  friend ostream& operator<<(ostream& out, const DrugProxy& proxy);
-  friend istream& operator>>(istream& in, DrugProxy& proxy);
+  void write (ostream& out) const;
+  void read (istream& in);
+  
+  void setWeight (double w) {
+    weight = w;
+  }
 };
 
 #endif
