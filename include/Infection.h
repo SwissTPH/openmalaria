@@ -49,6 +49,9 @@ public:
   virtual int getStartDate() =0;
   virtual int getDuration() =0;
   
+  /// Multiplies the density by x.
+  virtual void multiplyDensity(double x) =0;
+  //! Get the density of the infection
   virtual double getDensity() =0;
   virtual void setDensity(double density) =0;
   

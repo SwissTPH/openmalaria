@@ -289,7 +289,7 @@ void Human::clearOldInfections(){
     if (_simulationTime >= enddate) {
       delete *iter;
       iter=infections.erase(iter);
-      _MOI=_MOI-1;
+      _MOI--;
     }
     else{
       iter++;
@@ -300,7 +300,6 @@ void Human::clearOldInfections(){
 void Human::clearAllInfections(){
   std::list<Infection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    //std::cout<<"clear all: "<<_ID<<std::endl;
     delete *i;
   }
   infections.clear();
@@ -310,7 +309,7 @@ void Human::clearAllInfections(){
 void Human::treatAllInfections(){
   std::list<Infection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    (*i)->setDensity((*i)->getDensity()*exp(-_proxy.calculateDrugsFactor((*i))));
+    (*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
   }
 }
 
@@ -363,9 +362,9 @@ void Human::setCaseManagement(CaseManagementModel* caseManagement) {
 void Human::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
-    _cumulativeInfections=_cumulativeInfections+1;
+    _cumulativeInfections++;
     infections.push_back(new DescriptiveInfection(_lastSPDose, _simulationTime));
-    _MOI=_MOI+1;
+    _MOI++;
   }
 }
 

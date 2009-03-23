@@ -150,7 +150,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         }
 	calculateDensity(*i, ageyears);
         //(*i)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
-        (*i)->setDensity((double)(*i)->getDensity()*exp(-human.getInnateImmunity()));
+        (*i)->multiplyDensity(exp(-human.getInnateImmunity()));
 
         /*
           Possibly a better model version ensuring that the effect of variation in innate immunity
@@ -161,13 +161,13 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         }
         //Include here the effect of blood stage vaccination
         if (Vaccine::BSV.active) {
-          (*i)->setDensity((*i)->getDensity()*(1-human.getBSVEfficacy()));
+          (*i)->multiplyDensity(1-human.getBSVEfficacy());
           timeStepMaxDensity=(double)timeStepMaxDensity*(1-human.getBSVEfficacy());
         }
         // Include here the effect of attenuated infections by SP concentrations
         if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
           if ( IPTIntervention::IPT &&  (*i)->getSPattenuate() ==  1) {
-            (*i)->setDensity((*i)->getDensity()/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]);
+            (*i)->multiplyDensity(1.0/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]);
             timeStepMaxDensity=(double)timeStepMaxDensity/IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1];
             _SPattenuationt=(int)std::max(_SPattenuationt*1.0, ((*i)->getStartDate()+((*i)->getDuration()/Global::interval) * IPTIntervention::genotypeAtten[(*i)->getGenoTypeID() - 1]));
           }
@@ -181,7 +181,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       }
       human.setTotalDensity(human.getTotalDensity()+(*i)->getDensity());
       //Compute the proportion of parasites remaining after innate blood stage effect
-      if ( (*i)->getDensity() > Human::detectionlimit) {
+      if ((*i)->getDensity() > Human::detectionlimit) {
         human.setPatentInfections(human.getPatentInfections()+1);
       }
       if ( (*i)->getStartDate() == (Simulation::simulationTime-1)) {

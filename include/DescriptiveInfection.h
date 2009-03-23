@@ -84,16 +84,15 @@ class DescriptiveInfection : public Infection {
   */
   int getEndDate();
 
-  //! Get the density of the infection
+  void multiplyDensity(double x) { _density *= x; };
   double getDensity() { return _density; };
+  void setDensity(double density) { _density = density;};
 
   //! Get proteome
   ProteomeInstance* getProteome() const;
 
   bool getSPattenuate() { return _SPattenuate; };
   
-  void setDensity(double density) { _density = density;};
-
   int getGenoTypeID() { return _gType.ID; };
 
   //! Start date of the infection
