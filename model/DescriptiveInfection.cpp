@@ -37,10 +37,9 @@ double DescriptiveInfection::decayM;
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
-DescriptiveInfection::DescriptiveInfection() {
-}
-
 DescriptiveInfection::~DescriptiveInfection() {
+}
+void DescriptiveInfection::destroy() {
   //if (modelVersion & INCLUDES_PK_PD) {
   //  delete _proteome;
   //}
@@ -194,28 +193,6 @@ double DescriptiveInfection::determineWithinHostDensity(){
     return valdetermineWithinHostDensity;
 }
 
-double sampleFromLogNormal(double normp, double meanlog, double stdlog){
-    /*
-    
-    Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
-    
-    */
-
-    double zval;
-    double valsampleFromLogNormal;
-    zval=W_UGAUSS_PINV(normp);
-    /*
-    Why not zval=W_UGAUSS?
-    where normp is distributed uniformly over [0,1],
-    zval is distributed like a standard normal distribution
-    where normp has been transformed by raising to the power of 1/(T-1) 
-    zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
-    distr. function of a uniform gauss
-    */
-    valsampleFromLogNormal=exp(meanlog+stdlog*((float)zval));
-    return valsampleFromLogNormal;
-}
-
 int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
@@ -230,7 +207,7 @@ ProteomeInstance* DescriptiveInfection::getProteome() const {
   return _proteome;
 }
 
-void DescriptiveInfection::write (ostream& out) {
+void DescriptiveInfection::write (ostream& out) const {
   out << _duration << endl; 
   out << _startdate << endl; 
   out << _density << endl; 
@@ -242,7 +219,7 @@ void DescriptiveInfection::write (ostream& out) {
   out << boolalpha << _SPattenuate << endl; 
 }
 
-void DescriptiveInfection::read (istream& in) {
+DescriptiveInfection::DescriptiveInfection (istream& in) {
   int proteomeID;
   in >> _duration; 
   in >> _startdate; 

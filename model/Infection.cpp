@@ -22,3 +22,25 @@
 
 float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
+
+double sampleFromLogNormal(double normp, double meanlog, double stdlog){
+    /*
+    
+  Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
+    
+    */
+
+  double zval;
+  double valsampleFromLogNormal;
+  zval=W_UGAUSS_PINV(normp);
+    /*
+  Why not zval=W_UGAUSS?
+  where normp is distributed uniformly over [0,1],
+  zval is distributed like a standard normal distribution
+  where normp has been transformed by raising to the power of 1/(T-1) 
+  zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
+  distr. function of a uniform gauss
+    */
+  valsampleFromLogNormal=exp(meanlog+stdlog*((float)zval));
+  return valsampleFromLogNormal;
+}

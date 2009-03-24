@@ -26,11 +26,11 @@
 #include <iostream>
 #include "global.h"
 #include "withinHostModel.h"
+#include "DescriptiveInfection.h"
 
 using namespace std;
 
 class Human;
-class Infection;
 
 /*! Old Within Host Model class.
  */
@@ -69,7 +69,7 @@ private:
   the individual had their last dose of SP */
   void SPAction(Human&);
 
-  void calculateDensity(Infection *inf, double);
+  void calculateDensity(DescriptiveInfection& inf, double);
   
   void treatInfections();
   //! Treats all infections in an individual
@@ -93,7 +93,7 @@ private:
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
-  std::list<Infection*> infections;
+  std::list<DescriptiveInfection> infections;
 };
 
 #endif

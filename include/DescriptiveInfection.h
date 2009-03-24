@@ -53,17 +53,24 @@ class DescriptiveInfection : public Infection {
  //TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
   public:
 
-   DescriptiveInfection();
-  ~DescriptiveInfection();
-
   //! Constructor
   /*!
     \param lastSPdose Time interval of last SP Dose.
   */
   DescriptiveInfection(int lastSPdose, int simulationTime);
   
-  void write (ostream& out);
-  void read (istream& in);
+  /** Checkpoint-reading constructor */
+  DescriptiveInfection (istream& in);
+  
+  /** Destructor
+   * 
+   * NOTE: this destructor does nothing to allow shallow copying to the
+   * population list. destroy() does the real freeing and must be
+   * called explicitly. */
+  ~DescriptiveInfection();
+  void destroy();
+  
+  void write (ostream& out) const;
   
   //! Init constants common to all Phase A (AJTMH 75(2)) infections.
   /*!
@@ -84,7 +91,9 @@ class DescriptiveInfection : public Infection {
   */
   int getEndDate();
 
+  /// Multiplies the density by x.
   void multiplyDensity(double x) { _density *= x; };
+  //! Get the density of the infection
   double getDensity() { return _density; };
   void setDensity(double density) { _density = density;};
 

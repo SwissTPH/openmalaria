@@ -43,51 +43,8 @@ public:
   virtual ProteomeInstance* getProteome() const =0;
   //@}
   
-  // Used in oldWithinHostModel.cpp
-  //@{
-  //! Start date of the infection
-  virtual int getStartDate() =0;
-  virtual int getDuration() =0;
-  
-  /// Multiplies the density by x.
-  virtual void multiplyDensity(double x) =0;
-  //! Get the density of the infection
-  virtual double getDensity() =0;
-  virtual void setDensity(double density) =0;
-  
-  virtual double getCumulativeExposureJ() =0;
-  virtual void setCumulativeExposureJ(double exposure) =0;
-  
-  virtual bool getSPattenuate() =0;
-  
-  virtual int getGenoTypeID() =0;
-  
-  virtual double determineWithinHostDensity() =0;
-  
-  virtual double getAlpha_m() const =0;
-  virtual double getDecayM() const =0;
-  
-  virtual double getSigma0sq() const =0;
-  virtual double getXNuStar() const =0;
-  virtual double getMeanLogParasiteCount(int pos) const =0;
-  virtual float getCumulativeHstar() const =0;
-  virtual float getCumulativeYstar() const =0;
-  //@}
-  
-  // Used in human.cpp
-  //@{
-  //! Get the last timestep before the infection is cleared.
-  /*!
-  \return The interval before clearance.
-   */
-  virtual int getEndDate() =0;
-  
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
-  
-  virtual void write (ostream& out) =0;
-  virtual  void read (istream& in) =0;
-  //@}
 };
 
 #endif
