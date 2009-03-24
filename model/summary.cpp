@@ -364,18 +364,14 @@ void Summary::reportIPTDose (int ageGroup) {
 }
 
 int Summary::ageGroup(double age){
-
+    if (age < _lowerbound)
+      return _numOfAgeGroups;
+    
     int valageGroup=1;
-    if (age < _lowerbound) {
-      valageGroup=_numOfAgeGroups;
-    }
-    else {
-      while( age > _upperbound[valageGroup - 1]) {
-        valageGroup++;
-      }
+    while( age > _upperbound[valageGroup - 1]) {
+      valageGroup++;
     }
     return valageGroup;
-
 }
 
 void Summary::printHosts(ostream& out) {
