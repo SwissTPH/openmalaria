@@ -30,6 +30,10 @@ using namespace std;
 #include "population.h"
 #include "boincWrapper.h"
 
+#ifndef finite
+#define finite(x) _finite(x)
+#endif
+
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;
 gsl_multimin_fminimizer *s;
@@ -137,7 +141,7 @@ double W_LOGNORMAL(double mean, double std){
 }
 
 int W_POISSON(double lambda){
-   if (!_finite(lambda)){
+   if (!finite(lambda)){
     //This would lead to an inifinite loop in gsl_ran_poisson
      cerr << "lambda isInf" << endl;
      exit(-1);
