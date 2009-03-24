@@ -21,6 +21,9 @@
 #ifndef GSL_WRAPPER_H
 #define GSL_WRAPPER_H
 
+// Moved from infection.h
+double sampleFromLogNormal (double normp, double meanlog, double stdlog);
+
 double W_BETA(double a, double b);
 double W_GAUSS(double mean, double std);
 double w_minimize_calc_rss(double* par1, double* par2);

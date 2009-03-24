@@ -25,9 +25,6 @@
 #include "proteome.h"
 
 
-//TODO
-double sampleFromLogNormal (double normp, double meanlog, double stdlog);
-
 class Infection {
 public:
   // Used in drug.cpp
