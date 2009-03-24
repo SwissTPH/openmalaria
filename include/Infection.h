@@ -25,13 +25,6 @@
 #include "proteome.h"
 
 
-//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?
-const int maxDur=84;
-
-//The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
-const double maxDens=2000000;
-
-
 //TODO
 double sampleFromLogNormal (double normp, double meanlog, double stdlog);
 

@@ -19,6 +19,7 @@
 */
 
 #include "Infection.h"
+#include "GSLWrapper.h"
 
 float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
