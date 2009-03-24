@@ -124,6 +124,11 @@ private:
    * Length: N_v_length (longer than needed for S_v, but simplifyies code) */
   double *N_v, *O_v, *S_v;
   
+  /** Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
+   * Values are recalculated each step (not stored).
+   * Length: EIPDuration (θ_s). */
+  vector<double> fArray;
+  
   /** Per time-step partial calculation of EIR.
    *
    * See comment in advancePeriod() for details of how the EIR is calculated. */

@@ -49,8 +49,8 @@ VectorControl::VectorControl () {
   
   probMosqEggLaying=0;
   
-  if (EIPDuration < 1 || mosqRestDuration < 1) {
-    cerr << "Code expects EIPDuration and mosqRestDuration to be a positive number of days" << endl;
+  if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
+    cerr << "Code expects EIPDuration >= mosqRestDuration >= 1" << endl;
     throw 0;
   }
   
@@ -64,7 +64,10 @@ VectorControl::VectorControl () {
   O_v	= N_v + l;
   S_v	= O_v + l;
   
+  fArray.resize(EIPDuration);
+  
   //TODO: initialise arrays (run initial simulation for N_v_length-1 days?)
+  // Calculations are invalid before arrays are initialized!
 }
 VectorControl::~VectorControl () {
   delete[] P_A;
@@ -98,9 +101,10 @@ double VectorControl::calculateEIR(int simulationTime, Human& host) {
 void VectorControl::advancePeriod (const std::list<Human>& population, int simulationTime) {
   /* Largely equations correspond to Nakul Chitnis's model in
     "A mathematic model for the dynamics of malaria in
-    mosquitoes feeding on a heterogeneous host population"
-  section 2, 3.5-3.6, plus extensions to a non-autonomous case (where
-  emergence rate varies over the year).
+    mosquitoes feeding on a heterogeneous host population" [MMDM]
+  section 2, 3.5-3.6, plus extensions to a non-autonomous case from
+    "Nonautonomous Difference Equations for Malaria Dynamics
+                 in a Mosquito Population" [NDEMD]
   
   We calculate EIR over a 5-day Global::interval as:
     sum_{for t over days} σ_i[t] * s_v[t]
@@ -140,10 +144,12 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
   int endDay = (simulationTime+1) * Global::interval;
   for (int day = simulationTime * Global::interval; day < endDay; ++day) {
     // Indecies for today, yesterday and mosqRestDuration days back:
+    // WARNING: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     size_t t    = day % N_v_length;
-    size_t t1   = (t - 1) % N_v_length;
-    size_t ttau = (t - mosqRestDuration) % N_v_length;
+    size_t t1   = (day - 1) % N_v_length;
+    size_t ttau = (day - mosqRestDuration) % N_v_length;
     
+    //BEGIN P_A, P_Ai, P_df, P_dif
     double leaveHostRate = totalAvailability + mosqSeekingDeathRate;
   
     // Probability of a mosquito not finding a host this day:
@@ -163,45 +169,57 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
     }
     P_df[t] = sum * P_Ai_base * probMosqEggLaying;
     P_dif[t] = sum_dif * P_Ai_base * probMosqEggLaying;
+    //END P_A, P_Ai, P_df, P_dif
     
     
-    //FIXME: formulas need adjusting for NC's non-autonomous model
     N_v[t] = mosqEmergeRate[day%daysInYear]
-        + P_A[t]  * N_v[t1]
-        + P_df[t] * N_v[ttau];
-    O_v[t] = P_dif[t] * (N_v[ttau] - O_v[ttau])
-        + P_A[t]  * O_v[t1]
-        + P_df[t] * O_v[ttau];
+        + P_A[t1]  * N_v[t1]
+        + P_df[ttau] * N_v[ttau];
+    O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
+        + P_A[t1]  * O_v[t1]
+        + P_df[ttau] * O_v[ttau];
     
-    sum = 0.0;	// Sums making S_v[t] in eqn. (3c)
-    int k_p = EIPDuration/mosqRestDuration - 1;		// k_+
-    for (int j = 0; j <= k_p; ++j) {
-      int temp = EIPDuration-(j+1)*mosqRestDuration;
-      sum += gsl_sf_choose(temp+j, j)
-          * gsl_pow_int(P_A[t] , temp)
-          * gsl_pow_int(P_df[t], j);
-    }
-    size_t ts = (t - EIPDuration) % N_v_length;
-    S_v[t] = P_dif[t] * sum * N_v[ts] - O_v[ts]
-        + P_A[t]  * S_v[t1]
-        + P_df[t] * S_v[ttau];	// + second sum:
+    
+    //BEGIN S_v
+    // Set up array with n in 1..θ_s−1 for f_τ(day-n) (NDEMD eq. 1.7)
+    // Note: calculates all values, even if they aren't eventually used,
+    // but they are all used in calculating the next value.
+    //TODO (eqn in paper wrong?)
     
     sum = 0.0;
+    size_t ts = day - EIPDuration;
     for (int l = 1; l < mosqRestDuration; ++l) {
-      double S_subsum = 0.0;
-      k_p = (EIPDuration+l)/mosqRestDuration - 2;	// k_l+
-      for (int j = 0; j <= k_p; ++j) {
-        int temp = EIPDuration+l-(j+2)*mosqRestDuration;
-        S_subsum += gsl_sf_choose(temp+j, j)
-            * gsl_pow_int(P_A[t] , temp)
-            * gsl_pow_int(P_df[t], j);
-      }
-      ts = (t - EIPDuration - l) % N_v_length;
-      sum += S_subsum * (N_v[ts] - O_v[ts]);
+      size_t tsl = (ts - l) % N_v_length;	// index day - theta_s - l
+      sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * fArray[EIPDuration+l-mosqRestDuration];
     }
-    S_v[t] += sum * P_df[t];
+    
+    
+    // Set up array with n in 1..θ_s−τ for f(day-n) (NDEMD eq. 1.6)
+    // Note: calculates all values (as for f_τ).
+    fArray[0] = 1.0;
+    for (int n = 1; n <= mosqRestDuration; ++n) {
+      fArray[n] =
+          fArray[n-1] * P_A[(day-n)%N_v_length];
+    }
+    fArray[mosqRestDuration] += P_df[ttau];
+    
+    ts = EIPDuration-mosqRestDuration;	// reuse index
+    for (size_t n = mosqRestDuration+1; n <= ts; ++n) {
+      size_t tn = (day-n)%N_v_length;
+      fArray[n] =
+          P_df[tn] * fArray[n - mosqRestDuration]
+          + P_A[tn] * fArray[n-1];
+    }
+    
+    
+    ts = (day - EIPDuration) % N_v_length;	// index day - theta_s
+    S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
+        + sum
+        + P_A[t1]*S_v[t1]
+        + P_df[ttau]*S_v[ttau];
     
     partialEIR += S_v[t] * P_Ai_base;
+    //END S_v
   }
 }
 

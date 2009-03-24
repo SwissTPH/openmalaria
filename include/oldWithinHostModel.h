@@ -39,9 +39,6 @@ public:
   OldWithinHostModel();
   ~OldWithinHostModel();
   
-  friend ostream& operator<<(ostream& out, const WithinHostModel &model);
-  friend istream& operator>>(istream& in, WithinHostModel &model);
-
 
   virtual void update(double age);
   
