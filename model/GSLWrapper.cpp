@@ -137,7 +137,7 @@ double W_LOGNORMAL(double mean, double std){
 }
 
 int W_POISSON(double lambda){
-   if (!finite(lambda)){
+   if (!_finite(lambda)){
     //This would lead to an inifinite loop in gsl_ran_poisson
      cerr << "lambda isInf" << endl;
      exit(-1);

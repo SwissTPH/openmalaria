@@ -46,7 +46,7 @@
 				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\CodeSynthesis XSD 3.2\xerces-c-3.0.1\src&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="0"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=""
 				AssemblerListingLocation=".\Debug/"
@@ -229,6 +229,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\boincWrapper.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\caseManagement.h"
 				>
 			</File>
@@ -246,6 +250,10 @@
 			</File>
 			<File
 				RelativePath=".\include\empiricalWithinHostModel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\EntoIntervention.h"
 				>
 			</File>
 			<File
@@ -372,6 +380,10 @@
 		<Filter
 			Name="model"
 			>
+			<File
+				RelativePath=".\model\boincWrapper.cpp"
+				>
+			</File>
 			<File
 				RelativePath=".\model\caseManagement.cpp"
 				>
