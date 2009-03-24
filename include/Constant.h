@@ -272,4 +272,10 @@ const double BaselineAvailabilityMean= 1.0;
  * .xml */
 const double RelativeRiskNonMalariaFever= 1.0;
 
+  //NOTE: relocated to avoid circular dependency. Age-group stuff should be central..
+  /* nwtgrps is the number of age groups for which expected weights are read in
+  for use in the age adjustment of the EIR.
+  It is used both by Human and TransmissionModel. */
+  static const int nwtgrps= 27; 
+
 #endif

@@ -24,7 +24,6 @@
 #include <math.h> 
 #include "global.h" 
 #include <gsl/gsl_vector.h> 
-#include "Infection.h" 
 #include "intervention.h" 
 #include <iostream>
 #include "inputData.h"
@@ -32,9 +31,9 @@
 #include "vectorControl.h"
 
 //static (class) variables
-const double TransmissionModel::agemin[Human::nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
-const double TransmissionModel::agemax[Human::nwtgrps] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
-const double TransmissionModel::bsa_prop[Human::nwtgrps] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+const double TransmissionModel::agemin[nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
+const double TransmissionModel::agemax[nwtgrps] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
+const double TransmissionModel::bsa_prop[nwtgrps] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   if (Global::modelVersion & VECTOR_CONTROL)

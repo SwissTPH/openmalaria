@@ -171,15 +171,15 @@ protected:
 
   // NOTE: perhaps all these age-specific constants should be moved to Human. It depends which part of the simulation each class is meant to simulate...
   //! average number of bites for each age as a proportion of the maximum
-  double ageSpecificRelativeAvailability[Human::nwtgrps];
+  double ageSpecificRelativeAvailability[nwtgrps];
 
   //! Cutpoints of the age categories (minima) used for storing relative
   //! weights? surface areas?
-  static const double agemin[Human::nwtgrps]; 
+  static const double agemin[nwtgrps]; 
 
   //! Cutpoints of the age categories (maxima) used for storing relative
   //! weights? surface areas?
-  static const double agemax[Human::nwtgrps];  
+  static const double agemax[nwtgrps];  
 
   //! Proportionate body surface area
  /* 
@@ -188,7 +188,7 @@ protected:
   Mosteller RD: Simplified Calculation of Body Surface Area. N Engl J Med 1987 Oct 22;317(17):1098 (letter) 
   These values are retained here should they be required for future comparisons 
  */ 
-  static const double bsa_prop[Human::nwtgrps]; 
+  static const double bsa_prop[nwtgrps]; 
   
   char fnametestentopar[30];
 };

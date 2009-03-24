@@ -35,30 +35,59 @@ class Infection;
 /*! Old Within Host Model class.
  */
 class OldWithinHostModel : public WithinHostModel {
-  private:
+public:
+  OldWithinHostModel();
+  ~OldWithinHostModel();
+  
+  friend ostream& operator<<(ostream& out, const WithinHostModel &model);
+  friend istream& operator>>(istream& in, WithinHostModel &model);
+
+
+  virtual void update(double age);
+  
+  virtual void summarize(double age);
+  
+  //! Create a new infection requires that the human is allocated and current
+  virtual void newInfection(int);
+
+  /*!  Clears all infections which have expired (their startdate+duration is less
+  than the current time). */
+  virtual void clearOldInfections();
+
+  //! Clears all infections in an individual
+  virtual void clearAllInfections();
+  
+  void medicate(string drugName, double qty, int time);
+
+  void calculateDensities(Human&);
+  
+  void write(ostream& out) const;
+  void read(istream& in);
+
+private:
+  /*!  SP drug action applies to each infection depending on genotype and when
+  the individual had their last dose of SP */
+  void SPAction(Human&);
+
+  void calculateDensity(Infection *inf, double);
+  
+  void treatInfections();
+  //! Treats all infections in an individual
+  void treatAllInfections();
+  
   //! time at which attenuated infection 'would' end if SP present
   int _SPattenuationt;
   double cumulativeY;
   double cumulativeh;
   double timeStepMaxDensity;
-  void write(ostream& out) const;
-  void read(istream& in);
-
-  /*!  SP drug action applies to each infection depending on genotype and when
-    the individual had their last dose of SP */
-  void SPAction(Human&);
-
-  void calculateDensity(Infection *inf, double);
-
-  public:
-  OldWithinHostModel();
-
-  friend ostream& operator<<(ostream& out, const WithinHostModel &model);
-  friend istream& operator>>(istream& in, WithinHostModel &model);
-
-
-  void calculateDensities(Human&);
-
+  
+  //!multiplicity of infection
+  int _MOI;
+  //!Number of infections with densities above the limit of detection
+  int patentInfections;
+  
+  /// Encapsulates drug code for each human
+  DrugProxy _proxy;
 };
 
 #endif

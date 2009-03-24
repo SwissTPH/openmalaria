@@ -57,8 +57,6 @@ double Human::baseEntoAvailability;
 double Human::baseProbMosqSurvivalBiting;
 double Human::baseProbMosqSurvivalResting;
 
-const double Human::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
   MorbidityModel::initModels();
@@ -109,7 +107,6 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   _BSVEfficacy=0.0;
   _cumulativeEIRa=0.0;
   _cumulativeh=0.0;
-  _cumulativeInfections=0;
   _cumulativeY=0.0;
   _cumulativeYlag=0.0;
   _dateOfBirth=dateOfBirth;
@@ -125,8 +122,6 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   _lastVaccineDose=0;
   _latestRegimen=0;
   _tLastTreatment=missing_value;
-  _MOI=0;
-  _patentinfections=0;
   _PEVEfficacy=0.0;
   _pinfected=0.0;
   _ptransmit=0.0;
@@ -223,40 +218,22 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
   // Reading human from file
   funit >> *this;
   _latestEvent.setCaseManagement(caseManagement);
-
-  if ( _MOI <  0) {
-    cout << "E MOI" << endl;
-    exit(-3);
-  }
 }
 
 void Human::destroy() {
   if (_latestEvent.getTime() !=  missing_value){
     Simulation::gMainSummary->report(_latestEvent);
   }
-  clearAllInfections();
-  if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
-    _proxy.destroy();
-  }
+  _withinHostModel->clearAllInfections();
   delete _withinHostModel;
   delete _morbidityModel;
 }
 
-void Human::readFromFile(fstream& funit){
-
-  funit >> *this;
-
-  if ( _MOI <  0) {
-    cout << "E MOI" << endl;
-    exit(-3);
-  }
-
-}
 
 void Human::updateInfection(double expectedInfectionRate, double expectedNumberOfInfections){
 
   introduceInfections(expectedInfectionRate, expectedNumberOfInfections); 
-  clearOldInfections();
+  _withinHostModel->clearOldInfections();
 
   if ((_simulationTime*Global::interval) % 5 ==  0) {
     for (int i=1;i<=3; i++) {
@@ -267,49 +244,6 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
   _cumulativeYlag = _cumulativeY;
 
   _withinHostModel->calculateDensities(*this);
-}
-
-void Human::treatInfections(){
-
-  if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
-    treatAllInfections();
-    _proxy.decayDrugs();
-  }
-
-}
-
-void Human::clearOldInfections(){
-
-  int enddate;
-  std::list<Infection*>::iterator iter=infections.begin();
-  while(iter != infections.end()){
-    enddate=(*iter)->getEndDate();
-    //enddate=(*iter)->iData.startdate+(*iter)->iData.duration/Global::interval;
-    if (_simulationTime >= enddate) {
-      delete *iter;
-      iter=infections.erase(iter);
-      _MOI--;
-    }
-    else{
-      iter++;
-    }
-  }
-}
-
-void Human::clearAllInfections(){
-  std::list<Infection*>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    delete *i;
-  }
-  infections.clear();
-  _MOI=0;
-}
-
-void Human::treatAllInfections(){
-  std::list<Infection*>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    (*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
-  }
 }
 
 void Human::introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections){
@@ -330,7 +264,7 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
     int Ninf = W_POISSON(expectedNumberOfInfections);
     if (Ninf > 0) {
       for (int i=1;i<=Ninf; i++) {
-        newInfection();
+        _withinHostModel->newInfection(_lastSPDose);
       }
     }
   }
@@ -350,21 +284,11 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   updateInfection(expectedInfectionRate,
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
-  _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(getAgeInYears())]);
-  treatInfections();
+  _withinHostModel->update(getAgeInYears());
 }
 
 void Human::setCaseManagement(CaseManagementModel* caseManagement) {
   _caseManagement=caseManagement;
-}
-
-void Human::newInfection(){
-  //std::cout<<"MOI "<<_MOI<<std::endl;
-  if (_MOI <=  20) {
-    _cumulativeInfections++;
-    infections.push_back(new DescriptiveInfection(_lastSPDose, _simulationTime));
-    _MOI++;
-  }
 }
 
 void Human::updateImmuneStatus(){
@@ -439,12 +363,8 @@ void Human::doCM(int entrypoint){
     double qty=medicates[medicateID].getQty();
     int time=medicates[medicateID].getTime();
     string name=medicates[medicateID].getName();
-    medicate(name,qty,time);
+    _withinHostModel->medicate(name,qty,time);
   }
-}
-
-void Human::medicate(string drugName, double qty, int time) {
-  _proxy.medicate(drugName, qty, time);
 }
 
 void Human::determineClinicalStatus(){ //TODO: this function should not do case management
@@ -464,20 +384,20 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
     if ( drugEffect) {
       if (!IPTIntervention::IPT) {
         if (!(Global::modelVersion & INCLUDES_PK_PD)) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
         }
       }
       // TODO: maybe all this IPT stuff should be put in a different module
       if (IPTIntervention::IPT) {
         if ( _latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
         }
         else if(_simulationTime-_lastIptiOrPlacebo <=  fortnight) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
           // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
         }
         else if(_simulationTime-_lastSPDose <=  fortnight) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
           /*
             second line used if fever within 14 days of SP dose (ipti or treatment)
             TODO: if this code is to survive, then the iptiEffect values should be 
@@ -486,18 +406,18 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
         }
 # define iptiEffect IPTIntervention::iptiEffect
         else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
           _lastSPDose=_simulationTime+1;
         }
         else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
         }
         else if(iptiEffect >=  14 && iptiEffect < 30) {
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
         }
         else {
           _lastSPDose=_simulationTime+1;
-          clearAllInfections();
+          _withinHostModel->clearAllInfections();
           // SPAction will first act at the beginning of the next Global::interval
         }
       }
@@ -599,12 +519,7 @@ void Human::summarize(){
     return ;
   }
   Simulation::gMainSummary->addToHost(age,1);
-  if ( _MOI >  0) {
-    Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, _MOI);
-    Simulation::gMainSummary->addToTotalPatentInfections(age, _patentinfections);
-
-  }
+  _withinHostModel->summarize(age);
   if ( _totalDensity >  detectionlimit) {
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
@@ -888,10 +803,6 @@ bool Human::defineEvent(){
 }
 
 
-double Human::calculateSelectionCoefficient (Infection& inf) {
-  return 1.0;
-}
-
 double Human::entoAvailability () const {
   return _entoAvailability
       * entoInterventionITN.availability()
@@ -908,15 +819,12 @@ double Human::probMosqSurvivalResting () const {
 
 
 ostream& operator<<(ostream& out, const Human& human){
-  out << human._cumulativeInfections << endl; 
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 
   out << human._lastVaccineDose << endl;
   out << human._latestRegimen << endl; 
   out << human._tLastTreatment << endl; 
-  out << human._MOI << endl; 
-  out << human._patentinfections << endl; 
   out << human._BSVEfficacy << endl; 
   out << human._cumulativeYlag << endl; 
   out << human._cumulativeEIRa << endl; 
@@ -938,34 +846,24 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._treatmentSeekingFactor << endl; 
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._latestEvent;   
-  out << *human._withinHostModel;
+  human._withinHostModel->write(out);
   human._morbidityModel->write(out);
   out << human._entoAvailability << endl;
   out << human._probMosqSurvivalBiting << endl;
   out << human._probMosqSurvivalResting << endl;
   out << human.entoInterventionITN;
   out << human.entoInterventionIRS;
-
-  for(std::list<Infection*>::const_iterator iter=human.infections.begin(); iter != human.infections.end(); iter++)
-    (*iter)->write (out);
-     
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    human._proxy.write (out);
-  }
   return out;
 
 }
 
 istream& operator>>(istream& in, Human& human){
-  in >> human._cumulativeInfections; 
   in >> human._dateOfBirth; 
   in >> human._doomed; 
   in >> human._ID; 
   in >> human._lastVaccineDose; 
   in >> human._latestRegimen; 
   in >> human._tLastTreatment; 
-  in >> human._MOI; 
-  in >> human._patentinfections; 
   in >> human._BSVEfficacy; 
   in >> human._cumulativeYlag; 
   in >> human._cumulativeEIRa; 
@@ -987,23 +885,13 @@ istream& operator>>(istream& in, Human& human){
   in >> human._treatmentSeekingFactor; 
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._latestEvent;
-  in >> *(human._withinHostModel);
+  human._withinHostModel->read(in);
   human._morbidityModel->read(in);
   in >> human._entoAvailability;
   in >> human._probMosqSurvivalBiting;
   in >> human._probMosqSurvivalResting;
   in >> human.entoInterventionITN;
   in >> human.entoInterventionIRS;
-
-  for(int i=0;i<human._MOI;++i) {
-    Infection* infection = new DescriptiveInfection();
-    infection->read(in);
-    human.infections.push_back(infection);
-  }
-
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    human._proxy.read (in);
-  }
 
   return in;
 }

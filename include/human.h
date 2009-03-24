@@ -20,13 +20,10 @@
 #define Hmod_human
 #include "global.h"
 #include "event.h"
-#include "Infection.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
 #include "morbidityModel.h"
 #include "drug.h"
-
-#include <list>
 
 // Forward declaration
 class CaseManagementModel;
@@ -68,10 +65,6 @@ public:
   //@{
   friend ostream& operator<<(ostream& out, const Human& human);
   friend istream& operator>>(istream& in, Human& human);
-
-  /** Reads out from a file the state data of the current human.
-   * \param funit io unit number */
-  void readFromFile(fstream& funit);
   //@}
   
   /// Functions not called from within Human but calling functions in Human
@@ -88,11 +81,6 @@ public:
   void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
   //@}
   
-  /// treatInfections related functions
-  //@{
-  void treatInfections();
-  //@}
-  
   /// updateImmuneStatus related functions
   //@{
   /*! Until now, this only includes decay of immunity against
@@ -103,12 +91,6 @@ public:
   /// determineClinicalStatus related functions
   //@{
   void determineClinicalStatus();
-  
-  //! Clears all infections in an individual
-  void clearAllInfections();
-  
-  //! docu 
-  void medicate(string drugName, double qty, int time);
   //@}
   
   /// updateInterventionStatus related functions
@@ -163,9 +145,6 @@ public:
   
   void setSPDose(int dose) {_lastSPDose=dose;};
 
-  //! Returns Cumulative Infections
-  int getCumulativeInfections() {return _cumulativeInfections;};
-
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
 
   //! Set doomed
@@ -199,15 +178,7 @@ public:
   
   double getInnateImmunity() const {return _innateImmunity;}
   
-  int getPatentInfections() const {return _patentinfections;}
-  void setPatentInfections(int patentinfections) {_patentinfections=patentinfections;}
-  
   double getBSVEfficacy() {return _BSVEfficacy;}
-  
-  int getMOI() const {return _MOI;}
-  void setMOI(int MOI) {_MOI=MOI;}
-  
-  std::list<Infection*>* getInfections() { return &infections;}
   
   int getLastSPDose() const {return _lastSPDose;};
   
@@ -215,6 +186,13 @@ public:
     mosquito */
   double infectiousness();
 
+  //@}
+  
+  /// For direct interactions with within host model
+  ///TODO: possibly functionality of functions using them should be moved to Human?
+  //@{
+  int getCumulativeInfections() {return _withinHostModel->getCumulativeInfections();}
+  void clearAllInfections() {_withinHostModel->clearAllInfections();}
   //@}
   
   /// static public
@@ -231,11 +209,6 @@ public:
   /* Shape constant of (Gamma) distribution of availability
   real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
   static double BaselineAvailabilityShapeParam;
-  
-  /* nwtgrps is the number of age groups for which expected weights are read in
-  for use in the age adjustment of the EIR.
-  It is used both by Human and TransmissionModel. */
-  static const int nwtgrps= 27; 
   //@}
 
 private:
@@ -247,7 +220,6 @@ private:
   int _simulationTime;
   
   CaseManagementModel* _caseManagement;
-  std::list<Infection*> infections;
 
   MorbidityModel* _morbidityModel;
 
@@ -257,8 +229,6 @@ private:
   int _lastSPDose;
   //!last IPTi or placebo dose given 
   int _lastIptiOrPlacebo;
-  //!Cumulative number of infections since birth
-  int _cumulativeInfections;
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
   //!Indicates that individual will die from indirect mortality
@@ -271,12 +241,8 @@ private:
   int _latestRegimen;
   //!time of the last treatment
   int _tLastTreatment;
-  //!multiplicity of infection
-  int _MOI;
   //!Total asexual blood stage density
   double _totalDensity;		// possibly move to WithinHostModel
-  //!Number of infections with densities above the limit of detection
-  int _patentinfections;	//TODO: move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;
   //!cumulativeY from previous timestep
@@ -306,9 +272,6 @@ private:
   double _BaselineAvailabilityToMosquitoes;
   Event _latestEvent;
   
-  /// Encapsulates drug code for each human
-  DrugProxy _proxy;
-  
   /// Rate/probabilities before interventions. See functions.
   double _entoAvailability;
   double _probMosqSurvivalBiting;
@@ -320,22 +283,6 @@ private:
   EntoInterventionIRS entoInterventionIRS;
   //@}
   
-  /// updateInfection related functions
-  //@{
-  //! Create a new infection requires that the human is allocated and current
-  void newInfection();
-
-  /*!  Clears all infections which have expired (their startdate+duration is less
-      than the current time). */
-  void clearOldInfections();
-  //@}
-  
-  /// treatInfections related functions
-  //@{
-  //! Treats all infections in an individual
-  void treatAllInfections();
-  //@}
-
   //! Determines eligibility and gives IPTi SP or placebo doses 
   void setLastSPDose();
 
@@ -369,9 +316,6 @@ private:
 
   //! docu
   double computeExponentialDecay(double c, int hl, int t);
-
-  //! docu
-  double calculateSelectionCoefficient(Infection& inf);
 
   void clearInfection(Infection *iCurrent);
 
@@ -408,14 +352,6 @@ private:
   This variable decays the effectors cumulativeH and cumulativeY exponentially.
 */
   static double immEffectorRemain;
-  
-  //! Relative weights by age group
-  /** Relative weights, based on data in InputTables\wt_bites.csv 
-  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
-  thesis). The original source was anthropometric studies by Inez Azevedo Reads
-  in weights by age group. The weights are expressed as proportions of 0.5*those
-  in the reference age group. */
-  static const double wtprop[nwtgrps];
   
   static double baseEntoAvailability;
   static double baseProbMosqSurvivalBiting;
