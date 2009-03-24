@@ -88,6 +88,12 @@ private:
   
   /// Encapsulates drug code for each human
   DrugProxy _proxy;
+  
+  /** The list of all infections this human has.
+   * 
+   * Since infection models and within host models are very much intertwined,
+   * the idea is that each WithinHostModel has its own list of infections. */
+  std::list<Infection*> infections;
 };
 
 #endif

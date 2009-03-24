@@ -61,9 +61,6 @@ public:
   //! Returns Cumulative Infections
   int getCumulativeInfections() {return _cumulativeInfections;};
   
-  //FIXME: as an interim step, this is public. It should be in oldWithinHostModel.
-  std::list<Infection*> infections;
-  
   virtual void write(ostream& out) const =0;
   virtual void read(istream& in) =0;
   
