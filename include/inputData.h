@@ -34,7 +34,7 @@ class Anopheles;
 Do not wait to have a policy saying you were the error is. In the best case, the function
 will crash and you will be able to use the debugger to know where the error is.
 */
-bool createDocument(const char *);
+bool createDocument(std::string);
 
 /**
 * Some elements in memory have been created. This function deletes the object in memory

@@ -17,13 +17,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+// Header for shared memory struct between model and graphics.
+// This file should ONLY be included by boincWrapper.cpp and [graphics code].
 
 #ifndef Hmod_ShmStruct
 #define Hmod_ShmStruct
 
 #include "boinc_bridge.h"
+#include "boincWrapper.h"
 
-#define KappaArraySize 12
 struct UC_SHMEM {
 	double update_time;
 	double fraction_done;
@@ -31,7 +33,5 @@ struct UC_SHMEM {
 	BOINC_STATUS status;
 	double KappaArray[KappaArraySize];
 };
-
-void add_kappa(double *kappa);
 
 #endif

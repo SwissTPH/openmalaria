@@ -23,17 +23,17 @@
 #include "GSLWrapper.h"
 #include "timer.h"
 #include "inputData.h"
-#include "ShmStruct.h"
 #include "human.h"
 #include "simulation.h"
 #include "caseManagement.h"
 #include "intervention.h"
 #include "transmissionModel.h"
 #include "summary.h"
+#include "boincWrapper.h"
 #include <math.h>
-#include "ShmStruct.h"
 
 using namespace std;
+
 
 double Population::ageGroupBounds[ngroups+1];
 double Population::ageGroupPercent[ngroups];
@@ -346,7 +346,7 @@ void Population::update1(){
     for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++) {
       kappaByAge[i] /= nByAge[ia];
     }
-    add_kappa(kappaByAge);
+    SharedGraphics::copyKappa(kappaByAge);
   }
   int nbirths = Nsize - survivsSoFar;
   for (int i=0;i<nbirths; i++) {

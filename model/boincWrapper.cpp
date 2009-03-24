@@ -22,6 +22,9 @@
 
 #include "boincWrapper.h"
 #include "boinc_bridge.h"
+#include "ShmStruct.h"
+
+#include <iostream>
 
 int boincWrapper_fraction_done(double progress) {
   return boinc_fraction_done (progress);
@@ -44,4 +47,67 @@ int boincWrapper_resolve_filename_s(const char* name, std::string& outName) {
 
 int boincWrapper_finish(int status) {
   return boinc_finish (status);
+}
+
+namespace BoincWrapper {
+  void init () {
+    boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
+    int err = boinc_init();
+    if (err) {
+      cerr << "APP. boinc_init() failed with code: "<<err<<endl;
+      exit (err);
+    }
+    cout << "boinc initialized" << endl;
+    
+    SharedGraphics::init();
+  }
+  void finish(int err = 0) {
+    boinc_finish(err);	// doesn't return
+  }
+  
+  string resolveFile (const char* inName) {
+    string ret;
+    int err = boinc_resolve_filename_s(inName,ret);
+    if (err) {
+      cerr << "APP. boinc_resolve_filename failed with code: "<<err<<endl;
+      finish(err);
+    }
+    return ret;
+  }
+}
+
+namespace SharedGraphics {
+#if (defined(_GRAPHICS_6)&&defined(_BOINC))
+  UC_SHMEM* shmem;
+  void update_shmem() {
+    shmem->fraction_done = boinc_get_fraction_done();
+    shmem->cpu_time = boinc_worker_thread_cpu_time();
+    shmem->update_time = dtime();
+    boinc_get_status(&shmem->status);
+  }
+  
+  void init() {
+    // create shared mem segment for graphics, and arrange to update it.
+    //"malariacontrol" is a hard coded shared mem key, could be better
+    shmem = (UC_SHMEM*)boinc_graphics_make_shmem("malariacontrol", sizeof(UC_SHMEM));
+    if (!shmem) {
+      cerr << "failed to create graphics shared mem segment (no graphics possible)" << endl;
+      return;
+    }
+    cerr << "graphics shared mem segment created" << endl;
+    
+    update_shmem();
+    boinc_register_timer_callback(update_shmem);
+  }
+  
+  void copyKappa(double *kappa){
+    if (!shmem) return;
+    memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
+  }
+
+#else
+  void init() {}
+  
+  void copyKappa(double *kappa){}
+#endif
 }

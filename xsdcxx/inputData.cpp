@@ -77,7 +77,7 @@ void initTimedInterventions() {
  * @brief Reads the document in the xmlFile
  * 
  * @returns true if parsing was successful */
-bool createDocument(const char * lXmlFile) {
+bool createDocument(std::string lXmlFile) {
   //Parses the document
   try {
     scenario = (parseScenario (lXmlFile)).release();

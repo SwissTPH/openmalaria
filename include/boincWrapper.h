@@ -28,6 +28,7 @@
 #define Hmod_boincWrapper
 
 #include <string>
+using namespace std;
 
 int boincWrapper_fraction_done(double progress);
 
@@ -39,5 +40,26 @@ int boincWrapper_resolve_filename(const char* name, char* outName, int len);
 int boincWrapper_resolve_filename_s(const char* name, std::string& outName);
 
 int boincWrapper_finish(int status);
+
+/// Wrapper around BOINC functions
+namespace BoincWrapper {
+  /// Initializes BOINC
+  void init ();
+  /// Cleans up BOINC and exits
+  void finish (int err);
+  
+  /// Calls boinc_resolve_filename_s with inName, returning the result.
+  string resolveFile (const char* inName);
+}
+
+/// Memory shared with graphics app:
+namespace SharedGraphics {
+  /// Creates shared memory and sets up updates.
+  void init();
+  
+  #define KappaArraySize 12
+  /// Function to set kappa in shared memory:
+  void copyKappa(double *kappa);
+}
 
 #endif
