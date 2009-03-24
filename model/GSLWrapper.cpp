@@ -30,7 +30,7 @@ using namespace std;
 #include "population.h"
 #include "boincWrapper.h"
 
-#ifndef finite
+#ifdef _WIN32
 #define finite(x) _finite(x)
 #endif
 
