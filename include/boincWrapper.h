@@ -30,17 +30,6 @@
 #include <string>
 using namespace std;
 
-int boincWrapper_fraction_done(double progress);
-
-int boincWrapper_time_to_checkpoint();
-int boincWrapper_checkpoint_completed(void);
-
-int boincWrapper_resolve_filename(const char* name, char* outName, int len);
-
-int boincWrapper_resolve_filename_s(const char* name, std::string& outName);
-
-int boincWrapper_finish(int status);
-
 /// Wrapper around BOINC functions
 namespace BoincWrapper {
   /// Initializes BOINC
@@ -50,6 +39,14 @@ namespace BoincWrapper {
   
   /// Calls boinc_resolve_filename_s with inName, returning the result.
   string resolveFile (const char* inName);
+  
+  /// Report the proportion of work done
+  void reportProgress (double progress);
+  
+  /// Returns true if it's time to write a checkpoint
+  int timeToCheckpoint();
+  /// Call when a checkpoint's completed
+  void checkpointCompleted();
 }
 
 /// Memory shared with graphics app:

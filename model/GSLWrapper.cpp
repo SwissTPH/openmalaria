@@ -183,18 +183,15 @@ double W_UNIFORM(){
 }
 
 void load_rng_state(int seedFileNumber){
-  FILE * f;
-  const int MAX_LENGTH = 1000;
-  char resolved_name [MAX_LENGTH];
-  string seed_file_name = "seed";
-  char seedFileNumber_string [MAX_LENGTH];
-  sprintf(seedFileNumber_string,"%i",seedFileNumber);
-  seed_file_name.append(seedFileNumber_string);
+  ostringstream seedN (string("seed"));
+  seedN << seedFileNumber;
+  string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
   cerr << "load_rng " << seed_file_name << "\n";
-  boincWrapper_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
-  if ((f = fopen(resolved_name, "rb"))!=NULL){
-  gsl_rng_fread(f, generator);
-  fclose (f);
+  
+  FILE * f = fopen(seed_file_name.c_str(), "rb");
+  if (f!=NULL){
+    gsl_rng_fread(f, generator);
+    fclose (f);
   }
   else{
     cerr << "load_rng, " << seed_file_name << "not found\n";
@@ -203,15 +200,11 @@ void load_rng_state(int seedFileNumber){
 }
 
 void save_rng_state(int seedFileNumber){
-  FILE * f;
-  const int MAX_LENGTH = 1000;
-  char resolved_name [MAX_LENGTH];
-  string seed_file_name = "seed";
-  char seedFileNumber_string [MAX_LENGTH];
-  sprintf(seedFileNumber_string,"%i",seedFileNumber);
-  seed_file_name.append(seedFileNumber_string);
-  boincWrapper_resolve_filename(seed_file_name.c_str(), resolved_name,MAX_LENGTH);
-  f = fopen(resolved_name, "wb");
+  ostringstream seedN (string("seed"));
+  seedN << seedFileNumber;
+  string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
+  
+  FILE * f = fopen(seed_file_name.c_str(), "wb");
   gsl_rng_fwrite(f, generator);
   fclose (f);
 }

@@ -389,12 +389,8 @@ void Summary::printHosts(ostream& out) {
 }
 
 void Summary::writeSummaryArrays () {
-
-  string output_filename;
-  if (boincWrapper_resolve_filename_s("output.txt",output_filename)){
-    cerr << "APP. boinc_resolve_filename failed: output.txt\n";
-    exit(-1);
-  }
+  string output_filename =
+      BoincWrapper::resolveFile("output.txt");
 
   ofstream outputFile;
   outputFile.open(output_filename.c_str());

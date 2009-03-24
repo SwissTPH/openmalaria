@@ -111,7 +111,6 @@ int Simulation::start(){
 }
 
 void Simulation::mainSimulation(){
-  double progress;
   //TODO5D
   timeStep=0;
   gMainSummary->initialiseSummaries();
@@ -120,8 +119,7 @@ void Simulation::mainSimulation(){
   while( timeStep <=  simulationDuration) {
     _population->implementIntervention(timeStep);
     //Calculate the current progress
-    progress=relTimeInMainSim*(timeStep*1.0/simulationDuration)+(1-relTimeInMainSim);
-    boincWrapper_fraction_done(progress);
+    BoincWrapper::reportProgress(relTimeInMainSim*(timeStep/simulationDuration)+(1-relTimeInMainSim));
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
     ++simulationTime;
     ++timeStep;
@@ -135,18 +133,13 @@ void Simulation::mainSimulation(){
 }
 
 void Simulation::updateOneLifespan () {
-
-  double progress;
-
   while( simulationTime <  Global::maxAgeIntervals) {
-    progress=simulationTime*1.0/(Global::maxAgeIntervals)*(1-relTimeInMainSim);
-    //Here we have to call the checkpoint and to inform about the fraction done
-    boincWrapper_fraction_done(progress);
-    if (boincWrapper_time_to_checkpoint()) {
+    BoincWrapper::reportProgress (simulationTime / Global::maxAgeIntervals * (1-relTimeInMainSim));
+    if (BoincWrapper::timeToCheckpoint()) {
       writeCheckpoint();
-      boincWrapper_checkpoint_completed();
-      cout << "ewcpt" << simulationTime << endl;
+      BoincWrapper::checkpointCompleted();
     }
+    
     ++simulationTime;
     _population->update1();
   }

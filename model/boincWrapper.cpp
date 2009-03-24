@@ -26,29 +26,6 @@
 
 #include <iostream>
 
-int boincWrapper_fraction_done(double progress) {
-  return boinc_fraction_done (progress);
-}
-
-int boincWrapper_time_to_checkpoint() {
-  return boinc_time_to_checkpoint();
-}
-int boincWrapper_checkpoint_completed(void) {
-  return boinc_checkpoint_completed();
-}
-
-int boincWrapper_resolve_filename(const char* name, char* outName, int len) {
-  return boinc_resolve_filename (name, outName, len);
-}
-
-int boincWrapper_resolve_filename_s(const char* name, std::string& outName) {
-  return boinc_resolve_filename_s (name, outName);
-}
-
-int boincWrapper_finish(int status) {
-  return boinc_finish (status);
-}
-
 namespace BoincWrapper {
   void init () {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
@@ -73,6 +50,17 @@ namespace BoincWrapper {
       finish(err);
     }
     return ret;
+  }
+  
+  void reportProgress (double progress) {
+    boinc_fraction_done (progress);
+  }
+  
+  int timeToCheckpoint() {
+    return boinc_time_to_checkpoint();
+  }
+  void checkpointCompleted() {
+    boinc_checkpoint_completed();
   }
 }
 

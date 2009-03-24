@@ -59,11 +59,7 @@ void DescriptiveInfection::initParameters(){
   xNuStar=getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
   string densities_filename;
-  int retval = boincWrapper_resolve_filename_s("densities.csv",densities_filename);
-  if (retval){
-    std::cerr << "APP. boinc_resolve_filename failed \n";
-    boincWrapper_finish(retval);
-  }
+  densities_filename = BoincWrapper::resolveFile("densities.csv");
 
   fstream f_MTherapyDensities(densities_filename.c_str(),ios::in);
 
