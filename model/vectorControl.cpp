@@ -37,8 +37,9 @@
 
 VectorControl::VectorControl () {
   //TODO: initialize these and perhaps other params properly:
-  // Get params from xml:
-  //alpha = ;
+  //K_vi
+  //P_vi
+  
   /* This will be defined in the xml file as a real.
   We will define it as a integer - and convert after multiplying
   by the length of the Global::interval. Scalar. */
@@ -64,7 +65,15 @@ VectorControl::VectorControl () {
   O_v	= N_v + l;
   S_v	= O_v + l;
   
-  fArray.resize(EIPDuration);
+  // Set up fArray and ftauArray. Each step, all elements not set here are
+  // calculated, even if they aren't directly used in the end;
+  // however all calculated values are used in calculating the next value.
+  fArray.resize(EIPDuration-mosqRestDuration+1);
+  fArray[0] = 1.0;
+  ftauArray.resize(EIPDuration);
+  for (int i = 0; i < mosqRestDuration; ++i)
+    ftauArray[i] = 0.0;
+  ftauArray[mosqRestDuration] = 1.0;
   
   //TODO: initialise arrays (run initial simulation for N_v_length-1 days?)
   // Calculations are invalid before arrays are initialized!
@@ -156,7 +165,6 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
     P_A[t] = exp(-leaveHostRate * mosqSeekingDuration);
     
     double P_Ai_base = (1.0 - P_A[t]) / leaveHostRate;
-      // NOTE: already have kappa array - is same?
     
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
@@ -165,7 +173,8 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
     for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
       double prod = h->entoAvailability() * h->probMosqSurvivalBiting() * h->probMosqSurvivalResting();
       sum += prod;
-      sum_dif += prod;//FIXME: * h->K_vi();
+      sum_dif += prod;//FIXME: * h->K_vi();	// infectiousness of host * probability parasites survive in mosquito
+      // NOTE: already have kappa array - is same?
     }
     P_df[t] = sum * P_Ai_base * probMosqEggLaying;
     P_dif[t] = sum_dif * P_Ai_base * probMosqEggLaying;
@@ -182,29 +191,37 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
     
     //BEGIN S_v
     // Set up array with n in 1..θ_s−1 for f_τ(day-n) (NDEMD eq. 1.7)
-    // Note: calculates all values, even if they aren't eventually used,
-    // but they are all used in calculating the next value.
-    //TODO (eqn in paper wrong?)
+    size_t fProdEnd = 2*mosqRestDuration;
+    for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
+      ftauArray[n] =
+          ftauArray[n-1] * P_A[(day-n)%N_v_length];
+    }
+    ftauArray[fProdEnd] += P_df[(day-fProdEnd)%N_v_length];
+    
+    for (int n = fProdEnd+1; n < EIPDuration; ++n) {
+      size_t tn = (day-n)%N_v_length;
+      ftauArray[n] =
+          P_df[tn] * ftauArray[n - mosqRestDuration]
+          + P_A[tn] * ftauArray[n-1];
+    }
     
     sum = 0.0;
     size_t ts = day - EIPDuration;
     for (int l = 1; l < mosqRestDuration; ++l) {
       size_t tsl = (ts - l) % N_v_length;	// index day - theta_s - l
-      sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * fArray[EIPDuration+l-mosqRestDuration];
+      sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * ftauArray[EIPDuration+l-mosqRestDuration];
     }
     
     
     // Set up array with n in 1..θ_s−τ for f(day-n) (NDEMD eq. 1.6)
-    // Note: calculates all values (as for f_τ).
-    fArray[0] = 1.0;
     for (int n = 1; n <= mosqRestDuration; ++n) {
       fArray[n] =
           fArray[n-1] * P_A[(day-n)%N_v_length];
     }
     fArray[mosqRestDuration] += P_df[ttau];
     
-    ts = EIPDuration-mosqRestDuration;	// reuse index
-    for (size_t n = mosqRestDuration+1; n <= ts; ++n) {
+    fProdEnd = EIPDuration-mosqRestDuration;
+    for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
       size_t tn = (day-n)%N_v_length;
       fArray[n] =
           P_df[tn] * fArray[n - mosqRestDuration]
@@ -212,7 +229,7 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
     }
     
     
-    ts = (day - EIPDuration) % N_v_length;	// index day - theta_s
+    ts = ts % N_v_length;	// index day - theta_s
     S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
         + sum
         + P_A[t1]*S_v[t1]

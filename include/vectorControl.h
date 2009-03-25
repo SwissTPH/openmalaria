@@ -73,11 +73,11 @@ private:
 
   /** Death rate of mosquitoes while host-seeking (μ_vA).
    * Unit: animals/day. */
-  double mosqSeekingDeathRate;	// FIXME: varies over time
+  double mosqSeekingDeathRate;	// TODO: varies over time
   
   /** Duration of host-seeking per day; the maximum fraction of a day that a
    * mosquito would spend seeking (θ_d). */
-  double mosqSeekingDuration;	// FIXME: varies over time
+  double mosqSeekingDuration;	// TODO: varies over time
   
   // NOTE: K_vi = P_vi * (host infected) ?
   /** Probability of an infected host infecting a mosquito and that mosquito
@@ -105,11 +105,11 @@ private:
   int N_v_length;
   
   /** @brief Probability of a mosquito not finding a host one night.
-   * NOTE: should length be N_v_length? */
+   * NOTE: needs to be N_v_length long? */
   double *P_A;
   
   /** @brief P_df and P_dif per-day.
-   * NOTE: should length be N_v_length?
+   * NOTE: needs to be N_v_length long?
    * 
    * P_df is the probability of a mosquito finding a host and completing a
    * feeding cycle without being killed.
@@ -125,9 +125,13 @@ private:
   double *N_v, *O_v, *S_v;
   
   /** Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
-   * Values are recalculated each step (not stored).
+   * Values are recalculated each step, only first few elements are stored
+   * across steps.
    * Length: EIPDuration (θ_s). */
+  //@{
   vector<double> fArray;
+  vector<double> ftauArray;
+  //@}
   
   /** Per time-step partial calculation of EIR.
    *
