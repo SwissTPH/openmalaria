@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\DummyWithinHostModel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\empiricalWithinHostModel.h"
 				>
 			</File>
@@ -412,6 +416,10 @@
 			</File>
 			<File
 				RelativePath=".\model\drug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\DummyWithinHostModel.cpp"
 				>
 			</File>
 			<File
