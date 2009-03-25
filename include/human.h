@@ -143,8 +143,8 @@ public:
   
   void setLastIPTIorPlacebo(int last) {_lastIptiOrPlacebo = last;};
   
-  void setSPDose(int dose) {_lastSPDose=dose;};
-
+  void IPTiTreatment (double compliance);
+  
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
 
   //! Set doomed

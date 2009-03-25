@@ -465,21 +465,10 @@ void Population::massIPTiTreatment(const Mass& mass, int time){
   double compliance = mass.getCoverage();
   
   HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter){
+  for(iter=_population.begin(); iter != _population.end(); ++iter) {
     double ageYears = iter->getAgeInYears(Simulation::simulationTime);
-    if ((iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
-      if (W_UNIFORM() < compliance){
-        iter->setLastIPTIorPlacebo(Simulation::simulationTime);
-          /*
-        *            iptiEffect denotes treatment or placebo group
-        *                       and also the treatment given when sick (trial-dependent)
-          *                                 */
-        if (IPTIntervention::iptiEffect >= 10){
-          iter->setSPDose(Simulation::simulationTime);
-          Simulation::gMainSummary->reportIPTDose(iter->ageGroup());
-        }
-      }
-    }
+    if ((ageYears > minAge) && (ageYears < maxAge))
+      iter->IPTiTreatment(compliance);
   }
 }
 

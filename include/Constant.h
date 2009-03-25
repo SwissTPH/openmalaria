@@ -40,7 +40,9 @@ enum ModelVersion {
    * in AJTMH 75 (suppl 2) pp11-18. */
   NEGATIVE_BINOMIAL_MASS_ACTION = 1 << 2,
   
-  /** @brief Not currently implemented */
+  /** @brief 
+   * 
+   * Does nothing if IPT is not present. */
   ATTENUATION_ASEXUAL_DENSITY = 1 << 3,
   
   /** @brief Baseline availability of humans is sampled from a log normal distribution

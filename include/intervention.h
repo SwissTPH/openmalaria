@@ -92,7 +92,7 @@ class IPTIntervention {
 public:
   /* IPT specific parameters */
   //IPT present or not
-  static short IPT;
+  static bool IPT;
   //Number of IPTi doses
   static int numberOfIPTiDoses;
    //Target age for IPTi doses, in time steps

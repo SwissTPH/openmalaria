@@ -39,7 +39,7 @@ Vaccine Vaccine::PEV;
 Vaccine Vaccine::BSV;
 Vaccine Vaccine::TBV;
 
-short IPTIntervention::IPT;
+bool IPTIntervention::IPT;
 int IPTIntervention::numberOfIPTiDoses;
 int *IPTIntervention::iptiTargetagetstep;
 double *IPTIntervention::iptiCoverage;

@@ -86,7 +86,7 @@ void Global::setModelVersion () {
       cerr << "Incompatible model versions: flag " << i << " is incompatible with other flags." << endl;
       throw 0;
     }
-  if (modelVersion & (ATTENUATION_ASEXUAL_DENSITY | MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
+  if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
     cerr << "Warning: model version used is deprecated" << endl;
 }
 

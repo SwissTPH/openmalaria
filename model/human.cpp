@@ -380,13 +380,13 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   if (! iDeath) {
   //indicates if this individual was treated successfully (ie parasites cleared)
     bool drugEffect = defineEvent();
-    if ( drugEffect) {
+    if (drugEffect) {
       if (!IPTIntervention::IPT) {
         if (!(Global::modelVersion & INCLUDES_PK_PD)) {
           _withinHostModel->clearAllInfections();
         }
       }
-      // TODO: maybe all this IPT stuff should be put in a different module
+      // TODO: move this IPT stuff to OldITNWithinHostModel
       if (IPTIntervention::IPT) {
         if ( _latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
           _withinHostModel->clearAllInfections();
@@ -492,10 +492,10 @@ void Human::updateInterventionStatus() {
 
 void Human::setLastSPDose() {
   int agetstep=_simulationTime-_dateOfBirth;
-  for (int i=1;i<=IPTIntervention::numberOfIPTiDoses; i++) {
-    if (IPTIntervention::iptiTargetagetstep[i - 1] == agetstep) {
+  for (int i=0;i<IPTIntervention::numberOfIPTiDoses; i++) {
+    if (IPTIntervention::iptiTargetagetstep[i] == agetstep) {
       double rnum=W_UNIFORM();
-      if ( (rnum) <  IPTIntervention::iptiCoverage[i - 1]) {
+      if ( (rnum) <  IPTIntervention::iptiCoverage[i]) {
         _lastIptiOrPlacebo=_simulationTime;
         /*
           iptiEffect denotes treatment or placebo group
@@ -509,6 +509,22 @@ void Human::setLastSPDose() {
     }
   }
 }
+
+void Human::IPTiTreatment (double compliance)
+{
+  if ((getCumulativeInfections() > 0) && W_UNIFORM() < compliance){
+    setLastIPTIorPlacebo(Simulation::simulationTime);
+    /*
+     * iptiEffect denotes treatment or placebo group
+     * and also the treatment given when sick (trial-dependent)
+     */
+    if (IPTIntervention::iptiEffect >= 10){
+      _lastSPDose = Simulation::simulationTime;
+      Simulation::gMainSummary->reportIPTDose(ageGroup());
+    }
+  }
+}
+
 
 void Human::summarize(){
   double age = getAgeInYears();
