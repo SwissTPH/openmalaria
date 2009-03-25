@@ -90,7 +90,7 @@ void Human::initHumanParameters () {	// static
 
 // Testing Ctor
 Human::Human() {
-  _withinHostModel = new OldWithinHostModel();
+  _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
 }
 
@@ -205,7 +205,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
       _treatmentSeekingFactor=1.8;
     }
   }  
-  _withinHostModel = new OldWithinHostModel();
+  _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(_comorbidityFactor);
 }
 
@@ -213,7 +213,7 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
 Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime) 
   : _simulationTime(simulationTime), _caseManagement(caseManagement)
 {
-  _withinHostModel = new OldWithinHostModel();
+  _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
   // Reading human from file
   funit >> *this;

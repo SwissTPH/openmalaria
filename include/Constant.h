@@ -70,7 +70,7 @@ enum ModelVersion {
    *
    * Default: Parasite densities are determined from the descriptive model
    * given in AJTMH 75 (suppl 2) pp19-31 .*/
-  WITHIN_HOST_PARASITE = 1 << 9,
+  DUMMY_WITHIN_HOST_MODEL = 1 << 9,
   
   /** Clinical episodes occur if parasitaemia exceeds the pyrogenic threshold.
    * 

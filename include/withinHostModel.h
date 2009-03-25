@@ -38,6 +38,8 @@ class Human;
  */
 class WithinHostModel {
 public:
+  static WithinHostModel* createWithinHostModel ();
+  
   WithinHostModel() :
     _cumulativeInfections(0)
   {}

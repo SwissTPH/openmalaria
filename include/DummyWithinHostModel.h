@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_oldwhost
-#define Hmod_oldwhost
+#ifndef Hmod_dummywithinhost
+#define Hmod_dummywithinhost
 
 #include <iostream>
 #include "global.h"
@@ -33,12 +33,12 @@ using namespace std;
 
 class Human;
 
-/*! Old Within Host Model class.
+/*! Dummy Within Host Model class.
  */
-class OldWithinHostModel : public WithinHostModel {
+class DummyWithinHostModel : public WithinHostModel {
 public:
-  OldWithinHostModel();
-  ~OldWithinHostModel();
+  DummyWithinHostModel();
+  ~DummyWithinHostModel();
   
 
   virtual void update(double age);
