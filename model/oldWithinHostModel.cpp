@@ -54,11 +54,11 @@ void OldWithinHostModel::update (double age) {
 
 // -----  Simple infection adders/removers  -----
 
-void OldWithinHostModel::newInfection(int lastSPDose){
+void OldWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DescriptiveInfection(lastSPDose, Simulation::simulationTime));
+    infections.push_back(DescriptiveInfection(missing_value, Simulation::simulationTime));
     _MOI++;
   }
 }

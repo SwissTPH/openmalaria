@@ -32,6 +32,7 @@
 using namespace std;
 
 class Human;
+class Event;
 
 /*! Within Host Model abstract class.
  * Dont forget to create friend << and >> for subclasses.
@@ -49,7 +50,7 @@ public:
   virtual void summarize(double age) =0;
   
   //! Create a new infection requires that the human is allocated and current
-  virtual void newInfection(int) =0;
+  virtual void newInfection() =0;
   /*!  Clears all infections which have expired (their startdate+duration is less
   than the current time). */
   virtual void clearOldInfections() =0;
@@ -62,6 +63,16 @@ public:
   
   //! Returns Cumulative Infections
   int getCumulativeInfections() {return _cumulativeInfections;};
+  
+  /// Only do anything when IPT is present:
+  //@{
+  /// Conditionally clear all infections
+  virtual void IPTClearInfections (Event& ) {}
+  /// Conditionally set last SP dose
+  virtual void IPTSetLastSPDose (int agetstep, int ageGroup) {}
+  /// Prescribe IPTi with probability compliance. Only called if IPT present.
+  virtual void IPTiTreatment (double compliance, int ageGroup) {}
+  //@}
   
   virtual void write(ostream& out) const =0;
   virtual void read(istream& in) =0;

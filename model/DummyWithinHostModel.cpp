@@ -24,7 +24,6 @@
 #include "human.h"
 #include "DummyWithinHostModel.h"
 #include "simulation.h"
-#include "intervention.h"
 #include "transmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 
@@ -54,11 +53,11 @@ void DummyWithinHostModel::update (double age) {
 
 // -----  Simple infection adders/removers  -----
 
-void DummyWithinHostModel::newInfection(int lastSPDose){
+void DummyWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DescriptiveInfection(lastSPDose, Simulation::simulationTime));
+    infections.push_back(DescriptiveInfection(missing_value, Simulation::simulationTime));
     _MOI++;
   }
 }
@@ -124,10 +123,6 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
   if (_cumulativeInfections >  0) {
     cumulativeh=human.getCumulativeh();
     cumulativeY=human.getCumulativeY();
-    // IPTi SP dosec lears infections at the time that blood-stage parasites appear     
-    if (IPTIntervention::IPT) {
-      SPAction(human);
-    }
     std::list<DescriptiveInfection>::iterator i;
     for(i=infections.begin(); i!=infections.end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
@@ -148,12 +143,6 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
       i->setDensity(std::min(maxDens, i->getDensity()));
       i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
       human.setCumulativeY(human.getCumulativeY()+Global::interval*i->getDensity());
-    }
-    if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
-      if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  human.getTotalDensity() <  10) {
-        human.setTotalDensity(10);
-        human.setCumulativeY(human.getCumulativeY()+10);
-      }
     }
   }
   human.setPTransmit(human.infectiousness());
@@ -243,33 +232,6 @@ void DummyWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ag
   }
   else {
     inf.setDensity(0.0);
-  }
-}
-
-void DummyWithinHostModel::SPAction(Human& human){
- 
-  /*TODO if we want to look at presumptive SP treatment with the PkPD model we
-    need to add some code here that will be conditionally implemented depending on the
-    model version.*/
-
-  double rnum;
-  std::list<DescriptiveInfection>::iterator i=infections.begin();
-  while(i != infections.end()){
-    if ( 1+Simulation::simulationTime-i->getStartDate()-Global::latentp > 0){
-      rnum=W_UNIFORM();
-      if ((rnum<=IPTIntervention::genotypeACR[i->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - human.getLastSPDose() <= IPTIntervention::genotypeProph[i->getGenoTypeID()-1])) {
-        i->destroy();
-        i=infections.erase(i);
-        _MOI--;
-      }
-      else{
-        i++;
-      }
-    }
-    else{
-      i++;
-    }
   }
 }
 

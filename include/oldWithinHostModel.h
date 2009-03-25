@@ -46,7 +46,7 @@ public:
   virtual void summarize(double age);
   
   //! Create a new infection requires that the human is allocated and current
-  virtual void newInfection(int);
+  virtual void newInfection();
 
   /*!  Clears all infections which have expired (their startdate+duration is less
   than the current time). */

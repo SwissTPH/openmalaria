@@ -22,7 +22,7 @@
 
 #include "withinHostModel.h"
 #include "oldWithinHostModel.h"
-#include "OldITNWithinHostModel.h"
+#include "OldIPTWithinHostModel.h"
 #include "DummyWithinHostModel.h"
 
 using namespace std;
@@ -35,7 +35,7 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
     return new DummyWithinHostModel();
   } else {
     if (IPTIntervention::IPT)
-      return new OldITNWithinHostModel();
+      return new OldIPTWithinHostModel();
     else
       return new OldWithinHostModel();
   }

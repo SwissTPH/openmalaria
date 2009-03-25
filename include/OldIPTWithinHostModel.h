@@ -23,9 +23,21 @@
 
 #include "oldWithinHostModel.h"
 
-class OldITNWithinHostModel : public OldWithinHostModel {
+class OldIPTWithinHostModel : public OldWithinHostModel {
 public:
-  OldITNWithinHostModel () : _SPattenuationt(0) {}
+  OldIPTWithinHostModel () :
+    _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
+  {}
+  
+  //! Create a new infection requires that the human is allocated and current
+  virtual void newInfection();
+  
+  /// Conditionally clear all infections
+  virtual void IPTClearInfections (Event& );
+  /// Conditionally set last SP dose
+  virtual void IPTSetLastSPDose (int agetstep, int ageGroup);
+  /// Prescribe IPTi with probability compliance. Only called if IPT present.
+  virtual void IPTiTreatment (double compliance, int ageGroup);
   
 protected:
   /*!  SP drug action applies to each infection depending on genotype and when
@@ -41,6 +53,10 @@ protected:
 private:
   //! time at which attenuated infection 'would' end if SP present
   int _SPattenuationt;
+  //!last SP Dose given
+  int _lastSPDose;
+  //!last IPTi or placebo dose given 
+  int _lastIptiOrPlacebo;
 };
 
 #endif

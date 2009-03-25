@@ -141,8 +141,6 @@ public:
   
   double getCumulativeY() const {return _cumulativeY;}
   
-  void setLastIPTIorPlacebo(int last) {_lastIptiOrPlacebo = last;};
-  
   void IPTiTreatment (double compliance);
   
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
@@ -179,8 +177,6 @@ public:
   double getInnateImmunity() const {return _innateImmunity;}
   
   double getBSVEfficacy() {return _BSVEfficacy;}
-  
-  int getLastSPDose() const {return _lastSPDose;};
   
   /*!  Determines the probability that the individual transmits to a feeding
     mosquito */
@@ -225,10 +221,6 @@ private:
 
   //!Total asexual blood stage density
   double _ylag[4];
-  //!last SP Dose given
-  int _lastSPDose;
-  //!last IPTi or placebo dose given 
-  int _lastIptiOrPlacebo;
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
   //!Indicates that individual will die from indirect mortality

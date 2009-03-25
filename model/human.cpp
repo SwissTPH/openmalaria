@@ -132,8 +132,6 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
   }
   _latestEvent.setTime(missing_value);
   _latestEvent.setCaseManagement(caseManagement);
-  _lastSPDose=missing_value;
-  _lastIptiOrPlacebo=missing_value;
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
   }
@@ -263,7 +261,7 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
     int Ninf = W_POISSON(expectedNumberOfInfections);
     if (Ninf > 0) {
       for (int i=1;i<=Ninf; i++) {
-        _withinHostModel->newInfection(_lastSPDose);
+        _withinHostModel->newInfection();
       }
     }
   }
@@ -367,10 +365,6 @@ void Human::doCM(int entrypoint){
 }
 
 void Human::determineClinicalStatus(){ //TODO: this function should not do case management
-  int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
-  //TODOConversion
-  //fortnight= (int)(14.0/Global::interval);
-  //fortnight=3;
   //	Countdown to indirect mortality
   if ( _doomed <  0) {
     _doomed--;
@@ -386,40 +380,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
           _withinHostModel->clearAllInfections();
         }
       }
-      // TODO: move this IPT stuff to OldITNWithinHostModel
-      if (IPTIntervention::IPT) {
-        if ( _latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
-          _withinHostModel->clearAllInfections();
-        }
-        else if(_simulationTime-_lastIptiOrPlacebo <=  fortnight) {
-          _withinHostModel->clearAllInfections();
-          // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
-        }
-        else if(_simulationTime-_lastSPDose <=  fortnight) {
-          _withinHostModel->clearAllInfections();
-          /*
-            second line used if fever within 14 days of SP dose (ipti or treatment)
-            TODO: if this code is to survive, then the iptiEffect values should be 
-            symbolic constants
-          */
-        }
-# define iptiEffect IPTIntervention::iptiEffect
-        else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
-          _withinHostModel->clearAllInfections();
-          _lastSPDose=_simulationTime+1;
-        }
-        else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
-          _withinHostModel->clearAllInfections();
-        }
-        else if(iptiEffect >=  14 && iptiEffect < 30) {
-          _withinHostModel->clearAllInfections();
-        }
-        else {
-          _lastSPDose=_simulationTime+1;
-          _withinHostModel->clearAllInfections();
-          // SPAction will first act at the beginning of the next Global::interval
-        }
-      }
+      _withinHostModel->IPTClearInfections(_latestEvent);
     }
     // if drugEffect
   }
@@ -473,56 +434,11 @@ void Human::updateInterventionStatus() {
       }
     }
   }
-  if (IPTIntervention::IPT) {
-    if ( Simulation::timeStep >  0) {
-      // assumes 5-day intervals and Niakhar seasonality
-      static int IPT_MIN_INTERVAL[9] = { 42, 48, 54, 60, 66, 36, 30, 24, 18 };
-      static int IPT_MAX_INTERVAL[9] = { 60, 66, 72, 78, 82, 54, 48, 42, 42 };
-      
-      if (iptiEffect >= 14 && iptiEffect <= 22) {
-        int yearInterval = (Global::modIntervalsPerYear(_simulationTime)-1);
-        if (yearInterval >= IPT_MIN_INTERVAL[iptiEffect-14] &&
-            yearInterval <  IPT_MAX_INTERVAL[iptiEffect-14])
-          setLastSPDose();
-      } else
-        setLastSPDose();
-    }
-  }
+  _withinHostModel->IPTSetLastSPDose(Simulation::simulationTime-_dateOfBirth, ageGroup());
 }
 
-void Human::setLastSPDose() {
-  int agetstep=_simulationTime-_dateOfBirth;
-  for (int i=0;i<IPTIntervention::numberOfIPTiDoses; i++) {
-    if (IPTIntervention::iptiTargetagetstep[i] == agetstep) {
-      double rnum=W_UNIFORM();
-      if ( (rnum) <  IPTIntervention::iptiCoverage[i]) {
-        _lastIptiOrPlacebo=_simulationTime;
-        /*
-          iptiEffect denotes treatment or placebo group
-          and also the treatment given when sick (trial-dependent)
-        */
-        if (iptiEffect >=  10) {
-          _lastSPDose=_simulationTime;
-          Simulation::gMainSummary->reportIPTDose(ageGroup());					 
-        }
-      }
-    }
-  }
-}
-
-void Human::IPTiTreatment (double compliance)
-{
-  if ((getCumulativeInfections() > 0) && W_UNIFORM() < compliance){
-    setLastIPTIorPlacebo(Simulation::simulationTime);
-    /*
-     * iptiEffect denotes treatment or placebo group
-     * and also the treatment given when sick (trial-dependent)
-     */
-    if (IPTIntervention::iptiEffect >= 10){
-      _lastSPDose = Simulation::simulationTime;
-      Simulation::gMainSummary->reportIPTDose(ageGroup());
-    }
-  }
+void Human::IPTiTreatment (double compliance) {
+  _withinHostModel->IPTiTreatment (compliance, ageGroup());
 }
 
 
@@ -856,8 +772,6 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._ylag[1] << endl; 
   out << human._ylag[2] << endl; 
   out << human._ylag[3] << endl; 
-  out << human._lastSPDose << endl; 
-  out << human._lastIptiOrPlacebo << endl; 
   out << human._treatmentSeekingFactor << endl; 
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._latestEvent;   
@@ -895,8 +809,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._ylag[1]; 
   in >> human._ylag[2]; 
   in >> human._ylag[3]; 
-  in >> human._lastSPDose; 
-  in >> human._lastIptiOrPlacebo; 
   in >> human._treatmentSeekingFactor; 
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._latestEvent;

@@ -304,7 +304,7 @@ void Population::update1(){
       if (agetstep <= Global::intervalsPerYear){
         updateInfantArrays(agetstep-1, iter->getDoomed());
       }
-      int ia = iter->ageGroup() - 1;
+      ia = iter->ageGroup() - 1;
       /*
       TODO: ptransmit should depend on bednet usage
       kappaByAge and nByAge are used in the screensaver only
