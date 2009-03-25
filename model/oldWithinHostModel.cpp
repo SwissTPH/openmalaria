@@ -38,6 +38,7 @@ OldWithinHostModel::OldWithinHostModel() :
 }
 
 OldWithinHostModel::~OldWithinHostModel() {
+  clearAllInfections();
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _proxy.destroy();
   }

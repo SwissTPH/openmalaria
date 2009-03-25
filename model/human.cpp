@@ -224,7 +224,6 @@ void Human::destroy() {
   if (_latestEvent.getTime() !=  missing_value){
     Simulation::gMainSummary->report(_latestEvent);
   }
-  _withinHostModel->clearAllInfections();
   delete _withinHostModel;
   delete _morbidityModel;
 }
