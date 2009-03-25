@@ -33,7 +33,7 @@ using namespace std;
 // -----  Initialization  -----
 
 OldWithinHostModel::OldWithinHostModel() :
-     WithinHostModel(), _SPattenuationt(0), _MOI(0), patentInfections(0)
+     WithinHostModel(), _MOI(0), patentInfections(0)
 {
 }
 
@@ -125,10 +125,9 @@ void OldWithinHostModel::calculateDensities(Human& human) {
   if (_cumulativeInfections >  0) {
     cumulativeh=human.getCumulativeh();
     cumulativeY=human.getCumulativeY();
-    // IPTi SP dosec lears infections at the time that blood-stage parasites appear     
-    if (IPTIntervention::IPT) {
-      SPAction(human);
-    }
+    // IPTi SP dose clears infections at the time that blood-stage parasites appear     
+    SPAction(human);
+    
     std::list<DescriptiveInfection>::iterator i;
     for(i=infections.begin(); i!=infections.end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
@@ -153,14 +152,10 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         i->multiplyDensity(1-human.getBSVEfficacy());
         timeStepMaxDensity=(double)timeStepMaxDensity*(1-human.getBSVEfficacy());
       }
-        // Include here the effect of attenuated infections by SP concentrations
-      if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
-        if (IPTIntervention::IPT && i->getSPattenuate() == 1) {
-          i->multiplyDensity(1.0/IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1]);
-          timeStepMaxDensity=(double)timeStepMaxDensity/IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1];
-          _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (i->getStartDate()+(i->getDuration()/Global::interval) * IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1]));
-        }
-      }
+      
+      // Include here the effect of attenuated infections by SP concentrations
+      IPTattenuateAsexualDensity (i);
+      
       if (Global::modelVersion & MAX_DENS_CORRECTION) {
         human.setTimeStepMaxDensity(std::max(timeStepMaxDensity, human.getTimeStepMaxDensity()));
       }
@@ -180,12 +175,8 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
       human.setCumulativeY(human.getCumulativeY()+Global::interval*i->getDensity());
     }
-    if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
-      if ( IPTIntervention::IPT &&  _SPattenuationt > Simulation::simulationTime &&  human.getTotalDensity() <  10) {
-        human.setTotalDensity(10);
-        human.setCumulativeY(human.getCumulativeY()+10);
-      }
-    }
+    
+    IPTattenuateAsexualMinTotalDensity(human);
   }
   human.setPTransmit(human.infectiousness());
 }
@@ -277,32 +268,9 @@ void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageY
   }
 }
 
-void OldWithinHostModel::SPAction(Human& human){
- 
-  /*TODO if we want to look at presumptive SP treatment with the PkPD model we
-    need to add some code here that will be conditionally implemented depending on the
-    model version.*/
-
-  double rnum;
-  std::list<DescriptiveInfection>::iterator i=infections.begin();
-  while(i != infections.end()){
-    if ( 1+Simulation::simulationTime-i->getStartDate()-Global::latentp > 0){
-      rnum=W_UNIFORM();
-      if ((rnum<=IPTIntervention::genotypeACR[i->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - human.getLastSPDose() <= IPTIntervention::genotypeProph[i->getGenoTypeID()-1])) {
-        i->destroy();
-        i=infections.erase(i);
-        _MOI--;
-      }
-      else{
-        i++;
-      }
-    }
-    else{
-      i++;
-    }
-  }
-}
+void OldWithinHostModel::SPAction(Human&){}
+void OldWithinHostModel::IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator) {}
+void OldWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human&) {}
 
 // -----  Summarize  -----
 
@@ -318,10 +286,16 @@ void OldWithinHostModel::summarize(double age) {
 // -----  Data checkpointing  -----
 
 void OldWithinHostModel::read(istream& in) {
+  readOWHM (in);
+}
+void OldWithinHostModel::write(ostream& out) const {
+  writeOWHM (out);
+}
+
+void OldWithinHostModel::readOWHM(istream& in) {
   in >> _cumulativeInfections; 
   in >> _MOI; 
   in >> patentInfections; 
-  in >> _SPattenuationt;
   in >> cumulativeY;
   in >> cumulativeh;
   in >> timeStepMaxDensity;
@@ -340,11 +314,10 @@ void OldWithinHostModel::read(istream& in) {
   }
 }
 
-void OldWithinHostModel::write(ostream& out) const {
+void OldWithinHostModel::writeOWHM(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _MOI << endl; 
   out << patentInfections << endl; 
-  out << _SPattenuationt << endl;
   out << cumulativeY << endl;
   out << cumulativeh << endl;
   out << timeStepMaxDensity << endl;

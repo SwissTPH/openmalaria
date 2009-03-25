@@ -59,39 +59,46 @@ public:
 
   void calculateDensities(Human&);
   
-  void write(ostream& out) const;
-  void read(istream& in);
-
-private:
+  virtual void write(ostream& out) const;
+  virtual void read(istream& in);
+  
+protected:
   /*!  SP drug action applies to each infection depending on genotype and when
   the individual had their last dose of SP */
-  void SPAction(Human&);
-
-  void calculateDensity(DescriptiveInfection& inf, double);
+  virtual void SPAction(Human&);
   
-  void treatInfections();
-  //! Treats all infections in an individual
-  void treatAllInfections();
+  virtual void IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator i);
+  virtual void IPTattenuateAsexualMinTotalDensity (Human&);
   
-  //! time at which attenuated infection 'would' end if SP present
-  int _SPattenuationt;
-  double cumulativeY;
-  double cumulativeh;
+  void writeOWHM(ostream& out) const;
+  void readOWHM(istream& in);
+  
   double timeStepMaxDensity;
   
   //!multiplicity of infection
   int _MOI;
-  //!Number of infections with densities above the limit of detection
-  int patentInfections;
-  
-  /// Encapsulates drug code for each human
-  DrugProxy _proxy;
   
   /** The list of all infections this human has.
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<DescriptiveInfection> infections;
+
+private:
+  void calculateDensity(DescriptiveInfection& inf, double);
+  
+  void treatInfections();
+  //! Treats all infections in an individual
+  void treatAllInfections();
+  
+  double cumulativeY;
+  double cumulativeh;
+  
+  //!Number of infections with densities above the limit of detection
+  int patentInfections;
+  
+  /// Encapsulates drug code for each human
+  DrugProxy _proxy;
 };
 
 #endif

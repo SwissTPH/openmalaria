@@ -23,11 +23,12 @@
 #ifndef Hmod_dummywithinhost
 #define Hmod_dummywithinhost
 
-#include <iostream>
 #include "global.h"
 #include "withinHostModel.h"
 #include "DescriptiveInfection.h"
 #include "drug.h"
+;
+#include <iostream>
 
 using namespace std;
 

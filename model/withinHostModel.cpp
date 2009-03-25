@@ -22,6 +22,7 @@
 
 #include "withinHostModel.h"
 #include "oldWithinHostModel.h"
+#include "OldITNWithinHostModel.h"
 #include "DummyWithinHostModel.h"
 
 using namespace std;
@@ -32,6 +33,10 @@ const double WithinHostModel::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.18
 WithinHostModel* WithinHostModel::createWithinHostModel () {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     return new DummyWithinHostModel();
-  } else
-    return new OldWithinHostModel();
+  } else {
+    if (IPTIntervention::IPT)
+      return new OldITNWithinHostModel();
+    else
+      return new OldWithinHostModel();
+  }
 }
