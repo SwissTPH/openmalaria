@@ -91,16 +91,15 @@ Morbidity::Infection MorbidityModel::infectionEvent(double ageYears, double tota
     else if (W_UNIFORM() < pCoinfection)
       ret = Morbidity::COINFECTION;
     
-    /*
-      Indirect mortality	
-      IndirectRisk is the probability of dying from indirect effects of malaria
-      conditional on not having an acute attack of malaria
-    *
+    /* Indirect mortality	
+       IndirectRisk is the probability of dying from indirect effects of malaria
+       conditional on not having an acute attack of malaria
+    */
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
     if (W_UNIFORM() < indirectRisk)
       ret = Morbidity::Infection (ret | Morbidity::INDIRECT_MORTALITY);
-    */
+    
     return ret;
   }
   else if(Global::modelVersion & NON_MALARIA_FEVERS) {
@@ -109,12 +108,6 @@ Morbidity::Infection MorbidityModel::infectionEvent(double ageYears, double tota
       return Morbidity::NON_MALARIA;
   }
   return Morbidity::NONE;
-}
-
-bool MorbidityModel::indirectDeath(double ageYears) {
-  double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
-  indirectRisk*=_comorbidityFactor;
-  return (W_UNIFORM() < indirectRisk);
 }
 
 double MorbidityModel::getPyrogenThres(){

@@ -678,10 +678,7 @@ void Human::defineEvent(){
     else if (event == Morbidity::UNCOMPLICATED)
       effectiveTreatment=uncomplicatedEvent(true);
     
-    //NOTE: was integrated into infectionEvent, but changes order of W_UNIFORM() calls, changing test results.
-    // Need to decide - reintegrate or keep separate
-    //if ((event & Morbidity::INDIRECT_MORTALITY) && _doomed == 0)
-    if (_morbidityModel->indirectDeath(getAgeInYears()) && _doomed == 0)
+    if ((event & Morbidity::INDIRECT_MORTALITY) && _doomed == 0)
       _doomed=-1;
     
     // Penalizing immunity for clinical episodes	

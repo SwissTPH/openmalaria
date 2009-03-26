@@ -78,7 +78,6 @@ public:
   // non-static
   MorbidityModel(double cF);
   Morbidity::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
-  bool indirectDeath(double ageYears);
   virtual double getPyrogenThres();
   virtual void write(ostream& out) const;
   virtual void read(istream& in);
