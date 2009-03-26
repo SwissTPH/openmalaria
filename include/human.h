@@ -287,9 +287,9 @@ private:
 
   /*!  Determines whether there is an acute episode, or concomitant fever and
     then whether the episode is severe, uncomplicated or there is an indirect
-    death returns:true if there was an effective treatment, false otherwise.
+    death. Clears infections if there was an effective treatment.
   */
-  bool defineEvent();
+  void defineEvent();
   
   //! returns true in case of effective treatment, false otherwise
   bool severeMalaria();

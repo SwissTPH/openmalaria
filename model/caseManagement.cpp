@@ -201,9 +201,9 @@ void CaseManagementModel::setParasiteCaseParameters () {
   if (pSeekOfficialCareUncomplicated1 + pSelfTreatment > 0){
     double cureRateSelfTreatment = healthSystem.getInitialACR().getSelfTreatment().getValue();
     
-    cureRate[0] = (cureRate[0]*pSeekOfficialCareUncomplicated1+
-        cureRateSelfTreatment*pSelfTreatment)/
-        (pSeekOfficialCareUncomplicated1+pSelfTreatment);
+    cureRate[0] = (cureRate[0] * pSeekOfficialCareUncomplicated1
+        + cureRateSelfTreatment * pSelfTreatment)
+       / (pSeekOfficialCareUncomplicated1+pSelfTreatment);
   }
 
   cureRate[1] = getHealthSystemACRByName (healthSystem.getInitialACR(),
@@ -242,11 +242,12 @@ void CaseManagementModel::setParasiteCaseParameters () {
   //calculate probParasitesCleared 0
   if ((pSeekOfficialCareUncomplicated1 + pSelfTreatment) > 0){
     probParasitesCleared[0] = (pSeekOfficialCareUncomplicated1
-        * (complianceFirstLine * cureRateFirstLine + (1 - complianceFirstLine)
-        * nonCompliersEffectiveFirstLine) + pSelfTreatment
-        * (complianceSelfTreatment * cureRateSelfTreatment + (1 - complianceSelfTreatment)
-        * nonCompliersEffectiveFirstLine))
-		/ (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
+        * (complianceFirstLine * cureRateFirstLine
+         + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine)
+       + pSelfTreatment
+        * (complianceSelfTreatment * cureRateSelfTreatment
+         + (1 - complianceSelfTreatment) * nonCompliersEffectiveFirstLine))
+      / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
   } else {
     probParasitesCleared[0] = 0;
   }

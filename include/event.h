@@ -49,7 +49,7 @@ class Event{
   void update(int simulationTime, int ageGroup, int diagnosis, int outcome);
 
   //! Determine if a human dies from indirect mortality
-  /*
+  /**
     This can be a consequence of a clinical episode 6 intervals earlier (TODO:
     5days?), or because it's a neonatal.  
     \param dateOfBirth: date of birth 
