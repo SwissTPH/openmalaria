@@ -41,9 +41,9 @@ void OldIPTWithinHostModel::newInfection(){
 
 // -----    -----
 
-void OldIPTWithinHostModel::IPTClearInfections (Event& _latestEvent) {
+void OldIPTWithinHostModel::IPTClearInfections (Event& latestEvent) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
-  if ( _latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
+  if ( latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
     clearAllInfections();
   }
   else if(Simulation::simulationTime-_lastIptiOrPlacebo <=  fortnight) {
@@ -108,7 +108,7 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
 }
 
 void OldIPTWithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
-  //NOTE: shouldn't test _cumulativeInfections?
+  //NOTE to AR remove _cumulativeInfections > 0 &&
   if (_cumulativeInfections > 0 && W_UNIFORM() < compliance){
     _lastIptiOrPlacebo = Simulation::simulationTime;
     /*
