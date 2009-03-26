@@ -24,7 +24,7 @@
 #include "GSLWrapper.h"
 #include "event.h"
 #include "summary.h"
-
+#include "intervention.h"
 
 
 // -----  Simple infection adders/removers  -----
@@ -58,15 +58,15 @@ void OldIPTWithinHostModel::IPTClearInfections (Event& _latestEvent) {
     symbolic constants
           */
   }
-# define iptiEffect IPTIntervention::iptiEffect
-  else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
+
+  else if( IPTIntervention::iptiEffect ==  2 ||  IPTIntervention::iptiEffect ==  12) {
     clearAllInfections();
     _lastSPDose=Simulation::simulationTime+1;
   }
-  else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
+  else if( IPTIntervention::iptiEffect ==  3 ||  IPTIntervention::iptiEffect ==  13) {
     clearAllInfections();
   }
-  else if(iptiEffect >=  14 && iptiEffect < 30) {
+  else if(IPTIntervention::iptiEffect >=  14 && IPTIntervention::iptiEffect < 30) {
     clearAllInfections();
   }
   else {
@@ -83,10 +83,10 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   static int IPT_MIN_INTERVAL[9] = { 42, 48, 54, 60, 66, 36, 30, 24, 18 };
   static int IPT_MAX_INTERVAL[9] = { 60, 66, 72, 78, 82, 54, 48, 42, 42 };
   
-  if (iptiEffect >= 14 && iptiEffect <= 22) {
+  if (IPTIntervention::iptiEffect >= 14 && IPTIntervention::iptiEffect <= 22) {
     int yearInterval = (Global::modIntervalsPerYear(Simulation::simulationTime)-1);
-    if (yearInterval <  IPT_MIN_INTERVAL[iptiEffect-14] &&
-        yearInterval >= IPT_MAX_INTERVAL[iptiEffect-14])
+    if (yearInterval <  IPT_MIN_INTERVAL[IPTIntervention::iptiEffect-14] &&
+        yearInterval >= IPT_MAX_INTERVAL[IPTIntervention::iptiEffect-14])
       return;
   }
   
@@ -98,7 +98,7 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
         iptiEffect denotes treatment or placebo group
         and also the treatment given when sick (trial-dependent)
         */
-        if (iptiEffect >=  10) {
+        if (IPTIntervention::iptiEffect >=  10) {
           _lastSPDose=Simulation::simulationTime;
           Simulation::gMainSummary->reportIPTDose(ageGroup);
         }

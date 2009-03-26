@@ -309,6 +309,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\OldIPTWithinHostModel.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\oldWithinHostModel.h"
 				>
 			</File>
@@ -482,6 +486,10 @@
 			</File>
 			<File
 				RelativePath=".\model\noVectorControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\OldIPTWithinHostModel.cpp"
 				>
 			</File>
 			<File
