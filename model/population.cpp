@@ -65,11 +65,10 @@ Population::Population(TransmissionModel* transmissionModel, int populationSize)
 }
 
 Population::~Population() {
-  delete _caseManagement; 
 }
 
 void Population::init(){
-  _caseManagement = new CaseManagementModel();
+  CaseManagementModel::init();
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
   cumpc = (double*)malloc(((_maxTimestepsPerLife))*sizeof(double));
@@ -238,7 +237,7 @@ void Population::readLists (fstream& funit) {
   int indCounter = 0;	// Number of individuals read from checkpoint
   while(!(funit.eof()||_populationSize==indCounter)){
       //continue: Fortran cont is probably not C cont
-    _population.push_back(Human(funit, _caseManagement, Simulation::simulationTime));
+    _population.push_back(Human(funit, Simulation::simulationTime));
     indCounter++;
   }
   if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){
@@ -249,7 +248,7 @@ void Population::readLists (fstream& funit) {
 
 void Population::newHuman(int dob){
   ++IDCounter;
-  _population.push_back(Human(IDCounter, dob,  _caseManagement, Simulation::simulationTime));
+  _population.push_back(Human(IDCounter, dob, Simulation::simulationTime));
 }
 
 void Population::update1(){
@@ -398,11 +397,7 @@ void Population::implementIntervention (int time) {
   
   if (interv->getChangeHS().present()) {
     changeHealthSystem (&interv->getChangeHS().get());
-    delete _caseManagement;
-    _caseManagement = new CaseManagementModel();
-    for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
-      iter->setCaseManagement(_caseManagement);
-    }
+    CaseManagementModel::init();	// should re-read all parameters
     
     //TODO: Do we also need to re-init the kappa array?
     memcpy (_transmissionModel->initialKappa, _transmissionModel->kappa, Global::intervalsPerYear * sizeof(*_transmissionModel->kappa));

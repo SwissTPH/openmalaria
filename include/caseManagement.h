@@ -23,8 +23,9 @@
 
 //! Models of treatment seeking and referral
 class CaseManagementModel{
-
- public:
+public:
+  /// Initialize static parameters
+  static void init();
 
   //!Read caseManagement parameters from input file and allocate data structures.
   CaseManagementModel();
@@ -33,41 +34,41 @@ class CaseManagementModel{
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 
    * @param ageyears Age of person in years */
-  double caseFatality(double ageyears);
+  static double caseFatality(double ageyears);
 
   /*! Calculate the case fatality rate in the community as a function of the
     hospital case fatality rate.*/
-  double getCommunityCaseFatalityRate(double caseFatalityRatio) const;
+  static double getCommunityCaseFatalityRate(double caseFatalityRatio);
 
   /*!
     Look up any recent treatments and determine which drug regimen to use
     next.  latestTreatment: time of the most recent treatment for the
     individual regimen: drug to be used for the new treatment.
   */
-  int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) const;
-  bool indirectDeath(int dob, int ageGroup, int& doomed);
+  static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen);
+  static bool indirectDeath(int dob, int ageGroup, int& doomed);
 
-  int getCaseManagementMemory() const;
+  static int getCaseManagementMemory();
 
-  double getProbabilityGetsTreatment(int regimen) const;
-  double getProbabilityParasitesCleared(int regimen) const;
-  double getCureRate(int regimen) const;
-  double getProbabilitySequelaeTreated(int regimen) const;
-  double getProbabilitySequelaeUntreated(int regimen) const;
+  static double getProbabilityGetsTreatment(int regimen);
+  static double getProbabilityParasitesCleared(int regimen);
+  static double getCureRate(int regimen);
+  static double getProbabilitySequelaeTreated(int regimen);
+  static double getProbabilitySequelaeUntreated(int regimen);
   
   static int caseManagementMemory;
 
 private:
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   //@{
-  void setParasiteCaseParameters ();
+  static void setParasiteCaseParameters ();
   //@}
   
-  double probGetsTreatment[3];
-  double probParasitesCleared[3];
-  double cureRate[3];
+  static double probGetsTreatment[3];
+  static double probParasitesCleared[3];
+  static double cureRate[3];
   //log odds ratio of case-fatality in community compared to hospital
-  double _oddsRatioThreshold;
+  static double _oddsRatioThreshold;
   
   /// Age bounds of probSequelae* parameters
   //@{
@@ -77,22 +78,22 @@ private:
   
   /** pSequelaeTreated is the probability that the patient has sequelae
    * conditional on hospital treatment for severe disease. */
-  double probSequelaeTreated[2];
+  static double probSequelaeTreated[2];
   /** pSequelaeUntreated is the probability that the patient has sequelae
    * conditional if they don't receive hospital treatment for severe disease.
    */
-  double probSequelaeUntreated[2];
+  static double probSequelaeUntreated[2];
 
   /// shortcut: if there is only one CFR group, and the CFR is 0, set this to true.
-  bool _noMortality;
+  static bool _noMortality;
   
   /// Age-specific bounds and case-fatality rates.
   //@{
   /// Age groups have the bounds [_inputAge[i], _inputAge[i+1])
-  std::vector<double> _inputAge;
+  static std::vector<double> _inputAge;
   /** Case fatality rate for age groups; last entry is a copy of the previous
    * entry. */
-  std::vector<double> _caseFatalityRate;
+  static std::vector<double> _caseFatalityRate;
   //@}
 
   //! Reads in the Case Fatality percentages from the XML.
@@ -100,7 +101,7 @@ private:
     calculate and cache the CFR as a function of age in years for better
     performance. This would require a specification of the resolution.
   */
-  void readCaseFatalityRatio();
+  static void readCaseFatalityRatio();
 
 };
 

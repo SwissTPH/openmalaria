@@ -26,7 +26,6 @@
 #include "drug.h"
 
 // Forward declaration
-class CaseManagementModel;
 class TransmissionModel;
 
 //! Model of a human individual 
@@ -43,12 +42,12 @@ public:
    * 
    * \param ID unique identifier
    * \param dateOfBirth date of birth in time steps */
-  Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int simulationTime);
+  Human(int ID, int dateOfBirth, int simulationTime);
 
   /**  Initialise all variables of a human datatype including infectionlist and
    * and druglist.
    * \param funit IO unit */
-  Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime);
+  Human(istream& funit, int simulationTime);
   //@}
   
   /** Destructor
@@ -148,9 +147,6 @@ public:
   //! Set doomed
   void setDoomed(int doomed) { _doomed = doomed;}
 
-  //! Set a new caseManagement. Used if the changeHS intervention is called.
-  void setCaseManagement(CaseManagementModel* caseManagement);
-
   /** Availability of host to mosquitoes (α_i). */
   double entoAvailability () const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
@@ -215,8 +211,6 @@ private:
   // Time from start of the simulation
   int _simulationTime;
   
-  CaseManagementModel* _caseManagement;
-
   MorbidityModel* _morbidityModel;
 
   //!Total asexual blood stage density

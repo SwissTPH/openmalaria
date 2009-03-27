@@ -95,8 +95,8 @@ Human::Human() {
 }
 
 // Create new human
-Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int simulationTime) 
-  : _simulationTime(simulationTime), _caseManagement(caseManagement)
+Human::Human(int ID, int dateOfBirth, int simulationTime) 
+  : _simulationTime(simulationTime)
 {
   //FIXME: should be partially random:
   _entoAvailability = baseEntoAvailability;
@@ -207,8 +207,8 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
 }
 
 // Load human from checkpoint
-Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulationTime) 
-  : _simulationTime(simulationTime), _caseManagement(caseManagement)
+Human::Human(istream& funit, int simulationTime) 
+  : _simulationTime(simulationTime)
 {
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
@@ -280,10 +280,6 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
   _withinHostModel->update(getAgeInYears());
-}
-
-void Human::setCaseManagement(CaseManagementModel* caseManagement) {
-  _caseManagement=caseManagement;
 }
 
 void Human::updateImmuneStatus(){
@@ -531,8 +527,8 @@ bool Human::uncomplicatedEvent(bool isMalaria){
   else {
     int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
                                : Diagnosis::NON_MALARIA_FEVER;
-    int nextRegimen=_caseManagement->getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    if (_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
+    int nextRegimen=CaseManagementModel::getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
+    if (CaseManagementModel::getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
       _latestRegimen=nextRegimen;
       _tLastTreatment=_simulationTime;
       Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
@@ -548,7 +544,7 @@ bool Human::uncomplicatedEvent(bool isMalaria){
         return true;
       }
       else {
-        if (_caseManagement->getProbabilityParasitesCleared(nextRegimen-1) > W_UNIFORM()){
+        if (CaseManagementModel::getProbabilityParasitesCleared(nextRegimen-1) > W_UNIFORM()){
           _latestEvent.update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
           return true;
         }
@@ -587,19 +583,19 @@ bool Human::severeMalaria(){
     and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
     do we want to change this section of code rather than just introducing the new alternative (TS))
   */ 
-  int nextRegimen=_caseManagement->getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
+  int nextRegimen=CaseManagementModel::getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
   
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
-  p2=_caseManagement->getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
+  p2=CaseManagementModel::getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
   // Probability of getting cured after getting treatment:
-  p3=_caseManagement->getCureRate(nextRegimen-1);
+  p3=CaseManagementModel::getCureRate(nextRegimen-1);
   // p4 is the hospital case-fatality rate from Tanzania
-  p4=_caseManagement->caseFatality(getAgeInYears());
+  p4=CaseManagementModel::caseFatality(getAgeInYears());
   // p5 here is the community threshold case-fatality rate
-  p5=_caseManagement->getCommunityCaseFatalityRate(p4);
-  p6=_caseManagement->getProbabilitySequelaeTreated(isAdultIndex);
-  p7=_caseManagement->getProbabilitySequelaeUntreated(isAdultIndex);
+  p5=CaseManagementModel::getCommunityCaseFatalityRate(p4);
+  p6=CaseManagementModel::getProbabilitySequelaeTreated(isAdultIndex);
+  p7=CaseManagementModel::getProbabilitySequelaeUntreated(isAdultIndex);
   
   double q[9];
   //	Community deaths

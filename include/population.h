@@ -25,7 +25,6 @@
 
 // Forward declarations
 class Human;
-class CaseManagementModel;
 class TransmissionModel;
 class Mass;
 
@@ -168,9 +167,6 @@ private:
 
   //! TransmissionModel model
   TransmissionModel* _transmissionModel;
-
-  //! Case Management System model
-  CaseManagementModel* _caseManagement;
   
   /// The simulated human population
   std::list<Human> _population;

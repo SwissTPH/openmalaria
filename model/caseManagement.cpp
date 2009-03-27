@@ -24,8 +24,17 @@
 
 const int CaseManagementModel::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
 int CaseManagementModel::caseManagementMemory;
+double CaseManagementModel::_oddsRatioThreshold;
+bool CaseManagementModel::_noMortality;
+std::vector<double> CaseManagementModel::_inputAge;
+std::vector<double> CaseManagementModel::_caseFatalityRate;
+double CaseManagementModel::probGetsTreatment[3];
+double CaseManagementModel::probParasitesCleared[3];
+double CaseManagementModel::cureRate[3];
+double CaseManagementModel::probSequelaeTreated[2];
+double CaseManagementModel::probSequelaeUntreated[2];
 
-CaseManagementModel::CaseManagementModel(){
+void CaseManagementModel::init (){
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   setParasiteCaseParameters ();
@@ -47,6 +56,9 @@ CaseManagementModel::CaseManagementModel(){
   caseManagementMemory = get_health_system_memory();
   readCaseFatalityRatio();
 }
+
+CaseManagementModel::CaseManagementModel()
+{}
 
 CaseManagementModel::~CaseManagementModel(){
 }
@@ -74,12 +86,12 @@ void CaseManagementModel::readCaseFatalityRatio(){
   _noMortality = (numOfGroups == 1) && ( _caseFatalityRate[0] == 0);
 }
 
-double CaseManagementModel::getCommunityCaseFatalityRate(double caseFatalityRatio) const{
+double CaseManagementModel::getCommunityCaseFatalityRate(double caseFatalityRatio) {
   double x = caseFatalityRatio * _oddsRatioThreshold;
   return x / (1 - caseFatalityRatio + x);
 }
 
-int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) const{
+int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) {
   if (diagnosis == Diagnosis::SEVERE_MALARIA)
     return 3;
   
@@ -89,27 +101,27 @@ int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int t
   return 1;
 }
 
-int CaseManagementModel::getCaseManagementMemory() const{
+int CaseManagementModel::getCaseManagementMemory() {
   return caseManagementMemory;
 }
 
-double CaseManagementModel::getProbabilityGetsTreatment(int regimen) const{
+double CaseManagementModel::getProbabilityGetsTreatment(int regimen) {
   return probGetsTreatment[regimen];
 }
 
-double CaseManagementModel::getProbabilityParasitesCleared(int regimen) const{
+double CaseManagementModel::getProbabilityParasitesCleared(int regimen) {
   return probParasitesCleared[regimen];
 }
 
-double CaseManagementModel::getCureRate(int regimen) const{
+double CaseManagementModel::getCureRate(int regimen) {
   return cureRate[regimen];
 }
 
-double CaseManagementModel::getProbabilitySequelaeTreated(int ageGroup) const{
+double CaseManagementModel::getProbabilitySequelaeTreated(int ageGroup) {
   return probSequelaeTreated[ageGroup];
 }
 
-double CaseManagementModel::getProbabilitySequelaeUntreated(int ageGroup) const{
+double CaseManagementModel::getProbabilitySequelaeUntreated(int ageGroup) {
   return probSequelaeUntreated[ageGroup];
 }
 
