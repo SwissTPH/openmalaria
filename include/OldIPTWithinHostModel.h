@@ -25,9 +25,7 @@
 
 class OldIPTWithinHostModel : public OldWithinHostModel {
 public:
-  OldIPTWithinHostModel () :
-    _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
-  {}
+  OldIPTWithinHostModel ();
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();

@@ -680,13 +680,9 @@ void Human::defineEvent(){
   }
   
   if (effectiveTreatment) {
-    //FIXME: use just IPTClearInfections
-    if (!IPTIntervention::IPT) {
-      if (!(Global::modelVersion & INCLUDES_PK_PD)) {
-        _withinHostModel->clearAllInfections();
-      }
-    }
-    _withinHostModel->IPTClearInfections(_latestEvent);
+    // INCLUDES_PK_PD clears drugs by calling medicate.
+    if (!(Global::modelVersion & INCLUDES_PK_PD))
+      _withinHostModel->IPTClearInfections(_latestEvent);
   }
 }
 

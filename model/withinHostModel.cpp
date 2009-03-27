@@ -56,5 +56,5 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
 }
 
 void WithinHostModel::IPTClearInfections (Event&) {
-  //clearAllInfections();
+  clearAllInfections();
 }

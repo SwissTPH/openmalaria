@@ -27,6 +27,18 @@
 #include "intervention.h"
 
 
+// -----  init  -----
+OldIPTWithinHostModel::OldIPTWithinHostModel () :
+    _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
+{
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    cerr << "OldIPTWithinHostModel not intended to work with DrugAction" << endl;
+    // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
+    throw 0;
+  }
+}
+
+
 // -----  Simple infection adders/removers  -----
 
 void OldIPTWithinHostModel::newInfection(){
