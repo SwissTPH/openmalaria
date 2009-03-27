@@ -71,11 +71,6 @@ public:
   /// Calls static init on correct MorbidityModel.
   static void init();
   
-  /** Emulate old BUG: reset of _prevalenceByGestationalAge on changeHS
-   * (presumably introduced by TS on moving *RiskFromMaternalInfection to
-   * CaseManagementModel). */
-  static void resetPrevalenceByGestationalAge();
-  
   /** Create a sub-class instance, dependant on global options.
    * 
    * @param cF = Comorbidity factor (currently set in Human). */

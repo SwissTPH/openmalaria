@@ -59,10 +59,6 @@ void MorbidityModel::init() {
       PyrogenMorbidityModel::init();
   }
 }
-void MorbidityModel::resetPrevalenceByGestationalAge() {
-  int timeStepsPer5Months = 150 / Global::interval;
-  _prevalenceByGestationalAge.assign(timeStepsPer5Months, 0.0);
-}
 
 MorbidityModel* MorbidityModel::createMorbidityModel(double cF) {
   if (Global::modelVersion & PREDETERMINED_EPISODES) {

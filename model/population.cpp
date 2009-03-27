@@ -400,7 +400,6 @@ void Population::implementIntervention (int time) {
     changeHealthSystem (&interv->getChangeHS().get());
     delete _caseManagement;
     _caseManagement = new CaseManagementModel();
-    MorbidityModel::resetPrevalenceByGestationalAge();
     for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
       iter->setCaseManagement(_caseManagement);
     }
