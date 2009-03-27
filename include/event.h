@@ -28,12 +28,9 @@
   Summary for clinical events during a caseManagementMemory period, in one individual.
   time in 5 day intervals
 */
-class CaseManagementModel;
 
 class Event{
- 
- public:
-
+public:
   Event() {};
   ~Event() {};
 
@@ -48,18 +45,6 @@ class Event{
   */
   void update(int simulationTime, int ageGroup, int diagnosis, int outcome);
 
-  //! Determine if a human dies from indirect mortality
-  /**
-    This can be a consequence of a clinical episode 6 intervals earlier (TODO:
-    5days?), or because it's a neonatal.  
-    \param dateOfBirth: date of birth 
-    \param agegroup: Monitoring agegroup 
-    \param doomed: Human state variable, used to count down to death and mark
-    the dead.  return: .true. if this individual dies from indirect mortality,
-    else false
-  */
-  bool indirectDeath(int simulationTime, int dateOfBirth, int ageGroup, int& doomed);
-
   int getTime() const {return _time;};
   void setTime(int time) {_time=time;};
   int getDiagnosis() const {return _diagnosis;};
@@ -67,8 +52,7 @@ class Event{
   int getSurveyPeriod() const {return _surveyPeriod;};
   int getOutcome() const {return _outcome;};
   
- private:
-
+private:
   int _time;
   //! survey period during which the event occured
   //! TODO: we could use the survey array to map time to survey period. slower, but less memory.

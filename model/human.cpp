@@ -367,9 +367,27 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   if ( _doomed <  0) {
     _doomed--;
   }
-  //indirect death: if this human's going to die, don't worry about further episodes...
-  if (_latestEvent.indirectDeath(_simulationTime, _dateOfBirth, ageGroup(), _doomed))
+  //indirect death: if this human's about to die, don't worry about further episodes:
+  if (_doomed ==  -7) {	//clinical episode 6 intervals before
+    _latestEvent.update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+    /*
+    doomed=7 is the code for indirect death, and 6 for neonatal death.
+    Individuals with positive doomed values are removed at the start of
+    the next time step. They cannot be removed immediately because 
+    their deaths need to be counted.
+    */
+    _doomed  = 7;
+    //Indirect Neonatal mortality
     return;
+  }
+  // Neonatal mortality:
+  if(_simulationTime-_dateOfBirth == 1) {
+    if (MorbidityModel::eventNeonatalMortality()) {
+      _latestEvent.update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+      _doomed  = 6;
+      return;
+    }
+  }
   
   //indicates if this individual was treated successfully (ie parasites cleared)
   defineEvent();

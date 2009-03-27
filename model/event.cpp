@@ -30,51 +30,25 @@
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
   if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + CaseManagementModel::caseManagementMemory))){
-        if (_time!=missing_value){
-          Simulation::gMainSummary->report(*this);
-        }
-        _time=simulationTime;
-        _surveyPeriod=Simulation::gMainSummary->getSurveyPeriod();
-        _ageGroup=ageGroup;
-        _diagnosis=diagnosis;
-        _outcome=outcome;
-        _recurrence=1;
+    if (_time!=missing_value){
+      Simulation::gMainSummary->report(*this);
     }
-    else {
-        _outcome=std::max(outcome, _outcome);
-        _diagnosis=std::max(diagnosis, _diagnosis);
-        _recurrence++;
-    }
+    _time=simulationTime;
+    _surveyPeriod=Simulation::gMainSummary->getSurveyPeriod();
+    _ageGroup=ageGroup;
+    _diagnosis=diagnosis;
+    _outcome=outcome;
+    _recurrence=1;
+  }
+  else {
+    _outcome=std::max(outcome, _outcome);
+    _diagnosis=std::max(diagnosis, _diagnosis);
+    _recurrence++;
+  }
 }
 
-
-bool Event::indirectDeath(int simulationTime, int dateOfBirth, int ageGroup, int& doomed){
-  
-  //clinical episode 6 intervals before
-  if (doomed ==  -7) {
-    this->update(simulationTime, ageGroup, Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-    /*
-     doomed=7 is the code for indirect death, and 6 for neonatal death.
-     Individuals with positive doomed values are removed at the start of
-     the next time step. They cannot be removed immediately because 
-     their deaths need to bxe counted.
-    */
-    doomed  = 7;
-    //Indirect Neonatal mortality
-    return true;
-  }
-  else if(simulationTime-dateOfBirth ==  1) {
-    if (MorbidityModel::eventNeonatalMortality()) {
-      this->update(simulationTime, ageGroup, Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-      doomed  = 6;
-      return true;
-    }
-  }
-  return false;
-}
 
 ostream& operator<<(ostream& out, const Event& event){
-
   out << event._time << endl;
   out << event._surveyPeriod << endl;
   out << event._ageGroup << endl;
@@ -85,7 +59,6 @@ ostream& operator<<(ostream& out, const Event& event){
 }
 
 istream& operator>>(istream& in, Event& event){
-  
   in >> event._time;
   in >> event._surveyPeriod;
   in >> event._ageGroup;
