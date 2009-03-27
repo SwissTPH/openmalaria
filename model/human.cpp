@@ -285,6 +285,7 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
 }
 
 void Human::setCaseManagement(CaseManagementModel* caseManagement) {
+  _latestEvent.setCaseManagement(caseManagement);
   _caseManagement=caseManagement;
 }
 
