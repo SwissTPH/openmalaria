@@ -29,7 +29,7 @@
 #include "morbidityModel.h"
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
-  if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + _caseManagement->getCaseManagementMemory()))){
+  if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + CaseManagementModel::caseManagementMemory))){
         if (_time!=missing_value){
           Simulation::gMainSummary->report(*this);
         }

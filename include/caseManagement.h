@@ -54,6 +54,8 @@ class CaseManagementModel{
   double getCureRate(int regimen) const;
   double getProbabilitySequelaeTreated(int regimen) const;
   double getProbabilitySequelaeUntreated(int regimen) const;
+  
+  static int caseManagementMemory;
 
 private:
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
@@ -64,7 +66,6 @@ private:
   double probGetsTreatment[3];
   double probParasitesCleared[3];
   double cureRate[3];
-  int _caseManagementMemory;
   //log odds ratio of case-fatality in community compared to hospital
   double _oddsRatioThreshold;
   

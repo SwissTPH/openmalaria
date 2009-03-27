@@ -23,6 +23,7 @@
 #include <limits>
 
 const int CaseManagementModel::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
+int CaseManagementModel::caseManagementMemory;
 
 CaseManagementModel::CaseManagementModel(){
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
@@ -43,7 +44,7 @@ CaseManagementModel::CaseManagementModel(){
     gotItem:;	// alternative to for ... break ... else
   }
   
-  _caseManagementMemory = get_health_system_memory();
+  caseManagementMemory = get_health_system_memory();
   readCaseFatalityRatio();
 }
 
@@ -82,14 +83,14 @@ int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int t
   if (diagnosis == Diagnosis::SEVERE_MALARIA)
     return 3;
   
-  if (tLastTreated > ( simulationTime-_caseManagementMemory))
+  if (tLastTreated > ( simulationTime-caseManagementMemory))
     return 2;
   
   return 1;
 }
 
 int CaseManagementModel::getCaseManagementMemory() const{
-  return _caseManagementMemory;
+  return caseManagementMemory;
 }
 
 double CaseManagementModel::getProbabilityGetsTreatment(int regimen) const{

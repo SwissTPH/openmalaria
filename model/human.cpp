@@ -131,7 +131,6 @@ Human::Human(int ID, int dateOfBirth, CaseManagementModel* caseManagement, int s
     _ylag[i-1]=0.0;
   }
   _latestEvent.setTime(missing_value);
-  _latestEvent.setCaseManagement(caseManagement);
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
   }
@@ -215,7 +214,6 @@ Human::Human(istream& funit, CaseManagementModel* caseManagement, int simulation
   _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
   // Reading human from file
   funit >> *this;
-  _latestEvent.setCaseManagement(caseManagement);
 }
 
 void Human::destroy() {
@@ -285,7 +283,6 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
 }
 
 void Human::setCaseManagement(CaseManagementModel* caseManagement) {
-  _latestEvent.setCaseManagement(caseManagement);
   _caseManagement=caseManagement;
 }
 
