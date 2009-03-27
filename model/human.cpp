@@ -47,10 +47,6 @@
 #endif
 
 
-double Human::sigma_i;
-double Human::immPenalty_22;
-double Human::asexImmRemain;
-double Human::immEffectorRemain;
 double Human::BaselineAvailabilityShapeParam;
 double Human::detectionlimit;
 double Human::baseEntoAvailability;
@@ -59,6 +55,7 @@ double Human::baseProbMosqSurvivalResting;
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
+  WithinHostModel::init();
   MorbidityModel::init();
   
   /*
@@ -69,10 +66,6 @@ void Human::initHumanParameters () {	// static
   baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
   baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
   double densitybias;
-  sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
-  immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
-  immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
-  asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
   /*
     TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
     or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
@@ -106,9 +99,6 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
   _cumulativeEIRa=0.0;
-  _cumulativeh=0.0;
-  _cumulativeY=0.0;
-  _cumulativeYlag=0.0;
   _dateOfBirth=dateOfBirth;
   if (_dateOfBirth > simulationTime) {
     // This test may be totally unnecessary; it was done in oldWithinHostModel
@@ -118,7 +108,8 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   _doomed=0;
   _timeStepMaxDensity=0.0;
   _ID=ID;
-  _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
+  //NOTE: initialized here to preserve order of random calls
+  _withinHostModel = WithinHostModel::createWithinHostModel();
   _lastVaccineDose=0;
   _latestRegimen=0;
   _tLastTreatment=missing_value;
@@ -201,8 +192,7 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
-  }  
-  _withinHostModel = WithinHostModel::createWithinHostModel();
+  }
   _morbidityModel=MorbidityModel::createMorbidityModel(_comorbidityFactor);
 }
 
@@ -210,6 +200,8 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
 Human::Human(istream& funit, int simulationTime) 
   : _simulationTime(simulationTime)
 {
+  // NOTE: makes some unnecessary random calls
+  // WARNING: this will likely change some tests with checkpointing
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(0.0);
   // Reading human from file
@@ -236,7 +228,6 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
     }
   }
   _ylag[0]=_totalDensity;
-  _cumulativeYlag = _cumulativeY;
 
   _withinHostModel->calculateDensities(*this);
 }
@@ -275,24 +266,11 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, *this);
   
   updateInterventionStatus(); 
-  updateImmuneStatus();
+  _withinHostModel->updateImmuneStatus();
   updateInfection(expectedInfectionRate,
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
   _withinHostModel->update(getAgeInYears());
-}
-
-void Human::updateImmuneStatus(){
-  if (immEffectorRemain < 1){
-    _cumulativeh=(double)_cumulativeh*immEffectorRemain;
-    _cumulativeY=(double)_cumulativeY*immEffectorRemain;
-  }
-  if (asexImmRemain < 1){
-    _cumulativeh=(double)_cumulativeh*asexImmRemain/
-      (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
-    _cumulativeY=(double)_cumulativeY*asexImmRemain/
-      (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
-  }
 }
 
 void Human::doCM(int entrypoint){
@@ -695,16 +673,14 @@ void Human::defineEvent(){
     
     // Penalizing immunity for clinical episodes	
     if (Global::modelVersion & PENALISATION_EPISODES) {
-      _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
-      if (_cumulativeY <  0) {
-        _cumulativeY=0.0;
-      }
+      _withinHostModel->immunityPenalisation();
     }
   } else if(event & Morbidity::NON_MALARIA) {
     effectiveTreatment = uncomplicatedEvent(false);
   }
   
   if (effectiveTreatment) {
+    //FIXME: use just IPTClearInfections
     if (!IPTIntervention::IPT) {
       if (!(Global::modelVersion & INCLUDES_PK_PD)) {
         _withinHostModel->clearAllInfections();
@@ -738,12 +714,8 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._latestRegimen << endl; 
   out << human._tLastTreatment << endl; 
   out << human._BSVEfficacy << endl; 
-  out << human._cumulativeYlag << endl; 
   out << human._cumulativeEIRa << endl; 
-  out << human._cumulativeh << endl; 
-  out << human._cumulativeY << endl; 
   out << human._timeStepMaxDensity << endl; 
-  out << human._innateImmunity << endl; 
   out << human._PEVEfficacy << endl; 
   out << human._pinfected << endl; 
   out << human._ptransmit << endl;  
@@ -775,12 +747,8 @@ istream& operator>>(istream& in, Human& human){
   in >> human._latestRegimen; 
   in >> human._tLastTreatment; 
   in >> human._BSVEfficacy; 
-  in >> human._cumulativeYlag; 
   in >> human._cumulativeEIRa; 
-  in >> human._cumulativeh; 
-  in >> human._cumulativeY; 
   in >> human._timeStepMaxDensity; 
-  in >> human._innateImmunity; 
   in >> human._PEVEfficacy; 
   in >> human._pinfected; 
   in >> human._ptransmit; 

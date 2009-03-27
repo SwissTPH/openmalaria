@@ -24,11 +24,25 @@
 #include "oldWithinHostModel.h"
 #include "OldIPTWithinHostModel.h"
 #include "DummyWithinHostModel.h"
+#include "inputData.h"
 
 using namespace std;
 
 // weight proportions, used by drug code
 const double WithinHostModel::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+double WithinHostModel::sigma_i;
+double WithinHostModel::immPenalty_22;
+double WithinHostModel::asexImmRemain;
+double WithinHostModel::immEffectorRemain;
+
+// -----  Initialization  -----
+
+void WithinHostModel::init() {
+  sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
+  immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
+  immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
+  asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+}
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
@@ -39,4 +53,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
     else
       return new OldWithinHostModel();
   }
+}
+
+void WithinHostModel::IPTClearInfections (Event&) {
+  //clearAllInfections();
 }

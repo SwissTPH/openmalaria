@@ -80,13 +80,6 @@ public:
   void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
   //@}
   
-  /// updateImmuneStatus related functions
-  //@{
-  /*! Until now, this only includes decay of immunity against
-      asexual blood stages */
-  void updateImmuneStatus();
-  //@}
-  
   /// determineClinicalStatus related functions
   //@{
   void determineClinicalStatus();
@@ -138,8 +131,6 @@ public:
   
   double getTotalDensity() const {return _totalDensity;}
   
-  double getCumulativeY() const {return _cumulativeY;}
-  
   void IPTiTreatment (double compliance);
   
   void setProbabilityOfInfection(double probability) { _pinfected=probability;};
@@ -163,14 +154,7 @@ public:
   
   void setTotalDensity(double totalDensity) {_totalDensity=totalDensity;}
   
-  double getCumulativeh() const {return _cumulativeh;}
-  void setCumulativeh(double cumulativeh) {_cumulativeh = cumulativeh;}
-  
-  void setCumulativeY(double cumulativeY) {_cumulativeY = cumulativeY;}
-  
   void setPTransmit(double pTransmit) {_ptransmit = pTransmit;}
-  
-  double getInnateImmunity() const {return _innateImmunity;}
   
   double getBSVEfficacy() {return _BSVEfficacy;}
   
@@ -231,16 +215,8 @@ private:
   double _totalDensity;		// possibly move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;
-  //!cumulativeY from previous timestep
-  double _cumulativeYlag;
   //!Number of infective bites since birth
   double _cumulativeEIRa;
-  //!Number of infections received since birth
-  double _cumulativeh;
-  //!Cumulative parasite density since birth
-  double _cumulativeY;
-  //!innate ability to control parasite densities
-  double _innateImmunity;
   //!Remaining efficacy of Pre-erythrocytic vaccines
   double _PEVEfficacy;
   //!pinfected: probability of infection (cumulative or reset to zero in massTreatment). Appears to be used only for calculating expected inoculations for the analysis
@@ -322,22 +298,6 @@ private:
 
 
   /* Static private */
-  
-//Standard dev innate immunity for densities
-  static double sigma_i;
-// contribution of parasite densities to acquired immunity in the presence of fever
-  static double immPenalty_22;
-/*
-  Remaining immunity against asexual parasites(after time step, each of 2 components y and h)
-  This variable decays the effectors cumulativeH and cumulativeY in a way that their
-  effects on densities (1-Dh and 1-Dy) decay exponentially.
-*/
-  static double asexImmRemain;
-/*
-  Remaining immunity against asexual parasites(after each time step, each of 2 components y and h)
-  This variable decays the effectors cumulativeH and cumulativeY exponentially.
-*/
-  static double immEffectorRemain;
   
   static double baseEntoAvailability;
   static double baseProbMosqSurvivalBiting;

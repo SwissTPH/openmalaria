@@ -165,7 +165,7 @@ void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
   if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
     if (_SPattenuationt > Simulation::simulationTime &&  human.getTotalDensity() <  10) {
       human.setTotalDensity(10);
-      human.setCumulativeY(human.getCumulativeY()+10);
+      _cumulativeY += 10;
     }
   }
 }

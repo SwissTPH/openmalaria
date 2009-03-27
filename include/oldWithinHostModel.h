@@ -59,6 +59,12 @@ public:
 
   void calculateDensities(Human&);
   
+  /*! Until now, this only includes decay of immunity against
+  asexual blood stages */
+  virtual void updateImmuneStatus();
+  
+  virtual void immunityPenalisation();
+  
   virtual void write(ostream& out) const;
   virtual void read(istream& in);
   
@@ -84,6 +90,9 @@ protected:
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<DescriptiveInfection> infections;
 
+  //!Cumulative parasite density since birth
+  double _cumulativeY;
+  
 private:
   void calculateDensity(DescriptiveInfection& inf, double);
   
@@ -91,8 +100,17 @@ private:
   //! Treats all infections in an individual
   void treatAllInfections();
   
+  //TODO: check why we have 2 cumulativeh and cumulativeY params
+  //!Number of infections received since birth
+  double _cumulativeh;
+  //!cumulativeY from previous timestep
+  double _cumulativeYlag;
+  
   double cumulativeY;
   double cumulativeh;
+  
+  //!innate ability to control parasite densities
+  double _innateImmunity;
   
   //!Number of infections with densities above the limit of detection
   int patentInfections;

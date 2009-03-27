@@ -39,6 +39,8 @@ class Event;
  */
 class WithinHostModel {
 public:
+  /// Initialise static parameters
+  static void init();
   static WithinHostModel* createWithinHostModel ();
   
   WithinHostModel() :
@@ -54,6 +56,11 @@ public:
   /*!  Clears all infections which have expired (their startdate+duration is less
   than the current time). */
   virtual void clearOldInfections() =0;
+  /** Conditionally clear all infections.
+   * Just calls clearAllInfections if IPT isn't present.
+   * NOTE: replace Event& with minimal info needed.
+   * NOTE: make clearAllInfections protected and replace with this? */
+  virtual void IPTClearInfections (Event&);
   //! Clears all infections in an individual
   virtual void clearAllInfections() =0;
   
@@ -66,13 +73,17 @@ public:
   
   /// Only do anything when IPT is present:
   //@{
-  /// Conditionally clear all infections
-  virtual void IPTClearInfections (Event& ) {}
   /// Conditionally set last SP dose
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup) {}
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (double compliance, int ageGroup) {}
   //@}
+  
+  /*! Until now, this only includes decay of immunity against
+  asexual blood stages */
+  virtual void updateImmuneStatus() =0;
+  
+  virtual void immunityPenalisation() =0;
   
   virtual void write(ostream& out) const =0;
   virtual void read(istream& in) =0;
@@ -81,6 +92,8 @@ protected:
   //!Cumulative number of infections since birth
   int _cumulativeInfections;
   
+  /* Static private */
+  
   //! Relative weights by age group
   /** Relative weights, based on data in InputTables\wt_bites.csv 
   The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
@@ -88,6 +101,22 @@ protected:
   in weights by age group. The weights are expressed as proportions of 0.5*those
   in the reference age group. */
   static const double wtprop[nwtgrps];
+  
+//Standard dev innate immunity for densities
+  static double sigma_i;
+// contribution of parasite densities to acquired immunity in the presence of fever
+  static double immPenalty_22;
+/*
+  Remaining immunity against asexual parasites(after time step, each of 2 components y and h)
+  This variable decays the effectors cumulativeH and cumulativeY in a way that their
+  effects on densities (1-Dh and 1-Dy) decay exponentially.
+*/
+  static double asexImmRemain;
+/*
+  Remaining immunity against asexual parasites(after each time step, each of 2 components y and h)
+  This variable decays the effectors cumulativeH and cumulativeY exponentially.
+*/
+  static double immEffectorRemain;
 };
 
 #endif

@@ -32,8 +32,9 @@ using namespace std;
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-     WithinHostModel(), _SPattenuationt(0), _MOI(0), patentInfections(0)
+    WithinHostModel(), _SPattenuationt(0), _MOI(0), _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0), patentInfections(0)
 {
+  W_GAUSS(0, sigma_i);	// FIXME: random call to keep these in sync
 }
 
 DummyWithinHostModel::~DummyWithinHostModel() {
@@ -111,18 +112,43 @@ void DummyWithinHostModel::medicate(string drugName, double qty, int time) {
 }
 
 
+// -----  immunity  -----
+
+void DummyWithinHostModel::updateImmuneStatus(){
+  if (immEffectorRemain < 1){
+    _cumulativeh*=immEffectorRemain;
+    _cumulativeY*=immEffectorRemain;
+  }
+  if (asexImmRemain < 1){
+    _cumulativeh*=asexImmRemain/
+        (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
+    _cumulativeY*=asexImmRemain/
+        (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
+  }
+}
+
+void DummyWithinHostModel::immunityPenalisation() {
+  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
+  if (_cumulativeY <  0) {
+    _cumulativeY=0.0;
+  }
+}
+
+
 // -----  Density calculations  -----
 
 // NOTE: refering back to human so much isn't good programming practice. Could
 // some variables be stored locally?
 void DummyWithinHostModel::calculateDensities(Human& human) {
+  _cumulativeYlag = _cumulativeY;
+  
   human.setPTransmit(0);
   patentInfections = 0;
   human.setTotalDensity(0.0);
   human.setTimeStepMaxDensity(0.0);
   if (_cumulativeInfections >  0) {
-    cumulativeh=human.getCumulativeh();
-    cumulativeY=human.getCumulativeY();
+    cumulativeh=_cumulativeh;
+    cumulativeY=_cumulativeY;
     std::list<DescriptiveInfection>::iterator i;
     for(i=infections.begin(); i!=infections.end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
@@ -138,11 +164,11 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
         patentInfections++;
       }
       if (i->getStartDate() == (Simulation::simulationTime-1)) {
-        human.setCumulativeh(human.getCumulativeh()+1);
+        _cumulativeh++;
       }
       i->setDensity(std::min(maxDens, i->getDensity()));
       i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
-      human.setCumulativeY(human.getCumulativeY()+Global::interval*i->getDensity());
+      _cumulativeY += Global::interval*i->getDensity();
     }
   }
   human.setPTransmit(human.infectiousness());
@@ -256,6 +282,9 @@ void DummyWithinHostModel::read(istream& in) {
   in >> cumulativeY;
   in >> cumulativeh;
   in >> timeStepMaxDensity;
+  in >> _cumulativeh;
+  in >> _cumulativeY;
+  in >> _cumulativeYlag;
 
   if ( _MOI <  0) {
     cerr << "Error reading checkpoint" << endl;
@@ -279,6 +308,9 @@ void DummyWithinHostModel::write(ostream& out) const {
   out << cumulativeY << endl;
   out << cumulativeh << endl;
   out << timeStepMaxDensity << endl;
+  out << _cumulativeh << endl;
+  out << _cumulativeY << endl;
+  out << _cumulativeYlag << endl;
 
   for(std::list<DescriptiveInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);

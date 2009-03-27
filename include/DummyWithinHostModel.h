@@ -60,6 +60,12 @@ public:
 
   void calculateDensities(Human&);
   
+  /*! Until now, this only includes decay of immunity against
+  asexual blood stages */
+  virtual void updateImmuneStatus();
+  
+  virtual void immunityPenalisation();
+  
   void write(ostream& out) const;
   void read(istream& in);
 
@@ -73,6 +79,14 @@ private:
   void treatInfections();
   //! Treats all infections in an individual
   void treatAllInfections();
+  
+  //TODO: check why we have 2 cumulativeh and cumulativeY params
+  //!Number of infections received since birth
+  double _cumulativeh;
+  //!Cumulative parasite density since birth
+  double _cumulativeY;
+  //!cumulativeY from previous timestep
+  double _cumulativeYlag;
   
   //! time at which attenuated infection 'would' end if SP present
   int _SPattenuationt;

@@ -33,8 +33,9 @@ using namespace std;
 // -----  Initialization  -----
 
 OldWithinHostModel::OldWithinHostModel() :
-     WithinHostModel(), _MOI(0), patentInfections(0)
+    WithinHostModel(), _MOI(0), _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0), patentInfections(0)
 {
+  _innateImmunity=(double)W_GAUSS(0, sigma_i);
 }
 
 OldWithinHostModel::~OldWithinHostModel() {
@@ -112,19 +113,44 @@ void OldWithinHostModel::medicate(string drugName, double qty, int time) {
 }
 
 
+// -----  immunity  -----
+
+void OldWithinHostModel::updateImmuneStatus(){
+  if (immEffectorRemain < 1){
+    _cumulativeh*=immEffectorRemain;
+    _cumulativeY*=immEffectorRemain;
+  }
+  if (asexImmRemain < 1){
+    _cumulativeh*=asexImmRemain/
+        (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
+    _cumulativeY*=asexImmRemain/
+        (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
+  }
+}
+
+void OldWithinHostModel::immunityPenalisation() {
+  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
+  if (_cumulativeY <  0) {
+    _cumulativeY=0.0;
+  }
+}
+
+
 // -----  Density calculations  -----
 
 // NOTE: refering back to human so much isn't good programming practice. Could
 // some variables be stored locally?
 void OldWithinHostModel::calculateDensities(Human& human) {
+  _cumulativeYlag = _cumulativeY;
+  
   double ageyears = human.getAgeInYears();
   human.setPTransmit(0);
   patentInfections = 0;
   human.setTotalDensity(0.0);
   human.setTimeStepMaxDensity(0.0);
   if (_cumulativeInfections >  0) {
-    cumulativeh=human.getCumulativeh();
-    cumulativeY=human.getCumulativeY();
+    cumulativeh=_cumulativeh;
+    cumulativeY=_cumulativeY;
     // IPTi SP dose clears infections at the time that blood-stage parasites appear     
     SPAction(human);
     
@@ -138,14 +164,14 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       }
       calculateDensity(*i, ageyears);
         //i->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
-      i->multiplyDensity(exp(-human.getInnateImmunity()));
+      i->multiplyDensity(exp(-_innateImmunity));
 
         /*
       Possibly a better model version ensuring that the effect of variation in innate immunity
           is reflected in case incidence would have the following here:
         */
       if (Global::modelVersion & INNATE_MAX_DENS) {
-        timeStepMaxDensity=(double)timeStepMaxDensity*exp(-human.getInnateImmunity());
+        timeStepMaxDensity=(double)timeStepMaxDensity*exp(-_innateImmunity);
       }
         //Include here the effect of blood stage vaccination
       if (Vaccine::BSV.active) {
@@ -169,11 +195,11 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         patentInfections++;
       }
       if (i->getStartDate() == (Simulation::simulationTime-1)) {
-        human.setCumulativeh(human.getCumulativeh()+1);
+        _cumulativeh++;
       }
       i->setDensity(std::min(maxDens, i->getDensity()));
       i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
-      human.setCumulativeY(human.getCumulativeY()+Global::interval*i->getDensity());
+      _cumulativeY += Global::interval*i->getDensity();
     }
     
     IPTattenuateAsexualMinTotalDensity(human);
@@ -299,6 +325,10 @@ void OldWithinHostModel::readOWHM(istream& in) {
   in >> cumulativeY;
   in >> cumulativeh;
   in >> timeStepMaxDensity;
+  in >> _cumulativeh;
+  in >> _cumulativeY;
+  in >> _cumulativeYlag;
+  in >> _innateImmunity; 
 
   if ( _MOI <  0) {
     cerr << "Error reading checkpoint" << endl;
@@ -321,6 +351,10 @@ void OldWithinHostModel::writeOWHM(ostream& out) const {
   out << cumulativeY << endl;
   out << cumulativeh << endl;
   out << timeStepMaxDensity << endl;
+  out << _cumulativeh << endl;
+  out << _cumulativeY << endl;
+  out << _cumulativeYlag << endl;
+  out << _innateImmunity << endl; 
 
   for(std::list<DescriptiveInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
