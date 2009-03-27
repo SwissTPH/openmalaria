@@ -334,7 +334,7 @@ void Population::update1(){
     }
     if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
       isAtRiskOfFirstPregnancy = false;	// only call once per time-step
-      _caseManagement->setRiskFromMaternalInfection(nCounter, pCounter);
+      MorbidityModel::setRiskFromMaternalInfection(nCounter, pCounter);
     }
     ++iter;
   }
@@ -400,6 +400,7 @@ void Population::implementIntervention (int time) {
     changeHealthSystem (&interv->getChangeHS().get());
     delete _caseManagement;
     _caseManagement = new CaseManagementModel();
+    MorbidityModel::resetPrevalenceByGestationalAge();
     for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
       iter->setCaseManagement(_caseManagement);
     }

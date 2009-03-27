@@ -59,7 +59,7 @@ double Human::baseProbMosqSurvivalResting;
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
-  MorbidityModel::initModels();
+  MorbidityModel::init();
   
   /*
     Init parameters that are common to all humans

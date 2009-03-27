@@ -24,6 +24,7 @@
 #define Hmod_morbidity
 
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -67,8 +68,13 @@ namespace Morbidity {
 class MorbidityModel {
 public:
   // static:
-  /// Calls static init on all MorbidityModels.
-  static void initModels();
+  /// Calls static init on correct MorbidityModel.
+  static void init();
+  
+  /** Emulate old BUG: reset of _prevalenceByGestationalAge on changeHS
+   * (presumably introduced by TS on moving *RiskFromMaternalInfection to
+   * CaseManagementModel). */
+  static void resetPrevalenceByGestationalAge();
   
   /** Create a sub-class instance, dependant on global options.
    * 
@@ -79,6 +85,10 @@ public:
   MorbidityModel(double cF);
   Morbidity::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
   virtual double getPyrogenThres();
+  
+  static bool eventNeonatalMortality();
+  static void setRiskFromMaternalInfection(int nCounter, int pCounter);
+  
   virtual void write(ostream& out) const;
   virtual void read(istream& in);
   
@@ -91,6 +101,13 @@ private:	// static
   static double critAgeComorb_30;
   //comorbidity prevalence at birth as a risk factor for severe
   static double comorbintercept_24;
+  
+  /** Probability for a newborn to die (indirect death) because the mother is
+   * infected. Depends on the prevalence of parasitaemia in mother at some
+   * previous t. */
+  static double _riskFromMaternalInfection;
+  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
+  static std::vector<double> _prevalenceByGestationalAge;
   
 protected:	// non-static
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;

@@ -26,6 +26,7 @@
 #include <algorithm>
 #include "caseManagement.h"
 #include "summary.h"
+#include "morbidityModel.h"
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
   if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + _caseManagement->getCaseManagementMemory()))){
@@ -63,8 +64,7 @@ bool Event::indirectDeath(int simulationTime, int dateOfBirth, int ageGroup, int
     return true;
   }
   else if(simulationTime-dateOfBirth ==  1) {
-    double give = W_UNIFORM();
-    if ( give <= _caseManagement->getRiskFromMaternalInfection()) {
+    if (MorbidityModel::eventNeonatalMortality()) {
       this->update(simulationTime, ageGroup, Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       doomed  = 6;
       return true;

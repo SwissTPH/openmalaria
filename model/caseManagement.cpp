@@ -45,9 +45,6 @@ CaseManagementModel::CaseManagementModel(){
   
   _caseManagementMemory = get_health_system_memory();
   readCaseFatalityRatio();
-  
-  int timeStepsPer5Months = 150 / Global::interval;
-  _prevalenceByGestationalAge.assign(timeStepsPer5Months, 0.0);
 }
 
 CaseManagementModel::~CaseManagementModel(){
@@ -95,10 +92,6 @@ int CaseManagementModel::getCaseManagementMemory() const{
   return _caseManagementMemory;
 }
 
-double CaseManagementModel::getRiskFromMaternalInfection() const{
-  return _riskFromMaternalInfection;
-}
-
 double CaseManagementModel::getProbabilityGetsTreatment(int regimen) const{
   return probGetsTreatment[regimen];
 }
@@ -132,35 +125,6 @@ double CaseManagementModel::caseFatality(double ageYears) {
   double a0 = _inputAge[i-1];
   double f0 = _caseFatalityRate[i-1];
   return (ageYears - a0) / (_inputAge[i] - a0) * (_caseFatalityRate[i]-f0) + f0;
-}
-
-void CaseManagementModel::setRiskFromMaternalInfection(int nCounter, int pCounter){
-  //Goodman estimated for neonatal mortality due to malaria in pregnancy
-  const double gEst = 0.011;
-  //Critical value of Prev20-25 for neonatal mortality
-  const double critPrev2025 = 0.25;
-  //Critical value for estimating prevalence in primigravidae
-  const double critPrevPrim = 0.19;
-  //Proportion of births with primigravid mothers
-  const double pBirthPrim = 0.3;
-  //default value for prev2025, for short simulations 
-  double prev2025 = 0.25;
-  prev2025 = double(pCounter) / nCounter;  
-  double maxprev = prev2025;
-  //gestational age is in time steps for the last 5 months of pregnancy only
-  int timeStepsMinus1 = 150 / Global::interval - 1;
-  //update the vector containing the prevalence by gestational age
-  for (int t=0; t < timeStepsMinus1; t++) {
-    _prevalenceByGestationalAge[t] = _prevalenceByGestationalAge[t+1];
-    if (_prevalenceByGestationalAge[t] > maxprev) {
-      maxprev = _prevalenceByGestationalAge[t];
-    }
-  }
-  _prevalenceByGestationalAge[timeStepsMinus1] = prev2025;
-  //equation (2) p 75 AJTMH 75 suppl 2
-  double prevpg= maxprev / (critPrevPrim + maxprev);
-  //equation (1) p 75 AJTMH 75 suppl 2
-  _riskFromMaternalInfection = gEst * pBirthPrim * (1.0-exp(-prevpg/critPrev2025));
 }
 
 

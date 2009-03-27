@@ -48,14 +48,12 @@ class CaseManagementModel{
   bool indirectDeath(int dob, int ageGroup, int& doomed);
 
   int getCaseManagementMemory() const;
-  double getRiskFromMaternalInfection() const;
 
   double getProbabilityGetsTreatment(int regimen) const;
   double getProbabilityParasitesCleared(int regimen) const;
   double getCureRate(int regimen) const;
   double getProbabilitySequelaeTreated(int regimen) const;
   double getProbabilitySequelaeUntreated(int regimen) const;
-  void setRiskFromMaternalInfection(int nCounter, int pCounter);
 
 private:
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
@@ -67,11 +65,6 @@ private:
   double probParasitesCleared[3];
   double cureRate[3];
   int _caseManagementMemory;
-  /*
-    Probability for a newborn to die (indirect death) because the mother is infected.
-    Depends on the prevalence of parasitaemia in mother at some previous t.
-  */
-  double _riskFromMaternalInfection;
   //log odds ratio of case-fatality in community compared to hospital
   double _oddsRatioThreshold;
   
@@ -88,9 +81,6 @@ private:
    * conditional if they don't receive hospital treatment for severe disease.
    */
   double probSequelaeUntreated[2];
-
-  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
-  std::vector<double> _prevalenceByGestationalAge;
 
   /// shortcut: if there is only one CFR group, and the CFR is 0, set this to true.
   bool _noMortality;
