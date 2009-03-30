@@ -41,12 +41,6 @@ double OldCaseManagement::probSequelaeUntreated[2];
 // -----  init  -----
 
 void OldCaseManagement::init (){
-  /* FIXME: this model won't eventually be compatible; for now it's (nearly) the same as before.
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    cerr << "OldCaseManagement not compatible with INCLUDES_PK_PD" << endl;
-    throw 0;
-  }*/
-  
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   setParasiteCaseParameters ();
@@ -70,10 +64,15 @@ void OldCaseManagement::init (){
 
 OldCaseManagement::OldCaseManagement(double tSF) :
     CaseManagementModel (tSF), _latestRegimen (0), _tLastTreatment(missing_value)
-{}
+{
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    cerr << "Warning: OldCaseManagement's case management predetermines clinical outcomes, and is not currently compatible with INCLUDES_PK_PD" << endl;
+  }
+}
 
 OldCaseManagement::~OldCaseManagement(){
 }
+
 
 void OldCaseManagement::doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
   bool effectiveTreatment =false;
@@ -119,7 +118,7 @@ bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
     int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
                                : Diagnosis::NON_MALARIA_FEVER;
     int nextRegimen=getNextRegimen(Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    if (getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
+    if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (W_UNIFORM())){
       _latestRegimen=nextRegimen;
       _tLastTreatment=Simulation::simulationTime;
       Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
@@ -135,7 +134,7 @@ bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
         return true;
       }
       else {
-        if (getProbabilityParasitesCleared(nextRegimen-1) > W_UNIFORM()){
+        if (probParasitesCleared[nextRegimen-1] > W_UNIFORM()){
           _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
           return true;
         }
@@ -177,15 +176,15 @@ bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
   
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
-  p2=getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
+  p2=probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor;
   // Probability of getting cured after getting treatment:
-  p3=getCureRate(nextRegimen-1);
+  p3=cureRate[nextRegimen-1];
   // p4 is the hospital case-fatality rate from Tanzania
   p4=caseFatality(ageYears);
   // p5 here is the community threshold case-fatality rate
   p5=getCommunityCaseFatalityRate(p4);
-  p6=getProbabilitySequelaeTreated(isAdultIndex);
-  p7=getProbabilitySequelaeUntreated(isAdultIndex);
+  p6=probSequelaeTreated[isAdultIndex];
+  p7=probSequelaeUntreated[isAdultIndex];
   
   double q[9];
   //	Community deaths
@@ -292,26 +291,6 @@ int OldCaseManagement::getNextRegimen(int simulationTime, int diagnosis, int tLa
     return 2;
   
   return 1;
-}
-
-double OldCaseManagement::getProbabilityGetsTreatment(int regimen) {
-  return probGetsTreatment[regimen];
-}
-
-double OldCaseManagement::getProbabilityParasitesCleared(int regimen) {
-  return probParasitesCleared[regimen];
-}
-
-double OldCaseManagement::getCureRate(int regimen) {
-  return cureRate[regimen];
-}
-
-double OldCaseManagement::getProbabilitySequelaeTreated(int ageGroup) {
-  return probSequelaeTreated[ageGroup];
-}
-
-double OldCaseManagement::getProbabilitySequelaeUntreated(int ageGroup) {
-  return probSequelaeUntreated[ageGroup];
 }
 
 double OldCaseManagement::caseFatality(double ageYears) {

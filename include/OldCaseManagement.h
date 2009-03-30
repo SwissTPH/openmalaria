@@ -37,12 +37,6 @@ public:
   
   virtual  void write(ostream& out) const;
   virtual void read(istream& in);
-
-  static double getProbabilityGetsTreatment(int regimen);
-  static double getProbabilityParasitesCleared(int regimen);
-  static double getCureRate(int regimen);
-  static double getProbabilitySequelaeTreated(int regimen);
-  static double getProbabilitySequelaeUntreated(int regimen);
   
 private:
    /*! should return true in case of effective or partially effective
