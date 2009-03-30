@@ -32,12 +32,20 @@ public:
   /// Initialize caseManagementMemory
   static void init();
   /// Return a new CaseManagementModel. Don't create one directly.
-  static CaseManagementModel* createCaseManagementModel ();
+  static CaseManagementModel* createCaseManagementModel (double tSF);
 
   /// Report last event, if any
   ~CaseManagementModel ();
   
-  static int caseManagementMemory;
+  /** Determine treatment for a human.
+   * @param infection = Type of infection
+   * @param withinHostModel = WithinHostModel of human.
+   * @param ageYears = Age of human.
+   * @param doomed = _doomed variable of human. Passing like this isn't ideal.
+   */
+  virtual void doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
+  
+  virtual bool recentTreatment() =0;
   
   /** Return the case management's event.
    * NOTE: possibly this method should be removed later. */
@@ -46,13 +54,17 @@ public:
   virtual void write(ostream& out) const;
   virtual void read(istream& in);
   
+  static int caseManagementMemory;
+  
 protected:
   /// Create, initializing _treatmentSeekingFactor to tSF.
-  CaseManagementModel ();
+  CaseManagementModel (double tSF);
   
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
   Event _latestEvent;
+  //! treatment seeking for heterogeneity
+  double _treatmentSeekingFactor;
 };
 
 #endif

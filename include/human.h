@@ -210,10 +210,6 @@ private:
   int _ID;
   //!number of vaccine doses this individual has received
   int _lastVaccineDose;
-  //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
-  int _latestRegimen;
-  //!time of the last treatment
-  int _tLastTreatment;
   //!Total asexual blood stage density
   double _totalDensity;		// possibly move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
@@ -232,8 +228,6 @@ private:
   //!Maximum parasite density during the previous 5-day interval
   double _timeStepMaxDensity;	// WithinHostModel, used by Morbidity
   //!Baseline availability to mosquitoes
-  double _treatmentSeekingFactor;
-  //! treatment seeking for heterogeneity
   double _BaselineAvailabilityToMosquitoes;
   
   /// Rate/probabilities before interventions. See functions.
@@ -251,20 +245,7 @@ private:
   void setLastSPDose();
 
   void updateInfectionStatus();
-
-
-   /*! should return true in case of effective or partially effective
-     treatment, false otherwise */
-  bool uncomplicatedEvent(bool isMalaria);
-
-  /*!  Determines whether there is an acute episode, or concomitant fever and
-    then whether the episode is severe, uncomplicated or there is an indirect
-    death. Clears infections if there was an effective treatment.
-  */
-  void defineEvent();
   
-  //! returns true in case of effective treatment, false otherwise
-  bool severeMalaria();
   
   //! Introduce new infections via a stochastic process
   void introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections);

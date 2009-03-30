@@ -28,7 +28,7 @@
 #include "simulation.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include "OldCaseManagement.h"
+#include "CaseManagementModel.h"
 #include "summary.h"
 #include "proteome.h"
 #include "intervention.h"
@@ -85,7 +85,7 @@ void Human::initHumanParameters () {	// static
 Human::Human() {
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(1.0);
-  _caseManagement = CaseManagementModel::createCaseManagementModel();
+  _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
 }
 
 // Create new human
@@ -112,8 +112,6 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   //NOTE: initialized here to preserve order of random calls
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _lastVaccineDose=0;
-  _latestRegimen=0;
-  _tLastTreatment=missing_value;
   _PEVEfficacy=0.0;
   _pinfected=0.0;
   _ptransmit=0.0;
@@ -140,6 +138,8 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   
   // Stored in morbidity model, not Human, now. Initialization looks somewhat entwined though..
   double _comorbidityFactor;
+  // Ditto, but in case management.
+  double _treatmentSeekingFactor;
   
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
@@ -194,7 +194,7 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
     }
   }
   _morbidityModel=MorbidityModel::createMorbidityModel(_comorbidityFactor);
-  _caseManagement = CaseManagementModel::createCaseManagementModel();
+  _caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
 }
 
 // Load human from checkpoint
@@ -205,7 +205,7 @@ Human::Human(istream& funit, int simulationTime)
   // WARNING: this will likely change some tests with checkpointing
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _morbidityModel=MorbidityModel::createMorbidityModel(1.0);
-  _caseManagement = CaseManagementModel::createCaseManagementModel();
+  _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
   // Reading human from file
   funit >> *this;
 }
@@ -341,6 +341,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   if ( _doomed < 0) {
     _doomed--;
   }
+  
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed ==  -7) {	//clinical episode 6 intervals before
     _caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
@@ -363,8 +364,16 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
     }
   }
   
-  //indicates if this individual was treated successfully (ie parasites cleared)
-  defineEvent();
+  /* infectionEvent determines whether there is an acute episode, or concomitant fever and
+  then whether the episode is severe, uncomplicated or there is an indirect
+  death.
+  doCaseManagement clears infections if there was an effective treatment, or calls medicate,
+  and decides whether the patient lives, has sequelae, or dies.
+  */
+  _caseManagement->doCaseManagement (_morbidityModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
+                                     *_withinHostModel,
+                                     getAgeInYears(),
+                                     _doomed);
 }
 
 void Human::vaccinate(){
@@ -424,11 +433,9 @@ void Human::IPTiTreatment (double compliance) {
 
 void Human::summarize(){
   double age = getAgeInYears();
-  if (getInterventions().getIptiDescription().present() &&
-      _simulationTime-_tLastTreatment >= 1 &&
-      _simulationTime-_tLastTreatment <=  4) {
+  if (getInterventions().getIptiDescription().present() && _caseManagement->recentTreatment())
     return ;
-  }
+  
   Simulation::gMainSummary->addToHost(age,1);
   _withinHostModel->summarize(age);
   if ( _totalDensity >  detectionlimit) {
@@ -494,199 +501,6 @@ double Human::infectiousness(){
   return valinfectiousness;
 }
 
-bool Human::uncomplicatedEvent(bool isMalaria){
-  //ageGroup is not optimized
-  int agegroup=ageGroup();
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    //TODO. Note entrypoint enumerations don't match up.
-    //doCM(isMalaria ? 1 : 4);
-    return true;
-  }
-  else {
-    int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
-                               : Diagnosis::NON_MALARIA_FEVER;
-    int nextRegimen=OldCaseManagement::getNextRegimen(_simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    if (OldCaseManagement::getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
-      _latestRegimen=nextRegimen;
-      _tLastTreatment=_simulationTime;
-      Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
-      
-      if (Global::modelVersion & INCLUDES_PK_PD){
-        _caseManagement->getEvent().update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
-        /*
-          TODO: uncomplicatedEvent forces a call of pk PD model
-          in the event that there is no treatment it should remain .false.
-          TODO: 
-          call medicate(currInd, "cq ", 300.0, 0)
-        */
-        return true;
-      }
-      else {
-        if (OldCaseManagement::getProbabilityParasitesCleared(nextRegimen-1) > W_UNIFORM()){
-          _caseManagement->getEvent().update(_simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
-          return true;
-        }
-        else {
-          _caseManagement->getEvent().update(_simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
-        }
-      }
-    }
-    else {
-      _caseManagement->getEvent().update(_simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
-    }
-  }
-  return false;
-}
-
-bool Human::severeMalaria(){
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    //TODO. Note entrypoint enumerations don't match up.
-    //doCM(3);
-    return true;
-  }
-  
-  /*
-    DOCU
-    Set doomed=4 if the patient dies.
-  */
-
-  int agegroup=ageGroup();
-  double prandom=(W_UNIFORM());
-  int isAdultIndex=1;
-  if (getAgeInYears() >= 5.0) {
-    isAdultIndex=0;
-  }
-  /*
-    TODO: is there a reason we cannot first decide if the patient is treated, then increase latestRegimen
-    and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
-    do we want to change this section of code rather than just introducing the new alternative (TS))
-  */ 
-  int nextRegimen=OldCaseManagement::getNextRegimen(_simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
-  
-  double p2, p3, p4, p5, p6, p7;
-  // Probability of getting treatment (only part which is case managment):
-  p2=OldCaseManagement::getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
-  // Probability of getting cured after getting treatment:
-  p3=OldCaseManagement::getCureRate(nextRegimen-1);
-  // p4 is the hospital case-fatality rate from Tanzania
-  p4=OldCaseManagement::caseFatality(getAgeInYears());
-  // p5 here is the community threshold case-fatality rate
-  p5=OldCaseManagement::getCommunityCaseFatalityRate(p4);
-  p6=OldCaseManagement::getProbabilitySequelaeTreated(isAdultIndex);
-  p7=OldCaseManagement::getProbabilitySequelaeUntreated(isAdultIndex);
-  
-  double q[9];
-  //	Community deaths
-  q[0]=(1-p2)*p5;
-  //	Community sequelae
-  q[1]=q[0]+(1-p2)*(1-p5)*p7;
-  //	Community survival
-  q[2]=q[1]+(1-p2)*(1-p5)*(1-p7);
-  //	Parasitological failure deaths
-  q[3]=q[2]+p2*p5*(1-p3);
-  //	Parasitological failure sequelae
-  q[4]=q[3]+p2*(1-p3)*(1-p5)*p7;
-  //	Parasitological failure survivors
-  q[5]=q[4]+p2*(1-p3)*(1-p5)*(1-p7);
-  //	Parasitological success deaths
-  q[6]=q[5]+p2*p3*p4;
-  //	Parasitological success sequelae
-  q[7]=q[6]+p2*p3*(1-p4)*p6;
-  //	Parasitological success survival
-  q[8]=q[7]+p2*p3*(1-p4)*(1-p6);
-  /*
-    if (q(5).lt.1) stop
-    NOT TREATED
-  */
-  
-  if (q[8] < 1.0) {
-    cout << "SM: ONE" << endl;
-
-    cout << prandom;
-    cout << q[0];
-    cout << q[1];
-    cout << q[2];
-    cout << q[3];
-    cout << q[4];
-    cout << q[5];
-    cout << q[6];
-    cout << q[7];
-    cout << q[8] << endl;
-  }
-  
-  if ( q[0] >  prandom) {
-    _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
-    _doomed  = 4;
-  }
-  else if( q[1] >  prandom) {
-    _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
-  }
-  else if( q[2] >  prandom) {
-    _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
-  }
-  else {
-    _tLastTreatment = _simulationTime;
-    _latestRegimen = nextRegimen;
-    Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
-    
-    if( q[3] >  prandom) {
-      _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
-      _doomed  = 4;
-    }
-    else if( q[4] >  prandom) {
-      _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
-    }
-    else if( q[5] >  prandom) {
-      _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
-    }
-    else {
-      if( q[6] >  prandom) {
-        _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
-        _doomed  = 4;
-      }
-      else if( q[7] >  prandom) {
-        _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
-      }
-      else // assume true, so we don't get another else case (DH): if( q[8] >=  prandom)
-      {
-        _caseManagement->getEvent().update(_simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
-void Human::defineEvent(){
-  bool effectiveTreatment =false;
-  
-  Morbidity::Infection event = _morbidityModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity);
-  
-  if (event & Morbidity::MALARIA) {
-    if (event & Morbidity::COMPLICATED)
-      effectiveTreatment=severeMalaria();
-    else if (event == Morbidity::UNCOMPLICATED)
-      effectiveTreatment=uncomplicatedEvent(true);
-    
-    if ((event & Morbidity::INDIRECT_MORTALITY) && _doomed == 0)
-      _doomed=-1;
-    
-    // Penalizing immunity for clinical episodes	
-    if (Global::modelVersion & PENALISATION_EPISODES) {
-      _withinHostModel->immunityPenalisation();
-    }
-  } else if(event & Morbidity::NON_MALARIA) {
-    effectiveTreatment = uncomplicatedEvent(false);
-  }
-  
-  if (effectiveTreatment) {
-    // INCLUDES_PK_PD clears drugs by calling medicate.
-    if (!(Global::modelVersion & INCLUDES_PK_PD))
-      _withinHostModel->IPTClearInfections(_caseManagement->getEvent());
-  }
-}
-
-
 double Human::entoAvailability () const {
   return _entoAvailability
       * entoInterventionITN.availability()
@@ -710,8 +524,6 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._doomed << endl; 
   out << human._ID << endl ; 
   out << human._lastVaccineDose << endl;
-  out << human._latestRegimen << endl; 
-  out << human._tLastTreatment << endl; 
   out << human._BSVEfficacy << endl; 
   out << human._cumulativeEIRa << endl; 
   out << human._timeStepMaxDensity << endl; 
@@ -724,15 +536,14 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._ylag[1] << endl; 
   out << human._ylag[2] << endl; 
   out << human._ylag[3] << endl; 
-  out << human._treatmentSeekingFactor << endl; 
   out << human._BaselineAvailabilityToMosquitoes << endl; 
   out << human._entoAvailability << endl;
   out << human._probMosqSurvivalBiting << endl;
   out << human._probMosqSurvivalResting << endl;
   out << human.entoInterventionITN;
   out << human.entoInterventionIRS;
+  
   return out;
-
 }
 
 istream& operator>>(istream& in, Human& human){
@@ -743,8 +554,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._doomed; 
   in >> human._ID; 
   in >> human._lastVaccineDose; 
-  in >> human._latestRegimen; 
-  in >> human._tLastTreatment; 
   in >> human._BSVEfficacy; 
   in >> human._cumulativeEIRa; 
   in >> human._timeStepMaxDensity; 
@@ -757,7 +566,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._ylag[1]; 
   in >> human._ylag[2]; 
   in >> human._ylag[3]; 
-  in >> human._treatmentSeekingFactor; 
   in >> human._BaselineAvailabilityToMosquitoes; 
   in >> human._entoAvailability;
   in >> human._probMosqSurvivalBiting;

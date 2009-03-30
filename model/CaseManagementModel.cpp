@@ -34,11 +34,12 @@ void CaseManagementModel::init () {
   OldCaseManagement::init();
 }
 
-CaseManagementModel* CaseManagementModel::createCaseManagementModel () {
-  return new OldCaseManagement();
+CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF) {
+  return new OldCaseManagement(tSF);
 }
 
-CaseManagementModel::CaseManagementModel ()
+CaseManagementModel::CaseManagementModel (double tSF) :
+     _treatmentSeekingFactor(tSF)
 {
   _latestEvent.setTime(missing_value);
 }
@@ -62,7 +63,9 @@ Event& CaseManagementModel::getEvent() {
 
 void CaseManagementModel::read(istream& in) {
   in >> _latestEvent;
+  in >> _treatmentSeekingFactor; 
 }
 void CaseManagementModel::write(ostream& out) const {
   out << _latestEvent;
+  out << _treatmentSeekingFactor << endl; 
 }
