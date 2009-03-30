@@ -255,7 +255,7 @@ void Summary::report(Event& event){
     break;
   default:
     //Diagnosis not conclusive
-    cout << "diag nc or non-malaria fever" << endl;
+    cout << "diag nc or non-malaria fever" << lineEnd;
     break;
   }
   switch (outcome) {
@@ -307,7 +307,7 @@ void Summary::report(Event& event){
     break;
   default:
     //Outcome not conclusive
-    cout << "oc nc" << outcome << endl;
+    cout << "oc nc" << outcome << lineEnd;
     break;
   }
 }
@@ -330,7 +330,7 @@ void Summary::reportTreatment (int ageGroup, int regimen) {
       break;
     default:
       //Regimen not conclusive
-      cout << "reg nc" << regimen << endl;
+      cout << "reg nc" << regimen << lineEnd;
       break;
     }
 }
@@ -379,10 +379,10 @@ void Summary::printHosts(ostream& out) {
   for(int j=0; j< (int) _numHosts[0].size()-1; j++){
 
     if (_assimilatorMode ==  1)
-      cout << "\t" << _numHosts[0][j] << endl;
+      cout << "\t" << _numHosts[0][j] << lineEnd;
     else
       cout << "\t" << 1 << "\t" << j+1 << "\t" 
-         << nHost << "\t" <<  _numHosts[0][j] <<  endl;
+         << nHost << "\t" <<  _numHosts[0][j] <<  lineEnd;
     
   }
 
@@ -394,6 +394,11 @@ void Summary::writeSummaryArrays () {
 
   ofstream outputFile;
   outputFile.open(output_filename.c_str());
+  
+  outputFile.width (0);
+  // For additional control:
+//   outputFile.precision (6);
+//   outputFile << scientific;
 
   if ( isOptionIncluded(_summaryOption, nHost)) {
     writeArray(outputFile, nHost, _assimilatorMode,  _numHosts);
@@ -484,7 +489,7 @@ void Summary::writeSummaryArrays () {
   //Infant mortality rate is a single number, therefore treated separately
   if ( isOptionIncluded(_summaryOption, imr_summary)) {
     outputFile << "\t" << 1 << "\t" << 1 << "\t" << imr_summary 
-               << "\t" <<infantAllCauseMort() <<  endl;
+               << "\t" <<infantAllCauseMort() <<  lineEnd;
   }
 
   outputFile.close();
@@ -592,10 +597,10 @@ void writeArray(ostream& file, int measure,
   for (int i=0; i<(int)array.size()-1; i++){
  
       if (assimilatorMode ==  1)
-        file << "\t" << array[i] << endl;
+        file << "\t" << array[i] << lineEnd;
       else
         file << "\t" << i+1 << "\t" << 0 << "\t" 
-             << measure << "\t" <<  array[i] <<  endl;
+             << measure << "\t" <<  array[i] <<  lineEnd;
       
     }
 
@@ -615,10 +620,10 @@ void writeArray(ostream& file, int measure,
     for(int j=0; j< (int) array[i].size()-1; j++){
  
       if (assimilatorMode ==  1)
-        file << "\t" << array[i][j] << endl;
+        file << "\t" << array[i][j] << lineEnd;
       else
         file << "\t" << i+1 << "\t" << j+1 << "\t" 
-             << measure << "\t" <<  array[i][j] <<  endl;
+             << measure << "\t" <<  array[i][j] <<  lineEnd;
 
     }
   }

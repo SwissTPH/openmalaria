@@ -310,6 +310,9 @@ class Summary {
   };
 
 };
+  
+  /** Line end character. Use Unix line endings to save a little size. */
+  const char lineEnd = '\n';
 
   template <class T>
     void writeArray(ostream& file, int measure, 
