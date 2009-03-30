@@ -212,21 +212,7 @@ bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
   */
   
   double prandom=(W_UNIFORM());
-  if (q[8] < 1.0) {
-    cout << "SM: ONE" << endl;
-
-    cout << prandom;
-    cout << q[0];
-    cout << q[1];
-    cout << q[2];
-    cout << q[3];
-    cout << q[4];
-    cout << q[5];
-    cout << q[6];
-    cout << q[7];
-    cout << q[8] << endl;
-  }
-  
+    
   if ( q[0] >  prandom) {
     _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
     doomed  = 4;

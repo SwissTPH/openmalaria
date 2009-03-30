@@ -233,7 +233,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\caseManagement.h"
+				RelativePath=".\include\CaseManagementModel.h"
 				>
 			</File>
 			<File
@@ -306,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\include\noVectorControl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\OldCaseManagement.h"
 				>
 			</File>
 			<File
@@ -393,26 +397,8 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\caseManagement.cpp"
+				RelativePath=".\model\CaseManagementModel.cpp"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\model\DescriptiveInfection.cpp"
@@ -486,6 +472,10 @@
 			</File>
 			<File
 				RelativePath=".\model\noVectorControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\OldCaseManagement.cpp"
 				>
 			</File>
 			<File

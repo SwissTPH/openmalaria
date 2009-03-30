@@ -33,6 +33,7 @@ using namespace std;
 /** main() - initializes and shuts down BOINC and GSL, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]){
+  cout << "Message to std::cout"<<endl;
   try {
     string scenario_name = "scenario.xml";
     if (argc == 2) {
