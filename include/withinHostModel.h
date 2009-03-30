@@ -41,6 +41,7 @@ class WithinHostModel {
 public:
   /// Initialise static parameters
   static void init();
+  
   static WithinHostModel* createWithinHostModel ();
   
   WithinHostModel() :

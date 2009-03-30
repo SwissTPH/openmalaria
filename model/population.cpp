@@ -25,10 +25,11 @@
 #include "inputData.h"
 #include "human.h"
 #include "simulation.h"
-#include "CaseManagementModel.h"
 #include "intervention.h"
 #include "transmissionModel.h"
 #include "summary.h"
+#include "morbidityModel.h"
+#include "CaseManagementModel.h"
 #include "boincWrapper.h"
 #include <math.h>
 
