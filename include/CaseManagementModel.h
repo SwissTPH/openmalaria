@@ -33,12 +33,26 @@ public:
   static void init();
   /// Return a new CaseManagementModel. Don't create one directly.
   static CaseManagementModel* createCaseManagementModel ();
+
+  /// Report last event, if any
+  ~CaseManagementModel ();
   
   static int caseManagementMemory;
+  
+  /** Return the case management's event.
+   * NOTE: possibly this method should be removed later. */
+  Event& getEvent();
+  
+  virtual void write(ostream& out) const;
+  virtual void read(istream& in);
   
 protected:
   /// Create, initializing _treatmentSeekingFactor to tSF.
   CaseManagementModel ();
+  
+  /** Next event to report.
+   * Only reported when the Human dies or a separate episode occurs. */
+  Event _latestEvent;
 };
 
 #endif

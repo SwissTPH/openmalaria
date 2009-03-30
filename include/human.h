@@ -27,6 +27,7 @@
 
 // Forward declaration
 class TransmissionModel;
+class CaseManagementModel;
 
 //! Model of a human individual 
 class Human {
@@ -194,6 +195,8 @@ private:
 
   // Time from start of the simulation
   int _simulationTime;
+
+  CaseManagementModel* _caseManagement;
   
   MorbidityModel* _morbidityModel;
 
@@ -232,7 +235,6 @@ private:
   double _treatmentSeekingFactor;
   //! treatment seeking for heterogeneity
   double _BaselineAvailabilityToMosquitoes;
-  Event _latestEvent;
   
   /// Rate/probabilities before interventions. See functions.
   double _entoAvailability;

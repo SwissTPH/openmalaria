@@ -93,7 +93,7 @@ int OldCaseManagement::getNextRegimen(int simulationTime, int diagnosis, int tLa
   if (diagnosis == Diagnosis::SEVERE_MALARIA)
     return 3;
   
-  if (tLastTreated > ( simulationTime-caseManagementMemory))
+  if (tLastTreated > (simulationTime-caseManagementMemory))
     return 2;
   
   return 1;
@@ -230,4 +230,14 @@ void OldCaseManagement::setParasiteCaseParameters () {
 
   //calculate probParasitesCleared 2 : cool :)
   probParasitesCleared[2] = 0;
+}
+
+
+// -----  checkpointing  -----
+
+void OldCaseManagement::read(istream& in) {
+  in >> _latestEvent;
+}
+void OldCaseManagement::write(ostream& out) const {
+  out << _latestEvent;
 }

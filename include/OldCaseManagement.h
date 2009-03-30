@@ -20,7 +20,6 @@
 #define Hcase_management
 
 #include "CaseManagementModel.h"
-#include <vector>
 
 //! Models of treatment seeking and referral
 class OldCaseManagement : public CaseManagementModel {
@@ -31,6 +30,9 @@ public:
   //!Read caseManagement parameters from input file and allocate data structures.
   OldCaseManagement();
   ~OldCaseManagement();
+  
+  virtual  void write(ostream& out) const;
+  virtual void read(istream& in);
   
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 

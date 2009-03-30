@@ -21,6 +21,8 @@
 #include "CaseManagementModel.h"
 #include "OldCaseManagement.h"
 #include "inputData.h"
+#include "simulation.h"
+#include "summary.h"
 
 
 int CaseManagementModel::caseManagementMemory;
@@ -38,4 +40,29 @@ CaseManagementModel* CaseManagementModel::createCaseManagementModel () {
 
 CaseManagementModel::CaseManagementModel ()
 {
+  _latestEvent.setTime(missing_value);
+}
+
+CaseManagementModel::~CaseManagementModel ()
+{
+  if (_latestEvent.getTime() !=  missing_value){
+    Simulation::gMainSummary->report(_latestEvent);
+  }
+}
+
+
+// -----  other  -----
+
+Event& CaseManagementModel::getEvent() {
+  return _latestEvent;
+}
+
+
+// -----  checkpointing  -----
+
+void CaseManagementModel::read(istream& in) {
+  in >> _latestEvent;
+}
+void CaseManagementModel::write(ostream& out) const {
+  out << _latestEvent;
 }
