@@ -25,7 +25,7 @@
 
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include "caseManagement.h"
+#include "CaseManagementModel.h"
 #include "transmissionModel.h"
 #include "population.h"
 #include "summary.h"

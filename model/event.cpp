@@ -24,7 +24,7 @@
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <algorithm>
-#include "caseManagement.h"
+#include "CaseManagementModel.h"
 #include "summary.h"
 #include "morbidityModel.h"
 

@@ -26,13 +26,14 @@
 #include "simulation.h"
 #include "transmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
+#include "inputData.h"
 
 using namespace std;
 
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), _SPattenuationt(0), _MOI(0), _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0), patentInfections(0)
+    WithinHostModel(), _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0), _SPattenuationt(0), _MOI(0), patentInfections(0)
 {
   W_GAUSS(0, sigma_i);	// FIXME: random call to keep these in sync
 }

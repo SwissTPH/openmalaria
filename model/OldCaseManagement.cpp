@@ -16,25 +16,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#include "caseManagement.h"
+#include "OldCaseManagement.h"
 #include "inputData.h"
 #include "global.h"
 #include <iostream>
 #include <limits>
 
-const int CaseManagementModel::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
-int CaseManagementModel::caseManagementMemory;
-double CaseManagementModel::_oddsRatioThreshold;
-bool CaseManagementModel::_noMortality;
-std::vector<double> CaseManagementModel::_inputAge;
-std::vector<double> CaseManagementModel::_caseFatalityRate;
-double CaseManagementModel::probGetsTreatment[3];
-double CaseManagementModel::probParasitesCleared[3];
-double CaseManagementModel::cureRate[3];
-double CaseManagementModel::probSequelaeTreated[2];
-double CaseManagementModel::probSequelaeUntreated[2];
+const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
+double OldCaseManagement::_oddsRatioThreshold;
+bool OldCaseManagement::_noMortality;
+std::vector<double> OldCaseManagement::_inputAge;
+std::vector<double> OldCaseManagement::_caseFatalityRate;
+double OldCaseManagement::probGetsTreatment[3];
+double OldCaseManagement::probParasitesCleared[3];
+double OldCaseManagement::cureRate[3];
+double OldCaseManagement::probSequelaeTreated[2];
+double OldCaseManagement::probSequelaeUntreated[2];
 
-void CaseManagementModel::init (){
+void OldCaseManagement::init (){
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   setParasiteCaseParameters ();
@@ -53,17 +52,16 @@ void CaseManagementModel::init (){
     gotItem:;	// alternative to for ... break ... else
   }
   
-  caseManagementMemory = get_health_system_memory();
   readCaseFatalityRatio();
 }
 
-CaseManagementModel::CaseManagementModel()
+OldCaseManagement::OldCaseManagement()
 {}
 
-CaseManagementModel::~CaseManagementModel(){
+OldCaseManagement::~OldCaseManagement(){
 }
 
-void CaseManagementModel::readCaseFatalityRatio(){
+void OldCaseManagement::readCaseFatalityRatio(){
   const AgeGroups::GroupSequence& xmlGroupSeq = getHealthSystem().getCFR().getGroup();
   
   int numOfGroups = xmlGroupSeq.size();
@@ -86,12 +84,12 @@ void CaseManagementModel::readCaseFatalityRatio(){
   _noMortality = (numOfGroups == 1) && ( _caseFatalityRate[0] == 0);
 }
 
-double CaseManagementModel::getCommunityCaseFatalityRate(double caseFatalityRatio) {
+double OldCaseManagement::getCommunityCaseFatalityRate(double caseFatalityRatio) {
   double x = caseFatalityRatio * _oddsRatioThreshold;
   return x / (1 - caseFatalityRatio + x);
 }
 
-int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) {
+int OldCaseManagement::getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) {
   if (diagnosis == Diagnosis::SEVERE_MALARIA)
     return 3;
   
@@ -101,31 +99,27 @@ int CaseManagementModel::getNextRegimen(int simulationTime, int diagnosis, int t
   return 1;
 }
 
-int CaseManagementModel::getCaseManagementMemory() {
-  return caseManagementMemory;
-}
-
-double CaseManagementModel::getProbabilityGetsTreatment(int regimen) {
+double OldCaseManagement::getProbabilityGetsTreatment(int regimen) {
   return probGetsTreatment[regimen];
 }
 
-double CaseManagementModel::getProbabilityParasitesCleared(int regimen) {
+double OldCaseManagement::getProbabilityParasitesCleared(int regimen) {
   return probParasitesCleared[regimen];
 }
 
-double CaseManagementModel::getCureRate(int regimen) {
+double OldCaseManagement::getCureRate(int regimen) {
   return cureRate[regimen];
 }
 
-double CaseManagementModel::getProbabilitySequelaeTreated(int ageGroup) {
+double OldCaseManagement::getProbabilitySequelaeTreated(int ageGroup) {
   return probSequelaeTreated[ageGroup];
 }
 
-double CaseManagementModel::getProbabilitySequelaeUntreated(int ageGroup) {
+double OldCaseManagement::getProbabilitySequelaeUntreated(int ageGroup) {
   return probSequelaeUntreated[ageGroup];
 }
 
-double CaseManagementModel::caseFatality(double ageYears) {
+double OldCaseManagement::caseFatality(double ageYears) {
   // NOTE: assume ageYears >= 0 and _inputAge[0] <= 0
   if (_noMortality)
     return 0.0;
@@ -162,7 +156,7 @@ double getHealthSystemACRByName (const TreatmentDetails& td, string firstLineDru
   }
 }
 
-void CaseManagementModel::setParasiteCaseParameters () {
+void OldCaseManagement::setParasiteCaseParameters () {
   const HealthSystem& healthSystem = getHealthSystem();
   
   

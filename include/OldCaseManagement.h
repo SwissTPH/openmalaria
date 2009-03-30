@@ -19,17 +19,18 @@
 #ifndef Hcase_management
 #define Hcase_management
 
+#include "CaseManagementModel.h"
 #include <vector>
 
 //! Models of treatment seeking and referral
-class CaseManagementModel{
+class OldCaseManagement : public CaseManagementModel {
 public:
   /// Initialize static parameters
   static void init();
 
   //!Read caseManagement parameters from input file and allocate data structures.
-  CaseManagementModel();
-  ~CaseManagementModel();
+  OldCaseManagement();
+  ~OldCaseManagement();
   
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 
@@ -46,17 +47,12 @@ public:
     individual regimen: drug to be used for the new treatment.
   */
   static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen);
-  static bool indirectDeath(int dob, int ageGroup, int& doomed);
-
-  static int getCaseManagementMemory();
 
   static double getProbabilityGetsTreatment(int regimen);
   static double getProbabilityParasitesCleared(int regimen);
   static double getCureRate(int regimen);
   static double getProbabilitySequelaeTreated(int regimen);
   static double getProbabilitySequelaeUntreated(int regimen);
-  
-  static int caseManagementMemory;
 
 private:
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
