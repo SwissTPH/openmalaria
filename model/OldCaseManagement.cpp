@@ -17,8 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 #include "OldCaseManagement.h"
+#include "withinHostModel.h"
 #include "inputData.h"
 #include "global.h"
+#include "simulation.h"
+#include "summary.h"
+#include "GSLWrapper.h"
 #include <iostream>
 #include <limits>
 
@@ -33,7 +37,16 @@ double OldCaseManagement::cureRate[3];
 double OldCaseManagement::probSequelaeTreated[2];
 double OldCaseManagement::probSequelaeUntreated[2];
 
+
+// -----  init  -----
+
 void OldCaseManagement::init (){
+  /* FIXME: this model won't eventually be compatible; for now it's (nearly) the same as before.
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    cerr << "OldCaseManagement not compatible with INCLUDES_PK_PD" << endl;
+    throw 0;
+  }*/
+  
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   setParasiteCaseParameters ();
@@ -55,10 +68,206 @@ void OldCaseManagement::init (){
   readCaseFatalityRatio();
 }
 
-OldCaseManagement::OldCaseManagement()
+OldCaseManagement::OldCaseManagement(double tSF) :
+    CaseManagementModel (tSF), _latestRegimen (0), _tLastTreatment(missing_value)
 {}
 
 OldCaseManagement::~OldCaseManagement(){
+}
+
+void OldCaseManagement::doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
+  bool effectiveTreatment =false;
+  
+  if (infection & Morbidity::MALARIA) {
+    if (infection & Morbidity::COMPLICATED)
+      effectiveTreatment=severeMalaria(ageYears, doomed);
+    else if (infection == Morbidity::UNCOMPLICATED)
+      effectiveTreatment=uncomplicatedEvent(true, ageYears);
+    
+    if ((infection & Morbidity::INDIRECT_MORTALITY) && doomed == 0)
+      doomed=-1;
+    
+    if (Global::modelVersion & PENALISATION_EPISODES) {
+      withinHostModel.immunityPenalisation();
+    }
+  } else if(infection & Morbidity::NON_MALARIA) {
+    effectiveTreatment = uncomplicatedEvent(false, ageYears);
+  }
+  
+  if (effectiveTreatment) {
+    if (!(Global::modelVersion & INCLUDES_PK_PD))
+      withinHostModel.IPTClearInfections(_latestEvent);
+  }
+}
+
+bool OldCaseManagement::recentTreatment() {
+  return (Simulation::simulationTime-_tLastTreatment >= 1 &&
+      Simulation::simulationTime-_tLastTreatment <= 4);
+}
+
+// -----  private  -----
+
+bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
+  //ageGroup is not optimized
+  int agegroup=Simulation::gMainSummary->ageGroup(ageYears);
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
+    //TODO. Note entrypoint enumerations don't match up.
+    //doCM(isMalaria ? 1 : 4);
+    return true;
+  }
+  else {
+    int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
+                               : Diagnosis::NON_MALARIA_FEVER;
+    int nextRegimen=getNextRegimen(Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
+    if (getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor > (W_UNIFORM())){
+      _latestRegimen=nextRegimen;
+      _tLastTreatment=Simulation::simulationTime;
+      Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
+      
+      if (Global::modelVersion & INCLUDES_PK_PD){
+        _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
+        /*
+        TODO: uncomplicatedEvent forces a call of pk PD model
+        in the event that there is no treatment it should remain .false.
+          TODO: 
+        call medicate(currInd, "cq ", 300.0, 0)
+        */
+        return true;
+      }
+      else {
+        if (getProbabilityParasitesCleared(nextRegimen-1) > W_UNIFORM()){
+          _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
+          return true;
+        }
+        else {
+          _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
+        }
+      }
+    }
+    else {
+      _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+    }
+  }
+  return false;
+}
+
+bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
+    //TODO. Note entrypoint enumerations don't match up.
+    //doCM(3);
+    return true;
+  }
+  
+  /*
+  DOCU
+  Set doomed=4 if the patient dies.
+  */
+
+  int agegroup=Simulation::gMainSummary->ageGroup(ageYears);
+  int isAdultIndex=1;
+  if (ageYears >= 5.0) {
+    isAdultIndex=0;
+  }
+  /*
+  TODO: is there a reason we cannot first decide if the patient is treated, then increase latestRegimen
+  and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
+  do we want to change this section of code rather than just introducing the new alternative (TS))
+  */ 
+  int nextRegimen=getNextRegimen(Simulation::simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
+  
+  double p2, p3, p4, p5, p6, p7;
+  // Probability of getting treatment (only part which is case managment):
+  p2=getProbabilityGetsTreatment(nextRegimen-1)*_treatmentSeekingFactor;
+  // Probability of getting cured after getting treatment:
+  p3=getCureRate(nextRegimen-1);
+  // p4 is the hospital case-fatality rate from Tanzania
+  p4=caseFatality(ageYears);
+  // p5 here is the community threshold case-fatality rate
+  p5=getCommunityCaseFatalityRate(p4);
+  p6=getProbabilitySequelaeTreated(isAdultIndex);
+  p7=getProbabilitySequelaeUntreated(isAdultIndex);
+  
+  double q[9];
+  //	Community deaths
+  q[0]=(1-p2)*p5;
+  //	Community sequelae
+  q[1]=q[0]+(1-p2)*(1-p5)*p7;
+  //	Community survival
+  q[2]=q[1]+(1-p2)*(1-p5)*(1-p7);
+  //	Parasitological failure deaths
+  q[3]=q[2]+p2*p5*(1-p3);
+  //	Parasitological failure sequelae
+  q[4]=q[3]+p2*(1-p3)*(1-p5)*p7;
+  //	Parasitological failure survivors
+  q[5]=q[4]+p2*(1-p3)*(1-p5)*(1-p7);
+  //	Parasitological success deaths
+  q[6]=q[5]+p2*p3*p4;
+  //	Parasitological success sequelae
+  q[7]=q[6]+p2*p3*(1-p4)*p6;
+  //	Parasitological success survival
+  q[8]=q[7]+p2*p3*(1-p4)*(1-p6);
+  /*
+  if (q(5).lt.1) stop
+  NOT TREATED
+  */
+  
+  double prandom=(W_UNIFORM());
+  if (q[8] < 1.0) {
+    cout << "SM: ONE" << endl;
+
+    cout << prandom;
+    cout << q[0];
+    cout << q[1];
+    cout << q[2];
+    cout << q[3];
+    cout << q[4];
+    cout << q[5];
+    cout << q[6];
+    cout << q[7];
+    cout << q[8] << endl;
+  }
+  
+  if ( q[0] >  prandom) {
+    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
+    doomed  = 4;
+  }
+  else if( q[1] >  prandom) {
+    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
+  }
+  else if( q[2] >  prandom) {
+    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+  }
+  else {
+    _tLastTreatment = Simulation::simulationTime;
+    _latestRegimen = nextRegimen;
+    Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
+    
+    if( q[3] >  prandom) {
+      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+      doomed  = 4;
+    }
+    else if( q[4] >  prandom) {
+      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+    }
+    else if( q[5] >  prandom) {
+      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
+    }
+    else {
+      if( q[6] >  prandom) {
+        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+        doomed  = 4;
+      }
+      else if( q[7] >  prandom) {
+        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+      }
+      else // assume true, so we don't get another else case (DH): if( q[8] >=  prandom)
+      {
+        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
+      }
+      return true;
+    }
+  }
+  return false;
 }
 
 void OldCaseManagement::readCaseFatalityRatio(){
@@ -237,7 +446,13 @@ void OldCaseManagement::setParasiteCaseParameters () {
 
 void OldCaseManagement::read(istream& in) {
   in >> _latestEvent;
+  in >> _treatmentSeekingFactor; 
+  in >> _latestRegimen; 
+  in >> _tLastTreatment; 
 }
 void OldCaseManagement::write(ostream& out) const {
   out << _latestEvent;
+  out << _treatmentSeekingFactor << endl; 
+  out << _latestRegimen << endl; 
+  out << _tLastTreatment << endl; 
 }

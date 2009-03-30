@@ -26,13 +26,36 @@ class OldCaseManagement : public CaseManagementModel {
 public:
   /// Initialize static parameters
   static void init();
-
+  
   //!Read caseManagement parameters from input file and allocate data structures.
-  OldCaseManagement();
+  OldCaseManagement(double tSF);
   ~OldCaseManagement();
+  
+  virtual void doCaseManagement (Morbidity::Infection, WithinHostModel&, double, int& doomed);
+  
+  virtual bool recentTreatment();
   
   virtual  void write(ostream& out) const;
   virtual void read(istream& in);
+
+  static double getProbabilityGetsTreatment(int regimen);
+  static double getProbabilityParasitesCleared(int regimen);
+  static double getCureRate(int regimen);
+  static double getProbabilitySequelaeTreated(int regimen);
+  static double getProbabilitySequelaeUntreated(int regimen);
+  
+private:
+   /*! should return true in case of effective or partially effective
+  treatment, false otherwise */
+  bool uncomplicatedEvent(bool isMalaria, double ageYears);
+
+  //! returns true in case of effective treatment, false otherwise
+  bool severeMalaria(double ageYears, int& doomed);
+  
+  //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
+  int _latestRegimen;
+  //!time of the last treatment
+  int _tLastTreatment;
   
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 
@@ -50,13 +73,6 @@ public:
   */
   static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen);
 
-  static double getProbabilityGetsTreatment(int regimen);
-  static double getProbabilityParasitesCleared(int regimen);
-  static double getCureRate(int regimen);
-  static double getProbabilitySequelaeTreated(int regimen);
-  static double getProbabilitySequelaeUntreated(int regimen);
-
-private:
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   //@{
   static void setParasiteCaseParameters ();
@@ -65,6 +81,7 @@ private:
   static double probGetsTreatment[3];
   static double probParasitesCleared[3];
   static double cureRate[3];
+  
   //log odds ratio of case-fatality in community compared to hospital
   static double _oddsRatioThreshold;
   
@@ -100,7 +117,6 @@ private:
     performance. This would require a specification of the resolution.
   */
   static void readCaseFatalityRatio();
-
 };
 
 #endif
