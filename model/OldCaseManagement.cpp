@@ -41,6 +41,9 @@ double OldCaseManagement::probSequelaeUntreated[2];
 // -----  init  -----
 
 void OldCaseManagement::init (){
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    cerr << "Warning: OldCaseManagement's case management predetermines clinical outcomes, and is not currently compatible with INCLUDES_PK_PD" << endl;
+  }
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   setParasiteCaseParameters ();
@@ -63,11 +66,8 @@ void OldCaseManagement::init (){
 }
 
 OldCaseManagement::OldCaseManagement(double tSF) :
-    CaseManagementModel (tSF), _latestRegimen (0), _tLastTreatment(missing_value)
+    CaseManagementModel (tSF), _latestRegimen (0)
 {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    cerr << "Warning: OldCaseManagement's case management predetermines clinical outcomes, and is not currently compatible with INCLUDES_PK_PD" << endl;
-  }
 }
 
 OldCaseManagement::~OldCaseManagement(){
@@ -97,11 +97,6 @@ void OldCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
     if (!(Global::modelVersion & INCLUDES_PK_PD))
       withinHostModel.IPTClearInfections(_latestEvent);
   }
-}
-
-bool OldCaseManagement::recentTreatment() {
-  return (Simulation::simulationTime-_tLastTreatment >= 1 &&
-      Simulation::simulationTime-_tLastTreatment <= 4);
 }
 
 // -----  private  -----

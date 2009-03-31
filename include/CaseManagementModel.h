@@ -45,7 +45,7 @@ public:
    */
   virtual void doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
   
-  virtual bool recentTreatment() =0;
+  bool recentTreatment();
   
   /** Return the case management's event.
    * NOTE: possibly this method should be removed later. */
@@ -65,6 +65,9 @@ protected:
   Event _latestEvent;
   //! treatment seeking for heterogeneity
   double _treatmentSeekingFactor;
+  
+  //!time of the last treatment
+  int _tLastTreatment;
 };
 
 #endif

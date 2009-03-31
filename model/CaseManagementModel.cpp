@@ -20,6 +20,7 @@
 
 #include "CaseManagementModel.h"
 #include "OldCaseManagement.h"
+#include "NewCaseManagement.h"
 #include "inputData.h"
 #include "simulation.h"
 #include "summary.h"
@@ -31,15 +32,23 @@ int CaseManagementModel::caseManagementMemory;
 
 void CaseManagementModel::init () {
   caseManagementMemory = get_health_system_memory();
-  OldCaseManagement::init();
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
+    NewCaseManagement::init();
+  } else {
+    OldCaseManagement::init();
+  }
 }
 
 CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF) {
-  return new OldCaseManagement(tSF);
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
+    return new NewCaseManagement(tSF);
+  } else {
+    return new OldCaseManagement(tSF);
+  }
 }
 
 CaseManagementModel::CaseManagementModel (double tSF) :
-     _treatmentSeekingFactor(tSF)
+    _treatmentSeekingFactor(tSF), _tLastTreatment(missing_value)
 {
   _latestEvent.setTime(missing_value);
 }
@@ -53,6 +62,11 @@ CaseManagementModel::~CaseManagementModel ()
 
 
 // -----  other  -----
+
+bool CaseManagementModel::recentTreatment() {
+  return (Simulation::simulationTime-_tLastTreatment >= 1 &&
+  Simulation::simulationTime-_tLastTreatment <= 4);
+}
 
 Event& CaseManagementModel::getEvent() {
   return _latestEvent;

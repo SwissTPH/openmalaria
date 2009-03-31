@@ -33,8 +33,6 @@ public:
   
   virtual void doCaseManagement (Morbidity::Infection, WithinHostModel&, double, int& doomed);
   
-  virtual bool recentTreatment();
-  
   virtual  void write(ostream& out) const;
   virtual void read(istream& in);
   
@@ -48,8 +46,6 @@ private:
   
   //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
   int _latestRegimen;
-  //!time of the last treatment
-  int _tLastTreatment;
   
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 

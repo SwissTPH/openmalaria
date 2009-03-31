@@ -51,9 +51,10 @@ am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	event.$(OBJEXT) human.$(OBJEXT) transmissionModel.$(OBJEXT) \
 	noVectorControl.$(OBJEXT) VectorControlInternal.$(OBJEXT) \
 	vectorControl.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
-	OldCaseManagement.$(OBJEXT) EntoIntervention.$(OBJEXT) \
-	muellerMorbidityModel.$(OBJEXT) morbidityModel.$(OBJEXT) \
-	predetMorbidityModel.$(OBJEXT) pyrogenMorbidityModel.$(OBJEXT)
+	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
+	EntoIntervention.$(OBJEXT) muellerMorbidityModel.$(OBJEXT) \
+	morbidityModel.$(OBJEXT) predetMorbidityModel.$(OBJEXT) \
+	pyrogenMorbidityModel.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -181,7 +182,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  withinHostModel.cpp oldWithinHostModel.cpp OldIPTWithinHostModel.cpp DummyWithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
- CaseManagementModel.cpp OldCaseManagement.cpp\
+ CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
  muellerMorbidityModel.cpp morbidityModel.cpp predetMorbidityModel.cpp pyrogenMorbidityModel.cpp
 
@@ -242,6 +243,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EntoIntervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSLWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorControlInternal.Po@am__quote@

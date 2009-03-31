@@ -264,12 +264,6 @@ private:
 
   void clearInfection(Infection *iCurrent);
 
-  /*!
-    Demonstrates the use of the CM-related calls to medicate. May or may not be
-    used as a subroutine in the final implementation.
-  */
-  void doCM(int entrypoint);
-
   //! Reads drugs from checkpoint
   void readDrugs(fstream& funit, int multiplicity);
 

@@ -7,7 +7,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  withinHostModel.cpp oldWithinHostModel.cpp OldIPTWithinHostModel.cpp DummyWithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
- CaseManagementModel.cpp OldCaseManagement.cpp\
+ CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
  muellerMorbidityModel.cpp morbidityModel.cpp predetMorbidityModel.cpp pyrogenMorbidityModel.cpp
 
