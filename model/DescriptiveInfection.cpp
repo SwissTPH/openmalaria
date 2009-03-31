@@ -166,29 +166,6 @@ int DescriptiveInfection::getEndDate(){
   return _startdate+_duration/Global::interval;
 }
 
-double DescriptiveInfection::determineWithinHostDensity(){
-    // TODO: this is the insertion point for the within host model
-
-    double density;
-    double valdetermineWithinHostDensity;
-    density=std::max(0.025, _density);
-    /*
-     if the density gets to be < 1 parasite per host then clear infections
-     is called by making the duration negative. TODO: the current test version
-     does not give a reasonable model for densities so we do not allow
-     the within-host model to set the duration.  Instead we allow the original model to determine duration
-     An alternative would be to set initial duration to be large positive to override the original model
-    */
-    if ( density <  0.02) {
-        _duration=-99;
-    }
-    // FIXME: was:
-    // valdetermineWithinHostDensity=mymodf(density*8.0, 20000.0);
-    // This is equivalent, but modulo (%) is not a useful operator on non-integers!
-    valdetermineWithinHostDensity=int(density*8.0) % 20000;
-    return valdetermineWithinHostDensity;
-}
-
 int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration

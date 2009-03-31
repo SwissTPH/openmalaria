@@ -25,7 +25,7 @@
 
 #include "global.h"
 #include "withinHostModel.h"
-#include "DescriptiveInfection.h"
+#include "DummyInfection.h"
 #include "drug.h"
 ;
 #include <iostream>
@@ -70,12 +70,6 @@ public:
   void read(istream& in);
 
 private:
-  /*!  SP drug action applies to each infection depending on genotype and when
-  the individual had their last dose of SP */
-  void SPAction(Human&);
-
-  void calculateDensity(DescriptiveInfection& inf, double);
-  
   void treatInfections();
   //! Treats all infections in an individual
   void treatAllInfections();
@@ -106,7 +100,7 @@ private:
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
-  std::list<DescriptiveInfection> infections;
+  std::list<DummyInfection> infections;
 };
 
 #endif

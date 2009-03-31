@@ -19,39 +19,18 @@
 
 */
 
-#ifndef Hmod_DescriptiveInfection
-#define Hmod_DescriptiveInfection
+#ifndef Hmod_DummyInfection
+#define Hmod_DummyInfection
 #include <fcntl.h>
 #include "intervention.h"
 #include "Infection.h"
 #include <fstream>
 
-
-//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?
-const int maxDur=84;
-
-//The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
-const double maxDens=2000000;
-
-struct genotype {
-   int ID;
-//!In order to save memory, we just define the ID of the genotype. Attributes of the
-//!genotype can be accessed via arrays in mod_intervention.
-//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
-//!attributes are:
-//!freq: Probability of being infected by this specific genotype
-//!ACR: Probability of being cured (due to SP)
-//!proph: Prophylactic effect of SP (measured in time steps)
-//!tolperiod: time window of tolerance period
-//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
-};
-
-
 //!  Models of infection.
 /*!
   Models related to the within-host dynamics of infections.
 */
-class DescriptiveInfection : public Infection {
+class DummyInfection : public Infection {
   //! Proteome (used in a different situation than genotype) 
   ProteomeInstance* _proteome; 
 
@@ -62,17 +41,17 @@ class DescriptiveInfection : public Infection {
   /*!
     \param lastSPdose Time interval of last SP Dose.
   */
-  DescriptiveInfection(int lastSPdose, int simulationTime);
+  DummyInfection(int lastSPdose, int simulationTime);
   
   /** Checkpoint-reading constructor */
-  DescriptiveInfection (istream& in);
+  DummyInfection (istream& in);
   
   /** Destructor
    * 
    * NOTE: this destructor does nothing to allow shallow copying to the
    * population list. destroy() does the real freeing and must be
    * called explicitly. */
-  ~DescriptiveInfection();
+  ~DummyInfection();
   void destroy();
   
   void write (ostream& out) const;
@@ -100,32 +79,19 @@ class DescriptiveInfection : public Infection {
   void multiplyDensity(double x) { _density *= x; };
   //! Get the density of the infection
   double getDensity() { return _density; };
-  void setDensity(double density) { _density = density;};
 
   //! Get proteome
   ProteomeInstance* getProteome() const;
-
-  bool getSPattenuate() { return _SPattenuate; };
-  
-  int getGenoTypeID() { return _gType.ID; };
 
   //! Start date of the infection
   int getStartDate() { return _startdate; };
   
   int getDuration() { return _duration; };
 
-  double getCumulativeExposureJ() {return _cumulativeExposureJ;};
-
-  void setCumulativeExposureJ(double exposure) { _cumulativeExposureJ=exposure; };
-
-  //! Determines parasite density of an individual infection.
-  /*!
-    \param cumulativeY Previous exposure, in cumulative number of parasites.
-    \param ageyrs Age in years.
-    \param cumulativeH cumulative number of inoculations (inoculation equals infection ?)
-
-  */
-  void determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity);
+  /*
+  //! Dummy function. Should override \sa determineDensities.
+  */ 
+  void determineWithinHostDensity();
 
   //! Initialises infection duration.
   /*! 
@@ -142,50 +108,18 @@ class DescriptiveInfection : public Infection {
   */
   void writeInfectionToFile (fstream& funit);
 
-  double getAlpha_m() const {return alpha_m;}
-  double getDecayM() const {return decayM;}
-  double getSigma0sq() const {return sigma0sq;}
-  double getXNuStar() const {return xNuStar;}
-  double getMeanLogParasiteCount(int pos) const {return meanLogParasiteCount[pos];}
   float getCumulativeHstar() const {return cumulativeHstar;};
   float getCumulativeYstar() const {return cumulativeYstar;};
 
 
  private:
 
-  //! Density distributions
-  /*!
-    Mean Log Parasite Count at time step i for an infection that lasts j days.
-    only about one half of the matrix is initialized. (right upper triangle)
-  */
-  static double meanLogParasiteCount[maxDur*maxDur];
- 
-  static double alpha_m; //!< Maternal protection at birth
-
-  /*!
-    More or less (up to 0.693) inverse quantity of alphaMStar (AJTM p. 9 eq. 12),
-    decay rate of maternal protection in years^(-1).
-  */
-  static double decayM;
-
-  static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
-
-  static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
- 
-  //! Sampled duration of the infection
+  //! Arbitrary maximum duration of the infection
   int _duration; 
   //! Start date of the infection
   int _startdate; 
   //! Current density of the infection
   double _density;
-  //! Cumulative parasite density, since start of this infection
-  double _cumulativeExposureJ; 
-  //! Genotype responsible for infection
-  genotype _gType;
-  //! IPTi parameter (indicator for attenuation).
-  bool _SPattenuate; 
-
-
 };
 
 #endif

@@ -59,13 +59,13 @@ void DummyWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DescriptiveInfection(missing_value, Simulation::simulationTime));
+    infections.push_back(DummyInfection(missing_value, Simulation::simulationTime));
     _MOI++;
   }
 }
 
 void DummyWithinHostModel::clearOldInfections(){
-  std::list<DescriptiveInfection>::iterator iter=infections.begin();
+  std::list<DummyInfection>::iterator iter=infections.begin();
   while(iter != infections.end()){
     int enddate=iter->getEndDate();
     if (Simulation::simulationTime >= enddate) {
@@ -80,7 +80,7 @@ void DummyWithinHostModel::clearOldInfections(){
 }
 
 void DummyWithinHostModel::clearAllInfections(){
-  std::list<DescriptiveInfection>::iterator i;
+  std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     i->destroy();
   }
@@ -99,7 +99,7 @@ void DummyWithinHostModel::treatInfections(){
 }
 
 void DummyWithinHostModel::treatAllInfections(){
-  std::list<DescriptiveInfection>::iterator i;
+  std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
   }
@@ -138,8 +138,6 @@ void DummyWithinHostModel::immunityPenalisation() {
 
 // -----  Density calculations  -----
 
-// NOTE: refering back to human so much isn't good programming practice. Could
-// some variables be stored locally?
 void DummyWithinHostModel::calculateDensities(Human& human) {
   _cumulativeYlag = _cumulativeY;
   
@@ -150,12 +148,12 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
   if (_cumulativeInfections >  0) {
     cumulativeh=_cumulativeh;
     cumulativeY=_cumulativeY;
-    std::list<DescriptiveInfection>::iterator i;
+    std::list<DummyInfection>::iterator i;
     for(i=infections.begin(); i!=infections.end(); i++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
       timeStepMaxDensity=human.getTimeStepMaxDensity();
       
-      i->setDensity(i->determineWithinHostDensity());
+      i->determineWithinHostDensity();
       timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
       human.setTimeStepMaxDensity(timeStepMaxDensity);
         
@@ -167,99 +165,10 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
       if (i->getStartDate() == (Simulation::simulationTime-1)) {
         _cumulativeh++;
       }
-      i->setDensity(std::min(maxDens, i->getDensity()));
-      i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
       _cumulativeY += Global::interval*i->getDensity();
     }
   }
   human.setPTransmit(human.infectiousness());
-}
-
-void DummyWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageYears) {
-  //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  int infage=1+Simulation::simulationTime-inf.getStartDate()-Global::latentp;
-  
-  if ( infage >  0) {
-    double y;
-    if ( infage <=  maxDur) {
-      int iduration=inf.getDuration()/Global::interval;
-      if ( iduration >  maxDur)
-        iduration=maxDur;
-      
-      y=(float)exp(inf.getMeanLogParasiteCount(infage - 1 + (iduration - 1)*maxDur));
-    } else {
-      y=(float)exp(inf.getMeanLogParasiteCount(maxDur - 1 + (maxDur - 1)*maxDur));
-    }
-    if ( y <  1.0)
-      y=1.0;
-    
-    //effect of cumulative Parasite density (named Dy in AJTM)
-    double dY;
-    //effect of number of infections experienced since birth (named Dh in AJTM)
-    double dH;
-    //effect of age-dependent maternal immunity (named Dm in AJTM)
-    double dA;
-    
-    if ( cumulativeh <=  1.0) {
-      dY=1;
-      dH=1;
-    } else {
-      dH=1 / (1+(cumulativeh-1.0)/inf.getCumulativeHstar());
-      //TODO: compare this with the asex paper
-      dY=1 / (1+(cumulativeY-inf.getCumulativeExposureJ())/inf.getCumulativeYstar());
-    }
-    dA=1 - inf.getAlpha_m() * exp(-inf.getDecayM() * ageYears);
-    
-    double survival=min (dY*dH*dA, 1.0);
-    double logy=log(y)*survival;
-    /*
-    The expected parasite density in the non naive host. 
-    As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
-    */
-    y=exp(logy);
-    //Perturb y using a lognormal 
-    double varlog=inf.getSigma0sq()/(1+(cumulativeh/inf.getXNuStar()));
-    double stdlog=sqrt(varlog);
-    /*
-    This code samples from a log normal distribution with mean equal to the predicted density
-    n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
-    the log of the predicted density.  If we really did the latter then this bias correction is not needed.
-    */
-    double meanlog=log(y)-stdlog*stdlog/2.0;
-    timeStepMaxDensity = 0.0;
-    if ( stdlog >  0.0000001) {
-      if ( Global::interval >  1) {
-        double normp=W_UNIFORM();
-	/*
-        sample the maximum density over the T-1 remaining days in the
-        time interval, (where T is the duration of the time interval)
-        */
-        normp=pow(normp, 1.0*1/(Global::interval-1));
-	/*
-        To mimic sampling T-1 repeated values, we transform the sampling
-        distribution and use only one sampled value, which has the sampling
-        distribution of the maximum of T-1 values sampled from a uniform.
-        The probability density function of this sampled random var is distributed
-        according to a skewed distribution (defined in [0,1]) where the
-        exponent (1/(T-1)) arises because each of T-1 sampled
-        values would have this probability of being the maximum. 
-        */
-        timeStepMaxDensity = sampleFromLogNormal(normp, meanlog, stdlog);
-      }
-      //calculate the expected density on the day of sampling
-      y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
-      timeStepMaxDensity = std::max( y, timeStepMaxDensity);
-    }
-    if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
-      cout << "MD lim" << endl;
-      y=maxDens;
-      timeStepMaxDensity = (double) y;
-    }
-    inf.setDensity(y);
-  }
-  else {
-    inf.setDensity(0.0);
-  }
 }
 
 // -----  Summarize  -----
@@ -293,7 +202,7 @@ void DummyWithinHostModel::read(istream& in) {
   }
 
   for(int i=0;i<_MOI;++i) {
-    infections.push_back(DescriptiveInfection(in));
+    infections.push_back(DummyInfection(in));
   }
 
   if (Global::modelVersion & INCLUDES_PK_PD) {
@@ -313,7 +222,7 @@ void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeY << endl;
   out << _cumulativeYlag << endl;
 
-  for(std::list<DescriptiveInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+  for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
   
   if (Global::modelVersion & INCLUDES_PK_PD) {
