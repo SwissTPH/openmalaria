@@ -23,11 +23,23 @@
 #include <fcntl.h>
 #include <math.h>
 #include <vector>
+#include <string>
 using namespace std;
 
 class Global
 {
 public:
+  /** Looks through all command line options.
+   *
+   * @returns The name of the scenario XML file to use.
+   *
+   * Calls exit(1) directly to exit in the case a help message is printed. Help
+   * is printed to cout. Both actions necessitate calling this function
+   * before BOINC is initialised.
+   * 
+   * In other cases, sets variables in Global to achieve the desired result. */
+  static string parseCommandLine (int argc, char* argv[]);
+  
   /// Sets parameters in Global.
   static void initGlobal ();
   

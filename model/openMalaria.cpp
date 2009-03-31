@@ -27,21 +27,16 @@ using namespace std;
 #include "inputData.h" //Include parser for the input
 #include "GSLWrapper.h" //Include wrapper for GSL library
 
+#include "global.h"
 #include "simulation.h"
 
 
 /** main() - initializes and shuts down BOINC and GSL, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]){
-  cout << "Message to std::cout"<<endl;
   try {
-    string scenario_name = "scenario.xml";
-    if (argc == 2) {
-      scenario_name = argv[1];
-    } else if (argc > 1) {
-      cout << "Usage: "<<argv[0]<<" [file.xml]\nIf no file name is supplied, the name scenario.xml is used."<<endl;
-      return 1;
-    }
+    string scenario_name =
+      Global::parseCommandLine (argc, argv);
     
     BoincWrapper::init();
     

@@ -43,6 +43,62 @@ int Global::latentp;
 vector<int> Global::infantIntervalsAtRisk;
 vector<int> Global::infantDeaths;
 
+string Global::parseCommandLine (int argc, char* argv[]) {
+  bool cloHelp = false;
+  bool fileGiven = false;
+  string scenarioFile = "scenario.xml";
+  
+  for (int i = 1; i < argc; ++i) {
+    string clo = argv[i];
+    
+    // starts "--"
+    if (clo.size() >= 2 && *clo.data() == '-' && clo.data()[1] == '-') {
+      clo.assign (clo, 2, clo.size()-2);
+      
+      if (clo == "help") {
+	cloHelp = true;
+      } else {
+	cerr << "Unrecognised option: --" << clo << endl;
+	cloHelp = true;
+      }
+      continue;
+    }
+    
+    if (!fileGiven) {
+      scenarioFile = clo;
+      fileGiven = true;
+    } else {
+      cerr << "Only one scenario file may be given." << endl;
+      cloHelp = true;
+    }
+  }
+  
+  if (cloHelp) {
+    cout << argv[0] << " [options] [file.xml]" << endl
+    << "Input scenario file defaults to scenario.xml if no name is given." << endl << endl
+    << "Options:" << endl
+    << "  --help\tPrint this message." << endl
+    ;
+    exit (1);
+  }
+  
+  return scenarioFile;
+}
+
+void Global::initGlobal () {
+  setModelVersion();
+  interval=get_interval();
+  if (daysInYear % interval !=  0) {
+    cerr << "daysInYear not a multiple of interval" << endl;
+    exit(-12);
+  }
+  intervalsPerYear = daysInYear/interval;
+  infantDeaths.resize(intervalsPerYear);
+  infantIntervalsAtRisk.resize(intervalsPerYear);
+  latentp=get_latentp();
+  maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
+}
+
 void Global::setModelVersion () {
   modelVersion = (ModelVersion) get_model_version();
   /* To print flags as binary:
@@ -88,20 +144,6 @@ void Global::setModelVersion () {
     }
   if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
     cerr << "Warning: model version used is deprecated" << endl;
-}
-
-void Global::initGlobal () {
-  setModelVersion();
-  interval=get_interval();
-  if (daysInYear % interval !=  0) {
-    cerr << "daysInYear not a multiple of interval" << endl;
-    exit(-12);
-  }
-  intervalsPerYear = daysInYear/interval;
-  infantDeaths.resize(intervalsPerYear);
-  infantIntervalsAtRisk.resize(intervalsPerYear);
-  latentp=get_latentp();
-  maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
 }
 
 int Global::modIntervalsPerYear (int i) {
