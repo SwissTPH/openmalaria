@@ -176,6 +176,8 @@ public:
   //@{
   static void initHumanParameters ();
   
+  static void clear();
+  
 /*
   The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
   TODO: in fact the detection limit in Garki should be the same as the PCR detection limit

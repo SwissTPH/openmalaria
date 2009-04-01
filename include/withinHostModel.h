@@ -42,6 +42,9 @@ public:
   /// Initialise static parameters
   static void init();
   
+  /// Free memory
+  static void clear();
+  
   static WithinHostModel* createWithinHostModel ();
   
   WithinHostModel() :

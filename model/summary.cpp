@@ -28,95 +28,7 @@
 #include "event.h"
 #include "boincWrapper.h"
 
-Summary::Summary() : _surveyPeriod(0)  {
-
- /*
-    
-    Allocates memory for event and parasitological summaries. We can wait 
-    with the call to this until the beginning of the main simulation.
-   
- */
-  
-
-//  int numberOfSurveys;
-//   int i;
-//   _surveyPeriod=1;
-//   numberOfSurveys=get_number_of_surveys();
-//   _surveysTimeIntervals.resize(numberOfSurveys+1);
-
-//   for (i=0;i<numberOfSurveys; i++) {
-//     _surveysTimeIntervals[i]=get_time_of_survey(i+1);
-//   }
-
-//   _summaryDimensionX=numberOfSurveys+1;
-//   _summaryDimensionY=_numOfAgeGroups;
-//   _summaryOption=get_summary_option();
-//   _assimilatorMode=get_assim_mode();
-
-//   /* Vectors initialization */
-  
-//   _numHosts.resize(numberOfSurveys+1);
-//   _numInfectedHosts.resize(numberOfSurveys+1);
-//   _numExpectedInfected.resize(numberOfSurveys+1);
-//   _numPatentHosts.resize(numberOfSurveys+1);
-//   _sumX.resize(numberOfSurveys+1);
-//   _sumLogDensity.resize(numberOfSurveys+1);
-//   _totalInfections.resize(numberOfSurveys+1);
-//   _numTransmittingHosts.resize(numberOfSurveys+1);
-//   _totalPatentInfections.resize(numberOfSurveys+1);
-//   _contributionImmunity.resize(numberOfSurveys+1);
-//   _pyrogenicThreshold.resize(numberOfSurveys+1);
-//   _numTreatments1.resize(numberOfSurveys+1);
-//   _numTreatments2.resize(numberOfSurveys+1);
-//   _numTreatments3.resize(numberOfSurveys+1);
-//   _numNonMalariaFever.resize(numberOfSurveys+1);
-//   _numUncomplicatedEpisodes.resize(numberOfSurveys+1);
-//   _numSevereEpisodes.resize(numberOfSurveys+1);
-//   _numDirectDeaths.resize(numberOfSurveys+1);
-//   _numIndirectDeaths.resize(numberOfSurveys+1);
-//   _numSequelae.resize(numberOfSurveys+1);
-//   _numHospitalDeaths.resize(numberOfSurveys+1);
-//   _numHospitalRecoveries.resize(numberOfSurveys+1);
-//   _numHospitalSequelae.resize(numberOfSurveys+1);
-//   _numEPIVaccines.resize(numberOfSurveys+1);
-//   _numMassVaccines.resize(numberOfSurveys+1);
-//   _numIPTDoses.resize(numberOfSurveys+1);
-//   _annualAverageKappa.resize(numberOfSurveys+1);
-
-//   for (int i=0;i<numberOfSurveys+1;i++){
-
-//     _numHosts[i].resize(_numOfAgeGroups);
-//     _numInfectedHosts[i].resize(_numOfAgeGroups);
-//     _numExpectedInfected[i].resize(_numOfAgeGroups);
-//     _numPatentHosts[i].resize(_numOfAgeGroups);
-//     _sumX[i].resize(_numOfAgeGroups);
-//     _sumLogDensity[i].resize(_numOfAgeGroups);
-//     _totalInfections[i].resize(_numOfAgeGroups);
-//     _totalPatentInfections[i].resize(_numOfAgeGroups);
-//     _contributionImmunity[i].resize(_numOfAgeGroups);
-//     _pyrogenicThreshold[i].resize(_numOfAgeGroups);
-//     _numTreatments1[i].resize(_numOfAgeGroups);
-//     _numTreatments2[i].resize(_numOfAgeGroups);
-//     _numTreatments3[i].resize(_numOfAgeGroups);
-//     _numNonMalariaFever[i].resize(_numOfAgeGroups);
-//     _numUncomplicatedEpisodes[i].resize(_numOfAgeGroups);
-//     _numSevereEpisodes[i].resize(_numOfAgeGroups);
-//     _numDirectDeaths[i].resize(_numOfAgeGroups);
-//     _numIndirectDeaths[i].resize(_numOfAgeGroups);
-//     _numSequelae[i].resize(_numOfAgeGroups);
-//     _numHospitalDeaths[i].resize(_numOfAgeGroups);
-//     _numHospitalRecoveries[i].resize(_numOfAgeGroups);
-//     _numHospitalSequelae[i].resize(_numOfAgeGroups);
-//     _numEPIVaccines[i].resize(_numOfAgeGroups);
-//     _numMassVaccines[i].resize(_numOfAgeGroups);
-//     _numIPTDoses[i].resize(_numOfAgeGroups);   
-
-//   }
-
-
-}
-
-void Summary::initSummaryParameters () {
+Summary::Summary() : _surveyPeriod(0) {
   //Read all summary parameters from the input file and allocate datastructures.
   const AgeGroup::GroupSequence& groups = getMonitoring().getAgeGroup().getGroup();
   _numOfAgeGroups = groups.size()+1;
@@ -136,7 +48,6 @@ void Summary::initSummaryParameters () {
 }
 
 void Summary::initialiseSummaries () {
-
 /*
     
     Allocates memory for event and parasitological summaries. We can wait 

@@ -57,6 +57,9 @@ void Human::initHumanParameters () {	// static
   // Init models used by humans:
   WithinHostModel::init();
   MorbidityModel::init();
+  EntoInterventionITN::initParameters();
+  EntoInterventionIRS::initParameters();
+  Vaccine::initParameters();
   
   /*
     Init parameters that are common to all humans
@@ -79,6 +82,11 @@ void Human::initHumanParameters () {	// static
   }
   detectionlimit=get_detectionlimit()*densitybias;
   BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
+}
+
+void Human::clear() {	// static clear
+  WithinHostModel::clear();
+  Vaccine::clearParameters();
 }
 
 // Testing Ctor

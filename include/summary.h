@@ -49,9 +49,6 @@ class Summary {
   //! Initialisation Routine. This will have to be moved to the class constructor
   void initialiseSummaries ();
 
-  //! Initialisation Routine. This will have to be moved to the class constructor
-  void initSummaryParameters();
-
   //! Clearing Routine. This will have to be moved to the class destructor
   void clearSummaryParameters();
 

@@ -23,14 +23,13 @@
 
 #include "boincWrapper.h"
 
-#include "inputData.h"
 #include "GSLWrapper.h"
-#include "transmissionModel.h"
 #include "population.h"
 #include "summary.h"
-#include "intervention.h"
+#include "proteome.h"
+#include "drug.h"
 #include "global.h"
-#include "DescriptiveInfection.h"
+#include "inputData.h"
 #include <fstream>
 
 /*
@@ -53,18 +52,15 @@ static const int NUM_CHECKPOINTS = 2;
 Simulation::Simulation() :
     checkpointName(CHECKPOINT)
 {
+  // Initialize input variables and allocate memory.
+  // We try to make initialization hierarchical (i.e. most classes initialise
+  // through Population::init).
   GSL_SETUP();
   
-  //initialize input variables and allocate memory, correct order is important.
-  gMainSummary = new Summary();	// currently won't affect anything else
-  gMainSummary->initSummaryParameters();
+  gMainSummary = new Summary();
   
-  _population = new Population(get_populationsize());
-  EntoInterventionITN::initParameters();
-  EntoInterventionIRS::initParameters();
-  Human::initHumanParameters();
-  IPTIntervention::initParameters();
-  Vaccine::initParameters();
+  Population::init();
+  _population = new Population();
   Global::simulationMode=equilibriumMode;
   simulationDuration=get_simulation_duration();
   relTimeInMainSim=simulationDuration/(1.0*simulationDuration+Global::maxAgeIntervals);
@@ -78,10 +74,8 @@ Simulation::Simulation() :
 Simulation::~Simulation(){
   //free memory
   gMainSummary->clearSummaryParameters();
-  IPTIntervention::clearParameters();
-  Vaccine::clearParameters();
+  Population::clear();
   delete gMainSummary;
-  delete _population;
   
   GSL_TEARDOWN();
 }
@@ -122,7 +116,7 @@ void Simulation::mainSimulation(){
       _population->newSurvey();
     }
   }
-  _population->clear();
+  delete _population;
   gMainSummary->writeSummaryArrays();
 }
 

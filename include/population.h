@@ -31,8 +31,15 @@ class Mass;
 //! The simulated human population
 class Population{
 public:
-  Population(int _populationSize);
+  Population();
+  //! Clears human collection.
   ~Population();
+  
+  /// Call static inits of sub-models
+  static void init();
+  
+  /// Calls static clear on sub-models to free memory
+  static void clear();
   
   /** Initialisation run between initial one-lifespan run of simulation and
    * actual simulation. */
@@ -72,9 +79,6 @@ public:
        \param time Current time (in tsteps) 
   */
   void massIPTiTreatment(const Mass&, int time);
-
-  //!   Clear human collection.
-  void clear();
 
   //! Mass Vaccination Intervention
   /*!
@@ -191,8 +195,6 @@ private:
  
   //! Used to calculate annAvgKappa.
   double _sumAnnualKappa;
-
-  void init();
 };
 
 #endif

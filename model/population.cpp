@@ -54,18 +54,11 @@ double *Population::cumpc;
 
 int Population::IDCounter;
 
-Population::Population(int populationSize)
-    : _populationSize(populationSize)
+Population::Population()
+    : _populationSize(get_populationsize())
 {
   _transmissionModel = TransmissionModel::createTransmissionModel();
-  this->init();
-}
 
-Population::~Population() {
-  delete _transmissionModel;  
-}
-
-void Population::init(){
   CaseManagementModel::init();
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
@@ -74,8 +67,23 @@ void Population::init(){
   IDCounter=0;
 }
 
+Population::~Population() {
+  for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
+    iter->destroy();
+  }
+  delete _transmissionModel;  
+}
+
+void Population::init(){
+  Human::initHumanParameters();
+}
+
+void Population::clear(){
+  Human::clear();
+}
+
 void Population::preMainSimInit () {
-  _transmissionModel->initMainSimulation(get_populationsize());
+  _transmissionModel->initMainSimulation(_populationSize);
 
   initialiseInfantArrays();
 }
@@ -464,14 +472,6 @@ void Population::massIPTiTreatment(const Mass& mass, int time){
     if ((ageYears > minAge) && (ageYears < maxAge))
       iter->IPTiTreatment(compliance);
   }
-}
-
-void Population::clear() {
-  HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter){
-    iter->destroy();
-  }
-  _population.clear();
 }
 
 

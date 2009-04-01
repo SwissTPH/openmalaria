@@ -47,7 +47,12 @@ void WithinHostModel::init() {
     DummyInfection::init ();
   } else {
     DescriptiveInfection::init ();
+    IPTIntervention::initParameters();
   }
+}
+
+void WithinHostModel::clear() {
+  IPTIntervention::clearParameters();
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
