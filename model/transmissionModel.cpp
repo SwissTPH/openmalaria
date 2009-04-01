@@ -36,7 +36,9 @@ const double TransmissionModel::agemax[nwtgrps] = { 0.99, 1.99, 2.99, 3.99, 4.99
 const double TransmissionModel::bsa_prop[nwtgrps] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 
 TransmissionModel* TransmissionModel::createTransmissionModel () {
-  if (Global::modelVersion & VECTOR_CONTROL)
+  // EntoData contains either a list of at least one anopheles or a list of at
+  // least one EIRDaily.
+  if (getEntoData().getAnopheles().size())
     return new VectorControl();
   else
     return new NoVectorControl();

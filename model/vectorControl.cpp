@@ -25,6 +25,7 @@
 
 #include "vectorControl.h"
 #include "VectorControlInternal.h"
+#include "inputData.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
@@ -36,19 +37,22 @@
 
 
 VectorControl::VectorControl () {
+  //TODO: For some reason we get a list of anopheles data. Use first item only
+  // until I find out why we have a list (DH).
+  // TransmissionModel::createTransmissionModel checks length of this list:
+  Anopheles anoph = getEntoData().getAnopheles()[0];
+  Mosq mosq = anoph.getMosq();
+  
+  mosqRestDuration = mosq.getMosqRestDuration();
+
+  mosqSeekingDeathRate = mosq.getMosqSeekingDeathRate();
+  mosqSeekingDuration = mosq.getMosqSeekingDuration();
+  
+  probMosqEggLaying = mosq.getMosqProbOvipositing();
+  
   //TODO: initialize these and perhaps other params properly:
   //K_vi
   //P_vi
-  
-  /* This will be defined in the xml file as a real.
-  We will define it as a integer - and convert after multiplying
-  by the length of the Global::interval. Scalar. */
-  mosqRestDuration=3;		// TODO: Move to XML
-
-  mosqSeekingDeathRate=1.6;	// TODO: Move to XML
-  mosqSeekingDuration=0.33;	// TODO: Move to XML
-  
-  probMosqEggLaying=0;
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     cerr << "Code expects EIPDuration >= mosqRestDuration >= 1" << endl;

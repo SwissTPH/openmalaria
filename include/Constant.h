@@ -123,15 +123,6 @@ enum ModelVersion {
   TRIPLE_HET = 1 << 21,
   // @}
   
-  // NOTE: This shouldn't be used yet. Previously, the noVectorControl constant was defined.
-  //const int noVectorControl = 22;  vector control is opt-in, not opt-out:
-  /** @brief Simulate the mosquito life-cycle.
-   * 
-   * Use VectorControl as the TransmissionModel.
-   * 
-   * Default: use NoVectorControl. */
-  VECTOR_CONTROL = 1 << 23,
-  
   // Used by tests; should be 1 plus highest left-shift value of 1
   NUM_VERSIONS = 24,
 };
