@@ -20,7 +20,9 @@
 
 #ifndef Hsimulation
 #define Hsimulation
-#include <fstream>
+#include <string>
+
+using namespace std;
 
 extern int simulationDuration;
 
@@ -33,10 +35,6 @@ extern double relTimeInMainSim;
 class TransmissionModel;
 class Population;
 class Summary;
-
-static const char* const checkpoint_name = "checkpoint";
-static const char* const checkpoint_0_name = "checkpoint0";
-static const char* const checkpoint_1_name = "checkpoint1";
 
 //! Main simulation class
 class Simulation{
@@ -73,16 +71,10 @@ public:
     classes. Don't report any events */
   void updateOneLifespan();
 
- private:
-
-  TransmissionModel* _transmissionModel;
+private:
   Population* _population;
 
-  //! This is the checkpoint data (the snapshot)
-  std::fstream f_checkpoint;
-
   void validateInput();
-  void tearDown();
 
    //!  Write the current checkpoint to a file.
   void writeCheckpoint();
@@ -94,7 +86,8 @@ public:
   /*! if it exists and initializes all the data return true if the workunit is
     checkpointed and false otherwise */
   bool isCheckpoint();
-
+  
+  string checkpointName;
 };
 
 #endif

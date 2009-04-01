@@ -229,3 +229,17 @@ size_t TransmissionModel::getAgeGroup (double age) {
   }
   return nages-1;	// final category
 }
+
+
+// -----  checkpointing  -----
+
+void TransmissionModel::write(ostream& out) const {
+  out << annualEIR << endl;
+  for (int i = 0; i < Global::intervalsPerYear; ++i)
+    out << kappa[i] << endl;
+}
+void TransmissionModel::read(istream& in) {
+  in >> annualEIR;
+  for (int i = 0; i < Global::intervalsPerYear; ++i)
+    in >> kappa[i];
+}

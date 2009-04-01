@@ -31,11 +31,12 @@ class Mass;
 //! The simulated human population
 class Population{
 public:
-
-  Population();
-  Population(TransmissionModel* transmissionModel, int _populationSize);
-
+  Population(int _populationSize);
   ~Population();
+  
+  /** Initialisation run between initial one-lifespan run of simulation and
+   * actual simulation. */
+  void preMainSimInit ();
 
    /*! Estimates demography parameters to define a smooth curve for the target
       population age-distribution (age in years) */
@@ -49,11 +50,10 @@ public:
   //! Initialise arrays for recording infant mortality
   void initialiseInfantArrays();
  
-  //! Write the human list and some parameters to a file. This is called during checkpoints
-  void writeLists(fstream& funit);
-
-  //! Read all lists from a checkpoint file after resuming the application
-  void readLists(fstream& funit);
+  //! Write checkpoint
+  void write (ostream& out);
+  /// Read checkpoint
+  void read (istream& in);
   
   //! Updates all individuals in the list for one time-step
   /*!  Also updates the population-level measures such as infectiousness, and

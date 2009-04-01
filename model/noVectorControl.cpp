@@ -80,7 +80,6 @@ NoVectorControl::~NoVectorControl () {
 
 //! initialise the main simulation 
 void NoVectorControl::initMainSimulation (int populationSize){
-
   // initialKappa is used in calculateEIR
   memcpy (initialKappa, kappa, Global::intervalsPerYear*sizeof(*kappa));
 }

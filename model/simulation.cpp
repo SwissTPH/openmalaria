@@ -29,9 +29,10 @@
 #include "population.h"
 #include "summary.h"
 #include "intervention.h"
-#include <stdio.h>
 #include "global.h"
 #include "DescriptiveInfection.h"
+#include <fstream>
+
 /*
 
   Defines the duration of the simulation runs and the pre-timestep call-sequence for both the
@@ -46,7 +47,12 @@ int Simulation::simulationTime;
 Summary* Simulation::gMainSummary;
 int Simulation::timeStep;
 
-Simulation::Simulation(){
+static const char* const CHECKPOINT = "checkpoint";
+static const int NUM_CHECKPOINTS = 2;
+
+Simulation::Simulation() :
+    checkpointName(CHECKPOINT)
+{
   GSL_SETUP();
   
   //initialize input variables and allocate memory, correct order is important.
@@ -54,11 +60,9 @@ Simulation::Simulation(){
   gMainSummary = new Summary();	// currently won't affect anything else
   //FIXME: when multiple types exist, should happen through Infections
   DescriptiveInfection::initParameters();
-
-  _transmissionModel = TransmissionModel::createTransmissionModel();
   
   gMainSummary->initSummaryParameters();
-  _population = new Population(_transmissionModel, get_populationsize());
+  _population = new Population(get_populationsize());
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
   Human::initHumanParameters();
@@ -81,33 +85,24 @@ Simulation::~Simulation(){
   Vaccine::clearParameters();
   delete gMainSummary;
   delete _population;
-  delete _transmissionModel;  
   
   GSL_TEARDOWN();
 }
 
 int Simulation::start(){
-  int whichSeedfile;
   if (isCheckpoint()) {
     readCheckpoint();
+    _population->setupPyramid(true);
   }
   else {
-    simulationTime=0;
+    simulationTime = 0;
     _population->estimateRemovalRates();
     _population->initialiseHumanList();
-  }
-  _population->setupPyramid(isCheckpoint());
-  if (isCheckpoint()){
-    fstream checkpointFile;
-    checkpointFile.open(checkpoint_name);
-    checkpointFile >> whichSeedfile;
-    checkpointFile.close();
-    load_rng_state(whichSeedfile);
+    _population->setupPyramid(false);
   }
   updateOneLifespan();
-  _transmissionModel->initMainSimulation(get_populationsize());
 
-  _population->initialiseInfantArrays();
+  _population->preMainSimInit();
   mainSimulation();
   return 0;
 }
@@ -154,84 +149,76 @@ void Simulation::validateInput(){
 
 
 bool Simulation::isCheckpoint(){
-  //open the file in which the checkpoint would have been written
-  fstream checkPonitFile(checkpoint_name,ios::in);
-
-  if (!checkPonitFile.is_open()){
-    //If File cannot be accessed:
-    return false;
-  }
-  return true;
-
+  ifstream checkpointFile(CHECKPOINT,ios::in);
+  // If not open, file doesn't exist (or is inaccessible)
+  return checkpointFile.is_open();
 }
 
 void Simulation::writeCheckpoint(){
-  //set this to 1, so that the first checkpoint is written to file "checkpoint0"
-  int lastCompleteCheckpoint = 1;
-
-  //check if there already is a checkpoint. 
-  fstream checkpointFile;
-  checkpointFile.open(checkpoint_name, fstream::in);
-  if(checkpointFile.is_open()){
-    checkpointFile >> lastCompleteCheckpoint;
-    checkpointFile.close();
+  // Set so that first checkpoint has number 0
+  int checkpointNum = NUM_CHECKPOINTS - 1;
+  {	// Get checkpoint number, if any
+    ifstream checkpointFile;
+    checkpointFile.open(CHECKPOINT, fstream::in);
+    if(checkpointFile.is_open()){
+      checkpointFile >> checkpointNum;
+      checkpointFile.close();
+    }
   }
- 
-  /*
-    Open the file in which the checkpoint data will be written
-    use the one that is outdated
-  */
-  if ( lastCompleteCheckpoint ==  1) {
-    f_checkpoint.open(checkpoint_0_name, ios::out | ios::binary);
-    save_rng_state(0);
+  // Get next checkpoint number:
+  checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
+  
+  save_rng_state (checkpointNum);
+  
+  // Open the next checkpoint file for writing:
+  ofstream f_checkpoint;
+  {
+    ostringstream name (checkpointName);
+    name << checkpointNum;
+    f_checkpoint.open(name.str().c_str(), ios::out | ios::binary);
   }
-  else {
-    f_checkpoint.open(checkpoint_1_name, ios::out | ios::binary);
-    save_rng_state(1);
-  }
-   
+  
+  // Write checkpoint
   f_checkpoint.precision(20);
-  f_checkpoint << simulationTime << endl ;
+  f_checkpoint << simulationTime << endl;
   if (Global::modelVersion & INCLUDES_PK_PD) {
     f_checkpoint << ProteomeManager::getManager();
   }
-  _population->writeLists(f_checkpoint);
+  _population->write (f_checkpoint);
   f_checkpoint.close();
-
-  /*
-    Now update the checkpoint file, to indicate that now the other datafile is
-    up-to-date
-  */
-  fstream checkpointFile2;
-  checkpointFile2.open(checkpoint_name,ios::out);
-  if ( lastCompleteCheckpoint ==  1) {
-    checkpointFile2 << "0" <<endl;
+  
+  {	// Indicate which is the latest checkpoint file.
+    ofstream checkpointFile;
+    checkpointFile.open(CHECKPOINT,ios::out);
+    checkpointFile << checkpointNum;
+    checkpointFile.close();
   }
-  else {
-    checkpointFile2 << "1" <<endl;
-  }
-  checkpointFile2.close();
 }
 
-void Simulation::readCheckpoint(){
-    int lastCompleteCheckpoint;
-    //Open the checkpoint file to see which cp datafile is up-to-date
-    fstream checkpointFile;
-    checkpointFile.open(checkpoint_name, ios::in);
-    checkpointFile >> lastCompleteCheckpoint;
+void Simulation::readCheckpoint() {
+  int checkpointNum;
+  {	// Find out which checkpoint file is current
+    ifstream checkpointFile;
+    checkpointFile.open(CHECKPOINT, ios::in);
+    checkpointFile >> checkpointNum;
     checkpointFile.close();
-    //Open the up-to-date file
-    if ( lastCompleteCheckpoint ==  1){
-      f_checkpoint.open(checkpoint_1_name, ios::in | ios::binary);
-    }
-    else {
-      f_checkpoint.open(checkpoint_0_name, ios::in | ios::binary);
-    }
-    f_checkpoint >> simulationTime;
-    if (Global::modelVersion & INCLUDES_PK_PD) {
-      ProteomeManager* manager = ProteomeManager::getManager();
-      f_checkpoint >> *manager;
-    }
-    _population->readLists(f_checkpoint);
-    f_checkpoint.close();
+  }
+  // Open the latest file
+  ifstream f_checkpoint;
+  {
+    ostringstream name (checkpointName);
+    name << checkpointNum;
+    f_checkpoint.open(name.str().c_str(), ios::in | ios::binary);
+  }
+  
+  // Read checkpoint
+  f_checkpoint >> simulationTime;
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    ProteomeManager* manager = ProteomeManager::getManager();
+    f_checkpoint >> *manager;
+  }
+  _population->read(f_checkpoint);
+  f_checkpoint.close();
+  
+  load_rng_state(checkpointNum);
 }

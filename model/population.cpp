@@ -54,18 +54,15 @@ double *Population::cumpc;
 
 int Population::IDCounter;
 
-Population::Population(){
-
-  this->init();
-
-}
-
-Population::Population(TransmissionModel* transmissionModel, int populationSize) 
-  : _populationSize(populationSize), _transmissionModel(transmissionModel) {
+Population::Population(int populationSize)
+    : _populationSize(populationSize)
+{
+  _transmissionModel = TransmissionModel::createTransmissionModel();
   this->init();
 }
 
 Population::~Population() {
+  delete _transmissionModel;  
 }
 
 void Population::init(){
@@ -75,6 +72,12 @@ void Population::init(){
   cumpc = (double*)malloc(((_maxTimestepsPerLife))*sizeof(double));
 
   IDCounter=0;
+}
+
+void Population::preMainSimInit () {
+  _transmissionModel->initMainSimulation(get_populationsize());
+
+  initialiseInfantArrays();
 }
 
 void Population::estimateRemovalRates () {
@@ -185,49 +188,44 @@ void Population::initialiseHumanList(){
   IDCounter=0;
 }
 
-void Population::writeLists (fstream& funit) {
-  funit << _transmissionModel->annualEIR << endl;
-  funit << _populationSize << endl;
-  funit << IDCounter << endl;
-  funit << mu0 << endl;
-  funit << mu1 << endl;
-  funit << alpha0 << endl;
-  funit << alpha1 << endl ;
-  funit << rho << endl; 
-  funit << _annualAverageKappa << endl;
-  funit << _sumAnnualKappa << endl;
-  for (int i = 0; i < Global::intervalsPerYear; ++i)
-    funit << _transmissionModel->kappa[i] << endl;
-  funit <<  _workUnitIdentifier << endl;
+void Population::write (ostream& out) {
+  _transmissionModel->write (out);
+  out << _populationSize << endl;
+  out << IDCounter << endl;
+  out << mu0 << endl;
+  out << mu1 << endl;
+  out << alpha0 << endl;
+  out << alpha1 << endl ;
+  out << rho << endl; 
+  out << _annualAverageKappa << endl;
+  out << _sumAnnualKappa << endl;
+  out <<  _workUnitIdentifier << endl;
 
   //Write human data
   start_cp_timer();
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    funit << *iter;
+    out << *iter;
   }
 
   //Finished writing lists
   stop_cp_timer();
-
 }
 
-void Population::readLists (fstream& funit) {
+void Population::read (istream& in) {
   //Start reading a checkpoint
   initialiseHumanList();
-  funit >> _transmissionModel->annualEIR;
-  funit >> _populationSize;
-  funit >> IDCounter;
-  funit >> mu0;
-  funit >> mu1;
-  funit >> alpha0;
-  funit >> alpha1;
-  funit >> rho;
-  funit >> _annualAverageKappa;
-  funit >> _sumAnnualKappa;
-  for (int i = 0; i < Global::intervalsPerYear; ++i)
-    funit >> _transmissionModel->kappa[i];
-  funit >> _workUnitIdentifier;
+  _transmissionModel->read (in);
+  in >> _populationSize;
+  in >> IDCounter;
+  in >> mu0;
+  in >> mu1;
+  in >> alpha0;
+  in >> alpha1;
+  in >> rho;
+  in >> _annualAverageKappa;
+  in >> _sumAnnualKappa;
+  in >> _workUnitIdentifier;
 
   if ( _workUnitIdentifier !=  get_wu_id()) {
     cout << "cp_ct" << get_wu_id() << _workUnitIdentifier << endl;
@@ -236,9 +234,9 @@ void Population::readLists (fstream& funit) {
 
   //Start reading the human data
   int indCounter = 0;	// Number of individuals read from checkpoint
-  while(!(funit.eof()||_populationSize==indCounter)){
+  while(!(in.eof()||_populationSize==indCounter)){
       //continue: Fortran cont is probably not C cont
-    _population.push_back(Human(funit, Simulation::simulationTime));
+    _population.push_back(Human(in, Simulation::simulationTime));
     indCounter++;
   }
   if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){

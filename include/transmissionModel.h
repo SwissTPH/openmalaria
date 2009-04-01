@@ -98,6 +98,9 @@ public:
   /// for this age (in years). Also used by Human.
   static size_t  getAgeGroup (double age);
 
+  void write(ostream& out) const;
+  void read(istream& in);
+  
 protected:
   /**
    *  Given a positive array, originalArray, of length OALength,
