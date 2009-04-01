@@ -44,7 +44,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="D:\data\workspace\boinc\lib;D:\data\workspace\boinc\api;xsdcxx;include"
-				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
+				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY;WITHOUT_BOINC"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
@@ -234,14 +234,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\OldCaseManagement.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\NewCaseManagement.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\Constant.h"
 				>
 			</File>
@@ -286,7 +278,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\NewCaseManagement.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\noVectorControl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\OldCaseManagement.h"
 				>
 			</File>
 			<File
@@ -342,19 +342,27 @@
 			Name="model"
 			>
 			<File
+				RelativePath=".\model\boincWrapper.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\CaseManagementModel.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\model\OldCaseManagement.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\NewCaseManagement.cpp"
+				RelativePath=".\model\DescriptiveInfection.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\drug.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\DummyInfection.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\DummyWithinHostModel.cpp"
 				>
 			</File>
 			<File
@@ -386,7 +394,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\morbidityModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\muellerMorbidityModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\NewCaseManagement.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\noVectorControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\OldCaseManagement.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\OldIPTWithinHostModel.cpp"
 				>
 			</File>
 			<File
@@ -402,7 +430,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\predetMorbidityModel.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\proteome.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\pyrogenMorbidityModel.cpp"
 				>
 			</File>
 			<File
@@ -414,11 +450,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\timer.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\transmissionModel.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\vectorControl.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\VectorControlInternal.cpp"
 				>
 			</File>
 			<File

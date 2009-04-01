@@ -409,6 +409,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\DummyInfection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\DummyWithinHostModel.cpp"
 				>
 			</File>
@@ -468,6 +472,10 @@
 			</File>
 			<File
 				RelativePath=".\model\muellerMorbidityModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\NewCaseManagement.cpp"
 				>
 			</File>
 			<File
