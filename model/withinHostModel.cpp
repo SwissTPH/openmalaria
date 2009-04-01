@@ -42,6 +42,12 @@ void WithinHostModel::init() {
   immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
   immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
   asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+  
+  if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
+    DummyInfection::init ();
+  } else {
+    DescriptiveInfection::init ();
+  }
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {

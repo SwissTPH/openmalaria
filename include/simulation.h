@@ -74,8 +74,6 @@ public:
 private:
   Population* _population;
 
-  void validateInput();
-
    //!  Write the current checkpoint to a file.
   void writeCheckpoint();
 

@@ -56,18 +56,7 @@ class DummyInfection : public Infection {
   
   void write (ostream& out) const;
   
-  //! Init constants common to all Phase A (AJTMH 75(2)) infections.
-  /*!
-    Init constants common to all infections modeled via the original (AJTMH 75(2)
-    empirical model.  Using this model, the time step remains 5 days.  Where the simulation
-    time step is shorter than 5 days the parasite densities are looked up by rounding down
-    to the previous 5 days.
-
-    Once constants are initialised then cumulative distributions of parasite densities and durations of patency
-    from the malariatherapy data and also the category boundaries for the grouping
-    of time since first positive slide.
-  */
-  static void initParameters();
+  static void init ();
   
   //! Get the last timestep before the infection is cleared.
   /*!

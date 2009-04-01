@@ -88,7 +88,7 @@ class DescriptiveInfection : public Infection {
     from the malariatherapy data and also the category boundaries for the grouping
     of time since first positive slide.
   */
-  static void initParameters();
+  static void init ();
   
   //! Get the last timestep before the infection is cleared.
   /*!

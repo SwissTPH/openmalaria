@@ -56,12 +56,9 @@ Simulation::Simulation() :
   GSL_SETUP();
   
   //initialize input variables and allocate memory, correct order is important.
-  validateInput();		// does nothing now
   gMainSummary = new Summary();	// currently won't affect anything else
-  //FIXME: when multiple types exist, should happen through Infections
-  DescriptiveInfection::initParameters();
-  
   gMainSummary->initSummaryParameters();
+  
   _population = new Population(get_populationsize());
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
@@ -140,11 +137,6 @@ void Simulation::updateOneLifespan () {
     ++simulationTime;
     _population->update1();
   }
-}
-
-
-void Simulation::validateInput(){
-  //all input validation goes here
 }
 
 

@@ -38,7 +38,7 @@ void DummyInfection::destroy() {
   //}
 }
 
-void DummyInfection::initParameters(){
+void DummyInfection::init (){
 }
 
 DummyInfection::DummyInfection(int lastSPdose, int simulationTime){

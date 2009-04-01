@@ -45,7 +45,7 @@ void DescriptiveInfection::destroy() {
   //}
 }
 
-void DescriptiveInfection::initParameters(){
+void DescriptiveInfection::init (){
   //Empirical description of single Malaria infections in naive individuals
   //counter variables, i stands for 5 day time interval, j for duration of infection
   int i;
