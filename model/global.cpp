@@ -40,6 +40,8 @@ int Global::maxAgeIntervals;
 int Global::simulationMode;
 int Global::latentp;
 
+CLO::CLO Global::clOptions = CLO::NONE;
+
 vector<int> Global::infantIntervalsAtRisk;
 vector<int> Global::infantDeaths;
 
@@ -55,28 +57,39 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     if (clo.size() >= 2 && *clo.data() == '-' && clo.data()[1] == '-') {
       clo.assign (clo, 2, clo.size()-2);
       
-      if (clo == "help") {
+      if (clo == "scenario") {
+	if (!fileGiven) {
+	  ++i;
+	  if (i >= argc) {
+	    cerr << "Expected: --scenario filename" << endl << endl;
+	    cloHelp = true;
+	    break;
+	  }
+	  scenarioFile = argv[i];
+	  fileGiven = true;
+	} else {
+	  cerr << "Only one scenario file may be given." << endl;
+	}
+      } else if (clo == "print-model") {
+	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
+      } else if (clo == "help") {
 	cloHelp = true;
       } else {
-	cerr << "Unrecognised option: --" << clo << endl;
+	cerr << "Unrecognised option: --" << clo << endl << endl;
 	cloHelp = true;
       }
-      continue;
-    }
-    
-    if (!fileGiven) {
-      scenarioFile = clo;
-      fileGiven = true;
     } else {
-      cerr << "Only one scenario file may be given." << endl;
+      cerr << "Unexpected parameter: " << clo << endl << endl;
       cloHelp = true;
     }
   }
   
   if (cloHelp) {
-    cout << argv[0] << " [options] [file.xml]" << endl
-    << "Input scenario file defaults to scenario.xml if no name is given." << endl << endl
+    cout << "Usage:" << endl
+    << argv[0] << " [options]" << endl << endl
     << "Options:" << endl
+    << "  --scenario file.xml\tUses file.xml as the scenario. If not given, scenario.xml is used." << endl
+    << "  --print-model\tPrint which model version flags are set (as binary with right-most digit representing option 0) and exit." << endl
     << "  --help\tPrint this message." << endl
     ;
     exit (1);
@@ -85,7 +98,7 @@ string Global::parseCommandLine (int argc, char* argv[]) {
   return scenarioFile;
 }
 
-void Global::initGlobal () {
+bool Global::initGlobal () {
   setModelVersion();
   interval=get_interval();
   if (daysInYear % interval !=  0) {
@@ -97,15 +110,19 @@ void Global::initGlobal () {
   infantIntervalsAtRisk.resize(intervalsPerYear);
   latentp=get_latentp();
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
+  
+  return clOptions & CLO::EARLY_EXIT;
 }
 
 void Global::setModelVersion () {
   modelVersion = (ModelVersion) get_model_version();
-  /* To print flags as binary:
-  cerr << "Model version: ";
-  for (int i = 24; i >= 0; --i)
-    cerr << ((modelVersion >> i) & 1);
-  cerr << endl; */
+  
+  if (clOptions & CLO::PRINT_MODEL_VERSION) {
+    cout << "Model version: ";
+    for (int i = NUM_VERSIONS; i >= 0; --i)
+      cout << ((modelVersion >> i) & 1);
+    cout << endl; 
+  }
   
   // Or'd flags of incompatibility triangle from
   // "description of variables for interface" excel sheet

@@ -47,10 +47,11 @@ Summary* Simulation::gMainSummary;
 int Simulation::timeStep;
 
 Simulation::Simulation(){
+  GSL_SETUP();
+  
   //initialize input variables and allocate memory, correct order is important.
-  validateInput();		// only checks get_mode() currently
+  validateInput();		// does nothing now
   gMainSummary = new Summary();	// currently won't affect anything else
-  Global::initGlobal();
   //FIXME: when multiple types exist, should happen through Infections
   DescriptiveInfection::initParameters();
 
@@ -81,6 +82,8 @@ Simulation::~Simulation(){
   delete gMainSummary;
   delete _population;
   delete _transmissionModel;  
+  
+  GSL_TEARDOWN();
 }
 
 int Simulation::start(){

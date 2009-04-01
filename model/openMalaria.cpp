@@ -49,12 +49,15 @@ int main(int argc, char* argv[]){
       exit(-1);
     }
     
-    GSL_SETUP();
+    if (Global::initGlobal()) {
+      cleanDocument();
+      BoincWrapper::finish (0);	// This takes about 1 second to run!
+    }
+    
     {
       Simulation simulation;	// CTOR runs
       simulation.start();
     }	// DTOR runs
-    GSL_TEARDOWN();
     
     cleanDocument();
     BoincWrapper::finish(0);	// Never returns

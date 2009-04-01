@@ -26,6 +26,17 @@
 #include <string>
 using namespace std;
 
+/// Command-Line Option possibilities
+namespace CLO {
+  enum CLO {
+    NONE = 0,
+    
+    EARLY_EXIT = 0x100,	///< Don't run main simulation flag
+    
+    PRINT_MODEL_VERSION = 0x1 | EARLY_EXIT
+  };
+}
+
 class Global
 {
 public:
@@ -40,8 +51,13 @@ public:
    * In other cases, sets variables in Global to achieve the desired result. */
   static string parseCommandLine (int argc, char* argv[]);
   
-  /// Sets parameters in Global.
-  static void initGlobal ();
+  /** Sets parameters in Global and performs some checks.
+   *
+   * Also outputs some extra information for command-line options.
+   * 
+   * @returns: True if we should stop before running the simulation because of
+   * an option. */
+  static bool initGlobal ();
   
   static int modIntervalsPerYear (int i);
 
@@ -79,6 +95,8 @@ public:
 private:
   /// Sets modelVersion, checking for incompatible versions.
   static void setModelVersion ();
+  
+  static CLO::CLO clOptions;
 };
 
 inline int isOptionIncluded (int allOptions, int option) {
