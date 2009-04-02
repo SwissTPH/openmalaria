@@ -52,9 +52,6 @@ struct genotype {
   Models related to the within-host dynamics of infections.
 */
 class DescriptiveInfection : public Infection {
-  //! Proteome (used in a different situation than genotype) 
-  ProteomeInstance* _proteome; 
-
  //TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
   public:
 
@@ -172,12 +169,6 @@ class DescriptiveInfection : public Infection {
 
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
  
-  //! Sampled duration of the infection
-  int _duration; 
-  //! Start date of the infection
-  int _startdate; 
-  //! Current density of the infection
-  double _density;
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ; 
   //! Genotype responsible for infection

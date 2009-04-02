@@ -249,6 +249,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\DummyInfection.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\DummyWithinHostModel.h"
 				>
 			</File>

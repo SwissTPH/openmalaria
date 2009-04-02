@@ -176,10 +176,6 @@ int DescriptiveInfection::infectionDuration(){
     return valinfectionDuration;
 }
 
-ProteomeInstance* DescriptiveInfection::getProteome() const {
-  return _proteome;
-}
-
 void DescriptiveInfection::write (ostream& out) const {
   out << _duration << endl; 
   out << _startdate << endl; 

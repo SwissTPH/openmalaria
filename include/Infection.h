@@ -30,11 +30,24 @@ public:
   // Used in drug.cpp
   //@{
   //! Get proteome
-  virtual ProteomeInstance* getProteome() const =0;
+  inline ProteomeInstance* getProteome() const {
+    return _proteome;
+  }
   //@}
   
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
+
+protected:
+  //! Proteome (used in a different situation than genotype) 
+  ProteomeInstance* _proteome; 
+
+  //! Arbitrary maximum duration of the infection
+  int _duration; 
+  //! Start date of the infection
+  int _startdate; 
+  //! Current density of the infection
+  double _density;
 };
 
 #endif

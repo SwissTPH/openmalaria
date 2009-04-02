@@ -19,6 +19,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
+//This is needed to get symbols like M_PI with MSVC:
+#define _USE_MATH_DEFINES
 
 #include "transmissionModel.h"
 #include <math.h> 
@@ -47,7 +49,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 TransmissionModel::TransmissionModel(){
   strcpy(fnametestentopar,"output_ento_para.txt");
   
-  EIRRotateAngle = M_PI/2;
+  EIRRotateAngle = M_PI_2;
   EIPDuration = get_EipDuration();
   Human::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
   

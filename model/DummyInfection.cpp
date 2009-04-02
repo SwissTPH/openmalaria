@@ -68,10 +68,6 @@ int DummyInfection::infectionDuration(){
     return 100;
 }
 
-ProteomeInstance* DummyInfection::getProteome() const {
-  return _proteome;
-}
-
 void DummyInfection::write (ostream& out) const {
   out << _duration << endl; 
   out << _startdate << endl; 
