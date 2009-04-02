@@ -112,6 +112,7 @@ class ProteomeManager {
   ~ProteomeManager();
   static void addInstance(ProteomeInstance* _instance);
   static void addProtein(Protein* _protein);
+  //NOTE: all data is static, so there's no need to create an instance.
   static ProteomeManager* getManager();
   //!returns the proteome of a new infection
   ProteomeInstance* getInfection() const;

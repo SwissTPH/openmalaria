@@ -20,10 +20,8 @@
 
 #ifndef Hmod_TransmissionModel 
 #define Hmod_TransmissionModel 
-#define _USE_MATH_DEFINES 
 
 #include "human.h"
-#include "string.h"
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintOrigEIR

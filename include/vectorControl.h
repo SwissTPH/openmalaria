@@ -57,13 +57,6 @@ public:
   /** This needs to be called every interval. */
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime);
   
-  //maxDurIntPhaseEIR is the maximum number of days for which an
-  //intervention phase EIR is specified
-  static const int ifCalcMosqEmergeRate = 0;	// TODO: Move to XML.
-  // This should be 1 for the entomological model code to run.
-  // But we can set it to 0 to allow the program to run faster by 
-  // skipping EntoModel.cpp.
-
 private:
   /* Parameters from model */
   
@@ -85,7 +78,8 @@ private:
    * Assumed constant for all hosts. */
   double P_vi;
   
-  /** Probability of a mosquito successfully laying eggs after resting (P_E_i).
+  /** Probability of a mosquito successfully laying eggs given that it has
+   * rested (P_E_i).
    * 
    * Currently assumed constant, although NC's non-autonomous model provides
    * an alternative. */
@@ -217,7 +211,6 @@ private:
                                 double mosqProbBiting,
                                 double mosqProbFindRestSite,
                                 double mosqProbResting,
-                                double mosqProbOvipositing,
                                 double* FHumanInfectivityInitVector,
                                 double* FEIRInitVector);
 };

@@ -26,6 +26,7 @@
 #include "vectorControl.h"
 #include "VectorControlInternal.h"
 #include "inputData.h"
+#include <fstream>
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
@@ -37,8 +38,8 @@
 
 
 VectorControl::VectorControl () {
-  //TODO: For some reason we get a list of anopheles data. Use first item only
-  // until I find out why we have a list (DH).
+  // The XML schema allows a list of anopheles data to represent multiple types
+  // of mosquito. Currently only using one set of data is supported.
   // TransmissionModel::createTransmissionModel checks length of this list:
   Anopheles anoph = getEntoData().getAnopheles()[0];
   Mosq mosq = anoph.getMosq();
@@ -328,6 +329,9 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   And we still initialize the parameters here, but do not
   define them. */
   
+  Anopheles anoph = getEntoData().getAnopheles()[0];
+  Mosq mosq = anoph.getMosq();
+  
   /* Availability rate of hosts to mosquitoes.
   Units: 1/(Animals * Time)
   $\alpha_i$ in model. Matrix of size $n \times \theta_p$.
@@ -344,7 +348,7 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   Dimensionless.
   $P_{B_i}$ in model. Matrix of size $n \times \theta_p$.
   For now, we assume this does not change over the cycle. */
-  double mosqProbBiting=0.95;		// TODO: Move to XML
+  double mosqProbBiting = mosq.getMosqProbBiting();
 
   /*! Probability of a mosquito finding a resting side given that it has bitten a host.
   
@@ -352,32 +356,19 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   $P_{B_i}$ in model. Matrix of size $n \times \theta_p$.
   For now, we assume this does not change over the cycle. */
     
-  double mosqProbFindRestSite=0.95;	// TODO: Move to XML
+  double mosqProbFindRestSite = mosq.getMosqProbFindRestSite();
     
   /*! Probability of a mosquito surviving the resting period given that it has found a resting site.
    * 
   Dimensionless.
   $P_{D_i}$ in model. Matrix of size $n \times \theta_p$.
   For now, we assume this does not change over the cycle. */
-  double mosqProbResting=0.94;		// TODO: Move to XML
+  double mosqProbResting = mosq.getMosqProbResting();
   
-  /*! Probability of a mosquito ovipositing and returning to host-seeking given that it has survived the resting period.
-   * 
-  Dimensionless.
-  $P_{E_i}$ in model. Matrix of size $n \times \theta_p$.
-  For now, we assume this does not change over the cycle. */
-  double mosqProbOvipositing=0.93;	// TODO: Move to XML
-
-  int ifUseNv0Guess = 0;	// TODO: Move to XML.
-				// Use a predefined array for the initial
-				// mosquito emergence rate.
-				// Perhaps calculated in a different
-				// iteration.
+  /** Read the emergence rates from a file instead of calcuating them now. */
+  int ifUseNv0Guess = anoph.getUseNv0Guess();
+  /** File name to read emergence rates from. */
   char Nv0guessfilename[20] = "N_v0-Initial.txt";
-				// TODO: Move to XML.
-				// File that contains our initial guess for the 
-				// mosquito emergence rate.
-				// To be used only if ifUseNv0Guess=1.
 
   /**************************************************************! 
   ***************************************************************!
@@ -480,11 +471,11 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
     */
   if(ifUseNv0Guess){
     // Read from file.
-    FILE* fNv0 = fopen(Nv0guessfilename, "r");
-    for(int i = 0; i < daysInYear; i++){
-      fscanf(fNv0, "%le", &mosqEmergeRate[i]);
+    ifstream file (Nv0guessfilename);
+    for (int i = 0; i < daysInYear; i++){
+      file >> mosqEmergeRate[i];
     }
-    fclose(fNv0);
+    file.close();
   }else{
     double temp = populationSize*populationSize*hostAvailabilityRateInit;
     for (int i = 0; i < daysInYear; i++) {
@@ -493,13 +484,22 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   }
 
   // Now calculate the emergence rate:
-  if(ifCalcMosqEmergeRate)
+  // Do we want a separate control on this to ifUseNv0Guess? Presumably if we
+  // have good N_v0 from a file this won't take long anyway?
+  if(true) {
     CalcInitMosqEmergeRate(populationSize, EIPDuration,
                            nHostTypesInit,
                            nMalHostTypesInit, hostAvailabilityRateInit,
                            mosqProbBiting, mosqProbFindRestSite,
-                           mosqProbResting, mosqProbOvipositing,
+                           mosqProbResting,
                            humanInfectivityInit, EIRInit);
+    
+    // Since we've calculated the emergence rate, we might as well save it:
+    ofstream file (Nv0guessfilename);
+    for (int i = 0; i < daysInYear; ++i)
+      file << mosqEmergeRate[i];
+    file.close();
+  }
 }
 
 void VectorControl::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
@@ -526,7 +526,6 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
                                              double mosqProbBiting,
                                              double mosqProbFindRestSite,
                                              double mosqProbResting,
-                                             double mosqProbOvipositing,
                                              double* FHumanInfectivityInitVector,
                                              double* FEIRInitVector)
 {
@@ -569,7 +568,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
 # define P_B_i		mosqProbBiting
 # define P_C_i		mosqProbFindRestSite
 # define P_D_i		mosqProbResting
-# define P_E_i		mosqProbOvipositing
+# define P_E_i		probMosqEggLaying
 
 
   // Parameters that help to describe the order of the system.
