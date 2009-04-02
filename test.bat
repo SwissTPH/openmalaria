@@ -43,5 +43,9 @@ copy output.txt output10.txt
 copy test\original\scenario11.xml scenario.xml
 Release\malariacontrol_6.12_windows_intelx86
 fc test\original\original11.txt output.txt
-copy output.txt output11.txt
+copy output.txt output12.txt
+copy test\original\scenario12.xml scenario.xml
+Release\malariacontrol_6.12_windows_intelx86
+fc test\original\original12.txt output.txt
+copy output.txt output12.txt
 pause

@@ -34,7 +34,11 @@ namespace BoincWrapper {
       cerr << "APP. boinc_init() failed with code: "<<err<<endl;
       exit (err);
     }
+#ifdef WITHOUT_BOINC
+    cout << "non-boinc: \"dummy initialized\"" << endl;
+#else
     cout << "boinc initialized" << endl;
+#endif
     
     SharedGraphics::init();
   }

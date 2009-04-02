@@ -76,7 +76,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalDependencies="xerces-c_static_3D.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib"
-				OutputFile=".\Debug/malariaModel.exe"
+				OutputFile=".\Debug/malariacontrol_6.12_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=".\Debug;.\lib"
