@@ -49,7 +49,7 @@ boinc not found. You can get it here: http://boinc.ssl.berkeley.edu/
   AC_SUBST([BOINCDIR])
   BOINC_CFLAGS="-I$BOINCDIR -I$BOINCDIR/api -I$BOINCDIR/lib"
   AC_SUBST([BOINC_CFLAGS])
-  BOINC_LDFLAGS="-L$BOINCDIR -L$BOINCDIR/api -L$BOINCDIR/lib"
+  BOINC_LDFLAGS="-L$BOINCDIR -L$BOINCDIR/api -L$BOINCDIR/lib -L$BOINCDIR/mac_build/build/Deployment"
   AC_SUBST([BOINC_LDFLAGS])
   LIB_BOINC="-lboinc_api -lboinc"
   AC_SUBST([LIB_BOINC])  
