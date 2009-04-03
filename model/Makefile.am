@@ -13,7 +13,7 @@ openMalaria_SOURCES = openMalaria.cpp\
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a
 
-openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
+openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a -L../lib -L$BOINC_LIB_PATH @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ #@LIB_BOINC_API@ 
 
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall @BOINC_CFLAGS@ -I$(top_srcdir)/include -I$(top_srcdir)/xsdcxx #-Werror
 

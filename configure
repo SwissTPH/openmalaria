@@ -4448,7 +4448,7 @@ $as_echo "$as_me: error: Can't find Code Synthesis' xsd (or xsdcxx) program." >&
    fi
 fi
 
-BOINC_LIB_PATH=../boinc/lib
+export BOINC_LIB_PATH=../boinc/lib
 
 # Checks for Darwin architecture (MacOS)
  if test `uname -s | tr 'A-Z' 'a-z' | grep darwin`; then
@@ -4462,7 +4462,7 @@ fi
 
 # needed paths for MacOS
 if test `uname -s | tr 'A-Z' 'a-z' | grep darwin` ; then
-  BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
+  export BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
   export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
@@ -4587,7 +4587,7 @@ $as_echo "$ac_res" >&6; }
 as_val=`eval 'as_val=${'$as_ac_File'}
 		 $as_echo "$as_val"'`
    if test "x$as_val" = x""yes; then
-  LIB_BOINC_API="../$BOINC_LIB_PATH/libboinc_api.a"
+  LIB_BOINC_API="libboinc_api.a"
 
 else
   { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
@@ -4622,7 +4622,7 @@ $as_echo "$ac_res" >&6; }
 as_val=`eval 'as_val=${'$as_ac_File'}
 		 $as_echo "$as_val"'`
    if test "x$as_val" = x""yes; then
-  LIB_BOINC="../$BOINC_LIB_PATH/libboinc.a"
+  LIB_BOINC="libboinc.a"
 
 else
   { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5

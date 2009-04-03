@@ -32,14 +32,14 @@ if test "x$XSD" = x; then
    fi
 fi
 
-BOINC_LIB_PATH=../boinc/lib
+export BOINC_LIB_PATH=../boinc/lib
 
 # Checks for Darwin architecture (MacOS)
 AM_CONDITIONAL(DARWIN, [test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin`])
 
 # needed paths for MacOS
 if test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin` ; then
-  BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
+  export BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
   export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
@@ -54,8 +54,8 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
     AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
-    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc_api.a,[AC_SUBST(LIB_BOINC_API, "../$BOINC_LIB_PATH/libboinc_api.a")],[AC_MSG_FAILURE([No static boinc api library present])]) 
-    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc.a,[AC_SUBST(LIB_BOINC, "../$BOINC_LIB_PATH/libboinc.a")],[AC_MSG_FAILURE([No static boinc library present])]) 
+    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc_api.a,[AC_SUBST(LIB_BOINC_API, "libboinc_api.a")],[AC_MSG_FAILURE([No static boinc api library present])]) 
+    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc.a,[AC_SUBST(LIB_BOINC, "libboinc.a")],[AC_MSG_FAILURE([No static boinc library present])]) 
     #check for boinc libs
     CHECK_BOINC
 else
