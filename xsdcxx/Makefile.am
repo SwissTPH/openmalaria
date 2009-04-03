@@ -4,7 +4,8 @@ libxsdcxx_a_SOURCES = inputData.cpp scenario.cxx
 
 AM_CXXFLAGS = @CXXFLAGS@ -I$(top_srcdir)/xsdcxx -I$(top_srcdir)/include -static-libgcc -Wall @BOINC_CFLAGS@ #-Werror 
 
-XSD = xsdcxx
+#configure decides whether to use xsd or xsdcxx (must be in PATH)
+
 XSDFLAGS = --type-naming ucc --function-naming java --parser-regex '/(.+)/parse\u$$1/' --generate-doxygen
 
 all : inputData.o scenario.o

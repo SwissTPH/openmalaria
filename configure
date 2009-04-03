@@ -653,6 +653,7 @@ LIB_GSL
 LIB_XERC
 DARWIN_FALSE
 DARWIN_TRUE
+XSD
 RANLIB
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
@@ -755,6 +756,7 @@ CPP
 CXX
 CXXFLAGS
 CCC
+XSD
 BOINCDIR
 PKG_CONFIG
 gsl_CFLAGS
@@ -1400,6 +1402,7 @@ Some influential environment variables:
   CPP         C preprocessor
   CXX         C++ compiler command
   CXXFLAGS    C++ compiler flags
+  XSD         Code Synthesis XSD
   BOINCDIR    boinc directory
   PKG_CONFIG  path to pkg-config utility
   gsl_CFLAGS  C compiler flags for gsl, overriding pkg-config
@@ -4361,6 +4364,91 @@ if test "${enable_deploy+set}" = set; then
 fi
 
 
+# Check for xsd or xsdcxx
+
+# Extract the first word of "xsd", so it can be a program name with args.
+set dummy xsd; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_XSD+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$XSD"; then
+  ac_cv_prog_XSD="$XSD" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_XSD="xsd"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+XSD=$ac_cv_prog_XSD
+if test -n "$XSD"; then
+  { $as_echo "$as_me:$LINENO: result: $XSD" >&5
+$as_echo "$XSD" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+if test "x$XSD" = x; then
+   # Extract the first word of "xsdcxx", so it can be a program name with args.
+set dummy xsdcxx; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_prog_XSD+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test -n "$XSD"; then
+  ac_cv_prog_XSD="$XSD" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_prog_XSD="xsdcxx"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+fi
+fi
+XSD=$ac_cv_prog_XSD
+if test -n "$XSD"; then
+  { $as_echo "$as_me:$LINENO: result: $XSD" >&5
+$as_echo "$XSD" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+   if test "x$XSD" = x; then
+      { { $as_echo "$as_me:$LINENO: error: Can't find Code Synthesis' xsd (or xsdcxx) program." >&5
+$as_echo "$as_me: error: Can't find Code Synthesis' xsd (or xsdcxx) program." >&2;}
+   { (exit 1); exit 1; }; }
+   fi
+fi
+
+BOINC_LIB_PATH=../boinc/lib
 
 # Checks for Darwin architecture (MacOS)
  if test `uname -s | tr 'A-Z' 'a-z' | grep darwin`; then
@@ -4374,9 +4462,10 @@ fi
 
 # needed paths for MacOS
 if test `uname -s | tr 'A-Z' 'a-z' | grep darwin` ; then
-  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -L../../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
+  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export SDKROOT="/Developer/SDKs/MacOSX10.4u.sdk"
   export MACOSX_DEPLOYMENT_TARGET=10.4
   export PATH=/opt/local/bin:$PATH
@@ -4475,25 +4564,30 @@ See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }; }
 fi
 
-    { $as_echo "$as_me:$LINENO: checking for ../boinc/api/libboinc_api.a" >&5
-$as_echo_n "checking for ../boinc/api/libboinc_api.a... " >&6; }
-if test "${ac_cv_file____boinc_api_libboinc_api_a+set}" = set; then
+    as_ac_File=`$as_echo "ac_cv_file_$BOINC_LIB_PATH/libboinc_api.a" | $as_tr_sh`
+{ $as_echo "$as_me:$LINENO: checking for $BOINC_LIB_PATH/libboinc_api.a" >&5
+$as_echo_n "checking for $BOINC_LIB_PATH/libboinc_api.a... " >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
   $as_echo_n "(cached) " >&6
 else
   test "$cross_compiling" = yes &&
   { { $as_echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
 $as_echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
    { (exit 1); exit 1; }; }
-if test -r "../boinc/api/libboinc_api.a"; then
-  ac_cv_file____boinc_api_libboinc_api_a=yes
+if test -r "$BOINC_LIB_PATH/libboinc_api.a"; then
+  eval "$as_ac_File=yes"
 else
-  ac_cv_file____boinc_api_libboinc_api_a=no
+  eval "$as_ac_File=no"
 fi
 fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_file____boinc_api_libboinc_api_a" >&5
-$as_echo "$ac_cv_file____boinc_api_libboinc_api_a" >&6; }
-if test "x$ac_cv_file____boinc_api_libboinc_api_a" = x""yes; then
-  LIB_BOINC_API="../../boinc/api/libboinc_api.a"
+ac_res=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+as_val=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+   if test "x$as_val" = x""yes; then
+  LIB_BOINC_API="../$BOINC_LIB_PATH/libboinc_api.a"
 
 else
   { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
@@ -4505,25 +4599,30 @@ See \`config.log' for more details." >&2;}
    { (exit 1); exit 1; }; }; }
 fi
 
-    { $as_echo "$as_me:$LINENO: checking for ../boinc/lib/libboinc.a" >&5
-$as_echo_n "checking for ../boinc/lib/libboinc.a... " >&6; }
-if test "${ac_cv_file____boinc_lib_libboinc_a+set}" = set; then
+    as_ac_File=`$as_echo "ac_cv_file_$BOINC_LIB_PATH/libboinc.a" | $as_tr_sh`
+{ $as_echo "$as_me:$LINENO: checking for $BOINC_LIB_PATH/libboinc.a" >&5
+$as_echo_n "checking for $BOINC_LIB_PATH/libboinc.a... " >&6; }
+if { as_var=$as_ac_File; eval "test \"\${$as_var+set}\" = set"; }; then
   $as_echo_n "(cached) " >&6
 else
   test "$cross_compiling" = yes &&
   { { $as_echo "$as_me:$LINENO: error: cannot check for file existence when cross compiling" >&5
 $as_echo "$as_me: error: cannot check for file existence when cross compiling" >&2;}
    { (exit 1); exit 1; }; }
-if test -r "../boinc/lib/libboinc.a"; then
-  ac_cv_file____boinc_lib_libboinc_a=yes
+if test -r "$BOINC_LIB_PATH/libboinc.a"; then
+  eval "$as_ac_File=yes"
 else
-  ac_cv_file____boinc_lib_libboinc_a=no
+  eval "$as_ac_File=no"
 fi
 fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_file____boinc_lib_libboinc_a" >&5
-$as_echo "$ac_cv_file____boinc_lib_libboinc_a" >&6; }
-if test "x$ac_cv_file____boinc_lib_libboinc_a" = x""yes; then
-  LIB_BOINC="../../boinc/api/libboinc.a"
+ac_res=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+	       { $as_echo "$as_me:$LINENO: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+as_val=`eval 'as_val=${'$as_ac_File'}
+		 $as_echo "$as_val"'`
+   if test "x$as_val" = x""yes; then
+  LIB_BOINC="../$BOINC_LIB_PATH/libboinc.a"
 
 else
   { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
@@ -6267,6 +6366,146 @@ See \`config.log' for more details." >&2;}
 fi
 
 done
+
+if test "${ac_cv_header_xsd_cxx_version_hxx+set}" = set; then
+  { $as_echo "$as_me:$LINENO: checking for xsd/cxx/version.hxx" >&5
+$as_echo_n "checking for xsd/cxx/version.hxx... " >&6; }
+if test "${ac_cv_header_xsd_cxx_version_hxx+set}" = set; then
+  $as_echo_n "(cached) " >&6
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_xsd_cxx_version_hxx" >&5
+$as_echo "$ac_cv_header_xsd_cxx_version_hxx" >&6; }
+else
+  # Is the header compilable?
+{ $as_echo "$as_me:$LINENO: checking xsd/cxx/version.hxx usability" >&5
+$as_echo_n "checking xsd/cxx/version.hxx usability... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <xsd/cxx/version.hxx>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+$as_echo "$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ $as_echo "$as_me:$LINENO: checking xsd/cxx/version.hxx presence" >&5
+$as_echo_n "checking xsd/cxx/version.hxx presence... " >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <xsd/cxx/version.hxx>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ $as_echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+$as_echo "$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: accepted by the compiler, rejected by the preprocessor!" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: proceeding with the compiler's result" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: present but cannot be compiled" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: present but cannot be compiled" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx:     check for missing prerequisite headers?" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx:     check for missing prerequisite headers?" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: see the Autoconf documentation" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: see the Autoconf documentation" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx:     section \"Present But Cannot Be Compiled\"" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: proceeding with the preprocessor's result" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: proceeding with the preprocessor's result" >&2;}
+    { $as_echo "$as_me:$LINENO: WARNING: xsd/cxx/version.hxx: in the future, the compiler will take precedence" >&5
+$as_echo "$as_me: WARNING: xsd/cxx/version.hxx: in the future, the compiler will take precedence" >&2;}
+
+    ;;
+esac
+{ $as_echo "$as_me:$LINENO: checking for xsd/cxx/version.hxx" >&5
+$as_echo_n "checking for xsd/cxx/version.hxx... " >&6; }
+if test "${ac_cv_header_xsd_cxx_version_hxx+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_header_xsd_cxx_version_hxx=$ac_header_preproc
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_header_xsd_cxx_version_hxx" >&5
+$as_echo "$ac_cv_header_xsd_cxx_version_hxx" >&6; }
+
+fi
+if test "x$ac_cv_header_xsd_cxx_version_hxx" = x""yes; then
+  :
+else
+  { { $as_echo "$as_me:$LINENO: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+{ { $as_echo "$as_me:$LINENO: error: Unable to find xsd headers
+See \`config.log' for more details." >&5
+$as_echo "$as_me: error: Unable to find xsd headers
+See \`config.log' for more details." >&2;}
+   { (exit 1); exit 1; }; }; }
+fi
+
 
 
 

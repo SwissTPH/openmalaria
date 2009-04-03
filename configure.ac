@@ -22,15 +22,27 @@ AC_ARG_ENABLE(deploy,
  [ deploy=yes
  ])
 
+# Check for xsd or xsdcxx
+AC_ARG_VAR([XSD], [Code Synthesis XSD])
+AC_CHECK_PROG([XSD], [xsd], [xsd])
+if test "x$XSD" = x; then
+   AC_CHECK_PROG([XSD], [xsdcxx], [xsdcxx])
+   if test "x$XSD" = x; then
+      AC_MSG_ERROR([Can't find Code Synthesis' xsd (or xsdcxx) program.])
+   fi
+fi
+
+BOINC_LIB_PATH=../boinc/lib
 
 # Checks for Darwin architecture (MacOS)
 AM_CONDITIONAL(DARWIN, [test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin`])
 
 # needed paths for MacOS
 if test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin` ; then
-  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -L../../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  BOINC_LIB_PATH=../boinc/mac_build/build/Deployment
+  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
   export SDKROOT="/Developer/SDKs/MacOSX10.4u.sdk"
   export MACOSX_DEPLOYMENT_TARGET=10.4
   export PATH=/opt/local/bin:$PATH
@@ -42,8 +54,8 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
     AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
-    AC_CHECK_FILE(../boinc/api/libboinc_api.a,[AC_SUBST(LIB_BOINC_API, "../../boinc/api/libboinc_api.a")],[AC_MSG_FAILURE([No static boinc api library present])]) 
-    AC_CHECK_FILE(../boinc/lib/libboinc.a,[AC_SUBST(LIB_BOINC, "../../boinc/api/libboinc.a")],[AC_MSG_FAILURE([No static boinc library present])]) 
+    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc_api.a,[AC_SUBST(LIB_BOINC_API, "../$BOINC_LIB_PATH/libboinc_api.a")],[AC_MSG_FAILURE([No static boinc api library present])]) 
+    AC_CHECK_FILE($BOINC_LIB_PATH/libboinc.a,[AC_SUBST(LIB_BOINC, "../$BOINC_LIB_PATH/libboinc.a")],[AC_MSG_FAILURE([No static boinc library present])]) 
     #check for boinc libs
     CHECK_BOINC
 else
@@ -90,6 +102,7 @@ fi
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h],,[AC_MSG_FAILURE([Some headers are missing])])
+AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
 
 
 # Checks for typedefs, structures, and compiler characteristics.
