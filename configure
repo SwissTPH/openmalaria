@@ -4712,7 +4712,7 @@ boinc not found. You can get it here: http://boinc.ssl.berkeley.edu/
 
 
     # statically link libgcc
-    export LDFLAGS="$LDFLAGS -static-libgcc"
+    export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
 else
     build_state='local'
     LIB_XERC=""

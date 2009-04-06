@@ -60,7 +60,7 @@ if test "${deploy}" = yes ; then
     CHECK_BOINC
     
     # statically link libgcc
-    export LDFLAGS="$LDFLAGS -static-libgcc"
+    export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
 else
     build_state='local'
     AC_SUBST(LIB_XERC, "")
