@@ -21,6 +21,11 @@ AC_ARG_ENABLE(deploy,
  [  --enable-deploy  Use this for static linking against xerces, gsl and BOINC ],
  [ deploy=yes
  ])
+AC_ARG_ENABLE(m32,
+ [  --enable-m32     Passes the -m32 compiler option (i.e. builds 32bit binaries on 64bit platforms).],
+ [ m32Option=yes
+ ])
+
 
 # Check for xsd or xsdcxx
 AC_ARG_VAR([XSD], [Code Synthesis XSD])
@@ -51,6 +56,7 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
     AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
+    #check for boinc libs
     CHECK_BOINC
 else
     build_state='local'
@@ -104,6 +110,13 @@ AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
+
+#32-bit compiling on x64 (experiment)
+if test "${m32Option}" = yes ; then
+  export LDFLAGS="$LDFLAGS -m32"
+  export CPPFLAGS="$CPPFLAGS -m32"
+  export CFLAGS="$CFLAGS -m32"
+fi
 
 
 # Checks for library functions.
