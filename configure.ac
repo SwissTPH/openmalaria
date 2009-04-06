@@ -81,7 +81,7 @@ fi
 
 
 #check posix threads
-AC_CHECK_LIB(pthread,main,, [AC_MSG_FAILURE([pthread not present])])
+AC_CHECK_LIB(pthread,pthread_create,, [AC_MSG_FAILURE([pthread not present])])
 
 dnl Check for glut In the future we will check for the good glut
 AX_CHECK_GL="-lGL"
