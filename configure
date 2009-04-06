@@ -4710,6 +4710,9 @@ boinc not found. You can get it here: http://boinc.ssl.berkeley.edu/
   LIB_BOINC="-lboinc_api -lboinc"
 
 
+
+    # statically link libgcc
+    export LDFLAGS="$LDFLAGS -static-libgcc"
 else
     build_state='local'
     LIB_XERC=""
@@ -6956,6 +6959,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 fi
+
 
 
 #32-bit compiling on x64 (experiment)

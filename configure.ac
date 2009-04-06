@@ -58,6 +58,9 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
     #check for boinc libs
     CHECK_BOINC
+    
+    # statically link libgcc
+    export LDFLAGS="$LDFLAGS -static-libgcc"
 else
     build_state='local'
     AC_SUBST(LIB_XERC, "")
@@ -110,6 +113,7 @@ AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
 AC_TYPE_SIZE_T
+
 
 #32-bit compiling on x64 (experiment)
 if test "${m32Option}" = yes ; then
