@@ -33,7 +33,7 @@ class CaseManagementModel;
 class Human {
 public:
   
-  /// Constructors
+  /// @name Constructors
   //@{
   //! Constructor which does not need random numbers. Only for testing.
   Human();
@@ -61,13 +61,14 @@ public:
   /// The real destructor
   void destroy();
   
-  /// Checkpointing functions
+  /// @name Checkpointing functions
   //@{
   friend ostream& operator<<(ostream& out, const Human& human);
   friend istream& operator>>(istream& in, Human& human);
   //@}
   
-  /// Functions not called from within Human but calling functions in Human
+  /** @name External functions
+   * @brief Functions not called from within Human but calling functions in Human */
   //@{
   /// Updates an individual for a time-step.
   void update(int simulationTime, TransmissionModel* transmissionModel);
@@ -76,17 +77,17 @@ public:
   void summarize();
   //@}
   
-  /// updateInfection related functions
+  /// @name updateInfection related functions
   //@{
   void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
   //@}
   
-  /// determineClinicalStatus related functions
+  /// @name determineClinicalStatus related functions
   //@{
   void determineClinicalStatus();
   //@}
   
-  /// updateInterventionStatus related functions
+  /// @name updateInterventionStatus related functions
   //@{
   /*! Apply interventions to this human if eligible. Calculate the remaining
       efficacy of the latest vaccination if vaccinated before */
@@ -98,8 +99,9 @@ public:
   void vaccinate();
   //@}
   
-  /// Functions used internally by more than one category above
-  /// (excluding update and summarize)
+  /** @name More functions
+   * @brief Functions used internally by more than one category above
+   * (excluding update and summarize) */
   //@{
   //! Determines the age group of a human
   int ageGroup() const;
@@ -111,7 +113,8 @@ public:
   double getAgeInYears() const;
   //@}
   
-  /// Other functions not called within Human
+  /** @name Other functions
+   * @brief Other functions not called within Human */
   //@{
   //! Get the PEV Efficacy
   double getPEVEfficacy() {return _PEVEfficacy;} 
@@ -148,7 +151,8 @@ public:
   double probMosqSurvivalResting () const;
   //@}
   
-  /// Functions only used by oldWithinHostModel.cpp
+  /** @name OldWithinHostModel functions
+   * @brief Functions only used by oldWithinHostModel.cpp */
   //@{
   double getTimeStepMaxDensity() const {return _timeStepMaxDensity;}
   void setTimeStepMaxDensity(double timeStepMaxDensity){_timeStepMaxDensity = timeStepMaxDensity;}
@@ -172,7 +176,7 @@ public:
   void clearInfections();
   //@}
   
-  /// static public
+  ///@name static public
   //@{
   static void initHumanParameters ();
   
@@ -191,7 +195,7 @@ public:
   //@}
 
 private:
-  ///Private variables
+  ///@name Private variables
   //@{
   WithinHostModel* _withinHostModel;
 
