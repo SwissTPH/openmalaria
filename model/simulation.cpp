@@ -107,7 +107,7 @@ void Simulation::mainSimulation(){
   while( timeStep <=  simulationDuration) {
     _population->implementIntervention(timeStep);
     //Calculate the current progress
-    BoincWrapper::reportProgress(relTimeInMainSim*(timeStep/simulationDuration)+(1-relTimeInMainSim));
+    BoincWrapper::reportProgress(relTimeInMainSim*(double(timeStep)/simulationDuration)+(1-relTimeInMainSim));
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
     ++simulationTime;
     ++timeStep;
@@ -122,7 +122,7 @@ void Simulation::mainSimulation(){
 
 void Simulation::updateOneLifespan () {
   while( simulationTime <  Global::maxAgeIntervals) {
-    BoincWrapper::reportProgress (simulationTime / Global::maxAgeIntervals * (1-relTimeInMainSim));
+    BoincWrapper::reportProgress (double(simulationTime) / Global::maxAgeIntervals * (1-relTimeInMainSim));
     if (BoincWrapper::timeToCheckpoint()) {
       writeCheckpoint();
       BoincWrapper::checkpointCompleted();
