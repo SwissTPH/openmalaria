@@ -31,8 +31,8 @@
 
 class Event{
 public:
-  Event() {};
-  ~Event() {};
+  Event() : _time(missing_value) {};
+  ~Event();
 
   friend ostream& operator<<(ostream& out, const Event& event);
   friend istream& operator>>(istream& in, Event& event);

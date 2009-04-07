@@ -47,24 +47,29 @@ void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome)
   }
 }
 
+Event::~Event () {
+  if (_time != missing_value)
+    Simulation::gMainSummary->report(*this);
+}
+
 
 ostream& operator<<(ostream& out, const Event& event){
   out << event._time << endl;
+  if (event._time == missing_value) return out;
   out << event._surveyPeriod << endl;
   out << event._ageGroup << endl;
   out << event._diagnosis << endl;
   out << event._outcome << endl;
   return out << event._recurrence << endl;
-  
 }
 
 istream& operator>>(istream& in, Event& event){
   in >> event._time;
+  if (event._time == missing_value) return in;
   in >> event._surveyPeriod;
   in >> event._ageGroup;
   in >> event._diagnosis;
   in >> event._outcome;
   in >> event._recurrence;
-
   return in;
 }

@@ -49,16 +49,10 @@ CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF)
 
 CaseManagementModel::CaseManagementModel (double tSF) :
     _treatmentSeekingFactor(tSF), _tLastTreatment(missing_value)
-{
-  _latestEvent.setTime(missing_value);
-}
+{}
 
 CaseManagementModel::~CaseManagementModel ()
-{
-  if (_latestEvent.getTime() !=  missing_value){
-    Simulation::gMainSummary->report(_latestEvent);
-  }
-}
+{}
 
 
 // -----  other  -----
