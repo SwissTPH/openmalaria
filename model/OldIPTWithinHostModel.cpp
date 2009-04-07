@@ -53,7 +53,7 @@ void OldIPTWithinHostModel::newInfection(){
 
 // -----    -----
 
-void OldIPTWithinHostModel::IPTClearInfections (Event& latestEvent) {
+void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
   if ( latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
     clearAllInfections();

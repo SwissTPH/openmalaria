@@ -95,7 +95,7 @@ void OldCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
   
   if (effectiveTreatment) {
     if (!(Global::modelVersion & INCLUDES_PK_PD))
-      withinHostModel.IPTClearInfections(_latestEvent);
+      withinHostModel.clearInfections(_latestEvent);
   }
 }
 

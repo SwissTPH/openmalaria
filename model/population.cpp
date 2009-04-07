@@ -447,7 +447,7 @@ void Population::massTreatment(const Mass& mass, int time){
     double ageYears = iter->getAgeInYears(Simulation::simulationTime);
     if ((iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if (W_UNIFORM() < compliance) {
-        iter->clearAllInfections();
+        iter->clearInfections();
       }
     }
         /*

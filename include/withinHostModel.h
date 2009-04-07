@@ -60,13 +60,12 @@ public:
   /*!  Clears all infections which have expired (their startdate+duration is less
   than the current time). */
   virtual void clearOldInfections() =0;
-  /** Conditionally clear all infections.
-   * Just calls clearAllInfections if IPT isn't present.
-   * NOTE: replace Event& with minimal info needed.
-   * NOTE: make clearAllInfections protected and replace with this? */
-  virtual void IPTClearInfections (Event&);
-  //! Clears all infections in an individual
-  virtual void clearAllInfections() =0;
+  /** Conditionally clears all infections.
+   *
+   * If IPT isn't present, it just calls clearAllInfections(); otherwise it
+   * uses IPT code to determine whether to clear all infections or do nothing.
+   * NOTE: replace Event& with minimal info needed. */
+  virtual void clearInfections (Event&);
   
   virtual void medicate(string drugName, double qty, int time) =0;
 
@@ -93,6 +92,13 @@ public:
   virtual void read(istream& in) =0;
   
 protected:
+  /** Literally just removes all infections in an individual.
+   *
+   * Normally clearInfections() would be called instead, which, when IPT is not
+   * active, just calls this function (although this needs to be changed for
+   * PK_PD integration). */
+  virtual void clearAllInfections() =0;
+  
   //!Cumulative number of infections since birth
   int _cumulativeInfections;
   

@@ -371,6 +371,10 @@ void Human::updateInterventionStatus() {
   _withinHostModel->IPTSetLastSPDose(Simulation::simulationTime-_dateOfBirth, ageGroup());
 }
 
+void Human::clearInfections () {
+  _withinHostModel->clearInfections(_caseManagement->getEvent());
+}
+
 void Human::IPTiTreatment (double compliance) {
   _withinHostModel->IPTiTreatment (compliance, ageGroup());
 }

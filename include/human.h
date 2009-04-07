@@ -169,7 +169,7 @@ public:
   ///TODO: possibly functionality of functions using them should be moved to Human?
   //@{
   int getCumulativeInfections() {return _withinHostModel->getCumulativeInfections();}
-  void clearAllInfections() {_withinHostModel->clearAllInfections();}
+  void clearInfections();
   //@}
   
   /// static public
