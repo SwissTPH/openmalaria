@@ -25,6 +25,7 @@
 #include "OldIPTWithinHostModel.h"
 #include "DummyWithinHostModel.h"
 #include "inputData.h"
+#include "DescriptiveInfection.h"
 
 using namespace std;
 
@@ -46,20 +47,21 @@ void WithinHostModel::init() {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     DummyInfection::init ();
   } else {
-    DescriptiveInfection::init ();
-    IPTIntervention::initParameters();
+    DescriptiveInfection::initParameters ();
+    OldIPTWithinHostModel::initParameters();
   }
 }
 
 void WithinHostModel::clear() {
-  IPTIntervention::clearParameters();
+  OldIPTWithinHostModel::clearParameters();
+  DescriptiveInfection::clearParameters();
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     return new DummyWithinHostModel();
   } else {
-    if (IPTIntervention::IPT)
+    if (DescriptiveInfection::IPT)
       return new OldIPTWithinHostModel();
     else
       return new OldWithinHostModel();

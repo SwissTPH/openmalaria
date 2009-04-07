@@ -37,20 +37,19 @@ double DescriptiveInfection::decayM;
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
-DescriptiveInfection::~DescriptiveInfection() {
-}
-void DescriptiveInfection::destroy() {
-  //if (modelVersion & INCLUDES_PK_PD) {
-  //  delete _proteome;
-  //}
-}
+// static IPT variables (possibly move to a subclass)
+bool DescriptiveInfection::IPT;
+int DescriptiveInfection::numberOfGenoTypes;
+double *DescriptiveInfection::genotypeFreq;
+int *DescriptiveInfection::genotypeProph;
+int *DescriptiveInfection::genotypeTolPeriod;
+double *DescriptiveInfection::genotypeACR;
+double *DescriptiveInfection::genotypeAtten;
 
-void DescriptiveInfection::init (){
-  //Empirical description of single Malaria infections in naive individuals
-  //counter variables, i stands for 5 day time interval, j for duration of infection
-  int i;
-  int j;
-  double meanlogdens;
+
+// -----  static init/clear -----
+
+void DescriptiveInfection::initParameters (){
   cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
   cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
   alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
@@ -75,6 +74,11 @@ void DescriptiveInfection::init (){
 
   // read every line from the stream
   while(getline(f_MTherapyDensities, csvLine)){
+    //Empirical description of single Malaria infections in naive individuals
+    //counter variables, i stands for 5 day time interval, j for duration of infection
+    int i;
+    int j;
+    double meanlogdens;
 
     std::istringstream csvStream(csvLine);
 
@@ -101,8 +105,50 @@ void DescriptiveInfection::init (){
   }
 
   f_MTherapyDensities.close();
-
+  
+  
+  // IPT-specific intitialisation
+  
+  const Interventions& xmlInterventions = getInterventions();
+  IPT = xmlInterventions.getIptiDescription().present();
+  if (!IPT)
+    return;
+  
+  // --- IptiDescription begin ---
+  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  
+  const IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
+  numberOfGenoTypes = genotypes.size();
+  genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  genotypeProph	= (int*)malloc(((numberOfGenoTypes))*sizeof(int));
+  genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
+  genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  
+  size_t i = 0;
+  for (IptDescription::InfGenotypeConstIterator it = genotypes.begin(); it != genotypes.end(); ++it, ++i) {
+    genotypeFreq[i]	= it->getFreq();
+    genotypeACR[i]	= it->getACR();
+    genotypeProph[i]	= it->getProph();
+    genotypeTolPeriod[i]= it->getTolPeriod();
+    genotypeAtten[i]	= it->getAtten();
+  }
+  // --- IptiDescription end ---
 }
+
+void DescriptiveInfection::clearParameters () {
+  if (!IPT)
+    return;
+  
+  free(genotypeFreq);
+  free(genotypeACR);
+  free(genotypeProph);
+  free(genotypeTolPeriod);
+  free(genotypeAtten);
+}
+
+
+// -----  non-static init/destruction  -----
 
 DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
     int genotypeCounter;
@@ -115,12 +161,12 @@ DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
     _duration=infectionDuration();
     _cumulativeExposureJ=0.0;
     _gType.ID=0;
-    if (IPTIntervention::IPT) {
+    if (IPT) {
         uniformRandomVariable=(W_UNIFORM());
         lowerIntervalBound=0.0;
-        upperIntervalBound=IPTIntervention::genotypeFreq[0];
+        upperIntervalBound=genotypeFreq[0];
         //This Loop assigns the infection a genotype according to its frequency
-        for (genotypeCounter=1; genotypeCounter<=IPTIntervention::numberOfGenoTypes; genotypeCounter++){
+        for (genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
             if (uniformRandomVariable > lowerIntervalBound &&
                 uniformRandomVariable < upperIntervalBound){
                 _gType.ID=genotypeCounter;
@@ -130,8 +176,8 @@ DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
             The loop should never come into this else-part (exits before), so the if statement is not necessary.
             For safety reason we do it nevertheless
             */
-            if ( genotypeCounter !=  IPTIntervention::numberOfGenoTypes) {
-              upperIntervalBound = upperIntervalBound + IPTIntervention::genotypeFreq[genotypeCounter];
+            if ( genotypeCounter !=  numberOfGenoTypes) {
+              upperIntervalBound = upperIntervalBound + genotypeFreq[genotypeCounter];
             }
             else {
               upperIntervalBound=1.0;
@@ -144,8 +190,8 @@ DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
         The time window starts after the prophylactic period ended (during the prophylactic
         period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
         */
-        if (simulationTime-lastSPdose > IPTIntervention::genotypeProph[_gType.ID-1] &&
-            simulationTime-lastSPdose <= IPTIntervention::genotypeProph[_gType.ID-1] + IPTIntervention::genotypeTolPeriod[_gType.ID-1]){
+        if (simulationTime-lastSPdose > genotypeProph[_gType.ID-1] &&
+            simulationTime-lastSPdose <= genotypeProph[_gType.ID-1] + genotypeTolPeriod[_gType.ID-1]){
           _SPattenuate=true;
         }
     }
@@ -157,6 +203,17 @@ DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
       _proteome = 0;
     }
 }
+
+DescriptiveInfection::~DescriptiveInfection() {
+}
+void DescriptiveInfection::destroy() {
+  //if (modelVersion & INCLUDES_PK_PD) {
+  //  delete _proteome;
+  //}
+}
+
+
+// -----  other  -----
 
 void DescriptiveInfection::writeInfectionToFile(fstream& funit){
   write(funit);

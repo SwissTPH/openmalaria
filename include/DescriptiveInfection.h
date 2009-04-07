@@ -52,9 +52,27 @@ struct genotype {
   Models related to the within-host dynamics of infections.
 */
 class DescriptiveInfection : public Infection {
- //TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
-  public:
+//TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
+public:
+  ///@name Static init/cleanup
+  //@{
+  //! Init constants common to all Phase A (AJTMH 75(2)) infections.
+  /*!
+    Init constants common to all infections modeled via the original (AJTMH 75(2)
+    empirical model.  Using this model, the time step remains 5 days.  Where the simulation
+    time step is shorter than 5 days the parasite densities are looked up by rounding down
+    to the previous 5 days.
 
+    Once constants are initialised then cumulative distributions of parasite densities and durations of patency
+    from the malariatherapy data and also the category boundaries for the grouping
+    of time since first positive slide.
+  */
+  static void initParameters();
+  static void clearParameters();
+  //@}
+  
+  ///@name CTOR & DTOR
+  //@{
   //! Constructor
   /*!
     \param lastSPdose Time interval of last SP Dose.
@@ -71,21 +89,9 @@ class DescriptiveInfection : public Infection {
    * called explicitly. */
   ~DescriptiveInfection();
   void destroy();
+  //@}
   
   void write (ostream& out) const;
-  
-  //! Init constants common to all Phase A (AJTMH 75(2)) infections.
-  /*!
-    Init constants common to all infections modeled via the original (AJTMH 75(2)
-    empirical model.  Using this model, the time step remains 5 days.  Where the simulation
-    time step is shorter than 5 days the parasite densities are looked up by rounding down
-    to the previous 5 days.
-
-    Once constants are initialised then cumulative distributions of parasite densities and durations of patency
-    from the malariatherapy data and also the category boundaries for the grouping
-    of time since first positive slide.
-  */
-  static void init ();
   
   //! Get the last timestep before the infection is cleared.
   /*!
@@ -146,10 +152,24 @@ class DescriptiveInfection : public Infection {
   double getMeanLogParasiteCount(int pos) const {return meanLogParasiteCount[pos];}
   float getCumulativeHstar() const {return cumulativeHstar;};
   float getCumulativeYstar() const {return cumulativeYstar;};
-
-
- private:
-
+  
+  /** IPT present or not
+   *
+   * NOTE: could be moved to a sub-class, but then instances of
+   * DescriptiveInfection have to be stored by pointer in OldWithinHostModel. */
+  static bool IPT;
+  
+private:
+  //! Cumulative parasite density, since start of this infection
+  double _cumulativeExposureJ; 
+  //! Genotype responsible for infection
+  genotype _gType;
+  //! IPTi parameter (indicator for attenuation).
+  bool _SPattenuate; 
+  
+  
+  // -----  static  -----
+  
   //! Density distributions
   /*!
     Mean Log Parasite Count at time step i for an infection that lasts j days.
@@ -168,15 +188,17 @@ class DescriptiveInfection : public Infection {
   static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
 
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
- 
-  //! Cumulative parasite density, since start of this infection
-  double _cumulativeExposureJ; 
-  //! Genotype responsible for infection
-  genotype _gType;
-  //! IPTi parameter (indicator for attenuation).
-  bool _SPattenuate; 
-
-
+  
+  /// @name genotypes
+  //@{
+  static int numberOfGenoTypes;
+  static double *genotypeFreq;
+  static int *genotypeTolPeriod;
+public:
+  static int *genotypeProph;
+  static double *genotypeACR;
+  static double *genotypeAtten;
+  //@}
 };
 
 #endif

@@ -85,41 +85,4 @@ private:
   double efficacyB;
 };
 
-/** Other intervention parameters: IPT, genotypes.
- * 
- * Currently all are static - they apply to the simulation as a whole. */
-class IPTIntervention {
-public:
-  /* IPT specific parameters */
-  //IPT present or not
-  static bool IPT;
-  //Number of IPTi doses
-  static int numberOfIPTiDoses;
-   //Target age for IPTi doses, in time steps
-  static int *iptiTargetagetstep;
-   //Coverage , as a proportion of the poulation in the target age range
-  static double *iptiCoverage;
-   //Values   
-  static int iptiEffect;
-   /*
-  These are actually not IPTi related values but related
-  to the genotypes: Since the genotype variability was first studied in a IPTi intervention,
-  they are defined here. (Logically, they belong to infection.f)
-   */
-  static int numberOfGenoTypes;
-  static double *genotypeFreq;
-  static double *genotypeACR;
-  static int *genotypeProph;
-  static int *genotypeTolPeriod;
-  static double *genotypeAtten;
-
-  // Initialization routines
-  static void initParameters ();
-  static void initIPTIParameters ();
-  
-  // Destruction routines
-  static void clearParameters ();
-  static void clearIPTIParameters ();
-};
-
 #endif

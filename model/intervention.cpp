@@ -39,18 +39,6 @@ Vaccine Vaccine::PEV;
 Vaccine Vaccine::BSV;
 Vaccine Vaccine::TBV;
 
-bool IPTIntervention::IPT;
-int IPTIntervention::numberOfIPTiDoses;
-int *IPTIntervention::iptiTargetagetstep;
-double *IPTIntervention::iptiCoverage;
-int IPTIntervention::iptiEffect;
-int IPTIntervention::numberOfGenoTypes;
-double *IPTIntervention::genotypeFreq;
-double *IPTIntervention::genotypeACR;
-int *IPTIntervention::genotypeProph;
-int *IPTIntervention::genotypeTolPeriod;
-double *IPTIntervention::genotypeAtten;
-
 
 double Vaccine::getEfficacy (int numPrevDoses) {
   /* If initialMeanEfficacy.size or more doses have already been given, use
@@ -135,62 +123,4 @@ void Vaccine::clearParameters () {
     return;
   free(targetagetstep);
   free(vaccineCoverage);
-}
-
-void IPTIntervention::initParameters () {
-  const Interventions& xmlInterventions = getInterventions();
-  IPT = xmlInterventions.getIptiDescription().present();
-  if (!IPT)
-    return;
-  
-  // --- IptiDescription begin ---
-  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
-  
-  const IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
-  numberOfGenoTypes = genotypes.size();
-  genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeProph	= (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  
-  size_t i = 0;
-  for (IptDescription::InfGenotypeConstIterator it = genotypes.begin(); it != genotypes.end(); ++it, ++i) {
-    genotypeFreq[i]	= it->getFreq();
-    genotypeACR[i]	= it->getACR();
-    genotypeProph[i]	= it->getProph();
-    genotypeTolPeriod[i]= it->getTolPeriod();
-    genotypeAtten[i]	= it->getAtten();
-  }
-  
-  iptiEffect = xmlIPTI.getIptiEffect();
-  // --- IptiDescription end ---
-  
-  if (xmlInterventions.getContinuous().present()) {
-    const Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
-    numberOfIPTiDoses = xmlIpti.size();
-    
-    iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
-    iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
-    for (int i=0;i<numberOfIPTiDoses; i++) {
-      iptiTargetagetstep[i] = floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval));
-      iptiCoverage[i] = xmlIpti[i].getCoverage();
-    }
-  } else
-    numberOfIPTiDoses = 0;
-}
-
-void IPTIntervention::clearParameters () {
-  if (!IPT)
-    return;
-  
-  free(genotypeFreq);
-  free(genotypeACR);
-  free(genotypeProph);
-  free(genotypeTolPeriod);
-  free(genotypeAtten);
-  if (numberOfIPTiDoses) {
-    free(iptiTargetagetstep);
-    free(iptiCoverage);
-  }
 }

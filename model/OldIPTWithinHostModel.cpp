@@ -25,9 +25,51 @@
 #include "event.h"
 #include "summary.h"
 #include "intervention.h"
+#include "inputData.h"
+
+
+// -----  static data  -----
+
+int OldIPTWithinHostModel::numberOfIPTiDoses = 0;
+int *OldIPTWithinHostModel::iptiTargetagetstep;
+double *OldIPTWithinHostModel::iptiCoverage;
+int OldIPTWithinHostModel::iptiEffect;
 
 
 // -----  init  -----
+
+void OldIPTWithinHostModel::initParameters () {
+  const Interventions& xmlInterventions = getInterventions();
+  if (!xmlInterventions.getIptiDescription().present())
+    return;
+  
+  // --- IptiDescription begin ---
+  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  
+  iptiEffect = xmlIPTI.getIptiEffect();
+  // --- IptiDescription end ---
+  
+  if (xmlInterventions.getContinuous().present()) {
+    const Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
+    numberOfIPTiDoses = xmlIpti.size();
+    
+    iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
+    iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
+    for (int i=0;i<numberOfIPTiDoses; i++) {
+      iptiTargetagetstep[i] = floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval));
+      iptiCoverage[i] = xmlIpti[i].getCoverage();
+    }
+  } else
+    numberOfIPTiDoses = 0;
+}
+
+void OldIPTWithinHostModel::clearParameters () {
+  if (numberOfIPTiDoses) {
+    free(iptiTargetagetstep);
+    free(iptiCoverage);
+  }
+}
+
 OldIPTWithinHostModel::OldIPTWithinHostModel () :
     _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
 {
@@ -71,14 +113,14 @@ void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
           */
   }
 
-  else if( IPTIntervention::iptiEffect ==  2 ||  IPTIntervention::iptiEffect ==  12) {
+  else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
     clearAllInfections();
     _lastSPDose=Simulation::simulationTime+1;
   }
-  else if( IPTIntervention::iptiEffect ==  3 ||  IPTIntervention::iptiEffect ==  13) {
+  else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
     clearAllInfections();
   }
-  else if(IPTIntervention::iptiEffect >=  14 && IPTIntervention::iptiEffect < 30) {
+  else if(iptiEffect >=  14 && iptiEffect < 30) {
     clearAllInfections();
   }
   else {
@@ -95,22 +137,22 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   static int IPT_MIN_INTERVAL[9] = { 42, 48, 54, 60, 66, 36, 30, 24, 18 };
   static int IPT_MAX_INTERVAL[9] = { 60, 66, 72, 78, 82, 54, 48, 42, 42 };
   
-  if (IPTIntervention::iptiEffect >= 14 && IPTIntervention::iptiEffect <= 22) {
+  if (iptiEffect >= 14 && iptiEffect <= 22) {
     int yearInterval = (Global::modIntervalsPerYear(Simulation::simulationTime)-1);
-    if (yearInterval <  IPT_MIN_INTERVAL[IPTIntervention::iptiEffect-14] &&
-        yearInterval >= IPT_MAX_INTERVAL[IPTIntervention::iptiEffect-14])
+    if (yearInterval <  IPT_MIN_INTERVAL[iptiEffect-14] &&
+        yearInterval >= IPT_MAX_INTERVAL[iptiEffect-14])
       return;
   }
   
-  for (int i=0;i<IPTIntervention::numberOfIPTiDoses; i++) {
-    if (IPTIntervention::iptiTargetagetstep[i] == agetstep) {
-      if (W_UNIFORM() <  IPTIntervention::iptiCoverage[i]) {
+  for (int i=0;i<numberOfIPTiDoses; i++) {
+    if (iptiTargetagetstep[i] == agetstep) {
+      if (W_UNIFORM() <  iptiCoverage[i]) {
         _lastIptiOrPlacebo=Simulation::simulationTime;
         /*
         iptiEffect denotes treatment or placebo group
         and also the treatment given when sick (trial-dependent)
         */
-        if (IPTIntervention::iptiEffect >=  10) {
+        if (iptiEffect >=  10) {
           _lastSPDose=Simulation::simulationTime;
           Simulation::gMainSummary->reportIPTDose(ageGroup);
         }
@@ -127,7 +169,7 @@ void OldIPTWithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
     * iptiEffect denotes treatment or placebo group
     * and also the treatment given when sick (trial-dependent)
     */
-    if (IPTIntervention::iptiEffect >= 10){
+    if (iptiEffect >= 10){
       _lastSPDose = Simulation::simulationTime;
       Simulation::gMainSummary->reportIPTDose(ageGroup);
     }
@@ -147,8 +189,8 @@ void OldIPTWithinHostModel::SPAction(Human& human){
   while(i != infections.end()){
     if ( 1+Simulation::simulationTime-i->getStartDate()-Global::latentp > 0){
       rnum=W_UNIFORM();
-      if ((rnum<=IPTIntervention::genotypeACR[i->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - _lastSPDose <= IPTIntervention::genotypeProph[i->getGenoTypeID()-1])) {
+      if ((rnum<=DescriptiveInfection::genotypeACR[i->getGenoTypeID()-1]) &&
+           (Simulation::simulationTime - _lastSPDose <= DescriptiveInfection::genotypeProph[i->getGenoTypeID()-1])) {
         i->destroy();
         i=infections.erase(i);
         _MOI--;
@@ -166,9 +208,9 @@ void OldIPTWithinHostModel::SPAction(Human& human){
 void OldIPTWithinHostModel::IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator i) {
   if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
     if (i->getSPattenuate() == 1) {
-      i->multiplyDensity(1.0/IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1]);
-      timeStepMaxDensity=(double)timeStepMaxDensity/IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1];
-      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (i->getStartDate()+(i->getDuration()/Global::interval) * IPTIntervention::genotypeAtten[i->getGenoTypeID() - 1]));
+      i->multiplyDensity(1.0/DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1]);
+      timeStepMaxDensity=(double)timeStepMaxDensity/DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1];
+      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (i->getStartDate()+(i->getDuration()/Global::interval) * DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1]));
     }
   }
 }

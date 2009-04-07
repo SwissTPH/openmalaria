@@ -23,8 +23,16 @@
 
 #include "oldWithinHostModel.h"
 
+/** Extension to the OldWithinHostModel, including IPT (intermittent
+ * preventative treatment) plus a simple drug-action model (SPAction). */
 class OldIPTWithinHostModel : public OldWithinHostModel {
 public:
+  ///@name Static init/cleanup
+  //@{
+  static void initParameters();
+  static void clearParameters();
+  //@}
+  
   OldIPTWithinHostModel ();
   
   //! Create a new infection requires that the human is allocated and current
@@ -55,6 +63,18 @@ private:
   int _lastSPDose;
   //!last IPTi or placebo dose given 
   int _lastIptiOrPlacebo;
+  
+  
+  // -----  static data  -----
+  
+  ///Number of IPTi doses
+  static int numberOfIPTiDoses;
+  ///Target age for IPTi doses, in time steps
+  static int *iptiTargetagetstep;
+  ///Coverage , as a proportion of the poulation in the target age range
+  static double *iptiCoverage;
+  /// Values (codes)
+  static int iptiEffect;
 };
 
 #endif
