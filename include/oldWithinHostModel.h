@@ -96,10 +96,6 @@ protected:
 private:
   void calculateDensity(DescriptiveInfection& inf, double);
   
-  void treatInfections();
-  //! Treats all infections in an individual
-  void treatAllInfections();
-  
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;

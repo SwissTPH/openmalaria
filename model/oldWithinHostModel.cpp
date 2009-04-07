@@ -49,7 +49,13 @@ OldWithinHostModel::~OldWithinHostModel() {
 
 void OldWithinHostModel::update (double age) {
   _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
-  treatInfections();
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    std::list<DescriptiveInfection>::iterator i;
+    for(i=infections.begin(); i != infections.end(); i++){
+	i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
+    }
+    _proxy.decayDrugs();
+  }
 }
 
 
@@ -86,23 +92,6 @@ void OldWithinHostModel::clearAllInfections(){
   }
   infections.clear();
   _MOI=0;
-}
-
-
-// -----  Treat infections  -----
-
-void OldWithinHostModel::treatInfections(){
-  if (Global::modelVersion & INCLUDES_PK_PD) { // treatInfections() 
-    treatAllInfections();
-    _proxy.decayDrugs();
-  }
-}
-
-void OldWithinHostModel::treatAllInfections(){
-  std::list<DescriptiveInfection>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
-  }
 }
 
 

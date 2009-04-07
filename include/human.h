@@ -119,7 +119,7 @@ public:
   //! Get the Availability to mosquitoes
   double getBaselineAvailabilityToMosquitoes() {return _BaselineAvailabilityToMosquitoes;};
   
-  double getProbTransmissionToMosquito() {return _ptransmit;};
+  inline double getProbTransmissionToMosquito() {return _ptransmit;};
 
   //! Get the cumulative EIRa
   double getCumulativeEIRa() {return _cumulativeEIRa;};
