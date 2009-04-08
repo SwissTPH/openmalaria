@@ -65,7 +65,7 @@ void OldWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(new DescriptiveInfection(missing_value, Simulation::simulationTime));
+    infections.push_back(new DescriptiveInfection(Simulation::simulationTime));
     _MOI++;
   }
 }
@@ -305,6 +305,10 @@ void OldWithinHostModel::summarize(double age) {
 
 void OldWithinHostModel::read(istream& in) {
   readOWHM (in);
+
+  for(int i=0;i<_MOI;++i) {
+    infections.push_back(new DescriptiveInfection(in));
+  }
 }
 void OldWithinHostModel::write(ostream& out) const {
   writeOWHM (out);
@@ -324,10 +328,6 @@ void OldWithinHostModel::readOWHM(istream& in) {
     exit(-3);
   }
 
-  for(int i=0;i<_MOI;++i) {
-    infections.push_back(new DescriptiveInfection(in));
-  }
-
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _proxy.read (in);
   }
@@ -341,11 +341,11 @@ void OldWithinHostModel::writeOWHM(ostream& out) const {
   out << _cumulativeY << endl;
   out << _cumulativeYlag << endl;
   out << _innateImmunity << endl; 
-
-  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    (*iter)->write (out);
   
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _proxy.write (out);
   }
+
+  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    (*iter)->write (out);
 }

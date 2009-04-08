@@ -37,15 +37,6 @@ double DescriptiveInfection::decayM;
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
-// static IPT variables (possibly move to a subclass)
-bool DescriptiveInfection::IPT;
-int DescriptiveInfection::numberOfGenoTypes;
-double *DescriptiveInfection::genotypeFreq;
-int *DescriptiveInfection::genotypeProph;
-int *DescriptiveInfection::genotypeTolPeriod;
-double *DescriptiveInfection::genotypeACR;
-double *DescriptiveInfection::genotypeAtten;
-
 
 // -----  static init/clear -----
 
@@ -105,98 +96,21 @@ void DescriptiveInfection::initParameters (){
   }
 
   f_MTherapyDensities.close();
-  
-  
-  // IPT-specific intitialisation
-  
-  const Interventions& xmlInterventions = getInterventions();
-  IPT = xmlInterventions.getIptiDescription().present();
-  if (!IPT)
-    return;
-  
-  // --- IptiDescription begin ---
-  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
-  
-  const IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
-  numberOfGenoTypes = genotypes.size();
-  genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeProph	= (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  
-  size_t i = 0;
-  for (IptDescription::InfGenotypeConstIterator it = genotypes.begin(); it != genotypes.end(); ++it, ++i) {
-    genotypeFreq[i]	= it->getFreq();
-    genotypeACR[i]	= it->getACR();
-    genotypeProph[i]	= it->getProph();
-    genotypeTolPeriod[i]= it->getTolPeriod();
-    genotypeAtten[i]	= it->getAtten();
-  }
-  // --- IptiDescription end ---
 }
 
-void DescriptiveInfection::clearParameters () {
-  if (!IPT)
-    return;
-  
-  free(genotypeFreq);
-  free(genotypeACR);
-  free(genotypeProph);
-  free(genotypeTolPeriod);
-  free(genotypeAtten);
-}
+void DescriptiveInfection::clearParameters () {}
 
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime) :
-  _SPattenuate(false)
+DescriptiveInfection::DescriptiveInfection(int simulationTime)
 {
-    int genotypeCounter;
-    double uniformRandomVariable;
-    double lowerIntervalBound;
-    double upperIntervalBound;
     //Initialize current infection data
     _startdate=simulationTime;
     _density=0.0;
     _duration=infectionDuration();
     _cumulativeExposureJ=0.0;
-    _gType.ID=0;
-    if (IPT) {
-        uniformRandomVariable=(W_UNIFORM());
-        lowerIntervalBound=0.0;
-        upperIntervalBound=genotypeFreq[0];
-        //This Loop assigns the infection a genotype according to its frequency
-        for (genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
-            if (uniformRandomVariable > lowerIntervalBound &&
-                uniformRandomVariable < upperIntervalBound){
-                _gType.ID=genotypeCounter;
-            }
-            lowerIntervalBound=upperIntervalBound;
-            /*
-            The loop should never come into this else-part (exits before), so the if statement is not necessary.
-            For safety reason we do it nevertheless
-            */
-            if ( genotypeCounter !=  numberOfGenoTypes) {
-              upperIntervalBound = upperIntervalBound + genotypeFreq[genotypeCounter];
-            }
-            else {
-              upperIntervalBound=1.0;
-              //write(0,*) 'should not be here'
-            }
-        }
-        /*
-        The attenuation effect of SP is only effective during a certain time-window for certain IPTi models
-        If t(=now) lies within this time window, SPattenuate is true, false otherwise.
-        The time window starts after the prophylactic period ended (during the prophylactic
-        period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
-        */
-        if (simulationTime-lastSPdose > genotypeProph[_gType.ID-1] &&
-            simulationTime-lastSPdose <= genotypeProph[_gType.ID-1] + genotypeTolPeriod[_gType.ID-1]){
-          _SPattenuate=true;
-        }
-    }
+    
     //This should probably be inside an IF
     if (Global::modelVersion & INCLUDES_PK_PD) {
       _proteome = ProteomeManager::getManager()->getInfection();
@@ -238,25 +152,21 @@ void DescriptiveInfection::write (ostream& out) const {
   out << _startdate << endl; 
   out << _density << endl; 
   out << _cumulativeExposureJ << endl; 
-  out << _gType.ID << endl; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
     out << _proteome->getProteomeID() << endl; 
   }
-  out << boolalpha << _SPattenuate << endl; 
 }
 
 DescriptiveInfection::DescriptiveInfection (istream& in) {
-  int proteomeID;
   in >> _duration; 
   in >> _startdate; 
   in >> _density; 
   in >> _cumulativeExposureJ; 
-  in >> _gType.ID; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
+    int proteomeID;
     in >> proteomeID; 
     _proteome = ProteomeManager::getManager()->getProteome(proteomeID);
   }
-  in >> boolalpha >> _SPattenuate; 
 }
 
 void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity){

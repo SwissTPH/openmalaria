@@ -258,7 +258,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\infection.h"
+				RelativePath=".\include\Infection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DescriptiveInfection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\DummyInfection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\OldIPTInfection.h"
 				>
 			</File>
 			<File
@@ -354,6 +366,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\model\OldIPTInfection.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\model\drug.cpp"
 				>
 			</File>
@@ -386,7 +402,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\infection.cpp"
+				RelativePath=".\model\Infection.cpp"
 				>
 			</File>
 			<File

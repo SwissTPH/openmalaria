@@ -33,19 +33,6 @@ const int maxDur=84;
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
 const double maxDens=2000000;
 
-struct genotype {
-   int ID;
-//!In order to save memory, we just define the ID of the genotype. Attributes of the
-//!genotype can be accessed via arrays in mod_intervention.
-//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
-//!attributes are:
-//!freq: Probability of being infected by this specific genotype
-//!ACR: Probability of being cured (due to SP)
-//!proph: Prophylactic effect of SP (measured in time steps)
-//!tolperiod: time window of tolerance period
-//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
-};
-
 
 //!  Models of infection.
 /*!
@@ -74,10 +61,7 @@ public:
   ///@name CTOR & DTOR
   //@{
   //! Constructor
-  /*!
-    \param lastSPdose Time interval of last SP Dose.
-  */
-  DescriptiveInfection(int lastSPdose, int simulationTime);
+  DescriptiveInfection(int simulationTime);
   
   /** Checkpoint-reading constructor */
   DescriptiveInfection (istream& in);
@@ -86,7 +70,7 @@ public:
   ~DescriptiveInfection();
   //@}
   
-  void write (ostream& out) const;
+  virtual void write (ostream& out) const;
   
   //! Get the last timestep before the infection is cleared.
   /*!
@@ -102,10 +86,6 @@ public:
 
   //! Get proteome
   ProteomeInstance* getProteome() const;
-
-  bool getSPattenuate() { return _SPattenuate; };
-  
-  int getGenoTypeID() { return _gType.ID; };
 
   //! Start date of the infection
   int getStartDate() { return _startdate; };
@@ -148,21 +128,12 @@ public:
   float getCumulativeHstar() const {return cumulativeHstar;};
   float getCumulativeYstar() const {return cumulativeYstar;};
   
-  /** IPT present or not
-   *
-   * NOTE: could be moved to a sub-class, but then instances of
-   * DescriptiveInfection have to be stored by pointer in OldWithinHostModel. */
-  static bool IPT;
-  
-private:
+protected:
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ; 
-  //! Genotype responsible for infection
-  genotype _gType;
-  //! IPTi parameter (indicator for attenuation).
-  bool _SPattenuate;
   
   
+private:
   // -----  static  -----
   
   //! Density distributions
@@ -183,17 +154,6 @@ private:
   static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
 
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
-  
-  /// @name genotypes
-  //@{
-  static int numberOfGenoTypes;
-  static double *genotypeFreq;
-  static int *genotypeTolPeriod;
-public:
-  static int *genotypeProph;
-  static double *genotypeACR;
-  static double *genotypeAtten;
-  //@}
 };
 
 #endif

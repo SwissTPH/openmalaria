@@ -61,7 +61,7 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     return new DummyWithinHostModel();
   } else {
-    if (DescriptiveInfection::IPT)
+    if (OldIPTWithinHostModel::iptActive)
       return new OldIPTWithinHostModel();
     else
       return new OldWithinHostModel();

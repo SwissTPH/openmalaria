@@ -3,7 +3,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  drug.cpp proteome.cpp\
- Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp\
+ Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp\
  withinHostModel.cpp oldWithinHostModel.cpp OldIPTWithinHostModel.cpp DummyWithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\

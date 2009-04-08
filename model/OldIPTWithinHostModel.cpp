@@ -26,7 +26,9 @@
 #include "summary.h"
 #include "intervention.h"
 #include "inputData.h"
+#include "OldIPTInfection.h"
 
+bool OldIPTWithinHostModel::iptActive = false;
 
 // -----  static data  -----
 
@@ -40,8 +42,8 @@ int OldIPTWithinHostModel::iptiEffect;
 
 void OldIPTWithinHostModel::initParameters () {
   const Interventions& xmlInterventions = getInterventions();
-  if (!xmlInterventions.getIptiDescription().present())
-    return;
+  iptActive = xmlInterventions.getIptiDescription().present();
+  if (!iptActive) return;
   
   // --- IptiDescription begin ---
   const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
@@ -61,13 +63,17 @@ void OldIPTWithinHostModel::initParameters () {
     }
   } else
     numberOfIPTiDoses = 0;
+  
+  OldIPTInfection::initParameters(xmlInterventions);
 }
 
 void OldIPTWithinHostModel::clearParameters () {
+  if (!iptActive) return;
   if (numberOfIPTiDoses) {
     free(iptiTargetagetstep);
     free(iptiCoverage);
   }
+  OldIPTInfection::clearParameters();
 }
 
 OldIPTWithinHostModel::OldIPTWithinHostModel () :
@@ -87,7 +93,7 @@ void OldIPTWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(new DescriptiveInfection(_lastSPDose, Simulation::simulationTime));
+    infections.push_back(new OldIPTInfection(_lastSPDose, Simulation::simulationTime));
     _MOI++;
   }
 }
@@ -184,35 +190,35 @@ void OldIPTWithinHostModel::SPAction(Human& human){
   need to add some code here that will be conditionally implemented depending on the
   model version.*/
 
-  double rnum;
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-  while(iter != infections.end()){
-    if ( 1+Simulation::simulationTime-(*iter)->getStartDate()-Global::latentp > 0){
-      rnum=W_UNIFORM();
-      if ((rnum<=DescriptiveInfection::genotypeACR[(*iter)->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - _lastSPDose <= DescriptiveInfection::genotypeProph[(*iter)->getGenoTypeID()-1])) {
+  while(iter != infections.end()) {
+    if (1 + Simulation::simulationTime - (*iter)->getStartDate() > Global::latentp) {
+      OldIPTInfection* infec = dynamic_cast<OldIPTInfection*> (*iter);
+      if (infec == NULL) throw 0;
+      size_t genoTypeIndex = infec->getGenoTypeID()-1;
+      if ((W_UNIFORM() <= OldIPTInfection::genotypeACR[genoTypeIndex]) &&
+	  (Simulation::simulationTime - _lastSPDose <= OldIPTInfection::genotypeProph[genoTypeIndex])) {
         delete *iter;
         iter=infections.erase(iter);
         _MOI--;
-           }
-           else{
-             iter++;
-           }
-    }
-    else{
+      } else {
+	iter++;
+      }
+    } else {
       iter++;
     }
   }
 }
 
-void OldIPTWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection& infec) {
-  if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
+void OldIPTWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection& dinfec) {
+  if (!(Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY)) return;
+  
+  OldIPTInfection& infec = dynamic_cast<OldIPTInfection&> (dinfec);
     if (infec.getSPattenuate() == 1) {
-      infec.multiplyDensity(1.0/DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1]);
-      timeStepMaxDensity=(double)timeStepMaxDensity/DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1];
-      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (infec.getStartDate()+(infec.getDuration()/Global::interval) * DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1]));
+      infec.multiplyDensity(1.0/OldIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1]);
+      timeStepMaxDensity=(double)timeStepMaxDensity/OldIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1];
+      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (infec.getStartDate()+(infec.getDuration()/Global::interval) * OldIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1]));
     }
-  }
 }
 
 void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
@@ -229,6 +235,11 @@ void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
 
 void OldIPTWithinHostModel::read(istream& in) {
   readOWHM (in);
+  
+  for(int i=0;i<_MOI;++i) {
+    infections.push_back(new OldIPTInfection(in));
+  }
+  
   in >> _SPattenuationt;
   in >> _lastSPDose; 
   in >> _lastIptiOrPlacebo; 

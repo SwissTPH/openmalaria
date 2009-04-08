@@ -29,6 +29,8 @@ class OldIPTWithinHostModel : public OldWithinHostModel {
 public:
   ///@name Static init/cleanup
   //@{
+  /** Determines whether IPT is present or not (iptActive), and if so
+   * initialises parameters here and in OldIPTInfection. */
   static void initParameters();
   static void clearParameters();
   //@}
@@ -44,6 +46,9 @@ public:
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (double compliance, int ageGroup);
+  
+  /// Is IPT present?
+  static bool iptActive;
   
 protected:
   /*!  SP drug action applies to each infection depending on genotype and when

@@ -46,15 +46,16 @@ am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
 	drug.$(OBJEXT) proteome.$(OBJEXT) Infection.$(OBJEXT) \
 	DescriptiveInfection.$(OBJEXT) DummyInfection.$(OBJEXT) \
-	withinHostModel.$(OBJEXT) oldWithinHostModel.$(OBJEXT) \
-	OldIPTWithinHostModel.$(OBJEXT) DummyWithinHostModel.$(OBJEXT) \
-	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
-	transmissionModel.$(OBJEXT) noVectorControl.$(OBJEXT) \
-	VectorControlInternal.$(OBJEXT) vectorControl.$(OBJEXT) \
-	CaseManagementModel.$(OBJEXT) OldCaseManagement.$(OBJEXT) \
-	NewCaseManagement.$(OBJEXT) EntoIntervention.$(OBJEXT) \
-	muellerMorbidityModel.$(OBJEXT) morbidityModel.$(OBJEXT) \
-	predetMorbidityModel.$(OBJEXT) pyrogenMorbidityModel.$(OBJEXT)
+	OldIPTInfection.$(OBJEXT) withinHostModel.$(OBJEXT) \
+	oldWithinHostModel.$(OBJEXT) OldIPTWithinHostModel.$(OBJEXT) \
+	DummyWithinHostModel.$(OBJEXT) intervention.$(OBJEXT) \
+	event.$(OBJEXT) human.$(OBJEXT) transmissionModel.$(OBJEXT) \
+	noVectorControl.$(OBJEXT) VectorControlInternal.$(OBJEXT) \
+	vectorControl.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
+	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
+	EntoIntervention.$(OBJEXT) muellerMorbidityModel.$(OBJEXT) \
+	morbidityModel.$(OBJEXT) predetMorbidityModel.$(OBJEXT) \
+	pyrogenMorbidityModel.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -179,7 +180,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  drug.cpp proteome.cpp\
- Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp\
+ Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp\
  withinHostModel.cpp oldWithinHostModel.cpp OldIPTWithinHostModel.cpp DummyWithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
@@ -247,6 +248,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTInfection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorControlInternal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
