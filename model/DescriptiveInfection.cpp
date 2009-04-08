@@ -150,7 +150,9 @@ void DescriptiveInfection::clearParameters () {
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime){
+DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime) :
+  _SPattenuate(false)
+{
     int genotypeCounter;
     double uniformRandomVariable;
     double lowerIntervalBound;
