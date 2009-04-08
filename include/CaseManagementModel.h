@@ -35,7 +35,7 @@ public:
   static CaseManagementModel* createCaseManagementModel (double tSF);
 
   /// Report last event, if any
-  ~CaseManagementModel ();
+  virtual ~CaseManagementModel ();
   
   /** Determine treatment for a human.
    * @param infection = Type of infection

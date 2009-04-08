@@ -67,7 +67,7 @@ public:
   DescriptiveInfection (istream& in);
   
   /** Destructor */
-  ~DescriptiveInfection();
+  virtual ~DescriptiveInfection();
   //@}
   
   virtual void write (ostream& out) const;

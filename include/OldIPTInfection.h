@@ -57,7 +57,7 @@ public:
   OldIPTInfection (istream& in);
   
   /** Destructor */
-  ~OldIPTInfection();
+  virtual ~OldIPTInfection() {}
   //@}
   
   virtual void write (ostream& out) const;

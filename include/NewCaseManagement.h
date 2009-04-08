@@ -30,7 +30,7 @@ public:
   static void init();
   
   NewCaseManagement(double tSF);
-  ~NewCaseManagement();
+  virtual ~NewCaseManagement();
   
   /*!
     Demonstrates the use of the CM-related calls to medicate. May or may not be

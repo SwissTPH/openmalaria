@@ -38,9 +38,8 @@ class Human;
 class OldWithinHostModel : public WithinHostModel {
 public:
   OldWithinHostModel();
-  ~OldWithinHostModel();
+  virtual ~OldWithinHostModel();
   
-
   virtual void update(double age);
   
   virtual void summarize(double age);

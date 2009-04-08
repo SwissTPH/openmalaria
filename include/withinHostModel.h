@@ -50,6 +50,7 @@ public:
   WithinHostModel() :
     _cumulativeInfections(0)
   {}
+  virtual ~WithinHostModel() {}
   
   virtual void update(double age) =0;
 

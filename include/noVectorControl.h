@@ -27,7 +27,7 @@ class NoVectorControl : public TransmissionModel {
 public:
 
   NoVectorControl();
-  ~NoVectorControl();
+  virtual ~NoVectorControl();
   //! initialise the main simulation 
   void initMainSimulation (int populationSize); 	
 

@@ -34,7 +34,7 @@
 class VectorControl : public TransmissionModel {
 public:
   VectorControl();
-  ~VectorControl();
+  virtual ~VectorControl();
   
   /** Initialise the main simulation.
    * 

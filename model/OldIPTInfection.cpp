@@ -53,8 +53,6 @@ void OldIPTInfection::initParameters (const Interventions& xmlInterventions){
     genotypeTolPeriod[i]= it->getTolPeriod();
     genotypeAtten[i]	= it->getAtten();
   }
-  
-  true;
 }
 
 void OldIPTInfection::clearParameters () {

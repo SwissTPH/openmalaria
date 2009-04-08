@@ -29,7 +29,7 @@ public:
   
   //!Read caseManagement parameters from input file and allocate data structures.
   OldCaseManagement(double tSF);
-  ~OldCaseManagement();
+  virtual ~OldCaseManagement();
   
   virtual void doCaseManagement (Morbidity::Infection, WithinHostModel&, double, int& doomed);
   

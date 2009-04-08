@@ -141,10 +141,8 @@ int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
     double sdlogdur=0.80000001192092895508;
-    int valinfectionDuration;
     double dur=W_LOGNORMAL(meanlogdur, sdlogdur);
-    valinfectionDuration=1+(int)floor(dur);
-    return valinfectionDuration;
+    return 1+(int)floor(dur);
 }
 
 void DescriptiveInfection::write (ostream& out) const {
