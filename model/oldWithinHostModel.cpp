@@ -138,8 +138,11 @@ void OldWithinHostModel::calculateDensities(Human& human) {
   human.setTotalDensity(0.0);
   human.setTimeStepMaxDensity(0.0);
   if (_cumulativeInfections >  0) {
-    cumulativeh=_cumulativeh;
-    cumulativeY=_cumulativeY;
+    // Values of _cumulativeh/Y at beginning of step
+    // (values are adjusted for each infection)
+    double cumulativeh=_cumulativeh;
+    double cumulativeY=_cumulativeY;
+    
     // IPTi SP dose clears infections at the time that blood-stage parasites appear     
     SPAction(human);
     
@@ -151,7 +154,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       if (Global::modelVersion & MAX_DENS_RESET) {
         timeStepMaxDensity=0.0;
       }
-      calculateDensity(*i, ageyears);
+      calculateDensity(*i, ageyears, cumulativeh, cumulativeY);
         //i->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
       i->multiplyDensity(exp(-_innateImmunity));
 
@@ -196,7 +199,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
   human.setPTransmit(human.infectiousness());
 }
 
-void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageYears) {
+void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageYears, double cumulativeh, double cumulativeY) {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+Simulation::simulationTime-inf.getStartDate()-Global::latentp;
   
@@ -311,9 +314,6 @@ void OldWithinHostModel::readOWHM(istream& in) {
   in >> _cumulativeInfections; 
   in >> _MOI; 
   in >> patentInfections; 
-  in >> cumulativeY;
-  in >> cumulativeh;
-  in >> timeStepMaxDensity;
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
@@ -337,9 +337,6 @@ void OldWithinHostModel::writeOWHM(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _MOI << endl; 
   out << patentInfections << endl; 
-  out << cumulativeY << endl;
-  out << cumulativeh << endl;
-  out << timeStepMaxDensity << endl;
   out << _cumulativeh << endl;
   out << _cumulativeY << endl;
   out << _cumulativeYlag << endl;

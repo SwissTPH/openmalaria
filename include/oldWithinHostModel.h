@@ -79,8 +79,6 @@ protected:
   void writeOWHM(ostream& out) const;
   void readOWHM(istream& in);
   
-  double timeStepMaxDensity;
-  
   //!multiplicity of infection
   int _MOI;
   
@@ -93,17 +91,19 @@ protected:
   //!Cumulative parasite density since birth
   double _cumulativeY;
   
+  /** Used within calculateDensities and other functions, set each call.
+   *
+   * Doesn't need to be checkpointed. */
+  double timeStepMaxDensity;
+  
 private:
-  void calculateDensity(DescriptiveInfection& inf, double);
+  void calculateDensity(DescriptiveInfection& inf, double, double, double);
   
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
-  
-  double cumulativeY;
-  double cumulativeh;
   
   //!innate ability to control parasite densities
   double _innateImmunity;
