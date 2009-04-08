@@ -73,7 +73,7 @@ protected:
   the individual had their last dose of SP */
   virtual void SPAction(Human&);
   
-  virtual void IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator i);
+  virtual void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
   virtual void IPTattenuateAsexualMinTotalDensity (Human&);
   
   void writeOWHM(ostream& out) const;
@@ -86,7 +86,7 @@ protected:
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
-  std::list<DescriptiveInfection> infections;
+  std::list<DescriptiveInfection*> infections;
 
   //!Cumulative parasite density since birth
   double _cumulativeY;

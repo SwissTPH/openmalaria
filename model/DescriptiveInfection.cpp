@@ -207,8 +207,6 @@ DescriptiveInfection::DescriptiveInfection(int lastSPdose, int simulationTime) :
 }
 
 DescriptiveInfection::~DescriptiveInfection() {
-}
-void DescriptiveInfection::destroy() {
   //if (modelVersion & INCLUDES_PK_PD) {
   //  delete _proteome;
   //}

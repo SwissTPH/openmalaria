@@ -87,7 +87,7 @@ void OldIPTWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DescriptiveInfection(_lastSPDose, Simulation::simulationTime));
+    infections.push_back(new DescriptiveInfection(_lastSPDose, Simulation::simulationTime));
     _MOI++;
   }
 }
@@ -185,32 +185,32 @@ void OldIPTWithinHostModel::SPAction(Human& human){
   model version.*/
 
   double rnum;
-  std::list<DescriptiveInfection>::iterator i=infections.begin();
-  while(i != infections.end()){
-    if ( 1+Simulation::simulationTime-i->getStartDate()-Global::latentp > 0){
+  std::list<DescriptiveInfection*>::iterator iter=infections.begin();
+  while(iter != infections.end()){
+    if ( 1+Simulation::simulationTime-(*iter)->getStartDate()-Global::latentp > 0){
       rnum=W_UNIFORM();
-      if ((rnum<=DescriptiveInfection::genotypeACR[i->getGenoTypeID()-1]) &&
-           (Simulation::simulationTime - _lastSPDose <= DescriptiveInfection::genotypeProph[i->getGenoTypeID()-1])) {
-        i->destroy();
-        i=infections.erase(i);
+      if ((rnum<=DescriptiveInfection::genotypeACR[(*iter)->getGenoTypeID()-1]) &&
+           (Simulation::simulationTime - _lastSPDose <= DescriptiveInfection::genotypeProph[(*iter)->getGenoTypeID()-1])) {
+        delete *iter;
+        iter=infections.erase(iter);
         _MOI--;
            }
            else{
-             i++;
+             iter++;
            }
     }
     else{
-      i++;
+      iter++;
     }
   }
 }
 
-void OldIPTWithinHostModel::IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator i) {
+void OldIPTWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection& infec) {
   if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
-    if (i->getSPattenuate() == 1) {
-      i->multiplyDensity(1.0/DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1]);
-      timeStepMaxDensity=(double)timeStepMaxDensity/DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1];
-      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (i->getStartDate()+(i->getDuration()/Global::interval) * DescriptiveInfection::genotypeAtten[i->getGenoTypeID() - 1]));
+    if (infec.getSPattenuate() == 1) {
+      infec.multiplyDensity(1.0/DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1]);
+      timeStepMaxDensity=(double)timeStepMaxDensity/DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1];
+      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (infec.getStartDate()+(infec.getDuration()/Global::interval) * DescriptiveInfection::genotypeAtten[infec.getGenoTypeID() - 1]));
     }
   }
 }

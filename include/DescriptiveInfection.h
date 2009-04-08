@@ -82,13 +82,8 @@ public:
   /** Checkpoint-reading constructor */
   DescriptiveInfection (istream& in);
   
-  /** Destructor
-   * 
-   * NOTE: this destructor does nothing to allow shallow copying to the
-   * population list. destroy() does the real freeing and must be
-   * called explicitly. */
+  /** Destructor */
   ~DescriptiveInfection();
-  void destroy();
   //@}
   
   void write (ostream& out) const;
@@ -165,7 +160,7 @@ private:
   //! Genotype responsible for infection
   genotype _gType;
   //! IPTi parameter (indicator for attenuation).
-  bool _SPattenuate; 
+  bool _SPattenuate;
   
   
   // -----  static  -----

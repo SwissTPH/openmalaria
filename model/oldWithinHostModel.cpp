@@ -50,9 +50,9 @@ OldWithinHostModel::~OldWithinHostModel() {
 void OldWithinHostModel::update (double age) {
   _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    std::list<DescriptiveInfection>::iterator i;
+    std::list<DescriptiveInfection*>::iterator i;
     for(i=infections.begin(); i != infections.end(); i++){
-	i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(*i)));
+	(*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor(**i)));
     }
     _proxy.decayDrugs();
   }
@@ -65,17 +65,17 @@ void OldWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DescriptiveInfection(missing_value, Simulation::simulationTime));
+    infections.push_back(new DescriptiveInfection(missing_value, Simulation::simulationTime));
     _MOI++;
   }
 }
 
 void OldWithinHostModel::clearOldInfections(){
-  std::list<DescriptiveInfection>::iterator iter=infections.begin();
+  std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
-    int enddate=iter->getEndDate();
+    int enddate=(*iter)->getEndDate();
     if (Simulation::simulationTime >= enddate) {
-      iter->destroy();
+      delete *iter;
       iter=infections.erase(iter);
       _MOI--;
     }
@@ -86,9 +86,9 @@ void OldWithinHostModel::clearOldInfections(){
 }
 
 void OldWithinHostModel::clearAllInfections(){
-  std::list<DescriptiveInfection>::iterator i;
+  std::list<DescriptiveInfection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    i->destroy();
+    delete *i;
   }
   infections.clear();
   _MOI=0;
@@ -146,17 +146,17 @@ void OldWithinHostModel::calculateDensities(Human& human) {
     // IPTi SP dose clears infections at the time that blood-stage parasites appear     
     SPAction(human);
     
-    std::list<DescriptiveInfection>::iterator i;
-    for(i=infections.begin(); i!=infections.end(); i++){
+    std::list<DescriptiveInfection*>::iterator iter;
+    for(iter=infections.begin(); iter!=infections.end(); iter++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
       timeStepMaxDensity=human.getTimeStepMaxDensity();
       
       if (Global::modelVersion & MAX_DENS_RESET) {
         timeStepMaxDensity=0.0;
       }
-      calculateDensity(*i, ageyears, cumulativeh, cumulativeY);
-        //i->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, cumulativeh , &(timeStepMaxDensity));
-      i->multiplyDensity(exp(-_innateImmunity));
+      calculateDensity(**iter, ageyears, cumulativeh, cumulativeY);
+        //(*iter)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, _cumulativeh , &(timeStepMaxDensity));
+      (*iter)->multiplyDensity(exp(-_innateImmunity));
 
         /*
       Possibly a better model version ensuring that the effect of variation in innate immunity
@@ -167,12 +167,12 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       }
         //Include here the effect of blood stage vaccination
       if (Vaccine::BSV.active) {
-        i->multiplyDensity(1-human.getBSVEfficacy());
+        (*iter)->multiplyDensity(1-human.getBSVEfficacy());
         timeStepMaxDensity=(double)timeStepMaxDensity*(1-human.getBSVEfficacy());
       }
       
       // Include here the effect of attenuated infections by SP concentrations
-      IPTattenuateAsexualDensity (i);
+      IPTattenuateAsexualDensity (**iter);
       
       if (Global::modelVersion & MAX_DENS_CORRECTION) {
         human.setTimeStepMaxDensity(std::max(timeStepMaxDensity, human.getTimeStepMaxDensity()));
@@ -181,17 +181,17 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         human.setTimeStepMaxDensity(timeStepMaxDensity);
       }
       
-      human.setTotalDensity(human.getTotalDensity()+i->getDensity());
+      human.setTotalDensity(human.getTotalDensity()+(*iter)->getDensity());
       //Compute the proportion of parasites remaining after innate blood stage effect
-      if (i->getDensity() > Human::detectionlimit) {
+      if ((*iter)->getDensity() > Human::detectionlimit) {
         patentInfections++;
       }
-      if (i->getStartDate() == (Simulation::simulationTime-1)) {
+      if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
         _cumulativeh++;
       }
-      i->setDensity(std::min(maxDens, i->getDensity()));
-      i->setCumulativeExposureJ(i->getCumulativeExposureJ()+Global::interval*i->getDensity());
-      _cumulativeY += Global::interval*i->getDensity();
+      (*iter)->setDensity(std::min(maxDens, (*iter)->getDensity()));
+      (*iter)->setCumulativeExposureJ((*iter)->getCumulativeExposureJ()+Global::interval*(*iter)->getDensity());
+      _cumulativeY += Global::interval*(*iter)->getDensity();
     }
     
     IPTattenuateAsexualMinTotalDensity(human);
@@ -224,7 +224,7 @@ void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageY
     //effect of age-dependent maternal immunity (named Dm in AJTM)
     double dA;
     
-    if ( cumulativeh <=  1.0) {
+    if (cumulativeh <=  1.0) {
       dY=1;
       dH=1;
     } else {
@@ -287,7 +287,7 @@ void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageY
 }
 
 void OldWithinHostModel::SPAction(Human&){}
-void OldWithinHostModel::IPTattenuateAsexualDensity (std::list<DescriptiveInfection>::iterator) {}
+void OldWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection&) {}
 void OldWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human&) {}
 
 // -----  Summarize  -----
@@ -325,7 +325,7 @@ void OldWithinHostModel::readOWHM(istream& in) {
   }
 
   for(int i=0;i<_MOI;++i) {
-    infections.push_back(DescriptiveInfection(in));
+    infections.push_back(new DescriptiveInfection(in));
   }
 
   if (Global::modelVersion & INCLUDES_PK_PD) {
@@ -342,8 +342,8 @@ void OldWithinHostModel::writeOWHM(ostream& out) const {
   out << _cumulativeYlag << endl;
   out << _innateImmunity << endl; 
 
-  for(std::list<DescriptiveInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    iter->write (out);
+  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    (*iter)->write (out);
   
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _proxy.write (out);
