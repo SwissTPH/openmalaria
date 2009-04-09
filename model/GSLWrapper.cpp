@@ -187,8 +187,8 @@ double W_UNIFORM(){
 }
 
 void load_rng_state(int seedFileNumber){
-  ostringstream seedN (string("seed"));
-  seedN << seedFileNumber;
+  ostringstream seedN;
+  seedN << string("seed") << seedFileNumber;
   string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
   cerr << "load_rng " << seed_file_name << "\n";
   
@@ -204,8 +204,8 @@ void load_rng_state(int seedFileNumber){
 }
 
 void save_rng_state(int seedFileNumber){
-  ostringstream seedN (string("seed"));
-  seedN << seedFileNumber;
+  ostringstream seedN;
+  seedN << string("seed") << seedFileNumber;
   string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
   
   FILE * f = fopen(seed_file_name.c_str(), "wb");

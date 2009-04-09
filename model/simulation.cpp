@@ -159,8 +159,8 @@ void Simulation::writeCheckpoint(){
   // Open the next checkpoint file for writing:
   ofstream f_checkpoint;
   {
-    ostringstream name (checkpointName);
-    name << checkpointNum;
+    ostringstream name;
+    name << checkpointName << checkpointNum;
     f_checkpoint.open(name.str().c_str(), ios::out | ios::binary);
   }
   
@@ -192,8 +192,8 @@ void Simulation::readCheckpoint() {
   // Open the latest file
   ifstream f_checkpoint;
   {
-    ostringstream name (checkpointName);
-    name << checkpointNum;
+    ostringstream name;
+    name << checkpointName << checkpointNum;
     f_checkpoint.open(name.str().c_str(), ios::in | ios::binary);
   }
   
