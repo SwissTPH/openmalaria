@@ -52,6 +52,8 @@ public class SchemaTranslator {
                     .getAttribute("schemaVersion"))) {
                 break;
             }
+        case 3:
+        	break;
         default:
             System.out.println("Not a recognized schemaVersion");
         }
