@@ -38,6 +38,21 @@ public class SchemaTranslator {
         if (schemaVersion == "") {
             schemaVersion = "0";
         }
+        NodeList sourcesElements = scenarioElement
+                .getElementsByTagName("sources");
+        for (int index = 0; index < sourcesElements.getLength(); index++) {
+            Element sourcesElement = (Element) sourcesElements.item(index);
+            Element parent = (Element) sourcesElement.getParentNode();
+            parent.removeChild(sourcesElement);
+            parent.setNodeValue("");
+        }
+
+        NodeList itemsElements = scenarioElement.getElementsByTagName("item");
+        for (int index = 0; index < itemsElements.getLength(); index++) {
+            Element itemsElement = (Element) itemsElements.item(index);
+            itemsElement.setTextContent("");
+        }
+
         switch (Integer.parseInt(schemaVersion)) {
         case 0:
         case 1:
@@ -53,7 +68,7 @@ public class SchemaTranslator {
                 break;
             }
         case 3:
-        	break;
+            break;
         default:
             System.out.println("Not a recognized schemaVersion");
         }
