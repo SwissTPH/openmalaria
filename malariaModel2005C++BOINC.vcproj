@@ -76,10 +76,10 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalDependencies="xerces-c_static_3D.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib"
-				OutputFile=".\Debug/malariacontrol_6.12_windows_intelx86"
+				OutputFile=".\Debug/malariacontrolBeta_6.15_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="C:\work\boinc\win_build\Build\Win32\Debug;.\Debug;.\lib"
+				AdditionalLibraryDirectories="..\boinc\win_build\Build\Win32\Debug;.\Debug;.\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames="LIBCMT.LIB"
 				DelayLoadDLLs=""
@@ -176,7 +176,7 @@
 				OutputFile=".\Release/malariacontrol_6.12_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="C:\work\boinc\win_build\Build\Win32\Release;.\Release;.\lib"
+				AdditionalLibraryDirectories="..\boinc\win_build\Build\Win32\Release;.\Release;.\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs="GDI32.dll;OPENGL32.dll;GLU32.dll"
@@ -253,10 +253,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\OldIPTInfection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\DummyWithinHostModel.h"
 				>
 			</File>
@@ -318,6 +314,10 @@
 			</File>
 			<File
 				RelativePath=".\include\OldCaseManagement.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\OldIPTInfection.h"
 				>
 			</File>
 			<File
@@ -413,10 +413,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\OldIPTInfection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\drug.cpp"
 				>
 			</File>
@@ -496,6 +492,10 @@
 			</File>
 			<File
 				RelativePath=".\model\OldCaseManagement.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\OldIPTInfection.cpp"
 				>
 			</File>
 			<File
