@@ -38,21 +38,6 @@ public class SchemaTranslator {
         if (schemaVersion == "") {
             schemaVersion = "0";
         }
-        NodeList sourcesElements = scenarioElement
-                .getElementsByTagName("sources");
-        for (int index = 0; index < sourcesElements.getLength(); index++) {
-            Element sourcesElement = (Element) sourcesElements.item(index);
-            Element parent = (Element) sourcesElement.getParentNode();
-            parent.removeChild(sourcesElement);
-            parent.setNodeValue("");
-        }
-
-        NodeList itemsElements = scenarioElement.getElementsByTagName("item");
-        for (int index = 0; index < itemsElements.getLength(); index++) {
-            Element itemsElement = (Element) itemsElements.item(index);
-            itemsElement.setTextContent("");
-        }
-
         switch (Integer.parseInt(schemaVersion)) {
         case 0:
         case 1:
@@ -93,6 +78,27 @@ public class SchemaTranslator {
             ((Element) scenarioElement.getElementsByTagName("entoData").item(0))
                     .removeAttribute("firstDay");
         }
+
+        if (((Element) scenarioElement.getElementsByTagName("changeEIR")
+                .item(0)).hasAttribute("firstDay")) {
+            System.out.println("Warning: Removed firstDay attribute");
+            ((Element) scenarioElement.getElementsByTagName("changeEIR")
+                    .item(0)).removeAttribute("firstDay");
+        }
+        NodeList sourcesElements = scenarioElement
+                .getElementsByTagName("sources");
+        for (int index = 0; index < sourcesElements.getLength(); index++) {
+            Element sourcesElement = (Element) sourcesElements.item(index);
+            Element parent = (Element) sourcesElement.getParentNode();
+            parent.removeChild(sourcesElement);
+            parent.setNodeValue("");
+        }
+
+        NodeList itemsElements = scenarioElement.getElementsByTagName("item");
+        for (int index = 0; index < itemsElements.getLength(); index++) {
+            Element itemsElement = (Element) itemsElements.item(index);
+            itemsElement.setTextContent("");
+        }
         Element paramElement = ((Element) scenarioElement.getElementsByTagName(
                 "parameters").item(0));
         if (paramElement != null) {
@@ -100,6 +106,13 @@ public class SchemaTranslator {
             paramElement.setAttribute("eipDuration", Integer
                     .toString(nspore * 5));
             paramElement.removeAttribute("nspore");
+        }
+        NodeList mdaElements = scenarioElement.getElementsByTagName("MDA");
+        for (int index = 0; index < mdaElements.getLength(); index++) {
+            Element el = (Element) mdaElements.item(index);
+            el.setAttribute("minAge", "0");
+            el.setAttribute("maxAge", "99");
+            el.setAttribute("coverage", "1");
         }
         NodeList allElements = scenarioElement.getElementsByTagName("*");
         for (int index = 0; index < allElements.getLength(); index++) {
