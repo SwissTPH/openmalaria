@@ -80,10 +80,13 @@ public class SchemaTranslator {
         }
 
         if (((Element) scenarioElement.getElementsByTagName("changeEIR")
-                .item(0)).hasAttribute("firstDay")) {
-            System.out.println("Warning: Removed firstDay attribute");
-            ((Element) scenarioElement.getElementsByTagName("changeEIR")
-                    .item(0)).removeAttribute("firstDay");
+                .item(0)) != null) {
+            if (((Element) scenarioElement.getElementsByTagName("changeEIR")
+                    .item(0)).hasAttribute("firstDay")) {
+                System.out.println("Warning: Removed firstDay attribute");
+                ((Element) scenarioElement.getElementsByTagName("changeEIR")
+                        .item(0)).removeAttribute("firstDay");
+            }
         }
         NodeList sourcesElements = scenarioElement
                 .getElementsByTagName("sources");
