@@ -167,9 +167,8 @@ double NoVectorControl::calculateEIR(int simulationTime, Human&){
             initialKappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1];
       }
       break;
-    default:
-      cerr << "Invalid simulation mode" << endl;
-      throw 0;	// Anything else.. don't continue silently
+    default:	// Anything else.. don't continue silently
+      throw xml_scenario_error ("Invalid simulation mode");
   }
 }
 

@@ -20,9 +20,12 @@
 
 #include "inputData.h"
 #include "scenario.hxx"
+#include "global.h"
 
 #include <iostream>
+#include <sstream>
 #include <map>
+using namespace std;
 
 const int SCHEMA_VERSION = 3;
 
@@ -65,8 +68,9 @@ void initTimedInterventions() {
   for (Timed::InterventionConstIterator it (interventionSeq.begin()); it != interventionSeq.end(); ++it) {
     int time = it->getTime();
     if (timedInterventions.count(time)) {
-      std::cerr << "Error: multiple timed interventions with time " << time << std::endl;
-      throw 0;
+      ostringstream msg;
+      msg << "Error: multiple timed interventions with time: " << time;
+      throw xml_scenario_error (msg.str());
     }
     timedInterventions[time] = &(*it);
   }
@@ -82,8 +86,9 @@ bool createDocument(std::string lXmlFile) {
   try {
     scenario = (parseScenario (lXmlFile)).release();
     if (scenario->getSchemaVersion() != SCHEMA_VERSION) {
-      std::cerr << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION << std::endl;
-      throw 0;
+      ostringstream msg;
+      msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
+      throw xml_scenario_error (msg.str());
     }
     
     monitoring = &scenario->getMonitoring();

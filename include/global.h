@@ -24,6 +24,7 @@
 #include <math.h>
 #include <vector>
 #include <string>
+#include <stdexcept>
 using namespace std;
 
 /// Command-Line Option possibilities
@@ -101,6 +102,13 @@ private:
 
 inline int isOptionIncluded (int allOptions, int option) {
   return allOptions & (1 << option);
+};
+
+/** Thrown to indicate an error in the scenario.xml file.  */
+class xml_scenario_error : public runtime_error
+{
+  public:
+    explicit xml_scenario_error(const string&  __arg);
 };
 
 #endif

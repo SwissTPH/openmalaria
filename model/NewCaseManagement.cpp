@@ -29,8 +29,7 @@
 void NewCaseManagement::init () {
   cerr << "Warning: NewCaseManagement has no way of determining clinical outcomes" << endl;
   if (!(Global::modelVersion & INCLUDES_PK_PD)) {
-    cerr << "Error: NewCaseManagement relies on INCLUDES_PK_PD to medicate treatment." << endl;
-    throw 0;
+    throw xml_scenario_error ("Error: NewCaseManagement relies on INCLUDES_PK_PD to medicate treatment.");
   }
 }
 
@@ -60,8 +59,9 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
       (!it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageYears))
       caseManagement = &*it;
     if (caseManagement == NULL) {
-      cerr << "No case management for age " << ageYears << endl;
-      throw 0;
+      ostringstream msg;
+      msg << "No case management for age " << ageYears;
+      throw xml_scenario_error (msg.str());
     }
   
   const CaseType::EndPointSequence* caseTypeSeq;
@@ -79,19 +79,9 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
     cerr << "Invalid infection code: "<<infection<<endl;
     return;
   }
-  /* Old entrypoint - new code doesn't support UC2
-  if (entrypoint == 1) {
-    caseTypeSeq = &caseManagement->getUc1().getEndPoint();
-  } else if (entrypoint == 2) {
+  /* UC2 should be the case sometimes:
     caseTypeSeq = &caseManagement->getUc2().getEndPoint();
-  } else if (entrypoint == 3) {
-    caseTypeSeq = &caseManagement->getSev().getEndPoint();
-  } else if (entrypoint == 4) {
-    caseTypeSeq = &caseManagement->getNmf().getEndPoint();
-  } else {
-    cerr << "invalid entrypoint" << endl;
-    throw 0;
-  }*/
+  */
   double randCum = W_UNIFORM();
   int decisionID = -1;
   for (CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
@@ -102,8 +92,7 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
     }
   }
   if (decisionID < 0) {
-    cerr << "Sum of probabilities of case management end-points for some severity type less than 1" << endl;
-    throw 0;
+    throw xml_scenario_error ("Sum of probabilities of case management end-points for some severity type less than 1");
   }
   
   //FIXME: build list of decisions by ID and use

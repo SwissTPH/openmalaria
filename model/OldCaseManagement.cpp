@@ -57,8 +57,7 @@ void OldCaseManagement::init (){
         goto gotItem;
       }
     }
-    cerr << "In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10" << endl;
-    throw 0;
+    throw xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
     gotItem:;	// alternative to for ... break ... else
   }
   
@@ -320,8 +319,7 @@ double getHealthSystemACRByName (const TreatmentDetails& td, string firstLineDru
   else if (firstLineDrug == "selfTreatment")
     return td.getSelfTreatment().getValue();
   else {
-    cerr << "healthSystem.drugRegimen->firstLine has bad value" << endl;
-    throw 0;
+    throw xml_scenario_error ("healthSystem.drugRegimen->firstLine has bad value");
   }
 }
 

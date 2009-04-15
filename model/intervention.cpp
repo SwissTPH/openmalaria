@@ -84,8 +84,9 @@ void Vaccine::initParameters() {
     const Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
     for (size_t i=0;i<_numberOfEpiDoses; i++) {
       if (i >= cVS.size()) {
-        cerr << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous" << endl;
-        throw 0;
+	ostringstream msg;
+	msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
+        throw xml_scenario_error (msg.str());
       }
       targetagetstep[i] = floor(cVS[i].getTargetAgeYrs() * daysInYear/(double)Global::interval);
       vaccineCoverage[i] = cVS[i].getCoverage();

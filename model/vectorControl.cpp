@@ -56,8 +56,7 @@ VectorControl::VectorControl () {
   //P_vi
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-    cerr << "Code expects EIPDuration >= mosqRestDuration >= 1" << endl;
-    throw 0;
+    throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
   
   N_v_length = EIPDuration + mosqRestDuration;
@@ -503,9 +502,6 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
 }
 
 void VectorControl::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
-  if (daysInYear != Global::interval*Global::intervalsPerYear)
-    throw 0;
-  
   for (int i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
       FullArray[i*Global::interval+j] = ShortArray[i];
@@ -692,11 +688,11 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   // For this model, all the eigenvalues should be in the unit circle. However,
   // as we cannot show that analytically, we need to check it numerically.
   if(srXtp >= 1.0){
-    printf("Warning: The spectral radius of $X_{tp}$ is not less than 1.\n"); 
-    printf("Warning: No globally asymptotically stable periodic orbit. \n");
-    printf("Warning: All results from the entomologoical model may be meaningless. \n");
-    printf("The spectral radius of X_t_p = %e\n", srXtp);
-    throw 0;
+    ostringstream msg;
+    msg << "The spectral radius of X_t_p = "<< srXtp << "; expected to be less than 1.\n";
+    msg << "Warning: No globally asymptotically stable periodic orbit. \n";
+    msg << "Warning: All results from the entomologoical model may be meaningless. \n";
+    throw xml_scenario_error (msg.str());
   }
 
   // Calculate the inverse of (I-X_t_p).

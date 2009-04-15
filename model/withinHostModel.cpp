@@ -26,6 +26,7 @@
 #include "DummyWithinHostModel.h"
 #include "inputData.h"
 #include "DescriptiveInfection.h"
+#include <stdexcept>
 
 using namespace std;
 
@@ -70,4 +71,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
 
 void WithinHostModel::clearInfections (Event&) {
   clearAllInfections();
+}
+
+void WithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
+  throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }

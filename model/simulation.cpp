@@ -68,7 +68,6 @@ Simulation::Simulation() :
     initProteomeModule();
     initDrugModule(5*24*60, 24*60);
   }
-
 }
 
 Simulation::~Simulation(){

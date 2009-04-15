@@ -61,8 +61,11 @@ int main(int argc, char* argv[]){
     
     cleanDocument();
     BoincWrapper::finish(0);	// Never returns
+  } catch (const exception& e) {
+    cerr << "Exception: " << e.what() << endl;
+    BoincWrapper::finish(-1);
   } catch (...) {
-    cerr << "Error occurred." << endl;
+    cerr << "Unknown exception" << endl;
     BoincWrapper::finish(-1);
   }
 }

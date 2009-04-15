@@ -35,6 +35,7 @@
 #include "transmissionModel.h"
 #include "oldWithinHostModel.h"
 #include "DescriptiveInfection.h"
+#include <stdexcept>
 
 
 /*
@@ -111,8 +112,7 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   _dateOfBirth=dateOfBirth;
   if (_dateOfBirth > simulationTime) {
     // This test may be totally unnecessary; it was done in oldWithinHostModel
-    cerr << "date of birth in future!" << endl;
-    throw 0;
+    throw out_of_range ("date of birth in future!");
   }
   _doomed=0;
   _timeStepMaxDensity=0.0;

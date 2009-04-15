@@ -80,9 +80,8 @@ OldIPTWithinHostModel::OldIPTWithinHostModel () :
     _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
 {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    cerr << "OldIPTWithinHostModel not intended to work with DrugAction" << endl;
+    throw xml_scenario_error ("OldIPTWithinHostModel not intended to work with DrugAction");
     // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
-    throw 0;
   }
 }
 
@@ -194,7 +193,7 @@ void OldIPTWithinHostModel::SPAction(Human& human){
   while(iter != infections.end()) {
     if (1 + Simulation::simulationTime - (*iter)->getStartDate() > Global::latentp) {
       OldIPTInfection* infec = dynamic_cast<OldIPTInfection*> (*iter);
-      if (infec == NULL) throw 0;
+      if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
       size_t genoTypeIndex = infec->getGenoTypeID()-1;
       if ((W_UNIFORM() <= OldIPTInfection::genotypeACR[genoTypeIndex]) &&
 	  (Simulation::simulationTime - _lastSPDose <= OldIPTInfection::genotypeProph[genoTypeIndex])) {

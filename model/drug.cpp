@@ -26,6 +26,7 @@
 #include <iostream>
 #include <cmath>
 #include <algorithm>
+#include <stdexcept>
 
 using namespace std;
 
@@ -430,8 +431,7 @@ void DrugRegistry::addDrug(Drug* _drug) throw(int) {
   if (find (drugs.begin(), drugs.end(), _drug) == drugs.end()) {
     drugs.push_back(_drug);
   } else {	//Element exists, we throw
-    cerr << "Drug already in registry: " << _drug->getAbbreviation() << endl;
-    throw(1);
+    throw invalid_argument (string ("Drug already in registry: ").append(_drug->getAbbreviation()));
   }
 }
 

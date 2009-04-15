@@ -25,6 +25,7 @@
 #include "inputData.h"
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 /*
 Contains global variables and constants and utility functions that are used in different modules.
@@ -156,8 +157,9 @@ void Global::setModelVersion () {
   for (size_t i = 0; i < NUM_VERSIONS; ++i)
     if (((modelVersion >> i) & 1) &&
           modelVersion & INCOMPATIBLITITIES[i]) {
-      cerr << "Incompatible model versions: flag " << i << " is incompatible with other flags." << endl;
-      throw 0;
+      ostringstream msg;
+      msg << "Incompatible model versions: flag " << i << " is incompatible with other flags.";
+      throw xml_scenario_error (msg.str());
     }
   if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
     cerr << "Warning: model version used is deprecated" << endl;
@@ -170,3 +172,6 @@ int Global::modIntervalsPerYear (int i) {
     }
     return valmodIntervalsPerYear;
 }
+
+xml_scenario_error::xml_scenario_error(const string&  __arg)
+: runtime_error(__arg) { }

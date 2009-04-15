@@ -114,8 +114,9 @@ void Population::estimateRemovalRates () {
   sumperc=0.0;
   const AgeGroupPerC::GroupSequence& group = getDemography().getAgeGroup().getGroup();
   if (group.size() < ngroups-1) {
-    cerr << "expected " << ngroups-1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)" << endl;
-    throw 0;
+    ostringstream msg;
+    msg << "expected " << ngroups-1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)";
+    throw xml_scenario_error(msg.str());
   }
   //Add age group for first month of life
   ageGroupBounds[0]=0.0;
