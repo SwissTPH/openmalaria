@@ -27,7 +27,9 @@
 #include "global.h"
 
 // Forward declare: doesn't need to be known about here
-class VaccineDescription;
+namespace scnXml {
+  class VaccineDescription;
+}
 
 /** Vaccine intervention parameters.
  * 
@@ -76,7 +78,7 @@ public:
 private:
   /** Per-type initialization
    * @returns decay */
-  void initVaccine (const VaccineDescription* vd);
+  void initVaccine (const scnXml::VaccineDescription* vd);
   
   /* Vaccine type specific parameters
    * Initial mean efficacy, definition depends on vaccine type */

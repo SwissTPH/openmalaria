@@ -51,10 +51,10 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
   
   //NOTE: should we just return in these cases? Maybe data should be read in init.
   if (getCaseManagements() == NULL) return;
-  const CaseManagements::CaseManagementSequence managements = getCaseManagements()->getCaseManagement();
+  const scnXml::CaseManagements::CaseManagementSequence managements = getCaseManagements()->getCaseManagement();
   if (managements.size() == 0) return;
-  const CaseManagement* caseManagement = NULL;
-  for (CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
+  const scnXml::CaseManagement* caseManagement = NULL;
+  for (scnXml::CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
     if (ageYears < it->getMaxAgeYrs() &&
       (!it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageYears))
       caseManagement = &*it;
@@ -64,7 +64,7 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
       throw xml_scenario_error (msg.str());
     }
   
-  const CaseType::EndPointSequence* caseTypeSeq;
+  const scnXml::CaseType::EndPointSequence* caseTypeSeq;
   // FIXME: UC1/UC2 endpoints? (infection & Morbidity::INDIRECT_MORTALITY)?
   if (infection & Morbidity::MALARIA) {
     if (infection & Morbidity::COMPLICATED)
@@ -84,7 +84,7 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
   */
   double randCum = W_UNIFORM();
   int decisionID = -1;
-  for (CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
+  for (scnXml::CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
     randCum -= it->getP();
     if (randCum < 0) {
       decisionID = it->getDecision();
@@ -96,12 +96,12 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
   }
   
   //FIXME: build list of decisions by ID and use
-  const Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
+  const scnXml::Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
   if ((int)decisions.size() < decisionID) {
     cerr << "A decision for a case-management end-point doesn't exist (number "<<decisionID<<")!" << endl;
     return;
   }
-  const Decision::MedicateSequence& medicates = decisions[decisionID-1].getMedicate();
+  const scnXml::Decision::MedicateSequence& medicates = decisions[decisionID-1].getMedicate();
   if (medicates.size() == 0)
     return;
   

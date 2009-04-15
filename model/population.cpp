@@ -112,7 +112,7 @@ void Population::estimateRemovalRates () {
 
   //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
   sumperc=0.0;
-  const AgeGroupPerC::GroupSequence& group = getDemography().getAgeGroup().getGroup();
+  const scnXml::AgeGroupPerC::GroupSequence& group = getDemography().getAgeGroup().getGroup();
   if (group.size() < ngroups-1) {
     ostringstream msg;
     msg << "expected " << ngroups-1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)";
@@ -399,7 +399,7 @@ void Population::newSurvey () {
 }
 
 void Population::implementIntervention (int time) {
-  const Intervention* interv = getInterventionByTime (time);
+  const scnXml::Intervention* interv = getInterventionByTime (time);
   if (interv == NULL)
     return;
   
@@ -432,7 +432,7 @@ void Population::implementIntervention (int time) {
   } */
 }
 
-void Population::massTreatment(const Mass& mass, int time){
+void Population::massTreatment(const scnXml::Mass& mass, int time){
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
   double compliance = mass.getCoverage();
@@ -461,7 +461,7 @@ void Population::massTreatment(const Mass& mass, int time){
   }
 }
 
-void Population::massIPTiTreatment(const Mass& mass, int time){
+void Population::massIPTiTreatment(const scnXml::Mass& mass, int time){
   //Set the last SP Dose given for the eligible humans - is this all we need to do?     
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
@@ -476,7 +476,7 @@ void Population::massIPTiTreatment(const Mass& mass, int time){
 }
 
 
-void Population::vaccinatePopulation(const Mass& mass, int time){
+void Population::vaccinatePopulation(const scnXml::Mass& mass, int time){
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
   double compliance = mass.getCoverage();

@@ -36,14 +36,16 @@ struct genotype {
   //!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
 };
 
-class Interventions;	// XML data passed to initParameters
+namespace scnXml {
+  class Interventions;	// XML data passed to initParameters
+}
 
 /// IPT extension of DescriptiveInfection
 class OldIPTInfection : public DescriptiveInfection {
 public:
   ///@name Static init/cleanup
   //@{
-  static void initParameters(const Interventions& xmlInterventions);
+  static void initParameters(const scnXml::Interventions& xmlInterventions);
   static void clearParameters();
   //@}
   

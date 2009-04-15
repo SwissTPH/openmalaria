@@ -42,25 +42,25 @@ bool createDocument(std::string);
 void cleanDocument();
 
 /// Get the Monitoring xml object
-const Monitoring& getMonitoring();
+const scnXml::Monitoring& getMonitoring();
 /// Get the Interventions xml object
-const Interventions& getInterventions();
+const scnXml::Interventions& getInterventions();
 /// Get the EntoData xml object
-const EntoData& getEntoData();
+const scnXml::EntoData& getEntoData();
 /// Get the Demography xml object
-const Demography& getDemography();
+const scnXml::Demography& getDemography();
 /// Get the CaseManagements xml object
-const CaseManagements* getCaseManagements();
+const scnXml::CaseManagements* getCaseManagements();
 /// Get the HealthSystem xml object
-const HealthSystem& getHealthSystem();
+const scnXml::HealthSystem& getHealthSystem();
 
 // Change xml data for certain interventions
-void changeEntoData (const EntoData*);
-void changeHealthSystem (const HealthSystem*);
+void changeEntoData (const scnXml::EntoData*);
+void changeHealthSystem (const scnXml::HealthSystem*);
 
 /// Get the intervention from interventions->timed with time time.
 /// @returns NULL if not available
-const Intervention* getInterventionByTime(int time);
+const scnXml::Intervention* getInterventionByTime(int time);
 
 /// Get a parameter from the parameter list. i should be less than Params::MAX.
 double getParameter (size_t i);

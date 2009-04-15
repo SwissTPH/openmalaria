@@ -41,18 +41,18 @@ int OldIPTWithinHostModel::iptiEffect;
 // -----  init  -----
 
 void OldIPTWithinHostModel::initParameters () {
-  const Interventions& xmlInterventions = getInterventions();
+  const scnXml::Interventions& xmlInterventions = getInterventions();
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) return;
   
   // --- IptiDescription begin ---
-  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
   
   iptiEffect = xmlIPTI.getIptiEffect();
   // --- IptiDescription end ---
   
   if (xmlInterventions.getContinuous().present()) {
-    const Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
+    const scnXml::Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
     numberOfIPTiDoses = xmlIpti.size();
     
     iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));

@@ -104,13 +104,13 @@ void NoVectorControl::inputEIR () {
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR();
-  const EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
+  const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
     updateEIR (mpcday, std::max((double)daily[mpcday], minEIR));
   }
   
   // Calculate total annual EIR 
-  if ( Global::simulationMode !=  transientEIRknown) {
+  if (Global::simulationMode !=  transientEIRknown) {
     annualEIR=0.0;
     for (int j=0;j<Global::intervalsPerYear; j++) {
       annualEIR += Global::interval*EIR[j];
@@ -233,8 +233,8 @@ double NoVectorControl::averageEIR () {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
   double valaverageEIR=0.0;
   size_t i = 0;
-  const EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
-  for (; i < daily.size(); ++i) {
+  for (const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
+       i < daily.size(); ++i) {
     valaverageEIR += (double)daily[i];
   }
   return valaverageEIR / i;

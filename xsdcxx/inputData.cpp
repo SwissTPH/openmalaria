@@ -26,6 +26,10 @@
 #include <sstream>
 #include <map>
 using namespace std;
+// This namespace should make it obvious when types come from scenario.hxx and
+// when they come from model code. It is not explicitly used here (prepending
+// scnXml::), but I recommend code within the model explicitly do this.
+using namespace scnXml;
 
 const int SCHEMA_VERSION = 3;
 

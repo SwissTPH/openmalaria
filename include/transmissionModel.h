@@ -29,9 +29,9 @@
 //#define TransmissionModel_PrintSmoothArray
 #define TransmissionModel_PrintRotateArray
 
- 
+
 //! Abstract base class, defines behaviour of transmission models
-class TransmissionModel{ 
+class TransmissionModel {
 public:
   /// Creates a derived class
   static TransmissionModel* createTransmissionModel ();

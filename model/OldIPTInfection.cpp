@@ -34,10 +34,10 @@ double *OldIPTInfection::genotypeAtten;
 // -----  static init/clear -----
 
 // Only called if IPT is present
-void OldIPTInfection::initParameters (const Interventions& xmlInterventions){
-  const IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+void OldIPTInfection::initParameters (const scnXml::Interventions& xmlInterventions){
+  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
   
-  const IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
+  const scnXml::IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
   numberOfGenoTypes = genotypes.size();
   genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
   genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
@@ -46,7 +46,8 @@ void OldIPTInfection::initParameters (const Interventions& xmlInterventions){
   genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
   
   size_t i = 0;
-  for (IptDescription::InfGenotypeConstIterator it = genotypes.begin(); it != genotypes.end(); ++it, ++i) {
+  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypes.begin();
+       it != genotypes.end(); ++it, ++i) {
     genotypeFreq[i]	= it->getFreq();
     genotypeACR[i]	= it->getACR();
     genotypeProph[i]	= it->getProph();

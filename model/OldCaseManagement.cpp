@@ -48,7 +48,7 @@ void OldCaseManagement::init (){
   
   setParasiteCaseParameters ();
   
-  const ByAgeItems::ItemSequence& items = getHealthSystem().getPSequelaeInpatient().getItem();
+  const scnXml::ByAgeItems::ItemSequence& items = getHealthSystem().getPSequelaeInpatient().getItem();
   for (int agegrp=0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
     for (size_t i = 0; i < items.size(); i++) {
       if (items[i].getMaxAgeYrs() > SEQUELAE_AGE_BOUND[agegrp]) {
@@ -250,14 +250,14 @@ bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
 }
 
 void OldCaseManagement::readCaseFatalityRatio(){
-  const AgeGroups::GroupSequence& xmlGroupSeq = getHealthSystem().getCFR().getGroup();
+  const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = getHealthSystem().getCFR().getGroup();
   
   int numOfGroups = xmlGroupSeq.size();
   _inputAge.resize(numOfGroups+1);
   _caseFatalityRate.resize(numOfGroups+1);
   
   for (int i=0;i<numOfGroups; i++) {
-    const Group& xmlGroup = xmlGroupSeq[i];
+    const scnXml::Group& xmlGroup = xmlGroupSeq[i];
     _inputAge[i] = xmlGroup.getLowerbound();
     _caseFatalityRate[i] = xmlGroup.getCfr();
   }
@@ -303,7 +303,7 @@ double OldCaseManagement::caseFatality(double ageYears) {
 }
 
 
-double getHealthSystemACRByName (const TreatmentDetails& td, string firstLineDrug) {
+double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firstLineDrug) {
   if (firstLineDrug == "CQ")
     return td.getCQ().present() ? td.getCQ().get().getValue() : 0;
   else if (firstLineDrug == "SP")
@@ -324,7 +324,7 @@ double getHealthSystemACRByName (const TreatmentDetails& td, string firstLineDru
 }
 
 void OldCaseManagement::setParasiteCaseParameters () {
-  const HealthSystem& healthSystem = getHealthSystem();
+  const scnXml::HealthSystem& healthSystem = getHealthSystem();
   
   
   // --- calculate cureRate ---

@@ -582,7 +582,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="cd xsdcxx &amp;&amp; xsd cxx-tree --type-naming ucc --function-naming java --generate-doxygen --parser-regex /(.+)/parse\u$1/ ../test/original/scenario.xsd&#x0D;&#x0A;"
+					CommandLine="cd xsdcxx &amp;&amp; xsd cxx-tree --type-naming ucc --function-naming java --namespace-map =scnXml --generate-inline --generate-doxygen --generate-intellisense ../test/original/scenario.xsd&#x0D;&#x0A;"
 					Outputs="xsdcxx\scenario.cxx;xsdcxx\scenario.hxx"
 				/>
 			</FileConfiguration>
@@ -591,7 +591,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="cd xsdcxx &amp;&amp; xsd cxx-tree --type-naming ucc --function-naming java --generate-doxygen --parser-regex /(.+)/parse\u$1/ ../test/original/scenario.xsd&#x0D;&#x0A;"
+					CommandLine="cd xsdcxx &amp;&amp; xsd cxx-tree --type-naming ucc --function-naming java --namespace-map =scnXml --generate-inline --generate-doxygen --generate-intellisense ../test/original/scenario.xsd&#x0D;&#x0A;"
 					Outputs="xsdcxx\scenario.cxx;xsdcxx\scenario.hxx"
 				/>
 			</FileConfiguration>

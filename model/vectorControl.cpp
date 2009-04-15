@@ -41,8 +41,8 @@ VectorControl::VectorControl () {
   // The XML schema allows a list of anopheles data to represent multiple types
   // of mosquito. Currently only using one set of data is supported.
   // TransmissionModel::createTransmissionModel checks length of this list:
-  Anopheles anoph = getEntoData().getAnopheles()[0];
-  Mosq mosq = anoph.getMosq();
+  scnXml::Anopheles anoph = getEntoData().getAnopheles()[0];
+  scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
 
@@ -328,8 +328,8 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   And we still initialize the parameters here, but do not
   define them. */
   
-  Anopheles anoph = getEntoData().getAnopheles()[0];
-  Mosq mosq = anoph.getMosq();
+  scnXml::Anopheles anoph = getEntoData().getAnopheles()[0];
+  scnXml::Mosq mosq = anoph.getMosq();
   
   /* Availability rate of hosts to mosquitoes.
   Units: 1/(Animals * Time)

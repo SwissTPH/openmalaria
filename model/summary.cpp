@@ -30,7 +30,7 @@
 
 Summary::Summary() : _surveyPeriod(0) {
   //Read all summary parameters from the input file and allocate datastructures.
-  const AgeGroup::GroupSequence& groups = getMonitoring().getAgeGroup().getGroup();
+  const scnXml::AgeGroup::GroupSequence& groups = getMonitoring().getAgeGroup().getGroup();
   _numOfAgeGroups = groups.size()+1;
   _upperbound.resize(_numOfAgeGroups);
   _lowerbound=get_lowerbound();

@@ -54,10 +54,10 @@ double Vaccine::getEfficacy (int numPrevDoses) {
 }
 
 void Vaccine::initParameters() {
-  const VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-  const Interventions& interventions = getInterventions();
-  const Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
-  for (Interventions::VaccineDescriptionConstIterator i = vaccDesc.begin();
+  const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
+  const scnXml::Interventions& interventions = getInterventions();
+  const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
+  for (scnXml::Interventions::VaccineDescriptionConstIterator i = vaccDesc.begin();
        i != vaccDesc.end(); i++) {
     int type = i->getVaccineType();
     if (type == preerythrocytic_reduces_h)
@@ -81,7 +81,7 @@ void Vaccine::initParameters() {
   if (_numberOfEpiDoses) {
     targetagetstep = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
     vaccineCoverage = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
-    const Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
+    const scnXml::Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
     for (size_t i=0;i<_numberOfEpiDoses; i++) {
       if (i >= cVS.size()) {
 	ostringstream msg;
@@ -94,7 +94,7 @@ void Vaccine::initParameters() {
   }
 }
 
-void Vaccine::initVaccine (const VaccineDescription* vd) {
+void Vaccine::initVaccine (const scnXml::VaccineDescription* vd) {
   if (vd != NULL) {
     active = true;
     
@@ -102,7 +102,7 @@ void Vaccine::initVaccine (const VaccineDescription* vd) {
     efficacyB = vd->getEfficacyB().getValue();
     
     // set initialMeanEfficacy:
-    const VaccineDescription::InitialEfficacySequence ies = vd->getInitialEfficacy();
+    const scnXml::VaccineDescription::InitialEfficacySequence ies = vd->getInitialEfficacy();
     initialMeanEfficacy.resize (ies.size());
     for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
       initialMeanEfficacy[i] = ies[i].getValue();

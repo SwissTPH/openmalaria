@@ -26,7 +26,9 @@
 // Forward declarations
 class Human;
 class TransmissionModel;
-class Mass;
+namespace scnXml {
+  class Mass;
+}
 
 //! The simulated human population
 class Population{
@@ -78,13 +80,13 @@ public:
   /*!   
        \param time Current time (in tsteps) 
   */
-  void massIPTiTreatment(const Mass&, int time);
+  void massIPTiTreatment(const scnXml::Mass&, int time);
 
   //! Mass Vaccination Intervention
   /*!
      \param time Current time (in tsteps)
   */
-  void vaccinatePopulation(const Mass&, int time);
+  void vaccinatePopulation(const scnXml::Mass&, int time);
   
   //! Initialise human list
   void initialiseHumanList();
@@ -105,7 +107,7 @@ public:
   /*!  
     \param time Current time (in tsteps)
   */
-  void massTreatment(const Mass&, int time);
+  void massTreatment(const scnXml::Mass&, int time);
 
   //! remove human from the list
   short outmigrate(Human& current, int Nsize, int &survivsSoFar);
