@@ -31,7 +31,7 @@ public:
   OldCaseManagement(double tSF);
   virtual ~OldCaseManagement();
   
-  virtual void doCaseManagement (Morbidity::Infection, WithinHostModel&, double, int& doomed);
+  virtual void doCaseManagement (Presentation::Infection, WithinHostModel&, double, int& doomed);
   
   virtual  void write(ostream& out) const;
   virtual void read(istream& in);

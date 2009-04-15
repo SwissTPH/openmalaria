@@ -42,12 +42,12 @@ NewCaseManagement::~NewCaseManagement(){
 }
 
 
-void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
+void NewCaseManagement::doCaseManagement (Presentation::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
   //TODO: implement age-specificity of drug dosing
   //TODO: This is a rough and quick implementation, which could perhaps be improved.
   
   // Frequently there is no infection:
-  if (infection == Morbidity::NONE) return;
+  if (infection == Presentation::NONE) return;
   
   //NOTE: should we just return in these cases? Maybe data should be read in init.
   if (getCaseManagements() == NULL) return;
@@ -65,14 +65,14 @@ void NewCaseManagement::doCaseManagement (Morbidity::Infection infection, Within
     }
   
   const scnXml::CaseType::EndPointSequence* caseTypeSeq;
-  // FIXME: UC1/UC2 endpoints? (infection & Morbidity::INDIRECT_MORTALITY)?
-  if (infection & Morbidity::MALARIA) {
-    if (infection & Morbidity::COMPLICATED)
+  // FIXME: UC1/UC2 endpoints? (infection & Presentation::INDIRECT_MORTALITY)?
+  if (infection & Presentation::MALARIA) {
+    if (infection & Presentation::COMPLICATED)
       // FIXME: severe / coinfection differences?
       caseTypeSeq = &caseManagement->getSev().getEndPoint();
-    else //if (infection & Morbidity::UNCOMPLICATED)
+    else //if (infection & Presentation::UNCOMPLICATED)
       caseTypeSeq = &caseManagement->getUc1().getEndPoint();
-  } else if (infection & Morbidity::NON_MALARIA) {
+  } else if (infection & Presentation::NON_MALARIA) {
     caseTypeSeq = &caseManagement->getNmf().getEndPoint();
   } else {
     // NOTE: shouldn't happen; could just be checked in debug mode.

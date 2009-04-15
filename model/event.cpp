@@ -26,7 +26,7 @@
 #include <algorithm>
 #include "CaseManagementModel.h"
 #include "summary.h"
-#include "morbidityModel.h"
+#include "PresentationModel.h"
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
   if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + CaseManagementModel::caseManagementMemory))){

@@ -22,7 +22,7 @@
 #include "event.h"
 #include "withinHostModel.h"
 #include "EntoIntervention.h"
-#include "morbidityModel.h"
+#include "PresentationModel.h"
 #include "drug.h"
 
 // Forward declaration
@@ -204,7 +204,7 @@ private:
 
   CaseManagementModel* _caseManagement;
   
-  MorbidityModel* _morbidityModel;
+  PresentationModel* _presentationModel;
 
   //!Total asexual blood stage density
   double _ylag[4];
@@ -232,7 +232,7 @@ private:
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval
-  double _timeStepMaxDensity;	// WithinHostModel, used by Morbidity
+  double _timeStepMaxDensity;	// WithinHostModel, used by PresentationModel
   //!Baseline availability to mosquitoes
   double _BaselineAvailabilityToMosquitoes;
   

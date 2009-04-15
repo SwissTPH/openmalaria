@@ -80,7 +80,7 @@ enum ModelVersion {
    * 75 (suppl 2) pp56-62. */
   PREDETERMINED_EPISODES = 1 << 10,
   
-  /** @brief The morbidity model includes simulation of non-malaria fevers
+  /** @brief The presentation model includes simulation of non-malaria fevers
    * 
    * Default: Non-malaria fevers are not simulated. */
   NON_MALARIA_FEVERS = 1 << 11,
@@ -99,9 +99,9 @@ enum ModelVersion {
   
   /** @brief Clinical episodes occur in response to a simple parasite density trigger
    * 
-   * Default: Use the Ross et al morbidity model (Clinical episodes are a
+   * Default: Use the Ross et al presentation model (Clinical episodes are a
    * stochastic function as described in AJTMH 75 (suppl 2) pp56-62). */
-  MUELLER_MORBIDITY_MODEL = 1 << 14,
+  MUELLER_PRESENTATION_MODEL = 1 << 14,
   
   /** @brief Simple heterogeneity
    * 

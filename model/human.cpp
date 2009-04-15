@@ -57,7 +57,7 @@ double Human::baseProbMosqSurvivalResting;
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
   WithinHostModel::init();
-  MorbidityModel::init();
+  PresentationModel::init();
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
   Vaccine::initParameters();
@@ -93,7 +93,7 @@ void Human::clear() {	// static clear
 // Testing Ctor
 Human::Human() {
   _withinHostModel = WithinHostModel::createWithinHostModel();
-  _morbidityModel=MorbidityModel::createMorbidityModel(1.0);
+  _presentationModel=PresentationModel::createPresentationModel(1.0);
   _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
 }
 
@@ -144,7 +144,7 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
     _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
   }
   
-  // Stored in morbidity model, not Human, now. Initialization looks somewhat entwined though..
+  // Stored in presentation model, not Human, now. Initialization looks somewhat entwined though..
   double _comorbidityFactor;
   // Ditto, but in case management.
   double _treatmentSeekingFactor;
@@ -201,7 +201,7 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
       _treatmentSeekingFactor=1.8;
     }
   }
-  _morbidityModel=MorbidityModel::createMorbidityModel(_comorbidityFactor);
+  _presentationModel=PresentationModel::createPresentationModel(_comorbidityFactor);
   _caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
 }
 
@@ -212,7 +212,7 @@ Human::Human(istream& funit, int simulationTime)
   // NOTE: makes some unnecessary random calls
   // WARNING: this will likely change some tests with checkpointing
   _withinHostModel = WithinHostModel::createWithinHostModel();
-  _morbidityModel=MorbidityModel::createMorbidityModel(1.0);
+  _presentationModel=PresentationModel::createPresentationModel(1.0);
   _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
   // Reading human from file
   funit >> *this;
@@ -220,7 +220,7 @@ Human::Human(istream& funit, int simulationTime)
 
 void Human::destroy() {
   delete _withinHostModel;
-  delete _morbidityModel;
+  delete _presentationModel;
   delete _caseManagement; 
 }
 
@@ -302,7 +302,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   }
   // Neonatal mortality:
   if(_simulationTime-_dateOfBirth == 1) {
-    if (MorbidityModel::eventNeonatalMortality()) {
+    if (PresentationModel::eventNeonatalMortality()) {
       _caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       _doomed  = 6;
       return;
@@ -315,7 +315,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   doCaseManagement clears infections if there was an effective treatment, or calls medicate,
   and decides whether the patient lives, has sequelae, or dies.
   */
-  _caseManagement->doCaseManagement (_morbidityModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
+  _caseManagement->doCaseManagement (_presentationModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
                                      *_withinHostModel,
                                      getAgeInYears(),
                                      _doomed);
@@ -392,8 +392,8 @@ void Human::summarize(){
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
   }
   Simulation::gMainSummary->addToExpectedInfected(age, _pinfected);
-  Simulation::gMainSummary->addToPyrogenicThreshold(age, _morbidityModel->getPyrogenThres());
-  Simulation::gMainSummary->addToSumX(age, log(_morbidityModel->getPyrogenThres()+1.0));
+  Simulation::gMainSummary->addToPyrogenicThreshold(age, _presentationModel->getPyrogenThres());
+  Simulation::gMainSummary->addToSumX(age, log(_presentationModel->getPyrogenThres()+1.0));
 }
 
 
@@ -467,7 +467,7 @@ double Human::probMosqSurvivalResting () const {
 
 ostream& operator<<(ostream& out, const Human& human){
   human._withinHostModel->write(out);
-  human._morbidityModel->write(out);
+  human._presentationModel->write(out);
   human._caseManagement->write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
@@ -497,7 +497,7 @@ ostream& operator<<(ostream& out, const Human& human){
 
 istream& operator>>(istream& in, Human& human){
   human._withinHostModel->read(in);
-  human._morbidityModel->read(in);
+  human._presentationModel->read(in);
   human._caseManagement->read (in);
   in >> human._dateOfBirth; 
   in >> human._doomed; 

@@ -20,15 +20,15 @@
 
 */
 
-#ifndef Hmod_morbidity
-#define Hmod_morbidity
+#ifndef Hmod_PresentationModel
+#define Hmod_PresentationModel
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-namespace Morbidity {
+namespace Presentation {
   /** Types of infection; correspond roughly to those in doCM.
    * 
    * The following are flags:
@@ -53,7 +53,7 @@ namespace Morbidity {
     NON_MALARIA		= 0x1,
     MALARIA		= 0x2,
     
-    // Flags indicating morbidity severity:
+    // Flags indicating infection severity:
     INDIRECT_MORTALITY	= 0x4,
     COMPLICATED		= 0x8,
     
@@ -64,28 +64,44 @@ namespace Morbidity {
   };
 }
 
-/*! Morbidity Model abstract base class. */
-class MorbidityModel {
+/*! Presentation Model abstract base class. 
+ *
+ * Previously named MorbidityModel. */
+class PresentationModel {
 public:
   // static:
-  /// Calls static init on correct MorbidityModel.
+  /// Calls static init on correct PresentationModel.
   static void init();
   
   /** Create a sub-class instance, dependant on global options.
    * 
    * @param cF = Comorbidity factor (currently set in Human). */
-  static MorbidityModel* createMorbidityModel(double cF);
+  static PresentationModel* createPresentationModel(double cF);
   
-  // non-static
-  MorbidityModel(double cF);
-  Morbidity::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
-  virtual double getPyrogenThres();
-  
+  /** Called for each birth; returns true if infant dies due to mother's
+   * infection. */
   static bool eventNeonatalMortality();
+  /** Calculates the risk of neonatal mortality. */
   static void setRiskFromMaternalInfection(int nCounter, int pCounter);
   
+  // non-static
+  /** Determines whether there is an acute episode or concomitant fever (or
+   * neither) and then whether the episode is severe, uncomplicated or there is
+   * an indirect death. */
+  Presentation::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
+  
+  /// Model-specific; for summary.
+  virtual double getPyrogenThres();
+  
+  /// @brief Checkpointing functions
+  //@{
   virtual void write(ostream& out) const;
   virtual void read(istream& in);
+  //@}
+  
+protected:
+  /** Create a PresentationModel. */
+  PresentationModel(double cF);
   
 private:	// static
   //comorbidity prevalence at birth as a risk factor for indirect

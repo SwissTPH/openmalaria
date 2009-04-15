@@ -20,18 +20,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
-#include "pyrogenMorbidityModel.h"
+#include "PresentationModel/Pyrogen.h"
 #include "inputData.h"
 
 using namespace std;
 
-double PyrogenMorbidityModel::initPyroThres;
-double PyrogenMorbidityModel::smuY;
-double PyrogenMorbidityModel::Ystar2_13;
-double PyrogenMorbidityModel::alpha14;
-double PyrogenMorbidityModel::Ystar1_26;
+double PyrogenPresentationModel::initPyroThres;
+double PyrogenPresentationModel::smuY;
+double PyrogenPresentationModel::Ystar2_13;
+double PyrogenPresentationModel::alpha14;
+double PyrogenPresentationModel::Ystar1_26;
 
-void PyrogenMorbidityModel::init(){
+void PyrogenPresentationModel::init(){
   initPyroThres=getParameter(Params::Y_STAR_0);
   smuY=-log(0.5)/(daysInYear/Global::interval*getParameter(Params::Y_STAR_HALF_LIFE));
   Ystar2_13=getParameter(Params::Y_STAR_SQ);
@@ -39,20 +39,20 @@ void PyrogenMorbidityModel::init(){
   Ystar1_26=getParameter(Params::Y_STAR_1);
 }
 
-PyrogenMorbidityModel::PyrogenMorbidityModel(double cF) :
-     MorbidityModel (cF), _pyrogenThres (initPyroThres)
+PyrogenPresentationModel::PyrogenPresentationModel(double cF) :
+     PresentationModel (cF), _pyrogenThres (initPyroThres)
 {}
 
-double PyrogenMorbidityModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
+double PyrogenPresentationModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
   updatePyrogenThres(totalDensity);
   return 1-1/(1+(timeStepMaxDensity/_pyrogenThres));;
 }
 
-double PyrogenMorbidityModel::getPyrogenThres(){
+double PyrogenPresentationModel::getPyrogenThres(){
   return _pyrogenThres;
 }
 
-void PyrogenMorbidityModel::updatePyrogenThres(double totalDensity){
+void PyrogenPresentationModel::updatePyrogenThres(double totalDensity){
   int i;
   //Number of categories in the numerical approx. below
   const int n= 11;
@@ -65,12 +65,12 @@ void PyrogenMorbidityModel::updatePyrogenThres(double totalDensity){
   _pyrogenThres=valYstar;
 }
 
-void PyrogenMorbidityModel::read(istream& in) {
+void PyrogenPresentationModel::read(istream& in) {
   in >> _comorbidityFactor;
   in >> _pyrogenThres;
 }
 
-void PyrogenMorbidityModel::write(ostream& out) const {
+void PyrogenPresentationModel::write(ostream& out) const {
   out << _comorbidityFactor << endl;
   out << _pyrogenThres << endl;
 }

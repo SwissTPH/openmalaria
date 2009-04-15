@@ -28,7 +28,7 @@
 #include "intervention.h"
 #include "transmissionModel.h"
 #include "summary.h"
-#include "morbidityModel.h"
+#include "PresentationModel.h"
 #include "CaseManagementModel.h"
 #include "boincWrapper.h"
 #include <math.h>
@@ -341,7 +341,7 @@ void Population::update1(){
     }
     if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
       isAtRiskOfFirstPregnancy = false;	// only call once per time-step
-      MorbidityModel::setRiskFromMaternalInfection(nCounter, pCounter);
+      PresentationModel::setRiskFromMaternalInfection(nCounter, pCounter);
     }
     ++iter;
   }

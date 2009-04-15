@@ -25,16 +25,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <iostream>
 #include "global.h"
-#include "morbidityModel.h"
+#include "PresentationModel.h"
 
 using namespace std;
 
-/*! Mueller morbidity model.
+/*! Mueller presentation model.
 */
-class MuellerMorbidityModel : public MorbidityModel {
+class MuellerPresentationModel : public PresentationModel {
 public:
-  MuellerMorbidityModel(double cF) :
-    MorbidityModel(cF) {}
+  MuellerPresentationModel(double cF) :
+    PresentationModel(cF) {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 

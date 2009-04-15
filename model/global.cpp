@@ -139,7 +139,7 @@ void Global::setModelVersion () {
     DUMMY_WITHIN_HOST_MODEL,	// 8
     0,	// 9
     0,	// 10
-    MUELLER_MORBIDITY_MODEL,	// 11
+    MUELLER_PRESENTATION_MODEL,	// 11
     0,	// 12
     0,	// 13
     0,	// 14

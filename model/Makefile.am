@@ -9,7 +9,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
- muellerMorbidityModel.cpp morbidityModel.cpp predetMorbidityModel.cpp pyrogenMorbidityModel.cpp
+ PresentationModel.cpp PresentationModel/Mueller.cpp PresentationModel/Pyrogen.cpp PresentationModel/Predet.cpp
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a
 

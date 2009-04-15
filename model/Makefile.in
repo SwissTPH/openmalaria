@@ -53,9 +53,8 @@ am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	noVectorControl.$(OBJEXT) VectorControlInternal.$(OBJEXT) \
 	vectorControl.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
 	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
-	EntoIntervention.$(OBJEXT) muellerMorbidityModel.$(OBJEXT) \
-	morbidityModel.$(OBJEXT) predetMorbidityModel.$(OBJEXT) \
-	pyrogenMorbidityModel.$(OBJEXT)
+	EntoIntervention.$(OBJEXT) PresentationModel.$(OBJEXT) \
+	Mueller.$(OBJEXT) Pyrogen.$(OBJEXT) Predet.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -186,7 +185,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
- muellerMorbidityModel.cpp morbidityModel.cpp predetMorbidityModel.cpp pyrogenMorbidityModel.cpp
+ PresentationModel.cpp PresentationModel/Mueller.cpp PresentationModel/Pyrogen.cpp PresentationModel/Predet.cpp
 
 openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a
 openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a -L../lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
@@ -246,10 +245,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EntoIntervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSLWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mueller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTInfection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTWithinHostModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Predet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PresentationModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pyrogen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorControlInternal.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drug.Po@am__quote@
@@ -257,15 +260,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/human.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intervention.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/morbidityModel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/muellerMorbidityModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/noVectorControl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oldWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/openMalaria.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/population.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/predetMorbidityModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proteome.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pyrogenMorbidityModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simulation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/summary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
@@ -286,6 +285,48 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+Mueller.o: PresentationModel/Mueller.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mueller.o -MD -MP -MF $(DEPDIR)/Mueller.Tpo -c -o Mueller.o `test -f 'PresentationModel/Mueller.cpp' || echo '$(srcdir)/'`PresentationModel/Mueller.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mueller.Tpo $(DEPDIR)/Mueller.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Mueller.cpp' object='Mueller.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mueller.o `test -f 'PresentationModel/Mueller.cpp' || echo '$(srcdir)/'`PresentationModel/Mueller.cpp
+
+Mueller.obj: PresentationModel/Mueller.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mueller.obj -MD -MP -MF $(DEPDIR)/Mueller.Tpo -c -o Mueller.obj `if test -f 'PresentationModel/Mueller.cpp'; then $(CYGPATH_W) 'PresentationModel/Mueller.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Mueller.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Mueller.Tpo $(DEPDIR)/Mueller.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Mueller.cpp' object='Mueller.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Mueller.obj `if test -f 'PresentationModel/Mueller.cpp'; then $(CYGPATH_W) 'PresentationModel/Mueller.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Mueller.cpp'; fi`
+
+Pyrogen.o: PresentationModel/Pyrogen.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Pyrogen.o -MD -MP -MF $(DEPDIR)/Pyrogen.Tpo -c -o Pyrogen.o `test -f 'PresentationModel/Pyrogen.cpp' || echo '$(srcdir)/'`PresentationModel/Pyrogen.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Pyrogen.Tpo $(DEPDIR)/Pyrogen.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Pyrogen.cpp' object='Pyrogen.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Pyrogen.o `test -f 'PresentationModel/Pyrogen.cpp' || echo '$(srcdir)/'`PresentationModel/Pyrogen.cpp
+
+Pyrogen.obj: PresentationModel/Pyrogen.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Pyrogen.obj -MD -MP -MF $(DEPDIR)/Pyrogen.Tpo -c -o Pyrogen.obj `if test -f 'PresentationModel/Pyrogen.cpp'; then $(CYGPATH_W) 'PresentationModel/Pyrogen.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Pyrogen.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Pyrogen.Tpo $(DEPDIR)/Pyrogen.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Pyrogen.cpp' object='Pyrogen.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Pyrogen.obj `if test -f 'PresentationModel/Pyrogen.cpp'; then $(CYGPATH_W) 'PresentationModel/Pyrogen.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Pyrogen.cpp'; fi`
+
+Predet.o: PresentationModel/Predet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Predet.o -MD -MP -MF $(DEPDIR)/Predet.Tpo -c -o Predet.o `test -f 'PresentationModel/Predet.cpp' || echo '$(srcdir)/'`PresentationModel/Predet.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Predet.Tpo $(DEPDIR)/Predet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Predet.cpp' object='Predet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Predet.o `test -f 'PresentationModel/Predet.cpp' || echo '$(srcdir)/'`PresentationModel/Predet.cpp
+
+Predet.obj: PresentationModel/Predet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Predet.obj -MD -MP -MF $(DEPDIR)/Predet.Tpo -c -o Predet.obj `if test -f 'PresentationModel/Predet.cpp'; then $(CYGPATH_W) 'PresentationModel/Predet.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Predet.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Predet.Tpo $(DEPDIR)/Predet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='PresentationModel/Predet.cpp' object='Predet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Predet.obj `if test -f 'PresentationModel/Predet.cpp'; then $(CYGPATH_W) 'PresentationModel/Predet.cpp'; else $(CYGPATH_W) '$(srcdir)/PresentationModel/Predet.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

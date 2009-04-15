@@ -21,7 +21,7 @@
 #ifndef Hmod_CaseManagementModel
 #define Hmod_CaseManagementModel
 
-#include "morbidityModel.h"
+#include "PresentationModel.h"
 #include "event.h"
 
 class WithinHostModel;
@@ -43,7 +43,7 @@ public:
    * @param ageYears = Age of human.
    * @param doomed = _doomed variable of human. Passing like this isn't ideal.
    */
-  virtual void doCaseManagement (Morbidity::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
+  virtual void doCaseManagement (Presentation::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
   
   bool recentTreatment();
   
