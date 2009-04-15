@@ -167,76 +167,62 @@ DescriptiveInfection::DescriptiveInfection (istream& in) {
   }
 }
 
-void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity){
-
-    int iduration;
-    int infage;
-    double survival;
-    double normp;
-    double y;
-    double logy;
-    double stdlog;
-    double meanlog;
-    double varlog;
-    //effect of cumulative Parasite density (named Dy in AJTM)
-    double dY;
-    //effect of number of infections experienced since birth (named Dh in AJTM)
-    double dH;
-    //effect of age-dependent maternal immunity (named Dm in AJTM)
-    double dA;
-    //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-    infage=1+simulationTime-_startdate-Global::latentp;
+void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double &timeStepMaxDensity)
+{
+  //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
+  int infage=1+simulationTime-_startdate-Global::latentp;
     if ( infage >  0) {
-      iduration=_duration/Global::interval;
-        if ( iduration >  maxDur) {
-            iduration=maxDur;
-        }
+      double y;
         if ( infage <=  maxDur) {
-            y=(float)exp(meanLogParasiteCount[infage - 1 + (iduration - 1)*maxDur]);
-        }
-        else {
+	  int iduration=_duration/Global::interval;
+	  if ( iduration >  maxDur)
+	    iduration=maxDur;
+	  
+	  y=(float)exp(meanLogParasiteCount[infage - 1 + (iduration - 1)*maxDur]);
+        } else {
             y=(float)exp(meanLogParasiteCount[maxDur - 1 + (maxDur - 1)*maxDur]);
         }
         if ( y <  1.0) {
             y=1.0;
         }
-        if ( cumulativeh <=  1.0) {
+	
+	//effect of cumulative Parasite density (named Dy in AJTM)
+	double dY;
+	//effect of number of infections experienced since birth (named Dh in AJTM)
+	double dH;
+	//effect of age-dependent maternal immunity (named Dm in AJTM)
+	double dA;
+	
+	if ( cumulativeh <=  1.0) {
             dY=1;
             dH=1;
-        }
-        else {
+        } else {
             dH=1/(1+(cumulativeh-1.0)/cumulativeHstar);
             //TODO: compare this with the asex paper
             dY=1/(1+(cumulativeY-_cumulativeExposureJ)/cumulativeYstar);
         }
-        //Can this happen or is it just for security ?
-        if ( ageyears <=  0.0) {
-            dA=1-alpha_m;
-        }
-        else {
-            dA=1-alpha_m*exp(-decayM*ageyears);
-        }
-        survival=dY*dH*dA;
+        dA=1-alpha_m*exp(-decayM*ageyears);
+        double survival=dY*dH*dA;
         survival=std::min(survival, 1.0);
-        logy=log(y)*(survival);
+        double logy=log(y)*(survival);
         /*
         The expected parasite density in the non naive host. 
         As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
         */
         y=exp(logy);
         //Perturb y using a lognormal 
-        varlog=sigma0sq/(1+(cumulativeh/xNuStar));
-        stdlog=sqrt(varlog);
+        double varlog=sigma0sq/(1+(cumulativeh/xNuStar));
+        double stdlog=sqrt(varlog);
         /*
         This code samples from a log normal distribution with mean equal to the predicted density
         n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
         the log of the predicted density.  If we really did the latter then this bias correction is not needed.
         */
-        meanlog=log(y)-stdlog*stdlog/2.0;
-        *timeStepMaxDensity =0.0;
+        double meanlog=log(y)-stdlog*stdlog/2.0;
+        timeStepMaxDensity =0.0;
         if ( stdlog >  0.0000001) {
           if ( Global::interval >  1) {
-                normp=W_UNIFORM();
+                double normp=W_UNIFORM();
                 /*
                 sample the maximum density over the T-1 remaining days in the
                 time interval, (where T is the duration of the time interval)
@@ -251,17 +237,16 @@ void DescriptiveInfection::determineDensities(int simulationTime, double cumulat
                 exponent (1/(T-1)) arises because each of T-1 sampled
                 values would have this probability of being the maximum. 
                 */
-                *timeStepMaxDensity =sampleFromLogNormal(normp, meanlog, stdlog);
+                timeStepMaxDensity =sampleFromLogNormal(normp, meanlog, stdlog);
             }
             //calculate the expected density on the day of sampling
-            normp=W_UNIFORM();
-            y=(float)sampleFromLogNormal(normp, meanlog, stdlog);
-            *timeStepMaxDensity = std::max((double) y, *timeStepMaxDensity);
+            y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
+            timeStepMaxDensity = std::max((double) y, timeStepMaxDensity);
         }
-        if (( y >  maxDens) || ( *timeStepMaxDensity >  (double)maxDens)) {
-          cout << "MD lim" << endl;
+        if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
+          cerr << "MD lim" << endl;
           y=maxDens;
-          *timeStepMaxDensity =(double) y;
+          timeStepMaxDensity =(double) y;
         }
         _density = y;
     }

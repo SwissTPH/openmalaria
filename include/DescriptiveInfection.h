@@ -103,7 +103,7 @@ public:
     \param cumulativeH cumulative number of inoculations (inoculation equals infection ?)
 
   */
-  void determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double *timeStepMaxDensity);
+  void determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double &timeStepMaxDensity);
 
   //! Initialises infection duration.
   /*! 

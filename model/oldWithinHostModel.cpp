@@ -155,7 +155,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
         timeStepMaxDensity=0.0;
       }
       calculateDensity(**iter, ageyears, cumulativeh, cumulativeY);
-        //(*iter)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, _cumulativeh , &(timeStepMaxDensity));
+      //(*iter)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, _cumulativeh , timeStepMaxDensity);
       (*iter)->multiplyDensity(exp(-_innateImmunity));
 
         /*
@@ -275,7 +275,7 @@ void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageY
       timeStepMaxDensity = std::max( y, timeStepMaxDensity);
     }
     if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
-      cout << "MD lim" << endl;
+      cerr << "MD lim" << endl;
       y=maxDens;
       timeStepMaxDensity = (double) y;
     }

@@ -170,8 +170,8 @@ void TransmissionModel::calcInverseDFTExp(double* tArray, int aL, double* FC, in
   double w = 2*M_PI/P;
     
   if((FCL%2)==0){
-    printf("The number of Fourier coefficents should be odd.\n");
-    getchar();
+    //NOTE: should throw xml_scenario_error if/when FCEIR is moved to the XML
+    throw logic_error("The number of Fourier coefficents should be odd.");
   }
 
     // Number of Fourier Modes.

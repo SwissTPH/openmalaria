@@ -237,7 +237,7 @@ void Population::read (istream& in) {
   in >> _workUnitIdentifier;
 
   if ( _workUnitIdentifier !=  get_wu_id()) {
-    cout << "cp_ct" << get_wu_id() << _workUnitIdentifier << endl;
+    cerr << "cp_ct" << get_wu_id() << ", " << _workUnitIdentifier << endl;
     exit(-9);
   }
 
@@ -249,7 +249,7 @@ void Population::read (istream& in) {
     indCounter++;
   }
   if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){
-    cout << "exp_p_s" << _populationSize << get_populationsize() << indCounter << endl;
+    cerr << "exp_p_s" << _populationSize << get_populationsize() << indCounter << endl;
     exit(-7);
   }
 }
@@ -364,7 +364,7 @@ void Population::update1(){
   //Prevent NaNs
   if (sumWeight == 0) {
     _transmissionModel->kappa[tmod]=0;
-    cout << "sW.eq.0" << endl;
+    cerr << "sW.eq.0" << endl;
   }
   else {
     _transmissionModel->kappa[tmod] = sumWt_kappa / sumWeight;
@@ -378,7 +378,7 @@ void Population::update1(){
   if (tmod + 1 == Global::intervalsPerYear) {
     if ( _transmissionModel->annualEIR ==  0) {
       _annualAverageKappa=0;
-      cout << "aE.eq.0" << endl;
+      cerr << "aE.eq.0" << endl;
     }
     else {
       _annualAverageKappa=_sumAnnualKappa/_transmissionModel->annualEIR;
