@@ -167,90 +167,87 @@ DescriptiveInfection::DescriptiveInfection (istream& in) {
   }
 }
 
-void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double &timeStepMaxDensity)
+void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageYears, double cumulativeh, double &timeStepMaxDensity)
 {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+simulationTime-_startdate-Global::latentp;
-    if ( infage >  0) {
-      double y;
-        if ( infage <=  maxDur) {
-	  int iduration=_duration/Global::interval;
-	  if ( iduration >  maxDur)
-	    iduration=maxDur;
-	  
-	  y=(float)exp(meanLogParasiteCount[infage - 1 + (iduration - 1)*maxDur]);
-        } else {
-            y=(float)exp(meanLogParasiteCount[maxDur - 1 + (maxDur - 1)*maxDur]);
-        }
-        if ( y <  1.0) {
-            y=1.0;
-        }
-	
-	//effect of cumulative Parasite density (named Dy in AJTM)
-	double dY;
-	//effect of number of infections experienced since birth (named Dh in AJTM)
-	double dH;
-	//effect of age-dependent maternal immunity (named Dm in AJTM)
-	double dA;
-	
-	if ( cumulativeh <=  1.0) {
-            dY=1;
-            dH=1;
-        } else {
-            dH=1/(1+(cumulativeh-1.0)/cumulativeHstar);
-            //TODO: compare this with the asex paper
-            dY=1/(1+(cumulativeY-_cumulativeExposureJ)/cumulativeYstar);
-        }
-        dA=1-alpha_m*exp(-decayM*ageyears);
-        double survival=dY*dH*dA;
-        survival=std::min(survival, 1.0);
-        double logy=log(y)*(survival);
-        /*
-        The expected parasite density in the non naive host. 
-        As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
-        */
-        y=exp(logy);
-        //Perturb y using a lognormal 
-        double varlog=sigma0sq/(1+(cumulativeh/xNuStar));
-        double stdlog=sqrt(varlog);
-        /*
-        This code samples from a log normal distribution with mean equal to the predicted density
-        n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
-        the log of the predicted density.  If we really did the latter then this bias correction is not needed.
-        */
-        double meanlog=log(y)-stdlog*stdlog/2.0;
-        timeStepMaxDensity =0.0;
-        if ( stdlog >  0.0000001) {
-          if ( Global::interval >  1) {
-                double normp=W_UNIFORM();
-                /*
-                sample the maximum density over the T-1 remaining days in the
-                time interval, (where T is the duration of the time interval)
-                */
-                normp=pow(normp, 1.0*1/(Global::interval-1));
-                /*
-                To mimic sampling T-1 repeated values, we transform the sampling
-                distribution and use only one sampled value, which has the sampling
-                distribution of the maximum of T-1 values sampled from a uniform.
-                The probability density function of this sampled random var is distributed
-                according to a skewed distribution (defined in [0,1]) where the
-                exponent (1/(T-1)) arises because each of T-1 sampled
-                values would have this probability of being the maximum. 
-                */
-                timeStepMaxDensity =sampleFromLogNormal(normp, meanlog, stdlog);
-            }
-            //calculate the expected density on the day of sampling
-            y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
-            timeStepMaxDensity = std::max((double) y, timeStepMaxDensity);
-        }
-        if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
-          cerr << "MD lim" << endl;
-          y=maxDens;
-          timeStepMaxDensity =(double) y;
-        }
-        _density = y;
+  if ( infage >  0) {
+    double y;
+    if ( infage <=  maxDur) {
+      int iduration=_duration/Global::interval;
+      if ( iduration >  maxDur)
+	iduration=maxDur;
+      
+      y=(float)exp(meanLogParasiteCount[infage - 1 + (iduration - 1)*maxDur]);
+    } else {
+      y=(float)exp(meanLogParasiteCount[maxDur - 1 + (maxDur - 1)*maxDur]);
     }
-    else {
-        _density =0.0;
+    if (y < 1.0)
+      y=1.0;
+    
+    //effect of cumulative Parasite density (named Dy in AJTM)
+    double dY;
+    //effect of number of infections experienced since birth (named Dh in AJTM)
+    double dH;
+    //effect of age-dependent maternal immunity (named Dm in AJTM)
+    double dA;
+    
+    if (cumulativeh <= 1.0) {
+      dY=1.0;
+      dH=1.0;
+    } else {
+      dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
+      //TODO: compare this with the asex paper
+      dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
     }
+    dA = 1.0 - alpha_m * exp(-decayM * ageYears);
+    double survival = std::min(dY*dH*dA, 1.0);
+    double logy = log(y) * survival;
+    /*
+    The expected parasite density in the non naive host. 
+    As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
+    */
+    y = exp(logy);
+    //Perturb y using a lognormal 
+    double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));
+    double stdlog = sqrt(varlog);
+    /*
+    This code samples from a log normal distribution with mean equal to the predicted density
+    n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
+    the log of the predicted density.  If we really did the latter then this bias correction is not needed.
+    */
+    double meanlog = log(y) - stdlog*stdlog / 2.0;
+    timeStepMaxDensity = 0.0;
+    if (stdlog > 0.0000001) {
+      if (Global::interval > 1) {
+	/*
+	sample the maximum density over the T-1 remaining days in the
+	time interval, (where T is the duration of the time interval)
+	*/
+	double normp = pow(W_UNIFORM(), 1.0 / (Global::interval-1));
+	/*
+	To mimic sampling T-1 repeated values, we transform the sampling
+	distribution and use only one sampled value, which has the sampling
+	distribution of the maximum of T-1 values sampled from a uniform.
+	The probability density function of this sampled random var is distributed
+	according to a skewed distribution (defined in [0,1]) where the
+	exponent (1/(T-1)) arises because each of T-1 sampled
+	values would have this probability of being the maximum. 
+	*/
+	timeStepMaxDensity = sampleFromLogNormal(normp, meanlog, stdlog);
+      }
+      //calculate the expected density on the day of sampling
+      y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
+      timeStepMaxDensity = std::max((double) y, timeStepMaxDensity);
+    }
+    if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
+      cerr << "MD lim" << endl;
+      y = maxDens;
+      timeStepMaxDensity = y;
+    }
+    _density = y;
+  }
+  else {
+    _density = 0.0;
+  }
 }

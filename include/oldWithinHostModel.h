@@ -96,8 +96,6 @@ protected:
   double timeStepMaxDensity;
   
 private:
-  void calculateDensity(DescriptiveInfection& inf, double, double, double);
-  
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;

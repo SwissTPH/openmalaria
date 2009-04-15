@@ -154,8 +154,7 @@ void OldWithinHostModel::calculateDensities(Human& human) {
       if (Global::modelVersion & MAX_DENS_RESET) {
         timeStepMaxDensity=0.0;
       }
-      calculateDensity(**iter, ageyears, cumulativeh, cumulativeY);
-      //(*iter)->determineDensities(Simulation::simulationTime, human.getCumulativeY(), ageyears, _cumulativeh , timeStepMaxDensity);
+      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageyears, cumulativeh , timeStepMaxDensity);
       (*iter)->multiplyDensity(exp(-_innateImmunity));
 
         /*
@@ -197,93 +196,6 @@ void OldWithinHostModel::calculateDensities(Human& human) {
     IPTattenuateAsexualMinTotalDensity(human);
   }
   human.setPTransmit(human.infectiousness());
-}
-
-void OldWithinHostModel::calculateDensity(DescriptiveInfection& inf, double ageYears, double cumulativeh, double cumulativeY) {
-  //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  int infage=1+Simulation::simulationTime-inf.getStartDate()-Global::latentp;
-  
-  if ( infage >  0) {
-    double y;
-    if ( infage <=  maxDur) {
-      int iduration=inf.getDuration()/Global::interval;
-      if ( iduration >  maxDur)
-        iduration=maxDur;
-      
-      y=(float)exp(inf.getMeanLogParasiteCount(infage - 1 + (iduration - 1)*maxDur));
-    } else {
-      y=(float)exp(inf.getMeanLogParasiteCount(maxDur - 1 + (maxDur - 1)*maxDur));
-    }
-    if ( y <  1.0)
-      y=1.0;
-    
-    //effect of cumulative Parasite density (named Dy in AJTM)
-    double dY;
-    //effect of number of infections experienced since birth (named Dh in AJTM)
-    double dH;
-    //effect of age-dependent maternal immunity (named Dm in AJTM)
-    double dA;
-    
-    if (cumulativeh <=  1.0) {
-      dY=1;
-      dH=1;
-    } else {
-      dH=1 / (1+(cumulativeh-1.0)/inf.getCumulativeHstar());
-      //TODO: compare this with the asex paper
-      dY=1 / (1+(cumulativeY-inf.getCumulativeExposureJ())/inf.getCumulativeYstar());
-    }
-    dA=1 - inf.getAlpha_m() * exp(-inf.getDecayM() * ageYears);
-    
-    double survival=min (dY*dH*dA, 1.0);
-    double logy=log(y)*survival;
-    /*
-    The expected parasite density in the non naive host. 
-    As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
-    */
-    y=exp(logy);
-    //Perturb y using a lognormal 
-    double varlog=inf.getSigma0sq()/(1+(cumulativeh/inf.getXNuStar()));
-    double stdlog=sqrt(varlog);
-    /*
-    This code samples from a log normal distribution with mean equal to the predicted density
-    n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
-    the log of the predicted density.  If we really did the latter then this bias correction is not needed.
-    */
-    double meanlog=log(y)-stdlog*stdlog/2.0;
-    timeStepMaxDensity = 0.0;
-    if ( stdlog >  0.0000001) {
-      if ( Global::interval >  1) {
-        double normp=W_UNIFORM();
-	/*
-        sample the maximum density over the T-1 remaining days in the
-        time interval, (where T is the duration of the time interval)
-        */
-        normp=pow(normp, 1.0*1/(Global::interval-1));
-	/*
-        To mimic sampling T-1 repeated values, we transform the sampling
-        distribution and use only one sampled value, which has the sampling
-        distribution of the maximum of T-1 values sampled from a uniform.
-        The probability density function of this sampled random var is distributed
-        according to a skewed distribution (defined in [0,1]) where the
-        exponent (1/(T-1)) arises because each of T-1 sampled
-        values would have this probability of being the maximum. 
-        */
-        timeStepMaxDensity = sampleFromLogNormal(normp, meanlog, stdlog);
-      }
-      //calculate the expected density on the day of sampling
-      y=(float)sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
-      timeStepMaxDensity = std::max( y, timeStepMaxDensity);
-    }
-    if (( y >  maxDens) || ( timeStepMaxDensity >  (double)maxDens)) {
-      cerr << "MD lim" << endl;
-      y=maxDens;
-      timeStepMaxDensity = (double) y;
-    }
-    inf.setDensity(y);
-  }
-  else {
-    inf.setDensity(0.0);
-  }
 }
 
 void OldWithinHostModel::SPAction(Human&){}
