@@ -28,4 +28,4 @@ scenario.o : scenario.cxx scenario.hxx
 clean: clean-am clean-scenario
 
 clean-scenario:
-	rm -f scenario.cxx scenario.hxx
+	rm -f scenario.cxx scenario.hxx scenario.ixx

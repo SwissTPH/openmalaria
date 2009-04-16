@@ -440,7 +440,7 @@ scenario.o : scenario.cxx scenario.hxx
 clean: clean-am clean-scenario
 
 clean-scenario:
-	rm -f scenario.cxx scenario.hxx
+	rm -f scenario.cxx scenario.hxx scenario.ixx
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

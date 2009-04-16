@@ -90,7 +90,8 @@ AX_CHECK_GLUTL="-lglut"
 if test "$no_gl" = yes -o "$no_glu" = yes -o "$no_glut" = yes; then
    have_glut=no
    AC_MSG_WARN([
-================================================================================WARNING: openGL/GLU/glut not found.
+================================================================================
+WARNING: openGL/GLU/glut not found.
 The GL, GLU and glut libraries are required in order to build the graphical parts
 of the BOINC application API library.
 ================================================================================]) 
