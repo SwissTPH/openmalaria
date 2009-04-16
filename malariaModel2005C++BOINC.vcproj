@@ -221,6 +221,18 @@
 	</References>
 	<Files>
 		<Filter
+			Name="xsdcxx"
+			>
+			<File
+				RelativePath=".\xsdcxx\inputData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\xsdcxx\scenario.cxx"
+				>
+			</File>
+		</Filter>
+		<Filter
 			Name="headers"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
@@ -241,23 +253,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\DescriptiveInfection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\drug.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\DummyInfection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\DummyWithinHostModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\empiricalWithinHostModel.h"
+				RelativePath=".\include\dummy_boinc_api.h"
 				>
 			</File>
 			<File
@@ -281,10 +281,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\Infection.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\inputData.h"
 				>
 			</File>
@@ -293,19 +289,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\MalariaNode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\morbidityModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\muellerMorbidityModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\Names.h"
+				RelativePath=".\include\NewCaseManagement.h"
 				>
 			</File>
 			<File
@@ -317,39 +301,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\OldIPTInfection.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\OldIPTWithinHostModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\oldWithinHostModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\openMalaria.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\population.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\predetMorbidityModel.h"
+				RelativePath=".\include\PresentationModel.h"
 				>
 			</File>
 			<File
 				RelativePath=".\include\proteome.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\pyrogenMorbidityModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\xsdcxx\scenario.hxx"
 				>
 			</File>
 			<File
@@ -381,21 +341,61 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\withinHostModel.h"
+				RelativePath=".\include\WithinHostModel.h"
 				>
 			</File>
-		</Filter>
-		<Filter
-			Name="xsdcxx"
-			>
-			<File
-				RelativePath=".\xsdcxx\inputData.cpp"
+			<Filter
+				Name="PresentationModel"
 				>
-			</File>
-			<File
-				RelativePath=".\xsdcxx\scenario.cxx"
+				<File
+					RelativePath=".\include\PresentationModel\Mueller.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\PresentationModel\Predet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\PresentationModel\Pyrogen.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="WithinHostModel"
 				>
-			</File>
+				<File
+					RelativePath=".\include\WithinHostModel\Descriptive.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\DescriptiveInfection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\Dummy.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\DummyInfection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\Empirical.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\Infection.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\OldIPT.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\WithinHostModel\OldIPTInfection.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="model"
@@ -409,23 +409,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\DescriptiveInfection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\drug.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\DummyInfection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\DummyWithinHostModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\empiricalWithinHostModel.cpp"
 				>
 			</File>
 			<File
@@ -449,37 +433,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\Infection.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\intervention.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\model\morbidityModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\muellerMorbidityModel.cpp"
 				>
 			</File>
 			<File
@@ -495,18 +449,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\OldIPTInfection.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\OldIPTWithinHostModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\oldWithinHostModel.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\openMalaria.cpp"
 				>
 			</File>
@@ -515,33 +457,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\predetMorbidityModel.cpp"
+				RelativePath=".\model\PresentationModel.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\proteome.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						ObjectFile="$(IntDir)\$(InputName)1.obj"
-						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\model\pyrogenMorbidityModel.cpp"
 				>
 			</File>
 			<File
@@ -569,9 +489,61 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\withinHostModel.cpp"
+				RelativePath=".\model\WithinHostModel.cpp"
 				>
 			</File>
+			<Filter
+				Name="PresentationModel"
+				>
+				<File
+					RelativePath=".\model\PresentationModel\Mueller.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\PresentationModel\Predet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\PresentationModel\Pyrogen.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="WithinHostModel"
+				>
+				<File
+					RelativePath=".\model\WithinHostModel\Descriptive.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\DescriptiveInfection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\Dummy.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\DummyInfection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\Empirical.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\Infection.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\OldIPT.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\OldIPTInfection.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath=".\test\original\scenario.xsd"
