@@ -22,7 +22,7 @@
 
 #include "GSLWrapper.h"
 #include "human.h"
-#include "oldWithinHostModel.h"
+#include "WithinHostModel/Descriptive.h"
 #include "simulation.h"
 #include "intervention.h"
 #include "transmissionModel.h"	// getAgeGroup() - is in a funny place
@@ -32,13 +32,13 @@ using namespace std;
 
 // -----  Initialization  -----
 
-OldWithinHostModel::OldWithinHostModel() :
+DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
     WithinHostModel(), _MOI(0), _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0), patentInfections(0)
 {
   _innateImmunity=(double)W_GAUSS(0, sigma_i);
 }
 
-OldWithinHostModel::~OldWithinHostModel() {
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
   if (Global::modelVersion & INCLUDES_PK_PD) {
     _proxy.destroy();
@@ -47,12 +47,12 @@ OldWithinHostModel::~OldWithinHostModel() {
 
 // -----  Update function, called each step  -----
 
-void OldWithinHostModel::update (double age) {
+void DescriptiveWithinHostModel::update (double age) {
   _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
   if (Global::modelVersion & INCLUDES_PK_PD) {
     std::list<DescriptiveInfection*>::iterator i;
     for(i=infections.begin(); i != infections.end(); i++){
-	(*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor((*i)->getProteome())));
+      (*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor((*i)->getProteome())));
     }
     _proxy.decayDrugs();
   }
@@ -61,7 +61,7 @@ void OldWithinHostModel::update (double age) {
 
 // -----  Simple infection adders/removers  -----
 
-void OldWithinHostModel::newInfection(){
+void DescriptiveWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
@@ -70,7 +70,7 @@ void OldWithinHostModel::newInfection(){
   }
 }
 
-void OldWithinHostModel::clearOldInfections(){
+void DescriptiveWithinHostModel::clearOldInfections(){
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
     int enddate=(*iter)->getEndDate();
@@ -85,7 +85,7 @@ void OldWithinHostModel::clearOldInfections(){
   }
 }
 
-void OldWithinHostModel::clearAllInfections(){
+void DescriptiveWithinHostModel::clearAllInfections(){
   std::list<DescriptiveInfection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     delete *i;
@@ -97,14 +97,14 @@ void OldWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void OldWithinHostModel::medicate(string drugName, double qty, int time) {
+void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time) {
   _proxy.medicate(drugName, qty, time);
 }
 
 
 // -----  immunity  -----
 
-void OldWithinHostModel::updateImmuneStatus(){
+void DescriptiveWithinHostModel::updateImmuneStatus(){
   if (immEffectorRemain < 1){
     _cumulativeh*=immEffectorRemain;
     _cumulativeY*=immEffectorRemain;
@@ -117,7 +117,7 @@ void OldWithinHostModel::updateImmuneStatus(){
   }
 }
 
-void OldWithinHostModel::immunityPenalisation() {
+void DescriptiveWithinHostModel::immunityPenalisation() {
   _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
   if (_cumulativeY <  0) {
     _cumulativeY=0.0;
@@ -129,7 +129,7 @@ void OldWithinHostModel::immunityPenalisation() {
 
 // NOTE: refering back to human so much isn't good programming practice. Could
 // some variables be stored locally?
-void OldWithinHostModel::calculateDensities(Human& human) {
+void DescriptiveWithinHostModel::calculateDensities(Human& human) {
   _cumulativeYlag = _cumulativeY;
   
   double ageyears = human.getAgeInYears();
@@ -198,13 +198,13 @@ void OldWithinHostModel::calculateDensities(Human& human) {
   human.setPTransmit(human.infectiousness());
 }
 
-void OldWithinHostModel::SPAction(Human&){}
-void OldWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection&) {}
-void OldWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human&) {}
+void DescriptiveWithinHostModel::SPAction(Human&){}
+void DescriptiveWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection&) {}
+void DescriptiveWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human&) {}
 
 // -----  Summarize  -----
 
-void OldWithinHostModel::summarize(double age) {
+void DescriptiveWithinHostModel::summarize(double age) {
   if (_MOI > 0) {
     Simulation::gMainSummary->addToInfectedHost(age,1);
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
@@ -215,18 +215,18 @@ void OldWithinHostModel::summarize(double age) {
 
 // -----  Data checkpointing  -----
 
-void OldWithinHostModel::read(istream& in) {
+void DescriptiveWithinHostModel::read(istream& in) {
   readOWHM (in);
 
   for(int i=0;i<_MOI;++i) {
     infections.push_back(new DescriptiveInfection(in));
   }
 }
-void OldWithinHostModel::write(ostream& out) const {
+void DescriptiveWithinHostModel::write(ostream& out) const {
   writeOWHM (out);
 }
 
-void OldWithinHostModel::readOWHM(istream& in) {
+void DescriptiveWithinHostModel::readOWHM(istream& in) {
   in >> _cumulativeInfections; 
   in >> _MOI; 
   in >> patentInfections; 
@@ -245,7 +245,7 @@ void OldWithinHostModel::readOWHM(istream& in) {
   }
 }
 
-void OldWithinHostModel::writeOWHM(ostream& out) const {
+void DescriptiveWithinHostModel::writeOWHM(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _MOI << endl; 
   out << patentInfections << endl; 

@@ -19,7 +19,7 @@
 
 */
 
-#include "DescriptiveInfection.h"
+#include "WithinHostModel/DescriptiveInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <iostream>

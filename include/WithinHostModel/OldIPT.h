@@ -18,14 +18,14 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_oldITNWHM
-#define Hmod_oldITNWHM
+#ifndef Hmod_OldIPTWHM
+#define Hmod_OldIPTWHM
 
-#include "oldWithinHostModel.h"
+#include "WithinHostModel/Descriptive.h"
 
-/** Extension to the OldWithinHostModel, including IPT (intermittent
+/** Extension to the DescriptiveWithinHostModel, including IPT (intermittent
  * preventative treatment) plus a simple drug-action model (SPAction). */
-class OldIPTWithinHostModel : public OldWithinHostModel {
+class OldIPTWithinHostModel : public DescriptiveWithinHostModel {
 public:
   ///@name Static init/cleanup
   //@{

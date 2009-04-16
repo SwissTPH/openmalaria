@@ -44,17 +44,17 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	timer.$(OBJEXT) boincWrapper.$(OBJEXT) global.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
-	drug.$(OBJEXT) proteome.$(OBJEXT) Infection.$(OBJEXT) \
-	DescriptiveInfection.$(OBJEXT) DummyInfection.$(OBJEXT) \
-	OldIPTInfection.$(OBJEXT) withinHostModel.$(OBJEXT) \
-	oldWithinHostModel.$(OBJEXT) OldIPTWithinHostModel.$(OBJEXT) \
-	DummyWithinHostModel.$(OBJEXT) intervention.$(OBJEXT) \
-	event.$(OBJEXT) human.$(OBJEXT) transmissionModel.$(OBJEXT) \
-	noVectorControl.$(OBJEXT) VectorControlInternal.$(OBJEXT) \
-	vectorControl.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
-	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
-	EntoIntervention.$(OBJEXT) PresentationModel.$(OBJEXT) \
-	Mueller.$(OBJEXT) Pyrogen.$(OBJEXT) Predet.$(OBJEXT)
+	drug.$(OBJEXT) proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
+	Descriptive.$(OBJEXT) OldIPT.$(OBJEXT) Dummy.$(OBJEXT) \
+	Infection.$(OBJEXT) DescriptiveInfection.$(OBJEXT) \
+	DummyInfection.$(OBJEXT) OldIPTInfection.$(OBJEXT) \
+	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
+	transmissionModel.$(OBJEXT) noVectorControl.$(OBJEXT) \
+	VectorControlInternal.$(OBJEXT) vectorControl.$(OBJEXT) \
+	CaseManagementModel.$(OBJEXT) OldCaseManagement.$(OBJEXT) \
+	NewCaseManagement.$(OBJEXT) EntoIntervention.$(OBJEXT) \
+	PresentationModel.$(OBJEXT) Mueller.$(OBJEXT) \
+	Pyrogen.$(OBJEXT) Predet.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -179,8 +179,8 @@ openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  drug.cpp proteome.cpp\
- Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp\
- withinHostModel.cpp oldWithinHostModel.cpp OldIPTWithinHostModel.cpp DummyWithinHostModel.cpp\
+ WithinHostModel.cpp WithinHostModel/Descriptive.cpp WithinHostModel/OldIPT.cpp WithinHostModel/Dummy.cpp\
+ WithinHostModel/Infection.cpp WithinHostModel/DescriptiveInfection.cpp WithinHostModel/DummyInfection.cpp WithinHostModel/OldIPTInfection.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
@@ -189,7 +189,8 @@ openMalaria_SOURCES = openMalaria.cpp\
 
 openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a
 openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a -L../lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
-AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall @BOINC_CFLAGS@ -I$(top_srcdir)/include -I$(top_srcdir)/xsdcxx #-Werror
+AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@/xsdcxx
+AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror
 @DARWIN_FALSE@openMalaria_LDFLAGS = @BOINC_LDFLAGS@
 @DARWIN_TRUE@openMalaria_LDFLAGS = @BOINC_LDFLAGS@ -framework Carbon
 all: all-am
@@ -239,21 +240,23 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CaseManagementModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Descriptive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DescriptiveInfection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DummyInfection.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DummyWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EntoIntervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSLWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mueller.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPT.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTInfection.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Predet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PresentationModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pyrogen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorControlInternal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
@@ -261,7 +264,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/human.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/noVectorControl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/oldWithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/openMalaria.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/population.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proteome.Po@am__quote@
@@ -270,7 +272,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/transmissionModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vectorControl.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/withinHostModel.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -285,6 +286,104 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+Descriptive.o: WithinHostModel/Descriptive.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Descriptive.o -MD -MP -MF $(DEPDIR)/Descriptive.Tpo -c -o Descriptive.o `test -f 'WithinHostModel/Descriptive.cpp' || echo '$(srcdir)/'`WithinHostModel/Descriptive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Descriptive.Tpo $(DEPDIR)/Descriptive.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Descriptive.cpp' object='Descriptive.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Descriptive.o `test -f 'WithinHostModel/Descriptive.cpp' || echo '$(srcdir)/'`WithinHostModel/Descriptive.cpp
+
+Descriptive.obj: WithinHostModel/Descriptive.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Descriptive.obj -MD -MP -MF $(DEPDIR)/Descriptive.Tpo -c -o Descriptive.obj `if test -f 'WithinHostModel/Descriptive.cpp'; then $(CYGPATH_W) 'WithinHostModel/Descriptive.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Descriptive.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Descriptive.Tpo $(DEPDIR)/Descriptive.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Descriptive.cpp' object='Descriptive.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Descriptive.obj `if test -f 'WithinHostModel/Descriptive.cpp'; then $(CYGPATH_W) 'WithinHostModel/Descriptive.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Descriptive.cpp'; fi`
+
+OldIPT.o: WithinHostModel/OldIPT.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OldIPT.o -MD -MP -MF $(DEPDIR)/OldIPT.Tpo -c -o OldIPT.o `test -f 'WithinHostModel/OldIPT.cpp' || echo '$(srcdir)/'`WithinHostModel/OldIPT.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/OldIPT.Tpo $(DEPDIR)/OldIPT.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/OldIPT.cpp' object='OldIPT.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OldIPT.o `test -f 'WithinHostModel/OldIPT.cpp' || echo '$(srcdir)/'`WithinHostModel/OldIPT.cpp
+
+OldIPT.obj: WithinHostModel/OldIPT.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OldIPT.obj -MD -MP -MF $(DEPDIR)/OldIPT.Tpo -c -o OldIPT.obj `if test -f 'WithinHostModel/OldIPT.cpp'; then $(CYGPATH_W) 'WithinHostModel/OldIPT.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/OldIPT.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/OldIPT.Tpo $(DEPDIR)/OldIPT.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/OldIPT.cpp' object='OldIPT.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OldIPT.obj `if test -f 'WithinHostModel/OldIPT.cpp'; then $(CYGPATH_W) 'WithinHostModel/OldIPT.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/OldIPT.cpp'; fi`
+
+Dummy.o: WithinHostModel/Dummy.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Dummy.o -MD -MP -MF $(DEPDIR)/Dummy.Tpo -c -o Dummy.o `test -f 'WithinHostModel/Dummy.cpp' || echo '$(srcdir)/'`WithinHostModel/Dummy.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Dummy.Tpo $(DEPDIR)/Dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Dummy.cpp' object='Dummy.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Dummy.o `test -f 'WithinHostModel/Dummy.cpp' || echo '$(srcdir)/'`WithinHostModel/Dummy.cpp
+
+Dummy.obj: WithinHostModel/Dummy.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Dummy.obj -MD -MP -MF $(DEPDIR)/Dummy.Tpo -c -o Dummy.obj `if test -f 'WithinHostModel/Dummy.cpp'; then $(CYGPATH_W) 'WithinHostModel/Dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Dummy.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Dummy.Tpo $(DEPDIR)/Dummy.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Dummy.cpp' object='Dummy.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Dummy.obj `if test -f 'WithinHostModel/Dummy.cpp'; then $(CYGPATH_W) 'WithinHostModel/Dummy.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Dummy.cpp'; fi`
+
+Infection.o: WithinHostModel/Infection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Infection.o -MD -MP -MF $(DEPDIR)/Infection.Tpo -c -o Infection.o `test -f 'WithinHostModel/Infection.cpp' || echo '$(srcdir)/'`WithinHostModel/Infection.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Infection.Tpo $(DEPDIR)/Infection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Infection.cpp' object='Infection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Infection.o `test -f 'WithinHostModel/Infection.cpp' || echo '$(srcdir)/'`WithinHostModel/Infection.cpp
+
+Infection.obj: WithinHostModel/Infection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Infection.obj -MD -MP -MF $(DEPDIR)/Infection.Tpo -c -o Infection.obj `if test -f 'WithinHostModel/Infection.cpp'; then $(CYGPATH_W) 'WithinHostModel/Infection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Infection.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/Infection.Tpo $(DEPDIR)/Infection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/Infection.cpp' object='Infection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Infection.obj `if test -f 'WithinHostModel/Infection.cpp'; then $(CYGPATH_W) 'WithinHostModel/Infection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/Infection.cpp'; fi`
+
+DescriptiveInfection.o: WithinHostModel/DescriptiveInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DescriptiveInfection.o -MD -MP -MF $(DEPDIR)/DescriptiveInfection.Tpo -c -o DescriptiveInfection.o `test -f 'WithinHostModel/DescriptiveInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/DescriptiveInfection.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/DescriptiveInfection.Tpo $(DEPDIR)/DescriptiveInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/DescriptiveInfection.cpp' object='DescriptiveInfection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DescriptiveInfection.o `test -f 'WithinHostModel/DescriptiveInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/DescriptiveInfection.cpp
+
+DescriptiveInfection.obj: WithinHostModel/DescriptiveInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DescriptiveInfection.obj -MD -MP -MF $(DEPDIR)/DescriptiveInfection.Tpo -c -o DescriptiveInfection.obj `if test -f 'WithinHostModel/DescriptiveInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/DescriptiveInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/DescriptiveInfection.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/DescriptiveInfection.Tpo $(DEPDIR)/DescriptiveInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/DescriptiveInfection.cpp' object='DescriptiveInfection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DescriptiveInfection.obj `if test -f 'WithinHostModel/DescriptiveInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/DescriptiveInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/DescriptiveInfection.cpp'; fi`
+
+DummyInfection.o: WithinHostModel/DummyInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DummyInfection.o -MD -MP -MF $(DEPDIR)/DummyInfection.Tpo -c -o DummyInfection.o `test -f 'WithinHostModel/DummyInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/DummyInfection.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/DummyInfection.Tpo $(DEPDIR)/DummyInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/DummyInfection.cpp' object='DummyInfection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DummyInfection.o `test -f 'WithinHostModel/DummyInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/DummyInfection.cpp
+
+DummyInfection.obj: WithinHostModel/DummyInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DummyInfection.obj -MD -MP -MF $(DEPDIR)/DummyInfection.Tpo -c -o DummyInfection.obj `if test -f 'WithinHostModel/DummyInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/DummyInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/DummyInfection.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/DummyInfection.Tpo $(DEPDIR)/DummyInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/DummyInfection.cpp' object='DummyInfection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DummyInfection.obj `if test -f 'WithinHostModel/DummyInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/DummyInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/DummyInfection.cpp'; fi`
+
+OldIPTInfection.o: WithinHostModel/OldIPTInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OldIPTInfection.o -MD -MP -MF $(DEPDIR)/OldIPTInfection.Tpo -c -o OldIPTInfection.o `test -f 'WithinHostModel/OldIPTInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/OldIPTInfection.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/OldIPTInfection.Tpo $(DEPDIR)/OldIPTInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/OldIPTInfection.cpp' object='OldIPTInfection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OldIPTInfection.o `test -f 'WithinHostModel/OldIPTInfection.cpp' || echo '$(srcdir)/'`WithinHostModel/OldIPTInfection.cpp
+
+OldIPTInfection.obj: WithinHostModel/OldIPTInfection.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT OldIPTInfection.obj -MD -MP -MF $(DEPDIR)/OldIPTInfection.Tpo -c -o OldIPTInfection.obj `if test -f 'WithinHostModel/OldIPTInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/OldIPTInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/OldIPTInfection.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/OldIPTInfection.Tpo $(DEPDIR)/OldIPTInfection.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WithinHostModel/OldIPTInfection.cpp' object='OldIPTInfection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o OldIPTInfection.obj `if test -f 'WithinHostModel/OldIPTInfection.cpp'; then $(CYGPATH_W) 'WithinHostModel/OldIPTInfection.cpp'; else $(CYGPATH_W) '$(srcdir)/WithinHostModel/OldIPTInfection.cpp'; fi`
 
 Mueller.o: PresentationModel/Mueller.cpp
 @am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Mueller.o -MD -MP -MF $(DEPDIR)/Mueller.Tpo -c -o Mueller.o `test -f 'PresentationModel/Mueller.cpp' || echo '$(srcdir)/'`PresentationModel/Mueller.cpp

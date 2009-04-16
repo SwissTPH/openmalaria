@@ -25,7 +25,7 @@
 #define INPUTDATABOINC_H
 
 #include "Constant.h"
-#include "scenario.hxx"
+#include <scenario.hxx>
 #include <string>
 class Anopheles;
 

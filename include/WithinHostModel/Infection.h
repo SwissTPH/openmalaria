@@ -18,7 +18,33 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Infection.h"
+#ifndef Hmod_Infection
+#define Hmod_Infection
 
-float Infection::cumulativeYstar;
-float Infection::cumulativeHstar;
+#include "global.h"
+#include "proteome.h"
+
+
+class Infection {
+public:
+  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
+  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
+   
+  //! Get proteome
+  inline ProteomeInstance* getProteome() const {
+    return _proteome;
+  }
+  
+protected:
+  //! Proteome (used in a different situation than genotype) 
+  ProteomeInstance* _proteome; 
+  
+  //! Arbitrary maximum duration of the infection
+  int _duration; 
+  //! Start date of the infection
+  int _startdate; 
+  //! Current density of the infection
+  double _density;
+};
+
+#endif

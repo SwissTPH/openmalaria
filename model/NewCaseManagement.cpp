@@ -19,7 +19,7 @@
 */
 
 #include "NewCaseManagement.h"
-#include "withinHostModel.h"
+#include "WithinHostModel.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 
@@ -82,6 +82,7 @@ void NewCaseManagement::doCaseManagement (Presentation::Infection infection, Wit
   /* UC2 should be the case sometimes:
     caseTypeSeq = &caseManagement->getUc2().getEndPoint();
   */
+  
   double randCum = W_UNIFORM();
   int decisionID = -1;
   for (scnXml::CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {

@@ -22,7 +22,7 @@
 
 #include "GSLWrapper.h"
 #include "human.h"
-#include "DummyWithinHostModel.h"
+#include "WithinHostModel/Dummy.h"
 #include "simulation.h"
 #include "transmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
@@ -52,7 +52,7 @@ void DummyWithinHostModel::update (double age) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     std::list<DummyInfection>::iterator i;
     for(i=infections.begin(); i != infections.end(); i++){
-	i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(i->getProteome())));
+      i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(i->getProteome())));
     }
     _proxy.decayDrugs();
   }

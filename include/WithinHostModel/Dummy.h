@@ -20,26 +20,28 @@
 
 */
 
-#ifndef Hmod_oldwhost
-#define Hmod_oldwhost
+#ifndef Hmod_dummywithinhost
+#define Hmod_dummywithinhost
 
-#include <iostream>
 #include "global.h"
-#include "withinHostModel.h"
-#include "DescriptiveInfection.h"
+#include "WithinHostModel.h"
+#include "WithinHostModel/DummyInfection.h"
 #include "drug.h"
+;
+#include <iostream>
 
 using namespace std;
 
 class Human;
 
-/*! Old Within Host Model class.
+/*! Dummy Within Host Model class.
  */
-class OldWithinHostModel : public WithinHostModel {
+class DummyWithinHostModel : public WithinHostModel {
 public:
-  OldWithinHostModel();
-  virtual ~OldWithinHostModel();
+  DummyWithinHostModel();
+  ~DummyWithinHostModel();
   
+
   virtual void update(double age);
   
   virtual void summarize(double age);
@@ -64,52 +66,37 @@ public:
   
   virtual void immunityPenalisation();
   
-  virtual void write(ostream& out) const;
-  virtual void read(istream& in);
-  
-protected:
-  /*!  SP drug action applies to each infection depending on genotype and when
-  the individual had their last dose of SP */
-  virtual void SPAction(Human&);
-  
-  virtual void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
-  virtual void IPTattenuateAsexualMinTotalDensity (Human&);
-  
-  void writeOWHM(ostream& out) const;
-  void readOWHM(istream& in);
-  
-  //!multiplicity of infection
-  int _MOI;
-  
-  /** The list of all infections this human has.
-   * 
-   * Since infection models and within host models are very much intertwined,
-   * the idea is that each WithinHostModel has its own list of infections. */
-  std::list<DescriptiveInfection*> infections;
+  void write(ostream& out) const;
+  void read(istream& in);
 
-  //!Cumulative parasite density since birth
-  double _cumulativeY;
-  
-  /** Used within calculateDensities and other functions, set each call.
-   *
-   * Doesn't need to be checkpointed. */
-  double timeStepMaxDensity;
-  
 private:
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;
+  //!Cumulative parasite density since birth
+  double _cumulativeY;
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
   
-  //!innate ability to control parasite densities
-  double _innateImmunity;
+  //! time at which attenuated infection 'would' end if SP present
+  int _SPattenuationt;
+  double cumulativeY;
+  double cumulativeh;
+  double timeStepMaxDensity;
   
+  //!multiplicity of infection
+  int _MOI;
   //!Number of infections with densities above the limit of detection
   int patentInfections;
   
   /// Encapsulates drug code for each human
   DrugProxy _proxy;
+  
+  /** The list of all infections this human has.
+   * 
+   * Since infection models and within host models are very much intertwined,
+   * the idea is that each WithinHostModel has its own list of infections. */
+  std::list<DummyInfection> infections;
 };
 
 #endif

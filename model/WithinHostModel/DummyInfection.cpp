@@ -19,7 +19,7 @@
 
 */
 
-#include "DummyInfection.h"
+#include "WithinHostModel/DummyInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <iostream>

@@ -20,7 +20,7 @@
 #define Hmod_human
 #include "global.h"
 #include "event.h"
-#include "withinHostModel.h"
+#include "WithinHostModel.h"
 #include "EntoIntervention.h"
 #include "PresentationModel.h"
 #include "drug.h"

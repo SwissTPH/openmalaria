@@ -2,7 +2,8 @@ noinst_LIBRARIES = libxsdcxx.a
 
 libxsdcxx_a_SOURCES = inputData.cpp scenario.cxx
 
-AM_CXXFLAGS = @CXXFLAGS@ -I$(top_srcdir)/xsdcxx -I$(top_srcdir)/include -static-libgcc -Wall @BOINC_CFLAGS@ #-Werror 
+AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
+AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
 
 #configure decides whether to use xsd or xsdcxx (must be in PATH)
 

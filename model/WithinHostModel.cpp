@@ -20,12 +20,12 @@
 
 */
 
-#include "withinHostModel.h"
-#include "oldWithinHostModel.h"
-#include "OldIPTWithinHostModel.h"
-#include "DummyWithinHostModel.h"
+#include "WithinHostModel.h"
+#include "WithinHostModel/Descriptive.h"
+#include "WithinHostModel/OldIPT.h"
+#include "WithinHostModel/Dummy.h"
 #include "inputData.h"
-#include "DescriptiveInfection.h"
+#include "WithinHostModel/DescriptiveInfection.h"
 #include <stdexcept>
 
 using namespace std;
@@ -65,7 +65,7 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
     if (OldIPTWithinHostModel::iptActive)
       return new OldIPTWithinHostModel();
     else
-      return new OldWithinHostModel();
+      return new DescriptiveWithinHostModel();
   }
 }
 

@@ -33,8 +33,6 @@
 #include "proteome.h"
 #include "intervention.h"
 #include "transmissionModel.h"
-#include "oldWithinHostModel.h"
-#include "DescriptiveInfection.h"
 #include <stdexcept>
 
 

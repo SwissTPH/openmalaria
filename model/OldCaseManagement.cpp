@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 #include "OldCaseManagement.h"
-#include "withinHostModel.h"
+#include "WithinHostModel.h"
 #include "inputData.h"
 #include "global.h"
 #include "simulation.h"

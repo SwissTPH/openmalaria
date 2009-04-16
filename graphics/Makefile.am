@@ -13,4 +13,4 @@ malariaGraphics_LDADD =  -lboinc_api -lboinc -lboinc_graphics2 -lglut -lGL -lGLU
 
 malariaGraphics_LDFLAGS = @BOINC_LDFLAGS@
 
-AM_CXXFLAGS  = @CXXFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I$(top_srcdir)/include/glew -I$(top_srcdir)/cpp/include
+AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I$(top_srcdir)/include/glew -I$(top_srcdir)/cpp/include
