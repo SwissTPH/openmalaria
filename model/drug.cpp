@@ -20,7 +20,6 @@
 
 */
 
-#include "Infection.h"
 #include "drug.h"
 
 #include <iostream>
@@ -271,10 +270,10 @@ void Drug::addConcentration(double concentration) {
   _nextConcentration = calculateDecay(withinHostTimestep);
 }
 
-double Drug::calculateDrugFactor(Infection& infection) const {
+double Drug::calculateDrugFactor(ProteomeInstance* infProteome) const {
   //Returning an average of 2 points
   //The wackiness below is because of const requirements (which operator[] on maps does not supply)
-  double param = (*(proteomePDParameters->find(infection.getProteome()->getProteomeID()))).second;
+  double param = (*(proteomePDParameters->find(infProteome->getProteomeID()))).second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
   return (startFactor + endFactor)/2;
@@ -359,13 +358,13 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) 
   myDrug->addConcentration(_qty*myDrug->getAbsorptionFactor()/weight);
 }
 
-double DrugProxy::calculateDrugsFactor(Infection& _infection) {
+double DrugProxy::calculateDrugsFactor(ProteomeInstance* infProteome) {
   //We will choose for now the smallest (ie, most impact)
   list<Drug*>::const_iterator it;
   double factor = 1; //no effect
   for (it=_drugs.begin(); it!=_drugs.end(); it++) {
     double drugFactor;
-    drugFactor = (*it)->calculateDrugFactor(_infection);
+    drugFactor = (*it)->calculateDrugFactor(infProteome);
     if (drugFactor< factor) {
       factor = drugFactor;
     }

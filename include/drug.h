@@ -34,7 +34,6 @@ using namespace std;
 
 
 class Human;
-class Infection;
 
 //! Initialises the drug module.
 /*!
@@ -129,7 +128,7 @@ class Drug {
   double getConcentration() const { return _concentration;}
   double getNextConcentration() const { return _nextConcentration;}
   void addConcentration(double concentration);
-  double calculateDrugFactor(Infection& _infection) const;
+  double calculateDrugFactor(ProteomeInstance* infProteome) const;
   double calculateDecay(int _time) const;
   void decay();
 
@@ -199,7 +198,7 @@ class DrugProxy {
    *  Medicate has to be called in correct time order (ie first lower times).
    */
   void medicate(string _drugAbbrev, double _qty, int _time) throw(int);
-  double calculateDrugsFactor(Infection& _infection);
+  double calculateDrugsFactor(ProteomeInstance* infProteome);
   void decayDrugs();
 
   void write (ostream& out) const;

@@ -66,9 +66,6 @@ class DummyInfection : public Infection {
   //! Get the density of the infection
   double getDensity() { return _density; };
 
-  //! Get proteome
-  ProteomeInstance* getProteome() const;
-
   //! Start date of the infection
   int getStartDate() { return _startdate; };
   

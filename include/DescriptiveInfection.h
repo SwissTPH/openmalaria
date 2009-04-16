@@ -84,9 +84,6 @@ public:
   double getDensity() { return _density; };
   void setDensity(double density) { _density = density;};
 
-  //! Get proteome
-  ProteomeInstance* getProteome() const;
-
   //! Start date of the infection
   int getStartDate() { return _startdate; };
   

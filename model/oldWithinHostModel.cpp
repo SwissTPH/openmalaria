@@ -52,7 +52,7 @@ void OldWithinHostModel::update (double age) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     std::list<DescriptiveInfection*>::iterator i;
     for(i=infections.begin(); i != infections.end(); i++){
-	(*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor(**i)));
+	(*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor((*i)->getProteome())));
     }
     _proxy.decayDrugs();
   }
