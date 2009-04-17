@@ -38,8 +38,7 @@ public:
   //! Constructor which does not need random numbers. Only for testing.
   Human();
 
-  /** Initialise all variables of a human datatype including infectionlist and
-   * druglist.
+  /** Initialise all variables of a human datatype.
    * 
    * \param ID unique identifier
    * \param dateOfBirth date of birth in time steps */

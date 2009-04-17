@@ -129,7 +129,9 @@ AC_FUNC_ERROR_AT_LINE
 
 AC_CONFIG_FILES([Makefile
                  model/Makefile
-                 xsdcxx/Makefile
+		 model/PresentationModel/Makefile
+		 model/WithinHostModel/Makefile
+		 xsdcxx/Makefile
                  graphics/Makefile])
 
 AC_OUTPUT

@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libxsdcxx.a
-
 libxsdcxx_a_SOURCES = inputData.cpp scenario.cxx
+BUILT_SOURCES = scenario.hxx scenario.ixx scenario.cxx
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
@@ -17,11 +17,6 @@ XSDFLAGS = --type-naming ucc --function-naming java\
 --generate-inline\
 --generate-doxygen
 
-
-all : inputData.o scenario.o
-
-inputData.o : inputData.cpp scenario.hxx
-scenario.o : scenario.cxx scenario.hxx
 
 %.cxx %.hxx %.ixx: ../test/original/%.xsd
 	$(XSD) cxx-tree $(XSDFLAGS) $<

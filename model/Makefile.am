@@ -1,19 +1,20 @@
+SUBDIRS = PresentationModel WithinHostModel
 noinst_PROGRAMS = openMalaria
 openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  drug.cpp proteome.cpp\
- WithinHostModel.cpp WithinHostModel/Descriptive.cpp WithinHostModel/OldIPT.cpp WithinHostModel/Dummy.cpp\
- WithinHostModel/Infection.cpp WithinHostModel/DescriptiveInfection.cpp WithinHostModel/DummyInfection.cpp WithinHostModel/OldIPTInfection.cpp\
+ WithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
- PresentationModel.cpp PresentationModel/Mueller.cpp PresentationModel/Pyrogen.cpp PresentationModel/Predet.cpp
+ PresentationModel.cpp
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a
 
-openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
+openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a PresentationModel/libPresentationModel.a WithinHostModel/libWithinHostModel.a\
+ -L@top_builddir@/lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@/xsdcxx
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror

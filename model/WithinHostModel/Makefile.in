@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = xsdcxx
+subdir = model/WithinHostModel
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/check_boinc.m4 \
@@ -42,10 +42,13 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
-libxsdcxx_a_AR = $(AR) $(ARFLAGS)
-libxsdcxx_a_LIBADD =
-am_libxsdcxx_a_OBJECTS = inputData.$(OBJEXT) scenario.$(OBJEXT)
-libxsdcxx_a_OBJECTS = $(am_libxsdcxx_a_OBJECTS)
+libWithinHostModel_a_AR = $(AR) $(ARFLAGS)
+libWithinHostModel_a_LIBADD =
+am_libWithinHostModel_a_OBJECTS = Descriptive.$(OBJEXT) \
+	OldIPT.$(OBJEXT) Dummy.$(OBJEXT) Infection.$(OBJEXT) \
+	DescriptiveInfection.$(OBJEXT) DummyInfection.$(OBJEXT) \
+	OldIPTInfection.$(OBJEXT)
+libWithinHostModel_a_OBJECTS = $(am_libWithinHostModel_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -54,8 +57,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(libxsdcxx_a_SOURCES)
-DIST_SOURCES = $(libxsdcxx_a_SOURCES)
+SOURCES = $(libWithinHostModel_a_SOURCES)
+DIST_SOURCES = $(libWithinHostModel_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -163,29 +166,16 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libxsdcxx.a
-libxsdcxx_a_SOURCES = inputData.cpp scenario.cxx
-BUILT_SOURCES = scenario.hxx scenario.ixx scenario.cxx
+noinst_LIBRARIES = libWithinHostModel.a
+libWithinHostModel_a_SOURCES = Descriptive.cpp OldIPT.cpp Dummy.cpp\
+  Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp
+
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
-
-#configure decides whether to use xsd or xsdcxx (must be in PATH)
-
-# use UpperCamelCase type names, java function naming (getFoo(), etc),
-#put everything in the namespace scnXml,
-#inline simple functions,
-#generate doxygen doc,
-#VS only: --generate-intellisense
-XSDFLAGS = --type-naming ucc --function-naming java\
---namespace-map =scnXml\
---generate-inline\
---generate-doxygen
-
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cpp .cxx .o .obj
+.SUFFIXES: .cpp .o .obj
 $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -195,9 +185,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  xsdcxx/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  model/WithinHostModel/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  xsdcxx/Makefile
+	  $(AUTOMAKE) --gnu  model/WithinHostModel/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -218,10 +208,10 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libxsdcxx.a: $(libxsdcxx_a_OBJECTS) $(libxsdcxx_a_DEPENDENCIES) 
-	-rm -f libxsdcxx.a
-	$(libxsdcxx_a_AR) libxsdcxx.a $(libxsdcxx_a_OBJECTS) $(libxsdcxx_a_LIBADD)
-	$(RANLIB) libxsdcxx.a
+libWithinHostModel.a: $(libWithinHostModel_a_OBJECTS) $(libWithinHostModel_a_DEPENDENCIES) 
+	-rm -f libWithinHostModel.a
+	$(libWithinHostModel_a_AR) libWithinHostModel.a $(libWithinHostModel_a_OBJECTS) $(libWithinHostModel_a_LIBADD)
+	$(RANLIB) libWithinHostModel.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -229,8 +219,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/inputData.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scenario.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Descriptive.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DescriptiveInfection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Dummy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DummyInfection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPT.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTInfection.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -240,20 +235,6 @@ distclean-compile:
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
 
 .cpp.obj:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
-
-.cxx.o:
-@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
-@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
-
-.cxx.obj:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
 @am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
@@ -334,12 +315,10 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(LIBRARIES)
 installdirs:
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -363,7 +342,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
@@ -434,9 +412,6 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-
-%.cxx %.hxx %.ixx: ../test/original/%.xsd
-	$(XSD) cxx-tree $(XSDFLAGS) $<
 
 clean: clean-am clean-scenario
 

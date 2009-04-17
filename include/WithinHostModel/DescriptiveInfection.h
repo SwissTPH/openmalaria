@@ -23,7 +23,7 @@
 #define Hmod_DescriptiveInfection
 #include <fcntl.h>
 #include "intervention.h"
-#include "Infection.h"
+#include "WithinHostModel/Infection.h"
 #include <fstream>
 
 
