@@ -1,30 +1,30 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.61)
+AC_PREREQ(2.63)
 AC_INIT([malariaModel],[0.9])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
-#AC_CONFIG_HEADER([config.h])
+#AC_CONFIG_HEADERS([config.h])
 
 
 # Checks for programs.
-
-#check for CC and C++
-AC_PROG_CC
-AC_PROG_CPP
 AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_AWK
 AC_PROG_INSTALL
-
 AC_PROG_RANLIB
+AC_PROG_CPP
+AC_PROG_MKDIR_P
+
+AC_ARG_ENABLE(boinc,
+ [  --enable-boinc  Enables boinc integration (required for deploy, allows checkpointing)],
+ [ use_boinc=yes ]
+ )
 AC_ARG_ENABLE(deploy,
  [  --enable-deploy  Use this for static linking against xerces, gsl and BOINC ],
- [ deploy=yes
- ])
-AC_ARG_ENABLE(m32,
- [  --enable-m32     Passes the -m32 compiler option (i.e. builds 32bit binaries on 64bit platforms).],
- [ m32Option=yes
- ])
+ [ deploy=yes; use_boinc=yes ]
+ )
 
 
 # Check for xsd or xsdcxx
@@ -51,13 +51,20 @@ if test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin` ; then
 fi
 
 #check libraries
+if test "${use_boinc}" = yes ; then
+  #check for boinc libs
+  CHECK_BOINC
+else
+  AC_DEFINE(WITHOUT_BOINC)
+  AC_SUBST(LIB_BOINC, "")
+  AC_SUBST(LIB_BOINC_API, "")
+fi
+
 if test "${deploy}" = yes ; then
     build_state='Deploy'
     AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
     AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
-    #check for boinc libs
-    CHECK_BOINC
     
     # statically link libgcc
     export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
@@ -66,9 +73,6 @@ else
     AC_SUBST(LIB_XERC, "")
     AC_SUBST(LIB_GSL, "")
     AC_SUBST(LIB_GSLCBLAS,"")
-    AC_SUBST(LIB_BOINC, "")
-    AC_SUBST(LIB_BOINC_API, "")
-     AC_DEFINE(WITHOUT_BOINC)
     AC_CHECK_LIB(gslcblas,main,,[AC_MSG_FAILURE([gslcblas not present])])
     AC_CHECK_LIB(gsl,main,, [AC_MSG_FAILURE([gsl not present])])
     if test `uname -s | grep Linux` ; then
@@ -77,7 +81,6 @@ else
     AC_CHECK_HEADERS([gsl/gsl_cdf.h gsl/gsl_multimin.h gsl/gsl_rng.h gsl/gsl_randist.h],, [AC_MSG_FAILURE([Some gsl headers are missing])])
     AC_CHECK_LIB(xerces-c,main,,[AC_MSG_FAILURE([xerces-c not present])])
 fi
-
 
 
 #check posix threads
@@ -103,9 +106,10 @@ else
    AC_CHECK_HEADERS([gl.h glu.h glut.h glaux.h GL/gl.h GL/glu.h GL/glut.h GL/glaux.h OpenGL/gl.h OpenGL/glu.h OpenGL/glut.h OpenGL/glaux.h GLUT/glut.h MesaGL/gl.h MesaGL/glu.h MesaGL/glut.h MesaGL/glaux.h])
 fi
 
+
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h],,[AC_MSG_FAILURE([Some headers are missing])])
+AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/timeb.h],,[AC_MSG_FAILURE([Some headers are missing])])
 AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
 
 
@@ -116,16 +120,10 @@ AC_C_INLINE
 AC_TYPE_SIZE_T
 
 
-#32-bit compiling on x64 (experiment)
-if test "${m32Option}" = yes ; then
-  export LDFLAGS="$LDFLAGS -m32"
-  export CPPFLAGS="$CPPFLAGS -m32"
-  export CFLAGS="$CFLAGS -m32"
-fi
-
-
 # Checks for library functions.
 AC_FUNC_ERROR_AT_LINE
+AC_FUNC_MALLOC
+AC_CHECK_FUNCS([floor pow sqrt])
 
 AC_CONFIG_FILES([Makefile
                  model/Makefile
