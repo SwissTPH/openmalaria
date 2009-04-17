@@ -30,11 +30,12 @@ using namespace std;
 /// Command-Line Option possibilities
 namespace CLO {
   enum CLO {
-    NONE = 0,
+    NONE		= 0x0,
     
-    EARLY_EXIT = 0x100,	///< Don't run main simulation flag
+    EARLY_EXIT		= 0x100,	///< Don't run main simulation flag
     
-    PRINT_MODEL_VERSION = 0x1 | EARLY_EXIT
+    PRINT_MODEL_VERSION	= 0x1 | EARLY_EXIT,
+    TEST_CHECKPOINTING	= 0x2,
   };
 }
 
@@ -93,11 +94,11 @@ public:
   static vector<int> infantIntervalsAtRisk;
   //@}
   
+  static CLO::CLO clOptions;
+  
 private:
   /// Sets modelVersion, checking for incompatible versions.
   static void setModelVersion ();
-  
-  static CLO::CLO clOptions;
 };
 
 inline int isOptionIncluded (int allOptions, int option) {

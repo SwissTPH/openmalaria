@@ -103,15 +103,17 @@ void Simulation::mainSimulation(){
   gMainSummary->initialiseSummaries();
   Global::simulationMode=get_mode();
   
-  while( timeStep <=  simulationDuration) {
+  while(timeStep <= simulationDuration) {
     _population->implementIntervention(timeStep);
+#ifndef WITHOUT_BOINC
     //Calculate the current progress
     BoincWrapper::reportProgress(relTimeInMainSim*(double(timeStep)/simulationDuration)+(1-relTimeInMainSim));
+#endif
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
     ++simulationTime;
     ++timeStep;
     _population->update1();
-    if ( timeStep ==  gMainSummary->getSurveyTimeInterval(gMainSummary->getSurveyPeriod()-1)) {
+    if (timeStep == gMainSummary->getSurveyTimeInterval(gMainSummary->getSurveyPeriod()-1)) {
       _population->newSurvey();
     }
   }
@@ -120,15 +122,22 @@ void Simulation::mainSimulation(){
 }
 
 void Simulation::updateOneLifespan () {
-  while( simulationTime <  Global::maxAgeIntervals) {
-    BoincWrapper::reportProgress (double(simulationTime) / Global::maxAgeIntervals * (1-relTimeInMainSim));
-    if (BoincWrapper::timeToCheckpoint()) {
-      writeCheckpoint();
-      BoincWrapper::checkpointCompleted();
-    }
-    
+  int testCheckpointStep = -1;
+  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+    testCheckpointStep = Global::maxAgeIntervals / 2;
+  while(simulationTime < Global::maxAgeIntervals) {
     ++simulationTime;
     _population->update1();
+    
+#ifndef WITHOUT_BOINC
+    BoincWrapper::reportProgress (double(simulationTime) / Global::maxAgeIntervals * (1-relTimeInMainSim));
+#endif
+    if (BoincWrapper::timeToCheckpoint() || simulationTime == testCheckpointStep) {
+      writeCheckpoint();
+      BoincWrapper::checkpointCompleted();
+      if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+	throw runtime_error ("Checkpoint test − written checkpoint, now halting");
+    }
   }
 }
 
