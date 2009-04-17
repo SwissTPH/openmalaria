@@ -23,8 +23,8 @@
 
 /* Entomology model coordinator: Nakul Chitnis. */ 
 
-#include "vectorControl.h"
-#include "VectorControlInternal.h"
+#include "TransmissionModel/Vector.h"
+#include "TransmissionModel/VectorInternal.h"
 #include "inputData.h"
 #include <fstream>
 
@@ -37,7 +37,7 @@
  *****************************************************************************/
 
 
-VectorControl::VectorControl () {
+VectorTransmission::VectorTransmission () {
   // The XML schema allows a list of anopheles data to represent multiple types
   // of mosquito. Currently only using one set of data is supported.
   // TransmissionModel::createTransmissionModel checks length of this list:
@@ -82,24 +82,24 @@ VectorControl::VectorControl () {
   //TODO: initialise arrays (run initial simulation for N_v_length-1 days?)
   // Calculations are invalid before arrays are initialized!
 }
-VectorControl::~VectorControl () {
+VectorTransmission::~VectorTransmission () {
   delete[] P_A;
 }
 
-void VectorControl::initMainSimulation(int populationSize) {
-  cerr << "Warning: using incomplete VectorControl transmission model!" << endl;
+void VectorTransmission::initMainSimulation(int populationSize) {
+  cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   calMosqEmergeRate (populationSize);
 }
 
 // dummy functions until they're implemented:
-double VectorControl::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
+double VectorTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
   // I'm not really sure what this should do (hardy).
   cerr << "dummy function getExpectedNumberOfInfections called" << endl;
   return 0.0;
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */
-double VectorControl::calculateEIR(int simulationTime, Human& host) {
+double VectorTransmission::calculateEIR(int simulationTime, Human& host) {
   /* Calculates EIR per individual (hence N_i == 1).
    *
    * See comment in advancePeriod for method. */
@@ -111,7 +111,7 @@ double VectorControl::calculateEIR(int simulationTime, Human& host) {
 
 
 // Per 5-day step:
-void VectorControl::advancePeriod (const std::list<Human>& population, int simulationTime) {
+void VectorTransmission::advancePeriod (const std::list<Human>& population, int simulationTime) {
   /* Largely equations correspond to Nakul Chitnis's model in
     "A mathematic model for the dynamics of malaria in
     mosquitoes feeding on a heterogeneous host population" [MMDM]
@@ -284,7 +284,7 @@ void VectorControl::advancePeriod (const std::list<Human>& population, int simul
  */ 
 
 
-void VectorControl::calMosqEmergeRate (int populationSize) {
+void VectorTransmission::calMosqEmergeRate (int populationSize) {
   /* Number of types of hosts. 
   Dimensionless.
   $n$ in model. Scalar.
@@ -431,7 +431,7 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
     printf("Rotating EIR \n");
   }
 
-# ifdef VectorControl_PRINT_calMosqEmergeRate
+# ifdef VectorTransmission_PRINT_calMosqEmergeRate
   char origEIRname[15] = "OrigEIR";
   char shortEIRname[15] = "ShortEIR";
   char longEIRname[15] = "LongEIR";
@@ -441,7 +441,7 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
 # endif
 
   convertLengthToFullYear(humanInfectivityInit, initialKappa);
-# ifdef VectorControl_PRINT_calMosqEmergeRate
+# ifdef VectorTransmission_PRINT_calMosqEmergeRate
   char shortKviname[15] = "ShortKvi";
   char longKviname[15] = "LongKvi";
   PrintArray(fnametestentopar, shortKviname, initialKappa, Global::intervalsPerYear);
@@ -501,7 +501,7 @@ void VectorControl::calMosqEmergeRate (int populationSize) {
   }
 }
 
-void VectorControl::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
+void VectorTransmission::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
   for (int i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
       FullArray[i*Global::interval+j] = ShortArray[i];
@@ -514,7 +514,7 @@ void VectorControl::convertLengthToFullYear (double FullArray[daysInYear], doubl
 /***************************************************************************
  ************************ START SUBROUTINES HERE ***************************
  ***************************************************************************/
-double VectorControl::CalcInitMosqEmergeRate(int populationSize,
+double VectorTransmission::CalcInitMosqEmergeRate(int populationSize,
                                              int EIPDuration,
                                              int nHostTypesInit,
                                              int nMalHostTypesInit,
@@ -632,7 +632,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   // The inverse of the identity matrix minus X_t_p.
   gsl_matrix* inv1Xtp = gsl_matrix_calloc(eta, eta);
 
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   // We now try to print these parameters to file to make sure that 
   // they show what we want them to show.
   PrintParameters(fnametestentopar, theta_p, tau, theta_s, nHostTypesInit, nMalHostTypesInit, N_i, alpha_i,
@@ -669,7 +669,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   // for more information.
   FuncX(X_t_p, Upsilon, theta_p, 0, eta);
 
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char xtpname[15] = "X_t_p";
   PrintMatrix(fnametestentopar, xtpname, X_t_p, eta, eta);
 # endif
@@ -698,7 +698,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   // Calculate the inverse of (I-X_t_p).
   CalcInv1minusA(inv1Xtp, X_t_p, eta, fnametestentopar);
 
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char inv1Xtpname[15] = "inv1minusXtp";
   PrintMatrix(fnametestentopar, inv1Xtpname, inv1Xtp, eta, eta);
 # endif
@@ -706,7 +706,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   // Calculate the number of infectious host-seeking mosquitoes for the given EIR.
   CalSvfromEIRdata(S_vFromEIR, P_Ai, P_B_i, N_i, Xi_i);
 
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char SvfromEIRname[15] = "S_vFromEIR";
   PrintVector(fnametestentopar, SvfromEIRname, S_vFromEIR, theta_p);
 # endif
@@ -727,7 +727,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
 
   CalcSvDiff(S_vDiff, S_vFromEIR, Upsilon, N_v0, inv1Xtp, 
              eta, mt, theta_p, fnametestentopar);
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char InitSvDiffname[20] = "InitSvDifference";
   PrintVector(fnametestentopar, InitSvDiffname, S_vDiff, theta_p);
 # endif
@@ -797,7 +797,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
     // Copy solution for N_v0 into N_v0.
     gsl_vector_memcpy(N_v0, srootfind->x);
 
-#   ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+#   ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
     char finalNv0name[15] = "FinalNv0";
     char finalSvDiffname[15] = "FinalSvDiff";
     PrintVector(fnametestentopar, finalNv0name, N_v0, theta_p);
@@ -810,7 +810,7 @@ double VectorControl::CalcInitMosqEmergeRate(int populationSize,
   }
 
 
-# ifdef VectorControl_PRINT_CalcInitMosqEmergeRate
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   // Calculate final periodic orbit and print out values.
 
   // Calculate final periodic orbit.

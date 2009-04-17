@@ -17,18 +17,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-/// This is a header for VectorControl's functions which are only used internally.
+/// This is a header for VectorTransmission's functions which are only used internally.
 
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
 
-//#define VectorControl_PRINT_CalcUpsilonOneHost
-//#define VectorControl_PRINT_CalcSvDiff
-//#define VectorControl_PRINT_CalcLambda
-//#define VectorControl_PRINT_CalcXP
-//#define VectorControl_PRINT_CalcSpectralRadius
-//#define VectorControl_PRINT_CalcInv1minusA
+//#define VectorTransmission_PRINT_CalcUpsilonOneHost
+//#define VectorTransmission_PRINT_CalcSvDiff
+//#define VectorTransmission_PRINT_CalcLambda
+//#define VectorTransmission_PRINT_CalcXP
+//#define VectorTransmission_PRINT_CalcSpectralRadius
+//#define VectorTransmission_PRINT_CalcInv1minusA
 
 
 /***************************************************************************

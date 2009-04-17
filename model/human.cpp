@@ -32,7 +32,7 @@
 #include "summary.h"
 #include "proteome.h"
 #include "intervention.h"
-#include "transmissionModel.h"
+#include "TransmissionModel.h"
 #include <stdexcept>
 
 

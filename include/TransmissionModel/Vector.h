@@ -17,24 +17,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorControl
-#define Hmod_VectorControl
+#ifndef Hmod_VectorTransmission
+#define Hmod_VectorTransmission
 /* This file should contain the headers of all routines that we write in the C
  * program.
  */ 
 
 /* We also include library headers here. */ 
-#include "transmissionModel.h"
+#include "TransmissionModel.h"
 
-//#define VectorControl_PRINT_calMosqEmergeRate
-//#define VectorControl_PRINT_CalcInitMosqEmergeRate
+//#define VectorTransmission_PRINT_calMosqEmergeRate
+//#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
 
 //! Transmission models, Chitnis et al
-class VectorControl : public TransmissionModel {
+class VectorTransmission : public TransmissionModel {
 public:
-  VectorControl();
-  virtual ~VectorControl();
+  VectorTransmission();
+  virtual ~VectorTransmission();
   
   /** Initialise the main simulation.
    * 
@@ -136,7 +136,7 @@ private:
   
   //! This subroutine converts vectors of length intervalsPerYear to daysInYear. 
   /*! 
-    we expect to put the following this into VectorControl class 
+    we expect to put the following this into VectorTransmission class 
  
     Note that ShortArray is assumed to be a pointer to a double array 
     of length intervalsPerYear. We do not explicitly check this. 

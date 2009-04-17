@@ -46,11 +46,9 @@ am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
 	drug.$(OBJEXT) proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
 	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
-	transmissionModel.$(OBJEXT) noVectorControl.$(OBJEXT) \
-	VectorControlInternal.$(OBJEXT) vectorControl.$(OBJEXT) \
-	CaseManagementModel.$(OBJEXT) OldCaseManagement.$(OBJEXT) \
-	NewCaseManagement.$(OBJEXT) EntoIntervention.$(OBJEXT) \
-	PresentationModel.$(OBJEXT)
+	TransmissionModel.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
+	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
+	EntoIntervention.$(OBJEXT) PresentationModel.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -181,20 +179,20 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = PresentationModel WithinHostModel
+SUBDIRS = PresentationModel TransmissionModel WithinHostModel
 openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  drug.cpp proteome.cpp\
  WithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
- transmissionModel.cpp noVectorControl.cpp VectorControlInternal.cpp vectorControl.cpp\
+ TransmissionModel.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  EntoIntervention.cpp\
  PresentationModel.cpp
 
 openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a
-openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a PresentationModel/libPresentationModel.a WithinHostModel/libWithinHostModel.a\
+openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a PresentationModel/libPresentationModel.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a\
  -L@top_builddir@/lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@/xsdcxx
@@ -253,7 +251,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PresentationModel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorControlInternal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransmissionModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drug.Po@am__quote@
@@ -261,15 +259,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/human.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intervention.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/noVectorControl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/openMalaria.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/population.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proteome.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simulation.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/summary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/transmissionModel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vectorControl.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

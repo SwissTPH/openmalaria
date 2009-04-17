@@ -17,18 +17,18 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#include "noVectorControl.h"
+#include "TransmissionModel/NonVector.h"
 #include "inputData.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
 #include "intervention.h"
 
 //static (class) variables
-const double NoVectorControl::susceptibility= 0.702;
-const double NoVectorControl::totalInfectionrateVariance= 1.0;
-const double NoVectorControl::min_EIR_mult= 0.01; 
+const double NonVectorTransmission::susceptibility= 0.702;
+const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
+const double NonVectorTransmission::min_EIR_mult= 0.01; 
 
-NoVectorControl::NoVectorControl() : nspore (EIPDuration/Global::interval) {
+NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::interval) {
   gamma_p=getParameter(Params::GAMMA_P);
   Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
   Simm=getParameter(Params::SIMM);
@@ -71,7 +71,7 @@ NoVectorControl::NoVectorControl() : nspore (EIPDuration/Global::interval) {
   inputEIR();
 }
 
-NoVectorControl::~NoVectorControl () {
+NonVectorTransmission::~NonVectorTransmission () {
   free(no);
   free(ino);
   free(intEIR);
@@ -79,13 +79,13 @@ NoVectorControl::~NoVectorControl () {
 
 
 //! initialise the main simulation 
-void NoVectorControl::initMainSimulation (int populationSize){
+void NonVectorTransmission::initMainSimulation (int populationSize){
   // initialKappa is used in calculateEIR
   memcpy (initialKappa, kappa, Global::intervalsPerYear*sizeof(*kappa));
 }
 
 
-void NoVectorControl::inputEIR () {
+void NonVectorTransmission::inputEIR () {
   // TODO: Properly include new Global::simulationMode for entomological model. 
   // Depending on flags, this should either take in given EIR and smooth through
   // a DFT or directly take in Fourier coefficients and create an EIR over time.
@@ -147,7 +147,7 @@ void NoVectorControl::inputEIR () {
   }
 }
 
-double NoVectorControl::calculateEIR(int simulationTime, Human&){
+double NonVectorTransmission::calculateEIR(int simulationTime, Human&){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   switch (Global::simulationMode) {
     case equilibriumMode:
@@ -173,7 +173,7 @@ double NoVectorControl::calculateEIR(int simulationTime, Human&){
 }
 
 
-double NoVectorControl::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
+double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
   double baseAvailToMos = human.getBaselineAvailabilityToMosquitoes();
   //The age-adjusted EIR, possibly adjusted for bed nets.
   double expectedNumInfections;
@@ -212,7 +212,7 @@ double NoVectorControl::getExpectedNumberOfInfections (Human& human, double age_
 
 // -----   Private functs ------
 
-void NoVectorControl::updateEIR (int day, double EIRdaily) {
+void NonVectorTransmission::updateEIR (int day, double EIRdaily) {
   // istep is the time period to which the day is assigned.  The result of the
   // division is automatically rounded down to the next integer
   int istep= 1 + (day-1) / Global::interval;
@@ -229,7 +229,7 @@ void NoVectorControl::updateEIR (int day, double EIRdaily) {
 }
 
 
-double NoVectorControl::averageEIR () {
+double NonVectorTransmission::averageEIR () {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
   double valaverageEIR=0.0;
   size_t i = 0;

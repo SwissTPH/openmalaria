@@ -26,7 +26,7 @@
 #include "human.h"
 #include "simulation.h"
 #include "intervention.h"
-#include "transmissionModel.h"
+#include "TransmissionModel.h"
 #include "summary.h"
 #include "PresentationModel.h"
 #include "CaseManagementModel.h"

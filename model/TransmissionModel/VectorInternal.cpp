@@ -18,11 +18,11 @@
  */
 
 
-/* --- This file contains free functions used by VectorControl  ---
+/* --- This file contains free functions used by VectorTransmission  ---
    ---         (to calculate mosquito emergence rates).         --- */
 
 
-#include "VectorControlInternal.h"
+#include "TransmissionModel/VectorInternal.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
@@ -149,7 +149,7 @@ void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
 
   }
 
-# ifdef VectorControl_PRINT_CalcUpsilonOneHost
+# ifdef VectorTransmission_PRINT_CalcUpsilonOneHost
   // We should try to print some of these matrices out to see what they  look like.
   PrintUpsilon(fntestentopar, Upsilon, theta_p, eta, P_A, P_Ai, Pdf, Pdif, Pduf);
 # endif
@@ -245,7 +245,7 @@ void CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
                    gsl_vector_get(x_p[i], indexSv));
   }
 
-# ifdef VectorControl_PRINT_CalcSvDiff
+# ifdef VectorTransmission_PRINT_CalcSvDiff
   char SvfromNv0name[15] = "SvfromNv0";
   PrintVector(fntestentopar, SvfromNv0name, SvfromNv0, theta_p);
 # endif
@@ -274,7 +274,7 @@ void CalcLambda(gsl_vector** Lambda, gsl_vector* N_v0, size_t eta,
     gsl_vector_set(Lambda[t], 0, gsl_vector_get(N_v0, t));
   }
 	
-# ifdef VectorControl_PRINT_CalcLambda
+# ifdef VectorTransmission_PRINT_CalcLambda
   // We should try to print some of these vectors out to see what they  look like.
   PrintLambda(Lambda, eta, fntestentopar);		
 # endif
@@ -305,7 +305,7 @@ void CalcXP(gsl_vector** x_p, gsl_matrix** Upsilon,
   gsl_blas_dgemv(CblasNoTrans, 1.0, inv1Xtp, vtemp, 0.0, x0p);
 
   printf("Calculated initial condition for periodic orbit. \n");
-# ifdef VectorControl_PRINT_CalcXP
+# ifdef VectorTransmission_PRINT_CalcXP
   char x0pname[15] = "x0p";
   PrintVector(fntestentopar, x0pname, x0p, eta);
 # endif
@@ -339,7 +339,7 @@ void CalcXP(gsl_vector** x_p, gsl_matrix** Upsilon,
         
   printf("Calculated periodic orbit. \n");
 
-# ifdef VectorControl_PRINT_CalcXP
+# ifdef VectorTransmission_PRINT_CalcXP
   // We should try to print some of these vectors out to see what they  look like.
   PrintXP(x_p, eta, theta_p, fntestentopar);		
 # endif
@@ -432,7 +432,7 @@ double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[])
 	// Calculate eigenvalues of B:
   gsl_eigen_nonsymm(B, eval, w);
 
-# ifdef VectorControl_PRINT_CalcSpectralRadius
+# ifdef VectorTransmission_PRINT_CalcSpectralRadius
   PrintEigenvalues(fntestentopar, eval, n);
 # endif
 
@@ -474,7 +474,7 @@ void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n, char fntestentop
   gsl_linalg_LU_invert(B, p, inv1A);
 
 
-# ifdef VectorControl_PRINT_CalcInv1minusA
+# ifdef VectorTransmission_PRINT_CalcInv1minusA
   char invname[15] = "inv1minusA"; // Name of matrix (when printing to file).
   PrintMatrix(fntestentopar, invname, inv1A, n, n);
 # endif
@@ -538,7 +538,7 @@ void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind,
   fclose(fpp);
 }
 
-#ifdef VectorControl_PRINT_CalcInitMosqEmergeRate	// only use
+#ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
 void PrintParameters(char fntestentopar[], size_t theta_p, size_t tau, size_t theta_s, 
                     size_t n, size_t m, double N_i, double alpha_i, double mu_vA, 
                     double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i, 
@@ -603,7 +603,7 @@ void PrintParameters(char fntestentopar[], size_t theta_p, size_t tau, size_t th
 }
 #endif
 
-#ifdef VectorControl_PRINT_CalcUpsilonOneHost	// only use
+#ifdef VectorTransmission_PRINT_CalcUpsilonOneHost	// only use
 void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, size_t theta_p,
                   size_t eta, double P_A, double P_Ai, double Pdf, gsl_vector* Pdif,
                   gsl_vector* Pduf)
@@ -665,7 +665,7 @@ void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, size_t theta_p,
 }
 #endif
 
-#ifdef VectorControl_PRINT_CalcXP	// only use
+#ifdef VectorTransmission_PRINT_CalcXP	// only use
 void PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p, char fntestentopar[])
 {
 /* PrintXP() prints out values of XP, the periodic orbit.
@@ -694,7 +694,7 @@ void PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p, char fntestentopar[])
 }
 #endif
 
-#ifdef VectorControl_PRINT_CalcLambda	// only use
+#ifdef VectorTransmission_PRINT_CalcLambda	// only use
 void PrintLambda(gsl_vector** Lambda, size_t eta, char fntestentopar[])
 {
 /* PrintLambda() prints some values of Lambda.
@@ -726,7 +726,7 @@ void PrintLambda(gsl_vector** Lambda, size_t eta, char fntestentopar[])
 }
 #endif
 
-#ifdef VectorControl_PRINT_CalcSpectralRadius	// only use
+#ifdef VectorTransmission_PRINT_CalcSpectralRadius	// only use
 void PrintEigenvalues(char fntestentopar[],gsl_vector_complex* eval, size_t n)
 {
 /* PrintEigenvalues() prints eigenvalues to the given file.
@@ -754,7 +754,7 @@ void PrintEigenvalues(char fntestentopar[],gsl_vector_complex* eval, size_t n)
 }
 #endif
 
-#if defined VectorControl_PRINT_CalcInitMosqEmergeRate || defined VectorControl_PRINT_CalcInv1minusA
+#if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcInv1minusA
 void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A, 
                  size_t RowLength, size_t ColLength)
 {
@@ -783,7 +783,7 @@ void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A,
 }
 #endif
 
-#if defined VectorControl_PRINT_CalcInitMosqEmergeRate || defined VectorControl_PRINT_CalcSvDiff || defined VectorControl_PRINT_CalcXP
+#if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcSvDiff || defined VectorTransmission_PRINT_CalcXP
 void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, size_t n)
 {
 /* PrintVector() prints the given (GSL) vector to the given file.

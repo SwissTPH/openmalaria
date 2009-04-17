@@ -17,17 +17,17 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef Hmod_NoVectorControl
-#define Hmod_NoVectorControl
+#ifndef Hmod_NonVectorTransmission
+#define Hmod_NonVectorTransmission
 
-#include "transmissionModel.h"
+#include "TransmissionModel.h"
 
 //! Base transmission model, as used in Phase A
-class NoVectorControl : public TransmissionModel { 
+class NonVectorTransmission : public TransmissionModel { 
 public:
 
-  NoVectorControl();
-  virtual ~NoVectorControl();
+  NonVectorTransmission();
+  virtual ~NonVectorTransmission();
   //! initialise the main simulation 
   void initMainSimulation (int populationSize); 	
 

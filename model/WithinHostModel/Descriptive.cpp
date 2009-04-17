@@ -25,7 +25,7 @@
 #include "WithinHostModel/Descriptive.h"
 #include "simulation.h"
 #include "intervention.h"
-#include "transmissionModel.h"	// getAgeGroup() - is in a funny place
+#include "TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 
 using namespace std;

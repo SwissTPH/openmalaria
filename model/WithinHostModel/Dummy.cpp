@@ -24,7 +24,7 @@
 #include "human.h"
 #include "WithinHostModel/Dummy.h"
 #include "simulation.h"
-#include "transmissionModel.h"	// getAgeGroup() - is in a funny place
+#include "TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 #include "inputData.h"
 

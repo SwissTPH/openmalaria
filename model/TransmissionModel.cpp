@@ -22,15 +22,15 @@
 //This is needed to get symbols like M_PI with MSVC:
 #define _USE_MATH_DEFINES
 
-#include "transmissionModel.h"
+#include "TransmissionModel.h"
 #include <math.h> 
 #include "global.h" 
 #include <gsl/gsl_vector.h> 
 #include "intervention.h" 
 #include <iostream>
 #include "inputData.h"
-#include "noVectorControl.h"
-#include "vectorControl.h"
+#include "TransmissionModel/NonVector.h"
+#include "TransmissionModel/Vector.h"
 
 //static (class) variables
 const double TransmissionModel::agemin[nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
@@ -41,9 +41,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
   if (getEntoData().getAnopheles().size())
-    return new VectorControl();
+    return new VectorTransmission();
   else
-    return new NoVectorControl();
+    return new NonVectorTransmission();
 }
 
 TransmissionModel::TransmissionModel(){
