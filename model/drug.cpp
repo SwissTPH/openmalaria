@@ -43,7 +43,6 @@ static ProteomeManager* manager;
 
 void initDrugModule(int _withinHostTimestep, int _simulatorTimestep){
   DrugRegistry* registry;
-  manager = ProteomeManager::getManager();
   registry = DrugRegistry::getRegistry();
   withinHostTimestep = _withinHostTimestep;
   simulatorTimestep  = _simulatorTimestep;
@@ -56,7 +55,7 @@ void initDrugModule(int _withinHostTimestep, int _simulatorTimestep){
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
   s->addPDRule(vector<Mutation*>(), 68.0);
-  s->parseProteomeInstances(manager);
+  s->parseProteomeInstances();
   registry->addDrug(s);
 
 }
@@ -140,7 +139,6 @@ Drug::~Drug() {
 
 istream& operator>>(istream& in, Drug& drug) {
   //Human is not saved. This is correct.
-  ProteomeManager* manager = ProteomeManager::getManager();
   int numRules;
   int numCachedRules;
   int numDoses;
@@ -301,8 +299,8 @@ void Drug::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
   pdParameters->push_back(pdFactor);
 }
 
-void Drug::parseProteomeInstances(ProteomeManager* manager) {
-  vector<ProteomeInstance*> instances = manager->getInstances();
+void Drug::parseProteomeInstances() {
+  vector<ProteomeInstance*> instances = ProteomeManager::getInstances();
   vector<ProteomeInstance*>::const_iterator it;
   int numRules = requiredMutations->size();
   for (it=instances.begin(); it !=instances.end(); it++) {

@@ -42,12 +42,14 @@ class Protein {
 
   public:
   Protein(string _name);
+  /** @brief Create, reading from checkpoint */
+  Protein(istream& in);
   ~Protein();
+  
   string getName() const;
   void addPosition(ProteinPosition* _position);
   Mutation* getMutation(int _position, char _allele) throw(int);
-  friend ostream& operator<<(ostream& out, const Protein& protein);
-  friend istream& operator>>(istream& in, Protein& protein);
+  void write (ostream& out);
 };
 
 class ProteinPosition {
@@ -58,16 +60,16 @@ class ProteinPosition {
 
   public:
   ProteinPosition(Protein* _protein, int _position, char _wildType);
+  /** @brief Create, reading from checkpoint */
+  ProteinPosition(Protein* _protein, istream& in);
   ~ProteinPosition();
+  
   void addMutation(Mutation* _mutation);
   Protein* getProtein();
   string getProteinName();
   Mutation* getMutation(char _allele) throw(int);
-  char getWildType() const {return wildType;}
-  vector<Mutation*>* getMutations() {return &mutations;}
   int getPosition() const;
-  friend ostream& operator<<(ostream& out, const ProteinPosition& position);
-  friend istream& operator>>(istream& in, ProteinPosition& position);
+  void write (ostream& out);
 };
 
 class Mutation {
@@ -81,8 +83,6 @@ class Mutation {
   int getPosition() const;
   char getAllele() const;
   int operator==(const Mutation& rhs) const;
-  friend ostream& operator<<(ostream& out, const Mutation& mutation);
-  friend istream& operator>>(istream& in, Mutation& mutation);
 };
 
 class ProteomeInstance {
@@ -93,33 +93,28 @@ class ProteomeInstance {
 
   public:
   ProteomeInstance();
+  /** @brief Create, reading from checkpoint */
+  ProteomeInstance (istream& in);
   ~ProteomeInstance();
   void addMutation(Mutation* _mutation);
   int getProteomeID();
   bool hasMutations(vector<Mutation*> _mutations);
-  friend ostream& operator<<(ostream& out, const ProteomeInstance& instance);
-  friend istream& operator>>(istream& in, ProteomeInstance& instance);
+  void write (ostream& out);
 };
 
 class ProteomeManager {
-  static ProteomeManager* manager;
   static vector<ProteomeInstance*> instances;
   static vector<Protein*> proteins;
 
-  ProteomeManager();
-
   public:
-  ~ProteomeManager();
   static void addInstance(ProteomeInstance* _instance);
   static void addProtein(Protein* _protein);
-  //NOTE: all data is static, so there's no need to create an instance.
-  static ProteomeManager* getManager();
   //!returns the proteome of a new infection
-  ProteomeInstance* getInfection() const;
-  ProteomeInstance* getProteome(int proteome) const;
-  Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
-  vector<ProteomeInstance*> getInstances() const;
-  friend ostream& operator<<(ostream& out, const ProteomeManager& manager);
-  friend istream& operator>>(istream& in, ProteomeManager& manager);
+  static ProteomeInstance* getInfection();
+  static ProteomeInstance* getProteome(int proteome);
+  static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
+  static vector<ProteomeInstance*> getInstances();
+  static void write (ostream& out);
+  static void read (istream& in);
 };
 #endif

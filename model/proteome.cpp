@@ -36,14 +36,13 @@ void initProteomeModule() {
   Protein* crt = new Protein(string("CRT"));
   ProteinPosition* pos = new ProteinPosition(crt, 76, 'K');
   Mutation* mutation = new Mutation(pos, 'T');
-  ProteomeInstance* instance;
-  instance = new ProteomeInstance();
-  ProteomeManager::addInstance(instance);
-  instance = new ProteomeInstance();
+  ProteomeManager::addProtein(crt);
+  
+  ProteomeManager::addInstance(new ProteomeInstance());
+  
+  ProteomeInstance* instance = new ProteomeInstance();
   instance->addMutation(mutation);
   ProteomeManager::addInstance(instance);
-  //ProteomeManager* manager;
-  //manager = ProteomeManager::getManager();
 }
 
 
@@ -54,7 +53,17 @@ void initProteomeModule() {
 Protein::Protein(string _name) {
   name = _name;
   positions = vector<ProteinPosition*>();
-  ProteomeManager::addProtein(this);
+}
+
+Protein::Protein(istream& in) {
+  in >> name;
+  positions = vector<ProteinPosition*>();
+  size_t numPositions;
+  in >> numPositions;
+  for(size_t i=0; i<numPositions; i++) {
+    //Object will add itself to this->positions
+    new ProteinPosition (this, in);
+  }
 }
 
 Protein::~Protein() {
@@ -82,46 +91,13 @@ Mutation* Protein::getMutation(int _position, char _allele) throw(int) {
   throw(2); // Position not known
 }
 
-ostream& operator<<(ostream& out, const Protein& protein) {
+void Protein::write (ostream& out) {
   vector<ProteinPosition*>::const_iterator it;
-  out << protein.name << endl;
-  out << protein.positions.size() << endl;
-  for(it=protein.positions.begin(); it != protein.positions.end(); it++) {
-    vector<Mutation*>::const_iterator itM;
-    ProteinPosition* position = (*it);
-    out << position->getPosition() << endl;
-    out << position->getWildType() << endl;
-    out << position->getMutations()->size() << endl;
-    for(itM=position->getMutations()->begin(); itM != position->getMutations()->end(); itM++) {
-      out << (*itM)->getAllele() << endl;
-    }
+  out << name << endl;
+  out << positions.size() << endl;
+  for(it=positions.begin(); it != positions.end(); it++) {
+    (*it)->write(out);
   }
-  return out;
-}
-
-istream& operator>>(istream& in, Protein& protein) {
-  int numPositions;
-  int numMutations;
-  int i;
-  int j;
-  in >> protein.name;
-  in >> numPositions;
-  protein.positions = vector<ProteinPosition*>();
-  for(i=0; i<numPositions; i++) {
-    int pos;
-    char wildType;
-    in >> pos;
-    in >> wildType;
-    //Object will add itself to protein.positions
-    ProteinPosition* position = new ProteinPosition(&protein, pos, wildType);
-    in >> numMutations;
-    for(j=0; j<numMutations; j++) {
-      char allele;
-      in >> allele;
-      new Mutation(position, allele); //it will hook itself to position
-    }
-  }
-  return in;
 }
 
 
@@ -136,6 +112,20 @@ ProteinPosition::ProteinPosition(Protein* _protein, int _position,
   position = _position;
   wildType = _wildType;
   mutations = vector<Mutation*>();
+}
+ProteinPosition::ProteinPosition(Protein* _protein, istream& in) {
+  protein = _protein;
+  protein->addPosition(this);
+  in >> position;
+  in >> wildType;
+  mutations = vector<Mutation*>();
+  size_t numMutations;
+  in >> numMutations;
+  for(size_t j=0; j<numMutations; j++) {
+    char allele;
+    in >> allele;
+    new Mutation(this, allele); //it will hook itself to position
+  }
 }
 
 ProteinPosition::~ProteinPosition() {
@@ -153,12 +143,13 @@ string ProteinPosition::getProteinName() {
   return protein->getName();
 }
 
-ostream& operator<<(ostream& out, const ProteinPosition& position) {
-  return out;
-}
-
-istream& operator>>(istream& in, ProteinPosition& position) {
-  return in;
+void ProteinPosition::write (ostream& out) {
+  out << position << endl;
+  out << wildType << endl;
+  out << mutations.size() << endl;
+  for(vector<Mutation*>::const_iterator itM=mutations.begin(); itM != mutations.end(); itM++) {
+    out << (*itM)->getAllele() << endl;
+  }
 }
 
 void ProteinPosition::addMutation(Mutation* _mutation) {
@@ -190,14 +181,6 @@ Mutation::Mutation(ProteinPosition* _position, char _allele) {
 }
 
 Mutation::~Mutation() {
-}
-
-ostream& operator<<(ostream& out, const Mutation& mutation) {
-  return out;
-}
-
-istream& operator>>(istream& in, Mutation& mutation) {
-  return in;
 }
 
 
@@ -234,43 +217,38 @@ ProteomeInstance::ProteomeInstance(){
   proteomeID = currentID++;
   mutations = vector<Mutation*>();
 }
-
-ProteomeInstance::~ProteomeInstance(){
-  //the content doesnt need to be deleted, that is the reponsability of delete proteins
-  mutations.clear();
-}
-
-ostream& operator<<(ostream& out, const ProteomeInstance& instance) {
-  vector<Mutation*>::const_iterator it;
-  out << instance.proteomeID << endl;
-  out << instance.mutations.size() << endl;
-  for(it=instance.mutations.begin(); it!=instance.mutations.end(); it++) {
-    out << (*it)->getProteinName() << endl;
-    out << (*it)->getPosition() << endl;
-    out << (*it)->getAllele() << endl;
-  }
-  return out;
-}
-
-istream& operator>>(istream& in, ProteomeInstance& instance) {
-  int numMuts;
-  in >> instance.proteomeID;
+ProteomeInstance::ProteomeInstance (istream& in) {
+  in >> proteomeID;
+  size_t numMuts;
   in >> numMuts;
-  instance.mutations = vector<Mutation*>();
-  for (int i=0; i<numMuts; i++) {
+  mutations = vector<Mutation*>();
+  for (size_t i=0; i<numMuts; i++) {
     string proteinName;
     int position;
     char allele;
     in >> proteinName;
     in >> position;
     in >> allele;
-    instance.mutations.push_back(
-      ProteomeManager::getManager()->getMutation(proteinName, position, allele));
+    mutations.push_back(
+      ProteomeManager::getMutation(proteinName, position, allele));
   }
-  if (instance.currentID<instance.proteomeID) {
-    instance.currentID = instance.proteomeID;
+  if (currentID<proteomeID)
+    currentID = proteomeID;
+}
+
+ProteomeInstance::~ProteomeInstance(){
+  //the content doesnt need to be deleted, that is the reponsability of delete proteins
+  mutations.clear();
+}
+
+void ProteomeInstance::write (ostream& out) {
+  out << proteomeID << endl;
+  out << mutations.size() << endl;
+  for(vector<Mutation*>::const_iterator it=mutations.begin(); it!=mutations.end(); it++) {
+    out << (*it)->getProteinName() << endl;
+    out << (*it)->getPosition() << endl;
+    out << (*it)->getAllele() << endl;
   }
-  return in;
 }
 
 void ProteomeInstance::addMutation(Mutation* _mutation) {
@@ -300,67 +278,42 @@ bool ProteomeInstance::hasMutations(vector<Mutation*> _mutations) {
  * ProteomeManager
  */
 
-ProteomeManager* ProteomeManager::manager = 0;
 vector<ProteomeInstance*> ProteomeManager::instances = vector<ProteomeInstance*>();
 vector<Protein*> ProteomeManager::proteins = vector<Protein*>();
 
 
-ProteomeManager::ProteomeManager() {
-  manager = this;
-}
-
-ProteomeManager::~ProteomeManager() {
-}
-
-ostream& operator<<(ostream& out, const ProteomeManager& manager) {
-  vector<ProteomeInstance*>* instances = &ProteomeManager::instances;
-  vector<Protein*>* proteins = &ProteomeManager::proteins;
-  vector<ProteomeInstance*>::const_iterator iti;
-  vector<Protein*>::const_iterator itp;
-
-  out << proteins->size() << endl;
-  for(itp=proteins->begin(); itp!=proteins->end(); itp++) {
-    out << *(*itp);
+void ProteomeManager::write (ostream& out) {
+  out << proteins.size() << endl;
+  for(vector<Protein*>::const_iterator itp=proteins.begin(); itp!=proteins.end(); itp++) {
+    (*itp)->write (out);
   }
-  out << instances->size() << endl;
-  for(iti=instances->begin(); iti!=instances->end(); iti++) {
-    out << *(*iti);
+  out << instances.size() << endl;
+  for(vector<ProteomeInstance*>::const_iterator iti=instances.begin(); iti!=instances.end(); iti++) {
+    (*iti)->write (out);
   }
-  return out;
 }
 
-istream& operator>>(istream& in, ProteomeManager& manager) {
-  //Proteins need to go before instances!
-  int numInstances;
-  int numProteins;
-  int i;
-  if (ProteomeManager::manager != 0) { //This is aways true...
-    vector<ProteomeInstance*>::const_iterator iti ;
-    vector<Protein*>::const_iterator itp;
-    for(iti=ProteomeManager::instances.begin(); iti!=ProteomeManager::instances.end(); iti++) {
+void ProteomeManager::read (istream& in) {
+    for(vector<ProteomeInstance*>::const_iterator iti=instances.begin(); iti!=instances.end(); iti++) {
       delete (*iti);
     }
-    for(itp=ProteomeManager::proteins.begin(); itp!=ProteomeManager::proteins.end(); itp++) {
+    for(vector<Protein*>::const_iterator itp=proteins.begin(); itp!=proteins.end(); itp++) {
       delete (*itp);
     }
-    ProteomeManager::instances.clear();
-    ProteomeManager::proteins.clear();
-  }
-  ProteomeManager::manager = &manager;
-  ProteomeManager::instances = vector<ProteomeInstance*>();
-  ProteomeManager::proteins = vector<Protein*>();
+    instances.clear();
+    proteins.clear();
+  
+  size_t numProteins;
   in >> numProteins;
-  for(i=0; i<numProteins; i++) {
-    Protein* protein = new Protein("");
-    in >> (*protein);
+  for(size_t i=0; i<numProteins; i++) {
+    proteins.push_back(new Protein(in));
   }
+  
+  size_t numInstances;
   in >> numInstances;
-  for(i=0; i<numInstances; i++) {
-    ProteomeInstance* instance = new ProteomeInstance();
-    in >> (*instance);
-    ProteomeManager::instances.push_back(instance);
+  for(size_t i=0; i<numInstances; i++) {
+    instances.push_back(new ProteomeInstance(in));
   }
-  return in;
 }
 
 
@@ -372,16 +325,8 @@ void ProteomeManager::addProtein(Protein* _protein) {
   proteins.push_back(_protein);
 }
 
-ProteomeManager* ProteomeManager::getManager() {
-  if (manager==0) {
-    ProteomeManager();
-  }
-  return manager;
-}
-
 Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char _allele) throw(int) {
-  vector<Protein*>::const_iterator itProt;
-  for (itProt=proteins.begin(); itProt != proteins.end(); itProt++) {
+  for (vector<Protein*>::const_iterator itProt = proteins.begin(); itProt != proteins.end(); itProt++) {
     if ((*itProt)->getName() == _proteinName) {
       return (*itProt)->getMutation(_position, _allele);
     }
@@ -389,15 +334,15 @@ Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char 
   throw(1); // Name not known
 }
 
-vector<ProteomeInstance*> ProteomeManager::getInstances() const {
+vector<ProteomeInstance*> ProteomeManager::getInstances() {
   return instances;
 }
 
-ProteomeInstance* ProteomeManager::getProteome(int proteome) const {
+ProteomeInstance* ProteomeManager::getProteome(int proteome) {
   return instances[proteome];
 }
 
-ProteomeInstance* ProteomeManager::getInfection() const {
+ProteomeInstance* ProteomeManager::getInfection() {
   return *(instances.begin()); //To be changed
 }
 

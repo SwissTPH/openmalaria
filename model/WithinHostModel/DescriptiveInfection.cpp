@@ -113,7 +113,7 @@ DescriptiveInfection::DescriptiveInfection(int simulationTime)
     
     //This should probably be inside an IF
     if (Global::modelVersion & INCLUDES_PK_PD) {
-      _proteome = ProteomeManager::getManager()->getInfection();
+      _proteome = ProteomeManager::getInfection();
     }
     else {
       _proteome = 0;
@@ -163,7 +163,7 @@ DescriptiveInfection::DescriptiveInfection (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
     in >> proteomeID; 
-    _proteome = ProteomeManager::getManager()->getProteome(proteomeID);
+    _proteome = ProteomeManager::getProteome(proteomeID);
   }
 }
 

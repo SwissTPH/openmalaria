@@ -146,7 +146,7 @@ class Drug {
   /*! Creates an association between ProteomeInstance and PD factor.
    *  This is solely for performance purposes.
    */
-  void parseProteomeInstances(ProteomeManager* manager);
+  void parseProteomeInstances();
 
 };
 

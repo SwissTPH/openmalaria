@@ -48,7 +48,7 @@ DummyInfection::DummyInfection(int lastSPdose, int simulationTime){
     _duration=infectionDuration(); 
     //This should probably be inside an IF
     if (Global::modelVersion & INCLUDES_PK_PD) {
-      _proteome = ProteomeManager::getManager()->getInfection();
+      _proteome = ProteomeManager::getInfection();
     }
     else {
       _proteome = 0;
@@ -78,13 +78,13 @@ void DummyInfection::write (ostream& out) const {
 }
 
 DummyInfection::DummyInfection (istream& in) {
-  int proteomeID;
   in >> _duration; 
   in >> _startdate; 
   in >> _density; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
+    int proteomeID;
     in >> proteomeID; 
-    _proteome = ProteomeManager::getManager()->getProteome(proteomeID);
+    _proteome = ProteomeManager::getProteome(proteomeID);
   }
 }
 

@@ -176,7 +176,7 @@ void Simulation::writeCheckpoint(){
   f_checkpoint.precision(20);
   f_checkpoint << simulationTime << endl;
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    f_checkpoint << ProteomeManager::getManager();
+    ProteomeManager::write (f_checkpoint);
   }
   _population->write (f_checkpoint);
   f_checkpoint.close();
@@ -208,8 +208,7 @@ void Simulation::readCheckpoint() {
   // Read checkpoint
   f_checkpoint >> simulationTime;
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager* manager = ProteomeManager::getManager();
-    f_checkpoint >> *manager;
+    ProteomeManager::read (f_checkpoint);
   }
   _population->read(f_checkpoint);
   f_checkpoint.close();
