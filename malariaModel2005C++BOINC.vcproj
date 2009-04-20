@@ -293,10 +293,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\noVectorControl.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\OldCaseManagement.h"
 				>
 			</File>
@@ -330,14 +326,6 @@
 			</File>
 			<File
 				RelativePath=".\include\transmissionModel.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\vectorControl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\VectorControlInternal.h"
 				>
 			</File>
 			<File
@@ -396,6 +384,22 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="TransmissionModel"
+				>
+				<File
+					RelativePath=".\include\TransmissionModel\NonVector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\TransmissionModel\Vector.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\TransmissionModel\VectorInternal.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="model"
@@ -441,10 +445,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\noVectorControl.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\OldCaseManagement.cpp"
 				>
 			</File>
@@ -478,14 +478,6 @@
 			</File>
 			<File
 				RelativePath=".\model\transmissionModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\vectorControl.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\VectorControlInternal.cpp"
 				>
 			</File>
 			<File
@@ -541,6 +533,22 @@
 				</File>
 				<File
 					RelativePath=".\model\WithinHostModel\OldIPTInfection.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="TransmissionModel"
+				>
+				<File
+					RelativePath=".\model\TransmissionModel\NonVector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\TransmissionModel\Vector.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\TransmissionModel\VectorInternal.cpp"
 					>
 				</File>
 			</Filter>
