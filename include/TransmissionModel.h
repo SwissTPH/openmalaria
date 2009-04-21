@@ -22,6 +22,7 @@
 #define Hmod_TransmissionModel 
 
 #include "human.h"
+#include <string.h>
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintOrigEIR
@@ -29,10 +30,13 @@
 //#define TransmissionModel_PrintSmoothArray
 #define TransmissionModel_PrintRotateArray
 
+class Summary;
 
 //! Abstract base class, defines behaviour of transmission models
 class TransmissionModel {
 public:
+  ///@brief Creation, destruction and checkpointing
+  //@{
   /// Creates a derived class
   static TransmissionModel* createTransmissionModel ();
   
@@ -40,7 +44,19 @@ public:
   TransmissionModel();
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();
-
+  
+  //FIXME: do implementing models need checkpointing?
+  void write(ostream& out) const;
+  void read(istream& in);
+  //@}
+  
+  /// Set a couple of summary items
+  void summarize (Summary&);
+  
+  /// Get the appropriate index within ageSpecificRelativeAvailability, etc.,
+  /// for this age (in years). Also used by Human.
+  static size_t  getAgeGroup (double age);
+  
   //! get the number of infections for a specific human at a given time step 
   virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR) = 0;
 
@@ -50,7 +66,7 @@ public:
   Linear interpolation is used to calculate this from the input array of surface areas. 
   \param ageyrs age in years 
   \return the ratio of bites received by the host to the average for an adult 
-  */ 
+  */
   double getRelativeAvailability (double ageyrs); 
 
 
@@ -64,12 +80,21 @@ public:
   //protected: 
   //functions used by the constructor 
 
-  /// Only used in no vector control, but called externally:
-  /// Reads in the estimates of the EIR for each village and each day
-  /// and converts this into EIR estimates per five day period
-  /// assuming that the annual cycle repeated during the pre-intervention period
+  /** @brief Initialization function, setting up EIR arrays
+   *
+   * Needs to be called after EIR data is changed ("changeEIR intervention").
+   *
+   * Reads in the estimates of the EIR for each village and each day
+   * and converts this into EIR estimates per five day period
+   * assuming that the annual cycle repeated during the pre-intervention period
+   */
   virtual void inputEIR () {}
- 
+  
+  /** Little function to copy kappa to initialKappa. */
+  inline void copyToInitialKappa () {
+    memcpy (initialKappa, kappa, Global::intervalsPerYear * sizeof(*kappa));
+  }
+  
   //! EIR per time step during the pre-intervention phase 
   double *EIR; 
  
@@ -91,13 +116,6 @@ public:
 
   //! total annual EIR (checkpointed by Population)
   double annualEIR; 
- 
-  /// Get the appropriate index within ageSpecificRelativeAvailability, etc.,
-  /// for this age (in years). Also used by Human.
-  static size_t  getAgeGroup (double age);
-
-  void write(ostream& out) const;
-  void read(istream& in);
   
 protected:
   /**

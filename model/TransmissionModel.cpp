@@ -31,6 +31,8 @@
 #include "inputData.h"
 #include "TransmissionModel/NonVector.h"
 #include "TransmissionModel/Vector.h"
+#include "simulation.h"
+#include "summary.h"
 
 //static (class) variables
 const double TransmissionModel::agemin[nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
@@ -80,6 +82,10 @@ TransmissionModel::~TransmissionModel () {
   delete [] EIR;
   delete[] origEIR;
   free(FCEIR);
+}
+
+void TransmissionModel::summarize (Summary& summary) {
+  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
 }
 
 

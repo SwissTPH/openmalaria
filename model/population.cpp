@@ -355,10 +355,12 @@ void Population::update1(){
     }
     SharedGraphics::copyKappa(kappaByAge);
   }
-  int nbirths = Nsize - survivsSoFar;
-  for (int i=0;i<nbirths; i++) {
+  
+  // increase population size to Nsize
+  while (survivsSoFar < Nsize) {
     newHuman(Simulation::simulationTime);
-    ++nCounter;
+    //++nCounter;
+    ++survivsSoFar;
   }
   int tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
   //Prevent NaNs
@@ -392,7 +394,7 @@ void Population::newSurvey () {
   for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
     iter->summarize();
   }
-  Simulation::gMainSummary->setNumTransmittingHosts(_transmissionModel->kappa[Global::modIntervalsPerYear(Simulation::simulationTime) - 1]);
+  _transmissionModel->summarize (*Simulation::gMainSummary);
   Simulation::gMainSummary->setAnnualAverageKappa(_annualAverageKappa);
   Simulation::gMainSummary->incrementSurveyPeriod();
 
@@ -408,7 +410,7 @@ void Population::implementIntervention (int time) {
     CaseManagementModel::init();	// should re-read all parameters
     
     //TODO: Do we also need to re-init the kappa array?
-    memcpy (_transmissionModel->initialKappa, _transmissionModel->kappa, Global::intervalsPerYear * sizeof(*_transmissionModel->kappa));
+    _transmissionModel->copyToInitialKappa();
   }
   
   if (interv->getChangeEIR().present()) {
