@@ -46,9 +46,12 @@ public:
   */ 
   virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR);
   
-  /// Reads in the estimates of the EIR for each village and each day
-  /// and converts this into EIR estimates per five day period
-  /// assuming that the annual cycle repeated during the pre-intervention period
+  /** @brief Initialization function, setting up EIR arrays
+   *
+   * Reads in the estimates of the EIR for each village and each day
+   * and converts this into EIR estimates per five day period
+   * assuming that the annual cycle repeated during the pre-intervention period
+   */
   virtual void inputEIR (); 
 
   /** Calculates EIR (in adults), based on vectorial capacity or looks up EIR
@@ -58,11 +61,6 @@ public:
   virtual double calculateEIR(int simulationTime, Human&); 
  
 private:
-
-  /// Processes each daily EIR estimate, allocating each day in turn to the
-  /// appropriate time period. EIRdaily is the value of the daily EIR read in
-  /// from the .XML file.
-  void updateEIR (int day, double EIRdaily); 
   double averageEIR (); 
 
 //! multiplier used to calculate a positive EIR value where the measured value is zero

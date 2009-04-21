@@ -19,6 +19,8 @@ CHECKPOINT=""
 PRINT_MODEL=""
 
 runScenario() {
+  # delete old checkpoints; necessary after a previous run:
+  rm -f checkpoint* seed*
   CMD="./openMalaria --scenario scenario$number.xml $CHECKPOINT $PRINT_MODEL"
   date
   echo $CMD

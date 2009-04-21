@@ -91,7 +91,7 @@ void NonVectorTransmission::inputEIR () {
   // a DFT or directly take in Fourier coefficients and create an EIR over time.
 
   //initialise all the EIR arrays to 0
-  if ( Global::simulationMode !=  transientEIRknown) {
+  if (Global::simulationMode != transientEIRknown) {
     for (int j=0;j<Global::intervalsPerYear; j++) {
       EIR[j]=0.0;
       no[j]=0;
@@ -105,12 +105,32 @@ void NonVectorTransmission::inputEIR () {
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR();
   const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
-  for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-    updateEIR (mpcday, std::max((double)daily[mpcday], minEIR));
+  for (int mpcday = 0; mpcday < (int)daily.size(); ++mpcday) {
+    /// Processes each daily EIR estimate, allocating each day in turn to the
+    /// appropriate time period. EIRdaily is the value of the daily EIR read in
+    /// from the .XML file.
+    double EIRdaily = std::max((double)daily[mpcday], minEIR);
+    // istep is the time period to which the day is assigned.  The result of the
+    // division is automatically rounded down to the next integer
+    
+    // NOTE: shouldn't this be just (mpcday/Global::interval)?
+    // The current case for (mpcday == 0): (-1/5) is rounded, probably to 0
+    // (http://stackoverflow.com/questions/319880/integer-division-rounding-with-negatives-in-c)
+    int istep= (mpcday-1) / Global::interval;
+    if (Global::simulationMode != transientEIRknown) {
+      int i1 = istep % Global::intervalsPerYear;
+      no[i1]++;
+      //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
+      EIR[i1] = ((EIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
+    } else {
+      int i1=istep;
+      ino[i1]++;
+      intEIR[i1]= ((intEIR[i1] * (ino[i1]-1)) + EIRdaily) / ino[i1];
+    }
   }
   
-  // Calculate total annual EIR 
-  if (Global::simulationMode !=  transientEIRknown) {
+  // Calculate total annual EIR
+  if (Global::simulationMode != transientEIRknown) {
     annualEIR=0.0;
     for (int j=0;j<Global::intervalsPerYear; j++) {
       annualEIR += Global::interval*EIR[j];
@@ -159,7 +179,7 @@ double NonVectorTransmission::calculateEIR(int simulationTime, Human&){
       return intEIR[Simulation::timeStep - 1];
       break;
     case dynamicEIR:
-      if ( Simulation::timeStep ==  1) {
+      if (Simulation::timeStep == 1) {
         return EIR[Global::modIntervalsPerYear(simulationTime) - 1];
       } else {
         return EIR[Global::modIntervalsPerYear(simulationTime) - 1] *
@@ -211,23 +231,6 @@ double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, doubl
 
 
 // -----   Private functs ------
-
-void NonVectorTransmission::updateEIR (int day, double EIRdaily) {
-  // istep is the time period to which the day is assigned.  The result of the
-  // division is automatically rounded down to the next integer
-  int istep= 1 + (day-1) / Global::interval;
-  if ( Global::simulationMode !=  transientEIRknown) {
-    int i1 = Global::modIntervalsPerYear(istep) - 1;
-    no[i1]++;
-    //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-    EIR[i1] = ((EIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
-  } else {
-    int i1=istep - 1;
-    ino[i1]++;
-    intEIR[i1]= ((intEIR[i1] * (ino[i1]-1)) + EIRdaily) / ino[i1];
-  }
-}
-
 
 double NonVectorTransmission::averageEIR () {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
