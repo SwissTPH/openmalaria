@@ -84,10 +84,37 @@ TransmissionModel::~TransmissionModel () {
   free(FCEIR);
 }
 
-void TransmissionModel::summarize (Summary& summary) {
-  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
+void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
+  int tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
+  //Prevent NaNs
+  if (sumWeight == 0.0) {
+    kappa[tmod] = 0.0;
+    cerr << "sW.eq.0" << endl;
+  }
+  else {
+    kappa[tmod] = sumWt_kappa / sumWeight;
+  }
+  
+  //Calculate time-weighted average of kappa
+  if (tmod == 0) {
+    _sumAnnualKappa = 0.0;
+  }
+  _sumAnnualKappa += kappa[tmod] * Global::interval * EIR[tmod];
+  if (tmod + 1 == Global::intervalsPerYear) {
+    if (annualEIR == 0) {
+      _annualAverageKappa=0;
+      cerr << "aE.eq.0" << endl;
+    }
+    else {
+      _annualAverageKappa = _sumAnnualKappa / annualEIR;
+    }
+  }
 }
 
+void TransmissionModel::summarize (Summary& summary) {
+  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
+  summary.setAnnualAverageKappa(_annualAverageKappa);
+}
 
 double TransmissionModel::getRelativeAvailability(double ageyrs) {
   return ageSpecificRelativeAvailability[getAgeGroup(ageyrs)];
@@ -245,9 +272,13 @@ void TransmissionModel::write(ostream& out) const {
   out << annualEIR << endl;
   for (int i = 0; i < Global::intervalsPerYear; ++i)
     out << kappa[i] << endl;
+  out << _annualAverageKappa << endl;
+  out << _sumAnnualKappa << endl;
 }
 void TransmissionModel::read(istream& in) {
   in >> annualEIR;
   for (int i = 0; i < Global::intervalsPerYear; ++i)
     in >> kappa[i];
+  in >> _annualAverageKappa;
+  in >> _sumAnnualKappa;
 }

@@ -188,15 +188,6 @@ private:
     random integer number should do the job
   */
   int _workUnitIdentifier;
-  
-  /*!
-    annAvgKappa is the overall proportion of mosquitoes that get infected allowing for the different densities
-    in different seasons (approximating relative mosquito density with the EIR)
-  */
-  double _annualAverageKappa;
- 
-  //! Used to calculate annAvgKappa.
-  double _sumAnnualKappa;
 };
 
 #endif

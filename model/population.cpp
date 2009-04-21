@@ -206,9 +206,7 @@ void Population::write (ostream& out) {
   out << alpha0 << endl;
   out << alpha1 << endl ;
   out << rho << endl; 
-  out << _annualAverageKappa << endl;
-  out << _sumAnnualKappa << endl;
-  out <<  _workUnitIdentifier << endl;
+  out << _workUnitIdentifier << endl;
 
   //Write human data
   start_cp_timer();
@@ -232,8 +230,6 @@ void Population::read (istream& in) {
   in >> alpha0;
   in >> alpha1;
   in >> rho;
-  in >> _annualAverageKappa;
-  in >> _sumAnnualKappa;
   in >> _workUnitIdentifier;
 
   if ( _workUnitIdentifier !=  get_wu_id()) {
@@ -260,7 +256,7 @@ void Population::newHuman(int dob){
 }
 
 void Population::update1(){
-  //NOTE: this needs to be called somewhere; possibly where its called will affect the results slightly.
+  //NOTE: this needs to be called somewhere; and should really be called before humans contract new infections in the simulation step
   _transmissionModel->advancePeriod (_population, Simulation::simulationTime);
   
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
@@ -362,30 +358,12 @@ void Population::update1(){
     //++nCounter;
     ++survivsSoFar;
   }
-  int tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
-  //Prevent NaNs
-  if (sumWeight == 0) {
-    _transmissionModel->kappa[tmod]=0;
-    cerr << "sW.eq.0" << endl;
-  }
-  else {
-    _transmissionModel->kappa[tmod] = sumWt_kappa / sumWeight;
-  }
   
-  //Calculate time-weighted average of kappa
-  if (tmod == 0) {
-    _sumAnnualKappa=0.0;
-  }
-  _sumAnnualKappa += _transmissionModel->kappa[tmod] * Global::interval * _transmissionModel->EIR[tmod];
-  if (tmod + 1 == Global::intervalsPerYear) {
-    if ( _transmissionModel->annualEIR ==  0) {
-      _annualAverageKappa=0;
-      cerr << "aE.eq.0" << endl;
-    }
-    else {
-      _annualAverageKappa=_sumAnnualKappa/_transmissionModel->annualEIR;
-    }
-  }
+  // Calculate kappa (total infectiousness)
+  // Currently we use the same summed weights as before. Doing them here would
+  // be different because of outmigrated individuals and new births.
+  _transmissionModel->updateKappa (sumWeight, sumWt_kappa);
+  
   delete [] nByAge;
   delete [] kappaByAge;
 }
@@ -395,9 +373,7 @@ void Population::newSurvey () {
     iter->summarize();
   }
   _transmissionModel->summarize (*Simulation::gMainSummary);
-  Simulation::gMainSummary->setAnnualAverageKappa(_annualAverageKappa);
   Simulation::gMainSummary->incrementSurveyPeriod();
-
 }
 
 void Population::implementIntervention (int time) {

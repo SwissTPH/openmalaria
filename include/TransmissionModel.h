@@ -53,6 +53,7 @@ public:
   /// Set a couple of summary items
   void summarize (Summary&);
   
+  //NOTE: doesn't really belong here
   /// Get the appropriate index within ageSpecificRelativeAvailability, etc.,
   /// for this age (in years). Also used by Human.
   static size_t  getAgeGroup (double age);
@@ -66,7 +67,7 @@ public:
   Linear interpolation is used to calculate this from the input array of surface areas. 
   \param ageyrs age in years 
   \return the ratio of bites received by the host to the average for an adult 
-  */
+  */ 
   double getRelativeAvailability (double ageyrs); 
 
 
@@ -75,10 +76,6 @@ public:
   
   /// Needs to be called each step of the simulation
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime) {}
-
-  //TODO: at least the following should be made private
-  //protected: 
-  //functions used by the constructor 
 
   /** @brief Initialization function, setting up EIR arrays
    *
@@ -90,20 +87,29 @@ public:
    */
   virtual void inputEIR () {}
   
+  /** Set kappa for current interval in year from infectiousness of humans.
+   *
+   * Also updates _annualAverageKappa.
+   * 
+   * NOTE: could be combined with advancePeriod(), but is currently called at
+   * a different time. */
+  void updateKappa (double sumWeight, double sumWt_kappa);
+  
   /** Little function to copy kappa to initialKappa. */
   inline void copyToInitialKappa () {
     memcpy (initialKappa, kappa, Global::intervalsPerYear * sizeof(*kappa));
   }
   
-  //! EIR per time step during the pre-intervention phase 
-  double *EIR; 
- 
   //FUNCTIONS THAT SHOULD BE USED BY getExpectedNumberOfInfections (renamed as getNinfections ???) 
-
+  
   /** Calculates EIR (in adults).
    * 
    * \param simulationTime Time since start of simulation . */
   virtual double calculateEIR(int simulationTime, Human& host) = 0; 
+  
+protected:
+  //! EIR per time step during the pre-intervention phase 
+  double *EIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.
    * Checkpointed by Population. */
@@ -113,11 +119,21 @@ public:
    * 
    * Not checkpointed (should be?), but used in calculateEIR. */
   double *initialKappa; 
-
+  
+private:
+  /*!
+  annAvgKappa is the overall proportion of mosquitoes that get infected allowing for the different densities
+  in different seasons (approximating relative mosquito density with the EIR)
+  */
+  double _annualAverageKappa;
+  
+  //! Used to calculate annAvgKappa.
+  double _sumAnnualKappa;
+  
+protected:
   //! total annual EIR (checkpointed by Population)
   double annualEIR; 
   
-protected:
   /**
    *  Given a positive array, originalArray, of length OALength,
    *  this routine exponentiates the inverse discrete Fourier 
