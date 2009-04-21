@@ -224,7 +224,6 @@ void Human::destroy() {
 
 
 void Human::updateInfection(double expectedInfectionRate, double expectedNumberOfInfections){
-
   introduceInfections(expectedInfectionRate, expectedNumberOfInfections); 
   _withinHostModel->clearOldInfections();
 
@@ -254,10 +253,8 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
 
   if (expectedNumberOfInfections > 0.0000001) {
     int Ninf = W_POISSON(expectedNumberOfInfections);
-    if (Ninf > 0) {
-      for (int i=1;i<=Ninf; i++) {
-        _withinHostModel->newInfection();
-      }
+    for (int i=1;i<=Ninf; i++) {
+      _withinHostModel->newInfection();
     }
   }
 

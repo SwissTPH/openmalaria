@@ -119,9 +119,9 @@ public:
   double getPEVEfficacy() {return _PEVEfficacy;} 
   
   //! Get the Availability to mosquitoes
-  double getBaselineAvailabilityToMosquitoes() {return _BaselineAvailabilityToMosquitoes;};
+  double getBaselineAvailabilityToMosquitoes() const {return _BaselineAvailabilityToMosquitoes;}
   
-  inline double getProbTransmissionToMosquito() {return _ptransmit;};
+  inline double getProbTransmissionToMosquito() const {return _ptransmit;}
 
   //! Get the cumulative EIRa
   double getCumulativeEIRa() {return _cumulativeEIRa;};

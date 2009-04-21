@@ -173,7 +173,7 @@ void Global::setModelVersion () {
 
 int Global::modIntervalsPerYear (int i) {
     int valmodIntervalsPerYear = i % intervalsPerYear;
-    if ( valmodIntervalsPerYear ==  0) {
+    if (valmodIntervalsPerYear == 0) {
         valmodIntervalsPerYear=intervalsPerYear;
     }
     return valmodIntervalsPerYear;

@@ -61,6 +61,11 @@ public:
   virtual double calculateEIR(int simulationTime, Human&); 
  
 private:
+
+  /// Processes each daily EIR estimate, allocating each day in turn to the
+  /// appropriate time period. EIRdaily is the value of the daily EIR read in
+  /// from the .XML file.
+  void updateEIR (int day, double EIRdaily); 
   double averageEIR (); 
 
 //! multiplier used to calculate a positive EIR value where the measured value is zero
