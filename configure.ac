@@ -78,7 +78,6 @@ else
     if test `uname -s | grep Linux` ; then
         PKG_CHECK_MODULES(gsl, gsl >= 1.11,,[AC_MSG_FAILURE([Old gsl version. You must update your current version. Please follow the instructions in the wiki])])
     fi
-    AC_CHECK_HEADERS([gsl/gsl_cdf.h gsl/gsl_multimin.h gsl/gsl_rng.h gsl/gsl_randist.h],, [AC_MSG_FAILURE([Some gsl headers are missing])])
     AC_CHECK_LIB(xerces-c,main,,[AC_MSG_FAILURE([xerces-c not present])])
 fi
 
@@ -110,6 +109,7 @@ fi
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/timeb.h],,[AC_MSG_FAILURE([Some headers are missing])])
+AC_CHECK_HEADERS([gsl/gsl_cdf.h gsl/gsl_multimin.h gsl/gsl_rng.h gsl/gsl_randist.h],, [AC_MSG_FAILURE([Some gsl headers are missing])])
 AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
 
 
