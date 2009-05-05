@@ -64,6 +64,10 @@ void Human::initHumanParameters () {	// static
     Init parameters that are common to all humans
   */
   
+  // TODO: Change values of these probabilities - should get from old C code for entomodel.
+  // We assume that baseEntoAvailability is not the same as the availability used
+  // by NonVector.cpp.
+
   baseEntoAvailability = 1.0;		// FIXME: get from xml
   baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
   baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml

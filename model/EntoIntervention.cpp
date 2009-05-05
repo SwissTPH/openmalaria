@@ -27,8 +27,9 @@ double EntoInterventionITN::weibullDecayLambdaInv,
 double EntoInterventionIRS::decayLambdaInv;
 
 void EntoInterventionITN::initParameters () {
-  //TODO: set from XML
+  // TODO: set from XML
   // Rough λ, k values to fit Polyester / Polyethylene: 7, 2.2 / 3.2, 1.8
+  // TODO: Provide Give references for these values.
   weibullDecayLambdaInv = 1.0/3.2;
   weibullDecayk = 1.8;
 }
@@ -57,6 +58,12 @@ double EntoInterventionITN::probMosqBiting() const {
   double E = 0.0;
   return 1.0 - (1.0 - E)*decay();
 }
+
+// Probably need to add another function for 
+// EntoInterventionITN::probMosqFindRestingSite()
+// We need to make sure that we model the decay correctly
+// for the effect of the net to be divided equally between
+// before biting and after biting.
 
 double EntoInterventionIRS::decay () const {
   int age = Simulation::simulationTime - dateOfUse;
