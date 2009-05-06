@@ -75,8 +75,14 @@ protected:
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
   virtual void IPTattenuateAsexualMinTotalDensity (Human&);
   
-  void writeOWHM(ostream& out) const;
-  void readOWHM(istream& in);
+  /** @brief Checkpointing of variables in DescriptiveWithinHostModel.
+   *
+   * Since read() and write() are replaced in sub-classes, having separately
+   * named methods allows the same code to be used in both classes. */
+  //@{
+  void writeDescriptiveWHM(ostream& out) const;
+  void readDescriptiveWHM(istream& in);
+  //@}
   
   //!multiplicity of infection
   int _MOI;

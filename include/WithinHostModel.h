@@ -39,18 +39,28 @@ class Event;
  */
 class WithinHostModel {
 public:
+  /// @brief Static methods
+  //@{
   /// Initialise static parameters
   static void init();
   
   /// Free memory
   static void clear();
   
+  /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();
+  //@}
   
+  /// @brief Constructors, destructors and checkpointing functions
+  //@{
   WithinHostModel() :
-    _cumulativeInfections(0)
+    _cumulativeInfections(0), _pTransToMosq(0.0)
   {}
   virtual ~WithinHostModel() {}
+  
+  virtual void write(ostream& out) const =0;
+  virtual void read(istream& in) =0;
+  //@}
   
   virtual void update(double age) =0;
 
@@ -89,8 +99,7 @@ public:
   
   virtual void immunityPenalisation() =0;
   
-  virtual void write(ostream& out) const =0;
-  virtual void read(istream& in) =0;
+  inline double getProbTransmissionToMosquito() const {return _pTransToMosq;}
   
 protected:
   /** Literally just removes all infections in an individual.
@@ -102,6 +111,9 @@ protected:
   
   //!Cumulative number of infections since birth
   int _cumulativeInfections;
+  
+  //!probability that a mosquito will become infected if feeds on individual
+  double _pTransToMosq;
   
   /* Static private */
   

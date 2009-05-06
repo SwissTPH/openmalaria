@@ -124,7 +124,6 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
   _pinfected=0.0;
-  _ptransmit=0.0;
   _TBVEfficacy=0.0;
   _totalDensity=0.0;
   for (int i=1;i<=4; i++) {
@@ -477,7 +476,6 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._timeStepMaxDensity << endl; 
   out << human._PEVEfficacy << endl; 
   out << human._pinfected << endl; 
-  out << human._ptransmit << endl;  
   out << human._TBVEfficacy << endl; 
   out << human._totalDensity << endl; 
   out << human._ylag[0] << endl; 
@@ -507,7 +505,6 @@ istream& operator>>(istream& in, Human& human){
   in >> human._timeStepMaxDensity; 
   in >> human._PEVEfficacy; 
   in >> human._pinfected; 
-  in >> human._ptransmit; 
   in >> human._TBVEfficacy; 
   in >> human._totalDensity; 
   in >> human._ylag[0]; 

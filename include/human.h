@@ -121,7 +121,7 @@ public:
   //! Get the Availability to mosquitoes
   double getBaselineAvailabilityToMosquitoes() const {return _BaselineAvailabilityToMosquitoes;}
   
-  inline double getProbTransmissionToMosquito() const {return _ptransmit;}
+  inline double getProbTransmissionToMosquito() const {return _withinHostModel->getProbTransmissionToMosquito();}
 
   //! Get the cumulative EIRa
   double getCumulativeEIRa() {return _cumulativeEIRa;};
@@ -157,8 +157,6 @@ public:
   void setTimeStepMaxDensity(double timeStepMaxDensity){_timeStepMaxDensity = timeStepMaxDensity;}
   
   void setTotalDensity(double totalDensity) {_totalDensity=totalDensity;}
-  
-  void setPTransmit(double pTransmit) {_ptransmit = pTransmit;}
   
   double getBSVEfficacy() {return _BSVEfficacy;}
   
@@ -226,8 +224,6 @@ private:
   //!pinfected: probability of infection (cumulative or reset to zero in massTreatment). Appears to be used only for calculating expected inoculations for the analysis
   //!of pre-erythrocytic immunity.
   double _pinfected;
-  //!probability that a mosquito will become infected if feeds on individual
-  double _ptransmit;
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval

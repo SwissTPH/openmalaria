@@ -233,7 +233,7 @@ void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
 // -----  Data checkpointing  -----
 
 void OldIPTWithinHostModel::read(istream& in) {
-  readOWHM (in);
+  readDescriptiveWHM (in);
   
   for(int i=0;i<_MOI;++i) {
     infections.push_back(new OldIPTInfection(in));
@@ -244,7 +244,7 @@ void OldIPTWithinHostModel::read(istream& in) {
   in >> _lastIptiOrPlacebo; 
 }
 void OldIPTWithinHostModel::write(ostream& out) const {
-  writeOWHM (out);
+  writeDescriptiveWHM (out);
   out << _SPattenuationt << endl;
   out << _lastSPDose << endl; 
   out << _lastIptiOrPlacebo << endl; 

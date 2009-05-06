@@ -130,7 +130,7 @@ void DummyWithinHostModel::immunityPenalisation() {
 void DummyWithinHostModel::calculateDensities(Human& human) {
   _cumulativeYlag = _cumulativeY;
   
-  human.setPTransmit(0);
+  _pTransToMosq = 0.0;
   patentInfections = 0;
   human.setTotalDensity(0.0);
   human.setTimeStepMaxDensity(0.0);
@@ -157,7 +157,7 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
       _cumulativeY += Global::interval*i->getDensity();
     }
   }
-  human.setPTransmit(human.infectiousness());
+  _pTransToMosq = human.infectiousness();
 }
 
 // -----  Summarize  -----
@@ -175,6 +175,7 @@ void DummyWithinHostModel::summarize(double age) {
 
 void DummyWithinHostModel::read(istream& in) {
   in >> _cumulativeInfections; 
+  in >> _pTransToMosq; 
   in >> _MOI; 
   in >> patentInfections; 
   in >> _SPattenuationt;
@@ -201,6 +202,7 @@ void DummyWithinHostModel::read(istream& in) {
 
 void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeInfections << endl; 
+  out << _pTransToMosq << endl;  
   out << _MOI << endl; 
   out << patentInfections << endl; 
   out << _SPattenuationt << endl;
