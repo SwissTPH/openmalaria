@@ -144,52 +144,39 @@ void Population::estimateRemovalRates () {
 }
 
 void Population::setupPyramid(bool isCheckpoint){
-  int predpercX;
-  double M1s;
-  double M2s;
-  double Ms;
   double* predperc = new double[_maxTimestepsPerLife];
-  predpercX = _maxTimestepsPerLife;
   cumpc[0] = 0.0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     double ageYears = (_maxTimestepsPerLife-j-1) / (1.0*Global::intervalsPerYear);
-    M1s=(mu0 * (1.0-exp(-alpha0*ageYears)) / alpha0);
-    M2s=(mu1 * (exp(alpha1*ageYears)-1.0) / alpha1);
-    Ms=M1s+M2s;
+    double M1s=(mu0 * (1.0-exp(-alpha0*ageYears)) / alpha0);
+    double M2s=(mu1 * (exp(alpha1*ageYears)-1.0) / alpha1);
+    double Ms=M1s+M2s;
     predperc[j]=exp(-rho*ageYears-Ms);
     if (j < _maxTimestepsPerLife-Global::maxAgeIntervals){
       predperc[j]=0.0;
     }
     cumpc[j]=cumpc[j-1]+predperc[j];
   }
-  int N_new=0;
+  delete [] predperc;
   int cumulativePop=0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     int iage=_maxTimestepsPerLife-j-1;
     //Scale using the total cumpc
     cumpc[j]=cumpc[j]/cumpc[_maxTimestepsPerLife-1];
-    N_new=(int)floor(cumpc[j]*_populationSize+0.5)-cumulativePop;
+    int N_new=(int)floor(cumpc[j]*_populationSize+0.5)-cumulativePop;
     for (int j1=1;j1<=N_new; j1++){
       if (!isCheckpoint){
         newHuman(-iage);
       }
-      cumulativePop=cumulativePop+1;
+      ++cumulativePop;
     }
   }
-  delete [] predperc;
 }
 
 void Population::initialiseInfantArrays(){
   for ( int i=0;i<Global::intervalsPerYear; i++) {
     Global::infantIntervalsAtRisk[i]=0;
     Global::infantDeaths[i]=0;
-  }
-}
-
-void Population::updateInfantArrays(int agetstep, int doomed){
-  ++Global::infantIntervalsAtRisk[agetstep];
-  if ((doomed == 4) || (doomed == -6) || (doomed == 6)){
-    ++Global::infantDeaths[agetstep];
   }
 }
 
@@ -285,31 +272,23 @@ void Population::update1(){
   HumanIter last = _population.end();
   --last;
   for (HumanIter iter = _population.begin(); iter != _population.end();){
-    int agetstep = Simulation::simulationTime-iter->getDateOfBirth();
-    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
-    //First eliminate those who die or who are too old
-    if (agetstep > Global::maxAgeIntervals) {
-      iter->setDoomed(1);
-    }
-    if (iter->getDoomed() > 0){
+    // Update human, and remove if too old:
+    if (iter->update(Simulation::simulationTime,_transmissionModel)){
       iter->destroy();
       iter=_population.erase(iter);
       continue;
-    } else {	//else update the individual
+    }
+    
+    //else update the individual
       ++survivsSoFar;
-      // UPDATE HUMAN
-      iter->update(Simulation::simulationTime,_transmissionModel);
+      double ageYears = iter->getAgeInYears(Simulation::simulationTime);
       double availability = iter->getBaselineAvailabilityToMosquitoes() * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
       sumWt_kappa += availability*iter->getProbTransmissionToMosquito();
       
-      //  update array for the infant death rates     
-      if (agetstep <= Global::intervalsPerYear){
-        updateInfantArrays(agetstep-1, iter->getDoomed());
-      }
-      
-      // TODO: ptransmit should depend on bednet usage
       // kappaByAge and nByAge are used in the screensaver only
+      // TODO: This measure of infectiousness isn't directly affected by
+      // bed-nets and isn't usable with NC's vector transmission model.
       ia = iter->ageGroup() - 1;
       kappaByAge[ia] += iter->getProbTransmissionToMosquito();
       ++nByAge[ia];
@@ -329,7 +308,6 @@ void Population::update1(){
           iter = _population.erase(iter);
           continue;
         }
-    }
     
     //Determine risk from maternal infection from   
     if(ageYears < 25.0) {
@@ -355,11 +333,9 @@ void Population::update1(){
     }
     
     ++iter;
-  }
-  /*
-  end of updating each individual
-  now update the population-level measures, and add new births
-  */
+  }	// end of per-human updates
+  
+  // Shared graphics: report infectiousness
   if (Simulation::simulationTime % 6 ==  0) {
     for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++) {
       // FIXME: do we really want infectiousness relative to last agegroup?
@@ -432,27 +408,24 @@ void Population::massTreatment(const scnXml::Mass& mass, int time){
   double maxAge = mass.getMaxAge();
   double compliance = mass.getCoverage();
   
-    /*
-  TODO: here we assume a 100% clearance rate for the MDA drug we use. This is not consistent with
-  the way we treat according to the Health system description.
-  the default clearance rate for MDA should be 100% since this simulates what was meant to happen
-  in Garki.  We can change this by introducing an optional clearance rate that can be < 100%
-    */
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
     double ageYears = iter->getAgeInYears(Simulation::simulationTime);
     if ((iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if (W_UNIFORM() < compliance) {
-        iter->clearInfections();
+	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
+	This is not consistent with the way we treat according to the Health
+	system description. The default clearance rate for MDA should be 100%
+	since this simulates what was meant to happen in Garki.  We can change
+	this by introducing an optional clearance rate that can be < 100%. */
+	iter->clearInfections();
       }
     }
-        /*
-    The following line of code is added for calculating expected inoculations for the analysis
-    of pre-erythrocytic immunity
-    TODO: inside the above conditional?
-        */
+    /* The following line of code is added for calculating expected
+    inoculations for the analysis of pre-erythrocytic immunity.
+    TODO: inside the above conditional? */
+    // Only affects Summary::addToExpectedInfected
     iter->setProbabilityOfInfection(0.0);
-
   }
 }
 
@@ -489,35 +462,21 @@ void Population::vaccinatePopulation(const scnXml::Mass& mass, int time){
 
 
 short Population::outmigrate(Human& current, int Nsize, int &survivsSoFar){
-  /*
-    
-  TODO: I had to extract this from update1 because the surrounding conditional
-  would not have worked without dupclicating it. However, I don't understand how it
-  works. The change did not break the test case, but we need to go through this with AR.
-  fix setting of riskfrommaternalinfection
-  */
-
-  int j;  // maximum remaining lifespan in timesteps
-  int outmigrs;
-  double targetPop;
-  bool valoutmigrate=false;
-  j=_maxTimestepsPerLife-(Simulation::simulationTime-current.getDateOfBirth());
-  targetPop=cumpc[j-1] * Nsize;	//target population in age group of current human
-    /*
-  Actual number of people so far = Survivsofar
-  Number to be removed is the difference, rounded to the nearest integer
-    */
-  outmigrs = survivsSoFar - (int)floor(targetPop+0.5);
-  //std::cout <<" outmigrs "<<outmigrs<<std::endl;
-  //Outmigrs should not excced 1, otherwise the calling routine has trouble
-  outmigrs=min(outmigrs,1);
-  if (outmigrs >= 1){
+  // maximum remaining lifespan in timesteps:
+  int j=_maxTimestepsPerLife-(Simulation::simulationTime-current.getDateOfBirth());
+  
+  double targetPop=cumpc[j-1] * Nsize;	//target population in age group of current human
+  
+  // Actual number of people so far = Survivsofar
+  // Number to be removed is the difference, rounded to the nearest integer
+  int outmigrs = survivsSoFar - (int)floor(targetPop+0.5);
+  // We can't outmigrate more than one person at once:
+  if (outmigrs > 1) outmigrs = 1;
+  if (outmigrs == 1){
     --survivsSoFar;
-    //std::cout <<" outmigrate "<<current.hData.dob<<"
-  //"<<current.hData.ID<<std::endl;
-    valoutmigrate=true;
+    return true;
   }
-  return valoutmigrate;
+  return false;
 }
 
 // Static method used by estimateRemovalRates

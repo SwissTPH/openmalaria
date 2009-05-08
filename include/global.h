@@ -80,7 +80,7 @@ public:
   static int interval;
    //Simulation time steps per year
   static int intervalsPerYear;
-   //Maximum age of individuals in a scenario in time intervals
+  // Maximum age of individuals in a scenario in time intervals
   static int maxAgeIntervals;
   static int simulationMode;
    //pre-erythrocytic latent period, in time steps

@@ -214,7 +214,14 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
   _withinHostModel->calculateDensities(*this);
 }
 
-void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
+bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
+  int ageTimeSteps = simulationTime-getDateOfBirth();
+  if (ageTimeSteps > Global::maxAgeIntervals) {	// too old
+    _doomed = 1;
+  }
+  if (_doomed > 0)
+    return true;	// remove from population
+  
   _simulationTime = simulationTime;
   double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, _perHostTransmission);
   
@@ -224,6 +231,15 @@ void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
                   transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
   _withinHostModel->update(getAgeInYears());
+  
+  // update array for the infant death rates
+  if (ageTimeSteps <= Global::intervalsPerYear){
+    ++Global::infantIntervalsAtRisk[ageTimeSteps-1];
+    if ((_doomed == 4) || (_doomed == -6) || (_doomed == 6)){
+      ++Global::infantDeaths[ageTimeSteps-1];
+    }
+  }
+  return false;
 }
 
 void Human::determineClinicalStatus(){ //TODO: this function should not do case management

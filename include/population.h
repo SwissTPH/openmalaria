@@ -91,9 +91,6 @@ public:
   //! Initialise human list
   void initialiseHumanList();
   
-  //! Updates infant mortality array when there is a death
-  void updateInfantArrays(int agetstep, int doomed);
- 
   //! Creates initializes and add to the population list a new uninfected human
   /*! 
      \param dob date of birth (usually current time)

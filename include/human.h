@@ -69,8 +69,9 @@ public:
   /** @name External functions
    * @brief Functions not called from within Human but calling functions in Human */
   //@{
-  /// Updates an individual for a time-step.
-  void update(int simulationTime, TransmissionModel* transmissionModel);
+  /** If the individual is too old, returns true. Otherwise, updates the
+   * individual for the time-step. */
+  bool update(int simulationTime, TransmissionModel* transmissionModel);
   
   //! Summarize the state of a human individual.
   void summarize();
@@ -134,9 +135,6 @@ public:
   void IPTiTreatment (double compliance);
   
   void setProbabilityOfInfection(double probability) { _perHostTransmission._pinfected=probability;};
-
-  //! Set doomed
-  void setDoomed(int doomed) { _doomed = doomed;}
   //@}
   
   /** @name OldWithinHostModel functions
