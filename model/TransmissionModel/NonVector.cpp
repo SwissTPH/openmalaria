@@ -60,12 +60,12 @@ NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::int
   
   //TODO: Sanity check for sqrt and division by zero
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    InfectionrateShapeParam = (PerHostTransmission::BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
+    InfectionrateShapeParam = (PerHostTransmission::BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*PerHostTransmission::BaselineAvailabilityShapeParam - 1.0);
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   else if (Global::modelVersion &
            (LOGNORMAL_MASS_ACTION | LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM)) {
-    InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(BaselineAvailabilityShapeParam, 2));
+    InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(PerHostTransmission::BaselineAvailabilityShapeParam, 2));
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   
@@ -82,7 +82,7 @@ NonVectorTransmission::~NonVectorTransmission () {
 //! initialise the main simulation 
 void NonVectorTransmission::initMainSimulation (int populationSize){
   // initialKappa is used in calculateEIR
-  memcpy (initialKappa, kappa, Global::intervalsPerYear*sizeof(*kappa));
+  copyToInitialKappa();
 }
 
 
@@ -119,9 +119,6 @@ void NonVectorTransmission::inputEIR () {
   } else {
     annualEIR=-9.99;
   }
-  
-  // We copy EIR into origEIR
-  memcpy (origEIR, EIR,Global::intervalsPerYear * sizeof(*EIR));
 
   // For now we assume that we can manipulate EIR depending on the value of FTSmoothEIR.
   // We are assuming that the simulation mode is not set to transientEIRknown.
@@ -130,14 +127,10 @@ void NonVectorTransmission::inputEIR () {
   // If FTSmoothEIR is 1, we smooth the EIR using the first 3 modes of the discrete
   //		Fourier Transform
   if(FTSmoothEIR==1){
-# ifdef TransmissionModel_PrintOrigEIR
-    PrintArray(fnametestentopar, "originalEIR", origEIR, Global::intervalsPerYear);
-# endif
-  
-    logDFTThreeModeSmooth(EIR, origEIR, Global::intervalsPerYear, Global::intervalsPerYear);
+    logDFTThreeModeSmooth(EIR, EIR, Global::intervalsPerYear, Global::intervalsPerYear);
   }
   if(ifUseFC==1){
-    calcInverseDFTExp(EIR, Global::intervalsPerYear, FCEIR, FCEIRX);
+    (EIR, Global::intervalsPerYear, FCEIR);
 # ifdef TransmissionModel_PrintEIRaIDFT
     PrintArray(fnametestentopar, "EIRafterIDFT", EIR, Global::intervalsPerYear);
 # endif

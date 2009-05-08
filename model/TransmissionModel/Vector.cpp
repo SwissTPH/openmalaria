@@ -417,10 +417,11 @@ void VectorTransmission::calMosqEmergeRate (int populationSize) {
     
     if(ifUseFC){
       printf("Calculating inverse discrete Fourier transform over full year \n");
-      calcInverseDFTExp(EIRInit, daysInYear, FCEIR, FCEIRX);
+      calcInverseDFTExp(EIRInit, daysInYear, FCEIR);
     } else if(FTSmoothEIR==1){
       printf("Smoothing and expanding EIR \n");
-      logDFTThreeModeSmooth(EIRInit, origEIR, daysInYear, Global::intervalsPerYear);
+      //FIXME: Where is EIR coming from (initialised)? (Was origEIR, which was copied from EIR in inputEIR.)
+      logDFTThreeModeSmooth(EIRInit, EIR, daysInYear, Global::intervalsPerYear);
     } else
       convertLengthToFullYear(EIRInit, EIR);
       
@@ -433,10 +434,8 @@ void VectorTransmission::calMosqEmergeRate (int populationSize) {
   }
 
 # ifdef VectorTransmission_PRINT_calMosqEmergeRate
-  char origEIRname[15] = "OrigEIR";
   char shortEIRname[15] = "ShortEIR";
   char longEIRname[15] = "LongEIR";
-  PrintArray(fnametestentopar, origEIRname, origEIR, Global::intervalsPerYear);
   PrintArray(fnametestentopar, shortEIRname, EIR, Global::intervalsPerYear);
   PrintArray(fnametestentopar, longEIRname, EIRInit, daysInYear);
 # endif

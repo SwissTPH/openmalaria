@@ -83,18 +83,23 @@ private:
   \sa initEntoParameters 
   */ 
   static const int maxDurIntPhaseEIR= 1500; 
- 
-  //! The maximum number of intervals in the intervention phase 
+  
+  /** @brief Variables set by constructor.
+   *
+   * There shouldn't be any need to checkpoint these, at least before
+   * interventions take effect. */
+  //@{
+  //! The maximum number of intervals in the intervention phase.
   int maxIntervals; 
   
   //! Number of days contributing to each EIR estimate for pre-intervention 
-  int *no; 
+  int *no;
 
-  ///ino() Number of days contributing to each EIR estimate (post intervention) 
-  int *ino; 
+  /// Number of days contributing to each EIR estimate (post intervention) 
+  int *ino;
 
   ///intEIR() EIR per time interval during the intervention period 
-  double *intEIR; 
+  double *intEIR;
   
 //VARIABLES INCLUDED IN CORE GETs of number of infections 
 //! The average proportion of bites from sporozoite positive mosquitoes resulting in infection. 
@@ -104,7 +109,7 @@ private:
   0.5-6 year old child (as per Saradidi) to adult) 
   \sa getExpectedNumberOfInfections() 
   */ 
-  static const double susceptibility; 
+  static const double susceptibility;
 
 //!Steepness of relationship between success of inoculation and Xp in Phase A model 
  /*! 
@@ -138,19 +143,13 @@ private:
  
 
 //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
-  double InfectionrateShapeParam; 
+  double InfectionrateShapeParam;
 
 //! Variance of Infection Rate according to fielddata 
   static const double totalInfectionrateVariance; 
-
-//! Shape parameter of the distribution of the baseline availability
-/* 
-  Same BaselineAvailabilityShapeParam as in human.f, but we have to redefine it here, since mod_human 
-  uses MOD_entomology 
-*/ 
-  double BaselineAvailabilityShapeParam;
   
   //! The duration of sporogony in time steps 
   int nspore;
+  //@}
 };
 #endif

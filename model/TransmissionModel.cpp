@@ -59,15 +59,9 @@ TransmissionModel::TransmissionModel(){
   kappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
   initialKappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
   EIR = new double[Global::intervalsPerYear];
-  origEIR = new double[Global::intervalsPerYear];
   
-  // FCEIR[] is the array of parameters of the Fourier approximation to the annual EIR
-  // We set these here for now - with no if statement.
-  // We will need to deal with this cleanly later.
-  // We use the order, a0, a1, b1, a2, b2, ...
-  // TODO: Move to XML.
-  FCEIRX = 5;
-  FCEIR = (double *) malloc((FCEIRX)*sizeof(double));
+  // TODO: Move to XML. See declaration of FCEIR in header.
+  FCEIR.resize (5);
   FCEIR[0] = -0.926517;
   FCEIR[1] = -0.692164;
   FCEIR[2] = 0.002098;
@@ -81,8 +75,6 @@ TransmissionModel::~TransmissionModel () {
   free(kappa);
   free(initialKappa);
   delete [] EIR;
-  delete[] origEIR;
-  free(FCEIR);
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
@@ -153,36 +145,36 @@ void TransmissionModel::logDFTThreeModeSmooth (double* smoothArray,
                                                int SALength,
                                                int OALength)
 {
-    // Frequency
+  // Frequency
   double foa = 1.0/OALength;
   double woa = 2*M_PI * foa;
   double wsa = 2*M_PI/SALength;
-    
+  
   double tempsuma0 = 0.0;
   double tempsuma1 = 0.0;
   double tempsumb1 = 0.0;
   double tempsuma2 = 0.0;
   double tempsumb2 = 0.0;
-
-    // Calculate first three Fourier modes
+  
+  // Calculate first three Fourier modes
   for (int t=0; t < OALength; t++) {
     double yt = log(originalArray[t]);
     double woa_t = woa*t;
-    tempsuma0 = tempsuma0+yt;
-    tempsuma1 = tempsuma1 + (yt*cos(woa_t));
-    tempsumb1 = tempsumb1 + (yt*sin(woa_t));
-    tempsuma2 = tempsuma2 + (yt*cos(2*woa_t));
-    tempsumb2 = tempsumb2 + (yt*sin(2*woa_t));       
+    tempsuma0 += yt;
+    tempsuma1 += (yt*cos(woa_t));
+    tempsumb1 += (yt*sin(woa_t));
+    tempsuma2 += (yt*cos(2*woa_t));
+    tempsumb2 += (yt*sin(2*woa_t));       
   }
-    
-    // Fourier Coefficients
+  
+  // Fourier Coefficients
   double a0 = (  foa)*tempsuma0;
   double a1 = (2*foa)*tempsuma1;
   double b1 = (2*foa)*tempsumb1;
   double a2 = (2*foa)*tempsuma2;
   double b2 = (2*foa)*tempsumb2;
-    
-    // Calculate inverse discrete Fourier transform
+  
+  // Calculate inverse discrete Fourier transform
   for (int t=0; t < SALength; t++){
     double wsa_t = wsa*(t+1);
     smoothArray[t] = 
@@ -197,27 +189,23 @@ void TransmissionModel::logDFTThreeModeSmooth (double* smoothArray,
 
 
 
-void TransmissionModel::calcInverseDFTExp(double* tArray, int aL, double* FC, int FCL) {
-    // Period
-  double P = (double)aL;
-    // Frequency
-  double w = 2*M_PI/P;
-    
-  if((FCL%2)==0){
+void TransmissionModel::calcInverseDFTExp(double* tArray, int aL, vector<double>& FC) {
+  // Frequency
+  double w = 2*M_PI / double(aL);
+  
+  if((FC.size()%2)==0){
     //NOTE: should throw xml_scenario_error if/when FCEIR is moved to the XML
     throw logic_error("The number of Fourier coefficents should be odd.");
   }
 
-    // Number of Fourier Modes.
-  int Fn = (FCL-1)/2;
+  // Number of Fourier Modes.
+  int Fn = (FC.size()-1)/2;
 
-    // Calculate inverse discrete Fourier transform
+  // Calculate inverse discrete Fourier transform
   for (int t=1; t<=aL; t++){
     double temp = FC[0];
-    if(Fn>0){
-      for(int n=1;n<=Fn;n++){
-        temp = temp + FC[2*n-1]*cos(n*w*t) + FC[2*n]*sin(n*w*t);
-      }
+    for(int n=1;n<=Fn;n++){
+      temp = temp + FC[2*n-1]*cos(n*w*t) + FC[2*n]*sin(n*w*t);
     }
     tArray[t-1] = exp(temp);
   }

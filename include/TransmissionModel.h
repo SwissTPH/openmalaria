@@ -25,7 +25,6 @@
 #include <string.h>
 
 // Define these to print out various arrays:
-//#define TransmissionModel_PrintOrigEIR
 //#define TransmissionModel_PrintEIRaIDFT
 //#define TransmissionModel_PrintSmoothArray
 #define TransmissionModel_PrintRotateArray
@@ -108,35 +107,44 @@ public:
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host) = 0; 
   
 protected:
-  //! EIR per time step during the pre-intervention phase 
+  /** EIR per time step during the pre-intervention phase 
+   *
+   * Only NonVectorTransmission?
+   * Not checkpointed; doesn't need to be for NonVectorTransmission (unless
+   * changeEIR intervention occurred). */
   double *EIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.
-   * Checkpointed by Population. */
+   *
+   * Checkpointed. */
   double *kappa; 
 
   /** initialKappa[] is the value of kappa during the pre-intervention phase.
    * 
-   * Not checkpointed (should be?), but used in calculateEIR. */
+   * Doesn't need to be checkpointed. */
   double *initialKappa; 
   
 private:
-  /*!
-  annAvgKappa is the overall proportion of mosquitoes that get infected allowing for the different densities
-  in different seasons (approximating relative mosquito density with the EIR)
-  */
+  /*! annAvgKappa is the overall proportion of mosquitoes that get infected
+   * allowing for the different densities in different seasons (approximating
+   * relative mosquito density with the EIR).
+   *
+   * Checkpointed. */
   double _annualAverageKappa;
   
-  //! Used to calculate annAvgKappa.
+  /*! Used to calculate annAvgKappa.
+   *
+   * Checkpointed. */
   double _sumAnnualKappa;
   
 protected:
-  //! total annual EIR (checkpointed by Population)
+  /*! Total annual EIR.
+   *
+   * Checkpointed. */
   double annualEIR; 
   
-  /**
-   *  Given a positive array, originalArray, of length OALength,
-   *  this routine exponentiates the inverse discrete Fourier 
+  /** Given a positive array, originalArray, of length OALength,
+   * this routine exponentiates the inverse discrete Fourier 
    * tranform of the first three modes of the natural logarithm of 
    * the array to smooth out the array to produce smoothArray of 
    * length SALength.
@@ -145,7 +153,8 @@ protected:
    * positive.
    *
    * smoothArray is an OUT parameter.
-   * originalArray, SALength and OALength are IN parameters. */
+   * originalArray, SALength and OALength are IN parameters.
+   * No reason smoothArray and originalArray can't be the same array. */
   void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
 
   /**
@@ -156,8 +165,8 @@ protected:
    *  Note that FCL is assumed to be an odd number.
    *  
    * tArray is an OUT parameter.
-   * aL, FC, and FCL are IN parameters. */
-  void calcInverseDFTExp(double* tArray, int aL, double* FC, int FCL);
+   * aL and FC are IN parameters. */
+  void calcInverseDFTExp(double* tArray, int aL, vector<double>& FC);
 
   /**
    *  Given an array, rArray, of length aLength, the routine rotates
@@ -188,24 +197,33 @@ protected:
 					// Flag to use Fourier coefficients to create EIR (instead of time series data).
 					// Right now we do not link this to FTSmoothEIR - but these definitions should
 					// be linked.
-  double* origEIR;	// Original EIR - if we smooth the EIR using the Fourier transform.
-  double* FCEIR;	// Fourier coefficients for the EIR.
-  int	FCEIRX;		// Number of Fourier coefficients used to calculate EIR.
-  double EIRRotateAngle;	// Angle to rotate EIR: Should be between 0 and 2Pi.
+  /** FCEIR[] is the array of parameters of the Fourier approximation to the
+   * annual EIR. Currently always set in the TransmissionModel constructor
+   * (with length 5). We will need to deal with this cleanly later.
+   * We use the order, a0, a1, b1, a2, b2, ... */
+  vector<double> FCEIR;
+  /** Angle to rotate EIR: Should be between 0 and 2Pi.
+   *
+   * Currently set in constructor. */
+  double EIRRotateAngle;
   static const int FTSmoothEIR = 0;	// TODO: Move to XML: 1 to smooth EIR using an approximate DFT
 					//                    0 to do nothing.
-
+  
   
   /** Duration of the extrinsic incubation period (sporozoite development time)
    * (θ_s).
-   * Units: Days. */
+   * Units: Days.
+   * 
+   * Doesn't need checkpointing. */
   int EIPDuration;
   
   //! Number of age groups for which the surface area calculations apply 
   static const size_t nages= 22;
 
   // NOTE: perhaps all these age-specific constants should be moved to Human. It depends which part of the simulation each class is meant to simulate...
-  //! average number of bites for each age as a proportion of the maximum
+  /** Average number of bites for each age as a proportion of the maximum.
+   *
+   * Set by constructor. */
   double ageSpecificRelativeAvailability[nwtgrps];
 
   //! Cutpoints of the age categories (minima) used for storing relative
@@ -225,6 +243,7 @@ protected:
  */ 
   static const double bsa_prop[nwtgrps]; 
   
+  // File to print debugging info to.
   char fnametestentopar[30];
 };
 
