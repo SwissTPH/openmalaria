@@ -307,14 +307,13 @@ void Population::update1(){
       if (agetstep <= Global::intervalsPerYear){
         updateInfantArrays(agetstep-1, iter->getDoomed());
       }
+      
+      // TODO: ptransmit should depend on bednet usage
+      // kappaByAge and nByAge are used in the screensaver only
       ia = iter->ageGroup() - 1;
-      /*
-      TODO: ptransmit should depend on bednet usage
-      kappaByAge and nByAge are used in the screensaver only
-      */
       kappaByAge[ia] += iter->getProbTransmissionToMosquito();
       ++nByAge[ia];
-        
+      
       /*
       TODO: we need to check the order (ok) that all data
       is in a defined state when used.
@@ -331,14 +330,30 @@ void Population::update1(){
           continue;
         }
     }
+    
     //Determine risk from maternal infection from   
-    if(ageYears < 25.0 && ageYears >= 20.0) {
-      updateMaternalMalariaCounters(*iter, isAtRiskOfFirstPregnancy, nCounter, pCounter);
+    if(ageYears < 25.0) {
+      if (ageYears >= 20.0) {
+	/* updates the counts of the number of individuals of child bearing age
+	and the numbers of these with patent parasitemia */
+	
+	if(!isAtRiskOfFirstPregnancy) {
+	  nCounter = 0;
+	  pCounter = 0;
+	  isAtRiskOfFirstPregnancy = true;
+	}
+	nCounter ++;
+	if (iter->getTotalDensity() > Human::detectionlimit){
+	  pCounter ++;
+	}
+      }
+      
+      if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
+	isAtRiskOfFirstPregnancy = false;	// only call once per time-step
+	PresentationModel::setRiskFromMaternalInfection(nCounter, pCounter);
+      }
     }
-    if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
-      isAtRiskOfFirstPregnancy = false;	// only call once per time-step
-      PresentationModel::setRiskFromMaternalInfection(nCounter, pCounter);
-    }
+    
     ++iter;
   }
   /*
@@ -347,6 +362,8 @@ void Population::update1(){
   */
   if (Simulation::simulationTime % 6 ==  0) {
     for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++) {
+      // FIXME: do we really want infectiousness relative to last agegroup?
+      // shouldn't we divide by nByAge[i] instead?
       kappaByAge[i] /= nByAge[ia];
     }
     SharedGraphics::copyKappa(kappaByAge);
@@ -501,21 +518,6 @@ short Population::outmigrate(Human& current, int Nsize, int &survivsSoFar){
     valoutmigrate=true;
   }
   return valoutmigrate;
-}
-
-void Population::updateMaternalMalariaCounters(Human& current, bool &isAtRiskOfFirstPregnancy, int &nCounter, int &pCounter){
-  /* updates the counts of the number of individuals of child bearing age
-     and the numbers of these with patent parasitemia */
-  
-  if(!isAtRiskOfFirstPregnancy) {
-    nCounter = 0;
-    pCounter = 0;
-    isAtRiskOfFirstPregnancy = true;
-  }
-  nCounter ++;
-  if (current.getTotalDensity() > Human::detectionlimit){
-    pCounter ++;
-  }
 }
 
 // Static method used by estimateRemovalRates
