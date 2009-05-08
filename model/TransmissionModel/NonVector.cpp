@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 #include "TransmissionModel/NonVector.h"
+#include "TransmissionModel/PerHost.h"
 #include "inputData.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
@@ -59,7 +60,7 @@ NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::int
   
   //TODO: Sanity check for sqrt and division by zero
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    InfectionrateShapeParam = (Human::BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
+    InfectionrateShapeParam = (PerHostTransmission::BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   else if (Global::modelVersion &
@@ -147,7 +148,7 @@ void NonVectorTransmission::inputEIR () {
   }
 }
 
-double NonVectorTransmission::calculateEIR(int simulationTime, Human&){
+double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   switch (Global::simulationMode) {
     case equilibriumMode:

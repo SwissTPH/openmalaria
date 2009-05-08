@@ -52,7 +52,7 @@ public:
   /** Calculates EIR (in adults).
    * 
    * \param simulationTime Time since start of simulation . */
-  virtual double calculateEIR(int simulationTime, Human& host); 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host); 
 
   /** This needs to be called every interval. */
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime);

@@ -99,7 +99,7 @@ double VectorTransmission::getExpectedNumberOfInfections (Human& human, double a
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */
-double VectorTransmission::calculateEIR(int simulationTime, Human& host) {
+double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host) {
   /* Calculates EIR per individual (hence N_i == 1).
    *
    * See comment in advancePeriod for method. */
@@ -145,7 +145,7 @@ void VectorTransmission::advancePeriod (const std::list<Human>& population, int 
   // Per Global::interval (hosts don't update per day):
   double totalAvailability = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    totalAvailability += h->entoAvailability();
+    totalAvailability += h->_perHostTransmission.entoAvailability();
   
   
   // Summed per day:
@@ -175,7 +175,8 @@ void VectorTransmission::advancePeriod (const std::list<Human>& population, int 
     double sum = 0.0;
     double sum_dif = 0.0;
     for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-      double prod = h->entoAvailability() * h->probMosqSurvivalBiting() * h->probMosqSurvivalResting();
+      const PerHostTransmission& host = h->_perHostTransmission;
+      double prod = host.entoAvailability() * host.probMosqSurvivalBiting() * host.probMosqSurvivalResting();
       sum += prod;
       sum_dif += prod;//FIXME: * h->K_vi();	// infectiousness of host * probability parasites survive in mosquito
       // NOTE: already have kappa array - is same?

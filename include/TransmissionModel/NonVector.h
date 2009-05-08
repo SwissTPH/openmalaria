@@ -58,7 +58,7 @@ public:
    * in the input data.
    * 
    * \param simulationTime Time since start of simulation . */
-  virtual double calculateEIR(int simulationTime, Human&); 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission&); 
  
 private:
 

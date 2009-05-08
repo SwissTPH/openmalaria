@@ -31,6 +31,7 @@
 #include "inputData.h"
 #include "TransmissionModel/NonVector.h"
 #include "TransmissionModel/Vector.h"
+#include "TransmissionModel/PerHost.h"
 #include "simulation.h"
 #include "summary.h"
 
@@ -53,7 +54,7 @@ TransmissionModel::TransmissionModel(){
   
   EIRRotateAngle = M_PI_2;
   EIPDuration = get_EipDuration();
-  Human::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
+  PerHostTransmission::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
   
   kappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
   initialKappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));

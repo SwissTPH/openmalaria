@@ -46,18 +46,13 @@
 #endif
 
 
-double Human::BaselineAvailabilityShapeParam;
 double Human::detectionlimit;
-double Human::baseEntoAvailability;
-double Human::baseProbMosqSurvivalBiting;
-double Human::baseProbMosqSurvivalResting;
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
   WithinHostModel::init();
   PresentationModel::init();
-  EntoInterventionITN::initParameters();
-  EntoInterventionIRS::initParameters();
+  PerHostTransmission::initParameters();
   Vaccine::initParameters();
   
   /*
@@ -68,9 +63,6 @@ void Human::initHumanParameters () {	// static
   // We assume that baseEntoAvailability is not the same as the availability used
   // by NonVector.cpp.
 
-  baseEntoAvailability = 1.0;		// FIXME: get from xml
-  baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
-  baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
   double densitybias;
   /*
     TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
@@ -84,7 +76,6 @@ void Human::initHumanParameters () {	// static
     densitybias=getParameter(Params::DENSITY_BIAS_GARKI);
   }
   detectionlimit=get_detectionlimit()*densitybias;
-  BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
 }
 
 void Human::clear() {	// static clear
@@ -103,14 +94,8 @@ Human::Human() {
 Human::Human(int ID, int dateOfBirth, int simulationTime) 
   : _simulationTime(simulationTime)
 {
-  //FIXME: should be partially random:
-  _entoAvailability = baseEntoAvailability;
-  _probMosqSurvivalBiting = baseProbMosqSurvivalBiting;
-  _probMosqSurvivalResting = baseProbMosqSurvivalResting;
-  
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
-  _cumulativeEIRa=0.0;
   _dateOfBirth=dateOfBirth;
   if (_dateOfBirth > simulationTime) {
     // This test may be totally unnecessary; it was done in oldWithinHostModel
@@ -123,32 +108,17 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
-  _pinfected=0.0;
   _TBVEfficacy=0.0;
   _totalDensity=0.0;
   for (int i=1;i<=4; i++) {
     _ylag[i-1]=0.0;
-  }
-  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
-  }
-  else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-    _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
-  }
-  else if (Global::modelVersion & TRANS_HET) {
-    _BaselineAvailabilityToMosquitoes=0.2;
-    if (W_UNIFORM() < 0.5) {            
-      _BaselineAvailabilityToMosquitoes=1.8;
-    }
-  }
-  else {
-    _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
   }
   
   // Stored in presentation model, not Human, now. Initialization looks somewhat entwined though..
   double _comorbidityFactor;
   // Ditto, but in case management.
   double _treatmentSeekingFactor;
+  // ditto for _BaselineAvailabilityToMosquitoes in PerHostTransmission
   
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
@@ -170,10 +140,10 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
   }
   if (Global::modelVersion & TRANS_TREAT_HET) {
     _treatmentSeekingFactor=0.2;
-    _BaselineAvailabilityToMosquitoes=1.8;
+    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
     if (W_UNIFORM()<0.5) {
       _treatmentSeekingFactor=1.8;
-      _BaselineAvailabilityToMosquitoes=0.2;
+      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
     }
   }
   if (Global::modelVersion & COMORB_TREAT_HET) {
@@ -185,19 +155,19 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
     }
   }
   if (Global::modelVersion & COMORB_TRANS_HET) {
-    _BaselineAvailabilityToMosquitoes=1.8;
+    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     if (W_UNIFORM()<0.5) {
-      _BaselineAvailabilityToMosquitoes=0.2;
+      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
       _comorbidityFactor=0.2;
     }
   }  
   if (Global::modelVersion & TRIPLE_HET) {
-    _BaselineAvailabilityToMosquitoes=1.8;
+    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
     if (W_UNIFORM()<0.5) {
-      _BaselineAvailabilityToMosquitoes=0.2;
+      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
@@ -248,10 +218,10 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
   //Update pre-erythrocytic immunity
   if (Global::modelVersion & 
       (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
-    _cumulativeEIRa+=(double)(Global::interval*expectedInfectionRate*(_BaselineAvailabilityToMosquitoes));
+    _perHostTransmission._cumulativeEIRa+=(double)(Global::interval*expectedInfectionRate*(_perHostTransmission._BaselineAvailabilityToMosquitoes));
   }
   else {
-    _cumulativeEIRa+=(double)Global::interval*expectedInfectionRate;
+    _perHostTransmission._cumulativeEIRa+=(double)Global::interval*expectedInfectionRate;
   }
 
   if (expectedNumberOfInfections > 0.0000001) {
@@ -262,14 +232,14 @@ void Human::introduceInfections(double expectedInfectionRate, double expectedNum
   }
 
   double pInfectedstep = 1.0 - exp(-expectedNumberOfInfections);
-  _pinfected = 1.0 - (1.0-pInfectedstep) * (1.0-_pinfected);
-  _pinfected = std::min(_pinfected, 1.0);
-  _pinfected = std::max(_pinfected, 0.0);
+  _perHostTransmission._pinfected = 1.0 - (1.0-pInfectedstep) * (1.0-_perHostTransmission._pinfected);
+  _perHostTransmission._pinfected = std::min(_perHostTransmission._pinfected, 1.0);
+  _perHostTransmission._pinfected = std::max(_perHostTransmission._pinfected, 0.0);
 }
 
 void Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   _simulationTime = simulationTime;
-  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, *this);
+  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, _perHostTransmission);
   
   updateInterventionStatus(); 
   _withinHostModel->updateImmuneStatus();
@@ -389,7 +359,7 @@ void Human::summarize(){
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
   }
-  Simulation::gMainSummary->addToExpectedInfected(age, _pinfected);
+  _perHostTransmission.summarize (*Simulation::gMainSummary, age);
   Simulation::gMainSummary->addToPyrogenicThreshold(age, _presentationModel->getPyrogenThres());
   Simulation::gMainSummary->addToSumX(age, log(_presentationModel->getPyrogenThres()+1.0));
 }
@@ -448,46 +418,25 @@ double Human::infectiousness(){
   return valinfectiousness;
 }
 
-double Human::entoAvailability () const {
-  return _entoAvailability
-      * entoInterventionITN.availability()
-      * entoInterventionIRS.availability();
-}
-double Human::probMosqSurvivalBiting () const {
-  return _probMosqSurvivalBiting
-      * entoInterventionITN.probMosqBiting();
-}
-double Human::probMosqSurvivalResting () const {
-  return _probMosqSurvivalResting
-      * entoInterventionIRS.probMosqSurvivalResting();
-}
-
 
 ostream& operator<<(ostream& out, const Human& human){
   human._withinHostModel->write(out);
   human._presentationModel->write(out);
   human._caseManagement->write (out);
+  human._perHostTransmission.write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 
   out << human._lastVaccineDose << endl;
   out << human._BSVEfficacy << endl; 
-  out << human._cumulativeEIRa << endl; 
   out << human._timeStepMaxDensity << endl; 
   out << human._PEVEfficacy << endl; 
-  out << human._pinfected << endl; 
   out << human._TBVEfficacy << endl; 
   out << human._totalDensity << endl; 
   out << human._ylag[0] << endl; 
   out << human._ylag[1] << endl; 
   out << human._ylag[2] << endl; 
   out << human._ylag[3] << endl; 
-  out << human._BaselineAvailabilityToMosquitoes << endl; 
-  out << human._entoAvailability << endl;
-  out << human._probMosqSurvivalBiting << endl;
-  out << human._probMosqSurvivalResting << endl;
-  out << human.entoInterventionITN;
-  out << human.entoInterventionIRS;
   
   return out;
 }
@@ -496,27 +445,20 @@ istream& operator>>(istream& in, Human& human){
   human._withinHostModel->read(in);
   human._presentationModel->read(in);
   human._caseManagement->read (in);
+  human._perHostTransmission.read (in);
   in >> human._dateOfBirth; 
   in >> human._doomed; 
   in >> human._ID; 
   in >> human._lastVaccineDose; 
   in >> human._BSVEfficacy; 
-  in >> human._cumulativeEIRa; 
   in >> human._timeStepMaxDensity; 
   in >> human._PEVEfficacy; 
-  in >> human._pinfected; 
   in >> human._TBVEfficacy; 
   in >> human._totalDensity; 
   in >> human._ylag[0]; 
   in >> human._ylag[1]; 
   in >> human._ylag[2]; 
   in >> human._ylag[3]; 
-  in >> human._BaselineAvailabilityToMosquitoes; 
-  in >> human._entoAvailability;
-  in >> human._probMosqSurvivalBiting;
-  in >> human._probMosqSurvivalResting;
-  in >> human.entoInterventionITN;
-  in >> human.entoInterventionIRS;
 
   return in;
 }

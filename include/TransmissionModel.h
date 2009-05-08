@@ -105,7 +105,7 @@ public:
   /** Calculates EIR (in adults).
    * 
    * \param simulationTime Time since start of simulation . */
-  virtual double calculateEIR(int simulationTime, Human& host) = 0; 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host) = 0; 
   
 protected:
   //! EIR per time step during the pre-intervention phase 

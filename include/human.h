@@ -21,9 +21,9 @@
 #include "global.h"
 #include "event.h"
 #include "WithinHostModel.h"
-#include "EntoIntervention.h"
 #include "PresentationModel.h"
 #include "drug.h"
+#include "TransmissionModel/PerHost.h"
 
 // Forward declaration
 class TransmissionModel;
@@ -119,12 +119,12 @@ public:
   double getPEVEfficacy() {return _PEVEfficacy;} 
   
   //! Get the Availability to mosquitoes
-  double getBaselineAvailabilityToMosquitoes() const {return _BaselineAvailabilityToMosquitoes;}
+  double getBaselineAvailabilityToMosquitoes() const {return _perHostTransmission._BaselineAvailabilityToMosquitoes;}
   
   inline double getProbTransmissionToMosquito() const {return _withinHostModel->getProbTransmissionToMosquito();}
 
   //! Get the cumulative EIRa
-  double getCumulativeEIRa() {return _cumulativeEIRa;};
+  double getCumulativeEIRa() {return _perHostTransmission._cumulativeEIRa;};
 
   //! Return doomed value
   int getDoomed() {return _doomed;};
@@ -136,18 +136,10 @@ public:
   
   void IPTiTreatment (double compliance);
   
-  void setProbabilityOfInfection(double probability) { _pinfected=probability;};
+  void setProbabilityOfInfection(double probability) { _perHostTransmission._pinfected=probability;};
 
   //! Set doomed
   void setDoomed(int doomed) { _doomed = doomed;}
-
-  /** Availability of host to mosquitoes (α_i). */
-  double entoAvailability () const;
-  /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqSurvivalBiting () const;
-  /** Probability of a mosquito succesfully finding a resting
-   * place and resting (P_C_i * P_D_i). */
-  double probMosqSurvivalResting () const;
   //@}
   
   /** @name OldWithinHostModel functions
@@ -185,12 +177,10 @@ public:
   The density bias allows the detection limit for microscopy to be higher for other sites
 */
   static double detectionlimit;
-  
-  /* Shape constant of (Gamma) distribution of availability
-  real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
-  static double BaselineAvailabilityShapeParam;
   //@}
-
+  
+  PerHostTransmission _perHostTransmission;
+  
 private:
   ///@name Private variables
   //@{
@@ -202,7 +192,7 @@ private:
   CaseManagementModel* _caseManagement;
   
   PresentationModel* _presentationModel;
-
+  
   //!Total asexual blood stage density
   double _ylag[4];
   //!Date of birth, time step since start of warmup
@@ -217,29 +207,12 @@ private:
   double _totalDensity;		// possibly move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;
-  //!Number of infective bites since birth
-  double _cumulativeEIRa;
   //!Remaining efficacy of Pre-erythrocytic vaccines
   double _PEVEfficacy;
-  //!pinfected: probability of infection (cumulative or reset to zero in massTreatment). Appears to be used only for calculating expected inoculations for the analysis
-  //!of pre-erythrocytic immunity.
-  double _pinfected;
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval
   double _timeStepMaxDensity;	// WithinHostModel, used by PresentationModel
-  //!Baseline availability to mosquitoes
-  double _BaselineAvailabilityToMosquitoes;
-  
-  /// Rate/probabilities before interventions. See functions.
-  double _entoAvailability;
-  double _probMosqSurvivalBiting;
-  double _probMosqSurvivalResting;
-  
-  /// Intervention: an ITN (active if netEffectiveness > 0)
-  EntoInterventionITN entoInterventionITN;
-  /// Intervention: IRS (active if insecticide != 0)
-  EntoInterventionIRS entoInterventionIRS;
   //@}
   
   //! Determines eligibility and gives IPTi SP or placebo doses 
@@ -273,13 +246,6 @@ private:
     \param funit io unit number
   */
   void writeDrugs(fstream& funit);
-
-
-  /* Static private */
-  
-  static double baseEntoAvailability;
-  static double baseProbMosqSurvivalBiting;
-  static double baseProbMosqSurvivalResting;
 };
 
 #endif
