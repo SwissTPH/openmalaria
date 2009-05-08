@@ -175,7 +175,8 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
 
 
 double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
-  double baseAvailToMos = human.getBaselineAvailabilityToMosquitoes();
+  PerHostTransmission& host = human._perHostTransmission;
+  double baseAvailToMos = host._BaselineAvailabilityToMosquitoes;
   //The age-adjusted EIR, possibly adjusted for bed nets.
   double expectedNumInfections;
   
@@ -188,7 +189,7 @@ double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, doubl
         InfectionrateShapeParam);
   } else {
     //The default model is that in Smith et al, AJTMH 2006 75 Suppl 2
-    double survivalOfInoculum=(1.0+pow((human.getCumulativeEIRa()/Xstar_p), gamma_p));
+    double survivalOfInoculum=(1.0+pow((host._cumulativeEIRa/Xstar_p), gamma_p));
     survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
     survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + age_adj_EIR/Estar));
     

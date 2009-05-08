@@ -122,10 +122,7 @@ public:
   double getBaselineAvailabilityToMosquitoes() const {return _perHostTransmission._BaselineAvailabilityToMosquitoes;}
   
   inline double getProbTransmissionToMosquito() const {return _withinHostModel->getProbTransmissionToMosquito();}
-
-  //! Get the cumulative EIRa
-  double getCumulativeEIRa() {return _perHostTransmission._cumulativeEIRa;};
-
+  
   //! Return doomed value
   int getDoomed() {return _doomed;};
 
