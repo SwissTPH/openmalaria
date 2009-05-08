@@ -254,7 +254,13 @@ enum SimulationMode {
    * 
    * The EIR changes dynamically during the intervention phase as a function of
    * the characteristics of the interventions. */
-  dynamicEIR = 4
+  dynamicEIR = 4,
+  /** Use Vector Control Model
+   * 
+   * Use mosquito transmission model to calculate the EIR at each time point as
+   * function of the mosquito population and the past infectiousness of humans
+   * to mosquitoes. */
+  vectorControlModel = 5 
 };
 
 /// The mean of the base line availability, is used by both human.f and entomology.f
