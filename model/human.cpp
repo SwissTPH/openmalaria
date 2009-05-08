@@ -197,7 +197,11 @@ void Human::destroy() {
 
 
 void Human::updateInfection(double expectedInfectionRate, double expectedNumberOfInfections){
-  introduceInfections(expectedInfectionRate, expectedNumberOfInfections); 
+  int numInf = _perHostTransmission.numNewInfections(expectedInfectionRate, expectedNumberOfInfections);
+  for (int i=1;i<=numInf; i++) {
+    _withinHostModel->newInfection();
+  }
+  
   _withinHostModel->clearOldInfections();
 
   if ((_simulationTime*Global::interval) % 5 ==  0) {
@@ -208,33 +212,6 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
   _ylag[0]=_totalDensity;
 
   _withinHostModel->calculateDensities(*this);
-}
-
-void Human::introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections){
-  //TODO: this code does not allow for variations in baseline availability
-  //this is only likely to be relevant in some models but should not be
-  //forgotten
-  
-  //Update pre-erythrocytic immunity
-  if (Global::modelVersion & 
-      (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
-    _perHostTransmission._cumulativeEIRa+=(double)(Global::interval*expectedInfectionRate*(_perHostTransmission._BaselineAvailabilityToMosquitoes));
-  }
-  else {
-    _perHostTransmission._cumulativeEIRa+=(double)Global::interval*expectedInfectionRate;
-  }
-
-  if (expectedNumberOfInfections > 0.0000001) {
-    int Ninf = W_POISSON(expectedNumberOfInfections);
-    for (int i=1;i<=Ninf; i++) {
-      _withinHostModel->newInfection();
-    }
-  }
-
-  double pInfectedstep = 1.0 - exp(-expectedNumberOfInfections);
-  _perHostTransmission._pinfected = 1.0 - (1.0-pInfectedstep) * (1.0-_perHostTransmission._pinfected);
-  _perHostTransmission._pinfected = std::min(_perHostTransmission._pinfected, 1.0);
-  _perHostTransmission._pinfected = std::max(_perHostTransmission._pinfected, 0.0);
 }
 
 void Human::update(int simulationTime, TransmissionModel* transmissionModel) {

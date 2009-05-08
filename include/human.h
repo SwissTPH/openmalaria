@@ -219,10 +219,6 @@ private:
   void setLastSPDose();
 
   void updateInfectionStatus();
-  
-  
-  //! Introduce new infections via a stochastic process
-  void introduceInfections(double expectedInfectionRate, double expectedNumberOfInfections);
 
   //! docu 
   void computeFinalConc(Drug drg, int hl);

@@ -45,6 +45,9 @@ public:
   
   void summarize (Summary&, double age);
   
+  //! Calculate the number of new infections to introduce via a stochastic process
+  int numNewInfections(double expectedInfectionRate, double expectedNumberOfInfections);
+  
   /** Availability of host to mosquitoes (α_i). */
   double entoAvailability () const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */

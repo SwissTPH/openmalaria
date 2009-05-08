@@ -94,6 +94,32 @@ void PerHostTransmission::summarize (Summary& summary, double age) {
 }
 
 
+int PerHostTransmission::numNewInfections (double expectedInfectionRate, double expectedNumberOfInfections){
+  //TODO: this code does not allow for variations in baseline availability
+  //this is only likely to be relevant in some models but should not be
+  //forgotten
+  
+  //Update pre-erythrocytic immunity
+  if (Global::modelVersion & 
+    (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
+    _cumulativeEIRa+=double(Global::interval)*expectedInfectionRate*_BaselineAvailabilityToMosquitoes;
+  }
+  else {
+    _cumulativeEIRa+=double(Global::interval)*expectedInfectionRate;
+  }
+  
+  _pinfected = 1.0 - exp(-expectedNumberOfInfections) * (1.0-_pinfected);
+  if (_pinfected < 0.0)
+    _pinfected = 0.0;
+  else if (_pinfected > 1.0)
+    _pinfected = 1.0;
+  
+  if (expectedNumberOfInfections > 0.0000001)
+    return W_POISSON(expectedNumberOfInfections);
+  else
+    return 0;
+}
+
 double PerHostTransmission::entoAvailability () const {
   return _entoAvailability
   * entoInterventionITN.availability()
