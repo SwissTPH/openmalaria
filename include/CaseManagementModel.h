@@ -66,7 +66,7 @@ protected:
   //! treatment seeking for heterogeneity
   double _treatmentSeekingFactor;
   
-  //!time of the last treatment
+  /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
   int _tLastTreatment;
 };
 

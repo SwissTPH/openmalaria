@@ -55,10 +55,9 @@ int main(int argc, char* argv[]){
     }
     
     {
-      // What is CTOR and DTOR?
-      Simulation simulation;	// CTOR runs
+      Simulation simulation;	// constructor runs
       simulation.start();
-    }	// DTOR runs
+    }	// simulation's destructor runs
     
     cleanDocument();
     BoincWrapper::finish(0);	// Never returns

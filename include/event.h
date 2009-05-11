@@ -31,7 +31,7 @@
 
 class Event{
 public:
-  Event() : _time(missing_value) {};
+  Event() : _time(TIMESTEP_NEVER) {};
   ~Event();
 
   friend ostream& operator<<(ostream& out, const Event& event);
@@ -53,6 +53,7 @@ public:
   int getOutcome() const {return _outcome;};
   
 private:
+  /// Timestep of event (TIMESTEP_NEVER if no event).
   int _time;
   //! survey period during which the event occured
   //! TODO: we could use the survey array to map time to survey period. slower, but less memory.

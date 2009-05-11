@@ -41,7 +41,7 @@ void DummyInfection::destroy() {
 void DummyInfection::init (){
 }
 
-DummyInfection::DummyInfection(int lastSPdose, int simulationTime){
+DummyInfection::DummyInfection(int simulationTime){
     //Initialize current infection data
     _startdate=simulationTime;
     _density=4;

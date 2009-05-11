@@ -227,8 +227,8 @@ namespace Params {
   };
 }
 
-/// Any chance we can get rid of this?
-const int  missing_value= -99999;
+/// Value used as the timestep for an event which has never happened.
+const int TIMESTEP_NEVER = -0x7FFFFFFF;
 
 /// Days in a year. Should be a multiple of interval.
 const int daysInYear= 365;

@@ -48,7 +48,7 @@ CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF)
 }
 
 CaseManagementModel::CaseManagementModel (double tSF) :
-    _treatmentSeekingFactor(tSF), _tLastTreatment(missing_value)
+    _treatmentSeekingFactor(tSF), _tLastTreatment(TIMESTEP_NEVER)
 {}
 
 CaseManagementModel::~CaseManagementModel ()

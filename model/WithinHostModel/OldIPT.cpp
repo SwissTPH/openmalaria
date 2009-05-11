@@ -77,7 +77,7 @@ void OldIPTWithinHostModel::clearParameters () {
 }
 
 OldIPTWithinHostModel::OldIPTWithinHostModel () :
-    _SPattenuationt(0), _lastSPDose (missing_value), _lastIptiOrPlacebo (missing_value)
+    _SPattenuationt(0), _lastSPDose (TIMESTEP_NEVER), _lastIptiOrPlacebo (TIMESTEP_NEVER)
 {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     throw xml_scenario_error ("OldIPTWithinHostModel not intended to work with DrugAction");

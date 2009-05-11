@@ -209,17 +209,18 @@ double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, doubl
 
 void NonVectorTransmission::updateEIR (int day, double EIRdaily) {
   // istep is the time period to which the day is assigned.  The result of the
-  // division is automatically rounded down to the next integer
-  int istep= 1 + (day-1) / Global::interval;
+  // division is automatically rounded down to the next integer.
+  // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
+  // some compilers may round it to -1.
+  int istep = (day-1) / Global::interval;
   if ( Global::simulationMode !=  transientEIRknown) {
-    int i1 = Global::modIntervalsPerYear(istep) - 1;
+    int i1 = Global::modIntervalsPerYear(1+istep) - 1;
     no[i1]++;
     //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
     EIR[i1] = ((EIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
   } else {
-    int i1=istep - 1;
-    ino[i1]++;
-    intEIR[i1]= ((intEIR[i1] * (ino[i1]-1)) + EIRdaily) / ino[i1];
+    ino[istep]++;
+    intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
   }
 }
 

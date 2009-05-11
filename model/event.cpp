@@ -30,7 +30,7 @@
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
   if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + CaseManagementModel::caseManagementMemory))){
-    if (_time!=missing_value){
+    if (_time!=TIMESTEP_NEVER){
       Simulation::gMainSummary->report(*this);
     }
     _time=simulationTime;
@@ -48,14 +48,14 @@ void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome)
 }
 
 Event::~Event () {
-  if (_time != missing_value)
+  if (_time != TIMESTEP_NEVER)
     Simulation::gMainSummary->report(*this);
 }
 
 
 ostream& operator<<(ostream& out, const Event& event){
   out << event._time << endl;
-  if (event._time == missing_value) return out;
+  if (event._time == TIMESTEP_NEVER) return out;
   out << event._surveyPeriod << endl;
   out << event._ageGroup << endl;
   out << event._diagnosis << endl;
@@ -65,7 +65,7 @@ ostream& operator<<(ostream& out, const Event& event){
 
 istream& operator>>(istream& in, Event& event){
   in >> event._time;
-  if (event._time == missing_value) return in;
+  if (event._time == TIMESTEP_NEVER) return in;
   in >> event._surveyPeriod;
   in >> event._ageGroup;
   in >> event._diagnosis;

@@ -65,7 +65,7 @@ void DummyWithinHostModel::newInfection(){
   //std::cout<<"MOI "<<_MOI<<std::endl;
   if (_MOI <=  20) {
     _cumulativeInfections++;
-    infections.push_back(DummyInfection(missing_value, Simulation::simulationTime));
+    infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;
   }
 }

@@ -35,10 +35,7 @@ class DummyInfection : public Infection {
   public:
 
   //! Constructor
-  /*!
-    \param lastSPdose Time interval of last SP Dose.
-  */
-  DummyInfection(int lastSPdose, int simulationTime);
+  DummyInfection(int simulationTime);
   
   /** Checkpoint-reading constructor */
   DummyInfection (istream& in);

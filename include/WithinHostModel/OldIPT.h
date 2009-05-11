@@ -64,9 +64,9 @@ protected:
 private:
   //! time at which attenuated infection 'would' end if SP present
   int _SPattenuationt;
-  //!last SP Dose given
+  /** Timestep of last SP Dose given (TIMESTEP_NEVER if no SP dose given). */
   int _lastSPDose;
-  //!last IPTi or placebo dose given 
+  /// Timestep of last IPTi or placebo dose given (TIMESTEP_NEVER if never given).
   int _lastIptiOrPlacebo;
   
   
