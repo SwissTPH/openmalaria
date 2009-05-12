@@ -211,6 +211,16 @@ void Simulation::readCheckpoint() {
     ProteomeManager::read (f_checkpoint);
   }
   _population->read(f_checkpoint);
+  // Read trailing white-space (final endl has not yet been read):
+  while (!f_checkpoint.eof() && isspace (f_checkpoint.peek()))
+    f_checkpoint.get();
+  if (!f_checkpoint.eof()) {	// if anything else is left
+    streampos i = f_checkpoint.tellg();
+    f_checkpoint.seekg(0, ios_base::end);
+    cerr << "Error (checkpointing): not the whole checkpointing file was read; " << f_checkpoint.tellg()-i << " bytes remaining:" << endl;
+    f_checkpoint.seekg (i);
+    cerr << f_checkpoint.rdbuf() << endl;
+  }
   f_checkpoint.close();
   
   load_rng_state(checkpointNum);
