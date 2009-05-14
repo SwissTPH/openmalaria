@@ -45,7 +45,6 @@ public:
   */
   void update(int simulationTime, int ageGroup, int diagnosis, int outcome);
 
-  int getTime() const {return _time;};
   void setTime(int time) {_time=time;};
   int getDiagnosis() const {return _diagnosis;};
   int getAgeGroup() const {return _ageGroup;};

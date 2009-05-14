@@ -227,8 +227,14 @@ namespace Params {
   };
 }
 
-/// Value used as the timestep for an event which has never happened.
-const int TIMESTEP_NEVER = -0x7FFFFFFF;
+/** Value used as the timestep for an event which has never happened.
+ *
+ * For any simulation timestep, we must have:
+ * ( TIMESTEP_NEVER + simulationTime < 0 )
+ * but since (x - TIMESTEP_NEVER >= y) is often checked, x - TIMESTEP_NEVER
+ * must not overflow for any timestep x (int represents down to -0x7FFFFFFF).
+ */
+const int TIMESTEP_NEVER = -0x3FFFFFFF;
 
 /// Days in a year. Should be a multiple of interval.
 const int daysInYear= 365;
