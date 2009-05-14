@@ -58,6 +58,13 @@ public:
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime);
   
 private:
+  /** The number of discrete species of anopheles mosquitos to be modelled.
+   *
+   * Must be the same as species.size(). Usually just one. */
+  static int numSpecies;
+  
+  vector<VectorTransmissionSpecies> species;
+  
   /* Parameters from model */
   
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
@@ -77,13 +84,6 @@ private:
    * becoming infective (assuming it survives), per bite.
    * Assumed constant for all hosts. */
   double P_vi;
-  
-  /** Probability of a mosquito successfully laying eggs given that it has
-   * rested (P_E_i).
-   * 
-   * Currently assumed constant, although NC's non-autonomous model provides
-   * an alternative. */
-  double probMosqEggLaying;
   
   /** Duration of resting period for mosquito (τ).
    * Units: days. */

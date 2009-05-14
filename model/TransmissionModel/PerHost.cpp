@@ -24,9 +24,9 @@
 #include "summary.h"
 
 double PerHostTransmission::BaselineAvailabilityShapeParam;
-double PerHostTransmission::baseEntoAvailability;
-double PerHostTransmission::baseProbMosqSurvivalBiting;
-double PerHostTransmission::baseProbMosqSurvivalResting;
+double PerHostPerSpecies::baseEntoAvailability;
+double PerHostPerSpecies::baseProbMosqSurvivalBiting;
+double PerHostPerSpecies::baseProbMosqSurvivalResting;
 
 void PerHostTransmission::initParameters () {
   EntoInterventionITN::initParameters();
@@ -42,11 +42,6 @@ void PerHostTransmission::initParameters () {
 PerHostTransmission::PerHostTransmission () :
   _cumulativeEIRa(0.0), _pinfected(0.0)
 {
-  //FIXME: should be partially random:
-  _entoAvailability = baseEntoAvailability;
-  _probMosqSurvivalBiting = baseProbMosqSurvivalBiting;
-  _probMosqSurvivalResting = baseProbMosqSurvivalResting;
-  
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
   }
@@ -64,6 +59,17 @@ PerHostTransmission::PerHostTransmission () :
   }
   
   // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
+  
+  species.resize (0);	//FIXME: numSpecies, vector control only
+}
+
+PerHostPerSpecies::PerHostPerSpecies ()
+{
+  //FIXME: should be partially random:
+  _entoAvailability = baseEntoAvailability;
+  _probMosqSurvivalBiting = baseProbMosqSurvivalBiting;
+  _probMosqSurvivalResting = baseProbMosqSurvivalResting;
+  
 }
 
 void PerHostTransmission::read (istream& in) {
@@ -120,16 +126,20 @@ int PerHostTransmission::numNewInfections (double expectedInfectionRate, double 
     return 0;
 }
 
-double PerHostTransmission::entoAvailability () const {
-  return _entoAvailability
+double PerHostTransmission::entoAvailability (size_t speciesIndex) const {
+  return species[speciesIndex].entoAvailability
   * entoInterventionITN.availability()
   * entoInterventionIRS.availability();
 }
-double PerHostTransmission::probMosqSurvivalBiting () const {
-  return _probMosqSurvivalBiting
+double PerHostTransmission::probMosqBiting (size_t speciesIndex) const {
+  return species[speciesIndex].probMosqBiting
   * entoInterventionITN.probMosqBiting();
 }
-double PerHostTransmission::probMosqSurvivalResting () const {
-  return _probMosqSurvivalResting
+double PerHostTransmission::probMosqFindRestSite (size_t speciesIndex) const {
+  return species[speciesIndex].probMosqFindRestSite
+  * ??
+}
+double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const {
+  return species[speciesIndex].probMosqSurvivalResting
   * entoInterventionIRS.probMosqSurvivalResting();
 }

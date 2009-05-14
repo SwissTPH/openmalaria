@@ -38,18 +38,13 @@
 
 
 VectorTransmission::VectorTransmission () {
-  // The XML schema allows a list of anopheles data to represent multiple types
-  // of mosquito. Currently only using one set of data is supported.
-  // TransmissionModel::createTransmissionModel checks length of this list:
-  scnXml::Anopheles anoph = getEntoData().getAnopheles()[0];
-  scnXml::Mosq mosq = anoph.getMosq();
-  
-  mosqRestDuration = mosq.getMosqRestDuration();
-
-  mosqSeekingDeathRate = mosq.getMosqSeekingDeathRate();
-  mosqSeekingDuration = mosq.getMosqSeekingDuration();
-  
-  probMosqEggLaying = mosq.getMosqProbOvipositing();
+  // Each item in the AnophelesSequence represents an anopheles species.
+  // TransmissionModel::createTransmissionModel checks length of list >= 1.
+  scnXml::AnophelesSequence anophelesList = getEntoData().getAnopheles();
+  numSpecies = anophelesList.size();
+  species.resize (numSpecies);
+  for (int i = 0; i < numSpecies; ++i)
+    species[i].setAnophelesData (anophelesList[i]);
   
   //TODO: initialize these and perhaps other params properly:
   //K_vi
@@ -176,7 +171,7 @@ void VectorTransmission::advancePeriod (const std::list<Human>& population, int 
     double sum_dif = 0.0;
     for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
       const PerHostTransmission& host = h->_perHostTransmission;
-      double prod = host.entoAvailability() * host.probMosqSurvivalBiting() * host.probMosqSurvivalResting();
+      double prod = host.entoAvailability() * host.probMosqBiting() * host.probMosqFindRestSite() * host.probMosqSurvivalResting();
       sum += prod;
       sum_dif += prod;//FIXME: * h->K_vi();	// infectiousness of host * probability parasites survive in mosquito
       // NOTE: already have kappa array - is same?

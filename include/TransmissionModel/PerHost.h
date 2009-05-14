@@ -24,9 +24,11 @@
 
 class Summary;
 
-/** For now, this is just a data container.
+/** Contains TransmissionModel parameters which need to be stored per host.
  *
- * Currently members are public; later make private and use friend classes?
+ * Currently many members are public and directly accessed.
+ * 
+ * 
  */
 class PerHostTransmission
 {
@@ -48,13 +50,18 @@ public:
   //! Calculate the number of new infections to introduce via a stochastic process
   int numNewInfections(double expectedInfectionRate, double expectedNumberOfInfections);
   
+  ///@brief Get model parameters for species[speciesIndex].
+  //@{
   /** Availability of host to mosquitoes (α_i). */
-  double entoAvailability () const;
+  double entoAvailability (size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqSurvivalBiting () const;
+  double probMosqBiting (size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
-  * place and resting (P_C_i * P_D_i). */
-  double probMosqSurvivalResting () const;
+  * place after biting (P_C_i). */
+  double probMosqFindRestSite (size_t speciesIndex) const;
+  /** Probability of a mosquito succesfully resting (P_D_i). */
+  double probMosqSurvivalResting (size_t speciesIndex) const;
+  //@}
   
   /// @brief Public data members
   //@{
@@ -66,15 +73,7 @@ public:
   //!Baseline availability to mosquitoes
   double _BaselineAvailabilityToMosquitoes;
   
-  /// Rate/probabilities before interventions. See functions.
-  double _entoAvailability;
-  double _probMosqSurvivalBiting;
-  double _probMosqSurvivalResting;
-  
-  /// Intervention: an ITN (active if netEffectiveness > 0)
-  EntoInterventionITN entoInterventionITN;
-  /// Intervention: IRS (active if insecticide != 0)
-  EntoInterventionIRS entoInterventionIRS;
+  vector<PerHostPerSpecies> species;
   //@}
   
   /* Shape constant of (Gamma) distribution of availability
@@ -82,11 +81,38 @@ public:
   static double BaselineAvailabilityShapeParam;
   
 private:
-  /* Static private */
+  //NOTE: include intervention data here?
+  /** simulationTime - dateOfUse is the age of the intervention.
+  * 
+  * This is the date of last use. */
+  int timestepITN;
+  int timestepIRS;
   
-  static double baseEntoAvailability;
-  static double baseProbMosqSurvivalBiting;
-  static double baseProbMosqSurvivalResting;
+  /** Insecticide used. */
+  int insecticideITN;
+  int insecticideIRS;
+  
+  //NOTE: or in sub-containers
+  /// Intervention: an ITN (active if netEffectiveness > 0)
+  EntoInterventionITN entoInterventionITN;
+  /// Intervention: IRS (active if insecticide != 0)
+  EntoInterventionIRS entoInterventionIRS;
 };
+
+/** Data needed for each human which is per-mosquito species. */
+class PerHostPerSpecies
+{
+public:
+  PerHostPerSpecies();
+  
+  friend class PerHostTransmission;
+  
+private:
+  /// Rate/probabilities before interventions. See functions.
+  double entoAvailability;
+  double probMosqBiting;
+  double probMosqFindRestSite;
+  double probMosqSurvivalResting;
+}
 
 #endif
