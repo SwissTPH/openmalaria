@@ -89,7 +89,7 @@ void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
                         double* PAiPtr, size_t thetap, size_t eta, size_t mt, size_t tau, 
                         size_t thetas, size_t n, size_t m, double Ni, double alphai, 
                         double muvA, double thetad, double PBi, double PCi, double PDi, 
-                        double PEi, gsl_vector* Kvi, char fntestentopar[]);
+                        double PEi, gsl_vector* Kvi);
 
 /** CalcSvDiff_rf returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -126,7 +126,7 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
  * All other parameters are IN parameters. */
 void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR, 
                 gsl_matrix** Upsilon, gsl_vector* Nv0, gsl_matrix* inv1Xtp, 
-                size_t eta, size_t mt, size_t thetap, char fntestentopar[]);
+                size_t eta, size_t mt, size_t thetap);
 
 /** CalcLambda() returns a pointer to an array of thetap 
  * GSL vectors.
@@ -148,7 +148,7 @@ void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR,
  * Lambda is an OUT parameter.
  * All other parameters are IN parameters. */
 void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, size_t eta,
-                size_t thetap, char fntestentopar[]);
+                size_t thetap);
 
 /** CalcXP returns a pointer to an array of thetap 
  * GSL vectors.
@@ -170,7 +170,7 @@ void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, size_t eta,
  * All other parameters are IN parameters. */
 void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon, 
             gsl_vector** Lambda, gsl_matrix* inv1Xtp, size_t eta,
-            size_t thetap, char fntestentopar[]);
+            size_t thetap);
 
 
 /** CalcPSTS() calculates probabilities of surviving the extrinsic
@@ -210,7 +210,7 @@ void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, size_t t, size_t s, size_t n);
  * that is, the eigenvalue with the largest absolute value.
  * 
  * A, n, and fntestentopar are IN parameters. */
-double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[]);
+double CalcSpectralRadius(gsl_matrix* A, size_t n);
 
 /** CalcInv1minusA() calculates the inverse of (I-A) where A is a 
  * given matrix.
@@ -221,7 +221,7 @@ double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[]);
  * 
  * A, n, and fntestentopar are IN parameters.
  * inv1A is an OUT parameter. */
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n, char fntestentopar[]);
+void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n);
 
 /** CalcSvfromEIRdata() calculates Sv, given the EIR.
  *
@@ -255,7 +255,7 @@ double binomial(int n, int k);
 void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
                              size_t thetap, char fnrootfindingstate[]);
 
-void PrintParameters(char fntestentopar[], size_t thetap, size_t tau, size_t thetas, 
+void PrintParameters(size_t thetap, size_t tau, size_t thetas, 
                      size_t n, size_t m, double Ni, double alphai, double muvA, 
                      double thetad, double PBi, double PCi, double PDi, double PEi, 
                      gsl_vector* Kvi, gsl_vector* Xii, gsl_vector* Nv0guess);
@@ -264,14 +264,20 @@ void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, size_t thetap,
                   size_t eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
                   gsl_vector* Pduf);
 
-void PrintXP(gsl_vector** xp, size_t eta, size_t thetap, char fntestentopar[]);
+void PrintXP(gsl_vector** xp, size_t eta, size_t thetap);
 
-void PrintLambda(gsl_vector** Lambda, size_t eta, char fntestentopar[]);
+void PrintLambda(gsl_vector** Lambda, size_t eta);
 
-void PrintEigenvalues(char fntestentopar[], gsl_vector_complex* eval, size_t n);
+void PrintEigenvalues(gsl_vector_complex* eval, size_t n);
 
-void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A, 
+void PrintMatrix(char matrixname[], gsl_matrix* A, 
                  size_t RowLength, size_t ColLength);
 
 
-void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, size_t n);
+void PrintVector(char vectorname[], gsl_vector* v, size_t n);
+
+/** PrintArray() prints the given (C) array to the given file.
+* 
+* The array, v, of doubles is assumed to be of length n.
+* All parameters are IN parameters. */
+void PrintArray(char vectorname[], double* v, int n);

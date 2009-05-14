@@ -77,6 +77,10 @@ public:
   /** Multiplies the chance of a mosquito biting the host. */
   double probMosqBiting() const;
   
+  /** Multiplies the probability of a mosquito finding a resting site after
+   * biting. */
+  double probMosqFindRestSite() const;
+  
 protected:
   double decay() const;
   

@@ -35,19 +35,16 @@ public:
   
   /// @name Constructors
   //@{
-  //! Constructor which does not need random numbers. Only for testing.
-  Human();
-
   /** Initialise all variables of a human datatype.
    * 
    * \param ID unique identifier
    * \param dateOfBirth date of birth in time steps */
-  Human(int ID, int dateOfBirth, int simulationTime);
+  Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime);
 
   /**  Initialise all variables of a human datatype including infectionlist and
    * and druglist.
    * \param funit IO unit */
-  Human(istream& funit, int simulationTime);
+  Human(istream& funit, TransmissionModel& tm, int simulationTime);
   //@}
   
   /** Destructor
@@ -63,7 +60,6 @@ public:
   /// @name Checkpointing functions
   //@{
   friend ostream& operator<<(ostream& out, const Human& human);
-  friend istream& operator>>(istream& in, Human& human);
   //@}
   
   /** @name External functions

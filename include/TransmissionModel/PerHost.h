@@ -21,8 +21,11 @@
 #define Hmod_PerHostTransmission
 
 #include "EntoIntervention.h"
+#include "TransmissionModel/VectorSpecies.h"
 
 class Summary;
+class HostMosquitoInteraction;
+class TransmissionModel;
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
@@ -39,10 +42,8 @@ public:
   static void initParameters ();
   //@}
   
-  PerHostTransmission ();
-  
-  
-  void read (istream& in);
+  PerHostTransmission (TransmissionModel&);
+  PerHostTransmission (istream& in, TransmissionModel&);
   void write (ostream& out) const;
   
   void summarize (Summary&, double age);
@@ -50,6 +51,8 @@ public:
   //! Calculate the number of new infections to introduce via a stochastic process
   int numNewInfections(double expectedInfectionRate, double expectedNumberOfInfections);
   
+  //NOTE: may need to be within PerHostTransmission if some intervention parameters are moved here.
+  //NOTE: Since only the product of these is usually required, could perhaps be optimised
   ///@brief Get model parameters for species[speciesIndex].
   //@{
   /** Availability of host to mosquitoes (α_i). */
@@ -73,7 +76,7 @@ public:
   //!Baseline availability to mosquitoes
   double _BaselineAvailabilityToMosquitoes;
   
-  vector<PerHostPerSpecies> species;
+  vector<HostMosquitoInteraction> species;
   //@}
   
   /* Shape constant of (Gamma) distribution of availability
@@ -81,38 +84,50 @@ public:
   static double BaselineAvailabilityShapeParam;
   
 private:
-  //NOTE: include intervention data here?
+  //NOTE: some intervention data such as timestep of use could be stored here:
   /** simulationTime - dateOfUse is the age of the intervention.
   * 
-  * This is the date of last use. */
+  * This is the date of last use.
   int timestepITN;
-  int timestepIRS;
+  int timestepIRS; */
+};
+
+/** Data needed for each human which is per-mosquito species. */
+class HostMosquitoInteraction
+{
+  friend class PerHostTransmission;
   
-  /** Insecticide used. */
-  int insecticideITN;
-  int insecticideIRS;
+public:
+  /** In lieu of a constructor initialises elements, using the passed base to
+   * get baseline parameters. */
+  void initialise (VectorTransmissionSpecies base);
   
-  //NOTE: or in sub-containers
+  void read (istream& in);
+  void write (ostream& out) const;
+  
+private:
+  ///@brief Rate/probabilities before interventions. See functions.
+  //@{
+  //FIXME: not set:
+  /** Availability rate (α_i) */
+  double entoAvailability;
+  
+  /** Probability of mosquito successfully biting host (P_B_i) */
+  double probMosqBiting;
+  
+  /** Probability of mosquito escaping human and finding a resting site without
+  * dying, after biting the human (P_C_i). */
+  double probMosqFindRestSite;
+  
+  /** Probability of mosquito successfully resting after finding a resting site
+  * (P_D_i). */
+  double probMosqSurvivalResting;
+  //@}
+  
   /// Intervention: an ITN (active if netEffectiveness > 0)
   EntoInterventionITN entoInterventionITN;
   /// Intervention: IRS (active if insecticide != 0)
   EntoInterventionIRS entoInterventionIRS;
 };
-
-/** Data needed for each human which is per-mosquito species. */
-class PerHostPerSpecies
-{
-public:
-  PerHostPerSpecies();
-  
-  friend class PerHostTransmission;
-  
-private:
-  /// Rate/probabilities before interventions. See functions.
-  double entoAvailability;
-  double probMosqBiting;
-  double probMosqFindRestSite;
-  double probMosqSurvivalResting;
-}
 
 #endif

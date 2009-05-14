@@ -119,7 +119,7 @@ void NonVectorTransmission::inputEIR () {
   } else {
     annualEIR=-9.99;
   }
-
+  /*FIXME: remove (once init code sorted out)
   // For now we assume that we can manipulate EIR depending on the value of FTSmoothEIR.
   // We are assuming that the simulation mode is not set to transientEIRknown.
   // This needs to be rewritten properly once we have introduced a new Global::simulationMode.
@@ -130,15 +130,15 @@ void NonVectorTransmission::inputEIR () {
     logDFTThreeModeSmooth(EIR, EIR, Global::intervalsPerYear, Global::intervalsPerYear);
   }
   if(ifUseFC==1){
-    (EIR, Global::intervalsPerYear, FCEIR);
+    calcInverseDFTExp(EIR, Global::intervalsPerYear, FCEIR);
 # ifdef TransmissionModel_PrintEIRaIDFT
-    PrintArray(fnametestentopar, "EIRafterIDFT", EIR, Global::intervalsPerYear);
+    PrintArray("EIRafterIDFT", EIR, Global::intervalsPerYear);
 # endif
   }
   
   if(ifrotateEIR){
     rotateArray(EIR, Global::intervalsPerYear, EIRRotateAngle);
-  }
+  }*/
 }
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&){

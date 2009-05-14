@@ -45,7 +45,8 @@ ARFLAGS = cru
 libTransmissionModel_a_AR = $(AR) $(ARFLAGS)
 libTransmissionModel_a_LIBADD =
 am_libTransmissionModel_a_OBJECTS = NonVector.$(OBJEXT) \
-	Vector.$(OBJEXT) VectorInternal.$(OBJEXT) PerHost.$(OBJEXT)
+	Vector.$(OBJEXT) VectorInternal.$(OBJEXT) PerHost.$(OBJEXT) \
+	VectorSpecies.$(OBJEXT)
 libTransmissionModel_a_OBJECTS = $(am_libTransmissionModel_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -165,7 +166,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libTransmissionModel.a
-libTransmissionModel_a_SOURCES = NonVector.cpp  Vector.cpp  VectorInternal.cpp PerHost.cpp
+libTransmissionModel_a_SOURCES = NonVector.cpp  Vector.cpp  VectorInternal.cpp PerHost.cpp VectorSpecies.cpp
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
 all: all-am
@@ -219,6 +220,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PerHost.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorInternal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorSpecies.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

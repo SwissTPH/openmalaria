@@ -239,10 +239,7 @@ const int TIMESTEP_NEVER = -0x3FFFFFFF;
 /// Days in a year. Should be a multiple of interval.
 const int daysInYear= 365;
 
-/** There are 3 simulation modes.
- * 
- * TODO: Add simulation mode for entomological model.
-   This probably needs to be done soon. */
+/** There are 3 simulation modes. */
 enum SimulationMode {
   /** Equilibrium mode
    * 

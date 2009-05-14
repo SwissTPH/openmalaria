@@ -142,72 +142,15 @@ protected:
    *
    * Checkpointed. */
   double annualEIR; 
-  
-  /** Given a positive array, originalArray, of length OALength,
-   * this routine exponentiates the inverse discrete Fourier 
-   * tranform of the first three modes of the natural logarithm of 
-   * the array to smooth out the array to produce smoothArray of 
-   * length SALength.
-   *
-   * All elements of originalArray are assumed to be strictly
-   * positive.
-   *
-   * smoothArray is an OUT parameter.
-   * originalArray, SALength and OALength are IN parameters.
-   * No reason smoothArray and originalArray can't be the same array. */
-  void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
-
-  /**
-   *  Given a sequence of Fourier coefficients, FC, of length, FCL,
-   *  this routine calculates the exponent of the inverse discrete
-   *  Fourier transform into an array, Tarray, of length, aL.
-   *
-   *  Note that FCL is assumed to be an odd number.
-   *  
-   * tArray is an OUT parameter.
-   * aL and FC are IN parameters. */
-  void calcInverseDFTExp(double* tArray, int aL, vector<double>& FC);
-
-  /**
-   *  Given an array, rArray, of length aLength, the routine rotates
-   *  the array clockwise by rAngle.
-   *
-   * rArray is an IN/OUT parameter. */
-  void rotateArray(double* rArray, int aLength, double rAngle);
 
   //TODO: the entire code for specifying availability should be part of the human
   //! initialisation of the vector of expected surface area as a function of age
   void initAgeExposureConversion(); 
-
-  /** PrintArray() prints the given (C) array to the given file.
-   * 
-   * The array, v, of doubles is assumed to be of length n.
-   * All parameters are IN parameters. */
-  void PrintArray(char fntestentopar[], char vectorname[], double* v, int n);
   
   
   /* Not used - uncomment code in initAgeExposureConversion() to initialise.
   // ratio of the number of bites received relative to the number received at age 6 years 
   double biteratio_6; */
-
-  static const int ifrotateEIR = 0;	// TODO: Move to XML.
-					// Flag to rotate EIR by a given number of days
-					// to check the calculations for Kappa.
-  static const int ifUseFC = 0;		// TODO: Move to XML.
-					// Flag to use Fourier coefficients to create EIR (instead of time series data).
-					// Right now we do not link this to FTSmoothEIR - but these definitions should
-					// be linked.
-  /** FCEIR[] is the array of parameters of the Fourier approximation to the
-   * annual EIR. Currently always set in the TransmissionModel constructor
-   * (with length 5). We will need to deal with this cleanly later.
-   * We use the order, a0, a1, b1, a2, b2, ... */
-  vector<double> FCEIR;
-  /** Angle to rotate EIR: Should be between 0 and 2Pi.
-   *
-   * Currently set in constructor. */
-  double EIRRotateAngle;
-  static const int FTSmoothEIR = 0;	// TODO: Move to XML: 1 to smooth EIR using an approximate DFT
-					//                    0 to do nothing.
   
   
   /** Duration of the extrinsic incubation period (sporozoite development time)
@@ -242,9 +185,6 @@ protected:
   These values are retained here should they be required for future comparisons 
  */ 
   static const double bsa_prop[nwtgrps]; 
-  
-  // File to print debugging info to.
-  char fnametestentopar[30];
 };
 
 #endif

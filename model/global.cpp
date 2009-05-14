@@ -156,8 +156,6 @@ void Global::setModelVersion () {
     COMORB_TREAT_HET | TRIPLE_HET,	// 19
     TRIPLE_HET,	// 20
     0,	// 21
-    0,
-    0
   };
   
   for (size_t i = 0; i < NUM_VERSIONS; ++i)

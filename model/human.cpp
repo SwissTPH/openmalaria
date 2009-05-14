@@ -83,16 +83,9 @@ void Human::clear() {	// static clear
   Vaccine::clearParameters();
 }
 
-// Testing Ctor
-Human::Human() {
-  _withinHostModel = WithinHostModel::createWithinHostModel();
-  _presentationModel=PresentationModel::createPresentationModel(1.0);
-  _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
-}
-
 // Create new human
-Human::Human(int ID, int dateOfBirth, int simulationTime) 
-  : _simulationTime(simulationTime)
+Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) 
+  : _perHostTransmission(tm), _simulationTime(simulationTime)
 {
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
@@ -177,16 +170,31 @@ Human::Human(int ID, int dateOfBirth, int simulationTime)
 }
 
 // Load human from checkpoint
-Human::Human(istream& funit, int simulationTime) 
-  : _simulationTime(simulationTime)
+Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
+  : _perHostTransmission(in, tm), _simulationTime(simulationTime)
 {
   // NOTE: makes some unnecessary random calls
   // WARNING: this will likely change some tests with checkpointing
   _withinHostModel = WithinHostModel::createWithinHostModel();
   _presentationModel=PresentationModel::createPresentationModel(1.0);
   _caseManagement = CaseManagementModel::createCaseManagementModel(1.0);
-  // Reading human from file
-  funit >> *this;
+  
+  _withinHostModel->read(in);
+  _presentationModel->read(in);
+  _caseManagement->read (in);
+  in >> _dateOfBirth; 
+  in >> _doomed; 
+  in >> _ID; 
+  in >> _lastVaccineDose; 
+  in >> _BSVEfficacy; 
+  in >> _timeStepMaxDensity; 
+  in >> _PEVEfficacy; 
+  in >> _TBVEfficacy; 
+  in >> _totalDensity; 
+  in >> _ylag[0]; 
+  in >> _ylag[1]; 
+  in >> _ylag[2]; 
+  in >> _ylag[3]; 
 }
 
 void Human::destroy() {
@@ -432,26 +440,4 @@ ostream& operator<<(ostream& out, const Human& human){
   out << human._ylag[3] << endl; 
   
   return out;
-}
-
-istream& operator>>(istream& in, Human& human){
-  human._withinHostModel->read(in);
-  human._presentationModel->read(in);
-  human._caseManagement->read (in);
-  human._perHostTransmission.read (in);
-  in >> human._dateOfBirth; 
-  in >> human._doomed; 
-  in >> human._ID; 
-  in >> human._lastVaccineDose; 
-  in >> human._BSVEfficacy; 
-  in >> human._timeStepMaxDensity; 
-  in >> human._PEVEfficacy; 
-  in >> human._TBVEfficacy; 
-  in >> human._totalDensity; 
-  in >> human._ylag[0]; 
-  in >> human._ylag[1]; 
-  in >> human._ylag[2]; 
-  in >> human._ylag[3]; 
-
-  return in;
 }

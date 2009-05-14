@@ -228,7 +228,7 @@ void Population::read (istream& in) {
   int indCounter = 0;	// Number of individuals read from checkpoint
   while(!(in.eof()||_populationSize==indCounter)){
       //continue: Fortran cont is probably not C cont
-    _population.push_back(Human(in, Simulation::simulationTime));
+    _population.push_back(Human(in, *_transmissionModel, Simulation::simulationTime));
     indCounter++;
   }
   if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){
@@ -239,7 +239,7 @@ void Population::read (istream& in) {
 
 void Population::newHuman(int dob){
   ++IDCounter;
-  _population.push_back(Human(IDCounter, dob, Simulation::simulationTime));
+  _population.push_back(Human(*_transmissionModel, IDCounter, dob, Simulation::simulationTime));
 }
 
 void Population::update1(){

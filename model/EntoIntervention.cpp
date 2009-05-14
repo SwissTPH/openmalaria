@@ -41,6 +41,10 @@ void EntoInterventionIRS::initParameters () {
 
 /* ----- Main functionality ----- */
 
+//TODO:
+// We need to make sure that we model the decay correctly
+// for the effect of the net to be divided equally between
+// before biting and after biting.
 double EntoInterventionITN::decay () const {
   int age = Simulation::simulationTime - dateOfUse;
   
@@ -59,11 +63,11 @@ double EntoInterventionITN::probMosqBiting() const {
   return 1.0 - (1.0 - E)*decay();
 }
 
-// Probably need to add another function for 
-// EntoInterventionITN::probMosqFindRestingSite()
-// We need to make sure that we model the decay correctly
-// for the effect of the net to be divided equally between
-// before biting and after biting.
+double EntoInterventionITN::probMosqFindRestSite() const {
+  //FIXME:
+  return 1.0;
+}
+
 
 double EntoInterventionIRS::decay () const {
   int age = Simulation::simulationTime - dateOfUse;

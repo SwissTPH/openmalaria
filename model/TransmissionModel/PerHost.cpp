@@ -20,78 +20,67 @@
 #include "TransmissionModel/PerHost.h"
 #include "GSLWrapper.h"
 #include "inputData.h"
+#include "TransmissionModel/Vector.h"
 
 #include "summary.h"
 
 double PerHostTransmission::BaselineAvailabilityShapeParam;
-double PerHostPerSpecies::baseEntoAvailability;
-double PerHostPerSpecies::baseProbMosqSurvivalBiting;
-double PerHostPerSpecies::baseProbMosqSurvivalResting;
 
 void PerHostTransmission::initParameters () {
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
   
   BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
-  
-  baseEntoAvailability = 1.0;		// FIXME: get from xml
-  baseProbMosqSurvivalBiting = 1.0;	// FIXME: get from xml
-  baseProbMosqSurvivalResting = 1.0;	// FIXME: get from xml
 }
 
-PerHostTransmission::PerHostTransmission () :
+PerHostTransmission::PerHostTransmission (TransmissionModel& tm) :
   _cumulativeEIRa(0.0), _pinfected(0.0)
 {
-  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
-  }
-  else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-    _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
-  }
-  else if (Global::modelVersion & TRANS_HET) {
-    _BaselineAvailabilityToMosquitoes=0.2;
-    if (W_UNIFORM() < 0.5) {            
-      _BaselineAvailabilityToMosquitoes=1.8;
+  VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
+  if (vTM) {
+    species.resize (vTM->numSpecies);
+    for (size_t i = 0; i < vTM->numSpecies; ++i)
+      species[i].initialise (vTM->species[i]);
+  } else {
+    if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+      _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
     }
+    else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
+      _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
+    }
+    else if (Global::modelVersion & TRANS_HET) {
+      _BaselineAvailabilityToMosquitoes=0.2;
+      if (W_UNIFORM() < 0.5) {            
+	_BaselineAvailabilityToMosquitoes=1.8;
+      }
+    }
+    else {
+      _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
+    }
+    
+    // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
   }
-  else {
-    _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
-  }
-  
-  // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
-  
-  species.resize (0);	//FIXME: numSpecies, vector control only
 }
 
-PerHostPerSpecies::PerHostPerSpecies ()
-{
-  //FIXME: should be partially random:
-  _entoAvailability = baseEntoAvailability;
-  _probMosqSurvivalBiting = baseProbMosqSurvivalBiting;
-  _probMosqSurvivalResting = baseProbMosqSurvivalResting;
-  
-}
-
-void PerHostTransmission::read (istream& in) {
-  in >> _cumulativeEIRa; 
-  in >> _pinfected; 
-  in >> _BaselineAvailabilityToMosquitoes; 
-  in >> _entoAvailability;
-  in >> _probMosqSurvivalBiting;
-  in >> _probMosqSurvivalResting;
-  in >> entoInterventionITN;
-  in >> entoInterventionIRS;
+PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
+  in >> _cumulativeEIRa;
+  in >> _pinfected;
+  in >> _BaselineAvailabilityToMosquitoes;
+  VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
+  if (vTM) {
+    species.resize (vTM->numSpecies);
+    for (vector<HostMosquitoInteraction>::iterator hMI = species.begin(); hMI != species.end(); ++hMI)
+      hMI->read (in);
+  }
 }
 
 void PerHostTransmission::write (ostream& out) const {
   out << _cumulativeEIRa << endl; 
   out << _pinfected << endl; 
   out << _BaselineAvailabilityToMosquitoes << endl; 
-  out << _entoAvailability << endl;
-  out << _probMosqSurvivalBiting << endl;
-  out << _probMosqSurvivalResting << endl;
-  out << entoInterventionITN;
-  out << entoInterventionIRS;
+  out << species.size() << endl;
+  for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
+    hMI->write (out);
 }
 
 
@@ -126,20 +115,49 @@ int PerHostTransmission::numNewInfections (double expectedInfectionRate, double 
     return 0;
 }
 
+
 double PerHostTransmission::entoAvailability (size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability
-  * entoInterventionITN.availability()
-  * entoInterventionIRS.availability();
+  * species[speciesIndex].entoInterventionITN.availability()
+  * species[speciesIndex].entoInterventionIRS.availability();
 }
 double PerHostTransmission::probMosqBiting (size_t speciesIndex) const {
   return species[speciesIndex].probMosqBiting
-  * entoInterventionITN.probMosqBiting();
+  * species[speciesIndex].entoInterventionITN.probMosqBiting();
 }
 double PerHostTransmission::probMosqFindRestSite (size_t speciesIndex) const {
   return species[speciesIndex].probMosqFindRestSite
-  * ??
+  * species[speciesIndex].entoInterventionITN.probMosqFindRestSite();
 }
 double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const {
   return species[speciesIndex].probMosqSurvivalResting
-  * entoInterventionIRS.probMosqSurvivalResting();
+  * species[speciesIndex].entoInterventionIRS.probMosqSurvivalResting();
+}
+
+
+void HostMosquitoInteraction::initialise (VectorTransmissionSpecies base)
+{
+  //FIXME: should be partially random:
+  entoAvailability = base.entoAvailability;
+  probMosqBiting = base.probMosqBiting;
+  probMosqFindRestSite = base.probMosqFindRestSite;
+  probMosqSurvivalResting = base.probMosqSurvivalResting;
+}
+
+void HostMosquitoInteraction::read (istream& in) {
+  in >> entoAvailability;
+  in >> probMosqBiting;
+  in >> probMosqFindRestSite;
+  in >> probMosqSurvivalResting;
+  in >> entoInterventionITN;
+  in >> entoInterventionIRS;
+}
+
+void HostMosquitoInteraction::write (ostream& out) const {
+  out << entoAvailability << endl;
+  out << probMosqBiting << endl;
+  out << probMosqFindRestSite << endl;
+  out << probMosqSurvivalResting << endl;
+  out << entoInterventionITN;
+  out << entoInterventionIRS;
 }

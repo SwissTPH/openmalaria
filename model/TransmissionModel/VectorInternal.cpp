@@ -28,12 +28,14 @@
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_complex_math.h>
 
+const char fntestentopar[30] = "output_ento_para.txt";
+
 
 void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr, 
                         double* PAiPtr, size_t theta_p, size_t eta, size_t mt, size_t tau, 
                         size_t theta_s, size_t n, size_t m, double N_i, double alpha_i, 
                         double mu_vA, double theta_d, double P_B_i, double P_C_i, double P_D_i, 
-                        double P_E_i, gsl_vector* K_vi, char fntestentopar[])
+                        double P_E_i, gsl_vector* K_vi)
 {
 	// $P_{dif}$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and gets infected.
@@ -183,11 +185,6 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
   size_t mt = (params->mt);
   size_t theta_p = (params->thetap);
 
-	// It would be cleaner to read in the name of this file as an input
-	// parameter but for now, we leave it out of the root-finding
-	// algorithm and simply redefine it here.
-  char fnametestentopar[30] = "output_ento_para.txt";	
-
 	// Recreate a new N_v0 so that we're not restricted by const problems.
   gsl_vector* N_v0 = gsl_vector_calloc(theta_p);
   gsl_vector_memcpy(N_v0, x);
@@ -199,7 +196,7 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
 	// To set f, we simply call CalcSvDiff. It's probably easier than rewriting
 	// this code.
   CalcSvDiff(f, S_vFromEIR, Upsilon, N_v0, inv1Xtp, 
-             eta, mt, theta_p, fnametestentopar);
+             eta, mt, theta_p);
 
 	// Calculate the l^1 norm of f.
   SvDiff1norm = gsl_blas_dasum(f);
@@ -215,7 +212,7 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
 
 void CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR, 
                 gsl_matrix** Upsilon, gsl_vector* N_v0, gsl_matrix* inv1Xtp, 
-                size_t eta, size_t mt, size_t theta_p, char fntestentopar[])
+                size_t eta, size_t mt, size_t theta_p)
 {
 	// The set of theta_p vectors that determine the forcing of the system
 	// at every time step.
@@ -232,10 +229,10 @@ void CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
   gsl_vector* SvfromNv0 = gsl_vector_calloc(theta_p);
 
 	// Calculate the forcing term for each time in the period.
-  CalcLambda(Lambda, N_v0, eta, theta_p, fntestentopar);
+  CalcLambda(Lambda, N_v0, eta, theta_p);
 
 	// Calculate the periodic orbit for the given N_v0.
-  CalcXP(x_p, Upsilon, Lambda, inv1Xtp, eta, theta_p, fntestentopar);
+  CalcXP(x_p, Upsilon, Lambda, inv1Xtp, eta, theta_p);
 
 	// Extract the number of infectious mosquitoes from the full periodic
 	// orbit.
@@ -267,7 +264,7 @@ void CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
 
 
 void CalcLambda(gsl_vector** Lambda, gsl_vector* N_v0, size_t eta,
-                size_t theta_p, char fntestentopar[])
+                size_t theta_p)
 {
   for(size_t t=0; t < theta_p; t++){
     Lambda[t] = gsl_vector_calloc(eta);
@@ -283,7 +280,7 @@ void CalcLambda(gsl_vector** Lambda, gsl_vector* N_v0, size_t eta,
 
 void CalcXP(gsl_vector** x_p, gsl_matrix** Upsilon, 
             gsl_vector** Lambda, gsl_matrix* inv1Xtp, size_t eta,
-            size_t theta_p, char fntestentopar[])
+            size_t theta_p)
 {
   gsl_vector* vtemp = gsl_vector_calloc(eta);
 	// gsl_vector* vtempsum = gsl_vector_calloc(eta);
@@ -418,7 +415,7 @@ void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, size_t t, size_t s, size_t eta)
 }
 
 
-double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[])
+double CalcSpectralRadius(gsl_matrix* A, size_t n)
 {
   gsl_vector* abseval = gsl_vector_calloc(n);	// Vector of the absolute values of eigenvalues.
   gsl_matrix* B = gsl_matrix_calloc(n, n); // Use to keep A safe.
@@ -456,7 +453,7 @@ double CalcSpectralRadius(gsl_matrix* A, size_t n, char fntestentopar[])
 }
 
 
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n, char fntestentopar[])
+void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n)
 {
 	// Data types required to compute inverse.
   gsl_matrix* B = gsl_matrix_calloc(n, n); // We calculate (I-A) in B.
@@ -784,19 +781,17 @@ void PrintMatrix(char fntestentopar[], char matrixname[], gsl_matrix* A,
 #endif
 
 #if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcSvDiff || defined VectorTransmission_PRINT_CalcXP
-void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, size_t n)
+void PrintVector(char vectorname[], gsl_vector* v, size_t n)
 {
 /* PrintVector() prints the given (GSL) vector to the given file.
   * 
   * All parameters are IN parameters.
  */
-  size_t i;
-  double temp;
 
   FILE* fpp = fopen(fntestentopar, "a");
 
-  for (i=0; i < n; i++){
-    temp = gsl_vector_get(v, i);
+  for (size_t i=0; i < n; i++){
+    double temp = gsl_vector_get(v, i);
     fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, temp);
 		
   }
@@ -804,3 +799,13 @@ void PrintVector(char fntestentopar[], char vectorname[], gsl_vector* v, size_t 
   fclose(fpp);
 }
 #endif
+
+
+void PrintArray(char vectorname[], double* v, int n){
+  FILE* fpp = fopen(fntestentopar, "a");
+  
+  for (int i=0; i < n; i++){
+    fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, v[i]);
+  }
+  fclose(fpp);
+}
