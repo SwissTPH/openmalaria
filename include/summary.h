@@ -305,7 +305,10 @@ class Summary {
     // Number of episodes (non-malaria fever)
     nNMFever= 27
   };
-
+  
+  inline int isOptionIncluded (int allOptions, int option) {
+    return allOptions & (1 << option);
+  };
 };
   
   /** Line end character. Use Unix line endings to save a little size. */

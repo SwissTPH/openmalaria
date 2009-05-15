@@ -408,7 +408,11 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
   // updateOneLifespan period as a forced EIR. We should now copy EIR to an
   // array of length daysInYear, without smoothing (since humans only
   // experience 1 EIR value per timestep).
-  convertLengthToFullYear(EIRInit, &speciesEIR[0]);
+  //NOTE: hack to still use the old one-based arrays (initialisationEIR was one-based):
+  double shiftedEIR[Global::intervalsPerYear];
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    shiftedEIR[i] = speciesEIR[(i+1)%Global::intervalsPerYear];
+  convertLengthToFullYear(EIRInit, shiftedEIR);
   // The other option would be to smooth (or recalculate from FCEIR).
   //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
   
@@ -908,14 +912,15 @@ void VectorTransmissionSpecies::calcInverseDFTExp(vector<double>& tArray, vector
   
   // Number of Fourier Modes.
   int Fn = (FC.size()-1)/2;
-
+  
   // Calculate inverse discrete Fourier transform
-  for (size_t t=1; t<=tArray.size(); t++){
+  for (size_t t=0; t<tArray.size(); t++){
     double temp = FC[0];
+    double wt = w*(t+1);
     for(int n=1;n<=Fn;n++){
-      temp = temp + FC[2*n-1]*cos(n*w*t) + FC[2*n]*sin(n*w*t);
+      temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
     }
-    tArray[t-1] = exp(temp);
+    tArray[t] = exp(temp);
   }
 }
 

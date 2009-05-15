@@ -103,7 +103,25 @@ void NonVectorTransmission::inputEIR () {
   double minEIR=min_EIR_mult*averageEIR();
   const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-    updateEIR (mpcday, std::max((double)daily[mpcday], minEIR));
+    // FIXME: convertions to make this run the same as when encapsulated in updateEIR
+    int day = mpcday;
+    double EIRdaily = std::max((double)daily[mpcday], minEIR);
+    
+    // istep is the time period to which the day is assigned.  The result of the
+    // division is automatically rounded down to the next integer.
+    // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
+    // some compilers may round it to -1.
+    int istep = (day-1) / Global::interval;
+    if ( Global::simulationMode !=  transientEIRknown) {
+      size_t i1 = Global::modIntervalsPerYear(1+istep) - 1;
+      size_t i2 = (1+istep) % Global::intervalsPerYear;
+      no[i1]++;
+      //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
+      initialisationEIR[i2] = ((initialisationEIR[i2] * (no[i1]-1)) + EIRdaily) / no[i1];
+    } else {
+      ino[istep]++;
+      intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
+    }
   }
   
   // Calculate total annual EIR
@@ -127,9 +145,9 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
       break;
     case dynamicEIR:
       if (Simulation::timeStep == 1) {
-        return initialisationEIR[Global::modIntervalsPerYear(simulationTime) - 1];
+	return initialisationEIR[simulationTime % Global::intervalsPerYear];
       } else {
-        return initialisationEIR[Global::modIntervalsPerYear(simulationTime) - 1] *
+	return initialisationEIR[simulationTime % Global::intervalsPerYear] *
             kappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1] /
             initialKappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1];
       }
@@ -179,24 +197,6 @@ double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, doubl
 
 
 // -----   Private functs ------
-
-void NonVectorTransmission::updateEIR (int day, double EIRdaily) {
-  // istep is the time period to which the day is assigned.  The result of the
-  // division is automatically rounded down to the next integer.
-  // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
-  // some compilers may round it to -1.
-  int istep = (day-1) / Global::interval;
-  if ( Global::simulationMode !=  transientEIRknown) {
-    int i1 = Global::modIntervalsPerYear(1+istep) - 1;
-    no[i1]++;
-    //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-    initialisationEIR[i1] = ((initialisationEIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
-  } else {
-    ino[istep]++;
-    intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
-  }
-}
-
 
 double NonVectorTransmission::averageEIR () {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
