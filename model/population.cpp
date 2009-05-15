@@ -174,7 +174,7 @@ void Population::setupPyramid(bool isCheckpoint){
 }
 
 void Population::initialiseInfantArrays(){
-  for ( int i=0;i<Global::intervalsPerYear; i++) {
+  for (size_t i=0;i<Global::intervalsPerYear; i++) {
     Global::infantIntervalsAtRisk[i]=0;
     Global::infantDeaths[i]=0;
   }

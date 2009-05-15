@@ -410,13 +410,12 @@ void Summary::writeSummaryArrays () {
 double Summary::infantAllCauseMort(){
   //DOCU
 
-  int i;
   double* intervalSurviv;
   double infantProductLimit;
   double valinfantAllCauseMort;
   infantProductLimit=1.0;
   intervalSurviv = (double*)malloc(((Global::intervalsPerYear))*sizeof(double));
-  for ( i=0;i<Global::intervalsPerYear; i++) {
+  for (size_t i=0;i<Global::intervalsPerYear; i++) {
     intervalSurviv[i]=(Global::infantIntervalsAtRisk[i]-Global::infantDeaths[i]);
     intervalSurviv[i]=intervalSurviv[i]/(Global::infantIntervalsAtRisk[i]);
     infantProductLimit=infantProductLimit*intervalSurviv[i];

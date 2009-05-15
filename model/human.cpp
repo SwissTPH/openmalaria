@@ -231,7 +231,7 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
     return true;	// remove from population
   
   _simulationTime = simulationTime;
-  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->calculateEIR(_simulationTime, _perHostTransmission);
+  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
   
   updateInterventionStatus(); 
   _withinHostModel->updateImmuneStatus();
@@ -241,7 +241,7 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   _withinHostModel->update(getAgeInYears());
   
   // update array for the infant death rates
-  if (ageTimeSteps <= Global::intervalsPerYear){
+  if (ageTimeSteps <= (int)Global::intervalsPerYear){
     ++Global::infantIntervalsAtRisk[ageTimeSteps-1];
     if ((_doomed == 4) || (_doomed == -6) || (_doomed == 6)){
       ++Global::infantDeaths[ageTimeSteps-1];

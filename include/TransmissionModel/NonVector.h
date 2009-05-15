@@ -54,8 +54,8 @@ public:
    */
   virtual void inputEIR (); 
 
-  /** Calculates EIR (in adults), based on vectorial capacity or looks up EIR
-   * in the input data.
+  /** Calculates EIR (in adults) during the main period of the simulation,
+   * based on vectorial capacity or looks up EIR in the input data.
    * 
    * \param simulationTime Time since start of simulation . */
   virtual double calculateEIR(int simulationTime, PerHostTransmission&); 

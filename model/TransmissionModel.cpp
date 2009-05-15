@@ -56,7 +56,7 @@ TransmissionModel::TransmissionModel(){
   
   kappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
   initialKappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
-  EIR = new double[Global::intervalsPerYear];
+  initialisationEIR = new double[Global::intervalsPerYear];
   
   initAgeExposureConversion();
 }
@@ -64,17 +64,23 @@ TransmissionModel::TransmissionModel(){
 TransmissionModel::~TransmissionModel () {
   free(kappa);
   free(initialKappa);
-  delete [] EIR;
+  delete [] initialisationEIR;
+}
+
+double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host) {
+  if (Global::simulationMode == equilibriumMode)
+    return initialisationEIR[Global::modIntervalsPerYear(simulationTime) - 1];
+  else
+    return calculateEIR (simulationTime, host);
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
-  int tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
+  size_t tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
   //Prevent NaNs
   if (sumWeight == 0.0) {
     kappa[tmod] = 0.0;
     cerr << "sW.eq.0" << endl;
-  }
-  else {
+  } else {
     kappa[tmod] = sumWt_kappa / sumWeight;
   }
   
@@ -82,7 +88,7 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   if (tmod == 0) {
     _sumAnnualKappa = 0.0;
   }
-  _sumAnnualKappa += kappa[tmod] * Global::interval * EIR[tmod];
+  _sumAnnualKappa += kappa[tmod] * Global::interval * initialisationEIR[tmod];
   if (tmod + 1 == Global::intervalsPerYear) {
     if (annualEIR == 0) {
       _annualAverageKappa=0;
@@ -143,14 +149,14 @@ size_t TransmissionModel::getAgeGroup (double age) {
 
 void TransmissionModel::write(ostream& out) const {
   out << annualEIR << endl;
-  for (int i = 0; i < Global::intervalsPerYear; ++i)
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     out << kappa[i] << endl;
   out << _annualAverageKappa << endl;
   out << _sumAnnualKappa << endl;
 }
 void TransmissionModel::read(istream& in) {
   in >> annualEIR;
-  for (int i = 0; i < Global::intervalsPerYear; ++i)
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     in >> kappa[i];
   in >> _annualAverageKappa;
   in >> _sumAnnualKappa;

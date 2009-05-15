@@ -6,7 +6,7 @@ all: xsdcxx model
 	test -x runTests.sh || ln -s @top_srcdir@/runTests.sh ./
 
 test: all
-	./runTests.sh
+	./runTests.sh --checkpoint
 
 doxygen: config.doxygen
 	-doxygen config.doxygen

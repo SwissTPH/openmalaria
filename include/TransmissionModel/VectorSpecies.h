@@ -30,7 +30,11 @@ class Human;
 
 /** Per-species data for vector control.
  *
- * A list of this class is used by the VectorTransmission class to hold
+ * Data in this class is specific to the "species" of anopheles mosquito, where
+ * species is used in a relaxed way to mean any variation of anopheles
+ * mosquito, not just those types formally recognised as distinct species.
+ *
+ * A list of this class type is used by the VectorTransmission class to hold
  * (potentially) species-specific per-population data.
  * 
  * Instead of storing static variables in this class, store them in
@@ -40,8 +44,12 @@ class VectorTransmissionSpecies
 public:
   ///@brief Initialisation and destruction
   //@{
-  /** Called to initialise variables instead of a constructor. */
-  void setAnophelesData (scnXml::Anopheles anoph);
+  /** Called to initialise variables instead of a constructor.
+   *
+   * @param anoph Data structure from XML to use
+   * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
+   */
+  void initialise (scnXml::Anopheles anoph, double EIR[]);
   
   ~VectorTransmissionSpecies ();
   //@}
@@ -171,30 +179,9 @@ private:
   
   /** @brief Parameters used during the initialisation phase. */
   //@{
-  double EIR[];	//FIXME: initialise
+  // NOTE: only needs to be stored so calMosqEmergeRate doesn't have to recalculate.
+  double *speciesEIR;
   //@}
-  
-  
-  //FIXME: refine these params (all(?) can be removed/moved to functions as local params)
-  static const int ifrotateEIR = 0;	// TODO: Move to XML.
-  // Flag to rotate EIR by a given number of days
-  // to check the calculations for Kappa.
-  static const int ifUseFC = 0;		// TODO: Move to XML.
-  // Flag to use Fourier coefficients to create EIR (instead of time series data).
-  // Right now we do not link this to FTSmoothEIR - but these definitions should
-  // be linked.
-  /** FCEIR[] is the array of parameters of the Fourier approximation to the
-  * annual EIR. Currently always set in the TransmissionModel constructor
-  * (with length 5). We will need to deal with this cleanly later.
-  * We use the order, a0, a1, b1, a2, b2, ... */
-  vector<double> FCEIR;
-  /** Angle to rotate EIR: Should be between 0 and 2Pi.
-  *
-  * Currently set in constructor. */
-  double EIRRotateAngle;
-  static const int FTSmoothEIR = 0;	// TODO: Move to XML: 1 to smooth EIR using an approximate DFT
-  //                    0 to do nothing.
-  
   
   /* Functions */
   

@@ -36,7 +36,7 @@ Constants (parameter)
 
 ModelVersion Global::modelVersion;
 int Global::interval;
-int Global::intervalsPerYear;
+size_t Global::intervalsPerYear;
 int Global::maxAgeIntervals;
 int Global::simulationMode;
 int Global::latentp;

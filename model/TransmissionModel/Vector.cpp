@@ -34,13 +34,16 @@
 
 
 VectorTransmission::VectorTransmission () {
+  for (size_t j=0;j<Global::intervalsPerYear; j++)
+    initialisationEIR[j]=0.0;
+  
   // Each item in the AnophelesSequence represents an anopheles species.
   // TransmissionModel::createTransmissionModel checks length of list >= 1.
   scnXml::EntoData::AnophelesSequence anophelesList = getEntoData().getAnopheles();
   numSpecies = anophelesList.size();
   species.resize (numSpecies);
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].setAnophelesData (anophelesList[i]);
+    species[i].initialise (anophelesList[i], initialisationEIR);
 }
 VectorTransmission::~VectorTransmission () {
 }

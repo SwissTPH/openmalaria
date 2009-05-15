@@ -99,20 +99,27 @@ public:
     memcpy (initialKappa, kappa, Global::intervalsPerYear * sizeof(*kappa));
   }
   
-  //FUNCTIONS THAT SHOULD BE USED BY getExpectedNumberOfInfections (renamed as getNinfections ???) 
-  
-  /** Calculates EIR (in adults).
-   * 
-   * \param simulationTime Time since start of simulation . */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host) = 0; 
+  /** Returns the EIR, per host and per time step.
+   *
+   * During the pre-intervention phase, the EIR is forced, using values from
+   * the XML file (possibly generated from fourier coefficients). During the
+   * main simulation phase, it may be calculated or obtained from data in the
+   * XML file. */
+  double getEIR (int simulationTime, PerHostTransmission& host);
   
 protected:
+  /** Calculates the EIR (in adults), during the main simulation phase.
+   * 
+   * \param simulationTime Time since start of simulation.
+   * \param host The human to calculate EIR for (not used by all models). */
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host) = 0; 
+  
   /** EIR per time step during the pre-intervention phase 
    *
    * Only NonVectorTransmission?
    * Not checkpointed; doesn't need to be for NonVectorTransmission (unless
    * changeEIR intervention occurred). */
-  double *EIR; 
+  double *initialisationEIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.
    *

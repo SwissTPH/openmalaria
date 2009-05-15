@@ -28,7 +28,7 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::setAnophelesData (scnXml::Anopheles anoph) {
+void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, double initialisationEIR[]) {
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
@@ -45,15 +45,6 @@ void VectorTransmissionSpecies::setAnophelesData (scnXml::Anopheles anoph) {
   //TODO: initialize these and perhaps other params properly:
   //K_vi
   //P_vi
-  
-  scnXml::Eir eirData = anoph.getEir();
-  FCEIR.resize (5);
-  FCEIR[0] = eirData.getA0();
-  FCEIR[1] = eirData.getA1();
-  FCEIR[2] = eirData.getB1();
-  FCEIR[3] = eirData.getA2();
-  FCEIR[4] = eirData.getB2();
-  EIRRotateAngle = eirData.getEIRRotateAngle();
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
@@ -81,10 +72,42 @@ void VectorTransmissionSpecies::setAnophelesData (scnXml::Anopheles anoph) {
   
   //TODO: initialise arrays (run initial simulation for N_v_length-1 days?)
   // Calculations are invalid before arrays are initialized!
+  
+  
+  /** FCEIR[] is the array of parameters of the Fourier approximation to the
+   * annual EIR. Currently always set in the TransmissionModel constructor
+   * (with length 5). We will need to deal with this cleanly later.
+   * We use the order, a0, a1, b1, a2, b2, ... */
+  vector<double> FCEIR;
+  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
+  double EIRRotateAngle;
+  
+  scnXml::Eir eirData = anoph.getEir();
+  FCEIR.resize (5);
+  FCEIR[0] = eirData.getA0();
+  FCEIR[1] = eirData.getA1();
+  FCEIR[2] = eirData.getB1();
+  FCEIR[3] = eirData.getA2();
+  FCEIR[4] = eirData.getB2();
+  EIRRotateAngle = eirData.getEIRRotateAngle();
+  
+  speciesEIR = new double[Global::intervalsPerYear];
+  
+  // Calculate forced EIR for pre-intervention phase from FCEIR:
+  calcInverseDFTExp(speciesEIR, Global::intervalsPerYear, FCEIR);
+  
+  if(EIRRotateAngle != 0.0)
+    rotateArray(speciesEIR, Global::intervalsPerYear, EIRRotateAngle);
+  
+  // Add to the TransmissionModel's EIR, used for the initalization phase:
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    initialisationEIR[i] += speciesEIR[i];
 }
 
 VectorTransmissionSpecies::~VectorTransmissionSpecies () {
   delete[] P_A;
+  if (speciesEIR != NULL)
+    delete[] speciesEIR;
 }
 
 
@@ -265,6 +288,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
 
 
 void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double initialKappa[]) {
+  //TODO: is this still correct?
   /* Number of types of hosts. 
   Dimensionless.
   $n$ in model. Scalar.
@@ -376,49 +400,29 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
   I'm not sure how we should check this - but we should look into
   it more carefully at some point in time. For now, we can 
   continue with this.
-  We first create arrays of length intervalsperYear for all three.
+  We first create arrays of length intervalsPerYear for all three.
   We then convert them to length daysInYear.
   Save the human infectivity to mosquitoes from simulation of one
   lifetime to initialKappa. We will then use this to create 
   humanInfectivityInit (of size daysInYear). */
-
-	// We need to decide how we deal with the EIR - if we smooth it out
-	// over the entire year, or leave it constant over the Global::interval length.
-	// I think it would be better ot smooth it over the full year. 
-	// It may not be fully accurate - but we are in any case going to lose
-	// some accuracy over the difference between the time step of the human
-	// simulation model and the mosquito transmission model.
-	// Note that we smooth over the entire year, we are slightly shifting
-	// the EIR a little bit to the right.
-	// We have a lot of if statements and flags here. We need to clean this 
-	// up eventually when the flags are moved to XML.
-  if( true ){
-    //NOTE: EIR should have been calculated from fourier coefic. and used for the updateOneLifespan period as a forced EIRInit.
-    // We should now copy EIR to an array of length daysInYear, without smoothing (since humans only experience 1 EIR value per timestep).
-    if(ifUseFC){
-      printf("Calculating inverse discrete Fourier transform over full year \n");
-      calcInverseDFTExp(EIRInit, daysInYear, FCEIR);
-    } else if(FTSmoothEIR==1){
-      printf("Smoothing and expanding EIR \n");
-      //FIXME: Where is EIR coming from (initialised)? (Was origEIR, which was copied from EIR in inputEIR.)
-      logDFTThreeModeSmooth(EIRInit, EIR, daysInYear, Global::intervalsPerYear);
-    } else
-      convertLengthToFullYear(EIRInit, EIR);
-      
-  } else
-    convertLengthToFullYear(EIRInit, EIR);
-    
-  if(ifrotateEIR){
-    rotateArray(EIRInit, daysInYear, EIRRotateAngle);
-    printf("Rotating EIR \n");
-  }
-
+  
+  // EIR should have been calculated from fourier coefic. and used for the
+  // updateOneLifespan period as a forced EIR. We should now copy EIR to an
+  // array of length daysInYear, without smoothing (since humans only
+  // experience 1 EIR value per timestep).
+  convertLengthToFullYear(EIRInit, speciesEIR);
+  // The other option would be to smooth (or recalculate from FCEIR).
+  //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
+  
 # ifdef VectorTransmission_PRINT_calMosqEmergeRate
   char shortEIRname[15] = "ShortEIR";
   char longEIRname[15] = "LongEIR";
-  PrintArray(shortEIRname, EIR, Global::intervalsPerYear);
+  PrintArray(shortEIRname, speciesEIR, Global::intervalsPerYear);
   PrintArray(longEIRname, EIRInit, daysInYear);
 # endif
+  // We're done with speciesEIR now; free the memory:
+  delete[] speciesEIR;
+  speciesEIR = NULL;	// so destructor knows this has been freed.
 
   convertLengthToFullYear(humanInfectivityInit, initialKappa);
 # ifdef VectorTransmission_PRINT_calMosqEmergeRate
@@ -482,7 +486,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
 }
 
 void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
-  for (int i=0; i < Global::intervalsPerYear; i++) {
+  for (size_t i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
       FullArray[i*Global::interval+j] = ShortArray[i];
     }

@@ -79,7 +79,7 @@ public:
   /// temporal resolution of simulation, in days
   static int interval;
    //Simulation time steps per year
-  static int intervalsPerYear;
+  static size_t intervalsPerYear;
   // Maximum age of individuals in a scenario in time intervals
   static int maxAgeIntervals;
   static int simulationMode;

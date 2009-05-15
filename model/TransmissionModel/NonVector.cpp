@@ -87,14 +87,10 @@ void NonVectorTransmission::initMainSimulation (int populationSize){
 
 
 void NonVectorTransmission::inputEIR () {
-  // TODO: Properly include new Global::simulationMode for entomological model. 
-  // Depending on flags, this should either take in given EIR and smooth through
-  // a DFT or directly take in Fourier coefficients and create an EIR over time.
-
   //initialise all the EIR arrays to 0
   if (Global::simulationMode != transientEIRknown) {
-    for (int j=0;j<Global::intervalsPerYear; j++) {
-      EIR[j]=0.0;
+    for (size_t j=0;j<Global::intervalsPerYear; j++) {
+      initialisationEIR[j]=0.0;
       no[j]=0;
     }
   } else {
@@ -113,40 +109,17 @@ void NonVectorTransmission::inputEIR () {
   // Calculate total annual EIR
   if (Global::simulationMode != transientEIRknown) {
     annualEIR=0.0;
-    for (int j=0;j<Global::intervalsPerYear; j++) {
-      annualEIR += Global::interval*EIR[j];
+    for (size_t j=0;j<Global::intervalsPerYear; j++) {
+      annualEIR += Global::interval*initialisationEIR[j];
     }
   } else {
     annualEIR=-9.99;
   }
-  /*FIXME: remove (once init code sorted out)
-  // For now we assume that we can manipulate EIR depending on the value of FTSmoothEIR.
-  // We are assuming that the simulation mode is not set to transientEIRknown.
-  // This needs to be rewritten properly once we have introduced a new Global::simulationMode.
-  // If FTSmoothEIR is 0, we do nothing.
-  // If FTSmoothEIR is 1, we smooth the EIR using the first 3 modes of the discrete
-  //		Fourier Transform
-  if(FTSmoothEIR==1){
-    logDFTThreeModeSmooth(EIR, EIR, Global::intervalsPerYear, Global::intervalsPerYear);
-  }
-  if(ifUseFC==1){
-    calcInverseDFTExp(EIR, Global::intervalsPerYear, FCEIR);
-# ifdef TransmissionModel_PrintEIRaIDFT
-    PrintArray("EIRafterIDFT", EIR, Global::intervalsPerYear);
-# endif
-  }
-  
-  if(ifrotateEIR){
-    rotateArray(EIR, Global::intervalsPerYear, EIRRotateAngle);
-  }*/
 }
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   switch (Global::simulationMode) {
-    case equilibriumMode:
-      return EIR[Global::modIntervalsPerYear(simulationTime) - 1];
-      break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the intEIR array
@@ -154,9 +127,9 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
       break;
     case dynamicEIR:
       if (Simulation::timeStep == 1) {
-        return EIR[Global::modIntervalsPerYear(simulationTime) - 1];
+        return initialisationEIR[Global::modIntervalsPerYear(simulationTime) - 1];
       } else {
-        return EIR[Global::modIntervalsPerYear(simulationTime) - 1] *
+        return initialisationEIR[Global::modIntervalsPerYear(simulationTime) - 1] *
             kappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1] /
             initialKappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1];
       }
@@ -217,7 +190,7 @@ void NonVectorTransmission::updateEIR (int day, double EIRdaily) {
     int i1 = Global::modIntervalsPerYear(1+istep) - 1;
     no[i1]++;
     //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-    EIR[i1] = ((EIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
+    initialisationEIR[i1] = ((initialisationEIR[i1] * (no[i1]-1)) + EIRdaily) / no[i1];
   } else {
     ino[istep]++;
     intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
