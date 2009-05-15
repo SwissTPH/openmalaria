@@ -180,7 +180,10 @@ private:
   /** @brief Parameters used during the initialisation phase. */
   //@{
   // NOTE: only needs to be stored so calMosqEmergeRate doesn't have to recalculate.
-  double *speciesEIR;
+  /** EIR for this species to be used during the initialisation phase.
+   *
+   * Length: Global::intervalsPerYear */
+  vector<double> speciesEIR;
   //@}
   
   /* Functions */
@@ -263,22 +266,15 @@ private:
   void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
 
   /**
-   *  Given a sequence of Fourier coefficients, FC, of length, FCL,
+   *  Given a sequence of Fourier coefficients, FC, of odd length,
    *  this routine calculates the exponent of the inverse discrete
-   *  Fourier transform into an array, Tarray, of length, aL.
+   *  Fourier transform into an array, tArray.
    *
-   *  Note that FCL is assumed to be an odd number.
-   *  
-   * tArray is an OUT parameter.
-   * aL and FC are IN parameters. */
-  void calcInverseDFTExp(double* tArray, int aL, vector<double>& FC);
+   * tArray is an OUT parameter, FC is an IN parameter. */
+  void calcInverseDFTExp(vector<double>& tArray, vector<double>& FC);
 
-  /**
-   *  Given an array, rArray, of length aLength, the routine rotates
-   *  the array clockwise by rAngle.
-   *
-   * rArray is an IN/OUT parameter. */
-  void rotateArray(double* rArray, int aLength, double rAngle);
+  /// Shifts elements of rArray clockwise by rAngle.
+  void rotateArray(vector<double>& rArray, double rAngle);
 };
 
 #endif

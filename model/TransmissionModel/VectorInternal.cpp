@@ -800,12 +800,19 @@ void PrintVector(char vectorname[], gsl_vector* v, size_t n)
 }
 #endif
 
-
 void PrintArray(char vectorname[], double* v, int n){
   FILE* fpp = fopen(fntestentopar, "a");
   
   for (int i=0; i < n; i++){
     fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, v[i]);
+  }
+  fclose(fpp);
+}
+void PrintArray(char vectorname[], vector<double>& v){
+  FILE* fpp = fopen(fntestentopar, "a");
+  
+  for (uint i=0; i < v.size(); i++){
+    fprintf(fpp, "%s(%u) = %f; \n", vectorname, i+1, v[i]);
   }
   fclose(fpp);
 }

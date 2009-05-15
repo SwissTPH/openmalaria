@@ -19,9 +19,11 @@
 
 /// This is a header for VectorTransmission's functions which are only used internally.
 
+#include <vector>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
+using namespace std;
 
 //#define VectorTransmission_PRINT_CalcUpsilonOneHost
 //#define VectorTransmission_PRINT_CalcSvDiff
@@ -281,3 +283,5 @@ void PrintVector(char vectorname[], gsl_vector* v, size_t n);
 * The array, v, of doubles is assumed to be of length n.
 * All parameters are IN parameters. */
 void PrintArray(char vectorname[], double* v, int n);
+/// ditto, taking a vector
+void PrintArray(char vectorname[], vector<double>& v);

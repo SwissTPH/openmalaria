@@ -91,13 +91,13 @@ void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, double init
   FCEIR[4] = eirData.getB2();
   EIRRotateAngle = eirData.getEIRRotateAngle();
   
-  speciesEIR = new double[Global::intervalsPerYear];
+  speciesEIR.resize (Global::intervalsPerYear);
   
   // Calculate forced EIR for pre-intervention phase from FCEIR:
-  calcInverseDFTExp(speciesEIR, Global::intervalsPerYear, FCEIR);
+  calcInverseDFTExp(speciesEIR, FCEIR);
   
   if(EIRRotateAngle != 0.0)
-    rotateArray(speciesEIR, Global::intervalsPerYear, EIRRotateAngle);
+    rotateArray(speciesEIR, EIRRotateAngle);
   
   // Add to the TransmissionModel's EIR, used for the initalization phase:
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
@@ -106,8 +106,6 @@ void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, double init
 
 VectorTransmissionSpecies::~VectorTransmissionSpecies () {
   delete[] P_A;
-  if (speciesEIR != NULL)
-    delete[] speciesEIR;
 }
 
 
@@ -410,19 +408,17 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
   // updateOneLifespan period as a forced EIR. We should now copy EIR to an
   // array of length daysInYear, without smoothing (since humans only
   // experience 1 EIR value per timestep).
-  convertLengthToFullYear(EIRInit, speciesEIR);
+  convertLengthToFullYear(EIRInit, &speciesEIR[0]);
   // The other option would be to smooth (or recalculate from FCEIR).
   //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
   
 # ifdef VectorTransmission_PRINT_calMosqEmergeRate
   char shortEIRname[15] = "ShortEIR";
   char longEIRname[15] = "LongEIR";
-  PrintArray(shortEIRname, speciesEIR, Global::intervalsPerYear);
+  PrintArray(shortEIRname, speciesEIR);
   PrintArray(longEIRname, EIRInit, daysInYear);
 # endif
-  // We're done with speciesEIR now; free the memory:
-  delete[] speciesEIR;
-  speciesEIR = NULL;	// so destructor knows this has been freed.
+  speciesEIR.clear();	// this is finished with; frees memory?
 
   convertLengthToFullYear(humanInfectivityInit, initialKappa);
 # ifdef VectorTransmission_PRINT_calMosqEmergeRate
@@ -903,20 +899,18 @@ void VectorTransmissionSpecies::logDFTThreeModeSmooth (double* smoothArray,
 
 
 
-void VectorTransmissionSpecies::calcInverseDFTExp(double* tArray, int aL, vector<double>& FC) {
-  // Frequency
-  double w = 2*M_PI / double(aL);
+void VectorTransmissionSpecies::calcInverseDFTExp(vector<double>& tArray, vector<double>& FC) {
+  if (FC.size() % 2 == 0)
+    throw xml_scenario_error("The number of Fourier coefficents should be odd.");
   
-  if((FC.size()%2)==0){
-    //NOTE: should throw xml_scenario_error if/when FCEIR is moved to the XML
-    throw logic_error("The number of Fourier coefficents should be odd.");
-  }
-
+  // Frequency
+  double w = 2*M_PI / double(tArray.size());
+  
   // Number of Fourier Modes.
   int Fn = (FC.size()-1)/2;
 
   // Calculate inverse discrete Fourier transform
-  for (int t=1; t<=aL; t++){
+  for (size_t t=1; t<=tArray.size(); t++){
     double temp = FC[0];
     for(int n=1;n<=Fn;n++){
       temp = temp + FC[2*n-1]*cos(n*w*t) + FC[2*n]*sin(n*w*t);
@@ -925,27 +919,17 @@ void VectorTransmissionSpecies::calcInverseDFTExp(double* tArray, int aL, vector
   }
 }
 
-void VectorTransmissionSpecies::rotateArray(double* rArray, int aLength, double rAngle) {
-  double* tempArray = (double *)malloc((aLength)*sizeof(double));
+void VectorTransmissionSpecies::rotateArray(vector<double>& rArray, double rAngle) {
+  vector<double> tempArray (rArray.size());
+  size_t rotIndex = size_t ((rAngle*rArray.size())/(2.0*M_PI));
 
-  int rotIndex = (int)((rAngle*aLength)/(2*M_PI));
-
-#   ifdef TransmissionModel_PrintRotateArray
-  PrintArray((char*)"PrerotationArray", rArray, aLength);
-#   endif
-
-
-  for (int i=0;i<aLength; i++) {
-    int tIndex = (i+rotIndex) % aLength;
-    tempArray[tIndex] = rArray[i];
+  for (size_t i=0; i < rArray.size(); i++) {
+    tempArray[(i+rotIndex) % rArray.size()] = rArray[i];
   }
-    
-  for (int i=0; i<aLength; i++){
-    rArray[i] = tempArray[i];
-  }
-
-#   ifdef TransmissionModel_PrintRotateArray
-  PrintArray((char*)"PostrotationArray", rArray, aLength);
-#   endif
-  free(tempArray);
+  
+# ifdef TransmissionModel_PrintRotateArray
+  PrintArray((char*)"PrerotationArray", rArray);
+  PrintArray((char*)"PostrotationArray", tempArray);
+# endif
+  rArray = tempArray;
 }
