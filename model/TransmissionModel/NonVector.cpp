@@ -35,7 +35,7 @@ NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::int
   Simm=getParameter(Params::SIMM);
   Estar=getParameter(Params::E_STAR);
   Xstar_p=getParameter(Params::X_STAR_P);
-  no = (int *) malloc(((Global::intervalsPerYear))*sizeof(int));
+  nDays = (int *) malloc(((Global::intervalsPerYear))*sizeof(int));
   maxIntervals=maxDurIntPhaseEIR/Global::interval;
   ino = (int *) malloc(((maxIntervals))*sizeof(int));
   intEIR = (double *) malloc(((maxIntervals))*sizeof(double));
@@ -73,7 +73,7 @@ NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::int
 }
 
 NonVectorTransmission::~NonVectorTransmission () {
-  free(no);
+  free(nDays);
   free(ino);
   free(intEIR);
 }
@@ -91,7 +91,7 @@ void NonVectorTransmission::inputEIR () {
   if (Global::simulationMode != transientEIRknown) {
     for (size_t j=0;j<Global::intervalsPerYear; j++) {
       initialisationEIR[j]=0.0;
-      no[j]=0;
+      nDays[j]=0;
     }
   } else {
     for (int j=0;j<maxIntervals; j++) {
@@ -112,12 +112,11 @@ void NonVectorTransmission::inputEIR () {
     // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
     // some compilers may round it to -1.
     int istep = (day-1) / Global::interval;
-    if ( Global::simulationMode !=  transientEIRknown) {
-      size_t i1 = Global::modIntervalsPerYear(1+istep) - 1;
+    if (Global::simulationMode !=  transientEIRknown) {
       size_t i2 = (1+istep) % Global::intervalsPerYear;
-      no[i1]++;
+      nDays[i2]++;
       //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-      initialisationEIR[i2] = ((initialisationEIR[i2] * (no[i1]-1)) + EIRdaily) / no[i1];
+      initialisationEIR[i2] = ((initialisationEIR[i2] * (nDays[i2]-1)) + EIRdaily) / nDays[i2];
     } else {
       ino[istep]++;
       intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
@@ -148,8 +147,8 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
 	return initialisationEIR[simulationTime % Global::intervalsPerYear];
       } else {
 	return initialisationEIR[simulationTime % Global::intervalsPerYear] *
-            kappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1] /
-            initialKappa[Global::modIntervalsPerYear(simulationTime-nspore) - 1];
+            kappa[(simulationTime-nspore) % Global::intervalsPerYear] /
+            initialKappa[(simulationTime-nspore) % Global::intervalsPerYear];
       }
       break;
     default:	// Anything else.. don't continue silently

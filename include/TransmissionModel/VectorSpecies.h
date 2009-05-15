@@ -49,7 +49,7 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (scnXml::Anopheles anoph, double EIR[]);
+  void initialise (scnXml::Anopheles anoph, vector<double>& EIR);
   
   ~VectorTransmissionSpecies ();
   //@}
@@ -69,7 +69,7 @@ public:
    * 	Mathematically, we require this parameter to be a positive
    * 	real number, so although this will typically be a natural 
    * 	number, it is not restricted to being one. */
-  void calMosqEmergeRate (int populationSize, double initialKappa[]); 
+  void calMosqEmergeRate (int populationSize, vector<double>& initialKappa); 
   
   /** Called per time-step. Does most of calculation of EIR.
    *
@@ -188,26 +188,14 @@ private:
   
   /* Functions */
   
-  //! This subroutine converts vectors of length intervalsPerYear to daysInYear. 
-  /*! 
-    we expect to put the following this into VectorTransmission class 
- 
-    Note that ShortArray is assumed to be a pointer to a double array 
-    of length intervalsPerYear. We do not explicitly check this. 
- 
-    For now, we assume that we will use intervalsPerYear and 
-    daysInYear as they are defined in global.f. We do not make this 
-    subroutine a general subroutine that converts from a given 
-    length to another given length. 
- 
-    Note: We also assume that: 
-    daysInYear = interval*intervalsPerYear. 
-	 
-    \param FullArray an array of doubles of length daysInYear 
-    \param ShortArray a pointer to a array of doubles of length intervalsPerYear 
-    \sa daysInYear, interval, intervalsPerYear 
-  */ 
-  void convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray); 
+  /** This subroutine converts ShortArray of length intervalsPerYear to
+   * FullArray by copying and duplicating elements to fill the gaps.
+   *
+   * It also rotates FullArray slightly, since the indecies of some input
+   * arrays used to be one-based but are now zero based while the use of the
+   * output is unchanged. NOTE: may not be correct, but this preserves the
+   * previous situation. */
+  void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
 
 
   /** calcInitMosqEmergeRate() calculates the mosquito emergence rate given

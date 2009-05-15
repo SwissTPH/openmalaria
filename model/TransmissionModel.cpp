@@ -54,17 +54,14 @@ TransmissionModel::TransmissionModel(){
   EIPDuration = get_EipDuration();
   PerHostTransmission::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
   
-  kappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
-  initialKappa = (double *) malloc(((Global::intervalsPerYear))*sizeof(double));
-  initialisationEIR = new double[Global::intervalsPerYear];
+  kappa.resize (Global::intervalsPerYear);
+  initialKappa.resize (Global::intervalsPerYear);
+  initialisationEIR.resize (Global::intervalsPerYear);
   
   initAgeExposureConversion();
 }
 
 TransmissionModel::~TransmissionModel () {
-  free(kappa);
-  free(initialKappa);
-  delete [] initialisationEIR;
 }
 
 double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host) {
@@ -75,7 +72,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host)
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
-  size_t tmod = (Simulation::simulationTime - 1) % Global::intervalsPerYear;
+  size_t tmod = Simulation::simulationTime % Global::intervalsPerYear;
   //Prevent NaNs
   if (sumWeight == 0.0) {
     kappa[tmod] = 0.0;
@@ -85,11 +82,11 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   }
   
   //Calculate time-weighted average of kappa
-  if (tmod == 0) {
+  if (tmod == 1) {
     _sumAnnualKappa = 0.0;
   }
-  _sumAnnualKappa += kappa[tmod] * Global::interval * initialisationEIR[(tmod+1)%Global::intervalsPerYear];
-  if (tmod + 1 == Global::intervalsPerYear) {
+  _sumAnnualKappa += kappa[tmod] * Global::interval * initialisationEIR[tmod];
+  if (tmod == 0) {
     if (annualEIR == 0) {
       _annualAverageKappa=0;
       cerr << "aE.eq.0" << endl;
@@ -101,7 +98,7 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
 }
 
 void TransmissionModel::summarize (Summary& summary) {
-  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
+  summary.setNumTransmittingHosts(kappa[Simulation::simulationTime % Global::intervalsPerYear]);
   summary.setAnnualAverageKappa(_annualAverageKappa);
 }
 

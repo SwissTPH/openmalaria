@@ -96,7 +96,7 @@ public:
   
   /** Little function to copy kappa to initialKappa. */
   inline void copyToInitialKappa () {
-    memcpy (initialKappa, kappa, Global::intervalsPerYear * sizeof(*kappa));
+    initialKappa = kappa;
   }
   
   /** Returns the EIR, per host and per time step.
@@ -119,17 +119,17 @@ protected:
    * Only NonVectorTransmission?
    * Not checkpointed; doesn't need to be for NonVectorTransmission (unless
    * changeEIR intervention occurred). */
-  double *initialisationEIR; 
+  vector<double> initialisationEIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.
    *
    * Checkpointed. */
-  double *kappa; 
+  vector<double> kappa; 
 
   /** initialKappa[] is the value of kappa during the pre-intervention phase.
    * 
    * Doesn't need to be checkpointed. */
-  double *initialKappa; 
+  vector<double> initialKappa; 
   
 private:
   /*! annAvgKappa is the overall proportion of mosquitoes that get infected

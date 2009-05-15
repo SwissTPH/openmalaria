@@ -26,7 +26,6 @@
 /* We also include library headers here. */ 
 #include "TransmissionModel.h"
 
-//#define VectorTransmission_PRINT_calMosqEmergeRate
 //#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
 

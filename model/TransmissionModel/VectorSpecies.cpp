@@ -28,7 +28,7 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, double initialisationEIR[]) {
+void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, vector<double>& initialisationEIR) {
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
@@ -285,7 +285,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
  */ 
 
 
-void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double initialKappa[]) {
+void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& initialKappa) {
   //TODO: is this still correct?
   /* Number of types of hosts. 
   Dimensionless.
@@ -408,29 +408,13 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
   // updateOneLifespan period as a forced EIR. We should now copy EIR to an
   // array of length daysInYear, without smoothing (since humans only
   // experience 1 EIR value per timestep).
-  //NOTE: hack to still use the old one-based arrays (initialisationEIR was one-based):
-  double shiftedEIR[Global::intervalsPerYear];
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    shiftedEIR[i] = speciesEIR[(i+1)%Global::intervalsPerYear];
-  convertLengthToFullYear(EIRInit, shiftedEIR);
+  convertLengthToFullYear(EIRInit, speciesEIR);
   // The other option would be to smooth (or recalculate from FCEIR).
   //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
   
-# ifdef VectorTransmission_PRINT_calMosqEmergeRate
-  char shortEIRname[15] = "ShortEIR";
-  char longEIRname[15] = "LongEIR";
-  PrintArray(shortEIRname, speciesEIR);
-  PrintArray(longEIRname, EIRInit, daysInYear);
-# endif
   speciesEIR.clear();	// this is finished with; frees memory?
-
+  
   convertLengthToFullYear(humanInfectivityInit, initialKappa);
-# ifdef VectorTransmission_PRINT_calMosqEmergeRate
-  char shortKviname[15] = "ShortKvi";
-  char longKviname[15] = "LongKvi";
-  PrintArray(shortKviname, initialKappa, Global::intervalsPerYear);
-  PrintArray(longKviname, humanInfectivityInit, daysInYear);
-# endif
   
   
   /* Find an initial estimate of the mosquito emergence rate, in
@@ -485,10 +469,13 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, double in
   }
 }
 
-void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], double* ShortArray) {
+void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray) {
+  // shift by one (convert ShortArray from a zero-based array to a one-based array):
+  // This may not be what's wanted, but's it's equivalent to what used to happen.
+  
   for (size_t i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
-      FullArray[i*Global::interval+j] = ShortArray[i];
+      FullArray[((i+1)*Global::interval)%daysInYear + j] = ShortArray[i];
     }
   }
 }

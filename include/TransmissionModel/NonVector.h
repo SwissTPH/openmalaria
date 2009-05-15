@@ -93,7 +93,7 @@ private:
   int maxIntervals; 
   
   //! Number of days contributing to each EIR estimate for pre-intervention 
-  int *no;
+  int *nDays;
 
   /// Number of days contributing to each EIR estimate (post intervention) 
   int *ino;
