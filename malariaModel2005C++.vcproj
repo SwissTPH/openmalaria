@@ -393,11 +393,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\TransmissionModel\PerHost.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\TransmissionModel\Vector.h"
 					>
 				</File>
 				<File
 					RelativePath=".\include\TransmissionModel\VectorInternal.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\TransmissionModel\VectorSpecies.h"
 					>
 				</File>
 			</Filter>
@@ -545,11 +553,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\model\TransmissionModel\PerHost.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\model\TransmissionModel\Vector.cpp"
 					>
 				</File>
 				<File
 					RelativePath=".\model\TransmissionModel\VectorInternal.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\TransmissionModel\VectorSpecies.cpp"
 					>
 				</File>
 			</Filter>

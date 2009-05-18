@@ -811,7 +811,7 @@ void PrintArray(char vectorname[], double* v, int n){
 void PrintArray(char vectorname[], vector<double>& v){
   FILE* fpp = fopen(fntestentopar, "a");
   
-  for (uint i=0; i < v.size(); i++){
+  for (unsigned int i=0; i < v.size(); i++){
     fprintf(fpp, "%s(%u) = %f; \n", vectorname, i+1, v[i]);
   }
   fclose(fpp);
