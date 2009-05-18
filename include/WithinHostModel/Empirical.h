@@ -25,7 +25,8 @@ public:
   EmpiricalWithinHostModel ();
   double getNewDensity(double * transformedLaggedDensities, int ageOfInfection);
   void initialiseInfection(double * transfomedLaggedDensities);
-  void setInflationFactors(double inflationMean, double inflationVariance);
+  void setInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
+
 private:
   double getInflatedDensity(double nonInflatedDensity);
   double sigma_noise(int ageOfInfection);
@@ -38,6 +39,8 @@ private:
   double _subPatentLimit;
   double _inflationVariance;
   double _inflationMean;
+  double _extinctionLevel;
+  double _overallMultiplier;
   double _lambda;
   double _alpha1;
 	double _alpha2;	

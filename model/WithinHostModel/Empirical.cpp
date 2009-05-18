@@ -86,7 +86,6 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel(){
 void EmpiricalWithinHostModel::initialiseInfection(double * transformedLaggedDensities){
 //sample the parasite densities for the last 3 prepatent days
 //note that the lag decreases with time
-_subPatentLimit=10.0;
 transformedLaggedDensities[0]=sampleSubPatentValue(_alpha1,_sigma_alpha1,boxCoxTransform(_subPatentLimit));  
 transformedLaggedDensities[1]=sampleSubPatentValue(_alpha2,_sigma_alpha2,boxCoxTransform(_subPatentLimit)); 
 transformedLaggedDensities[2]=sampleSubPatentValue(_alpha3,_sigma_alpha3,boxCoxTransform(_subPatentLimit));  
@@ -94,51 +93,63 @@ return;
 }
 
 double EmpiricalWithinHostModel::getNewDensity(double * transformedLaggedDensities, int ageOfInfection){
-double newDensity=-9.99;
-double transformedInflatedDensity=9999.9;
+double newDensity=-9.99;  
+double transformedInflatedDensity=-9999999.99;
+if (transformedLaggedDensities[0]>-999999.9) {
 //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
-double L[3];
-for (int i=0;i<3;i++) L[i]=transformedLaggedDensities[i];
+  double L[3];
+  for (int i=0;i<3;i++) L[i]=transformedLaggedDensities[i];
 // constraints to ensure the density is defined and not exploding
-double upperLimitofTransformedDensity=boxCoxTransform(_maximumPermittedAmplificationPerCycle*inverseBoxCoxTransform(L[1])/_inflationMean);
-double amplificationPerCycle=999999.9;
-int tries0=0;
-while (((newDensity <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
-  int tries1=0;
-  double transformedDensity=9999.9;
-  while ((transformedDensity>upperLimitofTransformedDensity) && (tries1<10)) {
-    double b_1=W_GAUSS(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
-    double b_2=W_GAUSS(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
-    double b_3=W_GAUSS(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
-    double expectedTransformedDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
+  double upperLimitofTransformedDensity=boxCoxTransform(_maximumPermittedAmplificationPerCycle*inverseBoxCoxTransform(L[1])/_inflationMean);
+  double amplificationPerCycle=999999.9;
+  int tries0=0;
+  while (((newDensity <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
+    int tries1=0;
+    double transformedDensity=9999.9;
+    while ((transformedDensity>upperLimitofTransformedDensity) && (tries1<10)) {
+      double b_1=W_GAUSS(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
+      double b_2=W_GAUSS(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
+      double b_3=W_GAUSS(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
+      double expectedTransformedDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
 //include sampling error
-    transformedDensity=W_GAUSS(expectedTransformedDensity,sigma_noise(ageOfInfection));
-    tries1++;
+      transformedDensity=W_GAUSS(expectedTransformedDensity,sigma_noise(ageOfInfection));
+      tries1++;
+    }
+    if (tries1 > 9) transformedDensity=upperLimitofTransformedDensity;
+    newDensity= getInflatedDensity(transformedDensity); 
+    if ((ageOfInfection==0) && (newDensity < _subPatentLimit)) newDensity=-9.9; 
+    tries0++;
+    if (tries0 > 9) newDensity=_maximumPermittedAmplificationPerCycle*inverseBoxCoxTransform(L[1]);
+    transformedInflatedDensity=boxCoxTransform(newDensity);
+    amplificationPerCycle=newDensity/inverseBoxCoxTransform(L[1]);
   }
-  if (tries1 > 9) transformedDensity=upperLimitofTransformedDensity;
-  newDensity= getInflatedDensity(transformedDensity); 
-  if ((ageOfInfection==0) && (newDensity < _subPatentLimit)) newDensity=-9.9; 
-  tries0++;
-  if (tries0 > 9) newDensity=_maximumPermittedAmplificationPerCycle*inverseBoxCoxTransform(L[1]);
-  transformedInflatedDensity=boxCoxTransform(newDensity);
-  amplificationPerCycle=newDensity/inverseBoxCoxTransform(L[1]);
 }
 transformedLaggedDensities[2]=transformedLaggedDensities[1];
 transformedLaggedDensities[1]=transformedLaggedDensities[0];
 transformedLaggedDensities[0]=transformedInflatedDensity;
-return newDensity;
+if (newDensity*_overallMultiplier< _extinctionLevel) {
+  transformedLaggedDensities[0]=-9999999.99;
+  newDensity=-9.99;
+}
+return newDensity*_overallMultiplier;
 }
 
 double EmpiricalWithinHostModel::sampleSubPatentValue(double mu, double sigma, double upperBound){
   double nonInflatedValue;
+  int tries=0;
   do {
     nonInflatedValue=W_GAUSS(mu, sigma);
-  } while (nonInflatedValue>upperBound);
-  double returnValue;
+    tries++;
+  } while ((nonInflatedValue>upperBound) && tries<10);
+  if (nonInflatedValue>upperBound) nonInflatedValue=upperBound;
+  double inflatedValue;
+  tries=0;
   do {
-    returnValue=getInflatedDensity(nonInflatedValue);
-  } while (returnValue>upperBound);
-  return nonInflatedValue;
+    inflatedValue=getInflatedDensity(nonInflatedValue);
+    tries++;
+  } while ((inflatedValue>upperBound) && tries<10);
+  if (inflatedValue>upperBound) inflatedValue=upperBound;
+  return inflatedValue;
 }
 
 double EmpiricalWithinHostModel::samplePatentValue(double mu, double sigma, double lowerBound){
@@ -158,9 +169,12 @@ double EmpiricalWithinHostModel::boxCoxTransform(double untransformedValue){
 return (exp(_lambda*log(untransformedValue))-1.0)/_lambda;
 }
 
-void EmpiricalWithinHostModel::setInflationFactors(double inflationMean, double inflationVariance){
+void EmpiricalWithinHostModel::setInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier){
   _inflationVariance=inflationVariance;
   _inflationMean=inflationMean;
+  _extinctionLevel=extinctionLevel;
+  _overallMultiplier=overallMultiplier;
+  _subPatentLimit=10.0/overallMultiplier;
 }
 
 double EmpiricalWithinHostModel::sigma_noise(int ageOfInfection) {

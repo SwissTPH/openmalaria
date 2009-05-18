@@ -19,6 +19,7 @@
 */
 #ifndef Hmod_global
 #define Hmod_global
+#pragma warning(disable: 4290)
 #include "Constant.h"
 #include <fcntl.h>
 #include <math.h>
