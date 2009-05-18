@@ -13,6 +13,7 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class SchemaTranslator {
@@ -31,7 +32,7 @@ public class SchemaTranslator {
         }
     }
 
-    private void translate(File documentFile) throws Exception {
+    private void translate(File documentFile, File outDir) throws Exception {
         Document scenarioDocument = _builder.parse(documentFile);
         Element scenarioElement = scenarioDocument.getDocumentElement();
         String schemaVersion = scenarioElement.getAttribute("schemaVersion");
@@ -57,7 +58,8 @@ public class SchemaTranslator {
         default:
             System.out.println("Not a recognized schemaVersion");
         }
-        File outFile = new File("translatedScenarios/" + documentFile.getName());
+        File outFile = new File(outDir, documentFile.getName());
+        outFile.createNewFile();
         OutputStream os = new FileOutputStream(outFile);
         Result result = new StreamResult(os);
         // Write the DOM document to the file
@@ -72,22 +74,24 @@ public class SchemaTranslator {
         scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
                 "scenario.xsd");
         scenarioElement.setAttribute("schemaVersion", "2");
-        if (((Element) scenarioElement.getElementsByTagName("entoData").item(0))
-                .hasAttribute("firstDay")) {
+        if (!scenarioElement.hasAttribute("wuID"))
+        	scenarioElement.setAttribute("wuID", "0");
+        if (!scenarioElement.hasAttribute("assimMode"))
+        	scenarioElement.setAttribute("assimMode", "0");
+        Element elt = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
+        if (elt != null && elt.hasAttribute("firstDay")) {
             System.out.println("Warning: Removed firstDay attribute");
-            ((Element) scenarioElement.getElementsByTagName("entoData").item(0))
-                    .removeAttribute("firstDay");
+            elt.removeAttribute("firstDay");
         }
-
-        if (((Element) scenarioElement.getElementsByTagName("changeEIR")
-                .item(0)) != null) {
-            if (((Element) scenarioElement.getElementsByTagName("changeEIR")
-                    .item(0)).hasAttribute("firstDay")) {
-                System.out.println("Warning: Removed firstDay attribute");
-                ((Element) scenarioElement.getElementsByTagName("changeEIR")
-                        .item(0)).removeAttribute("firstDay");
-            }
+        elt = (Element) scenarioElement.getElementsByTagName("changeEIR").item(0);
+        if (elt != null && elt.hasAttribute("firstDay")) {
+        	System.out.println("Warning: Removed firstDay attribute");
+        	elt.removeAttribute("firstDay");
         }
+        elt = (Element) scenarioElement.getElementsByTagName("parameters").item(0);
+        if (elt != null && elt.hasAttribute("useIseed"))
+        	elt.removeAttribute("useIseed");
+        
         NodeList sourcesElements = scenarioElement
                 .getElementsByTagName("sources");
         for (int index = 0; index < sourcesElements.getLength(); index++) {
@@ -132,16 +136,16 @@ public class SchemaTranslator {
         scenarioElement.setAttribute("schemaVersion", "3");
     }
 
-    private void visitAllFiles(File file) throws Exception {
+    private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {
             String[] children = file.list();
             for (int i = 0; i < children.length; i++) {
-                visitAllFiles(new File(file, children[i]));
+                visitAllFiles(new File(file, children[i]), outDir);
             }
         } else {
             if (file.getName().endsWith(".xml")) {
                 System.out.println(file.getAbsolutePath());
-                translate(file);
+                translate(file, outDir);
             }
         }
     }
@@ -161,7 +165,13 @@ public class SchemaTranslator {
 
         SchemaTranslator st = new SchemaTranslator(required_version);
         try {
-            st.visitAllFiles(new File("scenarios"));
+        	File scenarios = new File("scenarios");
+        	if (!scenarios.isDirectory())
+        		scenarios.mkdir();
+        	File outDir = new File("translatedScenarios");
+        	if (!outDir.isDirectory())
+        		outDir.mkdir();
+            st.visitAllFiles(scenarios, outDir);
         } catch (Exception e) {
             e.printStackTrace();
         }
