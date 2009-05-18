@@ -11,9 +11,9 @@ openMalaria_SOURCES = openMalaria.cpp\
  EntoIntervention.cpp\
  PresentationModel.cpp
 
-openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a
+openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a PresentationModel/libPresentationModel.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a
 
-openMalaria_LDADD = $(top_builddir)/xsdcxx/libxsdcxx.a PresentationModel/libPresentationModel.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a\
+openMalaria_LDADD = $(openMalaria_DEPENDENCIES)\
  -L@top_builddir@/lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@/xsdcxx

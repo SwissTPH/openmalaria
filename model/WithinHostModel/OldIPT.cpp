@@ -45,6 +45,9 @@ void OldIPTWithinHostModel::initParameters () {
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) return;
   
+  if (Global::interval != 5)
+    throw domain_error ("IPT code only supports using an interval of 5");
+  
   // --- IptiDescription begin ---
   const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
   
@@ -137,16 +140,24 @@ void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
 
 void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   if (Simulation::timeStep <= 0) return;
-  
   // assumes 5-day intervals and Niakhar seasonality
-  static int IPT_MIN_INTERVAL[9] = { 42, 48, 54, 60, 66, 36, 30, 24, 18 };
-  static int IPT_MAX_INTERVAL[9] = { 60, 66, 72, 78, 82, 54, 48, 42, 42 };
+  // These numbers, should have MAX = MIN + 18 (modulo 73).
+  static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
+  static int IPT_MAX_INTERVAL[9] = { 61, 67, 73,  6, 12, 55, 49, 43, 31 };
   
   if (iptiEffect >= 14 && iptiEffect <= 22) {
-    int yearInterval = (Global::modIntervalsPerYear(Simulation::simulationTime)-1);
-    if (yearInterval <  IPT_MIN_INTERVAL[iptiEffect-14] &&
-        yearInterval >= IPT_MAX_INTERVAL[iptiEffect-14])
-      return;
+    int yearInterval = (Global::modIntervalsPerYear(Simulation::simulationTime));
+    //int yearInterval = Simulation::simulationTime % Global::intervalsPerYear;
+    int min = IPT_MIN_INTERVAL[iptiEffect-14];
+    int max = IPT_MAX_INTERVAL[iptiEffect-14];
+    // We're using modular arithmatic here, to represent a time period 5*18 days long.
+    if (min < max) {
+      if (yearInterval < min || yearInterval >= max)
+	return;
+    } else {
+      if (yearInterval < min && yearInterval >= max)
+	return;
+    }
   }
   
   for (int i=0;i<numberOfIPTiDoses; i++) {
