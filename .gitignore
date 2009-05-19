@@ -5,3 +5,5 @@ autom4te.cache
 # These two folders are tracked in svn anyway (git won't track folders).
 util/SchemaTranslator/scenarios
 util/SchemaTranslator/translatedScenarios
+util/.metadata
+util/SchemaTranslator/SchemaTranslator.class
