@@ -1,6 +1,6 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
-AC_PREREQ(2.63)
+AC_PREREQ(2.59)
 AC_INIT([malariaModel],[0.9])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_MACRO_DIR([m4])
@@ -15,7 +15,8 @@ AC_PROG_AWK
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PROG_CPP
-AC_PROG_MKDIR_P
+#This check causes a problem with autoconf 2.59
+#AC_PROG_MKDIR_P
 
 AC_ARG_ENABLE(boinc,
  [  --enable-boinc  Enables boinc integration (required for deploy, allows checkpointing)],
@@ -83,7 +84,7 @@ fi
 
 
 #check posix threads
-AC_CHECK_LIB(pthread,pthread_create,, [AC_MSG_FAILURE([pthread not present])])
+AC_CHECK_LIB(pthread,pthread_join,, [AC_MSG_FAILURE([pthread not present])])
 
 dnl Check for glut In the future we will check for the good glut
 AX_CHECK_GL="-lGL"
