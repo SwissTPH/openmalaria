@@ -18,7 +18,7 @@ XSDFLAGS = --type-naming ucc --function-naming java\
 --generate-doxygen
 
 
-%.cxx %.hxx %.ixx: ../test/original/%.xsd
+%.cxx %.hxx %.ixx: %.xsd
 	$(XSD) cxx-tree $(XSDFLAGS) $<
 
 clean: clean-am clean-scenario

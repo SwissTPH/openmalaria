@@ -55,7 +55,6 @@ const scnXml::CaseManagements* getCaseManagements();
 const scnXml::HealthSystem& getHealthSystem();
 
 // Change xml data for certain interventions
-void changeEntoData (const scnXml::EntoData*);
 void changeHealthSystem (const scnXml::HealthSystem*);
 
 /// Get the intervention from interventions->timed with time time.
@@ -116,7 +115,6 @@ double get_popperc(int);
 
 double get_delta(); 
 int get_latentp(); 
-int get_EipDuration();
 int get_interval(); 
 double get_ipti_effect(); 
 double get_genotype_freq(int ); 

@@ -31,7 +31,7 @@ using namespace std;
 // scnXml::), but I recommend code within the model explicitly do this.
 using namespace scnXml;
 
-const int SCHEMA_VERSION = 3;
+const int SCHEMA_VERSION = 4;
 
 /** @brief The xml data structure. */
 const Scenario* scenario;
@@ -140,9 +140,6 @@ const HealthSystem& getHealthSystem() {
   return *healthSystem;
 }
 
-void changeEntoData (const EntoData* ed) {
-  entoData = ed;
-}
 void changeHealthSystem (const HealthSystem* hs) {
   healthSystem = hs;
 }
@@ -248,10 +245,6 @@ Anopheles * getAnopheles(string name){
 
 int get_latentp(){ 
   return parameters->getLatentp();
-}
-
-int get_EipDuration(){ 
-  return parameters->getEipDuration();
 }
 
 int get_interval(){ 

@@ -44,14 +44,18 @@ const double TransmissionModel::bsa_prop[nwtgrps] = { 0.1843, 0.2225, 0.252, 0.2
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  if (getEntoData().getAnopheles().size())
-    return new VectorTransmission();
-  else
-    return new NonVectorTransmission();
+  const scnXml::EntoData::VectorOptional& vectorData = getEntoData().getVector();
+  if (vectorData.present())
+    return new VectorTransmission(vectorData.get());
+  else {
+    const scnXml::EntoData::NonVectorOptional& nonVectorData = getEntoData().getNonVector();
+    if (!nonVectorData.present())	// should be a validation error, but anyway...
+      throw xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
+    return new NonVectorTransmission(nonVectorData.get());
+  }
 }
 
 TransmissionModel::TransmissionModel(){
-  EIPDuration = get_EipDuration();
   PerHostTransmission::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
   
   kappa.resize (Global::intervalsPerYear);

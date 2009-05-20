@@ -22,14 +22,21 @@
 
 #include "TransmissionModel.h"
 
+namespace scnXml {
+  class NonVector;
+}
+
 //! Base transmission model, as used in Phase A
 class NonVectorTransmission : public TransmissionModel { 
 public:
 
-  NonVectorTransmission();
+  NonVectorTransmission(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorTransmission();
   //! initialise the main simulation 
-  void initMainSimulation (int populationSize); 	
+  void initMainSimulation (int populationSize);
+  
+  /** Change the scnXml::NonVector data (changeEIR intervention). */
+  void setNonVectorData (const scnXml::NonVector& nonVectorData);
 
  /*! 
   1. Calculates h from the EIR measured on adults where 
@@ -52,7 +59,7 @@ public:
    * and converts this into EIR estimates per five day period
    * assuming that the annual cycle repeated during the pre-intervention period
    */
-  virtual void inputEIR (); 
+  void inputEIR (const scnXml::NonVector& nonVectorData); 
 
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
@@ -66,8 +73,8 @@ private:
   /// appropriate time period. EIRdaily is the value of the daily EIR read in
   /// from the .XML file.
   void updateEIR (int day, double EIRdaily); 
-  double averageEIR (); 
-
+  double averageEIR (const scnXml::NonVector& nonVectorData); 
+  
 //! multiplier used to calculate a positive EIR value where the measured value is zero
 /* 
   0.01 was old pv(30) Now a constant. min_EIR_mult multiplies the average EIR to obtain a value used for the EIR during periods when it is too low 

@@ -49,9 +49,10 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (scnXml::Anopheles anoph, vector<double>& EIR);
+  void initialise (scnXml::Anopheles& anoph, vector<double>& EIR);
   
-  ~VectorTransmissionSpecies ();
+  /** Called to free memory instead of a destructor. */
+  void destroy ();
   //@}
   
   /*! get mosquito emergence rates 
@@ -94,7 +95,6 @@ public:
    * Units: days. */
   int mosqRestDuration;
   
-  //FIXME: here or in TransmissionModel?
   /** Duration of the extrinsic incubation period (sporozoite development time)
   * (θ_s).
   * Units: Days.
@@ -184,6 +184,9 @@ private:
    *
    * Length: Global::intervalsPerYear */
   vector<double> speciesEIR;
+  
+  /** A reference to the XML data for this variant of anopheles mosquito. */
+  scnXml::Anopheles* anophelesData;
   //@}
   
   /* Functions */

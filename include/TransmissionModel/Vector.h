@@ -28,13 +28,16 @@
 
 //#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
+namespace scnXml {
+  class Vector;
+}
 
 //! Transmission models, Chitnis et al
 class VectorTransmission : public TransmissionModel {
 public:
   friend class PerHostTransmission;
   
-  VectorTransmission();
+  VectorTransmission(scnXml::Vector vectorData);
   virtual ~VectorTransmission();
   
   /** Initialise the main simulation.

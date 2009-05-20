@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" popSize="100" schemaVersion="3" simulationDuration="1465" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" popSize="100" schemaVersion="4" simulationDuration="1465" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_4.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -213,375 +214,375 @@
       <group cfr="0.1378378" lowerbound="15"/>
     </CFR>
   </healthSystem>
-  <entoData inputType="EIR" name="Namawala1_16*1.0">
-    <EIRDaily origin="Namawala Pre">0.011646449</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.010093589</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012399958</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00417152</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.032564215</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.022553714</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.109582625</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03679304</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.019256035</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.021840315</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.12177057</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.062335003</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.08145638</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02654187</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.18463561</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.12458692</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.15459837</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.091613</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.29196343</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.17139332</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.17837547</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.17242761</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.09780438</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.15611112</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.24088523</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.13097599</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.24442644</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.20882814</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.32493162</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.16841653</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.19186127</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.21454392</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.18540058</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.26535854</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.19882336</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3791184</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3377986</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3828573</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.37944216</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.36320302</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3490869</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.56899995</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.25438538</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3142507</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.44112965</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.32541868</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.69834</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.4899244</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.35683113</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3121363</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.26744142</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3126749</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.21521434</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.3667958</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.4191633</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.18140669</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.2747903</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.2058499</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.1433344</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.1390053</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.094167195</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07993647</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.038923204</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.051262997</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.040923014</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.037337396</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.036820255</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02212682</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024907356</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029843846</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.025112208</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018432332</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023211243</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024670988</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029928366</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03922547</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04500285</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04982474</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.042215154</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.041410074</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.036191374</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03292521</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03233501</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.026036188</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.016353734</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04388118</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02623674</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.027153559</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018122906</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.031979743</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.045998458</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.031938203</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.047396604</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04554005</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.049647108</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.030711958</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.037540816</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.044699155</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07712299</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.041427262</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.032465372</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.046409596</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.036858935</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.08993408</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.06211869</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.058447123</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.042765245</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.054427452</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07138284</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.08039774</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0594327</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.05522537</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.032177433</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03763966</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07012222</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.06978414</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.10657288</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.067280084</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0648362</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.05537435</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.047952425</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.049419336</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.045265004</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.040958825</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.057014596</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03499808</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04717886</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.05518669</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04024543</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.025335683</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029351056</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.026296908</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.022079546</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.041281145</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.11026307</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.062466796</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.05943127</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.056480262</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04188424</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.076269194</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.062529825</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.04762151</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07641102</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07051903</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.067500696</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.046847947</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.063968085</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.08584851</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.06953345</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0721206</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.051470716</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.039705366</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.034995213</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.026332721</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020061115</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023596594</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.022207042</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0146031855</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.021980703</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.021591054</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018779004</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.028917</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023653895</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029028738</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.026398618</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024789888</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02412806</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024848623</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02335163</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02008117</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018121473</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.026362805</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.01748543</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020320402</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.019141432</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029756462</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029429846</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018151557</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015742045</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.021999326</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023473395</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.019013938</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.017526975</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.027064743</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02552191</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018582746</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018049847</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.017498324</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015657526</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015595927</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012024636</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012142103</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0064076954</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.013071814</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0149111785</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009530606</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.007446278</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.019781772</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009378757</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00834304</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0073058903</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0073717865</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0056369957</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0046743373</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005675674</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.01578502</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0063460968</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005303217</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0079978015</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0035727236</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0047832094</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008874508</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.011265396</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.013190714</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0066440627</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.004841943</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008280009</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005114123</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008956162</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009964662</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009698211</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.010978891</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00782733</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009812813</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0069047827</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0039967517</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0052946215</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0065924916</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.007890361</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009185366</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.010483236</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.011781107</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0096007995</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024100844</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009689616</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.018307703</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008214112</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0063375016</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005778816</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005887688</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00599656</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0061054323</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005922069</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.016250592</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009122335</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.011007542</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012892747</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012689329</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0071540424</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00676153</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009755513</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023063693</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015663255</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0074634682</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009534903</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0065495158</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015757803</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.007878901</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.010526212</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.01070098</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008446182</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.001194728</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005664214</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.006919108</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008174002</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015299394</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008417532</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.013927032</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0109617</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0084003415</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0012806796</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012918533</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008552189</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0052688364</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009325754</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.009758377</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008274279</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0067987754</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.008196922</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.002186037</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.001773469</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0013580361</EIRDaily>
-    <EIRDaily origin="Namawala Pre">6.073917E-4</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0018680159</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0023779958</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0036128343</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0035154226</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0035641284</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0030140379</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily>
-    <EIRDaily origin="Namawala Pre">4.8992445E-4</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0023694006</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0017448185</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.002392321</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0030426884</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0036901908</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.004337693</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0049851956</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0056355633</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.006283066</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.016909555</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005798871</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0045468425</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.002137331</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0026387158</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0013666312</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0012720844</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0010686655</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.00417152</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005394899</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0049221646</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0011059112</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0024267016</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.002650176</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0117324</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005329002</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.016726192</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.014170562</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.040039144</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020029599</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020791704</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020510929</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.023834392</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.020009544</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02158246</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03534905</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0016932475</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.041070566</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.08855312</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.067108184</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.10968863</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.049932178</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.06417723</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.052754257</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.07044311</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.036423445</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02869066</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.019367771</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.045640327</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.02805462</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.038941827</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.025974588</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.017794857</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.06690763</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.029624669</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03307706</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.01947378</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.03999044</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.024923114</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.013712154</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.005033902</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.012981565</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.015700502</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0040827035</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0046156035</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0013637661</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0032489724</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.006391938</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0053461925</EIRDaily>
-    <EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily>
-  </entoData>
-  <parameters delta="0.000548" eipDuration="10" interval="5" iseed="0" latentp="3">
-    <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
+  <entoData name="Namawala1_16*1.0">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <nonVector eipDuration="10"><EIRDaily origin="Namawala Pre">0.011646449</EIRDaily><EIRDaily origin="Namawala Pre">0.012176484</EIRDaily><EIRDaily origin="Namawala Pre">0.010093589</EIRDaily><EIRDaily origin="Namawala Pre">0.012176484</EIRDaily><EIRDaily origin="Namawala Pre">0.012399958</EIRDaily><EIRDaily origin="Namawala Pre">0.00417152</EIRDaily><EIRDaily origin="Namawala Pre">0.032564215</EIRDaily><EIRDaily origin="Namawala Pre">0.022553714</EIRDaily><EIRDaily origin="Namawala Pre">0.109582625</EIRDaily><EIRDaily origin="Namawala Pre">0.03679304</EIRDaily><EIRDaily origin="Namawala Pre">0.019256035</EIRDaily><EIRDaily origin="Namawala Pre">0.021840315</EIRDaily><EIRDaily origin="Namawala Pre">0.12177057</EIRDaily><EIRDaily origin="Namawala Pre">0.062335003</EIRDaily><EIRDaily origin="Namawala Pre">0.08145638</EIRDaily><EIRDaily origin="Namawala Pre">0.02654187</EIRDaily><EIRDaily origin="Namawala Pre">0.18463561</EIRDaily><EIRDaily origin="Namawala Pre">0.12458692</EIRDaily><EIRDaily origin="Namawala Pre">0.15459837</EIRDaily><EIRDaily origin="Namawala Pre">0.091613</EIRDaily><EIRDaily origin="Namawala Pre">0.29196343</EIRDaily><EIRDaily origin="Namawala Pre">0.17139332</EIRDaily><EIRDaily origin="Namawala Pre">0.17837547</EIRDaily><EIRDaily origin="Namawala Pre">0.17242761</EIRDaily><EIRDaily origin="Namawala Pre">0.09780438</EIRDaily><EIRDaily origin="Namawala Pre">0.15611112</EIRDaily><EIRDaily origin="Namawala Pre">0.24088523</EIRDaily><EIRDaily origin="Namawala Pre">0.13097599</EIRDaily><EIRDaily origin="Namawala Pre">0.24442644</EIRDaily><EIRDaily origin="Namawala Pre">0.20882814</EIRDaily><EIRDaily origin="Namawala Pre">0.32493162</EIRDaily><EIRDaily origin="Namawala Pre">0.16841653</EIRDaily><EIRDaily origin="Namawala Pre">0.19186127</EIRDaily><EIRDaily origin="Namawala Pre">0.21454392</EIRDaily><EIRDaily origin="Namawala Pre">0.18540058</EIRDaily><EIRDaily origin="Namawala Pre">0.26535854</EIRDaily><EIRDaily origin="Namawala Pre">0.19882336</EIRDaily><EIRDaily origin="Namawala Pre">0.3791184</EIRDaily><EIRDaily origin="Namawala Pre">0.3377986</EIRDaily><EIRDaily origin="Namawala Pre">0.3828573</EIRDaily><EIRDaily origin="Namawala Pre">0.37944216</EIRDaily><EIRDaily origin="Namawala Pre">0.36320302</EIRDaily><EIRDaily origin="Namawala Pre">0.3490869</EIRDaily><EIRDaily origin="Namawala Pre">0.56899995</EIRDaily><EIRDaily origin="Namawala Pre">0.25438538</EIRDaily><EIRDaily origin="Namawala Pre">0.3142507</EIRDaily><EIRDaily origin="Namawala Pre">0.44112965</EIRDaily><EIRDaily origin="Namawala Pre">0.32541868</EIRDaily><EIRDaily origin="Namawala Pre">0.69834</EIRDaily><EIRDaily origin="Namawala Pre">0.4899244</EIRDaily><EIRDaily origin="Namawala Pre">0.35683113</EIRDaily><EIRDaily origin="Namawala Pre">0.3121363</EIRDaily><EIRDaily origin="Namawala Pre">0.26744142</EIRDaily><EIRDaily origin="Namawala Pre">0.3126749</EIRDaily><EIRDaily origin="Namawala Pre">0.21521434</EIRDaily><EIRDaily origin="Namawala Pre">0.3667958</EIRDaily><EIRDaily origin="Namawala Pre">0.4191633</EIRDaily><EIRDaily origin="Namawala Pre">0.18140669</EIRDaily><EIRDaily origin="Namawala Pre">0.2747903</EIRDaily><EIRDaily origin="Namawala Pre">0.2058499</EIRDaily><EIRDaily origin="Namawala Pre">0.1433344</EIRDaily><EIRDaily origin="Namawala Pre">0.1390053</EIRDaily><EIRDaily origin="Namawala Pre">0.094167195</EIRDaily><EIRDaily origin="Namawala Pre">0.07993647</EIRDaily><EIRDaily origin="Namawala Pre">0.038923204</EIRDaily><EIRDaily origin="Namawala Pre">0.051262997</EIRDaily><EIRDaily origin="Namawala Pre">0.040923014</EIRDaily><EIRDaily origin="Namawala Pre">0.037337396</EIRDaily><EIRDaily origin="Namawala Pre">0.036820255</EIRDaily><EIRDaily origin="Namawala Pre">0.02212682</EIRDaily><EIRDaily origin="Namawala Pre">0.024907356</EIRDaily><EIRDaily origin="Namawala Pre">0.029843846</EIRDaily><EIRDaily origin="Namawala Pre">0.025112208</EIRDaily><EIRDaily origin="Namawala Pre">0.018432332</EIRDaily><EIRDaily origin="Namawala Pre">0.023211243</EIRDaily><EIRDaily origin="Namawala Pre">0.024670988</EIRDaily><EIRDaily origin="Namawala Pre">0.029928366</EIRDaily><EIRDaily origin="Namawala Pre">0.03922547</EIRDaily><EIRDaily origin="Namawala Pre">0.04500285</EIRDaily><EIRDaily origin="Namawala Pre">0.04982474</EIRDaily><EIRDaily origin="Namawala Pre">0.042215154</EIRDaily><EIRDaily origin="Namawala Pre">0.041410074</EIRDaily><EIRDaily origin="Namawala Pre">0.036191374</EIRDaily><EIRDaily origin="Namawala Pre">0.03292521</EIRDaily><EIRDaily origin="Namawala Pre">0.03233501</EIRDaily><EIRDaily origin="Namawala Pre">0.026036188</EIRDaily><EIRDaily origin="Namawala Pre">0.016353734</EIRDaily><EIRDaily origin="Namawala Pre">0.04388118</EIRDaily><EIRDaily origin="Namawala Pre">0.02623674</EIRDaily><EIRDaily origin="Namawala Pre">0.027153559</EIRDaily><EIRDaily origin="Namawala Pre">0.018122906</EIRDaily><EIRDaily origin="Namawala Pre">0.031979743</EIRDaily><EIRDaily origin="Namawala Pre">0.045998458</EIRDaily><EIRDaily origin="Namawala Pre">0.031938203</EIRDaily><EIRDaily origin="Namawala Pre">0.047396604</EIRDaily><EIRDaily origin="Namawala Pre">0.04554005</EIRDaily><EIRDaily origin="Namawala Pre">0.049647108</EIRDaily><EIRDaily origin="Namawala Pre">0.030711958</EIRDaily><EIRDaily origin="Namawala Pre">0.037540816</EIRDaily><EIRDaily origin="Namawala Pre">0.044699155</EIRDaily><EIRDaily origin="Namawala Pre">0.07712299</EIRDaily><EIRDaily origin="Namawala Pre">0.041427262</EIRDaily><EIRDaily origin="Namawala Pre">0.032465372</EIRDaily><EIRDaily origin="Namawala Pre">0.046409596</EIRDaily><EIRDaily origin="Namawala Pre">0.036858935</EIRDaily><EIRDaily origin="Namawala Pre">0.08993408</EIRDaily><EIRDaily origin="Namawala Pre">0.06211869</EIRDaily><EIRDaily origin="Namawala Pre">0.058447123</EIRDaily><EIRDaily origin="Namawala Pre">0.042765245</EIRDaily><EIRDaily origin="Namawala Pre">0.054427452</EIRDaily><EIRDaily origin="Namawala Pre">0.07138284</EIRDaily><EIRDaily origin="Namawala Pre">0.08039774</EIRDaily><EIRDaily origin="Namawala Pre">0.0594327</EIRDaily><EIRDaily origin="Namawala Pre">0.05522537</EIRDaily><EIRDaily origin="Namawala Pre">0.032177433</EIRDaily><EIRDaily origin="Namawala Pre">0.03763966</EIRDaily><EIRDaily origin="Namawala Pre">0.07012222</EIRDaily><EIRDaily origin="Namawala Pre">0.06978414</EIRDaily><EIRDaily origin="Namawala Pre">0.10657288</EIRDaily><EIRDaily origin="Namawala Pre">0.067280084</EIRDaily><EIRDaily origin="Namawala Pre">0.0648362</EIRDaily><EIRDaily origin="Namawala Pre">0.05537435</EIRDaily><EIRDaily origin="Namawala Pre">0.047952425</EIRDaily><EIRDaily origin="Namawala Pre">0.049419336</EIRDaily><EIRDaily origin="Namawala Pre">0.045265004</EIRDaily><EIRDaily origin="Namawala Pre">0.040958825</EIRDaily><EIRDaily origin="Namawala Pre">0.057014596</EIRDaily><EIRDaily origin="Namawala Pre">0.03499808</EIRDaily><EIRDaily origin="Namawala Pre">0.04717886</EIRDaily><EIRDaily origin="Namawala Pre">0.05518669</EIRDaily><EIRDaily origin="Namawala Pre">0.04024543</EIRDaily><EIRDaily origin="Namawala Pre">0.025335683</EIRDaily><EIRDaily origin="Namawala Pre">0.029351056</EIRDaily><EIRDaily origin="Namawala Pre">0.026296908</EIRDaily><EIRDaily origin="Namawala Pre">0.022079546</EIRDaily><EIRDaily origin="Namawala Pre">0.041281145</EIRDaily><EIRDaily origin="Namawala Pre">0.11026307</EIRDaily><EIRDaily origin="Namawala Pre">0.062466796</EIRDaily><EIRDaily origin="Namawala Pre">0.05943127</EIRDaily><EIRDaily origin="Namawala Pre">0.056480262</EIRDaily><EIRDaily origin="Namawala Pre">0.04188424</EIRDaily><EIRDaily origin="Namawala Pre">0.076269194</EIRDaily><EIRDaily origin="Namawala Pre">0.062529825</EIRDaily><EIRDaily origin="Namawala Pre">0.04762151</EIRDaily><EIRDaily origin="Namawala Pre">0.07641102</EIRDaily><EIRDaily origin="Namawala Pre">0.07051903</EIRDaily><EIRDaily origin="Namawala Pre">0.067500696</EIRDaily><EIRDaily origin="Namawala Pre">0.046847947</EIRDaily><EIRDaily origin="Namawala Pre">0.063968085</EIRDaily><EIRDaily origin="Namawala Pre">0.08584851</EIRDaily><EIRDaily origin="Namawala Pre">0.06953345</EIRDaily><EIRDaily origin="Namawala Pre">0.0721206</EIRDaily><EIRDaily origin="Namawala Pre">0.051470716</EIRDaily><EIRDaily origin="Namawala Pre">0.039705366</EIRDaily><EIRDaily origin="Namawala Pre">0.034995213</EIRDaily><EIRDaily origin="Namawala Pre">0.026332721</EIRDaily><EIRDaily origin="Namawala Pre">0.020061115</EIRDaily><EIRDaily origin="Namawala Pre">0.023596594</EIRDaily><EIRDaily origin="Namawala Pre">0.022207042</EIRDaily><EIRDaily origin="Namawala Pre">0.0146031855</EIRDaily><EIRDaily origin="Namawala Pre">0.021980703</EIRDaily><EIRDaily origin="Namawala Pre">0.021591054</EIRDaily><EIRDaily origin="Namawala Pre">0.018779004</EIRDaily><EIRDaily origin="Namawala Pre">0.028917</EIRDaily><EIRDaily origin="Namawala Pre">0.023653895</EIRDaily><EIRDaily origin="Namawala Pre">0.029028738</EIRDaily><EIRDaily origin="Namawala Pre">0.026398618</EIRDaily><EIRDaily origin="Namawala Pre">0.024789888</EIRDaily><EIRDaily origin="Namawala Pre">0.02412806</EIRDaily><EIRDaily origin="Namawala Pre">0.024848623</EIRDaily><EIRDaily origin="Namawala Pre">0.02335163</EIRDaily><EIRDaily origin="Namawala Pre">0.02008117</EIRDaily><EIRDaily origin="Namawala Pre">0.018121473</EIRDaily><EIRDaily origin="Namawala Pre">0.026362805</EIRDaily><EIRDaily origin="Namawala Pre">0.01748543</EIRDaily><EIRDaily origin="Namawala Pre">0.020320402</EIRDaily><EIRDaily origin="Namawala Pre">0.019141432</EIRDaily><EIRDaily origin="Namawala Pre">0.029756462</EIRDaily><EIRDaily origin="Namawala Pre">0.029429846</EIRDaily><EIRDaily origin="Namawala Pre">0.018151557</EIRDaily><EIRDaily origin="Namawala Pre">0.015742045</EIRDaily><EIRDaily origin="Namawala Pre">0.021999326</EIRDaily><EIRDaily origin="Namawala Pre">0.023473395</EIRDaily><EIRDaily origin="Namawala Pre">0.019013938</EIRDaily><EIRDaily origin="Namawala Pre">0.017526975</EIRDaily><EIRDaily origin="Namawala Pre">0.027064743</EIRDaily><EIRDaily origin="Namawala Pre">0.02552191</EIRDaily><EIRDaily origin="Namawala Pre">0.018582746</EIRDaily><EIRDaily origin="Namawala Pre">0.018049847</EIRDaily><EIRDaily origin="Namawala Pre">0.017498324</EIRDaily><EIRDaily origin="Namawala Pre">0.015657526</EIRDaily><EIRDaily origin="Namawala Pre">0.015595927</EIRDaily><EIRDaily origin="Namawala Pre">0.012024636</EIRDaily><EIRDaily origin="Namawala Pre">0.012142103</EIRDaily><EIRDaily origin="Namawala Pre">0.0064076954</EIRDaily><EIRDaily origin="Namawala Pre">0.013071814</EIRDaily><EIRDaily origin="Namawala Pre">0.0149111785</EIRDaily><EIRDaily origin="Namawala Pre">0.009530606</EIRDaily><EIRDaily origin="Namawala Pre">0.007446278</EIRDaily><EIRDaily origin="Namawala Pre">0.019781772</EIRDaily><EIRDaily origin="Namawala Pre">0.009378757</EIRDaily><EIRDaily origin="Namawala Pre">0.00834304</EIRDaily><EIRDaily origin="Namawala Pre">0.0073058903</EIRDaily><EIRDaily origin="Namawala Pre">0.0073717865</EIRDaily><EIRDaily origin="Namawala Pre">0.0056369957</EIRDaily><EIRDaily origin="Namawala Pre">0.0046743373</EIRDaily><EIRDaily origin="Namawala Pre">0.005675674</EIRDaily><EIRDaily origin="Namawala Pre">0.01578502</EIRDaily><EIRDaily origin="Namawala Pre">0.0063460968</EIRDaily><EIRDaily origin="Namawala Pre">0.005303217</EIRDaily><EIRDaily origin="Namawala Pre">0.0079978015</EIRDaily><EIRDaily origin="Namawala Pre">0.0035727236</EIRDaily><EIRDaily origin="Namawala Pre">0.0047832094</EIRDaily><EIRDaily origin="Namawala Pre">0.008874508</EIRDaily><EIRDaily origin="Namawala Pre">0.011265396</EIRDaily><EIRDaily origin="Namawala Pre">0.013190714</EIRDaily><EIRDaily origin="Namawala Pre">0.0066440627</EIRDaily><EIRDaily origin="Namawala Pre">0.004841943</EIRDaily><EIRDaily origin="Namawala Pre">0.008280009</EIRDaily><EIRDaily origin="Namawala Pre">0.005114123</EIRDaily><EIRDaily origin="Namawala Pre">0.008956162</EIRDaily><EIRDaily origin="Namawala Pre">0.009964662</EIRDaily><EIRDaily origin="Namawala Pre">0.009698211</EIRDaily><EIRDaily origin="Namawala Pre">0.010978891</EIRDaily><EIRDaily origin="Namawala Pre">0.00782733</EIRDaily><EIRDaily origin="Namawala Pre">0.009812813</EIRDaily><EIRDaily origin="Namawala Pre">0.0069047827</EIRDaily><EIRDaily origin="Namawala Pre">0.0039967517</EIRDaily><EIRDaily origin="Namawala Pre">0.0052946215</EIRDaily><EIRDaily origin="Namawala Pre">0.0065924916</EIRDaily><EIRDaily origin="Namawala Pre">0.007890361</EIRDaily><EIRDaily origin="Namawala Pre">0.009185366</EIRDaily><EIRDaily origin="Namawala Pre">0.010483236</EIRDaily><EIRDaily origin="Namawala Pre">0.011781107</EIRDaily><EIRDaily origin="Namawala Pre">0.0096007995</EIRDaily><EIRDaily origin="Namawala Pre">0.024100844</EIRDaily><EIRDaily origin="Namawala Pre">0.009689616</EIRDaily><EIRDaily origin="Namawala Pre">0.018307703</EIRDaily><EIRDaily origin="Namawala Pre">0.008214112</EIRDaily><EIRDaily origin="Namawala Pre">0.0063375016</EIRDaily><EIRDaily origin="Namawala Pre">0.005778816</EIRDaily><EIRDaily origin="Namawala Pre">0.005887688</EIRDaily><EIRDaily origin="Namawala Pre">0.00599656</EIRDaily><EIRDaily origin="Namawala Pre">0.0061054323</EIRDaily><EIRDaily origin="Namawala Pre">0.005922069</EIRDaily><EIRDaily origin="Namawala Pre">0.016250592</EIRDaily><EIRDaily origin="Namawala Pre">0.009122335</EIRDaily><EIRDaily origin="Namawala Pre">0.011007542</EIRDaily><EIRDaily origin="Namawala Pre">0.012892747</EIRDaily><EIRDaily origin="Namawala Pre">0.012689329</EIRDaily><EIRDaily origin="Namawala Pre">0.0071540424</EIRDaily><EIRDaily origin="Namawala Pre">0.00676153</EIRDaily><EIRDaily origin="Namawala Pre">0.009755513</EIRDaily><EIRDaily origin="Namawala Pre">0.023063693</EIRDaily><EIRDaily origin="Namawala Pre">0.015663255</EIRDaily><EIRDaily origin="Namawala Pre">0.0074634682</EIRDaily><EIRDaily origin="Namawala Pre">0.009534903</EIRDaily><EIRDaily origin="Namawala Pre">0.0065495158</EIRDaily><EIRDaily origin="Namawala Pre">0.015757803</EIRDaily><EIRDaily origin="Namawala Pre">0.007878901</EIRDaily><EIRDaily origin="Namawala Pre">0.010526212</EIRDaily><EIRDaily origin="Namawala Pre">0.01070098</EIRDaily><EIRDaily origin="Namawala Pre">0.008446182</EIRDaily><EIRDaily origin="Namawala Pre">0.001194728</EIRDaily><EIRDaily origin="Namawala Pre">0.005664214</EIRDaily><EIRDaily origin="Namawala Pre">0.006919108</EIRDaily><EIRDaily origin="Namawala Pre">0.008174002</EIRDaily><EIRDaily origin="Namawala Pre">0.015299394</EIRDaily><EIRDaily origin="Namawala Pre">0.008417532</EIRDaily><EIRDaily origin="Namawala Pre">0.013927032</EIRDaily><EIRDaily origin="Namawala Pre">0.0109617</EIRDaily><EIRDaily origin="Namawala Pre">0.0084003415</EIRDaily><EIRDaily origin="Namawala Pre">0.0012806796</EIRDaily><EIRDaily origin="Namawala Pre">0.012918533</EIRDaily><EIRDaily origin="Namawala Pre">0.008552189</EIRDaily><EIRDaily origin="Namawala Pre">0.0052688364</EIRDaily><EIRDaily origin="Namawala Pre">0.009325754</EIRDaily><EIRDaily origin="Namawala Pre">0.009758377</EIRDaily><EIRDaily origin="Namawala Pre">0.008274279</EIRDaily><EIRDaily origin="Namawala Pre">0.0067987754</EIRDaily><EIRDaily origin="Namawala Pre">0.008196922</EIRDaily><EIRDaily origin="Namawala Pre">0.002186037</EIRDaily><EIRDaily origin="Namawala Pre">0.001773469</EIRDaily><EIRDaily origin="Namawala Pre">0.0013580361</EIRDaily><EIRDaily origin="Namawala Pre">6.073917E-4</EIRDaily><EIRDaily origin="Namawala Pre">0.0018680159</EIRDaily><EIRDaily origin="Namawala Pre">0.0023779958</EIRDaily><EIRDaily origin="Namawala Pre">0.0036128343</EIRDaily><EIRDaily origin="Namawala Pre">0.0035154226</EIRDaily><EIRDaily origin="Namawala Pre">0.0035641284</EIRDaily><EIRDaily origin="Namawala Pre">0.0030140379</EIRDaily><EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily><EIRDaily origin="Namawala Pre">0.0</EIRDaily><EIRDaily origin="Namawala Pre">0.0014726383</EIRDaily><EIRDaily origin="Namawala Pre">4.8992445E-4</EIRDaily><EIRDaily origin="Namawala Pre">0.0</EIRDaily><EIRDaily origin="Namawala Pre">0.0023694006</EIRDaily><EIRDaily origin="Namawala Pre">0.0017448185</EIRDaily><EIRDaily origin="Namawala Pre">0.002392321</EIRDaily><EIRDaily origin="Namawala Pre">0.0030426884</EIRDaily><EIRDaily origin="Namawala Pre">0.0036901908</EIRDaily><EIRDaily origin="Namawala Pre">0.004337693</EIRDaily><EIRDaily origin="Namawala Pre">0.0049851956</EIRDaily><EIRDaily origin="Namawala Pre">0.0056355633</EIRDaily><EIRDaily origin="Namawala Pre">0.006283066</EIRDaily><EIRDaily origin="Namawala Pre">0.016909555</EIRDaily><EIRDaily origin="Namawala Pre">0.005798871</EIRDaily><EIRDaily origin="Namawala Pre">0.0045468425</EIRDaily><EIRDaily origin="Namawala Pre">0.002137331</EIRDaily><EIRDaily origin="Namawala Pre">0.0026387158</EIRDaily><EIRDaily origin="Namawala Pre">0.0013666312</EIRDaily><EIRDaily origin="Namawala Pre">0.0012720844</EIRDaily><EIRDaily origin="Namawala Pre">0.0010686655</EIRDaily><EIRDaily origin="Namawala Pre">0.00417152</EIRDaily><EIRDaily origin="Namawala Pre">0.005394899</EIRDaily><EIRDaily origin="Namawala Pre">0.0049221646</EIRDaily><EIRDaily origin="Namawala Pre">0.0011059112</EIRDaily><EIRDaily origin="Namawala Pre">0.0024267016</EIRDaily><EIRDaily origin="Namawala Pre">0.002650176</EIRDaily><EIRDaily origin="Namawala Pre">0.0117324</EIRDaily><EIRDaily origin="Namawala Pre">0.005329002</EIRDaily><EIRDaily origin="Namawala Pre">0.016726192</EIRDaily><EIRDaily origin="Namawala Pre">0.014170562</EIRDaily><EIRDaily origin="Namawala Pre">0.040039144</EIRDaily><EIRDaily origin="Namawala Pre">0.020029599</EIRDaily><EIRDaily origin="Namawala Pre">0.020791704</EIRDaily><EIRDaily origin="Namawala Pre">0.020510929</EIRDaily><EIRDaily origin="Namawala Pre">0.023834392</EIRDaily><EIRDaily origin="Namawala Pre">0.020009544</EIRDaily><EIRDaily origin="Namawala Pre">0.02158246</EIRDaily><EIRDaily origin="Namawala Pre">0.03534905</EIRDaily><EIRDaily origin="Namawala Pre">0.0016932475</EIRDaily><EIRDaily origin="Namawala Pre">0.041070566</EIRDaily><EIRDaily origin="Namawala Pre">0.08855312</EIRDaily><EIRDaily origin="Namawala Pre">0.067108184</EIRDaily><EIRDaily origin="Namawala Pre">0.10968863</EIRDaily><EIRDaily origin="Namawala Pre">0.049932178</EIRDaily><EIRDaily origin="Namawala Pre">0.06417723</EIRDaily><EIRDaily origin="Namawala Pre">0.052754257</EIRDaily><EIRDaily origin="Namawala Pre">0.07044311</EIRDaily><EIRDaily origin="Namawala Pre">0.036423445</EIRDaily><EIRDaily origin="Namawala Pre">0.02869066</EIRDaily><EIRDaily origin="Namawala Pre">0.019367771</EIRDaily><EIRDaily origin="Namawala Pre">0.045640327</EIRDaily><EIRDaily origin="Namawala Pre">0.02805462</EIRDaily><EIRDaily origin="Namawala Pre">0.038941827</EIRDaily><EIRDaily origin="Namawala Pre">0.025974588</EIRDaily><EIRDaily origin="Namawala Pre">0.017794857</EIRDaily><EIRDaily origin="Namawala Pre">0.06690763</EIRDaily><EIRDaily origin="Namawala Pre">0.029624669</EIRDaily><EIRDaily origin="Namawala Pre">0.03307706</EIRDaily><EIRDaily origin="Namawala Pre">0.01947378</EIRDaily><EIRDaily origin="Namawala Pre">0.03999044</EIRDaily><EIRDaily origin="Namawala Pre">0.024923114</EIRDaily><EIRDaily origin="Namawala Pre">0.013712154</EIRDaily><EIRDaily origin="Namawala Pre">0.005033902</EIRDaily><EIRDaily origin="Namawala Pre">0.012981565</EIRDaily><EIRDaily origin="Namawala Pre">0.015700502</EIRDaily><EIRDaily origin="Namawala Pre">0.0040827035</EIRDaily><EIRDaily origin="Namawala Pre">0.0046156035</EIRDaily><EIRDaily origin="Namawala Pre">0.0013637661</EIRDaily><EIRDaily origin="Namawala Pre">0.0032489724</EIRDaily><EIRDaily origin="Namawala Pre">0.006391938</EIRDaily><EIRDaily origin="Namawala Pre">0.0053461925</EIRDaily><EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily></nonVector></entoData>
+  <parameters delta="0.000548" interval="5" iseed="0" latentp="3">
+    <parameter include="false" name="        &apos;-ln(1-Sinf)&apos;   " number="1" value="0.050736"/>
     <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
     <parameter include="false" name="        Simm    " number="3" value="0.1447"/>
     <parameter include="false" name="        Xstar_p " number="4" value="2801.485664"/>
@@ -589,7 +590,7 @@
     <parameter include="false" name="        sigma2i " number="6" value="9.569774"/>
     <parameter include="false" name="        CumulativeYstar " number="7" value="137595256.939881"/>
     <parameter include="false" name="        CumulativeHstar " number="8" value="97.798358"/>
-    <parameter include="false" name="        '-ln(1-alpha_m)'        " number="9" value="2.306627"/>
+    <parameter include="false" name="        &apos;-ln(1-alpha_m)&apos;        " number="9" value="2.306627"/>
     <parameter include="false" name="        decay_m " number="10" value="2.587184"/>
     <parameter include="false" name="        sigma2_0        " number="11" value="0.656515"/>
     <parameter include="false" name="        Xstar_v " number="12" value="0.918108"/>

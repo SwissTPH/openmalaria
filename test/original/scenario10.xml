@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" modelVersion="20480" name="Idete Incidence" popSize="300" schemaVersion="3" simulationDuration="730" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" modelVersion="20480" name="Idete Incidence" popSize="300" schemaVersion="4" simulationDuration="730" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_4.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -81,879 +82,879 @@
       <group cfr="0.1378378" lowerbound="15"/>
     </CFR>
   </healthSystem>
-  <entoData inputType="EIR" name="Idete">
+  <entoData name="Idete">
     <!--first day is 17-03-92-->
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>31.5389</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>12.0794</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>30.3456</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4530</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>0.4174</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>1.0581</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.7063</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.4828</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>0.2606</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>1.7687</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.3815</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.0629</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1237</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.1351</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.0829</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.1222</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0547</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.0196</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.1861</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.3604</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.2309</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3349</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.3663</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.2367</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.5726</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1705</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.1684</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.0905</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.6006</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>0.1915</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>1.1981</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.9569</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.4506</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1157</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.1217</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.0499</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.1119</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.9067</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.4750</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.6395</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.2549</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.3137</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.0876</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.2192</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.3620</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4264</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4314</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.4191</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.2827</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.4949</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.6872</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>0.4083</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>4.0790</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.3345</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.4434</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.7719</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.4817</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>0.3894</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>1.2806</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.2673</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>0.4734</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-    <EIRDaily>1.8254</EIRDaily>
-  </entoData>
-  <parameters delta="0.000547945205479452" eipDuration="10" interval="5" iseed="0" latentp="3">
-    <parameter include="false" name="         '-ln(1-Sinf)'    " number="1" value="0.050736"/>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+  <nonVector eipDuration="10"><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>31.5389</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>12.0794</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>30.3456</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4530</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>0.4174</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>1.0581</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.7063</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.4828</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>0.2606</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>1.7687</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.3815</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.0629</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1237</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.1351</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.0829</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.1222</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0547</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.0196</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.1861</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.3604</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.2309</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3349</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.3663</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.2367</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.5726</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1705</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.1684</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.0905</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.6006</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>0.1915</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>1.1981</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.9569</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.4506</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1157</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.1217</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.0499</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.1119</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.9067</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.4750</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.6395</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.2549</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.3137</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.0876</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.2192</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.3620</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4264</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4314</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.4191</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.2827</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.4949</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.6872</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>0.4083</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>4.0790</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.3345</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.4434</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.7719</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.4817</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>0.3894</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>1.2806</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.2673</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>0.4734</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily><EIRDaily>1.8254</EIRDaily></nonVector></entoData>
+  <parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
+    <parameter include="false" name="         &apos;-ln(1-Sinf)&apos;    " number="1" value="0.050736"/>
     <parameter include="false" name="         Estar    " number="2" value="0.03247"/>
     <parameter include="false" name="         Simm     " number="3" value="0.157325"/>
     <parameter include="false" name="         Xstar_p  " number="4" value="2393.949859"/>
@@ -961,7 +962,7 @@
     <parameter include="false" name="         sigma2i  " number="6" value="9.525457"/>
     <parameter include="false" name="         CumulativeYstar  " number="7" value="151465400.748812"/>
     <parameter include="false" name="         CumulativeHstar  " number="8" value="70.526914"/>
-    <parameter include="false" name="         '-ln(1-alpha_m)'         " number="9" value="2.349838"/>
+    <parameter include="false" name="         &apos;-ln(1-alpha_m)&apos;         " number="9" value="2.349838"/>
     <parameter include="false" name="         decay_m  " number="10" value="2.372811"/>
     <parameter include="false" name="         sigma2_0         " number="11" value="0.657622"/>
     <parameter include="false" name="         Xstar_v  " number="12" value="0.922477"/>

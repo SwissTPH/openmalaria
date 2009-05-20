@@ -108,7 +108,6 @@ public:
 private:
   ///@brief Rate/probabilities before interventions. See functions.
   //@{
-  //FIXME: not set:
   /** Availability rate (α_i) */
   double entoAvailability;
   

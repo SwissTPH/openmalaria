@@ -75,16 +75,6 @@ public:
   
   /// Needs to be called each step of the simulation
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime) {}
-
-  /** @brief Initialization function, setting up EIR arrays
-   *
-   * Needs to be called after EIR data is changed ("changeEIR intervention").
-   *
-   * Reads in the estimates of the EIR for each village and each day
-   * and converts this into EIR estimates per five day period
-   * assuming that the annual cycle repeated during the pre-intervention period
-   */
-  virtual void inputEIR () {}
   
   /** Set kappa for current interval in year from infectiousness of humans.
    *
@@ -159,13 +149,6 @@ protected:
   // ratio of the number of bites received relative to the number received at age 6 years 
   double biteratio_6; */
   
-  
-  /** Duration of the extrinsic incubation period (sporozoite development time)
-   * (θ_s).
-   * Units: Days.
-   * 
-   * Doesn't need checkpointing. */
-  int EIPDuration;
   
   //! Number of age groups for which the surface area calculations apply 
   static const size_t nages= 22;

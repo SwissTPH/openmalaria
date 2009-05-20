@@ -28,7 +28,8 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, vector<double>& initialisationEIR) {
+void VectorTransmissionSpecies::initialise (scnXml::Anopheles& anoph, vector<double>& initialisationEIR) {
+  anophelesData = &anoph;
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
@@ -104,7 +105,7 @@ void VectorTransmissionSpecies::initialise (scnXml::Anopheles anoph, vector<doub
     initialisationEIR[i] += speciesEIR[i];
 }
 
-VectorTransmissionSpecies::~VectorTransmissionSpecies () {
+void VectorTransmissionSpecies::destroy () {
   delete[] P_A;
 }
 
@@ -286,19 +287,18 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
 
 
 void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& initialKappa) {
-  //TODO: is this still correct?
-  /* Number of types of hosts. 
-  Dimensionless.
-  $n$ in model. Scalar.
-  Is equal to 1 in initalization. */
-  int nHostTypesInit = 1;
-
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
   $m$ in model. Scalar.
   Is equal to 1 in initalization. */
   int nMalHostTypesInit = 1;
   
+  /* Number of types of hosts. 
+  Dimensionless.
+  $n$ in model. Scalar.
+  Is equal to 1 in initalization. */
+  int nHostTypesInit = nMalHostTypesInit;	// TODO: plus num non-human host types
+
   /* Infectivity of hosts to mosquitoes.
   $K_vi$ in model. Matrix of size $n \times \theta_p$.
   In initialization, there is only one time of host.
@@ -318,20 +318,9 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   year. Although, in the theoretical model, we assume that they
   may vary periodically over one year, we code them as though 
   they are constant. We can change that later if they need to 
-  vary.
+  vary. */
   
-  We assume that we will read them from the xml file as doubles
-  so that they will be passed into Fortran as real*8. We 
-  therefore define them here as real*8. The results, then, when
-  used in the main simulation can be converted to reals.
-  When they are defined in the xml file, we can rearrange 
-  parameters here so that one group is taken directly from the
-  xml file and the other group from other Fortran routines.
-  And we still initialize the parameters here, but do not
-  define them. */
-  
-  scnXml::Anopheles anoph = getEntoData().getAnopheles()[0];
-  scnXml::Mosq mosq = anoph.getMosq();
+  scnXml::Mosq mosq = anophelesData->getMosq();
   
   /* Availability rate of hosts to mosquitoes.
   Units: 1/(Animals * Time)
@@ -343,7 +332,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   between $\sum_{i=1}^n \alpha_i N_i$ and $N_{v0}$. */
   // We set the host availability relative to the population size.
   double hostAvailabilityRateInit=7.0/populationSize;	// TODO: Move absolute availability to XML
-    
+  
   /*! Probability of a mosquito biting a host given that it has encountered the host.
   
   Dimensionless.
@@ -354,7 +343,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   /*! Probability of a mosquito finding a resting side given that it has bitten a host.
   
   Dimensionless.
-  $P_{B_i}$ in model. Matrix of size $n \times \theta_p$.
+  $P_{C_i}$ in model. Matrix of size $n \times \theta_p$.
   For now, we assume this does not change over the cycle. */
     
   double mosqProbFindRestSite = mosq.getMosqProbFindRestSite();
@@ -365,11 +354,6 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   $P_{D_i}$ in model. Matrix of size $n \times \theta_p$.
   For now, we assume this does not change over the cycle. */
   double mosqProbResting = mosq.getMosqProbResting();
-  
-  /** Read the emergence rates from a file instead of calcuating them now. */
-  int ifUseNv0Guess = anoph.getUseNv0Guess();
-  /** File name to read emergence rates from. */
-  char Nv0guessfilename[20] = "N_v0-Initial.txt";
 
   /**************************************************************! 
   ***************************************************************!
@@ -436,23 +420,21 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   finding algorithm (but probably not).
   (2008.10.20: It appears to make no difference to the speed.)
     */
-  if(ifUseNv0Guess){
-    // Read from file.
-    ifstream file (Nv0guessfilename);
+  ifstream file (mosq.getEmergenceRateFilename().c_str());
+  if(!file.bad()) {	// file exists since it opened succesfully
     for (int i = 0; i < daysInYear; i++){
       file >> mosqEmergeRate[i];
     }
-    file.close();
   }else{
     double temp = populationSize*populationSize*hostAvailabilityRateInit;
     for (int i = 0; i < daysInYear; i++) {
       mosqEmergeRate[i] = EIRInit[i]*temp;
     }
   }
-
-  // Now calculate the emergence rate:
-  // Do we want a separate control on this to ifUseNv0Guess? Presumably if we
-  // have good N_v0 from a file this won't take long anyway?
+  file.close();
+  
+  // Now calculate the emergence rate.
+  // The routine should finish quickly if the emergence rate is already accurate.
   if(true) {
     CalcInitMosqEmergeRate(populationSize, EIPDuration,
                            nHostTypesInit,
@@ -461,8 +443,8 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
                            mosqProbResting,
                            humanInfectivityInit, EIRInit);
     
-    // Since we've calculated the emergence rate, we might as well save it:
-    ofstream file (Nv0guessfilename);
+    // Now we've calculated the emergence rate, save it:
+    ofstream file (mosq.getEmergenceRateFilename().c_str());
     for (int i = 0; i < daysInYear; ++i)
       file << mosqEmergeRate[i];
     file.close();

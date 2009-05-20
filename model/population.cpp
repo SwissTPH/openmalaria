@@ -27,6 +27,7 @@
 #include "simulation.h"
 #include "intervention.h"
 #include "TransmissionModel.h"
+#include "TransmissionModel/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
 #include "PresentationModel.h"
 #include "CaseManagementModel.h"
@@ -383,9 +384,13 @@ void Population::implementIntervention (int time) {
   }
   
   if (interv->getChangeEIR().present()) {
-    changeEntoData (&interv->getChangeEIR().get());
-    Global::simulationMode=transientEIRknown;
-    _transmissionModel->inputEIR();
+    NonVectorTransmission* nvt = dynamic_cast<NonVectorTransmission*> (_transmissionModel);
+    if (nvt != NULL) {
+      Global::simulationMode=transientEIRknown;
+      nvt->inputEIR(interv->getChangeEIR().get());
+    } else {
+      throw xml_scenario_error("Warning: changeEIR intervention can only be used with NonVectorTransmission model!");
+    }
   }
   
   if (interv->getVaccinate().present()) {

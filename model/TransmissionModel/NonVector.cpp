@@ -29,14 +29,16 @@ const double NonVectorTransmission::susceptibility= 0.702;
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
 const double NonVectorTransmission::min_EIR_mult= 0.01; 
 
-NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::interval) {
+NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
+{
+  nspore = nonVectorData.getEipDuration() / Global::interval;
   gamma_p=getParameter(Params::GAMMA_P);
   Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
   Simm=getParameter(Params::SIMM);
   Estar=getParameter(Params::E_STAR);
   Xstar_p=getParameter(Params::X_STAR_P);
   nDays = (int *) malloc(((Global::intervalsPerYear))*sizeof(int));
-  maxIntervals=maxDurIntPhaseEIR/Global::interval;
+  maxIntervals=maxDurIntPhaseEIR / Global::interval;
   ino = (int *) malloc(((maxIntervals))*sizeof(int));
   intEIR = (double *) malloc(((maxIntervals))*sizeof(double));
   
@@ -69,7 +71,7 @@ NonVectorTransmission::NonVectorTransmission() : nspore (EIPDuration/Global::int
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   
-  inputEIR();
+  inputEIR(nonVectorData);
 }
 
 NonVectorTransmission::~NonVectorTransmission () {
@@ -86,7 +88,7 @@ void NonVectorTransmission::initMainSimulation (int populationSize){
 }
 
 
-void NonVectorTransmission::inputEIR () {
+void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
   //initialise all the EIR arrays to 0
   if (Global::simulationMode != transientEIRknown) {
     for (size_t j=0;j<Global::intervalsPerYear; j++) {
@@ -100,8 +102,8 @@ void NonVectorTransmission::inputEIR () {
     }
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
-  double minEIR=min_EIR_mult*averageEIR();
-  const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
+  double minEIR=min_EIR_mult*averageEIR(nonVectorData);
+  const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
     // FIXME: convertions to make this run the same as when encapsulated in updateEIR
     int day = mpcday;
@@ -197,11 +199,11 @@ double NonVectorTransmission::getExpectedNumberOfInfections (Human& human, doubl
 
 // -----   Private functs ------
 
-double NonVectorTransmission::averageEIR () {
+double NonVectorTransmission::averageEIR (const scnXml::NonVector& nonVectorData) {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
   double valaverageEIR=0.0;
   size_t i = 0;
-  for (const scnXml::EntoData::EIRDailySequence& daily = getEntoData().getEIRDaily();
+  for (const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
        i < daily.size(); ++i) {
     valaverageEIR += (double)daily[i];
   }
