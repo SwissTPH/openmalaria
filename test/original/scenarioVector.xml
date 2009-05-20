@@ -142,13 +142,13 @@
 </healthSystem>
 <entoData name="Vector Test">
   <vector>
-    <anopheles mosquito="species name">
-      <eir a0="0.0" a1="0.0" b1="0.0" a2="0.0" b2="0.0" EIRRotateAngle="0.0" />
+    <anopheles mosquito="gambiae_ss">
+      <eir a0="-0.926517" a1="-0.692164" b1="0.002098" a2="0.401189" b2="-0.375356" EIRRotateAngle="0.0" />
       <mosq mosqRestDuration="3" extrinsicIncubationPeriod="10"
-	mosqSeekingDeathRate="0.0" mosqSeekingDuration="0.0"
-	mosqEntoAvailability="0.0" mosqProbBiting="0.0"
-	mosqProbFindRestSite="0.0" mosqProbResting="0.0"
-	mosqProbOvipositing="0.0" emergenceRateFilename="filename.xxx"/>
+	mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"
+	mosqEntoAvailability="0.35" mosqProbBiting="0.95"
+	mosqProbFindRestSite="0.95" mosqProbResting="0.94"
+	mosqProbOvipositing="0.93" emergenceRateFilename="Nv0-Initial.txt"/>
     </anopheles>
   </vector>
 </entoData>
