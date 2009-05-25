@@ -421,10 +421,10 @@ double Human::infectiousness(){
 
 
 ostream& operator<<(ostream& out, const Human& human){
+  human._perHostTransmission.write (out);
   human._withinHostModel->write(out);
   human._presentationModel->write(out);
   human._caseManagement->write (out);
-  human._perHostTransmission.write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 

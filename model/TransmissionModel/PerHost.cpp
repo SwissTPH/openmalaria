@@ -78,7 +78,6 @@ void PerHostTransmission::write (ostream& out) const {
   out << _cumulativeEIRa << endl; 
   out << _pinfected << endl; 
   out << _BaselineAvailabilityToMosquitoes << endl; 
-  out << species.size() << endl;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
 }
