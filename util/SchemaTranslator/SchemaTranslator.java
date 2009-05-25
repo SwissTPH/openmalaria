@@ -57,25 +57,27 @@ public class SchemaTranslator {
 		// This is set by the work generator
 		scenarioElement.setAttribute("wuID", "123");
 
-		scenarioElement.getLastChild().setNodeValue("");
-		// Add a dummy parameter
-		Element parameters = forValidation.createElement("parameters");
+		if (scenarioElement.getLastChild().getNodeValue() == "@parameters@") {
+			scenarioElement.getLastChild().setNodeValue("");
+			// Add a dummy parameter
+			Element parameters = forValidation.createElement("parameters");
 
-		parameters.setAttribute("latentp", "0");
-		parameters.setAttribute("delta", "0");
-		parameters.setAttribute("eipDuration", "0");
-		parameters.setAttribute("interval", "0");
-		parameters.setAttribute("iseed", "0");
-		Element parameter = forValidation.createElement("parameter");
-		parameter.setAttribute("value", "0");
-		parameter.setAttribute("name", "0");
-		parameter.setAttribute("number", "0");
-		parameters.appendChild(parameter);
-		scenarioElement.appendChild(parameters);
+			parameters.setAttribute("latentp", "0");
+			parameters.setAttribute("delta", "0");
+			parameters.setAttribute("eipDuration", "0");
+			parameters.setAttribute("interval", "0");
+			parameters.setAttribute("iseed", "0");
+			Element parameter = forValidation.createElement("parameter");
+			parameter.setAttribute("value", "0");
+			parameter.setAttribute("name", "0");
+			parameter.setAttribute("number", "0");
+			parameters.appendChild(parameter);
+			scenarioElement.appendChild(parameters);
+		}
 
 		// Validate the updated document
 		File xsdFile = new File("../../test/original/"+schemaFileName);
-		if (!xsdFile.isFile()) {
+		if (xsdFile == null || !xsdFile.isFile()) {
 			System.out.println("Unable to find scenario.xsd file; not validating.");
 			return;
 		}
@@ -83,11 +85,9 @@ public class SchemaTranslator {
 				.newInstance("http://www.w3.org/2001/XMLSchema");
 		//FIXME: this throws a java.lang.NullPointerException :
 		Schema schema = factory.newSchema(xsdFile);
-		System.out.println(schema);
 		Validator validator = schema.newValidator();
 
 		Source source = new DOMSource(forValidation);
-		System.out.println(System.getProperty("user.dir"));
 		validator.validate(source);
 	}
 
