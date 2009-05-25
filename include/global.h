@@ -19,7 +19,11 @@
 */
 #ifndef Hmod_global
 #define Hmod_global
+
+#ifdef _MSC_VER	// disable warnings on MSVC
 #pragma warning(disable: 4290)
+#endif
+
 #include "Constant.h"
 #include <fcntl.h>
 #include <math.h>
