@@ -21,7 +21,7 @@
 #include "global.h"
 #include "event.h"
 #include "WithinHostModel.h"
-#include "PresentationModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
 #include "drug.h"
 #include "TransmissionModel/PerHost.h"
 
@@ -182,7 +182,7 @@ private:
 
   CaseManagementModel* _caseManagement;
   
-  PresentationModel* _presentationModel;
+  PathogenesisModel* _pathogenesisModel;
   
   //!Total asexual blood stage density
   double _ylag[4];
@@ -203,7 +203,7 @@ private:
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //!Maximum parasite density during the previous 5-day interval
-  double _timeStepMaxDensity;	// WithinHostModel, used by PresentationModel
+  double _timeStepMaxDensity;	// WithinHostModel, used by PathogenesisModel
   //@}
   
   //! Determines eligibility and gives IPTi SP or placebo doses 

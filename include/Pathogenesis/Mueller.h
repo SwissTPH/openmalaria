@@ -25,16 +25,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <iostream>
 #include "global.h"
-#include "PresentationModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
 
 using namespace std;
 
 /*! Mueller presentation model.
 */
-class MuellerPresentationModel : public PresentationModel {
+class MuellerPathogenesis : public PathogenesisModel {
 public:
-  MuellerPresentationModel(double cF) :
-    PresentationModel(cF) {}
+  MuellerPathogenesis(double cF) :
+    PathogenesisModel(cF) {}
+  MuellerPathogenesis(istream& in) :
+    PathogenesisModel(in) {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 

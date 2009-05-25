@@ -25,13 +25,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <iostream>
 #include "global.h"
-#include "PresentationModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
 
 using namespace std;
 
 /*! Pyrogenic threshold presentation model.
 */
-class PyrogenPresentationModel : public PresentationModel {
+class PyrogenPathogenesis : public PathogenesisModel {
 protected:
   //!critical density for fever (clinical episodes)
   double _pyrogenThres;
@@ -39,11 +39,11 @@ protected:
     virtual void updatePyrogenThres(double totalDensity);
 
 public:
-  PyrogenPresentationModel(double cF);
+  PyrogenPathogenesis(double cF);
+  PyrogenPathogenesis(istream& in);
   virtual double getPyrogenThres();
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;
-  void read(istream& in);
   
   // Static:
   static void init();

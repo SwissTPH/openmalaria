@@ -20,10 +20,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
-#include "PresentationModel.h"
-#include "PresentationModel/Pyrogen.h"
-#include "PresentationModel/Predet.h"
-#include "PresentationModel/Mueller.h"
+#include "Pathogenesis/PathogenesisModel.h"
+#include "Pathogenesis/Pyrogen.h"
+#include "Pathogenesis/Predet.h"
+#include "Pathogenesis/Mueller.h"
 #include "global.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
@@ -32,16 +32,16 @@ using namespace std;
 
 
 //BEGIN static
-double PresentationModel::indirRiskCoFactor_18;
-double PresentationModel::sevMal_21;
-double PresentationModel::comorbintercept_24;
-double PresentationModel::critAgeComorb_30;
+double PathogenesisModel::indirRiskCoFactor_18;
+double PathogenesisModel::sevMal_21;
+double PathogenesisModel::comorbintercept_24;
+double PathogenesisModel::critAgeComorb_30;
 
-double PresentationModel::_riskFromMaternalInfection;
-std::vector<double> PresentationModel::_prevalenceByGestationalAge;
+double PathogenesisModel::_riskFromMaternalInfection;
+std::vector<double> PathogenesisModel::_prevalenceByGestationalAge;
 
 
-void PresentationModel::init() {
+void PathogenesisModel::init() {
   indirRiskCoFactor_18=(1-exp(-getParameter(Params::INDIRECT_RISK_COFACTOR)));
   sevMal_21=getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
   comorbintercept_24=1-exp(-getParameter(Params::COMORBIDITY_INTERCEPT));
@@ -52,34 +52,48 @@ void PresentationModel::init() {
   
   if (Global::modelVersion & PREDETERMINED_EPISODES) {
     //no separate init:
-    PyrogenPresentationModel::init();
+    PyrogenPathogenesis::init();
   } else {
     if (Global::modelVersion & MUELLER_PRESENTATION_MODEL)
-      MuellerPresentationModel::init();
+      MuellerPathogenesis::init();
     else
-      PyrogenPresentationModel::init();
+      PyrogenPathogenesis::init();
   }
 }
 
-PresentationModel* PresentationModel::createPresentationModel(double cF) {
+PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
   if (Global::modelVersion & PREDETERMINED_EPISODES) {
-    return new PredetPresentationModel(cF);
+    return new PredetPathogenesis(cF);
   }
   else {
     if (Global::modelVersion & MUELLER_PRESENTATION_MODEL) {
-      return new MuellerPresentationModel(cF);
+      return new MuellerPathogenesis(cF);
     }
     else {
-      return new PyrogenPresentationModel(cF);
+      return new PyrogenPathogenesis(cF);
     }
   }
 }
 
-bool PresentationModel::eventNeonatalMortality() {
+PathogenesisModel* PathogenesisModel::createPathogenesisModel(istream& in) {
+  if (Global::modelVersion & PREDETERMINED_EPISODES) {
+    return new PredetPathogenesis(in);
+  }
+  else {
+    if (Global::modelVersion & MUELLER_PRESENTATION_MODEL) {
+      return new MuellerPathogenesis(in);
+    }
+    else {
+      return new PyrogenPathogenesis(in);
+    }
+  }
+}
+
+bool PathogenesisModel::eventNeonatalMortality() {
   return W_UNIFORM() <= _riskFromMaternalInfection;
 }
 
-void PresentationModel::setRiskFromMaternalInfection(int nCounter, int pCounter){
+void PathogenesisModel::setRiskFromMaternalInfection(int nCounter, int pCounter){
   //Goodman estimated for neonatal mortality due to malaria in pregnancy
   const double gEst = 0.011;
   //Critical value of Prev20-25 for neonatal mortality
@@ -110,11 +124,15 @@ void PresentationModel::setRiskFromMaternalInfection(int nCounter, int pCounter)
 //END static
 
 
-PresentationModel::PresentationModel(double cF) :
+PathogenesisModel::PathogenesisModel(double cF) :
     _comorbidityFactor(cF)
 {}
+PathogenesisModel::PathogenesisModel(istream& in)
+{
+  in >> _comorbidityFactor;
+}
 
-Presentation::Infection PresentationModel::infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity) {
+Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity) {
   double prEpisode = getPEpisode(timeStepMaxDensity,totalDensity);
   
   //Decide whether a clinical episode occurs and if so, which type
@@ -126,12 +144,12 @@ Presentation::Infection PresentationModel::infectionEvent(double ageYears, doubl
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
-    Presentation::Infection ret = Presentation::UNCOMPLICATED;
+    Pathogenesis::Infection ret = Pathogenesis::UNCOMPLICATED;
     
     if (W_UNIFORM() < prSevereEpisode)
-      ret = Presentation::SEVERE;
+      ret = Pathogenesis::SEVERE;
     else if (W_UNIFORM() < pCoinfection)
-      ret = Presentation::COINFECTION;
+      ret = Pathogenesis::COINFECTION;
     
     /* Indirect mortality	
        IndirectRisk is the probability of dying from indirect effects of malaria
@@ -140,27 +158,23 @@ Presentation::Infection PresentationModel::infectionEvent(double ageYears, doubl
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
     if (W_UNIFORM() < indirectRisk)
-      ret = Presentation::Infection (ret | Presentation::INDIRECT_MORTALITY);
+      ret = Pathogenesis::Infection (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
   }
   else if(Global::modelVersion & NON_MALARIA_FEVERS) {
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
     if ((W_UNIFORM()) < prNonMalariaFever)
-      return Presentation::NON_MALARIA;
+      return Pathogenesis::NON_MALARIA;
   }
-  return Presentation::NONE;
+  return Pathogenesis::NONE;
 }
 
-double PresentationModel::getPyrogenThres(){
+double PathogenesisModel::getPyrogenThres(){
   return 0;
 }
 
 
-void PresentationModel::read(istream& in) {
-  in >> _comorbidityFactor;
-}
-
-void PresentationModel::write(ostream& out) const {
+void PathogenesisModel::write(ostream& out) const {
   out << _comorbidityFactor << endl;
 }

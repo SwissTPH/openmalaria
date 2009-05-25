@@ -51,7 +51,7 @@ double Human::detectionlimit;
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
   WithinHostModel::init();
-  PresentationModel::init();
+  PathogenesisModel::init();
   PerHostTransmission::initParameters();
   Vaccine::initParameters();
   
@@ -165,22 +165,20 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
       _treatmentSeekingFactor=1.8;
     }
   }
-  _presentationModel=PresentationModel::createPresentationModel(_comorbidityFactor);
+  _pathogenesisModel=PathogenesisModel::createPathogenesisModel(_comorbidityFactor);
   _caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
 }
 
 // Load human from checkpoint
 Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
   : _perHostTransmission(in, tm), _simulationTime(simulationTime),
-    _caseManagement(CaseManagementModel::createCaseManagementModel(in))
+    _caseManagement(CaseManagementModel::createCaseManagementModel(in)),
+    _pathogenesisModel(PathogenesisModel::createPathogenesisModel(in))
 {
   // NOTE: makes some unnecessary random calls
-  // WARNING: this will likely change some tests with checkpointing
   _withinHostModel = WithinHostModel::createWithinHostModel();
-  _presentationModel=PresentationModel::createPresentationModel(1.0);
   
   _withinHostModel->read(in);
-  _presentationModel->read(in);
   in >> _dateOfBirth; 
   in >> _doomed; 
   in >> _ID; 
@@ -198,7 +196,7 @@ Human::Human(istream& in, TransmissionModel& tm, int simulationTime)
 
 void Human::destroy() {
   delete _withinHostModel;
-  delete _presentationModel;
+  delete _pathogenesisModel;
   delete _caseManagement; 
 }
 
@@ -270,7 +268,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   }
   // Neonatal mortality:
   if(_simulationTime-_dateOfBirth == 1) {
-    if (PresentationModel::eventNeonatalMortality()) {
+    if (PathogenesisModel::eventNeonatalMortality()) {
       _caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       _doomed  = 6;
       return;
@@ -283,7 +281,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   doCaseManagement clears infections if there was an effective treatment, or calls medicate,
   and decides whether the patient lives, has sequelae, or dies.
   */
-  _caseManagement->doCaseManagement (_presentationModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
+  _caseManagement->doCaseManagement (_pathogenesisModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
                                      *_withinHostModel,
                                      getAgeInYears(),
                                      _doomed);
@@ -360,8 +358,8 @@ void Human::summarize(){
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
   }
   _perHostTransmission.summarize (*Simulation::gMainSummary, age);
-  Simulation::gMainSummary->addToPyrogenicThreshold(age, _presentationModel->getPyrogenThres());
-  Simulation::gMainSummary->addToSumX(age, log(_presentationModel->getPyrogenThres()+1.0));
+  Simulation::gMainSummary->addToPyrogenicThreshold(age, _pathogenesisModel->getPyrogenThres());
+  Simulation::gMainSummary->addToSumX(age, log(_pathogenesisModel->getPyrogenThres()+1.0));
 }
 
 
@@ -422,8 +420,8 @@ double Human::infectiousness(){
 ostream& operator<<(ostream& out, const Human& human){
   human._perHostTransmission.write (out);
   human._caseManagement->write (out);
+  human._pathogenesisModel->write(out);
   human._withinHostModel->write(out);
-  human._presentationModel->write(out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 

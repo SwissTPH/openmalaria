@@ -79,22 +79,22 @@ OldCaseManagement::~OldCaseManagement(){
 }
 
 
-void OldCaseManagement::doCaseManagement (Presentation::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
+void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
   bool effectiveTreatment =false;
   
-  if (infection & Presentation::MALARIA) {
-    if (infection & Presentation::COMPLICATED)
+  if (infection & Pathogenesis::MALARIA) {
+    if (infection & Pathogenesis::COMPLICATED)
       effectiveTreatment=severeMalaria(ageYears, doomed);
-    else if (infection == Presentation::UNCOMPLICATED)
+    else if (infection == Pathogenesis::UNCOMPLICATED)
       effectiveTreatment=uncomplicatedEvent(true, ageYears);
     
-    if ((infection & Presentation::INDIRECT_MORTALITY) && doomed == 0)
+    if ((infection & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
       doomed=-1;
     
     if (Global::modelVersion & PENALISATION_EPISODES) {
       withinHostModel.immunityPenalisation();
     }
-  } else if(infection & Presentation::NON_MALARIA) {
+  } else if(infection & Pathogenesis::NON_MALARIA) {
     effectiveTreatment = uncomplicatedEvent(false, ageYears);
   }
   

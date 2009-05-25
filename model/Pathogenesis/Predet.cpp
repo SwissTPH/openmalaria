@@ -20,19 +20,17 @@
 
 */
 
-#include "PresentationModel/Mueller.h"
-#include "inputData.h"
+#include "Pathogenesis/Predet.h"
+
 using namespace std;
 
-double MuellerPresentationModel::rateMultiplier_31;
-double MuellerPresentationModel::densityExponent_32;
 
-void MuellerPresentationModel::init(){
-  rateMultiplier_31=getParameter(Params::MUELLER_RATE_MULTIPLIER);
-  densityExponent_32=getParameter(Params::MUELLER_DENSITY_EXPONENT);
-}
-
-double MuellerPresentationModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
-  double incidenceDensity=rateMultiplier_31*(pow(totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
-  return 1-exp(-incidenceDensity);
+double PredetPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
+  updatePyrogenThres(totalDensity);
+  if ( timeStepMaxDensity > _pyrogenThres) {
+      return 1;
+    }
+  else{
+    return 0;
+  }
 }

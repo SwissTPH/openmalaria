@@ -33,7 +33,7 @@ public:
   OldCaseManagement(istream& in);
   virtual ~OldCaseManagement();
   
-  virtual void doCaseManagement (Presentation::Infection, WithinHostModel&, double, int& doomed);
+  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, double, int& doomed);
   
   virtual  void write(ostream& out) const;
   

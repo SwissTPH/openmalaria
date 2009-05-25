@@ -29,7 +29,7 @@
 #include "TransmissionModel.h"
 #include "TransmissionModel/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
-#include "PresentationModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
 #include "CaseManagementModel.h"
 #include "boincWrapper.h"
 #include <math.h>
@@ -329,7 +329,7 @@ void Population::update1(){
       
       if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
 	isAtRiskOfFirstPregnancy = false;	// only call once per time-step
-	PresentationModel::setRiskFromMaternalInfection(nCounter, pCounter);
+	PathogenesisModel::setRiskFromMaternalInfection(nCounter, pCounter);
       }
     }
     

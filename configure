@@ -7426,7 +7426,7 @@ fi
 done
 
 
-ac_config_files="$ac_config_files Makefile model/Makefile model/PresentationModel/Makefile model/TransmissionModel/Makefile model/WithinHostModel/Makefile xsdcxx/Makefile graphics/Makefile"
+ac_config_files="$ac_config_files Makefile model/Makefile model/Pathogenesis/Makefile model/TransmissionModel/Makefile model/WithinHostModel/Makefile xsdcxx/Makefile graphics/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -8080,7 +8080,7 @@ do
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "model/Makefile") CONFIG_FILES="$CONFIG_FILES model/Makefile" ;;
-    "model/PresentationModel/Makefile") CONFIG_FILES="$CONFIG_FILES model/PresentationModel/Makefile" ;;
+    "model/Pathogenesis/Makefile") CONFIG_FILES="$CONFIG_FILES model/Pathogenesis/Makefile" ;;
     "model/TransmissionModel/Makefile") CONFIG_FILES="$CONFIG_FILES model/TransmissionModel/Makefile" ;;
     "model/WithinHostModel/Makefile") CONFIG_FILES="$CONFIG_FILES model/WithinHostModel/Makefile" ;;
     "xsdcxx/Makefile") CONFIG_FILES="$CONFIG_FILES xsdcxx/Makefile" ;;

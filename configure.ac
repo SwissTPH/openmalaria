@@ -128,7 +128,7 @@ AC_CHECK_FUNCS([floor pow sqrt])
 
 AC_CONFIG_FILES([Makefile
                  model/Makefile
-		 model/PresentationModel/Makefile
+		 model/Pathogenesis/Makefile
 		 model/TransmissionModel/Makefile
 		 model/WithinHostModel/Makefile
 		 xsdcxx/Makefile

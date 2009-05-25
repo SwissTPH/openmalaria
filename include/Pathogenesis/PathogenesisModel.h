@@ -20,15 +20,15 @@
 
 */
 
-#ifndef Hmod_PresentationModel
-#define Hmod_PresentationModel
+#ifndef Hmod_PathogenesisModel
+#define Hmod_PathogenesisModel
 
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
-namespace Presentation {
+namespace Pathogenesis {
   /** Types of infection; correspond roughly to those in doCM.
    * 
    * The following are flags:
@@ -64,20 +64,22 @@ namespace Presentation {
   };
 }
 
-/*! Presentation Model abstract base class. 
+/*! PathogenesisModel abstract base class. 
  *
- * Previously named MorbidityModel. */
-class PresentationModel {
+ * Previously named MorbidityModel and PresentationModel. */
+class PathogenesisModel {
 public:
   // static:
-  /// Calls static init on correct PresentationModel.
+  /// Calls static init on correct PathogenesisModel.
   static void init();
   
   /** Create a sub-class instance, dependant on global options.
-   * 
-   * @param cF = Comorbidity factor (currently set in Human). */
-  static PresentationModel* createPresentationModel(double cF);
-  
+  * 
+  * @param cF = Comorbidity factor (currently set in Human). */
+  static PathogenesisModel* createPathogenesisModel(double cF);
+  /** Create a sub-class instance, loading from a checkpoint. */
+  static PathogenesisModel* createPathogenesisModel(istream& in);
+
   /** Called for each birth; returns true if infant dies due to mother's
    * infection. */
   static bool eventNeonatalMortality();
@@ -88,7 +90,7 @@ public:
   /** Determines whether there is an acute episode or concomitant fever (or
    * neither) and then whether the episode is severe, uncomplicated or there is
    * an indirect death. */
-  Presentation::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
+  Pathogenesis::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
   
   /// Model-specific; for summary.
   virtual double getPyrogenThres();
@@ -96,12 +98,13 @@ public:
   /// @brief Checkpointing functions
   //@{
   virtual void write(ostream& out) const;
-  virtual void read(istream& in);
   //@}
   
 protected:
-  /** Create a PresentationModel. */
-  PresentationModel(double cF);
+  /** Create a PathogenesisModel. */
+  PathogenesisModel(double cF);
+  /** Create a PathogenesisModel. */
+  PathogenesisModel(istream& in);
   
 private:	// static
   //comorbidity prevalence at birth as a risk factor for indirect

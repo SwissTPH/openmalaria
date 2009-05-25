@@ -37,7 +37,7 @@ public:
     Demonstrates the use of the CM-related calls to medicate. May or may not be
     used as a subroutine in the final implementation.
   */
-  virtual void doCaseManagement (Presentation::Infection, WithinHostModel&, double, int& doomed);
+  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, double, int& doomed);
 };
 
 #endif

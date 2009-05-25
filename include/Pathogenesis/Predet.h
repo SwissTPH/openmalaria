@@ -25,16 +25,18 @@
 
 #include <iostream>
 #include "global.h"
-#include "PresentationModel/Pyrogen.h"
+#include "Pathogenesis/Pyrogen.h"
 
 using namespace std;
 
 /*! Predetermined episodes presentation model.
  */
-class PredetPresentationModel : public PyrogenPresentationModel {
+class PredetPathogenesis : public PyrogenPathogenesis {
 public:
-  PredetPresentationModel (double cF) :
-    PyrogenPresentationModel(cF) {}
+  PredetPathogenesis (double cF) :
+    PyrogenPathogenesis(cF) {}
+  PredetPathogenesis (istream& in) :
+    PyrogenPathogenesis(in) {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 };

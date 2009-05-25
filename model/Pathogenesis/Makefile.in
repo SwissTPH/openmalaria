@@ -30,7 +30,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = model/PresentationModel
+subdir = model/Pathogenesis
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/check_boinc.m4 \
@@ -42,11 +42,11 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
-libPresentationModel_a_AR = $(AR) $(ARFLAGS)
-libPresentationModel_a_LIBADD =
-am_libPresentationModel_a_OBJECTS = Mueller.$(OBJEXT) \
-	Pyrogen.$(OBJEXT) Predet.$(OBJEXT)
-libPresentationModel_a_OBJECTS = $(am_libPresentationModel_a_OBJECTS)
+libPathogenesis_a_AR = $(AR) $(ARFLAGS)
+libPathogenesis_a_LIBADD =
+am_libPathogenesis_a_OBJECTS = PathogenesisModel.$(OBJEXT) \
+	Mueller.$(OBJEXT) Pyrogen.$(OBJEXT) Predet.$(OBJEXT)
+libPathogenesis_a_OBJECTS = $(am_libPathogenesis_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -55,8 +55,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(libPresentationModel_a_SOURCES)
-DIST_SOURCES = $(libPresentationModel_a_SOURCES)
+SOURCES = $(libPathogenesis_a_SOURCES)
+DIST_SOURCES = $(libPathogenesis_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -164,8 +164,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libPresentationModel.a
-libPresentationModel_a_SOURCES = Mueller.cpp Pyrogen.cpp Predet.cpp
+noinst_LIBRARIES = libPathogenesis.a
+libPathogenesis_a_SOURCES = PathogenesisModel.cpp Mueller.cpp Pyrogen.cpp Predet.cpp
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
 all: all-am
@@ -181,9 +181,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  model/PresentationModel/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  model/Pathogenesis/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  model/PresentationModel/Makefile
+	  $(AUTOMAKE) --gnu  model/Pathogenesis/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -204,10 +204,10 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libPresentationModel.a: $(libPresentationModel_a_OBJECTS) $(libPresentationModel_a_DEPENDENCIES) 
-	-rm -f libPresentationModel.a
-	$(libPresentationModel_a_AR) libPresentationModel.a $(libPresentationModel_a_OBJECTS) $(libPresentationModel_a_LIBADD)
-	$(RANLIB) libPresentationModel.a
+libPathogenesis.a: $(libPathogenesis_a_OBJECTS) $(libPathogenesis_a_DEPENDENCIES) 
+	-rm -f libPathogenesis.a
+	$(libPathogenesis_a_AR) libPathogenesis.a $(libPathogenesis_a_OBJECTS) $(libPathogenesis_a_LIBADD)
+	$(RANLIB) libPathogenesis.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -216,6 +216,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mueller.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PathogenesisModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Predet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pyrogen.Po@am__quote@
 
@@ -334,6 +335,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+clean: clean-am
+
 clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
 
 distclean: distclean-am
@@ -404,11 +407,6 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-
-clean: clean-am clean-scenario
-
-clean-scenario:
-	rm -f scenario.cxx scenario.hxx scenario.ixx
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

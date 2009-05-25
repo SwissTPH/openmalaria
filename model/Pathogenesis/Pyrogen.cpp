@@ -20,18 +20,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
 
-#include "PresentationModel/Pyrogen.h"
+#include "Pathogenesis/Pyrogen.h"
 #include "inputData.h"
 
 using namespace std;
 
-double PyrogenPresentationModel::initPyroThres;
-double PyrogenPresentationModel::smuY;
-double PyrogenPresentationModel::Ystar2_13;
-double PyrogenPresentationModel::alpha14;
-double PyrogenPresentationModel::Ystar1_26;
+double PyrogenPathogenesis::initPyroThres;
+double PyrogenPathogenesis::smuY;
+double PyrogenPathogenesis::Ystar2_13;
+double PyrogenPathogenesis::alpha14;
+double PyrogenPathogenesis::Ystar1_26;
 
-void PyrogenPresentationModel::init(){
+void PyrogenPathogenesis::init(){
   initPyroThres=getParameter(Params::Y_STAR_0);
   smuY=-log(0.5)/(daysInYear/Global::interval*getParameter(Params::Y_STAR_HALF_LIFE));
   Ystar2_13=getParameter(Params::Y_STAR_SQ);
@@ -39,20 +39,26 @@ void PyrogenPresentationModel::init(){
   Ystar1_26=getParameter(Params::Y_STAR_1);
 }
 
-PyrogenPresentationModel::PyrogenPresentationModel(double cF) :
-     PresentationModel (cF), _pyrogenThres (initPyroThres)
+PyrogenPathogenesis::PyrogenPathogenesis(double cF) :
+     PathogenesisModel (cF), _pyrogenThres (initPyroThres)
 {}
 
-double PyrogenPresentationModel::getPEpisode(double timeStepMaxDensity, double totalDensity) {
+PyrogenPathogenesis::PyrogenPathogenesis(istream& in) :
+     PathogenesisModel (in)
+{
+  in >> _pyrogenThres;
+}
+
+double PyrogenPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
   updatePyrogenThres(totalDensity);
   return 1-1/(1+(timeStepMaxDensity/_pyrogenThres));;
 }
 
-double PyrogenPresentationModel::getPyrogenThres(){
+double PyrogenPathogenesis::getPyrogenThres(){
   return _pyrogenThres;
 }
 
-void PyrogenPresentationModel::updatePyrogenThres(double totalDensity){
+void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
   int i;
   //Number of categories in the numerical approx. below
   const int n= 11;
@@ -65,12 +71,7 @@ void PyrogenPresentationModel::updatePyrogenThres(double totalDensity){
   _pyrogenThres=valYstar;
 }
 
-void PyrogenPresentationModel::read(istream& in) {
-  in >> _comorbidityFactor;
-  in >> _pyrogenThres;
-}
-
-void PyrogenPresentationModel::write(ostream& out) const {
+void PyrogenPathogenesis::write(ostream& out) const {
   out << _comorbidityFactor << endl;
   out << _pyrogenThres << endl;
 }
