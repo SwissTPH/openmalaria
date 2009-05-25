@@ -83,7 +83,8 @@ public class SchemaTranslator {
 		}
 		SchemaFactory factory = SchemaFactory
 				.newInstance("http://www.w3.org/2001/XMLSchema");
-		//FIXME: this throws a java.lang.NullPointerException :
+		//NOTE: this may throw a java.lang.NullPointerException when run within eclipse
+		// run from a command-line instead (java SchemaTranslator).
 		Schema schema = factory.newSchema(xsdFile);
 		Validator validator = schema.newValidator();
 
