@@ -17,11 +17,12 @@ cd test/sandbox && cp ../original/* . 2>/dev/null
 
 CHECKPOINT=""
 PRINT_MODEL=""
+CMD_PREFIX=""
 
 runScenario() {
   # delete old checkpoints; necessary after a previous run:
   rm -f checkpoint* seed*
-  CMD="./openMalaria --scenario scenario$number.xml $CHECKPOINT $PRINT_MODEL"
+  CMD="$CMD_PREFIX./openMalaria --scenario scenario$number.xml $CHECKPOINT $PRINT_MODEL"
   date
   echo $CMD
   touch timeFile
@@ -54,6 +55,9 @@ do
   if [ "$1" = "--checkpoint" ]
   then
     CHECKPOINT=$1
+  elif [ "$1" = "--gdb" ]
+  then
+    CMD_PREFIX="gdb --args "
   elif [ "$1" = "--print-model" ]
   then
     PRINT_MODEL=$1
@@ -63,6 +67,7 @@ do
     echo "If no scenario numbers are given, all scenarios are run."
     echo "Options:"
     echo "  --checkpoint	Run checkpointing tests. These no longer require BOINC."
+    echo "  --gdb		Run openMalaria through gdb"
     echo "  --help		Print this message."
     echo "Other options supported by openMalaria will be passed."
     exit 1;
@@ -75,7 +80,7 @@ done
 
 if [ "$#" -eq "0" ]
 then
-    if [ ! -f scenario2.xml ]
+    if [ ! -f scenario2.xml ] # make sure at least one exists
     then
       echo "Error: no scenario files present (at least not scenario2.xml)"
       exit 1

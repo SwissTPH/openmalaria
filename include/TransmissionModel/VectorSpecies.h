@@ -49,7 +49,7 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (scnXml::Anopheles& anoph, vector<double>& EIR);
+  void initialise (const scnXml::Anopheles& anoph, vector<double>& EIR);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();
@@ -185,8 +185,8 @@ private:
    * Length: Global::intervalsPerYear */
   vector<double> speciesEIR;
   
-  /** A reference to the XML data for this variant of anopheles mosquito. */
-  scnXml::Anopheles* anophelesData;
+  /** The filename to which emergence rates are loaded & saved. */
+  const char* emergenceRateFilename;
   //@}
   
   /* Functions */

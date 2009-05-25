@@ -33,13 +33,13 @@
  *****************************************************************************/
 
 
-VectorTransmission::VectorTransmission (scnXml::Vector vectorData) {
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
   
   // Each item in the AnophelesSequence represents an anopheles species.
   // TransmissionModel::createTransmissionModel checks length of list >= 1.
-  scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
+  const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
   numSpecies = anophelesList.size();
   species.resize (numSpecies);
   for (size_t i = 0; i < numSpecies; ++i)
@@ -59,7 +59,11 @@ void VectorTransmission::initMainSimulation(int populationSize) {
 // dummy functions until they're implemented:
 double VectorTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
   // I'm not really sure what this should do (hardy).
-  cerr << "dummy function getExpectedNumberOfInfections called" << endl;
+  static bool errReported = false;
+  if (!errReported) {
+    errReported = true;
+    cerr << "dummy function getExpectedNumberOfInfections called" << endl;
+  }
   return 0.0;
 }
 

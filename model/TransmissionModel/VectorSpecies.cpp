@@ -28,20 +28,22 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (scnXml::Anopheles& anoph, vector<double>& initialisationEIR) {
-  anophelesData = &anoph;
+void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vector<double>& initialisationEIR) {
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
+  EIPDuration = mosq.getExtrinsicIncubationPeriod();
   
   mosqSeekingDeathRate = mosq.getMosqSeekingDeathRate();
   mosqSeekingDuration = mosq.getMosqSeekingDuration();
   
-  entoAvailability = 0;	//FIXME
+  entoAvailability = mosq.getMosqEntoAvailability();
   probMosqBiting = mosq.getMosqProbBiting();
   probMosqFindRestSite = mosq.getMosqProbFindRestSite();
   probMosqSurvivalResting = mosq.getMosqProbResting();
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
+  
+  emergenceRateFilename = mosq.getEmergenceRateFilename().c_str();
   
   //TODO: initialize these and perhaps other params properly:
   //K_vi
@@ -320,8 +322,6 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   they are constant. We can change that later if they need to 
   vary. */
   
-  scnXml::Mosq mosq = anophelesData->getMosq();
-  
   /* Availability rate of hosts to mosquitoes.
   Units: 1/(Animals * Time)
   $\alpha_i$ in model. Matrix of size $n \times \theta_p$.
@@ -333,28 +333,6 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   // We set the host availability relative to the population size.
   double hostAvailabilityRateInit=7.0/populationSize;	// TODO: Move absolute availability to XML
   
-  /*! Probability of a mosquito biting a host given that it has encountered the host.
-  
-  Dimensionless.
-  $P_{B_i}$ in model. Matrix of size $n \times \theta_p$.
-  For now, we assume this does not change over the cycle. */
-  double mosqProbBiting = mosq.getMosqProbBiting();
-
-  /*! Probability of a mosquito finding a resting side given that it has bitten a host.
-  
-  Dimensionless.
-  $P_{C_i}$ in model. Matrix of size $n \times \theta_p$.
-  For now, we assume this does not change over the cycle. */
-    
-  double mosqProbFindRestSite = mosq.getMosqProbFindRestSite();
-    
-  /*! Probability of a mosquito surviving the resting period given that it has found a resting site.
-   * 
-  Dimensionless.
-  $P_{D_i}$ in model. Matrix of size $n \times \theta_p$.
-  For now, we assume this does not change over the cycle. */
-  double mosqProbResting = mosq.getMosqProbResting();
-
   /**************************************************************! 
   ***************************************************************!
   *********** Other main input and output parameters ************!
@@ -420,7 +398,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   finding algorithm (but probably not).
   (2008.10.20: It appears to make no difference to the speed.)
     */
-  ifstream file (mosq.getEmergenceRateFilename().c_str());
+  ifstream file (emergenceRateFilename);
   if(!file.bad()) {	// file exists since it opened succesfully
     for (int i = 0; i < daysInYear; i++){
       file >> mosqEmergeRate[i];
@@ -439,12 +417,12 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     CalcInitMosqEmergeRate(populationSize, EIPDuration,
                            nHostTypesInit,
                            nMalHostTypesInit, hostAvailabilityRateInit,
-                           mosqProbBiting, mosqProbFindRestSite,
-                           mosqProbResting,
+                           probMosqBiting, probMosqFindRestSite,
+                           probMosqSurvivalResting,
                            humanInfectivityInit, EIRInit);
     
     // Now we've calculated the emergence rate, save it:
-    ofstream file (mosq.getEmergenceRateFilename().c_str());
+    ofstream file (emergenceRateFilename);
     for (int i = 0; i < daysInYear; ++i)
       file << mosqEmergeRate[i];
     file.close();

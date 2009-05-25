@@ -37,7 +37,7 @@ class VectorTransmission : public TransmissionModel {
 public:
   friend class PerHostTransmission;
   
-  VectorTransmission(scnXml::Vector vectorData);
+  VectorTransmission(const scnXml::Vector vectorData);
   virtual ~VectorTransmission();
   
   /** Initialise the main simulation.
