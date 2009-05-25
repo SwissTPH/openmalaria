@@ -69,6 +69,12 @@ OldCaseManagement::OldCaseManagement(double tSF) :
 {
 }
 
+OldCaseManagement::OldCaseManagement(istream& in) :
+    CaseManagementModel (in)
+{
+  in >> _latestRegimen; 
+}
+
 OldCaseManagement::~OldCaseManagement(){
 }
 
@@ -402,15 +408,9 @@ void OldCaseManagement::setParasiteCaseParameters () {
 
 // -----  checkpointing  -----
 
-void OldCaseManagement::read(istream& in) {
-  in >> _latestEvent;
-  in >> _treatmentSeekingFactor; 
-  in >> _latestRegimen; 
-  in >> _tLastTreatment; 
-}
 void OldCaseManagement::write(ostream& out) const {
   out << _latestEvent;
   out << _treatmentSeekingFactor << endl; 
-  out << _latestRegimen << endl; 
   out << _tLastTreatment << endl; 
+  out << _latestRegimen << endl; 
 }

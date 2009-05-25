@@ -47,9 +47,24 @@ CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF)
   }
 }
 
+CaseManagementModel* CaseManagementModel::createCaseManagementModel (istream& in) {
+  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
+    return new NewCaseManagement(in);
+  } else {
+    return new OldCaseManagement(in);
+  }
+}
+
 CaseManagementModel::CaseManagementModel (double tSF) :
     _treatmentSeekingFactor(tSF), _tLastTreatment(TIMESTEP_NEVER)
 {}
+
+CaseManagementModel::CaseManagementModel (istream& in)
+{
+  in >> _latestEvent;
+  in >> _treatmentSeekingFactor; 
+  in >> _tLastTreatment; 
+}
 
 CaseManagementModel::~CaseManagementModel ()
 {}
@@ -69,11 +84,8 @@ Event& CaseManagementModel::getEvent() {
 
 // -----  checkpointing  -----
 
-void CaseManagementModel::read(istream& in) {
-  in >> _latestEvent;
-  in >> _treatmentSeekingFactor; 
-}
 void CaseManagementModel::write(ostream& out) const {
   out << _latestEvent;
   out << _treatmentSeekingFactor << endl; 
+  out << _tLastTreatment << endl; 
 }

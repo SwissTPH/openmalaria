@@ -30,6 +30,7 @@ public:
   static void init();
   
   NewCaseManagement(double tSF);
+  NewCaseManagement(istream& in);
   virtual ~NewCaseManagement();
   
   /*!

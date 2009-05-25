@@ -38,6 +38,11 @@ NewCaseManagement::NewCaseManagement(double tSF) :
 {
 }
 
+NewCaseManagement::NewCaseManagement(istream& in) :
+  CaseManagementModel (in)
+{
+}
+
 NewCaseManagement::~NewCaseManagement(){
 }
 

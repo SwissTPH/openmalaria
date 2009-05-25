@@ -29,12 +29,13 @@ public:
   
   //!Read caseManagement parameters from input file and allocate data structures.
   OldCaseManagement(double tSF);
+  /// Load from checkpoint
+  OldCaseManagement(istream& in);
   virtual ~OldCaseManagement();
   
   virtual void doCaseManagement (Presentation::Infection, WithinHostModel&, double, int& doomed);
   
   virtual  void write(ostream& out) const;
-  virtual void read(istream& in);
   
 private:
    /*! should return true in case of effective or partially effective

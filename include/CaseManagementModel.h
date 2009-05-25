@@ -33,7 +33,9 @@ public:
   static void init();
   /// Return a new CaseManagementModel. Don't create one directly.
   static CaseManagementModel* createCaseManagementModel (double tSF);
-
+  /// Load a CaseManagementModel from a checkpoint.
+  static CaseManagementModel* createCaseManagementModel (istream& in);
+  
   /// Report last event, if any
   virtual ~CaseManagementModel ();
   
@@ -52,13 +54,14 @@ public:
   Event& getEvent();
   
   virtual void write(ostream& out) const;
-  virtual void read(istream& in);
   
   static int caseManagementMemory;
   
 protected:
   /// Create, initializing _treatmentSeekingFactor to tSF.
   CaseManagementModel (double tSF);
+  /// Create, loading from checkpoint
+  CaseManagementModel (istream& in);
   
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
