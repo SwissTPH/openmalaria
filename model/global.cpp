@@ -74,6 +74,8 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	}
       } else if (clo == "print-model") {
 	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
+      } else if (clo == "enableERC") {
+	clOptions = CLO::CLO (clOptions | CLO::ENABLE_ERC);
       } else if (clo == "checkpoint") {
 	clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
       } else if (clo.compare ("compress-checkpoints=")) {
@@ -104,6 +106,8 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     << "  --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
     << "  --print-model		Print which model version flags are set (as binary with right-most"<<endl
     << "			digit representing option 0) and exit." << endl
+    << "  --enableERC		Allow Emergence Rate Calculations (otherwise will stop if the"<<endl
+    << "			values read from file are inaccurate)."<<endl
     << "  --checkpoint		Forces checkpointing once during simulation (during initialisation"<<endl
     << "			period), exiting after completing each"<<endl
     << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl

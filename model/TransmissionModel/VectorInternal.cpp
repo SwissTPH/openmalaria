@@ -663,6 +663,8 @@ void PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
 #endif
 
 #ifdef VectorTransmission_PRINT_CalcXP	// only use
+#include <string.h>
+
 void PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p)
 {
 /* PrintXP() prints out values of XP, the periodic orbit.

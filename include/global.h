@@ -41,7 +41,7 @@ namespace CLO {
     
     PRINT_MODEL_VERSION	= 0x1 | EARLY_EXIT,
     TEST_CHECKPOINTING	= 0x2,
-    COMPRESS_CHECKPOINTS= 0x4,
+    ENABLE_ERC		= 0x4,
   };
 }
 

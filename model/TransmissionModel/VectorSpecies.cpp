@@ -367,7 +367,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   speciesEIR.clear();	// this is finished with; frees memory?
   
   convertLengthToFullYear(humanInfectivityInit, initialKappa);
-  
+  //PrintArray ("initial kappa", humanInfectivityInit, daysInYear);
   
   /* Find an initial estimate of the mosquito emergence rate, in
   mosqEmergeRate.
@@ -661,7 +661,10 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   
   if(SvDiff1norm>EpsAbsRF){
     printf("The difference in Sv is greater than the tolerance. \n");
-
+    
+    if (!(Global::clOptions & CLO::ENABLE_ERC))
+      throw runtime_error ("Emergence rate calculations disabled.");
+    
     /************* We initialize variables for root-finding. **************/
     printf("Starting root-finding \n");
 
