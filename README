@@ -8,6 +8,7 @@ Dependencies:
 GSL (GNU Scientific Library)
 XSD (Code Synthesis XSD; debian package named xsdcxx)
 BOINC
+gzstream (included)
 
 The build system expects some shared libraries in lib/ for static linking. E.g. for linux:
 libboinc.a  libboinc_api.a  libgsl.a  libgslcblas.a  libxerces-c.a

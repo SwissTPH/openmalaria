@@ -32,8 +32,8 @@ POST_UNINSTALL = :
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/configure AUTHORS COPYING \
-	ChangeLog INSTALL NEWS config/depcomp config/install-sh \
-	config/missing
+	COPYING.LIB ChangeLog INSTALL NEWS config/depcomp \
+	config/install-sh config/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/check_boinc.m4 \
 	$(top_srcdir)/configure.ac
@@ -109,6 +109,7 @@ LIB_BOINC_API = @LIB_BOINC_API@
 LIB_GSL = @LIB_GSL@
 LIB_GSLCBLAS = @LIB_GSLCBLAS@
 LIB_XERC = @LIB_XERC@
+LIB_Z = @LIB_Z@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@

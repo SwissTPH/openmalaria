@@ -31,6 +31,7 @@
 #include "global.h"
 #include "inputData.h"
 #include <fstream>
+#include "gzstream.h"
 
 /*
 
@@ -165,21 +166,18 @@ void Simulation::writeCheckpoint(){
   save_rng_state (checkpointNum);
   
   // Open the next checkpoint file for writing:
-  ofstream f_checkpoint;
-  {
-    ostringstream name;
-    name << checkpointName << checkpointNum;
-    f_checkpoint.open(name.str().c_str(), ios::out | ios::binary);
+  ostringstream name;
+  name << checkpointName << checkpointNum;
+  if (Global::compressCheckpoints) {
+    name << ".gz";
+    ogzstream out(name.str().c_str(), ios::out | ios::binary);
+    write (out);
+    out.close();
+  } else {
+    ofstream out(name.str().c_str(), ios::out | ios::binary);
+    write (out);
+    out.close();
   }
-  
-  // Write checkpoint
-  f_checkpoint.precision(20);
-  f_checkpoint << simulationTime << endl;
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::write (f_checkpoint);
-  }
-  _population->write (f_checkpoint);
-  f_checkpoint.close();
   
   {	// Indicate which is the latest checkpoint file.
     ofstream checkpointFile;
@@ -187,6 +185,18 @@ void Simulation::writeCheckpoint(){
     checkpointFile << checkpointNum;
     checkpointFile.close();
   }
+}
+
+void Simulation::write (ostream& out) {
+  if (out == NULL || !out.good())
+    throw new runtime_error ("Unable to write checkpoint file");
+  
+  out.precision(20);
+  out << simulationTime << endl;
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    ProteomeManager::write (out);
+  }
+  _population->write (out);
 }
 
 void Simulation::readCheckpoint() {
@@ -198,30 +208,44 @@ void Simulation::readCheckpoint() {
     checkpointFile.close();
   }
   // Open the latest file
-  ifstream f_checkpoint;
-  {
-    ostringstream name;
-    name << checkpointName << checkpointNum;
-    f_checkpoint.open(name.str().c_str(), ios::in | ios::binary);
+  ostringstream name;
+  name << checkpointName << checkpointNum;	// try uncompressed
+  ifstream in(name.str().c_str(), ios::in | ios::binary);
+  if (in.good()) {
+    read (in);
+    in.close();
+  } else {
+    name << ".gz";				// then compressed
+    igzstream in(name.str().c_str(), ios::in | ios::binary);
+    if (!in.good())
+      throw runtime_error ("Unable to read checkpoint file");
+    read (in);
+    in.close();
   }
-  
-  // Read checkpoint
-  f_checkpoint >> simulationTime;
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::read (f_checkpoint);
-  }
-  _population->read(f_checkpoint);
-  // Read trailing white-space (final endl has not yet been read):
-  while (!f_checkpoint.eof() && isspace (f_checkpoint.peek()))
-    f_checkpoint.get();
-  if (!f_checkpoint.eof()) {	// if anything else is left
-    streampos i = f_checkpoint.tellg();
-    f_checkpoint.seekg(0, ios_base::end);
-    cerr << "Error (checkpointing): not the whole checkpointing file was read; " << f_checkpoint.tellg()-i << " bytes remaining:" << endl;
-    f_checkpoint.seekg (i);
-    cerr << f_checkpoint.rdbuf() << endl;
-  }
-  f_checkpoint.close();
   
   load_rng_state(checkpointNum);
+}
+
+void Simulation::read (istream& in) {
+  in >> simulationTime;
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    ProteomeManager::read (in);
+  }
+  _population->read(in);
+  
+  // Read trailing white-space (final endl has not yet been read):
+  while (in.good() && isspace (in.peek()))
+    in.get();
+  if (!in.eof()) {	// if anything else is left
+    cerr << "Error (checkpointing): not the whole checkpointing file was read;";
+    ifstream *ifCP = dynamic_cast<ifstream*> (&in);
+    if (ifCP) {
+      streampos i = ifCP->tellg();
+      ifCP->seekg(0, ios_base::end);
+      cerr << ifCP->tellg()-i << " bytes remaining:";
+      ifCP->seekg (i);
+    } else	// igzstream can't seek
+      cerr << " remainder:" << endl;
+    cerr << endl << in.rdbuf() << endl;
+  }
 }

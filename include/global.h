@@ -41,6 +41,7 @@ namespace CLO {
     
     PRINT_MODEL_VERSION	= 0x1 | EARLY_EXIT,
     TEST_CHECKPOINTING	= 0x2,
+    COMPRESS_CHECKPOINTS= 0x4,
   };
 }
 
@@ -99,7 +100,11 @@ public:
   static vector<int> infantIntervalsAtRisk;
   //@}
   
+  ///@brief Command-line options
+  //@{
   static CLO::CLO clOptions;
+  static bool compressCheckpoints;
+  //@}
   
 private:
   /// Sets modelVersion, checking for incompatible versions.

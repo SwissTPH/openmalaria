@@ -74,16 +74,22 @@ public:
 private:
   Population* _population;
 
-   //!  Write the current checkpoint to a file.
-  void writeCheckpoint();
-
-  //! Open the checkpoint file
-  void readCheckpoint();
-
+  /** @brief checkpointing functions
+   *
+   * readCheckpoint/writeCheckpoint prepare to read/write the file,
+   * and read/write read and write the actual data. */
+  //@{
   //! This function reads the checkpoint from the file in which is written
   /*! if it exists and initializes all the data return true if the workunit is
-    checkpointed and false otherwise */
+  checkpointed and false otherwise */
   bool isCheckpoint();
+  
+  void writeCheckpoint();
+  void readCheckpoint();
+  
+  void write (ostream& out);
+  void read (istream& in);
+  //@}
   
   string checkpointName;
 };

@@ -42,6 +42,7 @@ int Global::simulationMode;
 int Global::latentp;
 
 CLO::CLO Global::clOptions = CLO::NONE;
+bool Global::compressCheckpoints = true;
 
 vector<int> Global::infantIntervalsAtRisk;
 vector<int> Global::infantDeaths;
@@ -75,6 +76,15 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
       } else if (clo == "checkpoint") {
 	clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
+      } else if (clo.compare ("compress-checkpoints=")) {
+	stringstream t;
+	t << clo.substr (21);
+	t >> compressCheckpoints;
+	if (t.fail()) {
+	  cerr << "Expected: --compress-checkpoints=x  where x is 1 or 0" << endl;
+	  cloHelp = true;
+	  break;
+	}
       } else if (clo == "help") {
 	cloHelp = true;
       } else {
@@ -97,6 +107,8 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     << "  --checkpoint		Forces checkpointing once during simulation (during initialisation"<<endl
     << "			period), exiting after completing each"<<endl
     << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
+    << "  --compress-checkpoints=boolean" << endl
+    << "			Set checkpoint compression on or off. Default is on." <<endl
     << "  --help		Print this message." << endl
     ;
     exit (1);

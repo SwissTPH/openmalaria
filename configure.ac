@@ -66,6 +66,7 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
     AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
     AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
+    AC_CHECK_FILE(lib/libz.a,[AC_SUBST(LIB_Z, "../lib/libz.a")],[AC_MSG_FAILURE([No static zlib lib present])])
     
     # statically link libgcc
     export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
@@ -76,6 +77,7 @@ else
     AC_SUBST(LIB_GSLCBLAS,"")
     AC_CHECK_LIB(gslcblas,main,,[AC_MSG_FAILURE([gslcblas not present])])
     AC_CHECK_LIB(gsl,main,, [AC_MSG_FAILURE([gsl not present])])
+    AC_CHECK_LIB(z,main,, [AC_MSG_FAILURE([zlib not present])])
     if test `uname -s | grep Linux` ; then
         PKG_CHECK_MODULES(gsl, gsl >= 1.11,,[AC_MSG_FAILURE([Old gsl version. You must update your current version. Please follow the instructions in the wiki])])
     fi
@@ -112,6 +114,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/timeb.h],,[AC_MSG_FAILURE([Some headers are missing])])
 AC_CHECK_HEADERS([gsl/gsl_cdf.h gsl/gsl_multimin.h gsl/gsl_rng.h gsl/gsl_randist.h],, [AC_MSG_FAILURE([Some gsl headers are missing])])
 AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
+AC_CHECK_HEADER([zlib.h],,[AC_MSG_FAILURE([Unable to find zlib header])])
 
 
 # Checks for typedefs, structures, and compiler characteristics.

@@ -1,0 +1,8 @@
+
+                              gzstream
+      C++ iostream classes wrapping the zlib compression library.
+===========================================================================
+
+  Version:	1.5 (08 Jan 2003)
+  Licence:	LGPL 2.1 (see COPYING.LIB)
+  From:		http://www.cs.unc.edu/Research/compgeom/gzstream/
