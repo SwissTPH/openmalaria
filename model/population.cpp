@@ -245,7 +245,7 @@ void Population::newHuman(int dob){
 
 void Population::update1(){
   //NOTE: this needs to be called somewhere; and should really be called before humans contract new infections in the simulation step
-  _transmissionModel->advancePeriod (_population, Simulation::simulationTime);
+  //_transmissionModel->advancePeriod (_population, Simulation::simulationTime);
   
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
   int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y

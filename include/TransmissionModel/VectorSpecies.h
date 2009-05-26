@@ -115,7 +115,6 @@ public:
    * These may be varied per-human to account for interventions and innate
    * resistances. */
   //@{
-  //FIXME: not set:
   /** Availability rate (α_i) */
   double entoAvailability;
   
@@ -186,7 +185,7 @@ private:
   vector<double> speciesEIR;
   
   /** The filename to which emergence rates are loaded & saved. */
-  const char* emergenceRateFilename;
+  string emergenceRateFilename;
   //@}
   
   /* Functions */

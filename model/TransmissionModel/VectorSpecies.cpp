@@ -43,7 +43,7 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   probMosqSurvivalResting = mosq.getMosqProbResting();
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
-  emergenceRateFilename = mosq.getEmergenceRateFilename().c_str();
+  emergenceRateFilename = mosq.getEmergenceRateFilename();
   
   //TODO: initialize these and perhaps other params properly:
   //K_vi
@@ -322,17 +322,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   they are constant. We can change that later if they need to 
   vary. */
   
-  /* Availability rate of hosts to mosquitoes.
-  Units: 1/(Animals * Time)
-  $\alpha_i$ in model. Matrix of size $n \times \theta_p$.
-  In initialization, there is only one time of host.
-  We also assume that this does not change over the cycle.
-  This adds a further degree of freedom - the value should be 
-  chosen carefully as there will be an inverse relationhip
-  between $\sum_{i=1}^n \alpha_i N_i$ and $N_{v0}$. */
-  // We set the host availability relative to the population size.
-  double hostAvailabilityRateInit=7.0/populationSize;	// TODO: Move absolute availability to XML
-  
+
   /**************************************************************! 
   ***************************************************************!
   *********** Other main input and output parameters ************!
@@ -398,13 +388,13 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   finding algorithm (but probably not).
   (2008.10.20: It appears to make no difference to the speed.)
     */
-  ifstream file (emergenceRateFilename);
-  if(!file.bad()) {	// file exists since it opened succesfully
+  ifstream file (emergenceRateFilename.c_str());
+  if(file.good()) {	// file exists since it opened succesfully
     for (int i = 0; i < daysInYear; i++){
-      file >> mosqEmergeRate[i];
+	  file >> mosqEmergeRate[i];
     }
   }else{
-    double temp = populationSize*populationSize*hostAvailabilityRateInit;
+    double temp = populationSize*populationSize*entoAvailability;
     for (int i = 0; i < daysInYear; i++) {
       mosqEmergeRate[i] = EIRInit[i]*temp;
     }
@@ -416,13 +406,13 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   if(true) {
     CalcInitMosqEmergeRate(populationSize, EIPDuration,
                            nHostTypesInit,
-                           nMalHostTypesInit, hostAvailabilityRateInit,
+                           nMalHostTypesInit, entoAvailability,
                            probMosqBiting, probMosqFindRestSite,
                            probMosqSurvivalResting,
                            humanInfectivityInit, EIRInit);
     
     // Now we've calculated the emergence rate, save it:
-    ofstream file (emergenceRateFilename);
+    ofstream file (emergenceRateFilename.c_str());
     for (int i = 0; i < daysInYear; ++i)
       file << mosqEmergeRate[i];
     file.close();
@@ -526,6 +516,8 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   gsl_vector* N_v0 = gsl_vector_calloc(theta_p);	// mosqEmergeRate
   memcpy (N_v0->data, mosqEmergeRate, theta_p * sizeof (*mosqEmergeRate));
   
+  PrintVector("Nv0", N_v0, theta_p);
+
   gsl_vector* K_vi = gsl_vector_calloc(theta_p);	// humanInfectivity
   memcpy (K_vi->data, FHumanInfectivityInitVector, theta_p * sizeof (*FHumanInfectivityInitVector));
   

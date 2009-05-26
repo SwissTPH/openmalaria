@@ -25,12 +25,12 @@
 #include <gsl/gsl_multiroots.h>
 using namespace std;
 
-//#define VectorTransmission_PRINT_CalcUpsilonOneHost
-//#define VectorTransmission_PRINT_CalcSvDiff
-//#define VectorTransmission_PRINT_CalcLambda
-//#define VectorTransmission_PRINT_CalcXP
-//#define VectorTransmission_PRINT_CalcSpectralRadius
-//#define VectorTransmission_PRINT_CalcInv1minusA
+#define VectorTransmission_PRINT_CalcUpsilonOneHost
+#define VectorTransmission_PRINT_CalcSvDiff
+#define VectorTransmission_PRINT_CalcLambda
+#define VectorTransmission_PRINT_CalcXP
+#define VectorTransmission_PRINT_CalcSpectralRadius
+#define VectorTransmission_PRINT_CalcInv1minusA
 
 
 /***************************************************************************
@@ -262,7 +262,7 @@ void PrintParameters(size_t thetap, size_t tau, size_t thetas,
                      double thetad, double PBi, double PCi, double PDi, double PEi, 
                      gsl_vector* Kvi, gsl_vector* Xii, gsl_vector* Nv0guess);
 
-void PrintUpsilon(char fntestentopar[], gsl_matrix** Upsilon, size_t thetap,
+void PrintUpsilon(gsl_matrix** Upsilon, size_t thetap,
                   size_t eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
                   gsl_vector* Pduf);
 
