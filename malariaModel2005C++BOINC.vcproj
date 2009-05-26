@@ -301,10 +301,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\PresentationModel.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\proteome.h"
 				>
 			</File>
@@ -333,18 +329,22 @@
 				>
 			</File>
 			<Filter
-				Name="PresentationModel"
+				Name="Pathogenesis"
 				>
 				<File
-					RelativePath=".\include\PresentationModel\Mueller.h"
+					RelativePath=".\include\Pathogenesis\Mueller.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\PresentationModel\Predet.h"
+					RelativePath=".\include\Pathogenesis\PathogenesisModel.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\PresentationModel\Pyrogen.h"
+					RelativePath=".\include\Pathogenesis\Predet.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Pathogenesis\Pyrogen.h"
 					>
 				</File>
 			</Filter>
@@ -465,10 +465,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\PresentationModel.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\model\proteome.cpp"
 				>
 			</File>
@@ -493,18 +489,22 @@
 				>
 			</File>
 			<Filter
-				Name="PresentationModel"
+				Name="Pathogenesis"
 				>
 				<File
-					RelativePath=".\model\PresentationModel\Mueller.cpp"
+					RelativePath=".\model\Pathogenesis\Mueller.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\PresentationModel\Predet.cpp"
+					RelativePath=".\model\Pathogenesis\PathogenesisModel.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\PresentationModel\Pyrogen.cpp"
+					RelativePath=".\model\Pathogenesis\Predet.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\Pathogenesis\Pyrogen.cpp"
 					>
 				</File>
 			</Filter>

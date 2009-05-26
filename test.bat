@@ -1,5 +1,5 @@
 copy test\original\densities.csv .
-copy test\original\scenario.xsd .
+copy test\original\scenario_4.xsd .
 copy test\original\scenario1.xml scenario.xml
 Release\malariacontrol_6.17_windows_intelx86
 fc test\original\original1.txt output.txt
