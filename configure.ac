@@ -23,7 +23,7 @@ AC_ARG_ENABLE(boinc,
  [ use_boinc=yes ]
  )
 AC_ARG_ENABLE(deploy,
- [  --enable-deploy  Use this for static linking against xerces, gsl and BOINC ],
+ [  --enable-deploy  Use this for static linking against libs and enable BOINC ],
  [ deploy=yes; use_boinc=yes ]
  )
 
@@ -61,31 +61,29 @@ else
   AC_SUBST(LIB_BOINC_API, "")
 fi
 
+AC_SUBST(LIB_STATIC, "")
 if test "${deploy}" = yes ; then
     build_state='Deploy'
-    AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_XERC, "../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
-    AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_GSL, "../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
-    AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_GSLCBLAS, "../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
-    AC_CHECK_FILE(lib/libz.a,[AC_SUBST(LIB_Z, "../lib/libz.a")],[AC_MSG_FAILURE([No static zlib lib present])])
+    AC_SUBST(LIB_PATH, "-L@top_builddir@/lib")
+    AC_CHECK_FILE(lib/libgsl.a,[AC_SUBST(LIB_STATIC, "$LIB_STATIC ../lib/libgsl.a")],[AC_MSG_FAILURE([No static gsl lib present])])
+    AC_CHECK_FILE(lib/libgslcblas.a,[AC_SUBST(LIB_STATIC, "$LIB_STATIC ../lib/libgslcblas.a")],[AC_MSG_FAILURE([No static gslcblas lib present])])
+    AC_CHECK_FILE(lib/libxerces-c.a,[AC_SUBST(LIB_STATIC, "$LIB_STATIC ../lib/libxerces-c.a")],[AC_MSG_FAILURE([No static xerces lib present])])
+    AC_CHECK_FILE(lib/libz.a,[AC_SUBST(LIB_STATIC, "$LIB_STATIC ../lib/libz.a")],[AC_MSG_FAILURE([No static zlib lib present])])
     
     # statically link libgcc
     export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
 else
     build_state='local'
-    AC_SUBST(LIB_XERC, "")
-    AC_SUBST(LIB_GSL, "")
-    AC_SUBST(LIB_GSLCBLAS,"")
     AC_CHECK_LIB(gslcblas,main,,[AC_MSG_FAILURE([gslcblas not present])])
     AC_CHECK_LIB(gsl,main,, [AC_MSG_FAILURE([gsl not present])])
-    AC_CHECK_LIB(z,main,, [AC_MSG_FAILURE([zlib not present])])
     if test `uname -s | grep Linux` ; then
         PKG_CHECK_MODULES(gsl, gsl >= 1.11,,[AC_MSG_FAILURE([Old gsl version. You must update your current version. Please follow the instructions in the wiki])])
     fi
+    AC_CHECK_LIB(z,main,, [AC_MSG_FAILURE([zlib not present])])
     AC_CHECK_LIB(xerces-c,main,,[AC_MSG_FAILURE([xerces-c not present])])
 fi
 
-
-#check posix threads
+#Always link shared lib, since linking statically doesn't seem to work:
 AC_CHECK_LIB(pthread,pthread_join,, [AC_MSG_FAILURE([pthread not present])])
 
 dnl Check for glut In the future we will check for the good glut

@@ -14,10 +14,10 @@ openMalaria_SOURCES = openMalaria.cpp\
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a
 
 openMalaria_LDADD = $(openMalaria_DEPENDENCIES)\
- -L@top_builddir@/lib @LIB_XERC@ @LIB_GSL@ @LIB_GSLCBLAS@ @LIB_BOINC@ @LIB_BOINC_API@ 
+ @LIB_PATH@ @LIB_BOINC@ @LIB_BOINC_API@ @LIB_STATIC@
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@/xsdcxx
-AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror
+AM_CXXFLAGS = @CXXFLAGS@ -Wall #-Werror
 
 if DARWIN
 export MACOSX_DEPLOYMENT_TARGET=10.4
