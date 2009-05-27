@@ -172,13 +172,10 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
 // Load human from checkpoint
 Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
   : _perHostTransmission(in, tm), _simulationTime(simulationTime),
+    _withinHostModel(WithinHostModel::createWithinHostModel(in)),
     _caseManagement(CaseManagementModel::createCaseManagementModel(in)),
     _pathogenesisModel(PathogenesisModel::createPathogenesisModel(in))
 {
-  // NOTE: makes some unnecessary random calls
-  _withinHostModel = WithinHostModel::createWithinHostModel();
-  
-  _withinHostModel->read(in);
   in >> _dateOfBirth; 
   in >> _doomed; 
   in >> _ID; 
@@ -419,9 +416,9 @@ double Human::infectiousness(){
 
 ostream& operator<<(ostream& out, const Human& human){
   human._perHostTransmission.write (out);
+  human._withinHostModel->write(out);
   human._caseManagement->write (out);
   human._pathogenesisModel->write(out);
-  human._withinHostModel->write(out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 

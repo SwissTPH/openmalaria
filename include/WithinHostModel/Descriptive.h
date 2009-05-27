@@ -38,6 +38,7 @@ class Human;
 class DescriptiveWithinHostModel : public WithinHostModel {
 public:
   DescriptiveWithinHostModel();
+  DescriptiveWithinHostModel(istream& in);
   virtual ~DescriptiveWithinHostModel();
   
   virtual void update(double age);
@@ -65,7 +66,6 @@ public:
   virtual void immunityPenalisation();
   
   virtual void write(ostream& out) const;
-  virtual void read(istream& in);
   
 protected:
   /*!  SP drug action applies to each infection depending on genotype and when
@@ -77,11 +77,10 @@ protected:
   
   /** @brief Checkpointing of variables in DescriptiveWithinHostModel.
    *
-   * Since read() and write() are replaced in sub-classes, having separately
+   * Since write() is replaced in sub-classes, having separately
    * named methods allows the same code to be used in both classes. */
   //@{
   void writeDescriptiveWHM(ostream& out) const;
-  void readDescriptiveWHM(istream& in);
   //@}
   
   //!multiplicity of infection
@@ -92,6 +91,9 @@ protected:
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<DescriptiveInfection*> infections;
+  
+  /** Just push back a new infection of the relevant type, created from in. */
+  virtual void loadInfection (istream& in);
 
   //!Cumulative parasite density since birth
   double _cumulativeY;

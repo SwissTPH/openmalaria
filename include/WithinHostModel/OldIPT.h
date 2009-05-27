@@ -36,6 +36,7 @@ public:
   //@}
   
   OldIPTWithinHostModel ();
+  OldIPTWithinHostModel (istream& in);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
@@ -58,8 +59,8 @@ protected:
   void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
   void IPTattenuateAsexualMinTotalDensity (Human&);
   
+  virtual void loadInfection (istream& in);
   virtual void write(ostream& out) const;
-  virtual void read(istream& in);
   
 private:
   //! time at which attenuated infection 'would' end if SP present

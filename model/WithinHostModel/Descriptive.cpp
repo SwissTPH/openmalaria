@@ -38,6 +38,30 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
   _innateImmunity=(double)W_GAUSS(0, sigma_i);
 }
 
+DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
+    WithinHostModel(in)
+{
+  in >> _MOI; 
+  in >> patentInfections; 
+  in >> _cumulativeh;
+  in >> _cumulativeY;
+  in >> _cumulativeYlag;
+  in >> _innateImmunity; 
+  
+  if ( _MOI <  0) {
+    cerr << "Error reading checkpoint" << endl;
+    exit(-3);
+  }
+  
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    _proxy.read (in);
+  }
+  
+  for(int i=0;i<_MOI;++i) {
+    loadInfection (in);
+  }
+}
+
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
   if (Global::modelVersion & INCLUDES_PK_PD) {
@@ -62,8 +86,7 @@ void DescriptiveWithinHostModel::update (double age) {
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveWithinHostModel::newInfection(){
-  //std::cout<<"MOI "<<_MOI<<std::endl;
-  if (_MOI <=  20) {
+  if (_MOI <= 20) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveInfection(Simulation::simulationTime));
     _MOI++;
@@ -92,6 +115,10 @@ void DescriptiveWithinHostModel::clearAllInfections(){
   }
   infections.clear();
   _MOI=0;
+}
+
+void DescriptiveWithinHostModel::loadInfection (istream& in) {
+  infections.push_back(new DescriptiveInfection(in));
 }
 
 
@@ -215,35 +242,8 @@ void DescriptiveWithinHostModel::summarize(double age) {
 
 // -----  Data checkpointing  -----
 
-void DescriptiveWithinHostModel::read(istream& in) {
-  readDescriptiveWHM (in);
-
-  for(int i=0;i<_MOI;++i) {
-    infections.push_back(new DescriptiveInfection(in));
-  }
-}
 void DescriptiveWithinHostModel::write(ostream& out) const {
   writeDescriptiveWHM (out);
-}
-
-void DescriptiveWithinHostModel::readDescriptiveWHM(istream& in) {
-  in >> _cumulativeInfections; 
-  in >> _pTransToMosq; 
-  in >> _MOI; 
-  in >> patentInfections; 
-  in >> _cumulativeh;
-  in >> _cumulativeY;
-  in >> _cumulativeYlag;
-  in >> _innateImmunity; 
-
-  if ( _MOI <  0) {
-    cerr << "Error reading checkpoint" << endl;
-    exit(-3);
-  }
-
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.read (in);
-  }
 }
 
 void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {

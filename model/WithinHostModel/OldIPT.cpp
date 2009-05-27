@@ -88,18 +88,28 @@ OldIPTWithinHostModel::OldIPTWithinHostModel () :
   }
 }
 
+OldIPTWithinHostModel::OldIPTWithinHostModel (istream& in) :
+    DescriptiveWithinHostModel(in)
+{
+  in >> _SPattenuationt;
+  in >> _lastSPDose; 
+  in >> _lastIptiOrPlacebo; 
+}
+
 
 // -----  Simple infection adders/removers  -----
 
 void OldIPTWithinHostModel::newInfection(){
-  //std::cout<<"MOI "<<_MOI<<std::endl;
-  if (_MOI <=  20) {
+  if (_MOI <= 20) {
     _cumulativeInfections++;
     infections.push_back(new OldIPTInfection(_lastSPDose, Simulation::simulationTime));
     _MOI++;
   }
 }
 
+void OldIPTWithinHostModel::loadInfection (istream& in) {
+  infections.push_back(new OldIPTInfection(in));
+}
 
 // -----    -----
 
@@ -243,17 +253,6 @@ void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
 
 // -----  Data checkpointing  -----
 
-void OldIPTWithinHostModel::read(istream& in) {
-  readDescriptiveWHM (in);
-  
-  for(int i=0;i<_MOI;++i) {
-    infections.push_back(new OldIPTInfection(in));
-  }
-  
-  in >> _SPattenuationt;
-  in >> _lastSPDose; 
-  in >> _lastIptiOrPlacebo; 
-}
 void OldIPTWithinHostModel::write(ostream& out) const {
   writeDescriptiveWHM (out);
   out << _SPattenuationt << endl;

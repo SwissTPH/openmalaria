@@ -175,10 +175,10 @@ public:
 private:
   ///@name Private variables
   //@{
-  WithinHostModel* _withinHostModel;
-
   // Time from start of the simulation
   int _simulationTime;
+  
+  WithinHostModel* _withinHostModel;
 
   CaseManagementModel* _caseManagement;
   

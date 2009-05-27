@@ -38,6 +38,33 @@ DummyWithinHostModel::DummyWithinHostModel() :
   W_GAUSS(0, sigma_i);	// FIXME: random call to keep these in sync
 }
 
+DummyWithinHostModel::DummyWithinHostModel(istream& in) :
+    WithinHostModel(in)
+{
+  in >> _MOI; 
+  in >> patentInfections; 
+  in >> _SPattenuationt;
+  in >> cumulativeY;
+  in >> cumulativeh;
+  in >> timeStepMaxDensity;
+  in >> _cumulativeh;
+  in >> _cumulativeY;
+  in >> _cumulativeYlag;
+
+  if ( _MOI <  0) {
+    cerr << "Error reading checkpoint" << endl;
+    exit(-3);
+  }
+
+  for(int i=0;i<_MOI;++i) {
+    infections.push_back(DummyInfection(in));
+  }
+
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    _proxy.read (in);
+  }
+}
+
 DummyWithinHostModel::~DummyWithinHostModel() {
   clearAllInfections();
   if (Global::modelVersion & INCLUDES_PK_PD) {
@@ -62,8 +89,7 @@ void DummyWithinHostModel::update (double age) {
 // -----  Simple infection adders/removers  -----
 
 void DummyWithinHostModel::newInfection(){
-  //std::cout<<"MOI "<<_MOI<<std::endl;
-  if (_MOI <=  20) {
+  if (_MOI <= 20) {
     _cumulativeInfections++;
     infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;
@@ -172,33 +198,6 @@ void DummyWithinHostModel::summarize(double age) {
 
 
 // -----  Data checkpointing  -----
-
-void DummyWithinHostModel::read(istream& in) {
-  in >> _cumulativeInfections; 
-  in >> _pTransToMosq; 
-  in >> _MOI; 
-  in >> patentInfections; 
-  in >> _SPattenuationt;
-  in >> cumulativeY;
-  in >> cumulativeh;
-  in >> timeStepMaxDensity;
-  in >> _cumulativeh;
-  in >> _cumulativeY;
-  in >> _cumulativeYlag;
-
-  if ( _MOI <  0) {
-    cerr << "Error reading checkpoint" << endl;
-    exit(-3);
-  }
-
-  for(int i=0;i<_MOI;++i) {
-    infections.push_back(DummyInfection(in));
-  }
-
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.read (in);
-  }
-}
 
 void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeInfections << endl; 

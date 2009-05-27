@@ -69,6 +69,22 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
   }
 }
 
+WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
+  if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
+    return new DummyWithinHostModel(in);
+  } else {
+    if (OldIPTWithinHostModel::iptActive)
+      return new OldIPTWithinHostModel(in);
+    else
+      return new DescriptiveWithinHostModel(in);
+  }
+}
+
+WithinHostModel::WithinHostModel(istream& in) {
+  in >> _cumulativeInfections; 
+  in >> _pTransToMosq; 
+}
+
 void WithinHostModel::clearInfections (Event&) {
   clearAllInfections();
 }
