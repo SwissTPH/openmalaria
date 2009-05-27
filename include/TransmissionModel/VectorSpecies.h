@@ -70,7 +70,7 @@ public:
    * 	Mathematically, we require this parameter to be a positive
    * 	real number, so although this will typically be a natural 
    * 	number, it is not restricted to being one. */
-  void calMosqEmergeRate (int populationSize, vector<double>& initialKappa); 
+  void calMosqEmergeRate (int populationSize, vector<double>& kappa); 
   
   /** Called per time-step. Does most of calculation of EIR.
    *

@@ -288,7 +288,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
  */ 
 
 
-void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& initialKappa) {
+void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa) {
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
   $m$ in model. Scalar.
@@ -304,7 +304,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   /* Infectivity of hosts to mosquitoes.
   $K_vi$ in model. Matrix of size $n \times \theta_p$.
   In initialization, there is only one time of host.
-  This is taken directly from initialKappa(i) from
+  This is taken directly from kappa(i) from
   entomology. */
   double humanInfectivityInit[daysInYear];
   
@@ -344,7 +344,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     */
   
   /* Now we have to deal with 
-  - humanInfectivityInit - we take from initialKappa
+  - humanInfectivityInit - we take from kappa
   - EIRinit - we take from EIR.
   ************ Make sure that EIR is the correct one. ***********!
   I'm not sure how we should check this - but we should look into
@@ -353,7 +353,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   We first create arrays of length intervalsPerYear for all three.
   We then convert them to length daysInYear.
   Save the human infectivity to mosquitoes from simulation of one
-  lifetime to initialKappa. We will then use this to create 
+  lifetime to kappa. We will then use this to create 
   humanInfectivityInit (of size daysInYear). */
   
   // EIR should have been calculated from fourier coefic. and used for the
@@ -366,8 +366,8 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   
   speciesEIR.clear();	// this is finished with; frees memory?
   
-  convertLengthToFullYear(humanInfectivityInit, initialKappa);
-  //PrintArray ("initial kappa", humanInfectivityInit, daysInYear);
+  convertLengthToFullYear(humanInfectivityInit, kappa);
+  PrintArray ("kappa", humanInfectivityInit, daysInYear);
   
   /* Find an initial estimate of the mosquito emergence rate, in
   mosqEmergeRate.
@@ -393,11 +393,13 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     for (int i = 0; i < daysInYear; i++){
 	  file >> mosqEmergeRate[i];
     }
+    cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
   }else{
     double temp = populationSize*populationSize*entoAvailability;
     for (int i = 0; i < daysInYear; i++) {
       mosqEmergeRate[i] = EIRInit[i]*temp;
     }
+    cout << "Guessed emergence rates: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
   }
   file.close();
   
@@ -414,7 +416,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     // Now we've calculated the emergence rate, save it:
     ofstream file (emergenceRateFilename.c_str());
     for (int i = 0; i < daysInYear; ++i)
-      file << mosqEmergeRate[i];
+      file << mosqEmergeRate[i] << ' ';
     file.close();
   }
 }

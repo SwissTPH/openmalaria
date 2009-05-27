@@ -45,7 +45,10 @@ public:
    * assuming that the annual cycle repeated during the pre-intervention period
    */
   void inputEIR (const scnXml::NonVector& nonVectorData); 
-
+  
+  /** Little function to copy kappa to initialKappa. */
+  void copyToInitialKappa ();
+  
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
    * 
@@ -100,5 +103,10 @@ private:
   //! The duration of sporogony in time steps 
   int nspore;
   //@}
+  
+  /** initialKappa[] is the value of kappa during the pre-intervention phase.
+  * 
+  * Doesn't need to be checkpointed. */
+  vector<double> initialKappa; 
 };
 #endif

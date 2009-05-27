@@ -53,7 +53,7 @@ VectorTransmission::~VectorTransmission () {
 void VectorTransmission::initMainSimulation(int populationSize) {
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (vector<VectorTransmissionSpecies>::iterator s = species.begin(); s != species.end(); ++s)
-    s->calMosqEmergeRate (populationSize, initialKappa);
+    s->calMosqEmergeRate (populationSize, kappa);
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */

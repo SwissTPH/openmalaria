@@ -35,6 +35,7 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   ino = (int *) malloc(((maxIntervals))*sizeof(int));
   intEIR = (double *) malloc(((maxIntervals))*sizeof(double));
   
+  initialKappa.resize (Global::intervalsPerYear);
   inputEIR(nonVectorData);
 }
 
@@ -98,6 +99,10 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
   } else {
     annualEIR=-9.99;
   }
+}
+
+void NonVectorTransmission::copyToInitialKappa () {
+  initialKappa = kappa;
 }
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&){

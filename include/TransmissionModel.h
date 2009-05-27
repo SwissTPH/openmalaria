@@ -82,9 +82,7 @@ public:
   void updateKappa (double sumWeight, double sumWt_kappa);
   
   /** Little function to copy kappa to initialKappa. */
-  inline void copyToInitialKappa () {
-    initialKappa = kappa;
-  }
+  virtual void copyToInitialKappa () {}
   
   /** Returns the EIR, per host and per time step.
    *
@@ -112,11 +110,6 @@ protected:
    *
    * Checkpointed. */
   vector<double> kappa; 
-
-  /** initialKappa[] is the value of kappa during the pre-intervention phase.
-   * 
-   * Doesn't need to be checkpointed. */
-  vector<double> initialKappa; 
   
 private:
   /*! annAvgKappa is the overall proportion of mosquitoes that get infected

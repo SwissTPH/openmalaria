@@ -59,7 +59,6 @@ TransmissionModel::TransmissionModel(){
   PerHostTransmission::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
   
   kappa.resize (Global::intervalsPerYear);
-  initialKappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
   
   initAgeExposureConversion();
