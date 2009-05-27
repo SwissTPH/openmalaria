@@ -78,7 +78,7 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	clOptions = CLO::CLO (clOptions | CLO::ENABLE_ERC);
       } else if (clo == "checkpoint") {
 	clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
-      } else if (clo.compare ("compress-checkpoints=")) {
+      } else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
 	stringstream t;
 	t << clo.substr (21);
 	t >> compressCheckpoints;
