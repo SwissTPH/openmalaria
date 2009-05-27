@@ -75,7 +75,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
-				AdditionalDependencies="xerces-c_static_3D.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib"
+				AdditionalDependencies="xerces-c_static_3D.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib zdll.lib"
 				OutputFile=".\Debug/malariacontrolBeta_6.15_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -172,7 +172,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib"
+				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib zdll.lib"
 				OutputFile=".\Release/malariacontrol_6.17_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -274,6 +274,10 @@
 			</File>
 			<File
 				RelativePath=".\include\GSLWrapper.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\gzstream.h"
 				>
 			</File>
 			<File
@@ -438,6 +442,10 @@
 			</File>
 			<File
 				RelativePath=".\model\GSLWrapper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\gzstream.C"
 				>
 			</File>
 			<File
