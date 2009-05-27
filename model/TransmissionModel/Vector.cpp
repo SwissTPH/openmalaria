@@ -56,17 +56,6 @@ void VectorTransmission::initMainSimulation(int populationSize) {
     s->calMosqEmergeRate (populationSize, initialKappa);
 }
 
-// dummy functions until they're implemented:
-double VectorTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
-  // I'm not really sure what this should do (hardy).
-  static bool errReported = false;
-  if (!errReported) {
-    errReported = true;
-    cerr << "dummy function getExpectedNumberOfInfections called" << endl;
-  }
-  return 0.0;
-}
-
 /** Calculate EIR for host, using the fixed point of difference eqns. */
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host) {
   /* Calculates EIR per individual (hence N_i == 1).

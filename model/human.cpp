@@ -233,7 +233,7 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   updateInterventionStatus(); 
   _withinHostModel->updateImmuneStatus();
   updateInfection(expectedInfectionRate,
-                  transmissionModel->getExpectedNumberOfInfections(*this, expectedInfectionRate));
+                  _perHostTransmission.getExpectedNumberOfInfections(*this, expectedInfectionRate));
   determineClinicalStatus();
   _withinHostModel->update(getAgeInYears());
   

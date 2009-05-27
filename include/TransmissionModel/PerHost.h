@@ -48,6 +48,22 @@ public:
   
   void summarize (Summary&, double age);
   
+  /*! get the number of infections for a specific human at a given time step 
+   *
+  1. Calculates h from the EIR measured on adults where 
+  h is the expected number of epidemiological inoculations 
+  2 Calculates the updated values of the pre-erythrocytic exposure and 
+  passes this back to the calling routine 
+  Requires the five-day EIR, adjusted for age as input. 
+  cumEIR: is the pre-erythrocytic exposure; 
+  efficacy: Efficacy of a pre-erythrocytic vaccine 
+  \param *cumEIR cumulative EIR (measures pre-erthrocytic immunity) 
+  \param efficacy efficacy of a pre-erythrocytic vaccine 
+  \param age_adj_EIR Expected number of inoculations adjusted for age of the host 
+  \param baseAvailToMos Host-specific availability 
+  */ 
+  virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR);
+  
   //! Calculate the number of new infections to introduce via a stochastic process
   int numNewInfections(double expectedInfectionRate, double expectedNumberOfInfections);
   
@@ -90,6 +106,50 @@ private:
   * This is the date of last use.
   int timestepITN;
   int timestepIRS; */
+  
+  
+  //VARIABLES INCLUDED IN CORE GETs of number of infections 
+  //! The average proportion of bites from sporozoite positive mosquitoes resulting in infection. 
+  /*! 
+  This is computed as 0.19 (the value S from a neg bin mass action model fitted 
+  to Saradidi data, divided by 0.302 (the ratio of body surface area in a 
+  0.5-6 year old child (as per Saradidi) to adult) 
+  \sa getExpectedNumberOfInfections() 
+  */ 
+  static const double susceptibility;
+  
+  //!Steepness of relationship between success of inoculation and Xp in Phase A model 
+  /*! 
+  \sa getExpectedNumberOfInfections(),Sinf,Simm,Xstar_p,Estar 
+  */ 
+  static double gamma_p; 
+  
+  //!Lower limit of success probability of inoculations at high exposure in Phase A model 
+  /*! 
+  \sa getExpectedNumberOfInfections(),gamma_p,Simm,Xstar_p,Estar 
+  */ 
+  static double Sinf; 
+  
+  //!Lower limit of success probability of inoculations in immune individuals in Phase A model 
+  /*! 
+  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Xstar_p,Estar 
+  */ 
+  static double Simm; 
+  
+  //!Critical value of cumulative number of entomologic inoculations in Phase A model 
+  /*! 
+  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Simm,Estar 
+  */ 
+  static double Xstar_p; 
+  
+  //!Critical value of EIR in Phase A pre-erythrocytic model 
+  /*! 
+  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Simm,Xstar_p 
+  */ 
+  static double Estar; 
+  
+  //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
+  static double InfectionrateShapeParam;
 };
 
 /** Data needed for each human which is per-mosquito species. */

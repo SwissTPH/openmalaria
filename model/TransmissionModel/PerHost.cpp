@@ -21,16 +21,62 @@
 #include "GSLWrapper.h"
 #include "inputData.h"
 #include "TransmissionModel/Vector.h"
-
 #include "summary.h"
+#include "intervention.h"
 
 double PerHostTransmission::BaselineAvailabilityShapeParam;
+const double PerHostTransmission::susceptibility= 0.702;
+double PerHostTransmission::gamma_p; 
+double PerHostTransmission::Sinf; 
+double PerHostTransmission::Simm; 
+double PerHostTransmission::Xstar_p; 
+double PerHostTransmission::Estar; 
+double PerHostTransmission::InfectionrateShapeParam;
 
 void PerHostTransmission::initParameters () {
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
   
   BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
+  
+  // NOTE: The following concerns translating an EIR into a number of
+  // infections, and could be placed in a different module.
+  // TODO: use class inheritance to replace if blocks
+  
+  gamma_p=getParameter(Params::GAMMA_P);
+  Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
+  Simm=getParameter(Params::SIMM);
+  Estar=getParameter(Params::E_STAR);
+  Xstar_p=getParameter(Params::X_STAR_P);
+  
+  //! constant defining the constraint for the Gamma shape parameters
+  /// Used for the case where availability is assumed gamma distributed
+  double r_square_Gamma;
+  /*
+  //! Expected number of inoculations
+  /// Product of measured EIR, susceptibility and length of time Global::interval
+  double gsi = 1.0;
+  
+  r_square_Gamma=(totalInfectionrateVariance**2-gsi*BaselineAvailabilityMean)/(gsi*BaselineAvailabilityMean)**2
+  r_square_Gamma must be greater than zero, so r_square_LogNormal is also. 
+  */
+  r_square_Gamma=0.649;
+  //such that r_square_LogNormal =0.5
+  
+  //! constant defining the constraint for the log Normal variance
+  /// Used for the case where availability is assumed log Normally distributed
+  double r_square_LogNormal = log(1.0+r_square_Gamma);
+  
+  //TODO: Sanity check for sqrt and division by zero
+  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+    InfectionrateShapeParam = (PerHostTransmission::BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*PerHostTransmission::BaselineAvailabilityShapeParam - 1.0);
+    InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
+  }
+  else if (Global::modelVersion &
+    (LOGNORMAL_MASS_ACTION | LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM)) {
+    InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(PerHostTransmission::BaselineAvailabilityShapeParam, 2));
+  InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
+  }
 }
 
 PerHostTransmission::PerHostTransmission (TransmissionModel& tm) :
@@ -41,25 +87,26 @@ PerHostTransmission::PerHostTransmission (TransmissionModel& tm) :
     species.resize (vTM->numSpecies);
     for (size_t i = 0; i < vTM->numSpecies; ++i)
       species[i].initialise (vTM->species[i]);
-  } else {
-    if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-      _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
-    }
-    else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-      _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
-    }
-    else if (Global::modelVersion & TRANS_HET) {
-      _BaselineAvailabilityToMosquitoes=0.2;
-      if (W_UNIFORM() < 0.5) {            
-	_BaselineAvailabilityToMosquitoes=1.8;
-      }
-    }
-    else {
-      _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
-    }
-    
-    // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
   }
+  
+  //TODO: as for static counterpart
+  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+    _BaselineAvailabilityToMosquitoes=(W_GAMMA((BaselineAvailabilityShapeParam), (BaselineAvailabilityMean/BaselineAvailabilityShapeParam)));
+  }
+  else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
+    _BaselineAvailabilityToMosquitoes=(W_LOGNORMAL((log(BaselineAvailabilityMean))-(0.5*pow(BaselineAvailabilityShapeParam, 2)), (BaselineAvailabilityShapeParam)));
+  }
+  else if (Global::modelVersion & TRANS_HET) {
+    _BaselineAvailabilityToMosquitoes=0.2;
+    if (W_UNIFORM() < 0.5) {            
+      _BaselineAvailabilityToMosquitoes=1.8;
+    }
+  }
+  else {
+    _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
+  }
+  
+  // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
 }
 
 PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
@@ -87,6 +134,42 @@ void PerHostTransmission::summarize (Summary& summary, double age) {
   summary.addToExpectedInfected(age, _pinfected);
 }
 
+
+double PerHostTransmission::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
+  double baseAvailToMos = _BaselineAvailabilityToMosquitoes;
+  //The age-adjusted EIR, possibly adjusted for bed nets.
+  double expectedNumInfections;
+  
+  double ExpectedInfectionRate = age_adj_EIR * baseAvailToMos * susceptibility * Global::interval;
+  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+    expectedNumInfections = (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
+  } else if (Global::modelVersion & LOGNORMAL_MASS_ACTION) {
+    expectedNumInfections = sampleFromLogNormal(W_UNIFORM(),
+        log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
+        InfectionrateShapeParam);
+  } else {
+    //The default model is that in Smith et al, AJTMH 2006 75 Suppl 2
+    double survivalOfInoculum=(1.0+pow((_cumulativeEIRa/Xstar_p), gamma_p));
+    survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
+    survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + age_adj_EIR/Estar));
+    
+    if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
+      expectedNumInfections = survivalOfInoculum *
+          sampleFromLogNormal(W_UNIFORM(),
+                              log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
+                              InfectionrateShapeParam);
+    } else {
+      expectedNumInfections = survivalOfInoculum *
+          age_adj_EIR * Global::interval * baseAvailToMos;
+    }
+  }
+  
+  //Introduce the effect of vaccination. Note that this does not affect cumEIR.
+  if (Vaccine::PEV.active) {
+    expectedNumInfections *= (1 - human.getPEVEfficacy());
+  }
+  return expectedNumInfections;
+}
 
 int PerHostTransmission::numNewInfections (double expectedInfectionRate, double expectedNumberOfInfections){
   //TODO: this code does not allow for variations in baseline availability

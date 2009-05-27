@@ -56,9 +56,6 @@ public:
   /// Get the appropriate index within ageSpecificRelativeAvailability, etc.,
   /// for this age (in years). Also used by Human.
   static size_t  getAgeGroup (double age);
-  
-  //! get the number of infections for a specific human at a given time step 
-  virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR) = 0;
 
   //! Calculates the adjustment for body size in exposure to mosquitoes 
   /*! 

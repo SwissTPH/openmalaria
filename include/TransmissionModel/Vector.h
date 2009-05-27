@@ -50,9 +50,6 @@ public:
    * the rate for a stable situation before interventions are introduced. */
   void initMainSimulation (int populationSize); 
 
-  //! get the number of infections for a specific human at a given time step 
-  virtual double getExpectedNumberOfInfections (Human& human, double age_adj_EIR);
-
   /** Calculates EIR (in adults).
    * 
    * \param simulationTime Time since start of simulation . */
