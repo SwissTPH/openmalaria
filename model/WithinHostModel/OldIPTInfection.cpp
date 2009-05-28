@@ -118,9 +118,6 @@ void OldIPTInfection::write (ostream& out) const {
   out << _startdate << endl; 
   out << _density << endl; 
   out << _cumulativeExposureJ << endl; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << _proteome->getProteomeID() << endl; 
-  }
   out << _gType.ID << endl; 
   out << boolalpha << _SPattenuate << endl; 
 }

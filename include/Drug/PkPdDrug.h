@@ -22,6 +22,7 @@
 #define Hmod_PK_PD_Drug
 
 #include "Drug/DrugModel.h"
+#include "Drug/drug.h"
 
 /** Pharmacokinetic and pharmacodynamics drug model.
  *
@@ -30,12 +31,26 @@
  * 
  * Most of the implementation is contained in the drug.h/drug.cpp files, and
  * this class is just a wrapper to minimize changes to those files. */
-class PkPdDrug : DrugModel {
+class PkPdDrug : public DrugModel {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
+  
+  PkPdDrug ();
+  PkPdDrug (istream& in);
+  virtual ~PkPdDrug ();
+  void write (ostream& out);
+  
+  void medicate(string _drugAbbrev, double _qty, int _time);
+  void decayDrugs ();
+  
+  void setWeight (double w);
+  double getDrugFactor (ProteomeInstance* infProteome);
+  
+private:
+  DrugProxy _proxy;
 };
 
 #endif

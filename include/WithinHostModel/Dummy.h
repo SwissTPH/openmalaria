@@ -26,7 +26,7 @@
 #include "global.h"
 #include "WithinHostModel.h"
 #include "WithinHostModel/DummyInfection.h"
-#include "Drug/drug.h"
+#include "Drug/DrugModel.h"
 ;
 #include <iostream>
 
@@ -70,6 +70,9 @@ public:
   void write(ostream& out) const;
 
 private:
+  /// Encapsulates drug code for each human
+  DrugModel* drugProxy;
+  
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;
@@ -78,8 +81,6 @@ private:
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
   
-  //! time at which attenuated infection 'would' end if SP present
-  int _SPattenuationt;
   double cumulativeY;
   double cumulativeh;
   double timeStepMaxDensity;
@@ -88,9 +89,6 @@ private:
   int _MOI;
   //!Number of infections with densities above the limit of detection
   int patentInfections;
-  
-  /// Encapsulates drug code for each human
-  DrugProxy _proxy;
   
   /** The list of all infections this human has.
    * 

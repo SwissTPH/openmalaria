@@ -118,4 +118,11 @@ class xml_scenario_error : public runtime_error
     explicit xml_scenario_error(const string&  __arg);
 };
 
+/** Thrown to indicate an error while loading/saving a checkpoint.  */
+class checkpoint_error : public runtime_error
+{
+  public:
+    explicit checkpoint_error(const string&  __arg);
+};
+
 #endif

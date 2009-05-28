@@ -332,7 +332,7 @@ void DrugProxy::destroy() {
   _drugs.clear();
 }
 
-void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) throw(int) {
+void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) {
   /* We ignore time for now (as it is only relevant for ACTs).
    *   As such, no doses are created, but concentration is updated.
    */

@@ -27,7 +27,7 @@
 #include "global.h"
 #include "WithinHostModel.h"
 #include "WithinHostModel/DescriptiveInfection.h"
-#include "Drug/drug.h"
+#include "Drug/DrugModel.h"
 
 using namespace std;
 
@@ -83,6 +83,9 @@ protected:
   void writeDescriptiveWHM(ostream& out) const;
   //@}
   
+  /// Encapsulates drug code for each human
+  DrugModel* drugProxy;
+  
   //!multiplicity of infection
   int _MOI;
   
@@ -115,9 +118,6 @@ private:
   
   //!Number of infections with densities above the limit of detection
   int patentInfections;
-  
-  /// Encapsulates drug code for each human
-  DrugProxy _proxy;
 };
 
 #endif

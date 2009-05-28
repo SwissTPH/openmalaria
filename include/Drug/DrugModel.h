@@ -24,6 +24,13 @@
 #include <fstream>
 using namespace std;
 
+class ProteomeInstance;
+
+/** Encapsulates both the static operations for drug models and the per-human
+ * drug proxies.
+ * 
+ * Note that there currently needn't be a drug model, in which case an instance
+ * of this class is created (which while inefficient, allows nicer code). */
 class DrugModel {
 public:
   ///@brief Static functions
@@ -34,7 +41,50 @@ public:
   static void readStatic (istream& in);
   /// Write static variables to checkpoint
   static void writeStatic (ostream& out);
+  
+  /// Create a new DrugModel
+  static DrugModel* createDrugModel ();
+  /// Load a DrugModel from a checkpoint
+  static DrugModel* createDrugModel (istream& in);
   //@}
+  
+  /// @brief Constructors, destructor and checkpointing
+  //@{
+  /// Create a new instance
+  DrugModel () {}
+  /// Load an instance from a checkpoint
+  DrugModel (istream& in) {}
+  /// Destroy an instance
+  virtual ~DrugModel () {}
+  /// Write checkpoint
+  virtual void write (ostream& out) {}
+  //@}
+  
+  /** Medicate drugs to an individual, which act on infections the following
+   * timesteps, until rendered ineffective by decayDrugs().
+   *
+   * \param drugName - The drug abbreviation.
+   * \param qty      - the quantity (which units?).
+   * \param time     - Time in minutes since start of the simulation tStep.
+   */
+  virtual void medicate(string _drugAbbrev, double _qty, int _time) {}
+  
+  /// Called each timestep immediately after the drug acts on any infections.
+  //NOTE: does calling after applying drug effects make the most sense for all models?
+  virtual void decayDrugs () {}
+  
+  /** Called each timestep immediately before the drug acts on infections
+   * to set the body-mass of the individual. */
+  virtual void setWeight (double w) {}
+  
+  /** This is how drugs act on infections.
+   *
+   * Each timestep, on each infection, the parasite density is multiplied by
+   * the return value of this infection. The WithinHostModels are responsible
+   * for clearing infections once the parasite density is negligible. */
+  virtual double getDrugFactor (ProteomeInstance* infProteome) {
+    return 0.0;
+  }
 };
 
 #endif

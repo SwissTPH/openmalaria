@@ -33,13 +33,15 @@ using namespace std;
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-    WithinHostModel(), _MOI(0), _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0), patentInfections(0)
+    WithinHostModel(), drugProxy(DrugModel::createDrugModel ()), _MOI(0),
+    _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
+    patentInfections(0)
 {
   _innateImmunity=(double)W_GAUSS(0, sigma_i);
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
-    WithinHostModel(in)
+    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
   in >> _MOI; 
   in >> patentInfections; 
@@ -48,38 +50,27 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
   in >> _cumulativeYlag;
   in >> _innateImmunity; 
   
-  if ( _MOI <  0) {
-    cerr << "Error reading checkpoint" << endl;
-    exit(-3);
-  }
+  if (_MOI < 0)
+    throw checkpoint_error ("Error reading checkpoint");
   
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.read (in);
-  }
-  
-  for(int i=0;i<_MOI;++i) {
+  for(int i=0;i<_MOI;++i)
     loadInfection (in);
-  }
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.destroy();
-  }
+  delete drugProxy;
 }
 
 // -----  Update function, called each step  -----
 
 void DescriptiveWithinHostModel::update (double age) {
-  _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    std::list<DescriptiveInfection*>::iterator i;
-    for(i=infections.begin(); i != infections.end(); i++){
-      (*i)->multiplyDensity(exp(-_proxy.calculateDrugsFactor((*i)->getProteome())));
-    }
-    _proxy.decayDrugs();
+  drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+  std::list<DescriptiveInfection*>::iterator i;
+  for(i=infections.begin(); i != infections.end(); i++){
+    (*i)->multiplyDensity(exp(-drugProxy->getDrugFactor((*i)->getProteome())));
   }
+  drugProxy->decayDrugs();
 }
 
 
@@ -125,7 +116,7 @@ void DescriptiveWithinHostModel::loadInfection (istream& in) {
 // -----  medicate drugs -----
 
 void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time) {
-  _proxy.medicate(drugName, qty, time);
+  drugProxy->medicate(drugName, qty, time);
 }
 
 
@@ -249,6 +240,9 @@ void DescriptiveWithinHostModel::write(ostream& out) const {
 void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _pTransToMosq << endl;  
+  
+  drugProxy->write (out);
+  
   out << _MOI << endl; 
   out << patentInfections << endl; 
   out << _cumulativeh << endl;
@@ -256,10 +250,6 @@ void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
   out << _cumulativeYlag << endl;
   out << _innateImmunity << endl; 
   
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.write (out);
-  }
-
   for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     (*iter)->write (out);
 }

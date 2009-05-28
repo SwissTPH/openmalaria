@@ -21,6 +21,42 @@
 #include "Drug/PkPdDrug.h"
 #include "Drug/drug.h"
 
+// -----  static functions  -----
+
 void PkPdDrug::init() {
   initDrugModule(5*24*60, 24*60);
+}
+
+
+// -----  non-static functions  -----
+
+PkPdDrug::PkPdDrug () {
+}
+
+PkPdDrug::PkPdDrug (istream& in) {
+  _proxy.read (in);
+}
+
+PkPdDrug::~PkPdDrug () {
+  _proxy.destroy();
+}
+
+void PkPdDrug::write (ostream& out) {
+  _proxy.write (out);
+}
+
+void PkPdDrug::medicate(string _drugAbbrev, double _qty, int _time) {
+  _proxy.medicate (_drugAbbrev, _qty, _time);
+}
+
+void PkPdDrug::decayDrugs () {
+  _proxy.decayDrugs();
+}
+
+void PkPdDrug::setWeight (double w) {
+  _proxy.setWeight (w);
+}
+
+double PkPdDrug::getDrugFactor (ProteomeInstance* infProteome) {
+  return _proxy.calculateDrugsFactor (infProteome);
 }

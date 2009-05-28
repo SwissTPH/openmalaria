@@ -111,13 +111,10 @@ DescriptiveInfection::DescriptiveInfection(int simulationTime)
     _duration=infectionDuration();
     _cumulativeExposureJ=0.0;
     
-    //This should probably be inside an IF
-    if (Global::modelVersion & INCLUDES_PK_PD) {
+    if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeManager::getInfection();
-    }
-    else {
-      _proteome = 0;
-    }
+    else
+      _proteome = NULL;
 }
 
 DescriptiveInfection::~DescriptiveInfection() {

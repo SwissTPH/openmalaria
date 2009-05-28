@@ -33,56 +33,46 @@ using namespace std;
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0), _SPattenuationt(0), _MOI(0), patentInfections(0)
+    WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
+    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
+    _MOI(0), patentInfections(0)
 {
   W_GAUSS(0, sigma_i);	// FIXME: random call to keep these in sync
 }
 
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
-    WithinHostModel(in)
+    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
   in >> _MOI; 
   in >> patentInfections; 
-  in >> _SPattenuationt;
   in >> cumulativeY;
   in >> cumulativeh;
   in >> timeStepMaxDensity;
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
-
-  if ( _MOI <  0) {
-    cerr << "Error reading checkpoint" << endl;
-    exit(-3);
-  }
-
-  for(int i=0;i<_MOI;++i) {
+  
+  if (_MOI < 0)
+    throw checkpoint_error ("Error reading checkpoint");
+  
+  for(int i=0;i<_MOI;++i)
     infections.push_back(DummyInfection(in));
-  }
-
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.read (in);
-  }
 }
 
 DummyWithinHostModel::~DummyWithinHostModel() {
   clearAllInfections();
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.destroy();
-  }
+  delete drugProxy;
 }
 
 // -----  Update function, called each step  -----
 
 void DummyWithinHostModel::update (double age) {
-  _proxy.setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    std::list<DummyInfection>::iterator i;
-    for(i=infections.begin(); i != infections.end(); i++){
-      i->multiplyDensity(exp(-_proxy.calculateDrugsFactor(i->getProteome())));
-    }
-    _proxy.decayDrugs();
+  drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+  std::list<DummyInfection>::iterator i;
+  for(i=infections.begin(); i != infections.end(); i++){
+    i->multiplyDensity(exp(-drugProxy->getDrugFactor(i->getProteome())));
   }
+  drugProxy->decayDrugs();
 }
 
 
@@ -124,7 +114,7 @@ void DummyWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DummyWithinHostModel::medicate(string drugName, double qty, int time) {
-  _proxy.medicate(drugName, qty, time);
+  drugProxy->medicate(drugName, qty, time);
 }
 
 
@@ -202,9 +192,11 @@ void DummyWithinHostModel::summarize(double age) {
 void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _pTransToMosq << endl;  
+  
+  drugProxy->write (out);
+  
   out << _MOI << endl; 
   out << patentInfections << endl; 
-  out << _SPattenuationt << endl;
   out << cumulativeY << endl;
   out << cumulativeh << endl;
   out << timeStepMaxDensity << endl;
@@ -214,8 +206,4 @@ void DummyWithinHostModel::write(ostream& out) const {
 
   for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
-  
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    _proxy.write (out);
-  }
 }

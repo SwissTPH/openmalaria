@@ -46,4 +46,18 @@ void DrugModel::writeStatic (ostream& out) {
   }
 }
 
+DrugModel* DrugModel::createDrugModel () {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    return new PkPdDrug ();
+  }
+  return new DrugModel();
+}
+
+DrugModel* DrugModel::createDrugModel (istream& in) {
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    return new PkPdDrug (in);
+  }
+  return new DrugModel(in);
+}
+
 // -----  non-static functions  -----

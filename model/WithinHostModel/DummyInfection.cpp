@@ -46,13 +46,11 @@ DummyInfection::DummyInfection(int simulationTime){
     _startdate=simulationTime;
     _density=4;
     _duration=infectionDuration(); 
-    //This should probably be inside an IF
-    if (Global::modelVersion & INCLUDES_PK_PD) {
+    
+    if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeManager::getInfection();
-    }
-    else {
-      _proteome = 0;
-    }
+    else
+      _proteome = NULL;
 }
 
 void DummyInfection::writeInfectionToFile(fstream& funit){
@@ -83,7 +81,7 @@ DummyInfection::DummyInfection (istream& in) {
   in >> _density; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
-    in >> proteomeID; 
+    in >> proteomeID;
     _proteome = ProteomeManager::getProteome(proteomeID);
   }
 }

@@ -197,7 +197,7 @@ class DrugProxy {
    *
    *  Medicate has to be called in correct time order (ie first lower times).
    */
-  void medicate(string _drugAbbrev, double _qty, int _time) throw(int);
+  void medicate(string _drugAbbrev, double _qty, int _time);
   double calculateDrugsFactor(ProteomeInstance* infProteome);
   void decayDrugs();
 

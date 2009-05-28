@@ -194,4 +194,7 @@ int Global::modIntervalsPerYear (int i) {
 }
 
 xml_scenario_error::xml_scenario_error(const string&  __arg)
-: runtime_error(__arg) { }
+  : runtime_error(__arg) { }
+
+checkpoint_error::checkpoint_error(const string&  __arg)
+  : runtime_error(__arg) { }
