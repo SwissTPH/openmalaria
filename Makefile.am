@@ -1,3 +1,6 @@
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = xsdcxx model #graphics 
 

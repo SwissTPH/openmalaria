@@ -26,7 +26,7 @@
 #include "global.h"
 #include "WithinHostModel.h"
 #include "WithinHostModel/DummyInfection.h"
-#include "drug.h"
+#include "Drug/drug.h"
 ;
 #include <iostream>
 

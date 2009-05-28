@@ -14,6 +14,9 @@
 
 @SET_MAKE@
 
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -44,7 +47,7 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	timer.$(OBJEXT) boincWrapper.$(OBJEXT) global.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
-	drug.$(OBJEXT) proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
+	proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
 	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
 	TransmissionModel.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
 	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
@@ -178,11 +181,11 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = Pathogenesis TransmissionModel WithinHostModel
+SUBDIRS = Pathogenesis TransmissionModel WithinHostModel Drug
 openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp boincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
- drug.cpp proteome.cpp\
+ proteome.cpp\
  WithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
  TransmissionModel.cpp\
@@ -190,7 +193,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  EntoIntervention.cpp\
  gzstream.C
 
-openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a
+openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a Drug/libDrug.a
 openMalaria_LDADD = $(openMalaria_DEPENDENCIES)\
  @LIB_PATH@ @LIB_BOINC@ @LIB_BOINC_API@ @LIB_STATIC@
 
@@ -252,7 +255,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransmissionModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WithinHostModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gzstream.Po@am__quote@

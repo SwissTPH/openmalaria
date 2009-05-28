@@ -26,8 +26,7 @@
 #include "GSLWrapper.h"
 #include "population.h"
 #include "summary.h"
-#include "proteome.h"
-#include "drug.h"
+#include "Drug/DrugModel.h"
 #include "global.h"
 #include "inputData.h"
 #include <fstream>
@@ -65,10 +64,7 @@ Simulation::Simulation() :
   Global::simulationMode=equilibriumMode;
   simulationDuration=get_simulation_duration();
   relTimeInMainSim=simulationDuration/(1.0*simulationDuration+Global::maxAgeIntervals);
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    initProteomeModule();
-    initDrugModule(5*24*60, 24*60);
-  }
+  DrugModel::init();
 }
 
 Simulation::~Simulation(){
@@ -193,10 +189,8 @@ void Simulation::write (ostream& out) {
   
   out.precision(20);
   out << simulationTime << endl;
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::write (out);
-  }
   _population->write (out);
+  DrugModel::writeStatic (out);
 }
 
 void Simulation::readCheckpoint() {
@@ -228,10 +222,8 @@ void Simulation::readCheckpoint() {
 
 void Simulation::read (istream& in) {
   in >> simulationTime;
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::read (in);
-  }
   _population->read(in);
+  DrugModel::readStatic (in);
   
   // Read trailing white-space (final endl has not yet been read):
   while (in.good() && isspace (in.peek()))

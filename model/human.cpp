@@ -30,7 +30,6 @@
 #include "GSLWrapper.h"
 #include "CaseManagementModel.h"
 #include "summary.h"
-#include "proteome.h"
 #include "intervention.h"
 #include "TransmissionModel.h"
 #include <stdexcept>

@@ -22,7 +22,6 @@
 #include "event.h"
 #include "WithinHostModel.h"
 #include "Pathogenesis/PathogenesisModel.h"
-#include "drug.h"
 #include "TransmissionModel/PerHost.h"
 
 // Forward declaration
@@ -206,33 +205,7 @@ private:
   double _timeStepMaxDensity;	// WithinHostModel, used by PathogenesisModel
   //@}
   
-  //! Determines eligibility and gives IPTi SP or placebo doses 
-  void setLastSPDose();
-
-  void updateInfectionStatus();
-
-  //! docu 
-  void computeFinalConc(Drug drg, int hl);
-
-  //! In practice calculates drug concs (PK) for each drug
-  void startWHCycle();
-
-  double convertDose(Drug drg, Dose ds);
-
-
-  //! docu
-  double computeExponentialDecay(double c, int hl, int t);
-
   void clearInfection(Infection *iCurrent);
-
-  //! Reads drugs from checkpoint
-  void readDrugs(fstream& funit, int multiplicity);
-
-  //!  Write all drugs of this human to the standard checkpoint file.
-  /*
-    \param funit io unit number
-  */
-  void writeDrugs(fstream& funit);
 };
 
 #endif

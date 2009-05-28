@@ -20,7 +20,7 @@
 
 */
 
-#include "drug.h"
+#include "Drug/drug.h"
 
 #include <iostream>
 #include <cmath>

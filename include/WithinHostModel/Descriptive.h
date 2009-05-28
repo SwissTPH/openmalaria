@@ -27,7 +27,7 @@
 #include "global.h"
 #include "WithinHostModel.h"
 #include "WithinHostModel/DescriptiveInfection.h"
-#include "drug.h"
+#include "Drug/drug.h"
 
 using namespace std;
 

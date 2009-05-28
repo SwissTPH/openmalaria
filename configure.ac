@@ -1,5 +1,9 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
+
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 AC_PREREQ(2.59)
 AC_INIT([malariaModel],[0.9])
 AC_CONFIG_AUX_DIR(config)
@@ -132,6 +136,7 @@ AC_CONFIG_FILES([Makefile
 		 model/Pathogenesis/Makefile
 		 model/TransmissionModel/Makefile
 		 model/WithinHostModel/Makefile
+		 model/Drug/Makefile
 		 xsdcxx/Makefile
                  graphics/Makefile])
 

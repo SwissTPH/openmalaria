@@ -416,7 +416,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     // Now we've calculated the emergence rate, save it:
     ofstream file (emergenceRateFilename.c_str());
     for (int i = 0; i < daysInYear; ++i)
-      file << mosqEmergeRate[i] << ' ';
+      file << mosqEmergeRate[i] << '\n';
     file.close();
   }
 }

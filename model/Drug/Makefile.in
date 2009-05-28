@@ -33,7 +33,7 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-subdir = model/TransmissionModel
+subdir = model/Drug
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/check_boinc.m4 \
@@ -45,12 +45,11 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 AR = ar
 ARFLAGS = cru
-libTransmissionModel_a_AR = $(AR) $(ARFLAGS)
-libTransmissionModel_a_LIBADD =
-am_libTransmissionModel_a_OBJECTS = NonVector.$(OBJEXT) \
-	Vector.$(OBJEXT) VectorInternal.$(OBJEXT) PerHost.$(OBJEXT) \
-	VectorSpecies.$(OBJEXT)
-libTransmissionModel_a_OBJECTS = $(am_libTransmissionModel_a_OBJECTS)
+libDrug_a_AR = $(AR) $(ARFLAGS)
+libDrug_a_LIBADD =
+am_libDrug_a_OBJECTS = DrugModel.$(OBJEXT) PkPdDrug.$(OBJEXT) \
+	drug.$(OBJEXT)
+libDrug_a_OBJECTS = $(am_libDrug_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -59,8 +58,8 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(libTransmissionModel_a_SOURCES)
-DIST_SOURCES = $(libTransmissionModel_a_SOURCES)
+SOURCES = $(libDrug_a_SOURCES)
+DIST_SOURCES = $(libDrug_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -167,8 +166,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_LIBRARIES = libTransmissionModel.a
-libTransmissionModel_a_SOURCES = NonVector.cpp  Vector.cpp  VectorInternal.cpp PerHost.cpp VectorSpecies.cpp
+noinst_LIBRARIES = libDrug.a
+libDrug_a_SOURCES = DrugModel.cpp\
+    PkPdDrug.cpp drug.cpp
+
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
 all: all-am
@@ -184,9 +185,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  model/TransmissionModel/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  model/Drug/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  model/TransmissionModel/Makefile
+	  $(AUTOMAKE) --gnu  model/Drug/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -207,10 +208,10 @@ $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
-libTransmissionModel.a: $(libTransmissionModel_a_OBJECTS) $(libTransmissionModel_a_DEPENDENCIES) 
-	-rm -f libTransmissionModel.a
-	$(libTransmissionModel_a_AR) libTransmissionModel.a $(libTransmissionModel_a_OBJECTS) $(libTransmissionModel_a_LIBADD)
-	$(RANLIB) libTransmissionModel.a
+libDrug.a: $(libDrug_a_OBJECTS) $(libDrug_a_DEPENDENCIES) 
+	-rm -f libDrug.a
+	$(libDrug_a_AR) libDrug.a $(libDrug_a_OBJECTS) $(libDrug_a_LIBADD)
+	$(RANLIB) libDrug.a
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -218,11 +219,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NonVector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PerHost.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Vector.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorInternal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/VectorSpecies.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DrugModel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PkPdDrug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drug.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -1,3 +1,6 @@
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 noinst_PROGRAMS = malariaGraphics
 
 malariaGraphics_SOURCES = Anopheles.cpp AlphaConfiguration.cpp ChartRenderer.cpp DataConfiguration.cpp DemoConfiguration.cpp \

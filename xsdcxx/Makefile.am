@@ -1,3 +1,6 @@
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 noinst_LIBRARIES = libxsdcxx.a
 libxsdcxx_a_SOURCES = inputData.cpp scenario.cxx
 BUILT_SOURCES = scenario.hxx scenario.ixx scenario.cxx
