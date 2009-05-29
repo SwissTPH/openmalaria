@@ -23,8 +23,7 @@
 #ifndef Hmod_ShmStruct
 #define Hmod_ShmStruct
 
-#include "boinc_bridge.h"
-#include "boincWrapper.h"
+#include "BoincWrapper.h"
 
 struct UC_SHMEM {
 	double update_time;

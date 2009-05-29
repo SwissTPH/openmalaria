@@ -45,7 +45,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_CLEAN_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
-	timer.$(OBJEXT) boincWrapper.$(OBJEXT) global.$(OBJEXT) \
+	timer.$(OBJEXT) BoincWrapper.$(OBJEXT) global.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
 	proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
 	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
@@ -183,7 +183,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = Pathogenesis TransmissionModel WithinHostModel Drug
 openMalaria_SOURCES = openMalaria.cpp\
- GSLWrapper.cpp timer.cpp boincWrapper.cpp\
+ GSLWrapper.cpp timer.cpp BoincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  proteome.cpp\
  WithinHostModel.cpp\
@@ -247,6 +247,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BoincWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CaseManagementModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EntoIntervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSLWrapper.Po@am__quote@
@@ -254,7 +255,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransmissionModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WithinHostModel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/boincWrapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/global.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gzstream.Po@am__quote@

@@ -26,7 +26,7 @@
 #include <sstream>
 #include <string.h>
 
-#include "boincWrapper.h"
+#include "BoincWrapper.h"
 
 //static (class) variables
 

@@ -18,6 +18,10 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
+/* This header either includes BOINC headers or defines dummy functions.
+ * It's no longer used by the malaria simulation, but is still used by the
+ * graphics application. */
+
 #ifndef _BOINC_BRIDGE_
 #define _BOINC_BRIDGE_
 

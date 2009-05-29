@@ -4,7 +4,7 @@
 SUBDIRS = Pathogenesis TransmissionModel WithinHostModel Drug
 noinst_PROGRAMS = openMalaria
 openMalaria_SOURCES = openMalaria.cpp\
- GSLWrapper.cpp timer.cpp boincWrapper.cpp\
+ GSLWrapper.cpp timer.cpp BoincWrapper.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  proteome.cpp\
  WithinHostModel.cpp\

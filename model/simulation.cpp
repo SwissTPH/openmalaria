@@ -21,7 +21,7 @@
 
 #include "simulation.h"
 
-#include "boincWrapper.h"
+#include "BoincWrapper.h"
 
 #include "GSLWrapper.h"
 #include "population.h"
@@ -218,6 +218,7 @@ void Simulation::readCheckpoint() {
   }
   
   load_rng_state(checkpointNum);
+  cerr << "Loaded checkpoint from: " << name.str() << endl;
 }
 
 void Simulation::read (istream& in) {

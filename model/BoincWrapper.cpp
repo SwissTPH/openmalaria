@@ -20,12 +20,34 @@
 
 // A wrapper around BOINC. This header should not include any BOINC headers!
 
-#include "boincWrapper.h"
-#include "boinc_bridge.h"
-#include "ShmStruct.h"
-
+#include "BoincWrapper.h"
 #include <iostream>
 
+#ifdef WITHOUT_BOINC
+#include <stdlib.h>
+namespace BoincWrapper {
+  void init () {
+    cout << "BoincWrapper: not using BOINC" << endl;
+  }
+  void finish(int err = 0) {
+    exit(err);	// doesn't return
+  }
+  
+  string resolveFile (const char* inName) {
+    return string (inName);
+  }
+
+  void reportProgress (double progress) {}
+  int timeToCheckpoint() {
+    return 0;
+  }
+  void checkpointCompleted() {}
+}
+
+#else	// With BOINC
+#include "boinc_api.h"
+#include "diagnostics.h"
+#define _GRAPHICS_6
 namespace BoincWrapper {
   void init () {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
@@ -34,11 +56,7 @@ namespace BoincWrapper {
       cerr << "APP. boinc_init() failed with code: "<<err<<endl;
       exit (err);
     }
-#ifdef WITHOUT_BOINC
-    cout << "non-boinc: \"dummy initialized\"" << endl;
-#else
-    cout << "boinc initialized" << endl;
-#endif
+    cout << "BoincWrapper: BOINC initialized" << endl;
     
     SharedGraphics::init();
   }
@@ -50,8 +68,9 @@ namespace BoincWrapper {
     string ret;
     int err = boinc_resolve_filename_s(inName,ret);
     if (err) {
-      cerr << "APP. boinc_resolve_filename failed with code: "<<err<<endl;
-      finish(err);
+      stringstream t;
+      t << "APP. boinc_resolve_filename_s failed with code: "<<err;
+      throw runtime_error (t.str());	// can't call finish/exit here; need to free memory
     }
     return ret;
   }
@@ -67,10 +86,13 @@ namespace BoincWrapper {
     boinc_checkpoint_completed();
   }
 }
+#endif	// Without/with BOINC
 
 namespace SharedGraphics {
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
-  UC_SHMEM* shmem;
+#include "ShmStruct.h"
+#include "graphics2.h"
+  UC_SHMEM* shmem = NULL;
   void update_shmem() {
     shmem->fraction_done = boinc_get_fraction_done();
     shmem->cpu_time = boinc_worker_thread_cpu_time();
@@ -82,7 +104,7 @@ namespace SharedGraphics {
     // create shared mem segment for graphics, and arrange to update it.
     //"malariacontrol" is a hard coded shared mem key, could be better
     shmem = (UC_SHMEM*)boinc_graphics_make_shmem("malariacontrol", sizeof(UC_SHMEM));
-    if (!shmem) {
+    if (shmem == NULL) {
       cerr << "failed to create graphics shared mem segment (no graphics possible)" << endl;
       return;
     }
@@ -99,7 +121,6 @@ namespace SharedGraphics {
 
 #else
   void init() {}
-  
   void copyKappa(double *kappa){}
 #endif
 }

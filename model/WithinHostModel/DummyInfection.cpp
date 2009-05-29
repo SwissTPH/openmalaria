@@ -26,8 +26,6 @@
 #include <sstream>
 #include <string.h>
 
-#include "boincWrapper.h"
-
 
 DummyInfection::~DummyInfection() {
 }

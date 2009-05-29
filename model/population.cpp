@@ -31,7 +31,7 @@
 #include "summary.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "CaseManagementModel.h"
-#include "boincWrapper.h"
+#include "BoincWrapper.h"
 #include <math.h>
 
 using namespace std;

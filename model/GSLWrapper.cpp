@@ -27,7 +27,6 @@ using namespace std;
 #include "GSLWrapper.h"
 #include "inputData.h"
 #include "population.h"
-#include "boincWrapper.h"
 
 #ifdef _WIN32
 #define finite(x) _finite(x)
@@ -188,26 +187,19 @@ double W_UNIFORM(){
 void load_rng_state(int seedFileNumber){
   ostringstream seedN;
   seedN << string("seed") << seedFileNumber;
-  string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
-  cerr << "load_rng " << seed_file_name << "\n";
-  
-  FILE * f = fopen(seed_file_name.c_str(), "rb");
+  FILE * f = fopen(seedN.str().c_str(), "rb");
   if (f!=NULL){
     gsl_rng_fread(f, generator);
     fclose (f);
-  }
-  else{
-    cerr << "load_rng, " << seed_file_name << "not found\n";
-    exit(-7);
+  }else{
+    throw runtime_error (string("load_rng_state: file not found: ").append(seedN.str()));
   }
 }
 
 void save_rng_state(int seedFileNumber){
   ostringstream seedN;
   seedN << string("seed") << seedFileNumber;
-  string seed_file_name = BoincWrapper::resolveFile(seedN.str().c_str());
-  
-  FILE * f = fopen(seed_file_name.c_str(), "wb");
+  FILE * f = fopen(seedN.str().c_str(), "wb");
   gsl_rng_fwrite(f, generator);
   fclose (f);
 }
