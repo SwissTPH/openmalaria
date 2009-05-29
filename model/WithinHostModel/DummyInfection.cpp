@@ -22,7 +22,6 @@
 #include "WithinHostModel/DummyInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <string.h>
@@ -51,10 +50,6 @@ DummyInfection::DummyInfection(int simulationTime){
       _proteome = ProteomeManager::getInfection();
     else
       _proteome = NULL;
-}
-
-void DummyInfection::writeInfectionToFile(fstream& funit){
-  write(funit);
 }
 
 int DummyInfection::getEndDate(){

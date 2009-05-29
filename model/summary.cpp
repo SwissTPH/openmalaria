@@ -24,7 +24,6 @@
 #include "summary.h"
 #include "inputData.h"
 
-#include <iostream>
 #include "event.h"
 #include "boincWrapper.h"
 

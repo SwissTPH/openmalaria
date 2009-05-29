@@ -23,7 +23,6 @@
 #include "intervention.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include <iostream>
 
 enum VaccineType {
   preerythrocytic_reduces_h = 1,

@@ -23,7 +23,6 @@
 #include "simulation.h"
 #include "summary.h"
 #include "GSLWrapper.h"
-#include <iostream>
 #include <limits>
 
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };

@@ -27,7 +27,6 @@
 #include "global.h" 
 #include <gsl/gsl_vector.h> 
 #include "intervention.h" 
-#include <iostream>
 #include "inputData.h"
 #include "TransmissionModel/NonVector.h"
 #include "TransmissionModel/Vector.h"

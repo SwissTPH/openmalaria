@@ -29,12 +29,11 @@
 #include <string>
 class Anopheles;
 
-/**
-* return if the function was a success. The goal of this function is to parse. 
-Do not wait to have a policy saying you were the error is. In the best case, the function
-will crash and you will be able to use the debugger to know where the error is.
-*/
-bool createDocument(std::string);
+
+/** @brief Reads the document in the xmlFile
+ * 
+ * Throws on failure. */
+void createDocument(std::string);
 
 /**
 * Some elements in memory have been created. This function deletes the object in memory

@@ -23,8 +23,7 @@
 #ifndef Hmod_PathogenesisModel
 #define Hmod_PathogenesisModel
 
-#include <iostream>
-#include <vector>
+#include "global.h"
 
 using namespace std;
 

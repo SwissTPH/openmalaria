@@ -20,7 +20,6 @@
 
 #include "WithinHostModel/Empirical.h"
 #include "GSLWrapper.h"
-#include <iostream>
 #include <sstream>
 #include <fstream>
 

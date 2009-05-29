@@ -133,7 +133,7 @@ void Simulation::updateOneLifespan () {
       writeCheckpoint();
       BoincWrapper::checkpointCompleted();
       if (Global::clOptions & CLO::TEST_CHECKPOINTING)
-	throw checkpoint_error ("Checkpoint test − written checkpoint, now halting");
+	throw cmd_exit ("Checkpoint test − written checkpoint");
     }
   }
 }

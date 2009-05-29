@@ -34,7 +34,7 @@ using namespace scnXml;
 const int SCHEMA_VERSION = 4;
 
 /** @brief The xml data structure. */
-const Scenario* scenario;
+const Scenario* scenario = NULL;
 const Monitoring * monitoring;
 const Interventions * interventions;
 const EntoData * entoData;	// May be replaced by a changeEIR intervention
@@ -81,13 +81,8 @@ void initTimedInterventions() {
 }
 
 
-/** 
- * @brief Reads the document in the xmlFile
- * 
- * @returns true if parsing was successful */
-bool createDocument(std::string lXmlFile) {
+void createDocument(std::string lXmlFile) {
   //Parses the document
-  try {
     scenario = (parseScenario (lXmlFile)).release();
     if (scenario->getSchemaVersion() != SCHEMA_VERSION) {
       ostringstream msg;
@@ -107,18 +102,12 @@ bool createDocument(std::string lXmlFile) {
     
     initParameterValues();
     initTimedInterventions();
-  }
-  catch (const xml_schema::Exception& e)
-  {
-    std::cerr << e << std::endl;
-    return false;
-  }
-  return true;
 }
 
 void cleanDocument() {
   // Destructors should handle cleanup
-  delete scenario;
+  if (scenario != NULL)
+    delete scenario;
 }
 
 const Monitoring& getMonitoring() {

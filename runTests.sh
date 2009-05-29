@@ -15,62 +15,72 @@ cp model/openMalaria test/sandbox/openMalaria
 #strip test/sandbox/openMalaria
 cd test/sandbox && cp ../original/* . 2>/dev/null
 
-CHECKPOINT=""
-PRINT_MODEL=""
+DONT_RUN="false"
 CMD_PREFIX=""
+CMD_POSTFIX=""
+
+runCMD() {
+  echo "\033[1;32m"$CMD"\033[0;00m"
+  $DONT_RUN || $CMD
+}
 
 runScenario() {
   # delete old checkpoints; necessary after a previous run:
   rm -f checkpoint* seed*
-  CMD="$CMD_PREFIX./openMalaria --scenario scenario$number.xml $CHECKPOINT $PRINT_MODEL"
-  date
-  echo $CMD
+  CMD="$CMD_PREFIX./openMalaria --scenario scenario$number.xml $CMD_POSTFIX"
+  echo "\033[0;33m"`date`
   touch timeFile
-  $CMD
-  wait
-  # Checkpoint written after timeFile was last touched, and no output:
-  while [ ! -f output.txt -a checkpoint -nt timeFile ]
+  # First run:
+  runCMD
+  # While no output, a checkpoint has been written, and $CMD exits successfully:
+  while [ ! -f output.txt -a checkpoint -nt timeFile ] && runCMD
   do
-    echo $CMD
-    $CMD
     wait
   done
-  if [ -e stderr.txt ]
+  if [ -f stderr.txt ]
   then
     mv stderr.txt stderr$number.txt
   fi
-  if [ -e output.txt ]
-    then
-      mv output.txt output$number.txt
-      ../original/compareOutputsFloat.py original$number.txt output$number.txt 1
-    else
-      echo "No results output; error messages:"
-      cat stderr$number.txt
+  if [ -f output.txt ]
+  then
+    mv output.txt output$number.txt
+    echo -n "\033[1;34m"
+    ../original/compareOutputsFloat.py original$number.txt output$number.txt 1
+  elif ! $DONT_RUN
+  then
+    echo "\033[0;31mNo results output; error messages:"
+    test -f stderr$number.txt && cat stderr$number.txt
   fi
-  echo
+  echo "\033[0;00m"
 }
 
 while [ "$#" -ge "1" ]
 do
-  if [ "$1" = "--checkpoint" ]
-  then
-    CHECKPOINT=$1
-  elif [ "$1" = "--gdb" ]
+  if [ "$1" = "--gdb" ]
   then
     CMD_PREFIX="gdb --args "
-  elif [ "$1" = "--print-model" ]
+  elif [ "$1" = "--dont-run" ]
   then
-    PRINT_MODEL=$1
+    DONT_RUN="true"
   elif [ "$1" = "--help" ]
   then
-    echo "$0 [options] [scenario numbers]"
-    echo "If no scenario numbers are given, all scenarios are run."
-    echo "Options:"
-    echo "  --checkpoint	Run checkpointing tests. These no longer require BOINC."
-    echo "  --gdb		Run openMalaria through gdb"
+    echo "Usage: \033[1;32m$0 [options] [scenarios]\033[0;00m"
+    echo
+    echo "Scenarios to be run must be of the form scenarioXX.xml; if any are passed on"
+    echo "the command line, XX is substituted for each given; if not then all files of"
+    echo "the form scenario*.xml are run as test scenarios."
+    echo
+    echo "Options:\033[0;33m"
+    echo "  --gdb		Run openMalaria through gdb."
+    echo "  --dont-run		Don't actually run openMalaria, just output the commandline."
     echo "  --help		Print this message."
-    echo "Other options supported by openMalaria will be passed."
+    echo "\033[0;00mOther options starting '--' will be passed to openMalaria. openMalaria options:\033[0;33m"
+    ./openMalaria --help
+    echo -n "\033[0;00m"
     exit 1;
+  elif [ `expr match "$1" '--'` -eq 2 ]
+  then
+    CMD_POSTFIX="$CMD_POSTFIX $1"
   else
     break
   fi

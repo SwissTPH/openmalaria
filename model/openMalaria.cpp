@@ -17,7 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <iostream>
 #include <fstream>
 
 using namespace std;
@@ -34,6 +33,7 @@ using namespace std;
 /** main() - initializes and shuts down BOINC and GSL, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]){
+  int exitStatus = 0;
   try {
     string scenario_name =
       Global::parseCommandLine (argc, argv);
@@ -43,29 +43,29 @@ int main(int argc, char* argv[]){
     scenario_name = BoincWrapper::resolveFile (scenario_name.c_str());
     
     //Change it and read it with boinc
-    if (!createDocument(scenario_name)) {
-      cerr << "APP. createDocument failed." <<endl;
-      BoincWrapper::finish(-1);
-      exit(-1);
-    }
+    createDocument(scenario_name);
     
-    if (Global::initGlobal()) {
-      cleanDocument();
-      BoincWrapper::finish (0);	// This takes about 1 second to run!
-    }
+    Global::initGlobal();
     
     {
       Simulation simulation;	// constructor runs
       simulation.start();
     }	// simulation's destructor runs
-    
-    cleanDocument();
-    BoincWrapper::finish(0);	// Never returns
+  } catch (const cmd_exit& e) {	// this is not an error, but exiting due to command line
+    cout << e.what() << "; exiting..." << endl;
   } catch (const exception& e) {
     cerr << "Exception: " << e.what() << endl;
-    BoincWrapper::finish(-1);
+    exitStatus = -1;
   } catch (...) {
     cerr << "Unknown exception" << endl;
-    BoincWrapper::finish(-1);
+    exitStatus = -1;
   }
+  
+  try {	// free XML memory (if allocated)
+    cleanDocument();
+  } catch (...) {
+    cerr << "cleanDocument failed" << endl;
+    exitStatus = -1;
+  }
+  BoincWrapper::finish(exitStatus);	// Never returns
 }

@@ -19,7 +19,6 @@
 
 
 #include <string.h>
-#include <iostream>
 using namespace std;
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_multimin.h>

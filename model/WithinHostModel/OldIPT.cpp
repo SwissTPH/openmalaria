@@ -88,27 +88,37 @@ OldIPTWithinHostModel::OldIPTWithinHostModel () :
   }
 }
 
+
+// -----  Data checkpointing  -----
+
 OldIPTWithinHostModel::OldIPTWithinHostModel (istream& in) :
-    DescriptiveWithinHostModel(in)
+    DescriptiveWithinHostModel(in, true)
 {
+  for(int i=0;i<_MOI;++i)
+    infections.push_back(new OldIPTInfection(in));
+  
   in >> _SPattenuationt;
   in >> _lastSPDose; 
   in >> _lastIptiOrPlacebo; 
+}
+
+void OldIPTWithinHostModel::write(ostream& out) const {
+  writeDescriptiveWHM (out);
+  
+  out << _SPattenuationt << endl;
+  out << _lastSPDose << endl; 
+  out << _lastIptiOrPlacebo << endl; 
 }
 
 
 // -----  Simple infection adders/removers  -----
 
 void OldIPTWithinHostModel::newInfection(){
-  if (_MOI <= 20) {
+  if (_MOI <= MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new OldIPTInfection(_lastSPDose, Simulation::simulationTime));
     _MOI++;
   }
-}
-
-void OldIPTWithinHostModel::loadInfection (istream& in) {
-  infections.push_back(new OldIPTInfection(in));
 }
 
 // -----    -----
@@ -248,14 +258,4 @@ void OldIPTWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human& human) {
       _cumulativeY += 10;
     }
   }
-}
-
-
-// -----  Data checkpointing  -----
-
-void OldIPTWithinHostModel::write(ostream& out) const {
-  writeDescriptiveWHM (out);
-  out << _SPattenuationt << endl;
-  out << _lastSPDose << endl; 
-  out << _lastIptiOrPlacebo << endl; 
 }

@@ -79,7 +79,9 @@ inline int resume_activities() {return 0;};
 inline int restore_activities() {return 0;};  
 
 inline int boinc_init(void) {return 0;};
-inline int boinc_finish(int status) {return 0;};
+inline int boinc_finish(int status) {
+  exit (status);
+}
 inline int boinc_resolve_filename(const char* filenamein, char* filenameout, int len) {
     strcpy(filenameout, filenamein); return 0;
 }

@@ -59,7 +59,6 @@ protected:
   void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
   void IPTattenuateAsexualMinTotalDensity (Human&);
   
-  virtual void loadInfection (istream& in);
   virtual void write(ostream& out) const;
   
 private:

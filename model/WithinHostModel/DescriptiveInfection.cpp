@@ -22,7 +22,6 @@
 #include "WithinHostModel/DescriptiveInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include <iostream>
 #include <algorithm>
 #include <sstream>
 #include <string.h>
@@ -123,23 +122,16 @@ DescriptiveInfection::~DescriptiveInfection() {
   //}
 }
 
-
-// -----  other  -----
-
-void DescriptiveInfection::writeInfectionToFile(fstream& funit){
-  write(funit);
-}
-
-int DescriptiveInfection::getEndDate(){
-  return _startdate+_duration/Global::interval;
-}
-
-int DescriptiveInfection::infectionDuration(){
-    double meanlogdur=5.1300001144409179688;
-    //Std of the logduration
-    double sdlogdur=0.80000001192092895508;
-    double dur=W_LOGNORMAL(meanlogdur, sdlogdur);
-    return 1+(int)floor(dur);
+DescriptiveInfection::DescriptiveInfection (istream& in) {
+  in >> _duration; 
+  in >> _startdate; 
+  in >> _density; 
+  in >> _cumulativeExposureJ; 
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    int proteomeID;
+    in >> proteomeID; 
+    _proteome = ProteomeManager::getProteome(proteomeID);
+  }
 }
 
 void DescriptiveInfection::write (ostream& out) const {
@@ -152,16 +144,19 @@ void DescriptiveInfection::write (ostream& out) const {
   }
 }
 
-DescriptiveInfection::DescriptiveInfection (istream& in) {
-  in >> _duration; 
-  in >> _startdate; 
-  in >> _density; 
-  in >> _cumulativeExposureJ; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    int proteomeID;
-    in >> proteomeID; 
-    _proteome = ProteomeManager::getProteome(proteomeID);
-  }
+
+// -----  other  -----
+
+int DescriptiveInfection::getEndDate(){
+  return _startdate+_duration/Global::interval;
+}
+
+int DescriptiveInfection::infectionDuration(){
+    double meanlogdur=5.1300001144409179688;
+    //Std of the logduration
+    double sdlogdur=0.80000001192092895508;
+    double dur=W_LOGNORMAL(meanlogdur, sdlogdur);
+    return 1+(int)floor(dur);
 }
 
 void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageYears, double cumulativeh, double &timeStepMaxDensity)

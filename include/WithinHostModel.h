@@ -26,7 +26,6 @@
 #include "global.h"
 #include "WithinHostModel/Infection.h"
 
-#include <iostream>
 #include <list>
 
 using namespace std;

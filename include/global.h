@@ -30,6 +30,7 @@
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <iostream>
 using namespace std;
 
 /// Command-Line Option possibilities
@@ -37,9 +38,7 @@ namespace CLO {
   enum CLO {
     NONE		= 0x0,
     
-    EARLY_EXIT		= 0x100,	///< Don't run main simulation flag
-    
-    PRINT_MODEL_VERSION	= 0x1 | EARLY_EXIT,
+    PRINT_MODEL_VERSION	= 0x1,
     TEST_CHECKPOINTING	= 0x2,
     ENABLE_ERC		= 0x4,
   };
@@ -63,9 +62,9 @@ public:
    *
    * Also outputs some extra information for command-line options.
    * 
-   * @returns: True if we should stop before running the simulation because of
-   * an option. */
-  static bool initGlobal ();
+   * @throws cmd_exit if we should stop before running the simulation because
+   * of an option. */
+  static void initGlobal ();
   
   static int modIntervalsPerYear (int i);
 
@@ -123,6 +122,15 @@ class checkpoint_error : public runtime_error
 {
   public:
     explicit checkpoint_error(const string&  __arg);
+};
+
+/** Thrown to halt, when a command-line argument prompts an early exit.
+ *
+ * (Not an error; exits with status 0.) */
+class cmd_exit : public runtime_error
+{
+  public:
+    explicit cmd_exit(const string& __arg);
 };
 
 #endif

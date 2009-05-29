@@ -22,7 +22,6 @@
 #define Hmod_EntoIntervention
 
 #include "global.h"
-#include <iostream>
 
 /** Base for anti-mosq. interventions. */
 class EntoIntervention

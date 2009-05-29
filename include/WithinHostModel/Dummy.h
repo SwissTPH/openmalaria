@@ -28,7 +28,6 @@
 #include "WithinHostModel/DummyInfection.h"
 #include "Drug/DrugModel.h"
 ;
-#include <iostream>
 
 using namespace std;
 

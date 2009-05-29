@@ -30,6 +30,9 @@
 
 using namespace std;
 
+const int DescriptiveWithinHostModel::MAX_INFECTIONS = 20;
+
+
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
@@ -43,23 +46,57 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
-  in >> _MOI; 
+  readDescriptiveWHM (in);
+  
+  for(int i=0;i<_MOI;++i)
+    infections.push_back(new DescriptiveInfection(in));
+}
+
+DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in, bool) :
+    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
+{
+  readDescriptiveWHM (in);
+}
+
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
+  clearAllInfections();
+  delete drugProxy;
+}
+
+
+// -----  Data checkpointing  -----
+
+void DescriptiveWithinHostModel::write(ostream& out) const {
+  writeDescriptiveWHM (out);
+}
+
+void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
+  in >> _MOI;
   in >> patentInfections; 
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
   in >> _innateImmunity; 
   
-  if (_MOI < 0)
-    throw checkpoint_error ("Error reading checkpoint");
-  
-  for(int i=0;i<_MOI;++i)
-    loadInfection (in);
+  if (_MOI < 0 || _MOI > MAX_INFECTIONS)
+    throw checkpoint_error ("Error reading checkpoint (_MOI)");
 }
 
-DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-  clearAllInfections();
-  delete drugProxy;
+void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
+  out << _cumulativeInfections << endl;
+  out << _pTransToMosq << endl;
+  
+  drugProxy->write (out);
+  
+  out << _MOI << endl;
+  out << patentInfections << endl;
+  out << _cumulativeh << endl;
+  out << _cumulativeY << endl;
+  out << _cumulativeYlag << endl;
+  out << _innateImmunity << endl;
+  
+  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    (*iter)->write (out);
 }
 
 // -----  Update function, called each step  -----
@@ -77,7 +114,7 @@ void DescriptiveWithinHostModel::update (double age) {
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveWithinHostModel::newInfection(){
-  if (_MOI <= 20) {
+  if (_MOI <= MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveInfection(Simulation::simulationTime));
     _MOI++;
@@ -106,10 +143,6 @@ void DescriptiveWithinHostModel::clearAllInfections(){
   }
   infections.clear();
   _MOI=0;
-}
-
-void DescriptiveWithinHostModel::loadInfection (istream& in) {
-  infections.push_back(new DescriptiveInfection(in));
 }
 
 
@@ -228,28 +261,4 @@ void DescriptiveWithinHostModel::summarize(double age) {
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
     Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
   }
-}
-
-
-// -----  Data checkpointing  -----
-
-void DescriptiveWithinHostModel::write(ostream& out) const {
-  writeDescriptiveWHM (out);
-}
-
-void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
-  out << _cumulativeInfections << endl; 
-  out << _pTransToMosq << endl;  
-  
-  drugProxy->write (out);
-  
-  out << _MOI << endl; 
-  out << patentInfections << endl; 
-  out << _cumulativeh << endl;
-  out << _cumulativeY << endl;
-  out << _cumulativeYlag << endl;
-  out << _innateImmunity << endl; 
-  
-  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    (*iter)->write (out);
 }

@@ -24,7 +24,6 @@
 #include "global.h"
 #include "inputData.h"
 #include <cmath>
-#include <iostream>
 #include <stdexcept>
 
 /*
@@ -100,8 +99,7 @@ string Global::parseCommandLine (int argc, char* argv[]) {
   }
   
   if (cloHelp) {
-    cout << "Usage:" << endl
-    << argv[0] << " [options]" << endl << endl
+    cout << "Usage: " << argv[0] << " [options]" << endl << endl
     << "Options:"<<endl
     << "  --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
     << "  --print-model		Print which model version flags are set (as binary with right-most"<<endl
@@ -115,13 +113,13 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     << "			Set checkpoint compression on or off. Default is on." <<endl
     << "  --help		Print this message." << endl
     ;
-    exit (1);
+    throw cmd_exit ("Printed help");
   }
   
   return scenarioFile;
 }
 
-bool Global::initGlobal () {
+void Global::initGlobal () {
   setModelVersion();
   interval=get_interval();
   if (daysInYear % interval !=  0) {
@@ -133,19 +131,10 @@ bool Global::initGlobal () {
   infantIntervalsAtRisk.resize(intervalsPerYear);
   latentp=get_latentp();
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
-  
-  return clOptions & CLO::EARLY_EXIT;
 }
 
 void Global::setModelVersion () {
   modelVersion = (ModelVersion) get_model_version();
-  
-  if (clOptions & CLO::PRINT_MODEL_VERSION) {
-    cout << "Model version: ";
-    for (int i = NUM_VERSIONS; i >= 0; --i)
-      cout << ((modelVersion >> i) & 1);
-    cout << endl; 
-  }
   
   // Or'd flags of incompatibility triangle from
   // "description of variables for interface" excel sheet
@@ -183,6 +172,14 @@ void Global::setModelVersion () {
     }
   if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
     cerr << "Warning: model version used is deprecated" << endl;
+  
+  if (clOptions & CLO::PRINT_MODEL_VERSION) {
+    cout << "Model version: ";
+    for (int i = NUM_VERSIONS; i >= 0; --i)
+      cout << ((modelVersion >> i) & 1);
+    cout << endl; 
+    throw cmd_exit ("Printed model version");
+  }
 }
 
 int Global::modIntervalsPerYear (int i) {
@@ -197,4 +194,7 @@ xml_scenario_error::xml_scenario_error(const string&  __arg)
   : runtime_error(__arg) { }
 
 checkpoint_error::checkpoint_error(const string&  __arg)
+  : runtime_error(__arg) { }
+
+cmd_exit::cmd_exit(const string& __arg)
   : runtime_error(__arg) { }
