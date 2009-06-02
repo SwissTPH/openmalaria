@@ -55,8 +55,6 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 }
 
 TransmissionModel::TransmissionModel(){
-  PerHostTransmission::BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);	// also set in Human
-  
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
   

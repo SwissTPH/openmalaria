@@ -19,19 +19,22 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
+#include "human.h"
+
 #include <string>
 #include <string.h>
 #include <math.h>
 #include <algorithm>
-#include "human.h"
+#include <stdexcept>
+
 #include "simulation.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include "CaseManagementModel.h"
 #include "summary.h"
 #include "intervention.h"
 #include "TransmissionModel.h"
-#include <stdexcept>
+#include "CaseManagementModel.h"
+#include "InfectionIncidenceModel.h"
 
 
 /*
@@ -48,9 +51,10 @@ double Human::detectionlimit;
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
+  PerHostTransmission::initParameters();
+  InfectionIncidenceModel::init();
   WithinHostModel::init();
   PathogenesisModel::init();
-  PerHostTransmission::initParameters();
   Vaccine::initParameters();
   
   /*
@@ -83,7 +87,8 @@ void Human::clear() {	// static clear
 
 // Create new human
 Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) 
-  : _perHostTransmission(tm), _simulationTime(simulationTime)
+  : _perHostTransmission(tm), _simulationTime(simulationTime),
+  infIncidence(InfectionIncidenceModel::createModel())
 {
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
@@ -105,20 +110,20 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     _ylag[i-1]=0.0;
   }
   
-  // Stored in presentation model, not Human, now. Initialization looks somewhat entwined though..
-  double _comorbidityFactor;
-  // Ditto, but in case management.
-  double _treatmentSeekingFactor;
-  // ditto for _BaselineAvailabilityToMosquitoes in PerHostTransmission
+  /* Human heterogeneity; affects:
+   * _comorbidityFactor (stored in PathogenesisModel)
+   * _treatmentSeekingFactor (stored in CaseManagementModel)
+   * _BaselineAvailabilityToMosquitoes (stored in InfectionIncidenceModel)
+   */
+  //NOTE: infIncidence must already have been initialised
+  double _comorbidityFactor = 1.0;
+  double _treatmentSeekingFactor = 1.0;
   
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
-    if (W_UNIFORM() < 0.5) {            
+    if (W_UNIFORM() < 0.5) {
       _comorbidityFactor=1.8;
     }	
-  }
-  else {
-    _comorbidityFactor=1.0;
   }
   if (Global::modelVersion & TREAT_HET) {
     _treatmentSeekingFactor=0.2;
@@ -126,39 +131,31 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
       _treatmentSeekingFactor=1.8;
     }	
   }
-  else {
-    _treatmentSeekingFactor=1.0;
-  }
   if (Global::modelVersion & TRANS_TREAT_HET) {
     _treatmentSeekingFactor=0.2;
-    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
+    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
     if (W_UNIFORM()<0.5) {
       _treatmentSeekingFactor=1.8;
-      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
+      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
     }
-  }
-  if (Global::modelVersion & COMORB_TREAT_HET) {
-    _comorbidityFactor=0.2;
-    _treatmentSeekingFactor=1.8;
+  } else if (Global::modelVersion & COMORB_TRANS_HET) {
     if (W_UNIFORM()<0.5) {
       _treatmentSeekingFactor=0.2;
-      _comorbidityFactor=1.8;
+    } else {
+      _treatmentSeekingFactor=1.8;
     }
-  }
-  if (Global::modelVersion & COMORB_TRANS_HET) {
-    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
+    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     if (W_UNIFORM()<0.5) {
-      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
+      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
       _comorbidityFactor=0.2;
     }
-  }  
-  if (Global::modelVersion & TRIPLE_HET) {
-    _perHostTransmission._BaselineAvailabilityToMosquitoes=1.8;
+  } else if (Global::modelVersion & TRIPLE_HET) {
+    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
     if (W_UNIFORM()<0.5) {
-      _perHostTransmission._BaselineAvailabilityToMosquitoes=0.2;
+      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
@@ -170,6 +167,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
 // Load human from checkpoint
 Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
   : _perHostTransmission(in, tm), _simulationTime(simulationTime),
+    infIncidence(InfectionIncidenceModel::createModel(in)),
     _withinHostModel(WithinHostModel::createWithinHostModel(in)),
     _caseManagement(CaseManagementModel::createCaseManagementModel(in)),
     _pathogenesisModel(PathogenesisModel::createPathogenesisModel(in))
@@ -197,9 +195,10 @@ void Human::destroy() {
 
 ostream& operator<<(ostream& out, const Human& human){
   human._perHostTransmission.write (out);
-  human._withinHostModel->write(out);
+  human.infIncidence->write (out);
+  human._withinHostModel->write (out);
   human._caseManagement->write (out);
-  human._pathogenesisModel->write(out);
+  human._pathogenesisModel->write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 
@@ -218,8 +217,11 @@ ostream& operator<<(ostream& out, const Human& human){
 }
 
 
-void Human::updateInfection(double expectedInfectionRate, double expectedNumberOfInfections){
-  int numInf = _perHostTransmission.numNewInfections(expectedInfectionRate, expectedNumberOfInfections);
+void Human::updateInfection(TransmissionModel* transmissionModel){
+  //TODO: put getExpectedNumberOfInfections call in numNewInfections
+  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
+  int numInf = infIncidence->numNewInfections(expectedInfectionRate,
+			infIncidence->getExpectedNumberOfInfections(*this, expectedInfectionRate));
   for (int i=1;i<=numInf; i++) {
     _withinHostModel->newInfection();
   }
@@ -237,7 +239,7 @@ void Human::updateInfection(double expectedInfectionRate, double expectedNumberO
 }
 
 bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
-  int ageTimeSteps = simulationTime-getDateOfBirth();
+  int ageTimeSteps = simulationTime-_dateOfBirth;
   if (ageTimeSteps > Global::maxAgeIntervals) {	// too old
     _doomed = 1;
   }
@@ -245,12 +247,10 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
     return true;	// remove from population
   
   _simulationTime = simulationTime;
-  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
   
   updateInterventionStatus(); 
   _withinHostModel->updateImmuneStatus();
-  updateInfection(expectedInfectionRate,
-                  _perHostTransmission.getExpectedNumberOfInfections(*this, expectedInfectionRate));
+  updateInfection(transmissionModel);
   determineClinicalStatus();
   _withinHostModel->update(getAgeInYears());
   
@@ -319,10 +319,7 @@ void Human::vaccinate(){
 }
 
 void Human::updateInterventionStatus() {
-  int agetstep;
-  int nextDose;
   if (Vaccine::anyVaccine) {
-    agetstep=_simulationTime-_dateOfBirth;
     /*
       Update the effect of the vaccine
       We should assume the effect is maximal 25 days after vaccination
@@ -341,9 +338,10 @@ void Human::updateInterventionStatus() {
       It won't work if we introduce interventions into a scenario with a pre-existing intervention.
     */
     if ( Simulation::timeStep >  0) {
-      nextDose=_lastVaccineDose+1;
+      int nextDose=_lastVaccineDose+1;
       if (nextDose <= (int)Vaccine::_numberOfEpiDoses){
-        if (W_UNIFORM() <  Vaccine::vaccineCoverage[nextDose - 1] && 
+	int agetstep=_simulationTime-_dateOfBirth;
+	if (W_UNIFORM() <  Vaccine::vaccineCoverage[nextDose - 1] && 
             Vaccine::targetagetstep[nextDose - 1] ==  agetstep) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
@@ -374,7 +372,7 @@ void Human::summarize(){
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
   }
-  _perHostTransmission.summarize (*Simulation::gMainSummary, age);
+  infIncidence->summarize (*Simulation::gMainSummary, age);
   Simulation::gMainSummary->addToPyrogenicThreshold(age, _pathogenesisModel->getPyrogenThres());
   Simulation::gMainSummary->addToSumX(age, log(_pathogenesisModel->getPyrogenThres()+1.0));
 }

@@ -276,12 +276,12 @@ void PrintMatrix(char matrixname[], gsl_matrix* A,
                  size_t RowLength, size_t ColLength);
 
 
-void PrintVector(char vectorname[], gsl_vector* v, size_t n);
+void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
 
 /** PrintArray() prints the given (C) array to the given file.
 * 
 * The array, v, of doubles is assumed to be of length n.
 * All parameters are IN parameters. */
-void PrintArray(char vectorname[], double* v, int n);
+void PrintArray(const char* vectorname, double* v, int n);
 /// ditto, taking a vector
-void PrintArray(char vectorname[], vector<double>& v);
+void PrintArray(const char* vectorname, vector<double>& v);

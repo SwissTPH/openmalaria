@@ -783,7 +783,7 @@ void PrintMatrix(char matrixname[], gsl_matrix* A,
 #endif
 
 #if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcSvDiff || defined VectorTransmission_PRINT_CalcXP
-void PrintVector(char vectorname[], gsl_vector* v, size_t n)
+void PrintVector(const char* vectorname, gsl_vector* v, size_t n)
 {
 /* PrintVector() prints the given (GSL) vector to the given file.
   * 
@@ -802,7 +802,7 @@ void PrintVector(char vectorname[], gsl_vector* v, size_t n)
 }
 #endif
 
-void PrintArray(char vectorname[], double* v, int n){
+void PrintArray(const char* vectorname, double* v, int n){
   FILE* fpp = fopen(fntestentopar, "a");
   
   for (int i=0; i < n; i++){
@@ -810,7 +810,7 @@ void PrintArray(char vectorname[], double* v, int n){
   }
   fclose(fpp);
 }
-void PrintArray(char vectorname[], vector<double>& v){
+void PrintArray(const char* vectorname, vector<double>& v){
   FILE* fpp = fopen(fntestentopar, "a");
   
   for (unsigned int i=0; i < v.size(); i++){

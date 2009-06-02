@@ -49,9 +49,10 @@ am_openMalaria_OBJECTS = openMalaria.$(OBJEXT) GSLWrapper.$(OBJEXT) \
 	summary.$(OBJEXT) population.$(OBJEXT) simulation.$(OBJEXT) \
 	proteome.$(OBJEXT) WithinHostModel.$(OBJEXT) \
 	intervention.$(OBJEXT) event.$(OBJEXT) human.$(OBJEXT) \
-	TransmissionModel.$(OBJEXT) CaseManagementModel.$(OBJEXT) \
-	OldCaseManagement.$(OBJEXT) NewCaseManagement.$(OBJEXT) \
-	EntoIntervention.$(OBJEXT) gzstream.$(OBJEXT)
+	TransmissionModel.$(OBJEXT) EntoIntervention.$(OBJEXT) \
+	InfectionIncidenceModel.$(OBJEXT) \
+	CaseManagementModel.$(OBJEXT) OldCaseManagement.$(OBJEXT) \
+	NewCaseManagement.$(OBJEXT) gzstream.$(OBJEXT)
 openMalaria_OBJECTS = $(am_openMalaria_OBJECTS)
 openMalaria_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(openMalaria_LDFLAGS) $(LDFLAGS) -o $@
@@ -188,9 +189,9 @@ openMalaria_SOURCES = openMalaria.cpp\
  proteome.cpp\
  WithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
- TransmissionModel.cpp\
+ TransmissionModel.cpp EntoIntervention.cpp\
+ InfectionIncidenceModel.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
- EntoIntervention.cpp\
  gzstream.C
 
 openMalaria_DEPENDENCIES = $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a Drug/libDrug.a
@@ -251,6 +252,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CaseManagementModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EntoIntervention.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GSLWrapper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InfectionIncidenceModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NewCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TransmissionModel.Po@am__quote@

@@ -20,9 +20,10 @@
 #define Hmod_human
 #include "global.h"
 #include "event.h"
+#include "TransmissionModel/PerHost.h"
+#include "InfectionIncidenceModel.h"
 #include "WithinHostModel.h"
 #include "Pathogenesis/PathogenesisModel.h"
-#include "TransmissionModel/PerHost.h"
 
 // Forward declaration
 class TransmissionModel;
@@ -74,7 +75,7 @@ public:
   
   /// @name updateInfection related functions
   //@{
-  void updateInfection(double expectedInfectionRate, double expectedNumberOfInfections);
+  void updateInfection(TransmissionModel*);
   //@}
   
   /// @name determineClinicalStatus related functions
@@ -115,13 +116,10 @@ public:
   double getPEVEfficacy() {return _PEVEfficacy;} 
   
   //! Get the Availability to mosquitoes
-  double getBaselineAvailabilityToMosquitoes() const {return _perHostTransmission._BaselineAvailabilityToMosquitoes;}
+  double getBaselineAvailabilityToMosquitoes() const {return infIncidence->_BaselineAvailabilityToMosquitoes;}
   
   inline double getProbTransmissionToMosquito() const {return _withinHostModel->getProbTransmissionToMosquito();}
   
-  //! Return doomed value
-  int getDoomed() {return _doomed;};
-
   //! Returns the date of birth
   int getDateOfBirth() {return _dateOfBirth;};
   
@@ -129,7 +127,7 @@ public:
   
   void IPTiTreatment (double compliance);
   
-  void setProbabilityOfInfection(double probability) { _perHostTransmission._pinfected=probability;};
+  void setProbabilityOfInfection(double probability) { infIncidence->_pinfected=probability;};
   //@}
   
   /** @name OldWithinHostModel functions
@@ -177,11 +175,17 @@ private:
   // Time from start of the simulation
   int _simulationTime;
   
-  WithinHostModel* _withinHostModel;
-
-  CaseManagementModel* _caseManagement;
+  /// The InfectionIncidenceModel translates per-host EIR into new infections
+  InfectionIncidenceModel *infIncidence;
   
-  PathogenesisModel* _pathogenesisModel;
+  /// The WithinHostModel models parasite density and immunity
+  WithinHostModel *_withinHostModel;
+  
+  /// The CaseManagementModel decides how to treat ill individuals
+  CaseManagementModel * _caseManagement;
+  
+  /// The PathogenesisModel introduces illness dependant on parasite density
+  PathogenesisModel *_pathogenesisModel;
   
   //!Total asexual blood stage density
   double _ylag[4];

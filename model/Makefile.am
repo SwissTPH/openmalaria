@@ -9,9 +9,9 @@ openMalaria_SOURCES = openMalaria.cpp\
  proteome.cpp\
  WithinHostModel.cpp\
  intervention.cpp event.cpp human.cpp\
- TransmissionModel.cpp\
+ TransmissionModel.cpp EntoIntervention.cpp\
+ InfectionIncidenceModel.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
- EntoIntervention.cpp\
  gzstream.C
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a Drug/libDrug.a
