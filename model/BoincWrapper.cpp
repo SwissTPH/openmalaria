@@ -22,9 +22,10 @@
 
 #include "BoincWrapper.h"
 #include <iostream>
+#include <string>
 
 #ifdef WITHOUT_BOINC
-#include <stdlib.h>
+#include <stdlib.h>	// exit()
 namespace BoincWrapper {
   void init () {
     cout << "BoincWrapper: not using BOINC" << endl;
@@ -47,7 +48,9 @@ namespace BoincWrapper {
 #else	// With BOINC
 #include "boinc_api.h"
 #include "diagnostics.h"
-#define _GRAPHICS_6
+#include <sstream>
+#include <stdexcept>	// runtime_error
+
 namespace BoincWrapper {
   void init () {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
