@@ -112,9 +112,6 @@ public:
   /** @name Other functions
    * @brief Other functions not called within Human */
   //@{
-  //! Get the PEV Efficacy
-  double getPEVEfficacy() {return _PEVEfficacy;} 
-  
   //! Get the Availability to mosquitoes
   double getBaselineAvailabilityToMosquitoes() const {return infIncidence->_BaselineAvailabilityToMosquitoes;}
   

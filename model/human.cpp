@@ -218,10 +218,8 @@ ostream& operator<<(ostream& out, const Human& human){
 
 
 void Human::updateInfection(TransmissionModel* transmissionModel){
-  //TODO: put getExpectedNumberOfInfections call in numNewInfections
-  double expectedInfectionRate = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
-  int numInf = infIncidence->numNewInfections(expectedInfectionRate,
-			infIncidence->getExpectedNumberOfInfections(*this, expectedInfectionRate));
+  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
+  int numInf = infIncidence->numNewInfections(ageAdjustedEIR, _PEVEfficacy);
   for (int i=1;i<=numInf; i++) {
     _withinHostModel->newInfection();
   }
@@ -337,12 +335,10 @@ void Human::updateInterventionStatus() {
       TODO: The tstep conditional is appropriate if we assume there is no intervention during warmup
       It won't work if we introduce interventions into a scenario with a pre-existing intervention.
     */
-    if ( Simulation::timeStep >  0) {
-      int nextDose=_lastVaccineDose+1;
-      if (nextDose <= (int)Vaccine::_numberOfEpiDoses){
-	int agetstep=_simulationTime-_dateOfBirth;
-	if (W_UNIFORM() <  Vaccine::vaccineCoverage[nextDose - 1] && 
-            Vaccine::targetagetstep[nextDose - 1] ==  agetstep) {
+    if (Simulation::timeStep > 0) {
+      if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
+	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
+            Vaccine::targetagetstep[_lastVaccineDose] == _simulationTime-_dateOfBirth) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
         }
@@ -393,40 +389,33 @@ double Human::getAgeInYears(int time) const{
 
 double Human::infectiousness(){
   double transmit;
-  double x;
-  int agetstep;
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
   static const double beta2=0.46;
   static const double beta3=0.17;
   static const double tau= 0.066;
   static const double mu= -8.1;
-  double pone;
-  double zval;
-  double valinfectiousness;
-  agetstep=_simulationTime-_dateOfBirth;
+  int agetstep=_simulationTime-_dateOfBirth;
   /*
     Original infectiousness model based on 5 day intervals updates
     lagged variables only every 5 days and cannot compute infectiousness
     for the first 20 days of the simulation
   */
-  if (( agetstep*Global::interval >  20) && ( _simulationTime*Global::interval >  20)) {
-    x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
+  if ((agetstep*Global::interval >  20) && ( _simulationTime*Global::interval >  20)) {
+    double x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
     if ( x <  0.001) {
       transmit=0.0;
     }
     else {
-      zval=(log(x)+mu)/sqrt(1.0/tau);
-      pone=W_UGAUSS_P((zval));
+      double zval=(log(x)+mu)/sqrt(1.0/tau);
+      double pone=W_UGAUSS_P(zval);
       transmit=(pone*pone);
+      //transmit has to be between 0 and 1
+      transmit=std::max(transmit, 0.0);
+      transmit=std::min(transmit, 1.0);
     }
-  }
-  else {
+  } else {
     transmit=0.0;
   }
-  //transmit has to be between 0 and 1
-  transmit=std::max(transmit, 0.0);
-  transmit=std::min(transmit, 1.0);
   //	Include here the effect of transmission-blocking vaccination
-  valinfectiousness=transmit*(1-_TBVEfficacy);
-  return valinfectiousness;
+  return transmit*(1.0-_TBVEfficacy);
 }

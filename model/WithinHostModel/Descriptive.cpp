@@ -217,8 +217,9 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
       }
         //Include here the effect of blood stage vaccination
       if (Vaccine::BSV.active) {
-        (*iter)->multiplyDensity(1-human.getBSVEfficacy());
-        timeStepMaxDensity=(double)timeStepMaxDensity*(1-human.getBSVEfficacy());
+	double factor = 1.0-human.getBSVEfficacy();
+	(*iter)->multiplyDensity(factor);
+	timeStepMaxDensity=(double)timeStepMaxDensity*(factor);
       }
       
       // Include here the effect of attenuated infections by SP concentrations

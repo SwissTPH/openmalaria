@@ -21,7 +21,6 @@
 #include "InfectionIncidenceModel.h"
 #include "GSLWrapper.h"
 #include "inputData.h"
-#include "human.h"	//FIXME: remove
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 const double InfectionIncidenceModel::susceptibility= 0.702;
@@ -36,10 +35,6 @@ double InfectionIncidenceModel::InfectionrateShapeParam;
 
 void InfectionIncidenceModel::init () {
   BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
-  
-  // NOTE: The following concerns translating an EIR into a number of
-  // infections, and could be placed in a different module.
-  // TODO: use class inheritance to replace if blocks
   
   gamma_p=getParameter(Params::GAMMA_P);
   Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
@@ -165,46 +160,43 @@ void InfectionIncidenceModel::summarize (Summary& summary, double age) {
 }
 
 
-double InfectionIncidenceModel::getExpectedNumberOfInfections (Human& human, double age_adj_EIR) {
-  double expectedNumInfections = getModelExpectedInfections (age_adj_EIR);
-  
-  //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-  if (Vaccine::PEV.active) {
-    expectedNumInfections *= (1 - human.getPEVEfficacy());
-  }
-  return expectedNumInfections;
+double InfectionIncidenceModel::getModelExpectedInfections (double ageAdjustedEIR) {
+  return survivalOfInoculum(ageAdjustedEIR) * ageAdjustedEIR * Global::interval * _BaselineAvailabilityToMosquitoes;
 }
-
-double InfectionIncidenceModel::getModelExpectedInfections (double age_adj_EIR) {
-  return survivalOfInoculum(age_adj_EIR) * age_adj_EIR * Global::interval * _BaselineAvailabilityToMosquitoes;
-}
-double NegBinomMAII::getModelExpectedInfections (double age_adj_EIR) {
-  double ExpectedInfectionRate = age_adj_EIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+double NegBinomMAII::getModelExpectedInfections (double ageAdjustedEIR) {
+  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
   return (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
 }
-double LogNormalMAII::getModelExpectedInfections (double age_adj_EIR) {
-  double ExpectedInfectionRate = age_adj_EIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+double LogNormalMAII::getModelExpectedInfections (double ageAdjustedEIR) {
+  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
   return sampleFromLogNormal(W_UNIFORM(),
 			     log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			     InfectionrateShapeParam);
 }
-double LogNormalMAPlusPreImmII::getModelExpectedInfections (double age_adj_EIR) {
-  double ExpectedInfectionRate = age_adj_EIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+double LogNormalMAPlusPreImmII::getModelExpectedInfections (double ageAdjustedEIR) {
+  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
   
-  return survivalOfInoculum(age_adj_EIR) *
+  return survivalOfInoculum(ageAdjustedEIR) *
     sampleFromLogNormal(W_UNIFORM(),
 			log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			InfectionrateShapeParam);
 }
 
-double InfectionIncidenceModel::survivalOfInoculum (double age_adj_EIR) {
+double InfectionIncidenceModel::survivalOfInoculum (double ageAdjustedEIR) {
   double survivalOfInoculum=(1.0+pow((_cumulativeEIRa/Xstar_p), gamma_p));
   survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
-  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + age_adj_EIR/Estar));
+  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjustedEIR/Estar));
   return survivalOfInoculum;
 }
 
-int InfectionIncidenceModel::numNewInfections (double expectedInfectionRate, double expectedNumberOfInfections){
+int InfectionIncidenceModel::numNewInfections (double ageAdjustedEIR, double PEVEfficacy) {
+  double expectedNumInfections = getModelExpectedInfections (ageAdjustedEIR);
+  
+  //Introduce the effect of vaccination. Note that this does not affect cumEIR.
+  if (Vaccine::PEV.active) {
+    expectedNumInfections *= (1.0 - PEVEfficacy);
+  }
+  
   //TODO: this code does not allow for variations in baseline availability
   //this is only likely to be relevant in some models but should not be
   //forgotten
@@ -212,19 +204,19 @@ int InfectionIncidenceModel::numNewInfections (double expectedInfectionRate, dou
   //Update pre-erythrocytic immunity
   if (Global::modelVersion & 
     (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
-    _cumulativeEIRa+=double(Global::interval)*expectedInfectionRate*_BaselineAvailabilityToMosquitoes;
+    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR*_BaselineAvailabilityToMosquitoes;
   } else {
-    _cumulativeEIRa+=double(Global::interval)*expectedInfectionRate;
+    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR;
   }
   
-  _pinfected = 1.0 - exp(-expectedNumberOfInfections) * (1.0-_pinfected);
+  _pinfected = 1.0 - exp(-expectedNumInfections) * (1.0-_pinfected);
   if (_pinfected < 0.0)
     _pinfected = 0.0;
   else if (_pinfected > 1.0)
     _pinfected = 1.0;
   
-  if (expectedNumberOfInfections > 0.0000001)
-    return W_POISSON(expectedNumberOfInfections);
+  if (expectedNumInfections > 0.0000001)
+    return W_POISSON(expectedNumInfections);
   else
     return 0;
 }

@@ -26,8 +26,6 @@
 #include "inputData.h"
 #include "intervention.h"
 
-class Human;	//FIXME: remove this
-
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
  *
@@ -66,30 +64,23 @@ public:
   /// Output _pinfected to the summary
   void summarize (Summary&, double age);
   
-  /*! get the number of infections for a specific human at a given time step 
-   *
-  1. Calculates h from the EIR measured on adults where 
-  h is the expected number of epidemiological inoculations 
-  2 Calculates the updated values of the pre-erythrocytic exposure and 
-  passes this back to the calling routine 
-  Requires the five-day EIR, adjusted for age as input. 
-  cumEIR: is the pre-erythrocytic exposure; 
-  efficacy: Efficacy of a pre-erythrocytic vaccine 
-  \param *cumEIR cumulative EIR (measures pre-erthrocytic immunity) 
-  \param efficacy efficacy of a pre-erythrocytic vaccine 
-  \param age_adj_EIR Expected number of inoculations adjusted for age of the host 
-  \param baseAvailToMos Host-specific availability 
-  */ 
-  double getExpectedNumberOfInfections (Human& human, double age_adj_EIR);
-  
-  //! Calculate the number of new infections to introduce via a stochastic process
-  int numNewInfections(double expectedInfectionRate, double expectedNumberOfInfections);
+  /** Calculate the number of new infections to introduce.
+   * 
+   * Firstly converts the EIR into an expected number of infections (what
+   * getExpectedNumberOfInfections() used to do):
+   * 1. Calculates h from the EIR measured on adults where h is the expected
+   * number of epidemiological inoculations.
+   * 2. Calculates the updated values of the pre-erythrocytic exposure.
+   * 
+   * Secondly calculates the number of new infections to introduce via a
+   * stochastic process. */
+  int numNewInfections(double ageAdjustedEIR, double PEVEfficacy);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double age_adj_EIR);
+  virtual double getModelExpectedInfections (double ageAdjustedEIR);
   
-  double survivalOfInoculum (double age_adj_EIR);
+  double survivalOfInoculum (double ageAdjustedEIR);
   
 public:	//TODO - maybe better if not public
   /** Probability of infection (cumulative or reset to zero in massTreatment).
@@ -157,21 +148,21 @@ public:
   NegBinomMAII ();
   NegBinomMAII (istream& in);
 protected:
-  double getModelExpectedInfections (double age_adj_EIR);
+  double getModelExpectedInfections (double ageAdjustedEIR);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
   LogNormalMAII ();
   LogNormalMAII (istream& in);
 protected:
-  double getModelExpectedInfections (double age_adj_EIR);
+  double getModelExpectedInfections (double ageAdjustedEIR);
 };
 class LogNormalMAPlusPreImmII : public InfectionIncidenceModel {
 public:
   LogNormalMAPlusPreImmII ();
   LogNormalMAPlusPreImmII (istream& in);
 protected:
-  double getModelExpectedInfections (double age_adj_EIR);
+  double getModelExpectedInfections (double ageAdjustedEIR);
 };
 
 #endif
