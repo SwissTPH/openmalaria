@@ -51,11 +51,12 @@ public:
    *
    * @returns The name of the scenario XML file to use.
    *
-   * Calls exit(1) directly to exit in the case a help message is printed. Help
-   * is printed to cout. Both actions necessitate calling this function
+   * Throws cmd_exit in the case a help message is printed. Help
+   * is printed to cout, which necessitate calling this function
    * before BOINC is initialised.
    * 
-   * In other cases, sets variables in Global to achieve the desired result. */
+   * In other cases command-line parameters cause variables to be set in Global
+   * to achieve the desired result. */
   static string parseCommandLine (int argc, char* argv[]);
   
   /** Sets parameters in Global and performs some checks.

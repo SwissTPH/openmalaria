@@ -124,8 +124,7 @@ void DescriptiveWithinHostModel::newInfection(){
 void DescriptiveWithinHostModel::clearOldInfections(){
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
-    int enddate=(*iter)->getEndDate();
-    if (Simulation::simulationTime >= enddate) {
+    if (Simulation::simulationTime >= (*iter)->getEndDate()) {
       delete *iter;
       iter=infections.erase(iter);
       _MOI--;

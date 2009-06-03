@@ -145,31 +145,30 @@ void Population::estimateRemovalRates () {
 }
 
 void Population::setupPyramid(bool isCheckpoint){
-  double* predperc = new double[_maxTimestepsPerLife];
   cumpc[0] = 0.0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     double ageYears = (_maxTimestepsPerLife-j-1) / (1.0*Global::intervalsPerYear);
     double M1s=(mu0 * (1.0-exp(-alpha0*ageYears)) / alpha0);
     double M2s=(mu1 * (exp(alpha1*ageYears)-1.0) / alpha1);
     double Ms=M1s+M2s;
-    predperc[j]=exp(-rho*ageYears-Ms);
+    double predperc = exp(-rho*ageYears-Ms);
     if (j < _maxTimestepsPerLife-Global::maxAgeIntervals){
-      predperc[j]=0.0;
+      predperc=0.0;
     }
-    cumpc[j]=cumpc[j-1]+predperc[j];
+    cumpc[j] = cumpc[j-1] + predperc;
   }
-  delete [] predperc;
   int cumulativePop=0;
+  double totalCumPC = cumpc[_maxTimestepsPerLife-1];
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     int iage=_maxTimestepsPerLife-j-1;
     //Scale using the total cumpc
-    cumpc[j]=cumpc[j]/cumpc[_maxTimestepsPerLife-1];
-    int N_new=(int)floor(cumpc[j]*_populationSize+0.5)-cumulativePop;
-    for (int j1=1;j1<=N_new; j1++){
-      if (!isCheckpoint){
-        newHuman(-iage);
+    cumpc[j]=cumpc[j]/totalCumPC;
+    if (!isCheckpoint){
+      int N_new=(int)floor(cumpc[j]*_populationSize+0.5)-cumulativePop;
+      for (int j1=1;j1<=N_new; j1++){
+	newHuman(-iage);
+	++cumulativePop;
       }
-      ++cumulativePop;
     }
   }
 }
@@ -266,7 +265,6 @@ void Population::update1(){
   //  Initialise the variable used for calculating infectiousness
   double sumWt_kappa= 0.0;
   double sumWeight  = 0.0;
-  int ia = 0;
   
   // Update each human in turn
   //std::cout<<" time " <<t<<std::endl;
@@ -290,7 +288,7 @@ void Population::update1(){
       // kappaByAge and nByAge are used in the screensaver only
       // TODO: This measure of infectiousness isn't directly affected by
       // bed-nets and isn't usable with NC's vector transmission model.
-      ia = iter->ageGroup() - 1;
+      int ia = iter->ageGroup() - 1;
       kappaByAge[ia] += iter->getProbTransmissionToMosquito();
       ++nByAge[ia];
       
@@ -338,11 +336,8 @@ void Population::update1(){
   
   // Shared graphics: report infectiousness
   if (Simulation::simulationTime % 6 ==  0) {
-    for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++) {
-      // FIXME: do we really want infectiousness relative to last agegroup?
-      // shouldn't we divide by nByAge[i] instead?
-      kappaByAge[i] /= nByAge[ia];
-    }
+    for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++)
+      kappaByAge[i] /= nByAge[i];
     SharedGraphics::copyKappa(kappaByAge);
   }
   
@@ -394,13 +389,13 @@ void Population::implementIntervention (int time) {
   }
   
   if (interv->getVaccinate().present()) {
-    vaccinatePopulation(interv->getVaccinate().get(), time);
+    vaccinatePopulation(interv->getVaccinate().get());
   }
   if (interv->getMDA().present()) {
-    massTreatment(interv->getMDA().get(), time);
+    massTreatment(interv->getMDA().get());
   }
   if (interv->getIpti().present()) {
-    massIPTiTreatment(interv->getIpti().get(), time);
+    massIPTiTreatment(interv->getIpti().get());
   }
   
   /* TODO
@@ -408,7 +403,7 @@ void Population::implementIntervention (int time) {
   } */
 }
 
-void Population::massTreatment(const scnXml::Mass& mass, int time){
+void Population::massTreatment(const scnXml::Mass& mass){
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
   double compliance = mass.getCoverage();
@@ -434,7 +429,7 @@ void Population::massTreatment(const scnXml::Mass& mass, int time){
   }
 }
 
-void Population::massIPTiTreatment(const scnXml::Mass& mass, int time){
+void Population::massIPTiTreatment(const scnXml::Mass& mass){
   //Set the last SP Dose given for the eligible humans - is this all we need to do?     
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
@@ -449,7 +444,7 @@ void Population::massIPTiTreatment(const scnXml::Mass& mass, int time){
 }
 
 
-void Population::vaccinatePopulation(const scnXml::Mass& mass, int time){
+void Population::vaccinatePopulation(const scnXml::Mass& mass){
   double minAge = mass.getMinAge();
   double maxAge = mass.getMaxAge();
   double compliance = mass.getCoverage();

@@ -77,16 +77,10 @@ public:
   void implementIntervention(int time);
 
   //!  Mass IPTi Treatment Intervention
-  /*!   
-       \param time Current time (in tsteps) 
-  */
-  void massIPTiTreatment(const scnXml::Mass&, int time);
+  void massIPTiTreatment(const scnXml::Mass&);
 
   //! Mass Vaccination Intervention
-  /*!
-     \param time Current time (in tsteps)
-  */
-  void vaccinatePopulation(const scnXml::Mass&, int time);
+  void vaccinatePopulation(const scnXml::Mass&);
   
   //! Initialise human list
   void initialiseHumanList();
@@ -101,10 +95,7 @@ public:
   void newSurvey();
  
   //! Mass Drug Treatment Intervention
-  /*!  
-    \param time Current time (in tsteps)
-  */
-  void massTreatment(const scnXml::Mass&, int time);
+  void massTreatment(const scnXml::Mass&);
 
   //! remove human from the list
   short outmigrate(Human& current, int Nsize, int &survivsSoFar);

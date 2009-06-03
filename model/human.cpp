@@ -106,8 +106,8 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   _PEVEfficacy=0.0;
   _TBVEfficacy=0.0;
   _totalDensity=0.0;
-  for (int i=1;i<=4; i++) {
-    _ylag[i-1]=0.0;
+  for (int i=0;i<4; i++) {
+    _ylag[i]=0.0;
   }
   
   /* Human heterogeneity; affects:
@@ -225,14 +225,15 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
   }
   
   _withinHostModel->clearOldInfections();
-
-  if ((_simulationTime*Global::interval) % 5 ==  0) {
-    for (int i=1;i<=3; i++) {
-      _ylag[4-i]=_ylag[3-i];
+  
+  // _ylag is designed for a 5-day timestep model
+  if ((_simulationTime*Global::interval) % 5 == 0) {
+    for (int i=3;i>0; i--) {
+      _ylag[i]=_ylag[i-1];
     }
   }
   _ylag[0]=_totalDensity;
-
+  
   _withinHostModel->calculateDensities(*this);
 }
 

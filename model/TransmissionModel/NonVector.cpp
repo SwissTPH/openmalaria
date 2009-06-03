@@ -30,20 +30,13 @@ const double NonVectorTransmission::min_EIR_mult= 0.01;
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
 {
   nspore = nonVectorData.getEipDuration() / Global::interval;
-  nDays = (int *) malloc(((Global::intervalsPerYear))*sizeof(int));
   maxIntervals=maxDurIntPhaseEIR / Global::interval;
-  ino = (int *) malloc(((maxIntervals))*sizeof(int));
-  intEIR = (double *) malloc(((maxIntervals))*sizeof(double));
   
   initialKappa.resize (Global::intervalsPerYear);
   inputEIR(nonVectorData);
 }
 
-NonVectorTransmission::~NonVectorTransmission () {
-  free(nDays);
-  free(ino);
-  free(intEIR);
-}
+NonVectorTransmission::~NonVectorTransmission () {}
 
 
 //! initialise the main simulation 
@@ -54,17 +47,14 @@ void NonVectorTransmission::initMainSimulation (int populationSize){
 
 
 void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
+  vector<int> nDays;
   //initialise all the EIR arrays to 0
   if (Global::simulationMode != transientEIRknown) {
-    for (size_t j=0;j<Global::intervalsPerYear; j++) {
-      initialisationEIR[j]=0.0;
-      nDays[j]=0;
-    }
+    initialisationEIR.assign (Global::intervalsPerYear, 0.0);
+    nDays.assign (Global::intervalsPerYear, 0);
   } else {
-    for (int j=0;j<maxIntervals; j++) {
-      intEIR[j]=0.0;
-      ino[j]=0;
-    }
+    intEIR.assign (maxIntervals, 0.0);
+    nDays.assign (maxIntervals, 0);
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
@@ -85,8 +75,8 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
       //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
       initialisationEIR[i2] = ((initialisationEIR[i2] * (nDays[i2]-1)) + EIRdaily) / nDays[i2];
     } else {
-      ino[istep]++;
-      intEIR[istep]= ((intEIR[istep] * (ino[istep]-1)) + EIRdaily) / ino[istep];
+      nDays[istep]++;
+      intEIR[istep]= ((intEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
     }
   }
   

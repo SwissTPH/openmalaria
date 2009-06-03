@@ -86,15 +86,9 @@ private:
   //@{
   //! The maximum number of intervals in the intervention phase.
   int maxIntervals; 
-  
-  //! Number of days contributing to each EIR estimate for pre-intervention 
-  int *nDays;
-
-  /// Number of days contributing to each EIR estimate (post intervention) 
-  int *ino;
 
   ///intEIR() EIR per time interval during the intervention period 
-  double *intEIR;
+  vector<double> intEIR;
   
 
 //! Variance of Infection Rate according to fielddata 
