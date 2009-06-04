@@ -47,7 +47,6 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
   in >> patentInfections; 
   in >> cumulativeY;
   in >> cumulativeh;
-  in >> timeStepMaxDensity;
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
@@ -148,23 +147,19 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
   
   _pTransToMosq = 0.0;
   patentInfections = 0;
-  human.setTotalDensity(0.0);
-  human.setTimeStepMaxDensity(0.0);
+  totalDensity = 0.0;
+  timeStepMaxDensity = 0.0;
   if (_cumulativeInfections >  0) {
     cumulativeh=_cumulativeh;
     cumulativeY=_cumulativeY;
     std::list<DummyInfection>::iterator i;
     for(i=infections.begin(); i!=infections.end(); i++){
-      //std::cout<<"uis: "<<infData->duration<<std::endl;
-      timeStepMaxDensity=human.getTimeStepMaxDensity();
-      
       i->determineWithinHostDensity();
       timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
-      human.setTimeStepMaxDensity(timeStepMaxDensity);
-        
-      human.setTotalDensity(human.getTotalDensity()+i->getDensity());
+      
+      totalDensity += i->getDensity();
       //Compute the proportion of parasites remaining after innate blood stage effect
-      if (i->getDensity() > Human::detectionlimit) {
+      if (i->getDensity() > detectionLimit) {
         patentInfections++;
       }
       if (i->getStartDate() == (Simulation::simulationTime-1)) {
@@ -184,6 +179,10 @@ void DummyWithinHostModel::summarize(double age) {
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
     Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
   }
+  if (parasiteDensityDetectible()) {
+    Simulation::gMainSummary->addToPatentHost(age, 1);
+    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
+  }
 }
 
 
@@ -192,6 +191,8 @@ void DummyWithinHostModel::summarize(double age) {
 void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _pTransToMosq << endl;  
+  out << totalDensity << endl;
+  out << timeStepMaxDensity << endl;
   
   drugProxy->write (out);
   
@@ -199,7 +200,6 @@ void DummyWithinHostModel::write(ostream& out) const {
   out << patentInfections << endl; 
   out << cumulativeY << endl;
   out << cumulativeh << endl;
-  out << timeStepMaxDensity << endl;
   out << _cumulativeh << endl;
   out << _cumulativeY << endl;
   out << _cumulativeYlag << endl;

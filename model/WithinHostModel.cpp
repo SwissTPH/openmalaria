@@ -36,6 +36,7 @@ double WithinHostModel::sigma_i;
 double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
+double WithinHostModel::detectionLimit;
 
 // -----  Initialization  -----
 
@@ -44,6 +45,20 @@ void WithinHostModel::init() {
   immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
   immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
   asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+  
+  double densitybias;
+  /*
+  TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
+  or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
+  add an attribute to scenario.xml densityQuantification="malariaTherapy|garki|other"
+  */
+  if (( get_analysis_no() <  22) || ( get_analysis_no() >  30)) {
+    densitybias=getParameter(Params::DENSITY_BIAS_NON_GARKI);
+  }
+  else {
+    densitybias=getParameter(Params::DENSITY_BIAS_GARKI);
+  }
+  detectionLimit=get_detectionlimit()*densitybias;
   
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     DummyInfection::init ();
@@ -83,6 +98,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
 WithinHostModel::WithinHostModel(istream& in) {
   in >> _cumulativeInfections; 
   in >> _pTransToMosq; 
+  in >> totalDensity;
+  in >> timeStepMaxDensity;
 }
 
 void WithinHostModel::clearInfections (Event&) {

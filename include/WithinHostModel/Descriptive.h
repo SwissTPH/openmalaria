@@ -81,6 +81,10 @@ public:
   
   virtual void immunityPenalisation();
   
+  bool parasiteDensityDetectible() const {
+    return totalDensity > detectionLimit;
+  }
+  
 protected:
   /*!  SP drug action applies to each infection depending on genotype and when
   the individual had their last dose of SP */
@@ -105,11 +109,6 @@ protected:
   
   //!Cumulative parasite density since birth
   double _cumulativeY;
-  
-  /** Used within calculateDensities and other functions, set each call.
-   *
-   * Doesn't need to be checkpointed. */
-  double timeStepMaxDensity;
   
 private:
   //TODO: check why we have 2 cumulativeh and cumulativeY params

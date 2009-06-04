@@ -47,8 +47,6 @@
 #endif
 
 
-double Human::detectionlimit;
-
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
   PerHostTransmission::initParameters();
@@ -56,28 +54,6 @@ void Human::initHumanParameters () {	// static
   WithinHostModel::init();
   PathogenesisModel::init();
   Vaccine::initParameters();
-  
-  /*
-    Init parameters that are common to all humans
-  */
-  
-  // TODO: Change values of these probabilities - should get from old C code for entomodel.
-  // We assume that baseEntoAvailability is not the same as the availability used
-  // by NonVector.cpp.
-
-  double densitybias;
-  /*
-    TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
-    or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
-    add an attribute to scenario.xml densityQuantification="malariaTherapy|garki|other"
-  */
-  if (( get_analysis_no() <  22) || ( get_analysis_no() >  30)) {
-    densitybias=getParameter(Params::DENSITY_BIAS_NON_GARKI);
-  }
-  else {
-    densitybias=getParameter(Params::DENSITY_BIAS_GARKI);
-  }
-  detectionlimit=get_detectionlimit()*densitybias;
 }
 
 void Human::clear() {	// static clear
@@ -87,8 +63,9 @@ void Human::clear() {	// static clear
 
 // Create new human
 Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) 
-  : _perHostTransmission(tm), _simulationTime(simulationTime),
-  infIncidence(InfectionIncidenceModel::createModel())
+  : perHostTransmission(tm),
+    infIncidence(InfectionIncidenceModel::createModel()),
+    _simulationTime(simulationTime)
 {
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
@@ -98,14 +75,12 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     throw out_of_range ("date of birth in future!");
   }
   _doomed=0;
-  _timeStepMaxDensity=0.0;
   _ID=ID;
   //NOTE: initialized here to preserve order of random calls
-  _withinHostModel = WithinHostModel::createWithinHostModel();
+  withinHostModel = WithinHostModel::createWithinHostModel();
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
   _TBVEfficacy=0.0;
-  _totalDensity=0.0;
   for (int i=0;i<4; i++) {
     _ylag[i]=0.0;
   }
@@ -160,27 +135,26 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
       _treatmentSeekingFactor=1.8;
     }
   }
-  _pathogenesisModel=PathogenesisModel::createPathogenesisModel(_comorbidityFactor);
-  _caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
+  pathogenesisModel=PathogenesisModel::createPathogenesisModel(_comorbidityFactor);
+  caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
 }
 
 // Load human from checkpoint
 Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
-  : _perHostTransmission(in, tm), _simulationTime(simulationTime),
+  : perHostTransmission(in, tm),
     infIncidence(InfectionIncidenceModel::createModel(in)),
-    _withinHostModel(WithinHostModel::createWithinHostModel(in)),
-    _caseManagement(CaseManagementModel::createCaseManagementModel(in)),
-    _pathogenesisModel(PathogenesisModel::createPathogenesisModel(in))
+    withinHostModel(WithinHostModel::createWithinHostModel(in)),
+    pathogenesisModel(PathogenesisModel::createPathogenesisModel(in)),
+    caseManagement(CaseManagementModel::createCaseManagementModel(in)),
+    _simulationTime(simulationTime)
 {
   in >> _dateOfBirth; 
   in >> _doomed; 
   in >> _ID; 
   in >> _lastVaccineDose; 
   in >> _BSVEfficacy; 
-  in >> _timeStepMaxDensity; 
   in >> _PEVEfficacy; 
   in >> _TBVEfficacy; 
-  in >> _totalDensity; 
   in >> _ylag[0]; 
   in >> _ylag[1]; 
   in >> _ylag[2]; 
@@ -188,26 +162,24 @@ Human::Human(istream& in, TransmissionModel& tm, int simulationTime)
 }
 
 void Human::destroy() {
-  delete _withinHostModel;
-  delete _pathogenesisModel;
-  delete _caseManagement; 
+  delete withinHostModel;
+  delete pathogenesisModel;
+  delete caseManagement; 
 }
 
 ostream& operator<<(ostream& out, const Human& human){
-  human._perHostTransmission.write (out);
+  human.perHostTransmission.write (out);
   human.infIncidence->write (out);
-  human._withinHostModel->write (out);
-  human._caseManagement->write (out);
-  human._pathogenesisModel->write (out);
+  human.withinHostModel->write (out);
+  human.caseManagement->write (out);
+  human.pathogenesisModel->write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 
   out << human._lastVaccineDose << endl;
   out << human._BSVEfficacy << endl; 
-  out << human._timeStepMaxDensity << endl; 
   out << human._PEVEfficacy << endl; 
   out << human._TBVEfficacy << endl; 
-  out << human._totalDensity << endl; 
   out << human._ylag[0] << endl; 
   out << human._ylag[1] << endl; 
   out << human._ylag[2] << endl; 
@@ -218,13 +190,13 @@ ostream& operator<<(ostream& out, const Human& human){
 
 
 void Human::updateInfection(TransmissionModel* transmissionModel){
-  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, _perHostTransmission);
+  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, perHostTransmission);
   int numInf = infIncidence->numNewInfections(ageAdjustedEIR, _PEVEfficacy);
   for (int i=1;i<=numInf; i++) {
-    _withinHostModel->newInfection();
+    withinHostModel->newInfection();
   }
   
-  _withinHostModel->clearOldInfections();
+  withinHostModel->clearOldInfections();
   
   // _ylag is designed for a 5-day timestep model
   if ((_simulationTime*Global::interval) % 5 == 0) {
@@ -232,9 +204,10 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
       _ylag[i]=_ylag[i-1];
     }
   }
-  _ylag[0]=_totalDensity;
+  //NOTE: should this not also run only every 5 days?
+  _ylag[0]=withinHostModel->getTotalDensity();
   
-  _withinHostModel->calculateDensities(*this);
+  withinHostModel->calculateDensities(*this);
 }
 
 bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
@@ -248,10 +221,10 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   _simulationTime = simulationTime;
   
   updateInterventionStatus(); 
-  _withinHostModel->updateImmuneStatus();
+  withinHostModel->updateImmuneStatus();
   updateInfection(transmissionModel);
   determineClinicalStatus();
-  _withinHostModel->update(getAgeInYears());
+  withinHostModel->update(getAgeInYears());
   
   // update array for the infant death rates
   if (ageTimeSteps <= (int)Global::intervalsPerYear){
@@ -271,7 +244,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed ==  -7) {	//clinical episode 6 intervals before
-    _caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+    caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
     /*
     doomed=7 is the code for indirect death, and 6 for neonatal death.
     Individuals with positive doomed values are removed at the start of
@@ -285,7 +258,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   // Neonatal mortality:
   if(_simulationTime-_dateOfBirth == 1) {
     if (PathogenesisModel::eventNeonatalMortality()) {
-      _caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+      caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       _doomed  = 6;
       return;
     }
@@ -297,8 +270,8 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   doCaseManagement clears infections if there was an effective treatment, or calls medicate,
   and decides whether the patient lives, has sequelae, or dies.
   */
-  _caseManagement->doCaseManagement (_pathogenesisModel->infectionEvent (getAgeInYears(), _totalDensity, _timeStepMaxDensity),
-                                     *_withinHostModel,
+  caseManagement->doCaseManagement (pathogenesisModel->infectionEvent (getAgeInYears(), withinHostModel->getTotalDensity(), withinHostModel->getTimeStepMaxDensity()),
+                                     *withinHostModel,
                                      getAgeInYears(),
                                      _doomed);
 }
@@ -346,32 +319,28 @@ void Human::updateInterventionStatus() {
       }
     }
   }
-  _withinHostModel->IPTSetLastSPDose(Simulation::simulationTime-_dateOfBirth, ageGroup());
+  withinHostModel->IPTSetLastSPDose(Simulation::simulationTime-_dateOfBirth, ageGroup());
 }
 
 void Human::clearInfections () {
-  _withinHostModel->clearInfections(_caseManagement->getEvent());
+  withinHostModel->clearInfections(caseManagement->getEvent());
 }
 
 void Human::IPTiTreatment (double compliance) {
-  _withinHostModel->IPTiTreatment (compliance, ageGroup());
+  withinHostModel->IPTiTreatment (compliance, ageGroup());
 }
 
 
 void Human::summarize(){
   double age = getAgeInYears();
-  if (getInterventions().getIptiDescription().present() && _caseManagement->recentTreatment())
+  if (getInterventions().getIptiDescription().present() && caseManagement->recentTreatment())
     return ;
   
   Simulation::gMainSummary->addToHost(age,1);
-  _withinHostModel->summarize(age);
-  if ( _totalDensity >  detectionlimit) {
-    Simulation::gMainSummary->addToPatentHost(age, 1);
-    Simulation::gMainSummary->addToSumLogDensity(age, log(_totalDensity));
-  }
+  withinHostModel->summarize(age);
   infIncidence->summarize (*Simulation::gMainSummary, age);
-  Simulation::gMainSummary->addToPyrogenicThreshold(age, _pathogenesisModel->getPyrogenThres());
-  Simulation::gMainSummary->addToSumX(age, log(_pathogenesisModel->getPyrogenThres()+1.0));
+  Simulation::gMainSummary->addToPyrogenicThreshold(age, pathogenesisModel->getPyrogenThres());
+  Simulation::gMainSummary->addToSumX(age, log(pathogenesisModel->getPyrogenThres()+1.0));
 }
 
 

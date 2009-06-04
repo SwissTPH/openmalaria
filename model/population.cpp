@@ -281,15 +281,15 @@ void Population::update1(){
     //else update the individual
       ++survivsSoFar;
       double ageYears = iter->getAgeInYears(Simulation::simulationTime);
-      double availability = iter->getBaselineAvailabilityToMosquitoes() * _transmissionModel->getRelativeAvailability(ageYears);
+      double availability = iter->infIncidence->_BaselineAvailabilityToMosquitoes * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
-      sumWt_kappa += availability*iter->getProbTransmissionToMosquito();
+      sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
       
       // kappaByAge and nByAge are used in the screensaver only
       // TODO: This measure of infectiousness isn't directly affected by
       // bed-nets and isn't usable with NC's vector transmission model.
       int ia = iter->ageGroup() - 1;
-      kappaByAge[ia] += iter->getProbTransmissionToMosquito();
+      kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
       ++nByAge[ia];
       
       /*
@@ -320,7 +320,7 @@ void Population::update1(){
 	  isAtRiskOfFirstPregnancy = true;
 	}
 	nCounter ++;
-	if (iter->getTotalDensity() > Human::detectionlimit){
+	if (iter->withinHostModel->parasiteDensityDetectible()){
 	  pCounter ++;
 	}
       }
@@ -411,7 +411,7 @@ void Population::massTreatment(const scnXml::Mass& mass){
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
     double ageYears = iter->getAgeInYears(Simulation::simulationTime);
-    if ((iter->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
+    if ((iter->withinHostModel->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if (W_UNIFORM() < compliance) {
 	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
 	This is not consistent with the way we treat according to the Health
@@ -425,7 +425,7 @@ void Population::massTreatment(const scnXml::Mass& mass){
     inoculations for the analysis of pre-erythrocytic immunity.
     TODO: inside the above conditional? */
     // Only affects Summary::addToExpectedInfected
-    iter->setProbabilityOfInfection(0.0);
+    iter->infIncidence->_pinfected = 0.0;
   }
 }
 

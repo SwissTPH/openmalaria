@@ -148,7 +148,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   // Per Global::interval (hosts don't update per day):
   double totalAvailability = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    totalAvailability += h->_perHostTransmission.entoAvailability(sIndex);
+    totalAvailability += h->perHostTransmission.entoAvailability(sIndex);
   
   // Summed per day:
   partialEIR = 0.0;
@@ -177,7 +177,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
     double sum = 0.0;
     double sum_dif = 0.0;
     for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-      const PerHostTransmission& host = h->_perHostTransmission;
+      const PerHostTransmission& host = h->perHostTransmission;
       double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
 	* host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
       sum += prod;

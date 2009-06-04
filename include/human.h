@@ -112,29 +112,15 @@ public:
   /** @name Other functions
    * @brief Other functions not called within Human */
   //@{
-  //! Get the Availability to mosquitoes
-  double getBaselineAvailabilityToMosquitoes() const {return infIncidence->_BaselineAvailabilityToMosquitoes;}
-  
-  inline double getProbTransmissionToMosquito() const {return _withinHostModel->getProbTransmissionToMosquito();}
-  
   //! Returns the date of birth
   int getDateOfBirth() {return _dateOfBirth;};
   
-  double getTotalDensity() const {return _totalDensity;}
-  
   void IPTiTreatment (double compliance);
-  
-  void setProbabilityOfInfection(double probability) { infIncidence->_pinfected=probability;};
   //@}
   
   /** @name OldWithinHostModel functions
    * @brief Functions only used by oldWithinHostModel.cpp */
   //@{
-  double getTimeStepMaxDensity() const {return _timeStepMaxDensity;}
-  void setTimeStepMaxDensity(double timeStepMaxDensity){_timeStepMaxDensity = timeStepMaxDensity;}
-  
-  void setTotalDensity(double totalDensity) {_totalDensity=totalDensity;}
-  
   double getBSVEfficacy() {return _BSVEfficacy;}
   
   /*!  Determines the probability that the individual transmits to a feeding
@@ -146,7 +132,6 @@ public:
   /// For direct interactions with within host model
   ///TODO: possibly functionality of functions using them should be moved to Human?
   //@{
-  int getCumulativeInfections() {return _withinHostModel->getCumulativeInfections();}
   void clearInfections();
   //@}
   
@@ -155,34 +140,34 @@ public:
   static void initHumanParameters ();
   
   static void clear();
-  
-/*
-  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-  TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-  The density bias allows the detection limit for microscopy to be higher for other sites
-*/
-  static double detectionlimit;
   //@}
   
-  PerHostTransmission _perHostTransmission;
   
-private:
-  ///@name Private variables
+  /** @brief Models
+   *
+   * These contain various sub-models used by Humans. */
   //@{
-  // Time from start of the simulation
-  int _simulationTime;
+  /// Contains per-species vector data (VectorTransmission only).
+  PerHostTransmission perHostTransmission;
   
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
   
   /// The WithinHostModel models parasite density and immunity
-  WithinHostModel *_withinHostModel;
+  WithinHostModel *withinHostModel;
+  
+private:
+  /// The PathogenesisModel introduces illness dependant on parasite density
+  PathogenesisModel *pathogenesisModel;
   
   /// The CaseManagementModel decides how to treat ill individuals
-  CaseManagementModel * _caseManagement;
+  CaseManagementModel * caseManagement;
+  //@}
   
-  /// The PathogenesisModel introduces illness dependant on parasite density
-  PathogenesisModel *_pathogenesisModel;
+  ///@brief Private variables
+  //@{
+  // Time from start of the simulation
+  int _simulationTime;
   
   //!Total asexual blood stage density
   double _ylag[4];
@@ -194,16 +179,12 @@ private:
   int _ID;
   //!number of vaccine doses this individual has received
   int _lastVaccineDose;
-  //!Total asexual blood stage density
-  double _totalDensity;		// possibly move to WithinHostModel
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;
   //!Remaining efficacy of Pre-erythrocytic vaccines
   double _PEVEfficacy;
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
-  //!Maximum parasite density during the previous 5-day interval
-  double _timeStepMaxDensity;	// WithinHostModel, used by PathogenesisModel
   //@}
   
   void clearInfection(Infection *iCurrent);

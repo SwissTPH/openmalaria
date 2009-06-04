@@ -56,7 +56,8 @@ public:
   /// @brief Constructors, destructors and checkpointing functions
   //@{
   WithinHostModel() :
-    _cumulativeInfections(0), _pTransToMosq(0.0)
+    _cumulativeInfections(0), _pTransToMosq(0.0),
+    totalDensity(0.0), timeStepMaxDensity(0.0)
   {}
   WithinHostModel(istream& in);
   virtual ~WithinHostModel() {}
@@ -101,7 +102,11 @@ public:
   
   virtual void immunityPenalisation() =0;
   
+  virtual bool parasiteDensityDetectible() const =0;
+  
   inline double getProbTransmissionToMosquito() const {return _pTransToMosq;}
+  inline double getTotalDensity() const {return totalDensity;}
+  inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
   
 protected:
   /** Literally just removes all infections in an individual.
@@ -116,6 +121,11 @@ protected:
   
   //!probability that a mosquito will become infected if feeds on individual
   double _pTransToMosq;
+  
+  //!Total asexual blood stage density
+  double totalDensity;
+  /** Maximum parasite density during the previous 5-day interval. */
+  double timeStepMaxDensity;
   
   /* Static private */
   
@@ -142,6 +152,13 @@ protected:
   This variable decays the effectors cumulativeH and cumulativeY exponentially.
 */
   static double immEffectorRemain;
+  
+  /*
+  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
+  TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
+  The density bias allows the detection limit for microscopy to be higher for other sites
+  */
+  static double detectionLimit;
 };
 
 #endif

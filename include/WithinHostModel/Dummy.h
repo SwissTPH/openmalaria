@@ -67,7 +67,11 @@ public:
   virtual void immunityPenalisation();
   
   void write(ostream& out) const;
-
+  
+  bool parasiteDensityDetectible() const {
+    return totalDensity > detectionLimit;
+  }
+  
 private:
   /// Encapsulates drug code for each human
   DrugModel* drugProxy;
@@ -82,7 +86,6 @@ private:
   
   double cumulativeY;
   double cumulativeh;
-  double timeStepMaxDensity;
   
   //!multiplicity of infection
   int _MOI;

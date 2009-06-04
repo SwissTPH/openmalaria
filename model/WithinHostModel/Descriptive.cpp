@@ -39,7 +39,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
     WithinHostModel(), drugProxy(DrugModel::createDrugModel ()), _MOI(0),
     _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
     patentInfections(0)
-{
+  {
   _innateImmunity=(double)W_GAUSS(0, sigma_i);
 }
 
@@ -76,7 +76,7 @@ void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
-  in >> _innateImmunity; 
+  in >> _innateImmunity;
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
     throw checkpoint_error ("Error reading checkpoint (_MOI)");
@@ -85,6 +85,8 @@ void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
 void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
   out << _cumulativeInfections << endl;
   out << _pTransToMosq << endl;
+  out << totalDensity << endl;
+  out << timeStepMaxDensity << endl;
   
   drugProxy->write (out);
   
@@ -185,8 +187,8 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
   double ageyears = human.getAgeInYears();
   _pTransToMosq = 0.0;
   patentInfections = 0;
-  human.setTotalDensity(0.0);
-  human.setTimeStepMaxDensity(0.0);
+  totalDensity = 0.0;
+  timeStepMaxDensity = 0.0;
   if (_cumulativeInfections >  0) {
     // Values of _cumulativeh/Y at beginning of step
     // (values are adjusted for each infection)
@@ -199,12 +201,12 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
     std::list<DescriptiveInfection*>::iterator iter;
     for(iter=infections.begin(); iter!=infections.end(); iter++){
       //std::cout<<"uis: "<<infData->duration<<std::endl;
-      timeStepMaxDensity=human.getTimeStepMaxDensity();
+      double infStepMaxDens = timeStepMaxDensity;
       
       if (Global::modelVersion & MAX_DENS_RESET) {
-        timeStepMaxDensity=0.0;
+        infStepMaxDens=0.0;
       }
-      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageyears, cumulativeh , timeStepMaxDensity);
+      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageyears, cumulativeh , infStepMaxDens);
       (*iter)->multiplyDensity(exp(-_innateImmunity));
 
         /*
@@ -212,28 +214,26 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
           is reflected in case incidence would have the following here:
         */
       if (Global::modelVersion & INNATE_MAX_DENS) {
-        timeStepMaxDensity=(double)timeStepMaxDensity*exp(-_innateImmunity);
+        infStepMaxDens *= exp(-_innateImmunity);
       }
         //Include here the effect of blood stage vaccination
       if (Vaccine::BSV.active) {
 	double factor = 1.0-human.getBSVEfficacy();
 	(*iter)->multiplyDensity(factor);
-	timeStepMaxDensity=(double)timeStepMaxDensity*(factor);
+	infStepMaxDens *= factor;
       }
       
       // Include here the effect of attenuated infections by SP concentrations
       IPTattenuateAsexualDensity (**iter);
       
       if (Global::modelVersion & MAX_DENS_CORRECTION) {
-        human.setTimeStepMaxDensity(std::max(timeStepMaxDensity, human.getTimeStepMaxDensity()));
+        infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
       }
-      else {
-        human.setTimeStepMaxDensity(timeStepMaxDensity);
-      }
+      timeStepMaxDensity = infStepMaxDens;
       
-      human.setTotalDensity(human.getTotalDensity()+(*iter)->getDensity());
+      totalDensity += (*iter)->getDensity();
       //Compute the proportion of parasites remaining after innate blood stage effect
-      if ((*iter)->getDensity() > Human::detectionlimit) {
+      if ((*iter)->getDensity() > detectionLimit) {
         patentInfections++;
       }
       if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
@@ -260,5 +260,9 @@ void DescriptiveWithinHostModel::summarize(double age) {
     Simulation::gMainSummary->addToInfectedHost(age,1);
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
     Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+  }
+  if (parasiteDensityDetectible()) {
+    Simulation::gMainSummary->addToPatentHost(age, 1);
+    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
   }
 }
