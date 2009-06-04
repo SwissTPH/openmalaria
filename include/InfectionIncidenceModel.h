@@ -109,38 +109,22 @@ protected:	// Static data
   */ 
   static const double susceptibility;
   
-  //!Steepness of relationship between success of inoculation and Xp in Phase A model 
-  /*! 
-  \sa getExpectedNumberOfInfections(),Sinf,Simm,Xstar_p,Estar 
-  */ 
-  static double gamma_p; 
-  
-  //!Lower limit of success probability of inoculations at high exposure in Phase A model 
-  /*! 
-  \sa getExpectedNumberOfInfections(),gamma_p,Simm,Xstar_p,Estar 
-  */ 
-  static double Sinf; 
-  
-  //!Lower limit of success probability of inoculations in immune individuals in Phase A model 
-  /*! 
-  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Xstar_p,Estar 
-  */ 
-  static double Simm; 
-  
-  //!Critical value of cumulative number of entomologic inoculations in Phase A model 
-  /*! 
-  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Simm,Estar 
-  */ 
-  static double Xstar_p; 
-  
-  //!Critical value of EIR in Phase A pre-erythrocytic model 
-  /*! 
-  \sa getExpectedNumberOfInfections(),gamma_p,Sinf,Simm,Xstar_p 
-  */ 
-  static double Estar; 
-  
   //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
   static double InfectionrateShapeParam;
+  
+  /** @brief Variables for calculating survivalOfInoculum() */
+  //@{
+  //!Steepness of relationship between success of inoculation and Xp in Phase A model 
+  static double gamma_p;
+  //!Lower limit of success probability of inoculations at high exposure in Phase A model 
+  static double Sinf;
+  //!Lower limit of success probability of inoculations in immune individuals in Phase A model 
+  static double Simm;
+  //!1 over the critical value of cumulative number of entomologic inoculations in Phase A model 
+  static double Xstar_pInv;
+  //!1 over the critical value of EIR in Phase A pre-erythrocytic model 
+  static double EstarInv;
+  //@}
 };
 
 class NegBinomMAII : public InfectionIncidenceModel {

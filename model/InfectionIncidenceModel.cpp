@@ -24,12 +24,13 @@
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 const double InfectionIncidenceModel::susceptibility= 0.702;
-double InfectionIncidenceModel::gamma_p; 
-double InfectionIncidenceModel::Sinf; 
-double InfectionIncidenceModel::Simm; 
-double InfectionIncidenceModel::Xstar_p; 
-double InfectionIncidenceModel::Estar; 
 double InfectionIncidenceModel::InfectionrateShapeParam;
+
+double InfectionIncidenceModel::gamma_p;
+double InfectionIncidenceModel::Sinf;
+double InfectionIncidenceModel::Simm;
+double InfectionIncidenceModel::Xstar_pInv;
+double InfectionIncidenceModel::EstarInv;
 
 // -----  static initialisation  -----
 
@@ -39,8 +40,8 @@ void InfectionIncidenceModel::init () {
   gamma_p=getParameter(Params::GAMMA_P);
   Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
   Simm=getParameter(Params::SIMM);
-  Estar=getParameter(Params::E_STAR);
-  Xstar_p=getParameter(Params::X_STAR_P);
+  EstarInv = 1.0/getParameter(Params::E_STAR);
+  Xstar_pInv = 1.0/getParameter(Params::X_STAR_P);
   
   //! constant defining the constraint for the Gamma shape parameters
   /// Used for the case where availability is assumed gamma distributed
@@ -183,9 +184,9 @@ double LogNormalMAPlusPreImmII::getModelExpectedInfections (double ageAdjustedEI
 }
 
 double InfectionIncidenceModel::survivalOfInoculum (double ageAdjustedEIR) {
-  double survivalOfInoculum=(1.0+pow((_cumulativeEIRa/Xstar_p), gamma_p));
+  double survivalOfInoculum=(1.0+pow(_cumulativeEIRa*Xstar_pInv, gamma_p));
   survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
-  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjustedEIR/Estar));
+  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjustedEIR*EstarInv));
   return survivalOfInoculum;
 }
 
