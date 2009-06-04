@@ -182,14 +182,6 @@ void Global::setModelVersion () {
   }
 }
 
-int Global::modIntervalsPerYear (int i) {
-    int valmodIntervalsPerYear = i % intervalsPerYear;
-    if (valmodIntervalsPerYear == 0) {
-        valmodIntervalsPerYear=intervalsPerYear;
-    }
-    return valmodIntervalsPerYear;
-}
-
 xml_scenario_error::xml_scenario_error(const string&  __arg)
   : runtime_error(__arg) { }
 

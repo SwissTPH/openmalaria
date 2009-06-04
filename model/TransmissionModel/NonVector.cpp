@@ -70,8 +70,7 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
     // some compilers may round it to -1.
     int istep = (day-1) / Global::interval;
     if (Global::simulationMode !=  transientEIRknown) {
-      int i1 = Global::modIntervalsPerYear(1+istep) - 1;
-      size_t i2 = (1+istep) % Global::intervalsPerYear;
+      int i1 = istep % Global::intervalsPerYear;
       nDays[i1]++;
       //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
       initialisationEIR[i1] = ((initialisationEIR[i1] * (nDays[i1]-1)) + EIRdaily) / nDays[i1];

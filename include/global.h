@@ -67,8 +67,6 @@ public:
    * of an option. */
   static void initGlobal ();
   
-  static int modIntervalsPerYear (int i);
-
   /// Variables that must be checkpointed.
   //@{
 

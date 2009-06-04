@@ -163,11 +163,10 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
-  static int IPT_MAX_INTERVAL[9] = { 61, 67, 73,  6, 12, 55, 49, 43, 31 };
+  static int IPT_MAX_INTERVAL[9] = { 61, 67,  0,  6, 12, 55, 49, 43, 31 };
   
   if (iptiEffect >= 14 && iptiEffect <= 22) {
-    int yearInterval = (Global::modIntervalsPerYear(Simulation::simulationTime));
-    //int yearInterval = Simulation::simulationTime % Global::intervalsPerYear;
+    int yearInterval = Simulation::simulationTime % Global::intervalsPerYear;
     int min = IPT_MIN_INTERVAL[iptiEffect-14];
     int max = IPT_MAX_INTERVAL[iptiEffect-14];
     // We're using modular arithmatic here, to represent a time period 5*18 days long.
