@@ -66,13 +66,13 @@ TransmissionModel::~TransmissionModel () {
 
 double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host) {
   if (Global::simulationMode == equilibriumMode)
-    return initialisationEIR[simulationTime % Global::intervalsPerYear];
+    return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
   else
     return calculateEIR (simulationTime, host);
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
-  size_t tmod = Simulation::simulationTime % Global::intervalsPerYear;
+  size_t tmod = (Simulation::simulationTime-1) % Global::intervalsPerYear;
   //Prevent NaNs
   if (sumWeight == 0.0) {
     kappa[tmod] = 0.0;
@@ -82,11 +82,11 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   }
   
   //Calculate time-weighted average of kappa
-  if (tmod == 1) {
+  if (tmod == 0) {
     _sumAnnualKappa = 0.0;
   }
   _sumAnnualKappa += kappa[tmod] * Global::interval * initialisationEIR[tmod];
-  if (tmod == 0) {
+  if (tmod == Global::intervalsPerYear - 1) {
     if (annualEIR == 0) {
       _annualAverageKappa=0;
       cerr << "aE.eq.0" << endl;
@@ -98,7 +98,7 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
 }
 
 void TransmissionModel::summarize (Summary& summary) {
-  summary.setNumTransmittingHosts(kappa[Simulation::simulationTime % Global::intervalsPerYear]);
+  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
   summary.setAnnualAverageKappa(_annualAverageKappa);
 }
 

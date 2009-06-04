@@ -70,10 +70,11 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
     // some compilers may round it to -1.
     int istep = (day-1) / Global::interval;
     if (Global::simulationMode !=  transientEIRknown) {
+      int i1 = Global::modIntervalsPerYear(1+istep) - 1;
       size_t i2 = (1+istep) % Global::intervalsPerYear;
-      nDays[i2]++;
+      nDays[i1]++;
       //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-      initialisationEIR[i2] = ((initialisationEIR[i2] * (nDays[i2]-1)) + EIRdaily) / nDays[i2];
+      initialisationEIR[i1] = ((initialisationEIR[i1] * (nDays[i1]-1)) + EIRdaily) / nDays[i1];
     } else {
       nDays[istep]++;
       intEIR[istep]= ((intEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
@@ -105,11 +106,11 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
       break;
     case dynamicEIR:
       if (Simulation::timeStep == 1) {
-	return initialisationEIR[simulationTime % Global::intervalsPerYear];
+	return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
       } else {
-	return initialisationEIR[simulationTime % Global::intervalsPerYear] *
-            kappa[(simulationTime-nspore) % Global::intervalsPerYear] /
-            initialKappa[(simulationTime-nspore) % Global::intervalsPerYear];
+	return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
+            kappa[(simulationTime-nspore-1) % Global::intervalsPerYear] /
+            initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear];
       }
       break;
     default:	// Anything else.. don't continue silently

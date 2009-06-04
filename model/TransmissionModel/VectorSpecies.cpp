@@ -422,12 +422,9 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
 }
 
 void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray) {
-  // shift by one (convert ShortArray from a zero-based array to a one-based array):
-  // This may not be what's wanted, but's it's equivalent to what used to happen.
-  
   for (size_t i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
-      FullArray[((i+1)*Global::interval)%daysInYear + j] = ShortArray[i];
+      FullArray[i*Global::interval + j] = ShortArray[i];
     }
   }
 }

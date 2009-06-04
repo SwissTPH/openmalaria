@@ -191,12 +191,7 @@ private:
   /* Functions */
   
   /** This subroutine converts ShortArray of length intervalsPerYear to
-   * FullArray by copying and duplicating elements to fill the gaps.
-   *
-   * It also rotates FullArray slightly, since the indecies of some input
-   * arrays used to be one-based but are now zero based while the use of the
-   * output is unchanged. NOTE: may not be correct, but this preserves the
-   * previous situation. */
+   * FullArray by copying and duplicating elements to fill the gaps. */
   void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
 
 
