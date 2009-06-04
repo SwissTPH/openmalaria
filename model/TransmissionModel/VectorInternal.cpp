@@ -536,10 +536,10 @@ void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind,
 }
 
 #ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
-void PrintParameters(char fntestentopar[], size_t theta_p, size_t tau, size_t theta_s, 
+void PrintParameters(size_t theta_p, size_t tau, size_t theta_s, 
                     size_t n, size_t m, double N_i, double alpha_i, double mu_vA, 
                     double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i, 
-                    gsl_vector* K_vi, gsl_vector* Xi_i, gsl_vector* Nv0guess)
+                    gsl_vector* K_vi, gsl_vector* Xi_i)
 {
 /* PrintParameters() prints the input parameters to a given file. 
   * We currently use this to make sure that the inputs we have in C
@@ -576,8 +576,6 @@ void PrintParameters(char fntestentopar[], size_t theta_p, size_t tau, size_t th
   fprintf(fpp, "Xi_i = \n");
   gsl_vector_fprintf(fpp, Xi_i, "%f");
 
-  fprintf(fpp, "Nv0guess = \n");
-  gsl_vector_fprintf(fpp, Nv0guess, "%f");
 	
 	// Let's do this properly.
 	
@@ -591,11 +589,7 @@ void PrintParameters(char fntestentopar[], size_t theta_p, size_t tau, size_t th
     fprintf(fpp, "Xi_i(%d) = %f; \n", i+1, temp);
   }
 
-  for (i=0; i<theta_p; i++){
-    temp = gsl_vector_get(Nv0guess, i);
-    fprintf(fpp, "Nv0guess(%d) = %f; \n", i+1, temp);
-  }
-	
+
   fclose(fpp);
 }
 #endif

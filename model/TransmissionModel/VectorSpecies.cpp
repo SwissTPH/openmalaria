@@ -416,7 +416,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     // Now we've calculated the emergence rate, save it:
     ofstream file (emergenceRateFilename.c_str());
     for (int i = 0; i < daysInYear; ++i)
-      file << mosqEmergeRate[i] << '\n';
+      file << mosqEmergeRate[i] << endl;
     file.close();
   }
 }
@@ -558,7 +558,7 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   // We now try to print these parameters to file to make sure that 
   // they show what we want them to show.
   PrintParameters(theta_p, tau, theta_s, nHostTypesInit, nMalHostTypesInit, N_i, alpha_i,
-                  mu_vA, theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi, Xi_i, Nv0guess);
+                  mu_vA, theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi, Xi_i);
   // The parameter values look correct.
 # endif
   

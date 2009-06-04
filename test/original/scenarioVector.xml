@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<scenario analysisNo="233" mode="4" maximumAgeYrs="90" modelVersion="0" name="test D94" popSize="20" simulationDuration="385" schemaVersion="4" xsi:noNamespaceSchemaLocation="scenario_4.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" wuID="0" assimMode="0">
+<scenario analysisNo="233" mode="4" maximumAgeYrs="90" modelVersion="0" name="test D94" popSize="1000" simulationDuration="385" schemaVersion="4" xsi:noNamespaceSchemaLocation="scenario_4.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" wuID="0" assimMode="0">
 <demography name="test">
 <ageGroup lowerbound="0.0">
 	<group poppercent="3.474714994" upperbound="1"/>
@@ -146,7 +146,7 @@
       <eir a0="-0.926517" a1="-0.692164" b1="0.002098" a2="0.401189" b2="-0.375356" EIRRotateAngle="0.0" />
       <mosq mosqRestDuration="3" extrinsicIncubationPeriod="10"
 	mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"
-	mosqEntoAvailability="0.35" mosqProbBiting="0.95"
+	mosqEntoAvailability="0.0070" mosqProbBiting="0.95"
 	mosqProbFindRestSite="0.95" mosqProbResting="0.94"
 	mosqProbOvipositing="0.93" emergenceRateFilename="Nv0-Initial.txt"/>
     </anopheles>

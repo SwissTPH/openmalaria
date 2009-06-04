@@ -237,11 +237,7 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath=".\include\boinc_bridge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\boincWrapper.h"
+				RelativePath=".\include\BoincWrapper.h"
 				>
 			</File>
 			<File
@@ -250,10 +246,6 @@
 			</File>
 			<File
 				RelativePath=".\include\Constant.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\drug.h"
 				>
 			</File>
 			<File
@@ -282,6 +274,10 @@
 			</File>
 			<File
 				RelativePath=".\include\human.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\InfectionIncidenceModel.h"
 				>
 			</File>
 			<File
@@ -433,15 +429,11 @@
 			Name="model"
 			>
 			<File
-				RelativePath=".\model\boincWrapper.cpp"
+				RelativePath=".\model\BoincWrapper.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\CaseManagementModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\drug.cpp"
 				>
 			</File>
 			<File
@@ -466,6 +458,10 @@
 			</File>
 			<File
 				RelativePath=".\model\human.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\InfectionIncidenceModel.cpp"
 				>
 			</File>
 			<File

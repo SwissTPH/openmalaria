@@ -261,7 +261,7 @@ void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind,
 void PrintParameters(size_t thetap, size_t tau, size_t thetas, 
                      size_t n, size_t m, double Ni, double alphai, double muvA, 
                      double thetad, double PBi, double PCi, double PDi, double PEi, 
-                     gsl_vector* Kvi, gsl_vector* Xii, gsl_vector* Nv0guess);
+                     gsl_vector* Kvi, gsl_vector* Xii);
 
 void PrintUpsilon(gsl_matrix** Upsilon, size_t thetap,
                   size_t eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
