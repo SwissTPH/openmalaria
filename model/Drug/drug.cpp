@@ -150,12 +150,14 @@ istream& operator>>(istream& in, Drug& drug) {
   in >> drug.absorptionFactor;
   in >> drug.halfLife; 
   in >> numRules;
+  Global::validateListSize (numRules);
   drug.requiredMutations = new vector< vector<Mutation*> >();
   for (i=0; i<numRules; i++) {
     vector <Mutation*> rule = vector<Mutation*>();
     int numMuts;
     int j;
     in >> numMuts;
+    Global::validateListSize (numMuts);
     for (j=0; j<numMuts; j++) {
       string proteinName;
       int position;
@@ -169,6 +171,7 @@ istream& operator>>(istream& in, Drug& drug) {
     drug.requiredMutations->push_back(rule);
   }
   in >> numRules;
+  Global::validateListSize (numRules);
   drug.pdParameters = new vector<double>();
   for (i=0; i<numRules; i++) {
     double parameter;
@@ -176,6 +179,7 @@ istream& operator>>(istream& in, Drug& drug) {
     drug.pdParameters->push_back(parameter);
   }
   in >> numCachedRules;
+  Global::validateListSize (numCachedRules);
   drug.proteomePDParameters = new map<int, double>();
   for (i=0; i<numCachedRules; i++) {
     int proteomeID;
@@ -187,6 +191,7 @@ istream& operator>>(istream& in, Drug& drug) {
   in >> drug._concentration;
   in >> drug._nextConcentration;
   in >> numDoses;
+  Global::validateListSize (numDoses);
   drug.doses = vector<Dose*>();
   for (i=0; i<numDoses; i++) {
     int time;
@@ -387,6 +392,7 @@ void DrugProxy::write (ostream& out) const {
 void DrugProxy::read (istream& in) {
   int numDrugs;
   in >> numDrugs;
+  Global::validateListSize (numDrugs);
   for (int i=0; i<numDrugs; i++) {
     Drug* drug = new Drug("", "", 0, 0);
     in >> *drug;

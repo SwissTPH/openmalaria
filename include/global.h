@@ -67,6 +67,20 @@ public:
    * of an option. */
   static void initGlobal ();
   
+  /** For checking the number of elements in a list is sensible when loading
+   * checkpoints.
+   *
+   * While loading checkpoints, if memory is allocated in a loop using a
+   * variable loaded from the checkpoint file, it should be checked that length
+   * is sensible. This function is a convenient way to do that (although the
+   * limit isn't large enough to account for population size).
+   * 
+   * The reason for this check is that if the checkpoint is read wrongly,
+   * variables often get completely wrong values which can cause memory
+   * allocation to grind the computer to a halt. In this case the values are
+   * usually bad enough that a lenient check will still catch them. */
+  static void validateListSize (long length);
+  
   /// Variables that must be checkpointed.
   //@{
 
@@ -116,7 +130,9 @@ class xml_scenario_error : public runtime_error
     explicit xml_scenario_error(const string&  __arg);
 };
 
-/** Thrown to indicate an error while loading/saving a checkpoint.  */
+/** Thrown to indicate an error while loading/saving a checkpoint.
+ *
+ * Prepends "Error reading checkpoint: " to the message. */
 class checkpoint_error : public runtime_error
 {
   public:

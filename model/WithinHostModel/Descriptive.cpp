@@ -79,7 +79,7 @@ void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
   in >> _innateImmunity;
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-    throw checkpoint_error ("Error reading checkpoint (_MOI)");
+    throw checkpoint_error ("_MOI");
 }
 
 void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {

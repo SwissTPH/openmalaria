@@ -30,6 +30,8 @@
 
 using namespace std;
 
+const int DummyWithinHostModel::MAX_INFECTIONS = 20;
+
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
@@ -51,8 +53,8 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
   in >> _cumulativeY;
   in >> _cumulativeYlag;
   
-  if (_MOI < 0)
-    throw checkpoint_error ("Error reading checkpoint");
+  if (_MOI < 0 || _MOI > MAX_INFECTIONS)
+    throw checkpoint_error ("_MOI");
   
   for(int i=0;i<_MOI;++i)
     infections.push_back(DummyInfection(in));
@@ -78,7 +80,7 @@ void DummyWithinHostModel::update (double age) {
 // -----  Simple infection adders/removers  -----
 
 void DummyWithinHostModel::newInfection(){
-  if (_MOI <= 20) {
+  if (_MOI <= MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;

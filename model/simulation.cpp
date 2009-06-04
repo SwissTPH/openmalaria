@@ -185,7 +185,7 @@ void Simulation::writeCheckpoint(){
 
 void Simulation::write (ostream& out) {
   if (out == NULL || !out.good())
-    throw new checkpoint_error ("Unable to write checkpoint file");
+    throw new checkpoint_error ("Unable to write to file");
   
   out.precision(20);
   out << simulationTime << endl;
@@ -212,7 +212,7 @@ void Simulation::readCheckpoint() {
     name << ".gz";				// then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     if (!in.good())
-      throw checkpoint_error ("Unable to read checkpoint file");
+      throw checkpoint_error ("Unable to read file");
     read (in);
     in.close();
   }

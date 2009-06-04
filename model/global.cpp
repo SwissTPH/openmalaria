@@ -182,11 +182,19 @@ void Global::setModelVersion () {
   }
 }
 
+void Global::validateListSize (long length) {
+  if (length < 0 || length > 1000) {
+    ostringstream s;
+    s << "List length out of range: " << length;
+    throw checkpoint_error(s.str());
+  }
+}
+
 xml_scenario_error::xml_scenario_error(const string&  __arg)
   : runtime_error(__arg) { }
 
 checkpoint_error::checkpoint_error(const string&  __arg)
-  : runtime_error(__arg) { }
+  : runtime_error(string("Error reading checkpoint: ").append(__arg)) { }
 
 cmd_exit::cmd_exit(const string& __arg)
   : runtime_error(__arg) { }

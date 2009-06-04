@@ -211,6 +211,8 @@ void Population::read (istream& in) {
   initialiseHumanList();
   _transmissionModel->read (in);
   in >> _populationSize;
+  if (_populationSize != get_populationsize())
+    throw checkpoint_error("population size incorrect");
   in >> IDCounter;
   in >> mu0;
   in >> mu1;
@@ -219,8 +221,8 @@ void Population::read (istream& in) {
   in >> rho;
   in >> _workUnitIdentifier;
 
-  if ( _workUnitIdentifier !=  get_wu_id()) {
-    cerr << "cp_ct" << get_wu_id() << ", " << _workUnitIdentifier << endl;
+  if (_workUnitIdentifier !=  get_wu_id()) {
+    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
     exit(-9);
   }
 
@@ -231,10 +233,8 @@ void Population::read (istream& in) {
     _population.push_back(Human(in, *_transmissionModel, Simulation::simulationTime));
     indCounter++;
   }
-  if ((_populationSize !=  get_populationsize()) || (_populationSize !=  indCounter)){
-    cerr << "exp_p_s" << _populationSize << get_populationsize() << indCounter << endl;
-    exit(-7);
-  }
+  if (_populationSize != indCounter)
+    throw checkpoint_error("can't read whole population (out of data)");
 }
 
 void Population::newHuman(int dob){
