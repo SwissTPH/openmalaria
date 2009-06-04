@@ -43,7 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\CodeSynthesis XSD 3.2\xerces-c-3.0.1\src&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;"
+				AdditionalIncludeDirectories="..\zlib\include;..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\CodeSynthesis XSD 3.2\xerces-c-3.0.1\src&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -144,7 +144,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;"
+				AdditionalIncludeDirectories="..\zlib\include;..\boinc\api;..\boinc\lib;..\boinc;xsdcxx;include;&quot;C:\Program Files\GnuWin32\gsl-111\gsl\win32\include&quot;;&quot;C:\Program Files\CodeSynthesis XSD 3.2\include&quot;"
 				PreprocessorDefinitions="WIN32;_WIN32;_WINDOWS;_NO_GRAPHICS;_GRAPHICS_6;XERCES_STATIC_LIBRARY"
 				StringPooling="false"
 				RuntimeLibrary="0"
@@ -412,6 +412,22 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Drug"
+				>
+				<File
+					RelativePath=".\include\Drug\drug.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Drug\DrugModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Drug\PkPdDrug.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="model"
@@ -573,6 +589,40 @@
 				</File>
 				<File
 					RelativePath=".\model\TransmissionModel\VectorSpecies.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Drug"
+				>
+				<File
+					RelativePath=".\model\Drug\drug.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\model\Drug\DrugModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\Drug\PkPdDrug.cpp"
 					>
 				</File>
 			</Filter>

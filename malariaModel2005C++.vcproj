@@ -238,11 +238,7 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath=".\include\boinc_bridge.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\boincWrapper.h"
+				RelativePath=".\include\BoincWrapper.h"
 				>
 			</File>
 			<File
@@ -251,10 +247,6 @@
 			</File>
 			<File
 				RelativePath=".\include\Constant.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\drug.h"
 				>
 			</File>
 			<File
@@ -283,6 +275,10 @@
 			</File>
 			<File
 				RelativePath=".\include\human.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\InfectionIncidenceModel.h"
 				>
 			</File>
 			<File
@@ -413,20 +409,32 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="Drug"
+				>
+				<File
+					RelativePath=".\include\Drug\drug.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Drug\DrugModel.h"
+					>
+				</File>
+				<File
+					RelativePath=".\include\Drug\PkPdDrug.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="model"
 			>
 			<File
-				RelativePath=".\model\boincWrapper.cpp"
+				RelativePath=".\model\BoincWrapper.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\model\CaseManagementModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\drug.cpp"
 				>
 			</File>
 			<File
@@ -451,6 +459,10 @@
 			</File>
 			<File
 				RelativePath=".\model\human.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\model\InfectionIncidenceModel.cpp"
 				>
 			</File>
 			<File
@@ -574,6 +586,40 @@
 				</File>
 				<File
 					RelativePath=".\model\TransmissionModel\VectorSpecies.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Drug"
+				>
+				<File
+					RelativePath=".\model\Drug\drug.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							ObjectFile="$(IntDir)\$(InputName)1.obj"
+							XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\model\Drug\DrugModel.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\Drug\PkPdDrug.cpp"
 					>
 				</File>
 			</Filter>

@@ -18,7 +18,7 @@
  */
 
 
-#include <string.h>
+#include <string>
 using namespace std;
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_multimin.h>
