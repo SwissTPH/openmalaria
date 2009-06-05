@@ -178,11 +178,14 @@ private:
   
   /** @brief Parameters used during the initialisation phase. */
   //@{
-  // NOTE: only needs to be stored so calMosqEmergeRate doesn't have to recalculate.
-  /** EIR for this species to be used during the initialisation phase.
-   *
-   * Length: Global::intervalsPerYear */
-  vector<double> speciesEIR;
+  /** FCEIR[] is the array of parameters of the Fourier approximation to the
+   * annual EIR. Currently always set in the TransmissionModel constructor
+   * (with length 5). We will need to deal with this cleanly later.
+   * We use the order, a0, a1, b1, a2, b2, ... */
+  vector<double> FCEIR;
+  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
+  double EIRRotateAngle;
+  
   
   /** The filename to which emergence rates are loaded & saved. */
   string emergenceRateFilename;
@@ -234,7 +237,7 @@ private:
                                 double mosqProbFindRestSite,
                                 double mosqProbResting,
                                 double* FHumanInfectivityInitVector,
-                                double* FEIRInitVector);
+                                vector<double>& FEIRInitVector);
   
   /** Given a positive array, originalArray, of length OALength,
    * this routine exponentiates the inverse discrete Fourier 

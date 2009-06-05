@@ -77,14 +77,6 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   // Calculations are invalid before arrays are initialized!
   
   
-  /** FCEIR[] is the array of parameters of the Fourier approximation to the
-   * annual EIR. Currently always set in the TransmissionModel constructor
-   * (with length 5). We will need to deal with this cleanly later.
-   * We use the order, a0, a1, b1, a2, b2, ... */
-  vector<double> FCEIR;
-  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
-  double EIRRotateAngle;
-  
   scnXml::Eir eirData = anoph.getEir();
   FCEIR.resize (5);
   FCEIR[0] = eirData.getA0();
@@ -94,7 +86,7 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   FCEIR[4] = eirData.getB2();
   EIRRotateAngle = eirData.getEIRRotateAngle();
   
-  speciesEIR.resize (Global::intervalsPerYear);
+  vector<double> speciesEIR (Global::intervalsPerYear);
   
   // Calculate forced EIR for pre-intervention phase from FCEIR:
   calcInverseDFTExp(speciesEIR, FCEIR);
@@ -334,7 +326,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   We use this to calculate the mosquito emergence rate.
   During the initialization, it a vector with the length of the 
   annual period. */
-  double EIRInit[daysInYear];
+  vector<double> EIRInit(daysInYear, 0.0);
 
     /*
   ***************************************************************!
@@ -356,6 +348,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   lifetime to kappa. We will then use this to create 
   humanInfectivityInit (of size daysInYear). */
   
+  /* NOTE: old method (save speciesEIR from init and expand)
   // EIR should have been calculated from fourier coefic. and used for the
   // updateOneLifespan period as a forced EIR. We should now copy EIR to an
   // array of length daysInYear, without smoothing (since humans only
@@ -365,6 +358,11 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
   
   speciesEIR.clear();	// this is finished with; frees memory?
+  */
+  calcInverseDFTExp(EIRInit, FCEIR);
+  if(EIRRotateAngle != 0.0)
+    rotateArray(EIRInit, EIRRotateAngle);
+  
   
   convertLengthToFullYear(humanInfectivityInit, kappa);
   PrintArray ("kappa", humanInfectivityInit, daysInYear);
@@ -443,7 +441,7 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
                                              double mosqProbFindRestSite,
                                              double mosqProbResting,
                                              double* FHumanInfectivityInitVector,
-                                             double* FEIRInitVector)
+                                             vector<double>& FEIRInitVector)
 {
 /* Note that from here on we use the notation from "A Mathematical Model for the
   * Dynamics of Malaria in Mosquitoes Feeding on a Heterogeneous Host Population",
@@ -522,7 +520,7 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   
   // Output Parameters (for the model):
   gsl_vector* Xi_i = gsl_vector_calloc(theta_p);	// EIR
-  memcpy (Xi_i->data, FEIRInitVector, theta_p * sizeof (*FEIRInitVector));
+  memcpy (Xi_i->data, &FEIRInitVector[0], theta_p * sizeof (FEIRInitVector[0]));
   
   // The number of infectious mosquitoes over every day of the cycle.
   // calculated from the EIR data.
