@@ -30,7 +30,7 @@
 
 using namespace std;
 
-const int DummyWithinHostModel::MAX_INFECTIONS = 20;
+const int DummyWithinHostModel::MAX_INFECTIONS = 21;
 
 // -----  Initialization  -----
 
@@ -80,7 +80,7 @@ void DummyWithinHostModel::update (double age) {
 // -----  Simple infection adders/removers  -----
 
 void DummyWithinHostModel::newInfection(){
-  if (_MOI <= MAX_INFECTIONS) {
+  if (_MOI < MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;
