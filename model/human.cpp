@@ -171,8 +171,8 @@ ostream& operator<<(ostream& out, const Human& human){
   human.perHostTransmission.write (out);
   human.infIncidence->write (out);
   human.withinHostModel->write (out);
-  human.caseManagement->write (out);
   human.pathogenesisModel->write (out);
+  human.caseManagement->write (out);
   out << human._dateOfBirth << endl; 
   out << human._doomed << endl; 
   out << human._ID << endl ; 
