@@ -348,10 +348,6 @@ double Human::getAgeInYears() const{
   return 1.0*((Simulation::simulationTime-_dateOfBirth)*Global::interval)/daysInYear;
 }
 
-double Human::getAgeInYears(int time) const{
-  return 1.0*((time-_dateOfBirth)*Global::interval)/daysInYear;
-}
-
 
 double Human::infectiousness(){
   double transmit;

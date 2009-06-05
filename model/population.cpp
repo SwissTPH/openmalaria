@@ -280,7 +280,7 @@ void Population::update1(){
     
     //else update the individual
       ++survivsSoFar;
-      double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+      double ageYears = iter->getAgeInYears();
       double availability = iter->infIncidence->_BaselineAvailabilityToMosquitoes * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
       sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
@@ -410,7 +410,7 @@ void Population::massTreatment(const scnXml::Mass& mass){
   
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+    double ageYears = iter->getAgeInYears();
     if ((iter->withinHostModel->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if (W_UNIFORM() < compliance) {
 	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
@@ -437,7 +437,7 @@ void Population::massIPTiTreatment(const scnXml::Mass& mass){
   
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter) {
-    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+    double ageYears = iter->getAgeInYears();
     if ((ageYears > minAge) && (ageYears < maxAge))
       iter->IPTiTreatment(compliance);
   }
@@ -450,7 +450,7 @@ void Population::vaccinatePopulation(const scnXml::Mass& mass){
   double compliance = mass.getCoverage();
 
   for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = iter->getAgeInYears(Simulation::simulationTime);
+    double ageYears = iter->getAgeInYears();
     if ((ageYears > minAge) && (ageYears < maxAge)) {
       if (W_UNIFORM() < compliance){
         iter->vaccinate();

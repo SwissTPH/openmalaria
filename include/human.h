@@ -102,10 +102,7 @@ public:
   //! Determines the age group of a human
   int ageGroup() const;
   
-  //! Get the age in years, based on an input reference time.
-  double getAgeInYears(int time) const;
-
-  //! Get the age in years, based on current simulationTime in human.
+  //! Get the age in years, based on current simulationTime.
   double getAgeInYears() const;
   //@}
   
