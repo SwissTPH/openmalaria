@@ -641,6 +641,17 @@ void PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
   }
 	// gsl_matrix_fprintf(fpp, Upsilon[k], "%f");
 
+  k = 135;
+
+  fprintf(fpp, "Upsilon[%d] = \n", k);
+  for (i=0; i < eta; i++){
+    for (j=0; j < eta; j++){
+      temp = gsl_matrix_get(Upsilon[k], i, j);
+      fprintf(fpp, "%f ", temp);
+    }
+    fprintf(fpp, "\n");
+  }
+
   k = 364;
 
   fprintf(fpp, "Upsilon[%d] = \n", k);
