@@ -69,6 +69,8 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
     // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
     // some compilers may round it to -1.
     int istep = (day-1) / Global::interval;
+    if (istep < 0)
+      istep += Global::intervalsPerYear;
     if (Global::simulationMode !=  transientEIRknown) {
       int i1 = istep % Global::intervalsPerYear;
       nDays[i1]++;
