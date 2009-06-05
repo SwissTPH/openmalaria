@@ -64,8 +64,7 @@ void Human::clear() {	// static clear
 // Create new human
 Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) 
   : perHostTransmission(tm),
-    infIncidence(InfectionIncidenceModel::createModel()),
-    _simulationTime(simulationTime)
+    infIncidence(InfectionIncidenceModel::createModel())
 {
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
@@ -140,13 +139,12 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
 }
 
 // Load human from checkpoint
-Human::Human(istream& in, TransmissionModel& tm, int simulationTime) 
+Human::Human(istream& in, TransmissionModel& tm) 
   : perHostTransmission(in, tm),
     infIncidence(InfectionIncidenceModel::createModel(in)),
     withinHostModel(WithinHostModel::createWithinHostModel(in)),
     pathogenesisModel(PathogenesisModel::createPathogenesisModel(in)),
-    caseManagement(CaseManagementModel::createCaseManagementModel(in)),
-    _simulationTime(simulationTime)
+    caseManagement(CaseManagementModel::createCaseManagementModel(in))
 {
   in >> _dateOfBirth; 
   in >> _doomed; 
@@ -190,7 +188,7 @@ ostream& operator<<(ostream& out, const Human& human){
 
 
 void Human::updateInfection(TransmissionModel* transmissionModel){
-  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(_simulationTime, perHostTransmission);
+  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission);
   int numInf = infIncidence->numNewInfections(ageAdjustedEIR, _PEVEfficacy);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
@@ -199,7 +197,7 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
   withinHostModel->clearOldInfections();
   
   // _ylag is designed for a 5-day timestep model
-  if ((_simulationTime*Global::interval) % 5 == 0) {
+  if ((Simulation::simulationTime*Global::interval) % 5 == 0) {
     for (int i=3;i>0; i--) {
       _ylag[i]=_ylag[i-1];
     }
@@ -217,8 +215,6 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   }
   if (_doomed > 0)
     return true;	// remove from population
-  
-  _simulationTime = simulationTime;
   
   updateInterventionStatus(); 
   withinHostModel->updateImmuneStatus();
@@ -244,7 +240,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed ==  -7) {	//clinical episode 6 intervals before
-    caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+    caseManagement->getEvent().update(Simulation::simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
     /*
     doomed=7 is the code for indirect death, and 6 for neonatal death.
     Individuals with positive doomed values are removed at the start of
@@ -256,9 +252,9 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
     return;
   }
   // Neonatal mortality:
-  if(_simulationTime-_dateOfBirth == 1) {
+  if(Simulation::simulationTime-_dateOfBirth == 1) {
     if (PathogenesisModel::eventNeonatalMortality()) {
-      caseManagement->getEvent().update(_simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+      caseManagement->getEvent().update(Simulation::simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       _doomed  = 6;
       return;
     }
@@ -312,7 +308,7 @@ void Human::updateInterventionStatus() {
     if (Simulation::timeStep > 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
-            Vaccine::targetagetstep[_lastVaccineDose] == _simulationTime-_dateOfBirth) {
+            Vaccine::targetagetstep[_lastVaccineDose] == Simulation::simulationTime-_dateOfBirth) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
         }
@@ -349,7 +345,7 @@ int Human::ageGroup() const{
 }
 
 double Human::getAgeInYears() const{
-  return 1.0*((_simulationTime-_dateOfBirth)*Global::interval)/daysInYear;
+  return 1.0*((Simulation::simulationTime-_dateOfBirth)*Global::interval)/daysInYear;
 }
 
 double Human::getAgeInYears(int time) const{
@@ -364,13 +360,13 @@ double Human::infectiousness(){
   static const double beta3=0.17;
   static const double tau= 0.066;
   static const double mu= -8.1;
-  int agetstep=_simulationTime-_dateOfBirth;
+  int agetstep=Simulation::simulationTime-_dateOfBirth;
   /*
     Original infectiousness model based on 5 day intervals updates
     lagged variables only every 5 days and cannot compute infectiousness
     for the first 20 days of the simulation
   */
-  if ((agetstep*Global::interval >  20) && ( _simulationTime*Global::interval >  20)) {
+  if ((agetstep*Global::interval >  20) && (Simulation::simulationTime*Global::interval >  20)) {
     double x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
     if ( x <  0.001) {
       transmit=0.0;

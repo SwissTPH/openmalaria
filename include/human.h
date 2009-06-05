@@ -44,7 +44,7 @@ public:
   /**  Initialise all variables of a human datatype including infectionlist and
    * and druglist.
    * \param funit IO unit */
-  Human(istream& funit, TransmissionModel& tm, int simulationTime);
+  Human(istream& funit, TransmissionModel& tm);
   //@}
   
   /** Destructor
@@ -166,9 +166,6 @@ private:
   
   ///@brief Private variables
   //@{
-  // Time from start of the simulation
-  int _simulationTime;
-  
   //!Total asexual blood stage density
   double _ylag[4];
   //!Date of birth, time step since start of warmup
