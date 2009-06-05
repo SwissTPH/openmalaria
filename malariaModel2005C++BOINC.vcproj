@@ -172,8 +172,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib zdll.lib"
-				OutputFile=".\Release/malariacontrol_6.17_windows_intelx86"
+				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib zlib.lib"
+				OutputFile=".\Release/malariacontrol_windows_intelx86.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\boinc\win_build\Build\Win32\Release;.\Release;.\lib"
@@ -181,7 +181,7 @@
 				IgnoreDefaultLibraryNames="LIBCMT.lib"
 				DelayLoadDLLs="GDI32.dll;OPENGL32.dll;GLU32.dll"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\Release/malariacontrol_6.17_windows_intelx86.pdb"
+				ProgramDatabaseFile=".\Release/malariacontrol_windows_intelx86.pdb"
 				GenerateMapFile="true"
 				MapFileName="testmap"
 				MapExports="true"

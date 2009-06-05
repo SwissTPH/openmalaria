@@ -66,11 +66,7 @@ void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
     
     // istep is the time period to which the day is assigned.  The result of the
     // division is automatically rounded down to the next integer.
-    // Except: why is 1 subtracted from day? -1/5 is usually be rounded to 0, but
-    // some compilers may round it to -1.
-    int istep = (day-1) / Global::interval;
-    if (istep < 0)
-      istep += Global::intervalsPerYear;
+    int istep = day / Global::interval;
     if (Global::simulationMode !=  transientEIRknown) {
       int i1 = istep % Global::intervalsPerYear;
       nDays[i1]++;
