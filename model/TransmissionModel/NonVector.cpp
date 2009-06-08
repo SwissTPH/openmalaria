@@ -71,8 +71,10 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (nDays.size() <= Simulation::simulationDuration)
+  if (nDays.size() <= Simulation::simulationDuration) {
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Simulation::simulationDuration+1 << endl;
     throw xml_scenario_error ("Insufficient intervention phase EIR values provided");
+  }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
