@@ -24,14 +24,6 @@
 
 using namespace std;
 
-extern int simulationDuration;
-
-/*
-  The estimated proportion of total simulation time we spend in mainSimulation.
-  Used to give BOINC a hint on the progress.
-*/
-extern double relTimeInMainSim;
-
 class TransmissionModel;
 class Population;
 class Summary;
@@ -45,11 +37,16 @@ public:
   // Units: interval * 1 day?
   static int simulationTime;
   
-  //Time counter during the main simulation. 
+  /** Time counter during the main simulation.
+   *
+   * Maximum value: simulationDuration + 1 */
   static int timeStep;
 
   // Summary generator 
   static Summary* gMainSummary;
+
+  /** Duration of the main simulation (post-warmup), in 5 day intervals. */
+  static int simulationDuration;
 
   //!  Inititalise all step specific constants and variables.
   Simulation();
@@ -92,6 +89,10 @@ private:
   //@}
   
   string checkpointName;
+  
+  /** The estimated proportion of total simulation time we spend in
+   * mainSimulation. Used to give BOINC a hint on the progress. */
+  double relTimeInMainSim;
 };
 
 #endif

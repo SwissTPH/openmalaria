@@ -30,7 +30,6 @@ const double NonVectorTransmission::min_EIR_mult= 0.01;
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
 {
   nspore = nonVectorData.getEipDuration() / Global::interval;
-  maxIntervals=maxDurIntPhaseEIR / Global::interval;
   
   initialKappa.resize (Global::intervalsPerYear);
   
@@ -69,11 +68,13 @@ void NonVectorTransmission::initMainSimulation (int populationSize){
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
   Global::simulationMode = transientEIRknown;
-  vector<int> nDays (maxIntervals, 0);
-  intEIR.assign (maxIntervals, 0.0);
+  const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
+  vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
+  interventionEIR.assign (nDays.size(), 0.0);
+  if (nDays.size() <= Simulation::simulationDuration)
+    throw xml_scenario_error ("Insufficient intervention phase EIR values provided");
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
-  const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
     double EIRdaily = std::max((double)daily[mpcday], minEIR);
     
@@ -81,7 +82,7 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
     // division is automatically rounded down to the next integer.
     size_t istep = mpcday / Global::interval;
     nDays[istep]++;
-    intEIR[istep]= ((intEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
+    interventionEIR[istep]= ((interventionEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
   }
   annualEIR=-9.99;
 }
@@ -95,8 +96,8 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
   switch (Global::simulationMode) {
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
-      // the intEIR array
-      return intEIR[Simulation::timeStep - 1];
+      // the interventionEIR array
+      return interventionEIR[Simulation::timeStep - 1];
       break;
     case dynamicEIR:
       if (Simulation::timeStep == 1) {

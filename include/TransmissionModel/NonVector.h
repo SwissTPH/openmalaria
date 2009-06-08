@@ -72,36 +72,25 @@ private:
 */ 
   static const double min_EIR_mult; 
 
-//! The maximum number of daily EIR values specified for intervention phase 
- /*! 
-  The EIR is input on a daily basis even when the interval length is >1 day 
-  Average EIR per interval is computed in initEntoParameters 
-  \sa initEntoParameters 
-  */ 
-  static const int maxDurIntPhaseEIR= 1500; 
-  
   /** @brief Variables set by constructor.
    *
    * There shouldn't be any need to checkpoint these, at least before
    * interventions take effect. */
   //@{
-  //! The maximum number of intervals in the intervention phase.
-  int maxIntervals; 
-
-  ///intEIR() EIR per time interval during the intervention period 
-  vector<double> intEIR;
-  
-
-//! Variance of Infection Rate according to fielddata 
+  //! Variance of Infection Rate according to fielddata 
   static const double totalInfectionrateVariance; 
   
   //! The duration of sporogony in time steps 
   int nspore;
   //@}
   
+  /// EIR per time interval during the intervention period 
+  //TODO: checkpoint for intervention-phase checkpointing
+  vector<double> interventionEIR;
+  
   /** initialKappa[] is the value of kappa during the pre-intervention phase.
-  * 
-  * Doesn't need to be checkpointed. */
+   * 
+   * Doesn't need to be checkpointed. */
   vector<double> initialKappa; 
 };
 #endif

@@ -32,19 +32,10 @@
 #include <fstream>
 #include "gzstream.h"
 
-/*
-
-  Defines the duration of the simulation runs and the pre-timestep call-sequence for both the
-  warmup and the main simulation.
-
-  Duration of the main simulation (post-warmup), in 5 day intervals.
-*/
-int simulationDuration;
-double relTimeInMainSim;
-
+int Simulation::simulationDuration;
 int Simulation::simulationTime;
 Summary* Simulation::gMainSummary;
-int Simulation::timeStep;
+int Simulation::timeStep = TIMESTEP_NEVER;
 
 static const char* const CHECKPOINT = "checkpoint";
 static const int NUM_CHECKPOINTS = 2;
