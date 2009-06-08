@@ -48,7 +48,7 @@ public:
    * 
    * Emergence rate calculations assume only one type of host; i.e. it calculates
    * the rate for a stable situation before interventions are introduced. */
-  void initMainSimulation (int populationSize); 
+  void initMainSimulation (const std::list<Human>& population, int populationSize); 
 
   /** Calculates EIR (in adults).
    * 

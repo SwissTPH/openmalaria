@@ -80,7 +80,6 @@ int Simulation::start(){
   }
   updateOneLifespan();
 
-  _population->preMainSimInit();
   mainSimulation();
   return 0;
 }
@@ -88,6 +87,7 @@ int Simulation::start(){
 void Simulation::mainSimulation(){
   //TODO5D
   timeStep=0;
+  _population->preMainSimInit();
   gMainSummary->initialiseSummaries();
   Global::simulationMode=get_mode();
   

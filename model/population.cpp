@@ -84,7 +84,7 @@ void Population::clear(){
 }
 
 void Population::preMainSimInit () {
-  _transmissionModel->initMainSimulation(_populationSize);
+  _transmissionModel->initMainSimulation(_population, _populationSize);
 
   initialiseInfantArrays();
 }
@@ -280,6 +280,7 @@ void Population::update1(){
     
     //else update the individual
       ++survivsSoFar;
+      
       double ageYears = iter->getAgeInYears();
       double availability = iter->infIncidence->_BaselineAvailabilityToMosquitoes * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;

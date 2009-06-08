@@ -60,7 +60,7 @@ NonVectorTransmission::~NonVectorTransmission () {}
 
 
 //! initialise the main simulation 
-void NonVectorTransmission::initMainSimulation (int populationSize){
+void NonVectorTransmission::initMainSimulation (const std::list<Human>&, int){
   // initialKappa is used in calculateEIR
   copyToInitialKappa();
 }

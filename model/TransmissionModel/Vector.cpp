@@ -50,10 +50,10 @@ VectorTransmission::~VectorTransmission () {
     species[i].destroy();
 }
 
-void VectorTransmission::initMainSimulation(int populationSize) {
+void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
-  for (vector<VectorTransmissionSpecies>::iterator s = species.begin(); s != species.end(); ++s)
-    s->calMosqEmergeRate (populationSize, kappa);
+  for (size_t i = 0; i < numSpecies; ++i)
+    species[i].initMainSimulation (i, population, populationSize, kappa);
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */
@@ -62,12 +62,12 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
    *
    * See comment in advancePeriod for method. */
   
-  //FIXME: check this is right
   double EIR = 0.0;
-  for (size_t i = 0; i < numSpecies; ++i)
+  for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].partialEIR
       * host.entoAvailability(i)
       * host.probMosqBiting(i);	// probability of biting, once commited
+  }
   return EIR;
 }
 

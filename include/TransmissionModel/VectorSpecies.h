@@ -55,22 +55,8 @@ public:
   void destroy ();
   //@}
   
-  /*! get mosquito emergence rates 
-   *
-   * This routine passes the basic entomological parameters (that are already
-   * been read, the EIR, and the human infectivity to mosquitoes (all for one
-   * type of host) and calculate the mosquito emergence.
-   * 
-   * \param populationSize
-   * 	Number of hosts of each type.
-   * 	Units: Animals. 
-   * 	$N_i$ in model. Matrix of size $n \times \theta_p$.
-   * 	We assume that the size of the one group in initialization is
-   * 	fixed over the cycle.
-   * 	Mathematically, we require this parameter to be a positive
-   * 	real number, so although this will typically be a natural 
-   * 	number, it is not restricted to being one. */
-  void calMosqEmergeRate (int populationSize, vector<double>& kappa); 
+  /** Calls calMosqEmergeRate() and initialises arrays. */
+  void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
   
   /** Called per time-step. Does most of calculation of EIR.
    *
@@ -192,6 +178,23 @@ private:
   //@}
   
   /* Functions */
+  
+  /*! get mosquito emergence rates 
+   *
+   * This routine passes the basic entomological parameters (that are already
+   * been read, the EIR, and the human infectivity to mosquitoes (all for one
+   * type of host) and calculate the mosquito emergence.
+   * 
+   * \param populationSize
+   * 	Number of hosts of each type.
+   * 	Units: Animals. 
+   * 	$N_i$ in model. Matrix of size $n \times \theta_p$.
+   * 	We assume that the size of the one group in initialization is
+   * 	fixed over the cycle.
+   * 	Mathematically, we require this parameter to be a positive
+   * 	real number, so although this will typically be a natural 
+   * 	number, it is not restricted to being one. */
+  void calMosqEmergeRate (int populationSize, vector<double>& kappa);
   
   /** This subroutine converts ShortArray of length intervalsPerYear to
    * FullArray by copying and duplicating elements to fill the gaps. */

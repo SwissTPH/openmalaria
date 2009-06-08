@@ -50,23 +50,23 @@ void PerHostTransmission::write (ostream& out) const {
     hMI->write (out);
 }
 
-
+//TODO: intervention effects on these parameters:
 double PerHostTransmission::entoAvailability (size_t speciesIndex) const {
-  return species[speciesIndex].entoAvailability
-  * species[speciesIndex].entoInterventionITN.availability()
-  * species[speciesIndex].entoInterventionIRS.availability();
+  return species[speciesIndex].entoAvailability;
+//   * species[speciesIndex].entoInterventionITN.availability()
+//   * species[speciesIndex].entoInterventionIRS.availability();
 }
 double PerHostTransmission::probMosqBiting (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqBiting
-  * species[speciesIndex].entoInterventionITN.probMosqBiting();
+  return species[speciesIndex].probMosqBiting;
+//   * species[speciesIndex].entoInterventionITN.probMosqBiting();
 }
 double PerHostTransmission::probMosqFindRestSite (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqFindRestSite
-  * species[speciesIndex].entoInterventionITN.probMosqFindRestSite();
+  return species[speciesIndex].probMosqFindRestSite;
+//   * species[speciesIndex].entoInterventionITN.probMosqFindRestSite();
 }
 double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqSurvivalResting
-  * species[speciesIndex].entoInterventionIRS.probMosqSurvivalResting();
+  return species[speciesIndex].probMosqSurvivalResting;
+//   * species[speciesIndex].entoInterventionIRS.probMosqSurvivalResting();
 }
 
 

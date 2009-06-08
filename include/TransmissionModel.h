@@ -67,8 +67,11 @@ public:
   double getRelativeAvailability (double ageyrs); 
 
 
-  //! initialise the main simulation
-  virtual void initMainSimulation (int populationSize)=0; 
+  /** Initialise the main simulation.
+   *
+   * Although we should have (population.size() == populationSize), it appears
+   * that it's better not to use population.size(). */
+  virtual void initMainSimulation (const std::list<Human>& population, int populationSize)=0; 
   
   /// Needs to be called each step of the simulation
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime) {}

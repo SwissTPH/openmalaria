@@ -21,8 +21,9 @@
 #include "TransmissionModel/VectorSpecies.h"
 #include "inputData.h"
 #include "human.h"
-
 #include "TransmissionModel/VectorInternal.h"
+#include "simulation.h"
+
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
 #include <fstream>
@@ -55,8 +56,8 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   
   N_v_length = EIPDuration + mosqRestDuration;
   
-  P_A = new double[N_v_length * 6];	// allocate memory for all arrays
   size_t l = N_v_length*sizeof(double);
+  P_A = new double[N_v_length * 6];	// allocate memory for all arrays
   P_df	= P_A + l;
   P_dif	= P_df + l;
   N_v	= P_dif + l;
@@ -72,9 +73,6 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   for (int i = 0; i < mosqRestDuration; ++i)
     ftauArray[i] = 0.0;
   ftauArray[mosqRestDuration] = 1.0;
-  
-  //TODO: initialise arrays (run initial simulation for N_v_length-1 days?)
-  // Calculations are invalid before arrays are initialized!
   
   
   scnXml::Eir eirData = anoph.getEir();
@@ -101,6 +99,51 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
 
 void VectorTransmissionSpecies::destroy () {
   delete[] P_A;
+}
+
+void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
+  calMosqEmergeRate (populationSize, kappa);
+  
+  
+  //BEGIN P_A, P_Ai, P_df, P_dif
+  // Per Global::interval (hosts don't update per day):
+  double leaveHostRate = mosqSeekingDeathRate;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex);
+  
+  // Probability of a mosquito not finding a host this day:
+  double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
+  
+  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
+  
+  // NC's non-autonomous model provides two methods for calculating P_df and
+  // P_dif; here we assume that P_E is constant.
+  double intP_df = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    const PerHostTransmission& host = h->perHostTransmission;
+    double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
+    * host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
+    intP_df += prod;
+  }
+  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+  //END P_A, P_Ai, P_df, P_dif
+  
+  
+  if (Simulation::simulationTime*Global::interval < N_v_length)
+    throw xml_scenario_error ("Initialization phase too short");
+  // For day over N_v_length days prior to the next timestep's day.
+  int endDay = (Simulation::simulationTime+1) * Global::interval;
+  for (int day = endDay - N_v_length; day < endDay; ++day) {
+    size_t t       = day % N_v_length;
+    size_t simStep = day / Global::interval;
+    
+    P_A[t]	= intP_A;
+    P_df[t]	= intP_df;
+    // Should correspond to index of kappa updated by updateKappa:
+    P_dif[t]	= intP_df * kappa[(simStep-1) % Global::intervalsPerYear];
+  }
+  
+  // TODO: initialise N_v, O_v, S_v
 }
 
 
@@ -137,10 +180,31 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   */
   
   
+  //BEGIN P_A, P_Ai, P_df, P_dif
   // Per Global::interval (hosts don't update per day):
-  double totalAvailability = 0.0;
+  double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    totalAvailability += h->perHostTransmission.entoAvailability(sIndex);
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex);
+  
+  // Probability of a mosquito not finding a host this day:
+  double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
+  
+  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
+  
+  // NC's non-autonomous model provides two methods for calculating P_df and
+  // P_dif; here we assume that P_E is constant.
+  double intP_df = 0.0;
+  double intP_dif = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    const PerHostTransmission& host = h->perHostTransmission;
+    double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
+    * host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
+    intP_df += prod;
+    intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
+  }
+  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+  intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
+  //END P_A, P_Ai, P_df, P_dif
   
   // Summed per day:
   partialEIR = 0.0;
@@ -156,29 +220,12 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
     size_t t1   = (day - 1) % N_v_length;
     size_t ttau = (day - mosqRestDuration) % N_v_length;
     
-    //BEGIN P_A, P_Ai, P_df, P_dif
-    double leaveHostRate = totalAvailability + mosqSeekingDeathRate;
-  
-    // Probability of a mosquito not finding a host this day:
-    P_A[t] = exp(-leaveHostRate * mosqSeekingDuration);
     
-    double P_Ai_base = (1.0 - P_A[t]) / leaveHostRate;
-    
-    // NC's non-autonomous model provides two methods for calculating P_df and
-    // P_dif; here we assume that P_E is constant.
-    double sum = 0.0;
-    double sum_dif = 0.0;
-    for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-      const PerHostTransmission& host = h->perHostTransmission;
-      double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
-	* host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
-      sum += prod;
-      sum_dif += prod;//FIXME: * h->K_vi();	// infectiousness of host * probability parasites survive in mosquito
-      // NOTE: already have kappa array - is same?
-    }
-    P_df[t] = sum * P_Ai_base * probMosqSurvivalOvipositing;
-    P_dif[t] = sum_dif * P_Ai_base * probMosqSurvivalOvipositing;
-    //END P_A, P_Ai, P_df, P_dif
+    // These only need to be calculated once per timestep, but should be
+    // present in each of the previous N_v_length - 1 positions of arrays.
+    P_A[t] = intP_A;
+    P_df[t] = intP_df;
+    P_dif[t] = intP_dif;
     
     
     N_v[t] = mosqEmergeRate[day%daysInYear]
@@ -205,7 +252,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
           + P_A[tn] * ftauArray[n-1];
     }
     
-    sum = 0.0;
+    double sum = 0.0;
     size_t ts = day - EIPDuration;
     for (int l = 1; l < mosqRestDuration; ++l) {
       size_t tsl = (ts - l) % N_v_length;	// index day - theta_s - l
@@ -234,9 +281,10 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
         + sum
         + P_A[t1]*S_v[t1]
         + P_df[ttau]*S_v[ttau];
+    //END S_v
+    
     
     partialEIR += S_v[t] * P_Ai_base;
-    //END S_v
   }
 }
 
@@ -660,7 +708,7 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
     printf("The difference in Sv is greater than the tolerance. \n");
     
     if (!(Global::clOptions & CLO::ENABLE_ERC))
-      throw runtime_error ("Emergence rate calculations disabled.");
+      throw runtime_error ("Cannot recalculate: emergence rate calculations are not enabled.");
     
     /************* We initialize variables for root-finding. **************/
     printf("Starting root-finding \n");
@@ -732,9 +780,6 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   }
 
 
-# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  // Calculate final periodic orbit and print out values.
-
   // Calculate final periodic orbit.
   CalcLambda(Lambda, N_v0, eta, theta_p);
   CalcXP(x_p, Upsilon, Lambda, inv1Xtp, eta, theta_p);
@@ -751,18 +796,20 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
     temp = gsl_vector_get(x_p[i], indexSv);
     gsl_vector_set(Svp, i, temp);
   }
+  
+# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char Nvpname[15] = "NvPO";
   char Ovpname[15] = "OvPO";
   char Svpname[15] = "SvPO";
   PrintVector(Nvpname, Nvp, theta_p);
   PrintVector(Ovpname, Ovp, theta_p);
   PrintVector(Svpname, Svp, theta_p);
+# endif
 
   for (size_t i=0; i<theta_p; i++){
     gsl_vector_free(Lambda[i]);
     gsl_vector_free(x_p[i]);
   }
-# endif
 
 
   // Copy the mosquito emergence rate to the C array.
