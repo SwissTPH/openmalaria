@@ -381,8 +381,7 @@ void Population::implementIntervention (int time) {
   if (interv->getChangeEIR().present()) {
     NonVectorTransmission* nvt = dynamic_cast<NonVectorTransmission*> (_transmissionModel);
     if (nvt != NULL) {
-      Global::simulationMode=transientEIRknown;
-      nvt->inputEIR(interv->getChangeEIR().get());
+      nvt->setTransientEIR(interv->getChangeEIR().get());
     } else {
       throw xml_scenario_error("Warning: changeEIR intervention can only be used with NonVectorTransmission model!");
     }

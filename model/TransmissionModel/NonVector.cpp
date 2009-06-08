@@ -33,7 +33,28 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   maxIntervals=maxDurIntPhaseEIR / Global::interval;
   
   initialKappa.resize (Global::intervalsPerYear);
-  inputEIR(nonVectorData);
+  
+  vector<int> nDays (Global::intervalsPerYear, 0);
+  initialisationEIR.assign (Global::intervalsPerYear, 0.0);
+  //The minimum EIR allowed in the array. The product of the average EIR and a constant.
+  double minEIR=min_EIR_mult*averageEIR(nonVectorData);
+  const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
+  for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
+    double EIRdaily = std::max((double)daily[mpcday], minEIR);
+    
+    // istep is the time period to which the day is assigned.  The result of the
+    // division is automatically rounded down to the next integer.
+    size_t i1 = (mpcday / Global::interval) % Global::intervalsPerYear;
+    nDays[i1]++;
+    //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
+    initialisationEIR[i1] = ((initialisationEIR[i1] * (nDays[i1]-1)) + EIRdaily) / nDays[i1];
+  }
+  
+  // Calculate total annual EIR
+  annualEIR=0.0;
+  for (size_t j=0;j<Global::intervalsPerYear; j++) {
+    annualEIR += Global::interval*initialisationEIR[j];
+  }
 }
 
 NonVectorTransmission::~NonVectorTransmission () {}
@@ -46,47 +67,23 @@ void NonVectorTransmission::initMainSimulation (int populationSize){
 }
 
 
-void NonVectorTransmission::inputEIR (const scnXml::NonVector& nonVectorData) {
-  vector<int> nDays;
-  //initialise all the EIR arrays to 0
-  if (Global::simulationMode != transientEIRknown) {
-    initialisationEIR.assign (Global::intervalsPerYear, 0.0);
-    nDays.assign (Global::intervalsPerYear, 0);
-  } else {
-    intEIR.assign (maxIntervals, 0.0);
-    nDays.assign (maxIntervals, 0);
-  }
+void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
+  Global::simulationMode = transientEIRknown;
+  vector<int> nDays (maxIntervals, 0);
+  intEIR.assign (maxIntervals, 0.0);
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-    // FIXME: convertions to make this run the same as when encapsulated in updateEIR
-    int day = mpcday;
     double EIRdaily = std::max((double)daily[mpcday], minEIR);
     
     // istep is the time period to which the day is assigned.  The result of the
     // division is automatically rounded down to the next integer.
-    int istep = day / Global::interval;
-    if (Global::simulationMode !=  transientEIRknown) {
-      int i1 = istep % Global::intervalsPerYear;
-      nDays[i1]++;
-      //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-      initialisationEIR[i1] = ((initialisationEIR[i1] * (nDays[i1]-1)) + EIRdaily) / nDays[i1];
-    } else {
-      nDays[istep]++;
-      intEIR[istep]= ((intEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
-    }
+    size_t istep = mpcday / Global::interval;
+    nDays[istep]++;
+    intEIR[istep]= ((intEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
   }
-  
-  // Calculate total annual EIR
-  if (Global::simulationMode != transientEIRknown) {
-    annualEIR=0.0;
-    for (size_t j=0;j<Global::intervalsPerYear; j++) {
-      annualEIR += Global::interval*initialisationEIR[j];
-    }
-  } else {
-    annualEIR=-9.99;
-  }
+  annualEIR=-9.99;
 }
 
 void NonVectorTransmission::copyToInitialKappa () {

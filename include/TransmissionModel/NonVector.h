@@ -38,13 +38,14 @@ public:
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
   
-  /** @brief Initialization function, setting up EIR arrays
+  /** @brief Sets up the EIR used in a change of EIR intervention.
    *
    * Reads in the estimates of the EIR for each village and each day
    * and converts this into EIR estimates per five day period
    * assuming that the annual cycle repeated during the pre-intervention period
-   */
-  void inputEIR (const scnXml::NonVector& nonVectorData); 
+   * 
+   * Similar calculation to that used during initialization. */
+  void setTransientEIR (const scnXml::NonVector& nonVectorData); 
   
   /** Little function to copy kappa to initialKappa. */
   void copyToInitialKappa ();
