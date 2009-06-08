@@ -97,13 +97,13 @@ void Simulation::mainSimulation(){
     //Calculate the current progress
     BoincWrapper::reportProgress(relTimeInMainSim*(double(timeStep)/simulationDuration)+(1-relTimeInMainSim));
 #endif
-    //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
     ++simulationTime;
-    ++timeStep;
     _population->update1();
+    ++timeStep;
     if (timeStep == gMainSummary->getSurveyTimeInterval(gMainSummary->getSurveyPeriod()-1)) {
       _population->newSurvey();
     }
+    //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
   }
   delete _population;
   gMainSummary->writeSummaryArrays();

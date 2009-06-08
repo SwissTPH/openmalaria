@@ -305,7 +305,7 @@ void Human::updateInterventionStatus() {
       TODO: The tstep conditional is appropriate if we assume there is no intervention during warmup
       It won't work if we introduce interventions into a scenario with a pre-existing intervention.
     */
-    if (Simulation::timeStep > 0) {
+    if (Simulation::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
             Vaccine::targetagetstep[_lastVaccineDose] == Simulation::simulationTime-_dateOfBirth) {

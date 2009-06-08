@@ -39,7 +39,7 @@ public:
   
   /** Time counter during the main simulation.
    *
-   * Maximum value: simulationDuration + 1 */
+   * Maximum value during update1(): simulationDuration */
   static int timeStep;
 
   // Summary generator 

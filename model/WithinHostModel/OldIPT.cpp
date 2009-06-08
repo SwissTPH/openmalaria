@@ -159,7 +159,7 @@ void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
 }
 
 void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
-  if (Simulation::timeStep <= 0) return;
+  if (Simulation::timeStep < 0) return;
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
