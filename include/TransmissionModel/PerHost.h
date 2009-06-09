@@ -45,9 +45,14 @@ public:
   
   //NOTE: may need to be within PerHostTransmission if some intervention parameters are moved here.
   //NOTE: Since only the product of these is usually required, could perhaps be optimised
-  ///@brief Get model parameters for species[speciesIndex].
+  /** @brief Get model parameters for species[speciesIndex].
+   *
+   * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
-  /** Availability of host to mosquitoes (α_i). */
+  /** Availability of host to mosquitoes (α_i).
+   *
+   * The full availability is
+   * entoAvailability() * getRelativeAvailability(human->getAgeInYears()). */
   double entoAvailability (size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
   double probMosqBiting (size_t speciesIndex) const;

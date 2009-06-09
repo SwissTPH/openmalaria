@@ -51,6 +51,13 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
+  // These models cause _EIRFactor in InfectionIncidenceModel to not be 1.0.
+  // This was a method of adjusting the availability used with the NonVector model;
+  // availability should be adjusted within the TransmissionModel but no-one's
+  // confirmed these models make sense doing this. (DH)
+  if (Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION | LOGNORMAL_MASS_ACTION | ANY_TRANS_HET))
+    throw xml_scenario_error("VectorTransmission is incompatible with models adjusting EIR");
+  
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);

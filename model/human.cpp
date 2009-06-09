@@ -64,7 +64,7 @@ void Human::clear() {	// static clear
 // Create new human
 Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) 
   : perHostTransmission(tm),
-    infIncidence(InfectionIncidenceModel::createModel())
+  withinHostModel(WithinHostModel::createWithinHostModel())
 {
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
@@ -75,8 +75,6 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   }
   _doomed=0;
   _ID=ID;
-  //NOTE: initialized here to preserve order of random calls
-  withinHostModel = WithinHostModel::createWithinHostModel();
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
   _TBVEfficacy=0.0;
@@ -84,15 +82,22 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     _ylag[i]=0.0;
   }
   
+  
   /* Human heterogeneity; affects:
    * _comorbidityFactor (stored in PathogenesisModel)
    * _treatmentSeekingFactor (stored in CaseManagementModel)
-   * _BaselineAvailabilityToMosquitoes (stored in InfectionIncidenceModel)
+   * EIRFactor (stored in InfectionIncidenceModel)
    */
-  //NOTE: infIncidence must already have been initialised
   double _comorbidityFactor = 1.0;
   double _treatmentSeekingFactor = 1.0;
+  double EIRFactor = BaselineAvailabilityMean;
   
+  if (Global::modelVersion & TRANS_HET) {
+    EIRFactor=0.2;
+    if (W_UNIFORM() < 0.5) {
+      EIRFactor=1.8;
+    }
+  }
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
     if (W_UNIFORM() < 0.5) {
@@ -107,10 +112,10 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   }
   if (Global::modelVersion & TRANS_TREAT_HET) {
     _treatmentSeekingFactor=0.2;
-    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
+    EIRFactor=1.8;
     if (W_UNIFORM()<0.5) {
       _treatmentSeekingFactor=1.8;
-      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
+      EIRFactor=0.2;
     }
   } else if (Global::modelVersion & COMORB_TRANS_HET) {
     if (W_UNIFORM()<0.5) {
@@ -118,22 +123,23 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     } else {
       _treatmentSeekingFactor=1.8;
     }
-    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
+    EIRFactor=1.8;
     _comorbidityFactor=1.8;
     if (W_UNIFORM()<0.5) {
-      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
+      EIRFactor=0.2;
       _comorbidityFactor=0.2;
     }
   } else if (Global::modelVersion & TRIPLE_HET) {
-    infIncidence->_BaselineAvailabilityToMosquitoes=1.8;
+    EIRFactor=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
     if (W_UNIFORM()<0.5) {
-      infIncidence->_BaselineAvailabilityToMosquitoes=0.2;
+      EIRFactor=0.2;
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
   }
+  infIncidence=InfectionIncidenceModel::createModel(EIRFactor);
   pathogenesisModel=PathogenesisModel::createPathogenesisModel(_comorbidityFactor);
   caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
 }
@@ -188,7 +194,7 @@ ostream& operator<<(ostream& out, const Human& human){
 
 
 void Human::updateInfection(TransmissionModel* transmissionModel){
-  double ageAdjustedEIR = transmissionModel->getRelativeAvailability(getAgeInYears()) * transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission);
+  double ageAdjustedEIR = transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission, getAgeInYears());
   int numInf = infIncidence->numNewInfections(ageAdjustedEIR, _PEVEfficacy);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();

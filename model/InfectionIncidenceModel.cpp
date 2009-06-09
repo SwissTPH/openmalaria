@@ -43,6 +43,7 @@ void InfectionIncidenceModel::init () {
   EstarInv = 1.0/getParameter(Params::E_STAR);
   Xstar_pInv = 1.0/getParameter(Params::X_STAR_P);
   
+  //TODO: Sanity check for sqrt and division by zero
   //! constant defining the constraint for the Gamma shape parameters
   /// Used for the case where availability is assumed gamma distributed
   double r_square_Gamma;
@@ -57,65 +58,49 @@ void InfectionIncidenceModel::init () {
   r_square_Gamma=0.649;
   //such that r_square_LogNormal =0.5
   
-  //! constant defining the constraint for the log Normal variance
-  /// Used for the case where availability is assumed log Normally distributed
-  double r_square_LogNormal = log(1.0+r_square_Gamma);
-  
-  //TODO: Sanity check for sqrt and division by zero
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     InfectionrateShapeParam = (BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   else if (Global::modelVersion &
     (LOGNORMAL_MASS_ACTION | LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM)) {
+    //! constant defining the constraint for the log Normal variance
+    /// Used for the case where availability is assumed log Normally distributed
+    double r_square_LogNormal = log(1.0+r_square_Gamma);
+  
     InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(BaselineAvailabilityShapeParam, 2));
-  InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
+    InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
 }
 
 
 // -----  non-static non-checkpointing constructors  -----
 
-InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
+InfectionIncidenceModel* InfectionIncidenceModel::createModel (double EIRFactor) {
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    return new NegBinomMAII ();
+    return new NegBinomMAII (EIRFactor);
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-    return new LogNormalMAII ();
+    return new LogNormalMAII (EIRFactor);
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
-    return new LogNormalMAPlusPreImmII();
+    return new LogNormalMAPlusPreImmII(EIRFactor);
   } else
-    return new InfectionIncidenceModel();
+    return new InfectionIncidenceModel(EIRFactor);
 }
 
-InfectionIncidenceModel::InfectionIncidenceModel () :
-  _pinfected(0.0), _cumulativeEIRa(0.0)
+InfectionIncidenceModel::InfectionIncidenceModel (double EIRFactor) :
+  _pinfected(0.0), _EIRFactor(EIRFactor), _cumulativeEIRa(0.0)
 {
-  if (Global::modelVersion & TRANS_HET) {
-    _BaselineAvailabilityToMosquitoes=0.2;
-    if (W_UNIFORM() < 0.5) {
-      _BaselineAvailabilityToMosquitoes=1.8;
-    }
-  }
-  else {
-    _BaselineAvailabilityToMosquitoes=BaselineAvailabilityMean;
-  }
-  // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
 }
-InfectionIncidenceModel::InfectionIncidenceModel (double bATM) :
-  _pinfected(0.0), _BaselineAvailabilityToMosquitoes(bATM), _cumulativeEIRa(0.0)
-{
-  // NOTE: _BaselineAvailabilityToMosquitoes MAY be re-set in the Human constructor
-}
-NegBinomMAII::NegBinomMAII () :
+NegBinomMAII::NegBinomMAII (double EIRFactor) :
   InfectionIncidenceModel(W_GAMMA(BaselineAvailabilityShapeParam,
-				  BaselineAvailabilityMean/BaselineAvailabilityShapeParam))
+				  EIRFactor/BaselineAvailabilityShapeParam))
 {}
-LogNormalMAII::LogNormalMAII () :
-  InfectionIncidenceModel(W_LOGNORMAL(log(BaselineAvailabilityMean)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
+LogNormalMAII::LogNormalMAII (double EIRFactor) :
+  InfectionIncidenceModel(W_LOGNORMAL(log(EIRFactor)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 				       BaselineAvailabilityShapeParam))
 {}
-LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII () :
-  InfectionIncidenceModel()
+LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII (double EIRFactor) :
+  InfectionIncidenceModel(EIRFactor)
 {}
 
 
@@ -135,7 +120,7 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel (istream& in) {
 InfectionIncidenceModel::InfectionIncidenceModel (istream& in) {
   in >> _cumulativeEIRa;
   in >> _pinfected;
-  in >> _BaselineAvailabilityToMosquitoes;
+  in >> _EIRFactor;
 }
 NegBinomMAII::NegBinomMAII (istream& in) :
   InfectionIncidenceModel(in)
@@ -150,7 +135,7 @@ LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII (istream& in) :
 void InfectionIncidenceModel::write (ostream& out) const {
   out << _cumulativeEIRa << endl; 
   out << _pinfected << endl; 
-  out << _BaselineAvailabilityToMosquitoes << endl; 
+  out << _EIRFactor << endl; 
 }
 
 
@@ -162,20 +147,20 @@ void InfectionIncidenceModel::summarize (Summary& summary, double age) {
 
 
 double InfectionIncidenceModel::getModelExpectedInfections (double ageAdjustedEIR) {
-  return survivalOfInoculum(ageAdjustedEIR) * ageAdjustedEIR * Global::interval * _BaselineAvailabilityToMosquitoes;
+  return survivalOfInoculum(ageAdjustedEIR) * ageAdjustedEIR * Global::interval * _EIRFactor;
 }
 double NegBinomMAII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
   return (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
 }
 double LogNormalMAII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
   return sampleFromLogNormal(W_UNIFORM(),
 			     log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			     InfectionrateShapeParam);
 }
 double LogNormalMAPlusPreImmII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _BaselineAvailabilityToMosquitoes * susceptibility * Global::interval;
+  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
   
   return survivalOfInoculum(ageAdjustedEIR) *
     sampleFromLogNormal(W_UNIFORM(),
@@ -203,9 +188,8 @@ int InfectionIncidenceModel::numNewInfections (double ageAdjustedEIR, double PEV
   //forgotten
   
   //Update pre-erythrocytic immunity
-  if (Global::modelVersion & 
-    (TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET)) {
-    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR*_BaselineAvailabilityToMosquitoes;
+  if (Global::modelVersion & ANY_TRANS_HET) {
+    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR*_EIRFactor;
   } else {
     _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR;
   }

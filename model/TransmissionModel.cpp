@@ -38,7 +38,7 @@
 const double TransmissionModel::agemin[nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
 const double TransmissionModel::agemax[nwtgrps] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
 const double TransmissionModel::bsa_prop[nwtgrps] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-
+double TransmissionModel::ageSpecificRelativeAvailability[nwtgrps];
 
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
@@ -64,11 +64,17 @@ TransmissionModel::TransmissionModel(){
 TransmissionModel::~TransmissionModel () {
 }
 
-double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host) {
+double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears) {
+  /* For the NonVector model, the EIR should just be multiplied by the
+   * availability. For the Vector model, the availability is also required
+   * for internal calculations, but again the EIR should be multiplied by the
+   * availability. */
   if (Global::simulationMode == equilibriumMode)
-    return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
+    return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
+	getRelativeAvailability(ageInYears);
   else
-    return calculateEIR (simulationTime, host);
+    return calculateEIR (simulationTime, host) *
+	getRelativeAvailability(ageInYears);
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {

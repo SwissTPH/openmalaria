@@ -64,7 +64,7 @@ public:
   \param ageyrs age in years 
   \return the ratio of bites received by the host to the average for an adult 
   */ 
-  double getRelativeAvailability (double ageyrs); 
+  static double getRelativeAvailability (double ageyrs);
 
 
   /** Initialise the main simulation.
@@ -93,7 +93,7 @@ public:
    * the XML file (possibly generated from fourier coefficients). During the
    * main simulation phase, it may be calculated or obtained from data in the
    * XML file. */
-  double getEIR (int simulationTime, PerHostTransmission& host);
+  double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears);
   
 protected:
   /** Calculates the EIR (in adults), during the main simulation phase.
@@ -150,7 +150,7 @@ protected:
   /** Average number of bites for each age as a proportion of the maximum.
    *
    * Set by constructor. */
-  double ageSpecificRelativeAvailability[nwtgrps];
+  static double ageSpecificRelativeAvailability[nwtgrps];
 
   //! Cutpoints of the age categories (minima) used for storing relative
   //! weights? surface areas?

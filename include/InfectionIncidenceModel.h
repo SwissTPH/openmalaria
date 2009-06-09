@@ -43,17 +43,14 @@ public:
   /// Read in/initialise parameters
   static void init();
   /// Create a new instance
-  static InfectionIncidenceModel* createModel ();
+  static InfectionIncidenceModel* createModel (double EIRFactor);
   /// Read from a checkpoint
   static InfectionIncidenceModel* createModel (istream& in);
   //@}
   
 protected:
-  /// Create a new model, deciding what _BaselineAvailabilityToMosquitoes to use
-  InfectionIncidenceModel ();
-  /// Create a new model, passing the _BaselineAvailabilityToMosquitoes from
-  /// a derived class's constructor
-  InfectionIncidenceModel (double bATM);
+  /// Create a new model, passing the _EIRFactor.
+  InfectionIncidenceModel (double EIRFactor);
   /// Load from a checkpoint
   InfectionIncidenceModel (istream& in);
 public:
@@ -89,8 +86,12 @@ public:	//TODO - maybe better if not public
    * Appears to be used only for calculating expected inoculations for the
    * analysis of pre-erythrocytic immunity. */
   double _pinfected;
-  /// Baseline availability to mosquitoes
-  double _BaselineAvailabilityToMosquitoes;
+  /** Baseline availability to mosquitoes; used by some sub-classes and
+   * heterogeneity to adjust the effective EIR.
+   *
+   * Using this to adjust the EIR returned by the transmission model is not
+   * compatible with NC's VectorTransmission. */
+  double _EIRFactor;
 private:
   //!Number of infective bites since birth
     double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
@@ -130,7 +131,7 @@ protected:	// Static data
 
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
-  NegBinomMAII ();
+  NegBinomMAII (double EIRFactor);
   NegBinomMAII (istream& in);
   virtual ~NegBinomMAII() {}
 protected:
@@ -138,7 +139,7 @@ protected:
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
-  LogNormalMAII ();
+  LogNormalMAII (double EIRFactor);
   LogNormalMAII (istream& in);
   virtual ~LogNormalMAII() {}
 protected:
@@ -146,7 +147,7 @@ protected:
 };
 class LogNormalMAPlusPreImmII : public InfectionIncidenceModel {
 public:
-  LogNormalMAPlusPreImmII ();
+  LogNormalMAPlusPreImmII (double EIRFactor);
   LogNormalMAPlusPreImmII (istream& in);
   virtual ~LogNormalMAPlusPreImmII() {}
 protected:

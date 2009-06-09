@@ -282,7 +282,7 @@ void Population::update1(){
       ++survivsSoFar;
       
       double ageYears = iter->getAgeInYears();
-      double availability = iter->infIncidence->_BaselineAvailabilityToMosquitoes * _transmissionModel->getRelativeAvailability(ageYears);
+      double availability = iter->infIncidence->_EIRFactor * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
       sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
       

@@ -102,14 +102,12 @@ void VectorTransmissionSpecies::destroy () {
 }
 
 void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
-  calMosqEmergeRate (populationSize, kappa);	// initialises N_v, O_v, S_v
-  
-  
   //BEGIN P_A, P_Ai, P_df, P_dif
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex);
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex) *
+	TransmissionModel::getRelativeAvailability(h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -121,8 +119,11 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   double intP_df = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
-    * host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
+    double prod = host.entoAvailability(sIndex) *
+	TransmissionModel::getRelativeAvailability(h->getAgeInYears()) *
+	host.probMosqBiting(sIndex) *
+	host.probMosqFindRestSite(sIndex) *
+	host.probMosqSurvivalResting(sIndex);
     intP_df += prod;
   }
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
@@ -142,6 +143,9 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     // Should correspond to index of kappa updated by updateKappa:
     P_dif[t]	= intP_df * kappa[(simStep-1) % Global::intervalsPerYear];
   }
+  
+  
+  calMosqEmergeRate (populationSize, kappa, leaveHostRate-mosqSeekingDeathRate);	// initialises N_v, O_v, S_v
 }
 
 
@@ -162,7 +166,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   
     P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
   (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
-    α_i[t] = host.entoAvailability ()
+    α_i[t] = host.entoAvailability () * TransmissionModel::getRelativeAvailability(h->getAgeInYears())
   Let P_Ai_base[t] = (1 - P_A[t]) / sum_{h in hosts} α_h[t].
   
   Note that although the model allows α_i and P_B_i to vary per-day, they only
@@ -182,7 +186,8 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex);
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex) *
+	TransmissionModel::getRelativeAvailability(h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -195,8 +200,11 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   double intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex) * host.probMosqBiting(sIndex)
-    * host.probMosqFindRestSite(sIndex) * host.probMosqSurvivalResting(sIndex);
+    double prod = host.entoAvailability(sIndex) *
+	TransmissionModel::getRelativeAvailability(h->getAgeInYears()) *
+	host.probMosqBiting(sIndex) *
+	host.probMosqFindRestSite(sIndex) *
+	host.probMosqSurvivalResting(sIndex);
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
@@ -326,7 +334,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
  */ 
 
 
-void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa) {
+void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa, double totalAvailability) {
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
   $m$ in model. Scalar.
@@ -439,7 +447,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     }
     cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
   }else{
-    double temp = populationSize*populationSize*entoAvailability;
+    double temp = populationSize*populationSize*totalAvailability;
     for (int i = 0; i < daysInYear; i++) {
       mosqEmergeRate[i] = EIRInit[i]*temp;
     }
@@ -453,6 +461,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     CalcInitMosqEmergeRate(populationSize,
                            nHostTypesInit,
                            nMalHostTypesInit,
+			   totalAvailability,
                            humanInfectivityInit, EIRInit);
     
     // Now we've calculated the emergence rate, save it:
@@ -479,6 +488,7 @@ void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysIn
 double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
                                              int nHostTypesInit,
                                              int nMalHostTypesInit,
+					     double alpha_i,
                                              double* FHumanInfectivityInitVector,
                                              vector<double>& FEIRInitVector)
 {
@@ -515,7 +525,6 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   // n,m are not aliased but are: nHostTypesInit,nMalHostTypesInit
 
 # define N_i		populationSize
-# define alpha_i	entoAvailability
 # define mu_vA		mosqSeekingDeathRate
 # define theta_d	mosqSeekingDuration
 # define P_B_i		probMosqBiting

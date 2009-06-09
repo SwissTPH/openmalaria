@@ -105,7 +105,12 @@ enum ModelVersion {
   
   /** @brief Simple heterogeneity
    * 
-   * Defaults: No heterogeneity. */
+   * Defaults: No heterogeneity.
+   * 
+   * (Transmission) heterogeneity is incompatible with
+   * NEGATIVE_BINOMIAL_MASS_ACTION and LOGNORMAL_MASS_ACTION because both try
+   * to adjust _EIRFactor and it is not confirmed that the ways they do this is
+   * compatible. */
   // @{
   /// @brief Allow simple heterogeneity in transmission
   TRANS_HET = 1 << 15,
@@ -121,6 +126,9 @@ enum ModelVersion {
   COMORB_TREAT_HET = 1 << 20,
   /// @brief Allow correlated heterogeneities in transmission, comorbidity and treatment seeking
   TRIPLE_HET = 1 << 21,
+  /// Used to test if any heterogeneity is present
+  ANY_HET = TRANS_HET|COMORB_HET|TREAT_HET|COMORB_TRANS_HET|TRANS_TREAT_HET|TRIPLE_HET,
+  ANY_TRANS_HET =  TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,
   // @}
   
   // Used by tests; should be 1 plus highest left-shift value of 1

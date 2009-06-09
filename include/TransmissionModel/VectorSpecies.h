@@ -194,7 +194,7 @@ private:
    * 	Mathematically, we require this parameter to be a positive
    * 	real number, so although this will typically be a natural 
    * 	number, it is not restricted to being one. */
-  void calMosqEmergeRate (int populationSize, vector<double>& kappa);
+  void calMosqEmergeRate (int populationSize, vector<double>& kappa, double totalAvailability);
   
   /** This subroutine converts ShortArray of length intervalsPerYear to
    * FullArray by copying and duplicating elements to fill the gaps. */
@@ -234,6 +234,7 @@ private:
    * All parameters are IN parameters. */
   double CalcInitMosqEmergeRate(int populationSize,
                                 int nHostTypesInit, int nMalHostTypesInit,
+				double alpha_i,
                                 double* FHumanInfectivityInitVector,
                                 vector<double>& FEIRInitVector);
   
