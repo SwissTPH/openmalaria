@@ -145,7 +145,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   }
   
   
-  calMosqEmergeRate (populationSize, kappa, leaveHostRate-mosqSeekingDeathRate);	// initialises N_v, O_v, S_v
+  calMosqEmergeRate (populationSize, kappa, (leaveHostRate-mosqSeekingDeathRate)/populationSize);	// initialises N_v, O_v, S_v
 }
 
 
@@ -334,7 +334,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
  */ 
 
 
-void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa, double totalAvailability) {
+void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa, double averageAvailability) {
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
   $m$ in model. Scalar.
@@ -447,7 +447,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     }
     cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
   }else{
-    double temp = populationSize*populationSize*totalAvailability;
+    double temp = populationSize*populationSize*averageAvailability;
     for (int i = 0; i < daysInYear; i++) {
       mosqEmergeRate[i] = EIRInit[i]*temp;
     }
@@ -461,7 +461,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     CalcInitMosqEmergeRate(populationSize,
                            nHostTypesInit,
                            nMalHostTypesInit,
-			   totalAvailability,
+			   averageAvailability,
                            humanInfectivityInit, EIRInit);
     
     // Now we've calculated the emergence rate, save it:
