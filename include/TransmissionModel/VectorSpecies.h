@@ -233,12 +233,7 @@ private:
    * 
    * All parameters are IN parameters. */
   double CalcInitMosqEmergeRate(int populationSize,
-                                int EIPDuration,
                                 int nHostTypesInit, int nMalHostTypesInit,
-                                double hostAvailabilityRateInit,
-                                double mosqProbBiting,
-                                double mosqProbFindRestSite,
-                                double mosqProbResting,
                                 double* FHumanInfectivityInitVector,
                                 vector<double>& FEIRInitVector);
   

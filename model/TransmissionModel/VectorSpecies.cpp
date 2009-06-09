@@ -102,7 +102,7 @@ void VectorTransmissionSpecies::destroy () {
 }
 
 void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
-  calMosqEmergeRate (populationSize, kappa);
+  calMosqEmergeRate (populationSize, kappa);	// initialises N_v, O_v, S_v
   
   
   //BEGIN P_A, P_Ai, P_df, P_dif
@@ -142,8 +142,6 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     // Should correspond to index of kappa updated by updateKappa:
     P_dif[t]	= intP_df * kappa[(simStep-1) % Global::intervalsPerYear];
   }
-  
-  // TODO: initialise N_v, O_v, S_v
 }
 
 
@@ -452,11 +450,9 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   // Now calculate the emergence rate.
   // The routine should finish quickly if the emergence rate is already accurate.
   if(true) {
-    CalcInitMosqEmergeRate(populationSize, EIPDuration,
+    CalcInitMosqEmergeRate(populationSize,
                            nHostTypesInit,
-                           nMalHostTypesInit, entoAvailability,
-                           probMosqBiting, probMosqFindRestSite,
-                           probMosqSurvivalResting,
+                           nMalHostTypesInit,
                            humanInfectivityInit, EIRInit);
     
     // Now we've calculated the emergence rate, save it:
@@ -481,13 +477,8 @@ void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysIn
  ************************ START SUBROUTINES HERE ***************************
  ***************************************************************************/
 double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
-                                             int EIPDuration,
                                              int nHostTypesInit,
                                              int nMalHostTypesInit,
-                                             double hostAvailabilityRateInit,
-                                             double mosqProbBiting,
-                                             double mosqProbFindRestSite,
-                                             double mosqProbResting,
                                              double* FHumanInfectivityInitVector,
                                              vector<double>& FEIRInitVector)
 {
@@ -524,12 +515,12 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
   // n,m are not aliased but are: nHostTypesInit,nMalHostTypesInit
 
 # define N_i		populationSize
-# define alpha_i	hostAvailabilityRateInit
+# define alpha_i	entoAvailability
 # define mu_vA		mosqSeekingDeathRate
 # define theta_d	mosqSeekingDuration
-# define P_B_i		mosqProbBiting
-# define P_C_i		mosqProbFindRestSite
-# define P_D_i		mosqProbResting
+# define P_B_i		probMosqBiting
+# define P_C_i		probMosqFindRestSite
+# define P_D_i		probMosqSurvivalResting
 # define P_E_i		probMosqSurvivalOvipositing
 
 
@@ -796,6 +787,20 @@ double VectorTransmissionSpecies::CalcInitMosqEmergeRate(int populationSize,
     temp = gsl_vector_get(x_p[i], indexSv);
     gsl_vector_set(Svp, i, temp);
   }
+  
+  if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > (int)theta_p)
+    throw xml_scenario_error ("Initialization phase or theta_p too short");
+  // For day over N_v_length days prior to the next timestep's day.
+  int endDay = (Simulation::simulationTime+1) * Global::interval;
+  for (int day = endDay - N_v_length; day < endDay; ++day) {
+    size_t t = day % N_v_length;
+    size_t i = (theta_p + day - endDay) % theta_p;
+    
+    N_v[t] = gsl_vector_get (Nvp, i);
+    O_v[t] = gsl_vector_get (Ovp, i);
+    S_v[t] = gsl_vector_get (Svp, i);
+  }
+  
   
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char Nvpname[15] = "NvPO";
