@@ -61,7 +61,7 @@ void OldIPTWithinHostModel::initParameters () {
     iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
     iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
     for (int i=0;i<numberOfIPTiDoses; i++) {
-      iptiTargetagetstep[i] = floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval));
+      iptiTargetagetstep[i] = static_cast<int>(floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval)));
       iptiCoverage[i] = xmlIpti[i].getCoverage();
     }
   } else

@@ -33,6 +33,7 @@ public:
   };
   
   EntoIntervention () : insecticide(NONE) {}
+  virtual ~EntoIntervention() {}
   
   friend ostream& operator<<(ostream& out, const EntoIntervention& ei);
   friend istream& operator>>(istream& in, EntoIntervention& ei);
@@ -67,6 +68,7 @@ public:
   static void initParameters();
   
   EntoInterventionITN () : netEffectiveness(0.0) {}
+  virtual ~EntoInterventionITN() {}
   
   void write(ostream& out) const;
   void read(istream& in);
@@ -106,6 +108,8 @@ protected:
 class EntoInterventionIRS : public EntoIntervention
 {
 public:
+  virtual ~EntoInterventionIRS() {}
+  
   /** Set some static values from XML. */
   static void initParameters();
   

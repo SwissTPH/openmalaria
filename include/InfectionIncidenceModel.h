@@ -56,8 +56,9 @@ protected:
   InfectionIncidenceModel (double bATM);
   /// Load from a checkpoint
   InfectionIncidenceModel (istream& in);
-  
 public:
+  virtual ~InfectionIncidenceModel() {}
+  
   /// Write a checkpoint
   void write (ostream& out) const;
   
@@ -131,6 +132,7 @@ class NegBinomMAII : public InfectionIncidenceModel {
 public:
   NegBinomMAII ();
   NegBinomMAII (istream& in);
+  virtual ~NegBinomMAII() {}
 protected:
   double getModelExpectedInfections (double ageAdjustedEIR);
 };
@@ -138,6 +140,7 @@ class LogNormalMAII : public InfectionIncidenceModel {
 public:
   LogNormalMAII ();
   LogNormalMAII (istream& in);
+  virtual ~LogNormalMAII() {}
 protected:
   double getModelExpectedInfections (double ageAdjustedEIR);
 };
@@ -145,6 +148,7 @@ class LogNormalMAPlusPreImmII : public InfectionIncidenceModel {
 public:
   LogNormalMAPlusPreImmII ();
   LogNormalMAPlusPreImmII (istream& in);
+  virtual ~LogNormalMAPlusPreImmII() {}
 protected:
   double getModelExpectedInfections (double ageAdjustedEIR);
 };

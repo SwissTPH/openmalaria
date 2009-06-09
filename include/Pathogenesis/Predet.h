@@ -36,6 +36,7 @@ public:
     PyrogenPathogenesis(cF) {}
   PredetPathogenesis (istream& in) :
     PyrogenPathogenesis(in) {}
+  ~PredetPathogenesis() {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 };

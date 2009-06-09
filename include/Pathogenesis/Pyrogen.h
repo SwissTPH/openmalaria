@@ -40,6 +40,7 @@ protected:
 public:
   PyrogenPathogenesis(double cF);
   PyrogenPathogenesis(istream& in);
+  virtual ~PyrogenPathogenesis() {}
   virtual double getPyrogenThres();
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;

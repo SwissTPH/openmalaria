@@ -86,6 +86,8 @@ public:
   static void setRiskFromMaternalInfection(int nCounter, int pCounter);
   
   // non-static
+  virtual ~PathogenesisModel() {}
+  
   /** Determines whether there is an acute episode or concomitant fever (or
    * neither) and then whether the episode is severe, uncomplicated or there is
    * an indirect death. */
