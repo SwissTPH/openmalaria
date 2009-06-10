@@ -72,8 +72,8 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].partialEIR
-      * host.entoAvailability(i)
-      * host.probMosqBiting(i);	// probability of biting, once commited
+      * host.entoAvailability(i)	// Also multiplied by getRelativeAvailability in TransmissionModel::getEIR
+      * host.probMosqBiting(i);		// probability of biting, once commited
   }
   return EIR;
 }

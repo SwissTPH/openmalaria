@@ -401,7 +401,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\include\TransmissionModel\VectorInternal.h"
+					RelativePath=".\include\TransmissionModel\VectorEmergence.h"
 					>
 				</File>
 				<File
@@ -581,7 +581,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\model\TransmissionModel\VectorInternal.cpp"
+					RelativePath=".\model\TransmissionModel\VectorEmergence.cpp"
 					>
 				</File>
 				<File

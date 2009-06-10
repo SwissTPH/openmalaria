@@ -34,25 +34,74 @@ using namespace std;
 #define VectorTransmission_PRINT_CalcInv1minusA
 
 
-/***************************************************************************
- *********************** STRUCTURE DEFINITIONS *****************************
- ***************************************************************************/
-
-// Structure that contains the parameters for the function used in the 
-// root-finding algorithm to find the emergence rate that matches the 
-// number of infectious host-seeking mosquitoes.
-struct SvDiffParams
-{
-  gsl_vector* S_vFromEIR;
-  gsl_matrix** Upsilon;
-  gsl_matrix* inv1Xtp;
-  size_t eta;
-  size_t mt;
-  size_t thetap;
-};
-
-
-
+/** Container for functions used to calculate the mosquito emergence rate.
+ *
+ * Some data is stored here, so that it doesn't have to be continually
+ * freed and reallocated. It is cleaned by the destructor.
+ * 
+ * All non-const data outside of functions should be stored in here, so as
+ * to be thread-safe. */
+struct VectorEmergence {
+  /** Initialises some data elements */
+  VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize, double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting, double probMosqSurvivalOvipositing);
+  /** Frees data */
+  ~VectorEmergence() {}
+  
+  /** calcInitMosqEmergeRate() calculates the mosquito emergence rate given
+   * all other parameters.
+   *
+   * We use a periodic version of the model described in "A Mathematical Model 
+   * for the Dynamics of Malaria in Mosquitoes Feeding on a Heteregeneous Host
+   * Population". The periodic model still needs to be written as a paper. We will
+   * change these comments to refer to the approprirate paper when it is ready.
+   *
+   * The entomological model has a number of input parameters, including the
+   * mosquito emergence rate, $N_{v0}$, and a number of output parameters, 
+   * including the entomological inoculation rate, $\Xi_i$. The model produces
+   * equations for $\Xi_i$ as a function of $N_{v0}$ and the other parameters.
+   * However, in this function, we assume that all parameters, except $N_{v0}$ 
+   * are known, and $\Xi_i$ is known. We then use these parameters, with $\Xi_i$ 
+   * to calculate $N_{v0}$. The equations for $\Xi_i$ are linear in terms of 
+   * $N_{v0}$ so there is a unique solution for $N_{v0}$. 
+   *
+   * This routine first shows the existence of a unique globally asymptotically 
+   * stable periodic orbit for the system of equations describing the periodically
+   * forced entomological model (for a given set of parameter values, including the
+   * mosquito emergence rate). It then compares the number of infectious host-seeking
+   * mosquitoes for this periodic orbit to the the number of infectious host-seeking
+   * mosquitoes that would result in the given EIR. The routine then iteratively finds
+   * the emergence rate that matches the given EIR.
+   * 
+   * However, we cannot write these equations in the form Ax=b, so we use
+   * a root-finding algorithm to calculate $N_{v0}$.
+   *
+   * This function has a dummy return of 0.
+   * 
+   * All parameters are IN parameters. */
+  double CalcInitMosqEmergeRate(int populationSize,
+                                int nHostTypesInit, int nMalHostTypesInit,
+				double alpha_i,
+                                double* FHumanInfectivityInitVector,
+                                vector<double>& FEIRInitVector,
+				double* mosqEmergeRate);
+  
+private:
+  //BEGIN data
+  size_t counterSvDiff;
+  size_t theta_p;
+  size_t tau;
+  size_t theta_s;
+  
+  int N_i;
+  double alpha_i;
+  double mu_vA;
+  double theta_d;
+  double P_B_i;
+  double P_C_i;
+  double P_D_i;
+  double P_E_i;
+  //END data
+  
 /** CalcUpsilonOneHost returns a pointer to an array of thetap 
  * GSL matrices assuming there is only one host of humans..
  * Each matrix is Upsilon(t).
@@ -93,27 +142,6 @@ void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
                         size_t thetas, size_t n, size_t m, double Ni, double alphai, 
                         double muvA, double thetad, double PBi, double PCi, double PDi, 
                         double PEi, gsl_vector* Kvi);
-
-/** CalcSvDiff_rf returns the difference between Sv for the periodic 
- * orbit for the given Nv0 and from the EIR data.
- * 
- * Given the input parameters to the entomological model, this routine
- * calculates the number of infectious host-seekign mosquitoes for the 
- * resulting periodic orbit. It then calculates the difference between 
- * this Sv and the periodic Sv calculated from the EIR data (which is 
- * the Sv from the periodic orbit of the system with the final 
- * calculated Nv0.
- *
- * This routine performs the same calculations as CalcSvDiff() but it
- * does so in the format required by the GSL multiroot-finding
- * algorithms.
- * 
- * f is an OUT parameter.
- * All other parameters are IN parameters. */
-int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
-
-// NOTE: Unused
-//static size_t staticCalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f,void* obj);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -276,7 +304,7 @@ void PrintEigenvalues(gsl_vector_complex* eval, size_t n);
 void PrintMatrix(char matrixname[], gsl_matrix* A, 
                  size_t RowLength, size_t ColLength);
 
-
+public:
 void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
 
 /** PrintArray() prints the given (C) array to the given file.
@@ -286,3 +314,44 @@ void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
 void PrintArray(const char* vectorname, double* v, int n);
 /// ditto, taking a vector
 void PrintArray(const char* vectorname, vector<double>& v);
+
+  friend int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
+};
+
+/** @brief Free functions called by the GSL root finder
+ *
+ * GSL can't take member-function pointers, so instead we pass free functions,
+ * with a pointer to the VectorEmergence object. */
+//@{
+/** CalcSvDiff_rf returns the difference between Sv for the periodic 
+ * orbit for the given Nv0 and from the EIR data.
+ * 
+ * Given the input parameters to the entomological model, this routine
+ * calculates the number of infectious host-seekign mosquitoes for the 
+ * resulting periodic orbit. It then calculates the difference between 
+ * this Sv and the periodic Sv calculated from the EIR data (which is 
+ * the Sv from the periodic orbit of the system with the final 
+ * calculated Nv0.
+ *
+ * This routine performs the same calculations as CalcSvDiff() but it
+ * does so in the format required by the GSL multiroot-finding
+ * algorithms.
+ * 
+ * f is an OUT parameter.
+ * All other parameters are IN parameters. */
+int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
+//@}
+
+// Structure that contains the parameters for the function used in the 
+// root-finding algorithm to find the emergence rate that matches the 
+// number of infectious host-seeking mosquitoes.
+struct SvDiffParams
+{	//FIXME: move some of these to VectorEmergence
+  VectorEmergence* emerge;
+  gsl_vector* S_vFromEIR;
+  gsl_matrix** Upsilon;
+  gsl_matrix* inv1Xtp;
+  size_t eta;
+  size_t mt;
+  size_t theta_p;
+};

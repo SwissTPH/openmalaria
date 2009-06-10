@@ -200,43 +200,6 @@ private:
    * FullArray by copying and duplicating elements to fill the gaps. */
   void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
 
-
-  /** calcInitMosqEmergeRate() calculates the mosquito emergence rate given
-   * all other parameters.
-   *
-   * We use a periodic version of the model described in "A Mathematical Model 
-   * for the Dynamics of Malaria in Mosquitoes Feeding on a Heteregeneous Host
-   * Population". The periodic model still needs to be written as a paper. We will
-   * change these comments to refer to the approprirate paper when it is ready.
-   *
-   * The entomological model has a number of input parameters, including the
-   * mosquito emergence rate, $N_{v0}$, and a number of output parameters, 
-   * including the entomological inoculation rate, $\Xi_i$. The model produces
-   * equations for $\Xi_i$ as a function of $N_{v0}$ and the other parameters.
-   * However, in this function, we assume that all parameters, except $N_{v0}$ 
-   * are known, and $\Xi_i$ is known. We then use these parameters, with $\Xi_i$ 
-   * to calculate $N_{v0}$. The equations for $\Xi_i$ are linear in terms of 
-   * $N_{v0}$ so there is a unique solution for $N_{v0}$. 
-   *
-   * This routine first shows the existence of a unique globally asymptotically 
-   * stable periodic orbit for the system of equations describing the periodically
-   * forced entomological model (for a given set of parameter values, including the
-   * mosquito emergence rate). It then compares the number of infectious host-seeking
-   * mosquitoes for this periodic orbit to the the number of infectious host-seeking
-   * mosquitoes that would result in the given EIR. The routine then iteratively finds
-   * the emergence rate that matches the given EIR.
-   * 
-   * However, we cannot write these equations in the form Ax=b, so we use
-   * a root-finding algorithm to calculate $N_{v0}$.
-   *
-   * This function has a dummy return of 0.
-   * 
-   * All parameters are IN parameters. */
-  double CalcInitMosqEmergeRate(int populationSize,
-                                int nHostTypesInit, int nMalHostTypesInit,
-				double alpha_i,
-                                double* FHumanInfectivityInitVector,
-                                vector<double>& FEIRInitVector);
   
   /** Given a positive array, originalArray, of length OALength,
    * this routine exponentiates the inverse discrete Fourier 
