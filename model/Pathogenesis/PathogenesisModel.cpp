@@ -163,6 +163,8 @@ Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, doubl
     return ret;
   }
   else if(Global::modelVersion & NON_MALARIA_FEVERS) {
+    //TODO: should this be stored in the XML file?
+    const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
     if ((W_UNIFORM()) < prNonMalariaFever)
       return Pathogenesis::NON_MALARIA;

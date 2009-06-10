@@ -30,6 +30,7 @@ class TransmissionModel;
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
  * Currently many members are public and directly accessed. */
+// TODO: optimise for memory
 class PerHostTransmission
 {
 public:
@@ -39,7 +40,8 @@ public:
   static void initParameters ();
   //@}
   
-  PerHostTransmission (TransmissionModel&);
+  PerHostTransmission ();
+  void initialise (TransmissionModel& tm, double availabilityFactor);
   PerHostTransmission (istream& in, TransmissionModel&);
   void write (ostream& out) const;
   
@@ -63,12 +65,19 @@ public:
   double probMosqSurvivalResting (size_t speciesIndex) const;
   //@}
   
-  /// @brief Public data members
-  //@{
-  vector<HostMosquitoInteraction> species;
-  //@}
+  /** Get the availability of this host to mosquitoes (excl. age factor).
+   *
+   * For NonVector and initialisation phase with Vector. */
+  double entoAvailability () const {
+    return _entoAvailability;
+  }
   
 private:
+  vector<HostMosquitoInteraction> species;
+  
+  // Only used in the non-vector model and initialisation phase of the vector model.
+  double _entoAvailability;
+  
   //NOTE: some intervention data such as timestep of use could be stored here:
   /** simulationTime - dateOfUse is the age of the intervention.
   * 
@@ -85,7 +94,7 @@ class HostMosquitoInteraction
 public:
   /** In lieu of a constructor initialises elements, using the passed base to
    * get baseline parameters. */
-  void initialise (VectorTransmissionSpecies base);
+  void initialise (VectorTransmissionSpecies base, double availabilityFactor);
   
   void read (istream& in);
   void write (ostream& out) const;

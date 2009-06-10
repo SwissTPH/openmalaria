@@ -54,7 +54,7 @@ public:
    * based on vectorial capacity or looks up EIR in the input data.
    * 
    * \param simulationTime Time since start of simulation . */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission&); 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears); 
  
 private:
 

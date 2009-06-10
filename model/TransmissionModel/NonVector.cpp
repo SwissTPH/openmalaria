@@ -93,19 +93,19 @@ void NonVectorTransmission::copyToInitialKappa () {
   initialKappa = kappa;
 }
 
-double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&){
+double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
+  double eir;
   switch (Global::simulationMode) {
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array
-      return interventionEIR[Simulation::timeStep];
+      eir = interventionEIR[Simulation::timeStep];
       break;
     case dynamicEIR:
-      if (Simulation::timeStep == 0) {
-	return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
-      } else {
-	return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
+      eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
+      if (Simulation::timeStep != 0) {
+	eir *=
             kappa[(simulationTime-nspore-1) % Global::intervalsPerYear] /
             initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear];
       }
@@ -113,6 +113,7 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     default:	// Anything else.. don't continue silently
       throw xml_scenario_error ("Invalid simulation mode");
   }
+  return eir * getRelativeAvailability(ageInYears) * perHost.entoAvailability();
 }
 
 

@@ -100,7 +100,7 @@ protected:
    * 
    * \param simulationTime Time since start of simulation.
    * \param host The human to calculate EIR for (not used by all models). */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host) = 0; 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
   
   /** EIR per time step during the pre-intervention phase 
    *

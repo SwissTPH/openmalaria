@@ -268,14 +268,6 @@ enum SimulationMode {
   dynamicEIR = 4,
 };
 
-/// The mean of the base line availability, is used by both human.f and entomology.f
-const double BaselineAvailabilityMean= 1.0;
-
-/** The relative risk of non malaria fever is used in human.f
- * TODO: This is currently set arbitrarily to 1.0, but should be defined in the
- * .xml */
-const double RelativeRiskNonMalariaFever= 1.0;
-
   //NOTE: relocated to avoid circular dependency. Age-group stuff should be central..
   /* nwtgrps is the number of age groups for which expected weights are read in
   for use in the age adjustment of the EIR.

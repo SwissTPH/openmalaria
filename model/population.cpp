@@ -282,13 +282,11 @@ void Population::update1(){
       ++survivsSoFar;
       
       double ageYears = iter->getAgeInYears();
-      double availability = iter->infIncidence->_EIRFactor * _transmissionModel->getRelativeAvailability(ageYears);
+      double availability = iter->perHostTransmission.entoAvailability() * _transmissionModel->getRelativeAvailability(ageYears);
       sumWeight += availability;
       sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
       
       // kappaByAge and nByAge are used in the screensaver only
-      // TODO: This measure of infectiousness isn't directly affected by
-      // bed-nets and isn't usable with NC's vector transmission model.
       int ia = iter->ageGroup() - 1;
       kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
       ++nByAge[ia];

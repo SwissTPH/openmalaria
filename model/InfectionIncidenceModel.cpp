@@ -21,6 +21,7 @@
 #include "InfectionIncidenceModel.h"
 #include "GSLWrapper.h"
 #include "inputData.h"
+#include "TransmissionModel/PerHost.h"
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 const double InfectionIncidenceModel::susceptibility= 0.702;
@@ -71,36 +72,31 @@ void InfectionIncidenceModel::init () {
     InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(BaselineAvailabilityShapeParam, 2));
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
+  
+  if (Global::modelVersion & ANY_TRANS_HET)
+    cerr << "Warning: will use heterogeneity workaround." << endl;
 }
 
 
 // -----  non-static non-checkpointing constructors  -----
 
-InfectionIncidenceModel* InfectionIncidenceModel::createModel (double EIRFactor) {
+InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    return new NegBinomMAII (EIRFactor);
+    return new NegBinomMAII ();
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-    return new LogNormalMAII (EIRFactor);
+    return new LogNormalMAII ();
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
-    return new LogNormalMAPlusPreImmII(EIRFactor);
-  } else
-    return new InfectionIncidenceModel(EIRFactor);
+    return new LogNormalMAPlusPreImmII();
+  } else {
+    if (Global::modelVersion & ANY_TRANS_HET)
+      return new HeterogeneityWorkaroundII();
+    else
+      return new InfectionIncidenceModel();
+  }
 }
 
-InfectionIncidenceModel::InfectionIncidenceModel (double EIRFactor) :
-  _pinfected(0.0), _EIRFactor(EIRFactor), _cumulativeEIRa(0.0)
-{
-}
-NegBinomMAII::NegBinomMAII (double EIRFactor) :
-  InfectionIncidenceModel(W_GAMMA(BaselineAvailabilityShapeParam,
-				  EIRFactor/BaselineAvailabilityShapeParam))
-{}
-LogNormalMAII::LogNormalMAII (double EIRFactor) :
-  InfectionIncidenceModel(W_LOGNORMAL(log(EIRFactor)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
-				       BaselineAvailabilityShapeParam))
-{}
-LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII (double EIRFactor) :
-  InfectionIncidenceModel(EIRFactor)
+InfectionIncidenceModel::InfectionIncidenceModel () :
+  _pinfected(0.0), _cumulativeEIRa(0.0)
 {}
 
 
@@ -113,14 +109,17 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel (istream& in) {
     return new LogNormalMAII (in);
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
     return new LogNormalMAPlusPreImmII(in);
-  } else
-    return new InfectionIncidenceModel(in);
+  } else {
+    if (Global::modelVersion & ANY_TRANS_HET)
+      return new HeterogeneityWorkaroundII(in);
+    else
+      return new InfectionIncidenceModel(in);
+  }
 }
 
 InfectionIncidenceModel::InfectionIncidenceModel (istream& in) {
   in >> _cumulativeEIRa;
   in >> _pinfected;
-  in >> _EIRFactor;
 }
 NegBinomMAII::NegBinomMAII (istream& in) :
   InfectionIncidenceModel(in)
@@ -135,64 +134,70 @@ LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII (istream& in) :
 void InfectionIncidenceModel::write (ostream& out) const {
   out << _cumulativeEIRa << endl; 
   out << _pinfected << endl; 
-  out << _EIRFactor << endl; 
 }
 
 
 // -----  non-static methods  -----
+
+double InfectionIncidenceModel::getAvailabilityFactor(double baseAvailability) {
+  return baseAvailability;
+}
+double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
+  return W_GAMMA(BaselineAvailabilityShapeParam,
+		 baseAvailability/BaselineAvailabilityShapeParam);
+}
+double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
+  return W_LOGNORMAL(log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
+		     BaselineAvailabilityShapeParam);
+}
 
 void InfectionIncidenceModel::summarize (Summary& summary, double age) {
   summary.addToExpectedInfected(age, _pinfected);
 }
 
 
-double InfectionIncidenceModel::getModelExpectedInfections (double ageAdjustedEIR) {
-  return survivalOfInoculum(ageAdjustedEIR) * ageAdjustedEIR * Global::interval * _EIRFactor;
+double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+  return survivalOfInoculum(effectiveEIR) * effectiveEIR * Global::interval;
 }
-double NegBinomMAII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
+double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans) {
+  return survivalOfInoculum(effectiveEIR/phTrans.entoAvailability()) * effectiveEIR * Global::interval;
+}
+double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
   return (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
 }
-double LogNormalMAII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
+double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
   return sampleFromLogNormal(W_UNIFORM(),
 			     log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			     InfectionrateShapeParam);
 }
-double LogNormalMAPlusPreImmII::getModelExpectedInfections (double ageAdjustedEIR) {
-  double ExpectedInfectionRate = ageAdjustedEIR * _EIRFactor * susceptibility * Global::interval;
+double LogNormalMAPlusPreImmII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
   
-  return survivalOfInoculum(ageAdjustedEIR) *
+  return survivalOfInoculum(effectiveEIR) *
     sampleFromLogNormal(W_UNIFORM(),
 			log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			InfectionrateShapeParam);
 }
 
-double InfectionIncidenceModel::survivalOfInoculum (double ageAdjustedEIR) {
+double InfectionIncidenceModel::survivalOfInoculum (double ageAdjEIR) {
   double survivalOfInoculum=(1.0+pow(_cumulativeEIRa*Xstar_pInv, gamma_p));
   survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
-  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjustedEIR*EstarInv));
+  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjEIR*EstarInv));
   return survivalOfInoculum;
 }
 
-int InfectionIncidenceModel::numNewInfections (double ageAdjustedEIR, double PEVEfficacy) {
-  double expectedNumInfections = getModelExpectedInfections (ageAdjustedEIR);
+int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans) {
+  double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
   if (Vaccine::PEV.active) {
     expectedNumInfections *= (1.0 - PEVEfficacy);
   }
   
-  //TODO: this code does not allow for variations in baseline availability
-  //this is only likely to be relevant in some models but should not be
-  //forgotten
-  
   //Update pre-erythrocytic immunity
-  if (Global::modelVersion & ANY_TRANS_HET) {
-    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR*_EIRFactor;
-  } else {
-    _cumulativeEIRa+=double(Global::interval)*ageAdjustedEIR;
-  }
+  _cumulativeEIRa+=double(Global::interval)*effectiveEIR;
   
   _pinfected = 1.0 - exp(-expectedNumInfections) * (1.0-_pinfected);
   if (_pinfected < 0.0)

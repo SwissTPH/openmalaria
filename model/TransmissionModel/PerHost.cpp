@@ -27,16 +27,20 @@ void PerHostTransmission::initParameters () {
   EntoInterventionIRS::initParameters();
 }
 
-PerHostTransmission::PerHostTransmission (TransmissionModel& tm) {
+PerHostTransmission::PerHostTransmission () {
+}
+void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
+  _entoAvailability = availabilityFactor;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
     for (size_t i = 0; i < vTM->numSpecies; ++i)
-      species[i].initialise (vTM->species[i]);
+      species[i].initialise (vTM->species[i], availabilityFactor);
   }
 }
 
 PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
+  in >> _entoAvailability;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
@@ -46,6 +50,7 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
 }
 
 void PerHostTransmission::write (ostream& out) const {
+  out << _entoAvailability << endl;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
 }
@@ -70,10 +75,10 @@ double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const 
 }
 
 
-void HostMosquitoInteraction::initialise (VectorTransmissionSpecies base)
+void HostMosquitoInteraction::initialise (VectorTransmissionSpecies base, double availabilityFactor)
 {
-  //FIXME: should be partially random:
-  entoAvailability = base.entoAvailability;
+  //TODO: vary to simulate heterogeneity
+  entoAvailability = base.entoAvailability * availabilityFactor;
   probMosqBiting = base.probMosqBiting;
   probMosqFindRestSite = base.probMosqFindRestSite;
   probMosqSurvivalResting = base.probMosqSurvivalResting;

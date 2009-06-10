@@ -26,6 +26,8 @@
 #include "inputData.h"
 #include "intervention.h"
 
+class PerHostTransmission;
+
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
  *
@@ -43,14 +45,14 @@ public:
   /// Read in/initialise parameters
   static void init();
   /// Create a new instance
-  static InfectionIncidenceModel* createModel (double EIRFactor);
+  static InfectionIncidenceModel* createModel ();
   /// Read from a checkpoint
   static InfectionIncidenceModel* createModel (istream& in);
   //@}
   
 protected:
-  /// Create a new model, passing the _EIRFactor.
-  InfectionIncidenceModel (double EIRFactor);
+  /// Create a new model
+  InfectionIncidenceModel ();
   /// Load from a checkpoint
   InfectionIncidenceModel (istream& in);
 public:
@@ -58,6 +60,15 @@ public:
   
   /// Write a checkpoint
   void write (ostream& out) const;
+  
+  /** Return an availability multiplier, dependant on the model (NegBinomMAII
+   * and LogNormalMAII models use this). Ideally availability adjustments
+   * should have nothing to do with the InfectionIncidenceModel though.
+   * 
+   * @param baseAvailability This was BaselineAvailabilityMean from Constant.h,
+   *	and had the value 1.0. Whether it should be anything else I don't know.
+   */
+  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
   
   /// Output _pinfected to the summary
   void summarize (Summary&, double age);
@@ -72,13 +83,13 @@ public:
    * 
    * Secondly calculates the number of new infections to introduce via a
    * stochastic process. */
-  int numNewInfections(double ageAdjustedEIR, double PEVEfficacy);
+  int numNewInfections(double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double ageAdjustedEIR);
+  virtual double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
   
-  double survivalOfInoculum (double ageAdjustedEIR);
+  double survivalOfInoculum (double effectiveEIR);
   
 public:	//TODO - maybe better if not public
   /** Probability of infection (cumulative or reset to zero in massTreatment).
@@ -86,12 +97,6 @@ public:	//TODO - maybe better if not public
    * Appears to be used only for calculating expected inoculations for the
    * analysis of pre-erythrocytic immunity. */
   double _pinfected;
-  /** Baseline availability to mosquitoes; used by some sub-classes and
-   * heterogeneity to adjust the effective EIR.
-   *
-   * Using this to adjust the EIR returned by the transmission model is not
-   * compatible with NC's VectorTransmission. */
-  double _EIRFactor;
 private:
   //!Number of infective bites since birth
     double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
@@ -129,29 +134,46 @@ protected:	// Static data
   //@}
 };
 
+/** A workaround to produce the same results as with heterogeneity work-units.
+ *
+ * The EIR passed into the function was not in one place adjusted by the
+ * availability factor used in transmission heterogeneity, where it possibly
+ * should have been. In any case, this should allow reproducing those results.
+ */
+class HeterogeneityWorkaroundII : public InfectionIncidenceModel {
+public:
+  HeterogeneityWorkaroundII () {}
+  HeterogeneityWorkaroundII (istream& in) :
+    InfectionIncidenceModel (in) {}
+  virtual ~HeterogeneityWorkaroundII() {}
+protected:
+  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
+};
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
-  NegBinomMAII (double EIRFactor);
+  NegBinomMAII () {}
   NegBinomMAII (istream& in);
   virtual ~NegBinomMAII() {}
+  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double ageAdjustedEIR);
+  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
-  LogNormalMAII (double EIRFactor);
+  LogNormalMAII () {}
   LogNormalMAII (istream& in);
   virtual ~LogNormalMAII() {}
+  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double ageAdjustedEIR);
+  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
 };
 class LogNormalMAPlusPreImmII : public InfectionIncidenceModel {
 public:
-  LogNormalMAPlusPreImmII (double EIRFactor);
+  LogNormalMAPlusPreImmII () {}
   LogNormalMAPlusPreImmII (istream& in);
   virtual ~LogNormalMAPlusPreImmII() {}
 protected:
-  double getModelExpectedInfections (double ageAdjustedEIR);
+  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
 };
 
 #endif

@@ -71,10 +71,9 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
    * availability. */
   if (Global::simulationMode == equilibriumMode)
     return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
-	getRelativeAvailability(ageInYears);
+	getRelativeAvailability(ageInYears) * host.entoAvailability();
   else
-    return calculateEIR (simulationTime, host) *
-	getRelativeAvailability(ageInYears);
+    return calculateEIR (simulationTime, host, ageInYears);
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {

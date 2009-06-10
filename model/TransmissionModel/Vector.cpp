@@ -51,20 +51,13 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
-  // These models cause _EIRFactor in InfectionIncidenceModel to not be 1.0.
-  // This was a method of adjusting the availability used with the NonVector model;
-  // availability should be adjusted within the TransmissionModel but no-one's
-  // confirmed these models make sense doing this. (DH)
-  if (Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION | LOGNORMAL_MASS_ACTION | ANY_TRANS_HET))
-    throw xml_scenario_error("VectorTransmission is incompatible with models adjusting EIR");
-  
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */
-double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host) {
+double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
   /* Calculates EIR per individual (hence N_i == 1).
    *
    * See comment in advancePeriod for method. */
@@ -72,10 +65,10 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].partialEIR
-      * host.entoAvailability(i)	// Also multiplied by getRelativeAvailability in TransmissionModel::getEIR
+      * host.entoAvailability(i)
       * host.probMosqBiting(i);		// probability of biting, once commited
   }
-  return EIR;
+  return EIR * getRelativeAvailability(ageInYears);
 }
 
 
