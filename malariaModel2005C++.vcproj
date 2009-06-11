@@ -76,7 +76,7 @@
 				Name="VCLinkerTool"
 				IgnoreImportLibrary="false"
 				AdditionalDependencies="xerces-c_static_3D.lib delayimp.lib gsl_mtd.lib cblas_mtd.lib zdll.lib"
-				OutputFile=".\Debug/malariacontrol_6.17_windows_intelx86"
+				OutputFile="malariacontrol_6.17_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=".\Debug;.\lib"
@@ -174,7 +174,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib zdll.lib"
-				OutputFile=".\Release/malariacontrol_windows_intelx86"
+				OutputFile="malariacontrol_6.17_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=".\Release;.\lib"

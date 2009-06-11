@@ -1,55 +1,72 @@
-copy test\original\densities.csv .
-copy test\original\scenario_4.xsd .
-copy test\original\scenario1.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original1.txt output.txt
+mkdir test\sandbox
+cd test\sandbox
+del checkpoint
+copy ..\original\densities.csv .
+copy ..\original\scenario_5.xsd .
+copy ..\original\scenario* .
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario1.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario1.xml
+fc ..\original\original1.txt output.txt
 copy output.txt output1.txt
-copy test\original\scenario2.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original2.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario2.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario2.xml
+fc ..\original\original2.txt output.txt
 copy output.txt output2.txt
-copy test\original\scenario3.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original3.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario3.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario3.xml
+fc ..\original\original3.txt output.txt
 copy output.txt output3.txt
-copy test\original\scenario4.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original4.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario4.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario4.xml
+fc ..\original\original4.txt output.txt
 copy output.txt output4.txt
-copy test\original\scenario5.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original5.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario5.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario5.xml
+fc ..\original\original5.txt output.txt
 copy output.txt output5.txt
-copy test\original\scenario6.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original6.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario6.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario6.xml
+fc ..\original\original6.txt output.txt
 copy output.txt output6.txt
-copy test\original\scenario7.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original7.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario7.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario7.xml
+fc ..\original\original7.txt output.txt
 copy output.txt output7.txt
-copy test\original\scenario8.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original8.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario8.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario8.xml
+fc ..\original\original8.txt output.txt
 copy output.txt output8.txt
-copy test\original\scenario9.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original9.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario9.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario9.xml
+fc ..\original\original9.txt output.txt
 copy output.txt output9.txt
-copy test\original\scenario10.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original10.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario10.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario10.xml
+fc ..\original\original10.txt output.txt
 copy output.txt output10.txt
-copy test\original\scenario11.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original11.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario11.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario11.xml
+fc ..\original\original11.txt output.txt
 copy output.txt output11.txt
-copy test\original\scenario12.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\original12.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario12.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenario12.xml
+fc ..\original\original12.txt output.txt
 copy output.txt output12.txt
-copy test\original\scenarioIPT.xml scenario.xml
-Release\malariacontrol_windows_intelx86
-fc test\original\originalIPT.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenarioIPT.xml
+..\..\malariacontrol_6.17_windows_intelx86 --checkpoint --scenario scenarioIPT.xml
+fc ..\original\originalIPT.txt output.txt
 copy output.txt outputIPT.txt
+del checkpoint
 pause
