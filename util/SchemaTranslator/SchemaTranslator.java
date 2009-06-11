@@ -31,7 +31,7 @@ public class SchemaTranslator {
 	Document scenarioDocument;
 	Element scenarioElement;
 
-	static final int CURRENT_VERSION = 4;
+	static final int CURRENT_VERSION = 5;
 
 	private static int _required_version = CURRENT_VERSION;
 	private static boolean doValidation = true;
@@ -114,7 +114,7 @@ public class SchemaTranslator {
 			File outFile = new File(outDir, documentFile.getName());
 			outFile.createNewFile();
 			OutputStream os = new FileOutputStream(outFile);
-			Result result = new StreamResult(os);
+			/*Result result = new StreamResult(os);
 			// Write the DOM document to the file
 			Transformer xformer = TransformerFactory.newInstance().newTransformer();
 			xformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -122,8 +122,14 @@ public class SchemaTranslator {
 			// This adds more indentation/new-lines where there's already spacing :-( 
 			//xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			xformer.transform(new DOMSource(scenarioDocument), result);
-		}
+			xformer.transform(new DOMSource(scenarioDocument), result);*/
+	        OutputFormat format = new OutputFormat(doc);
+	         format.setLineWidth(65);
+	         format.setIndenting(true);
+	         format.setIndent(2);
+	         XMLSerializer serializer = new XMLSerializer(out, format);
+	         serializer.serialize(doc);
+	 		}
 		if (doValidation) validate(scenarioDocument, schemaFileName);
 	}
 
@@ -199,6 +205,10 @@ public class SchemaTranslator {
 	public void translate2To3() {
 	}
 	
+	/* EntoData now has either a nonVector or a vector element; EIRDaily and
+	 * anopheles lists have moved to one of these.
+	 * Some unwanted entomological parameters have been removed, many have been
+	 * added, and eipDuration has been moved from param. */
 	public void translate3To4() {
 		Element params = (Element)scenarioElement.getElementsByTagName("parameters").item(0);
 		Attr eip = params.getAttributeNode("eipDuration");
@@ -252,12 +262,31 @@ public class SchemaTranslator {
 			}
 		}
 	}
+	
+	// modelVersion flags 1<<2, 1<<4 or 1<<5 have changed
+	public void translate4To5() throws Exception {
+		int ver = Integer.parseInt(scenarioElement.getAttribute("modelVersion"));
+		if ((ver & 0x68) != 0)	// modelVersion with flags 1<<2, 1<<4 or 1<<5
+			throw new Exception ("Scenario uses InfectionIncidence model flags; these have changed. Please update!");
+		/* Note : We don't translate directly because
+		 *  a) Very few scenarios already do this
+		 *  b) It's probably better that people know this change is required.
+		 * However, there is a direct translation in 2/3 of cases:
+		 *  1<<2 translates to (1<<2 | 1<<5),
+		 *  1<<4 translates to (1<<4 | 1<<5),
+		 *  1<<5 had a bug fixed, but roughly translates to 1<<4.
+		 */
+	}
 
 	private void visitAllFiles(File file, File outDir) throws Exception {
 		if (file.isDirectory()) {
 			String[] children = file.list();
 			for (int i = 0; i < children.length; i++) {
-				visitAllFiles(new File(file, children[i]), outDir);
+				try {
+					visitAllFiles(new File(file, children[i]), outDir);
+				} catch (Exception exc) {
+					System.out.println ("Error translating "+file+": "+exc);
+				}
 			}
 		} else {
 			if (file.getName().endsWith(".xml")) {

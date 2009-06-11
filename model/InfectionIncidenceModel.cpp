@@ -24,7 +24,6 @@
 #include "TransmissionModel/PerHost.h"
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
-const double InfectionIncidenceModel::susceptibility= 0.702;
 double InfectionIncidenceModel::InfectionrateShapeParam;
 
 double InfectionIncidenceModel::gamma_p;
@@ -62,9 +61,7 @@ void InfectionIncidenceModel::init () {
   if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
     InfectionrateShapeParam = (BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
-  }
-  else if (Global::modelVersion &
-    (LOGNORMAL_MASS_ACTION | LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM)) {
+  } else if (Global::modelVersion & LOGNORMAL_MASS_ACTION) {
     //! constant defining the constraint for the log Normal variance
     /// Used for the case where availability is assumed log Normally distributed
     double r_square_LogNormal = log(1.0+r_square_Gamma);
@@ -85,8 +82,6 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
     return new NegBinomMAII ();
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
     return new LogNormalMAII ();
-  } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
-    return new LogNormalMAPlusPreImmII();
   } else {
     if (Global::modelVersion & ANY_TRANS_HET)
       return new HeterogeneityWorkaroundII();
@@ -107,8 +102,6 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel (istream& in) {
     return new NegBinomMAII (in);
   } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
     return new LogNormalMAII (in);
-  } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM) {
-    return new LogNormalMAPlusPreImmII(in);
   } else {
     if (Global::modelVersion & ANY_TRANS_HET)
       return new HeterogeneityWorkaroundII(in);
@@ -125,9 +118,6 @@ NegBinomMAII::NegBinomMAII (istream& in) :
   InfectionIncidenceModel(in)
 {}
 LogNormalMAII::LogNormalMAII (istream& in) :
-  InfectionIncidenceModel(in)
-{}
-LogNormalMAPlusPreImmII::LogNormalMAPlusPreImmII (istream& in) :
   InfectionIncidenceModel(in)
 {}
 
@@ -157,35 +147,39 @@ void InfectionIncidenceModel::summarize (Summary& summary, double age) {
 
 
 double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  return survivalOfInoculum(effectiveEIR) * effectiveEIR * Global::interval;
+  return (Sinf+(1-Sinf)/(1 + effectiveEIR*EstarInv)) *	// availability adjustment
+    susceptibility() * effectiveEIR * Global::interval;
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans) {
-  return survivalOfInoculum(effectiveEIR/phTrans.entoAvailability()) * effectiveEIR * Global::interval;
+  return (Sinf+(1-Sinf)/(1 + effectiveEIR/phTrans.entoAvailability()*EstarInv)) *
+    susceptibility() * effectiveEIR * Global::interval;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
+  double ExpectedInfectionRate = effectiveEIR * susceptibility() * Global::interval;
   return (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
+  double ExpectedInfectionRate = effectiveEIR * susceptibility() * Global::interval;
   return sampleFromLogNormal(W_UNIFORM(),
 			     log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
 			     InfectionrateShapeParam);
 }
-double LogNormalMAPlusPreImmII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  double ExpectedInfectionRate = effectiveEIR * susceptibility * Global::interval;
-  
-  return survivalOfInoculum(effectiveEIR) *
-    sampleFromLogNormal(W_UNIFORM(),
-			log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
-			InfectionrateShapeParam);
-}
 
-double InfectionIncidenceModel::survivalOfInoculum (double ageAdjEIR) {
-  double survivalOfInoculum=(1.0+pow(_cumulativeEIRa*Xstar_pInv, gamma_p));
-  survivalOfInoculum = Simm+(1.0-Simm)/survivalOfInoculum;
-  survivalOfInoculum = survivalOfInoculum*(Sinf+(1-Sinf)/(1 + ageAdjEIR*EstarInv));
-  return survivalOfInoculum;
+double InfectionIncidenceModel::susceptibility () {
+  if (Global::modelVersion & NO_PRE_ERYTHROCYTIC) {
+    //! The average proportion of bites from sporozoite positive mosquitoes resulting in infection. 
+    /*! 
+    This is computed as 0.19 (the value S from a neg bin mass action model fitted 
+    to Saradidi data, divided by 0.302 (the ratio of body surface area in a 
+    0.5-6 year old child (as per Saradidi) to adult) 
+    \sa getExpectedNumberOfInfections() 
+    */ 
+    return 0.702;
+  } else {
+    // S_2(i,t) from AJTMH 75 (suppl 2) p12 eqn. (7)
+    return Simm + (1.0-Simm) /
+      (1.0 + pow(_cumulativeEIRa*Xstar_pInv, gamma_p));
+  }
 }
 
 int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans) {

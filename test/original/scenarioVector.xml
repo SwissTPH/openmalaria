@@ -1,5 +1,4 @@
-<?xml version="1.0"?>
-<scenario analysisNo="233" mode="4" maximumAgeYrs="90" modelVersion="0" name="test D94" popSize="1000" simulationDuration="385" schemaVersion="4" xsi:noNamespaceSchemaLocation="scenario_4.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" wuID="0" assimMode="0">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="0" name="test D94" popSize="1000" schemaVersion="5" simulationDuration="385" wuID="0" xsi:noNamespaceSchemaLocation="scenario_5.xsd">
 <demography name="test">
 <ageGroup lowerbound="0.0">
 	<group poppercent="3.474714994" upperbound="1"/>
@@ -83,8 +82,8 @@
 <pSeekOfficialCareUncomplicated2 value="1"/>
 <pSeekOfficialCareSevere value="1"/>
 <pSequelaeInpatient>
-	<item maxAgeYrs="5" value="0.0132"></item>
-	<item maxAgeYrs="99" value="0.005"></item>
+	<item maxAgeYrs="5" value="0.0132"/>
+	<item maxAgeYrs="99" value="0.005"/>
 </pSequelaeInpatient>
 <CFR>
 	<group cfr="0.09189" lowerbound="0"/>
@@ -133,8 +132,8 @@
 <pSeekOfficialCareUncomplicated2 value="0"/>
 <pSeekOfficialCareSevere value="0"/>
 <pSequelaeInpatient>
-	<item maxAgeYrs="5" value="0.0132"></item>
-	<item maxAgeYrs="99" value="0.005"></item>
+	<item maxAgeYrs="5" value="0.0132"/>
+	<item maxAgeYrs="99" value="0.005"/>
 </pSequelaeInpatient>
 <CFR>
 	<group cfr="0" lowerbound="0"/>
@@ -143,45 +142,41 @@
 <entoData name="Vector Test">
   <vector>
     <anopheles mosquito="gambiae_ss">
-      <eir a0="-0.926517" a1="-0.692164" b1="0.002098" a2="0.401189" b2="-0.375356" EIRRotateAngle="0.0" />
-      <mosq mosqRestDuration="3" extrinsicIncubationPeriod="10"
-	mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"
-	mosqEntoAvailability="0.0070" mosqProbBiting="0.95"
-	mosqProbFindRestSite="0.95" mosqProbResting="0.94"
-	mosqProbOvipositing="0.93" emergenceRateFilename="Nv0-Initial.txt"/>
+      <eir EIRRotateAngle="0.0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
+      <mosq emergenceRateFilename="Nv0-Initial.txt" extrinsicIncubationPeriod="10" mosqEntoAvailability="0.0070" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
     </anopheles>
   </vector>
 </entoData>
-<parameters latentp="3" delta="0.000547945205479452" interval="5" iseed="1">
- <parameter number="1" name="&apos;-ln(1-Sinf)&apos;" include="false" value="0.0507360000000001"/>
- <parameter number="2" name="Estar" include="false" value="0.03247"/>
- <parameter number="3" name="Simm" include="false" value="0.138161050830301"/>
- <parameter number="4" name="Xstar_p" include="false" value="1514.3858532337"/>
- <parameter number="5" name="gamma_p" include="false" value="2.03692533424484"/>
- <parameter number="6" name="sigma2i" include="false" value="10.1735986985258"/>
- <parameter number="7" name="CumulativeYstar" include="false" value="35158523.3113251"/>
- <parameter number="8" name="CumulativeHstar" include="false" value="97.3346527238977"/>
- <parameter number="9" name="&apos;-ln(1-alpha_m)&apos;" include="false" value="2.33031045876193"/>
- <parameter number="10" name="decay_m" include="false" value="2.53106547375805"/>
- <parameter number="11" name="sigma2_0" include="false" value="0.655747311168152"/>
- <parameter number="12" name="Xstar_v" include="false" value="0.916181104713054"/>
- <parameter number="13" name="Ystar2" include="false" value="6502.26335600001"/>
- <parameter number="14" name="alpha" include="false" value="142601.91252"/>
- <parameter number="15" name="Density bias (non Garki)" include="false" value="0.177378570987455"/>
- <parameter number="16" name="No Use 1" include="false" value="1"/>
- <parameter number="17" name="log oddsr CF community" include="false" value="0.736202"/>
- <parameter number="18" name="Indirect risk cofactor" include="false" value="0.018777338"/>
- <parameter number="19" name="Non-malaria infant mortality" include="false" value="49.5390466"/>
- <parameter number="20" name="Density bias (Garki)" include="false" value="4.79610772546704"/>
- <parameter number="21" name="Severe Malaria Threshhold" include="false" value="784455.6"/>
- <parameter number="22" name="Immunity Penalty" include="false" value="1"/>
- <parameter number="23" name="Immune effector decay" include="false" value="0"/>
- <parameter number="24" name="comorbidity intercept" include="false" value="0.0968"/>
- <parameter number="25" name="Ystar half life" include="false" value="0.275437402"/>
- <parameter number="26" name="Ystar1" include="false" value="0.596539864"/>
- <parameter number="27" name="Asexual immunity decay" include="false" value="0"/>
- <parameter number="28" name="Ystar0" include="false" value="296.3024379"/>
- <parameter number="29" name="Idete multiplier" include="false" value="2.797523626"/>
- <parameter number="30" name="critical age for comorbidity" include="false" value="0.117383"/>
+<parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
+ <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+ <parameter include="false" name="Estar" number="2" value="0.03247"/>
+ <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+ <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+ <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+ <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
+ <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
+ <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+ <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+ <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+ <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+ <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+ <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
+ <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+ <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+ <parameter include="false" name="No Use 1" number="16" value="1"/>
+ <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+ <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+ <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+ <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+ <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+ <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+ <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+ <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+ <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+ <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+ <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+ <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+ <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+ <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
  </parameters>
 </scenario>

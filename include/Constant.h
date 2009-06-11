@@ -34,7 +34,7 @@ enum ModelVersion {
   
   /** @brief Baseline availability of humans is sampled from a gamma distribution
    * Infections introduced by mass action with negative binomial
-   * variation in numbers of infection and no acquired preerythrocytic immunity.
+   * variation in numbers of infection.
    * 
    * Default: New infections are introduced via a Poisson process as described
    * in AJTMH 75 (suppl 2) pp11-18. */
@@ -48,18 +48,14 @@ enum ModelVersion {
   /** @brief Baseline availability of humans is sampled from a log normal distribution
    * 
    * Infections introduced by mass action with log normal variation in
-   * infection rate with no acquired preerythrocytic immunity.
+   * infection rate.
    * 
    * Default: New infections are introduced via a Poisson process as described
    * in AJTMH 75 (suppl 2) pp11-18. */
   LOGNORMAL_MASS_ACTION = 1 << 4,
   
-  /** Infections introduced by mass action with log normal variation in
-   * infection rate modulated by preerythrocytic immunity.
-   * 
-   * Default: New infections are introduced via a Poisson process as described
-   * in AJTMH 75 (suppl 2) pp11-18. */
-  LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM = 1 << 5,
+  /** Infections are introduced without using preerythrocytic immunity. */
+  NO_PRE_ERYTHROCYTIC = 1 << 5,
   
   /// BugFix in previous versions.  This option is not currently implemented.
   // @{

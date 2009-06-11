@@ -31,7 +31,7 @@ using namespace std;
 // scnXml::), but I recommend code within the model explicitly do this.
 using namespace scnXml;
 
-const int SCHEMA_VERSION = 4;
+const int SCHEMA_VERSION = 5;
 
 /** @brief The xml data structure. */
 const Scenario* scenario = NULL;

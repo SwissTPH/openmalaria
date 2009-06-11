@@ -31,12 +31,14 @@ class PerHostTransmission;
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
  *
- * There are four versions of this model:
+ * There are four versions of this model, with different availability models:
  * - InfectionIncidenceModel (the default): Smith et al, AJTMH 2006 75 Suppl 2
+ * - HeterogeneityWorkaroundII: emulates old, presumably unintended, behaviour
  * - NegBinomMAII: NEGATIVE_BINOMIAL_MASS_ACTION
  * - LogNormalMAII: LOGNORMAL_MASS_ACTION
- * - LogNormalMAPlusPreImmII: LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM
- */
+ * 
+ * There are also two susceptibility models which should be compatible with all
+ * of these (see susceptibility()). */
 class InfectionIncidenceModel
 {
 public:
@@ -89,7 +91,7 @@ protected:
   /// Calculates the expected number of infections, excluding vaccine effects
   virtual double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
   
-  double survivalOfInoculum (double effectiveEIR);
+  double susceptibility ();
   
 public:	//TODO - maybe better if not public
   /** Probability of infection (cumulative or reset to zero in massTreatment).
@@ -107,15 +109,6 @@ protected:	// Static data
   static double BaselineAvailabilityShapeParam;
   
   //VARIABLES INCLUDED IN CORE GETs of number of infections 
-  //! The average proportion of bites from sporozoite positive mosquitoes resulting in infection. 
-  /*! 
-  This is computed as 0.19 (the value S from a neg bin mass action model fitted 
-  to Saradidi data, divided by 0.302 (the ratio of body surface area in a 
-  0.5-6 year old child (as per Saradidi) to adult) 
-  \sa getExpectedNumberOfInfections() 
-  */ 
-  static const double susceptibility;
-  
   //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
   static double InfectionrateShapeParam;
   
@@ -164,14 +157,6 @@ public:
   LogNormalMAII (istream& in);
   virtual ~LogNormalMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
-protected:
-  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
-};
-class LogNormalMAPlusPreImmII : public InfectionIncidenceModel {
-public:
-  LogNormalMAPlusPreImmII () {}
-  LogNormalMAPlusPreImmII (istream& in);
-  virtual ~LogNormalMAPlusPreImmII() {}
 protected:
   double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
 };
