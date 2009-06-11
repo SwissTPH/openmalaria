@@ -195,8 +195,8 @@ ostream& operator<<(ostream& out, const Human& human){
 
 
 void Human::updateInfection(TransmissionModel* transmissionModel){
-  double ageAdjustedEIR = transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission, getAgeInYears());
-  int numInf = infIncidence->numNewInfections(ageAdjustedEIR, _PEVEfficacy, perHostTransmission);
+  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission, getAgeInYears()),
+					      _PEVEfficacy, perHostTransmission);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
   }

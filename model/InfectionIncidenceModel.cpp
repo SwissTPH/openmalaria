@@ -147,21 +147,22 @@ void InfectionIncidenceModel::summarize (Summary& summary, double age) {
 
 
 double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  return (Sinf+(1-Sinf)/(1 + effectiveEIR*EstarInv)) *	// availability adjustment
-    susceptibility() * effectiveEIR * Global::interval;
+  // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
+  return (Sinf+(1-Sinf) / 
+    (1 + effectiveEIR/Global::interval*EstarInv)) *
+    susceptibility() * effectiveEIR;
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans) {
-  return (Sinf+(1-Sinf)/(1 + effectiveEIR/phTrans.entoAvailability()*EstarInv)) *
-    susceptibility() * effectiveEIR * Global::interval;
+  return (Sinf+(1-Sinf)/(1 + effectiveEIR/(Global::interval*phTrans.entoAvailability())*EstarInv)) *
+    susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  double ExpectedInfectionRate = effectiveEIR * susceptibility() * Global::interval;
-  return (W_GAMMA((InfectionrateShapeParam), (ExpectedInfectionRate/InfectionrateShapeParam)));
+  return W_GAMMA(InfectionrateShapeParam,
+		  effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  double ExpectedInfectionRate = effectiveEIR * susceptibility() * Global::interval;
   return sampleFromLogNormal(W_UNIFORM(),
-			     log(ExpectedInfectionRate) - 0.5*pow(InfectionrateShapeParam, 2),
+			     log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
 			     InfectionrateShapeParam);
 }
 
@@ -191,7 +192,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   }
   
   //Update pre-erythrocytic immunity
-  _cumulativeEIRa+=double(Global::interval)*effectiveEIR;
+  _cumulativeEIRa+=effectiveEIR;
   
   _pinfected = 1.0 - exp(-expectedNumInfections) * (1.0-_pinfected);
   if (_pinfected < 0.0)

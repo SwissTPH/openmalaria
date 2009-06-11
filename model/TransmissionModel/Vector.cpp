@@ -34,6 +34,9 @@
 
 
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
+  if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
+    throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
+  
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
   
@@ -44,6 +47,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   species.resize (numSpecies);
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initialise (anophelesList[i], initialisationEIR);
+  // We want the EIR to effectively be the sum of the EIR for each day in the interval
+  for (size_t i = 0; i < initialisationEIR.size(); ++i)
+    initialisationEIR[i] *= Global::interval;
 }
 VectorTransmission::~VectorTransmission () {
   for (size_t i = 0; i < numSpecies; ++i)

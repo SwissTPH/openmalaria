@@ -90,7 +90,7 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   if (tmod == 0) {
     _sumAnnualKappa = 0.0;
   }
-  _sumAnnualKappa += kappa[tmod] * Global::interval * initialisationEIR[tmod];
+  _sumAnnualKappa += kappa[tmod] * initialisationEIR[tmod];
   if (tmod == Global::intervalsPerYear - 1) {
     if (annualEIR == 0) {
       _annualAverageKappa=0;

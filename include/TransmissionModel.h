@@ -102,11 +102,10 @@ protected:
    * \param host The human to calculate EIR for (not used by all models). */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
   
-  /** EIR per time step during the pre-intervention phase 
+  /** EIR per time step during the pre-intervention phase.
    *
-   * Only NonVectorTransmission?
-   * Not checkpointed; doesn't need to be for NonVectorTransmission (unless
-   * changeEIR intervention occurred). */
+   * Not checkpointed; doesn't need to be except when a changeEIR intervention
+   * occurs. */
   vector<double> initialisationEIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.

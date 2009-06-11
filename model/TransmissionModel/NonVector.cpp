@@ -44,15 +44,17 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
     // istep is the time period to which the day is assigned.  The result of the
     // division is automatically rounded down to the next integer.
     size_t i1 = (mpcday / Global::interval) % Global::intervalsPerYear;
+    //EIR() is the sum of the EIRs assigned to the 73 different recurring time points
     nDays[i1]++;
-    //EIR() is the arithmetic mean of the EIRs assigned to the 73 different recurring time points
-    initialisationEIR[i1] = ((initialisationEIR[i1] * (nDays[i1]-1)) + EIRdaily) / nDays[i1];
+    initialisationEIR[i1] += EIRdaily;
   }
   
   // Calculate total annual EIR
   annualEIR=0.0;
   for (size_t j=0;j<Global::intervalsPerYear; j++) {
-    annualEIR += Global::interval*initialisationEIR[j];
+    // NOTE: this should be unnecessary, if daily.size() == daysInYear
+    initialisationEIR[j] *= Global::interval / (double)nDays[j];
+    annualEIR += initialisationEIR[j];
   }
 }
 
@@ -84,8 +86,11 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
     // division is automatically rounded down to the next integer.
     size_t istep = mpcday / Global::interval;
     nDays[istep]++;
-    interventionEIR[istep]= ((interventionEIR[istep] * (nDays[istep]-1)) + EIRdaily) / nDays[istep];
+    interventionEIR[istep] += EIRdaily;
   }
+  // NOTE: this should be unnecessary, if daily.size() == daysInYear
+  for (size_t i = 0; i < interventionEIR.size(); ++i)
+    interventionEIR[i] *= Global::interval / nDays[i];
   annualEIR=-9.99;
 }
 
