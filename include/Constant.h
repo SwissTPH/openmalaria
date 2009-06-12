@@ -177,7 +177,7 @@ namespace Outcome {
 
 namespace Params {
   enum Params {
-    /// Used in NoVectorControl
+    /// @b Used in NoVectorControl
     //@{
     NEG_LOG_ONE_MINUS_SINF = 1,
     E_STAR = 2,
@@ -185,10 +185,8 @@ namespace Params {
     X_STAR_P = 4,
     GAMMA_P = 5,
     //@}
-    
-    SIGMA_I_SQ = 6,			///< Used in Human
-    
-    /// Used in Infection
+    SIGMA_I_SQ = 6,			///< Used in WithinHostModel
+    /// @b Used in Infection
     //@{
     CUMULATIVE_Y_STAR = 7,
     CUMULATIVE_H_STAR = 8,
@@ -197,36 +195,35 @@ namespace Params {
     SIGMA0_SQ = 11,
     X_NU_STAR = 12,
     //@}
-    
-    /// Used in Human
+    /// @b Used in PathogenesisModel
     //@{
     Y_STAR_SQ = 13,
     ALPHA = 14,
-    DENSITY_BIAS_NON_GARKI = 15,
-    BASELINE_AVAILABILITY_SHAPE = 16,	///< Also used in TransmissionModel
     //@}
-    
+    DENSITY_BIAS_NON_GARKI = 15,	///< Used in WithinHostModel
+    BASELINE_AVAILABILITY_SHAPE = 16,	///< Used in InfectionIncidenceModel
     LOG_ODDS_RATIO_CF_COMMUNITY = 17,	///< Used in CaseManagementModel
-    INDIRECT_RISK_COFACTOR = 18,	///< Used in Human
+    INDIRECT_RISK_COFACTOR = 18,	///< Used in PathogenesisModel
     NON_MALARIA_INFANT_MORTALITY = 19,	///< Used in Summary
-    
-    /// Used in Human
+    DENSITY_BIAS_GARKI = 20,		///< Used in WithinHostModel
+    SEVERE_MALARIA_THRESHHOLD = 21,	///< Used in PathogenesisModel
+    IMMUNITY_PENALTY = 22,		///< Used in WithinHostModel
+    IMMUNE_EFFECTOR_DECAY = 23,		///< Used in WithinHostModel
+    /// @b Used in PathogenesisModel
     //@{
-    DENSITY_BIAS_GARKI = 20,
-    SEVERE_MALARIA_THRESHHOLD = 21,
-    IMMUNITY_PENALTY = 22,
-    IMMUNE_EFFECTOR_DECAY = 23,
     COMORBIDITY_INTERCEPT = 24,
     Y_STAR_HALF_LIFE = 25,
     Y_STAR_1 = 26,
-    ASEXUAL_IMMUNITY_DECAY = 27,
+    //@}
+    ASEXUAL_IMMUNITY_DECAY = 27,	///< Used in WithinHostModel
+    /// @b Used in PathogenesisModel
+    //@{
     Y_STAR_0 = 28,
     
     CRITICAL_AGE_FOR_COMORBIDITY = 30,
     MUELLER_RATE_MULTIPLIER = 31,
     MUELLER_DENSITY_EXPONENT = 32,
     //@}
-    
     MAX
   };
 }

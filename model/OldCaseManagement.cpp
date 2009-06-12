@@ -108,12 +108,6 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, Wit
 bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
   //ageGroup is not optimized
   int agegroup=Simulation::gMainSummary->ageGroup(ageYears);
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    //TODO. Note entrypoint enumerations don't match up.
-    //doCM(isMalaria ? 1 : 4);
-    return true;
-  }
-  else {
     int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
                                : Diagnosis::NON_MALARIA_FEVER;
     int nextRegimen=getNextRegimen(Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
@@ -145,17 +139,10 @@ bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
     else {
       _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
     }
-  }
   return false;
 }
 
 bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    //TODO. Note entrypoint enumerations don't match up.
-    //doCM(3);
-    return true;
-  }
-  
   /*
   DOCU
   Set doomed=4 if the patient dies.

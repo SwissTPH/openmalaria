@@ -125,37 +125,24 @@ void OldIPTWithinHostModel::newInfection(){
 
 void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
-  if ( latestEvent.getDiagnosis() ==  Diagnosis::SEVERE_MALARIA) {
-    clearAllInfections();
-  }
-  else if(Simulation::simulationTime-_lastIptiOrPlacebo <=  fortnight) {
-    clearAllInfections();
+  if (latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA) {
+  } else if(Simulation::simulationTime-_lastIptiOrPlacebo <= fortnight) {
           // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
-  }
-  else if(Simulation::simulationTime-_lastSPDose <=  fortnight) {
-    clearAllInfections();
+  } else if(Simulation::simulationTime-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
     TODO: if this code is to survive, then the iptiEffect values should be 
     symbolic constants
           */
-  }
-
-  else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
-    clearAllInfections();
+  } else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
     _lastSPDose=Simulation::simulationTime+1;
-  }
-  else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
-    clearAllInfections();
-  }
-  else if(iptiEffect >=  14 && iptiEffect < 30) {
-    clearAllInfections();
-  }
-  else {
+  } else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
+  } else if(iptiEffect >=  14 && iptiEffect < 30) {
+  } else {
     _lastSPDose=Simulation::simulationTime+1;
-    clearAllInfections();
-          // SPAction will first act at the beginning of the next Global::interval
+    // SPAction will first act at the beginning of the next Global::interval
   }
+  clearAllInfections();
 }
 
 void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
