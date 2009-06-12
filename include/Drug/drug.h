@@ -191,13 +191,13 @@ class DrugProxy {
   void destroy();
   
   //! Medicates an individual.
-  /*! \param drugName - The drug abbreviation.
+  /*! \param drugAbbrev - The drug abbreviation.
    *  \param qty      - the quantity (which units?).
    *  \param time     - Time in minutes since start of the simulation tStep.
    *
    *  Medicate has to be called in correct time order (ie first lower times).
    */
-  void medicate(string _drugAbbrev, double _qty, int _time);
+  void medicate(string drugAbbrev, double qty, int time);
   double calculateDrugsFactor(ProteomeInstance* infProteome);
   void decayDrugs();
 

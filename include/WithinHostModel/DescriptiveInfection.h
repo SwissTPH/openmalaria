@@ -96,9 +96,8 @@ public:
   //! Determines parasite density of an individual infection.
   /*!
     \param cumulativeY Previous exposure, in cumulative number of parasites.
-    \param ageyrs Age in years.
-    \param cumulativeH cumulative number of inoculations (inoculation equals infection ?)
-
+    \param ageyears Age in years.
+    \param cumulativeh cumulative number of inoculations
   */
   void determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double &timeStepMaxDensity);
 

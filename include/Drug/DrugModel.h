@@ -63,11 +63,11 @@ public:
   /** Medicate drugs to an individual, which act on infections the following
    * timesteps, until rendered ineffective by decayDrugs().
    *
-   * \param drugName - The drug abbreviation.
-   * \param qty      - the quantity (which units?).
-   * \param time     - Time in minutes since start of the simulation tStep.
+   * \param drugAbbrev - The drug abbreviation.
+   * \param qty        - the quantity (which units?).
+   * \param time       - Time in minutes (or hours?) since start of the simulation tStep.
    */
-  virtual void medicate(string _drugAbbrev, double _qty, int _time) {}
+  virtual void medicate(string drugAbbrev, double qty, int time) {}
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?

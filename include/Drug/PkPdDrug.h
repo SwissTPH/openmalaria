@@ -43,7 +43,7 @@ public:
   virtual ~PkPdDrug ();
   void write (ostream& out);
   
-  void medicate(string _drugAbbrev, double _qty, int _time);
+  void medicate(string drugAbbrev, double qty, int time);
   void decayDrugs ();
   
   void setWeight (double w);

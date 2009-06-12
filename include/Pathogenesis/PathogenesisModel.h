@@ -27,39 +27,23 @@
 
 using namespace std;
 
+/// Namespace enclosing pathogenesis output enumeration.
 namespace Pathogenesis {
-  /** Types of infection; correspond roughly to those in doCM.
-   * 
-   * The following are flags:
-   * @enum NON_MALARIA = non-malaria infection
-   * @enum MALARIA = malaria infection
-   * @enum INDIRECT_MORTALITY = Death caused by indirect effects of malaria
-   * @enum COMPLICATED = Severe malaria or a coinfection
-   * 
-   * The following are possible output values:
-   * @enum NONE = no infection
-   * @enum NON_MALARIA = non-malaria infection
-   * 
-   * The following output values (malaria infections) may additionally have
-   * flag INDIRECT_MORTALITY set:
-   * @enum UNCOMPLICATED
-   * @enum SEVERE
-   * @enum COINFECTION
-   */
+  /** Types of infection; correspond roughly to those in doCM. */
   enum Infection {
-    NONE		= 0,
+    NONE		= 0,		///< No infection
     
-    NON_MALARIA		= 0x1,
-    MALARIA		= 0x2,
+    NON_MALARIA		= 0x1,		///< Non-malaria infection (flag and output value)
+    MALARIA		= 0x2,		///< Malaria infection (flag)
     
     // Flags indicating infection severity:
-    INDIRECT_MORTALITY	= 0x4,
-    COMPLICATED		= 0x8,
+    INDIRECT_MORTALITY	= 0x4,		///< Death caused by indirect effects of malaria (flag)
+    COMPLICATED		= 0x8,		///< Severe malaria or a coinfection (flag)
     
-    UNCOMPLICATED	= MALARIA | 0x10,
+    UNCOMPLICATED	= MALARIA | 0x10,	///< Simpler malaria case (flag MALARIA)
     
-    SEVERE		= MALARIA | COMPLICATED | 0x10,
-    COINFECTION		= MALARIA | COMPLICATED | 0x20,
+    SEVERE		= MALARIA | COMPLICATED | 0x10,	///< Severe malaria case (flags MALARIA, COMPLICATED)
+    COINFECTION		= MALARIA | COMPLICATED | 0x20,	///< Malaria with a coinfection (flags MALARIA, COMPLICATED)
   };
 }
 

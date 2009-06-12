@@ -80,22 +80,22 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
 {
   // Parameters that help to describe the order of the system.
   // Ask not why we call mt, mt. We use mt to index the system.
-  // It is the maximum number of time steps we go back for $N_v$ and $O_v$.
+  // It is the maximum number of time steps we go back for \f$N_v\f$ and \f$O_v\f$.
   size_t mt = theta_s + tau -1;
-  size_t eta = 2*mt + tau;	// $\eta$: The order of the system.
+  size_t eta = 2*mt + tau;	// \f$\eta\f$: The order of the system.
 
   
   // The set of theta_p matrices that determine the dynamics of the system
   // from one step to the next, that is, the system is described by,
-  // $x(t) = \Upsilon(t) x(t-1) = \Lambda(t)$.
-  // $\Upsilon(t)$ is defined over time, $1 \leq t \leq \theta_p$, 
-  // where $t \in \mathbb{N}$.
+  // \f$x(t) = \Upsilon(t) x(t-1) = \Lambda(t)\f$.
+  // \f$\Upsilon(t)\f$ is defined over time, \f$1 \leq t \leq \theta_p\f$, 
+  // where \f$t \in \mathbb{N}\f$.
   gsl_matrix** Upsilon = (gsl_matrix**) malloc(theta_p*sizeof(gsl_matrix*));
 
   // The set of theta_p vectors that determine the forcing of the system
   // at every time step.
-  // $\Lambda(t)$ is defined over time, $1 \leq t \leq \theta_p$, 
-  // where $t \in \mathbb{N}$.
+  // \f$\Lambda(t)\f$ is defined over time, \f$1 \leq t \leq \theta_p\f$, 
+  // where \f$t \in \mathbb{N}\f$.
   gsl_vector** Lambda = (gsl_vector**) malloc(theta_p*sizeof(gsl_vector*));
 
   // The periodic orbit of all eta state variables.
@@ -117,7 +117,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
   
   // The number of infectious mosquitoes over every day of the cycle.
   // calculated from the EIR data.
-  // $S_v$ (from EIR).
+  // \f$S_v\f$ (from EIR).
   gsl_vector* S_vFromEIR = gsl_vector_calloc(theta_p);
   
   // The difference between S_vFromEIR and SvfromNv0.
@@ -126,22 +126,22 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
   // State variables.
   
   // The periodic values of the total number of host-seeking mosquitoes.
-  gsl_vector* Nvp = gsl_vector_calloc(theta_p);	// $N_v^{(p)}(t)$.
+  gsl_vector* Nvp = gsl_vector_calloc(theta_p);	// \f$N_v^{(p)}(t)\f$.
   // The periodic values of the number of infected host-seeking mosquitoes.
-  gsl_vector* Ovp = gsl_vector_calloc(theta_p);	// $O_v^{(p)}(t)$.
+  gsl_vector* Ovp = gsl_vector_calloc(theta_p);	// \f$O_v^{(p)}(t)\f$.
   // The periodic values of the number of infectious host-seeking mosquitoes.
-  gsl_vector* Svp = gsl_vector_calloc(theta_p);	// $S_v^{(p)}(t)$.
+  gsl_vector* Svp = gsl_vector_calloc(theta_p);	// \f$S_v^{(p)}(t)\f$.
   
   // Allocate memory for gsl_matrices and initialize to 0.
   
-  // $X_{\theta_p}$.
+  // \f$X_{\theta_p}\f$.
   // The product of all the evolution matrices.
-  // $X_{\theta_p} = X(\theta_p+1,1)$. 
+  // \f$X_{\theta_p} = X(\theta_p+1,1)\f$. 
   // Refer to Cushing (1995) and the paper for the periodic entomological model
   // for more information.
   gsl_matrix* X_t_p = gsl_matrix_calloc(eta, eta);
   
-  // $(\mathbb{I}-X_{\theta_p})^{-1}$.
+  // \f$(\mathbb{I}-X_{\theta_p})^{-1}\f$.
   // The inverse of the identity matrix minus X_t_p.
   gsl_matrix* inv1Xtp = gsl_matrix_calloc(eta, eta);
 
@@ -159,10 +159,10 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
   /// host-seeking but does not find a host. 
   double P_A = 0;
 
-  /// Probability that on a given day, a mosquito finds a host of type $i$.
+  /// Probability that on a given day, a mosquito finds a host of type \f$i\f$.
   /// For now, we assume that this  is  a double: 
   /// - no dependence on the phase of the period - or the type of host.
-  double P_Ai = 0;	// $P_{A^i}$
+  double P_Ai = 0;	// \f$P_{A^i}\f$
 
   
   // Create matrices in Upsilon.
@@ -176,7 +176,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
                      theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi);
 
 
-  // Calculate $X_{\theta_p}$.
+  // Calculate \f$X_{\theta_p}\f$.
   // Refer to Cushing (1995) and the paper for the periodic entomological model
   // for more information.
   FuncX(X_t_p, Upsilon, theta_p, 0, eta);
@@ -243,10 +243,10 @@ double VectorEmergence::CalcInitMosqEmergeRate(int populationSize,
   char InitSvDiffname[20] = "InitSvDifference";
   PrintVector(InitSvDiffname, S_vDiff, theta_p);
 # endif
-  double SvDiff1norm = gsl_blas_dasum(S_vDiff);	//The $l^1$ norm of S_vDiff.
-  printf("The $l^1$ norm of S_vDiff is %e \n", SvDiff1norm);
+  double SvDiff1norm = gsl_blas_dasum(S_vDiff);	//The \f$l^1\f$ norm of S_vDiff.
+  printf("The \f$l^1\f$ norm of S_vDiff is %e \n", SvDiff1norm);
 
-  // Maximum $l^1$ distance of error of root-finding algorithm
+  // Maximum \f$l^1\f$ distance of error of root-finding algorithm
   const double EpsAbsRF = 1.0;
   
   if(SvDiff1norm>EpsAbsRF){
@@ -406,10 +406,10 @@ void VectorEmergence::CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
                         double mu_vA, double theta_d, double P_B_i, double P_C_i, double P_D_i, 
                         double P_E_i, gsl_vector* K_vi)
 {
-	// $P_{dif}$: Probability that a mosquito finds a host on a given
+	// \f$P_{dif}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and gets infected.
   gsl_vector* Pdif;
-	// $P_{duf}$: Probability that a mosquito finds a host on a given
+	// \f$P_{duf}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and does not get infected.
   gsl_vector* Pduf; 
 	
@@ -437,7 +437,7 @@ void VectorEmergence::CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
         // P_A and P_Ai are described in CalcInitMosqEmergeRate.
   double P_A = exp(-(alpha_i*N_i+mu_vA)*theta_d);
   double P_Ai = (1-P_A)*(alpha_i*N_i)/(alpha_i*N_i+mu_vA);
-	// $P_{df}$: Probability that a mosquito finds a host on a given
+	// \f$P_{df}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle.
   double Pdf = P_Ai*P_B_i*P_C_i*P_D_i*P_E_i;
 
@@ -489,12 +489,12 @@ void VectorEmergence::CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
     }
 
 		
-		// for $N_v$.
+		// for \f$N_v\f$.
     gsl_matrix_set(Upsilon[k],0,0,P_A);
     double temp = Pdf + gsl_matrix_get(Upsilon[k], 0, tau-1);
     gsl_matrix_set(Upsilon[k],0,tau-1,temp);
 
-		// for $O_v$.
+		// for \f$O_v\f$.
 		// We add theta_p to i, to ensure that it's positive.
 		// % is the mod function.
     temp = gsl_vector_get(Pdif,(k+theta_p-tau)%theta_p);		
@@ -504,7 +504,7 @@ void VectorEmergence::CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
         + gsl_matrix_get(Upsilon[k], mt, mt+tau-1);	
     gsl_matrix_set(Upsilon[k],mt,mt+tau-1,temp);
 
-		// for $S_v$.
+		// for \f$S_v\f$.
     temp = gsl_vector_get(Pdif,(k+theta_p-theta_s)%theta_p)*sumkplus;
     gsl_matrix_set(Upsilon[k],indexSv,theta_s-1,temp);
     gsl_matrix_set(Upsilon[k],indexSv,mt+theta_s-1,-temp);
@@ -559,7 +559,7 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
 	
 	// gsl_vector_set_all(f, 2.3);
 
-  printf("The $l^1$ norm of S_vDiff is %e \n", SvDiff1norm);
+  printf("The \f$l^1\f$ norm of S_vDiff is %e \n", SvDiff1norm);
 	
   gsl_vector_free(N_v0);
   return GSL_SUCCESS;
@@ -572,8 +572,8 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
 {
 	// The set of theta_p vectors that determine the forcing of the system
 	// at every time step.
-	// $\Lambda(t)$ is defined over time, $1 \leq t \leq \theta_p$, 
-	// where $t \in \mathbb{N}$.
+	// \f$\Lambda(t)\f$ is defined over time, \f$1 \leq t \leq \theta_p\f$, 
+	// where \f$t \in \mathbb{N}\f$.
   gsl_vector** Lambda = (gsl_vector**) malloc(theta_p*sizeof(gsl_vector*));
 
 	// The full periodic orbit.
@@ -581,7 +581,7 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
 
 	// Periodic orbit of the number of infectious mosquitoes calculated for
 	// the given N_v0.
-	// $S_v$.
+	// \f$S_v\f$.
   gsl_vector* SvfromNv0 = gsl_vector_calloc(theta_p);
 
 	// Calculate the forcing term for each time in the period.
@@ -649,7 +649,7 @@ void VectorEmergence::CalcXP(gsl_vector** x_p, gsl_matrix** Upsilon,
 
 	// Evaluate the initial condition of the periodic orbit.
 	// Please refer to paper [add reference to paper and equation
-	// number here] for the expression for $x_0$.
+	// number here] for the expression for \f$x_0\f$.
   for(size_t i=0; i < theta_p; i++){
     FuncX(mtemp, Upsilon, theta_p, i+1, eta);
     gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, Lambda[i], 1.0, vtemp);
@@ -710,9 +710,9 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, size_t th
   double taud = (double)tau;
   double thetasd = (double) theta_s;
 
-  int klplus;	// $k_{l+}$ in model.
+  int klplus;	// \f$k_{l+}\f$ in model.
 	// klplus = (int *)malloc((tau-1)*sizeof(int)); Define temporarily.
-        // $k_+$ in model:
+        // \f$k_+\f$ in model:
   int kplus = (int) ((thetasd/taud)-1.); // = floor(theta_s/tau)-1;
 
 	// Evaluate sumkplus
@@ -867,8 +867,8 @@ void VectorEmergence::PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver
   * There are numerous quantities that we could print to see how the
   * root-finding algorithm is doing. It is not reasonable to print
   * all theta_p terms, so for now, we print out the value of N_v0[0]
-  * to see one of the values of the emergence rate, and the $l^1$
-  * norm of $f$.
+  * to see one of the values of the emergence rate, and the \f$l^1\f$
+  * norm of \f$f\f$.
   *
   * Note that we print to screen and to a file.
   *
@@ -879,7 +879,7 @@ void VectorEmergence::PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver
 
   FILE* fpp = fopen(fnrootfindingstate, "a");
 
-	// Calculate the $l^1$ norm of f.
+	// Calculate the \f$l^1\f$ norm of f.
   svdiffsum = gsl_blas_dasum(srootfind->f);
 
 	// Get the 0th element of N_v0.

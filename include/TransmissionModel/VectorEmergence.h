@@ -56,13 +56,13 @@ struct VectorEmergence {
    * change these comments to refer to the approprirate paper when it is ready.
    *
    * The entomological model has a number of input parameters, including the
-   * mosquito emergence rate, $N_{v0}$, and a number of output parameters, 
-   * including the entomological inoculation rate, $\Xi_i$. The model produces
-   * equations for $\Xi_i$ as a function of $N_{v0}$ and the other parameters.
-   * However, in this function, we assume that all parameters, except $N_{v0}$ 
-   * are known, and $\Xi_i$ is known. We then use these parameters, with $\Xi_i$ 
-   * to calculate $N_{v0}$. The equations for $\Xi_i$ are linear in terms of 
-   * $N_{v0}$ so there is a unique solution for $N_{v0}$. 
+   * mosquito emergence rate, \f$N_{v0}\f$, and a number of output parameters, 
+   * including the entomological inoculation rate, \f$\Xi_i\f$. The model produces
+   * equations for \f$\Xi_i\f$ as a function of \f$N_{v0}\f$ and the other parameters.
+   * However, in this function, we assume that all parameters, except \f$N_{v0}\f$ 
+   * are known, and \f$\Xi_i\f$ is known. We then use these parameters, with \f$\Xi_i\f$ 
+   * to calculate \f$N_{v0}\f$. The equations for \f$\Xi_i\f$ are linear in terms of 
+   * \f$N_{v0}\f$ so there is a unique solution for \f$N_{v0}\f$. 
    *
    * This routine first shows the existence of a unique globally asymptotically 
    * stable periodic orbit for the system of equations describing the periodically
@@ -73,7 +73,7 @@ struct VectorEmergence {
    * the emergence rate that matches the given EIR.
    * 
    * However, we cannot write these equations in the form Ax=b, so we use
-   * a root-finding algorithm to calculate $N_{v0}$.
+   * a root-finding algorithm to calculate \f$N_{v0}\f$.
    *
    * This function has a dummy return of 0.
    * 
@@ -106,23 +106,23 @@ private:
  * GSL matrices assuming there is only one host of humans..
  * Each matrix is Upsilon(t).
  *
- * $Upsilon(t)$ is the evolution of the mosquito population over one
+ * \f$Upsilon(t)\f$ is the evolution of the mosquito population over one
  * time step. There are three main system variables:
- * $N_v$: The total number of host-seeking mosquitoes.
- * $O_v$: The number of infected host-seeking mosquitoes.
- * $S_v$: The number of infectious host-seeking mosquitoes.
+ * \f$N_v\f$: The total number of host-seeking mosquitoes.
+ * \f$O_v\f$: The number of infected host-seeking mosquitoes.
+ * \f$S_v\f$: The number of infectious host-seeking mosquitoes.
  *
  * As the difference equations go back more than one time step, 
  * the size of the system is larger than 3.
- * For $N_v$ and $O_v$, we need to go back mt steps.
- * For $S_v$ we need to go back tau steps.
+ * For \f$N_v\f$ and \f$O_v\f$, we need to go back mt steps.
+ * For \f$S_v\f$ we need to go back tau steps.
  * So the size of the system, eta = 2 mt + tau.
  * The first column of Upsilon(t) (indexed by 0 in C) corresponds to
- * $N_v(t)$ - as it depends on the other paramters at previous times.
+ * \f$N_v(t)\f$ - as it depends on the other paramters at previous times.
  * The (mt+1)^th column of Upsilon(t) (indexed by mt in C) corresponds to
- * $O_v(t)$ - as it depends on the other paramters at previous times.
+ * \f$O_v(t)\f$ - as it depends on the other paramters at previous times.
  * The (2mt+1)^th column of Upsilon(t) (indexed by 2mt in C) corresponds to
- * $S_v(t)$ - as it depends on the other paramters at previous times.
+ * \f$S_v(t)\f$ - as it depends on the other paramters at previous times.
  * All other columns have 1 in the subdiagonal.
  *
  * For now, we write this code assuming that the parameters where we
@@ -163,9 +163,9 @@ void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR,
  * GSL vectors.
  * Each vector is Lambda(t).
  *
- * $Lambda(t)$ is the forcing of the mosquito population
+ * \f$Lambda(t)\f$ is the forcing of the mosquito population
  * at each time step, that is, it is the number of new
- * mosquitoes that enter the population at each time, $t$.
+ * mosquitoes that enter the population at each time, \f$t\f$.
  *
  * We note here that Nv0 is a gsl_vector where the index, t, refers
  * to the mosquito emergence rate at time, t. Lambda[t] is a
@@ -206,11 +206,11 @@ void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon,
 
 /** CalcPSTS() calculates probabilities of surviving the extrinsic
  * incubation period (or part of). The returned variables are the sums
- * to $k_+$ and $k_{l+}$ (including the binomial coefficients and 
+ * to \f$k_+\f$ and \f$k_{l+}\f$ (including the binomial coefficients and 
  * probabilities in (2.3c) of the paper. 
  *
- * Currently, this returns scalar values because neither $P_A$, nor
- * $P_{df}$, depend on the phase of the period.
+ * Currently, this returns scalar values because neither \f$P_A\f$, nor
+ * \f$P_{df}\f$, depend on the phase of the period.
  *
  * Note that sumklplus here is defined as sumlv in MATLAB.
  * 
@@ -222,8 +222,8 @@ void CalcPSTS(double* sumkplusPtr, double* sumklplus, size_t thetas,
 /** FuncX() calculates X(t,s).
  *
  * Note that we have to be careful with indices here. 
- * Cushing (1995) has indices starting at 0 and ending at $\theta_p -1$.
- * In our notes, and in MATLAB, the indices start at 1 and end at $\theta_p$.
+ * Cushing (1995) has indices starting at 0 and ending at \f$\theta_p -1\f$.
+ * In our notes, and in MATLAB, the indices start at 1 and end at \f$\theta_p\f$.
  *
  *       X(t,s) = \Upsilon(t-1)*...*Upsilon(s) for t \geq s+1
  *              = I                            for t = s.
