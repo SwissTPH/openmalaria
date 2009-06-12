@@ -26,7 +26,7 @@
 #include "global.h"
 #include "summary.h"
 
-using namespace std;
+class WithinHostModel;
 
 /// Namespace enclosing pathogenesis output enumeration.
 namespace Pathogenesis {
@@ -76,7 +76,7 @@ public:
   /** Determines whether there is an acute episode or concomitant fever (or
    * neither) and then whether the episode is severe, uncomplicated or there is
    * an indirect death. */
-  Pathogenesis::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
+  Pathogenesis::Infection infectionEvent(double ageYears, WithinHostModel& withinHostModel);
   
   /** Summarize PathogenesisModel details
    *

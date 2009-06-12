@@ -274,7 +274,7 @@ void Human::determineClinicalStatus(){ //TODO: this function should not do case 
   doCaseManagement clears infections if there was an effective treatment, or calls medicate,
   and decides whether the patient lives, has sequelae, or dies.
   */
-  caseManagement->doCaseManagement (pathogenesisModel->infectionEvent (getAgeInYears(), withinHostModel->getTotalDensity(), withinHostModel->getTimeStepMaxDensity()),
+  caseManagement->doCaseManagement (pathogenesisModel->infectionEvent (getAgeInYears(), *withinHostModel),
                                      *withinHostModel,
                                      getAgeInYears(),
                                      _doomed);

@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pathogenesis/Pyrogen.h"
 #include "Pathogenesis/Predet.h"
 #include "Pathogenesis/Mueller.h"
-#include "global.h"
+#include "WithinHostModel.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 
@@ -132,8 +132,9 @@ PathogenesisModel::PathogenesisModel(istream& in)
   in >> _comorbidityFactor;
 }
 
-Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity) {
-  double prEpisode = getPEpisode(timeStepMaxDensity,totalDensity);
+Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, WithinHostModel& withinHostModel) {
+  double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
+  double prEpisode = getPEpisode(timeStepMaxDensity, withinHostModel.getTotalDensity());
   
   //Decide whether a clinical episode occurs and if so, which type
   double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);

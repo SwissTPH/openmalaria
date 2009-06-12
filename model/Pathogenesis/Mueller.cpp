@@ -32,7 +32,7 @@ void MuellerPathogenesis::init(){
   densityExponent_32=getParameter(Params::MUELLER_DENSITY_EXPONENT);
 }
 
-double MuellerPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
+double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
   double incidenceDensity=rateMultiplier_31*(pow(totalDensity, densityExponent_32))/(1.0*Global::intervalsPerYear);
   return 1-exp(-incidenceDensity);
 }
