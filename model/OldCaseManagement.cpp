@@ -99,7 +99,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, Wit
   
   if (effectiveTreatment) {
     if (!(Global::modelVersion & INCLUDES_PK_PD))
-      withinHostModel.clearInfections(_latestEvent);
+      withinHostModel.clearInfections(_latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA);
   }
 }
 

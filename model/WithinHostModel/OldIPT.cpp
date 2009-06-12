@@ -123,9 +123,9 @@ void OldIPTWithinHostModel::newInfection(){
 
 // -----    -----
 
-void OldIPTWithinHostModel::clearInfections (Event& latestEvent) {
+void OldIPTWithinHostModel::clearInfections (bool isSevere) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
-  if (latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA) {
+  if (isSevere) {
   } else if(Simulation::simulationTime-_lastIptiOrPlacebo <= fortnight) {
           // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
   } else if(Simulation::simulationTime-_lastSPDose <=  fortnight) {

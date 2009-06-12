@@ -42,7 +42,7 @@ public:
   virtual void newInfection();
   
   /// Conditionally clear all infections
-  virtual void clearInfections (Event&);
+  virtual void clearInfections (bool isSevere);
   /// Conditionally set last SP dose
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.

@@ -77,9 +77,9 @@ public:
   /** Conditionally clears all infections.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
-   * uses IPT code to determine whether to clear all infections or do nothing.
-   * NOTE: replace Event& with minimal info needed. */
-  virtual void clearInfections (Event&);
+   * uses IPT code to determine whether to clear all infections or do nothing
+   * (isSevere is only used in the IPT case). */
+  virtual void clearInfections (bool isSevere);
   
   virtual void medicate(string drugName, double qty, int time) =0;
 

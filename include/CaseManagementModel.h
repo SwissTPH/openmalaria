@@ -48,7 +48,13 @@ public:
   virtual void doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
   
   bool recentTreatment();
-  
+    
+  /** Was the last diagnosis severe malaria?
+   * FIXME: update or remove */
+  inline bool latestDiagnosisIsSevereMalaria () {
+    return _latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA;
+  }
+
   /** Return the case management's event.
    * NOTE: possibly this method should be removed later. */
   Event& getEvent();

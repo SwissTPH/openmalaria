@@ -102,7 +102,7 @@ WithinHostModel::WithinHostModel(istream& in) {
   in >> timeStepMaxDensity;
 }
 
-void WithinHostModel::clearInfections (Event&) {
+void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 

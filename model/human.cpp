@@ -36,6 +36,7 @@
 #include "CaseManagementModel.h"
 #include "InfectionIncidenceModel.h"
 #include "Pathogenesis/PathogenesisModel.h"
+#include "WithinHostModel/OldIPT.h"
 
 
 /*
@@ -327,7 +328,8 @@ void Human::updateInterventionStatus() {
 }
 
 void Human::clearInfections () {
-  withinHostModel->clearInfections(caseManagement->getEvent());
+  //NOTE: if Population::massTreatment is incompatible with IPT, we can just pass false:
+  withinHostModel->clearInfections(caseManagement->latestDiagnosisIsSevereMalaria());
 }
 
 void Human::IPTiTreatment (double compliance) {
@@ -336,10 +338,10 @@ void Human::IPTiTreatment (double compliance) {
 
 
 void Human::summarize(){
-  double age = getAgeInYears();
-  if (getInterventions().getIptiDescription().present() && caseManagement->recentTreatment())
-    return ;
+  if (OldIPTWithinHostModel::iptActive && caseManagement->recentTreatment())
+    return;	//NOTE: do we need this?
   
+  double age = getAgeInYears();
   Simulation::gMainSummary->addToHost(age,1);
   withinHostModel->summarize(age);
   infIncidence->summarize (*Simulation::gMainSummary, age);
