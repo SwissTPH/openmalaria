@@ -78,14 +78,14 @@ OldCaseManagement::~OldCaseManagement(){
 }
 
 
-void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
+void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed) {
   bool effectiveTreatment =false;
   
   if (infection & Pathogenesis::MALARIA) {
     if (infection & Pathogenesis::COMPLICATED)
-      effectiveTreatment=severeMalaria(ageYears, doomed);
+      effectiveTreatment=severeMalaria(latestReport, ageYears, doomed);
     else if (infection == Pathogenesis::UNCOMPLICATED)
-      effectiveTreatment=uncomplicatedEvent(true, ageYears);
+      effectiveTreatment=uncomplicatedEvent(latestReport, true, ageYears);
     
     if ((infection & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
       doomed=-1;
@@ -94,18 +94,18 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::Infection infection, Wit
       withinHostModel.immunityPenalisation();
     }
   } else if(infection & Pathogenesis::NON_MALARIA) {
-    effectiveTreatment = uncomplicatedEvent(false, ageYears);
+    effectiveTreatment = uncomplicatedEvent(latestReport, false, ageYears);
   }
   
   if (effectiveTreatment) {
     if (!(Global::modelVersion & INCLUDES_PK_PD))
-      withinHostModel.clearInfections(_latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA);
+      withinHostModel.clearInfections(latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA);
   }
 }
 
 // -----  private  -----
 
-bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
+bool OldCaseManagement::uncomplicatedEvent(Event& latestReport, bool isMalaria, double ageYears){
   //ageGroup is not optimized
   int agegroup=Simulation::gMainSummary->ageGroup(ageYears);
     int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
@@ -117,7 +117,7 @@ bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
       Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
       
       if (Global::modelVersion & INCLUDES_PK_PD){
-        _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
+        latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
         /*
         TODO: uncomplicatedEvent forces a call of pk PD model
         in the event that there is no treatment it should remain .false.
@@ -128,21 +128,21 @@ bool OldCaseManagement::uncomplicatedEvent(bool isMalaria, double ageYears){
       }
       else {
         if (probParasitesCleared[nextRegimen-1] > W_UNIFORM()){
-          _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
+          latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
           return true;
         }
         else {
-          _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
+          latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
         }
       }
     }
     else {
-      _latestEvent.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+      latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
     }
   return false;
 }
 
-bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
+bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int& doomed){
   /*
   DOCU
   Set doomed=4 if the patient dies.
@@ -199,14 +199,14 @@ bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
   double prandom=(W_UNIFORM());
     
   if ( q[0] >  prandom) {
-    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
     doomed  = 4;
   }
   else if( q[1] >  prandom) {
-    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
   }
   else if( q[2] >  prandom) {
-    _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
   }
   else {
     _tLastTreatment = Simulation::simulationTime;
@@ -214,26 +214,26 @@ bool OldCaseManagement::severeMalaria(double ageYears, int& doomed){
     Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
     
     if( q[3] >  prandom) {
-      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
       doomed  = 4;
     }
     else if( q[4] >  prandom) {
-      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
     }
     else if( q[5] >  prandom) {
-      _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
     }
     else {
       if( q[6] >  prandom) {
-        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
         doomed  = 4;
       }
       else if( q[7] >  prandom) {
-        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
       }
       else // assume true, so we don't get another else case (DH): if( q[8] >=  prandom)
       {
-        _latestEvent.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
+        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
       }
       return true;
     }
@@ -395,7 +395,6 @@ void OldCaseManagement::setParasiteCaseParameters () {
 // -----  checkpointing  -----
 
 void OldCaseManagement::write(ostream& out) const {
-  out << _latestEvent;
   out << _treatmentSeekingFactor << endl; 
   out << _tLastTreatment << endl; 
   out << _latestRegimen << endl; 

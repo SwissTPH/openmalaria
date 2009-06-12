@@ -47,7 +47,7 @@ NewCaseManagement::~NewCaseManagement(){
 }
 
 
-void NewCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) {
+void NewCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, Event&, double ageYears, int&) {
   //TODO: implement age-specificity of drug dosing
   //TODO: This is a rough and quick implementation, which could perhaps be improved.
   

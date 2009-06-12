@@ -33,17 +33,17 @@ public:
   OldCaseManagement(istream& in);
   virtual ~OldCaseManagement();
   
-  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, double, int& doomed);
+  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, Event& latestReport, double, int& doomed);
   
   virtual  void write(ostream& out) const;
   
 private:
    /*! should return true in case of effective or partially effective
   treatment, false otherwise */
-  bool uncomplicatedEvent(bool isMalaria, double ageYears);
+   bool uncomplicatedEvent(Event& latestReport, bool isMalaria, double ageYears);
 
   //! returns true in case of effective treatment, false otherwise
-  bool severeMalaria(double ageYears, int& doomed);
+  bool severeMalaria(Event& latestReport, double ageYears, int& doomed);
   
   //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
   int _latestRegimen;

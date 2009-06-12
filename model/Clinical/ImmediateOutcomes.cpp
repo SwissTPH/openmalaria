@@ -18,9 +18,4 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_CaseManagementModel
-#define Hmod_CaseManagementModel
-
-class ClinicalEventScheduler : ClinicalModel
-{
-};
+#include "Clinical/ImmediateOutcomes.h"

@@ -43,21 +43,11 @@ public:
    * @param infection = Type of infection
    * @param withinHostModel = WithinHostModel of human.
    * @param ageYears = Age of human.
-   * @param doomed = _doomed variable of human. Passing like this isn't ideal.
-   */
-  virtual void doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, double ageYears, int& doomed) =0;
+   * @param doomed = _doomed variable of Human; used to kill the human.
+   *	Passing like this isn't ideal. */
+  virtual void doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed) =0;
   
   bool recentTreatment();
-    
-  /** Was the last diagnosis severe malaria?
-   * FIXME: update or remove */
-  inline bool latestDiagnosisIsSevereMalaria () {
-    return _latestEvent.getDiagnosis() == Diagnosis::SEVERE_MALARIA;
-  }
-
-  /** Return the case management's event.
-   * NOTE: possibly this method should be removed later. */
-  Event& getEvent();
   
   virtual void write(ostream& out) const;
   
@@ -69,9 +59,6 @@ protected:
   /// Create, loading from checkpoint
   CaseManagementModel (istream& in);
   
-  /** Next event to report.
-   * Only reported when the Human dies or a separate episode occurs. */
-  Event _latestEvent;
   //! treatment seeking for heterogeneity
   double _treatmentSeekingFactor;
   

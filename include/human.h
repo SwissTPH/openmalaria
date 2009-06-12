@@ -26,8 +26,7 @@
 
 // Forward declaration
 class TransmissionModel;
-class PathogenesisModel;
-class CaseManagementModel;
+class ClinicalModel;
 
 //! Model of a human individual 
 class Human {
@@ -76,11 +75,6 @@ public:
   /// @name updateInfection related functions
   //@{
   void updateInfection(TransmissionModel*);
-  //@}
-  
-  /// @name determineClinicalStatus related functions
-  //@{
-  void determineClinicalStatus();
   //@}
   
   /// @name updateInterventionStatus related functions
@@ -154,11 +148,10 @@ public:
   WithinHostModel *withinHostModel;
   
 private:
-  /// The PathogenesisModel introduces illness dependant on parasite density
-  PathogenesisModel *pathogenesisModel;
-  
-  /// The CaseManagementModel decides how to treat ill individuals
-  CaseManagementModel * caseManagement;
+  /** The ClinicalModel encapsulates pathogenesis (sickness status),
+   * case management (medicating drugs)
+   * and clinical outcomes (morbidity, reporting). */
+  ClinicalModel *clinicalModel;
   //@}
   
   ///@brief Private variables
@@ -167,8 +160,6 @@ private:
   double _ylag[4];
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
-  //!Indicates that individual will die from indirect mortality
-  int _doomed;
   //!unique identifier
   int _ID;
   //!number of vaccine doses this individual has received

@@ -61,7 +61,6 @@ CaseManagementModel::CaseManagementModel (double tSF) :
 
 CaseManagementModel::CaseManagementModel (istream& in)
 {
-  in >> _latestEvent;
   in >> _treatmentSeekingFactor; 
   in >> _tLastTreatment; 
 }
@@ -77,15 +76,10 @@ bool CaseManagementModel::recentTreatment() {
   Simulation::simulationTime-_tLastTreatment <= 4);
 }
 
-Event& CaseManagementModel::getEvent() {
-  return _latestEvent;
-}
-
 
 // -----  checkpointing  -----
 
 void CaseManagementModel::write(ostream& out) const {
-  out << _latestEvent;
   out << _treatmentSeekingFactor << endl; 
   out << _tLastTreatment << endl; 
 }

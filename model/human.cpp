@@ -33,10 +33,9 @@
 #include "summary.h"
 #include "intervention.h"
 #include "TransmissionModel.h"
-#include "CaseManagementModel.h"
 #include "InfectionIncidenceModel.h"
-#include "Pathogenesis/PathogenesisModel.h"
-#include "WithinHostModel/OldIPT.h"
+#include "Clinical/ClinicalModel.h"
+#include "WithinHostModel/OldIPT.h"	// only for summarizing
 
 
 /*
@@ -76,7 +75,6 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     // This test may be totally unnecessary; it was done in oldWithinHostModel
     throw out_of_range ("date of birth in future!");
   }
-  _doomed=0;
   _ID=ID;
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
@@ -143,8 +141,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     }
   }
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  pathogenesisModel=PathogenesisModel::createPathogenesisModel(_comorbidityFactor);
-  caseManagement = CaseManagementModel::createCaseManagementModel(_treatmentSeekingFactor);
+  clinicalModel=ClinicalModel::createClinicalModel (_comorbidityFactor, _treatmentSeekingFactor);
 }
 
 // Load human from checkpoint
@@ -152,11 +149,9 @@ Human::Human(istream& in, TransmissionModel& tm) :
     perHostTransmission(in, tm),
     infIncidence(InfectionIncidenceModel::createModel(in)),
     withinHostModel(WithinHostModel::createWithinHostModel(in)),
-    pathogenesisModel(PathogenesisModel::createPathogenesisModel(in)),
-    caseManagement(CaseManagementModel::createCaseManagementModel(in))
+    clinicalModel(ClinicalModel::createClinicalModel(in))
 {
   in >> _dateOfBirth; 
-  in >> _doomed; 
   in >> _ID; 
   in >> _lastVaccineDose; 
   in >> _BSVEfficacy; 
@@ -170,18 +165,15 @@ Human::Human(istream& in, TransmissionModel& tm) :
 
 void Human::destroy() {
   delete withinHostModel;
-  delete pathogenesisModel;
-  delete caseManagement; 
+  delete clinicalModel;
 }
 
 ostream& operator<<(ostream& out, const Human& human){
   human.perHostTransmission.write (out);
   human.infIncidence->write (out);
   human.withinHostModel->write (out);
-  human.pathogenesisModel->write (out);
-  human.caseManagement->write (out);
+  human.clinicalModel->write (out);
   out << human._dateOfBirth << endl; 
-  out << human._doomed << endl; 
   out << human._ID << endl ; 
   out << human._lastVaccineDose << endl;
   out << human._BSVEfficacy << endl; 
@@ -219,66 +211,16 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
 
 bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   int ageTimeSteps = simulationTime-_dateOfBirth;
-  if (ageTimeSteps > Global::maxAgeIntervals) {	// too old
-    _doomed = 1;
-  }
-  if (_doomed > 0)
-    return true;	// remove from population
+  if (clinicalModel->isDead(ageTimeSteps))
+    return true;
   
   updateInterventionStatus(); 
   withinHostModel->updateImmuneStatus();
   updateInfection(transmissionModel);
-  determineClinicalStatus();
+  clinicalModel->update (*withinHostModel, getAgeInYears(), Simulation::simulationTime-_dateOfBirth);
   withinHostModel->update(getAgeInYears());
-  
-  // update array for the infant death rates
-  if (ageTimeSteps <= (int)Global::intervalsPerYear){
-    ++Global::infantIntervalsAtRisk[ageTimeSteps-1];
-    if ((_doomed == 4) || (_doomed == -6) || (_doomed == 6)){
-      ++Global::infantDeaths[ageTimeSteps-1];
-    }
-  }
+  clinicalModel->updateInfantDeaths (ageTimeSteps);
   return false;
-}
-
-void Human::determineClinicalStatus(){ //TODO: this function should not do case management
-  //	Countdown to indirect mortality
-  if ( _doomed < 0) {
-    _doomed--;
-  }
-  
-  //indirect death: if this human's about to die, don't worry about further episodes:
-  if (_doomed ==  -7) {	//clinical episode 6 intervals before
-    caseManagement->getEvent().update(Simulation::simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-    /*
-    doomed=7 is the code for indirect death, and 6 for neonatal death.
-    Individuals with positive doomed values are removed at the start of
-    the next time step. They cannot be removed immediately because 
-    their deaths need to be counted.
-    */
-    _doomed  = 7;
-    //Indirect Neonatal mortality
-    return;
-  }
-  // Neonatal mortality:
-  if(Simulation::simulationTime-_dateOfBirth == 1) {
-    if (PathogenesisModel::eventNeonatalMortality()) {
-      caseManagement->getEvent().update(Simulation::simulationTime, ageGroup(), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-      _doomed  = 6;
-      return;
-    }
-  }
-  
-  /* infectionEvent determines whether there is an acute episode, or concomitant fever and
-  then whether the episode is severe, uncomplicated or there is an indirect
-  death.
-  doCaseManagement clears infections if there was an effective treatment, or calls medicate,
-  and decides whether the patient lives, has sequelae, or dies.
-  */
-  caseManagement->doCaseManagement (pathogenesisModel->infectionEvent (getAgeInYears(), *withinHostModel),
-                                     *withinHostModel,
-                                     getAgeInYears(),
-                                     _doomed);
 }
 
 void Human::vaccinate(){
@@ -329,7 +271,7 @@ void Human::updateInterventionStatus() {
 
 void Human::clearInfections () {
   //NOTE: if Population::massTreatment is incompatible with IPT, we can just pass false:
-  withinHostModel->clearInfections(caseManagement->latestDiagnosisIsSevereMalaria());
+  withinHostModel->clearInfections(clinicalModel->latestDiagnosisIsSevereMalaria());
 }
 
 void Human::IPTiTreatment (double compliance) {
@@ -338,14 +280,14 @@ void Human::IPTiTreatment (double compliance) {
 
 
 void Human::summarize(){
-  if (OldIPTWithinHostModel::iptActive && caseManagement->recentTreatment())
+  if (OldIPTWithinHostModel::iptActive && clinicalModel->recentTreatment())
     return;	//NOTE: do we need this?
   
   double age = getAgeInYears();
   Simulation::gMainSummary->addToHost(age,1);
   withinHostModel->summarize(age);
   infIncidence->summarize (*Simulation::gMainSummary, age);
-  pathogenesisModel->summarize (*Simulation::gMainSummary, age);
+  clinicalModel->summarize (*Simulation::gMainSummary, age);
 }
 
 

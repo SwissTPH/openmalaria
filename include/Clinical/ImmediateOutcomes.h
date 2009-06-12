@@ -18,26 +18,22 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_NewCaseManagement
-#define Hmod_NewCaseManagement
+#ifndef Hmod_ClinicalEventSchduler
+#define Hmod_ClinicalEventSchduler
 
-#include "CaseManagementModel.h"
+#include "Clinical/ClinicalModel.h"
 
-//! Treats infections by calling medicate
-class NewCaseManagement : public CaseManagementModel {
+/** This implementation of the model is intended to use the old case-management
+ * model with immediate outcomes of clinical events (immediate recovery with
+ * total parasite clearance or immediate death). */
+class ClinicalImmediateOutcomes : public ClinicalModel
+{
 public:
-  /// Initialize static parameters
-  static void init();
-  
-  NewCaseManagement(double tSF);
-  NewCaseManagement(istream& in);
-  virtual ~NewCaseManagement();
-  
-  /*!
-    Demonstrates the use of the CM-related calls to medicate. May or may not be
-    used as a subroutine in the final implementation.
-  */
-  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, Event& latestReport, double, int& doomed);
+  ClinicalImmediateOutcomes (double cF, double tSF) :
+      ClinicalModel (cF, tSF)
+  {}
+  ClinicalImmediateOutcomes (istream& in) :
+      ClinicalModel (in)
+  {}
 };
-
 #endif

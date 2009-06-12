@@ -1,7 +1,7 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-SUBDIRS = Pathogenesis TransmissionModel WithinHostModel Drug
+SUBDIRS = TransmissionModel WithinHostModel Drug Pathogenesis Clinical
 noinst_PROGRAMS = openMalaria
 openMalaria_SOURCES = openMalaria.cpp\
  GSLWrapper.cpp timer.cpp BoincWrapper.cpp\
@@ -14,7 +14,11 @@ openMalaria_SOURCES = openMalaria.cpp\
  CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  gzstream.C
 
-openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a Pathogenesis/libPathogenesis.a WithinHostModel/libWithinHostModel.a TransmissionModel/libTransmissionModel.a Drug/libDrug.a
+openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a\
+	TransmissionModel/libTransmissionModel.a\
+	WithinHostModel/libWithinHostModel.a Drug/libDrug.a\
+	Pathogenesis/libPathogenesis.a\
+	Clinical/libClinical.a
 
 openMalaria_LDADD = $(openMalaria_DEPENDENCIES)\
  @LIB_PATH@ @LIB_BOINC@ @LIB_BOINC_API@ @LIB_STATIC@

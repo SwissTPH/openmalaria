@@ -18,26 +18,12 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_NewCaseManagement
-#define Hmod_NewCaseManagement
+#ifndef Hmod_ClinicalEventSchduler
+#define Hmod_ClinicalEventSchduler
 
-#include "CaseManagementModel.h"
+#include "ClinicalModel/ClinicalModel.h"
 
-//! Treats infections by calling medicate
-class NewCaseManagement : public CaseManagementModel {
-public:
-  /// Initialize static parameters
-  static void init();
-  
-  NewCaseManagement(double tSF);
-  NewCaseManagement(istream& in);
-  virtual ~NewCaseManagement();
-  
-  /*!
-    Demonstrates the use of the CM-related calls to medicate. May or may not be
-    used as a subroutine in the final implementation.
-  */
-  virtual void doCaseManagement (Pathogenesis::Infection, WithinHostModel&, Event& latestReport, double, int& doomed);
+class ClinicalEventScheduler : ClinicalModel
+{
 };
-
 #endif
