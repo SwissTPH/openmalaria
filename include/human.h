@@ -23,10 +23,10 @@
 #include "TransmissionModel/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHostModel.h"
-#include "Pathogenesis/PathogenesisModel.h"
 
 // Forward declaration
 class TransmissionModel;
+class PathogenesisModel;
 class CaseManagementModel;
 
 //! Model of a human individual 

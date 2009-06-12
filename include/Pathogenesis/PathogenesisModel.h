@@ -24,6 +24,7 @@
 #define Hmod_PathogenesisModel
 
 #include "global.h"
+#include "summary.h"
 
 using namespace std;
 
@@ -77,8 +78,11 @@ public:
    * an indirect death. */
   Pathogenesis::Infection infectionEvent(double ageYears, double totalDensity, double timeStepMaxDensity);
   
-  /// Model-specific; for summary.
-  virtual double getPyrogenThres();
+  /** Summarize PathogenesisModel details
+   *
+   * Only PyrogenPathogenesis implements this; other models don't have anything
+   * to add to the summary. */
+  virtual void summarize (Summary& summary, double age) {}
   
   /// @brief Checkpointing functions
   //@{

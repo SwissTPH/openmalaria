@@ -35,6 +35,7 @@
 #include "TransmissionModel.h"
 #include "CaseManagementModel.h"
 #include "InfectionIncidenceModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
 
 
 /*
@@ -342,8 +343,7 @@ void Human::summarize(){
   Simulation::gMainSummary->addToHost(age,1);
   withinHostModel->summarize(age);
   infIncidence->summarize (*Simulation::gMainSummary, age);
-  Simulation::gMainSummary->addToPyrogenicThreshold(age, pathogenesisModel->getPyrogenThres());
-  Simulation::gMainSummary->addToSumX(age, log(pathogenesisModel->getPyrogenThres()+1.0));
+  pathogenesisModel->summarize (*Simulation::gMainSummary, age);
 }
 
 

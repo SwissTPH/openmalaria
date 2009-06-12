@@ -54,21 +54,19 @@ double PyrogenPathogenesis::getPEpisode(double timeStepMaxDensity, double totalD
   return 1-1/(1+(timeStepMaxDensity/_pyrogenThres));;
 }
 
-double PyrogenPathogenesis::getPyrogenThres(){
-  return _pyrogenThres;
+void PyrogenPathogenesis::summarize (Summary& summary, double age) {
+  summary.addToPyrogenicThreshold(age, _pyrogenThres);
+  summary.addToSumX(age, log(_pyrogenThres+1.0));
 }
 
 void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
-  int i;
   //Number of categories in the numerical approx. below
   const int n= 11;
   const double delt= 1.0/n;
-  double valYstar=_pyrogenThres;
   //Numerical approximation to equation 2, AJTMH p.57
-  for ( i=1;i<=n; i++) {
-    valYstar=valYstar+totalDensity*alpha14*Global::interval*delt/((Ystar1_26+totalDensity)*(Ystar2_13+valYstar))-smuY*valYstar*delt;
+  for (int i=1;i<=n; i++) {
+    _pyrogenThres += totalDensity*alpha14*Global::interval*delt/((Ystar1_26+totalDensity)*(Ystar2_13+_pyrogenThres))-smuY*_pyrogenThres*delt;
   }
-  _pyrogenThres=valYstar;
 }
 
 void PyrogenPathogenesis::write(ostream& out) const {

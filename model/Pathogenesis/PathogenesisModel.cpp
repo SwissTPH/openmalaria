@@ -172,11 +172,6 @@ Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, doubl
   return Pathogenesis::NONE;
 }
 
-double PathogenesisModel::getPyrogenThres(){
-  return 0;
-}
-
-
 void PathogenesisModel::write(ostream& out) const {
   out << _comorbidityFactor << endl;
 }
