@@ -40,12 +40,12 @@ public:
   virtual ~CaseManagementModel ();
   
   /** Determine treatment for a human.
-   * @param infection = Type of infection
+   * @param pgState = Wellbeing of subject (well, severe malaria sickness, etc.)
    * @param withinHostModel = WithinHostModel of human.
    * @param ageYears = Age of human.
    * @param doomed = _doomed variable of Human; used to kill the human.
    *	Passing like this isn't ideal. */
-  virtual void doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed) =0;
+  virtual void doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed) =0;
   
   bool recentTreatment();
   

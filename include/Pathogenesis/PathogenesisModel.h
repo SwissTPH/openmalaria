@@ -30,14 +30,14 @@ class WithinHostModel;
 
 /// Namespace enclosing pathogenesis output enumeration.
 namespace Pathogenesis {
-  /** Types of infection; correspond roughly to those in doCM. */
-  enum Infection {
-    NONE		= 0,		///< No infection
+  /** Types of sickness; used by case management. */
+  enum State {
+    NONE		= 0,		///< Not sick
     
-    NON_MALARIA		= 0x1,		///< Non-malaria infection (flag and output value)
-    MALARIA		= 0x2,		///< Malaria infection (flag)
+    NON_MALARIA		= 0x1,		///< Non-malaria sickness (flag and output value)
+    MALARIA		= 0x2,		///< Malaria sickness (flag)
     
-    // Flags indicating infection severity:
+    // Flags indicating case severity:
     INDIRECT_MORTALITY	= 0x4,		///< Death caused by indirect effects of malaria (flag)
     COMPLICATED		= 0x8,		///< Severe malaria or a coinfection (flag)
     
@@ -73,10 +73,11 @@ public:
   // non-static
   virtual ~PathogenesisModel() {}
   
-  /** Determines whether there is an acute episode or concomitant fever (or
-   * neither) and then whether the episode is severe, uncomplicated or there is
-   * an indirect death. */
-  Pathogenesis::Infection infectionEvent(double ageYears, WithinHostModel& withinHostModel);
+  /** Determines the health of the individual based on his/her parasitemia.
+   *
+   * May introduce severe or uncomplicated cases of malaria, as well as non-
+   * malaria fevers. */
+  Pathogenesis::State determineState(double ageYears, WithinHostModel& withinHostModel);
   
   /** Summarize PathogenesisModel details
    *

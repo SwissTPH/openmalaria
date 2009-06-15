@@ -47,12 +47,12 @@ NewCaseManagement::~NewCaseManagement(){
 }
 
 
-void NewCaseManagement::doCaseManagement (Pathogenesis::Infection infection, WithinHostModel& withinHostModel, Event&, double ageYears, int&) {
+void NewCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Event&, double ageYears, int&) {
   //TODO: implement age-specificity of drug dosing
   //TODO: This is a rough and quick implementation, which could perhaps be improved.
   
-  // Frequently there is no infection:
-  if (infection == Pathogenesis::NONE) return;
+  // Often individuals are not sick:
+  if (pgState == Pathogenesis::NONE) return;
   
   //NOTE: should we just return in these cases? Maybe data should be read in init.
   if (getCaseManagements() == NULL) return;
@@ -70,18 +70,18 @@ void NewCaseManagement::doCaseManagement (Pathogenesis::Infection infection, Wit
     }
   
   const scnXml::CaseType::EndPointSequence* caseTypeSeq;
-  // FIXME: UC1/UC2 endpoints? (infection & Pathogenesis::INDIRECT_MORTALITY)?
-  if (infection & Pathogenesis::MALARIA) {
-    if (infection & Pathogenesis::COMPLICATED)
-      // FIXME: severe / coinfection differences?
+  // FIXME: UC1/UC2 endpoints? (pgState & Pathogenesis::INDIRECT_MORTALITY)?
+  if (pgState & Pathogenesis::MALARIA) {
+    if (pgState & Pathogenesis::COMPLICATED)
+      // FIXME: severe / copgState differences?
       caseTypeSeq = &caseManagement->getSev().getEndPoint();
-    else //if (infection & Pathogenesis::UNCOMPLICATED)
+    else //if (pgState & Pathogenesis::UNCOMPLICATED)
       caseTypeSeq = &caseManagement->getUc1().getEndPoint();
-  } else if (infection & Pathogenesis::NON_MALARIA) {
+  } else if (pgState & Pathogenesis::NON_MALARIA) {
     caseTypeSeq = &caseManagement->getNmf().getEndPoint();
   } else {
     // NOTE: shouldn't happen; could just be checked in debug mode.
-    cerr << "Invalid infection code: "<<infection<<endl;
+    cerr << "Invalid pgState code: "<<pgState<<endl;
     return;
   }
   /* UC2 should be the case sometimes:

@@ -132,7 +132,7 @@ PathogenesisModel::PathogenesisModel(istream& in)
   in >> _comorbidityFactor;
 }
 
-Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, WithinHostModel& withinHostModel) {
+Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHostModel& withinHostModel) {
   double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
   double prEpisode = getPEpisode(timeStepMaxDensity, withinHostModel.getTotalDensity());
   
@@ -145,7 +145,7 @@ Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, Withi
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
-    Pathogenesis::Infection ret = Pathogenesis::UNCOMPLICATED;
+    Pathogenesis::State ret = Pathogenesis::UNCOMPLICATED;
     
     if (W_UNIFORM() < prSevereEpisode)
       ret = Pathogenesis::SEVERE;
@@ -159,7 +159,7 @@ Pathogenesis::Infection PathogenesisModel::infectionEvent(double ageYears, Withi
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
     if (W_UNIFORM() < indirectRisk)
-      ret = Pathogenesis::Infection (ret | Pathogenesis::INDIRECT_MORTALITY);
+      ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
   }
