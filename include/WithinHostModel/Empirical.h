@@ -20,40 +20,41 @@
 
 #include "WithinHostModel/Infection.h"
 
-class EmpiricalWithinHostModel : public Infection {
+class EmpiricalInfection : public Infection {
 public:
-  EmpiricalWithinHostModel ();
-  double getNewDensity(double * transformedLaggedDensities, int ageOfInfection);
-  void initialiseInfection(double * transfomedLaggedDensities);
-  void setInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
+  EmpiricalInfection(double growthRateMultiplier);
+  static void initParameters();
+  double getNewDensity(int ageOfInfection, double growthRateMultiplier);
+  static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
+
 
 private:
   double getInflatedDensity(double nonInflatedDensity);
   double sigma_noise(int ageOfInfection);
   double samplePatentValue(double mu, double sigma, double lowerBound);
   double sampleSubPatentValue(double mu, double sigma, double upperBound);
-  double inverseBoxCoxTransform(double transformedValue);
-  double boxCoxTransform(double untransformedValue);
   static const int _maximumDurationInDays=418; 
-  double _maximumPermittedAmplificationPerCycle;
-  double _subPatentLimit;
-  double _inflationVariance;
-  double _inflationMean;
-  double _extinctionLevel;
-  double _overallMultiplier;
-  double _lambda;
-  double _alpha1;
-	double _alpha2;	
-  double _alpha3;
-  double _sigma_alpha1;	
-	double _sigma_alpha2;	
-	double _sigma_alpha3;
-  double _sigma0_res;	
-  double _sigmat_res;
-  double _mu_beta1[_maximumDurationInDays];
-  double _sigma_beta1[_maximumDurationInDays];
-  double _mu_beta2[_maximumDurationInDays];
-  double _sigma_beta2[_maximumDurationInDays];
-  double _mu_beta3[_maximumDurationInDays];
-  double _sigma_beta3[_maximumDurationInDays];  
+  static double _maximumPermittedAmplificationPerCycle;
+  static double _subPatentLimit;
+  static double _lambda;
+  static double _alpha1;
+	static double _alpha2;	
+  static double _alpha3;
+  static double _mu1;	
+	static double _mu2;	
+	static double _mu3;
+  static double _sigma0_res;	
+  static double _sigmat_res;
+  static double _mu_beta1[_maximumDurationInDays];
+  static double _sigma_beta1[_maximumDurationInDays];
+  static double _mu_beta2[_maximumDurationInDays];
+  static double _sigma_beta2[_maximumDurationInDays];
+  static double _mu_beta3[_maximumDurationInDays];
+  static double _sigma_beta3[_maximumDurationInDays];
+  static double _inflationMean;
+  static double _inflationVariance;
+  static double _extinctionLevel;
+  static double _overallMultiplier;
+  double _laggedLogDensities[3];
+  int _startTime;
 };
