@@ -84,6 +84,9 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
     cerr << "sW.eq.0" << endl;
   } else {
     kappa[tmod] = sumWt_kappa / sumWeight;
+#ifdef DEBUG_PRINTING
+    cout << Simulation::simulationTime << '\t' << sumWeight << '\t' << sumWt_kappa << '\t' << kappa[tmod] << endl;
+#endif
   }
   
   //Calculate time-weighted average of kappa

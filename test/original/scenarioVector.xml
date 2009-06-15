@@ -52,93 +52,56 @@
 	<group upperbound="99"/>
 </ageGroup>
 </monitoring>
-<interventions name="Change to monitoring HS">
-<timed><intervention time="0">
-<changeHS healthSystemMemory="6" name="Test HS">
-<drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
-<initialACR>
-	<CQ value="1"/>
-	<AQ value="1"/>
-	<ACT value="1"/>
-	<QN value="1"/>
-	<selfTreatment value="1"/>
-</initialACR>
-<compliance>
-	<CQ value="1"/>
-	<AQ value="1"/>
-	<ACT value="1"/>
-	<QN value="1"/>
-	<selfTreatment value="1"/>
-</compliance>
-<nonCompliersEffective>
-	<CQ value="1"/>
-	<AQ value="1"/>
-	<ACT value="1"/>
-	<QN value="1"/>
-	<selfTreatment value="1"/>
-</nonCompliersEffective>
-<pSeekOfficialCareUncomplicated1 value="1"/>
-<pSelfTreatUncomplicated value="0"/>
-<pSeekOfficialCareUncomplicated2 value="1"/>
-<pSeekOfficialCareSevere value="1"/>
-<pSequelaeInpatient>
-	<item maxAgeYrs="5" value="0.0132"/>
-	<item maxAgeYrs="99" value="0.005"/>
-</pSequelaeInpatient>
-<CFR>
-	<group cfr="0.09189" lowerbound="0"/>
-	<group cfr="0.0810811" lowerbound="0.25"/>
-	<group cfr="0.0648649" lowerbound="0.75"/>
-	<group cfr="0.0689189" lowerbound="1.5"/>
-	<group cfr="0.0675676" lowerbound="2.5"/>
-	<group cfr="0.0297297" lowerbound="3.5"/>
-	<group cfr="0.0459459" lowerbound="4.5"/>
-	<group cfr="0.0945946" lowerbound="7.5"/>
-	<group cfr="0.1243243" lowerbound="12.5"/>
-	<group cfr="0.1378378" lowerbound="15"/>
-</CFR>
-</changeHS>
-	</intervention>
-	</timed>
+<interventions name="No interventions">
 </interventions>
-<healthSystem healthSystemMemory="6" name="no Treatment no Mortality">
-<drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
-<initialACR>
-	<CQ value="0"/>
-	<SP value="0"/>
-	<AQ value="0"/>
-	<ACT value="0"/>
-	<QN value="0"/>
-	<selfTreatment value="0"/>
-</initialACR>
-<compliance>
-	<CQ value="0"/>
-	<SP value="0"/>
-	<AQ value="0"/>
-	<ACT value="0"/>
-	<QN value="0"/>
-	<selfTreatment value="0"/>
-</compliance>
-<nonCompliersEffective>
-	<CQ value="0"/>
-	<SP value="0"/>
-	<AQ value="0"/>
-	<ACT value="0"/>
-	<QN value="0"/>
-	<selfTreatment value="0"/>
-</nonCompliersEffective>
-<pSeekOfficialCareUncomplicated1 value="0"/>
-<pSelfTreatUncomplicated value="0"/>
-<pSeekOfficialCareUncomplicated2 value="0"/>
-<pSeekOfficialCareSevere value="0"/>
-<pSequelaeInpatient>
-	<item maxAgeYrs="5" value="0.0132"/>
-	<item maxAgeYrs="99" value="0.005"/>
-</pSequelaeInpatient>
-<CFR>
-	<group cfr="0" lowerbound="0"/>
-</CFR>
-</healthSystem>
+  <!-- healthSystem copied from test scenario3.xml -->
+  <healthSystem healthSystemMemory="6" name="TanzaniaSP 04">
+    <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
+    <initialACR>
+      <CQ value="0"/>
+      <SP value="1"/>
+      <AQ value="0"/>
+      <ACT value="0"/>
+      <QN value="0"/>
+      <selfTreatment value="0"/>
+    </initialACR>
+    <compliance>
+      <CQ value="0"/>
+      <SP value="1"/>
+      <AQ value="0"/>
+      <ACT value="0"/>
+      <QN value="0"/>
+      <selfTreatment value="0"/>
+    </compliance>
+    <nonCompliersEffective>
+      <CQ value="0"/>
+      <SP value="0"/>
+      <AQ value="0"/>
+      <ACT value="0"/>
+      <QN value="0"/>
+      <selfTreatment value="0"/>
+    </nonCompliersEffective>
+    <pSeekOfficialCareUncomplicated1 value="0.04"/>
+    <pSelfTreatUncomplicated value="0"/>
+    <pSeekOfficialCareUncomplicated2 value="0.04"/>
+    <pSeekOfficialCareSevere value="0.48"/>
+    <pSequelaeInpatient>
+      <item maxAgeYrs="5" value="0"/>
+      <item maxAgeYrs="99" value="0"/>
+    </pSequelaeInpatient>
+    <CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR>
+  </healthSystem>
 <entoData name="Vector Test">
   <vector>
     <anopheles mosquito="gambiae_ss">
@@ -163,7 +126,7 @@
  <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
  <parameter include="false" name="alpha" number="14" value="142601.91252"/>
  <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
- <parameter include="false" name="No Use 1" number="16" value="1"/>
+    <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
  <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
  <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
  <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>

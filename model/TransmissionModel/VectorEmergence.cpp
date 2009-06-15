@@ -668,8 +668,9 @@ void VectorEmergence::CalcXP(gsl_vector** x_p, gsl_matrix** Upsilon,
 	// x_p[0] will refer to x_p(1): because Upsilon[0] refers to Upsilon(1).
 	// Thus, x_p[theta_p-1] = x0p. We can check this to make sure.
   for(size_t t=0; t<theta_p; t++){
-		// Print t 
+#ifdef DEBUG_PRINTING
     printf("t=%u \r", (unsigned)(t+1));
+#endif
 		/*
     if(t==100 || t==200 || t==300){
     printf("t=%d \n", t);
