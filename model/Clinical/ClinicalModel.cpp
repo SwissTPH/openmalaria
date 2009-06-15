@@ -20,21 +20,29 @@
 
 #include "Clinical/ClinicalModel.h"
 
-//#include "Clinical/EventScheduler.h"
+#include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "simulation.h"
 
 // -----  static methods  -----
 
+void ClinicalModel::init () {
+  PathogenesisModel::init();
+  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+    ClinicalEventScheduler::init();
+  else
+    ClinicalImmediateOutcomes::initParameters();
+}
+
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
-  if (false)	//FIXME: condition
-    return NULL;//new ClinicalEventScheduler (cF, tSF);
+  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+    return new ClinicalEventScheduler (cF, tSF);
   else
     return new ClinicalImmediateOutcomes (cF, tSF);
 }
 ClinicalModel* ClinicalModel::createClinicalModel (istream& in) {
-  if (false)
-    return NULL;//new ClinicalEventScheduler (in);
+  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+    return new ClinicalEventScheduler (in);
   else
     return new ClinicalImmediateOutcomes (in);
 }
@@ -44,26 +52,17 @@ ClinicalModel* ClinicalModel::createClinicalModel (istream& in) {
 
 ClinicalModel::ClinicalModel (double cF, double tSF) :
     pathogenesisModel(PathogenesisModel::createPathogenesisModel(cF)),
-    caseManagement(CaseManagementModel::createCaseManagementModel(tSF)),
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
   delete pathogenesisModel;
-  delete caseManagement; 
 }
 
 ClinicalModel::ClinicalModel (istream& in) :
-    pathogenesisModel(PathogenesisModel::createPathogenesisModel(in)),
-    caseManagement(CaseManagementModel::createCaseManagementModel(in))
+    pathogenesisModel(PathogenesisModel::createPathogenesisModel(in))
 {
   in >> latestReport;
   in >> _doomed; 
-}
-void ClinicalModel::write (ostream& out) {
-  pathogenesisModel->write (out);
-  caseManagement->write (out);
-  out << latestReport;
-  out << _doomed << endl; 
 }
 
 
@@ -103,17 +102,7 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
     }
   }
   
-  /* infectionEvent determines whether there is an acute episode, or concomitant fever and
-  then whether the episode is severe, uncomplicated or there is an indirect
-  death.
-  doCaseManagement clears infections if there was an effective treatment, or calls medicate,
-  and decides whether the patient lives, has sequelae, or dies.
-  */
-  caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
-				    withinHostModel,
-				    latestReport,
-				    ageYears,
-				    _doomed);
+  doCaseManagement (withinHostModel, ageYears);
 }
 
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {

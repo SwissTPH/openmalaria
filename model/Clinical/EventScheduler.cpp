@@ -18,31 +18,31 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Clinical/ImmediateOutcomes.h"
+#include "Clinical/EventScheduler.h"
 
 
 // -----  static init  -----
 
-void ClinicalImmediateOutcomes::initParameters () {
-  OldCaseManagement::init();
+void ClinicalEventScheduler::init () {
+  NewCaseManagement::init();
 }
 
 
 // -----  construction, destruction and checkpointing  -----
 
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
+ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     ClinicalModel (cF, tSF),
-    caseManagement(new OldCaseManagement (tSF))
+    caseManagement(new NewCaseManagement (tSF))
 {}
-ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
+ClinicalEventScheduler::~ClinicalEventScheduler() {
   delete caseManagement; 
 }
 
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (istream& in) :
+ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
     ClinicalModel (in),
-    caseManagement(new OldCaseManagement (in))
+    caseManagement(new NewCaseManagement (in))
 {}
-void ClinicalImmediateOutcomes::write (ostream& out) {
+void ClinicalEventScheduler::write (ostream& out) {
   pathogenesisModel->write (out);
   out << latestReport;
   out << _doomed << endl; 
@@ -52,7 +52,7 @@ void ClinicalImmediateOutcomes::write (ostream& out) {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
   caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,
 				    latestReport,

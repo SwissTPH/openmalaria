@@ -27,10 +27,10 @@
 #include "simulation.h"
 #include "intervention.h"
 #include "TransmissionModel.h"
+#include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention
 #include "TransmissionModel/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
 #include "Pathogenesis/PathogenesisModel.h"
-#include "CaseManagementModel.h"
 #include "BoincWrapper.h"
 #include <math.h>
 
@@ -60,7 +60,6 @@ Population::Population()
 {
   _transmissionModel = TransmissionModel::createTransmissionModel();
 
-  CaseManagementModel::init();
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
   cumpc = (double*)malloc(((_maxTimestepsPerLife))*sizeof(double));
@@ -370,8 +369,10 @@ void Population::implementIntervention (int time) {
     return;
   
   if (interv->getChangeHS().present()) {
+    if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+      throw xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
     changeHealthSystem (&interv->getChangeHS().get());
-    CaseManagementModel::init();	// should re-read all parameters
+    ClinicalImmediateOutcomes::initParameters();	// should re-read all parameters
     
     //TODO: Do we also need to re-init the kappa array?
     _transmissionModel->copyToInitialKappa();

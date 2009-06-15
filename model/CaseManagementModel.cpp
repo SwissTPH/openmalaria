@@ -30,31 +30,6 @@ int CaseManagementModel::caseManagementMemory;
 
 // -----  init  -----
 
-void CaseManagementModel::init () {
-  caseManagementMemory = get_health_system_memory();
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    NewCaseManagement::init();
-  } else {
-    OldCaseManagement::init();
-  }
-}
-
-CaseManagementModel* CaseManagementModel::createCaseManagementModel (double tSF) {
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    return new NewCaseManagement(tSF);
-  } else {
-    return new OldCaseManagement(tSF);
-  }
-}
-
-CaseManagementModel* CaseManagementModel::createCaseManagementModel (istream& in) {
-  if (Global::modelVersion & CASE_MANAGEMENT_V2) {
-    return new NewCaseManagement(in);
-  } else {
-    return new OldCaseManagement(in);
-  }
-}
-
 CaseManagementModel::CaseManagementModel (double tSF) :
     _treatmentSeekingFactor(tSF), _tLastTreatment(TIMESTEP_NEVER)
 {}

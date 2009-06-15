@@ -40,6 +40,7 @@ double OldCaseManagement::probSequelaeUntreated[2];
 // -----  init  -----
 
 void OldCaseManagement::init (){
+  caseManagementMemory = get_health_system_memory();
   if (Global::modelVersion & INCLUDES_PK_PD) {
     cerr << "Warning: OldCaseManagement's case management predetermines clinical outcomes, and is not currently compatible with INCLUDES_PK_PD" << endl;
   }

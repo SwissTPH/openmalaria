@@ -29,13 +29,6 @@ class WithinHostModel;
 class CaseManagementModel
 {
 public:
-  /// Initialize caseManagementMemory
-  static void init();
-  /// Return a new CaseManagementModel. Don't create one directly.
-  static CaseManagementModel* createCaseManagementModel (double tSF);
-  /// Load a CaseManagementModel from a checkpoint.
-  static CaseManagementModel* createCaseManagementModel (istream& in);
-  
   /// Report last event, if any
   virtual ~CaseManagementModel ();
   

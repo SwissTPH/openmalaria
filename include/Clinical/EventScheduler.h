@@ -21,9 +21,29 @@
 #ifndef Hmod_ClinicalEventSchduler
 #define Hmod_ClinicalEventSchduler
 
-#include "ClinicalModel/ClinicalModel.h"
+#include "Clinical/ClinicalModel.h"
+#include "NewCaseManagement.h"
 
-class ClinicalEventScheduler : ClinicalModel
+class ClinicalEventScheduler : public ClinicalModel
 {
+public:
+  static void init ();
+  
+  ClinicalEventScheduler (double cF, double tSF);
+  ClinicalEventScheduler (istream& in);
+  ~ClinicalEventScheduler ();
+  
+  void write (ostream& out);
+  
+  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  
+  inline bool recentTreatment() {
+    return caseManagement->recentTreatment();
+  }
+  
+private:
+  //TODO move implementation to derived class
+  /// The CaseManagementModel decides how to treat ill individuals
+  NewCaseManagement * caseManagement;
 };
 #endif

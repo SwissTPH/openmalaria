@@ -53,7 +53,7 @@ void Human::initHumanParameters () {	// static
   PerHostTransmission::initParameters();
   InfectionIncidenceModel::init();
   WithinHostModel::init();
-  PathogenesisModel::init();
+  ClinicalModel::init();
   Vaccine::initParameters();
 }
 

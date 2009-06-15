@@ -18,10 +18,11 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_ClinicalEventSchduler
-#define Hmod_ClinicalEventSchduler
+#ifndef Hmod_ClinicalImmediateOutcomes
+#define Hmod_ClinicalImmediateOutcomes
 
 #include "Clinical/ClinicalModel.h"
+#include "OldCaseManagement.h"
 
 /** This implementation of the model is intended to use the old case-management
  * model with immediate outcomes of clinical events (immediate recovery with
@@ -29,11 +30,27 @@
 class ClinicalImmediateOutcomes : public ClinicalModel
 {
 public:
-  ClinicalImmediateOutcomes (double cF, double tSF) :
-      ClinicalModel (cF, tSF)
-  {}
-  ClinicalImmediateOutcomes (istream& in) :
-      ClinicalModel (in)
-  {}
+  /** Initialises parameters, loading from XML data.
+   *
+   * Also used to re-set parameters for a change-of-health-system intervention.
+   */
+  static void initParameters ();
+  
+  ClinicalImmediateOutcomes (double cF, double tSF);
+  ClinicalImmediateOutcomes (istream& in);
+  ~ClinicalImmediateOutcomes ();
+  
+  void write (ostream& out);
+  
+  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  
+  inline bool recentTreatment() {
+    return caseManagement->recentTreatment();
+  }
+  
+private:
+  //TODO move implementation to derived class
+  /// The CaseManagementModel decides how to treat ill individuals
+  OldCaseManagement * caseManagement;
 };
 #endif

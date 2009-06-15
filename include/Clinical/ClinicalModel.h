@@ -22,7 +22,7 @@
 #define Hmod_ClinicalModel
 
 #include "Pathogenesis/PathogenesisModel.h"
-#include "CaseManagementModel.h"
+#include "event.h"
 
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
@@ -38,8 +38,11 @@
 class ClinicalModel
 {
 public:
-  /// \brief Static constructors
+  /// \brief Static functions
   //@{
+  /// Initialise whichever model is in use.
+  static void init ();
+  
   /** Return a new ClinicalModel.
    *
    * See ClinicalModel constructor for a description of parameters passed. */
@@ -51,7 +54,7 @@ public:
   /// Destructor
   virtual ~ClinicalModel ();
   /// Write a checkpoint
-  virtual void write (ostream& out);
+  virtual void write (ostream& out) =0;
   
   /** Kills the human if ageTimeSteps reaches the simulation age limit.
    *
@@ -77,9 +80,8 @@ public:
     return latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA;
   }
   
-  inline bool recentTreatment() {
-    return caseManagement->recentTreatment();
-  }
+  //NOTE: shouldn't have to be virtual once case management models are integrated
+  virtual bool recentTreatment() =0;
   
   /// Summarize PathogenesisModel details
   void summarize (Summary& summary, double age);
@@ -93,12 +95,13 @@ protected:
   /// Constructor, loading from a checkpoint.
   ClinicalModel (istream& in);
   
+  /** Determine treatment for a human.
+   * @param withinHostModel = WithinHostModel of human.
+   * @param ageYears = Age of human. */
+  virtual void doCaseManagement (WithinHostModel& withinHostModel, double ageYears) =0;
+  
   /// The PathogenesisModel introduces illness dependant on parasite density
   PathogenesisModel *pathogenesisModel;
-  
-  //TODO move implementation to derived class
-  /// The CaseManagementModel decides how to treat ill individuals
-  CaseManagementModel * caseManagement;
   
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */

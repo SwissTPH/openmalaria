@@ -87,11 +87,11 @@ enum ModelVersion {
    * models). */
   INCLUDES_PK_PD = 1 << 12,
   
-  /** @brief Use revised case management model
+  /** @brief Use revised clinical and case management model, ClinicalEventScheduler
    * 
    * Default: use the Tediosi et al case management model (Case management as
-   * described in AJTMH 75 (suppl 2) pp90-103. */
-  CASE_MANAGEMENT_V2 = 1 << 13,
+   * described in AJTMH 75 (suppl 2) pp90-103), ClinicalImmediateOutcomes. */
+  CLINICAL_EVENT_SCHEDULER = 1 << 13,
   
   /** @brief Clinical episodes occur in response to a simple parasite density trigger
    * 

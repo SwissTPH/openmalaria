@@ -27,6 +27,7 @@
 // -----  init  -----
 
 void NewCaseManagement::init () {
+  caseManagementMemory = get_health_system_memory();
   cerr << "Warning: NewCaseManagement has no way of determining clinical outcomes" << endl;
   if (!(Global::modelVersion & INCLUDES_PK_PD)) {
     throw xml_scenario_error ("Error: NewCaseManagement relies on INCLUDES_PK_PD to medicate treatment.");
