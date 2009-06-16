@@ -462,7 +462,7 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   // Now calculate the emergence rate.
   // The routine should finish quickly if the emergence rate is already accurate.
   if(true) {
-    emerge.CalcInitMosqEmergeRate(populationSize,
+    emerge.CalcInitMosqEmergeRate(
                            nHostTypesInit,
                            nMalHostTypesInit,
 			   averageAvailability,

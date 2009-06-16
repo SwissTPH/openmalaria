@@ -45,7 +45,7 @@ struct VectorEmergence {
   /** Initialises some data elements */
   VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize, double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting, double probMosqSurvivalOvipositing);
   /** Frees data */
-  ~VectorEmergence() {}
+  ~VectorEmergence();
   
   /** calcInitMosqEmergeRate() calculates the mosquito emergence rate given
    * all other parameters.
@@ -78,8 +78,7 @@ struct VectorEmergence {
    * This function has a dummy return of 0.
    * 
    * All parameters are IN parameters. */
-  double CalcInitMosqEmergeRate(int populationSize,
-                                int nHostTypesInit, int nMalHostTypesInit,
+  double CalcInitMosqEmergeRate(int nHostTypesInit, int nMalHostTypesInit,
 				double alpha_i,
                                 double* FHumanInfectivityInitVector,
                                 vector<double>& FEIRInitVector,
@@ -87,6 +86,18 @@ struct VectorEmergence {
   
 private:
   //BEGIN data
+  // n and m from the model are not renamed such here; they are:
+  // nHostTypesInit, nMalHostTypesInit
+  
+  ///@brief Parameters that help to describe the order of the system.
+  //@{
+  /// Ask not why we call mt, mt. We use mt to index the system.
+  /// It is the maximum number of time steps we go back for \f$N_v\f$ and \f$O_v\f$.
+  size_t mt;
+  /// \f$\eta\f$: The order of the system.
+  size_t eta;
+  //@}
+  
   size_t counterSvDiff;
   size_t theta_p;
   size_t tau;
@@ -100,9 +111,30 @@ private:
   double P_C_i;
   double P_D_i;
   double P_E_i;
+  
+  /** The set of theta_p matrices that determine the dynamics of the system
+   * from one step to the next.
+   *
+   * That is, the system is described by,
+   * \f$x(t) = \Upsilon(t) x(t-1) = \Lambda(t)\f$.
+   * \f$\Upsilon(t)\f$ is defined over time, \f$1 \leq t \leq \theta_p\f$, 
+   * where \f$t \in \mathbb{N}\f$. */
+  gsl_matrix** Upsilon;
+  
+  /** The set of theta_p vectors that determine the forcing of the system
+   * at every time step.
+   *
+   * \f$\Lambda(t)\f$ is defined over time, \f$1 \leq t \leq \theta_p\f$, 
+   * where \f$t \in \mathbb{N}\f$. */
+  gsl_vector** Lambda;
+  
+  /// The periodic orbit of all eta state variables.
+  gsl_vector** x_p;
+  
+  FILE *fpp;	///< Used for printing
   //END data
   
-/** CalcUpsilonOneHost returns a pointer to an array of thetap 
+/** CalcUpsilonOneHost returns a pointer to an array of theta_p 
  * GSL matrices assuming there is only one host of humans..
  * Each matrix is Upsilon(t).
  *
@@ -134,14 +166,11 @@ private:
  * hopefully, not be too difficult to change the code later (and
  * create a new general CalcUpsilon). Let's hope....
  *
+ * Upsilon is set.
  * 
- * Upsilon, PAPtr, and PAiPtr are OUT parameters.
+ * PAPtr, and PAiPtr are OUT parameters.
  * All other parameters are IN parameters. */
-void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr, 
-                        double* PAiPtr, size_t thetap, size_t eta, size_t mt, size_t tau, 
-                        size_t thetas, size_t n, size_t m, double Ni, double alphai, 
-                        double muvA, double thetad, double PBi, double PCi, double PDi, 
-                        double PEi, gsl_vector* Kvi);
+void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, gsl_vector* K_vi);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -153,13 +182,14 @@ void CalcUpsilonOneHost(gsl_matrix** Upsilon, double* PAPtr,
  * the Sv from the periodic orbit of the system with the final 
  * calculated Nv0.
  * 
+ * Upsilon is read.
+ * 
  * SvDiff is an OUT parameter.
  * All other parameters are IN parameters. */
 void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR, 
-                gsl_matrix** Upsilon, gsl_vector* Nv0, gsl_matrix* inv1Xtp, 
-                size_t eta, size_t mt, size_t thetap);
+                gsl_vector* Nv0, gsl_matrix* inv1Xtp);
 
-/** CalcLambda() returns a pointer to an array of thetap 
+/** CalcLambda() returns a pointer to an array of theta_p 
  * GSL vectors.
  * Each vector is Lambda(t).
  *
@@ -176,12 +206,12 @@ void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR,
  * Looking to the left and looking to the right,
  * But there is only water to see.
  * 
- * Lambda is an OUT parameter.
- * All other parameters are IN parameters. */
-void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, size_t eta,
-                size_t thetap);
+ * Lambda is set.
+ * 
+ * All parameters are IN parameters. */
+void CalcLambda(gsl_vector* Nv0);
 
-/** CalcXP returns a pointer to an array of thetap 
+/** CalcXP returns a pointer to an array of theta_p 
  * GSL vectors.
  * Each vector is is the periodic orbit solution to the main system
  * of equations at time, t.
@@ -197,11 +227,11 @@ void CalcLambda(gsl_vector** Lambda, gsl_vector* Nv0, size_t eta,
  * But for now we don't worry about speed and try to continue with the route
  * finding. There may be more work that we need to do to improve speed.
  * 
- * xp is an OUT parameter.
- * All other parameters are IN parameters. */
-void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon, 
-            gsl_vector** Lambda, gsl_matrix* inv1Xtp, size_t eta,
-            size_t thetap);
+ * Upsilon, Lambda are read.
+ * x_p is set.
+ * 
+ * All parameters are IN parameters. */
+void CalcXP(gsl_matrix* inv1Xtp);
 
 
 /** CalcPSTS() calculates probabilities of surviving the extrinsic
@@ -216,8 +246,7 @@ void CalcXP(gsl_vector** xp, gsl_matrix** Upsilon,
  * 
  * sumkplusPtr and sumklplus are OUT parameters.
  * All other parameters are IN parameter. */
-void CalcPSTS(double* sumkplusPtr, double* sumklplus, size_t thetas,
-              size_t tau, double PA, double Pdf);
+void CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df);
 
 /** FuncX() calculates X(t,s).
  *
@@ -230,9 +259,10 @@ void CalcPSTS(double* sumkplusPtr, double* sumklplus, size_t thetas,
  *
  * Here, FuncX() is defined for s>=0 and t>=1.
  * 
- * X is an OUT parameter.
- * All other parameters are IN parameters. */
-void FuncX(gsl_matrix* X, gsl_matrix** Upsilon, size_t t, size_t s, size_t n);
+ * Upsilon is read.
+ * 
+ * X is an OUT parameter, t and s are IN parameters. */
+void FuncX(gsl_matrix* X, size_t t, size_t s);
 
 /** CalcSpectralRadius() calculates the spectral radius of a given matrix.
  *
@@ -268,10 +298,9 @@ void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n);
  * Once the periodic paper is written, we should add a refernece to the 
  * equation that we use.
  * 
- * PAi, PBi, Ni and Xii are IN parameters.
+ * P_Ai, P_B_i and Xi_i are IN parameters.
  * Sv is an OUT parameter. */
-void CalSvfromEIRdata(gsl_vector* Sv, double PAi, double PBi, double Ni, 
-                      gsl_vector* Xii);
+void CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, gsl_vector* Xi_i);
 
 
 /** binomial() calculates the binomial coefficient given two integers.
@@ -283,37 +312,78 @@ double binomial(int n, int k);
 /******************************************************************************
  Printing routines below. Most are only optionally compiled in.
 ******************************************************************************/
+/** PrintRootFindingStateTS() prints the current status of the root-
+  * finding algorithm to the screen and to the given file.
+  *
+  * There are numerous quantities that we could print to see how the
+  * root-finding algorithm is doing. It is not reasonable to print
+  * all theta_p terms, so for now, we print out the value of N_v0[0]
+  * to see one of the values of the emergence rate, and the \f$l^1\f$
+  * norm of \f$f\f$.
+  *
+  * Note that we print to screen and to a file.
+  *
+  * All parameters are IN parameters.
+ */
 void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
-                             size_t thetap, char fnrootfindingstate[]);
+                             size_t theta_p, char fnrootfindingstate[]);
 
-void PrintParameters(size_t thetap, size_t tau, size_t thetas, 
-                     size_t n, size_t m, double Ni, double alphai, double muvA, 
-                     double thetad, double PBi, double PCi, double PDi, double PEi, 
-                     gsl_vector* Kvi, gsl_vector* Xii);
+/** PrintParameters() prints the input parameters to a given file. 
+  * We currently use this to make sure that the inputs we have in C
+  * are what we expect from what we've sent from Fortran. 
+  *
+  * We may transform/copy this into a new function that does more.
+  * 
+  * All parameters are IN parameters.
+ */
+void PrintParameters(size_t theta_p, size_t tau, size_t theta_s, 
+                     size_t n, size_t m, double N_i, double alpha_i, double mu_vA, 
+                     double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i, 
+                     gsl_vector* K_vi, gsl_vector* Xi_i);
 
-void PrintUpsilon(gsl_matrix** Upsilon, size_t thetap,
-                  size_t eta, double PA, double PAi, double Pdf, gsl_vector* Pdif,
-                  gsl_vector* Pduf);
+/** PrintUpsilon() prints the intermediate results while calculating 
+  * Upsilon.
+  * 
+  * All parameters are IN parameters.
+ */
+void PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
+                  size_t eta, double P_A, double P_Ai, double P_df, gsl_vector* P_dif,
+                  gsl_vector* P_duf);
 
-void PrintXP(gsl_vector** xp, size_t eta, size_t thetap);
+/** PrintXP() prints out values of XP, the periodic orbit.
+  * 
+  * All parameters are IN parameters.
+ */
+void PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p);
 
+/** PrintLambda() prints some values of Lambda.
+  * 
+  * All parameters are IN parameters.
+ */
 void PrintLambda(gsl_vector** Lambda, size_t eta);
 
+/** PrintEigenvalues() prints eigenvalues to the given file.
+  * 
+  * All parameters are IN parameters.
+ */
 void PrintEigenvalues(gsl_vector_complex* eval, size_t n);
 
 void PrintMatrix(char matrixname[], gsl_matrix* A, 
                  size_t RowLength, size_t ColLength);
 
 public:
-void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
+  /** PrintVector() prints the given (GSL) vector to the given file.
+   * 
+   * All parameters are IN parameters. */
+  void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
 
-/** PrintArray() prints the given (C) array to the given file.
-* 
-* The array, v, of doubles is assumed to be of length n.
-* All parameters are IN parameters. */
-void PrintArray(const char* vectorname, double* v, int n);
-/// ditto, taking a vector
-void PrintArray(const char* vectorname, vector<double>& v);
+  /** PrintArray() prints the given (C) array to the given file.
+   * 
+   * The array, v, of doubles is assumed to be of length n.
+   * All parameters are IN parameters. */
+  void PrintArray(const char* vectorname, double* v, int n);
+  /// ditto, taking a vector
+  void PrintArray(const char* vectorname, vector<double>& v);
 
   friend int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
 };
@@ -349,9 +419,5 @@ struct SvDiffParams
 {	//FIXME: move some of these to VectorEmergence
   VectorEmergence* emerge;
   gsl_vector* S_vFromEIR;
-  gsl_matrix** Upsilon;
   gsl_matrix* inv1Xtp;
-  size_t eta;
-  size_t mt;
-  size_t theta_p;
 };
