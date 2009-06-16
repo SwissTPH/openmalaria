@@ -23,6 +23,7 @@
 #include "simulation.h"
 #include "summary.h"
 #include "GSLWrapper.h"
+#include "Clinical/ClinicalModel.h"
 #include <limits>
 
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
@@ -40,9 +41,8 @@ double OldCaseManagement::probSequelaeUntreated[2];
 // -----  init  -----
 
 void OldCaseManagement::init (){
-  caseManagementMemory = get_health_system_memory();
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    cerr << "Warning: OldCaseManagement's case management predetermines clinical outcomes, and is not currently compatible with INCLUDES_PK_PD" << endl;
+    throw xml_scenario_error ("Warning: OldCaseManagement is not compatible with INCLUDES_PK_PD");
   }
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
@@ -117,24 +117,12 @@ bool OldCaseManagement::uncomplicatedEvent(Event& latestReport, bool isMalaria, 
       _tLastTreatment=Simulation::simulationTime;
       Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
       
-      if (Global::modelVersion & INCLUDES_PK_PD){
-        latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
-        /*
-        TODO: uncomplicatedEvent forces a call of pk PD model
-        in the event that there is no treatment it should remain .false.
-          TODO: 
-        call medicate(currInd, "cq ", 300.0, 0)
-        */
-        return true;
+      if (probParasitesCleared[nextRegimen-1] > W_UNIFORM()){
+	latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
+	return true;
       }
       else {
-        if (probParasitesCleared[nextRegimen-1] > W_UNIFORM()){
-          latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
-          return true;
-        }
-        else {
-          latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
-        }
+	latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
       }
     }
     else {
@@ -274,7 +262,7 @@ int OldCaseManagement::getNextRegimen(int simulationTime, int diagnosis, int tLa
   if (diagnosis == Diagnosis::SEVERE_MALARIA)
     return 3;
   
-  if (tLastTreated > (simulationTime-caseManagementMemory))
+  if (tLastTreated+ClinicalModel::reportingPeriodMemory > simulationTime)
     return 2;
   
   return 1;

@@ -44,8 +44,6 @@ public:
   
   virtual void write(ostream& out) const;
   
-  static int caseManagementMemory;
-  
 protected:
   /// Create, initializing _treatmentSeekingFactor to tSF.
   CaseManagementModel (double tSF);

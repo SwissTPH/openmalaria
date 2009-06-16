@@ -24,11 +24,11 @@
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <algorithm>
-#include "CaseManagementModel.h"
+#include "Clinical/ClinicalModel.h"
 #include "summary.h"
 
 void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
-  if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + CaseManagementModel::caseManagementMemory))){
+  if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + ClinicalModel::reportingPeriodMemory))){
     if (_time!=TIMESTEP_NEVER){
       Simulation::gMainSummary->report(*this);
     }

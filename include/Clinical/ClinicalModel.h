@@ -86,6 +86,12 @@ public:
   /// Summarize PathogenesisModel details
   void summarize (Summary& summary, double age);
   
+  /** The maximum age, in timesteps, of when a sickness event occurred, for
+   * another event to be considered part of the same reported "event".
+   * 
+   * NOTE: notation: episode/event */
+  static int reportingPeriodMemory;
+  
 protected:
   /** Constructor.
    *

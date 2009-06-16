@@ -26,8 +26,6 @@
 #include "summary.h"
 
 
-int CaseManagementModel::caseManagementMemory;
-
 // -----  init  -----
 
 CaseManagementModel::CaseManagementModel (double tSF) :
