@@ -8,10 +8,9 @@ openMalaria_SOURCES = openMalaria.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  proteome.cpp\
  WithinHostModel.cpp\
- intervention.cpp event.cpp human.cpp\
+ intervention.cpp human.cpp\
  TransmissionModel.cpp EntoIntervention.cpp\
  InfectionIncidenceModel.cpp\
- CaseManagementModel.cpp OldCaseManagement.cpp NewCaseManagement.cpp\
  gzstream.C
 
 openMalaria_DEPENDENCIES =  $(top_builddir)/xsdcxx/libxsdcxx.a\

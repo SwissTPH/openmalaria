@@ -31,7 +31,7 @@ void ClinicalImmediateOutcomes::initParameters () {
 // -----  construction, destruction and checkpointing  -----
 
 ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
-    ClinicalModel (cF, tSF),
+    ClinicalModel (cF),
     caseManagement(new OldCaseManagement (tSF))
 {}
 ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {

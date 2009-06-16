@@ -55,12 +55,13 @@ ClinicalModel* ClinicalModel::createClinicalModel (istream& in) {
 
 // -----  non-static construction, destruction and checkpointing  -----
 
-ClinicalModel::ClinicalModel (double cF, double tSF) :
+ClinicalModel::ClinicalModel (double cF) :
     pathogenesisModel(PathogenesisModel::createPathogenesisModel(cF)),
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
   delete pathogenesisModel;
+  // latestReport is reported, if any, by destructor
 }
 
 ClinicalModel::ClinicalModel (istream& in) :

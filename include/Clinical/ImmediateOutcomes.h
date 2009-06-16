@@ -49,7 +49,7 @@ public:
   }
   
 private:
-  //TODO move implementation to derived class
+  //TODO move implementation into class?
   /// The CaseManagementModel decides how to treat ill individuals
   OldCaseManagement * caseManagement;
 };

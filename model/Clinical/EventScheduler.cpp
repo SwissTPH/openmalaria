@@ -19,43 +19,109 @@
 */
 
 #include "Clinical/EventScheduler.h"
+#include "inputData.h"
+#include "GSLWrapper.h"
+#include "WithinHostModel.h"
 
 
 // -----  static init  -----
 
 void ClinicalEventScheduler::init () {
-  NewCaseManagement::init();
 }
 
 
 // -----  construction, destruction and checkpointing  -----
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
-    ClinicalModel (cF, tSF),
-    caseManagement(new NewCaseManagement (tSF))
+    ClinicalModel (cF)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {
-  delete caseManagement; 
 }
 
 ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
-    ClinicalModel (in),
-    caseManagement(new NewCaseManagement (in))
+    ClinicalModel (in)
 {}
 void ClinicalEventScheduler::write (ostream& out) {
   pathogenesisModel->write (out);
   out << latestReport;
   out << _doomed << endl; 
-  caseManagement->write (out);
 }
 
 
 // -----  other methods  -----
 
 void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
-  caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
-				    withinHostModel,
-				    latestReport,
-				    ageYears,
-				    _doomed);
+  Pathogenesis::State pgState = pathogenesisModel->determineState (ageYears, withinHostModel);
+  
+  //TODO: implement age-specificity of drug dosing
+  //TODO: This is a rough and quick implementation, which could perhaps be improved.
+  
+  // Often individuals are not sick:
+  if (pgState == Pathogenesis::NONE) return;
+  
+  //NOTE: should we just return in these cases? Maybe data should be read in init.
+  if (getCaseManagements() == NULL) return;
+  const scnXml::CaseManagements::CaseManagementSequence managements = getCaseManagements()->getCaseManagement();
+  if (managements.size() == 0) return;
+  const scnXml::CaseManagement* caseManagement = NULL;
+  for (scnXml::CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it)
+    if (ageYears < it->getMaxAgeYrs() &&
+      (!it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageYears))
+      caseManagement = &*it;
+    if (caseManagement == NULL) {
+      ostringstream msg;
+      msg << "No case management for age " << ageYears;
+      throw xml_scenario_error (msg.str());
+    }
+  
+  const scnXml::CaseType::EndPointSequence* caseTypeSeq;
+  // FIXME: UC1/UC2 endpoints? (pgState & Pathogenesis::INDIRECT_MORTALITY)?
+  if (pgState & Pathogenesis::MALARIA) {
+    if (pgState & Pathogenesis::COMPLICATED)
+      // FIXME: severe / copgState differences?
+      caseTypeSeq = &caseManagement->getSev().getEndPoint();
+    else //if (pgState & Pathogenesis::UNCOMPLICATED)
+      caseTypeSeq = &caseManagement->getUc1().getEndPoint();
+  } else if (pgState & Pathogenesis::NON_MALARIA) {
+    caseTypeSeq = &caseManagement->getNmf().getEndPoint();
+  } else {
+    // NOTE: shouldn't happen; could just be checked in debug mode.
+    cerr << "Invalid pgState code: "<<pgState<<endl;
+    return;
+  }
+  /* UC2 should be the case sometimes:
+    caseTypeSeq = &caseManagement->getUc2().getEndPoint();
+  */
+  
+  double randCum = W_UNIFORM();
+  int decisionID = -1;
+  for (scnXml::CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
+    randCum -= it->getP();
+    if (randCum < 0) {
+      decisionID = it->getDecision();
+      break;
+    }
+  }
+  if (decisionID < 0) {
+    throw xml_scenario_error ("Sum of probabilities of case management end-points for some severity type less than 1");
+  }
+  
+  //FIXME: build list of decisions by ID and use
+  const scnXml::Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
+  if ((int)decisions.size() < decisionID) {
+    cerr << "A decision for a case-management end-point doesn't exist (number "<<decisionID<<")!" << endl;
+    return;
+  }
+  const scnXml::Decision::MedicateSequence& medicates = decisions[decisionID-1].getMedicate();
+  if (medicates.size() == 0)
+    return;
+  
+  for (size_t medicateID=0;medicateID<medicates.size(); medicateID++) {
+    double qty=medicates[medicateID].getQty();
+    int time=medicates[medicateID].getTime();
+    string name=medicates[medicateID].getName();
+    withinHostModel.medicate(name,qty,time);
+  }
+  //TODO sort out reporting
+  //latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
 }

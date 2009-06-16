@@ -24,7 +24,7 @@
 #include "summary.h"
 #include "inputData.h"
 
-#include "event.h"
+#include "Clinical/event.h"
 #include "BoincWrapper.h"
 
 Summary::Summary() : _surveyPeriod(0) {

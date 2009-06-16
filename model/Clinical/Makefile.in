@@ -48,7 +48,8 @@ ARFLAGS = cru
 libClinical_a_AR = $(AR) $(ARFLAGS)
 libClinical_a_LIBADD =
 am_libClinical_a_OBJECTS = ClinicalModel.$(OBJEXT) \
-	ImmediateOutcomes.$(OBJEXT) EventScheduler.$(OBJEXT)
+	ImmediateOutcomes.$(OBJEXT) OldCaseManagement.$(OBJEXT) \
+	event.$(OBJEXT) EventScheduler.$(OBJEXT)
 libClinical_a_OBJECTS = $(am_libClinical_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -167,7 +168,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libClinical.a
-libClinical_a_SOURCES = ClinicalModel.cpp ImmediateOutcomes.cpp EventScheduler.cpp
+libClinical_a_SOURCES = ClinicalModel.cpp\
+	ImmediateOutcomes.cpp OldCaseManagement.cpp event.cpp\
+	EventScheduler.cpp
+
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
 all: all-am
@@ -220,6 +224,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ClinicalModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EventScheduler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ImmediateOutcomes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldCaseManagement.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

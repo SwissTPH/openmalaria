@@ -22,7 +22,6 @@
 #include "human.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
-#include "event.h"
 #include "summary.h"
 #include "intervention.h"
 #include "inputData.h"

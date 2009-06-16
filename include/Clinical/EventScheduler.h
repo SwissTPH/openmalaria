@@ -22,7 +22,6 @@
 #define Hmod_ClinicalEventSchduler
 
 #include "Clinical/ClinicalModel.h"
-#include "NewCaseManagement.h"
 
 class ClinicalEventScheduler : public ClinicalModel
 {
@@ -37,13 +36,6 @@ public:
   
   void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
   
-  inline bool recentTreatment() {
-    return caseManagement->recentTreatment();
-  }
-  
 private:
-  //TODO move implementation to derived class
-  /// The CaseManagementModel decides how to treat ill individuals
-  NewCaseManagement * caseManagement;
 };
 #endif

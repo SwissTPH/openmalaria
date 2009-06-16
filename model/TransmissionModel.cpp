@@ -85,7 +85,7 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   } else {
     kappa[tmod] = sumWt_kappa / sumWeight;
 #ifdef DEBUG_PRINTING
-    cout << Simulation::simulationTime << '\t' << sumWeight << '\t' << sumWt_kappa << '\t' << kappa[tmod] << endl;
+    cout << Simulation::simulationTime << '\t' << kappa[tmod] << endl;
 #endif
   }
   

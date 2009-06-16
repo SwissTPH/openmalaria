@@ -38,14 +38,15 @@
 class ClinicalModel
 {
 public:
-  /// \brief Static functions
+  /// @brief Static functions
   //@{
   /// Initialise whichever model is in use.
   static void init ();
   
   /** Return a new ClinicalModel.
    *
-   * See ClinicalModel constructor for a description of parameters passed. */
+   * @param cF 	comorbidity factor, passed to PathogenesisModel
+   * @param tSF	treatment seeking factor, passed to CaseManagementModel */
   static ClinicalModel* createClinicalModel (double cF, double tSF);
   /** Load a ClinicalModel from a checkpoint. */
   static ClinicalModel* createClinicalModel (istream& in);
@@ -80,8 +81,13 @@ public:
     return latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA;
   }
   
-  //NOTE: shouldn't have to be virtual once case management models are integrated
-  virtual bool recentTreatment() =0;
+  /** Used with IPT within host model to potentially skip summarizing.
+   *
+   * NOTE: Only used for IPT, which can only be used with OldCaseManagement.
+   * In other cases, this just returns false. */
+  virtual bool recentTreatment() {
+    return false;
+  }
   
   /// Summarize PathogenesisModel details
   void summarize (Summary& summary, double age);
@@ -93,11 +99,8 @@ public:
   static int reportingPeriodMemory;
   
 protected:
-  /** Constructor.
-   *
-   * \param cF 	comorbidity factor, passed to PathogenesisModel
-   * \param tSF	treatment seeking factor, passed to CaseManagementModel */
-  ClinicalModel (double cF, double tSF);
+  /// Constructor.
+  ClinicalModel (double cF);
   /// Constructor, loading from a checkpoint.
   ClinicalModel (istream& in);
   

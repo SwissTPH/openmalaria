@@ -19,7 +19,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
-#include "event.h"
+#include "Clinical/event.h"
 #include "simulation.h"
 #include "inputData.h"
 #include "GSLWrapper.h"

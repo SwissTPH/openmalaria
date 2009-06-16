@@ -19,10 +19,12 @@
 #ifndef Hcase_management
 #define Hcase_management
 
-#include "CaseManagementModel.h"
+#include "Pathogenesis/PathogenesisModel.h"
+#include "Clinical/event.h"
+#include "simulation.h"
 
 //! Models of treatment seeking and referral
-class OldCaseManagement : public CaseManagementModel {
+class OldCaseManagement {
 public:
   /// Initialize static parameters
   static void init();
@@ -31,11 +33,23 @@ public:
   OldCaseManagement(double tSF);
   /// Load from checkpoint
   OldCaseManagement(istream& in);
-  virtual ~OldCaseManagement();
+  ~OldCaseManagement();
   
-  virtual void doCaseManagement (Pathogenesis::State, WithinHostModel&, Event& latestReport, double, int& doomed);
+  /** Determine treatment for a human.
+   * @param pgState = Wellbeing of subject (well, severe malaria sickness, etc.)
+   * @param withinHostModel = WithinHostModel of human.
+   * @param latestReport = Reporting memory
+   * @param ageYears = Age of human.
+   * @param doomed = _doomed variable of Human; used to kill the human.
+   *	Passing like this isn't ideal. */
+  void doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed);
   
-  virtual  void write(ostream& out) const;
+  inline bool recentTreatment() {
+    return (Simulation::simulationTime-_tLastTreatment >= 1 &&
+	    Simulation::simulationTime-_tLastTreatment <= 4);
+  }
+  
+  void write(ostream& out) const;
   
 private:
    /*! should return true in case of effective or partially effective
@@ -47,6 +61,12 @@ private:
   
   //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
   int _latestRegimen;
+  
+  /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
+  int _tLastTreatment;
+  
+  //! treatment seeking for heterogeneity
+  double _treatmentSeekingFactor;
   
   /*! Linear interpolation to get age-specific hospital case fatality rates
    * 

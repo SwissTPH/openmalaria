@@ -257,10 +257,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\event.h"
-				>
-			</File>
-			<File
 				RelativePath=".\include\global.h"
 				>
 			</File>
@@ -286,10 +282,6 @@
 			</File>
 			<File
 				RelativePath=".\include\intervention.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\NewCaseManagement.h"
 				>
 			</File>
 			<File
@@ -439,6 +431,10 @@
 					RelativePath=".\include\Clinical\ImmediateOutcomes.h"
 					>
 				</File>
+				<File
+					RelativePath=".\include\event.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -454,10 +450,6 @@
 			</File>
 			<File
 				RelativePath=".\model\EntoIntervention.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\event.cpp"
 				>
 			</File>
 			<File
@@ -482,10 +474,6 @@
 			</File>
 			<File
 				RelativePath=".\model\intervention.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\NewCaseManagement.cpp"
 				>
 			</File>
 			<File
@@ -652,6 +640,10 @@
 				<File
 					RelativePath=".\model\Clinical\ImmediateOutcomes.cpp"
 					>
+				</File>
+				<File
+					RelativePath=".\model\Clinical\event.cpp"
+				>
 				</File>
 			</Filter>
 		</Filter>

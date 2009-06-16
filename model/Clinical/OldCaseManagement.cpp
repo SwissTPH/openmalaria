@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#include "OldCaseManagement.h"
+#include "Clinical/OldCaseManagement.h"
 #include "WithinHostModel.h"
 #include "inputData.h"
 #include "global.h"
@@ -38,7 +38,7 @@ double OldCaseManagement::probSequelaeTreated[2];
 double OldCaseManagement::probSequelaeUntreated[2];
 
 
-// -----  init  -----
+// -----  static init  -----
 
 void OldCaseManagement::init (){
   if (Global::modelVersion & INCLUDES_PK_PD) {
@@ -64,20 +64,29 @@ void OldCaseManagement::init (){
   readCaseFatalityRatio();
 }
 
+
+// -----  non-static construction/desctruction/checkpointing  -----
+
 OldCaseManagement::OldCaseManagement(double tSF) :
-    CaseManagementModel (tSF), _latestRegimen (0)
+    _latestRegimen (0), _tLastTreatment(TIMESTEP_NEVER), _treatmentSeekingFactor(tSF)
 {
 }
-
-OldCaseManagement::OldCaseManagement(istream& in) :
-    CaseManagementModel (in)
-{
-  in >> _latestRegimen; 
-}
-
 OldCaseManagement::~OldCaseManagement(){
 }
 
+OldCaseManagement::OldCaseManagement(istream& in) {
+  in >> _treatmentSeekingFactor; 
+  in >> _tLastTreatment; 
+  in >> _latestRegimen; 
+}
+void OldCaseManagement::write(ostream& out) const {
+  out << _treatmentSeekingFactor << endl; 
+  out << _tLastTreatment << endl; 
+  out << _latestRegimen << endl; 
+}
+
+
+// -----  other public  -----
 
 void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed) {
   bool effectiveTreatment =false;
@@ -103,6 +112,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
       withinHostModel.clearInfections(latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA);
   }
 }
+
 
 // -----  private  -----
 
@@ -186,46 +196,47 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
   */
   
   double prandom=(W_UNIFORM());
-    
-  if ( q[0] >  prandom) {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
-    doomed  = 4;
-  }
-  else if( q[1] >  prandom) {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
-  }
-  else if( q[2] >  prandom) {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
-  }
-  else {
+  
+  if (q[2] <= prandom) {
     _tLastTreatment = Simulation::simulationTime;
     _latestRegimen = nextRegimen;
     Simulation::gMainSummary->reportTreatment(agegroup,_latestRegimen);
     
-    if( q[3] >  prandom) {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
-      doomed  = 4;
-    }
-    else if( q[4] >  prandom) {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
-    }
-    else if( q[5] >  prandom) {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
-    }
-    else {
-      if( q[6] >  prandom) {
-        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
-        doomed  = 4;
+    if (q[5] <= prandom) {
+      if (q[6] > prandom) {
+	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+	doomed  = 4;
       }
-      else if( q[7] >  prandom) {
-        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+      else if (q[7] > prandom) {
+	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
       }
-      else // assume true, so we don't get another else case (DH): if( q[8] >=  prandom)
+      else /*if (q[8] > prandom)*/
       {
-        latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
+	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
       }
       return true;
     }
+    if (q[3] > prandom) {
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+      doomed  = 4;
+    }
+    else if (q[4] > prandom) {
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+    }
+    else /*if (q[5] > prandom)*/ {
+      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
+    }
+    return false;
+  }
+  if (q[0] > prandom) {
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
+    doomed  = 4;
+  }
+  else if (q[1] > prandom) {
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
+  }
+  else /*if (q[2] > prandom)*/ {
+    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
   }
   return false;
 }
@@ -378,13 +389,4 @@ void OldCaseManagement::setParasiteCaseParameters () {
 
   //calculate probParasitesCleared 2 : cool :)
   probParasitesCleared[2] = 0;
-}
-
-
-// -----  checkpointing  -----
-
-void OldCaseManagement::write(ostream& out) const {
-  out << _treatmentSeekingFactor << endl; 
-  out << _tLastTreatment << endl; 
-  out << _latestRegimen << endl; 
 }
