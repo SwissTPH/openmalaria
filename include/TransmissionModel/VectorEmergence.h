@@ -23,6 +23,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
+#include <gsl/gsl_sf.h>
 using namespace std;
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -130,6 +131,15 @@ private:
   
   /// The periodic orbit of all eta state variables.
   gsl_vector** x_p;
+  
+  /// @brief Cached memory; values only have meaning within some functions.
+  //@{
+  gsl_vector* memVectorEta;	///< eta long vector
+  gsl_vector_complex* memVectorComplexEta;	///< eta long vector of complex values
+  gsl_matrix* memMatrixEtaSq;	///< eta by eta matrix
+  gsl_eigen_nonsymm_workspace* memEigenWorkspace;	///< for dimension eta
+  gsl_permutation* memPermutation;	///< dimension eta
+  //@}
   
   FILE *fpp;	///< Used for printing
   //END data
@@ -266,23 +276,27 @@ void FuncX(gsl_matrix* X, size_t t, size_t s);
 
 /** CalcSpectralRadius() calculates the spectral radius of a given matrix.
  *
- * Given an n by n, real, nonsymmetric matrix, A, 
+ * Given an eta by eta, real, nonsymmetric matrix, A, 
  * this routine calcultes its spectral radius,
  * that is, the eigenvalue with the largest absolute value.
  * 
- * A, n, and fntestentopar are IN parameters. */
-double CalcSpectralRadius(gsl_matrix* A, size_t n);
+ * Dimensions are required to be eta×eta in order to allow re-using memory.
+ * 
+ * A is an IN parameters. */
+double CalcSpectralRadius(gsl_matrix* A);
 
 /** CalcInv1minusA() calculates the inverse of (I-A) where A is a 
  * given matrix.
  *
- * Given an n by n, real matrix, A, 
+ * Given an eta by eta, real matrix, A, 
  * this routine calcultes the inverse of (I-A) where I is the 
- * n by n identity matrix.
+ * eta by eta identity matrix.
  * 
- * A, n, and fntestentopar are IN parameters.
+ * Dimensions are required to be eta×eta in order to allow re-using memory.
+ * 
+ * A is an IN parameter.
  * inv1A is an OUT parameter. */
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n);
+void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A);
 
 /** CalcSvfromEIRdata() calculates Sv, given the EIR.
  *

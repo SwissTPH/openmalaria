@@ -27,8 +27,8 @@
 
 #include <sstream>
 #include <gsl/gsl_blas.h>
-#include <gsl/gsl_sf.h>
 #include <gsl/gsl_complex_math.h>
+#include <string.h>
 
 /* Note that from here on we use the notation from "A Mathematical Model for the
   * Dynamics of Malaria in Mosquitoes Feeding on a Heterogeneous Host Population",
@@ -70,14 +70,29 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration, int popu
   Upsilon = new gsl_matrix*[theta_p];
   Lambda = new gsl_vector*[theta_p];
   x_p = new gsl_vector*[theta_p];
-  for (size_t i=0; i<theta_p; ++i)
+  for (size_t i=0; i<theta_p; ++i) {
+    Upsilon[i] = gsl_matrix_calloc(eta, eta);
+    Lambda[i] = gsl_vector_calloc(eta);
     x_p[i] = gsl_vector_calloc(eta);
+  }
+  
+  memVectorEta = gsl_vector_calloc(eta);
+  memVectorComplexEta = gsl_vector_complex_calloc(eta);
+  memMatrixEtaSq = gsl_matrix_calloc(eta, eta);
+  memEigenWorkspace = gsl_eigen_nonsymm_alloc(eta);
+  memPermutation = gsl_permutation_alloc(eta);
   
   fpp = fopen("output_ento_para.txt", "w");
 }
 
 VectorEmergence::~VectorEmergence () {
   fclose (fpp);
+  
+  gsl_vector_complex_free(memVectorComplexEta);
+  gsl_vector_free(memVectorEta);
+  gsl_matrix_free(memMatrixEtaSq);
+  gsl_eigen_nonsymm_free(memEigenWorkspace);
+  gsl_permutation_free(memPermutation);
   
   for (size_t i=0; i<theta_p; i++){
     gsl_matrix_free(Upsilon[i]);
@@ -182,7 +197,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 # endif
 
   // We should now find the spectral radius of X_t_p and show that it's less than 1.
-  double srXtp = CalcSpectralRadius(X_t_p, eta);
+  double srXtp = CalcSpectralRadius(X_t_p);
 
   // printf("The spectral radius of X_t_p = %e\n", srXtp);
   // getchar();
@@ -203,7 +218,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   }
 
   // Calculate the inverse of (I-X_t_p).
-  CalcInv1minusA(inv1Xtp, X_t_p, eta);
+  CalcInv1minusA(inv1Xtp, X_t_p);
 
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char inv1Xtpname[15] = "inv1minusXtp";
@@ -450,8 +465,6 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n
 	// We start creating the matrices now.
 	// Refer to Section 2.1 of JBD Paper for how this matrix is created.
   for (size_t k=0; k < theta_p; k++){
-    Upsilon[k] = gsl_matrix_calloc(eta, eta);
-
     for (size_t i=0; i < eta; i++){
 			// Set 1's along the subdiagonal of all rows except the three
 			// rows for the the main system variables.
@@ -576,7 +589,6 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
 void VectorEmergence::CalcLambda(gsl_vector* N_v0)
 {
   for(size_t t=0; t < theta_p; t++){
-    Lambda[t] = gsl_vector_calloc(eta);
     gsl_vector_set(Lambda[t], 0, gsl_vector_get(N_v0, t));
   }
 	
@@ -657,13 +669,10 @@ void VectorEmergence::CalcXP(gsl_matrix* inv1Xtp)
 
 void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df)
 {
-  double taud = (double)tau;
-  double thetasd = (double) theta_s;
-
   int klplus;	// \f$k_{l+}\f$ in model.
 	// klplus = (int *)malloc((tau-1)*sizeof(int)); Define temporarily.
         // \f$k_+\f$ in model:
-  int kplus = (int) ((thetasd/taud)-1.); // = floor(theta_s/tau)-1;
+  int kplus = (int) ((double(theta_s)/tau)-1.); // = floor(theta_s/tau)-1;
 
 	// Evaluate sumkplus
   double sumkplus = 0.;
@@ -690,7 +699,7 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
 
 	// Evaluate sumklplus
   for (size_t l=1; l <= tau-1; l++){
-    klplus = (int) ((thetasd+l)/taud) -2; // = floor((theta_s+l)/tau)-2;
+    klplus = (int) (double(theta_s+l)/tau) -2; // = floor((theta_s+l)/tau)-2;
     sumklplus[l-1] = 0;
 		// printf("For l = %d, klplus = %d \n", l, klplus);
 
@@ -709,82 +718,54 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
 
 void VectorEmergence::FuncX(gsl_matrix* X, size_t t, size_t s)
 {
-  gsl_matrix* temp = gsl_matrix_calloc(eta, eta); 
-
   gsl_matrix_set_identity(X);
-
+  
   for (size_t i=s; i<t; i++){
-    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, Upsilon[i], X, 0.0, temp);
-    gsl_matrix_memcpy(X, temp);
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, Upsilon[i], X, 0.0, memMatrixEtaSq);
+    gsl_matrix_memcpy(X, memMatrixEtaSq);
   }
-  gsl_matrix_free(temp);
 }
 
 
-double VectorEmergence::CalcSpectralRadius(gsl_matrix* A, size_t n)
+double VectorEmergence::CalcSpectralRadius(gsl_matrix* A)
 {
-  gsl_vector* abseval = gsl_vector_calloc(n);	// Vector of the absolute values of eigenvalues.
-  gsl_matrix* B = gsl_matrix_calloc(n, n); // Use to keep A safe.
-  gsl_vector_complex* eval = gsl_vector_complex_calloc(n); // Vector of eigenvalues.
-	// Allocate memory for workspace to evaluate the eigenvalues.
-  gsl_eigen_nonsymm_workspace* w = gsl_eigen_nonsymm_alloc(n); 
+  // Copy A into memMatrixEtaSq to keep it safe; gsl_eigen_nonsymm changes its copy
+  gsl_matrix_memcpy(memMatrixEtaSq, A);
 
-	// Copy A into B to keep it safe.
-  gsl_matrix_memcpy(B, A);
-
-	// Calculate eigenvalues of B:
-  gsl_eigen_nonsymm(B, eval, w);
+  // Calculate eigenvalues of memMatrixEtaSq:
+  gsl_eigen_nonsymm(memMatrixEtaSq, memVectorComplexEta, memEigenWorkspace);
 
 # ifdef VectorTransmission_PRINT_CalcSpectralRadius
-  PrintEigenvalues(eval, n);
+  PrintEigenvalues(memVectorComplexEta, eta);
 # endif
 
-	// Calculate the absolute values of the eigenvalues.
-  for(size_t i=0; i<n; i++){
-    gsl_complex ztemp = gsl_vector_complex_get(eval, i);
-    gsl_vector_set(abseval, i, gsl_complex_abs(ztemp));
+  // Calculate the absolute values of the eigenvalues, and find the largest.
+  double sr = 0.0;	// sprectral radius
+  for(size_t i=0; i<eta; i++){
+    double temp = gsl_complex_abs(gsl_vector_complex_get(memVectorComplexEta, i));
+    if (temp > sr)
+      sr = temp;
   }
-	
-	// Find the largest eigenvalue.
-  double sr;	// sprectral radius
-  sr = gsl_vector_max(abseval);
-
-	// Free memory.
-  gsl_matrix_free(B);
-  gsl_vector_complex_free(eval);
-  gsl_eigen_nonsymm_free(w);
-  gsl_vector_free(abseval);
-
+  
   return sr;
 }
 
 
-void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A, size_t n)
+void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A)
 {
-	// Data types required to compute inverse.
-  gsl_matrix* B = gsl_matrix_calloc(n, n); // We calculate (I-A) in B.
-  gsl_permutation* p = gsl_permutation_alloc(n);
+  // We calculate (I-A) in memMatrixEtaSq.
+  gsl_matrix_set_identity(memMatrixEtaSq);	// memMatrixEtaSq = I.
+  gsl_matrix_sub(memMatrixEtaSq, A);		// memMatrixEtaSq = I-A.
 
-
-  gsl_matrix_set_identity(B); // B = I.
-  gsl_matrix_sub(B, A);	// B = I-A.
-
-	// Calculate LU decomposition of (I-A).
+  // Calculate LU decomposition of (I-A), and use to calculate inverse.
   int signum;
-  gsl_linalg_LU_decomp(B, p, &signum);
-
-	// Use LU decomposition to calculate inverse.
-  gsl_linalg_LU_invert(B, p, inv1A);
-
+  gsl_linalg_LU_decomp(memMatrixEtaSq, memPermutation, &signum);
+  gsl_linalg_LU_invert(memMatrixEtaSq, memPermutation, inv1A);
 
 # ifdef VectorTransmission_PRINT_CalcInv1minusA
   char invname[15] = "inv1minusA"; // Name of matrix (when printing to file).
-  PrintMatrix(invname, inv1A, n, n);
+  PrintMatrix(invname, inv1A, eta, eta);
 # endif
-
-	// Free memory.
-  gsl_matrix_free(B);
-  gsl_permutation_free(p);
 }
 
 
