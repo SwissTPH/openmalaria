@@ -33,6 +33,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
+build_triplet = @build@
+host_triplet = @host@
 subdir = model/WithinHostModel
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -50,7 +52,8 @@ libWithinHostModel_a_LIBADD =
 am_libWithinHostModel_a_OBJECTS = Descriptive.$(OBJEXT) \
 	OldIPT.$(OBJEXT) Dummy.$(OBJEXT) Infection.$(OBJEXT) \
 	DescriptiveInfection.$(OBJEXT) DummyInfection.$(OBJEXT) \
-	OldIPTInfection.$(OBJEXT)
+	OldIPTInfection.$(OBJEXT) Empirical.$(OBJEXT) \
+	EmpiricalInfection.$(OBJEXT)
 libWithinHostModel_a_OBJECTS = $(am_libWithinHostModel_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -91,6 +94,8 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FIND = @FIND@
+GL_CFLAGS = @GL_CFLAGS@
+GL_LIBS = @GL_LIBS@
 GREP = @GREP@
 HEAD = @HEAD@
 INSTALL = @INSTALL@
@@ -117,11 +122,15 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PTHREAD_CC = @PTHREAD_CC@
+PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
+PTHREAD_LIBS = @PTHREAD_LIBS@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+XMKMF = @XMKMF@
 XSD = @XSD@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -129,13 +138,18 @@ abs_top_builddir = @abs_top_builddir@
 abs_top_srcdir = @abs_top_srcdir@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+acx_pthread_config = @acx_pthread_config@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
 am__tar = @am__tar@
 am__untar = @am__untar@
 bindir = @bindir@
+build = @build@
 build_alias = @build_alias@
+build_cpu = @build_cpu@
+build_os = @build_os@
+build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
@@ -144,7 +158,11 @@ dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 gsl_CFLAGS = @gsl_CFLAGS@
 gsl_LIBS = @gsl_LIBS@
+host = @host@
 host_alias = @host_alias@
+host_cpu = @host_cpu@
+host_os = @host_os@
+host_vendor = @host_vendor@
 htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
@@ -170,7 +188,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 noinst_LIBRARIES = libWithinHostModel.a
 libWithinHostModel_a_SOURCES = Descriptive.cpp OldIPT.cpp Dummy.cpp\
-  Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp
+  Infection.cpp DescriptiveInfection.cpp DummyInfection.cpp OldIPTInfection.cpp\
+  Empirical.cpp EmpiricalInfection.cpp
 
 AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I@top_builddir@/xsdcxx -I$(top_srcdir)/include
 AM_CXXFLAGS = @CXXFLAGS@ -static-libgcc -Wall #-Werror 
@@ -225,6 +244,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DescriptiveInfection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Dummy.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DummyInfection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Empirical.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EmpiricalInfection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Infection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPT.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/OldIPTInfection.Po@am__quote@

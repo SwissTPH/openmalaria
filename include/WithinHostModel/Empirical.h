@@ -1,69 +1,93 @@
 /*
- This file is part of OpenMalaria.
+
+  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+  Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
+  OpenMalaria is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or (at
+  your option) any later version.
  
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
+  This program is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  General Public License for more details.
  
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 */
 
-#include "WithinHostModel/Infection.h"
+#ifndef Hmod_empiricalwithinhost
+#define Hmod_empiricalwithinhost
 
-class EmpiricalInfection : public Infection {
+#include "global.h"
+#include "WithinHostModel.h"
+#include "WithinHostModel/EmpiricalInfection.h"
+#include "Drug/DrugModel.h"
+;
+
+using namespace std;
+
+class Human;
+
+/*! EmpiricalDummy Within Host Model class.
+ */
+class EmpiricalWithinHostModel : public WithinHostModel {
 public:
-  /// Per instance initialisation; create new inf.
-  EmpiricalInfection(int startTime, double growthRateMultiplier);
+  EmpiricalWithinHostModel();
+  EmpiricalWithinHostModel(istream& in);
+  ~EmpiricalWithinHostModel();
   
-  /// Static (shared) data initialisation
-  static void initParameters();
-  
-  /// update
-  double getNewDensity(int time, double growthRateMultiplier);
-  
-  /// only for parameterisation?
-  static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
 
+  virtual void update(double age);
+  
+  virtual void summarize(double age);
+  
+  //! Create a new infection requires that the human is allocated and current
+  virtual void newInfection();
 
+  /*!  Clears all infections which have expired (their startdate+duration is less
+  than the current time). */
+  virtual void clearOldInfections();
+
+  //! Clears all infections in an individual
+  virtual void clearAllInfections();
+  
+  void medicate(string drugName, double qty, int time);
+
+  void calculateDensities(Human&);
+  
+  /*! Until now, this only includes decay of immunity against
+  asexual blood stages */
+  virtual void updateImmuneStatus();
+  
+  virtual void immunityPenalisation();
+  
+  void write(ostream& out) const;
+  
+  bool parasiteDensityDetectible() const {
+    return totalDensity > detectionLimit;
+  }
+  
 private:
-  double getInflatedDensity(double nonInflatedDensity);
-  double sigma_noise(int ageOfInfection);
-  double samplePatentValue(double mu, double sigma, double lowerBound);
-  double sampleSubPatentValue(double mu, double sigma, double upperBound);
-  //the following were meant to be static but this lead to a linker error
-  static const int _maximumDurationInDays=418; 
-  static double _maximumPermittedAmplificationPerCycle;
-  static double _subPatentLimit;
-  static double _lambda;
-  static double _alpha1;
-	static double _alpha2;	
-  static double _alpha3;
-  static double _mu1;	
-	static double _mu2;	
-	static double _mu3;
-  static double _sigma0_res;	
-  static double _sigmat_res;
-  static double _mu_beta1[_maximumDurationInDays];
-  static double _sigma_beta1[_maximumDurationInDays];
-  static double _mu_beta2[_maximumDurationInDays];
-  static double _sigma_beta2[_maximumDurationInDays];
-  static double _mu_beta3[_maximumDurationInDays];
-  static double _sigma_beta3[_maximumDurationInDays];
-  static double _inflationMean;
-  static double _inflationVariance;
-  static double _extinctionLevel;
-  static double _overallMultiplier;
-  // the following are not static
-  double _laggedLogDensities[3];
-  int _startTime;
+  /// Encapsulates drug code for each human
+  DrugModel* drugProxy;
+  
+  //!multiplicity of infection
+  int _MOI;
+  //!Number of infections with densities above the limit of detection
+  int patentInfections;
+  
+  /** The list of all infections this human has.
+   * 
+   * Since infection models and within host models are very much intertwined,
+   * the idea is that each WithinHostModel has its own list of infections. */
+  std::list<EmpiricalInfection> infections;
+  
+  static const int MAX_INFECTIONS;
 };
+
+#endif
