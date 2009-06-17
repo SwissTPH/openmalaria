@@ -22,9 +22,9 @@
 
 class EmpiricalInfection : public Infection {
 public:
-  EmpiricalInfection(double growthRateMultiplier);
+  EmpiricalInfection(int startTime, double growthRateMultiplier);
   static void initParameters();
-  double getNewDensity(int ageOfInfection, double growthRateMultiplier);
+  double getNewDensity(int time, double growthRateMultiplier);
   static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
 
 
@@ -33,6 +33,7 @@ private:
   double sigma_noise(int ageOfInfection);
   double samplePatentValue(double mu, double sigma, double lowerBound);
   double sampleSubPatentValue(double mu, double sigma, double upperBound);
+  //the following were meant to be static but this lead to a linker error
   static const int _maximumDurationInDays=418; 
   static double _maximumPermittedAmplificationPerCycle;
   static double _subPatentLimit;
@@ -55,6 +56,7 @@ private:
   static double _inflationVariance;
   static double _extinctionLevel;
   static double _overallMultiplier;
+  // the following are not static
   double _laggedLogDensities[3];
   int _startTime;
 };
