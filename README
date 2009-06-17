@@ -16,6 +16,9 @@ libboinc.a  libboinc_api.a  libgsl.a  libgslcblas.a  libxerces-c.a
 
 Linux building:
 ./autogen
+  If ./autogen fails run
+  automake --add-missing
+  and then repeat ./autogen
 ./configure [--enable-deployed]
 	The --enable-deployed option adds BOINC integration and statically links the libraries.
 make
