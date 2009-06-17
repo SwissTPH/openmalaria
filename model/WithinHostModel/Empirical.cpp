@@ -20,9 +20,32 @@
 
 #include "WithinHostModel/Empirical.h"
 #include "GSLWrapper.h"
+#include <iostream>
 #include <sstream>
 #include <fstream>
 
+//static (class) variables
+double EmpiricalInfection::_maximumPermittedAmplificationPerCycle;
+double EmpiricalInfection::_subPatentLimit;
+double EmpiricalInfection::_lambda;
+double EmpiricalInfection::_alpha1;
+double EmpiricalInfection::_alpha2;	
+double EmpiricalInfection::_alpha3;
+double EmpiricalInfection::_mu1;	
+double EmpiricalInfection::_mu2;	
+double EmpiricalInfection::_mu3;
+double EmpiricalInfection::_sigma0_res;	
+double EmpiricalInfection::_sigmat_res;
+double EmpiricalInfection::_mu_beta1[_maximumDurationInDays];
+double EmpiricalInfection::_sigma_beta1[_maximumDurationInDays];
+double EmpiricalInfection::_mu_beta2[_maximumDurationInDays];
+double EmpiricalInfection::_sigma_beta2[_maximumDurationInDays];
+double EmpiricalInfection::_mu_beta3[_maximumDurationInDays];
+double EmpiricalInfection::_sigma_beta3[_maximumDurationInDays];
+double EmpiricalInfection::_inflationMean;
+double EmpiricalInfection::_inflationVariance;
+double EmpiricalInfection::_extinctionLevel;
+double EmpiricalInfection::_overallMultiplier;
 
 void EmpiricalInfection::initParameters(){
   // alpha1 corresponds to 1 day before first patent, alpha2 2 days before first patent etc.
@@ -35,14 +58,13 @@ void EmpiricalInfection::initParameters(){
   _sigma0_res=0.9998;
   _sigmat_res=0.002528;
 /* The following variables are assigned separately for each infection to enable optimisation of their values
-*/
-  _inflationMean= 1.08345;
-  _inflationVariance= 0.22062;
-  _extinctionLevel= 0.00393247;
-  _overallMultiplier= 0.645975;
+*/    
+  _inflationMean= 1.09635;
+  _inflationVariance= 0.172029;
+  _extinctionLevel= 0.0100976;
+  _overallMultiplier= 0.697581;
   _subPatentLimit=10.0/_overallMultiplier; 
   _maximumPermittedAmplificationPerCycle=1000.0;
-  double _subPatentLimit=10.0;
   const int MAX_LENGTH = 1000;
   char autoRegressionParameters [MAX_LENGTH];
   strcpy(autoRegressionParameters,"autoRegressionParameters.csv");
@@ -90,17 +112,19 @@ void EmpiricalInfection::initParameters(){
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
-EmpiricalInfection::EmpiricalInfection(double growthRateMultiplier){
+EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplier){
 //sample the parasite densities for the last 3 prepatent days
 //note that the lag decreases with time
 _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
 _laggedLogDensities[1]=sampleSubPatentValue(_alpha2,_mu2,log(_subPatentLimit)); 
 _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
 //only the immediately preceding value is modified by the growth rate multiplier
-_laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier);  
+_laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier); 
+_startTime=startTime;
 }
 
-double EmpiricalInfection::getNewDensity(int ageOfInfection, double growthRateMultiplier){
+double EmpiricalInfection::getNewDensity(int time, double growthRateMultiplier){
+int ageOfInfection=time-_startTime;
 double newDensity=-9.99;  
 double logInflatedDensity=-9999999.99;
 if (_laggedLogDensities[0]>-999999.9) {
