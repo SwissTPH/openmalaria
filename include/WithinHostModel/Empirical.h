@@ -22,9 +22,16 @@
 
 class EmpiricalInfection : public Infection {
 public:
+  /// Per instance initialisation; create new inf.
   EmpiricalInfection(int startTime, double growthRateMultiplier);
+  
+  /// Static (shared) data initialisation
   static void initParameters();
+  
+  /// update
   double getNewDensity(int time, double growthRateMultiplier);
+  
+  /// only for parameterisation?
   static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
 
 
