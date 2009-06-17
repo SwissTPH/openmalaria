@@ -98,7 +98,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
       effectiveTreatment=uncomplicatedEvent(latestReport, true, ageYears);
     
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
-      doomed=-1;
+      doomed=-Global::interval;
     
     if (Global::modelVersion & PENALISATION_EPISODES) {
       withinHostModel.immunityPenalisation();

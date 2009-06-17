@@ -184,9 +184,6 @@ void Summary::report(Event& event){
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS:
     //do nothing
     break;
-  case Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS:
-    //do nothing
-    break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS:
     _numHospitalRecoveries[surveyPeriod-1][ageGroup - 1]++;
     //TODO: we curr do not distinquish between treated vs untreated seqs.

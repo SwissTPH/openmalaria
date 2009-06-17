@@ -115,7 +115,19 @@ protected:
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
   Event latestReport;
-  //!Indicates that individual will die from indirect mortality
+  
+  /** Can indicate that the individual is dead or about to die.
+   *
+   * If _doomed < 0, the individual is doomed to die.
+   * 
+   * If _doomed > 0, the individual is dead, and will be removed from the
+   * population at the beginning of the next timestep. NOTE: why not
+   * immediately? Several positive values are used in the code. FIXME: why
+   * is _doomed tested for values 4, -30 (5 days before indirect death) and
+   * 6?
+   * 4 = Direct death from severe malaria or a coinfection
+   * 6 = Neonatal death
+   * 7 = Indirect death */
   int _doomed;
 };
 #endif

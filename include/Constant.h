@@ -169,9 +169,7 @@ namespace Outcome {
     PATIENT_DIES_NON_TREATED,
     //for inpatients
     PATIENT_DIES_INPATIENTS,
-    INDIRECT_DEATH,
-    //for outpatients in models of pk/pD
-    PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS
+    INDIRECT_DEATH
   };
 }
 

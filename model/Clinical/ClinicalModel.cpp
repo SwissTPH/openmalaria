@@ -84,10 +84,10 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
 
 void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
-    _doomed--;
+    _doomed -= Global::interval;
   
   //indirect death: if this human's about to die, don't worry about further episodes:
-  if (_doomed ==  -7) {	//clinical episode 6 intervals before
+  if (_doomed <= -35) {	//clinical episode 6 intervals before
     latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
     /*
     doomed=7 is the code for indirect death, and 6 for neonatal death.
@@ -115,7 +115,7 @@ void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
   // update array for the infant death rates
   if (ageTimeSteps <= (int)Global::intervalsPerYear){
     ++Global::infantIntervalsAtRisk[ageTimeSteps-1];
-    if ((_doomed == 4) || (_doomed == -6) || (_doomed == 6)){
+    if ((_doomed == 4) || (_doomed == -30) || (_doomed == 6)){
       ++Global::infantDeaths[ageTimeSteps-1];
     }
   }
