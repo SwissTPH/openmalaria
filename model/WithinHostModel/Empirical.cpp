@@ -164,3 +164,11 @@ void EmpiricalWithinHostModel::write(ostream& out) const {
   for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
 }
+
+//Immunity?
+
+void EmpiricalWithinHostModel::updateImmuneStatus() {
+}
+
+void EmpiricalWithinHostModel::immunityPenalisation() {
+}

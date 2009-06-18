@@ -24,6 +24,7 @@
 #include "WithinHostModel/Descriptive.h"
 #include "WithinHostModel/OldIPT.h"
 #include "WithinHostModel/Dummy.h"
+#include "WithinHostModel/Empirical.h"
 #include "inputData.h"
 #include "WithinHostModel/DescriptiveInfection.h"
 #include <stdexcept>
@@ -62,6 +63,8 @@ void WithinHostModel::init() {
   
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     DummyInfection::init ();
+  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
+    EmpiricalInfection::initParameters();
   } else {
     DescriptiveInfection::initParameters ();
     OldIPTWithinHostModel::initParameters();
@@ -76,6 +79,8 @@ void WithinHostModel::clear() {
 WithinHostModel* WithinHostModel::createWithinHostModel () {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     return new DummyWithinHostModel();
+  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
+    return new EmpiricalWithinHostModel();
   } else {
     if (OldIPTWithinHostModel::iptActive)
       return new OldIPTWithinHostModel();
@@ -87,6 +92,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
 WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     return new DummyWithinHostModel(in);
+  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
+    return new EmpiricalWithinHostModel(in);
   } else {
     if (OldIPTWithinHostModel::iptActive)
       return new OldIPTWithinHostModel(in);

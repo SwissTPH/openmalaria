@@ -113,6 +113,49 @@ void EmpiricalInfection::initParameters(){
   
 }
 
+EmpiricalInfection::~EmpiricalInfection() {
+}
+void EmpiricalInfection::destroy() {
+  //XXX destroy the proteome?
+}
+
+void EmpiricalInfection::write (ostream& out) const {
+  out << _duration << endl;
+  out << _startdate << endl;
+  out << _density << endl;
+  out << _laggedLogDensities[0] << endl;
+  out << _laggedLogDensities[1] << endl;
+  out << _laggedLogDensities[2] << endl;
+  out << _startTime << endl;
+  out << _patentGrowthRateMultiplier << endl;
+
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    out << _proteome->getProteomeID() << endl;
+  }
+}
+
+EmpiricalInfection::EmpiricalInfection (istream& in) {
+  in >> _duration;
+  in >> _startdate;
+  in >> _density;
+  in >> _laggedLogDensities[0];
+  in >> _laggedLogDensities[1];
+  in >> _laggedLogDensities[2];
+  in >> _startTime;
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    int proteomeID;
+    in >> proteomeID;
+    _proteome = ProteomeManager::getProteome(proteomeID);
+  }
+}
+
+
+int EmpiricalInfection::getEndDate(){
+  return _startdate+_duration/Global::interval;
+}
+
+
+
 void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
   _patentGrowthRateMultiplier = multiplier;
 }
