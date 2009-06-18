@@ -122,13 +122,18 @@ enum ModelVersion {
   COMORB_TREAT_HET = 1 << 20,
   /// @brief Allow correlated heterogeneities in transmission, comorbidity and treatment seeking
   TRIPLE_HET = 1 << 21,
+
+  /** @brief Parasite densities are predicted from an empirical model
+   */
+  EMPIRICAL_WITHIN_HOST_MODEL = 1 << 22,
+
   /// Used to test if any heterogeneity is present
   ANY_HET = TRANS_HET|COMORB_HET|TREAT_HET|COMORB_TRANS_HET|TRANS_TREAT_HET|TRIPLE_HET,
   ANY_TRANS_HET =  TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,
   // @}
   
   // Used by tests; should be 1 plus highest left-shift value of 1
-  NUM_VERSIONS = 22,
+  NUM_VERSIONS = 23,
 };
 
 namespace Diagnosis {

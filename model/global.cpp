@@ -161,6 +161,7 @@ void Global::setModelVersion () {
     ANY_HET,	// 19
     ANY_HET,	// 20
     0,	// 21
+    DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD) // 22
   };
   
   for (size_t i = 0; i < NUM_VERSIONS; ++i)
