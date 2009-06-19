@@ -30,21 +30,26 @@ class WithinHostModel;
 
 /// Namespace enclosing pathogenesis output enumeration.
 namespace Pathogenesis {
-  /** Types of sickness; used by case management. */
+  /** Types of sickness; used by case management.
+   *
+   * Most values are flags which can be combined in any form. A few
+   * combinations set follow. */
   enum State {
     NONE		= 0,		///< Not sick
     
-    NON_MALARIA		= 0x1,		///< Non-malaria sickness (flag and output value)
-    MALARIA		= 0x2,		///< Malaria sickness (flag)
+    // Flags:
+    SICK		= 0x1,		///< Sick (may or may not be from malaria)
+    MALARIA		= 0x2,		///< Malaria sickness
+    SEVERE		= 0x8,		///< Severe malaria case
+    COINFECTION		= 0x10,		///< Malaria with a coinfection
+    /// Added by ClinicalEventScheduler to indicate individual was previously sick.
+    SECOND_CASE		= 0x400,
+    COMPLICATED		= 0x200,	///< Flag used to indicate SEVERE and/or COINFECTION
+    INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
     
-    // Flags indicating case severity:
-    INDIRECT_MORTALITY	= 0x4,		///< Death caused by indirect effects of malaria (flag)
-    COMPLICATED		= 0x8,		///< Severe malaria or a coinfection (flag)
-    
-    UNCOMPLICATED	= MALARIA | 0x10,	///< Simpler malaria case (flag MALARIA)
-    
-    SEVERE		= MALARIA | COMPLICATED | 0x10,	///< Severe malaria case (flags MALARIA, COMPLICATED)
-    COINFECTION		= MALARIA | COMPLICATED | 0x20,	///< Malaria with a coinfection (flags MALARIA, COMPLICATED)
+    STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
+    STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
+    STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
   };
 }
 

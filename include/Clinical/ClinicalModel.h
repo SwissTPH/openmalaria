@@ -104,10 +104,11 @@ protected:
   /// Constructor, loading from a checkpoint.
   ClinicalModel (istream& in);
   
-  /** Determine treatment for a human.
+  /** Update for clinical model - new pathogenesis status, treatment, etc.
+   *
    * @param withinHostModel = WithinHostModel of human.
    * @param ageYears = Age of human. */
-  virtual void doCaseManagement (WithinHostModel& withinHostModel, double ageYears) =0;
+  virtual void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) =0;
   
   /// The PathogenesisModel introduces illness dependant on parasite density
   PathogenesisModel *pathogenesisModel;

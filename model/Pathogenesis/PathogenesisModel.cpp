@@ -145,12 +145,13 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
-    Pathogenesis::State ret = Pathogenesis::UNCOMPLICATED;
-    
+    Pathogenesis::State ret;
     if (W_UNIFORM() < prSevereEpisode)
-      ret = Pathogenesis::SEVERE;
+      ret = Pathogenesis::STATE_SEVERE;
     else if (W_UNIFORM() < pCoinfection)
-      ret = Pathogenesis::COINFECTION;
+      ret = Pathogenesis::STATE_COINFECTION;
+    else
+      ret = Pathogenesis::STATE_MALARIA;
     
     /* Indirect mortality	
        IndirectRisk is the probability of dying from indirect effects of malaria
@@ -168,7 +169,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
     if ((W_UNIFORM()) < prNonMalariaFever)
-      return Pathogenesis::NON_MALARIA;
+      return Pathogenesis::SICK;
   }
   return Pathogenesis::NONE;
 }

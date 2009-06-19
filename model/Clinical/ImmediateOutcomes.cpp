@@ -52,7 +52,7 @@ void ClinicalImmediateOutcomes::write (ostream& out) {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) {
   caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,
 				    latestReport,

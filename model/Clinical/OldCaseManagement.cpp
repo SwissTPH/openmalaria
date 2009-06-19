@@ -94,8 +94,12 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
   if (pgState & Pathogenesis::MALARIA) {
     if (pgState & Pathogenesis::COMPLICATED)
       effectiveTreatment=severeMalaria(latestReport, ageYears, doomed);
-    else if (pgState == Pathogenesis::UNCOMPLICATED)
+    else if (pgState == Pathogenesis::STATE_MALARIA) {
+      // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
+      // included. Validity is debatable, but there's no point changing now.
+      // (This does affect tests.)
       effectiveTreatment=uncomplicatedEvent(latestReport, true, ageYears);
+    }
     
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
       doomed=-Global::interval;
@@ -103,7 +107,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
     if (Global::modelVersion & PENALISATION_EPISODES) {
       withinHostModel.immunityPenalisation();
     }
-  } else if(pgState & Pathogenesis::NON_MALARIA) {
+  } else if (pgState & Pathogenesis::SICK) {	// sick but not from malaria
     effectiveTreatment = uncomplicatedEvent(latestReport, false, ageYears);
   }
   

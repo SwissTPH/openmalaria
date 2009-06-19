@@ -42,7 +42,7 @@ public:
   
   void write (ostream& out);
   
-  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
   
   inline bool recentTreatment() {
     return caseManagement->recentTreatment();

@@ -108,7 +108,7 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
     }
   }
   
-  doCaseManagement (withinHostModel, ageYears);
+  doClinicalUpdate (withinHostModel, ageYears);
 }
 
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {

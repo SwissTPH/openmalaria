@@ -34,8 +34,18 @@ public:
   
   void write (ostream& out);
   
-  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
   
 private:
+  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  
+  /// Current state of sickness
+  Pathogenesis::State pgState;
+  /// Worst state within reporting period
+  Pathogenesis::State reportState;
+  /// Time of last state-change
+  int pgChangeTimestep;
+  /// Time when first entered a sick state (for reporting).
+  int reportStartTimestep;
 };
 #endif
