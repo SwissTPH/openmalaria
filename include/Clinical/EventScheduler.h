@@ -21,7 +21,14 @@
 #ifndef Hmod_ClinicalEventSchduler
 #define Hmod_ClinicalEventSchduler
 
+#include "global.h"
 #include "Clinical/ClinicalModel.h"
+#include <map>
+#include <list>
+
+namespace scnXml {
+  class CaseType;
+}
 
 /** Tracks clinical status (sickness), does case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
@@ -60,5 +67,49 @@ private:
   int _surveyPeriod;
   //! agegroup of the individual which experienced the episode
   int _ageGroup;
+  
+  /// Data used for a withinHostModel->medicate() call
+  struct MedicateData {
+    string abbrev;	/// Drug abbreviation
+    double qty;		/// Quantity of drug prescribed
+    int delay;		/// Delay before medicating, in hours
+  };
+  
+  /// All pending medications, sorted by time.
+  list<MedicateData> medicateQueue;
+  
+  
+  /** Cumulative probabilities and decisions for a case type */
+  struct CaseTypeEndPoints {
+    vector<double> cumProbs;
+    vector<int> decisions;
+  };
+  
+  /// Data type stored in decisions
+  /// TODO: treatment seeking delay(?), hospital/community care, RDTs or not.
+  struct CaseTreatment {
+    /// Data for each medicate() call.
+    vector<MedicateData> medications;
+  };
+  
+  struct CaseManagementEndPoints {
+    CaseTypeEndPoints caseUC1;
+    CaseTypeEndPoints caseUC2;
+    CaseTypeEndPoints caseSev;
+    CaseTypeEndPoints caseNMF;
+    
+    /** Decisions data (end points of decision tree plus part of path).
+     *
+     * NOTE: Using a red-black tree here; probably a hash-map would be faster.
+     * NOTE: Decisions from all age groups are being combined. */
+    map<size_t,CaseTreatment> decisions;
+  };
+  
+  /** Age groups */
+  static vector<double> caseManagementMaxAge;
+  /** Case management data, per age group. */
+  static vector<CaseManagementEndPoints> caseManagementEndPoints;
+  
+  static CaseTypeEndPoints readEndPoints (const scnXml::CaseType& caseType);
 };
 #endif

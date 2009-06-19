@@ -83,25 +83,34 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration, int popu
   memPermutation = gsl_permutation_alloc(eta);
   
   fpp = fopen("output_ento_para.txt", "w");
+  cout << "c9" << endl;
 }
 
 VectorEmergence::~VectorEmergence () {
+  cout << "d0" << endl;
   fclose (fpp);
   
+  cout << "d1" << endl;
   gsl_vector_complex_free(memVectorComplexEta);
   gsl_vector_free(memVectorEta);
   gsl_matrix_free(memMatrixEtaSq);
   gsl_eigen_nonsymm_free(memEigenWorkspace);
   gsl_permutation_free(memPermutation);
   
+  cout << "d3" << endl;
   for (size_t i=0; i<theta_p; i++){
+    cout << "d4 " << i << endl;
     gsl_matrix_free(Upsilon[i]);
+    cout << "d5" << endl;
     gsl_vector_free(Lambda[i]);
+    cout << "d6" << endl;
     gsl_vector_free(x_p[i]);
   }
+  cout << "d8" << endl;
   delete[] Upsilon;
   delete[] Lambda;
   delete[] x_p;
+  cout << "d9" << endl;
 }
 
 double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
@@ -176,6 +185,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   /// - no dependence on the phase of the period - or the type of host.
   double P_Ai = 0;	// \f$P_{A^i}\f$
 
+  cout << "er0" << endl;
   
   // Create matrices in Upsilon.
   // We also define P_A and P_Ai in the same routine. 
@@ -185,12 +195,14 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   // a lot of changes anyway. 
   CalcUpsilonOneHost(&P_A, &P_Ai, nHostTypesInit, nMalHostTypesInit, K_vi);
 
-
+  cout << "er1" << endl;
+  
   // Calculate \f$X_{\theta_p}\f$.
   // Refer to Cushing (1995) and the paper for the periodic entomological model
   // for more information.
   FuncX(X_t_p, theta_p, 0);
-
+  cout << "er2" << endl;
+  
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char xtpname[15] = "X_t_p";
   PrintMatrix(xtpname, X_t_p, eta, eta);
@@ -216,7 +228,8 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     msg << "Warning: All results from the entomologoical model may be meaningless. \n";
     throw xml_scenario_error (msg.str());
   }
-
+  cout << "er3" << endl;
+  
   // Calculate the inverse of (I-X_t_p).
   CalcInv1minusA(inv1Xtp, X_t_p);
 
@@ -225,7 +238,8 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   PrintMatrix(inv1Xtpname, inv1Xtp, eta, eta);
 # endif
 
-  // Calculate the number of infectious host-seeking mosquitoes for the given EIR.
+cout << "er4" << endl;
+// Calculate the number of infectious host-seeking mosquitoes for the given EIR.
   CalSvfromEIRdata(S_vFromEIR, P_Ai, Xi_i);
 
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -246,7 +260,8 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   gsl_vector* xrootfind = gsl_vector_calloc(theta_p);
   gsl_vector_memcpy(xrootfind, N_v0);
   
-
+  cout << "er5" << endl;
+  
   CalcSvDiff(S_vDiff, S_vFromEIR, N_v0, inv1Xtp);
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char InitSvDiffname[20] = "InitSvDifference";
@@ -257,6 +272,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 
   // Maximum \f$l^1\f$ distance of error of root-finding algorithm
   const double EpsAbsRF = 1.0;
+  cout << "er6" << endl;
   
   if(SvDiff1norm>EpsAbsRF){
     printf("The difference in Sv is greater than the tolerance. \n");
@@ -327,15 +343,19 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     gsl_vector_free(xrootfind);
     gsl_multiroot_fsolver_free(srootfind);
   }
-
+  cout << "er7" << endl;
+  
 
   // Calculate final periodic orbit.
   CalcLambda(N_v0);
+  cout << "er8" << endl;
   CalcXP(inv1Xtp);
-
+  cout << "er9" << endl;
+  
   // Retrieve the periodic orbits for Nv, Ov, and Sv.
   size_t indexSv = 2*mt;
   for (size_t i=0; i<theta_p; i++){
+    cout << "er cp " << i << endl;
     double temp = gsl_vector_get(x_p[i], 0);
     gsl_vector_set(Nvp, i, temp);
 
@@ -345,6 +365,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     temp = gsl_vector_get(x_p[i], indexSv);
     gsl_vector_set(Svp, i, temp);
   }
+  cout << "er10" << endl;
   
   /* FIXME - move back to VectorSpecies
   if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > (int)theta_p)
@@ -371,9 +392,11 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 # endif
 
 
-  // Copy the mosquito emergence rate to the C array.
+cout << "er11" << endl;
+// Copy the mosquito emergence rate to the C array.
   memcpy (mosqEmergeRate, N_v0->data, theta_p * sizeof (*mosqEmergeRate));
-
+  cout << "er12" << endl;
+  
   gsl_vector_free(N_v0);
   gsl_vector_free(K_vi);
   gsl_vector_free(Xi_i);
@@ -383,10 +406,12 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   gsl_vector_free(Ovp);
   gsl_vector_free(Svp);
 	
-
+  cout << "er13" << endl;
+  
   gsl_matrix_free(X_t_p);
   gsl_matrix_free(inv1Xtp);
-
+  cout << "er14" << endl;
+  
   return 0.0;
 }
 

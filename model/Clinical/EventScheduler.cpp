@@ -27,6 +27,9 @@
 //TODO: move to XML
 const int maxEpisodeLength = 28;
 
+vector<double> ClinicalEventScheduler::caseManagementMaxAge;
+vector<ClinicalEventScheduler::CaseManagementEndPoints> ClinicalEventScheduler::caseManagementEndPoints;
+
 
 // -----  static init  -----
 
@@ -35,6 +38,53 @@ void ClinicalEventScheduler::init () {
     throw xml_scenario_error("ClinicalEventScheduler is only designed for a 1-day timestep.");
   if (getCaseManagements() == NULL)
     throw xml_scenario_error ("ClinicalEventScheduler selected without caseManagements data in XML");
+  
+  const scnXml::CaseManagements::CaseManagementSequence& managements = getCaseManagements()->getCaseManagement();
+  caseManagementMaxAge.resize (managements.size());
+  caseManagementEndPoints.resize (managements.size());
+  for (size_t i = 0; i < managements.size(); ++i) {
+    caseManagementMaxAge[i] = managements[i].getMaxAgeYrs();
+    CaseManagementEndPoints& endPoints = caseManagementEndPoints[i];
+    endPoints.caseUC1 = readEndPoints (managements[i].getUc1());
+    endPoints.caseUC2 = readEndPoints (managements[i].getUc2());
+    endPoints.caseSev = readEndPoints (managements[i].getSev());
+    endPoints.caseNMF = readEndPoints (managements[i].getNmf());
+    
+    const scnXml::Decisions::DecisionSequence& dSeq = managements[i].getDecisions().getDecision();
+    for (scnXml::Decisions::DecisionSequence::const_iterator it = dSeq.begin(); it != dSeq.end(); ++it) {
+      CaseTreatment ct;
+      const scnXml::Decision::MedicateSequence& mSeq = it->getMedicate();
+      ct.medications.resize (mSeq.size());
+      for (size_t j = 0; j < mSeq.size(); ++j) {
+	ct.medications[j].abbrev = mSeq[j].getName();
+	ct.medications[j].qty = mSeq[j].getQty();
+	ct.medications[j].delay = mSeq[j].getTime();
+      }
+      endPoints.decisions[it->getId()] = ct;
+    }
+  }
+  if (caseManagementMaxAge[managements.size()-1] <= get_maximum_ageyrs())
+    throw xml_scenario_error ("CaseManagements data doesn't cover all ages");
+}
+
+ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints (const scnXml::CaseType& caseType) {
+  CaseTypeEndPoints ret;
+  const scnXml::CaseType::EndPointSequence& caseTypeSeq = caseType.getEndPoint();
+  ret.cumProbs.resize (caseTypeSeq.size());
+  ret.decisions.resize (caseTypeSeq.size());
+  double cumP = 0.0;
+  for (size_t i = 0; i < caseTypeSeq.size(); ++i) {
+    cumP += caseTypeSeq[i].getP();
+    ret.cumProbs[i] = cumP;
+    ret.decisions[i] = caseTypeSeq[i].getDecision();
+  }
+  // Test cumP is approx. 1.0 (in case the XML is wrong).
+  if (cumP < 0.999 || cumP > 1.001)
+    throw xml_scenario_error("EndPoint probabilities don't add up to 1.0 (CaseManagements)");
+  // In any case, force it exactly 1.0 (because it could be slightly less,
+  // meaning a random number x could have cumP<x<1.0, causing index errors.
+  ret.cumProbs[caseTypeSeq.size()-1] = 1.0;
+  return ret;
 }
 
 
@@ -112,7 +162,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   
   if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
     _doomed = -Global::interval;	// start indirect mortality countdown
-    
+  
   
   if (pgState & Pathogenesis::COMPLICATED) {
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
@@ -147,72 +197,59 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     pgState = Pathogenesis::NONE;
   }
   
-  // TODO: force leaving sick states after timeout
+  for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
+    list<MedicateData>::iterator next = it;
+    ++next;
+    if (it->delay < 24) {	// Medicate today's medications
+      withinHostModel.medicate(it->abbrev, it->qty, it->delay);
+      medicateQueue.erase(it);
+      //TODO sort out reporting
+    } else {			// and decrement delay for the rest
+      it->delay -= 24;
+    }
+    it = next;
+  }
 }
 
 void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
-  //TODO: implement age-specificity of drug dosing
-  //TODO: This is a rough and quick implementation, which could perhaps be improved.
+#ifdef DEBUG
+  if (!(pgState & Pathogenesis::SICK))
+    throw domain_error("doCaseManagement shouldn't be called if not sick");
+#endif
   
-  // Often individuals are not sick:
-  if (!(pgState & Pathogenesis::SICK)) return;
+  // We always remove any queued medications.
+  medicateQueue.clear();
   
-  const scnXml::CaseManagements::CaseManagementSequence managements = getCaseManagements()->getCaseManagement();
-  const scnXml::CaseManagement* caseManagement = NULL;
-  for (scnXml::CaseManagements::CaseManagementConstIterator it = managements.begin(); it != managements.end(); ++it) {
-    if (ageYears < it->getMaxAgeYrs() &&
-      (!it->getMinAgeYrs().present() || it->getMinAgeYrs().get() <= ageYears))
-      caseManagement = &*it;
+  size_t ageIndex = 0;
+  while (ageYears > caseManagementMaxAge[ageIndex]) {
+    ++ageIndex;
+#ifdef DEBUG
+    if (ageIndex >= caseManagementMaxAge.size()) {
+      ostringstream x;
+      x << "Individual's age (" << ageYears << ") is over maximum age which has caseManagement data in XML (" << CaseManagementMaxAge[ageIndex].first << ")";
+      throw xml_scenario_error(x.str());
+    }
+#endif
   }
-  if (caseManagement == NULL) {
-    ostringstream msg;
-    msg << "No case management for age " << ageYears;
-    throw xml_scenario_error (msg.str());
-  }
   
-  const scnXml::CaseType::EndPointSequence* caseTypeSeq;
+  const CaseTypeEndPoints* endPoints;
   if (pgState & Pathogenesis::MALARIA) {
     if (pgState & Pathogenesis::COMPLICATED)
-      // FIXME: SEVERE/COINFECTION differences?
-      caseTypeSeq = &caseManagement->getSev().getEndPoint();
+      endPoints = &caseManagementEndPoints[ageIndex].caseSev;
     else if (pgState & Pathogenesis::SECOND_CASE)
-      caseTypeSeq = &caseManagement->getUc2().getEndPoint();
+      endPoints = &caseManagementEndPoints[ageIndex].caseUC2;
     else
-      caseTypeSeq = &caseManagement->getUc1().getEndPoint();
+      endPoints = &caseManagementEndPoints[ageIndex].caseUC1;
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
-    caseTypeSeq = &caseManagement->getNmf().getEndPoint();
+    endPoints = &caseManagementEndPoints[ageIndex].caseNMF;
   }
   
   double randCum = W_UNIFORM();
-  int decisionID = -1;
-  for (scnXml::CaseType::EndPointConstIterator it = caseTypeSeq->begin(); it != caseTypeSeq->end(); ++it) {
-    randCum -= it->getP();
-    if (randCum < 0) {
-      decisionID = it->getDecision();
-      break;
-    }
-  }
-  if (decisionID < 0) {
-    throw xml_scenario_error ("Sum of probabilities of case management end-points for some severity type less than 1");
-  }
+  size_t decisionIndex = 0;
+  while (endPoints->cumProbs[decisionIndex] < randCum)
+    ++decisionIndex;
   
-  //FIXME: build list of decisions by ID and use (don't read every time)
-  const scnXml::Decisions::DecisionSequence& decisions = caseManagement->getDecisions().getDecision();
-  if ((int)decisions.size() < decisionID) {
-    cerr << "A decision for a case-management end-point doesn't exist (number "<<decisionID<<")!" << endl;
-    return;
-  }
-  const scnXml::Decision::MedicateSequence& medicates = decisions[decisionID-1].getMedicate();
-  if (medicates.size() == 0)
-    return;
-  
-  for (size_t medicateID=0;medicateID<medicates.size(); medicateID++) {
-    double qty=medicates[medicateID].getQty();
-    int time=medicates[medicateID].getTime();
-    string name=medicates[medicateID].getName();
-    //TODO: we shouldn't medicate immediately, but on the day, so it can be cancelled.
-    withinHostModel.medicate(name,qty,time);
-    //TODO sort out reporting
-    //latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
-  }
+  CaseTreatment& decision = caseManagementEndPoints[ageIndex].decisions[endPoints->decisions[decisionIndex]];
+  for (vector<MedicateData>::iterator it = decision.medications.begin(); it != decision.medications.end(); ++it)
+    medicateQueue.push_back (*it);
 }

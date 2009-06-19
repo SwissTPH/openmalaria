@@ -127,7 +127,6 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     intP_df += prod;
   }
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-  //END P_A, P_Ai, P_df, P_dif
   
   
   if (Simulation::simulationTime*Global::interval < N_v_length)
@@ -143,6 +142,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     // Should correspond to index of kappa updated by updateKappa:
     P_dif[t]	= intP_df * kappa[(simStep-1) % Global::intervalsPerYear];
   }
+  //END P_A, P_Ai, P_df, P_dif
   
   
   calMosqEmergeRate (populationSize, kappa, (leaveHostRate-mosqSeekingDeathRate)/populationSize);	// initialises N_v, O_v, S_v
