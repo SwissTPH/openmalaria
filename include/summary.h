@@ -51,8 +51,7 @@ class Summary {
   //! Clearing Routine. This will have to be moved to the class destructor
   void clearSummaryParameters();
 
-  //! Called for all episodes which are reported. Adds an episode 
-  //! to the summary data structure.
+  //! Called for all episodes which are reported from ClinicalImmediateOutcomes.
   /*  
       \param diagnosis the final diagnosis
       \param outcome the clinical outcome
@@ -63,6 +62,9 @@ class Summary {
     are assigned to survey period (number of surveys)+1.
   */
   void report(Event& event);
+  
+  /// Report episode for ClinicalEventScheduler.
+  void report(Pathogenesis::State state, int ageGroup,int surveyPeriod);
   
   //! Report a first or second line, or inpatient treatment
   void reportTreatment(int ageGroup, int regimen);

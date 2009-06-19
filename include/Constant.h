@@ -136,6 +136,33 @@ enum ModelVersion {
   NUM_VERSIONS = 23,
 };
 
+/// Namespace enclosing pathogenesis output enumeration.
+namespace Pathogenesis {
+  /** Types of sickness; used by case management.
+   *
+   * Most values are flags which can be combined in any form. A few
+   * combinations set follow. */
+  enum State {
+    NONE		= 0,		///< Not sick
+    
+    // Flags:
+    SICK		= 0x1,		///< Sick (may or may not be from malaria)
+    MALARIA		= 0x2,		///< Malaria sickness
+    SEVERE		= 0x8,		///< Severe malaria case
+    COINFECTION		= 0x10,		///< Malaria with a coinfection
+    /// Used by ClinicalEventScheduler to indicate a second bout of malarial sickness within the same episode (roughly)
+    SECOND_CASE		= 0x400,
+    COMPLICATED		= 0x200,	///< Flag used to indicate SEVERE and/or COINFECTION
+    SEQUELAE		= 0x20,		///< Used for reporting sequelae from COMPLICATED sickness
+    INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
+    DIRECT_DEATH	= 0x1000,	///< Used for reporting death from COMPLICATED sickness
+    
+    STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
+    STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
+    STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
+  };
+}
+
 namespace Diagnosis {
   enum Value { NON_MALARIA_FEVER,
                UNCOMPLICATED_MALARIA,

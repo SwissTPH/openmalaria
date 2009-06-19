@@ -140,35 +140,32 @@ void Summary::clearSummaryParameters () {
 
 
 void Summary::report(Event& event){
-
-  int diagnosis = event.getDiagnosis();
-  int outcome = event.getOutcome();
-  int ageGroup = event.getAgeGroup();
-  int surveyPeriod = event.getSurveyPeriod();
+  int reportAgeGroup = event.getAgeGroup() - 1;
+  int surveyPeriod = event.getSurveyPeriod() - 1;
 
   //No reporting during warmup
-  if (surveyPeriod < 1)
+  if (surveyPeriod < 0)
     return;
 
-  switch (diagnosis) {
+  switch (event.getDiagnosis()) {
   case Diagnosis::NON_MALARIA_FEVER:
-    _numNonMalariaFever[surveyPeriod-1][ageGroup - 1]++;
+    _numNonMalariaFever[surveyPeriod][reportAgeGroup]++;
     break;
   case Diagnosis::UNCOMPLICATED_MALARIA:
-    _numUncomplicatedEpisodes[surveyPeriod-1][ageGroup - 1]++;
+    _numUncomplicatedEpisodes[surveyPeriod][reportAgeGroup]++;
     break;
   case Diagnosis::SEVERE_MALARIA:
-    _numSevereEpisodes[surveyPeriod-1][ageGroup - 1]++;
+    _numSevereEpisodes[surveyPeriod][reportAgeGroup]++;
     break;
   case Diagnosis::INDIRECT_MALARIA_DEATH:
-    _numIndirectDeaths[surveyPeriod-1][ageGroup - 1]++;
+    _numIndirectDeaths[surveyPeriod][reportAgeGroup]++;
     break;
   default:
     //Diagnosis not conclusive
     cout << "diag nc or non-malaria fever" << lineEnd;
     break;
   }
-  switch (outcome) {
+  switch (event.getOutcome()) {
   case Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED:
     //do nothing
     break;
@@ -185,38 +182,67 @@ void Summary::report(Event& event){
     //do nothing
     break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS:
-    _numHospitalRecoveries[surveyPeriod-1][ageGroup - 1]++;
+    _numHospitalRecoveries[surveyPeriod][reportAgeGroup]++;
     //TODO: we curr do not distinquish between treated vs untreated seqs.
     break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED:
-    _numSequelae[surveyPeriod-1][ageGroup - 1]++;
+    _numSequelae[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS:
-    _numSequelae[surveyPeriod-1][ageGroup - 1]++;
-    _numHospitalSequelae[surveyPeriod-1][ageGroup - 1]++;
+    _numSequelae[surveyPeriod][reportAgeGroup]++;
+    _numHospitalSequelae[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED:
-    _numSequelae[surveyPeriod-1][ageGroup - 1]++;
+    _numSequelae[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS:
-    _numSequelae[surveyPeriod-1][ageGroup - 1]++;
-    _numHospitalSequelae[surveyPeriod-1][ageGroup - 1]++;
+    _numSequelae[surveyPeriod][reportAgeGroup]++;
+    _numHospitalSequelae[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::PATIENT_DIES_NON_TREATED:
-    _numDirectDeaths[surveyPeriod-1][ageGroup - 1]++;
+    _numDirectDeaths[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::PATIENT_DIES_INPATIENTS:
-    _numDirectDeaths[surveyPeriod-1][ageGroup - 1]++;
-    _numHospitalDeaths[surveyPeriod-1][ageGroup - 1]++;
+    _numDirectDeaths[surveyPeriod][reportAgeGroup]++;
+    _numHospitalDeaths[surveyPeriod][reportAgeGroup]++;
     break;
   case Outcome::INDIRECT_DEATH:
     //do nothing
     break;
   default:
     //Outcome not conclusive
-    cout << "oc nc" << outcome << lineEnd;
+    cout << "oc nc" << event.getOutcome() << lineEnd;
     break;
   }
+}
+
+void Summary::report(Pathogenesis::State state, int ageGroup,int surveyPeriod) {
+  //No reporting during warmup
+  if (surveyPeriod < 1)
+    return;
+  
+  //NOTE: this happens slightly differently to old reporting; we still report
+  // sickness when the patient has indirect death.
+  if (state & Pathogenesis::MALARIA) {
+    if (state & Pathogenesis::COMPLICATED)
+      _numSevereEpisodes[surveyPeriod-1][ageGroup-1]++;
+    else // UC or UC2
+      _numUncomplicatedEpisodes[surveyPeriod-1][ageGroup-1]++;
+  } else if (state & Pathogenesis::SICK) {
+    _numNonMalariaFever[surveyPeriod-1][ageGroup-1]++;
+  }	// also possibility of nothing, but not reported in this case
+  
+  if (state & Pathogenesis::DIRECT_DEATH)
+    _numDirectDeaths[surveyPeriod-1][ageGroup-1]++;
+  else if (state & Pathogenesis::INDIRECT_MORTALITY)
+    _numIndirectDeaths[surveyPeriod-1][ageGroup-1]++;
+  else if (state & Pathogenesis::SEQUELAE)
+    _numSequelae[surveyPeriod-1][ageGroup-1]++;
+  
+  //TODO: we don't know whether patient was in hospital or not
+  //_numHospitalRecoveries[surveyPeriod-1][ageGroup-1]++;
+  //_numHospitalSequelae[surveyPeriod-1][ageGroup-1]++;
+  //_numHospitalDeaths[surveyPeriod-1][ageGroup-1]++;
 }
 
 void Summary::reportTreatment (int ageGroup, int regimen) {

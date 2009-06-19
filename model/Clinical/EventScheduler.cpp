@@ -46,10 +46,9 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     pgChangeTimestep(TIMESTEP_NEVER), episodeStartTimestep(TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {
+  // If something still to report, do so now
   if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
-    //FIXME do reporting
-    episodeStartTimestep = TIMESTEP_NEVER;
-    reportState = Pathogenesis::NONE;
+    Simulation::gMainSummary->report (reportState, _surveyPeriod, _ageGroup);
   }
 }
 
@@ -63,6 +62,8 @@ ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
   reportState = (Pathogenesis::State) state;
   in >> pgChangeTimestep;
   in >> episodeStartTimestep;
+  in >> _surveyPeriod;
+  in >> _ageGroup;
 }
 void ClinicalEventScheduler::write (ostream& out) {
   pathogenesisModel->write (out);
@@ -72,6 +73,8 @@ void ClinicalEventScheduler::write (ostream& out) {
   out << reportState << endl;
   out << pgChangeTimestep << endl;
   out << episodeStartTimestep << endl;
+  out << _surveyPeriod << endl;
+  out << _ageGroup << endl;
 }
 
 
@@ -90,9 +93,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     // When an event occurs, if it's at least 28 days later than the first case,
     // we report the old episode and count the new case a new episode.
     if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
-      //FIXME do reporting
+      Simulation::gMainSummary->report (reportState, _surveyPeriod, _ageGroup);
       episodeStartTimestep = Simulation::simulationTime;
       reportState = Pathogenesis::NONE;
+      _surveyPeriod=Simulation::gMainSummary->getSurveyPeriod();
+      _ageGroup=Simulation::gMainSummary->ageGroup(ageYears);
     }
     
     if ((newState & pgState) & Pathogenesis::MALARIA)
@@ -125,11 +130,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
 	if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
 	  reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
 	pgState = Pathogenesis::NONE;
-      } else {
-	if (rand < pRecover+pDeath)
-	  _doomed = 4;	// kill human (removed from simulation next timestep)
-	// else stay in this state
+      } else if (rand < pRecover+pDeath) {
+	reportState = Pathogenesis::State (reportState | Pathogenesis::DIRECT_DEATH);
+	_doomed = 4;	// kill human (removed from simulation next timestep)
       }
+      // else stay in this state
     }
   } else if (Simulation::simulationTime >= episodeStartTimestep + maxEpisodeLength) {
     // End of what's counted as episode. We only do reporting on death or the

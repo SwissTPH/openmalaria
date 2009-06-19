@@ -23,6 +23,14 @@
 
 #include "Clinical/ClinicalModel.h"
 
+/** Tracks clinical status (sickness), does case management for new events,
+ * medicates treatment, determines patient recovery, death and sequelae.
+ * 
+ * TODO: Case management cleanup
+ * Case management delayed calls to medicate(), to allow cancelling when
+ * patient becomes severe (from uncomplicated) or dies.
+ * Reporting of parasitological status (not model specific).
+ */
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
@@ -47,5 +55,10 @@ private:
   int pgChangeTimestep;
   /// Time when first entered a sick state (for reporting).
   int episodeStartTimestep;
+  //! survey period during which the event occured
+  //! TODO: we could use the survey array to map time to survey period. slower, but less memory.
+  int _surveyPeriod;
+  //! agegroup of the individual which experienced the episode
+  int _ageGroup;
 };
 #endif
