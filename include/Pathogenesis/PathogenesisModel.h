@@ -42,7 +42,8 @@ namespace Pathogenesis {
     MALARIA		= 0x2,		///< Malaria sickness
     SEVERE		= 0x8,		///< Severe malaria case
     COINFECTION		= 0x10,		///< Malaria with a coinfection
-    /// Added by ClinicalEventScheduler to indicate individual was previously sick.
+    SEQUELAE		= 0x20,		///< Used by ClinicalEventScheduler for reporting
+    /// Used by ClinicalEventScheduler to indicate individual previously had malarial sickness.
     SECOND_CASE		= 0x400,
     COMPLICATED		= 0x200,	///< Flag used to indicate SEVERE and/or COINFECTION
     INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria

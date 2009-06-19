@@ -46,6 +46,6 @@ private:
   /// Time of last state-change
   int pgChangeTimestep;
   /// Time when first entered a sick state (for reporting).
-  int reportStartTimestep;
+  int episodeStartTimestep;
 };
 #endif

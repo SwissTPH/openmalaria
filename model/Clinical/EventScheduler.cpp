@@ -24,6 +24,9 @@
 #include "WithinHostModel.h"
 #include "simulation.h"
 
+//TODO: move to XML
+const int maxEpisodeLength = 28;
+
 
 // -----  static init  -----
 
@@ -40,9 +43,14 @@ void ClinicalEventScheduler::init () {
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     ClinicalModel (cF),
     pgState(Pathogenesis::NONE), reportState(Pathogenesis::NONE),
-    pgChangeTimestep(TIMESTEP_NEVER), reportStartTimestep(TIMESTEP_NEVER)
+    pgChangeTimestep(TIMESTEP_NEVER), episodeStartTimestep(TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {
+  if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
+    //FIXME do reporting
+    episodeStartTimestep = TIMESTEP_NEVER;
+    reportState = Pathogenesis::NONE;
+  }
 }
 
 ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
@@ -54,7 +62,7 @@ ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
   in >> state;
   reportState = (Pathogenesis::State) state;
   in >> pgChangeTimestep;
-  in >> reportStartTimestep;
+  in >> episodeStartTimestep;
 }
 void ClinicalEventScheduler::write (ostream& out) {
   pathogenesisModel->write (out);
@@ -63,7 +71,7 @@ void ClinicalEventScheduler::write (ostream& out) {
   out << pgState << endl;
   out << reportState << endl;
   out << pgChangeTimestep << endl;
-  out << reportStartTimestep << endl;
+  out << episodeStartTimestep << endl;
 }
 
 
@@ -79,15 +87,18 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   if ((((newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
       (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3))
   {
-    if (Simulation::simulationTime > reportStartTimestep + 28) {	//NOTE: 28 is reporting length in days
-      //FIXME: report
-      reportState = pgState;
-      reportStartTimestep = Simulation::simulationTime;
+    // When an event occurs, if it's at least 28 days later than the first case,
+    // we report the old episode and count the new case a new episode.
+    if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
+      //FIXME do reporting
+      episodeStartTimestep = Simulation::simulationTime;
+      reportState = Pathogenesis::NONE;
     }
     
     if ((newState & pgState) & Pathogenesis::MALARIA)
       newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
     pgState = Pathogenesis::State (pgState | newState);
+    reportState = Pathogenesis::State (reportState | pgState);
     pgChangeTimestep = Simulation::simulationTime;
     
     doCaseManagement (withinHostModel, ageYears);
@@ -100,20 +111,35 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   
   if (pgState & Pathogenesis::COMPLICATED) {
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
-      // FIXME: force recovery or something
+      // force recovery after 10 days
+      if (W_UNIFORM() < 0.02)
+	reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
       pgState = Pathogenesis::NONE;
     } else {
       //TODO: insert correct probabilities
+      const double pRecover = 0.1;
+      const double pSequelae = 0.02;
+      const double pDeath = 0.03;
       double rand = W_UNIFORM();
-      if (rand < 0.5) {
-	//TODO: if (rand < XXX && Simulation::simulationTime >= pgChangeTimestep + 5) report sequelae
+      if (rand < pRecover) {
+	if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
+	  reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
 	pgState = Pathogenesis::NONE;
       } else {
-	if (rand < 0.75)
+	if (rand < pRecover+pDeath)
 	  _doomed = 4;	// kill human (removed from simulation next timestep)
 	// else stay in this state
       }
     }
+  } else if (Simulation::simulationTime >= episodeStartTimestep + maxEpisodeLength) {
+    // End of what's counted as episode. We only do reporting on death or the
+    // next event.
+    // NOTE: An uncomplicated case occuring before this reset could be counted
+    // UC2 but with treatment only occuring after this reset (when the case
+    // should be counted UC) due to a treatment-seeking-delay. This can't be
+    // corrected because the delay depends on the UC/UC2/etc. state leading to
+    // a catch-22 situation, so DH, MP and VC decided to leave it like this.
+    pgState = Pathogenesis::NONE;
   }
   
   // TODO: force leaving sick states after timeout
@@ -179,8 +205,9 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
     double qty=medicates[medicateID].getQty();
     int time=medicates[medicateID].getTime();
     string name=medicates[medicateID].getName();
+    //TODO: we shouldn't medicate immediately, but on the day, so it can be cancelled.
     withinHostModel.medicate(name,qty,time);
+    //TODO sort out reporting
+    //latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
   }
-  //TODO sort out reporting
-  //latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_PKPD_DEPENDENT_RECOVERS_OUTPATIENTS);
 }

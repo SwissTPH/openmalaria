@@ -163,8 +163,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
       ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
-  }
-  else if(Global::modelVersion & NON_MALARIA_FEVERS) {
+  } else if(Global::modelVersion & NON_MALARIA_FEVERS) {
     //TODO: should this be stored in the XML file?
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
