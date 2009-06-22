@@ -76,7 +76,8 @@ DummyInfection::DummyInfection (istream& in) {
     int proteomeID;
     in >> proteomeID;
     _proteome = ProteomeManager::getProteome(proteomeID);
-  }
+  } else
+    _proteome = NULL;
 }
 
 void DummyInfection::determineWithinHostDensity(){

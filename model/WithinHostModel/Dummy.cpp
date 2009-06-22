@@ -38,9 +38,7 @@ DummyWithinHostModel::DummyWithinHostModel() :
     WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     _MOI(0), patentInfections(0)
-{
-  W_GAUSS(0, sigma_i);	// FIXME: random call to keep these in sync
-}
+{}
 
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))

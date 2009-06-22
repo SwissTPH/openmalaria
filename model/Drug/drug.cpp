@@ -352,7 +352,9 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) {
   if (myDrug==0) {
     myDrug = registry->getDrug(_drugAbbrev);
     if (myDrug == NULL) {
+#ifdef DEBUG_PRINTING	//FIXME make this throw eventually; for now this is happening in the DummyPKPD test.
       cerr << "prescribed non-existant drug " << _drugAbbrev << endl;
+#endif
       return;
     }
     _drugs.push_back(myDrug);

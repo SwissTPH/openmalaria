@@ -234,13 +234,17 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
   }
   
   const CaseTypeEndPoints* endPoints;
-  if (pgState & Pathogenesis::MALARIA) {
-    if (pgState & Pathogenesis::COMPLICATED)
+  if (pgState & Pathogenesis::MALARIA) {	// NOTE: report treatment shouldn't be done like this so it's handled correctly when treatment is cancelled
+    if (pgState & Pathogenesis::COMPLICATED) {
       endPoints = &caseManagementEndPoints[ageIndex].caseSev;
-    else if (pgState & Pathogenesis::SECOND_CASE)
+      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 3);
+    } else if (pgState & Pathogenesis::SECOND_CASE) {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC2;
-    else
+      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 2);
+    } else {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC1;
+      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 1);
+    }
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
     endPoints = &caseManagementEndPoints[ageIndex].caseNMF;
   }
