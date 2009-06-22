@@ -69,9 +69,6 @@ void DummyWithinHostModel::update (double age) {
   drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
   std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    double fact = exp(-drugProxy->getDrugFactor(i->getProteome()));
-    if (fact < 1.0)
-      cout << fact << endl;
     i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
   }
   drugProxy->decayDrugs();
