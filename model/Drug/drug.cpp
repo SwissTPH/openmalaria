@@ -278,7 +278,7 @@ double Drug::calculateDrugFactor(ProteomeInstance* infProteome) const {
   double param = (*(proteomePDParameters->find(infProteome->getProteomeID()))).second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
-  return (startFactor + endFactor)/2;
+  return exp(-(startFactor + endFactor)/2);
 }
 
 double Drug::calculateDecay(int time) const {
@@ -352,9 +352,7 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) {
   if (myDrug==0) {
     myDrug = registry->getDrug(_drugAbbrev);
     if (myDrug == NULL) {
-#ifdef DEBUG_PRINTING	//FIXME make this throw eventually; for now this is happening in the DummyPKPD test.
       cerr << "prescribed non-existant drug " << _drugAbbrev << endl;
-#endif
       return;
     }
     _drugs.push_back(myDrug);

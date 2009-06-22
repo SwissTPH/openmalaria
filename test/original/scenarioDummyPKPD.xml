@@ -74,15 +74,13 @@
       </nmf>
       <decisions>
         <decision id="1">
-          <medicate name="non" qty="0" time="0"/>
+          <medicate name="CQ" qty="0" time="0"/>
         </decision>
         <decision id="2">
-          <medicate name="cq" qty="700" time="0"/>
-          <medicate name="cq" qty="900" time="12"/>
+          <medicate name="CQ" qty="3000000" time="0"/>
         </decision>
         <decision id="3">
-          <medicate name="act" qty="700" time="0"/>
-          <medicate name="act" qty="900" time="24"/>
+          <medicate name="CQ" qty="50000000" time="0"/>
         </decision>
       </decisions>
     </caseManagement>
@@ -105,15 +103,13 @@
       </nmf>
       <decisions>
         <decision id="1">
-          <medicate name="non" qty="0" time="0"/>
+          <medicate name="CQ" qty="0" time="0"/>
         </decision>
         <decision id="2">
-          <medicate name="cq" qty="700" time="0"/>
-          <medicate name="cq" qty="900" time="12"/>
+          <medicate name="CQ" qty="3000000" time="0"/>
         </decision>
         <decision id="3">
-          <medicate name="act" qty="700" time="0"/>
-          <medicate name="act" qty="900" time="24"/>
+          <medicate name="CQ" qty="50000000" time="0"/>
         </decision>
       </decisions>
     </caseManagement>
