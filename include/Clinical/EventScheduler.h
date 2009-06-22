@@ -58,7 +58,7 @@ private:
   Pathogenesis::State pgState;
   /// Worst state within reporting period
   Pathogenesis::State reportState;
-  /// Time of last state-change
+  /// Time of last state-change; only meaningful if pgState & Pathogenesis::SICK.
   int pgChangeTimestep;
   /// Time when first entered a sick state (for reporting).
   int episodeStartTimestep;

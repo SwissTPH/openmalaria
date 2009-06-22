@@ -93,12 +93,12 @@ ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     ClinicalModel (cF),
     pgState(Pathogenesis::NONE), reportState(Pathogenesis::NONE),
-    pgChangeTimestep(TIMESTEP_NEVER), episodeStartTimestep(TIMESTEP_NEVER)
+    episodeStartTimestep(TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {
   // If something still to report, do so now
-  if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
-    Simulation::gMainSummary->report (reportState, _surveyPeriod, _ageGroup);
+  if (reportState != Pathogenesis::NONE) {
+    Simulation::gMainSummary->report (reportState, _ageGroup, _surveyPeriod);
   }
 }
 
@@ -143,7 +143,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     // When an event occurs, if it's at least 28 days later than the first case,
     // we report the old episode and count the new case a new episode.
     if (Simulation::simulationTime > episodeStartTimestep + maxEpisodeLength) {
-      Simulation::gMainSummary->report (reportState, _surveyPeriod, _ageGroup);
+      if (reportState != Pathogenesis::NONE)
+	Simulation::gMainSummary->report (reportState, _ageGroup, _surveyPeriod);
       episodeStartTimestep = Simulation::simulationTime;
       reportState = Pathogenesis::NONE;
       _surveyPeriod=Simulation::gMainSummary->getSurveyPeriod();
@@ -186,7 +187,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       }
       // else stay in this state
     }
-  } else if (Simulation::simulationTime >= episodeStartTimestep + maxEpisodeLength) {
+  } else if (pgState & Pathogenesis::SICK && Simulation::simulationTime >= episodeStartTimestep + maxEpisodeLength) {
     // End of what's counted as episode. We only do reporting on death or the
     // next event.
     // NOTE: An uncomplicated case occuring before this reset could be counted
