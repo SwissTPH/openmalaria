@@ -97,7 +97,8 @@ private:
     CaseTypeEndPoints caseUC1;
     CaseTypeEndPoints caseUC2;
     CaseTypeEndPoints caseSev;
-    CaseTypeEndPoints caseNMF;
+    CaseTypeEndPoints caseNMFWithParasites;
+    CaseTypeEndPoints caseNMFWithoutParasites;
     
     /** Decisions data (end points of decision tree plus part of path).
      *

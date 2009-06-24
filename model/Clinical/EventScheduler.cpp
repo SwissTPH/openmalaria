@@ -48,7 +48,8 @@ void ClinicalEventScheduler::init () {
     endPoints.caseUC1 = readEndPoints (managements[i].getUc1());
     endPoints.caseUC2 = readEndPoints (managements[i].getUc2());
     endPoints.caseSev = readEndPoints (managements[i].getSev());
-    endPoints.caseNMF = readEndPoints (managements[i].getNmf());
+    endPoints.caseNMFWithParasites = readEndPoints (managements[i].getNmfwithparasites());
+    endPoints.caseNMFWithoutParasites = readEndPoints (managements[i].getNmfwithoutparasites());
     
     const scnXml::Decisions::DecisionSequence& dSeq = managements[i].getDecisions().getDecision();
     for (scnXml::Decisions::DecisionSequence::const_iterator it = dSeq.begin(); it != dSeq.end(); ++it) {
@@ -246,7 +247,10 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
       Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 1);
     }
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
-    endPoints = &caseManagementEndPoints[ageIndex].caseNMF;
+    if (withinHostModel.getTotalDensity() > 0.0)
+      endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithParasites;
+    else
+      endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
   }
   
   double randCum = W_UNIFORM();

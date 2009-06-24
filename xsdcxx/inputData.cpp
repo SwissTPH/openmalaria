@@ -31,7 +31,12 @@ using namespace std;
 // scnXml::), but I recommend code within the model explicitly do this.
 using namespace scnXml;
 
-const int SCHEMA_VERSION = 5;
+/// Current schema version.
+const int SCHEMA_VERSION = 6;
+/** Oldest which current code is potentially compatible with
+ * (provided the scenario.xml file references this version and doesn't use
+ * members changed in newer versions). */
+const int OLDEST_COMPATIBLE = 5;
 
 /** @brief The xml data structure. */
 const Scenario* scenario = NULL;
@@ -84,11 +89,13 @@ void initTimedInterventions() {
 void createDocument(std::string lXmlFile) {
   //Parses the document
     scenario = (parseScenario (lXmlFile)).release();
-    if (scenario->getSchemaVersion() != SCHEMA_VERSION) {
+    if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
       ostringstream msg;
       msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
       throw xml_scenario_error (msg.str());
     }
+    if (scenario->getSchemaVersion() > SCHEMA_VERSION)
+      throw xml_scenario_error ("Error: new schema version unsupported");
     
     monitoring = &scenario->getMonitoring();
     interventions = &scenario->getInterventions();
