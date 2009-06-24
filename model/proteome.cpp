@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "proteome.h"
+#include "GSLWrapper.h"
 
 using namespace std;
 
@@ -347,6 +348,11 @@ ProteomeInstance* ProteomeManager::getProteome(int proteome) {
 }
 
 ProteomeInstance* ProteomeManager::getInfection() {
-  return *(instances.begin()); //To be changed
+  double percRes = 0.0;		// proportion of resistant infections
+  if (W_UNIFORM() < percRes) {
+    return instances[1];
+  } else {
+    return instances[0];
+  }
 }
 
