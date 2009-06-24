@@ -201,12 +201,12 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
     list<MedicateData>::iterator next = it;
     ++next;
-    if (it->delay < 24) {	// Medicate today's medications
+    if (it->seekingDelay == 0) {	// Medicate today's medications
       withinHostModel.medicate(it->abbrev, it->qty, it->delay);
       medicateQueue.erase(it);
       //TODO sort out reporting
-    } else {			// and decrement delay for the rest
-      it->delay -= 24;
+    } else {			// and decrement treatment seeking delay for the rest
+      it->seekingDelay--;
     }
     it = next;
   }
@@ -255,6 +255,8 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
     ++decisionIndex;
   
   CaseTreatment& decision = caseManagementEndPoints[ageIndex].decisions[endPoints->decisions[decisionIndex]];
-  for (vector<MedicateData>::iterator it = decision.medications.begin(); it != decision.medications.end(); ++it)
+  for (vector<MedicateData>::iterator it = decision.medications.begin(); it != decision.medications.end(); ++it) {
     medicateQueue.push_back (*it);
+    medicateQueue.back().seekingDelay = endPoints->decisions[decisionIndex] % 10;	// last digit
+  }
 }

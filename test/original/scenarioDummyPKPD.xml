@@ -57,58 +57,58 @@
   <caseManagements name="test">
     <caseManagement maxAgeYrs="5.0" minAgeYrs="0.0">
       <uc1>
-        <endPoint decision="2" p="0.42"/>
-        <endPoint decision="1" p="0.58"/>
+        <endPoint decision="00100" p="0.42"/>
+        <endPoint decision="00000" p="0.58"/>
       </uc1>
       <uc2>
-        <endPoint decision="2" p="0.42"/>
-        <endPoint decision="1" p="0.58"/>
+        <endPoint decision="00100" p="0.42"/>
+        <endPoint decision="00000" p="0.58"/>
       </uc2>
       <sev>
-        <endPoint decision="3" p="0.6"/>
-        <endPoint decision="2" p="0.24"/>
-        <endPoint decision="1" p="0.16"/>
+        <endPoint decision="02110" p="0.6"/>
+        <endPoint decision="00100" p="0.24"/>
+        <endPoint decision="00000" p="0.16"/>
       </sev>
       <nmf>
-        <endPoint decision="1" p="1.0"/>
+        <endPoint decision="00000" p="1.0"/>
       </nmf>
       <decisions>
-        <decision id="1">
+        <decision id="00000">
           <medicate name="CQ" qty="0" time="0"/>
         </decision>
-        <decision id="2">
+        <decision id="00100">
           <medicate name="CQ" qty="291000" time="0"/>
         </decision>
-        <decision id="3">
+        <decision id="02110">
           <medicate name="CQ" qty="874000" time="0"/>
         </decision>
       </decisions>
     </caseManagement>
     <caseManagement maxAgeYrs="100.0" minAgeYrs="5.0">
       <uc1>
-        <endPoint decision="2" p="0.42"/>
-        <endPoint decision="1" p="0.58"/>
+        <endPoint decision="00100" p="0.42"/>
+        <endPoint decision="00000" p="0.58"/>
       </uc1>
       <uc2>
-        <endPoint decision="2" p="0.42"/>
-        <endPoint decision="1" p="0.58"/>
+        <endPoint decision="00100" p="0.42"/>
+        <endPoint decision="00000" p="0.58"/>
       </uc2>
       <sev>
-        <endPoint decision="3" p="0.6"/>
-        <endPoint decision="2" p="0.24"/>
-        <endPoint decision="1" p="0.16"/>
+        <endPoint decision="02110" p="0.6"/>
+        <endPoint decision="00100" p="0.24"/>
+        <endPoint decision="00000" p="0.16"/>
       </sev>
       <nmf>
-        <endPoint decision="1" p="1.0"/>
+        <endPoint decision="00000" p="1.0"/>
       </nmf>
       <decisions>
-        <decision id="1">
+        <decision id="00000">
           <medicate name="CQ" qty="0" time="0"/>
         </decision>
-        <decision id="2">
+        <decision id="00100">
           <medicate name="CQ" qty="1250000" time="0"/>
         </decision>
-        <decision id="3">
+        <decision id="02110">
           <medicate name="CQ" qty="3750000" time="0"/>
         </decision>
       </decisions>
