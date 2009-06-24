@@ -531,7 +531,7 @@ void writeArray(ostream& file, int measure,
       if (assimilatorMode ==  1)
         file << "\t" << array[i] << lineEnd;
       else
-        file << "\t" << i+1 << "\t" << 0 << "\t" 
+        file << i+1 << "\t" << 0 << "\t" 
              << measure << "\t" <<  array[i] <<  lineEnd;
       
     }
@@ -554,7 +554,7 @@ void writeArray(ostream& file, int measure,
       if (assimilatorMode ==  1)
         file << "\t" << array[i][j] << lineEnd;
       else
-        file << "\t" << i+1 << "\t" << j+1 << "\t" 
+        file << i+1 << "\t" << j+1 << "\t" 
              << measure << "\t" <<  array[i][j] <<  lineEnd;
 
     }

@@ -66,7 +66,9 @@ copy output.txt outputIPT.txt
 del checkpoint
 rem Checkpointing is broken:
 ..\..\malariacontrol_6.17_windows_intelx86 --scenario scenarioDummyPKPD.xml
-fc ..\original\original8.txt output.txt
-copy output.txt output8.txt
+fc ..\original\originalDummyPKPD.txt output.txt
+del checkpoint
+..\..\malariacontrol_6.17_windows_intelx86 --scenario scenarioCevCq.xml
+fc ..\original\originalCevCq.txt output.txt
 del checkpoint
 pause

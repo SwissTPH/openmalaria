@@ -410,6 +410,7 @@ void Population::massTreatment(const scnXml::Mass& mass){
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
     double ageYears = iter->getAgeInYears();
+    //TODO: use parasite density instead?
     if ((iter->withinHostModel->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
       if (W_UNIFORM() < compliance) {
 	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
