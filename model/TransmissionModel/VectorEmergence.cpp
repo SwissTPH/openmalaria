@@ -115,13 +115,10 @@ VectorEmergence::~VectorEmergence () {
 
 double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 					       int nMalHostTypesInit,
-					       double alpha_i,
 					       double* FHumanInfectivityInitVector,
 					       vector<double>& FEIRInitVector,
 					       double* mosqEmergeRate)
 {
-  cout << "alpha_i: " << alpha_i << endl;
-  
   // This initially contains the initial estimate of the mosquito emergence
   // rate. This is used by the root finding algorithm to calculate N_v0.
   gsl_vector* N_v0 = gsl_vector_calloc(theta_p);	// mosqEmergeRate

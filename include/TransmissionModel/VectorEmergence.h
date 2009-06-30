@@ -80,7 +80,6 @@ struct VectorEmergence {
    * 
    * All parameters are IN parameters. */
   double CalcInitMosqEmergeRate(int nHostTypesInit, int nMalHostTypesInit,
-				double alpha_i,
                                 double* FHumanInfectivityInitVector,
                                 vector<double>& FEIRInitVector,
 				double* mosqEmergeRate);

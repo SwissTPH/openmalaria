@@ -357,6 +357,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\WithinHostModel\EmpiricalInfection.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\WithinHostModel\Infection.h"
 					>
 				</File>
@@ -417,6 +421,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\Clinical\event.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Clinical\EventScheduler.h"
 					>
 				</File>
@@ -425,12 +433,8 @@
 					>
 				</File>
 				<File
-				RelativePath=".\include\Clinical\event.h"
-				>
-				</File>
-				<File
-				RelativePath=".\include\Clinical\OldCaseManagement.h"
-				>
+					RelativePath=".\include\Clinical\OldCaseManagement.h"
+					>
 				</File>
 			</Filter>
 		</Filter>
@@ -545,6 +549,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\model\WithinHostModel\EmpiricalInfection.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\model\WithinHostModel\Infection.cpp"
 					>
 				</File>
@@ -623,6 +631,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\model\Clinical\event.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\model\Clinical\EventScheduler.cpp"
 					>
 				</File>
@@ -631,12 +643,8 @@
 					>
 				</File>
 				<File
-				RelativePath=".\model\Clinical\event.cpp"
-				>
-				</File>
-				<File
-				RelativePath=".\model\Clinical\OldCaseManagement.cpp"
-				>
+					RelativePath=".\model\Clinical\OldCaseManagement.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>

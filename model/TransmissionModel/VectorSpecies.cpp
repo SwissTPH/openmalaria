@@ -337,7 +337,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
 void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa, double averageAvailability) {
   // A class encapsulating VectorInternal code. Destructor frees memory at end
   // of this function.
-  VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, entoAvailability, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
+  VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, averageAvailability, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
   
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
@@ -465,7 +465,6 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
     emerge.CalcInitMosqEmergeRate(
                            nHostTypesInit,
                            nMalHostTypesInit,
-			   averageAvailability,
                            humanInfectivityInit, EIRInit,
 			   &mosqEmergeRate[0]);
     
