@@ -15,19 +15,23 @@ cp model/openMalaria test/sandbox/openMalaria
 #strip test/sandbox/openMalaria
 cd test/sandbox && cp ../original/* . 2>/dev/null
 
-DONT_RUN="false"
+RUN="test"
 CMD_PREFIX=""
+CMD_MAIN="./openMalaria --scenario"
 CMD_POSTFIX=""
 
 runCMD() {
   echo "\033[1;32m"$CMD"\033[0;00m"
-  $DONT_RUN || $CMD
+  if [ "x$RUN" != "x" ]
+  then
+    $CMD
+  fi
 }
 
 runScenario() {
   # delete old checkpoints; necessary after a previous run:
   rm -f checkpoint* seed*
-  CMD="$CMD_PREFIX./openMalaria --scenario scenario$number.xml $CMD_POSTFIX"
+  CMD="$CMD_PREFIX$CMD_MAIN scenario$number.xml $CMD_POSTFIX"
   echo "\033[0;33m"`date`
   touch timeFile
   # First run:
@@ -46,7 +50,7 @@ runScenario() {
     mv output.txt output$number.txt
     echo -n "\033[1;34m"
     ../original/compareOutputsFloat.py original$number.txt output$number.txt 1
-  elif ! $DONT_RUN
+  elif [ "$RUN" = "test" ]
   then
     echo "\033[0;31mNo results output; error messages:"
     test -f stderr$number.txt && cat stderr$number.txt
@@ -61,7 +65,11 @@ do
     CMD_PREFIX="gdb --args "
   elif [ "$1" = "--dont-run" ]
   then
-    DONT_RUN="true"
+    RUN=""
+  elif [ "$1" = "--valid" ]
+  then
+    CMD_MAIN="xmllint --noout --schema scenario_6.xsd"
+    RUN="run"
   elif [ "$1" = "--help" ]
   then
     echo "Usage: \033[1;32m$0 [options] [scenarios]\033[0;00m"
@@ -72,6 +80,7 @@ do
     echo
     echo "Options:\033[0;33m"
     echo "  --gdb		Run openMalaria through gdb."
+    echo "  --valid		Validate the XML file(s) using xmllint and the latest schema."
     echo "  --dont-run		Don't actually run openMalaria, just output the commandline."
     echo "  --help		Print this message."
     echo "\033[0;00mOther options starting '--' will be passed to openMalaria. openMalaria options:\033[0;33m"
