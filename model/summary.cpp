@@ -324,7 +324,10 @@ void Summary::printHosts(ostream& out) {
 void Summary::writeSummaryArrays () {
   string output_filename =
       BoincWrapper::resolveFile("output.txt");
-
+  ifstream test (output_filename.c_str());
+  if (test.is_open())
+    throw runtime_error ("File output.txt exists!");
+  
   ofstream outputFile;
   outputFile.open(output_filename.c_str());
   
