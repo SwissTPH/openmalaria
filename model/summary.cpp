@@ -432,19 +432,15 @@ void Summary::writeSummaryArrays () {
 double Summary::infantAllCauseMort(){
   //DOCU
 
-  double* intervalSurviv;
-  double infantProductLimit;
-  double valinfantAllCauseMort;
-  infantProductLimit=1.0;
-  intervalSurviv = (double*)malloc(((Global::intervalsPerYear))*sizeof(double));
+  double infantProductLimit=1.0;
+  double* intervalSurviv = new double[Global::intervalsPerYear];
   for (size_t i=0;i<Global::intervalsPerYear; i++) {
     intervalSurviv[i]=(Global::infantIntervalsAtRisk[i]-Global::infantDeaths[i]);
     intervalSurviv[i]=intervalSurviv[i]/(Global::infantIntervalsAtRisk[i]);
     infantProductLimit=infantProductLimit*intervalSurviv[i];
   }
-  free(intervalSurviv);
-  valinfantAllCauseMort=(1-infantProductLimit)*1000+_nonMalariaMortality;
-  return valinfantAllCauseMort;
+  delete[] intervalSurviv;
+  return (1-infantProductLimit)*1000+_nonMalariaMortality;
 }
 void Summary::addToHost(double age, int value){
 
