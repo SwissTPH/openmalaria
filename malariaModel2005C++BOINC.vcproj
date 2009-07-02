@@ -172,7 +172,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib zdll.lib"
+				AdditionalDependencies="xerces-c_static_3.lib gsl_mt.lib cblas_mt.lib delayimp.lib libboinc_staticcrt.lib libboincapi_staticcrt.lib zlib.lib"
 				OutputFile="malariacontrol_6.17_windows_intelx86"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -424,15 +424,15 @@
 					>
 				</File>
 				<File
+					RelativePath=".\include\event.h"
+					>
+				</File>
+				<File
 					RelativePath=".\include\Clinical\EventScheduler.h"
 					>
 				</File>
 				<File
 					RelativePath=".\include\Clinical\ImmediateOutcomes.h"
-					>
-				</File>
-				<File
-					RelativePath=".\include\event.h"
 					>
 				</File>
 			</Filter>
@@ -442,10 +442,6 @@
 			>
 			<File
 				RelativePath=".\model\BoincWrapper.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\CaseManagementModel.cpp"
 				>
 			</File>
 			<File
@@ -474,10 +470,6 @@
 			</File>
 			<File
 				RelativePath=".\model\intervention.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\model\OldCaseManagement.cpp"
 				>
 			</File>
 			<File
@@ -553,6 +545,10 @@
 				</File>
 				<File
 					RelativePath=".\model\WithinHostModel\Empirical.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\model\WithinHostModel\EmpiricalInfection.cpp"
 					>
 				</File>
 				<File
@@ -634,6 +630,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\model\Clinical\event.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\model\Clinical\EventScheduler.cpp"
 					>
 				</File>
@@ -642,8 +642,8 @@
 					>
 				</File>
 				<File
-					RelativePath=".\model\Clinical\event.cpp"
-				>
+					RelativePath=".\model\Clinical\OldCaseManagement.cpp"
+					>
 				</File>
 			</Filter>
 		</Filter>
@@ -669,6 +669,10 @@
 					Outputs="xsdcxx\scenario.cxx;xsdcxx\scenario.hxx"
 				/>
 			</FileConfiguration>
+			<File
+				RelativePath=".\scenario.h"
+				>
+			</File>
 		</File>
 	</Files>
 	<Globals>
