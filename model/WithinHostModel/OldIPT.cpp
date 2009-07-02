@@ -183,8 +183,7 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
 }
 
 void OldIPTWithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
-  //NOTE to AR remove _cumulativeInfections > 0 &&
-  if (_cumulativeInfections > 0 && W_UNIFORM() < compliance){
+  if (W_UNIFORM() < compliance){
     _lastIptiOrPlacebo = Simulation::simulationTime;
     /*
     * iptiEffect denotes treatment or placebo group
