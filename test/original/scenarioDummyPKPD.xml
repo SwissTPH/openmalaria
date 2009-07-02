@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="12800" name="test D94" popSize="1000" schemaVersion="5" simulationDuration="385" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_5.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="12800" name="test D94" popSize="100" schemaVersion="6" simulationDuration="385" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_6.xsd">
   <demography name="test">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -24,6 +24,7 @@
   </demography>
   <monitoring name="Test Moni">
     <surveys detectionLimit="2.5" summaryOption="915517">
+      <surveyTime>1</surveyTime>
       <surveyTime>384</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
@@ -67,9 +68,12 @@
         <endPoint decision="00100" p="0.24"/>
         <endPoint decision="00000" p="0.16"/>
       </sev>
-      <nmf>
+      <nmfP>
         <endPoint decision="00000" p="1.0"/>
-      </nmf>
+      </nmfP>
+      <nmfNP>
+        <endPoint decision="00000" p="1.0"/>
+      </nmfNP>
       <decisions>
         <decision id="00000">
           <medicate name="CQ" qty="0" time="0"/>
@@ -96,9 +100,12 @@
         <endPoint decision="00100" p="0.24"/>
         <endPoint decision="00000" p="0.16"/>
       </sev>
-      <nmf>
+      <nmfP>
         <endPoint decision="00000" p="1.0"/>
-      </nmf>
+      </nmfP>
+      <nmfNP>
+        <endPoint decision="00000" p="1.0"/>
+      </nmfNP>
       <decisions>
         <decision id="00000">
           <medicate name="CQ" qty="0" time="0"/>

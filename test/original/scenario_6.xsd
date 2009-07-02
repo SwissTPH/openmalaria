@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  
   <xs:element name="scenario">
     <xs:annotation>
       <xs:documentation>Description of scenario</xs:documentation>
@@ -32,8 +31,7 @@
             <xs:appinfo>units:List of elements;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element minOccurs="0" name="caseManagements"
-                    type="caseManagements">
+        <xs:element minOccurs="0" name="caseManagements" type="caseManagements">
           <xs:annotation>
             <xs:documentation>
               List of case managment interventions
@@ -78,8 +76,7 @@
           </xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="analysisNo" type="xs:int"
-                    use="required">
+      <xs:attribute name="analysisNo" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>
             Unique identifier of scenario
@@ -89,8 +86,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="maximumAgeYrs" type="xs:double"
-                    use="required">
+      <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
         <xs:annotation>
           <xs:documentation>
             Maximum age of simulated humans
@@ -114,8 +110,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="simulationDuration" type="xs:int"
-                    use="required">
+      <xs:attribute name="simulationDuration" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>
             Duration of main simulation
@@ -125,8 +120,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="modelVersion" type="xs:int"
-                    use="required">
+      <xs:attribute name="modelVersion" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>Model Version</xs:documentation>
           <xs:appinfo>
@@ -178,7 +172,6 @@
       </xs:attribute>
     </xs:complexType>
   </xs:element>
-  
   <!--Parameters-->
   <xs:complexType name="parameter">
     <xs:attribute name="name" type="xs:string" use="required">
@@ -217,8 +210,7 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="parameter"
-                  type="parameter" />
+      <xs:element maxOccurs="unbounded" name="parameter" type="parameter" />
     </xs:sequence>
     <xs:attribute name="interval" type="xs:int" use="required">
       <xs:annotation>
@@ -257,7 +249,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <!--Demography-->
   <xs:complexType name="demography">
     <xs:annotation>
@@ -284,8 +275,7 @@
         <xs:appinfo>units:string;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="growthRate" type="xs:double"
-                  use="optional">
+    <xs:attribute name="growthRate" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
           Growth rate of human population.
@@ -294,7 +284,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <!--Entomology-->
   <xs:complexType name="EIRDaily">
     <xs:annotation>
@@ -303,8 +292,7 @@
     </xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:double">
-        <xs:attribute name="origin" type="xs:string"
-                      use="optional" />
+        <xs:attribute name="origin" type="xs:string" use="optional" />
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
@@ -322,18 +310,12 @@
           <xs:appinfo>units:Element;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-          <xs:attribute name="a0" type="xs:double"
-                        use="required" />
-          <xs:attribute name="a1" type="xs:double"
-                        use="required" />
-          <xs:attribute name="a2" type="xs:double"
-                        use="required" />
-          <xs:attribute name="b1" type="xs:double"
-                        use="required" />
-          <xs:attribute name="b2" type="xs:double"
-                        use="required" />
-          <xs:attribute name="EIRRotateAngle" type="xs:double"
-                        use="required" />
+          <xs:attribute name="a0" type="xs:double" use="required" />
+          <xs:attribute name="a1" type="xs:double" use="required" />
+          <xs:attribute name="a2" type="xs:double" use="required" />
+          <xs:attribute name="b1" type="xs:double" use="required" />
+          <xs:attribute name="b2" type="xs:double" use="required" />
+          <xs:attribute name="EIRRotateAngle" type="xs:double" use="required" />
         </xs:complexType>
       </xs:element>
       <xs:element name="mosq">
@@ -342,28 +324,21 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-          <xs:attribute name="mosqRestDuration" type="xs:int"
-                        use="required" />
-	  <xs:attribute name="extrinsicIncubationPeriod" type="xs:int" use="required" />
-          <xs:attribute name="mosqSeekingDeathRate"
-                        type="xs:double" use="required" />
-          <xs:attribute name="mosqSeekingDuration"
-                        type="xs:double" use="required" />
-	  <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
-          <xs:attribute name="mosqProbBiting" type="xs:double"
-                        use="required" />
-          <xs:attribute name="mosqProbFindRestSite"
-                        type="xs:double" use="required" />
-          <xs:attribute name="mosqProbResting"
-                        type="xs:double" use="required" />
-          <xs:attribute name="mosqProbOvipositing"
-                        type="xs:double" use="required" />
-	  <xs:attribute name="emergenceRateFilename" type="xs:string" use="required" >
-	    <xs:annotation>
-	      <xs:documentation />
-	      <xs:appinfo />
-	    </xs:annotation>
-	  </xs:attribute>
+          <xs:attribute name="mosqRestDuration" type="xs:int" use="required" />
+          <xs:attribute name="extrinsicIncubationPeriod" type="xs:int" use="required" />
+          <xs:attribute name="mosqSeekingDeathRate" type="xs:double" use="required" />
+          <xs:attribute name="mosqSeekingDuration" type="xs:double" use="required" />
+          <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required" />
+          <xs:attribute name="emergenceRateFilename" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation />
+              <xs:appinfo />
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
@@ -372,13 +347,10 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-	  <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
-          <xs:attribute name="mosqProbBiting" type="xs:double"
-                        use="required" />
-          <xs:attribute name="mosqProbFindRestSite"
-                        type="xs:double" use="required" />
-          <xs:attribute name="mosqProbResting"
-                        type="xs:double" use="required" />
+          <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
+          <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
         </xs:complexType>
       </xs:element>
     </xs:sequence>
@@ -393,26 +365,25 @@
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
-	<xs:element name="nonVector" type="nonVector"/>
+        <xs:element name="nonVector" type="nonVector" />
         <xs:element name="vector">
-	  <xs:annotation>
-	    <xs:documentation>Parameters for the vector transmission model.</xs:documentation>
-	  </xs:annotation>
-	  <xs:complexType>
-	    <xs:sequence>
-	      <xs:element maxOccurs="unbounded" minOccurs="1"
-			  name="anopheles" type="anopheles" />
-	      <xs:element name="nonHumanHosts" minOccurs="0" maxOccurs="unbounded">
-		<xs:annotation>
-		  <xs:documentation>Populations of non-human hosts (must also have species-specific parameters).</xs:documentation>
-		</xs:annotation>
-		<xs:complexType>
-		  <xs:attribute name="name" type="xs:string" use="optional"/>
-		  <xs:attribute name="populationSize" type="xs:int" use="required"/>
-		</xs:complexType>
-	      </xs:element>
-	    </xs:sequence>
-	  </xs:complexType>
+          <xs:annotation>
+            <xs:documentation>Parameters for the vector transmission model.</xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
+              <xs:element name="nonHumanHosts" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>Populations of non-human hosts (must also have species-specific parameters).</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="optional" />
+                  <xs:attribute name="populationSize" type="xs:int" use="required" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
         </xs:element>
       </xs:choice>
     </xs:sequence>
@@ -430,12 +401,11 @@
       <xs:documentation>Parameters for the non-vector transmission model.</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded"
-		  name="EIRDaily" type="EIRDaily" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily" />
     </xs:sequence>
     <xs:attribute name="eipDuration" type="xs:int" use="required">
       <xs:annotation>
-	<xs:documentation>
+        <xs:documentation>
 	  The duration of sporogony in days
 	</xs:documentation>
       </xs:annotation>
@@ -468,8 +438,7 @@
               </xs:annotation>
             </xs:element>
           </xs:sequence>
-          <xs:attribute name="detectionLimit" type="xs:double"
-                        use="required">
+          <xs:attribute name="detectionLimit" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
                 Detection limit for parasitemia
@@ -479,8 +448,7 @@
               </xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="summaryOption" type="xs:int"
-                        use="required">
+          <xs:attribute name="summaryOption" type="xs:int" use="required">
             <xs:annotation>
               <xs:documentation>
                 Requested output variables
@@ -509,7 +477,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <!-- ageGroup -->
   <xs:complexType name="ageGroup">
     <xs:annotation>
@@ -519,11 +486,9 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group"
-                  type="groupBounds" />
+      <xs:element maxOccurs="unbounded" name="group" type="groupBounds" />
     </xs:sequence>
-    <xs:attribute name="lowerbound" type="xs:double"
-                  use="required">
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
           Lower bound of age group
@@ -535,7 +500,6 @@
   <xs:complexType name="groupBounds">
     <xs:attribute name="upperbound" type="xs:double" use="required" />
   </xs:complexType>
-  
   <!-- ageGroup -->
   <xs:complexType name="ageGroupPerC">
     <xs:annotation>
@@ -545,11 +509,9 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group"
-                  type="groupBoundsPerC" />
+      <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC" />
     </xs:sequence>
-    <xs:attribute name="lowerbound" type="xs:double"
-                  use="required">
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
           Lower bound of age group
@@ -562,7 +524,6 @@
     <xs:attribute name="poppercent" type="xs:double" use="required" />
     <xs:attribute name="upperbound" type="xs:double" use="required" />
   </xs:complexType>
-  
   <!--Interventions-->
   <xs:complexType name="interventions">
     <xs:annotation>
@@ -570,12 +531,9 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="3" minOccurs="0"
-                  name="vaccineDescription" type="vaccineDescription" />
-      <xs:element maxOccurs="1" minOccurs="0"
-                  name="iptiDescription" type="iptDescription" />
-      <xs:element minOccurs="0" name="continuous"
-                  type="continuous">
+      <xs:element maxOccurs="3" minOccurs="0" name="vaccineDescription" type="vaccineDescription" />
+      <xs:element maxOccurs="1" minOccurs="0" name="iptiDescription" type="iptDescription" />
+      <xs:element minOccurs="0" name="continuous" type="continuous">
         <xs:annotation>
           <xs:documentation />
           <xs:appinfo />
@@ -605,8 +563,7 @@
       <xs:appinfo />
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0"
-                  name="vaccine" type="ageSpecific">
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="vaccine" type="ageSpecific">
         <xs:annotation>
           <xs:documentation>
             List of age groups for vaccination
@@ -614,8 +571,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="ITN"
-                  type="ageSpecific">
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="ITN" type="ageSpecific">
         <xs:annotation>
           <xs:documentation>
             Description of ITN deployment in the community
@@ -623,8 +579,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="ipti"
-                  type="ageSpecific">
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="ipti" type="ageSpecific">
         <xs:annotation>
           <xs:documentation>
             List of age groups for IPTi distribution
@@ -642,8 +597,7 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="intervention"
-                  type="intervention" />
+      <xs:element maxOccurs="unbounded" name="intervention" type="intervention" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="IRS" />
@@ -674,8 +628,7 @@
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ageSpecific">
-    <xs:attribute name="targetAgeYrs" type="xs:double"
-                  use="required">
+    <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
           Target age of intervention
@@ -694,15 +647,13 @@
   </xs:complexType>
   <xs:complexType name="intervention">
     <xs:sequence>
-      <xs:element minOccurs="0" name="changeHS"
-                  type="healthSystem">
+      <xs:element minOccurs="0" name="changeHS" type="healthSystem">
         <xs:annotation>
           <xs:documentation />
           <xs:appinfo />
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="changeEIR"
-                  type="nonVector">
+      <xs:element minOccurs="0" name="changeEIR" type="nonVector">
         <xs:annotation>
           <xs:documentation />
           <xs:appinfo />
@@ -773,8 +724,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="1"
-                  name="initialEfficacy" type="inputValue" />
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="inputValue" />
     </xs:sequence>
     <xs:attribute name="vaccineType" type="xs:int" use="required">
       <xs:annotation>
@@ -787,8 +737,7 @@
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="infGenotype">
         <xs:complexType>
-          <xs:attribute name="name" type="xs:string"
-                        use="required">
+          <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
                 Name of age specific intervention
@@ -796,26 +745,21 @@
               <xs:appinfo>units:string;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="freq" type="xs:double"
-                        use="required">
+          <xs:attribute name="freq" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation />
               <xs:appinfo />
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="ACR" type="xs:double"
-                        use="required" />
-          <xs:attribute name="proph" type="xs:int"
-                        use="required">
+          <xs:attribute name="ACR" type="xs:double" use="required" />
+          <xs:attribute name="proph" type="xs:int" use="required">
             <xs:annotation>
               <xs:documentation />
               <xs:appinfo />
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="tolPeriod" type="xs:int"
-                        use="required" />
-          <xs:attribute name="atten" type="xs:int"
-                        use="required">
+          <xs:attribute name="tolPeriod" type="xs:int" use="required" />
+          <xs:attribute name="atten" type="xs:int" use="required">
             <xs:annotation>
               <xs:documentation />
               <xs:appinfo />
@@ -848,8 +792,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-          <xs:attribute name="firstLine" type="xs:string"
-                        use="required">
+          <xs:attribute name="firstLine" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
                 Code for first line drug
@@ -857,8 +800,7 @@
               <xs:appinfo>units:Drug code;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="secondLine" type="xs:string"
-                        use="required">
+          <xs:attribute name="secondLine" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
                 Code for second line drug
@@ -866,8 +808,7 @@
               <xs:appinfo>units:Drug code;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="inpatient" type="xs:string"
-                        use="required">
+          <xs:attribute name="inpatient" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
                 Code for drug used for treating
@@ -898,8 +839,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="nonCompliersEffective"
-                  type="treatmentDetails">
+      <xs:element name="nonCompliersEffective" type="treatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Effectiveness of treatment of non compliers
@@ -909,8 +849,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated1"
-                  type="inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with newly incident
@@ -921,8 +860,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSelfTreatUncomplicated"
-                  type="inputValue">
+      <xs:element name="pSelfTreatUncomplicated" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with uncomplicated
@@ -933,8 +871,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated2"
-                  type="inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with recurrence of
@@ -945,8 +882,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareSevere"
-                  type="inputValue">
+      <xs:element name="pSeekOfficialCareSevere" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with severe disease
@@ -976,8 +912,7 @@
         <xs:appinfo>units:string;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="healthSystemMemory" type="xs:int"
-                  use="required">
+    <xs:attribute name="healthSystemMemory" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>
           Follow-up period during which a recurrence is
@@ -987,18 +922,15 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <xs:complexType name="treatmentDetails">
     <xs:sequence>
-      <xs:element maxOccurs="1" minOccurs="0" name="CQ"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="inputValue">
         <xs:annotation>
           <xs:documentation>Chloroquine</xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SP"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SP" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine
@@ -1006,15 +938,13 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="AQ"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="inputValue">
         <xs:annotation>
           <xs:documentation>Amodiaquine</xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine/Amodiaquine
@@ -1022,8 +952,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="ACT"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="inputValue">
         <xs:annotation>
           <xs:documentation>
             Artemisinine combination therapy
@@ -1031,8 +960,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="QN"
-                  type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="QN" type="inputValue">
         <xs:annotation>
           <xs:documentation>Quinine</xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
@@ -1060,8 +988,7 @@
               <xs:appinfo>units:Proportion;min:0;max:1;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="lowerbound" type="xs:double"
-                        use="required">
+          <xs:attribute name="lowerbound" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
                 Lower bound of age group
@@ -1073,15 +1000,13 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  
   <xs:complexType name="byAgeItems">
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="item">
         <xs:complexType>
           <xs:complexContent>
             <xs:extension base="inputValue">
-              <xs:attribute name="maxAgeYrs"
-                            type="xs:double" use="required">
+              <xs:attribute name="maxAgeYrs" type="xs:double" use="required">
                 <xs:annotation>
                   <xs:documentation>
                     Upper bound of age group
@@ -1097,14 +1022,11 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  
   <xs:complexType name="caseType">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="1"
-                  name="endPoint">
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="endPoint">
         <xs:complexType>
-          <xs:attribute name="decision" type="xs:int"
-                        use="required">
+          <xs:attribute name="decision" type="xs:int" use="required">
             <xs:annotation>
               <xs:documentation>
                 Foreign key reference to outcome node
@@ -1115,8 +1037,7 @@
               </xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="p" type="xs:double"
-                        use="required">
+          <xs:attribute name="p" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
                 Probability of outcome
@@ -1131,7 +1052,6 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  
   <xs:complexType name="caseManagements">
     <xs:annotation>
       <xs:documentation>
@@ -1140,8 +1060,7 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="1"
-                  name="caseManagement">
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="caseManagement">
         <xs:annotation>
           <xs:documentation>
             Age-specific case management description,
@@ -1155,13 +1074,12 @@
             <xs:element name="uc1" type="caseType" />
             <xs:element name="uc2" type="caseType" />
             <xs:element name="sev" type="caseType" />
-            <xs:element name="nmfwithparasites" type="caseType" />
-            <xs:element name="nmfwithoutparasites" type="caseType" />
+            <xs:element name="nmfP" type="caseType" />
+            <xs:element name="nmfNP" type="caseType" />
             <xs:element name="decisions">
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element maxOccurs="unbounded"
-                              name="decision">
+                  <xs:element maxOccurs="unbounded" name="decision">
                     <xs:annotation>
                       <xs:documentation>
                         describes treatment
@@ -1173,11 +1091,9 @@
                     </xs:annotation>
                     <xs:complexType>
                       <xs:sequence>
-                        <xs:element
-                                   maxOccurs="unbounded" name="medicate">
+                        <xs:element maxOccurs="unbounded" name="medicate">
                           <xs:complexType>
-                            <xs:attribute
-                                         name="name" type="xs:string" use="required">
+                            <xs:attribute name="name" type="xs:string" use="required">
                               <xs:annotation>
                                 <xs:documentation>
                                   Name
@@ -1190,15 +1106,13 @@
                                 </xs:appinfo>
                               </xs:annotation>
                             </xs:attribute>
-                            <xs:attribute
-                                         name="qty" type="xs:int" use="required">
+                            <xs:attribute name="qty" type="xs:int" use="required">
                               <xs:annotation>
                                 <xs:documentation>Quantity of drug compound</xs:documentation>
                                 <xs:appinfo>units:Number;</xs:appinfo>
                               </xs:annotation>
                             </xs:attribute>
-                            <xs:attribute
-                                         name="time" type="xs:int" use="required">
+                            <xs:attribute name="time" type="xs:int" use="required">
                               <xs:annotation>
                                 <xs:documentation>
                                   Time
@@ -1214,8 +1128,7 @@
                           </xs:complexType>
                         </xs:element>
                       </xs:sequence>
-                      <xs:attribute name="id"
-                                    type="xs:int" use="required">
+                      <xs:attribute name="id" type="xs:int" use="required">
                         <xs:annotation>
                           <xs:documentation>Key of decision</xs:documentation>
                           <xs:appinfo>units:Number</xs:appinfo>
@@ -1227,10 +1140,8 @@
               </xs:complexType>
             </xs:element>
           </xs:sequence>
-          <xs:attribute name="minAgeYrs" type="xs:decimal"
-                        use="optional" />
-          <xs:attribute name="maxAgeYrs" type="xs:decimal"
-                        use="required">
+          <xs:attribute name="minAgeYrs" type="xs:decimal" use="optional" />
+          <xs:attribute name="maxAgeYrs" type="xs:decimal" use="required">
             <xs:annotation>
               <xs:documentation>
                 Upper bound of age group
