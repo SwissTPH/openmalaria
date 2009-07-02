@@ -174,6 +174,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       pgState = Pathogenesis::NONE;
     } else {
       //TODO: insert correct probabilities
+      //lastCmDecision
       const double pRecover = 0.1;
       const double pSequelae = 0.02;
       const double pDeath = 0.03;
@@ -247,7 +248,7 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
       Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 1);
     }
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
-    if (withinHostModel.getTotalDensity() > 0.0)
+    if (withinHostModel.getTotalDensity() > 0.0)  // FIXME use a detectible parasite density
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithParasites;
     else
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
@@ -262,5 +263,6 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
   for (vector<MedicateData>::iterator it = decision.medications.begin(); it != decision.medications.end(); ++it) {
     medicateQueue.push_back (*it);
     medicateQueue.back().seekingDelay = endPoints->decisions[decisionIndex] % 10;	// last digit
+    lastCmDecision = endPoints->decisions[decisionIndex];
   }
 }

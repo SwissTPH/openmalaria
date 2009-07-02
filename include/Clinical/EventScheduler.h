@@ -78,7 +78,8 @@ private:
   
   /// All pending medications
   list<MedicateData> medicateQueue;
-  
+  /// Decision ID of last case management run
+  int lastCmDecision;
   
   /** Cumulative probabilities and decisions for a case type */
   struct CaseTypeEndPoints {
