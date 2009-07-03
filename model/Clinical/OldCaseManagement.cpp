@@ -40,15 +40,17 @@ double OldCaseManagement::probSequelaeUntreated[2];
 
 // -----  static init  -----
 
-void OldCaseManagement::init (){
+int OldCaseManagement::init (){
   if (Global::modelVersion & INCLUDES_PK_PD) {
     throw xml_scenario_error ("Warning: OldCaseManagement is not compatible with INCLUDES_PK_PD");
   }
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
-  setParasiteCaseParameters ();
+  const scnXml::HealthSystem& healthSystem = getHealthSystem();
   
-  const scnXml::ByAgeItems::ItemSequence& items = getHealthSystem().getPSequelaeInpatient().getItem();
+  setParasiteCaseParameters (healthSystem);
+  
+  const scnXml::ByAgeItems::ItemSequence& items = healthSystem.getPSequelaeInpatient().getItem();
   for (int agegrp=0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
     for (size_t i = 0; i < items.size(); i++) {
       if (items[i].getMaxAgeYrs() > SEQUELAE_AGE_BOUND[agegrp]) {
@@ -61,7 +63,9 @@ void OldCaseManagement::init (){
     gotItem:;	// alternative to for ... break ... else
   }
   
-  readCaseFatalityRatio();
+  readCaseFatalityRatio(healthSystem);
+  
+  return healthSystem.getHealthSystemMemory();
 }
 
 
@@ -245,7 +249,7 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
   return false;
 }
 
-void OldCaseManagement::readCaseFatalityRatio(){
+void OldCaseManagement::readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem){
   const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = getHealthSystem().getCFR().getGroup();
   
   int numOfGroups = xmlGroupSeq.size();
@@ -319,10 +323,7 @@ double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firs
   }
 }
 
-void OldCaseManagement::setParasiteCaseParameters () {
-  const scnXml::HealthSystem& healthSystem = getHealthSystem();
-  
-  
+void OldCaseManagement::setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem) {
   // --- calculate cureRate ---
   
   //We get the ACR depending on the name of firstLineDrug.

@@ -1,3 +1,8 @@
+// This file is part of OpenMalaria.
+// Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+
+// kate: tab-width 4; indent-width 4;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +36,7 @@ public class SchemaTranslator {
 	Document scenarioDocument;
 	Element scenarioElement;
 
-	static final int CURRENT_VERSION = 5;
+	static final int CURRENT_VERSION = 6;
 
 	private static int _required_version = CURRENT_VERSION;
 	private static boolean doValidation = true;
@@ -78,7 +83,7 @@ public class SchemaTranslator {
 		// Validate the updated document
 		File xsdFile = new File("../../test/original/"+schemaFileName);
 		if (xsdFile == null || !xsdFile.isFile()) {
-			System.out.println("Unable to find scenario.xsd file; not validating.");
+			System.out.println("Unable to find "+schemaFileName+" file; not validating.");
 			return;
 		}
 		SchemaFactory factory = SchemaFactory
@@ -97,8 +102,8 @@ public class SchemaTranslator {
 		scenarioElement = scenarioDocument.getDocumentElement();
 		// 0 if no current version (getAttribute returns ""):
 		int schemaVersion = Integer.parseInt ("0"+scenarioElement.getAttribute("schemaVersion"));
-		String schemaFileName = "scenario"+schemaVersion+".xsd";
-		Class<SchemaTranslator> cls = (Class<SchemaTranslator>)this.getClass();
+		String schemaFileName = "scenario_"+schemaVersion+".xsd";
+		Class<?> cls = (Class<?>)this.getClass();
 		while (schemaVersion < _required_version) {
 			++schemaVersion;
 			schemaFileName = "scenario_"+schemaVersion+".xsd";
@@ -108,13 +113,15 @@ public class SchemaTranslator {
 			
 			String translateMeth = "translate"+(schemaVersion-1)+"To"+schemaVersion;
 			Method method = cls.getMethod(translateMeth, new Class[] {});
+			if (method == null)
+				throw new Exception ("Method "+translateMeth+" not found");
 			method.invoke(this, new Object[] {});
 		}
 		if (doTranslation) {
 			File outFile = new File(outDir, documentFile.getName());
 			outFile.createNewFile();
 			OutputStream os = new FileOutputStream(outFile);
-			/*Result result = new StreamResult(os);
+			Result result = new StreamResult(os);
 			// Write the DOM document to the file
 			Transformer xformer = TransformerFactory.newInstance().newTransformer();
 			xformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -122,13 +129,14 @@ public class SchemaTranslator {
 			// This adds more indentation/new-lines where there's already spacing :-( 
 			//xformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			xformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-			xformer.transform(new DOMSource(scenarioDocument), result);*/
-	        OutputFormat format = new OutputFormat(doc);
-	         format.setLineWidth(65);
+			xformer.transform(new DOMSource(scenarioDocument), result);
+	        /* Think this was something picked up from the web which never worked, to try reformatting the file...
+			OutputFormat format = new OutputFormat(doc);
+	         format.setLineWidth(80);
 	         format.setIndenting(true);
 	         format.setIndent(2);
 	         XMLSerializer serializer = new XMLSerializer(out, format);
-	         serializer.serialize(doc);
+	         serializer.serialize(doc);*/
 	 		}
 		if (doValidation) validate(scenarioDocument, schemaFileName);
 	}
@@ -139,8 +147,9 @@ public class SchemaTranslator {
 	public void translate1To2() {
 		scenarioElement.setAttribute("xmlns:xsi",
 				"http://www.w3.org/2001/XMLSchema-instance");
-		scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
-				"scenario.xsd");
+		// Done by translate() method
+		//scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
+		//		"scenario.xsd");
 		if (!scenarioElement.hasAttribute("wuID"))
 			scenarioElement.setAttribute("wuID", "0");
 		if (!scenarioElement.hasAttribute("assimMode"))
@@ -277,6 +286,30 @@ public class SchemaTranslator {
 		 *  1<<5 had a bug fixed, but roughly translates to 1<<4.
 		 */
 	}
+	
+	public void translate5To6() throws Exception {
+		int ver = Integer.parseInt(scenarioElement.getAttribute("modelVersion"));
+		Element cMs = (Element) scenarioElement.getElementsByTagName("caseManagements").item(0);
+		if ((ver & 8192) != 0) {	// ClinicalEventScheduler (new case management)
+			if (scenarioElement.getElementsByTagName("healthSystem").getLength() > 0)
+				System.err.println("Warning: healthSystem element present but not used");
+		} else {
+			if (cMs != null)
+				System.err.println("Warning: caseManagement element present but not used (updating anyway)");
+		}
+		if (cMs == null)
+			return;	// element may not exist, in which case there's nothing to do
+		NodeList cMList = cMs.getElementsByTagName("caseManagement");
+		for (int i = 0; i < cMList.getLength(); ++i) {
+			Element cM = (Element)cMList.item(i);
+			cM.removeAttribute ("minAgeYrs");
+			Element nmfNP = (Element) cM.getElementsByTagName("nmf").item(0);
+			scenarioDocument.renameNode (nmfNP, null, "nmfNP");
+			Element nmfP = (Element)nmfNP.cloneNode (true);
+			scenarioDocument.renameNode (nmfP, null, "nmfP");
+			cM.insertBefore (nmfP, nmfNP);
+		}
+	}
 
 	private void visitAllFiles(File file, File outDir) throws Exception {
 		if (file.isDirectory()) {
@@ -286,6 +319,7 @@ public class SchemaTranslator {
 					visitAllFiles(new File(file, children[i]), outDir);
 				} catch (Exception exc) {
 					System.out.println ("Error translating "+file+": "+exc);
+					exc.printStackTrace();
 				}
 			}
 		} else {

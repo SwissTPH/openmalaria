@@ -39,7 +39,7 @@
             <xs:appinfo>units:List of elements;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="healthSystem">
+        <xs:element name="healthSystem" type="healthSystem" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
               Description of health system
@@ -1140,7 +1140,6 @@
               </xs:complexType>
             </xs:element>
           </xs:sequence>
-          <xs:attribute name="minAgeYrs" type="xs:decimal" use="optional" />
           <xs:attribute name="maxAgeYrs" type="xs:decimal" use="required">
             <xs:annotation>
               <xs:documentation>
@@ -1160,6 +1159,15 @@
           Name of age specific intervention
         </xs:documentation>
         <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="reportingPeriodMemory" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+        </xs:documentation>
+        <xs:appinfo>units:Time steps;min:1;max:100;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

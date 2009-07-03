@@ -94,7 +94,6 @@ int get_number_of_cfrgroups();
 double get_cfr_lb(int ); 
 double get_cfr(int ); 
 
-int get_health_system_memory(); 
 int get_vaccine_type(); 
 int get_vaccine_effect(); 
 int get_number_of_epi_doses(); 

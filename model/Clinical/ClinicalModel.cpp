@@ -32,7 +32,6 @@ int ClinicalModel::reportingPeriodMemory;
 
 void ClinicalModel::init () {
   PathogenesisModel::init();
-  reportingPeriodMemory = get_health_system_memory();
   if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
     ClinicalEventScheduler::init();
   else

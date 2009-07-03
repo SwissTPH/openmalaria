@@ -101,7 +101,10 @@ void createDocument(std::string lXmlFile) {
     interventions = &scenario->getInterventions();
     entoData = &scenario->getEntoData();
     demography = &scenario->getDemography();
-    healthSystem = &scenario->getHealthSystem();
+    if (scenario->getHealthSystem().present())
+      healthSystem = &scenario->getHealthSystem().get();
+    else
+      healthSystem = NULL;
     caseManagements = scenario->getCaseManagements().present() ?
         &scenario->getCaseManagements().get() : NULL;
     parameters = &scenario->getParameters();
@@ -133,6 +136,8 @@ const CaseManagements* getCaseManagements() {
   return caseManagements;
 }
 const HealthSystem& getHealthSystem() {
+  if (healthSystem == NULL)
+    throw xml_scenario_error("heathSystem element requested but not present");
   return *healthSystem;
 }
 
@@ -218,10 +223,6 @@ int get_populationsize(){
   return scenario->getPopSize();
 }
 
-
-int get_health_system_memory(){ 
-  return healthSystem->getHealthSystemMemory();
-}
 
 double get_demo_lowerbound(){ 
   return demography->getAgeGroup().getLowerbound();

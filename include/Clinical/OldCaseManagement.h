@@ -23,11 +23,15 @@
 #include "Clinical/event.h"
 #include "simulation.h"
 
+namespace scnXml {
+  class HealthSystem;
+}
+
 //! Models of treatment seeking and referral
 class OldCaseManagement {
 public:
   /// Initialize static parameters
-  static void init();
+  static int init();
   
   //!Read caseManagement parameters from input file and allocate data structures.
   OldCaseManagement(double tSF);
@@ -86,7 +90,7 @@ private:
 
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   //@{
-  static void setParasiteCaseParameters ();
+  static void setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem);
   //@}
   
   static double probGetsTreatment[3];
@@ -127,7 +131,7 @@ private:
     calculate and cache the CFR as a function of age in years for better
     performance. This would require a specification of the resolution.
   */
-  static void readCaseFatalityRatio();
+  static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
 };
 
 #endif

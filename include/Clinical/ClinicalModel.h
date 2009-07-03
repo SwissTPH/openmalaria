@@ -95,6 +95,9 @@ public:
   /** The maximum age, in timesteps, of when a sickness event occurred, for
    * another event to be considered part of the same reported "event".
    * 
+   * Used by both the clinical models in roughly the same way, but will have
+   * different values in each to match Global::interval.
+   * 
    * NOTE: notation: episode/event */
   static int reportingPeriodMemory;
   

@@ -39,6 +39,8 @@ void ClinicalEventScheduler::init () {
   if (getCaseManagements() == NULL)
     throw xml_scenario_error ("ClinicalEventScheduler selected without caseManagements data in XML");
   
+  reportingPeriodMemory = getCaseManagements()->getReportingPeriodMemory();
+  
   const scnXml::CaseManagements::CaseManagementSequence& managements = getCaseManagements()->getCaseManagement();
   caseManagementMaxAge.resize (managements.size());
   caseManagementEndPoints.resize (managements.size());
