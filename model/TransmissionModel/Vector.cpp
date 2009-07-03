@@ -47,9 +47,14 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   species.resize (numSpecies);
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initialise (anophelesList[i], initialisationEIR);
+  
   // We want the EIR to effectively be the sum of the EIR for each day in the interval
-  for (size_t i = 0; i < initialisationEIR.size(); ++i)
+  for (size_t i = 0; i < initialisationEIR.size(); ++i) {
     initialisationEIR[i] *= Global::interval;
+  
+    // Calculate total annual EIR
+    annualEIR += initialisationEIR[i];
+  }
 }
 VectorTransmission::~VectorTransmission () {
   for (size_t i = 0; i < numSpecies; ++i)
@@ -80,6 +85,7 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::advancePeriod (const std::list<Human>& population, int simulationTime) {
+  if (Global::simulationMode == equilibriumMode) return;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].advancePeriod (population, simulationTime, i);
 }

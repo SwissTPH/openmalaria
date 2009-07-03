@@ -164,6 +164,7 @@ Human::Human(istream& in, TransmissionModel& tm) :
 }
 
 void Human::destroy() {
+  delete infIncidence;
   delete withinHostModel;
   delete clinicalModel;
 }

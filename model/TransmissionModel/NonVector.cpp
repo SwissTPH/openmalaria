@@ -50,7 +50,6 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   }
   
   // Calculate total annual EIR
-  annualEIR=0.0;
   for (size_t j=0;j<Global::intervalsPerYear; j++) {
     // NOTE: this should be unnecessary, if daily.size() == daysInYear
     initialisationEIR[j] *= Global::interval / (double)nDays[j];

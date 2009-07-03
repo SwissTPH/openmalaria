@@ -63,6 +63,9 @@ do
   if [ "$1" = "--gdb" ]
   then
     CMD_PREFIX="gdb --args "
+  elif [ "$1" = "--valgrind" ]
+  then
+    CMD_PREFIX="valgrind --gen-suppressions=yes --leak-check=full "
   elif [ "$1" = "--dont-run" ]
   then
     RUN=""
@@ -80,6 +83,7 @@ do
     echo
     echo "Options:\033[0;33m"
     echo "  --gdb		Run openMalaria through gdb."
+    echo "  --valgrind		Run openMalaria through valgrind."
     echo "  --valid		Validate the XML file(s) using xmllint and the latest schema."
     echo "  --dont-run		Don't actually run openMalaria, just output the commandline."
     echo "  --help		Print this message."

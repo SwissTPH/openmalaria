@@ -56,13 +56,12 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   
   N_v_length = EIPDuration + mosqRestDuration;
   
-  size_t l = N_v_length*sizeof(double);
-  P_A = new double[N_v_length * 6];	// allocate memory for all arrays
-  P_df	= P_A + l;
-  P_dif	= P_df + l;
-  N_v	= P_dif + l;
-  O_v	= N_v + l;
-  S_v	= O_v + l;
+  P_A = new double[N_v_length];
+  P_df = new double[N_v_length];
+  P_dif = new double[N_v_length];
+  N_v = new double[N_v_length];
+  O_v = new double[N_v_length];
+  S_v = new double[N_v_length];
   
   // Set up fArray and ftauArray. Each step, all elements not set here are
   // calculated, even if they aren't directly used in the end;
@@ -99,6 +98,11 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
 
 void VectorTransmissionSpecies::destroy () {
   delete[] P_A;
+  delete[] P_df;
+  delete[] P_dif;
+  delete[] N_v;
+  delete[] O_v;
+  delete[] S_v;
 }
 
 void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {

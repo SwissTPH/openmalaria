@@ -54,7 +54,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
   }
 }
 
-TransmissionModel::TransmissionModel(){
+TransmissionModel::TransmissionModel() :
+    annualEIR(0.0)
+{
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
   
