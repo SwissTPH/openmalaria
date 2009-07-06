@@ -7,3 +7,7 @@ util/SchemaTranslator/scenarios
 util/SchemaTranslator/translatedScenarios
 util/.metadata
 util/SchemaTranslator/SchemaTranslator.class
+util/CaseManagementTree/*.class
+util/CaseManagementTree/CaseManagementTree
+dsss.last
+dsss_objs
