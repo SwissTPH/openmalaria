@@ -51,6 +51,10 @@
  * TSDELAY is slightly different; (x & TSDELAY_MASK) << TSDELAY_LSHIFT yields
  * an integer in the range [0,15] which is the delay in days. */
 enum DecisionEnums {
+    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
+     * Many are designed to be "flags", so the value corresponds to a single bit:
+     * http://en.wikipedia.org/wiki/Flag_byte
+     * (note & | ^ are C++'s binary AND, OR and XOR operators). */
     NONE		= 0x0,
     
     TEST_NONE		= 0x0,

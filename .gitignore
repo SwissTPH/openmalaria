@@ -2,6 +2,7 @@
 html
 aclocal.m4
 autom4te.cache
+test/sandbox
 # These two folders are tracked in svn anyway (git won't track folders).
 util/SchemaTranslator/scenarios
 util/SchemaTranslator/translatedScenarios
