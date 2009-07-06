@@ -23,6 +23,7 @@
 #include "GSLWrapper.h"
 #include "WithinHostModel.h"
 #include "simulation.h"
+#include "Clinical/DecisionEnums.d"
 
 //TODO: move to XML
 const int maxEpisodeLength = 28;
@@ -176,7 +177,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       pgState = Pathogenesis::NONE;
     } else {
       //TODO: insert correct probabilities
-      //lastCmDecision
+      if (lastCmDecision & MANAGEMENT_GOOD) {
+	// Good management
+      } else {
+	// bad
+      }
       const double pRecover = 0.1;
       const double pSequelae = 0.02;
       const double pDeath = 0.03;
