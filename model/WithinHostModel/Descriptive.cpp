@@ -103,8 +103,7 @@ void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
 
 // -----  Update function, called each step  -----
 
-void DescriptiveWithinHostModel::update (double age) {
-  drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+void DescriptiveWithinHostModel::update () {
   std::list<DescriptiveInfection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     (*i)->multiplyDensity(exp(-drugProxy->getDrugFactor((*i)->getProteome())));
@@ -149,8 +148,8 @@ void DescriptiveWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time) {
-  drugProxy->medicate(drugName, qty, time);
+void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {
+  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
 }
 
 

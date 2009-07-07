@@ -324,7 +324,9 @@ void Drug::parseProteomeInstances() {
  * DrugProxy code
  */
 
-DrugProxy::DrugProxy() {
+DrugProxy::DrugProxy() :
+    _drugs()	// initialise empty list
+{
   registry = DrugRegistry::getRegistry();
 }
 
@@ -336,7 +338,7 @@ void DrugProxy::destroy() {
   _drugs.clear();
 }
 
-void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time) {
+void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time, double weight) {
   /* We ignore time for now (as it is only relevant for ACTs).
    *   As such, no doses are created, but concentration is updated.
    */

@@ -30,7 +30,9 @@ void PkPdDrug::init() {
 
 // -----  non-static functions  -----
 
-PkPdDrug::PkPdDrug () {
+PkPdDrug::PkPdDrug () :
+    _proxy()
+{
 }
 
 PkPdDrug::PkPdDrug (istream& in) {
@@ -45,16 +47,12 @@ void PkPdDrug::write (ostream& out) {
   _proxy.write (out);
 }
 
-void PkPdDrug::medicate(string _drugAbbrev, double _qty, int _time) {
-  _proxy.medicate (_drugAbbrev, _qty, _time);
+void PkPdDrug::medicate(string _drugAbbrev, double _qty, int _time, double weight) {
+  _proxy.medicate (_drugAbbrev, _qty, _time, weight);
 }
 
 void PkPdDrug::decayDrugs () {
   _proxy.decayDrugs();
-}
-
-void PkPdDrug::setWeight (double w) {
-  _proxy.setWeight (w);
 }
 
 double PkPdDrug::getDrugFactor (ProteomeInstance* infProteome) {

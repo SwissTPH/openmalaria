@@ -211,7 +211,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     list<MedicateData>::iterator next = it;
     ++next;
     if (it->seekingDelay == 0) {	// Medicate today's medications
-      withinHostModel.medicate(it->abbrev, it->qty, it->delay);
+      withinHostModel.medicate(it->abbrev, it->qty, it->delay, ageYears);
       medicateQueue.erase(it);
       //TODO sort out reporting
     } else {			// and decrement treatment seeking delay for the rest

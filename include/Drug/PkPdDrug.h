@@ -43,10 +43,9 @@ public:
   virtual ~PkPdDrug ();
   void write (ostream& out);
   
-  void medicate(string drugAbbrev, double qty, int time);
+  void medicate(string drugAbbrev, double qty, int time, double weight);
   void decayDrugs ();
   
-  void setWeight (double w);
   double getDrugFactor (ProteomeInstance* infProteome);
   
 private:

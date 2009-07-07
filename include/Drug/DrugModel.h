@@ -66,16 +66,12 @@ public:
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity (which units?).
    * \param time       - Time in minutes (or hours?) since start of the simulation tStep.
-   */
-  virtual void medicate(string drugAbbrev, double qty, int time) {}
+   *  \param weight    - Weight of human */
+  virtual void medicate(string drugAbbrev, double qty, int time, double weight) {}
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?
   virtual void decayDrugs () {}
-  
-  /** Called each timestep immediately before the drug acts on infections
-   * to set the body-mass of the individual. */
-  virtual void setWeight (double w) {}
   
   /** This is how drugs act on infections.
    *

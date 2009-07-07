@@ -65,8 +65,7 @@ DummyWithinHostModel::~DummyWithinHostModel() {
 
 // -----  Update function, called each step  -----
 
-void DummyWithinHostModel::update (double age) {
-  drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+void DummyWithinHostModel::update () {
   std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
@@ -112,8 +111,8 @@ void DummyWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void DummyWithinHostModel::medicate(string drugName, double qty, int time) {
-  drugProxy->medicate(drugName, qty, time);
+void DummyWithinHostModel::medicate(string drugName, double qty, int time, double age) {
+  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
 }
 
 

@@ -42,7 +42,7 @@ public:
   ~EmpiricalWithinHostModel();
   
 
-  virtual void update(double age);
+  virtual void update();
   
   virtual void summarize(double age);
   
@@ -56,7 +56,7 @@ public:
   //! Clears all infections in an individual
   virtual void clearAllInfections();
   
-  void medicate(string drugName, double qty, int time);
+  void medicate(string drugName, double qty, int time, double age);
 
   void calculateDensities(Human&);
   

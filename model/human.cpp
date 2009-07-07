@@ -219,7 +219,7 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   withinHostModel->updateImmuneStatus();
   updateInfection(transmissionModel);
   clinicalModel->update (*withinHostModel, getAgeInYears(), Simulation::simulationTime-_dateOfBirth);
-  withinHostModel->update(getAgeInYears());
+  withinHostModel->update();
   clinicalModel->updateInfantDeaths (ageTimeSteps);
   return false;
 }

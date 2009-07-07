@@ -183,8 +183,7 @@ class DrugRegistry {
 class DrugProxy {
   list<Drug*> _drugs;
   DrugRegistry* registry;
-  double weight;	// human's weight
-
+  
   public:
   DrugProxy();
   /// Destructor. NOTE: could it be a normal dtor?
@@ -194,19 +193,16 @@ class DrugProxy {
   /*! \param drugAbbrev - The drug abbreviation.
    *  \param qty      - the quantity (which units?).
    *  \param time     - Time in minutes since start of the simulation tStep.
+   *  \param weight   - Weight of human
    *
    *  Medicate has to be called in correct time order (ie first lower times).
    */
-  void medicate(string drugAbbrev, double qty, int time);
+  void medicate(string drugAbbrev, double qty, int time, double weight);
   double calculateDrugsFactor(ProteomeInstance* infProteome);
   void decayDrugs();
 
   void write (ostream& out) const;
   void read (istream& in);
-  
-  void setWeight (double w) {
-    weight = w;
-  }
 };
 
 #endif

@@ -60,8 +60,7 @@ EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
 
 // -----  Update function, called each step  -----
 
-void EmpiricalWithinHostModel::update (double age) {
-  drugProxy->setWeight (120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+void EmpiricalWithinHostModel::update () {
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     i->multiplyDensity(exp(-drugProxy->getDrugFactor(i->getProteome())));
@@ -107,8 +106,8 @@ void EmpiricalWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time) {
-  drugProxy->medicate(drugName, qty, time);
+void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, double age) {
+  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
 }
 
 

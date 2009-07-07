@@ -65,7 +65,7 @@ public:
   virtual void write(ostream& out) const =0;
   //@}
   
-  virtual void update(double age) =0;
+  virtual void update() =0;
 
   virtual void summarize(double age) =0;
   
@@ -81,7 +81,10 @@ public:
    * (isSevere is only used in the IPT case). */
   virtual void clearInfections (bool isSevere);
   
-  virtual void medicate(string drugName, double qty, int time) =0;
+  /** Medicate drugs (wraps drug's medicate).
+   *
+   * \param age	= Age in years of human. */
+  virtual void medicate(string drugName, double qty, int time, double age) =0;
 
   virtual void calculateDensities(Human&) =0;
   
