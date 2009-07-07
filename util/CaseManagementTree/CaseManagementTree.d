@@ -176,8 +176,13 @@ int main(char[][] args) {
     } else
 	Stdout (printer(outDoc));
     
-    // Idea was to reformat, but it won't strip old whitespace
-    //File.set ("inputCopy.xml", printer(inDoc));
+    // If you want to reformat whitespace in the decision tree file:
+    // (compile with version=reformatInput)
+    version (reformatInput) {
+	printer.cache(false);
+	inDoc.header;
+	File.set (inFile, printer(inDoc));
+    }
     
     return 0;
 }
