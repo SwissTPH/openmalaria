@@ -290,30 +290,15 @@ uint recurseLeaves (Document!(char).Node node, ref double[uint] leaves, Decision
 	return endPoints;
     } else {
 	int maskedFlags = MASK & inFlags;
-	query = node.query["decision"];
+	// leafNode isn't actually required, but for now leave as a placeholder
+	query = node.query["leafNode"];
 	assert (query.count == 1);
-	char[] id = query.nodes[0].value;
-	if (id == "1") {
-	    //Stdout.format ("{:x}\tno treatment", inFlags).newline;
-	    double* pLeaf = maskedFlags in leaves;
-	    if (pLeaf) {
-		*pLeaf += inProb;
-	    } else
-		leaves[maskedFlags] = inProb;
-	} else if (id.length == 5
-	    && id[0] == '0'
-	    && (id[1]-'0'+1) == filterRShift!(DecisionEnums.DRUG_MASK) (inFlags)
-	    && ((id[1]=='2') ? ((id[2]-'0') == filterRShift!(DecisionEnums.MANAGEMENT_MASK) (inFlags))
-			     : ((id[2]-'0') == filterRShift!(DecisionEnums.QUALITY_MASK) (inFlags)))
-	    && (id[3]-'0') == filterRShift!(DecisionEnums.ADHERENCE_MASK) (inFlags)
-	    && (id[4]-'0') == filterRShift!(DecisionEnums.TSDELAY_MASK) (inFlags)) {
-	    double* pLeaf = maskedFlags in leaves;
-	    if (pLeaf) {
-		*pLeaf += inProb;
-	    } else
-		leaves[maskedFlags] = inProb;
+	
+	double* pLeaf = maskedFlags in leaves;
+	if (pLeaf) {
+	    *pLeaf += inProb;
 	} else
-	    Stdout.format ("0x{:x}\tinvalid id: {}", inFlags, id).newline;
+	    leaves[maskedFlags] = inProb;
 	
 	return 1;
     }
