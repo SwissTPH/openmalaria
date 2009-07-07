@@ -36,6 +36,9 @@ using namespace std;
 /// Command-Line Option possibilities
 namespace CLO {
   enum CLO {
+    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
+     * Many are designed to be "flags", so the value corresponds to a single bit:
+     * http://en.wikipedia.org/wiki/Flag_byte */
     NONE		= 0x0,
     
     PRINT_MODEL_VERSION	= 0x1,

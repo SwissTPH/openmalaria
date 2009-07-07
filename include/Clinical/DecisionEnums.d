@@ -19,6 +19,10 @@
 */
 
 /* This is BOTH a C(++) header file and a D import file!
+ *
+ * This allows the enum values to be shared so there's no possibility of them
+ * getting out-of-sync between the converter and the simulator.
+ * 
  * As such, there are quite a few limitations:
  * Don't use macros
  *   hence no #ifndef HEADER_IDENT ... #endif

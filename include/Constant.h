@@ -22,6 +22,10 @@
 
 /** Flags signalling which versions of some models to use. */
 enum ModelVersion {
+  /* Values are written here using left-shifts. 1 << x is equal to pow(2,x)
+   * for integers, so each value here has only one bit true in binary, allowing
+   * the bits to be used as flags: http://en.wikipedia.org/wiki/Flag_byte
+   * For historical reasons only, there is no 1 (=1<<0). */
   /** @brief Clinical episodes reduce the level of acquired immunity
    * 
    * Effective cumulative exposure to blood stage parasites is reduced during a
@@ -143,6 +147,10 @@ namespace Pathogenesis {
    * Most values are flags which can be combined in any form. A few
    * combinations set follow. */
   enum State {
+    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
+     * Many are designed to be "flags", so the value corresponds to a single bit:
+     * http://en.wikipedia.org/wiki/Flag_byte
+     * (note & | ^ are C++'s binary AND, OR and XOR operators). */
     NONE		= 0,		///< Not sick
     
     // Flags:
