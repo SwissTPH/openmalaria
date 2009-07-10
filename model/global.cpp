@@ -157,9 +157,9 @@ void Global::setModelVersion () {
     COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 15
     COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 16
     COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 17
-    ANY_HET,	// 18
-    ANY_HET,	// 19
-    ANY_HET,	// 20
+    TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,   // 18
+    COMORB_TREAT_HET | TRIPLE_HET,	// 19
+    TRIPLE_HET,	// 20
     0,	// 21
     DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD) // 22
   };
@@ -168,7 +168,8 @@ void Global::setModelVersion () {
     if (((modelVersion >> i) & 1) &&
           modelVersion & INCOMPATIBLITITIES[i]) {
       ostringstream msg;
-      msg << "Incompatible model versions: flag " << i << " is incompatible with other flags.";
+      msg << "Incompatible model versions: flag " << i << " is incompatible with other flags: 0x" << hex << modelVersion;
+      //Note: this can occur if a version is listed as "incompatible with itself" in the above table
       throw xml_scenario_error (msg.str());
     }
   if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))

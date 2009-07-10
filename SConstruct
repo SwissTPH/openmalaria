@@ -59,9 +59,9 @@ env.Append(CCFLAGS = ['-DWITHOUT_BOINC'])
 conf = Configure(env)
 # TODO: Checks for libraries, header files, etc. go here!
 env['XsdExec'] = which('xsdcxx')
-if env['XsdExec'] == None:
+if env['XsdExec'] is None:
   env['XsdExec'] = which('xsd')
-  if env['XsdExec'] == None:
+  if env['XsdExec'] is None:
     print 'Unable to find (code synthesis\') xsd program'
     Exit(1)
 
