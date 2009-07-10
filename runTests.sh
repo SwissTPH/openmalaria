@@ -95,7 +95,7 @@ do
     ./openMalaria --help
     echo -n "\033[0;00m"
     exit 1;
-  elif [ `expr match "$1" '--'` -eq 2 ]
+  elif [ `expr "$1" : '--'` -eq 2 ]
   then
     CMD_POSTFIX="$CMD_POSTFIX $1"
   else

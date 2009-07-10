@@ -47,9 +47,9 @@ AM_CONDITIONAL(DARWIN, [test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin`])
 
 # needed paths for MacOS
 if test `uname -s | tr '[A-Z]' '[a-z]' | grep darwin` ; then
-  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
-  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386"
+  export LDFLAGS="-L/opt/local/lib -L/sw/lib -L../boinc/mac_build/build/Deployment -isysroot /Developer/SDKs/MacOSX10.4u.sdk -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk -arch i386 -mmacosx-version-min=10.4"
+  export CPPFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -mmacosx-version-min=10.4"
+  export CFLAGS="-I/usr/local/include -I/opt/local/include -I/sw/include -I../boinc/lib -I../xerces-c-src_2_7_0/include/xercesc -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386 -mmacosx-version-min=10.4"
   export SDKROOT="/Developer/SDKs/MacOSX10.4u.sdk"
   export MACOSX_DEPLOYMENT_TARGET=10.4
   export PATH=/opt/local/bin:$PATH
@@ -75,7 +75,7 @@ if test "${deploy}" = yes ; then
     AC_CHECK_FILE(lib/libz.a,[AC_SUBST(LIB_STATIC, "$LIB_STATIC ../lib/libz.a")],[AC_MSG_FAILURE([No static zlib lib present])])
     
     # statically link libgcc
-    export LDFLAGS="$LDFLAGS -static-libgcc -lstdc++"
+    export LDFLAGS="$LDFLAGS"
 else
     build_state='local'
     AC_CHECK_LIB(gslcblas,main,,[AC_MSG_FAILURE([gslcblas not present])])
@@ -115,7 +115,7 @@ fi
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h stdlib.h string.h sys/timeb.h],,[AC_MSG_FAILURE([Some headers are missing])])
 AC_CHECK_HEADERS([gsl/gsl_cdf.h gsl/gsl_multimin.h gsl/gsl_rng.h gsl/gsl_randist.h],, [AC_MSG_FAILURE([Some gsl headers are missing])])
-AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
+#AC_CHECK_HEADER([xsd/cxx/version.hxx],,[AC_MSG_FAILURE([Unable to find xsd headers])])
 AC_CHECK_HEADER([zlib.h],,[AC_MSG_FAILURE([Unable to find zlib header])])
 
 
