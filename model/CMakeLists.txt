@@ -16,11 +16,12 @@ else (USE_BOINC)
   add_definitions (-DWITHOUT_BOINC)
 endif (USE_BOINC)
 
-include_directories (${CMAKE_SOURCE_DIR}/include ${CMAKE_SOURCE_DIR}/xsdcxx)
-link_directories (${CMAKE_SOURCE_DIR}/xsdcxx)
+include_directories (${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx)
+link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 aux_source_directory (. SOURCE_CPP)
 add_executable (openMalaria ${SOURCE_CPP})
-set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_dependencies (openMalaria xsdcxx/scenario.hxx)
+set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 target_link_libraries (openMalaria
   xsdcxx Clinical Drug Pathogenesis TransmissionModel WithinHostModel
   gsl gslcblas xerces-c z pthread
