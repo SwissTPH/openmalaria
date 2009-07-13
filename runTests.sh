@@ -11,7 +11,17 @@
 
 rm -rf test/sandbox/* 2>/dev/null
 mkdir -p test/sandbox
-cp model/openMalaria test/sandbox/openMalaria
+OM_BIN="openMalaria"
+if [ ! -x openMalaria -o model/openMalaria -nt openMalaria ]
+then
+  OM_BIN="model/$OM_BIN"
+fi
+if [ ! -x $OM_BIN ]
+then
+  echo "Not found: $OM_BIN. Please compile."
+  exit 1
+fi
+cp $OM_BIN test/sandbox/openMalaria
 #strip test/sandbox/openMalaria
 cd test/sandbox && cp ../original/* . 2>/dev/null
 

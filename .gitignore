@@ -12,3 +12,6 @@ util/CaseManagementTree/*.class
 util/CaseManagementTree/CaseManagementTree
 dsss.last
 dsss_objs
+.sconsign.dblite
+build
+lib

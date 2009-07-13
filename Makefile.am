@@ -2,7 +2,7 @@
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
 ACLOCAL_AMFLAGS = -I m4
-SUBDIRS = xsdcxx model #graphics 
+SUBDIRS = xsdcxx model #graphics
 
 all: xsdcxx model
 	mkdir -p test && test -d test/original || ln -s @abs_top_srcdir@/test/original test/

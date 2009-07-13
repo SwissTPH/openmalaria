@@ -26,8 +26,8 @@ AM_CPPFLAGS = @CPPFLAGS@ @BOINC_CFLAGS@ -I$(top_srcdir)/include -I@top_builddir@
 AM_CXXFLAGS = @CXXFLAGS@ -Wall #-Werror
 
 if DARWIN
-export MACOSX_DEPLOYMENT_TARGET=10.4
-openMalaria_LDFLAGS = @BOINC_LDFLAGS@ -framework Carbon
+  export MACOSX_DEPLOYMENT_TARGET=10.4
+  openMalaria_LDFLAGS = @BOINC_LDFLAGS@ -framework Carbon
 else
-openMalaria_LDFLAGS = @BOINC_LDFLAGS@
+  openMalaria_LDFLAGS = @BOINC_LDFLAGS@
 endif
