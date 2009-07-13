@@ -23,9 +23,7 @@
 #define _USE_MATH_DEFINES
 
 #include "TransmissionModel.h"
-#include <math.h> 
 #include "global.h" 
-#include <gsl/gsl_vector.h> 
 #include "intervention.h" 
 #include "inputData.h"
 #include "TransmissionModel/NonVector.h"
@@ -33,6 +31,9 @@
 #include "TransmissionModel/PerHost.h"
 #include "simulation.h"
 #include "summary.h"
+#include <math.h> 
+#include <cfloat>
+#include <gsl/gsl_vector.h> 
 
 //static (class) variables
 const double TransmissionModel::agemin[nwtgrps] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
@@ -79,17 +80,15 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
+  //NOTE: error check
+  if (sumWeight < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
+    throw range_error ("sumWeight is invalid");
+  
   size_t tmod = (Simulation::simulationTime-1) % Global::intervalsPerYear;
-  //Prevent NaNs
-  if (sumWeight == 0.0) {
-    kappa[tmod] = 0.0;
-    cerr << "sW.eq.0" << endl;
-  } else {
-    kappa[tmod] = sumWt_kappa / sumWeight;
+  kappa[tmod] = sumWt_kappa / sumWeight;
 #ifdef DEBUG_PRINTING
-    cout << Simulation::simulationTime << '\t' << kappa[tmod] << endl;
+  cout << Simulation::simulationTime << '\t' << kappa[tmod] << endl;
 #endif
-  }
   
   //Calculate time-weighted average of kappa
   if (tmod == 0) {

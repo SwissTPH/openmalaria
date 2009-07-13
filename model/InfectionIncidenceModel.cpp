@@ -185,6 +185,12 @@ double InfectionIncidenceModel::susceptibility () {
 
 int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans) {
   double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
+  //NOTE: error check (should be OK if kappa is checked, for nonVector model)
+  if (!finite(effectiveEIR)) {
+    ostringstream out;
+    out << "Error: effectiveEIR is not finite: " << effectiveEIR << endl;
+    throw overflow_error (out.str());
+  }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
   if (Vaccine::PEV.active) {

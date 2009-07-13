@@ -139,7 +139,7 @@ void Global::setModelVersion () {
   // Or'd flags of incompatibility triangle from
   // "description of variables for interface" excel sheet
   const int INCOMPATIBLITITIES[NUM_VERSIONS] = {
-    0,
+    1,	// non-existent, so make it incompatible with itself
     DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// 1
     LOGNORMAL_MASS_ACTION | ANY_TRANS_HET,	// 2
     DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// 3
@@ -168,7 +168,8 @@ void Global::setModelVersion () {
     if (((modelVersion >> i) & 1) &&
           modelVersion & INCOMPATIBLITITIES[i]) {
       ostringstream msg;
-      msg << "Incompatible model versions: flag " << i << " is incompatible with other flags: 0x" << hex << modelVersion;
+      msg << hex << "Incompatible model versions: flag 0x" << (1<<i)
+	  << " is incompatible with flags: 0x" << (modelVersion & INCOMPATIBLITITIES[i]);
       //Note: this can occur if a version is listed as "incompatible with itself" in the above table
       throw xml_scenario_error (msg.str());
     }

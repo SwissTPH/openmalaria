@@ -52,7 +52,8 @@ xsd = Builder(action = xsdFunc, src_suffix = '.xsd')
 env = Environment(CPPPATH = ['include', 'xsdcxx'],
 		  LIBPATH = ['lib'],
 		  LIBS = ['gsl','gslcblas','xerces-c','z'])
-#potentially plus: python
+#potentially plus: pthreads
+env.Append(LDFLAGS = ['-isysroot /Developer/SDKs/MacOSX10.4u.sdk','-Wl,-syslibroot,/ Developer/SDKs/MacOSX10.4u.sdk','-arch i386'])
 env.Append(CPPSUFFIXES = [".d"])
 #env.Append(CCFLAGS = ['-isysroot','/Developer/SDKs/MacOSX10.4u.sdk','-arch','i386'])
 #env.Append(LDFLAGS = ['-isysroot /Developer/SDKs/MacOSX10.4u.sdk','-Wl,-syslibroot,/ Developer/SDKs/MacOSX10.4u.sdk','-arch i386'])

@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
+#include <cfloat>
 
 //static (class) variables
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
@@ -95,6 +96,11 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
 
 void NonVectorTransmission::copyToInitialKappa () {
   initialKappa = kappa;
+  //NOTE: error check
+  for (size_t  i = 0; i < initialKappa.size(); ++i) {
+    if (initialKappa[i] < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
+      throw range_error ("initialKappa is invalid");
+  }
 }
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
@@ -117,6 +123,15 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     default:	// Anything else.. don't continue silently
       throw xml_scenario_error ("Invalid simulation mode");
   }
+#ifdef DEBUG
+  if (!finite(eir)) {
+    ostringstream msg;
+    msg << "Error: non-vect eir is: " << eir
+	<< "\nkappa:\t" << kappa[(simulationTime-nspore-1) % Global::intervalsPerYear]
+	<< "\ninitialKappa:\t" << initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear] << endl;
+    throw overflow_error(msg.str());
+  }
+#endif
   return eir * getRelativeAvailability(ageInYears) * perHost.entoAvailability();
 }
 
