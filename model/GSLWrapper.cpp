@@ -137,7 +137,7 @@ double W_LOGNORMAL(double mean, double std){
 }
 
 int W_POISSON(double lambda){
-   if (!(std::fabs(lambda) <= std::numeric_limits<double>::max())){
+   if (!(fabs(lambda) <= numeric_limits<double>::max())){
     //This would lead to an inifinite loop in gsl_ran_poisson
      cerr << "lambda isInf" << endl;
      exit(-1);

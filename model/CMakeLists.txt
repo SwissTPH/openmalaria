@@ -21,10 +21,13 @@ else (USE_BOINC)
   add_definitions (-DWITHOUT_BOINC)
 endif (USE_BOINC)
 
-#TODO: sometimes needed...
 if (UNIX)
   find_library (PTHREAD_LIB pthread PATHS ${CMAKE_SOURCE_DIR}/lib)
+  if (NOT PTHREAD_LIB)
+    message (SEND_ERROR "PThread library not found")
+  endif (NOT PTHREAD_LIB)
 endif (UNIX)
+
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
@@ -58,5 +61,5 @@ target_link_libraries (openMalaria
   ${GSL_LIB} ${GSL_CBLAS_LIB}
   ${XERCES_C_LIB}
   ${Z_LIB}
-  ${PTHREAD}
+  ${PTHREAD_LIB}
   ${BOINC_API_LIB} ${BOINC_LIB})

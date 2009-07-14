@@ -17,7 +17,7 @@ find_library (GSL_LIB gsl
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
 )
-find_library (GSL_CBLAS_LIB NAMES gsl_cblas cblas
+find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"

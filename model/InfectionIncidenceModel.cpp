@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
+#include "global.h"
 #include "InfectionIncidenceModel.h"
 #include "GSLWrapper.h"
 #include "inputData.h"
@@ -186,7 +187,7 @@ double InfectionIncidenceModel::susceptibility () {
 int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans) {
   double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
   //NOTE: error check (should be OK if kappa is checked, for nonVector model)
-  if (!(std::fabs(effectiveEIR) <= std::numeric_limits<double>::max())){
+  if (!(fabs(effectiveEIR) <= numeric_limits<double>::max())){
     ostringstream out;
     out << "Error: effectiveEIR is not finite: " << effectiveEIR << endl;
     throw overflow_error (out.str());
