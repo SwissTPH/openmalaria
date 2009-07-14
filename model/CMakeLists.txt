@@ -28,13 +28,14 @@ else (BOINC_INTEGRATION)
 endif (BOINC_INTEGRATION)
 
 if (UNIX)
-  find_library (PTHREAD_LIBRARIES pthread PATHS ${CMAKE_SOURCE_DIR}/lib)
+  find_library (PTHREAD_LIBRARIES pthread PATHS ${CMAKE_SOURCE_DIR}/lib /usr/lib /usr/local/lib)
   if (NOT PTHREAD_LIBRARIES)
     message (SEND_ERROR "PThread library not found")
   endif (NOT PTHREAD_LIBRARIES)
 endif (UNIX)
 mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
 
+message (STATUS 0)
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
   ${XSD_INCLUDE_DIR}
@@ -42,15 +43,19 @@ include_directories (
   ${Z_INCLUDE_DIR}
 )
 
+message (STATUS 10)
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
+message (STATUS 20)
 aux_source_directory (. OpenMalaria_CPP)
+message (STATUS 30)
 aux_source_directory (Clinical Clinical_CPP)
 aux_source_directory (Drug Drug_CPP)
 aux_source_directory (Pathogenesis Pathogenesis_CPP)
 aux_source_directory (TransmissionModel TransmissionModel_CPP)
 aux_source_directory (WithinHostModel WithinHostModel_CPP)
 
+message (STATUS 40)
 add_executable (openMalaria
   ${OpenMalaria_CPP}
   ${Clinical_CPP}
@@ -59,13 +64,16 @@ add_executable (openMalaria
   ${TransmissionModel_CPP}
   ${WithinHostModel_CPP}
 )
+message (STATUS 50)
 #Really I want to make openMalaria depend on XSD having been run, but this doesn't work:
 #add_dependencies (openMalaria ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx)
 set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+message (STATUS 60)
 target_link_libraries (openMalaria
   xsdcxx
   ${GSL_LIBRARIES}
   ${XERCES_C_LIBRARIES}
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
-  ${BOINC_LIBRARIES})
+  ${BOINC_LIBRARIES}
+)

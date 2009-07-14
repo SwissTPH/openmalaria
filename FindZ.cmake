@@ -8,7 +8,9 @@
 
 # list common paths here:
 FIND_PATH(Z_INCLUDE_DIRS zconf.h
-  PATHS ${CMAKE_SOURCE_DIR}/../zlib/include
+ PATHS
+  ${CMAKE_SOURCE_DIR}/../zlib/include
+  ${CMAKE_SOURCE_DIR}/../zlib
 )
 
 if (NOT Z_INCLUDE_DIRS)

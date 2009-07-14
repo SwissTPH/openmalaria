@@ -10,7 +10,9 @@
 # The gsl-111 dir is because people have GSL 1.8 installed in C:/Program Files/GnuWin32/include
 # which isn't supported and gsl-1.11 extracted to in gsl-111
 FIND_PATH(GSL_INCLUDE_DIRS gsl/gsl_version.h
-  PATHS ${CMAKE_SOURCE_DIR}/../gsl/include
+ PATHS
+  ${CMAKE_SOURCE_DIR}/../gsl/include
+  ${CMAKE_SOURCE_DIR}/../gsl
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/include"
   "C:/Program Files/GnuWin32/include"
 )
