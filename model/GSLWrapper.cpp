@@ -17,6 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+// This isn't very important
+#define _CRT_SECURE_NO_DEPRECATE
 
 #include <string>
 using namespace std;
@@ -135,7 +137,7 @@ double W_LOGNORMAL(double mean, double std){
 }
 
 int W_POISSON(double lambda){
-   if ((std::fabs(lambda) > std::numeric_limits<double>::max())){
+   if (!(std::fabs(lambda) <= std::numeric_limits<double>::max())){
     //This would lead to an inifinite loop in gsl_ran_poisson
      cerr << "lambda isInf" << endl;
      exit(-1);
