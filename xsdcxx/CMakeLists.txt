@@ -1,3 +1,7 @@
+# CMake configuration for XML-reading code
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 set_source_files_properties (scenario.cxx scenario.ixx scenario.hxx PROPERTIES GENERATED TRUE)
 
 set (XSD_FILE ${CMAKE_SOURCE_DIR}/xsdcxx/scenario.xsd)

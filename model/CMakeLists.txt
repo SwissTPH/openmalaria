@@ -1,5 +1,9 @@
-include (FindGSL.cmake)
-include (FindZLib.cmake)
+# CMake configuration for all code in this dir and below
+# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Licence: GNU General Public Licence version 2 or later (see COPYING)
+
+find_package (GSL)
+find_package (Z)
 
 
 #for Visual Studio file groupings:
@@ -9,25 +13,27 @@ source_group (Pathogenesis REGULAR_EXPRESSION Pathogenesis/.*)
 source_group (TransmissionModel REGULAR_EXPRESSION TransmissionModel/.*)
 source_group (WithinHostModel REGULAR_EXPRESSION WithinHostModel/.*)
 
-option (USE_BOINC "Set to enable integration of the BOINC client.")
-if (USE_BOINC)
+option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
+if (BOINC_INTEGRATION)
   find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
   find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/boinc_api)
   include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
   if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
-    message (SEND_ERROR "Unable to find a boinc library (boinc or boinc_api)")
+    message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
   endif (NOT BOINC_LIB OR NOT BOINC_API_LIB)
-else (USE_BOINC)
+  set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
+  mark_as_advanced (BOINC_API_LIB BOINC_LIB)
+else (BOINC_INTEGRATION)
   add_definitions (-DWITHOUT_BOINC)
-endif (USE_BOINC)
+endif (BOINC_INTEGRATION)
 
 if (UNIX)
-  find_library (PTHREAD_LIB pthread PATHS ${CMAKE_SOURCE_DIR}/lib)
-  if (NOT PTHREAD_LIB)
+  find_library (PTHREAD_LIBRARIES pthread PATHS ${CMAKE_SOURCE_DIR}/lib)
+  if (NOT PTHREAD_LIBRARIES)
     message (SEND_ERROR "PThread library not found")
-  endif (NOT PTHREAD_LIB)
+  endif (NOT PTHREAD_LIBRARIES)
 endif (UNIX)
-
+mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
@@ -58,8 +64,8 @@ add_executable (openMalaria
 set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 target_link_libraries (openMalaria
   xsdcxx
-  ${GSL_LIB} ${GSL_CBLAS_LIB}
-  ${XERCES_C_LIB}
-  ${Z_LIB}
-  ${PTHREAD_LIB}
-  ${BOINC_API_LIB} ${BOINC_LIB})
+  ${GSL_LIBRARIES}
+  ${XERCES_C_LIBRARIES}
+  ${Z_LIBRARIES}
+  ${PTHREAD_LIBRARIES}
+  ${BOINC_LIBRARIES})
