@@ -29,6 +29,7 @@ using namespace std;
 #include "GSLWrapper.h"
 #include "inputData.h"
 #include "population.h"
+#include "global.h"
 
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;
@@ -137,11 +138,11 @@ double W_LOGNORMAL(double mean, double std){
 }
 
 int W_POISSON(double lambda){
-   if (!(fabs(lambda) <= numeric_limits<double>::max())){
+  if (!finite(lambda)) {
     //This would lead to an inifinite loop in gsl_ran_poisson
-     cerr << "lambda isInf" << endl;
-     exit(-1);
-    }
+    cerr << "lambda isInf" << endl;
+    exit(-1);
+  }
   return gsl_ran_poisson (generator, lambda);
 }
 

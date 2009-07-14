@@ -20,8 +20,9 @@
 #ifndef Hmod_global
 #define Hmod_global
 
-#ifdef _MSC_VER	// disable warnings on MSVC
-#pragma warning(disable: 4290)
+#ifdef _MSC_VER
+#pragma warning(disable: 4290)	// disable warnings on MSVC
+#define finite(x) _finite(x)
 #endif
 
 #include "Constant.h"
