@@ -28,9 +28,9 @@ using namespace std;
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 #define VectorTransmission_PRINT_CalcUpsilonOneHost
-// #define VectorTransmission_PRINT_CalcSvDiff
-// #define VectorTransmission_PRINT_CalcLambda
-// #define VectorTransmission_PRINT_CalcXP
+#define VectorTransmission_PRINT_CalcSvDiff
+#define VectorTransmission_PRINT_CalcLambda
+#define VectorTransmission_PRINT_CalcXP
 #define VectorTransmission_PRINT_CalcSpectralRadius
 #define VectorTransmission_PRINT_CalcInv1minusA
 

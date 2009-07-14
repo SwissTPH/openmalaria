@@ -14,5 +14,8 @@ ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
 option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
 
-add_subdirectory (model)
+include (FindXsd.cmake)
+include (FindXercesC.cmake)
+
 add_subdirectory (xsdcxx)
+add_subdirectory (model)
