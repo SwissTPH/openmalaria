@@ -123,7 +123,7 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     default:	// Anything else.. don't continue silently
       throw xml_scenario_error ("Invalid simulation mode");
   }
-#ifdef DEBUG
+#ifndef NDEBUG
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir

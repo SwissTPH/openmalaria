@@ -222,7 +222,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
 }
 
 void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
-#ifdef DEBUG
+#ifndef NDEBUG
   if (!(pgState & Pathogenesis::SICK))
     throw domain_error("doCaseManagement shouldn't be called if not sick");
 #endif
@@ -233,10 +233,10 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
   size_t ageIndex = 0;
   while (ageYears > caseManagementMaxAge[ageIndex]) {
     ++ageIndex;
-#ifdef DEBUG
+#ifndef NDEBUG
     if (ageIndex >= caseManagementMaxAge.size()) {
       ostringstream x;
-      x << "Individual's age (" << ageYears << ") is over maximum age which has caseManagement data in XML (" << CaseManagementMaxAge[ageIndex].first << ")";
+      x << "Individual's age (" << ageYears << ") is over maximum age which has caseManagement data in XML (" << caseManagementMaxAge[ageIndex-1] << ")";
       throw xml_scenario_error(x.str());
     }
 #endif
