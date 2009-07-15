@@ -41,8 +41,15 @@ using namespace std;
  * freed and reallocated. It is cleaned by the destructor.
  * 
  * All non-const data outside of functions should be stored in here, so as
- * to be thread-safe. */
-struct VectorEmergence {
+ * to be thread-safe.
+ * 
+ * Const-ness: Many of the params passed in to functions are now const.
+ * Making functions themselves const seems utterly pointless, since in C++ in
+ * const functions, only values directly stored in the object are effectively
+ * const, and anything pointed by them (including array members) is non-const.
+ */
+class VectorEmergence {
+public:
   /** Initialises some data elements */
   VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize, double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting, double probMosqSurvivalOvipositing);
   /** Frees data */
@@ -78,10 +85,10 @@ struct VectorEmergence {
    *
    * This function has a dummy return of 0.
    * 
-   * All parameters are IN parameters. */
+   * \param mosqEmergeRate is both an input (guessed or read from file) and output (calculated emergence rate-. */
   double CalcInitMosqEmergeRate(int nHostTypesInit, int nMalHostTypesInit,
-                                double* FHumanInfectivityInitVector,
-                                vector<double>& FEIRInitVector,
+                                const double* FHumanInfectivityInitVector,
+                                const vector<double>& FEIRInitVector,
 				double* mosqEmergeRate);
   
 private:
@@ -179,7 +186,7 @@ private:
  * 
  * PAPtr, and PAiPtr are OUT parameters.
  * All other parameters are IN parameters. */
-void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, gsl_vector* K_vi);
+void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, const gsl_vector* K_vi);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -195,8 +202,8 @@ void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, gsl_v
  * 
  * SvDiff is an OUT parameter.
  * All other parameters are IN parameters. */
-void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR, 
-                gsl_vector* Nv0, gsl_matrix* inv1Xtp);
+void CalcSvDiff(gsl_vector* SvDiff, const gsl_vector* SvfromEIR,
+                const gsl_vector* Nv0, const gsl_matrix* inv1Xtp);
 
 /** CalcLambda() returns a pointer to an array of theta_p 
  * GSL vectors.
@@ -218,7 +225,7 @@ void CalcSvDiff(gsl_vector* SvDiff, gsl_vector* SvfromEIR,
  * Lambda is set.
  * 
  * All parameters are IN parameters. */
-void CalcLambda(gsl_vector* Nv0);
+void CalcLambda(const gsl_vector* Nv0);
 
 /** CalcXP returns a pointer to an array of theta_p 
  * GSL vectors.
@@ -240,7 +247,7 @@ void CalcLambda(gsl_vector* Nv0);
  * x_p is set.
  * 
  * All parameters are IN parameters. */
-void CalcXP(gsl_matrix* inv1Xtp);
+void CalcXP(const gsl_matrix* inv1Xtp);
 
 
 /** CalcPSTS() calculates probabilities of surviving the extrinsic
@@ -255,7 +262,7 @@ void CalcXP(gsl_matrix* inv1Xtp);
  * 
  * sumkplusPtr and sumklplus are OUT parameters.
  * All other parameters are IN parameter. */
-void CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df);
+void CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df) const;
 
 /** FuncX() calculates X(t,s).
  *
@@ -271,7 +278,7 @@ void CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df);
  * Upsilon is read.
  * 
  * X is an OUT parameter, t and s are IN parameters. */
-void FuncX(gsl_matrix* X, size_t t, size_t s);
+void FuncX(gsl_matrix* X, size_t t, size_t s) const;
 
 /** CalcSpectralRadius() calculates the spectral radius of a given matrix.
  *
@@ -282,7 +289,7 @@ void FuncX(gsl_matrix* X, size_t t, size_t s);
  * Dimensions are required to be eta×eta in order to allow re-using memory.
  * 
  * A is an IN parameters. */
-double CalcSpectralRadius(gsl_matrix* A);
+double CalcSpectralRadius(const gsl_matrix* A) const;
 
 /** CalcInv1minusA() calculates the inverse of (I-A) where A is a 
  * given matrix.
@@ -295,7 +302,7 @@ double CalcSpectralRadius(gsl_matrix* A);
  * 
  * A is an IN parameter.
  * inv1A is an OUT parameter. */
-void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A);
+void CalcInv1minusA(gsl_matrix* inv1A, const gsl_matrix* A) const;
 
 /** CalcSvfromEIRdata() calculates Sv, given the EIR.
  *
@@ -313,13 +320,13 @@ void CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A);
  * 
  * P_Ai, P_B_i and Xi_i are IN parameters.
  * Sv is an OUT parameter. */
-void CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, gsl_vector* Xi_i);
+void CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, const gsl_vector* Xi_i) const;
 
 
 /** binomial() calculates the binomial coefficient given two integers.
  * 
  * Note that we do not check for errors. */
-double binomial(int n, int k);
+double binomial(int n, int k) const;
 
 
 /******************************************************************************
@@ -338,8 +345,8 @@ double binomial(int n, int k);
   *
   * All parameters are IN parameters.
  */
-void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
-                             size_t theta_p, char fnrootfindingstate[]);
+void PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind, 
+		size_t theta_p, const char fnrootfindingstate[]) const;
 
 /** PrintParameters() prints the input parameters to a given file. 
   * We currently use this to make sure that the inputs we have in C
@@ -349,54 +356,54 @@ void PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind,
   * 
   * All parameters are IN parameters.
  */
-void PrintParameters(size_t theta_p, size_t tau, size_t theta_s, 
-                     size_t n, size_t m, double N_i, double alpha_i, double mu_vA, 
-                     double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i, 
-                     gsl_vector* K_vi, gsl_vector* Xi_i);
+void PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
+		size_t n, size_t m, double N_i, double alpha_i, double mu_vA,
+		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
+		const gsl_vector* K_vi, const gsl_vector* Xi_i) const;
 
 /** PrintUpsilon() prints the intermediate results while calculating 
   * Upsilon.
   * 
   * All parameters are IN parameters.
  */
-void PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
-                  size_t eta, double P_A, double P_Ai, double P_df, gsl_vector* P_dif,
-                  gsl_vector* P_duf);
+void PrintUpsilon(const gsl_matrix *const * Upsilon, size_t theta_p,
+		size_t eta, double P_A, double P_Ai, double P_df,
+		const gsl_vector* P_dif, const gsl_vector* P_duf) const;
 
 /** PrintXP() prints out values of XP, the periodic orbit.
   * 
   * All parameters are IN parameters.
  */
-void PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p);
+void PrintXP(const gsl_vector *const * x_p, size_t eta, size_t theta_p) const;
 
 /** PrintLambda() prints some values of Lambda.
   * 
   * All parameters are IN parameters.
  */
-void PrintLambda(gsl_vector** Lambda, size_t eta);
+void PrintLambda(const gsl_vector *const * Lambda, size_t eta) const;
 
 /** PrintEigenvalues() prints eigenvalues to the given file.
   * 
   * All parameters are IN parameters.
  */
-void PrintEigenvalues(gsl_vector_complex* eval, size_t n);
+void PrintEigenvalues(const gsl_vector_complex* eval, size_t n) const;
 
-void PrintMatrix(char matrixname[], gsl_matrix* A, 
-                 size_t RowLength, size_t ColLength);
+void PrintMatrix(const char matrixname[], const gsl_matrix* A,
+		size_t RowLength, size_t ColLength) const;
 
 public:
   /** PrintVector() prints the given (GSL) vector to the given file.
    * 
    * All parameters are IN parameters. */
-  void PrintVector(const char* vectorname, gsl_vector* v, size_t n);
+  void PrintVector(const char* vectorname, const gsl_vector* v, size_t n) const;
 
   /** PrintArray() prints the given (C) array to the given file.
    * 
    * The array, v, of doubles is assumed to be of length n.
    * All parameters are IN parameters. */
-  void PrintArray(const char* vectorname, double* v, int n);
+  void PrintArray(const char* vectorname, const double* v, int n) const;
   /// ditto, taking a vector
-  void PrintArray(const char* vectorname, vector<double>& v);
+  void PrintArray(const char* vectorname, const vector<double>& v) const;
 
   friend int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
 };

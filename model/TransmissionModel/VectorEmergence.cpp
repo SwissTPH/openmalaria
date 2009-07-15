@@ -115,8 +115,8 @@ VectorEmergence::~VectorEmergence () {
 
 double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 					       int nMalHostTypesInit,
-					       double* FHumanInfectivityInitVector,
-					       vector<double>& FEIRInitVector,
+					       const double* FHumanInfectivityInitVector,
+					       const vector<double>& FEIRInitVector,
 					       double* mosqEmergeRate)
 {
   // This initially contains the initial estimate of the mosquito emergence
@@ -413,7 +413,7 @@ cout << "er11" << endl;
 }
 
 
-void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, gsl_vector* K_vi)
+void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, const gsl_vector* K_vi)
 {
 	// \f$P_{dif}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and gets infected.
@@ -572,8 +572,8 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
 }
 
 
-void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR, 
-                gsl_vector* N_v0, gsl_matrix* inv1Xtp)
+void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, const gsl_vector* S_vFromEIR, 
+		const gsl_vector* N_v0, const gsl_matrix* inv1Xtp)
 {
 	// Periodic orbit of the number of infectious mosquitoes calculated for
 	// the given N_v0.
@@ -608,7 +608,7 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, gsl_vector* S_vFromEIR,
 }
 
 
-void VectorEmergence::CalcLambda(gsl_vector* N_v0)
+void VectorEmergence::CalcLambda(const gsl_vector* N_v0)
 {
   for(size_t t=0; t < theta_p; t++){
     gsl_vector_set(Lambda[t], 0, gsl_vector_get(N_v0, t));
@@ -621,7 +621,7 @@ void VectorEmergence::CalcLambda(gsl_vector* N_v0)
 }
 
 
-void VectorEmergence::CalcXP(gsl_matrix* inv1Xtp)
+void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
 {
   gsl_vector* vtemp = gsl_vector_calloc(eta);
 	// gsl_vector* vtempsum = gsl_vector_calloc(eta);
@@ -637,7 +637,7 @@ void VectorEmergence::CalcXP(gsl_matrix* inv1Xtp)
 	// number here] for the expression for \f$x_0\f$.
   for(size_t i=0; i < theta_p; i++){
     FuncX(mtemp, theta_p, i+1);
-    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, Lambda[i], 1.0, vtemp);
+    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, vtemp);
 		// gsl_vector_add(vtempsum, vtemp);
   }
   gsl_blas_dgemv(CblasNoTrans, 1.0, inv1Xtp, vtemp, 0.0, x0p);
@@ -667,11 +667,13 @@ void VectorEmergence::CalcXP(gsl_matrix* inv1Xtp)
 		// gsl_vector_set_zero(vtemp);
 		// gsl_vector_set_zero(vtempsum);
     FuncX(mtemp, t+1, 0);
-    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, x0p, 1.0, x_p[t]);
+    gsl_vector_memcpy(memVectorEta, x_p[t]);
+    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, x0p, 1.0, memVectorEta);
     for(size_t i=0; i<=t; i++){
 			// printf("t=%d i=%d \n", t, i);
       FuncX(mtemp, t+1, i+1);
-      gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, Lambda[i], 1.0, x_p[t]);
+      gsl_vector_memcpy(memVectorEta, x_p[t]);
+      gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, memVectorEta);
     }
   }
         
@@ -689,7 +691,7 @@ void VectorEmergence::CalcXP(gsl_matrix* inv1Xtp)
 }
 
 
-void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df)
+void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_A, double P_df) const
 {
   int klplus;	// \f$k_{l+}\f$ in model.
 	// klplus = (int *)malloc((tau-1)*sizeof(int)); Define temporarily.
@@ -738,18 +740,19 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
 }
 
 
-void VectorEmergence::FuncX(gsl_matrix* X, size_t t, size_t s)
+void VectorEmergence::FuncX(gsl_matrix* X, size_t t, size_t s) const
 {
   gsl_matrix_set_identity(X);
   
   for (size_t i=s; i<t; i++){
-    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, Upsilon[i], X, 0.0, memMatrixEtaSq);
+    //Pass the blas function a copy of Upsilon[i] so it can't change the matrix there
+    gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, const_cast<const gsl_matrix*>(Upsilon[i]), X, 0.0, memMatrixEtaSq);
     gsl_matrix_memcpy(X, memMatrixEtaSq);
   }
 }
 
 
-double VectorEmergence::CalcSpectralRadius(gsl_matrix* A)
+double VectorEmergence::CalcSpectralRadius(const gsl_matrix* A) const
 {
   // Copy A into memMatrixEtaSq to keep it safe; gsl_eigen_nonsymm changes its copy
   gsl_matrix_memcpy(memMatrixEtaSq, A);
@@ -773,7 +776,7 @@ double VectorEmergence::CalcSpectralRadius(gsl_matrix* A)
 }
 
 
-void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A)
+void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, const gsl_matrix* A) const
 {
   // We calculate (I-A) in memMatrixEtaSq.
   gsl_matrix_set_identity(memMatrixEtaSq);	// memMatrixEtaSq = I.
@@ -791,7 +794,7 @@ void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, gsl_matrix* A)
 }
 
 
-void VectorEmergence::CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, gsl_vector* Xi_i)
+void VectorEmergence::CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, const gsl_vector* Xi_i) const
 {
   // Sv(t) = Xi_i(t)*(N_i/(P_Ai*P_B_i))
   gsl_vector_memcpy(Sv, Xi_i);
@@ -799,7 +802,7 @@ void VectorEmergence::CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, gsl_vector* 
 }
 
 
-double VectorEmergence::binomial(int n, int k)
+double VectorEmergence::binomial(int n, int k) const
 {
   return gsl_sf_fact((unsigned int) n) / (gsl_sf_fact((unsigned int) k) * gsl_sf_fact((unsigned int) (n-k)));
 }
@@ -810,8 +813,8 @@ double VectorEmergence::binomial(int n, int k)
   Printing routines below. Most are only optionally compiled in.
 ******************************************************************************/
 
-void VectorEmergence::PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver* srootfind, 
-                             size_t theta_p, char fnrootfindingstate[])
+void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind, 
+		size_t theta_p, const char fnrootfindingstate[]) const
 {
   FILE* fpp = fopen(fnrootfindingstate, "a");
 
@@ -828,10 +831,10 @@ void VectorEmergence::PrintRootFindingStateTS(size_t iter, gsl_multiroot_fsolver
 }
 
 #ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
-void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s, 
-                    size_t n, size_t m, double N_i, double alpha_i, double mu_vA, 
-                    double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i, 
-                    gsl_vector* K_vi, gsl_vector* Xi_i)
+void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
+		size_t n, size_t m, double N_i, double alpha_i, double mu_vA,
+		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
+		const gsl_vector* K_vi, const gsl_vector* Xi_i) const
 {
   fprintf(fpp, "theta_p = %d; \n", theta_p);
   fprintf(fpp, "tau = %d; \n", tau);
@@ -869,9 +872,9 @@ void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s
 #endif
 
 #ifdef VectorTransmission_PRINT_CalcUpsilonOneHost	// only use
-void VectorEmergence::PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
-                  size_t eta, double P_A, double P_Ai, double P_df, gsl_vector* P_dif,
-                  gsl_vector* P_duf)
+void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t theta_p,
+		size_t eta, double P_A, double P_Ai, double P_df,
+		const gsl_vector* P_dif, const gsl_vector* P_duf) const
 {
   fprintf(fpp, "P_A = %f\n", P_A);
   fprintf(fpp, "P_Ai = %f\n", P_Ai);
@@ -923,7 +926,7 @@ void VectorEmergence::PrintUpsilon(gsl_matrix** Upsilon, size_t theta_p,
 #ifdef VectorTransmission_PRINT_CalcXP	// only use
 #include <string.h>
 
-void VectorEmergence::PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p)
+void VectorEmergence::PrintXP(const gsl_vector *const * x_p, size_t eta, size_t theta_p) const
 {
   char xpname[15] = "x_p";
   char xpvecname[15];
@@ -944,7 +947,7 @@ void VectorEmergence::PrintXP(gsl_vector** x_p, size_t eta, size_t theta_p)
 #endif
 
 #ifdef VectorTransmission_PRINT_CalcLambda	// only use
-void VectorEmergence::PrintLambda(gsl_vector** Lambda, size_t eta)
+void VectorEmergence::PrintLambda(const gsl_vector *const * Lambda, size_t eta) const
 {
   // Print some Lambda[t].
   size_t t=0;
@@ -967,7 +970,7 @@ void VectorEmergence::PrintLambda(gsl_vector** Lambda, size_t eta)
 #endif
 
 #ifdef VectorTransmission_PRINT_CalcSpectralRadius	// only use
-void VectorEmergence::PrintEigenvalues(gsl_vector_complex* eval, size_t n)
+void VectorEmergence::PrintEigenvalues(const gsl_vector_complex* eval, size_t n) const
 {
   fprintf(fpp, "Eigenvalues = \n");
   gsl_vector_complex_fprintf(fpp, eval, "%e");
@@ -976,8 +979,8 @@ void VectorEmergence::PrintEigenvalues(gsl_vector_complex* eval, size_t n)
 #endif
 
 #if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcInv1minusA
-void VectorEmergence::PrintMatrix(char matrixname[], gsl_matrix* A, 
-                 size_t RowLength, size_t ColLength)
+void VectorEmergence::PrintMatrix(const char matrixname[], const gsl_matrix* A, 
+                 size_t RowLength, size_t ColLength) const
 {
   fprintf(fpp, "%s = \n", matrixname);
   for (size_t i=0; i < ColLength; i++){
@@ -992,7 +995,7 @@ void VectorEmergence::PrintMatrix(char matrixname[], gsl_matrix* A,
 #endif
 
 #if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcSvDiff || defined VectorTransmission_PRINT_CalcXP
-void VectorEmergence::PrintVector(const char* vectorname, gsl_vector* v, size_t n)
+void VectorEmergence::PrintVector(const char* vectorname, const gsl_vector* v, size_t n) const
 {
   for (size_t i=0; i < n; i++){
     double temp = gsl_vector_get(v, i);
@@ -1004,13 +1007,13 @@ void VectorEmergence::PrintVector(const char* vectorname, gsl_vector* v, size_t 
 }
 #endif
 
-void VectorEmergence::PrintArray(const char* vectorname, double* v, int n){
+void VectorEmergence::PrintArray(const char* vectorname, const double* v, int n) const {
   for (int i=0; i < n; i++){
     fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, v[i]);
   }
   fflush(fpp);
 }
-void VectorEmergence::PrintArray(const char* vectorname, vector<double>& v){
+void VectorEmergence::PrintArray(const char* vectorname, const vector<double>& v) const {
   for (unsigned int i=0; i < v.size(); i++){
     fprintf(fpp, "%s(%u) = %f; \n", vectorname, i+1, v[i]);
   }
