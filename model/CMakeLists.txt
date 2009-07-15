@@ -16,7 +16,7 @@ source_group (WithinHostModel REGULAR_EXPRESSION WithinHostModel/.*)
 option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
 if (BOINC_INTEGRATION)
   find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
-  find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/boinc_api)
+  find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/api)
   include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
   if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
     message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
@@ -44,7 +44,10 @@ include_directories (
 
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
-aux_source_directory (. OpenMalaria_CPP)
+#This doesn't work properly on CMake < 2.6, presumably because of TransmissionModel and WithinHostModel having source files and directories with the same name (ignoring extension).
+#aux_source_directory (. OpenMalaria_CPP)
+set (OpenMalaria_CPP "./global.cpp;./human.cpp;./EntoIntervention.cpp;./TransmissionModel.cpp;./timer.cpp;./WithinHostModel.cpp;./simulation.cpp;./BoincWrapper.cpp;./population.cpp;./gzstream.C;./intervention.cpp;./GSLWrapper.cpp;./openMalaria.cpp;./proteome.cpp;./summary.cpp;./InfectionIncidenceModel.cpp")
+message (STATUS "OM sources: ${OpenMalaria_CPP}")
 aux_source_directory (Clinical Clinical_CPP)
 aux_source_directory (Drug Drug_CPP)
 aux_source_directory (Pathogenesis Pathogenesis_CPP)

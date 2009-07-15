@@ -20,4 +20,4 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
   ${XSD_INCLUDE_DIR}
 )
-add_library (xsdcxx inputData.cpp scenario.cxx)
+add_library (xsdcxx inputData.cpp ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx)

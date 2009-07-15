@@ -1,7 +1,7 @@
 # Root CMake configuration for OpenMalaria
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.4)
 project (OpenMalaria CXX)
 
 # The FindXXX.cmake files included are not quite the same as standard ones.
