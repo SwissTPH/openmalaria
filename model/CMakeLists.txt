@@ -37,9 +37,9 @@ mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
-  ${XSD_INCLUDE_DIR}
-  ${GSL_INCLUDE_DIR}
-  ${Z_INCLUDE_DIR}
+  ${XSD_INCLUDE_DIRS}
+  ${GSL_INCLUDE_DIRS}
+  ${Z_INCLUDE_DIRS}
 )
 
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
@@ -61,10 +61,10 @@ add_executable (openMalaria
   ${Pathogenesis_CPP}
   ${TransmissionModel_CPP}
   ${WithinHostModel_CPP}
+  ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx
 )
-#Really I want to make openMalaria depend on XSD having been run, but this doesn't work:
-#add_dependencies (openMalaria ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx)
 set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 target_link_libraries (openMalaria
   xsdcxx
   ${GSL_LIBRARIES}

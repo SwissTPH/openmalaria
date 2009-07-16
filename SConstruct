@@ -49,7 +49,7 @@ def xsdFunc(target,source,env):
   return p.wait()
 
 xsd = Builder(action = xsdFunc, src_suffix = '.xsd')
-env = Environment(CPPPATH = ['include', 'xsdcxx'],
+env = Environment(CPPPATH = ['include', 'xsdcxx', 'C:\\Program Files\\CodeSynthesis XSD 3.2\\include'],
 		  LIBPATH = ['lib'],
 		  LIBS = ['gsl','gslcblas','xerces-c','z'])
 #potentially plus: pthreads
@@ -62,12 +62,13 @@ env.Append(BUILDERS = {'XSD' : xsd})
 env.Append(CCFLAGS = ['-DWITHOUT_BOINC'])
 conf = Configure(env)
 # TODO: Checks for libraries, header files, etc. go here!
-env['XsdExec'] = which('xsdcxx')
-if env['XsdExec'] is None:
-  env['XsdExec'] = which('xsd')
-  if env['XsdExec'] is None:
-    print 'Unable to find (code synthesis\') xsd program'
-    Exit(1)
+#env['XsdExec'] = which('xsdcxx')
+#if env['XsdExec'] == None:
+#  env['XsdExec'] = which('xsd')
+#  if env['XsdExec'] == None:
+#    print 'Unable to find (code synthesis\') xsd program'
+#    Exit(1)
+env['XsdExec'] = 'xsd'
 
 env = conf.Finish()
 

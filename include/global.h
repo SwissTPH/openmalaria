@@ -21,7 +21,8 @@
 #define Hmod_global
 
 #ifdef _MSC_VER
-#pragma warning(disable: 4290)	// disable warnings on MSVC
+#pragma warning(disable: 4290)	// disable some warnings on MSVC
+#define _CRT_SECURE_NO_DEPRECATE  // disable some more warnings
 #define finite(x) _finite(x)
 #endif
 
