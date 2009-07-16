@@ -17,11 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "TransmissionModel.h"
-#include "TransmissionModel/VectorSpecies.h"
+#include "Transmission/TransmissionModel.h"
+#include "Transmission/VectorSpecies.h"
 #include "inputData.h"
 #include "human.h"
-#include "TransmissionModel/VectorEmergence.h"
+#include "Transmission/VectorEmergence.h"
 #include "simulation.h"
 
 #include <gsl/gsl_blas.h>

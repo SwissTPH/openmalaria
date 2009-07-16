@@ -19,7 +19,7 @@
 #ifndef Hcase_management
 #define Hcase_management
 
-#include "WithinHostModel.h"
+#include "WithinHost/WithinHostModel.h"
 #include "Clinical/event.h"
 #include "simulation.h"
 

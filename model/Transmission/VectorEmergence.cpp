@@ -22,7 +22,7 @@
    ---         (to calculate mosquito emergence rates).         --- */
 
 
-#include "TransmissionModel/VectorEmergence.h"
+#include "Transmission/VectorEmergence.h"
 #include "global.h"
 
 #include <sstream>

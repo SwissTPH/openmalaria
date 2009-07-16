@@ -10,8 +10,8 @@ find_package (Z)
 source_group (Clinical REGULAR_EXPRESSION Clinical/.*)
 source_group (Drug REGULAR_EXPRESSION Drug/.*)
 source_group (Pathogenesis REGULAR_EXPRESSION Pathogenesis/.*)
-source_group (TransmissionModel REGULAR_EXPRESSION TransmissionModel/.*)
-source_group (WithinHostModel REGULAR_EXPRESSION WithinHostModel/.*)
+source_group (Transmission REGULAR_EXPRESSION Transmission/.*)
+source_group (WithinHost REGULAR_EXPRESSION WithinHost/.*)
 
 option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
 if (BOINC_INTEGRATION)
@@ -44,23 +44,20 @@ include_directories (
 
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
-#This doesn't work properly on CMake < 2.6, presumably because of TransmissionModel and WithinHostModel having source files and directories with the same name (ignoring extension).
-#aux_source_directory (. OpenMalaria_CPP)
-set (OpenMalaria_CPP "./global.cpp;./human.cpp;./EntoIntervention.cpp;./TransmissionModel.cpp;./timer.cpp;./WithinHostModel.cpp;./simulation.cpp;./BoincWrapper.cpp;./population.cpp;./gzstream.C;./intervention.cpp;./GSLWrapper.cpp;./openMalaria.cpp;./proteome.cpp;./summary.cpp;./InfectionIncidenceModel.cpp")
-message (STATUS "OM sources: ${OpenMalaria_CPP}")
+aux_source_directory (. OpenMalaria_CPP)
 aux_source_directory (Clinical Clinical_CPP)
 aux_source_directory (Drug Drug_CPP)
 aux_source_directory (Pathogenesis Pathogenesis_CPP)
-aux_source_directory (TransmissionModel TransmissionModel_CPP)
-aux_source_directory (WithinHostModel WithinHostModel_CPP)
+aux_source_directory (Transmission Transmission_CPP)
+aux_source_directory (WithinHost WithinHost_CPP)
 
 add_executable (openMalaria
   ${OpenMalaria_CPP}
   ${Clinical_CPP}
   ${Drug_CPP}
   ${Pathogenesis_CPP}
-  ${TransmissionModel_CPP}
-  ${WithinHostModel_CPP}
+  ${Transmission_CPP}
+  ${WithinHost_CPP}
   ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx
 )
 set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

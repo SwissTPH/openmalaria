@@ -22,48 +22,53 @@
 
 #include "GSLWrapper.h"
 #include "human.h"
-#include "WithinHostModel/Empirical.h"
+#include "WithinHost/Dummy.h"
 #include "simulation.h"
-#include "TransmissionModel.h"	// getAgeGroup() - is in a funny place
+#include "Transmission/TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 #include "inputData.h"
 
 using namespace std;
 
-const int EmpiricalWithinHostModel::MAX_INFECTIONS = 21;
+const int DummyWithinHostModel::MAX_INFECTIONS = 21;
 
 // -----  Initialization  -----
 
-EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
+DummyWithinHostModel::DummyWithinHostModel() :
     WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
+    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     _MOI(0), patentInfections(0)
-{
-}
+{}
 
-EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
+DummyWithinHostModel::DummyWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
   in >> _MOI; 
   in >> patentInfections; 
+  in >> cumulativeY;
+  in >> cumulativeh;
+  in >> _cumulativeh;
+  in >> _cumulativeY;
+  in >> _cumulativeYlag;
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
     throw checkpoint_error ("_MOI");
   
   for(int i=0;i<_MOI;++i)
-    infections.push_back(EmpiricalInfection(in));
+    infections.push_back(DummyInfection(in));
 }
 
-EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
+DummyWithinHostModel::~DummyWithinHostModel() {
   clearAllInfections();
   delete drugProxy;
 }
 
 // -----  Update function, called each step  -----
 
-void EmpiricalWithinHostModel::update () {
-  std::list<EmpiricalInfection>::iterator i;
+void DummyWithinHostModel::update () {
+  std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
-    i->multiplyDensity(exp(-drugProxy->getDrugFactor(i->getProteome())));
+    i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
   }
   drugProxy->decayDrugs();
 }
@@ -71,16 +76,16 @@ void EmpiricalWithinHostModel::update () {
 
 // -----  Simple infection adders/removers  -----
 
-void EmpiricalWithinHostModel::newInfection(){
+void DummyWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
     _cumulativeInfections++;
-    infections.push_back(EmpiricalInfection(Simulation::simulationTime, 1));
+    infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;
   }
 }
 
-void EmpiricalWithinHostModel::clearOldInfections(){
-  std::list<EmpiricalInfection>::iterator iter=infections.begin();
+void DummyWithinHostModel::clearOldInfections(){
+  std::list<DummyInfection>::iterator iter=infections.begin();
   while(iter != infections.end()){
     int enddate=iter->getEndDate();
     if (Simulation::simulationTime >= enddate) {
@@ -94,8 +99,8 @@ void EmpiricalWithinHostModel::clearOldInfections(){
   }
 }
 
-void EmpiricalWithinHostModel::clearAllInfections(){
-  std::list<EmpiricalInfection>::iterator i;
+void DummyWithinHostModel::clearAllInfections(){
+  std::list<DummyInfection>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
     i->destroy();
   }
@@ -106,35 +111,68 @@ void EmpiricalWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, double age) {
+void DummyWithinHostModel::medicate(string drugName, double qty, int time, double age) {
   drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+}
+
+
+// -----  immunity  -----
+
+void DummyWithinHostModel::updateImmuneStatus(){
+  if (immEffectorRemain < 1){
+    _cumulativeh*=immEffectorRemain;
+    _cumulativeY*=immEffectorRemain;
+  }
+  if (asexImmRemain < 1){
+    _cumulativeh*=asexImmRemain/
+        (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
+    _cumulativeY*=asexImmRemain/
+        (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
+  }
+}
+
+void DummyWithinHostModel::immunityPenalisation() {
+  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
+  if (_cumulativeY <  0) {
+    _cumulativeY=0.0;
+  }
 }
 
 
 // -----  Density calculations  -----
 
-void EmpiricalWithinHostModel::calculateDensities(Human& human) {
+void DummyWithinHostModel::calculateDensities(Human& human) {
+  _cumulativeYlag = _cumulativeY;
   
+  _pTransToMosq = 0.0;
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  std::list<EmpiricalInfection>::iterator i;
-  for(i=infections.begin(); i!=infections.end(); i++){
-    i->determineWithinHostDensity();
-    timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
-    
-    totalDensity += i->getDensity();
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    if (i->getDensity() > detectionLimit) {
-      patentInfections++;
+  if (_cumulativeInfections >  0) {
+    cumulativeh=_cumulativeh;
+    cumulativeY=_cumulativeY;
+    std::list<DummyInfection>::iterator i;
+    for(i=infections.begin(); i!=infections.end(); i++){
+      i->determineWithinHostDensity();
+      timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
+      
+      totalDensity += i->getDensity();
+      //Compute the proportion of parasites remaining after innate blood stage effect
+      if (i->getDensity() > detectionLimit) {
+        patentInfections++;
+      }
+      if (i->getStartDate() == (Simulation::simulationTime-1)) {
+        _cumulativeh++;
+      }
+      _cumulativeY += Global::interval*i->getDensity();
     }
-    _pTransToMosq = human.infectiousness();
   }
+  _pTransToMosq = human.infectiousness();
 }
 
 // -----  Summarize  -----
 
-void EmpiricalWithinHostModel::summarize(double age) {
+void DummyWithinHostModel::summarize(double age) {
   if (_MOI > 0) {
     Simulation::gMainSummary->addToInfectedHost(age,1);
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
@@ -149,7 +187,7 @@ void EmpiricalWithinHostModel::summarize(double age) {
 
 // -----  Data checkpointing  -----
 
-void EmpiricalWithinHostModel::write(ostream& out) const {
+void DummyWithinHostModel::write(ostream& out) const {
   out << _cumulativeInfections << endl; 
   out << _pTransToMosq << endl;  
   out << totalDensity << endl;
@@ -159,15 +197,12 @@ void EmpiricalWithinHostModel::write(ostream& out) const {
   
   out << _MOI << endl; 
   out << patentInfections << endl; 
+  out << cumulativeY << endl;
+  out << cumulativeh << endl;
+  out << _cumulativeh << endl;
+  out << _cumulativeY << endl;
+  out << _cumulativeYlag << endl;
 
-  for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+  for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
-}
-
-//Immunity?
-
-void EmpiricalWithinHostModel::updateImmuneStatus() {
-}
-
-void EmpiricalWithinHostModel::immunityPenalisation() {
 }

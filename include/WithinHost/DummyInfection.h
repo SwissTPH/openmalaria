@@ -23,7 +23,7 @@
 #define Hmod_DummyInfection
 #include <fcntl.h>
 #include "intervention.h"
-#include "WithinHostModel/Infection.h"
+#include "WithinHost/Infection.h"
 #include <fstream>
 
 //!  Models of infection.

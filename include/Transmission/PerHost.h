@@ -21,7 +21,7 @@
 #define Hmod_PerHostTransmission
 
 #include "EntoIntervention.h"
-#include "TransmissionModel/VectorSpecies.h"
+#include "Transmission/VectorSpecies.h"
 
 class Summary;
 class HostMosquitoInteraction;

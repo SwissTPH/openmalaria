@@ -32,10 +32,10 @@
 #include "GSLWrapper.h"
 #include "summary.h"
 #include "intervention.h"
-#include "TransmissionModel.h"
+#include "Transmission/TransmissionModel.h"
 #include "InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
-#include "WithinHostModel/OldIPT.h"	// only for summarizing
+#include "WithinHost/OldIPT.h"	// only for summarizing
 
 
 /*

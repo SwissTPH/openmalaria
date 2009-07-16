@@ -18,14 +18,14 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHostModel/OldIPT.h"
+#include "WithinHost/OldIPT.h"
+#include "WithinHost/OldIPTInfection.h"
 #include "human.h"
 #include "simulation.h"
 #include "GSLWrapper.h"
 #include "summary.h"
 #include "intervention.h"
 #include "inputData.h"
-#include "WithinHostModel/OldIPTInfection.h"
 
 bool OldIPTWithinHostModel::iptActive = false;
 

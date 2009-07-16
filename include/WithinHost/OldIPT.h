@@ -21,7 +21,7 @@
 #ifndef Hmod_OldIPTWHM
 #define Hmod_OldIPTWHM
 
-#include "WithinHostModel/Descriptive.h"
+#include "WithinHost/Descriptive.h"
 
 /** Extension to the DescriptiveWithinHostModel, including IPT (intermittent
  * preventative treatment) plus a simple drug-action model (SPAction). */

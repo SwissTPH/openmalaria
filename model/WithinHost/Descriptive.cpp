@@ -22,10 +22,10 @@
 
 #include "GSLWrapper.h"
 #include "human.h"
-#include "WithinHostModel/Descriptive.h"
+#include "WithinHost/Descriptive.h"
 #include "simulation.h"
 #include "intervention.h"
-#include "TransmissionModel.h"	// getAgeGroup() - is in a funny place
+#include "Transmission/TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 
 using namespace std;

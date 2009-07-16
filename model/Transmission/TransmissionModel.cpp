@@ -22,13 +22,13 @@
 //This is needed to get symbols like M_PI with MSVC:
 #define _USE_MATH_DEFINES
 
-#include "TransmissionModel.h"
+#include "Transmission/TransmissionModel.h"
 #include "global.h" 
 #include "intervention.h" 
 #include "inputData.h"
-#include "TransmissionModel/NonVector.h"
-#include "TransmissionModel/Vector.h"
-#include "TransmissionModel/PerHost.h"
+#include "Transmission/NonVector.h"
+#include "Transmission/Vector.h"
+#include "Transmission/PerHost.h"
 #include "simulation.h"
 #include "summary.h"
 #include <math.h> 

@@ -19,9 +19,9 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "global.h"
-#include "TransmissionModel/PerHost.h"
+#include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "WithinHostModel.h"
+#include "WithinHost/WithinHostModel.h"
 
 // Forward declaration
 class TransmissionModel;

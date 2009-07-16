@@ -24,7 +24,7 @@
 #define Hmod_whost
 
 #include "global.h"
-#include "WithinHostModel/Infection.h"
+#include "WithinHost/Infection.h"
 
 #include <list>
 

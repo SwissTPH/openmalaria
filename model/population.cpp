@@ -26,9 +26,9 @@
 #include "human.h"
 #include "simulation.h"
 #include "intervention.h"
-#include "TransmissionModel.h"
+#include "Transmission/TransmissionModel.h"
 #include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention
-#include "TransmissionModel/NonVector.h"	// changeEIR intervention deals directly with this model
+#include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "BoincWrapper.h"

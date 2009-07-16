@@ -317,7 +317,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\include\WithinHostModel.h"
+				RelativePath=".\include\WithinHost\WithinHostModel.h"
 				>
 			</File>
 			<Filter
@@ -344,35 +344,35 @@
 				Name="WithinHostModel"
 				>
 				<File
-					RelativePath=".\include\WithinHostModel\Descriptive.h"
+					RelativePath=".\include\WithinHost\Descriptive.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\DescriptiveInfection.h"
+					RelativePath=".\include\WithinHost\DescriptiveInfection.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\Dummy.h"
+					RelativePath=".\include\WithinHost\Dummy.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\DummyInfection.h"
+					RelativePath=".\include\WithinHost\DummyInfection.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\Empirical.h"
+					RelativePath=".\include\WithinHost\Empirical.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\Infection.h"
+					RelativePath=".\include\WithinHost\Infection.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\OldIPT.h"
+					RelativePath=".\include\WithinHost\OldIPT.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\WithinHostModel\OldIPTInfection.h"
+					RelativePath=".\include\WithinHost\OldIPTInfection.h"
 					>
 				</File>
 			</Filter>
@@ -380,23 +380,23 @@
 				Name="TransmissionModel"
 				>
 				<File
-					RelativePath=".\include\TransmissionModel\NonVector.h"
+					RelativePath=".\include\Transmission\NonVector.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\TransmissionModel\PerHost.h"
+					RelativePath=".\include\Transmission\PerHost.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\TransmissionModel\Vector.h"
+					RelativePath=".\include\Transmission\Vector.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\TransmissionModel\VectorEmergence.h"
+					RelativePath=".\include\Transmission\VectorEmergence.h"
 					>
 				</File>
 				<File
-					RelativePath=".\include\TransmissionModel\VectorSpecies.h"
+					RelativePath=".\include\Transmission\VectorSpecies.h"
 					>
 				</File>
 			</Filter>
@@ -501,7 +501,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\model\WithinHostModel.cpp"
+			RelativePath=".\model\WithinHost\WithinHostModel.cpp"
 				>
 			</File>
 			<Filter
@@ -528,39 +528,39 @@
 				Name="WithinHostModel"
 				>
 				<File
-					RelativePath=".\model\WithinHostModel\Descriptive.cpp"
+					RelativePath=".\model\WithinHost\Descriptive.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\DescriptiveInfection.cpp"
+					RelativePath=".\model\WithinHost\DescriptiveInfection.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\Dummy.cpp"
+					RelativePath=".\model\WithinHost\Dummy.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\DummyInfection.cpp"
+					RelativePath=".\model\WithinHost\DummyInfection.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\Empirical.cpp"
+					RelativePath=".\model\WithinHost\Empirical.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\EmpiricalInfection.cpp"
+					RelativePath=".\model\WithinHost\EmpiricalInfection.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\Infection.cpp"
+					RelativePath=".\model\WithinHost\Infection.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\OldIPT.cpp"
+					RelativePath=".\model\WithinHost\OldIPT.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\WithinHostModel\OldIPTInfection.cpp"
+					RelativePath=".\model\WithinHost\OldIPTInfection.cpp"
 					>
 				</File>
 			</Filter>
@@ -568,23 +568,23 @@
 				Name="TransmissionModel"
 				>
 				<File
-					RelativePath=".\model\TransmissionModel\NonVector.cpp"
+					RelativePath=".\model\Transmission\NonVector.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\TransmissionModel\PerHost.cpp"
+					RelativePath=".\model\Transmission\PerHost.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\TransmissionModel\Vector.cpp"
+					RelativePath=".\model\Transmission\Vector.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\TransmissionModel\VectorEmergence.cpp"
+					RelativePath=".\model\Transmission\VectorEmergence.cpp"
 					>
 				</File>
 				<File
-					RelativePath=".\model\TransmissionModel\VectorSpecies.cpp"
+					RelativePath=".\model\Transmission\VectorSpecies.cpp"
 					>
 				</File>
 			</Filter>

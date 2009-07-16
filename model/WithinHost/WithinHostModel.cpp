@@ -20,13 +20,12 @@
 
 */
 
-#include "WithinHostModel.h"
-#include "WithinHostModel/Descriptive.h"
-#include "WithinHostModel/OldIPT.h"
-#include "WithinHostModel/Dummy.h"
-#include "WithinHostModel/Empirical.h"
+#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/Descriptive.h"
+#include "WithinHost/OldIPT.h"
+#include "WithinHost/Dummy.h"
+#include "WithinHost/Empirical.h"
 #include "inputData.h"
-#include "WithinHostModel/DescriptiveInfection.h"
 #include <stdexcept>
 
 using namespace std;

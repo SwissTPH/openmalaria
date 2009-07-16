@@ -19,7 +19,7 @@
 
 */
 
-#include "WithinHostModel/DescriptiveInfection.h"
+#include "WithinHost/DescriptiveInfection.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 #include <algorithm>
@@ -40,6 +40,9 @@ double DescriptiveInfection::xNuStar;
 // -----  static init/clear -----
 
 void DescriptiveInfection::initParameters (){
+  if (Global::interval != 5)
+    throw domain_error ("DescriptiveInfection only supports using an interval of 5");
+  
   cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
   cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
   alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
