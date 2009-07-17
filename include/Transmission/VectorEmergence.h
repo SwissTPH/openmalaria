@@ -24,6 +24,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_sf.h>
+#include <fstream>
 using namespace std;
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -437,7 +438,29 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
 // number of infectious host-seeking mosquitoes.
 struct SvDiffParams
 {	//FIXME: move some of these to VectorEmergence
+  SvDiffParams (VectorEmergence* e, gsl_vector* v, gsl_matrix* m, size_t theta_p) :
+    emerge(e), S_vFromEIR(v), inv1Xtp(m),
+    lastNv0(gsl_vector_calloc (theta_p)), lastS_vDiff(gsl_vector_calloc (theta_p)),
+    outNv0("Nv0_values.csv")
+  {
+    // make sure lastNv0 won't match any input first time, so lastS_vDiff will be calculated
+    gsl_vector_set (lastNv0, 0, 0/0);
+    outNv0.precision(20);
+  }
+  ~SvDiffParams () {
+    outNv0.close();
+    gsl_vector_free (lastNv0);
+    gsl_vector_free (lastS_vDiff);
+  }
+  
   VectorEmergence* emerge;
   gsl_vector* S_vFromEIR;
   gsl_matrix* inv1Xtp;
+  /// The last Nv0 vector used to calculate x_p and S_vDiff
+  /// (if not current, we recalculate x_p during the root finding).
+  gsl_vector* lastNv0;
+  /// The last calculated S_vDiff
+  gsl_vector* lastS_vDiff;
+  /// Nv0 output file
+  ofstream outNv0;
 };

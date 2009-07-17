@@ -83,34 +83,25 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration, int popu
   memPermutation = gsl_permutation_alloc(eta);
   
   fpp = fopen("output_ento_para.txt", "w");
-  cout << "c9" << endl;
 }
 
 VectorEmergence::~VectorEmergence () {
-  cout << "d0" << endl;
   fclose (fpp);
   
-  cout << "d1" << endl;
   gsl_vector_complex_free(memVectorComplexEta);
   gsl_vector_free(memVectorEta);
   gsl_matrix_free(memMatrixEtaSq);
   gsl_eigen_nonsymm_free(memEigenWorkspace);
   gsl_permutation_free(memPermutation);
   
-  cout << "d3" << endl;
   for (size_t i=0; i<theta_p; i++){
-    cout << "d4 " << i << endl;
     gsl_matrix_free(Upsilon[i]);
-    cout << "d5" << endl;
     gsl_vector_free(Lambda[i]);
-    cout << "d6" << endl;
     gsl_vector_free(x_p[i]);
   }
-  cout << "d8" << endl;
   delete[] Upsilon;
   delete[] Lambda;
   delete[] x_p;
-  cout << "d9" << endl;
 }
 
 double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
@@ -181,8 +172,6 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   /// For now, we assume that this  is  a double: 
   /// - no dependence on the phase of the period - or the type of host.
   double P_Ai = 0;	// \f$P_{A^i}\f$
-
-  cout << "er0" << endl;
   
   // Create matrices in Upsilon.
   // We also define P_A and P_Ai in the same routine. 
@@ -191,14 +180,11 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   // may, then we will change the code accordingly. We will need to go through
   // a lot of changes anyway. 
   CalcUpsilonOneHost(&P_A, &P_Ai, nHostTypesInit, nMalHostTypesInit, K_vi);
-
-  cout << "er1" << endl;
   
   // Calculate \f$X_{\theta_p}\f$.
   // Refer to Cushing (1995) and the paper for the periodic entomological model
   // for more information.
   FuncX(X_t_p, theta_p, 0);
-  cout << "er2" << endl;
   
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   char xtpname[15] = "X_t_p";
@@ -225,7 +211,6 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     msg << "Warning: All results from the entomologoical model may be meaningless. \n";
     throw xml_scenario_error (msg.str());
   }
-  cout << "er3" << endl;
   
   // Calculate the inverse of (I-X_t_p).
   CalcInv1minusA(inv1Xtp, X_t_p);
@@ -234,9 +219,8 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   char inv1Xtpname[15] = "inv1minusXtp";
   PrintMatrix(inv1Xtpname, inv1Xtp, eta, eta);
 # endif
-
-cout << "er4" << endl;
-// Calculate the number of infectious host-seeking mosquitoes for the given EIR.
+  
+  // Calculate the number of infectious host-seeking mosquitoes for the given EIR.
   CalSvfromEIRdata(S_vFromEIR, P_Ai, Xi_i);
 
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -257,7 +241,6 @@ cout << "er4" << endl;
   gsl_vector* xrootfind = gsl_vector_calloc(theta_p);
   gsl_vector_memcpy(xrootfind, N_v0);
   
-  cout << "er5" << endl;
   
   CalcSvDiff(S_vDiff, S_vFromEIR, N_v0, inv1Xtp);
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -269,7 +252,6 @@ cout << "er4" << endl;
 
   // Maximum \f$l^1\f$ distance of error of root-finding algorithm
   const double EpsAbsRF = 1.0;
-  cout << "er6" << endl;
   
   if(SvDiff1norm>EpsAbsRF){
     printf("The difference in Sv is greater than the tolerance. \n");
@@ -281,11 +263,9 @@ cout << "er4" << endl;
     printf("Starting root-finding \n");
 
     // Parameters for root-finding function.
-    struct SvDiffParams pararootfind;
-    pararootfind.emerge = this;
-    pararootfind.S_vFromEIR = S_vFromEIR;
-    pararootfind.inv1Xtp = inv1Xtp;
-
+    struct SvDiffParams pararootfind (this, S_vFromEIR, inv1Xtp,
+				      theta_p);
+    
     // Set root-finding function.
     gsl_multiroot_function frootfind;
     frootfind.f = &CalcSvDiff_rf;
@@ -340,19 +320,15 @@ cout << "er4" << endl;
     gsl_vector_free(xrootfind);
     gsl_multiroot_fsolver_free(srootfind);
   }
-  cout << "er7" << endl;
   
 
   // Calculate final periodic orbit.
   CalcLambda(N_v0);
-  cout << "er8" << endl;
   CalcXP(inv1Xtp);
-  cout << "er9" << endl;
   
   // Retrieve the periodic orbits for Nv, Ov, and Sv.
   size_t indexSv = 2*mt;
   for (size_t i=0; i<theta_p; i++){
-    cout << "er cp " << i << endl;
     double temp = gsl_vector_get(x_p[i], 0);
     gsl_vector_set(Nvp, i, temp);
 
@@ -362,7 +338,6 @@ cout << "er4" << endl;
     temp = gsl_vector_get(x_p[i], indexSv);
     gsl_vector_set(Svp, i, temp);
   }
-  cout << "er10" << endl;
   
   /* FIXME - move back to VectorSpecies
   if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > (int)theta_p)
@@ -389,10 +364,8 @@ cout << "er4" << endl;
 # endif
 
 
-cout << "er11" << endl;
-// Copy the mosquito emergence rate to the C array.
+  // Copy the mosquito emergence rate to the C array.
   memcpy (mosqEmergeRate, N_v0->data, theta_p * sizeof (*mosqEmergeRate));
-  cout << "er12" << endl;
   
   gsl_vector_free(N_v0);
   gsl_vector_free(K_vi);
@@ -402,12 +375,9 @@ cout << "er11" << endl;
   gsl_vector_free(Nvp);
   gsl_vector_free(Ovp);
   gsl_vector_free(Svp);
-	
-  cout << "er13" << endl;
   
   gsl_matrix_free(X_t_p);
   gsl_matrix_free(inv1Xtp);
-  cout << "er14" << endl;
   
   return 0.0;
 }
@@ -547,27 +517,35 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
 	// SvDiffParams.
   SvDiffParams* params = (SvDiffParams *) p;
   VectorEmergence* emerge = params->emerge;
-
-	// Recreate a new N_v0 so that we're not restricted by const problems.
-  gsl_vector* N_v0 = gsl_vector_calloc(emerge->theta_p);
-  gsl_vector_memcpy(N_v0, x);
-
-
+  
+  for (size_t i = 0; i < emerge->theta_p; ++i) {
+    if (gsl_vector_get(params->lastNv0, i) == gsl_vector_get(x, i))
+      continue;	// if same, test next values (or leave for loop)
+    cout.precision(20);
+    cout << "iteration: "<<emerge->counterSvDiff <<"index:"<<i<<endl;
+    cout <<gsl_vector_get(params->lastNv0, i)<<'\t'<<gsl_vector_get(x, i)<<'\t'<<gsl_vector_get(params->lastNv0, i)-gsl_vector_get(x, i)<<endl;
+    // if different, calculate (then break)
+    
+    params->outNv0 << emerge->counterSvDiff << ",";
+    for (size_t j = 0; j < emerge->theta_p; ++j)
+      params->outNv0 << gsl_vector_get(x, j) << ",";
+    params->outNv0 << endl;
+    
+    // To set f, we simply call CalcSvDiff. It's probably easier than rewriting
+    // this code.
+    emerge->CalcSvDiff(params->lastS_vDiff, params->S_vFromEIR, x, params->inv1Xtp);
+    
+    // Calculate the l^1 norm of SvDiff.
+    printf("The \f$l^1\f$ norm of S_vDiff is %e \n", gsl_blas_dasum(params->lastS_vDiff));
+    gsl_vector_memcpy (params->lastNv0, x);
+    break;	// we only want to run this code once
+  }
+  
   emerge->counterSvDiff++;
   cout << "In CalcSvDiff_rf for the "<< emerge->counterSvDiff <<"th time"<<endl;
-
-	// To set f, we simply call CalcSvDiff. It's probably easier than rewriting
-	// this code.
-  emerge->CalcSvDiff(f, params->S_vFromEIR, N_v0, params->inv1Xtp);
-
-	// Calculate the l^1 norm of f.
-  double SvDiff1norm = gsl_blas_dasum(f);
-	
-	// gsl_vector_set_all(f, 2.3);
-
-  printf("The \f$l^1\f$ norm of S_vDiff is %e \n", SvDiff1norm);
-	
-  gsl_vector_free(N_v0);
+  
+  gsl_vector_memcpy (f, params->lastS_vDiff);
+  
   return GSL_SUCCESS;
 }
 
@@ -585,7 +563,7 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, const gsl_vector* S_vFromE
 
 	// Calculate the periodic orbit for the given N_v0.
   CalcXP(inv1Xtp);
-
+  
 	// Extract the number of infectious mosquitoes from the full periodic
 	// orbit.
   size_t indexSv = 2*mt;
@@ -666,17 +644,16 @@ void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
                 */
 		// gsl_vector_set_zero(vtemp);
 		// gsl_vector_set_zero(vtempsum);
+    gsl_vector_set_zero (x_p[t]);
     FuncX(mtemp, t+1, 0);
-    gsl_vector_memcpy(memVectorEta, x_p[t]);
-    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, x0p, 1.0, memVectorEta);
+    gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, x0p, 1.0, x_p[t]);
     for(size_t i=0; i<=t; i++){
 			// printf("t=%d i=%d \n", t, i);
       FuncX(mtemp, t+1, i+1);
-      gsl_vector_memcpy(memVectorEta, x_p[t]);
-      gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, memVectorEta);
+      gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, x_p[t]);
     }
   }
-        
+  
   printf("Calculated periodic orbit. \n");
 
 # ifdef VectorTransmission_PRINT_CalcXP
@@ -816,7 +793,7 @@ double VectorEmergence::binomial(int n, int k) const
 void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind, 
 		size_t theta_p, const char fnrootfindingstate[]) const
 {
-  FILE* fpp = fopen(fnrootfindingstate, "a");
+  FILE* fpp = fopen(fnrootfindingstate, "w");
 
 	// Calculate the \f$l^1\f$ norm of f.
   double svdiffsum = gsl_blas_dasum(srootfind->f);
