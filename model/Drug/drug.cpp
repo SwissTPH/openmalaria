@@ -304,14 +304,14 @@ void Drug::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
 }
 
 void Drug::parseProteomeInstances() {
-  vector<ProteomeInstance*> instances = ProteomeManager::getInstances();
-  vector<ProteomeInstance*>::const_iterator it;
+  vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
+  vector<ProteomeInstance>::const_iterator it;
   int numRules = requiredMutations->size();
   for (it=instances.begin(); it !=instances.end(); it++) {
     //cerr << " Here goes instance";
     for(int rule=0; rule<numRules; rule++) {
-      if ((*it)->hasMutations((*requiredMutations)[rule])) {
-        (*proteomePDParameters)[(*it)->getProteomeID()] = (*pdParameters)[rule];
+      if (it->hasMutations((*requiredMutations)[rule])) {
+        (*proteomePDParameters)[it->getProteomeID()] = (*pdParameters)[rule];
         //cerr << " rule: " << rule << "\n";
         break;
       }

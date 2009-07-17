@@ -38,11 +38,7 @@ void initProteomeModule() {
   Mutation* mutation = new Mutation(pos, 'T');
   ProteomeManager::addProtein(crt);
   
-  ProteomeManager::addInstance(new ProteomeInstance());
-  
-  ProteomeInstance* instance = new ProteomeInstance();
-  instance->addMutation(mutation);
-  ProteomeManager::addInstance(instance);
+  ProteomeInstance::init (mutation);
 }
 
 
@@ -72,10 +68,6 @@ Protein::~Protein() {
   for(it=positions.begin(); it!=positions.end(); it++) {
     delete (*it);
   }
-}
-
-string Protein::getName() const {
-  return name;
 }
 
 void Protein::addPosition(ProteinPosition* _position) {
@@ -112,14 +104,12 @@ ProteinPosition::ProteinPosition(Protein* _protein, int _position,
   protein->addPosition(this);
   position = _position;
   wildType = _wildType;
-  mutations = vector<Mutation*>();
 }
 ProteinPosition::ProteinPosition(Protein* _protein, istream& in) {
   protein = _protein;
   protein->addPosition(this);
   in >> position;
   in >> wildType;
-  mutations = vector<Mutation*>();
   size_t numMutations;
   in >> numMutations;
   Global::validateListSize (numMutations);
@@ -137,14 +127,6 @@ ProteinPosition::~ProteinPosition() {
   }
 }
 
-Protein* ProteinPosition::getProtein() {
-  return protein;
-}
-
-string ProteinPosition::getProteinName() {
-  return protein->getName();
-}
-
 void ProteinPosition::write (ostream& out) {
   out << position << endl;
   out << wildType << endl;
@@ -158,9 +140,6 @@ void ProteinPosition::addMutation(Mutation* _mutation) {
   mutations.push_back(_mutation);
 }
 
-int ProteinPosition::getPosition() const {
-  return position;
-}
 
 /*
  * Mutation
@@ -186,18 +165,6 @@ Mutation::~Mutation() {
 }
 
 
-char Mutation::getAllele() const {
-  return allele;
-}
-
-int Mutation::getPosition() const {
-  return position->getPosition();
-}
-
-string Mutation::getProteinName() const {
-  return position->getProteinName();
-}
-
 int Mutation::operator==(const Mutation& rhs) const {
   if (allele==rhs.allele) {
     if (position->getPosition() == rhs.position->getPosition()) {
@@ -209,17 +176,59 @@ int Mutation::operator==(const Mutation& rhs) const {
   return 0;
 }
 
-/*
- * ProteomeInstance
+
+// -----  ProteomeInstance static  -----
+
+int ProteomeInstance::currentID;
+vector<ProteomeInstance> ProteomeInstance::instances;
+
+void ProteomeInstance::init (Mutation* mutation) {
+  currentID = 0;
+  // We store objects, not instances - so this creates two objects, using the
+  // default constructor. Then we don't need to free memory each object.
+  // Note: can't add both at once, as the constructors must be called in the right order.
+  instances.resize (1);
+  instances.resize (2);
+  instances[1].mutations.push_back(mutation);
+}
+
+
+ProteomeInstance* ProteomeInstance::newInfection() {
+  const double percRes = 0.0;		// proportion of resistant infections
+  if (W_UNIFORM() < percRes) {
+    return &instances[1];
+  } else {
+    return &instances[0];
+  }
+}
+
+/* Instances are created the same way on start-up, so no need to checkpoint
+ * (for now at least).
+ * Code to write:
+  out << instances.size() << endl;
+  for(vector<ProteomeInstance*>::const_iterator iti=instances.begin(); iti!=instances.end(); iti++) {
+    (*iti)->write (out);
+  }
+ * Code to read:
+  if (instances.size() > 0) {
+    throw ...;
+  }
+  size_t numInstances;
+  in >> numInstances;
+  Global::validateListSize (numInstances);
+  for(size_t i=0; i<numInstances; i++) {
+    instances.push_back(new ProteomeInstance(in));
+  }
  */
 
-int ProteomeInstance::currentID = 0;
 
-ProteomeInstance::ProteomeInstance(){
+// -----  ProteomeInstance non-static  -----
+
+ProteomeInstance::ProteomeInstance() {
   proteomeID = currentID++;
-  mutations = vector<Mutation*>();
 }
-ProteomeInstance::ProteomeInstance (istream& in) {
+
+/*ProteomeInstance::ProteomeInstance (istream& in) {
   in >> proteomeID;
   size_t numMuts;
   in >> numMuts;
@@ -237,14 +246,14 @@ ProteomeInstance::ProteomeInstance (istream& in) {
   }
   if (currentID<proteomeID)
     currentID = proteomeID;
-}
+}*/
 
 ProteomeInstance::~ProteomeInstance(){
   //the content doesnt need to be deleted, that is the reponsability of delete proteins
   mutations.clear();
 }
 
-void ProteomeInstance::write (ostream& out) {
+/*void ProteomeInstance::write (ostream& out) {
   out << proteomeID << endl;
   out << mutations.size() << endl;
   for(vector<Mutation*>::const_iterator it=mutations.begin(); it!=mutations.end(); it++) {
@@ -252,20 +261,12 @@ void ProteomeInstance::write (ostream& out) {
     out << (*it)->getPosition() << endl;
     out << (*it)->getAllele() << endl;
   }
-}
+}*/
 
-void ProteomeInstance::addMutation(Mutation* _mutation) {
-  mutations.push_back(_mutation);
-}
-
-int ProteomeInstance::getProteomeID() {
-  return proteomeID;
-}
-
-bool ProteomeInstance::hasMutations(vector<Mutation*> _mutations) {
+bool ProteomeInstance::hasMutations(vector<Mutation*> _mutations) const {
   vector<Mutation*>::const_iterator it;
   for(it=_mutations.begin(); it!=_mutations.end(); it++) {
-    vector<Mutation*>::const_iterator it2;
+    list<Mutation*>::const_iterator it2;
     for(it2=mutations.begin(); it2!=mutations.end(); it2++) {
       if ((**it)==(**it2)) {
         goto findNext; //Yes, it is a goto, and a very good one.
@@ -281,7 +282,6 @@ bool ProteomeInstance::hasMutations(vector<Mutation*> _mutations) {
  * ProteomeManager
  */
 
-vector<ProteomeInstance*> ProteomeManager::instances = vector<ProteomeInstance*>();
 vector<Protein*> ProteomeManager::proteins = vector<Protein*>();
 
 
@@ -290,20 +290,12 @@ void ProteomeManager::write (ostream& out) {
   for(vector<Protein*>::const_iterator itp=proteins.begin(); itp!=proteins.end(); itp++) {
     (*itp)->write (out);
   }
-  out << instances.size() << endl;
-  for(vector<ProteomeInstance*>::const_iterator iti=instances.begin(); iti!=instances.end(); iti++) {
-    (*iti)->write (out);
-  }
 }
 
 void ProteomeManager::read (istream& in) {
-    for(vector<ProteomeInstance*>::const_iterator iti=instances.begin(); iti!=instances.end(); iti++) {
-      delete (*iti);
-    }
     for(vector<Protein*>::const_iterator itp=proteins.begin(); itp!=proteins.end(); itp++) {
       delete (*itp);
     }
-    instances.clear();
     proteins.clear();
   
   size_t numProteins;
@@ -312,19 +304,8 @@ void ProteomeManager::read (istream& in) {
   for(size_t i=0; i<numProteins; i++) {
     proteins.push_back(new Protein(in));
   }
-  
-  size_t numInstances;
-  in >> numInstances;
-  Global::validateListSize (numInstances);
-  for(size_t i=0; i<numInstances; i++) {
-    instances.push_back(new ProteomeInstance(in));
-  }
 }
 
-
-void ProteomeManager::addInstance(ProteomeInstance* _instance) {
-  instances.push_back(_instance);
-}
 
 void ProteomeManager::addProtein(Protein* _protein) {
   proteins.push_back(_protein);
@@ -337,22 +318,5 @@ Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char 
     }
   }
   throw(1); // Name not known
-}
-
-vector<ProteomeInstance*> ProteomeManager::getInstances() {
-  return instances;
-}
-
-ProteomeInstance* ProteomeManager::getProteome(int proteome) {
-  return instances[proteome];
-}
-
-ProteomeInstance* ProteomeManager::getInfection() {
-  double percRes = 0.0;		// proportion of resistant infections
-  if (W_UNIFORM() < percRes) {
-    return instances[1];
-  } else {
-    return instances[0];
-  }
 }
 

@@ -45,7 +45,7 @@ DummyInfection::DummyInfection(int simulationTime){
     _duration=infectionDuration(); 
     
     if (Global::modelVersion & INCLUDES_PK_PD)
-      _proteome = ProteomeManager::getInfection();
+      _proteome = ProteomeInstance::newInfection();
     else
       _proteome = NULL;
 }
@@ -75,7 +75,7 @@ DummyInfection::DummyInfection (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
     in >> proteomeID;
-    _proteome = ProteomeManager::getProteome(proteomeID);
+    _proteome = ProteomeInstance::getProteome(proteomeID);
   } else
     _proteome = NULL;
 }

@@ -145,7 +145,7 @@ EmpiricalInfection::EmpiricalInfection (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
     in >> proteomeID;
-    _proteome = ProteomeManager::getProteome(proteomeID);
+    _proteome = ProteomeInstance::getProteome(proteomeID);
   }
 }
 

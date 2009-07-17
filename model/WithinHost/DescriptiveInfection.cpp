@@ -114,7 +114,7 @@ DescriptiveInfection::DescriptiveInfection(int simulationTime)
     _cumulativeExposureJ=0.0;
     
     if (Global::modelVersion & INCLUDES_PK_PD)
-      _proteome = ProteomeManager::getInfection();
+      _proteome = ProteomeInstance::newInfection();
     else
       _proteome = NULL;
 }
@@ -133,7 +133,7 @@ DescriptiveInfection::DescriptiveInfection (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
     in >> proteomeID; 
-    _proteome = ProteomeManager::getProteome(proteomeID);
+    _proteome = ProteomeInstance::getProteome(proteomeID);
   }
 }
 

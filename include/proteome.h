@@ -25,95 +25,135 @@
 
 #include <string>
 #include <vector>
+#include <list>
 #include "global.h"
 
 using namespace std;
 
+class Mutation;
 
 //! Initialises the proteome module.
 void initProteomeModule();
 
-class ProteinPosition;
 class Mutation;
+class ProteinPosition;
 
+/** Only used within proteome code. */
 class Protein {
   string name;
   vector<ProteinPosition*> positions;
-
-  public:
+  
+public:
   Protein(string _name);
   /** @brief Create, reading from checkpoint */
   Protein(istream& in);
   ~Protein();
   
-  string getName() const;
+  inline string getName() const {
+    return name;
+  }
   void addPosition(ProteinPosition* _position);
   Mutation* getMutation(int _position, char _allele) throw(int);
   void write (ostream& out);
 };
 
+/** Only used within proteome code. */
 class ProteinPosition {
   Protein* protein;
   int position;
   char wildType;
   vector<Mutation*> mutations;
-
-  public:
+  
+public:
   ProteinPosition(Protein* _protein, int _position, char _wildType);
   /** @brief Create, reading from checkpoint */
   ProteinPosition(Protein* _protein, istream& in);
   ~ProteinPosition();
   
   void addMutation(Mutation* _mutation);
-  Protein* getProtein();
-  string getProteinName();
+  inline Protein* getProtein() {
+    return protein;
+  }
+  inline string getProteinName() {
+    return protein->getName();
+  }
   Mutation* getMutation(char _allele) throw(int);
-  int getPosition() const;
+  inline int getPosition() const {
+    return position;
+  }
   void write (ostream& out);
 };
 
+/** Used by proteome and drug code. */
 class Mutation {
   ProteinPosition* position;
   char allele;
-
-  public:
+  
+public:
   Mutation(ProteinPosition* _position, char _allele);
   ~Mutation();
-  string getProteinName() const;
-  int getPosition() const;
-  char getAllele() const;
+  inline string getProteinName() const {
+    return position->getProteinName();
+  }
+  inline int getPosition() const {
+    return position->getPosition();
+  }
+  inline char getAllele() const {
+    return allele;
+  }
   int operator==(const Mutation& rhs) const;
 };
 
+/** Each infection has an instance of this class. */
 class ProteomeInstance {
   static int currentID;
+  static vector<ProteomeInstance> instances;
+  
   int proteomeID;
-  //Fitness to be done
-  vector<Mutation*> mutations;
-
-  public:
+  //TODO: Fitness
+  // List of mutations. DON'T try using a custom comparator with C++ set/map,
+  // when we store pointers, because the comparator can't specify when two
+  // elements are equal.
+  list<Mutation*> mutations;
+  
+  // /** @brief Create, reading from checkpoint */
+  //ProteomeInstance (istream& in);
+  //void write (ostream& out);
+  
+public:
+  /** Creates all unique instances of proteome. */
+  static void init (Mutation*);
+  
+  /** Drug code needs a list of all instances. */
+  static inline vector<ProteomeInstance> getInstances() {
+    return instances;
+  }
+  
+  //! For a new infection, randomly chooses and returns a proteome.
+  static ProteomeInstance* newInfection();
+  /// When loading a checkpoint, use the proteome ID to find the original proteome.
+  static inline ProteomeInstance* getProteome(int proteome) {
+    return &instances[proteome];
+  }
+  
+  
   ProteomeInstance();
-  /** @brief Create, reading from checkpoint */
-  ProteomeInstance (istream& in);
   ~ProteomeInstance();
-  void addMutation(Mutation* _mutation);
-  int getProteomeID();
-  bool hasMutations(vector<Mutation*> _mutations);
-  void write (ostream& out);
+  
+  inline int getProteomeID() const {
+    return proteomeID;
+  }
+  /** True if this ProteomeInstance has all mutations in _mutations. */
+  bool hasMutations(vector<Mutation*> _mutations) const;
 };
 
+/** Methods getInfection and getProteome are used in Infection code. */
 class ProteomeManager {
-  static vector<ProteomeInstance*> instances;
   static vector<Protein*> proteins;
-
-  public:
-  static void addInstance(ProteomeInstance* _instance);
+  
+public:
   static void addProtein(Protein* _protein);
-  //!returns the proteome of a new infection
-  static ProteomeInstance* getInfection();
-  static ProteomeInstance* getProteome(int proteome);
   static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
-  static vector<ProteomeInstance*> getInstances();
   static void write (ostream& out);
   static void read (istream& in);
 };
