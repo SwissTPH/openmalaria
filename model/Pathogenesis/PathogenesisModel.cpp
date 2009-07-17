@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pathogenesis/Pyrogen.h"
 #include "Pathogenesis/Predet.h"
 #include "Pathogenesis/Mueller.h"
-#include "WithinHostModel.h"
+#include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
 

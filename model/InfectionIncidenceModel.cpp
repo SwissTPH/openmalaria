@@ -22,7 +22,7 @@
 #include "InfectionIncidenceModel.h"
 #include "GSLWrapper.h"
 #include "inputData.h"
-#include "TransmissionModel/PerHost.h"
+#include "Transmission/PerHost.h"
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 double InfectionIncidenceModel::InfectionrateShapeParam;

@@ -21,7 +21,7 @@
 #include "Clinical/EventScheduler.h"
 #include "inputData.h"
 #include "GSLWrapper.h"
-#include "WithinHostModel.h"
+#include "WithinHost/WithinHostModel.h"
 #include "simulation.h"
 #include "Clinical/DecisionEnums.d"
 
@@ -109,15 +109,25 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {
 ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
     ClinicalModel (in)
 {
-  int state;
-  in >> state;
-  pgState = (Pathogenesis::State) state;
-  in >> state;
-  reportState = (Pathogenesis::State) state;
+  int x;
+  in >> x;
+  pgState = (Pathogenesis::State) x;
+  in >> x;
+  reportState = (Pathogenesis::State) x;
   in >> pgChangeTimestep;
   in >> episodeStartTimestep;
   in >> _surveyPeriod;
   in >> _ageGroup;
+  in >> x;
+  for (; x > 0; --x) {
+    MedicateData md;
+    in >> md.abbrev;
+    in >> md.qty;
+    in >> md.delay;
+    in >> md.seekingDelay;
+    medicateQueue.push_back (md);
+  }
+  in >> lastCmDecision;
 }
 void ClinicalEventScheduler::write (ostream& out) {
   pathogenesisModel->write (out);
@@ -129,6 +139,14 @@ void ClinicalEventScheduler::write (ostream& out) {
   out << episodeStartTimestep << endl;
   out << _surveyPeriod << endl;
   out << _ageGroup << endl;
+  out << medicateQueue.size() << endl;
+  for (list<MedicateData>::iterator i = medicateQueue.begin(); i != medicateQueue.end(); ++i) {
+    out << i->abbrev << endl;
+    out << i->qty << endl;
+    out << i->delay << endl;
+    out << i->seekingDelay << endl;
+  }
+  out << lastCmDecision << endl;
 }
 
 
