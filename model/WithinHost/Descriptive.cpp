@@ -25,7 +25,6 @@
 #include "WithinHost/Descriptive.h"
 #include "simulation.h"
 #include "intervention.h"
-#include "Transmission/TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 
 using namespace std;
@@ -149,7 +148,7 @@ void DescriptiveWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[getAgeGroup(age)]);
 }
 
 

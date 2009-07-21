@@ -17,11 +17,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/TransmissionModel.h"
 #include "Transmission/VectorSpecies.h"
+#include "Transmission/VectorEmergence.h"
+#include "Transmission/PerHost.h"
 #include "inputData.h"
 #include "human.h"
-#include "Transmission/VectorEmergence.h"
 #include "simulation.h"
 
 #include <gsl/gsl_blas.h>
@@ -110,8 +110,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex) *
-	TransmissionModel::getRelativeAvailability(h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -123,8 +122,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   double intP_df = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex) *
-	TransmissionModel::getRelativeAvailability(h->getAgeInYears()) *
+    double prod = host.entoAvailability(sIndex, h->getAgeInYears()) *
 	host.probMosqBiting(sIndex) *
 	host.probMosqFindRestSite(sIndex) *
 	host.probMosqSurvivalResting(sIndex);
@@ -170,7 +168,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   
     P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
   (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
-    α_i[t] = host.entoAvailability () * TransmissionModel::getRelativeAvailability(h->getAgeInYears())
+    α_i[t] = host.entoAvailability (index, h->getAgeInYears())
   Let P_Ai_base[t] = (1 - P_A[t]) / sum_{h in hosts} α_h[t].
   
   Note that although the model allows α_i and P_B_i to vary per-day, they only
@@ -190,8 +188,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex) *
-	TransmissionModel::getRelativeAvailability(h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -204,8 +201,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   double intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex) *
-	TransmissionModel::getRelativeAvailability(h->getAgeInYears()) *
+    double prod = host.entoAvailability(sIndex, h->getAgeInYears()) *
 	host.probMosqBiting(sIndex) *
 	host.probMosqFindRestSite(sIndex) *
 	host.probMosqSurvivalResting(sIndex);

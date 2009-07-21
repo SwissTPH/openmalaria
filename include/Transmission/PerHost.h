@@ -22,6 +22,7 @@
 
 #include "EntoIntervention.h"
 #include "Transmission/VectorSpecies.h"
+#include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 
 class Summary;
 class HostMosquitoInteraction;
@@ -38,6 +39,17 @@ public:
   //@{
   /// Static initialisation
   static void initParameters ();
+  
+  //! Calculates the adjustment for body size in exposure to mosquitoes 
+  /*! 
+  The bites are assumed proportional to average surface area for hosts of the given age. 
+  Linear interpolation is used to calculate this from the input array of surface areas. 
+  \param ageyrs age in years 
+  \return the ratio of bites received by the host to the average for an adult 
+  */ 
+  static inline double getRelativeAvailability (double ageyrs) {
+    return ageSpecificRelativeAvailability[WithinHostModel::getAgeGroup(ageyrs)];
+  }
   //@}
   
   PerHostTransmission ();
@@ -51,11 +63,14 @@ public:
    *
    * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
+  /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
+  inline double entoAvailability (size_t speciesIndex, double ageYears) const {
+    return entoAvailabilityPartial (speciesIndex) *  (ageYears);
+  }
   /** Availability of host to mosquitoes (α_i).
    *
-   * The full availability is
-   * entoAvailability() * getRelativeAvailability(human->getAgeInYears()). */
-  double entoAvailability (size_t speciesIndex) const;
+   * The full availability is entoAvailability(human->getAgeInYears()). */
+  double entoAvailabilityPartial (size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
   double probMosqBiting (size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
@@ -65,10 +80,14 @@ public:
   double probMosqSurvivalResting (size_t speciesIndex) const;
   //@}
   
-  /** Get the availability of this host to mosquitoes (excl. age factor).
+  /** Get the availability of this host to mosquitoes.
    *
    * For NonVector and initialisation phase with Vector. */
-  double entoAvailability () const {
+  inline double entoAvailabilityNV (double ageYears) const {
+    return _entoAvailability * getRelativeAvailability (ageYears);
+  }
+  /// Just return _entoAvailability (ONLY for HeterogeneityWorkaroundII)
+  inline double entoAvailabilityNVPartial () const {
     return _entoAvailability;
   }
   
@@ -84,6 +103,24 @@ private:
   * This is the date of last use.
   int timestepITN;
   int timestepIRS; */
+  
+  
+  ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
+  //@{
+  /** Average number of bites for each age as a proportion of the maximum.
+   *
+   * Set by constructor. */
+  static double ageSpecificRelativeAvailability[WithinHostModel::nages];
+
+  //! Proportionate body surface area
+ /* 
+  The body surface area is expressed as proportions of 0.5*those in 
+  the reference age group.In some models we have used calculations of weight and in others surface area, based on 
+  Mosteller RD: Simplified Calculation of Body Surface Area. N Engl J Med 1987 Oct 22;317(17):1098 (letter) 
+  These values are retained here should they be required for future comparisons 
+ */ 
+  static const double bsa_prop[WithinHostModel::nages];
+  //@}
 };
 
 /** Data needed for each human which is per-mosquito species. */

@@ -30,8 +30,11 @@
 
 using namespace std;
 
+// NOTE: I'd rather use these than x.99 values, but it changes things!
+//const double WithinHostModel::agemin[nages] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
+const double WithinHostModel::agemax[nages] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
 // weight proportions, used by drug code
-const double WithinHostModel::wtprop[nwtgrps] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+const double WithinHostModel::wtprop[nages] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 double WithinHostModel::sigma_i;
 double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
@@ -114,4 +117,12 @@ void WithinHostModel::clearInfections (bool) {
 
 void WithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
   throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
+}
+
+size_t WithinHostModel::getAgeGroup (double age) {
+  for (size_t i = 0; i < nages; ++i) {
+    if (agemax[i] > age)
+      return i;
+  }
+  return nages-1;	// final category
 }

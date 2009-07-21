@@ -65,12 +65,13 @@ del checkpoint
 fc /W ..\original\originalIPT.txt output.txt
 rename output.txt outputIPT.txt
 del checkpoint
-rem Checkpointing is broken:
-..\..\malariacontrol_windows_intelx86 --scenario scenarioDummyPKPD.xml
+..\..\malariacontrol_windows_intelx86 --checkpoint --scenario scenarioDummyPKPD.xml
+..\..\malariacontrol_windows_intelx86 --checkpoint --scenario scenarioDummyPKPD.xml
 fc /W ..\original\originalDummyPKPD.txt output.txt
 rename output.txt outputDummyPKPD.txt
 del checkpoint
-..\..\malariacontrol_windows_intelx86 --scenario scenarioCevCq.xml
+..\..\malariacontrol_windows_intelx86 --checkpoint --scenario scenarioCevCq.xml
+..\..\malariacontrol_windows_intelx86 --checkpoint --scenario scenarioCevCq.xml
 fc /W ..\original\originalCevCq.txt output.txt
 rename output.txt outputDummyCevCq.txt
 del checkpoint

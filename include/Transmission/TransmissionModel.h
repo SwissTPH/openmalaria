@@ -21,15 +21,15 @@
 #ifndef Hmod_TransmissionModel 
 #define Hmod_TransmissionModel 
 
-#include "human.h"
+#include "global.h"
 #include <string.h>
+#include "human.h"
 
 // Define these to print out various arrays:
-//#define TransmissionModel_PrintEIRaIDFT
 //#define TransmissionModel_PrintSmoothArray
-#define TransmissionModel_PrintRotateArray
 
 class Summary;
+class PerHostTransmission;
 
 //! Abstract base class, defines behaviour of transmission models
 class TransmissionModel {
@@ -52,21 +52,7 @@ public:
   /// Set a couple of summary items
   void summarize (Summary&);
   
-  //NOTE: doesn't really belong here
-  /// Get the appropriate index within ageSpecificRelativeAvailability, etc.,
-  /// for this age (in years). Also used by Human.
-  static size_t  getAgeGroup (double age);
-
-  //! Calculates the adjustment for body size in exposure to mosquitoes 
-  /*! 
-  The bites are assumed proportional to average surface area for hosts of the given age. 
-  Linear interpolation is used to calculate this from the input array of surface areas. 
-  \param ageyrs age in years 
-  \return the ratio of bites received by the host to the average for an adult 
-  */ 
-  static double getRelativeAvailability (double ageyrs);
-
-
+  
   /** Initialise the main simulation.
    *
    * Although we should have (population.size() == populationSize), it appears
@@ -130,43 +116,7 @@ protected:
   /*! Total annual EIR.
    *
    * Checkpointed. */
-  double annualEIR; 
-
-  //TODO: the entire code for specifying availability should be part of the human
-  //! initialisation of the vector of expected surface area as a function of age
-  void initAgeExposureConversion(); 
-  
-  
-  /* Not used - uncomment code in initAgeExposureConversion() to initialise.
-  // ratio of the number of bites received relative to the number received at age 6 years 
-  double biteratio_6; */
-  
-  
-  //! Number of age groups for which the surface area calculations apply 
-  static const size_t nages= 22;
-
-  // NOTE: perhaps all these age-specific constants should be moved to Human. It depends which part of the simulation each class is meant to simulate...
-  /** Average number of bites for each age as a proportion of the maximum.
-   *
-   * Set by constructor. */
-  static double ageSpecificRelativeAvailability[nwtgrps];
-
-  //! Cutpoints of the age categories (minima) used for storing relative
-  //! weights? surface areas?
-  static const double agemin[nwtgrps]; 
-
-  //! Cutpoints of the age categories (maxima) used for storing relative
-  //! weights? surface areas?
-  static const double agemax[nwtgrps];  
-
-  //! Proportionate body surface area
- /* 
-  The body surface area is expressed as proportions of 0.5*those in 
-  the reference age group.In some models we have used calculations of weight and in others surface area, based on 
-  Mosteller RD: Simplified Calculation of Body Surface Area. N Engl J Med 1987 Oct 22;317(17):1098 (letter) 
-  These values are retained here should they be required for future comparisons 
- */ 
-  static const double bsa_prop[nwtgrps]; 
+  double annualEIR;
 };
 
 #endif

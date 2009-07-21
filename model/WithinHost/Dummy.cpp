@@ -24,7 +24,6 @@
 #include "human.h"
 #include "WithinHost/Dummy.h"
 #include "simulation.h"
-#include "Transmission/TransmissionModel.h"	// getAgeGroup() - is in a funny place
 #include "summary.h"
 #include "inputData.h"
 
@@ -112,7 +111,7 @@ void DummyWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DummyWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[TransmissionModel::getAgeGroup(age)]);
+  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[getAgeGroup(age)]);
 }
 
 

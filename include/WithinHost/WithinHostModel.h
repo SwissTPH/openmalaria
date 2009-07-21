@@ -111,6 +111,10 @@ public:
   inline double getTotalDensity() const {return totalDensity;}
   inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
   
+  /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
+  /// and wtprop for this age (in years). Also used by PerHostTransmission.
+  static size_t getAgeGroup (double age);
+  
 protected:
   /** Literally just removes all infections in an individual.
    *
@@ -131,14 +135,6 @@ protected:
   double timeStepMaxDensity;
   
   /* Static private */
-  
-  //! Relative weights by age group
-  /** Relative weights, based on data in InputTables\wt_bites.csv 
-  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
-  thesis). The original source was anthropometric studies by Inez Azevedo Reads
-  in weights by age group. The weights are expressed as proportions of 0.5*those
-  in the reference age group. */
-  static const double wtprop[nwtgrps];
   
 //Standard dev innate immunity for densities
   static double sigma_i;
@@ -162,6 +158,23 @@ protected:
   The density bias allows the detection limit for microscopy to be higher for other sites
   */
   static double detectionLimit;
+  
+  ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
+  //@{
+public:
+  //! Number of age groups to use
+  static const size_t nages= 22;
+protected:
+  //! Maximum of each age category
+  static const double agemax[nages];
+  //! Relative weights by age group
+  /** Relative weights, based on data in InputTables\wt_bites.csv 
+  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
+  thesis). The original source was anthropometric studies by Inez Azevedo Reads
+  in weights by age group. The weights are expressed as proportions of 0.5*those
+  in the reference age group. */
+  static const double wtprop[nages];
+  //@}
 };
 
 #endif

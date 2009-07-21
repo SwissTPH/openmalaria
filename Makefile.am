@@ -10,8 +10,7 @@ all: xsdcxx model
 
 # Run all valid tests (there may also exist broken tests)
 test: all
-	./runTests.sh --checkpoint 1 2 3 4 5 6 7 9 11 12 IPT
-	./runTests.sh DummyPKPD	CevCq # checkpointing is broken here
+	./runTests.sh --checkpoint 1 2 3 4 5 6 7 9 11 12 IPT DummyPKPD CevCq
 
 doxygen: config.doxygen
 	-doxygen config.doxygen

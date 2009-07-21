@@ -281,7 +281,7 @@ void Population::update1(){
       ++survivsSoFar;
       
       double ageYears = iter->getAgeInYears();
-      double availability = iter->perHostTransmission.entoAvailability() * _transmissionModel->getRelativeAvailability(ageYears);
+      double availability = iter->perHostTransmission.entoAvailabilityNV(ageYears);
       sumWeight += availability;
       sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
       

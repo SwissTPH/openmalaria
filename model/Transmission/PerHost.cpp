@@ -22,10 +22,24 @@
 #include "summary.h"
 #include "intervention.h"
 
+
+// -----  PerHostTransmission static  -----
+
+const double PerHostTransmission::bsa_prop[WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+double PerHostTransmission::ageSpecificRelativeAvailability[WithinHostModel::nages];
+
+
 void PerHostTransmission::initParameters () {
   EntoInterventionITN::initParameters();
   EntoInterventionIRS::initParameters();
+  
+  for (size_t i=0; i<WithinHostModel::nages; i++) {
+    ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
+  }
 }
+
+
+// -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () {
 }
@@ -56,7 +70,7 @@ void PerHostTransmission::write (ostream& out) const {
 }
 
 //TODO: intervention effects on these parameters:
-double PerHostTransmission::entoAvailability (size_t speciesIndex) const {
+double PerHostTransmission::entoAvailabilityPartial (size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability;
 //   * species[speciesIndex].entoInterventionITN.availability()
 //   * species[speciesIndex].entoInterventionIRS.availability();
@@ -74,6 +88,8 @@ double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const 
 //   * species[speciesIndex].entoInterventionIRS.probMosqSurvivalResting();
 }
 
+
+// ----- HostMosquitoInteraction non-static -----
 
 void HostMosquitoInteraction::initialise (VectorTransmissionSpecies base, double availabilityFactor)
 {
