@@ -15,8 +15,9 @@ add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINAR
 )
 
 message (STATUS "Xsd includes: ${XSD_INCLUDE_DIRS}")
-include_directories (
+include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
   ${XSD_INCLUDE_DIRS}
+  ${XERCESC_INCLUDE_DIRS}
 )
 add_library (xsdcxx inputData.cpp ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx)

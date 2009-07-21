@@ -35,9 +35,10 @@ if (UNIX)
 endif (UNIX)
 mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
 
-include_directories (
+include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
   ${XSD_INCLUDE_DIRS}
+  ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
 )

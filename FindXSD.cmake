@@ -14,7 +14,8 @@ FIND_PATH(XSD_INCLUDE_DIRS xsd/cxx/parser/elements.hxx
   $ENV{XSDDIR}/include
   /usr/local/include
   /usr/include
-  "D:/Program Files/CodeSynthesis XSD 3.2/include"
+  "C:/Program Files/CodeSynthesis XSD 3.2/include"
+  ${CMAKE_SOURCE_DIR}/../xsd/libxsd
 )
 
 FIND_PROGRAM(XSD_EXECUTABLE 
