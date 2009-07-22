@@ -32,3 +32,8 @@ if (OMTEST_ENABLE)
   enable_testing()
   add_subdirectory (test)
 endif (OMTEST_ENABLE)
+
+option(OMTEST_UNIT "Enable lower-level unittests" OFF)
+if (OMTEST_UNIT)
+  add_subdirectory (unittest)
+endif (OMTEST_UNIT)

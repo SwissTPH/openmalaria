@@ -10,7 +10,18 @@ http://code.google.com/p/openmalaria/w/list
 Code subdirs:
 graphics	Separate graphics app. Currently out-of-date (untested with latest simulator code).
 include		Header files associated with model & xsdcxx code.
+include/cxxtest	Headers for cxxtest
 model		Source code for the malaria model.
 xsdcxx		Xml reader code plus latest scenario.xsd schema.
 test		High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
 unittest	Low-level testing: unittests for the model using cxxunit.
+
+
+Included code (from other sources):
+gzstream, an STL iostream wrapper around zlib:
+  include/gzstream.h
+  model/gzstream.C
+CxxTest 3.10.1:
+  include/cxxtest
+  unittest/cxxtestgen.pl
+Both are licenced under the LGPL 2.1 (see COPYING.LIB).
