@@ -2,15 +2,21 @@
 # With no arguments, run all scenario*.xml files.
 # With arguments A,...,Z, only run scenarioA.xml, ..., scenarioZ.xml
 
-# ldd test disabled: 4 isn't always the right number; this information isn't useful to most people running the tests.
-#numberOfdllsNeeded=`ldd model/openMalaria | wc -l`
-#numberOfdllsExpected=4
-#if [ $numberOfdllsNeeded -ne $numberOfdllsExpected ]
-#	then echo "you probably don't have all project specific libraries statically linked, please check before BOINC deployment!"
-#fi
+# replaced by CMake
+SRC_DIR=@CMAKE_SOURCE_DIR@
+if [ ! -d $SRC_DIR ]
+then
+  echo "Don't run this script directly; configure CMake then use the version in the CMake build dir."
+  exit 1;
+fi
+if [ $SRC_DIR -ef . ]
+then
+  echo "This must not be run from the source dir!"
+  exit 1
+fi
 
-rm -rf test/sandbox/* 2>/dev/null
-mkdir -p test/sandbox
+rm -rf test/* 2>/dev/null
+mkdir -p "test"
 OM_BIN="openMalaria"
 if [ ! -x openMalaria -o model/openMalaria -nt openMalaria ]
 then
@@ -21,28 +27,43 @@ then
   echo "Not found: $OM_BIN. Please compile."
   exit 1
 fi
-cp $OM_BIN test/sandbox/openMalaria
-#strip test/sandbox/openMalaria
-cd test/sandbox && cp ../original/* . 2>/dev/null
+cp $OM_BIN test/openMalaria
+#strip test/openMalaria
+cp $SRC_DIR/test/* test/
+cd test
 
+# If RUN="test", then an error is printed when the output.txt file doesn't exist:
 RUN="test"
+# Used to run through gdb/valgrind:
 CMD_PREFIX=""
+# The command to run (plus any args before the scenario file):
 CMD_MAIN="./openMalaria --scenario"
+# Extra arguments to pass to the command:
 CMD_POSTFIX=""
+# If true, don't print so many messages:
+QUIET=""
 
+# Echo the command line to be run and run it
 runCMD() {
-  echo "\033[1;32m"$CMD"\033[0;00m"
+  if [ "x$QUIET" = "x" ]
+  then
+    echo "\033[1;32m"$CMD"\033[0;00m"
+  fi
   if [ "x$RUN" != "x" ]
   then
     $CMD
   fi
 }
 
+# Run, with file scenario$number.xml
 runScenario() {
   # delete old checkpoints; necessary after a previous run:
   rm -f checkpoint* seed*
   CMD="$CMD_PREFIX$CMD_MAIN scenario$number.xml $CMD_POSTFIX"
-  echo "\033[0;33m"`date`
+  if [ "x$QUIET" = "x" ]
+  then
+    echo "\033[0;33m"`date`
+  fi
   touch timeFile
   # First run:
   runCMD
@@ -59,7 +80,7 @@ runScenario() {
   then
     mv output.txt output$number.txt
     echo -n "\033[1;34m"
-    ../original/compareOutputsFloat.py original$number.txt output$number.txt 1
+    ./compareOutputsFloat.py original$number.txt output$number.txt 1
   elif [ "$RUN" = "test" ]
   then
     echo "\033[0;31mNo results output; error messages:"
@@ -68,6 +89,7 @@ runScenario() {
   echo "\033[0;00m"
 }
 
+# Test for options
 while [ "$#" -ge "1" ]
 do
   if [ "$1" = "--gdb" ]
@@ -86,6 +108,9 @@ do
   then
     CMD_MAIN="xmllint --noout --schema scenario_6.xsd"
     RUN="run"
+  elif [ "$1" = "--quiet" ]
+  then
+    QUIET="1>/dev/null 2>/dev/null"
   elif [ "$1" = "--help" ]
   then
     echo "Usage: \033[1;32m$0 [options] [scenarios]\033[0;00m"
@@ -114,7 +139,7 @@ do
   shift
 done
 
-
+# Run all tests:
 if [ "$#" -eq "0" ]
 then
     if [ ! -f scenario2.xml ] # make sure at least one exists
@@ -128,6 +153,7 @@ then
   	number=${name#scenario} 
   	runScenario
     done
+# or selected tests:
 else
     while [ "$#" -ge "1" ]
     do

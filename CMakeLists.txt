@@ -26,3 +26,22 @@ find_package (XERCESC)
 
 add_subdirectory (xsdcxx)
 add_subdirectory (model)
+
+# Testing via runTests.sh script:
+configure_file (${CMAKE_SOURCE_DIR}/runTests.sh ${CMAKE_BINARY_DIR}/runTests.sh @ONLY)
+
+option(OPENMALARIA_CMAKE_TESTS "Use CMake scripts instead of runTests.sh to run tests (not implemented)." OFF)
+enable_testing()
+if (OPENMALARIA_CMAKE_TESTS)
+  add_subdirectory (test)
+else (OPENMALARIA_CMAKE_TESTS)
+  if (UNIX)
+    # working tests:
+    set (TEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq)
+    foreach (TEST_NAME ${TEST_NAMES})
+      add_test (${TEST_NAME} ./runTests.sh --checkpoint ${TEST_NAME})
+    endforeach (TEST_NAME)
+    set_tests_properties (${TEST_NAMES}
+      PROPERTIES PASS_REGULAR_EXPRESSION "No differences, ok\\.\\.\\.")
+  endif (UNIX)
+endif (OPENMALARIA_CMAKE_TESTS)
