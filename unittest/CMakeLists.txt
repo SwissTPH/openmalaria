@@ -11,30 +11,46 @@ endif (CXXTEST_USE_PYTHON)
 
 option (CXXTEST_GUI "Draw a graphical progress bar" OFF)
 set (CXXTEST_GUI_ARG "")
-set (CXXTEST_GUI_LIB "")
 if (CXXTEST_GUI)
-  # also QT, but that has more dependencies.
+  # also supports QT, but that has more dependencies.
   if (WIN32)
     set (CXXTEST_GUI_ARG "--gui=Win32Gui")
   elseif (UNIX)
     set (CXXTEST_GUI_ARG "--gui=X11Gui")
-    set (CXXTEST_GUI_LIB "X11")
+    find_library (CXXTEST_GUI_LIB X11)
+    if (NOT CXXTEST_GUI_LIB)
+      message (SEND_ERROR "Requested use of a gui, but can't find X11 library${CXXTEST_GUI_LIB}!")
+    endif (NOT CXXTEST_GUI_LIB)
   endif (WIN32)
 endif (CXXTEST_GUI)
 
 
 include_directories (SYSTEM
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/unittest
+  ${CMAKE_BINARY_DIR}/xsdcxx
 )
 
 add_custom_command (OUTPUT tests.cpp
-  COMMAND ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --error-printer -o tests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/myTest.h
-  MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/myTest.h
+  COMMAND ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
+    PerHostSuite.h
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Generating unittest code with cxxtestgen"
   VERBATIM
 )
 add_executable (run tests.cpp)
-target_link_libraries (run ${CXXTEST_GUI_LIB})
+target_link_libraries (run
+  model
+  xsdcxx
+  ${CXXTEST_GUI_LIB}
+  ${GSL_LIBRARIES}
+  ${XERCESC_LIBRARIES}
+  ${Z_LIBRARIES}
+  ${PTHREAD_LIBRARIES}
+  ${BOINC_LIBRARIES}
+)
+
+add_test (cxxtest run)
 
 mark_as_advanced (
   CXXTEST_GUI_ARG

@@ -21,19 +21,78 @@ ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
 option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
 
+
+# -----  Find dependencies  -----
+
 find_package (XSD)
 find_package (XERCESC)
+find_package (GSL)
+find_package (Z)
+
+option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
+if (BOINC_INTEGRATION)
+  find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
+  find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/api)
+  include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
+  if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
+    message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
+  endif (NOT BOINC_LIB OR NOT BOINC_API_LIB)
+  set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
+  mark_as_advanced (BOINC_API_LIB BOINC_LIB)
+else (BOINC_INTEGRATION)
+  add_definitions (-DWITHOUT_BOINC)
+endif (BOINC_INTEGRATION)
+
+
+# -----  Compile code  -----
 
 add_subdirectory (xsdcxx)
 add_subdirectory (model)
 
-option(OMTEST_ENABLE "Enable 'make test' or Visual Studio build target to run tests" ON)
+
+# -----  generate openMalaria  -----
+
+if (UNIX)
+  find_library (PTHREAD_LIBRARIES pthread PATHS ${CMAKE_SOURCE_DIR}/lib /usr/lib /usr/local/lib)
+  if (NOT PTHREAD_LIBRARIES)
+    message (SEND_ERROR "PThread library not found")
+  endif (NOT PTHREAD_LIBRARIES)
+endif (UNIX)
+mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
+
+include_directories (SYSTEM
+  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
+  ${XSD_INCLUDE_DIRS}
+  ${XERCESC_INCLUDE_DIRS}
+  ${GSL_INCLUDE_DIRS}
+  ${Z_INCLUDE_DIRS}
+)
+
+link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
+
+add_executable (openMalaria model/openMalaria.cpp)
+
+target_link_libraries (openMalaria
+  model
+  xsdcxx
+  ${GSL_LIBRARIES}
+  ${XERCESC_LIBRARIES}
+  ${Z_LIBRARIES}
+  ${PTHREAD_LIBRARIES}
+  ${BOINC_LIBRARIES}
+)
+
+
+# -----  OMTEST - black-box & unit testing  -----
+
+option(OMTEST_ENABLE "Enable 'make test' or Visual Studio build target to run black-box tests" ON)
 if (OMTEST_ENABLE)
   enable_testing()
   add_subdirectory (test)
 endif (OMTEST_ENABLE)
 
-option(OMTEST_UNIT "Enable lower-level unittests" OFF)
-if (OMTEST_UNIT)
+option(CXXTEST_ENABLE "Enable lower-level unittests using cxxtest" OFF)
+if (CXXTEST_ENABLE)
+  enable_testing()
   add_subdirectory (unittest)
-endif (OMTEST_UNIT)
+endif (CXXTEST_ENABLE)

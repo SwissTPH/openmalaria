@@ -2,9 +2,6 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-find_package (GSL)
-find_package (Z)
-
 
 #for Visual Studio file groupings:
 source_group (Clinical REGULAR_EXPRESSION Clinical/.*)
@@ -13,27 +10,17 @@ source_group (Pathogenesis REGULAR_EXPRESSION Pathogenesis/.*)
 source_group (Transmission REGULAR_EXPRESSION Transmission/.*)
 source_group (WithinHost REGULAR_EXPRESSION WithinHost/.*)
 
-option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
-if (BOINC_INTEGRATION)
-  find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
-  find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/api)
-  include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
-  if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
-    message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
-  endif (NOT BOINC_LIB OR NOT BOINC_API_LIB)
-  set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
-  mark_as_advanced (BOINC_API_LIB BOINC_LIB)
-else (BOINC_INTEGRATION)
-  add_definitions (-DWITHOUT_BOINC)
-endif (BOINC_INTEGRATION)
-
-if (UNIX)
-  find_library (PTHREAD_LIBRARIES pthread PATHS ${CMAKE_SOURCE_DIR}/lib /usr/lib /usr/local/lib)
-  if (NOT PTHREAD_LIBRARIES)
-    message (SEND_ERROR "PThread library not found")
-  endif (NOT PTHREAD_LIBRARIES)
-endif (UNIX)
-mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
+# Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
+set (Model_CPP
+  EntoIntervention.cpp population.cpp timer.cpp InfectionIncidenceModel.cpp
+  gzstream.C simulation.cpp summary.cpp BoincWrapper.cpp global.cpp
+  intervention.cpp proteome.cpp human.cpp GSLWrapper.cpp
+)
+aux_source_directory (Clinical Clinical_CPP)
+aux_source_directory (Drug Drug_CPP)
+aux_source_directory (Pathogenesis Pathogenesis_CPP)
+aux_source_directory (Transmission Transmission_CPP)
+aux_source_directory (WithinHost WithinHost_CPP)
 
 include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
@@ -43,31 +30,12 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
 )
 
-link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
-
-aux_source_directory (. OpenMalaria_CPP)
-aux_source_directory (Clinical Clinical_CPP)
-aux_source_directory (Drug Drug_CPP)
-aux_source_directory (Pathogenesis Pathogenesis_CPP)
-aux_source_directory (Transmission Transmission_CPP)
-aux_source_directory (WithinHost WithinHost_CPP)
-
-add_executable (openMalaria
-  ${OpenMalaria_CPP}
+add_library (model
+  ${Model_CPP}
   ${Clinical_CPP}
   ${Drug_CPP}
   ${Pathogenesis_CPP}
   ${Transmission_CPP}
   ${WithinHost_CPP}
   ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx
-)
-set_target_properties (openMalaria PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-target_link_libraries (openMalaria
-  xsdcxx
-  ${GSL_LIBRARIES}
-  ${XERCESC_LIBRARIES}
-  ${Z_LIBRARIES}
-  ${PTHREAD_LIBRARIES}
-  ${BOINC_LIBRARIES}
 )

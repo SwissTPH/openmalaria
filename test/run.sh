@@ -21,11 +21,6 @@ fi
 # executable
 OM_NAME="openMalaria"
 OM_BIN="../$OM_NAME"
-# cmake 2.4 still puts it in the model dir, I think:
-if [ ! -x $OM_BIN -o ../model/$OM_NAME -nt $OM_BIN ]
-then
-  OM_BIN="../model/$OM_NAME"
-fi
 if [ ! -x $OM_BIN ]
 then
   echo "Not found: $OM_NAME. Please compile."

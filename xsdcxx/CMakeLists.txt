@@ -20,4 +20,7 @@ include_directories (SYSTEM
   ${XSD_INCLUDE_DIRS}
   ${XERCESC_INCLUDE_DIRS}
 )
-add_library (xsdcxx inputData.cpp ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx)
+add_library (xsdcxx
+  inputData.cpp
+  ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx
+)
