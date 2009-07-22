@@ -3,41 +3,41 @@
 # With arguments A,...,Z, only run scenarioA.xml, ..., scenarioZ.xml
 
 # replaced by CMake
-SRC_DIR=@CMAKE_SOURCE_DIR@
-if [ ! -d $SRC_DIR ]
+TEST_SOURCE=@CMAKE_CURRENT_SOURCE_DIR@
+TEST_BINARY=@CMAKE_CURRENT_BINARY_DIR@
+cd $TEST_BINARY
+if [ ! -d $TEST_SOURCE ]
 then
   echo "Don't run this script directly; configure CMake then use the version in the CMake build dir."
   exit 1;
 fi
-if [ $SRC_DIR -ef . ]
+# if same dir:
+if [ $TEST_SOURCE -ef $TEST_BINARY ]
 then
   echo "This must not be run from the source dir!"
   exit 1
 fi
 
-rm -rf test/* 2>/dev/null
-mkdir -p "test"
-OM_BIN="openMalaria"
-if [ ! -x openMalaria -o model/openMalaria -nt openMalaria ]
+# executable
+OM_NAME="openMalaria"
+OM_BIN="../$OM_NAME"
+# cmake 2.4 still puts it in the model dir, I think:
+if [ ! -x $OM_BIN -o ../model/$OM_NAME -nt $OM_BIN ]
 then
-  OM_BIN="model/$OM_BIN"
+  OM_BIN="../model/$OM_NAME"
 fi
 if [ ! -x $OM_BIN ]
 then
-  echo "Not found: $OM_BIN. Please compile."
+  echo "Not found: $OM_NAME. Please compile."
   exit 1
 fi
-cp $OM_BIN test/openMalaria
-#strip test/openMalaria
-cp $SRC_DIR/test/* test/
-cd test
 
 # If RUN="test", then an error is printed when the output.txt file doesn't exist:
 RUN="test"
 # Used to run through gdb/valgrind:
 CMD_PREFIX=""
 # The command to run (plus any args before the scenario file):
-CMD_MAIN="./openMalaria --scenario"
+CMD_MAIN="$OM_BIN --scenario"
 # Extra arguments to pass to the command:
 CMD_POSTFIX=""
 # If true, don't print so many messages:
@@ -58,8 +58,9 @@ runCMD() {
 # Run, with file scenario$number.xml
 runScenario() {
   # delete old checkpoints; necessary after a previous run:
-  rm -f checkpoint* seed*
-  CMD="$CMD_PREFIX$CMD_MAIN scenario$number.xml $CMD_POSTFIX"
+  # Also delete the output.txt file if existing since it won't get overridden now
+  rm -f checkpoint* seed* output.txt
+  CMD="$CMD_PREFIX$CMD_MAIN $TEST_SOURCE/scenario$number.xml $CMD_POSTFIX"
   if [ "x$QUIET" = "x" ]
   then
     echo "\033[0;33m"`date`
@@ -80,7 +81,7 @@ runScenario() {
   then
     mv output.txt output$number.txt
     echo -n "\033[1;34m"
-    ./compareOutputsFloat.py original$number.txt output$number.txt 1
+    $TEST_SOURCE/compareOutputsFloat.py $TEST_SOURCE/original$number.txt output$number.txt 1
   elif [ "$RUN" = "test" ]
   then
     echo "\033[0;31mNo results output; error messages:"
@@ -142,13 +143,14 @@ done
 # Run all tests:
 if [ "$#" -eq "0" ]
 then
-    if [ ! -f scenario2.xml ] # make sure at least one exists
+  if [ ! -f $TEST_SOURCE/scenario2.xml ] # make sure at least one exists
     then
       echo "Error: no scenario files present (at least not scenario2.xml)"
       exit 1
     fi
-    for file in scenario*.xml
+    for path in $TEST_SOURCE/scenario*.xml
     do
+	file=`basename $path`
 	name=${file%.xml}
   	number=${name#scenario} 
   	runScenario

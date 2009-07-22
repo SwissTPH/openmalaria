@@ -3,71 +3,14 @@ Open Malaria
 Licence: GPL v2 (see COPYING).
 
 
-
-Dependencies:
-GSL (GNU Scientific Library)
-XSD (Code Synthesis XSD; debian package named xsdcxx)
-BOINC
-gzstream (included)
-
-The build system expects some shared libraries in lib/ for static linking. E.g. for linux:
-libboinc.a  libboinc_api.a  libgsl.a  libgslcblas.a  libxerces-c.a
-
-
-Linux building:
-./autogen
-  If ./autogen fails run
-  automake --add-missing
-  and then repeat ./autogen
-./configure [--enable-deployed]
-	The --enable-deployed option adds BOINC integration and statically links the libraries.
-make
-
-To run tests, use:
-make test
-or:
-./test.sh [test numbers]
-./testCheckpointing.sh
-
-
-Windows build
-
-Note: Debug configuration is broken with a strange error. Someone has to fix this a soon as possible.
-
-Prequisites:
-
-    * Visual Studio .net
-    * BOINC source code (http://boinc.berkeley.edu) to a directory name boinc in your workspace.
-          o Build the BOINC libraries using the libboinc target in boinc\win_build\boinc.sln 
-    * GSL. Version update to 1.11 see newGSLversion
-    * Download Xerces C++ XML parser v3.0 from http://apache.mirror.testserver.li/xerces/c/3/sources/xerces-c-3.0.1.zip. Extract and follow build instructions at (http://xerces.apache.org/xerces-c/build-3.html). Build the XercesLib? target for both Static debug and Static release configurations.
-          o Copy the files xerces-c_static_3D.lib from Build\Win32\VC8\StaticDebug? and xerces-c_static_3.lib from Build\Win32\VC8\StaticRelease? to project_dir/lib 
-    * Install Code Synthesis' xsd
-    * Debugging Tools for Windows
-    * Download CodeSynthesis? XSD from http://codesynthesis.com/products/xsd/download.xhtml and follow the installation instructions 
-
-How to build 
-
-    * Open visual studio's options (Tools -> Options)
-          o Goto Projects and solutions -> VC++ Directories
-                + For executable files add:
-                      # C:\Program Files\CodeSynthesis? XSD 3.2\bin (XSD bin dir) 
-    * Check out openMalaria from google code. The Visual Studio project file makes the following assumptions:
-          o BOINC is in the same directory as the project root directory, the root directory is called boinc 
-    * Open malariaModel2005C++.sln
-    * Select the Release configuration
-    * Debug configuration is currently broken 
-
-
-Generating doxygen:
-doxygen config.doxygen
-Output is in the html folder.
-
+For build instructions, further documentation, etc:
+http://code.google.com/p/openmalaria/w/list
 
 
 Code subdirs:
-graphics	Windows-only optional GUI?
-include		Most header files are in here
-model		Source code for the malaria modelling
-xsdcxx		Xml reader code
-test/original	The scenario.xsd schema, and some test scenarios with expected outputs.
+graphics	Separate graphics app. Currently out-of-date (untested with latest simulator code).
+include		Header files associated with model & xsdcxx code.
+model		Source code for the malaria model.
+xsdcxx		Xml reader code plus latest scenario.xsd schema.
+test		High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
+unittest	Low-level testing: unittests for the model using cxxunit.
