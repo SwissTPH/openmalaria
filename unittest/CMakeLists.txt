@@ -31,9 +31,12 @@ include_directories (SYSTEM
   ${CMAKE_BINARY_DIR}/xsdcxx
 )
 
+set (CXXTEST_HEADERS PerHostSuite.h VectorEmergenceSuite.h)
+
 add_custom_command (OUTPUT tests.cpp
   COMMAND ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
-    PerHostSuite.h
+    ${CXXTEST_HEADERS}
+  DEPENDS ${CXXTEST_HEADERS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Generating unittest code with cxxtestgen"
   VERBATIM

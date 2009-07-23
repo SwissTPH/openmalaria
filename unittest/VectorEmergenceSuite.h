@@ -17,23 +17,18 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-// A very simple test for PerHostTransmission
 
-#ifndef Hmod_PerHostSuite
-#define Hmod_PerHostSuite
+#ifndef Hmod_VectorEmergenceSuite
+#define Hmod_VectorEmergenceSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Transmission/PerHost.h"
+#include "Transmission/VectorEmergence.h"
 
-class PerHostSuite : public CxxTest::TestSuite
+class VectorEmergenceSuite : public CxxTest::TestSuite
 {
 public:
-  PerHostSuite () {
-    PerHostTransmission::initParameters();
-  }
-  
-  void testRelativeAvailability () {
-    TS_ASSERT_DELTA (PerHostTransmission::getRelativeAvailability(7.0), 0.51263046437755255, 0.00000000000000000);
+  void testDummy () {
+    TS_WARN ("TODO: write VectorEmergence tests");
   }
 };
 
