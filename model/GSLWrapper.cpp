@@ -17,9 +17,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// This isn't very important
-#define _CRT_SECURE_NO_DEPRECATE
-
 #include <string>
 using namespace std;
 #include <gsl/gsl_cdf.h>

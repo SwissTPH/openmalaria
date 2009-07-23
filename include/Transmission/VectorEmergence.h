@@ -25,6 +25,7 @@
 #include <gsl/gsl_multiroots.h>
 #include <gsl/gsl_sf.h>
 #include <fstream>
+#include <limits>
 using namespace std;
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -444,7 +445,7 @@ struct SvDiffParams
     outNv0("Nv0_values.csv")
   {
     // make sure lastNv0 won't match any input first time, so lastS_vDiff will be calculated
-    gsl_vector_set (lastNv0, 0, 0/0);
+    gsl_vector_set (lastNv0, 0, numeric_limits<double>::quiet_NaN());
     outNv0.precision(20);
   }
   ~SvDiffParams () {

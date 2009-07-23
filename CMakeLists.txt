@@ -82,6 +82,11 @@ target_link_libraries (openMalaria
   ${BOINC_LIBRARIES}
 )
 
+# May want to remove LIBCMT or MSVCRTD like this, BUT if libraries are compiled with one there'll still be link errors
+if (MSVC)
+  set_target_properties (openMalaria
+    PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
+endif (MSVC)
 
 # -----  OMTEST - black-box & unit testing  -----
 
