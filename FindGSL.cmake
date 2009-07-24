@@ -15,33 +15,37 @@ FIND_PATH(GSL_INCLUDE_DIR gsl/gsl_version.h
   ${CMAKE_SOURCE_DIR}/../gsl
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/include"
   "C:/Program Files/GnuWin32/include"
+  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/include"
 )
 
 if (NOT GSL_INCLUDE_DIR)
   message (SEND_FATAL "Unable to find gsl/gsl_version.h")
 endif (NOT GSL_INCLUDE_DIR)
 
-set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2} CACHE PATH "GSL dirs")
 FIND_PATH(GSL_INCLUDE_DIR2 gsl_sys.h
  PATHS
   ${GSL_INCLUDE_DIRS}
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/include/gsl"
   "C:/Program Files/GnuWin32/include/gsl"
+  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/include/gsl"
 )
 if (${GSL_INCLUDE_DIR2})
   MARK_AS_ADVANCED(GSL_INCLUDE_DIR2)
   if (NOT (${GSL_INCLUDE_DIRS} STREQUAL ${GSL_INCLUDE_DIR2}))
-    set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2})
+    set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2} CACHE PATH "GSL include dirs")
   endif (NOT (${GSL_INCLUDE_DIRS} STREQUAL ${GSL_INCLUDE_DIR2}))
 endif (${GSL_INCLUDE_DIR2})
+set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2} CACHE PATH "GSL include dirs")
 
-find_library (GSL_LIB gsl
+find_library (GSL_LIB gsl gsl_mt
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
+  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
 )
-find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas
+find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas cblas_mt
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
+  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
 )

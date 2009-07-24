@@ -20,6 +20,7 @@ message (STATUS "Z_INCLUDE_DIRS is ${Z_INCLUDE_DIRS}")
 
 find_library (Z_LIBRARIES NAMES z zlib zdll
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../zlib/lib
+        ${CMAKE_SOURCE_DIR}/../zlib/projects/visualc6/Win32_LIB_Release
 )
 if (NOT Z_LIBRARIES)
   message (SEND_ERROR "Unable to find zlib library")
