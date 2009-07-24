@@ -196,10 +196,10 @@ private:
    * 	number, it is not restricted to being one. */
   void calMosqEmergeRate (int populationSize, vector<double>& kappa, double averageAvailability);
   
+  
   /** This subroutine converts ShortArray of length intervalsPerYear to
    * FullArray by copying and duplicating elements to fill the gaps. */
-  void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
-
+  static void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
   
   /** Given a positive array, originalArray, of length OALength,
    * this routine exponentiates the inverse discrete Fourier 
@@ -213,7 +213,7 @@ private:
    * smoothArray is an OUT parameter.
    * originalArray, SALength and OALength are IN parameters.
    * No reason smoothArray and originalArray can't be the same array. */
-  void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
+  static void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
 
   /**
    *  Given a sequence of Fourier coefficients, FC, of odd length,
@@ -221,10 +221,12 @@ private:
    *  Fourier transform into an array, tArray.
    *
    * tArray is an OUT parameter, FC is an IN parameter. */
-  void calcInverseDFTExp(vector<double>& tArray, vector<double>& FC);
+  static void calcInverseDFTExp(vector<double>& tArray, vector<double>& FC);
 
   /// Shifts elements of rArray clockwise by rAngle.
-  void rotateArray(vector<double>& rArray, double rAngle);
+  static void rotateArray(vector<double>& rArray, double rAngle);
+  
+  friend class VectorEmergenceSuite;
 };
 
 #endif

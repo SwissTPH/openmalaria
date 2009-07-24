@@ -339,6 +339,8 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   // of this function.
   VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, averageAvailability, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
   
+  //TODO: No support for nMalHostTypesInit, nHostTypesInit != 1 in emergence
+  // rate calculations (these aren't variables even used).
   /* Number of type of malaria-susceptible hosts. 
   Dimensionless.
   $m$ in model. Scalar.

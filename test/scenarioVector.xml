@@ -107,7 +107,17 @@
   <vector>
     <anopheles mosquito="gambiae_ss">
       <eir EIRRotateAngle="0.0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
-      <mosq emergenceRateFilename="Nv0scenarioVector.txt" extrinsicIncubationPeriod="10" mosqEntoAvailability="0.0070" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
+      <mosq
+	emergenceRateFilename="Nv0scenarioVector.txt"
+	extrinsicIncubationPeriod="10"
+	mosqEntoAvailability="0.0070"
+	mosqProbBiting="0.95"
+	mosqProbFindRestSite="0.95"
+	mosqProbOvipositing="0.93"
+	mosqProbResting="0.94"
+	mosqRestDuration="3"
+	mosqSeekingDeathRate="1.6"
+	mosqSeekingDuration="0.33"/>
     </anopheles>
   </vector>
 </entoData>

@@ -26,6 +26,7 @@
 #include <gsl/gsl_sf.h>
 #include <fstream>
 #include <limits>
+#include "global.h"
 using namespace std;
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
@@ -53,7 +54,12 @@ using namespace std;
 class VectorEmergence {
 public:
   /** Initialises some data elements */
-  VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize, double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting, double probMosqSurvivalOvipositing);
+  VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize,
+		  double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration,
+		  double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting,
+		  double probMosqSurvivalOvipositing,
+		  int yearLength = daysInYear, ostream& traceOut = cout,
+		  const char* logFileName = "output_ento_para.txt");
   /** Frees data */
   ~VectorEmergence();
   
@@ -149,7 +155,8 @@ private:
   gsl_permutation* memPermutation;	///< dimension eta
   //@}
   
-  FILE *fpp;	///< Used for printing
+  ostream& trace;	///< Run-time output is printed here
+  mutable ofstream logFile;	///< Values are logged to here
   //END data
   
 /** CalcUpsilonOneHost returns a pointer to an array of theta_p 
@@ -347,8 +354,7 @@ double binomial(int n, int k) const;
   *
   * All parameters are IN parameters.
  */
-void PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind, 
-		size_t theta_p, const char fnrootfindingstate[]) const;
+void PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind) const;
 
 /** PrintParameters() prints the input parameters to a given file. 
   * We currently use this to make sure that the inputs we have in C
@@ -378,36 +384,22 @@ void PrintUpsilon(const gsl_matrix *const * Upsilon, size_t theta_p,
  */
 void PrintXP(const gsl_vector *const * x_p, size_t eta, size_t theta_p) const;
 
-/** PrintLambda() prints some values of Lambda.
-  * 
-  * All parameters are IN parameters.
- */
-void PrintLambda(const gsl_vector *const * Lambda, size_t eta) const;
-
-/** PrintEigenvalues() prints eigenvalues to the given file.
-  * 
-  * All parameters are IN parameters.
- */
-void PrintEigenvalues(const gsl_vector_complex* eval, size_t n) const;
-
 void PrintMatrix(const char matrixname[], const gsl_matrix* A,
 		size_t RowLength, size_t ColLength) const;
 
 public:
-  /** PrintVector() prints the given (GSL) vector to the given file.
-   * 
-   * All parameters are IN parameters. */
-  void PrintVector(const char* vectorname, const gsl_vector* v, size_t n) const;
+  /** PrintVector() prints the given (GSL) vector to the given file. */
+  void PrintVector(const char* vectorname, const gsl_vector* v) const;
 
   /** PrintArray() prints the given (C) array to the given file.
    * 
-   * The array, v, of doubles is assumed to be of length n.
-   * All parameters are IN parameters. */
+   * The array, v, of doubles is assumed to be of length n. */
   void PrintArray(const char* vectorname, const double* v, int n) const;
   /// ditto, taking a vector
   void PrintArray(const char* vectorname, const vector<double>& v) const;
 
   friend int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
+  friend class VectorEmergenceSuite;
 };
 
 /** @brief Free functions called by the GSL root finder
@@ -441,15 +433,12 @@ struct SvDiffParams
 {	//FIXME: move some of these to VectorEmergence
   SvDiffParams (VectorEmergence* e, gsl_vector* v, gsl_matrix* m, size_t theta_p) :
     emerge(e), S_vFromEIR(v), inv1Xtp(m),
-    lastNv0(gsl_vector_calloc (theta_p)), lastS_vDiff(gsl_vector_calloc (theta_p)),
-    outNv0("Nv0_values.csv")
+    lastNv0(gsl_vector_calloc (theta_p)), lastS_vDiff(gsl_vector_calloc (theta_p))
   {
     // make sure lastNv0 won't match any input first time, so lastS_vDiff will be calculated
     gsl_vector_set (lastNv0, 0, numeric_limits<double>::quiet_NaN());
-    outNv0.precision(20);
   }
   ~SvDiffParams () {
-    outNv0.close();
     gsl_vector_free (lastNv0);
     gsl_vector_free (lastS_vDiff);
   }
@@ -462,6 +451,4 @@ struct SvDiffParams
   gsl_vector* lastNv0;
   /// The last calculated S_vDiff
   gsl_vector* lastS_vDiff;
-  /// Nv0 output file
-  ofstream outNv0;
 };

@@ -55,14 +55,19 @@
   *
   * As far as possible, we try to use gsl_vectors instead of arrays to allow more
   * flexibility. */
-VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize, double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting, double probMosqSurvivalOvipositing) :
+VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration,
+    int populationSize, double entoAvailability, double mosqSeekingDeathRate,
+    double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite,
+    double probMosqSurvivalResting, double probMosqSurvivalOvipositing,
+    int yearLength, ostream& traceOut, const char* logFileName) :
   counterSvDiff(0),
-  theta_p (daysInYear), tau(mosqRestDuration), theta_s(EIPDuration),
+  theta_p (yearLength), tau(mosqRestDuration), theta_s(EIPDuration),
   N_i(populationSize),
   alpha_i(entoAvailability),
   mu_vA(mosqSeekingDeathRate), theta_d(mosqSeekingDuration),
   P_B_i(probMosqBiting), P_C_i(probMosqFindRestSite),
-  P_D_i(probMosqSurvivalResting), P_E_i(probMosqSurvivalOvipositing)
+  P_D_i(probMosqSurvivalResting), P_E_i(probMosqSurvivalOvipositing),
+  trace (traceOut), logFile (logFileName)
 {
   mt = theta_s + tau -1;
   eta = 2*mt + tau;
@@ -81,13 +86,9 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration, int popu
   memMatrixEtaSq = gsl_matrix_calloc(eta, eta);
   memEigenWorkspace = gsl_eigen_nonsymm_alloc(eta);
   memPermutation = gsl_permutation_alloc(eta);
-  
-  fpp = fopen("output_ento_para.txt", "w");
 }
 
 VectorEmergence::~VectorEmergence () {
-  fclose (fpp);
-  
   gsl_vector_complex_free(memVectorComplexEta);
   gsl_vector_free(memVectorEta);
   gsl_matrix_free(memMatrixEtaSq);
@@ -102,6 +103,8 @@ VectorEmergence::~VectorEmergence () {
   delete[] Upsilon;
   delete[] Lambda;
   delete[] x_p;
+  
+  logFile.close();
 }
 
 double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
@@ -115,7 +118,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   gsl_vector* N_v0 = gsl_vector_calloc(theta_p);	// mosqEmergeRate
   memcpy (N_v0->data, mosqEmergeRate, theta_p * sizeof(double));
   
-  PrintVector("Nv0", N_v0, theta_p);
+  PrintVector("Nv0", N_v0);
 
   gsl_vector* K_vi = gsl_vector_calloc(theta_p);	// humanInfectivity
   memcpy (K_vi->data, FHumanInfectivityInitVector, theta_p * sizeof(double));
@@ -194,7 +197,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   // We should now find the spectral radius of X_t_p and show that it's less than 1.
   double srXtp = CalcSpectralRadius(X_t_p);
 
-  // printf("The spectral radius of X_t_p = %e\n", srXtp);
+  // trace << "The spectral radius of X_t_p = " << srXtp << endl;
   // getchar();
 
   // If the spectral radius of X_t_p is greater than or equal to 1, then
@@ -224,8 +227,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   CalSvfromEIRdata(S_vFromEIR, P_Ai, Xi_i);
 
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  char SvfromEIRname[15] = "S_vFromEIR";
-  PrintVector(SvfromEIRname, S_vFromEIR, theta_p);
+  PrintVector("S_vFromEIR", S_vFromEIR);
 # endif
 
   /**** We check the initial value of the mosquito emergence rate *****
@@ -244,23 +246,22 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   
   CalcSvDiff(S_vDiff, S_vFromEIR, N_v0, inv1Xtp);
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  char InitSvDiffname[20] = "InitSvDifference";
-  PrintVector(InitSvDiffname, S_vDiff, theta_p);
+  PrintVector("InitSvDifference", S_vDiff);
 # endif
-  double SvDiff1norm = gsl_blas_dasum(S_vDiff);	//The \f$l^1\f$ norm of S_vDiff.
-  printf("The \f$l^1\f$ norm of S_vDiff is %e \n", SvDiff1norm);
+  double SvDiff1norm = gsl_blas_dasum(S_vDiff);	//The $l^1$ norm of S_vDiff.
+  trace << "The $l^1$ norm of S_vDiff is " << SvDiff1norm << endl;
 
   // Maximum \f$l^1\f$ distance of error of root-finding algorithm
   const double EpsAbsRF = 1.0;
   
   if(SvDiff1norm>EpsAbsRF){
-    printf("The difference in Sv is greater than the tolerance. \n");
+    trace << "The difference in Sv is greater than the tolerance." << endl;
     
     if (!(Global::clOptions & CLO::ENABLE_ERC))
       throw runtime_error ("Cannot recalculate: emergence rate calculations are not enabled.");
     
     /************* We initialize variables for root-finding. **************/
-    printf("Starting root-finding \n");
+    trace << "Starting root-finding" << endl;
 
     // Parameters for root-finding function.
     struct SvDiffParams pararootfind (this, S_vFromEIR, inv1Xtp,
@@ -279,21 +280,20 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     gsl_multiroot_fsolver* srootfind =
         gsl_multiroot_fsolver_alloc(Trootfind, theta_p);
 
-    printf("About to set root-finding solver \n");
+    trace << "About to set root-finding solver" << endl;
     // Initialize root-finding.
     gsl_multiroot_fsolver_set(srootfind, &frootfind, xrootfind);
-    printf("Set root-finding \n");
+    trace << "Set root-finding" << endl;
 
     // Print initial state (to screen):
-    char fnamerootfindoutput[30] = "output_rootfinding.txt";
-    PrintRootFindingStateTS(0, srootfind, theta_p, fnamerootfindoutput);
+    PrintRootFindingStateTS(0, srootfind);
     
     // Maximum number of iterations of root-finding algorithm.
     const size_t maxiterRF = 1000;
     int status = GSL_CONTINUE;
     for (size_t iter = 1; status == GSL_CONTINUE && iter < maxiterRF; ++iter) {
       status = gsl_multiroot_fsolver_iterate(srootfind);
-      PrintRootFindingStateTS(iter, srootfind, theta_p, fnamerootfindoutput);
+      PrintRootFindingStateTS(iter, srootfind);
 
       // Check to see if solver is stuck
       if (status){
@@ -304,16 +304,14 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
     }
 
     // Print status
-    printf("status = %s \n", gsl_strerror(status)); 
+    trace << "status = " <<  gsl_strerror(status) << endl; 
 
     // Copy solution for N_v0 into N_v0.
     gsl_vector_memcpy(N_v0, srootfind->x);
 
 #   ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-    char finalNv0name[15] = "FinalNv0";
-    char finalSvDiffname[15] = "FinalSvDiff";
-    PrintVector(finalNv0name, N_v0, theta_p);
-    PrintVector(finalSvDiffname, srootfind->f, theta_p);
+    PrintVector("FinalNv0", N_v0);
+    PrintVector("FinalSvDiff", srootfind->f);
 #   endif
 
 		// Free memory.
@@ -355,12 +353,9 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   
   
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  char Nvpname[15] = "NvPO";
-  char Ovpname[15] = "OvPO";
-  char Svpname[15] = "SvPO";
-  PrintVector(Nvpname, Nvp, theta_p);
-  PrintVector(Ovpname, Ovp, theta_p);
-  PrintVector(Svpname, Svp, theta_p);
+  PrintVector("NvPO", Nvp);
+  PrintVector("OvPO", Ovp);
+  PrintVector("SvPO", Svp);
 # endif
 
 
@@ -445,9 +440,9 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n
   sumkplus = *sumkplusPtr;
 
 	/* // Print sumkplus and sumklplus
-  printf("In CalcUpsilonOneHost, sumkplus = %f\n", sumkplus);
+  trace << "In CalcUpsilonOneHost, sumkplus = " << sumkplus << endl;
   for(l=1; l<=tau-1; l++){
-  printf("sumklplus(%d) = %f \n", l, sumklplus[l-1]);
+  trace << "sumklplus(" << l << ") = " <<  sumklplus[l-1] << endl;
 }
   getchar();
         */ 
@@ -518,31 +513,26 @@ int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f){
   SvDiffParams* params = (SvDiffParams *) p;
   VectorEmergence* emerge = params->emerge;
   
+  /* If x is the same as lastNv0 (last array used to calculate f), then don't
+   * recalculate f. This was intended as an optimisation, but x is at least
+   * slightly different each time, so it has no effect. */
   for (size_t i = 0; i < emerge->theta_p; ++i) {
     if (gsl_vector_get(params->lastNv0, i) == gsl_vector_get(x, i))
       continue;	// if same, test next values (or leave for loop)
-    cout.precision(20);
-    cout << "iteration: "<<emerge->counterSvDiff <<"index:"<<i<<endl;
-    cout <<gsl_vector_get(params->lastNv0, i)<<'\t'<<gsl_vector_get(x, i)<<'\t'<<gsl_vector_get(params->lastNv0, i)-gsl_vector_get(x, i)<<endl;
     // if different, calculate (then break)
-    
-    params->outNv0 << emerge->counterSvDiff << ",";
-    for (size_t j = 0; j < emerge->theta_p; ++j)
-      params->outNv0 << gsl_vector_get(x, j) << ",";
-    params->outNv0 << endl;
     
     // To set f, we simply call CalcSvDiff. It's probably easier than rewriting
     // this code.
     emerge->CalcSvDiff(params->lastS_vDiff, params->S_vFromEIR, x, params->inv1Xtp);
     
     // Calculate the l^1 norm of SvDiff.
-    printf("The \f$l^1\f$ norm of S_vDiff is %e \n", gsl_blas_dasum(params->lastS_vDiff));
+    emerge->trace << "The \f$l^1\f$ norm of S_vDiff is " <<  gsl_blas_dasum(params->lastS_vDiff) << endl;
     gsl_vector_memcpy (params->lastNv0, x);
     break;	// we only want to run this code once
   }
   
   emerge->counterSvDiff++;
-  cout << "In CalcSvDiff_rf for the "<< emerge->counterSvDiff <<"th time"<<endl;
+  emerge->trace << "In CalcSvDiff_rf for the "<< emerge->counterSvDiff <<"th time"<<endl;
   
   gsl_vector_memcpy (f, params->lastS_vDiff);
   
@@ -573,8 +563,7 @@ void VectorEmergence::CalcSvDiff(gsl_vector* S_vDiff, const gsl_vector* S_vFromE
   }
 
 # ifdef VectorTransmission_PRINT_CalcSvDiff
-  char SvfromNv0name[15] = "SvfromNv0";
-  PrintVector(SvfromNv0name, SvfromNv0, theta_p);
+  PrintVector("SvfromNv0", SvfromNv0);
 # endif
 
 	// Subtract S_vFromEIR from SvfromNv0
@@ -594,7 +583,8 @@ void VectorEmergence::CalcLambda(const gsl_vector* N_v0)
 	
 # ifdef VectorTransmission_PRINT_CalcLambda
   // We should try to print some of these vectors out to see what they  look like.
-  PrintLambda(Lambda, eta);		
+  PrintVector("LambdaFirst", Lambda[0]);
+  PrintVector("LambdaLast", Lambda[theta_p-1]);
 # endif
 }
 
@@ -608,8 +598,6 @@ void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
 	// Initial condition for periodic orbit.
   gsl_vector* x0p = gsl_vector_calloc(eta);
 
-  printf("Entered CalcXP() \n");
-
 	// Evaluate the initial condition of the periodic orbit.
 	// Please refer to paper [add reference to paper and equation
 	// number here] for the expression for \f$x_0\f$.
@@ -620,10 +608,8 @@ void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
   }
   gsl_blas_dgemv(CblasNoTrans, 1.0, inv1Xtp, vtemp, 0.0, x0p);
 
-  printf("Calculated initial condition for periodic orbit. \n");
 # ifdef VectorTransmission_PRINT_CalcXP
-  char x0pname[15] = "x0p";
-  PrintVector(x0pname, x0p, eta);
+  PrintVector("x0p", x0p);
 # endif
 
 	// We evalute the full periodic orbit now. 
@@ -632,30 +618,20 @@ void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
 	// Thus, x_p[theta_p-1] = x0p. We can check this to make sure.
   for(size_t t=0; t<theta_p; t++){
 #ifdef DEBUG_PRINTING
-    printf("t=%u \r", (unsigned)(t+1));
+    trace << "t=" << (t+1) << '\r';
 #endif
-		/*
-    if(t==100 || t==200 || t==300){
-    printf("t=%d \n", t);
-  }
-    else{
-    printf("t=%d \r", t);
-  }
-                */
 		// gsl_vector_set_zero(vtemp);
 		// gsl_vector_set_zero(vtempsum);
     gsl_vector_set_zero (x_p[t]);
     FuncX(mtemp, t+1, 0);
     gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, x0p, 1.0, x_p[t]);
     for(size_t i=0; i<=t; i++){
-			// printf("t=%d i=%d \n", t, i);
+			// trace << "t=" << t << " i=" <<  i << endl;
       FuncX(mtemp, t+1, i+1);
       gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, x_p[t]);
     }
   }
   
-  printf("Calculated periodic orbit. \n");
-
 # ifdef VectorTransmission_PRINT_CalcXP
   // We should try to print some of these vectors out to see what they  look like.
   PrintXP(x_p, eta, theta_p);
@@ -688,13 +664,13 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
 
 	/* // Check results for kplus. 
   itemp = (int) (7./2.) - 1.;
-  printf("kplus = %d\n", kplus);
-  printf("itemp = %d\n", itemp);
+  trace << "kplus = " << kplus << endl;
+  trace << "itemp = " << itemp << endl;
   getchar();
         */
 
 	/* // Print sumkplus
-  printf("In CalcPSTS(), sumkplus = %f \n", sumkplus);
+  trace << "In CalcPSTS(), sumkplus = " << sumkplus << endl;
   getchar();
         */ 
 
@@ -702,7 +678,7 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
   for (size_t l=1; l <= tau-1; l++){
     klplus = (int) (double(theta_s+l)/tau) -2; // = floor((theta_s+l)/tau)-2;
     sumklplus[l-1] = 0;
-		// printf("For l = %d, klplus = %d \n", l, klplus);
+		// trace << "For l = " << l << ", klplus = " <<  klplus << endl;
 
     for(int j=0; j<=klplus; j++){
       double tempbin = binomial(theta_s+l-(j+2)*tau+j,j);
@@ -710,9 +686,9 @@ void VectorEmergence::CalcPSTS(double* sumkplusPtr, double* sumklplus, double P_
       double temppdfp = pow(P_df,(double)(j+1));
       double temp = tempbin*temppap*temppdfp;
       sumklplus[l-1] += temp;
-			// printf("For j = %d, tempsum = %f \n", j, temp);
+			// trace << "For j = " << j << ", tempsum = " <<  temp << endl;
     }
-		// printf("sumklplus(%d) = %f \n", l, sumklplus[l-1]);
+		// trace << "sumklplus(" << l << ") = " <<  sumklplus[l-1] << endl;
   }
 }
 
@@ -738,7 +714,8 @@ double VectorEmergence::CalcSpectralRadius(const gsl_matrix* A) const
   gsl_eigen_nonsymm(memMatrixEtaSq, memVectorComplexEta, memEigenWorkspace);
 
 # ifdef VectorTransmission_PRINT_CalcSpectralRadius
-  PrintEigenvalues(memVectorComplexEta, eta);
+  //logFile << "Eigenvalues =" << endl;
+  //gsl_vector_complex_fprintf(fpp, eval, "%e");
 # endif
 
   // Calculate the absolute values of the eigenvalues, and find the largest.
@@ -790,21 +767,12 @@ double VectorEmergence::binomial(int n, int k) const
   Printing routines below. Most are only optionally compiled in.
 ******************************************************************************/
 
-void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind, 
-		size_t theta_p, const char fnrootfindingstate[]) const
+void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind) const
 {
-  FILE* fpp = fopen(fnrootfindingstate, "w");
-
-	// Calculate the \f$l^1\f$ norm of f.
-  double svdiffsum = gsl_blas_dasum(srootfind->f);
-
-	// Get the 0th element of N_v0.
-  double Nv0_0 = gsl_vector_get(srootfind->x, 0);
-
-	// Print to screen:
-  printf("iter = %5u N_v0(1) = % .3f ||f||_1 = % .3f \n", (int)iter, Nv0_0, svdiffsum);
-  fprintf(fpp, "iter = %5u N_v0(1) = % .3f ||f||_1 = % .3f \n", (int)iter, Nv0_0, svdiffsum);
-  fflush(fpp);
+  trace << "iter = " << (int)iter
+	<< "\tN_v0(1) = " << gsl_vector_get(srootfind->x, 0)
+	<< "\t||f||_1 = " << gsl_blas_dasum(srootfind->f)	// Calculate the \f$l^1\f$ norm of f.
+	<< endl;
 }
 
 #ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
@@ -813,38 +781,34 @@ void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s
 		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
 		const gsl_vector* K_vi, const gsl_vector* Xi_i) const
 {
-  fprintf(fpp, "theta_p = %d; \n", theta_p);
-  fprintf(fpp, "tau = %d; \n", tau);
-  fprintf(fpp, "theta_s = %d; \n", theta_s);
-  fprintf(fpp, "n = %d; \n", n);
-  fprintf(fpp, "m = %d; \n", m);
+  logFile << "theta_p = " << theta_p << ";" << endl;
+  logFile << "tau = " << tau << ";" << endl;
+  logFile << "theta_s = " << theta_s << ";" << endl;
+  logFile << "n = " << n << ";" << endl;
+  logFile << "m = " << m << ";" << endl;
 
-  fprintf(fpp, "N_i = %f; \n", N_i);
-  fprintf(fpp, "alpha_i = %f; \n", alpha_i);
-  fprintf(fpp, "mu_vA = %f; \n", mu_vA);
-  fprintf(fpp, "theta_d = %f; \n", theta_d);
-  fprintf(fpp, "P_B_i = %f; \n", P_B_i);
-  fprintf(fpp, "P_C_i = %f; \n", P_C_i);
-  fprintf(fpp, "P_D_i = %f; \n", P_D_i);
-  fprintf(fpp, "P_E_i = %f; \n", P_E_i);
+  logFile << "N_i = " << N_i << ";" << endl;
+  logFile << "alpha_i = " << alpha_i << ";" << endl;
+  logFile << "mu_vA = " << mu_vA << ";" << endl;
+  logFile << "theta_d = " << theta_d << ";" << endl;
+  logFile << "P_B_i = " << P_B_i << ";" << endl;
+  logFile << "P_C_i = " << P_C_i << ";" << endl;
+  logFile << "P_D_i = " << P_D_i << ";" << endl;
+  logFile << "P_E_i = " << P_E_i << ";" << endl;
 
 	
-  fprintf(fpp, "K_vi = \n");
-  gsl_vector_fprintf(fpp, K_vi, "%f");
+  PrintVector("K_vi", K_vi);
 
-  fprintf(fpp, "Xi_i = \n");
-  gsl_vector_fprintf(fpp, Xi_i, "%f");
+  PrintVector("Xi_i", Xi_i);
 
   // Let's do this properly.
   for (size_t i=0; i<theta_p; i++){
-    fprintf(fpp, "K_vi(%d) = %f; \n", i+1, gsl_vector_get(K_vi, i));
+    logFile << "K_vi(" <<  i+1 << ") = " <<  gsl_vector_get(K_vi, i) << ";" << endl;
   }
 
   for (size_t i=0; i<theta_p; i++){
-    fprintf(fpp, "Xi_i(%d) = %f; \n", i+1, gsl_vector_get(Xi_i,i));
+    logFile << "Xi_i(" <<  i+1 << ") = " <<  gsl_vector_get(Xi_i,i) << ";" << endl;
   }
-
-  fflush(fpp);
 }
 #endif
 
@@ -853,50 +817,38 @@ void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t the
 		size_t eta, double P_A, double P_Ai, double P_df,
 		const gsl_vector* P_dif, const gsl_vector* P_duf) const
 {
-  fprintf(fpp, "P_A = %f\n", P_A);
-  fprintf(fpp, "P_Ai = %f\n", P_Ai);
-  fprintf(fpp, "P_df = %f\n", P_df);
+  logFile << "P_A = " << P_A << endl;
+  logFile << "P_Ai = " << P_Ai << endl;
+  logFile << "P_df = " << P_df << endl;
 
   /*
   for (size_t i=0; i<theta_p; i++)
-    fprintf(fpp, "P_dif(%d) = %f \n", i+1, gsl_vector_get(P_dif, i));
+    logFile << "P_dif(" <<  i+1 << ") = " <<  gsl_vector_get(P_dif, i) << endl;
 
   for (size_t i=0; i<theta_p; i++)
-    fprintf(fpp, "P_duf(%d) = %f \n", i+1, gsl_vector_get(P_duf, i));
+    logFile << "P_duf(" <<  i+1 << ") = " <<  gsl_vector_get(P_duf, i) << endl;
   */
 
   // Print some Upsilon[k].
   size_t k=0;
 
-  fprintf(fpp, "Upsilon[%d] = \n", k);
+  logFile << "Upsilon[" << k << "] =" << endl;
   for (size_t i=0; i < eta; i++){
     for (size_t j=0; j < eta; j++){
-      fprintf(fpp, "%f ", gsl_matrix_get(Upsilon[k], i, j));
+      logFile << gsl_matrix_get(Upsilon[k], i, j) << endl;
     }
-    fprintf(fpp, "\n");
+    logFile << endl;
   }
   
-  k = 135;
+  k = theta_p - 1;
 
-  fprintf(fpp, "Upsilon[%d] = \n", k);
+  logFile << "Upsilon[" << k << "] =" << endl;
   for (size_t i=0; i < eta; i++){
     for (size_t j=0; j < eta; j++){
-      fprintf(fpp, "%f ", gsl_matrix_get(Upsilon[k], i, j));
+      logFile << gsl_matrix_get(Upsilon[k], i, j) << endl;
     }
-    fprintf(fpp, "\n");
+    logFile << endl;
   }
-  
-  k = 364;
-
-  fprintf(fpp, "Upsilon[%d] = \n", k);
-  for (size_t i=0; i < eta; i++){
-    for (size_t j=0; j < eta; j++){
-      fprintf(fpp, "%f ", gsl_matrix_get(Upsilon[k], i, j));
-    }
-    fprintf(fpp, "\n");
-  }
-
-  fflush(fpp);
 }
 #endif
 
@@ -911,47 +863,10 @@ void VectorEmergence::PrintXP(const gsl_vector *const * x_p, size_t eta, size_t 
 
   // Print all x_p[t]:
   for(size_t t=0; t<theta_p; t++){
-    sprintf(timestring, "%d", t+1);
-    strcpy(xpvecname, xpname);
-    strcat(xpvecname, "(");
-    strcat(xpvecname, timestring);
-    strcat(xpvecname, ")");
-    PrintVector(xpvecname, x_p[t], eta);
+    ostringstream temp;
+    temp << "x_p(" << t+1 << ')';
+    PrintVector(temp.str().c_str(), x_p[t]);
   }
-
-  fflush(fpp);
-}
-#endif
-
-#ifdef VectorTransmission_PRINT_CalcLambda	// only use
-void VectorEmergence::PrintLambda(const gsl_vector *const * Lambda, size_t eta) const
-{
-  // Print some Lambda[t].
-  size_t t=0;
-
-  fprintf(fpp, "Lambda[%d] = \n", t);
-  gsl_vector_fprintf(fpp, Lambda[t], "%f");
-
-  t=139;
-
-  fprintf(fpp, "Lambda[%d] = \n", t);
-  gsl_vector_fprintf(fpp, Lambda[t], "%f");
-
-  t=363;
-
-  fprintf(fpp, "Lambda[%d] = \n", t);
-  gsl_vector_fprintf(fpp, Lambda[t], "%f");
-
-  fflush(fpp);
-}
-#endif
-
-#ifdef VectorTransmission_PRINT_CalcSpectralRadius	// only use
-void VectorEmergence::PrintEigenvalues(const gsl_vector_complex* eval, size_t n) const
-{
-  fprintf(fpp, "Eigenvalues = \n");
-  gsl_vector_complex_fprintf(fpp, eval, "%e");
-  fflush(fpp);
 }
 #endif
 
@@ -959,40 +874,34 @@ void VectorEmergence::PrintEigenvalues(const gsl_vector_complex* eval, size_t n)
 void VectorEmergence::PrintMatrix(const char matrixname[], const gsl_matrix* A, 
                  size_t RowLength, size_t ColLength) const
 {
-  fprintf(fpp, "%s = \n", matrixname);
+  logFile << "" << matrixname << " =" << endl;
   for (size_t i=0; i < ColLength; i++){
     for (size_t j=0; j < RowLength; j++){
-      fprintf(fpp, "%e ", gsl_matrix_get(A, i, j));
+      logFile << "" << gsl_matrix_get(A, i, j) << endl;
     }
-    fprintf(fpp, "\n");
+    logFile << endl;
   }
-
-  fflush(fpp);
 }
 #endif
 
 #if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcSvDiff || defined VectorTransmission_PRINT_CalcXP
-void VectorEmergence::PrintVector(const char* vectorname, const gsl_vector* v, size_t n) const
+void VectorEmergence::PrintVector(const char* vectorname, const gsl_vector* v) const
 {
-  for (size_t i=0; i < n; i++){
+  for (size_t i=0; i < v->size; i++){
     double temp = gsl_vector_get(v, i);
-    fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, temp);
+    logFile << vectorname << "(" <<  i+1 << ") = " <<  temp << ";" << endl;
 		
   }
-	
-  fflush(fpp);
 }
 #endif
 
 void VectorEmergence::PrintArray(const char* vectorname, const double* v, int n) const {
   for (int i=0; i < n; i++){
-    fprintf(fpp, "%s(%d) = %f; \n", vectorname, i+1, v[i]);
+    logFile << vectorname << "(" <<  i+1 << ") = " <<  v[i] << ";" << endl;
   }
-  fflush(fpp);
 }
 void VectorEmergence::PrintArray(const char* vectorname, const vector<double>& v) const {
   for (unsigned int i=0; i < v.size(); i++){
-    fprintf(fpp, "%s(%u) = %f; \n", vectorname, i+1, v[i]);
+    logFile << vectorname << "(" <<  i+1 << ") = " <<  v[i] << ";" << endl;
   }
-  fflush(fpp);
 }
