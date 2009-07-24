@@ -2,12 +2,29 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-option (CXXTEST_USE_PYTHON "Use python instead of perl to generate unittest code." OFF)
-if (CXXTEST_USE_PYTHON)
-  set (CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.py)
-else (CXXTEST_USE_PYTHON)
+find_program (PERL_EXECUTABLE perl
+  DOC "Path to perl. Only one of perl or python is needed.")
+find_program (PYTHON_EXECUTABLE python
+  DOC "Path to python. Only one of perl or python is needed.")
+
+if (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
+  option (CXXTEST_USE_PYTHON "Use python instead of perl to generate unittest code." OFF)
+  if (CXXTEST_USE_PYTHON)
+    set (CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
+    set (CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.py)
+  else (CXXTEST_USE_PYTHON)
+    set (CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
+    set (CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.pl)
+  endif (CXXTEST_USE_PYTHON)
+elseif (PERL_EXECUTABLE)
+  set (CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
   set (CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.pl)
-endif (CXXTEST_USE_PYTHON)
+elseif (PYTHON_EXECUTABLE)
+  set (CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
+  set (CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.py)
+else (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
+  set (CXXTEST_INTERPRETER "NOTFOUND")
+endif (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
 
 option (CXXTEST_GUI "Draw a graphical progress bar" OFF)
 set (CXXTEST_GUI_ARG "")
@@ -33,14 +50,27 @@ include_directories (SYSTEM
 
 set (CXXTEST_HEADERS PerHostSuite.h VectorEmergenceSuite.h)
 
-add_custom_command (OUTPUT tests.cpp
-  COMMAND ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
-    ${CXXTEST_HEADERS}
-  DEPENDS ${CXXTEST_HEADERS}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "Generating unittest code with cxxtestgen"
-  VERBATIM
-)
+if (CXXTEST_INTERPRETER)
+  # The second COMMAND, cp, is to update the source copy. We can't use configure_file
+  # because that runs at configure time, not build time.
+  add_custom_command (OUTPUT tests.cpp
+    COMMAND ${CXXTEST_INTERPRETER} ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
+      ${CXXTEST_HEADERS}
+    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp
+    DEPENDS ${CXXTEST_HEADERS}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Generating unittest code with cxxtestgen"
+    VERBATIM
+  )
+else (CXXTEST_INTERPRETER)
+  if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp)
+    configure_file (${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp COPYONLY)
+    message (STATUS "Unable to find perl or python executable. Thus I won't be able to rebuild tests.cpp if required.")
+  else (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp)
+    message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp, and I can't find an existing version to use.")
+  endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp)
+endif (CXXTEST_INTERPRETER)
+
 add_executable (run tests.cpp)
 target_link_libraries (run
   model
@@ -64,5 +94,4 @@ add_test (cxxtest run -keep)
 mark_as_advanced (
   CXXTEST_GUI_ARG
   CXXTEST_GUI_LIB
-  CXXTEST_SCRIPT
 )
