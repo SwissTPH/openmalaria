@@ -59,7 +59,7 @@ if (MSVC)
     PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
 endif (MSVC)
 
-add_test (cxxtest run)
+add_test (cxxtest run -keep)
 
 mark_as_advanced (
   CXXTEST_GUI_ARG
