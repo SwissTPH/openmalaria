@@ -15,3 +15,4 @@ dsss_objs
 .sconsign.dblite
 build
 lib
+test/compareOutputsFloat.pyc

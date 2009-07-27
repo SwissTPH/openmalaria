@@ -52,7 +52,7 @@ def runScenario(options,omOptions,name):
     return
   
   # Run from a temporary directory, so checkpoint files won't conflict
-  simDir = tempfile.mkdtemp(prefix='temp', dir=testBuildDir)
+  simDir = tempfile.mkdtemp(prefix=name+'-', dir=testBuildDir)
   outFile=os.path.join(simDir,"output.txt")
   outNameFile=os.path.join(testBuildDir,"output"+name+".txt")
   if (os.path.isfile(outNameFile)):
@@ -68,7 +68,8 @@ def runScenario(options,omOptions,name):
   Nv0fileSrc=os.path.join(testSrcDir,"Nv0scenario{0}.txt".format(name))
   Nv0file=os.path.join(simDir,"Nv0scenario{0}.txt".format(name))
   if os.path.isfile(Nv0fileSrc):
-    linkOrCopy (Nv0fileSrc,Nv0file)
+    # Don't link, because it may be edited in-situ; we don't want to replace the original:
+    shutil.copy2 (Nv0fileSrc,Nv0file)
   
   if options.logging:
     print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
@@ -79,8 +80,8 @@ def runScenario(options,omOptions,name):
     if options.logging:
       print "\033[1;32m",cmd,"\033[0;00m"
     ret=subprocess.call (cmd, shell=False, cwd=simDir)
-    if ret:
-      print "Non-zero exit status: {}".format(ret)
+    if ret != 0:
+      print "Non-zero exit status: {0}".format(ret)
       break
     
     # if the checkpoint file hasn't been updated, stop
@@ -97,10 +98,16 @@ def runScenario(options,omOptions,name):
     os.rename(stderrFile,dest)
     stderrFile=dest
   
-  os.remove(densities_csv)
-  os.remove(scenario_xsd)
-  if os.path.isfile(Nv0file):
-    os.remove (Nv0file)
+  if options.cleanup:
+    os.remove(densities_csv)
+    os.remove(scenario_xsd)
+    # For now do the safest thing and don't delete. We don't want to remove this file if it was overwritten.
+    #if os.path.isfile(Nv0file):
+      #os.remove (Nv0file)
+    for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?"))):
+      if os.path.isfile(f):
+	os.remove(f)
+  
   if os.path.isfile(outFile):
     os.rename(outFile,outNameFile)
   
@@ -135,6 +142,10 @@ def evalOptions (args):
   parser.add_option("-q","--quiet",
 		    action="store_false", dest="logging", default=True,
 		    help="Turn off console output from this script")
+  parser.add_option("-n","--dry-run", action="store_false", dest="run", default=True,
+		    help="Don't actually run openMalaria, just output the commandline.")
+  parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
+		    help="Don't clean up expected files from the temparary dir (checkpoint files, densities.csv and @OMTEST_SCEMA_NAME@)")
   parser.add_option("--valid","--validate",
 		    action="store_true", dest="xmlValidate", default=False,
 		    help="Validate the XML file(s) using xmllint and the latest schema.")
@@ -147,8 +158,6 @@ def evalOptions (args):
   parser.add_option("--valgrind-track-origins", action="callback", callback=setWrapArgs,
 		    callback_args=(["valgrind","--gen-suppressions=yes","leak-check=full","--track-origins=yes"],),
 		    help="As --valgrind, but pass --track-origins=yes option (1/2 performance).")
-  parser.add_option("-n","--dry-run", action="store_false", dest="run", default=True,
-		    help="Don't actually run openMalaria, just output the commandline.")
   (options, others) = parser.parse_args(args=args)
   
   options.ensure_value("wrapArgs", [])

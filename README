@@ -24,4 +24,5 @@ gzstream, an STL iostream wrapper around zlib:
 CxxTest 3.10.1:
   include/cxxtest
   unittest/cxxtestgen.pl
+  unittest/cxxtestgen.py
 Both are licenced under the LGPL 2.1 (see COPYING.LIB).
