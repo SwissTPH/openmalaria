@@ -177,10 +177,12 @@ void Global::setModelVersion () {
     cerr << "Warning: model version used is deprecated" << endl;
   
   if (clOptions & CLO::PRINT_MODEL_VERSION) {
+    cout << "Model flags:";
     for (int i = 0; i < NUM_VERSIONS; ++i) {
       if ((modelVersion >> i) & 1)
-	cout << "Model: 1 << "<<i<<endl;
+	cout << " 1<<"<<i;
     }
+    cout << endl;
     throw cmd_exit ("Printed model version");
   }
 }

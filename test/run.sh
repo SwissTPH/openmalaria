@@ -2,6 +2,8 @@
 # With no arguments, run all scenario*.xml files.
 # With arguments A,...,Z, only run scenarioA.xml, ..., scenarioZ.xml
 
+echo "Warning: this test-script has been replaced by run.py and will no longer be maintained!"
+
 # replaced by CMake
 TEST_SOURCE=@CMAKE_CURRENT_SOURCE_DIR@
 TEST_BINARY=@CMAKE_CURRENT_BINARY_DIR@

@@ -2,10 +2,9 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
+find_package (Python)
 find_program (PERL_EXECUTABLE perl
   DOC "Path to perl. Only one of perl or python is needed.")
-find_program (PYTHON_EXECUTABLE python
-  DOC "Path to python. Only one of perl or python is needed.")
 
 if (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
   option (CXXTEST_USE_PYTHON "Use python instead of perl to generate unittest code." OFF)
@@ -89,7 +88,7 @@ if (MSVC)
     PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
 endif (MSVC)
 
-add_test (cxxtest run -keep)
+add_test (unittest run -keep)
 
 mark_as_advanced (
   CXXTEST_GUI_ARG
