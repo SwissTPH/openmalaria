@@ -88,6 +88,7 @@ if (MSVC)
     PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
 endif (MSVC)
 
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/VectorEmergenceSuite.txt ${CMAKE_CURRENT_BINARY_DIR}/VectorEmergenceSuite.txt COPYONLY)
 add_test (unittest run -keep)
 
 mark_as_advanced (
