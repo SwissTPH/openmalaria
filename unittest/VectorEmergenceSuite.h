@@ -37,8 +37,15 @@ public:
   {
   }
   
-  void testDummy () {
-    TS_WARN ("TODO: write VectorEmergence tests");
+  void testCalcPSTS () {
+    emerge->theta_s = 5;
+    emerge->tau = 3;
+    double sumKPlus;
+    double sumKLPlus[2];
+    emerge->CalcPSTS (&sumKPlus, sumKLPlus, 5.4803567e-002, 6.1014058e-001);
+    TS_ASSERT_DELTA (sumKPlus, 3.0034309e-003);
+    TS_ASSERT_DELTA (sumKLPlus[0], 6.1014058e-001);
+    TS_ASSERT_DELTA (sumKLPlus[1], 3.3437880e-002);
   }
   
   void testWholeCalculation () {
