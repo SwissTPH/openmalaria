@@ -37,7 +37,7 @@ ofstream null("\0");
 
 // This is the smallest power of ten sufficient to pass current tests; so it
 // may need to be increased.
-const double MY_DELTA = 0.0000001;
+const double MY_DELTA = 1.0e-8;
 
 /** Tests on the Vector Control Emergence Rate calculation code.
  *
@@ -47,7 +47,7 @@ class VectorEmergenceSuite : public CxxTest::TestSuite
 {
 public:
   VectorEmergenceSuite () :
-      emerge(3, 5, POP_SIZE, AVG_AVAIL, 1.6, 0.33, .95, .95, .94, .93,
+      emerge(3, 5, POP_SIZE, AVG_AVAIL, 1.6, 0.33, 9.5000000e-001, .95, .94, .93,
 	     YEAR_LEN, null, "\0")
   {
     ifstream file ("VectorEmergenceSuite.txt");
@@ -55,11 +55,23 @@ public:
     input1CalcInv1minusA = readMatrix(file, "input1CalcInv1minusA",17);
     output1CalcInv1minusA = readMatrix(file, "output1CalcInv1minusA",17);
     input1CalcSpectralRadius = readMatrix(file,"input1CalcSpectralRadius",17);
+    input1CalSvfromEIRdata = readVector(file, "input1CalSvfromEIRdata", 10);
+    output1CalSvfromEIRdata = readVector(file, "output1CalSvfromEIRdata", 10);
+    input1FuncX = new gsl_matrix*[YEAR_LEN];
+    for (int i = 0; i < YEAR_LEN; ++i) {
+      ostringstream oss;
+      oss << "input1FuncX" << i;
+      input1FuncX[i] = readMatrix (file, oss.str(), 17);
+    }
+    output1FuncX = readMatrix (file, "output1FuncX", 17);
   }
   ~VectorEmergenceSuite () {
     gsl_matrix_free (input1CalcInv1minusA);
     gsl_matrix_free (output1CalcInv1minusA);
     gsl_matrix_free (input1CalcSpectralRadius);
+    gsl_vector_free (input1CalSvfromEIRdata);
+    gsl_vector_free (output1CalSvfromEIRdata);
+    gsl_matrix_free (output1FuncX);
   }
   
   void testCalcPSTS () {
@@ -72,6 +84,18 @@ public:
     TS_ASSERT_DELTA (sumKLPlus[1], 3.3437880e-002, MY_DELTA);
   }
   
+  void testFuncX () {
+    for (int i = 0; i < YEAR_LEN; ++i)
+      gsl_matrix_free (emerge.Upsilon[i]);
+    delete[] emerge.Upsilon;
+    emerge.Upsilon = input1FuncX;
+    
+    gsl_matrix *X = gsl_matrix_calloc (17,17);
+    emerge.FuncX (X, 10, 0);
+    checkEqual (X, output1FuncX, "output1FuncX", 1.0e-8);
+    gsl_matrix_free (X);
+  }
+  
   void testCalcSpectralRadius () {
     TS_ASSERT_DELTA (emerge.CalcSpectralRadius (input1CalcSpectralRadius), 2.3950405e-001, MY_DELTA);
   }
@@ -80,12 +104,19 @@ public:
     // Considered an input: eta = 17
     gsl_matrix* inv1A = gsl_matrix_calloc(17,17);
     emerge.CalcInv1minusA (inv1A, input1CalcInv1minusA);
-    checkEqual (inv1A, output1CalcInv1minusA, "output1CalcInv1minusA");
-    
+    checkEqual (inv1A, output1CalcInv1minusA, "output1CalcInv1minusA", 1.0e-7);
     gsl_matrix_free (inv1A);
   }
   
+  void testCalSvfromEIRdata () {
+    gsl_vector *Sv = gsl_vector_calloc (10);
+    emerge.CalSvfromEIRdata (Sv, 7.7334254e-001, input1CalSvfromEIRdata);
+    checkEqual (Sv, output1CalSvfromEIRdata, "output1CalSvfromEIRdata", 1.0e-4);
+    gsl_vector_free (Sv);
+  }
+  
   void testWholeCalculation () {
+    /*
     Global::clOptions = static_cast<CLO::CLO> (Global::clOptions | CLO::ENABLE_ERC);
     
     vector<double> humanInfectivityInit(YEAR_LEN, 0.0);	//TODO: init
@@ -108,6 +139,7 @@ public:
 				  EIRInit,
 				  emergenceRate);
     TS_WARN ("TODO: test output");
+    */
   }
   
 private:
@@ -134,13 +166,31 @@ private:
       }
     return ret;
   }
-  void checkEqual (gsl_matrix* A, gsl_matrix* B, const char* msg) {
-    for (int i = 0; i < emerge.eta; ++i)
-      for (int j = 0; j < emerge.eta; ++j)
-	TSM_ASSERT_DELTA (msg, gsl_matrix_get(A,i,j), gsl_matrix_get(B,i,j), MY_DELTA);
+  gsl_vector* readVector (istream& in, string name, int dim) {
+    checkNextString (in, name);
+    gsl_vector* ret = gsl_vector_calloc (dim);
+    double x;
+    for (int i = 0; i < dim; ++i) {
+      in >> x;
+      gsl_vector_set(ret,i, x);
+    }
+    return ret;
+  }
+  void checkEqual (gsl_matrix* A, gsl_matrix* B, const char* msg, double delta) {
+    TSM_ASSERT_EQUALS (msg, A->size1, B->size1);
+    TSM_ASSERT_EQUALS (msg, A->size2, B->size2);
+    for (int i = 0; i < A->size1; ++i)
+      for (int j = 0; j < A->size2; ++j)
+	TSM_ASSERT_DELTA (msg, gsl_matrix_get(A,i,j), gsl_matrix_get(B,i,j), delta);
+  }
+  void checkEqual (gsl_vector* A, gsl_vector* B, const char* msg, double delta) {
+    TSM_ASSERT_EQUALS (msg, A->size, B->size);
+    for (int i = 0; i < A->size; ++i)
+      TSM_ASSERT_DELTA (msg, gsl_vector_get(A,i), gsl_vector_get(B,i), delta);
   }
   
   // Number of "days" in our "year" (to speed up tests)
+  // NOTE: affects array lengths, so not too easy to change
   static const int YEAR_LEN = 10;
   // Population size
   static const int POP_SIZE = 1000;
@@ -151,6 +201,8 @@ private:
   
   gsl_matrix *input1CalcInv1minusA, *output1CalcInv1minusA;
   gsl_matrix *input1CalcSpectralRadius;
+  gsl_vector *input1CalSvfromEIRdata, *output1CalSvfromEIRdata;
+  gsl_matrix **input1FuncX, *output1FuncX;
 };
 
 #endif

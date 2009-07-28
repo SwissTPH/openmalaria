@@ -70,6 +70,9 @@ else (CXXTEST_INTERPRETER)
   endif (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp)
 endif (CXXTEST_INTERPRETER)
 
+# This file is needed. "run" won't search for it, so it must be in the current directory.
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/VectorEmergenceSuite.txt ${CMAKE_CURRENT_BINARY_DIR}/VectorEmergenceSuite.txt COPYONLY)
+
 add_executable (run tests.cpp)
 target_link_libraries (run
   model
@@ -88,7 +91,6 @@ if (MSVC)
     PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
 endif (MSVC)
 
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/VectorEmergenceSuite.txt ${CMAKE_CURRENT_BINARY_DIR}/VectorEmergenceSuite.txt COPYONLY)
 add_test (unittest run -keep)
 
 mark_as_advanced (
