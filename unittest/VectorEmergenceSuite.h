@@ -35,12 +35,12 @@ using namespace std;
 // We want to hide normal output, so route it here instead of cout
 ofstream null("\0");
 
-  // Number of "days" in our "year" (to speed up tests)
+  // Number of "days" in our "year" (θ_p) (small to speed up tests)
   // NOTE: affects array lengths, so not too easy to change
   const int YEAR_LEN = 10;
-  // Population size
+  // Population size (N_i)
   const int POP_SIZE = 1000;
-  // Average availability
+  // Average availability (α_i)
   const double AVG_AVAIL = 0.0072;
   
 /** Tests on the Vector Control Emergence Rate calculation code.
@@ -51,11 +51,19 @@ class VectorEmergenceSuite : public CxxTest::TestSuite
 {
 public:
   VectorEmergenceSuite () :
-      emerge(3, 5, POP_SIZE, AVG_AVAIL, 1.6, 0.33, 9.5000000e-001, .95, .94, .93,
-	     YEAR_LEN, null, "\0")
+      emerge(3, 5,		// mosqRestDuration (τ), EIPDuration (θ_s)
+	      POP_SIZE, AVG_AVAIL,
+	      1.6, 0.33,	// mosqSeekingDeathRate (μ_vA), mosqSeekingDuration (θ_d)
+	      .95, .95,		// probMosqBiting (P_B_i), probMosqFindRestSite (P_C_i)
+	      .94, .93,		// probMosqSurvivalResting (P_D_i), probMosqSurvivalOvipositing (P_E)
+	      YEAR_LEN,
+	      null, "\0")	// traceOut, logFileName
   {
     ifstream file ("VectorEmergenceSuite.txt");
     if (!file.good()) throw runtime_error ("Unable to read VectorEmergenceSuite.txt");
+    
+    input1CalcUpsilonOneHost = readVector (file, "input1CalcUpsilonOneHost", YEAR_LEN);
+    output1CalcUpsilonOneHost = readMatrices(file, "output1CalcUpsilonOneHost", 17, YEAR_LEN);
     
     input1CalcSvDiff = readVector (file, "input1CalcSvDiff", YEAR_LEN);
     input2CalcSvDiff = readVector (file, "input2CalcSvDiff", YEAR_LEN);
@@ -83,6 +91,9 @@ public:
     output1CalSvfromEIRdata = readVector(file, "output1CalSvfromEIRdata", 10);
   }
   ~VectorEmergenceSuite () {
+    gsl_vector_free (input1CalcUpsilonOneHost);
+    freeMatrices (output1CalcUpsilonOneHost, YEAR_LEN);
+    
     gsl_vector_free (input1CalcSvDiff);
     gsl_vector_free (input2CalcSvDiff);
     gsl_matrix_free (input3CalcSvDiff);
@@ -107,6 +118,15 @@ public:
     
     gsl_vector_free (input1CalSvfromEIRdata);
     gsl_vector_free (output1CalSvfromEIRdata);
+  }
+  
+  void testCalcUpsilonOneHost () {
+    double PA, PAi;
+    emerge.CalcUpsilonOneHost (&PA, &PAi, 1,1, input1CalcUpsilonOneHost);
+    checkApproxEq (PA,  5.4803567e-002);
+    checkApproxEq (PAi, 7.7334254e-001);
+    for (int i = 0; i < YEAR_LEN; ++i)
+      checkEqual (emerge.Upsilon[i], output1CalcUpsilonOneHost[i], "output1CalcUpsilonOneHost");
   }
   
   void testCalcSvDiff () {
@@ -301,6 +321,8 @@ private:
   
   VectorEmergence emerge;
   
+  gsl_vector *input1CalcUpsilonOneHost;
+  gsl_matrix **output1CalcUpsilonOneHost;
   gsl_vector *input1CalcSvDiff, *input2CalcSvDiff, *output1CalcSvDiff;
   gsl_matrix *input3CalcSvDiff, **input4CalcSvDiff;
   gsl_vector *input1CalcLambda, **output1CalcLambda;
