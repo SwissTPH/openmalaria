@@ -35,39 +35,51 @@ static VectorEmergenceSuite suite_VectorEmergenceSuite;
 static CxxTest::List Tests_VectorEmergenceSuite = { 0, 0 };
 CxxTest::StaticSuiteDescription suiteDescription_VectorEmergenceSuite( "VectorEmergenceSuite.h", 46, "VectorEmergenceSuite", suite_VectorEmergenceSuite, Tests_VectorEmergenceSuite );
 
+static class TestDescription_VectorEmergenceSuite_testCalcLambda : public CxxTest::RealTestDescription {
+public:
+ TestDescription_VectorEmergenceSuite_testCalcLambda() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 96, "testCalcLambda" ) {}
+ void runTest() { suite_VectorEmergenceSuite.testCalcLambda(); }
+} testDescription_VectorEmergenceSuite_testCalcLambda;
+
+static class TestDescription_VectorEmergenceSuite_testCalcXP : public CxxTest::RealTestDescription {
+public:
+ TestDescription_VectorEmergenceSuite_testCalcXP() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 102, "testCalcXP" ) {}
+ void runTest() { suite_VectorEmergenceSuite.testCalcXP(); }
+} testDescription_VectorEmergenceSuite_testCalcXP;
+
 static class TestDescription_VectorEmergenceSuite_testCalcPSTS : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testCalcPSTS() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 77, "testCalcPSTS" ) {}
+ TestDescription_VectorEmergenceSuite_testCalcPSTS() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 116, "testCalcPSTS" ) {}
  void runTest() { suite_VectorEmergenceSuite.testCalcPSTS(); }
 } testDescription_VectorEmergenceSuite_testCalcPSTS;
 
 static class TestDescription_VectorEmergenceSuite_testFuncX : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testFuncX() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 87, "testFuncX" ) {}
+ TestDescription_VectorEmergenceSuite_testFuncX() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 126, "testFuncX" ) {}
  void runTest() { suite_VectorEmergenceSuite.testFuncX(); }
 } testDescription_VectorEmergenceSuite_testFuncX;
 
 static class TestDescription_VectorEmergenceSuite_testCalcSpectralRadius : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testCalcSpectralRadius() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 99, "testCalcSpectralRadius" ) {}
+ TestDescription_VectorEmergenceSuite_testCalcSpectralRadius() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 138, "testCalcSpectralRadius" ) {}
  void runTest() { suite_VectorEmergenceSuite.testCalcSpectralRadius(); }
 } testDescription_VectorEmergenceSuite_testCalcSpectralRadius;
 
 static class TestDescription_VectorEmergenceSuite_testCalcInv1minusA : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testCalcInv1minusA() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 103, "testCalcInv1minusA" ) {}
+ TestDescription_VectorEmergenceSuite_testCalcInv1minusA() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 142, "testCalcInv1minusA" ) {}
  void runTest() { suite_VectorEmergenceSuite.testCalcInv1minusA(); }
 } testDescription_VectorEmergenceSuite_testCalcInv1minusA;
 
 static class TestDescription_VectorEmergenceSuite_testCalSvfromEIRdata : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testCalSvfromEIRdata() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 111, "testCalSvfromEIRdata" ) {}
+ TestDescription_VectorEmergenceSuite_testCalSvfromEIRdata() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 150, "testCalSvfromEIRdata" ) {}
  void runTest() { suite_VectorEmergenceSuite.testCalSvfromEIRdata(); }
 } testDescription_VectorEmergenceSuite_testCalSvfromEIRdata;
 
 static class TestDescription_VectorEmergenceSuite_testWholeCalculation : public CxxTest::RealTestDescription {
 public:
- TestDescription_VectorEmergenceSuite_testWholeCalculation() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 118, "testWholeCalculation" ) {}
+ TestDescription_VectorEmergenceSuite_testWholeCalculation() : CxxTest::RealTestDescription( Tests_VectorEmergenceSuite, suiteDescription_VectorEmergenceSuite, 157, "testWholeCalculation" ) {}
  void runTest() { suite_VectorEmergenceSuite.testWholeCalculation(); }
 } testDescription_VectorEmergenceSuite_testWholeCalculation;
 

@@ -60,26 +60,65 @@ public:
   {
     ifstream file ("VectorEmergenceSuite.txt");
     if (!file.good()) throw runtime_error ("Unable to read VectorEmergenceSuite.txt");
+    
+    input1CalcLambda = readVector(file, "input1CalcLambda", YEAR_LEN);
+    output1CalcLambda = readVectors (file, "output1CalcLambda", 17, YEAR_LEN);
+    
+    input1CalcXP = readMatrix  (file, "input1CalcXP", 17);
+    input2CalcXP = readVectors (file, "input2CalcXP", 17, YEAR_LEN);
+    input3CalcXP = readMatrices(file, "input3CalcXP", 17, YEAR_LEN);
+    output1CalcXP = readVectors(file, "output1CalcXP",17, YEAR_LEN);
+    
+    input1FuncX = readMatrices (file, "input1FuncX", 17, YEAR_LEN);
+    output1FuncX = readMatrix (file, "output1FuncX", 17);
+    
+    input1CalcSpectralRadius = readMatrix(file,"input1CalcSpectralRadius",17);
+    
     input1CalcInv1minusA = readMatrix(file, "input1CalcInv1minusA",17);
     output1CalcInv1minusA = readMatrix(file, "output1CalcInv1minusA",17);
-    input1CalcSpectralRadius = readMatrix(file,"input1CalcSpectralRadius",17);
+    
     input1CalSvfromEIRdata = readVector(file, "input1CalSvfromEIRdata", 10);
     output1CalSvfromEIRdata = readVector(file, "output1CalSvfromEIRdata", 10);
-    input1FuncX = new gsl_matrix*[YEAR_LEN];
-    for (int i = 0; i < YEAR_LEN; ++i) {
-      ostringstream oss;
-      oss << "input1FuncX" << i;
-      input1FuncX[i] = readMatrix (file, oss.str(), 17);
-    }
-    output1FuncX = readMatrix (file, "output1FuncX", 17);
   }
   ~VectorEmergenceSuite () {
+    gsl_vector_free (input1CalcLambda);
+    freeVectors (output1CalcLambda, YEAR_LEN);
+    
+    gsl_matrix_free (input1CalcXP);
+    freeVectors (input2CalcXP, YEAR_LEN);
+    freeMatrices(input3CalcXP, YEAR_LEN);
+    freeVectors (output1CalcXP,YEAR_LEN);
+    
+    freeMatrices (input1FuncX, YEAR_LEN);
+    gsl_matrix_free (output1FuncX);
+    
+    gsl_matrix_free (input1CalcSpectralRadius);
+    
     gsl_matrix_free (input1CalcInv1minusA);
     gsl_matrix_free (output1CalcInv1minusA);
-    gsl_matrix_free (input1CalcSpectralRadius);
+    
     gsl_vector_free (input1CalSvfromEIRdata);
     gsl_vector_free (output1CalSvfromEIRdata);
-    gsl_matrix_free (output1FuncX);
+  }
+  
+  void testCalcLambda () {
+    emerge.CalcLambda (input1CalcLambda);
+    for (int i = 0; i < YEAR_LEN; ++i)
+      checkEqual (emerge.Lambda[i], output1CalcLambda[i], "output1CalcLambda", 1.0e-8);
+  }
+  
+  void testCalcXP () {
+    gsl_vector **origLambda = emerge.Lambda;
+    gsl_matrix **origUpsilon = emerge.Upsilon;
+    emerge.Lambda = input2CalcXP;
+    emerge.Upsilon = input3CalcXP;
+    
+    emerge.CalcXP (input1CalcXP);
+    for (int i = 0; i < YEAR_LEN; ++i)
+      checkEqual (emerge.x_p[i], output1CalcXP[i], "output1CalcXP", 1.0e-2);
+    
+    emerge.Lambda = origLambda;
+    emerge.Upsilon = origUpsilon;
   }
   
   void testCalcPSTS () {
@@ -93,15 +132,15 @@ public:
   }
   
   void testFuncX () {
-    for (int i = 0; i < YEAR_LEN; ++i)
-      gsl_matrix_free (emerge.Upsilon[i]);
-    delete[] emerge.Upsilon;
+    gsl_matrix **origUpsilon = emerge.Upsilon;
     emerge.Upsilon = input1FuncX;
     
     gsl_matrix *X = gsl_matrix_calloc (17,17);
     emerge.FuncX (X, 10, 0);
     checkEqual (X, output1FuncX, "output1FuncX", 1.0e-8);
     gsl_matrix_free (X);
+    
+    emerge.Upsilon = origUpsilon;
   }
   
   void testCalcSpectralRadius () {
@@ -163,8 +202,12 @@ private:
       throw runtime_error (msg.str());
     }
   }
+  
   gsl_matrix* readMatrix (istream& in, string name, int dim) {
     checkNextString (in, name);
+    return readMatrix (in, dim);
+  }
+  gsl_matrix* readMatrix (istream& in, int dim) {
     gsl_matrix* ret = gsl_matrix_calloc (dim, dim);
     double x;
     for (int i = 0; i < dim; ++i)
@@ -174,8 +217,25 @@ private:
       }
     return ret;
   }
+  // read num matrixs each of length dim
+  gsl_matrix** readMatrices (istream& in, string name, int dim, int num) {
+    checkNextString (in, name);
+    gsl_matrix** ret = new gsl_matrix*[num];
+    for (int i = 0; i < num; ++i)
+      ret[i] = readMatrix(in, dim);
+    return ret;
+  }
+  void freeMatrices (gsl_matrix** mat, int num) {
+    for (int i = 0; i < num; ++i)
+      gsl_matrix_free (mat[i]);
+    delete[] mat;
+  }
+  
   gsl_vector* readVector (istream& in, string name, int dim) {
     checkNextString (in, name);
+    return readVector (in, dim);
+  }
+  gsl_vector* readVector (istream& in, int dim) {
     gsl_vector* ret = gsl_vector_calloc (dim);
     double x;
     for (int i = 0; i < dim; ++i) {
@@ -184,6 +244,20 @@ private:
     }
     return ret;
   }
+  // read num vectors each of length dim
+  gsl_vector** readVectors (istream& in, string name, int dim, int num) {
+    checkNextString (in, name);
+    gsl_vector** ret = new gsl_vector*[num];
+    for (int i = 0; i < num; ++i)
+      ret[i] = readVector(in, dim);
+    return ret;
+  }
+  void freeVectors (gsl_vector** vec, int num) {
+    for (int i = 0; i < num; ++i)
+      gsl_vector_free (vec[i]);
+    delete[] vec;
+  }
+  
   void checkEqual (gsl_matrix* A, gsl_matrix* B, const char* msg, double delta) {
     TSM_ASSERT_EQUALS (msg, A->size1, B->size1);
     TSM_ASSERT_EQUALS (msg, A->size2, B->size2);
@@ -199,10 +273,13 @@ private:
   
   VectorEmergence emerge;
   
-  gsl_matrix *input1CalcInv1minusA, *output1CalcInv1minusA;
-  gsl_matrix *input1CalcSpectralRadius;
-  gsl_vector *input1CalSvfromEIRdata, *output1CalSvfromEIRdata;
+  gsl_vector *input1CalcLambda, **output1CalcLambda;
+  gsl_matrix *input1CalcXP, **input3CalcXP;
+  gsl_vector **input2CalcXP, **output1CalcXP;
   gsl_matrix **input1FuncX, *output1FuncX;
+  gsl_matrix *input1CalcSpectralRadius;
+  gsl_matrix *input1CalcInv1minusA, *output1CalcInv1minusA;
+  gsl_vector *input1CalSvfromEIRdata, *output1CalSvfromEIRdata;
 };
 
 #endif
