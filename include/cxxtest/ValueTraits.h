@@ -320,7 +320,8 @@ namespace CxxTest
         const char *asString( void ) const { return _asString; }
         
     private:
-        enum { MAX_DIGITS_ON_LEFT = 24, DIGITS_ON_RIGHT = 4, BASE = 10 };
+        // NOTE: 17 DIGITS_ON_RIGHT may seem excessive, but it's approx. what's required to see full double precision:
+        enum { MAX_DIGITS_ON_LEFT = 24, DIGITS_ON_RIGHT = 17, BASE = 10 };
         char _asString[1 + MAX_DIGITS_ON_LEFT + 1 + DIGITS_ON_RIGHT + 1];
 
         static unsigned requiredDigitsOnLeft( double t );
