@@ -13,6 +13,7 @@ import tempfile
 import glob
 import time
 import subprocess
+import shutil
 from optparse import OptionParser
 
 sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
@@ -26,12 +27,24 @@ if testSrcDir[0] == '@':
   sys.exit(-1)
 
 # executable
-openMalariaExec=os.path.join(testBuildDir,"../openMalaria")
-if not os.access(openMalariaExec, os.X_OK):
-  openMalariaExec = openMalariaExec + ".exe"
-  if not os.access(openMalariaExec, os.X_OK):
+def findFile (*names):
+  execs=set()
+  for name in names:
+    path=os.path.join(testBuildDir,name)
+    if os.path.isfile (path):
+      execs.add (path)
+  
+  if not execs:
     print "Unable to find: openMalaria[.exe]; please compile it."
     sys.exit(-1)
+  
+  newest=None
+  for path in execs:
+    if newest is None or os.path.getmtime(path) > os.path.getmtime(newest):
+       newest=path
+  return newest
+
+openMalariaExec=findFile (*["../openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"])
 
 def linkOrCopy (src, dest):
   if hasattr(os, 'symlink'):

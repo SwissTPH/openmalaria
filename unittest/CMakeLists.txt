@@ -52,10 +52,15 @@ set (CXXTEST_HEADERS PerHostSuite.h VectorEmergenceSuite.h)
 if (CXXTEST_INTERPRETER)
   # The second COMMAND, cp, is to update the source copy. We can't use configure_file
   # because that runs at configure time, not build time.
+  if (UNIX)
+	set (CP cp)
+  else (UNIX)
+	set (CP copy)
+  endif (UNIX)
   add_custom_command (OUTPUT tests.cpp
     COMMAND ${CXXTEST_INTERPRETER} ${CXXTEST_SCRIPT} ${CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
       ${CXXTEST_HEADERS}
-    COMMAND cp ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp
+    COMMAND ${CP} ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp
     DEPENDS ${CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating unittest code with cxxtestgen"

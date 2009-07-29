@@ -35,6 +35,14 @@ using namespace std;
 // We want to hide normal output, so route it here instead of cout
 ofstream null("\0");
 
+  // Number of "days" in our "year" (to speed up tests)
+  // NOTE: affects array lengths, so not too easy to change
+  const int YEAR_LEN = 10;
+  // Population size
+  const int POP_SIZE = 1000;
+  // Average availability
+  const double AVG_AVAIL = 0.0072;
+  
 // This is the smallest power of ten sufficient to pass current tests; so it
 // may need to be increased.
 const double MY_DELTA = 1.0e-8;
@@ -188,14 +196,6 @@ private:
     for (int i = 0; i < A->size; ++i)
       TSM_ASSERT_DELTA (msg, gsl_vector_get(A,i), gsl_vector_get(B,i), delta);
   }
-  
-  // Number of "days" in our "year" (to speed up tests)
-  // NOTE: affects array lengths, so not too easy to change
-  static const int YEAR_LEN = 10;
-  // Population size
-  static const int POP_SIZE = 1000;
-  // Average availability
-  static const double AVG_AVAIL = 0.0072;
   
   VectorEmergence emerge;
   
