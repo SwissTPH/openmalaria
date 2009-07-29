@@ -90,10 +90,8 @@ target_link_libraries (run
   ${BOINC_LIBRARIES}
 )
 
-# May want to remove LIBCMT or MSVCRTD like this, BUT if libraries are compiled with one there'll still be link errors
 if (MSVC)
-  set_target_properties (run
-    PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
+  set_target_properties (model PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
 
 add_test (unittest run -keep)

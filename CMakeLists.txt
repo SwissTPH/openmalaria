@@ -8,6 +8,9 @@ project (OpenMalaria CXX)
 # They abort if not found, and look in a few extra places (e.g. ${CMAKE_SOURCE_DIR}/lib).
 set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
+
+# -----  Compile options  -----
+
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
   option (STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
@@ -20,6 +23,16 @@ ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
+
+if (MSVC)
+  option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRDT[D].lib when linking. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
+  # set a temporary variable, since cache variables don't get rewritten
+  if (OM_USE_LIBCMT)
+    set (OM_LINK_FLAGS "/NODEFAULTLIB:MSVCRDT /NODEFAULTLIB:MSVCRDTD")
+  else (OM_USE_LIBCMT)
+    set (OM_LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
+  endif (OM_USE_LIBCMT)
+endif (MSVC)
 
 
 # -----  Find dependencies  -----
@@ -82,10 +95,8 @@ target_link_libraries (openMalaria
   ${BOINC_LIBRARIES}
 )
 
-# May want to remove LIBCMT or MSVCRTD like this, BUT if libraries are compiled with one there'll still be link errors
 if (MSVC)
-  set_target_properties (openMalaria
-    PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
+  set_target_properties (model PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
 
 # -----  OMTEST - black-box & unit testing  -----

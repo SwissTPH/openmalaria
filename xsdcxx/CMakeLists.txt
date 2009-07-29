@@ -25,8 +25,6 @@ add_library (xsdcxx
   ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.ixx ${CMAKE_BINARY_DIR}/xsdcxx/scenario.hxx
 )
 
-# May want to remove LIBCMT or MSVCRTD like this, BUT if libraries are compiled with one there'll still be link errors
 if (MSVC)
-  set_target_properties (xsdcxx
-    PROPERTIES LINK_FLAGS /NODEFAULTLIB:LIBCMT)
+  set_target_properties (model PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
