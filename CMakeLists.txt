@@ -96,7 +96,7 @@ target_link_libraries (openMalaria
 )
 
 if (MSVC)
-  set_target_properties (model PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
+  set_target_properties (openMalaria PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
 
 # -----  OMTEST - black-box & unit testing  -----
