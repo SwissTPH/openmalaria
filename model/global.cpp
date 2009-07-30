@@ -36,6 +36,7 @@ Constants (parameter)
 ModelVersion Global::modelVersion;
 int Global::interval;
 size_t Global::intervalsPerYear;
+double Global::yearsPerInterval;
 int Global::maxAgeIntervals;
 int Global::simulationMode;
 int Global::latentp;
@@ -127,6 +128,7 @@ void Global::initGlobal () {
     exit(-12);
   }
   intervalsPerYear = daysInYear/interval;
+  yearsPerInterval = double(interval) / double(daysInYear);
   infantDeaths.resize(intervalsPerYear);
   infantIntervalsAtRisk.resize(intervalsPerYear);
   latentp=get_latentp();

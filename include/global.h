@@ -102,6 +102,8 @@ public:
   static int interval;
    //Simulation time steps per year
   static size_t intervalsPerYear;
+  // 1.0/intervalsPerYear
+  static double yearsPerInterval;
   // Maximum age of individuals in a scenario in time intervals
   static int maxAgeIntervals;
   static int simulationMode;

@@ -21,6 +21,7 @@
 #define Hmod_VectorTransmissionSpecies
 
 #include "global.h"
+#include "WeibullDecayedValue.h"
 #include <list>
 
 namespace scnXml {
@@ -121,6 +122,24 @@ public:
   * See comment in advancePeriod() for details of how the EIR is calculated. */
   double partialEIR;
   
+  /** @brief Intervention description parameters */
+  //@{
+  /** Effectiveness of net in preventing a mosquito from finding an individual,
+   * but not killing the mosquito. (1 - this) multiplies availability. */
+  WeibullDecayedValue ITNDeterrency;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
+   * an individual. */
+  WeibullDecayedValue ITNPreprandialKillingEffect;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to escape
+   * after feeding on an individual. */
+  WeibullDecayedValue ITNPostprandialKillingEffect;
+  /** Effectiveness of IRS in preventing a mosquito from finding an individual,
+   * but not killing the mosquito. (1 - this) multiplies availability. */
+  WeibullDecayedValue IRSDeterrency;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
+  WeibullDecayedValue IRSKillingEffect;
+  //@}
+  
 private:
   /* Parameters from model */
   /* Partial (derived) parameters from model */
@@ -176,6 +195,7 @@ private:
   /** The filename to which emergence rates are loaded & saved. */
   string emergenceRateFilename;
   //@}
+  
   
   /* Functions */
   

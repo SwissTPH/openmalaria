@@ -32,7 +32,7 @@ using namespace std;
 using namespace scnXml;
 
 /// Current schema version.
-const int SCHEMA_VERSION = 6;
+const int SCHEMA_VERSION = 7;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */

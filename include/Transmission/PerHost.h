@@ -20,7 +20,6 @@
 #ifndef Hmod_PerHostTransmission
 #define Hmod_PerHostTransmission
 
-#include "EntoIntervention.h"
 #include "Transmission/VectorSpecies.h"
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 
@@ -64,20 +63,20 @@ public:
    * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
   /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
-  inline double entoAvailability (size_t speciesIndex, double ageYears) const {
-    return entoAvailabilityPartial (speciesIndex) *  (ageYears);
+  inline double entoAvailability (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex, double ageYears) const {
+    return entoAvailabilityPartial (speciesStatic, speciesIndex) *  (ageYears);
   }
   /** Availability of host to mosquitoes (α_i).
    *
    * The full availability is entoAvailability(human->getAgeInYears()). */
-  double entoAvailabilityPartial (size_t speciesIndex) const;
+  double entoAvailabilityPartial (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqBiting (size_t speciesIndex) const;
+  double probMosqBiting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
   * place after biting (P_C_i). */
-  double probMosqFindRestSite (size_t speciesIndex) const;
+  double probMosqFindRestSite (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully resting (P_D_i). */
-  double probMosqSurvivalResting (size_t speciesIndex) const;
+  double probMosqSurvivalResting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
   //@}
   
   /** Get the availability of this host to mosquitoes.
@@ -97,12 +96,11 @@ private:
   // Only used in the non-vector model and initialisation phase of the vector model.
   double _entoAvailability;
   
-  //NOTE: some intervention data such as timestep of use could be stored here:
-  /** simulationTime - dateOfUse is the age of the intervention.
-  * 
-  * This is the date of last use.
+  // (simulationTime - timestepXXX) is the age of the intervention.
+  // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
+  
   int timestepITN;
-  int timestepIRS; */
+  int timestepIRS;
   
   
   ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
@@ -131,7 +129,7 @@ class HostMosquitoInteraction
 public:
   /** In lieu of a constructor initialises elements, using the passed base to
    * get baseline parameters. */
-  void initialise (VectorTransmissionSpecies base, double availabilityFactor);
+  void initialise (VectorTransmissionSpecies& base, double availabilityFactor);
   
   void read (istream& in);
   void write (ostream& out) const;
@@ -153,11 +151,6 @@ private:
   * (P_D_i). */
   double probMosqSurvivalResting;
   //@}
-  
-  /// Intervention: an ITN (active if netEffectiveness > 0)
-  EntoInterventionITN entoInterventionITN;
-  /// Intervention: IRS (active if insecticide != 0)
-  EntoInterventionIRS entoInterventionIRS;
 };
 
 #endif

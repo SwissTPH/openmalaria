@@ -94,6 +94,20 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   // Add to the TransmissionModel's EIR, used for the initalization phase:
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     initialisationEIR[i] += speciesEIR[i];
+  
+  
+  const scnXml::Interventions& xmlInterventions = getInterventions();
+  if (xmlInterventions.getITNDescription().present()) {
+    const scnXml::ITNDescription itnDesc = xmlInterventions.getITNDescription().get();
+    ITNDeterrency = itnDesc.getDeterrency ();
+    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
+    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+  }
+  if (xmlInterventions.getIRSDescription().present()) {
+    const scnXml::IRSDescription irsDesc = xmlInterventions.getIRSDescription().get();
+    IRSDeterrency = irsDesc.getDeterrency ();
+    IRSKillingEffect = irsDesc.getKillingEffect ();
+  }
 }
 
 void VectorTransmissionSpecies::destroy () {
@@ -110,7 +124,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex, h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(*this, sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -122,10 +136,10 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   double intP_df = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(sIndex) *
-	host.probMosqFindRestSite(sIndex) *
-	host.probMosqSurvivalResting(sIndex);
+    double prod = host.entoAvailability(*this, sIndex, h->getAgeInYears()) *
+	host.probMosqBiting(*this, sIndex) *
+	host.probMosqFindRestSite(*this, sIndex) *
+	host.probMosqSurvivalResting(*this, sIndex);
     intP_df += prod;
   }
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
@@ -188,7 +202,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(sIndex, h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(*this, sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -201,10 +215,10 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   double intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(sIndex) *
-	host.probMosqFindRestSite(sIndex) *
-	host.probMosqSurvivalResting(sIndex);
+    double prod = host.entoAvailability(*this, sIndex, h->getAgeInYears()) *
+	host.probMosqBiting(*this, sIndex) *
+	host.probMosqFindRestSite(*this, sIndex) *
+	host.probMosqSurvivalResting(*this, sIndex);
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }

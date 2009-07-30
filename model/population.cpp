@@ -146,7 +146,7 @@ void Population::estimateRemovalRates () {
 void Population::setupPyramid(bool isCheckpoint){
   cumpc[0] = 0.0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
-    double ageYears = (_maxTimestepsPerLife-j-1) / (1.0*Global::intervalsPerYear);
+    double ageYears = (_maxTimestepsPerLife-j-1) * Global::yearsPerInterval;
     double M1s=(mu0 * (1.0-exp(-alpha0*ageYears)) / alpha0);
     double M2s=(mu1 * (exp(alpha1*ageYears)-1.0) / alpha1);
     double Ms=M1s+M2s;
@@ -481,7 +481,7 @@ short Population::outmigrate(Human& current, int Nsize, int &survivsSoFar){
 
 // Static method used by estimateRemovalRates
 double Population::setDemoParameters (double param1, double param2) {
-  rho = get_growthrate() / (100.0*(Global::intervalsPerYear));
+  rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
   
   const double IMR=0.1;
   double M_inf=-log(1-IMR);

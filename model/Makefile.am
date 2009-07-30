@@ -8,7 +8,7 @@ openMalaria_SOURCES = openMalaria.cpp\
  global.cpp summary.cpp population.cpp simulation.cpp \
  proteome.cpp\
  intervention.cpp human.cpp\
- EntoIntervention.cpp\
+ WeibullDecayedValue.cpp\
  InfectionIncidenceModel.cpp\
  gzstream.C
 

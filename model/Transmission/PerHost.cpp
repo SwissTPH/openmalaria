@@ -30,9 +30,6 @@ double PerHostTransmission::ageSpecificRelativeAvailability[WithinHostModel::nag
 
 
 void PerHostTransmission::initParameters () {
-  EntoInterventionITN::initParameters();
-  EntoInterventionIRS::initParameters();
-  
   for (size_t i=0; i<WithinHostModel::nages; i++) {
     ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
   }
@@ -55,6 +52,8 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 
 PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
   in >> _entoAvailability;
+  in >> timestepITN;
+  in >> timestepIRS;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
@@ -65,33 +64,39 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
 
 void PerHostTransmission::write (ostream& out) const {
   out << _entoAvailability << endl;
+  out << timestepITN;
+  out << timestepIRS;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
 }
 
-//TODO: intervention effects on these parameters:
-double PerHostTransmission::entoAvailabilityPartial (size_t speciesIndex) const {
-  return species[speciesIndex].entoAvailability;
-//   * species[speciesIndex].entoInterventionITN.availability()
-//   * species[speciesIndex].entoInterventionIRS.availability();
+// NOTE: in the case an ITN / IRS is not present, this is only an approximation.
+// But (Simulation::simulationTime - TIMESTEP_NEVER) is easily large enough for
+// conceivable Weibull params that the value is 0.0 when rounded to a double.
+// Performance-wise, an if() might give a small performance gain when
+// interventions aren't present.
+double PerHostTransmission::entoAvailabilityPartial (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+  return species[speciesIndex].entoAvailability
+    * (1.0 - speciesStatic.ITNDeterrency (Simulation::simulationTime - timestepITN))
+    * (1.0 - speciesStatic.IRSDeterrency (Simulation::simulationTime - timestepIRS));
 }
-double PerHostTransmission::probMosqBiting (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqBiting;
-//   * species[speciesIndex].entoInterventionITN.probMosqBiting();
+double PerHostTransmission::probMosqBiting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+  return species[speciesIndex].probMosqBiting
+    * (1.0 - speciesStatic.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqFindRestSite (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqFindRestSite;
-//   * species[speciesIndex].entoInterventionITN.probMosqFindRestSite();
+double PerHostTransmission::probMosqFindRestSite (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+  return species[speciesIndex].probMosqFindRestSite
+    * (1.0 - speciesStatic.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqSurvivalResting (size_t speciesIndex) const {
-  return species[speciesIndex].probMosqSurvivalResting;
-//   * species[speciesIndex].entoInterventionIRS.probMosqSurvivalResting();
+double PerHostTransmission::probMosqSurvivalResting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+  return species[speciesIndex].probMosqSurvivalResting
+    * (1.0 - speciesStatic.IRSKillingEffect (Simulation::simulationTime - timestepIRS));
 }
 
 
 // ----- HostMosquitoInteraction non-static -----
 
-void HostMosquitoInteraction::initialise (VectorTransmissionSpecies base, double availabilityFactor)
+void HostMosquitoInteraction::initialise (VectorTransmissionSpecies& base, double availabilityFactor)
 {
   //TODO: vary to simulate heterogeneity
   entoAvailability = base.entoAvailability * availabilityFactor;
@@ -105,8 +110,6 @@ void HostMosquitoInteraction::read (istream& in) {
   in >> probMosqBiting;
   in >> probMosqFindRestSite;
   in >> probMosqSurvivalResting;
-  in >> entoInterventionITN;
-  in >> entoInterventionIRS;
 }
 
 void HostMosquitoInteraction::write (ostream& out) const {
@@ -114,6 +117,4 @@ void HostMosquitoInteraction::write (ostream& out) const {
   out << probMosqBiting << endl;
   out << probMosqFindRestSite << endl;
   out << probMosqSurvivalResting << endl;
-  out << entoInterventionITN;
-  out << entoInterventionIRS;
 }

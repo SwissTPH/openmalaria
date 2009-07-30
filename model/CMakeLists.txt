@@ -12,7 +12,7 @@ source_group (WithinHost REGULAR_EXPRESSION WithinHost/.*)
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  EntoIntervention.cpp population.cpp timer.cpp InfectionIncidenceModel.cpp
+  WeibullDecayedValue.cpp population.cpp timer.cpp InfectionIncidenceModel.cpp
   gzstream.C simulation.cpp summary.cpp BoincWrapper.cpp global.cpp
   intervention.cpp proteome.cpp human.cpp GSLWrapper.cpp
 )
