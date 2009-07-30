@@ -857,10 +857,6 @@ void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t the
 
 void VectorEmergence::PrintXP(const gsl_vector *const * x_p, size_t eta, size_t theta_p) const
 {
-  char xpname[15] = "x_p";
-  char xpvecname[15];
-  char timestring[5];
-
   // Print all x_p[t]:
   for(size_t t=0; t<theta_p; t++){
     ostringstream temp;
