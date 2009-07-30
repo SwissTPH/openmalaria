@@ -95,6 +95,8 @@ if (MSVC)
 endif (MSVC)
 
 add_test (unittest run -keep)
+set_tests_properties (unittest
+  PROPERTIES PASS_REGULAR_EXPRESSION "Running [0-9]+ tests.*OK!")
 
 mark_as_advanced (
   CXXTEST_GUI_ARG
