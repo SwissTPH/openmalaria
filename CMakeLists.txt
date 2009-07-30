@@ -13,12 +13,12 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
-  option (STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
-  if (STATICALLY_LINK)
+  option (OM_STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
+  if (OM_STATICALLY_LINK)
     link_directories (${CMAKE_SOURCE_DIR}/lib)
     ADD_DEFINITIONS(-static-libgcc)
     SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
-  endif (STATICALLY_LINK)
+  endif (OM_STATICALLY_LINK)
 ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
@@ -42,8 +42,8 @@ find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
 
-option (BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
-if (BOINC_INTEGRATION)
+option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
+if (OM_BOINC_INTEGRATION)
   find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
   find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/api)
   include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
@@ -52,9 +52,9 @@ if (BOINC_INTEGRATION)
   endif (NOT BOINC_LIB OR NOT BOINC_API_LIB)
   set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
   mark_as_advanced (BOINC_API_LIB BOINC_LIB)
-else (BOINC_INTEGRATION)
+else (OM_BOINC_INTEGRATION)
   add_definitions (-DWITHOUT_BOINC)
-endif (BOINC_INTEGRATION)
+endif (OM_BOINC_INTEGRATION)
 
 
 # -----  Compile code  -----
@@ -99,16 +99,16 @@ if (MSVC)
   set_target_properties (openMalaria PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
 
-# -----  OMTEST - black-box & unit testing  -----
+# -----  OM_BOXTEST - black-box & unit testing  -----
 
-option(OMTEST_ENABLE "Enable 'make test' or Visual Studio build target to run black-box tests" ON)
-if (OMTEST_ENABLE)
+option(OM_BOXTEST_ENABLE "Enable black-box testing of openMalaria (use 'make test' or Visual Studio build target)" ON)
+if (OM_BOXTEST_ENABLE)
   enable_testing()
   add_subdirectory (test)
-endif (OMTEST_ENABLE)
+endif (OM_BOXTEST_ENABLE)
 
-option(CXXTEST_ENABLE "Enable lower-level unittests using cxxtest" OFF)
-if (CXXTEST_ENABLE)
+option(OM_CXXTEST_ENABLE "Enable lower-level unittests using cxx (use 'make test' or Visual Studio build target)test" ON)
+if (OM_CXXTEST_ENABLE)
   enable_testing()
   add_subdirectory (unittest)
-endif (CXXTEST_ENABLE)
+endif (OM_CXXTEST_ENABLE)
