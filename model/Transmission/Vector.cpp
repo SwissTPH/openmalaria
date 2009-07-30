@@ -46,7 +46,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   numSpecies = anophelesList.size();
   species.resize (numSpecies);
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].initialise (anophelesList[i], initialisationEIR);
+    species[i].initialise (anophelesList[i], i, initialisationEIR);
   
   // We want the EIR to effectively be the sum of the EIR for each day in the interval
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {

@@ -29,7 +29,7 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vector<double>& initialisationEIR) {
+void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& initialisationEIR) {
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
@@ -98,15 +98,21 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, vect
   
   const scnXml::Interventions& xmlInterventions = getInterventions();
   if (xmlInterventions.getITNDescription().present()) {
-    const scnXml::ITNDescription itnDesc = xmlInterventions.getITNDescription().get();
-    ITNDeterrency = itnDesc.getDeterrency ();
-    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
-    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+    const scnXml::ITNDescription::AnophelesSequence& itnSeq = xmlInterventions.getITNDescription().get().getAnopheles();
+    if (itnSeq.size() > sIndex) {
+      const scnXml::Anopheles1& itnDesc = itnSeq[sIndex];
+      ITNDeterrency = itnDesc.getDeterrency ();
+      ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
+      ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+    }
   }
   if (xmlInterventions.getIRSDescription().present()) {
-    const scnXml::IRSDescription irsDesc = xmlInterventions.getIRSDescription().get();
-    IRSDeterrency = irsDesc.getDeterrency ();
-    IRSKillingEffect = irsDesc.getKillingEffect ();
+    const scnXml::IRSDescription::AnophelesSequence& irsSeq = xmlInterventions.getIRSDescription().get().getAnopheles();
+    if (irsSeq.size() > sIndex) {
+      const scnXml::Anopheles2& irsDesc = irsSeq[sIndex];
+      IRSDeterrency = irsDesc.getDeterrency ();
+      IRSKillingEffect = irsDesc.getKillingEffect ();
+    }
   }
 }
 

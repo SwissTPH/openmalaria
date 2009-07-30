@@ -402,10 +402,17 @@ void Population::implementIntervention (int time) {
   } */
 }
 
+// Returns mass.getCoverage(), sets minAge and maxAge
+double readFromMass (const scnXml::Mass& mass, double& minAge, double& maxAge) {
+  minAge = mass.getMinAge().present() ?
+      mass.getMinAge().get() : 0.0;
+  maxAge = mass.getMaxAge().present() ?
+      mass.getMaxAge().get() : 100.0;
+  return mass.getCoverage();
+}
+
 void Population::massTreatment(const scnXml::Mass& mass){
-  double minAge = mass.getMinAge();
-  double maxAge = mass.getMaxAge();
-  double compliance = mass.getCoverage();
+  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
   
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
@@ -431,9 +438,7 @@ void Population::massTreatment(const scnXml::Mass& mass){
 
 void Population::massIPTiTreatment(const scnXml::Mass& mass){
   //Set the last SP Dose given for the eligible humans - is this all we need to do?     
-  double minAge = mass.getMinAge();
-  double maxAge = mass.getMaxAge();
-  double compliance = mass.getCoverage();
+  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
   
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter) {
@@ -445,10 +450,8 @@ void Population::massIPTiTreatment(const scnXml::Mass& mass){
 
 
 void Population::vaccinatePopulation(const scnXml::Mass& mass){
-  double minAge = mass.getMinAge();
-  double maxAge = mass.getMaxAge();
-  double compliance = mass.getCoverage();
-
+  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
+  
   for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
     double ageYears = iter->getAgeInYears();
     if ((ageYears > minAge) && (ageYears < maxAge)) {

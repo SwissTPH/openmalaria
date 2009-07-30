@@ -46,7 +46,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 6;
+    static final int CURRENT_VERSION = 7;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -418,6 +418,11 @@ public class SchemaTranslator {
             cM.insertBefore(nmfP, nmfNP);
         }
     }
+	
+	// Version 7 added elements for ITN and IRS intervention descriptions.
+	// Nothing old needs to be changed.
+	public void translate6To7() throws Exception {
+	}
 
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<scenario analysisNo="000" maximumAgeYrs="90" mode="4" modelVersion="0" name="Full set of interventions" popSize="100000" simulationDuration="1465">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="000" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="100" simulationDuration="1465" wuID="0" schemaVersion="7" xsi:noNamespaceSchemaLocation="scenario_7.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -141,44 +141,51 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <itnDescription name="LLIN test" halfLifeKillingYrs="3.0" halfLifeAvailabilityYrs="3.0" weibullkKilling="1.0" weibullkAvailability="1.0">
-      <mosquito="gambiae_ss" initialAvailabilityRateReduction="0.44" initialPrePrandialKilling="0.27" initialPostPrandialKilling="0.27"/>
-    </itnDescription>
-    <irsDescription name="DDT test" halfLifeKillingYrs="0.5" halfLifeAvailabilityYrs="0.5" weibullkKilling="1.0" weibullkAvailability="1.0">
-      <mosquito="gambiae_ss" initialAvailabilityRateReduction="0.56" initialKilling="0.24"/>
-    </irsDescription>
+    <vaccineDescription vaccineType="3">
+      <halfLifeYrs value="10"/>
+      <efficacyB value="10"/>
+      <initialEfficacy value="0.512"/>
+      <initialEfficacy value="0.64"/>
+      <initialEfficacy value="0.80"/>
+    </vaccineDescription>
+    <vaccineDescription vaccineType="1">
+      <halfLifeYrs value="10"/>
+      <efficacyB value="10"/>
+      <initialEfficacy value="0.512"/>
+      <initialEfficacy value="0.64"/>
+      <initialEfficacy value="0.80"/>
+    </vaccineDescription>
     <iptiDescription iptiEffect="13">
       <!-- ipti with SP treatment drug clears all parasites.  We assume 80% wt -->
       <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
       <infGenotype ACR="1.0" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
       <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
     </iptiDescription>
+    <ITNDescription name="LLIN test">
+      <anopheles mosquito="gambiae_ss">
+	<deterrency initial="0.44" halflife="3.0"/>
+	<preprandialKillingEffect initial="0.27" halflife="3.0"/>
+	<postprandialKillingEffect initial="0.27" halflife="3.0"/>
+      </anopheles>
+    </ITNDescription>
+    <IRSDescription name="DDT test">
+      <anopheles mosquito="gambiae_ss">
+	<deterrency initial="0.56" halflife="0.5"/>
+	<killingEffect initial="0.24" halflife="0.5"/>
+      </anopheles>
+    </IRSDescription>
     <!-- vaccine description modified from ...PEVTBVREFEPICAMP.xml -->
-    <vaccineDescription vaccineType="3">
-      <halfLifeYrs best="10"/>
-      <efficacyB best="10"/>
-      <initialEfficacy best="0.512"/>
-      <initialEfficacy best="0.64"/>
-      <initialEfficacy best="0.80"/>
-    </vaccineDescription>
-    <vaccineDescription vaccineType="1">
-      <halfLifeYrs best="10"/>
-      <efficacyB best="10"/>
-      <initialEfficacy best="0.512"/>
-      <initialEfficacy best="0.64"/>
-      <initialEfficacy best="0.80"/>
-    </vaccineDescription>
     <continuous>
-      <!-- deliver ITNs to newborns -->
-      <itn coverage="0.95" targetAgeYrs="0.0833"/>
-      <!-- IPTi -->
-      <ipti coverage="0.95" targetAgeYrs="0.17"/>
-      <ipti coverage="0.95" targetAgeYrs="0.25"/>
-      <ipti coverage="0.95" targetAgeYrs="0.75"/>
       <!-- vaccinate -->
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>
       <vaccine coverage="0.95" targetAgeYrs="0.25"/>
+      <!-- deliver ITNs to newborns -->
+      <ITN coverage="0.95" targetAgeYrs="0.0833"/>
+      <!-- IPTi -->
+      <ipti coverage="0.95" targetAgeYrs="0.17"/>
+      <ipti coverage="0.95" targetAgeYrs="0.25"/>
+      <ipti coverage="0.95" targetAgeYrs="0.75"/>
     </continuous>
     <timed>
       <intervention time="1">
@@ -211,25 +218,25 @@
   <healthSystem healthSystemMemory="6" name="Tanzania ACT">
     <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
     <initialACR>
-      <ACT best="0.85"/>
-      <QN best="0.998"/>
-      <selfTreatment best="0.63"/>
+      <ACT value="0.85"/>
+      <QN value="0.998"/>
+      <selfTreatment value="0.63"/>
     </initialACR>
     <compliance>
-      <ACT best="0.900"/>
-      <selfTreatment best="0.85"/>
+      <ACT value="0.900"/>
+      <selfTreatment value="0.85"/>
     </compliance>
     <nonCompliersEffective>
-      <ACT best="0"/>
-      <selfTreatment best="0"/>
+      <ACT value="0"/>
+      <selfTreatment value="0"/>
     </nonCompliersEffective>
-    <pSeekOfficialCareUncomplicated1 best="0.04"/>
-    <pSelfTreatUncomplicated best="0.01"/>
-    <pSeekOfficialCareUncomplicated2 best="0.04"/>
-    <pSeekOfficialCareSevere best="0.48"/>
+    <pSeekOfficialCareUncomplicated1 value="0.04"/>
+    <pSelfTreatUncomplicated value="0.01"/>
+    <pSeekOfficialCareUncomplicated2 value="0.04"/>
+    <pSeekOfficialCareSevere value="0.48"/>
     <pSequelaeInpatient>
-      <item best="0.0132" maxAgeYrs="5"/>
-      <item best="0.005" maxAgeYrs="99"/>
+      <item value="0.0132" maxAgeYrs="5"/>
+      <item value="0.005" maxAgeYrs="99"/>
     </pSequelaeInpatient>
     <CFR>
       <group cfr="0.09189" lowerbound="0"/>

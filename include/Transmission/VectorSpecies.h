@@ -50,7 +50,7 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (const scnXml::Anopheles& anoph, vector<double>& EIR);
+  void initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();

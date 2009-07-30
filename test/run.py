@@ -22,8 +22,11 @@ import compareOutputsFloat as compareOuts
 # replaced by CMake; run the version it puts in the build/test/ dir.
 testSrcDir="@CMAKE_CURRENT_SOURCE_DIR@"
 testBuildDir="@CMAKE_CURRENT_BINARY_DIR@"
-if testSrcDir[0] == '@':
+if not os.path.isdir(testSrcDir) or not os.path.isdir(testBuildDir):
   print "Don't run this script directly; configure CMake then use the version in the CMake build dir."
+  sys.exit(-1)
+if not os.path.isfile (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@")):
+  print "File not found (wrong CMake var?): ",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@")
   sys.exit(-1)
 
 # executable
@@ -54,11 +57,12 @@ def linkOrCopy (src, dest):
 
 # Run, with file "scenario"+name+".xml"
 def runScenario(options,omOptions,name):
+  scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
   if options.xmlValidate:
-    return subprocess.call ("xmllint --noout --schema @OMTEST_SCEMA_NAME@",
-			 cwd=simDir)
+    return subprocess.call (["xmllint","--noout","--schema","@OM_BOXTEST_SCHEMA_NAME@",scenarioSrc],
+			 cwd=testBuildDir)
   
-  cmd=options.wrapArgs+[openMalariaExec,"--scenario",os.path.join(testSrcDir,"scenario%s.xml" % name)]+omOptions
+  cmd=options.wrapArgs+[openMalariaExec,"--scenario",scenarioSrc]+omOptions
   
   if not options.run:
     print "\033[1;32m",cmd,"\033[0;00m"
@@ -74,9 +78,9 @@ def runScenario(options,omOptions,name):
   
   # Link or copy required files.
   densities_csv=os.path.join(simDir,"densities.csv")
-  scenario_xsd=os.path.join(simDir,"@OMTEST_SCEMA_NAME@")
+  scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
   linkOrCopy (os.path.join(testSrcDir,"densities.csv"), densities_csv)
-  linkOrCopy (os.path.join(testSrcDir,"@OMTEST_SCEMA_NAME@"), scenario_xsd)
+  linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
   # Note: name may not always be correct; scan scenario XML file if you really want to be sure!
   Nv0fileSrc=os.path.join(testSrcDir,"Nv0scenario{0}.txt".format(name))
   Nv0file=os.path.join(simDir,"Nv0scenario{0}.txt".format(name))
@@ -158,7 +162,7 @@ def evalOptions (args):
   parser.add_option("-n","--dry-run", action="store_false", dest="run", default=True,
 		    help="Don't actually run openMalaria, just output the commandline.")
   parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
-		    help="Don't clean up expected files from the temparary dir (checkpoint files, densities.csv and @OMTEST_SCEMA_NAME@)")
+		    help="Don't clean up expected files from the temparary dir (checkpoint files, densities.csv and @OM_BOXTEST_SCHEMA_NAME@)")
   parser.add_option("--valid","--validate",
 		    action="store_true", dest="xmlValidate", default=False,
 		    help="Validate the XML file(s) using xmllint and the latest schema.")

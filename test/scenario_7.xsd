@@ -603,18 +603,18 @@
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="mass">
-    <xs:attribute name="maxAge" type="xs:double" use="required">
+    <xs:attribute name="maxAge" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Maximum age of eligible individuals
+          Maximum age of eligible individuals (defaults to 100)
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;max:100;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="minAge" type="xs:double" use="required">
+    <xs:attribute name="minAge" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Minimum age of eligible individuals
+          Minimum age of eligible individuals (defaults to 0)
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;max:100;</xs:appinfo>
       </xs:annotation>
@@ -816,6 +816,9 @@
   </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:sequence>
+      <xs:element name="anopheles" maxOccurs="unbounded">
+	<xs:complexType>
+	  <xs:sequence>
     <xs:element name="deterrency" type="WeibullDecayedProportion">
       <xs:annotation>
 	<xs:documentation>
@@ -840,10 +843,25 @@
 	<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:element>
+	  </xs:sequence>
+	  <xs:attribute name="mosquito" type="xs:string" use="required" />
+	</xs:complexType>
+      </xs:element>
     </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of Insecticide Treated Net intervention
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="IRSDescription">
     <xs:sequence>
+      <xs:element name="anopheles" maxOccurs="unbounded">
+	<xs:complexType>
+	  <xs:sequence>
     <xs:element name="deterrency" type="WeibullDecayedProportion">
       <xs:annotation>
 	<xs:documentation>
@@ -860,7 +878,19 @@
 	<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:element>
+	  </xs:sequence>
+	  <xs:attribute name="mosquito" type="xs:string" use="required" />
+	</xs:complexType>
+      </xs:element>
     </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of Indoor Residual Spraying intervention
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <!--HealthSystem-->
   <xs:complexType name="healthSystem">
