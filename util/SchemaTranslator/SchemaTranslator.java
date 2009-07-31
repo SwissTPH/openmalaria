@@ -139,7 +139,7 @@ public class SchemaTranslator {
              */
         }
         if (doValidation)
-            validate(scenarioDocument, schemaFileName, "../../test/original/");
+            validate(scenarioDocument, schemaFileName, "../../test/");
     }
 
     private void updateDB() {

@@ -192,13 +192,13 @@
         <vaccinate coverage="0.95"/>
       </intervention>
       <intervention time="7">
-        <vaccinate coverage="0.95"/>
-      <!-- IRS spray round -->
-        <sprayHouses coverage="0.95"/>
-      <!-- mass distribution of ITNs -->
-        <distributeITNs coverage="0.95"/>
       <!-- mass treatment with first-line drug -->
-        <massTreat coverage="0.95"/>
+        <MDA coverage="0.95"/>
+        <vaccinate coverage="0.95"/>
+      <!-- mass distribution of ITNs -->
+        <ITN coverage="0.95"/>
+      <!-- IRS spray round -->
+        <IRS coverage="0.95"/>
       </intervention>
       <intervention time="13">
         <vaccinate coverage="0.95"/>

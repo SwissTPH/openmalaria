@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" maximumAgeYrs="4" mode="2" modelVersion="0" name="Navrongo IPTi treated" popSize="500" schemaVersion="6" simulationDuration="292" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_6.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" maximumAgeYrs="4" mode="2" modelVersion="0" name="Navrongo IPTi treated" popSize="500" schemaVersion="7" simulationDuration="292" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_7.xsd">
   <demography name="Navrongo">
     <ageGroup lowerbound="0.0">
       <group poppercent="2.941827" upperbound="1"/>
