@@ -64,7 +64,7 @@ public:
   //@{
   /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
   inline double entoAvailability (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex, double ageYears) const {
-    return entoAvailabilityPartial (speciesStatic, speciesIndex) *  (ageYears);
+    return entoAvailabilityPartial (speciesStatic, speciesIndex) * getRelativeAvailability (ageYears);
   }
   /** Availability of host to mosquitoes (α_i).
    *

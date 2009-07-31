@@ -38,8 +38,9 @@ void PerHostTransmission::initParameters () {
 
 // -----  PerHostTransmission non-static -----
 
-PerHostTransmission::PerHostTransmission () {
-}
+PerHostTransmission::PerHostTransmission () :
+    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER)
+{}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
   _entoAvailability = availabilityFactor;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
