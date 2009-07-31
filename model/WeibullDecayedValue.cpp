@@ -24,13 +24,13 @@
 void WeibullDecayedValue::setParameters (double initial, double halflife, double k) {
   _initial = initial;
   _k = k;
-  _constOverLambda = Global::yearsPerInterval / (halflife * pow(log(2), -1.0/k));
+  _constOverLambda = Global::yearsPerInterval / (halflife * pow(log(2.0), -1.0/k));
 }
 void WeibullDecayedValue::operator= (const scnXml::WeibullDecayedProportion& elt) {
   _initial = elt.getInitial ();
   _k = elt.getWeibullk().present() ?
     elt.getWeibullk().get() : 1.0;
-  _constOverLambda = Global::yearsPerInterval / (elt.getHalflife() * pow(log(2), -1.0/_k));
+  _constOverLambda = Global::yearsPerInterval / (elt.getHalflife() * pow(log(2.0), -1.0/_k));
 }
 
 double WeibullDecayedValue::operator() (int ageTSteps) {
