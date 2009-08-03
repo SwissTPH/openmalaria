@@ -14,12 +14,10 @@ foreach (_file densities.csv Nv0scenarioVector.txt ${OM_BOXTEST_SCHEMA_NAME})
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file} COPY_ONLY)
 endforeach (_file)
 # working tests:
-set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq)
+set (OM_BOXTEST_NAMES 1 2 3 4 5 6 7 9 11 12 IPT DummyPKPD CevCq)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
     add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- --checkpoint ${TEST_NAME})
   endforeach (TEST_NAME)
 endif (PYTHON_EXECUTABLE)
-set_tests_properties (${OM_BOXTEST_NAMES}
-  PROPERTIES PASS_REGULAR_EXPRESSION "No differences, ok\\.\\.\\.")
