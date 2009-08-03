@@ -75,12 +75,6 @@ public:
        \param time Current time (in tsteps) 
   */
   void implementIntervention(int time);
-
-  //!  Mass IPTi Treatment Intervention
-  void massIPTiTreatment(const scnXml::Mass&);
-
-  //! Mass Vaccination Intervention
-  void vaccinatePopulation(const scnXml::Mass&);
   
   //! Initialise human list
   void initialiseHumanList();
@@ -107,6 +101,15 @@ public:
   static double setDemoParameters (double param1, double param2);
   
 private:
+  /** Generic function to activate some intervention on all humans within the
+   * age range and passing the compliance test given by mass.
+   * 
+   * @param mass XML element specifying the age range and compliance
+   *	(proportion of eligible individuals who receive the intervention).
+   * @param intervention A member-function pointer to a "void func ()" function
+   *	within human which activates the intervention. */
+  void massIntervention (const scnXml::Mass& mass, void (Human::*intervention)());
+  
   /** This is the maximum age of an individual that the simulation program can
    * handle. Max age for a scenario is given in the  the xml file. */
   static const int maxLifetimeDays= 32855;

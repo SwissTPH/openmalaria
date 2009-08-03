@@ -388,18 +388,21 @@ void Population::implementIntervention (int time) {
   }
   
   if (interv->getVaccinate().present()) {
-    vaccinatePopulation(interv->getVaccinate().get());
+    massIntervention (interv->getVaccinate().get(), &Human::massVaccinate);
   }
   if (interv->getMDA().present()) {
     massTreatment(interv->getMDA().get());
   }
   if (interv->getIpti().present()) {
-    massIPTiTreatment(interv->getIpti().get());
+    massIntervention (interv->getIpti().get(), &Human::IPTiTreatment);
   }
-  
-  /* TODO
+  /*
+  if (interv->getITN().present()) {
+    massIntervention (interv->getITN().get(), &Human::);
+  }
   if (interv->getIRS().present()) {
-  } */
+    massIntervention (interv->getIRS().get(), &Human::);
+  }*/
 }
 
 // Returns mass.getCoverage(), sets minAge and maxAge
@@ -409,6 +412,18 @@ double readFromMass (const scnXml::Mass& mass, double& minAge, double& maxAge) {
   maxAge = mass.getMaxAge().present() ?
       mass.getMaxAge().get() : 100.0;
   return mass.getCoverage();
+}
+
+void Population::massIntervention (const scnXml::Mass& mass, void (Human::*intervention)())
+{
+  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
+  
+  for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter) {
+    double ageYears = iter->getAgeInYears();
+    if ((ageYears > minAge) && (ageYears < maxAge) && W_UNIFORM() < compliance)
+      // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
+      ((*iter).*intervention)();
+  }
 }
 
 void Population::massTreatment(const scnXml::Mass& mass){
@@ -433,33 +448,6 @@ void Population::massTreatment(const scnXml::Mass& mass){
     TODO: inside the above conditional? */
     // Only affects Summary::addToExpectedInfected
     iter->infIncidence->_pinfected = 0.0;
-  }
-}
-
-void Population::massIPTiTreatment(const scnXml::Mass& mass){
-  //Set the last SP Dose given for the eligible humans - is this all we need to do?     
-  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
-  
-  HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter) {
-    double ageYears = iter->getAgeInYears();
-    if ((ageYears > minAge) && (ageYears < maxAge))
-      iter->IPTiTreatment(compliance);
-  }
-}
-
-
-void Population::vaccinatePopulation(const scnXml::Mass& mass){
-  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
-  
-  for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = iter->getAgeInYears();
-    if ((ageYears > minAge) && (ageYears < maxAge)) {
-      if (W_UNIFORM() < compliance){
-        iter->vaccinate();
-        Simulation::gMainSummary->reportMassVaccination(iter->ageGroup());
-      }
-    }
   }
 }
 

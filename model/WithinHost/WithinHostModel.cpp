@@ -115,7 +115,7 @@ void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 
-void WithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
+void WithinHostModel::IPTiTreatment (int ageGroup) {
   throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 

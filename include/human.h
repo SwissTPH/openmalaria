@@ -82,10 +82,9 @@ public:
       efficacy of the latest vaccination if vaccinated before */
   void updateInterventionStatus();
   
-  /*! 
-    Update the number of doses and the date of the most recent vaccination in
-    this human */
-  void vaccinate();
+  /** A wrapper around vaccinate to also report.
+   * Can't move reporting to vaccinate as it would change existing reporting. */
+  void massVaccinate ();
   //@}
   
   /** @name More functions
@@ -105,7 +104,7 @@ public:
   //! Returns the date of birth
   int getDateOfBirth() {return _dateOfBirth;};
   
-  void IPTiTreatment (double compliance);
+  void IPTiTreatment ();
   //@}
   
   /** @name OldWithinHostModel functions
@@ -147,6 +146,10 @@ public:
   WithinHostModel *withinHostModel;
   
 private:
+  /*! Update the number of doses and the date of the most recent vaccination in
+   * this human */
+  void vaccinate();
+  
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
    * and clinical outcomes (morbidity, reporting). */

@@ -256,7 +256,7 @@
       <anopheles mosquito="gambiae_ss">
         <eir EIRRotateAngle="0.0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
         <mosq
-    emergenceRateFilename="Nv0scenarioVector.txt"
+    emergenceRateFilename="Nv0scenarioFullInterventionSet.txt"
     extrinsicIncubationPeriod="10"
     mosqEntoAvailability="0.0070"
     mosqProbBiting="0.95"

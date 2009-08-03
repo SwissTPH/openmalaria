@@ -224,6 +224,10 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   return false;
 }
 
+void Human::massVaccinate () {
+  vaccinate();
+  Simulation::gMainSummary->reportMassVaccination(ageGroup());
+}
 void Human::vaccinate(){
   //Index to look up initial efficacy relevant for this dose.
   if (Vaccine::PEV.active)
@@ -275,8 +279,8 @@ void Human::clearInfections () {
   withinHostModel->clearInfections(clinicalModel->latestDiagnosisIsSevereMalaria());
 }
 
-void Human::IPTiTreatment (double compliance) {
-  withinHostModel->IPTiTreatment (compliance, ageGroup());
+void Human::IPTiTreatment () {
+  withinHostModel->IPTiTreatment (ageGroup());
 }
 
 

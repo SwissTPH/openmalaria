@@ -182,17 +182,16 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   }
 }
 
-void OldIPTWithinHostModel::IPTiTreatment (double compliance, int ageGroup) {
-  if (W_UNIFORM() < compliance){
-    _lastIptiOrPlacebo = Simulation::simulationTime;
-    /*
-    * iptiEffect denotes treatment or placebo group
-    * and also the treatment given when sick (trial-dependent)
-    */
-    if (iptiEffect >= 10){
-      _lastSPDose = Simulation::simulationTime;
-      Simulation::gMainSummary->reportIPTDose(ageGroup);
-    }
+void OldIPTWithinHostModel::IPTiTreatment (int ageGroup) {
+  //Set the last SP Dose given for the eligible humans - is this all we need to do?
+  
+  _lastIptiOrPlacebo = Simulation::simulationTime;
+  
+  // iptiEffect denotes treatment or placebo group
+  // and also the treatment given when sick (trial-dependent)
+  if (iptiEffect >= 10){
+    _lastSPDose = Simulation::simulationTime;
+    Simulation::gMainSummary->reportIPTDose(ageGroup);
   }
 }
 

@@ -96,7 +96,7 @@ public:
   /// Conditionally set last SP dose
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup) {}
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
-  virtual void IPTiTreatment (double compliance, int ageGroup);
+  virtual void IPTiTreatment (int ageGroup);
   //@}
   
   /*! Until now, this only includes decay of immunity against
