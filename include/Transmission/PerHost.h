@@ -22,6 +22,7 @@
 
 #include "Transmission/VectorSpecies.h"
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
+#include "GSLWrapper.h"
 
 class Summary;
 class HostMosquitoInteraction;
@@ -91,13 +92,25 @@ public:
   }
   
   /// Give individual a new ITN as of time timeStep.
-  inline void setupITN (int timeStep) {
-    timestepITN = timeStep;
+  inline void setupITN () {
+    timestepITN = Simulation::simulationTime;
   }
   /// Give individual a new IRS as of time timeStep.
-  inline void setupIRS (int timeStep) {
-    timestepIRS = timeStep;
+  inline void setupIRS () {
+    timestepIRS = Simulation::simulationTime;
   }
+  
+  /** Distribute ITNs to individuals of the correct age (to model ITN
+   * distribution along with measles vaccines, etc.). */
+  inline void continousItnDistribution (int ageTSteps) {
+    if (Simulation::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
+      && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
+      if (W_UNIFORM() < cntItnCoverage[nextItnDistribution])
+	setupITN ();
+      ++nextItnDistribution;
+    }
+  }
+  
   
 private:
   vector<HostMosquitoInteraction> species;
@@ -110,6 +123,8 @@ private:
   
   int timestepITN;
   int timestepIRS;
+  
+  int nextItnDistribution;
   
   
   ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
@@ -128,6 +143,11 @@ private:
  */ 
   static const double bsa_prop[WithinHostModel::nages];
   //@}
+  
+  /// Target ages at which individuals may receive ITNs
+  static vector<double> cntItnTargetAgeTStep;
+  /// Coverage levels associated with cntItnTargetAgeTStep
+  static vector<double> cntItnCoverage;
 };
 
 /** Data needed for each human which is per-mosquito species. */

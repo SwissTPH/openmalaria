@@ -71,10 +71,9 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
   _BSVEfficacy=0.0;
   _dateOfBirth=dateOfBirth;
-  if (_dateOfBirth > simulationTime) {
-    // This test may be totally unnecessary; it was done in oldWithinHostModel
-    throw out_of_range ("date of birth in future!");
-  }
+  if ((Simulation::timeStep >= 0 && _dateOfBirth != simulationTime) || _dateOfBirth > simulationTime)
+    throw out_of_range ("Invalid date of birth!");
+  
   _ID=ID;
   _lastVaccineDose=0;
   _PEVEfficacy=0.0;
@@ -243,6 +242,7 @@ void Human::vaccinate(){
 }
 
 void Human::updateInterventionStatus() {
+  int ageTimeSteps = Simulation::simulationTime-_dateOfBirth;
   if (Vaccine::anyVaccine) {
     /*
       Update the effect of the vaccine
@@ -264,14 +264,15 @@ void Human::updateInterventionStatus() {
     if (Simulation::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
-            Vaccine::targetagetstep[_lastVaccineDose] == Simulation::simulationTime-_dateOfBirth) {
+            Vaccine::targetagetstep[_lastVaccineDose] == ageTimeSteps) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
         }
       }
     }
   }
-  withinHostModel->IPTSetLastSPDose(Simulation::simulationTime-_dateOfBirth, ageGroup());
+  withinHostModel->IPTSetLastSPDose(ageTimeSteps, ageGroup());
+  perHostTransmission.continousItnDistribution (ageTimeSteps);
 }
 
 void Human::clearInfections () {
@@ -284,10 +285,10 @@ void Human::IPTiTreatment () {
 }
 
 void Human::setupITN () {
-  perHostTransmission.setupITN (Simulation::simulationTime);
+  perHostTransmission.setupITN ();
 }
 void Human::setupIRS () {
-  perHostTransmission.setupIRS (Simulation::simulationTime);
+  perHostTransmission.setupIRS ();
 }
 
 
@@ -319,13 +320,13 @@ double Human::infectiousness(){
   static const double beta3=0.17;
   static const double tau= 0.066;
   static const double mu= -8.1;
-  int agetstep=Simulation::simulationTime-_dateOfBirth;
+  int ageTimeSteps=Simulation::simulationTime-_dateOfBirth;
   /*
     Original infectiousness model based on 5 day intervals updates
     lagged variables only every 5 days and cannot compute infectiousness
     for the first 20 days of the simulation
   */
-  if ((agetstep*Global::interval >  20) && (Simulation::simulationTime*Global::interval >  20)) {
+  if ((ageTimeSteps*Global::interval >  20) && (Simulation::simulationTime*Global::interval >  20)) {
     double x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
     if ( x <  0.001) {
       transmit=0.0;

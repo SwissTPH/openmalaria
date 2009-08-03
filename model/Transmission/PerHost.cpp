@@ -21,17 +21,33 @@
 #include "Transmission/Vector.h"
 #include "summary.h"
 #include "intervention.h"
+#include "inputData.h"
 
 
 // -----  PerHostTransmission static  -----
 
 const double PerHostTransmission::bsa_prop[WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 double PerHostTransmission::ageSpecificRelativeAvailability[WithinHostModel::nages];
+vector<double> PerHostTransmission::cntItnTargetAgeTStep;
+vector<double> PerHostTransmission::cntItnCoverage;
 
 
 void PerHostTransmission::initParameters () {
   for (size_t i=0; i<WithinHostModel::nages; i++) {
     ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
+  }
+  
+  const scnXml::Interventions::ContinuousOptional& cntInterv = getInterventions().getContinuous();
+  if (cntInterv.present()) {
+    const scnXml::Continuous::ITNSequence& seqItn = cntInterv.get().getITN();
+    int n = seqItn.size();
+    cntItnTargetAgeTStep.resize(n);
+    cntItnCoverage.resize (n);
+    
+    for (int i=0;i<n; i++) {
+      cntItnTargetAgeTStep[i] = static_cast<int>(floor(seqItn[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval)));
+      cntItnCoverage[i] = seqItn[i].getCoverage();
+    }
   }
 }
 
@@ -39,7 +55,8 @@ void PerHostTransmission::initParameters () {
 // -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () :
-    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER)
+    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER),
+    nextItnDistribution(0)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
   _entoAvailability = availabilityFactor;
@@ -55,6 +72,7 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
   in >> _entoAvailability;
   in >> timestepITN;
   in >> timestepIRS;
+  in >> nextItnDistributiony
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
@@ -67,6 +85,7 @@ void PerHostTransmission::write (ostream& out) const {
   out << _entoAvailability << endl;
   out << timestepITN << endl;
   out << timestepIRS << endl;
+  out << nextItnDistribution << endl;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
 }
