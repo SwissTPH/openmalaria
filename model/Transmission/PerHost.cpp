@@ -65,8 +65,8 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
 
 void PerHostTransmission::write (ostream& out) const {
   out << _entoAvailability << endl;
-  out << timestepITN;
-  out << timestepIRS;
+  out << timestepITN << endl;
+  out << timestepIRS << endl;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
 }

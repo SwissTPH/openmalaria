@@ -182,7 +182,7 @@ def evalOptions (args):
   toRun=set()
   omOptions=[]
   for arg in others:
-    if (arg[0:2] == "--"):
+    if (arg[0] == '-'):
       omOptions = omOptions + [arg]
     else:
       toRun.add (arg)
