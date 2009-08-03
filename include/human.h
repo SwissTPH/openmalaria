@@ -166,7 +166,11 @@ private:
   int _dateOfBirth;
   //!unique identifier
   int _ID;
-  //!number of vaccine doses this individual has received
+  /** Number of vaccine doses this individual has received.
+   *
+   * If an individual misses one EPI (continuous) vaccine dose, it's
+   * intentional that they also miss following EPI doses (unless a timed mass
+   * vaccination reintroduces them to the EPI schedule). */
   int _lastVaccineDose;
   //!Remaining efficacy of Blood-stage vaccines
   double _BSVEfficacy;

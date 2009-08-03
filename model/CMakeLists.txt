@@ -2,14 +2,6 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-
-#for Visual Studio file groupings:
-source_group (Clinical REGULAR_EXPRESSION Clinical/.*)
-source_group (Drug REGULAR_EXPRESSION Drug/.*)
-source_group (Pathogenesis REGULAR_EXPRESSION Pathogenesis/.*)
-source_group (Transmission REGULAR_EXPRESSION Transmission/.*)
-source_group (WithinHost REGULAR_EXPRESSION WithinHost/.*)
-
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
   WeibullDecayedValue.cpp population.cpp timer.cpp InfectionIncidenceModel.cpp
@@ -21,6 +13,15 @@ aux_source_directory (Drug Drug_CPP)
 aux_source_directory (Pathogenesis Pathogenesis_CPP)
 aux_source_directory (Transmission Transmission_CPP)
 aux_source_directory (WithinHost WithinHost_CPP)
+
+# Headers - only included so they show up in the Visual Studio project:
+aux_source_directory (${CMAKE_SOURCE_DIR}/include Model_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/Clinical Clinical_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/Drug Drug_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/Pathogenesis Pathogenesis_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/Transmission Transmission_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/WithinHost WithinHost_H)
+
 
 include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
@@ -37,8 +38,29 @@ add_library (model
   ${Pathogenesis_CPP}
   ${Transmission_CPP}
   ${WithinHost_CPP}
+  ${Model_H}
+  ${Clinical_H}
+  ${Drug_H}
+  ${Pathogenesis_H}
+  ${Transmission_H}
+  ${WithinHost_H}
 )
 
 if (MSVC)
   set_target_properties (model PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
 endif (MSVC)
+
+
+#for Visual Studio file groupings:
+source_group (model\\Clinical FILES ${Clinical_CPP})
+source_group (model\\Drug FILES ${Drug_CPP})
+source_group (model\\Pathogenesis FILES ${Pathogenesis_CPP})
+source_group (model\\Transmission FILES ${Transmission_CPP})
+source_group (model\\WithinHost FILES ${WithinHost_CPP})
+
+source_group (include FILES ${Model_H})
+source_group (include\\Clinical FILES ${Clinical_H})
+source_group (include\\Drug FILES ${Drug_H})
+source_group (include\\Pathogenesis FILES ${Pathogenesis_H})
+source_group (include\\Transmission FILES ${Transmission_H})
+source_group (include\\WithinHost FILES ${WithinHost_H})
