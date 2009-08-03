@@ -90,6 +90,15 @@ public:
     return _entoAvailability;
   }
   
+  /// Give individual a new ITN as of time timeStep.
+  inline void setupITN (int timeStep) {
+    timestepITN = timeStep;
+  }
+  /// Give individual a new IRS as of time timeStep.
+  inline void setupIRS (int timeStep) {
+    timestepIRS = timeStep;
+  }
+  
 private:
   vector<HostMosquitoInteraction> species;
   

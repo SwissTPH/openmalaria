@@ -119,10 +119,12 @@ public:
   //@}
   
   /// For direct interactions with within host model
-  ///TODO: possibly functionality of functions using them should be moved to Human?
-  //@{
   void clearInfections();
-  //@}
+  
+  /// Give human a new ITN
+  void setupITN ();
+  /// Give human a new IRS
+  void setupIRS ();
   
   ///@name static public
   //@{

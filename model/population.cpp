@@ -396,13 +396,13 @@ void Population::implementIntervention (int time) {
   if (interv->getIpti().present()) {
     massIntervention (interv->getIpti().get(), &Human::IPTiTreatment);
   }
-  /*
+  
   if (interv->getITN().present()) {
-    massIntervention (interv->getITN().get(), &Human::);
+    massIntervention (interv->getITN().get(), &Human::setupITN);
   }
   if (interv->getIRS().present()) {
-    massIntervention (interv->getIRS().get(), &Human::);
-  }*/
+    massIntervention (interv->getIRS().get(), &Human::setupIRS);
+  }
 }
 
 // Returns mass.getCoverage(), sets minAge and maxAge

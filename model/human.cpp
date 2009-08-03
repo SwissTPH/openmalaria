@@ -283,6 +283,13 @@ void Human::IPTiTreatment () {
   withinHostModel->IPTiTreatment (ageGroup());
 }
 
+void Human::setupITN () {
+  perHostTransmission.setupITN (Simulation::simulationTime);
+}
+void Human::setupIRS () {
+  perHostTransmission.setupIRS (Simulation::simulationTime);
+}
+
 
 void Human::summarize(){
   if (OldIPTWithinHostModel::iptActive && clinicalModel->recentTreatment())
