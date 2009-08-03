@@ -72,7 +72,7 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
   in >> _entoAvailability;
   in >> timestepITN;
   in >> timestepIRS;
-  in >> nextItnDistributiony
+  in >> nextItnDistribution;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
