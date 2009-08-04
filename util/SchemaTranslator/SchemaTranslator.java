@@ -393,6 +393,8 @@ public class SchemaTranslator {
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
         Element cMs = (Element) scenarioElement.getElementsByTagName(
                 "caseManagements").item(0);
+        //wuID is added by add_work.cpp
+        scenarioElement.removeAttribute("wuID");
         if ((ver & 8192) != 0) { // ClinicalEventScheduler (new case
             // management)
             if (scenarioElement.getElementsByTagName("healthSystem")
