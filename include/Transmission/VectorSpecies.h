@@ -95,8 +95,8 @@ public:
   ///@brief Parameters which may vary per mosquito species
   //@{
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-   * Units: Animals per day. */
-  double mosqEmergeRate[daysInYear];
+   * Units: Animals per day. Length: daysInYear. */
+  vector<double> mosqEmergeRate;
   
   /** Death rate of mosquitoes while host-seeking (μ_vA).
    * Unit: animals/day. */
@@ -172,32 +172,37 @@ private:
   /* Parameters from model */
   /* Partial (derived) parameters from model */
   
-  /** Number of days for which data must be stored to calculate N_v, O_v and
-   * S_v.
+  /** N_v_length-1 is the number of previous days for which some parameters are
+   * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
+   * the arrays need to be, but simplifies code with no real impact.
    * 
    * Should equal EIPDuration + mosqRestDuration to allow values up to
    * θ_s + τ - 1 days back, plus current day. */
   int N_v_length;
   
-  /** @brief Probability of a mosquito not finding a host one night.
-   * NOTE: needs to be N_v_length long? */
-  double *P_A;
+  ///@brief Parameter arrays N_v_length long.
+  //@{
+  /** @brief Probability of a mosquito not finding a host one night. */
+  vector<double> P_A;
   
   /** @brief P_df and P_dif per-day.
-   * NOTE: needs to be N_v_length long?
    * 
    * P_df is the probability of a mosquito finding a host and completing a
    * feeding cycle without being killed.
    * 
    * P_dif is the probability of a mosquito finding a host, getting infected,
-   * and successfully completing a feeding cycle. */
-  double *P_df, *P_dif;
+   * and successfully completing a feeding cycle.
+   * 
+   * HOWEVER, if the initialisation phase is driven by an input EIR and not by
+   * vector calculations, then during the initialisation phase, P_dif contains
+   * the daily kappa values read from XML for validation purposes. */
+  vector<double> P_df, P_dif;
   
   /** Number of host-seeking mosquitos each day; respectively: total number,
-   * infected (dela, and infective.
-   * Index for each day is day % N_v_length.
-   * Length: N_v_length (longer than needed for S_v, but simplifyies code) */
+   * infected, and infective.
+   * Index for each day is day % N_v_length. */
   vector<double> N_v, O_v, S_v;
+  //@}
   
   /** Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
    * Values are recalculated each step, only first few elements are stored
@@ -219,7 +224,7 @@ private:
   /** Angle to rotate EIR: Should be between 0 and 2Pi. */
   double EIRRotateAngle;
   
-  
+  //FIXME: remove
   /** The filename to which emergence rates are loaded & saved. */
   string emergenceRateFilename;
   //@}
@@ -234,44 +239,12 @@ private:
    * @param population List of humans
    * @param kappaDaily Infectiousness of humans, per day, for last N_v_length days
    */
-  double initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double> kappaDaily);
+  double initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily);
   
-  /*! get mosquito emergence rates 
-   *
-   * This routine passes the basic entomological parameters (that are already
-   * been read, the EIR, and the human infectivity to mosquitoes (all for one
-   * type of host) and calculate the mosquito emergence.
-   * 
-   * \param populationSize
-   * 	Number of hosts of each type.
-   * 	Units: Animals. 
-   * 	$N_i$ in model. Matrix of size $n \times \theta_p$.
-   * 	We assume that the size of the one group in initialization is
-   * 	fixed over the cycle.
-   * 	Mathematically, we require this parameter to be a positive
-   * 	real number, so although this will typically be a natural 
-   * 	number, it is not restricted to being one. */
-  void calMosqEmergeRate (int populationSize, vector<double>& kappa, double averageAvailability);
+  /** This subroutine converts ShortArray to a vector<double> of length
+   * daysInYear by copying and duplicating elements to fill the gaps. */
+  static vector<double> convertLengthToFullYear (vector<double>& ShortArray); 
   
-  
-  /** This subroutine converts ShortArray of length intervalsPerYear to
-   * FullArray by copying and duplicating elements to fill the gaps. */
-  static void convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray); 
-  
-  /** Given a positive array, originalArray, of length OALength,
-   * this routine exponentiates the inverse discrete Fourier 
-   * tranform of the first three modes of the natural logarithm of 
-   * the array to smooth out the array to produce smoothArray of 
-   * length SALength.
-   *
-   * All elements of originalArray are assumed to be strictly
-   * positive.
-   *
-   * smoothArray is an OUT parameter.
-   * originalArray, SALength and OALength are IN parameters.
-   * No reason smoothArray and originalArray can't be the same array. */
-  static void logDFTThreeModeSmooth (double* smoothArray, double* originalArray, int SALength, int OALength); 
-
   /**
    *  Given a sequence of Fourier coefficients, FC, of odd length,
    *  this routine calculates the exponent of the inverse discrete

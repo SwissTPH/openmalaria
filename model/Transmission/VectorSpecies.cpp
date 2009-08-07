@@ -24,6 +24,7 @@
 #include "xmlHelperFuncs.h"
 #include "human.h"
 #include "simulation.h"
+#include "util/vectors.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
@@ -55,10 +56,6 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   
   
   // -----  allocate memory  -----
-  P_A = new double[N_v_length];
-  P_df = new double[N_v_length];
-  P_dif = new double[N_v_length];
-  
   // Set up fArray and ftauArray. Each step, all elements not set here are
   // calculated, even if they aren't directly used in the end;
   // however all calculated values are used in calculating the next value.
@@ -98,7 +95,11 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   // -----  if we have emerge rate data to use or validate  -----
   if (anoph.getEmergence().present()) {
     const scnXml::Emergence& emergeData = anoph.getEmergence().get();
-    initFeedingCycleProbs (sIndex, population, readDoubleList (emergeData.getKappa(), N_v_length));
+    mosqEmergeRate = readDoubleList (emergeData.getEmergenceRate(), N_v_length);
+    P_dif = readDoubleList (emergeData.getKappa(), N_v_length);
+    if (!FCEIR.size())
+      initFeedingCycleProbs (sIndex, population, P_dif);
+    //else: validate kappa (in P_dif) and calculate P_* after initialisation phase
     N_v = readDoubleList (emergeData.getN_v(), N_v_length);
     O_v = readDoubleList (emergeData.getO_v(), N_v_length);
     S_v = readDoubleList (emergeData.getS_v(), N_v_length);
@@ -127,12 +128,10 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
 }
 
 void VectorTransmissionSpecies::destroy () {
-  delete[] P_A;
-  delete[] P_df;
-  delete[] P_dif;
 }
 
-double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double> kappaDaily) {
+double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
+  //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
   //BEGIN P_A, P_Ai, P_df, P_dif
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
@@ -157,6 +156,9 @@ double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const st
   }
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   
+  P_A  .resize (N_v_length);
+  P_df .resize (N_v_length);
+  P_dif.resize (N_v_length);
   for (int t = 0; t < N_v_length; ++t) {
     P_A[t]	= intP_A;
     P_df[t]	= intP_df;
@@ -171,8 +173,6 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   // If EIR data was provided, validate EIR or do emergence rate calculations
   // and switch to calculating a dynamic EIR.
   if (FCEIR.size()) {
-    //TODO: validate P_*, ?_v
-    
     if (Simulation::simulationTime*Global::interval < N_v_length)
       throw xml_scenario_error ("Initialization phase too short");
     vector<double> kappaDaily (N_v_length, 0.0);
@@ -185,11 +185,87 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
 	kappa[(day / Global::interval - 1) % Global::intervalsPerYear];
     }
     
+    bool valid = approxEqual (kappaDaily, P_dif);
+    
     double availability = initFeedingCycleProbs (sIndex, population, kappaDaily);
     
-    calMosqEmergeRate (populationSize, kappa, availability/populationSize);	// initialises N_v, O_v, S_v
+    // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
+    VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, availability / populationSize, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
     
-    //TODO: save out parameters if recalculated
+    
+    /* We can either take the EIR from the initialisation stage and expand to
+     * length daysInYear without smoothing:
+     *	EIRInit = convertLengthToFullYear(speciesEIR);
+     * or recalculate from fourier coefficients to get a smooth array: */
+    vector<double> EIRInit(daysInYear, 0.0);
+    calcInverseDFTExp(EIRInit, FCEIR);
+    if(EIRRotateAngle != 0.0)
+      rotateArray(EIRInit, EIRRotateAngle);
+    
+    
+    //FIXME: rehash this once XML elements have been generated
+    mosqEmergeRate.resize (daysInYear);
+    {
+    ifstream file (emergenceRateFilename.c_str());
+    if(file.good()) {	// file exists since it opened succesfully
+      for (int i = 0; i < daysInYear; i++){
+	file >> mosqEmergeRate[i];
+      }
+      cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
+    }else{
+      // The root finding algorithm needs some estimate to start from. It's accuracy isn't that important since it should converge in a single step anyway.
+      double temp = populationSize*availability;
+      for (int i = 0; i < daysInYear; i++) {
+	mosqEmergeRate[i] = EIRInit[i]*temp;
+      }
+      cout << "Guessed emergence rates: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
+    }
+    file.close();
+    }
+    
+    //TODO validate as separate function, do all validation first, then all calculations if anything isn't valid
+    
+    valid = valid && emerge.CalcInitMosqEmergeRate(
+	convertLengthToFullYear (kappa),
+	EIRInit,
+	mosqEmergeRate);
+    
+    //FIXME
+    // Now we've calculated the emergence rate, save it:
+    ofstream file (emergenceRateFilename.c_str());
+    for (int i = 0; i < daysInYear; ++i)
+      file << mosqEmergeRate[i] << endl;
+    file.close();
+    
+    
+    
+    if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
+      throw xml_scenario_error ("Initialization phase or daysInYear too short");
+    vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
+    
+    for (int day = endDay - N_v_length; day < endDay; ++day) {
+      size_t t = day % N_v_length;
+      size_t i = (daysInYear + day - endDay) % daysInYear;
+      
+      Nv[t] = emerge.N_v[i];
+      Ov[t] = emerge.O_v[i];
+      Sv[t] = emerge.S_v[i];
+    }
+    
+    if (N_v.size()) {
+      if (!valid ||
+	!approxEqual (N_v, Nv) ||
+	!approxEqual (O_v, Ov) ||
+	!approxEqual (S_v, Sv)) {
+	  cerr << "Warning: parameters associated with emergence rate are not accurate; new values output." << endl;
+	  //TODO: save out parameters
+	}
+    }
+    // Set anyway; no harm if they already have good values
+    N_v = Nv;
+    O_v = Ov;
+    S_v = Sv;
+    
     FCEIR.resize(0, 0.0);	// indicate EIR-driven mode is no longer being used (although this is ignored)
   }
   // else: we're already in dynamic EIR calculation mode
@@ -340,273 +416,15 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
 }
 
 
-/*****************************************************************************
- *  The following code all concerns calculating the mosquito emergence rate  *
- *****************************************************************************/
-
-
-/* 2008.10.06 (Nakul Chitnis)
- * We are now dealing with code that has been fully converted to C. 
- * We probably need to redo some of this work - and make sure all
- * arrays are in C format. I think we should also avoid 2-dimensional
- * arrays in C and simply use gsl_matrices so we avoid the stupid
- * C convention of the first index refering to the column.
- *
- * The code probably needs some cleaning up to remove the remains of the
- * Fortran-C interations.
- */
-
-/* We are currently trying to create arrays and two dimensional arrays.
- * It may make more sense to just create gsl_vectors and gsl_matrices.
- * This may be a problem when we define Upsilon as a three dimensional
- * array. Maybe there is some way of dealing with that in gsl - but
- * perhaps not. Let's deal with that later.
- */ 
-
-/* We use the naming convention that all arrays and matrices that come from 
- * Fortran and will be sent back to Fortran begin with 'F'. All vectors
- * and matrices that are created and used by C begin with 'C'.
- * Hopefully this will help to keep things less confusing
- * - although certainly not eliminate the confusion...
- */
-
-/* In C, the first index refers to the column and the second index to the 
- * row. This is stupid, but we have no choice. However, in our attempt to
- * be as consistent as possible, we always refer to the row by 'i' and to
- * the column by 'j'. We refer to the element in the i^{th} row and j^{th} 
- * column of matrix, A, by A(j,i). This is certainly not perfect, but 
- * perhaps the best that we can do.
- */ 
-
-
-void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<double>& kappa, double averageAvailability) {
-  // A class encapsulating VectorInternal code. Destructor frees memory at end
-  // of this function.
-  VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, averageAvailability, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
-  
-  //TODO: No support for nMalHostTypesInit, nHostTypesInit != 1 in emergence
-  // rate calculations (these aren't variables even used).
-  /* Number of type of malaria-susceptible hosts. 
-  Dimensionless.
-  $m$ in model. Scalar.
-  Is equal to 1 in initalization. */
-  int nMalHostTypesInit = 1;
-  
-  /* Number of types of hosts. 
-  Dimensionless.
-  $n$ in model. Scalar.
-  Is equal to 1 in initalization. */
-  int nHostTypesInit = nMalHostTypesInit;	// TODO: plus num non-human host types
-
-  /* Infectivity of hosts to mosquitoes.
-  $K_vi$ in model. Matrix of size $n \times \theta_p$.
-  In initialization, there is only one time of host.
-  This is taken directly from kappa(i) from
-  entomology. */
-  double humanInfectivityInit[daysInYear];
-  
-  
-  
-  /**************************************************************!
-  ** We enter parameters here that will later be moved to .xml **!
-  ***************************************************************!
-  Note that these parameters are only for one group of humans.
-  We need to get parameters for multiple groups later.
-  Some parameters - that should be vectors of length daysInYear
-  we will enter as scalars and assume they are fixed over the 
-  year. Although, in the theoretical model, we assume that they
-  may vary periodically over one year, we code them as though 
-  they are constant. We can change that later if they need to 
-  vary. */
-  
-
-  /**************************************************************! 
-  ***************************************************************!
-  *********** Other main input and output parameters ************!
-  ***************************************************************!*/
-  
-  /* The entomological inoculation rate.
-  Units: 1/Time
-  $\Xi_i$ in model. Matrix of size $n \times \theta_p$.
-  We use this to calculate the mosquito emergence rate.
-  During the initialization, it a vector with the length of the 
-  annual period. */
-  vector<double> EIRInit(daysInYear, 0.0);
-
-    /*
-  ***************************************************************!
-  ***************************************************************!
-  *************** Begin code of subroutine here *****************!
-  ***************************************************************!
-    */
-  
-  /* Now we have to deal with 
-  - humanInfectivityInit - we take from kappa
-  - EIRinit - we take from EIR.
-  ************ Make sure that EIR is the correct one. ***********!
-  I'm not sure how we should check this - but we should look into
-  it more carefully at some point in time. For now, we can 
-  continue with this.
-  We first create arrays of length intervalsPerYear for all three.
-  We then convert them to length daysInYear.
-  Save the human infectivity to mosquitoes from simulation of one
-  lifetime to kappa. We will then use this to create 
-  humanInfectivityInit (of size daysInYear). */
-  
-  /* NOTE: old method (save speciesEIR from init and expand)
-  // EIR should have been calculated from fourier coefic. and used for the
-  // updateOneLifespan period as a forced EIR. We should now copy EIR to an
-  // array of length daysInYear, without smoothing (since humans only
-  // experience 1 EIR value per timestep).
-  convertLengthToFullYear(EIRInit, speciesEIR);
-  // The other option would be to smooth (or recalculate from FCEIR).
-  //logDFTThreeModeSmooth(EIRInit, speciesEIR, daysInYear, Global::intervalsPerYear);
-  
-  speciesEIR.clear();	// this is finished with; frees memory?
-  */
-  calcInverseDFTExp(EIRInit, FCEIR);
-  if(EIRRotateAngle != 0.0)
-    rotateArray(EIRInit, EIRRotateAngle);
-  
-  
-  convertLengthToFullYear(humanInfectivityInit, kappa);
-  emerge.PrintArray ("kappa", humanInfectivityInit, daysInYear);
-  
-  /* Find an initial estimate of the mosquito emergence rate, in
-  mosqEmergeRate.
-  Units: Mosquitoes/Time
-  
-  Not explicitly included in model. Vector of length $\theta_p$.
-  This initial estimate is used by a root finding algorithm
-  to calculate the mosquito emergence rate. */
-
-  /* Set values of the initial estimate for the mosquito emergence rate.
-  If we have already calcuated the mosquito emergence rate for the
-  given parameters separately, we can simply use that (and later
-  test the resulting EIR if it matches.
-  The file is assumed to contain a moquito emergence rate of length
-  daysInYear.
-  Otherwise, we just use a multiple of the EIR. The value of this 
-  vector may not be very important, but it may speed up the root
-  finding algorithm (but probably not).
-  (2008.10.20: It appears to make no difference to the speed.)
-    */
-  ifstream file (emergenceRateFilename.c_str());
-  if(file.good()) {	// file exists since it opened succesfully
-    for (int i = 0; i < daysInYear; i++){
-	  file >> mosqEmergeRate[i];
-    }
-    cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
-  }else{
-    double temp = populationSize*populationSize*averageAvailability;
-    for (int i = 0; i < daysInYear; i++) {
-      mosqEmergeRate[i] = EIRInit[i]*temp;
-    }
-    cout << "Guessed emergence rates: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
-  }
-  file.close();
-  
-  // Now calculate the emergence rate.
-  // The routine should finish quickly if the emergence rate is already accurate.
-  if(true) {
-    emerge.CalcInitMosqEmergeRate(
-                           nHostTypesInit,
-                           nMalHostTypesInit,
-                           humanInfectivityInit, EIRInit,
-			   &mosqEmergeRate[0]);
-    
-    // Now we've calculated the emergence rate, save it:
-    ofstream file (emergenceRateFilename.c_str());
-    for (int i = 0; i < daysInYear; ++i)
-      file << mosqEmergeRate[i] << endl;
-    file.close();
-  }
-  
-  
-  if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
-    throw xml_scenario_error ("Initialization phase or daysInYear too short");
-  vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
-  
-  // For day over N_v_length days prior to the next timestep's day.
-  int endDay = (Simulation::simulationTime+1) * Global::interval;
-  for (int day = endDay - N_v_length; day < endDay; ++day) {
-    size_t t = day % N_v_length;
-    size_t i = (daysInYear + day - endDay) % daysInYear;
-    
-    Nv[t] = emerge.N_v[i];
-    Ov[t] = emerge.O_v[i];
-    Sv[t] = emerge.S_v[i];
-  }
-  
-  if (N_v.size()) {
-    //TODO validate ?_v
-  } else {
-    N_v = Nv;
-    O_v = Ov;
-    S_v = Sv;
-  }
-}
-
-void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray) {
+vector<double> VectorTransmissionSpecies::convertLengthToFullYear (vector<double>& ShortArray) {
+  vector<double> FullArray (daysInYear);
   for (size_t i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
       FullArray[i*Global::interval + j] = ShortArray[i];
     }
   }
+  return FullArray;
 }
-
-
-
-/***************************************************************************
- ************************ START SUBROUTINES HERE ***************************
- ***************************************************************************/
-void VectorTransmissionSpecies::logDFTThreeModeSmooth (double* smoothArray,
-                                               double* originalArray,
-                                               int SALength,
-                                               int OALength)
-{
-  // Frequency
-  double foa = 1.0/OALength;
-  double woa = 2*M_PI * foa;
-  double wsa = 2*M_PI/SALength;
-  
-  double tempsuma0 = 0.0;
-  double tempsuma1 = 0.0;
-  double tempsumb1 = 0.0;
-  double tempsuma2 = 0.0;
-  double tempsumb2 = 0.0;
-  
-  // Calculate first three Fourier modes
-  for (int t=0; t < OALength; t++) {
-    double yt = log(originalArray[t]);
-    double woa_t = woa*t;
-    tempsuma0 += yt;
-    tempsuma1 += (yt*cos(woa_t));
-    tempsumb1 += (yt*sin(woa_t));
-    tempsuma2 += (yt*cos(2*woa_t));
-    tempsumb2 += (yt*sin(2*woa_t));       
-  }
-  
-  // Fourier Coefficients
-  double a0 = (  foa)*tempsuma0;
-  double a1 = (2*foa)*tempsuma1;
-  double b1 = (2*foa)*tempsumb1;
-  double a2 = (2*foa)*tempsuma2;
-  double b2 = (2*foa)*tempsumb2;
-  
-  // Calculate inverse discrete Fourier transform
-  for (int t=0; t < SALength; t++){
-    double wsa_t = wsa*(t+1);
-    smoothArray[t] = 
-        exp(a0 + a1*cos(wsa_t) + b1*sin(wsa_t) + 
-        a2*cos(2*wsa_t) + b2*sin(2*wsa_t));
-  }
-
-#   ifdef TransmissionModel_PrintSmoothArray
-  PrintArray("SmoothArray", smoothArray, SALength);
-#   endif
-}
-
 
 
 void VectorTransmissionSpecies::calcInverseDFTExp(vector<double>& tArray, vector<double>& FC) {

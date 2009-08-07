@@ -91,13 +91,13 @@ public:
    * However, we cannot write these equations in the form Ax=b, so we use
    * a root-finding algorithm to calculate \f$N_{v0}\f$.
    *
-   * This function has a dummy return of 0.
+   * This function returns true if the input mosqEmergeRate is sufficiently
+   * accurate, false if a recalculation is required (and potentially done).
    * 
    * \param mosqEmergeRate is both an input (guessed or read from file) and output (calculated emergence rate-. */
-  double CalcInitMosqEmergeRate(int nHostTypesInit, int nMalHostTypesInit,
-                                const double* FHumanInfectivityInitVector,
-                                const vector<double>& FEIRInitVector,
-				double* mosqEmergeRate);
+  bool CalcInitMosqEmergeRate(const vector<double>& FHumanInfectivityInitVector,
+			      const vector<double>& FEIRInitVector,
+			      vector<double>& mosqEmergeRate);
   
   
   /** Mosquito population (total, infected, infectious) periodic orbit over
@@ -125,6 +125,16 @@ private:
   size_t theta_p;
   size_t tau;
   size_t theta_s;
+  
+  //TODO: No support for nMalHostTypesInit, nHostTypesInit != 1 (these aren't variables even used).
+  /** Number of type of malaria-susceptible hosts.
+   *
+   * Dimensionless. \f$m\f$ in model. Scalar. */
+  int nMalHostTypes;
+  /** Number of types of hosts.
+   *
+   * Dimensionless. \f$n\f$ in model. Scalar. */
+  int nHostTypes;
   
   int N_i;
   double alpha_i;
@@ -203,7 +213,7 @@ private:
  * 
  * PAPtr, and PAiPtr are OUT parameters.
  * All other parameters are IN parameters. */
-void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, const gsl_vector* K_vi);
+void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -404,7 +414,7 @@ public:
    * The array, v, of doubles is assumed to be of length n. */
   void PrintArray(const char* vectorname, const double* v, int n) const;
   /// ditto, taking a vector
-  void PrintArray(const char* vectorname, const vector<double>& v) const;
+  void PrintVector(const char* vectorname, const vector<double>& v) const;
 
   friend int CalcSvDiff_rf(const gsl_vector* x, void* p, gsl_vector* f);
   friend class VectorEmergenceSuite;

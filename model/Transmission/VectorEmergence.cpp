@@ -24,6 +24,7 @@
 
 #include "Transmission/VectorEmergence.h"
 #include "global.h"
+#include "util/vectors.h"
 
 #include <sstream>
 #include <gsl/gsl_blas.h>
@@ -62,6 +63,7 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration,
     int yearLength, ostream& traceOut, const char* logFileName) :
   counterSvDiff(0),
   theta_p (yearLength), tau(mosqRestDuration), theta_s(EIPDuration),
+  nMalHostTypes(1), nHostTypes(nMalHostTypes /* TODO: plus num non-human host types */),
   N_i(populationSize),
   alpha_i(entoAvailability),
   mu_vA(mosqSeekingDeathRate), theta_d(mosqSeekingDuration),
@@ -107,25 +109,21 @@ VectorEmergence::~VectorEmergence () {
   logFile.close();
 }
 
-double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
-					       int nMalHostTypesInit,
-					       const double* FHumanInfectivityInitVector,
-					       const vector<double>& FEIRInitVector,
-					       double* mosqEmergeRate)
+bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfectivityInitVector,
+					     const vector<double>& FEIRInitVector,
+					     vector<double>& mosqEmergeRate)
 {
+  PrintVector ("kappa", FHumanInfectivityInitVector);
+  
   // This initially contains the initial estimate of the mosquito emergence
   // rate. This is used by the root finding algorithm to calculate N_v0.
-  gsl_vector* N_v0 = gsl_vector_calloc(theta_p);	// mosqEmergeRate
-  memcpy (N_v0->data, mosqEmergeRate, theta_p * sizeof(double));
-  
+  gsl_vector* N_v0 = vectorStd2Gsl (mosqEmergeRate, theta_p);
   PrintVector("Nv0", N_v0);
-
-  gsl_vector* K_vi = gsl_vector_calloc(theta_p);	// humanInfectivity
-  memcpy (K_vi->data, FHumanInfectivityInitVector, theta_p * sizeof(double));
+  
+  gsl_vector* K_vi = vectorStd2Gsl (FHumanInfectivityInitVector, theta_p);
   
   // Output Parameters (for the model):
-  gsl_vector* Xi_i = gsl_vector_calloc(theta_p);	// EIR
-  memcpy (Xi_i->data, &FEIRInitVector[0], theta_p * sizeof(double));
+  gsl_vector* Xi_i = vectorStd2Gsl (FEIRInitVector, theta_p);
   
   // The number of infectious mosquitoes over every day of the cycle.
   // calculated from the EIR data.
@@ -153,7 +151,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   // We now try to print these parameters to file to make sure that 
   // they show what we want them to show.
-  PrintParameters(theta_p, tau, theta_s, nHostTypesInit, nMalHostTypesInit, N_i, alpha_i,
+  PrintParameters(theta_p, tau, theta_s, nHostTypes, nMalHostTypes, N_i, alpha_i,
                   mu_vA, theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi, Xi_i);
   // The parameter values look correct.
 # endif
@@ -175,7 +173,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   // defining most parameters as scalars. If we do change things later, which we
   // may, then we will change the code accordingly. We will need to go through
   // a lot of changes anyway. 
-  CalcUpsilonOneHost(&P_A, &P_Ai, nHostTypesInit, nMalHostTypesInit, K_vi);
+  CalcUpsilonOneHost(&P_A, &P_Ai, K_vi);
   
   // Calculate \f$X_{\theta_p}\f$.
   // Refer to Cushing (1995) and the paper for the periodic entomological model
@@ -247,7 +245,8 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   // Maximum \f$l^1\f$ distance of error of root-finding algorithm
   const double EpsAbsRF = 1.0;
   
-  if(SvDiff1norm>EpsAbsRF){
+  bool valid = SvDiff1norm <= EpsAbsRF;
+  if (!valid){
     trace << "The difference in Sv is greater than the tolerance." << endl;
     
     if (!(Global::clOptions & CLO::ENABLE_ERC))
@@ -330,7 +329,7 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   
   
   // Copy the mosquito emergence rate to the C array.
-  memcpy (mosqEmergeRate, N_v0->data, theta_p * sizeof (*mosqEmergeRate));
+  memcpy (&mosqEmergeRate[0], N_v0->data, theta_p * sizeof (double));
   
   gsl_vector_free(N_v0);
   gsl_vector_free(K_vi);
@@ -341,11 +340,11 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   gsl_matrix_free(X_t_p);
   gsl_matrix_free(inv1Xtp);
   
-  return 0.0;
+  return valid;
 }
 
 
-void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n, size_t m, const gsl_vector* K_vi)
+void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi)
 {
 	// \f$P_{dif}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and gets infected.
@@ -383,8 +382,8 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, size_t n
   double P_df = P_Ai*P_B_i*P_C_i*P_D_i*P_E_i;
 
 	// Evaluate P_dif and P_duf.
-	// Note that these formulae are invalid for n>1.
-	// We can generalize these to any n later 
+	// Note that these formulae are invalid for nHostTypes>1.
+	// We can generalize these to any nHostTypes later 
 	// - perhaps in a different function.
 	
 	// P_dif:
@@ -863,7 +862,7 @@ void VectorEmergence::PrintArray(const char* vectorname, const double* v, int n)
     logFile << vectorname << "(" <<  i+1 << ") = " <<  v[i] << ";" << endl;
   }
 }
-void VectorEmergence::PrintArray(const char* vectorname, const vector<double>& v) const {
+void VectorEmergence::PrintVector(const char* vectorname, const vector<double>& v) const {
   for (unsigned int i=0; i < v.size(); i++){
     logFile << vectorname << "(" <<  i+1 << ") = " <<  v[i] << ";" << endl;
   }

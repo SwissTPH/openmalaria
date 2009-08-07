@@ -31,6 +31,7 @@ using namespace std;
 
 #include "Transmission/VectorEmergence.h"
 #include "Transmission/VectorSpecies.h"
+#include "util/vectors.h"
 
 // We want to hide normal output, so route it here instead of cout
 ofstream null("\0");
@@ -140,27 +141,24 @@ public:
       EIRInit[i] = gsl_vector_get(input1CalSvfromEIRdata, i);
     
     // Produce a rough estimate, which IS NOT the same as expected output:
-    gsl_vector *emergeRate = gsl_vector_alloc (YEAR_LEN);
+    vector<double> emergeRate (YEAR_LEN);
     const double temp = POP_SIZE*POP_SIZE*AVG_AVAIL;
-    for (int i = 0; i < YEAR_LEN; i++) {
-      gsl_vector_set (emergeRate, i, EIRInit[i]*temp);
-    }
+    for (int i = 0; i < YEAR_LEN; i++)
+      emergeRate[i] = EIRInit[i]*temp;
     
-    emerge->CalcInitMosqEmergeRate(1,1,	// no support for these not being 1 yet
-				   input1CalcUpsilonOneHost->data,
+    vector<double> in1 = vectorGsl2Std(input1CalcUpsilonOneHost);
+    emerge->CalcInitMosqEmergeRate(in1,
 				   EIRInit,
-				   emergeRate->data);
+				   emergeRate);
     
     // Requires a slightly higher error tolerance. NC did say the results he
     // gave (output1CalcInitMosqEmergeRate) were off by about 1e-10.
-    checkEqual (emergeRate, output1CalcInitMosqEmergeRate, "output1CalcInitMosqEmergeRate", 1e-6);
-    
-    gsl_vector_free (emergeRate);
+    checkEqual (vectorStd2Gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, "output1CalcInitMosqEmergeRate", 1e-6);
   }
   
   void testCalcUpsilonOneHost () {
     double PA, PAi;
-    emerge->CalcUpsilonOneHost (&PA, &PAi, 1,1, input1CalcUpsilonOneHost);
+    emerge->CalcUpsilonOneHost (&PA, &PAi, input1CalcUpsilonOneHost);
     checkApproxEq (PA,  5.4803567e-002);
     checkApproxEq (PAi, 7.7334254e-001);
     for (int i = 0; i < YEAR_LEN; ++i)
