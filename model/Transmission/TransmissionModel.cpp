@@ -115,6 +115,7 @@ void TransmissionModel::summarize (Summary& summary) {
   summary.setEirPerDayOfYear (eirPerDayOfYear);
   eirPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
   eirPerDayOfYearEntries.resize (Global::intervalsPerYear, 0);
+  summary.setKappaPerDayOfYear (kappa);
 }
 
 

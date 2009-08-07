@@ -26,8 +26,9 @@
   </demography>
 
   <monitoring name="Test Moni">
-    <surveys detectionLimit="2.5" summaryOption="268449853">
+    <surveys detectionLimit="2.5" summaryOption="805320765">
       <surveyTime>1</surveyTime>
+      <surveyTime>293</surveyTime>
       <surveyTime>366</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">

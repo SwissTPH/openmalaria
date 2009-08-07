@@ -98,7 +98,8 @@ void Summary::initialiseSummaries () {
   _numIPTDoses.resize(numberOfSurveys+1);
   _annualAverageKappa.resize(numberOfSurveys+1);
   _eirPerDayOfYear.resize(numberOfSurveys+1);
-
+  _kappaPerDayOfYear.resize(numberOfSurveys+1);
+  
   for (int i=0;i<numberOfSurveys+1;i++){
 
     _numHosts[i].resize(_numOfAgeGroups);
@@ -432,7 +433,10 @@ void Summary::writeSummaryArrays () {
   if (isOptionIncluded(_summaryOption, eirPerDayOfYear)) {
     writeArray(outputFile, eirPerDayOfYear, _assimilatorMode, _eirPerDayOfYear);
   }
-
+  if (isOptionIncluded(_summaryOption, kappaPerDayOfYear)) {
+    writeArray(outputFile, kappaPerDayOfYear, _assimilatorMode, _kappaPerDayOfYear);
+  }
+  
   outputFile.close();
 
 }

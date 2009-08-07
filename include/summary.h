@@ -179,10 +179,13 @@ class Summary {
   void setAnnualAverageKappa(double kappa);
   void setNumTransmittingHosts(double value);
   
-  void setEirPerDayOfYear (vector<double> ePDOY) {
-    _eirPerDayOfYear[_surveyPeriod-1] = ePDOY;
+  void setEirPerDayOfYear (vector<double> v) {
+    _eirPerDayOfYear[_surveyPeriod-1] = v;
   }
-
+  void setKappaPerDayOfYear (vector<double> v) {
+    _kappaPerDayOfYear[_surveyPeriod-1] = v;
+  }
+  
  private:
 
   //! X-dimension of summary arrays
@@ -232,6 +235,8 @@ class Summary {
   vector< vector<int> > _numNonMalariaFever; 
   /// Average of all EIR exhibited per day-of-year.
   vector< vector<double> > _eirPerDayOfYear;
+  /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+  vector< vector<double> > _kappaPerDayOfYear;
   
   //! Time intervals for all surveys specified in the XML
   vector<int> _surveysTimeIntervals; 
@@ -313,7 +318,9 @@ class Summary {
     // Number of episodes (non-malaria fever)
     nNMFever= 27,
     // EIR per day of year, summed over all years
-    eirPerDayOfYear = 28
+    eirPerDayOfYear = 28,
+    // Kappa per day of year, for the last year
+    kappaPerDayOfYear = 29
     
     // Note: can't use values greater than 31 without forcing a 64-bit type
   };
