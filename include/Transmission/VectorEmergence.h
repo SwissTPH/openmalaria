@@ -100,8 +100,9 @@ public:
 				double* mosqEmergeRate);
   
   
-  /** Initialisation values for the following variables of the Vector model:
-   * \f$N_v^{(p)}(t), O_v^{(p)}(t), S_v^{(p)}(t)\f$.
+  /** Mosquito population (total, infected, infectious) periodic orbit over
+   * the year. Used to initialise values for the following variables of the
+   * Vector model: \f$N_v^{(p)}(t), O_v^{(p)}(t), S_v^{(p)}(t)\f$.
    *
    * These are set by CalcInitMosqEmergeRate(). */
   vector<double> N_v, O_v, S_v;

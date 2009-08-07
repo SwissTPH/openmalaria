@@ -70,7 +70,6 @@ double get_parameter(int);
 
 double get_detectionlimit(); 
 double get_eir_daily(int); 
-Anopheles* getAnopheles(std::string name);
 int is_survey(int); 
 int get_number_of_surveys(); 
 int get_time_of_survey(int ); 

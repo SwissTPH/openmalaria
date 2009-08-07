@@ -20,14 +20,15 @@
 #ifndef Hmod_PerHostTransmission
 #define Hmod_PerHostTransmission
 
-#include "Transmission/VectorSpecies.h"
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 #include "GSLWrapper.h"
+#include "simulation.h"
 #include "inputData.h"
 
 class Summary;
 class HostMosquitoInteraction;
 class TransmissionModel;
+class VectorTransmissionSpecies;
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
@@ -67,25 +68,25 @@ public:
    * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
   /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
-  inline double entoAvailability (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex, double ageYears) const {
+  inline double entoAvailability (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex, double ageYears) const {
     return entoAvailabilityPartial (speciesStatic, speciesIndex) * getRelativeAvailability (ageYears);
   }
   /** Availability of host to mosquitoes (α_i).
    *
    * The full availability is entoAvailability(human->getAgeInYears()). */
-  double entoAvailabilityPartial (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
+  double entoAvailabilityPartial (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqBiting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
+  double probMosqBiting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
   * place after biting (P_C_i). */
-  double probMosqFindRestSite (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
+  double probMosqFindRestSite (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully resting (P_D_i). */
-  double probMosqSurvivalResting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const;
+  double probMosqSurvivalResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   //@}
   
-  /** Get the availability of this host to mosquitoes.
+  /** Get the availability of this host to mosquitoes relative to other hosts.
    *
-   * For NonVector and initialisation phase with Vector. */
+   * Used to drive a simulation from an input EIR. */
   inline double entoAvailabilityNV (double ageYears) const {
     return _entoAvailability * getRelativeAvailability (ageYears);
   }
@@ -118,7 +119,8 @@ public:
 private:
   vector<HostMosquitoInteraction> species;
   
-  // Only used in the non-vector model and initialisation phase of the vector model.
+  // Heterogeneity factor in availability; this is already multiplied into the
+  // entoAvailability param stored in HostMosquitoInteraction.
   double _entoAvailability;
   
   // (simulationTime - timestepXXX) is the age of the intervention.
@@ -161,7 +163,7 @@ class HostMosquitoInteraction
 public:
   /** In lieu of a constructor initialises elements, using the passed base to
    * get baseline parameters. */
-  void initialise (VectorTransmissionSpecies& base, double availabilityFactor);
+  void initialise (VectorTransmissionSpecies* base, double availabilityFactor);
   
   void read (istream& in);
   void write (ostream& out) const;

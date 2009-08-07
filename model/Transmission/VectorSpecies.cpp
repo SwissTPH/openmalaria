@@ -21,6 +21,7 @@
 #include "Transmission/VectorEmergence.h"
 #include "Transmission/PerHost.h"
 #include "inputData.h"
+#include "xmlHelperFuncs.h"
 #include "human.h"
 #include "simulation.h"
 
@@ -29,7 +30,8 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& initialisationEIR) {
+void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, vector<double>& initialisationEIR) {
+  // -----  Set model variables  -----
   scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
@@ -46,22 +48,16 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   
   emergenceRateFilename = mosq.getEmergenceRateFilename();
   
-  //TODO: initialize these and perhaps other params properly:
-  //K_vi
-  //P_vi
-  
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
-  
   N_v_length = EIPDuration + mosqRestDuration;
   
+  
+  // -----  allocate memory  -----
   P_A = new double[N_v_length];
   P_df = new double[N_v_length];
   P_dif = new double[N_v_length];
-  N_v = new double[N_v_length];
-  O_v = new double[N_v_length];
-  S_v = new double[N_v_length];
   
   // Set up fArray and ftauArray. Each step, all elements not set here are
   // calculated, even if they aren't directly used in the end;
@@ -74,28 +70,42 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   ftauArray[mosqRestDuration] = 1.0;
   
   
-  scnXml::Eir eirData = anoph.getEir();
-  FCEIR.resize (5);
-  FCEIR[0] = eirData.getA0();
-  FCEIR[1] = eirData.getA1();
-  FCEIR[2] = eirData.getB1();
-  FCEIR[3] = eirData.getA2();
-  FCEIR[4] = eirData.getB2();
-  EIRRotateAngle = eirData.getEIRRotateAngle();
+  // -----  if we're driving initialisation from EIR data  -----
+  if (anoph.getEir().present()) {
+    const scnXml::Eir& eirData = anoph.getEir().get();
+    FCEIR.resize (5);
+    FCEIR[0] = eirData.getA0();
+    FCEIR[1] = eirData.getA1();
+    FCEIR[2] = eirData.getB1();
+    FCEIR[3] = eirData.getA2();
+    FCEIR[4] = eirData.getB2();
+    EIRRotateAngle = eirData.getEIRRotateAngle();
+    
+    vector<double> speciesEIR (Global::intervalsPerYear);
+    
+    // Calculate forced EIR for pre-intervention phase from FCEIR:
+    calcInverseDFTExp(speciesEIR, FCEIR);
+    
+    if(EIRRotateAngle != 0.0)
+      rotateArray(speciesEIR, EIRRotateAngle);
+    
+    // Add to the TransmissionModel's EIR, used for the initalization phase:
+    for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+      initialisationEIR[i] += speciesEIR[i];
+  }
   
-  vector<double> speciesEIR (Global::intervalsPerYear);
   
-  // Calculate forced EIR for pre-intervention phase from FCEIR:
-  calcInverseDFTExp(speciesEIR, FCEIR);
-  
-  if(EIRRotateAngle != 0.0)
-    rotateArray(speciesEIR, EIRRotateAngle);
-  
-  // Add to the TransmissionModel's EIR, used for the initalization phase:
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    initialisationEIR[i] += speciesEIR[i];
+  // -----  if we have emerge rate data to use or validate  -----
+  if (anoph.getEmergence().present()) {
+    const scnXml::Emergence& emergeData = anoph.getEmergence().get();
+    initFeedingCycleProbs (sIndex, population, readDoubleList (emergeData.getKappa(), N_v_length));
+    N_v = readDoubleList (emergeData.getN_v(), N_v_length);
+    O_v = readDoubleList (emergeData.getO_v(), N_v_length);
+    S_v = readDoubleList (emergeData.getS_v(), N_v_length);
+  }
   
   
+  // -----  Initialise interventions  -----
   const scnXml::Interventions& xmlInterventions = getInterventions();
   if (xmlInterventions.getITNDescription().present()) {
     const scnXml::ITNDescription::AnophelesSequence& itnSeq = xmlInterventions.getITNDescription().get().getAnopheles();
@@ -120,17 +130,14 @@ void VectorTransmissionSpecies::destroy () {
   delete[] P_A;
   delete[] P_df;
   delete[] P_dif;
-  delete[] N_v;
-  delete[] O_v;
-  delete[] S_v;
 }
 
-void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
+double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double> kappaDaily) {
   //BEGIN P_A, P_Ai, P_df, P_dif
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(*this, sIndex, h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -142,32 +149,50 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   double intP_df = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(*this, sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(*this, sIndex) *
-	host.probMosqFindRestSite(*this, sIndex) *
-	host.probMosqSurvivalResting(*this, sIndex);
+    double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
+	host.probMosqBiting(this, sIndex) *
+	host.probMosqFindRestSite(this, sIndex) *
+	host.probMosqSurvivalResting(this, sIndex);
     intP_df += prod;
   }
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   
-  
-  if (Simulation::simulationTime*Global::interval < N_v_length)
-    throw xml_scenario_error ("Initialization phase too short");
-  // For day over N_v_length days prior to the next timestep's day.
-  int endDay = (Simulation::simulationTime+1) * Global::interval;
-  for (int day = endDay - N_v_length; day < endDay; ++day) {
-    size_t t       = day % N_v_length;
-    size_t simStep = day / Global::interval;
-    
+  for (int t = 0; t < N_v_length; ++t) {
     P_A[t]	= intP_A;
     P_df[t]	= intP_df;
-    // Should correspond to index of kappa updated by updateKappa:
-    P_dif[t]	= intP_df * kappa[(simStep-1) % Global::intervalsPerYear];
+    P_dif[t]	= intP_df * kappaDaily[t];
   }
   //END P_A, P_Ai, P_df, P_dif
   
-  
-  calMosqEmergeRate (populationSize, kappa, (leaveHostRate-mosqSeekingDeathRate)/populationSize);	// initialises N_v, O_v, S_v
+  return leaveHostRate - mosqSeekingDeathRate;
+}
+
+void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
+  // If EIR data was provided, validate EIR or do emergence rate calculations
+  // and switch to calculating a dynamic EIR.
+  if (FCEIR.size()) {
+    //TODO: validate P_*, ?_v
+    
+    if (Simulation::simulationTime*Global::interval < N_v_length)
+      throw xml_scenario_error ("Initialization phase too short");
+    vector<double> kappaDaily (N_v_length, 0.0);
+    
+    // For day over N_v_length days prior to the next timestep's day.
+    int endDay = (Simulation::simulationTime+1) * Global::interval;
+    for (int day = endDay - N_v_length; day < endDay; ++day) {
+      // Should correspond to index of kappa updated by updateKappa:
+      kappaDaily[day % N_v_length] =
+	kappa[(day / Global::interval - 1) % Global::intervalsPerYear];
+    }
+    
+    double availability = initFeedingCycleProbs (sIndex, population, kappaDaily);
+    
+    calMosqEmergeRate (populationSize, kappa, availability/populationSize);	// initialises N_v, O_v, S_v
+    
+    //TODO: save out parameters if recalculated
+    FCEIR.resize(0, 0.0);	// indicate EIR-driven mode is no longer being used (although this is ignored)
+  }
+  // else: we're already in dynamic EIR calculation mode
 }
 
 
@@ -208,7 +233,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   // Per Global::interval (hosts don't update per day):
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(*this, sIndex, h->getAgeInYears());
+    leaveHostRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
   double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
@@ -221,10 +246,10 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   double intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(*this, sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(*this, sIndex) *
-	host.probMosqFindRestSite(*this, sIndex) *
-	host.probMosqSurvivalResting(*this, sIndex);
+    double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
+	host.probMosqBiting(this, sIndex) *
+	host.probMosqFindRestSite(this, sIndex) *
+	host.probMosqSurvivalResting(this, sIndex);
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
@@ -500,15 +525,25 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
   
   if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
     throw xml_scenario_error ("Initialization phase or daysInYear too short");
+  vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
+  
   // For day over N_v_length days prior to the next timestep's day.
   int endDay = (Simulation::simulationTime+1) * Global::interval;
   for (int day = endDay - N_v_length; day < endDay; ++day) {
     size_t t = day % N_v_length;
     size_t i = (daysInYear + day - endDay) % daysInYear;
     
-    N_v[t] = emerge.N_v[i];
-    O_v[t] = emerge.O_v[i];
-    S_v[t] = emerge.S_v[i];
+    Nv[t] = emerge.N_v[i];
+    Ov[t] = emerge.O_v[i];
+    Sv[t] = emerge.S_v[i];
+  }
+  
+  if (N_v.size()) {
+    //TODO validate ?_v
+  } else {
+    N_v = Nv;
+    O_v = Ov;
+    S_v = Sv;
   }
 }
 

@@ -1,7 +1,7 @@
 // This file is part of OpenMalaria.
 // Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 
-// kate: tab-width 4; indent-width 4;
+// kate: tab-width 8; indent-width 4;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -376,16 +376,17 @@ public class SchemaTranslator {
     public void translate4To5() throws Exception {
         int ver = Integer
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
-        if ((ver & 0x68) != 0) // modelVersion with flags 1<<2, 1<<4 or 1<<5
-            throw new Exception(
-                    "Scenario uses InfectionIncidence model flags; these have changed. Please update!");
-        /*
-         * Note : We don't translate directly because a) Very few scenarios
-         * already do this b) It's probably better that people know this change
-         * is required. However, there is a direct translation in 2/3 of cases:
-         * 1<<2 translates to (1<<2 | 1<<5), 1<<4 translates to (1<<4 |
-         * 1<<5), 1<<5 had a bug fixed, but roughly translates to 1<<4.
-         */
+        if ((ver & 0x68) != 0) {// modelVersion with flags 1<<2, 1<<4 or 1<<5
+	    if ((ver & (1<<5)) == 0) {
+		ver = ver & (1<<2);
+	    } else if ((ver & 0x68) == (1<<5)) {
+		ver = (ver ^ (1<<5))	/* remove 1<<5 flag */
+		    & (1<<4);		/* and add 1<<4 flag */
+		System.err.println("Warning: Scenario uses LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM which has had a bug fixed!");
+	    } else {
+		throw new Exception ("Error: Scenario had a combination of InfectionIncidenceModel flags - this was invalid!");
+	    }
+	}
     }
 
     public void translate5To6() throws Exception {
@@ -420,11 +421,11 @@ public class SchemaTranslator {
             cM.insertBefore(nmfP, nmfNP);
         }
     }
-	
-	// Version 7 added elements for ITN and IRS intervention descriptions.
-	// Nothing old needs to be changed.
-	public void translate6To7() throws Exception {
-	}
+    
+    // Version 7 added elements for ITN and IRS intervention descriptions.
+    // Nothing old needs to be changed.
+    public void translate6To7() throws Exception {
+    }
 
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {

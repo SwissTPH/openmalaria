@@ -21,6 +21,7 @@
 #define Hmod_VectorTransmissionSpecies
 
 #include "global.h"
+#include "Transmission/PerHost.h"
 #include "WeibullDecayedValue.h"
 #include <list>
 
@@ -50,19 +51,46 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
+  void initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, vector<double>& EIR);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();
-  //@}
   
   /** Calls calMosqEmergeRate() and initialises arrays. */
   void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
+  //@}
   
   /** Called per time-step. Does most of calculation of EIR.
    *
    * @param sIndex Index of the type of mosquito in per-type/species lists. */
   void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex);
+  
+  /** Returns the EIR calculated by advancePeriod().
+   * 
+   * Could be extended to allow input EIR driven initialisation on a per-species
+   * level instead of the whole simulation, but that doesn't appear worth doing.
+   * 
+   * @param sIndex Index of this in VectorTransmission.species
+   * @param host PerHostTransmission of the human requesting this EIR. */
+  double calculateEIR (size_t sIndex, PerHostTransmission& host) {
+    /* Calculates EIR per individual (hence N_i == 1).
+     *
+     * See comment in VectorTransmissionSpecies.advancePeriod for method. */
+    return partialEIR
+      * host.entoAvailabilityPartial(this, sIndex)
+      * host.probMosqBiting(this, sIndex);	// probability of biting, once commited
+  }
+  
+  /** Return the SimulationMode the model is expecting to be run in for this
+   * species. Currently all species must run in the same mode. */
+  SimulationMode getSimulationMode () {
+    if (FCEIR.size())
+      return equilibriumMode;
+    else if (N_v.size())
+      return dynamicEIR;
+    else
+      throw xml_scenario_error ("Neither eir nor emergence rate data available to drive simulation");
+  }
   
   ///@brief Parameters which may vary per mosquito species
   //@{
@@ -169,7 +197,7 @@ private:
    * infected (dela, and infective.
    * Index for each day is day % N_v_length.
    * Length: N_v_length (longer than needed for S_v, but simplifyies code) */
-  double *N_v, *O_v, *S_v;
+  vector<double> N_v, O_v, S_v;
   
   /** Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
    * Values are recalculated each step, only first few elements are stored
@@ -198,6 +226,15 @@ private:
   
   
   /* Functions */
+  
+  /** Initialise P_A, P_df and P_dif using model parameters and the supplied
+   * kappaDaily array.
+   * 
+   * @param sIndex Index of *this in VectorTransmission.species
+   * @param population List of humans
+   * @param kappaDaily Infectiousness of humans, per day, for last N_v_length days
+   */
+  double initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double> kappaDaily);
   
   /*! get mosquito emergence rates 
    *

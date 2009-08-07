@@ -37,7 +37,7 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel ();
+  static TransmissionModel* createTransmissionModel (const std::list<Human>& population);
   
   //! Reads all entomological parameters from the input datafile. 
   TransmissionModel();

@@ -111,7 +111,6 @@ protected:
   double _cumulativeY;
   
 private:
-  //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth
   double _cumulativeh;
   //!cumulativeY from previous timestep

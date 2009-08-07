@@ -302,21 +302,80 @@
       <xs:appinfo />
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="eir">
-        <xs:annotation>
-          <xs:documentation>
-            Description of entomological inoculation rate
-          </xs:documentation>
-          <xs:appinfo>units:Element;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="a0" type="xs:double" use="required" />
-          <xs:attribute name="a1" type="xs:double" use="required" />
-          <xs:attribute name="a2" type="xs:double" use="required" />
-          <xs:attribute name="b1" type="xs:double" use="required" />
-          <xs:attribute name="b2" type="xs:double" use="required" />
-          <xs:attribute name="EIRRotateAngle" type="xs:double" use="required" />
-        </xs:complexType>
+      <xs:element name="eir" minOccurs="0">
+	<xs:annotation>
+	  <xs:documentation>
+	    Description of entomological inoculation rate. Usually one of the eir and emergence
+	    elements are provided. If both are given, the emergence rate is validated against the
+	    eir. Providing an eir allows emergence rate calculations when emergence-rate data is
+	    not provided or not valid.
+	  </xs:documentation>
+	</xs:annotation>
+	<xs:complexType>
+	  <xs:attribute name="a0" type="xs:double" use="required" />
+	  <xs:attribute name="a1" type="xs:double" use="required" />
+	  <xs:attribute name="a2" type="xs:double" use="required" />
+	  <xs:attribute name="b1" type="xs:double" use="required" />
+	  <xs:attribute name="b2" type="xs:double" use="required" />
+	  <xs:attribute name="EIRRotateAngle" type="xs:double" use="required" />
+	</xs:complexType>
+      </xs:element>
+      <xs:element name="emergence" minOccurs="0">
+	<xs:annotation>
+	  <xs:documentation>
+	    Data to drive simulation from a pre-calculated emergence rate. Usually one of the eir
+	    and emergence elements are provided. If just emergence data is given the simulation is
+	    run from this; if both are given, the emergence rate is validated against the eir.
+	  </xs:documentation>
+	</xs:annotation>
+	<xs:complexType>
+	  <xs:sequence>
+	    <xs:element name="emergenceRate" type="doubleList">
+	      <xs:annotation>
+		<xs:documentation>
+		  Mosquitoes per human emerging per day of the year.
+		</xs:documentation>
+		<xs:appinfo>length:365;units:Mosquitoes per human;min:0;max:inf;</xs:appinfo>
+	      </xs:annotation>
+	    </xs:element>
+	    <xs:element name="kappa" type="doubleList">
+	      <xs:annotation>
+		<xs:documentation>
+		  Human infectivity (probability of infection of a mosquito biting a human) over last
+		  mosqRestDuration+extrinsicIncubationPeriod days.
+		</xs:documentation>
+		<xs:appinfo>units:;min:0;max:1;</xs:appinfo>
+	      </xs:annotation>
+	    </xs:element>
+	    <xs:element name="N_v" type="doubleList">
+	      <xs:annotation>
+		<xs:documentation>
+		  Total population of mosquitoes over the last
+		  mosqRestDuration+extrinsicIncubationPeriod days.
+		</xs:documentation>
+		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
+	      </xs:annotation>
+	    </xs:element>
+	    <xs:element name="O_v" type="doubleList">
+	      <xs:annotation>
+		<xs:documentation>
+		  Population of infected mosquitoes over the last
+		  mosqRestDuration+extrinsicIncubationPeriod days.
+		</xs:documentation>
+		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
+	      </xs:annotation>
+	    </xs:element>
+	    <xs:element name="S_v" type="doubleList">
+	      <xs:annotation>
+		<xs:documentation>
+		  Population of infectious mosquitoes over the last
+		  mosqRestDuration+extrinsicIncubationPeriod days.
+		</xs:documentation>
+		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
+	      </xs:annotation>
+	    </xs:element>
+	  </xs:sequence>
+ 	</xs:complexType>
       </xs:element>
       <xs:element name="mosq">
         <xs:annotation>
@@ -371,7 +430,7 @@
             <xs:documentation>Parameters for the vector transmission model.</xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:sequence>
+            <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
               <xs:element name="nonHumanHosts" minOccurs="0" maxOccurs="unbounded">
                 <xs:annotation>
@@ -1287,5 +1346,12 @@
         <xs:appinfo>units:Time steps;min:1;max:100;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  
+  <!-- standard types used -->
+  <xs:complexType name="doubleList">
+    <xs:sequence>
+      <xs:element name="item" maxOccurs="unbounded" type="xs:double"/>
+    </xs:sequence>
   </xs:complexType>
 </xs:schema>

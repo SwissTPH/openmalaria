@@ -19,6 +19,7 @@
 */
 #include "Transmission/PerHost.h"
 #include "Transmission/Vector.h"
+#include "Transmission/VectorSpecies.h"
 #include "summary.h"
 #include "intervention.h"
 #include "inputData.h"
@@ -63,7 +64,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
   if (vTM) {
     species.resize (vTM->numSpecies);
     for (size_t i = 0; i < vTM->numSpecies; ++i)
-      species[i].initialise (vTM->species[i], availabilityFactor);
+      species[i].initialise (&vTM->species[i], availabilityFactor);
   }
 }
 
@@ -94,34 +95,34 @@ void PerHostTransmission::write (ostream& out) const {
 // conceivable Weibull params that the value is 0.0 when rounded to a double.
 // Performance-wise, an if() might give a small performance gain when
 // interventions aren't present.
-double PerHostTransmission::entoAvailabilityPartial (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+double PerHostTransmission::entoAvailabilityPartial (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability
-    * (1.0 - speciesStatic.ITNDeterrency (Simulation::simulationTime - timestepITN))
-    * (1.0 - speciesStatic.IRSDeterrency (Simulation::simulationTime - timestepIRS));
+    * (1.0 - speciesStatic->ITNDeterrency (Simulation::simulationTime - timestepITN))
+    * (1.0 - speciesStatic->IRSDeterrency (Simulation::simulationTime - timestepIRS));
 }
-double PerHostTransmission::probMosqBiting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+double PerHostTransmission::probMosqBiting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].probMosqBiting
-    * (1.0 - speciesStatic.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
+    * (1.0 - speciesStatic->ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqFindRestSite (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+double PerHostTransmission::probMosqFindRestSite (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].probMosqFindRestSite
-    * (1.0 - speciesStatic.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
+    * (1.0 - speciesStatic->ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqSurvivalResting (VectorTransmissionSpecies& speciesStatic, size_t speciesIndex) const {
+double PerHostTransmission::probMosqSurvivalResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].probMosqSurvivalResting
-    * (1.0 - speciesStatic.IRSKillingEffect (Simulation::simulationTime - timestepIRS));
+    * (1.0 - speciesStatic->IRSKillingEffect (Simulation::simulationTime - timestepIRS));
 }
 
 
 // ----- HostMosquitoInteraction non-static -----
 
-void HostMosquitoInteraction::initialise (VectorTransmissionSpecies& base, double availabilityFactor)
+void HostMosquitoInteraction::initialise (VectorTransmissionSpecies* base, double availabilityFactor)
 {
   //TODO: vary to simulate heterogeneity
-  entoAvailability = base.entoAvailability * availabilityFactor;
-  probMosqBiting = base.probMosqBiting;
-  probMosqFindRestSite = base.probMosqFindRestSite;
-  probMosqSurvivalResting = base.probMosqSurvivalResting;
+  entoAvailability = base->entoAvailability * availabilityFactor;
+  probMosqBiting = base->probMosqBiting;
+  probMosqFindRestSite = base->probMosqFindRestSite;
+  probMosqSurvivalResting = base->probMosqSurvivalResting;
 }
 
 void HostMosquitoInteraction::read (istream& in) {

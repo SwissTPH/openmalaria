@@ -25,6 +25,7 @@
 
 /* We also include library headers here. */ 
 #include "TransmissionModel.h"
+#include "Transmission/VectorSpecies.h"
 
 //#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
@@ -37,7 +38,7 @@ class VectorTransmission : public TransmissionModel {
 public:
   friend class PerHostTransmission;
   
-  VectorTransmission(const scnXml::Vector vectorData);
+  VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population);
   virtual ~VectorTransmission();
   
   /** Initialise the main simulation.

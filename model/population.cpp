@@ -58,7 +58,7 @@ int Population::IDCounter;
 Population::Population()
     : _populationSize(get_populationsize())
 {
-  _transmissionModel = TransmissionModel::createTransmissionModel();
+  _transmissionModel = TransmissionModel::createTransmissionModel(_population);
 
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;

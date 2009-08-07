@@ -234,11 +234,6 @@ double get_growthrate(){
   else
     return 0.;
 }
-/* not yet implemented or used
-Anopheles * getAnopheles(string name){
-  //TODO: return entoData->Anopheles by name
-  return null;
-}*/
 
 int get_latentp(){ 
   return parameters->getLatentp();

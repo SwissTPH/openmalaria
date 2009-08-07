@@ -33,7 +33,7 @@
  *****************************************************************************/
 
 
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const std::list<Human>& population) {
   if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
     throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
   
@@ -44,9 +44,19 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   // TransmissionModel::createTransmissionModel checks length of list >= 1.
   const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
   numSpecies = anophelesList.size();
+  if (numSpecies < 1)
+    throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
   species.resize (numSpecies);
-  for (size_t i = 0; i < numSpecies; ++i)
-    species[i].initialise (anophelesList[i], i, initialisationEIR);
+  
+  species[0].initialise (anophelesList[0], 0, population, initialisationEIR);
+  simulationMode = species[0].getSimulationMode();
+  for (size_t i = 1; i < numSpecies; ++i) {
+    species[i].initialise (anophelesList[i], i, population, initialisationEIR);
+    
+    if (simulationMode != species[i].getSimulationMode())
+      // Probably fourier eir data present only for some species
+      throw xml_scenario_error("Vector model requests EIR-driven initialisation for some species but not others");
+  }
   
   // We want the EIR to effectively be the sum of the EIR for each day in the interval
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {
@@ -65,20 +75,13 @@ void VectorTransmission::initMainSimulation(const std::list<Human>& population, 
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);
-  simulationMode = get_mode();
+  simulationMode = dynamicEIR;	// currently always the case post-initialisation
 }
 
-/** Calculate EIR for host, using the fixed point of difference eqns. */
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
-  /* Calculates EIR per individual (hence N_i == 1).
-   *
-   * See comment in advancePeriod for method. */
-  
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
-    EIR += species[i].partialEIR
-      * host.entoAvailabilityPartial(species[i], i)
-      * host.probMosqBiting(species[i], i);		// probability of biting, once commited
+    EIR += species[i].calculateEIR (i, host);
   }
   return EIR * PerHostTransmission::getRelativeAvailability(ageInYears);
 }
