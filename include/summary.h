@@ -178,6 +178,10 @@ class Summary {
 
   void setAnnualAverageKappa(double kappa);
   void setNumTransmittingHosts(double value);
+  
+  void setEirPerDayOfYear (vector<double> ePDOY) {
+    _eirPerDayOfYear[_surveyPeriod-1] = ePDOY;
+  }
 
  private:
 
@@ -226,6 +230,9 @@ class Summary {
   vector< double > _annualAverageKappa; //!< Annual Average Kappa
   //! Number of episodes (non-malaria fever)
   vector< vector<int> > _numNonMalariaFever; 
+  /// Average of all EIR exhibited per day-of-year.
+  vector< vector<double> > _eirPerDayOfYear;
+  
   //! Time intervals for all surveys specified in the XML
   vector<int> _surveysTimeIntervals; 
   int _summaryOption; //!< Binary encoded list of outputs of interest
@@ -304,7 +311,11 @@ class Summary {
     // Annual average kappa
     annAvgK= 26,
     // Number of episodes (non-malaria fever)
-    nNMFever= 27
+    nNMFever= 27,
+    // EIR per day of year, summed over all years
+    eirPerDayOfYear = 28
+    
+    // Note: can't use values greater than 31 without forcing a 64-bit type
   };
   
   inline int isOptionIncluded (int allOptions, int option) {

@@ -53,6 +53,10 @@ def main(*args):
       prev_lines2[i]=prev_lines2[i-1]
     prev_lines1[0]=line1
     prev_lines2[0]=line2
+  
+  if (file2.readline() != ""):
+    print "file {0} has more lines than {1}".format(args[2],args[1])
+    return 3
   print "No differences, ok..."
   return 0
 

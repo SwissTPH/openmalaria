@@ -55,6 +55,8 @@ TransmissionModel::TransmissionModel() :
 {
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
+  eirPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
+  eirPerDayOfYearEntries.resize (Global::intervalsPerYear, 0);
 }
 
 TransmissionModel::~TransmissionModel () {
@@ -65,11 +67,17 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
+  double EIR;
   if (simulationMode == equilibriumMode)
-    return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
+    EIR = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
 	host.entoAvailabilityNV(ageInYears);
   else
-    return calculateEIR (simulationTime, host, ageInYears);
+    EIR = calculateEIR (simulationTime, host, ageInYears);
+  
+  size_t dayInYear = simulationTime % Global::intervalsPerYear;
+  eirPerDayOfYear[dayInYear] += EIR;
+  eirPerDayOfYearEntries[dayInYear] ++;
+  return EIR;
 }
 
 void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
@@ -102,6 +110,11 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
 void TransmissionModel::summarize (Summary& summary) {
   summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
   summary.setAnnualAverageKappa(_annualAverageKappa);
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    eirPerDayOfYear[i] /= eirPerDayOfYearEntries[i];
+  summary.setEirPerDayOfYear (eirPerDayOfYear);
+  eirPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
+  eirPerDayOfYearEntries.resize (Global::intervalsPerYear, 0);
 }
 
 

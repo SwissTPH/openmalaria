@@ -121,6 +121,13 @@ protected:
    *
    * Checkpointed. */
   double annualEIR;
+  
+  /** Sum of all EIR exhibited per day-of-year.
+   *
+   * Use the average (i.e. divide by eirPerDayOfYearEntries). */
+  vector<double> eirPerDayOfYear;
+  /** Number of times an eir has been added, per day-of-year. */
+  vector<int> eirPerDayOfYearEntries;
 };
 
 #endif

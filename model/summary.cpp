@@ -97,6 +97,7 @@ void Summary::initialiseSummaries () {
   _numMassVaccines.resize(numberOfSurveys+1);
   _numIPTDoses.resize(numberOfSurveys+1);
   _annualAverageKappa.resize(numberOfSurveys+1);
+  _eirPerDayOfYear.resize(numberOfSurveys+1);
 
   for (int i=0;i<numberOfSurveys+1;i++){
 
@@ -426,6 +427,10 @@ void Summary::writeSummaryArrays () {
   if ( isOptionIncluded(_summaryOption, imr_summary)) {
     outputFile << "\t" << 1 << "\t" << 1 << "\t" << imr_summary 
                << "\t" <<infantAllCauseMort() <<  lineEnd;
+  }
+  
+  if (isOptionIncluded(_summaryOption, eirPerDayOfYear)) {
+    writeArray(outputFile, eirPerDayOfYear, _assimilatorMode, _eirPerDayOfYear);
   }
 
   outputFile.close();

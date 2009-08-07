@@ -111,7 +111,7 @@ def runScenario(options,omOptions,name):
   if os.path.isfile(outFile):
     print "\033[1;34m",
     ret = compareOuts.main (*["",os.path.join(testSrcDir,"original%s.txt"%name), outFile, 1])
-    if ret == 0:
+    if ret == 0 and options.cleanup:
       os.remove(outFile)
   else:
     stderrFile=os.path.join(simDir,"stderr.txt")
