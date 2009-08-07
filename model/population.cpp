@@ -237,7 +237,7 @@ void Population::newHuman(int dob){
 }
 
 void Population::update1(){
-  //NOTE: this needs to be called somewhere; and should really be called before humans contract new infections in the simulation step
+  // This should be called before humans contract new infections in the simulation step.
   _transmissionModel->advancePeriod (_population, Simulation::simulationTime);
   
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
@@ -369,6 +369,7 @@ void Population::implementIntervention (int time) {
     changeHealthSystem (&interv->getChangeHS().get());
     ClinicalImmediateOutcomes::initParameters();	// should re-read all parameters
     
+    //FIXME: surely we shouldn't do this at all? (DH)
     //TODO: Do we also need to re-init the kappa array?
     _transmissionModel->copyToInitialKappa();
   }

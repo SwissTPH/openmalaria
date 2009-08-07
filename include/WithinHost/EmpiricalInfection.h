@@ -30,8 +30,8 @@ public:
 
   /** Destructor
    * 
-   * NOTE: this destructor does nothing to allow shallow copying to the
-   * population list. destroy() does the real freeing and must be
+   * Note: this destructor does nothing in order to allow shallow copying to
+   * the population list. destroy() does the real freeing and must be
    * called explicitly. */
   ~EmpiricalInfection();
   void destroy();

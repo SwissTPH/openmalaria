@@ -25,6 +25,7 @@
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
+#include <sstream>
 
 using namespace std;
 
@@ -106,6 +107,7 @@ Drug::Drug(const Drug &_original) {
   proteomePDParameters = _original.proteomePDParameters;
 
   _concentration = 0;
+  _nextConcentration = 0;
   doses = vector<Dose*>();
   onHuman = true;
 }
@@ -343,7 +345,7 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time, double weig
    *   As such, no doses are created, but concentration is updated.
    */
   //cerr << "Medicating with: " << _drugAbbrev << " " << _qty << "\n";
-  Drug* myDrug = 0;
+  Drug* myDrug = NULL;
   list<Drug*>::iterator it;
   for (it=_drugs.begin(); it!=_drugs.end(); it++) {
     if ((*it)->getAbbreviation() == _drugAbbrev) {
@@ -351,11 +353,12 @@ void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time, double weig
       break;
     }
   }
-  if (myDrug==0) {
+  if (myDrug == NULL) {
     myDrug = registry->getDrug(_drugAbbrev);
     if (myDrug == NULL) {
-      cerr << "prescribed non-existant drug " << _drugAbbrev << endl;
-      return;
+      ostringstream temp;
+      temp << "prescribed non-existant drug " << _drugAbbrev;
+      throw xml_scenario_error (temp.str());
     }
     _drugs.push_back(myDrug);
   }

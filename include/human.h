@@ -47,9 +47,9 @@ public:
   
   /** Destructor
    * 
-   * NOTE: this destructor does nothing to allow shallow copying to the
-   * population list. Human::destroy() does the real freeing and must be
-   * called explicitly. */
+   * Note: this destructor does nothing in order to allow shallow copying of a
+   * Human into the population list. Human::destroy() does the real freeing and
+   * must be called explicitly. */
   ~Human() {}
   
   /// The real destructor

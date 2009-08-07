@@ -61,8 +61,6 @@ public:
   PerHostTransmission (istream& in, TransmissionModel&);
   void write (ostream& out) const;
   
-  //NOTE: may need to be within PerHostTransmission if some intervention parameters are moved here.
-  //NOTE: Since only the product of these is usually required, could perhaps be optimised
   /** @brief Get model parameters for species[speciesIndex].
    *
    * @param speciesIndex = Index in species list of this mosquito type. */

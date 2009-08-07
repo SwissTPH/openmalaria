@@ -201,7 +201,7 @@ public class SchemaTranslator {
         int schemaVersion = Integer.parseInt("0"
                 + scenarioElement.getAttribute("schemaVersion"));
         String schemaFileName = "scenario_" + schemaVersion + ".xsd";
-        Class<?> cls = (Class<?>) this.getClass();
+	Class<? extends SchemaTranslator> cls = this.getClass();
         while (schemaVersion < _required_version) {
             ++schemaVersion;
             schemaFileName = "scenario_" + schemaVersion + ".xsd";
