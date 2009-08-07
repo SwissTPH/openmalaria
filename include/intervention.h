@@ -49,9 +49,8 @@ public:
    * either through EPI or as EPI Boosters. */
   static size_t _numberOfEpiDoses;
   
-   /** Target age for EPI-like vaccination, in time steps
-    * TODO: Should be an integer? */
-  static double *targetagetstep;
+   /** Target age for EPI-like vaccination, in time steps. */
+  static vector<int> targetAgeTStep;
    ///Coverage , as a proportion of the poulation in the target age range
   static double *vaccineCoverage;
   

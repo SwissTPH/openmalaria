@@ -31,7 +31,7 @@ enum VaccineType {
 };
 
 bool Vaccine::anyVaccine = false;
-double *Vaccine::targetagetstep;
+vector<int> Vaccine::targetAgeTStep;
 double *Vaccine::vaccineCoverage;
 size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
@@ -78,7 +78,7 @@ void Vaccine::initParameters() {
   if (interventions.getContinuous().present())
     _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
   if (_numberOfEpiDoses) {
-    targetagetstep = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
+    targetAgeTStep.resize (_numberOfEpiDoses, 0);
     vaccineCoverage = (double*)malloc(((_numberOfEpiDoses))*sizeof(double));
     const scnXml::Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
     for (size_t i=0;i<_numberOfEpiDoses; i++) {
@@ -87,7 +87,7 @@ void Vaccine::initParameters() {
 	msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
         throw xml_scenario_error (msg.str());
       }
-      targetagetstep[i] = floor(cVS[i].getTargetAgeYrs() * daysInYear/(double)Global::interval);
+      targetAgeTStep[i] = (int)floor(cVS[i].getTargetAgeYrs() * daysInYear/(double)Global::interval);
       vaccineCoverage[i] = cVS[i].getCoverage();
     }
   }
@@ -121,6 +121,5 @@ void Vaccine::clearParameters () {
   
   if (_numberOfEpiDoses == 0)
     return;
-  free(targetagetstep);
   free(vaccineCoverage);
 }

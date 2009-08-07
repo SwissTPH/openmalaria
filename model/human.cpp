@@ -264,7 +264,7 @@ void Human::updateInterventionStatus() {
     if (Simulation::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
-            Vaccine::targetagetstep[_lastVaccineDose] == ageTimeSteps) {
+	    Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
         }

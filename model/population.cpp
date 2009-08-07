@@ -391,7 +391,12 @@ void Population::implementIntervention (int time) {
     massIntervention (interv->getVaccinate().get(), &Human::massVaccinate);
   }
   if (interv->getMDA().present()) {
-    massTreatment(interv->getMDA().get());
+    /* TODO: here we assume a 100% clearance rate for the MDA drug we use.
+    This is not consistent with the way we treat according to the Health
+    system description. The default clearance rate for MDA should be 100%
+    since this simulates what was meant to happen in Garki.  We can change
+    this by introducing an optional clearance rate that can be < 100%. */
+    massIntervention(interv->getMDA().get(), &Human::clearInfections);
   }
   if (interv->getIpti().present()) {
     massIntervention (interv->getIpti().get(), &Human::IPTiTreatment);
@@ -405,49 +410,19 @@ void Population::implementIntervention (int time) {
   }
 }
 
-// Returns mass.getCoverage(), sets minAge and maxAge
-double readFromMass (const scnXml::Mass& mass, double& minAge, double& maxAge) {
-  minAge = mass.getMinAge().present() ?
-      mass.getMinAge().get() : 0.0;
-  maxAge = mass.getMaxAge().present() ?
-      mass.getMaxAge().get() : 100.0;
-  return mass.getCoverage();
-}
-
 void Population::massIntervention (const scnXml::Mass& mass, void (Human::*intervention)())
 {
-  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
+  double minAge = mass.getMinAge().present() ?
+      mass.getMinAge().get() : 0.0;
+  double maxAge = mass.getMaxAge().present() ?
+      mass.getMaxAge().get() : 100.0;
+  double coverage = mass.getCoverage();
   
   for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter) {
     double ageYears = iter->getAgeInYears();
-    if ((ageYears > minAge) && (ageYears < maxAge) && W_UNIFORM() < compliance)
+    if ((ageYears > minAge) && (ageYears < maxAge) && W_UNIFORM() < coverage)
       // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
       ((*iter).*intervention)();
-  }
-}
-
-void Population::massTreatment(const scnXml::Mass& mass){
-  double minAge, maxAge, compliance = readFromMass (mass, minAge, maxAge);
-  
-  HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter){
-    double ageYears = iter->getAgeInYears();
-    //TODO: use parasite density instead?
-    if ((iter->withinHostModel->getCumulativeInfections() > 0) && (ageYears > minAge) && (ageYears < maxAge)){
-      if (W_UNIFORM() < compliance) {
-	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
-	This is not consistent with the way we treat according to the Health
-	system description. The default clearance rate for MDA should be 100%
-	since this simulates what was meant to happen in Garki.  We can change
-	this by introducing an optional clearance rate that can be < 100%. */
-	iter->clearInfections();
-      }
-    }
-    /* The following line of code is added for calculating expected
-    inoculations for the analysis of pre-erythrocytic immunity.
-    TODO: inside the above conditional? */
-    // Only affects Summary::addToExpectedInfected
-    iter->infIncidence->_pinfected = 0.0;
   }
 }
 

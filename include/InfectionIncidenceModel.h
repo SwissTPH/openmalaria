@@ -93,15 +93,14 @@ protected:
   
   double susceptibility ();
   
-public:	//TODO - maybe better if not public
   /** Probability of infection (cumulative or reset to zero in massTreatment).
    *
    * Appears to be used only for calculating expected inoculations for the
    * analysis of pre-erythrocytic immunity. */
   double _pinfected;
-private:
+  
   //!Number of infective bites since birth
-    double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
+  double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
   
 protected:	// Static data
   /* Shape constant of (Gamma) distribution of availability

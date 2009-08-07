@@ -88,9 +88,6 @@ public:
   //! Makes a survey
   void newSurvey();
  
-  //! Mass Drug Treatment Intervention
-  void massTreatment(const scnXml::Mass&);
-
   //! remove human from the list
   short outmigrate(Human& current, int Nsize, int &survivsSoFar);
   
