@@ -17,5 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-void start_cp_timer();
-void stop_cp_timer();
+#ifndef Hmod_timer
+#define Hmod_timer
+
+namespace timer {
+  void startCheckpoint ();
+  void stopCheckpoint ();
+}
+
+#endif

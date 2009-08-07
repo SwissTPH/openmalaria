@@ -20,8 +20,8 @@
 
 */
 #include "population.h"
+#include "util/BoincWrapper.h"
 #include "util/gsl.h"
-#include "timer.h"
 #include "inputData.h"
 #include "human.h"
 #include "simulation.h"
@@ -31,7 +31,6 @@
 #include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
 #include "Pathogenesis/PathogenesisModel.h"
-#include "BoincWrapper.h"
 #include <math.h>
 
 using namespace std;
@@ -195,14 +194,10 @@ void Population::write (ostream& out) {
   out << _workUnitIdentifier << endl;
 
   //Write human data
-  start_cp_timer();
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
     out << *iter;
   }
-
-  //Finished writing lists
-  stop_cp_timer();
 }
 
 void Population::read (istream& in) {

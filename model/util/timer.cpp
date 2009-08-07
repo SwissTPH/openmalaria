@@ -26,6 +26,7 @@
 #include <pthread.h>
 #endif
 
+#include "util/timer.h"
 #include "boinc_bridge.h"
 #include <iostream>
 using namespace std;
@@ -52,13 +53,13 @@ DWORD WINAPI write_cp_timer(PVOID arg) {
   //return 0;
 }
 
-void start_cp_timer(){
+void timer::startCheckpoint (){
   finishedCP=false;
   //setup windows thread
   timer_threadCP = CreateThread(NULL, 0, write_cp_timer, NULL,0, &timer_threadId);
 }
 
-void stop_cp_timer(){
+void timer::stopCheckpoint (){
   finishedCP=true;
   if (WaitForSingleObject(timer_threadCP, INFINITE) != WAIT_OBJECT_0) {
     perror("Thread join failed");
@@ -89,13 +90,13 @@ void *write_cp_timer(void *arg) {
   //return 0;
 }
 
-void start_cp_timer(){
+void timer::startCheckpoint (){
   finishedCP=false;
   //setup pthread
   res = pthread_create(&timer_thread, NULL, write_cp_timer, NULL);
 }
 
-void stop_cp_timer(){
+void timer::stopCheckpoint (){
   finishedCP=true;
   res = pthread_join(timer_thread, &thread_result);
   if (res != 0) {

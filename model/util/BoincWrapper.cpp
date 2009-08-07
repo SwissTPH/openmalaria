@@ -20,7 +20,7 @@
 
 // A wrapper around BOINC. This header should not include any BOINC headers!
 
-#include "BoincWrapper.h"
+#include "util/BoincWrapper.h"
 #include <iostream>
 #include <string>
 

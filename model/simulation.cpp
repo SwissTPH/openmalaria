@@ -21,8 +21,8 @@
 
 #include "simulation.h"
 
-#include "BoincWrapper.h"
-
+#include "util/BoincWrapper.h"
+#include "util/timer.h"
 #include "util/gsl.h"
 #include "population.h"
 #include "summary.h"
@@ -176,10 +176,12 @@ void Simulation::write (ostream& out) {
   if (out == NULL || !out.good())
     throw new checkpoint_error ("Unable to write to file");
   
+  timer::startCheckpoint ();
   out.precision(20);
   out << simulationTime << endl;
   _population->write (out);
   DrugModel::writeStatic (out);
+  timer::stopCheckpoint ();
 }
 
 void Simulation::readCheckpoint() {

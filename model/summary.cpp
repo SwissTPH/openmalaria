@@ -25,7 +25,7 @@
 #include "inputData.h"
 
 #include "Clinical/event.h"
-#include "BoincWrapper.h"
+#include "util/BoincWrapper.h"
 
 Summary::Summary() : _surveyPeriod(0) {
   //Read all summary parameters from the input file and allocate datastructures.

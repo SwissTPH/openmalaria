@@ -21,10 +21,9 @@
 
 using namespace std;
 
-#include "BoincWrapper.h"
-
-#include "inputData.h"	//Include parser for the input
+#include "util/BoincWrapper.h"
 #include "util/gsl.h"	//Include wrapper for GSL library
+#include "inputData.h"	//Include parser for the input
 
 #include "global.h"
 #include "simulation.h"
