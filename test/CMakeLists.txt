@@ -6,13 +6,8 @@ find_package (Python)
 
 # Testing via run.sh or run.py script:
 set (OM_BOXTEST_SCHEMA_NAME "scenario_7.xsd")
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.sh ${CMAKE_CURRENT_BINARY_DIR}/run.sh @ONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.py ${CMAKE_CURRENT_BINARY_DIR}/run.py @ONLY)
 
-# Not needed for the python script; leave while the shell script still works:
-foreach (_file densities.csv Nv0scenarioVector.txt ${OM_BOXTEST_SCHEMA_NAME})
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${_file} ${CMAKE_CURRENT_BINARY_DIR}/${_file} COPY_ONLY)
-endforeach (_file)
 # working tests:
 set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
