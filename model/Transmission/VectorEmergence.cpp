@@ -137,13 +137,6 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   
   // State variables.
   
-  // The periodic values of the total number of host-seeking mosquitoes.
-  gsl_vector* Nvp = gsl_vector_calloc(theta_p);	// \f$N_v^{(p)}(t)\f$.
-  // The periodic values of the number of infected host-seeking mosquitoes.
-  gsl_vector* Ovp = gsl_vector_calloc(theta_p);	// \f$O_v^{(p)}(t)\f$.
-  // The periodic values of the number of infectious host-seeking mosquitoes.
-  gsl_vector* Svp = gsl_vector_calloc(theta_p);	// \f$S_v^{(p)}(t)\f$.
-  
   // Allocate memory for gsl_matrices and initialize to 0.
   
   // \f$X_{\theta_p}\f$.
@@ -325,40 +318,17 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   CalcXP(inv1Xtp);
   
   // Retrieve the periodic orbits for Nv, Ov, and Sv.
+  N_v.resize (theta_p);
+  O_v.resize (theta_p);
+  S_v.resize (theta_p);
   size_t indexSv = 2*mt;
   for (size_t i=0; i<theta_p; i++){
-    double temp = gsl_vector_get(x_p[i], 0);
-    gsl_vector_set(Nvp, i, temp);
-
-    temp = gsl_vector_get(x_p[i], mt);
-    gsl_vector_set(Ovp, i, temp);
-
-    temp = gsl_vector_get(x_p[i], indexSv);
-    gsl_vector_set(Svp, i, temp);
+    N_v[i] = gsl_vector_get(x_p[i], 0);
+    O_v[i] = gsl_vector_get(x_p[i], mt);
+    S_v[i] = gsl_vector_get(x_p[i], indexSv);
   }
   
-  /* FIXME - move back to VectorSpecies
-  if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > (int)theta_p)
-    throw xml_scenario_error ("Initialization phase or theta_p too short");
-  // For day over N_v_length days prior to the next timestep's day.
-  int endDay = (Simulation::simulationTime+1) * Global::interval;
-  for (int day = endDay - N_v_length; day < endDay; ++day) {
-    size_t t = day % N_v_length;
-    size_t i = (theta_p + day - endDay) % theta_p;
-    
-    N_v[t] = gsl_vector_get (Nvp, i);
-    O_v[t] = gsl_vector_get (Ovp, i);
-    S_v[t] = gsl_vector_get (Svp, i);
-  }*/
   
-  
-# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  PrintVector("NvPO", Nvp);
-  PrintVector("OvPO", Ovp);
-  PrintVector("SvPO", Svp);
-# endif
-
-
   // Copy the mosquito emergence rate to the C array.
   memcpy (mosqEmergeRate, N_v0->data, theta_p * sizeof (*mosqEmergeRate));
   
@@ -367,9 +337,6 @@ double VectorEmergence::CalcInitMosqEmergeRate(int nHostTypesInit,
   gsl_vector_free(Xi_i);
   gsl_vector_free(S_vFromEIR);
   gsl_vector_free(S_vDiff);
-  gsl_vector_free(Nvp);
-  gsl_vector_free(Ovp);
-  gsl_vector_free(Svp);
   
   gsl_matrix_free(X_t_p);
   gsl_matrix_free(inv1Xtp);

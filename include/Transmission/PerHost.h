@@ -23,6 +23,7 @@
 #include "Transmission/VectorSpecies.h"
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 #include "GSLWrapper.h"
+#include "inputData.h"
 
 class Summary;
 class HostMosquitoInteraction;
@@ -37,8 +38,10 @@ class PerHostTransmission
 public:
   /// @brief Static member functions
   //@{
-  /// Static initialisation
-  static void initParameters ();
+  /** Static initialisation
+   *
+   * Pass getInterventions() from inputData. */
+  static void initParameters (const scnXml::Interventions&);
   
   //! Calculates the adjustment for body size in exposure to mosquitoes 
   /*! 

@@ -99,6 +99,13 @@ public:
                                 const vector<double>& FEIRInitVector,
 				double* mosqEmergeRate);
   
+  
+  /** Initialisation values for the following variables of the Vector model:
+   * \f$N_v^{(p)}(t), O_v^{(p)}(t), S_v^{(p)}(t)\f$.
+   *
+   * These are set by CalcInitMosqEmergeRate(). */
+  vector<double> N_v, O_v, S_v;
+  
 private:
   //BEGIN data
   // n and m from the model are not renamed such here; they are:

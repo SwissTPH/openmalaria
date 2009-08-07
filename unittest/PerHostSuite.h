@@ -24,12 +24,14 @@
 
 #include <cxxtest/TestSuite.h>
 #include "Transmission/PerHost.h"
+#include "inputData.h"
 
 class PerHostSuite : public CxxTest::TestSuite
 {
 public:
   PerHostSuite () {
-    PerHostTransmission::initParameters();
+    scnXml::Interventions intervs(xml_schema::String("dummy"));
+    PerHostTransmission::initParameters(intervs);
   }
   
   void testRelativeAvailability () {

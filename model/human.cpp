@@ -50,7 +50,7 @@
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
-  PerHostTransmission::initParameters();
+  PerHostTransmission::initParameters(getInterventions());
   InfectionIncidenceModel::init();
   WithinHostModel::init();
   ClinicalModel::init();

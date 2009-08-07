@@ -32,14 +32,13 @@ vector<double> PerHostTransmission::cntItnTargetAgeTStep;
 vector<double> PerHostTransmission::cntItnCoverage;
 
 
-void PerHostTransmission::initParameters () {
+void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
   for (size_t i=0; i<WithinHostModel::nages; i++) {
     ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
   }
   
-  const scnXml::Interventions::ContinuousOptional& cntInterv = getInterventions().getContinuous();
-  if (cntInterv.present()) {
-    const scnXml::Continuous::ITNSequence& seqItn = cntInterv.get().getITN();
+  if (interv.getContinuous().present()) {
+    const scnXml::Continuous::ITNSequence& seqItn = interv.getContinuous().get().getITN();
     int n = seqItn.size();
     cntItnTargetAgeTStep.resize(n);
     cntItnCoverage.resize (n);

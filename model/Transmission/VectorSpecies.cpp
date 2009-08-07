@@ -496,6 +496,20 @@ void VectorTransmissionSpecies::calMosqEmergeRate (int populationSize, vector<do
       file << mosqEmergeRate[i] << endl;
     file.close();
   }
+  
+  
+  if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
+    throw xml_scenario_error ("Initialization phase or daysInYear too short");
+  // For day over N_v_length days prior to the next timestep's day.
+  int endDay = (Simulation::simulationTime+1) * Global::interval;
+  for (int day = endDay - N_v_length; day < endDay; ++day) {
+    size_t t = day % N_v_length;
+    size_t i = (daysInYear + day - endDay) % daysInYear;
+    
+    N_v[t] = emerge.N_v[i];
+    O_v[t] = emerge.O_v[i];
+    S_v[t] = emerge.S_v[i];
+  }
 }
 
 void VectorTransmissionSpecies::convertLengthToFullYear (double FullArray[daysInYear], vector<double>& ShortArray) {
