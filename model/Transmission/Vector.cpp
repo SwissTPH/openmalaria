@@ -33,7 +33,7 @@
  *****************************************************************************/
 
 
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const std::list<Human>& population) {
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize) {
   if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
     throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
   
@@ -48,10 +48,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
     throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
   species.resize (numSpecies);
   
-  species[0].initialise (anophelesList[0], 0, population, initialisationEIR);
+  species[0].initialise (anophelesList[0], 0, population, populationSize, initialisationEIR);
   simulationMode = species[0].getSimulationMode();
   for (size_t i = 1; i < numSpecies; ++i) {
-    species[i].initialise (anophelesList[i], i, population, initialisationEIR);
+    species[i].initialise (anophelesList[i], i, population, populationSize, initialisationEIR);
     
     if (simulationMode != species[i].getSimulationMode())
       // Probably fourier eir data present only for some species

@@ -71,9 +71,6 @@ def runScenario(options,omOptions,name):
   # Run from a temporary directory, so checkpoint files won't conflict
   simDir = tempfile.mkdtemp(prefix=name+'-', dir=testBuildDir)
   outFile=os.path.join(simDir,"output.txt")
-  outNameFile=os.path.join(testBuildDir,"output"+name+".txt")
-  if (os.path.isfile(outNameFile)):
-    os.remove (outNameFile)
   checkFile=os.path.join(simDir,"checkpoint")
   
   # Link or copy required files.
@@ -81,12 +78,6 @@ def runScenario(options,omOptions,name):
   scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
   linkOrCopy (os.path.join(testSrcDir,"densities.csv"), densities_csv)
   linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
-  # Note: name may not always be correct; scan scenario XML file if you really want to be sure!
-  Nv0fileSrc=os.path.join(testSrcDir,"Nv0scenario{0}.txt".format(name))
-  Nv0file=os.path.join(simDir,"Nv0scenario{0}.txt".format(name))
-  if os.path.isfile(Nv0fileSrc):
-    # Don't link, because it may be edited in-situ; we don't want to replace the original:
-    shutil.copy2 (Nv0fileSrc,Nv0file)
   
   if options.logging:
     print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
@@ -109,34 +100,21 @@ def runScenario(options,omOptions,name):
       break
     lastTime=checkTime
   
-  stderrFile=os.path.join(simDir,"stderr.txt")
-  if os.path.isfile(stderrFile):
-    dest=os.path.join(testBuildDir,"stderr.txt")
-    os.rename(stderrFile,dest)
-    stderrFile=dest
-  
   if options.cleanup:
     os.remove(densities_csv)
     os.remove(scenario_xsd)
-    # For now do the safest thing and don't delete. We don't want to remove this file if it was overwritten.
-    #if os.path.isfile(Nv0file):
-      #os.remove (Nv0file)
     for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?"))):
       if os.path.isfile(f):
 	os.remove(f)
   
+  ret = 1
   if os.path.isfile(outFile):
-    os.rename(outFile,outNameFile)
-  
-  try:
-    os.rmdir(simDir)
-  except OSError:
-    print "Directory %s not empty, so not deleted!" % simDir
-  
-  if os.path.isfile(outNameFile):
     print "\033[1;34m",
-    return compareOuts.main (*["",os.path.join(testSrcDir,"original%s.txt"%name), outNameFile, 1])
+    ret = compareOuts.main (*["",os.path.join(testSrcDir,"original%s.txt"%name), outFile, 1])
+    if ret == 0:
+      os.remove(outFile)
   else:
+    stderrFile=os.path.join(simDir,"stderr.txt")
     if os.path.isfile (stderrFile):
       print "\033[0;31mNo results output; error messages:"
       se = file.open(stderrFile)
@@ -144,8 +122,14 @@ def runScenario(options,omOptions,name):
       se.close()
     else:
       print "\033[0;31mNo results output; error messages:"
+  
+  try:
+    os.rmdir(simDir)
+  except OSError:
+    print "Directory %s not empty, so not deleted!" % simDir
+  
   print "\033[0;00m"
-  return 1
+  return ret
 
 def setWrapArgs(option, opt_str, value, parser, *args, **kwargs):
   parser.values.wrapArgs = args[0]

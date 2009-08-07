@@ -23,13 +23,26 @@
 #include "global.h"
 #include <gsl/gsl_vector.h>
 
+
+//NOTE: maybe put everything in a Vectors namespace?
+
+///@brief Basic operations on std::vector
+/// Scale all elements of a vector by a in-situ
+void vectorScale (vector<double>& vec, double a);
+
+
+///@brief Comparissons on std::vector
+//@{
 /// Return true if, approximately, a == b
 bool approxEqual (const double a, const double b);
 
 /// Returns true if vec1 and vec2 have equal length and all elements are approximately equal.
 bool approxEqual (const vector<double>& vec1, const vector<double>& vec2);
+//@}
 
 
+///@brief Convertions between gsl_vector and std::vector<double>
+//@{
 /** Convert a gsl_vector to a std::vector<double>. */
 vector<double> vectorGsl2Std (const gsl_vector* vec);
 
@@ -41,5 +54,5 @@ vector<double> vectorGsl2Std (const gsl_vector* vec);
 gsl_vector* vectorStd2Gsl (const vector<double>& vec, size_t length);
 /// Ditto, but taking values from a double[].
 gsl_vector* vectorStd2Gsl (const double* vec, size_t length);
-
+//@}
 #endif

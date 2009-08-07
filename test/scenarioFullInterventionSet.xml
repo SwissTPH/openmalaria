@@ -1,12 +1,13 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="000" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="100" simulationDuration="1465" wuID="0" schemaVersion="7" xsi:noNamespaceSchemaLocation="scenario_7.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<scenario analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="100" schemaVersion="8" simulationDuration="1465" wuID="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="scenario_8.xsd">
+
   <demography name="Ifakara">
-    <ageGroup lowerbound="0.0">
+    <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
       <group poppercent="14.52151394" upperbound="10"/>
       <group poppercent="12.75565434" upperbound="15"/>
-      <group poppercent="10.83632374" upperbound="20"/>
+      <group poppercent="10.836323739999999" upperbound="20"/>
       <group poppercent="8.393312454" upperbound="25"/>
       <group poppercent="7.001421452" upperbound="30"/>
       <group poppercent="5.800587654" upperbound="35"/>
@@ -23,6 +24,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
+
   <monitoring name="Quarterly Surveys">
     <surveys detectionLimit="40" summaryOption="98564265">
       <surveyTime>1</surveyTime>
@@ -107,7 +109,7 @@
       <surveyTime>1442</surveyTime>
       <surveyTime>1461</surveyTime>
     </surveys>
-    <ageGroup lowerbound="0.0">
+    <ageGroup lowerbound="0">
       <group upperbound="0.25"/>
       <group upperbound="0.5"/>
       <group upperbound="0.75"/>
@@ -140,49 +142,45 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
+
   <interventions name="Full Set">
     <vaccineDescription vaccineType="3">
       <halfLifeYrs value="10"/>
       <efficacyB value="10"/>
       <initialEfficacy value="0.512"/>
       <initialEfficacy value="0.64"/>
-      <initialEfficacy value="0.80"/>
+      <initialEfficacy value="0.8"/>
     </vaccineDescription>
     <vaccineDescription vaccineType="1">
       <halfLifeYrs value="10"/>
       <efficacyB value="10"/>
       <initialEfficacy value="0.512"/>
       <initialEfficacy value="0.64"/>
-      <initialEfficacy value="0.80"/>
+      <initialEfficacy value="0.8"/>
     </vaccineDescription>
     <iptiDescription iptiEffect="13">
-      <!-- ipti with SP treatment drug clears all parasites.  We assume 80% wt -->
-      <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-      <infGenotype ACR="1.0" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
+      <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+      <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
       <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
     </iptiDescription>
     <ITNDescription name="LLIN test">
       <anopheles mosquito="gambiae_ss">
-	<deterrency initial="0.44" halflife="3.0"/>
-	<preprandialKillingEffect initial="0.27" halflife="3.0"/>
-	<postprandialKillingEffect initial="0.27" halflife="3.0"/>
+        <deterrency halflife="3" initial="0.44"/>
+        <preprandialKillingEffect halflife="3" initial="0.27"/>
+        <postprandialKillingEffect halflife="3" initial="0.27"/>
       </anopheles>
     </ITNDescription>
     <IRSDescription name="DDT test">
       <anopheles mosquito="gambiae_ss">
-	<deterrency initial="0.56" halflife="0.5"/>
-	<killingEffect initial="0.24" halflife="0.5"/>
+        <deterrency halflife="0.5" initial="0.56"/>
+        <killingEffect halflife="0.5" initial="0.24"/>
       </anopheles>
     </IRSDescription>
-    <!-- vaccine description modified from ...PEVTBVREFEPICAMP.xml -->
     <continuous>
-      <!-- vaccinate -->
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>
       <vaccine coverage="0.95" targetAgeYrs="0.25"/>
-      <!-- deliver ITNs to newborns -->
       <ITN coverage="0.95" targetAgeYrs="0.0833"/>
-      <!-- IPTi -->
       <ipti coverage="0.95" targetAgeYrs="0.17"/>
       <ipti coverage="0.95" targetAgeYrs="0.25"/>
       <ipti coverage="0.95" targetAgeYrs="0.75"/>
@@ -192,12 +190,9 @@
         <vaccinate coverage="0.95"/>
       </intervention>
       <intervention time="7">
-      <!-- mass treatment with first-line drug -->
         <MDA coverage="0.95"/>
         <vaccinate coverage="0.95"/>
-      <!-- mass distribution of ITNs -->
         <ITN coverage="0.95"/>
-      <!-- IRS spray round -->
         <IRS coverage="0.95"/>
       </intervention>
       <intervention time="13">
@@ -214,7 +209,7 @@
       </intervention>
     </timed>
   </interventions>
-  <!-- healthSystem copied from ...PEVTBVREFEPICAMP.xml -->
+
   <healthSystem healthSystemMemory="6" name="Tanzania ACT">
     <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
     <initialACR>
@@ -223,7 +218,7 @@
       <selfTreatment value="0.63"/>
     </initialACR>
     <compliance>
-      <ACT value="0.900"/>
+      <ACT value="0.9"/>
       <selfTreatment value="0.85"/>
     </compliance>
     <nonCompliersEffective>
@@ -235,8 +230,8 @@
     <pSeekOfficialCareUncomplicated2 value="0.04"/>
     <pSeekOfficialCareSevere value="0.48"/>
     <pSequelaeInpatient>
-      <item value="0.0132" maxAgeYrs="5"/>
-      <item value="0.005" maxAgeYrs="99"/>
+      <item maxAgeYrs="5" value="0.0132"/>
+      <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
     <CFR>
       <group cfr="0.09189" lowerbound="0"/>
@@ -250,58 +245,477 @@
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
     </CFR>
-  </healthSystem>  
+  </healthSystem>
+
   <entoData name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss">
-        <eir EIRRotateAngle="0.0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
-        <mosq
-    emergenceRateFilename="Nv0scenarioFullInterventionSet.txt"
-    extrinsicIncubationPeriod="10"
-    mosqEntoAvailability="0.0070"
-    mosqProbBiting="0.95"
-    mosqProbFindRestSite="0.95"
-    mosqProbOvipositing="0.93"
-    mosqProbResting="0.94"
-    mosqRestDuration="3"
-    mosqSeekingDeathRate="1.6"
-    mosqSeekingDuration="0.33"/>
+        <eir EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
+        <emergence>
+          <emergenceRate>
+            <item>794.476999999999975</item>
+            <item>787.88900000000001</item>
+            <item>776.080000000000041</item>
+            <item>765.560000000000059</item>
+            <item>754.186000000000035</item>
+            <item>741.486999999999966</item>
+            <item>731.401000000000067</item>
+            <item>720.786000000000058</item>
+            <item>710.593999999999937</item>
+            <item>700.516000000000076</item>
+            <item>696.711999999999989</item>
+            <item>684.154999999999973</item>
+            <item>674.90199999999993</item>
+            <item>665.358999999999924</item>
+            <item>656.72199999999998</item>
+            <item>665.766000000000076</item>
+            <item>648.918000000000006</item>
+            <item>641.115999999999985</item>
+            <item>631.923000000000002</item>
+            <item>624.791000000000054</item>
+            <item>626.93100000000004</item>
+            <item>615.93100000000004</item>
+            <item>609.75</item>
+            <item>603.025999999999954</item>
+            <item>597.528999999999996</item>
+            <item>632.682999999999993</item>
+            <item>607.539999999999964</item>
+            <item>602.916000000000054</item>
+            <item>594.668000000000006</item>
+            <item>590.800000000000068</item>
+            <item>590.326999999999998</item>
+            <item>585.654999999999973</item>
+            <item>582.86099999999999</item>
+            <item>580.139999999999986</item>
+            <item>578.086999999999989</item>
+            <item>570.341999999999985</item>
+            <item>572.07000000000005</item>
+            <item>571.15300000000002</item>
+            <item>571.218000000000075</item>
+            <item>571.069000000000074</item>
+            <item>578.803999999999974</item>
+            <item>575.726999999999975</item>
+            <item>576.769000000000005</item>
+            <item>577.484000000000037</item>
+            <item>579.350000000000023</item>
+            <item>583.749000000000024</item>
+            <item>585.432000000000016</item>
+            <item>588.59800000000007</item>
+            <item>592.003000000000043</item>
+            <item>596.07000000000005</item>
+            <item>600.764999999999986</item>
+            <item>605.699000000000069</item>
+            <item>611.198000000000093</item>
+            <item>617.18100000000004</item>
+            <item>623.69500000000005</item>
+            <item>636.289999999999964</item>
+            <item>641.173999999999978</item>
+            <item>649.341000000000008</item>
+            <item>657.533000000000015</item>
+            <item>666.856999999999971</item>
+            <item>692.516999999999939</item>
+            <item>695.503999999999905</item>
+            <item>706.826999999999998</item>
+            <item>717.271999999999935</item>
+            <item>729.941000000000031</item>
+            <item>746.631999999999948</item>
+            <item>759.164999999999964</item>
+            <item>774.06899999999996</item>
+            <item>789.428999999999974</item>
+            <item>805.923999999999978</item>
+            <item>824.610000000000014</item>
+            <item>842.157000000000039</item>
+            <item>861.25</item>
+            <item>881.128000000000043</item>
+            <item>902.088999999999942</item>
+            <item>926.441000000000031</item>
+            <item>948.241000000000099</item>
+            <item>972.256000000000085</item>
+            <item>997.095000000000027</item>
+            <item>1023.269999999999982</item>
+            <item>1064.410000000000082</item>
+            <item>1086.400000000000091</item>
+            <item>1116.269999999999982</item>
+            <item>1146.009999999999991</item>
+            <item>1178.360000000000127</item>
+            <item>1208.049999999999955</item>
+            <item>1244.860000000000127</item>
+            <item>1281.130000000000109</item>
+            <item>1319.170000000000073</item>
+            <item>1358.25</item>
+            <item>1384.450000000000045</item>
+            <item>1433.100000000000136</item>
+            <item>1476.339999999999918</item>
+            <item>1522.490000000000009</item>
+            <item>1568.789999999999964</item>
+            <item>1596.289999999999964</item>
+            <item>1655.130000000000109</item>
+            <item>1705.730000000000018</item>
+            <item>1759.880000000000109</item>
+            <item>1813.650000000000091</item>
+            <item>1879.779999999999973</item>
+            <item>1931.600000000000136</item>
+            <item>1990.150000000000091</item>
+            <item>2049.150000000000091</item>
+            <item>2110.679999999999836</item>
+            <item>2190.220000000000255</item>
+            <item>2246.909999999999854</item>
+            <item>2312.960000000000036</item>
+            <item>2378.700000000000273</item>
+            <item>2447.309999999999945</item>
+            <item>2499.740000000000236</item>
+            <item>2578.820000000000164</item>
+            <item>2650.559999999999945</item>
+            <item>2725</item>
+            <item>2798.630000000000109</item>
+            <item>2806.940000000000055</item>
+            <item>2912.970000000000255</item>
+            <item>2987.650000000000091</item>
+            <item>3069.269999999999982</item>
+            <item>3144.789999999999964</item>
+            <item>3164.630000000000109</item>
+            <item>3266.570000000000164</item>
+            <item>3341.349999999999909</item>
+            <item>3421.309999999999945</item>
+            <item>3495.400000000000091</item>
+            <item>3516.230000000000018</item>
+            <item>3613.75</item>
+            <item>3684.800000000000182</item>
+            <item>3759.820000000000164</item>
+            <item>3828.409999999999854</item>
+            <item>3842.309999999999945</item>
+            <item>3933</item>
+            <item>3995.940000000000055</item>
+            <item>4062.050000000000182</item>
+            <item>4120.760000000000218</item>
+            <item>4084.450000000000273</item>
+            <item>4182.699999999999818</item>
+            <item>4233.020000000000437</item>
+            <item>4289.619999999999891</item>
+            <item>4334.159999999999854</item>
+            <item>4252.859999999999673</item>
+            <item>4350.480000000000473</item>
+            <item>4384.619999999999891</item>
+            <item>4427.380000000000109</item>
+            <item>4454.590000000000146</item>
+            <item>4371.420000000000073</item>
+            <item>4443.470000000000255</item>
+            <item>4459.279999999999745</item>
+            <item>4481.819999999999709</item>
+            <item>4490.090000000000146</item>
+            <item>4434.409999999999854</item>
+            <item>4464.659999999999854</item>
+            <item>4461.390000000000327</item>
+            <item>4460.279999999999745</item>
+            <item>4449.520000000000437</item>
+            <item>4428.100000000000364</item>
+            <item>4413.460000000000036</item>
+            <item>4391.789999999999964</item>
+            <item>4367.359999999999673</item>
+            <item>4338.880000000000109</item>
+            <item>4296.579999999999927</item>
+            <item>4266.980000000000473</item>
+            <item>4229.130000000000109</item>
+            <item>4189.430000000000291</item>
+            <item>4145.949999999999818</item>
+            <item>4069.860000000000127</item>
+            <item>4036.550000000000182</item>
+            <item>3985.960000000000036</item>
+            <item>3936.220000000000255</item>
+            <item>3881.550000000000182</item>
+            <item>3772.680000000000291</item>
+            <item>3741.309999999999945</item>
+            <item>3682.190000000000055</item>
+            <item>3626.980000000000018</item>
+            <item>3565.389999999999873</item>
+            <item>3468.300000000000182</item>
+            <item>3422.670000000000073</item>
+            <item>3359</item>
+            <item>3298.230000000000018</item>
+            <item>3233.670000000000073</item>
+            <item>3115.010000000000218</item>
+            <item>3077.889999999999873</item>
+            <item>3013.590000000000146</item>
+            <item>2954.800000000000182</item>
+            <item>2890.860000000000127</item>
+            <item>2782.619999999999891</item>
+            <item>2742.670000000000073</item>
+            <item>2680.659999999999854</item>
+            <item>2623.730000000000018</item>
+            <item>2563.059999999999945</item>
+            <item>2497.800000000000182</item>
+            <item>2441.630000000000109</item>
+            <item>2383.670000000000073</item>
+            <item>2327.25</item>
+            <item>2271.349999999999909</item>
+            <item>2190.920000000000073</item>
+            <item>2150.550000000000182</item>
+            <item>2098.349999999999909</item>
+            <item>2049.849999999999909</item>
+            <item>1999.990000000000009</item>
+            <item>1954.579999999999927</item>
+            <item>1905.519999999999982</item>
+            <item>1859.340000000000146</item>
+            <item>1814.130000000000109</item>
+            <item>1770.5</item>
+            <item>1741.220000000000027</item>
+            <item>1693.319999999999936</item>
+            <item>1653.309999999999945</item>
+            <item>1613.279999999999973</item>
+            <item>1575.809999999999945</item>
+            <item>1548.090000000000146</item>
+            <item>1508.6400000000001</item>
+            <item>1474.710000000000036</item>
+            <item>1441.130000000000109</item>
+            <item>1409.569999999999936</item>
+            <item>1406.029999999999973</item>
+            <item>1362.839999999999918</item>
+            <item>1334.3900000000001</item>
+            <item>1304.360000000000127</item>
+            <item>1278.130000000000109</item>
+            <item>1221.549999999999955</item>
+            <item>1213.549999999999955</item>
+            <item>1190.670000000000073</item>
+            <item>1171.850000000000136</item>
+            <item>1150.809999999999945</item>
+            <item>1126.799999999999955</item>
+            <item>1109.579999999999927</item>
+            <item>1091.269999999999982</item>
+            <item>1074.200000000000045</item>
+            <item>1057.569999999999936</item>
+            <item>1041.920000000000073</item>
+            <item>1026.809999999999945</item>
+            <item>1012.550000000000068</item>
+            <item>999.033999999999992</item>
+            <item>986.266999999999939</item>
+            <item>984.29200000000003</item>
+            <item>967.818000000000097</item>
+            <item>957.078999999999951</item>
+            <item>946.016999999999939</item>
+            <item>936.618999999999915</item>
+            <item>932.590000000000032</item>
+            <item>922.04200000000003</item>
+            <item>914.476999999999975</item>
+            <item>907.031000000000063</item>
+            <item>900.644000000000005</item>
+            <item>915.981000000000108</item>
+            <item>900.067000000000007</item>
+            <item>895.269999999999982</item>
+            <item>888.916000000000054</item>
+            <item>885.187000000000012</item>
+            <item>900.595000000000027</item>
+            <item>888.571000000000026</item>
+            <item>886.315000000000055</item>
+            <item>882.701000000000022</item>
+            <item>881.408000000000015</item>
+            <item>885.961999999999989</item>
+            <item>882.912000000000035</item>
+            <item>882.980000000000018</item>
+            <item>882.951000000000022</item>
+            <item>883.886999999999944</item>
+            <item>892.261999999999944</item>
+            <item>890.548000000000002</item>
+            <item>892.716000000000122</item>
+            <item>894.583999999999946</item>
+            <item>897.52800000000002</item>
+            <item>907.144999999999982</item>
+            <item>907.733999999999924</item>
+            <item>911.783999999999992</item>
+            <item>915.565000000000055</item>
+            <item>920.30600000000004</item>
+            <item>932.409999999999968</item>
+            <item>934.340000000000032</item>
+            <item>940.057999999999993</item>
+            <item>945.366000000000099</item>
+            <item>951.658000000000015</item>
+            <item>972.180000000000064</item>
+            <item>972.18100000000004</item>
+            <item>979.300000000000068</item>
+            <item>985.283000000000015</item>
+            <item>992.848999999999933</item>
+            <item>1018.100000000000023</item>
+            <item>1017.540000000000077</item>
+            <item>1025.759999999999991</item>
+            <item>1032.410000000000082</item>
+            <item>1040.910000000000082</item>
+            <item>1052.870000000000118</item>
+            <item>1059.990000000000009</item>
+            <item>1068.829999999999927</item>
+            <item>1077.410000000000082</item>
+            <item>1086.360000000000127</item>
+            <item>1106.880000000000109</item>
+            <item>1110.25</item>
+            <item>1119.259999999999991</item>
+            <item>1127.100000000000136</item>
+            <item>1136.019999999999982</item>
+            <item>1151.410000000000082</item>
+            <item>1156.920000000000073</item>
+            <item>1165.529999999999973</item>
+            <item>1173.329999999999927</item>
+            <item>1181.589999999999918</item>
+            <item>1192.549999999999955</item>
+            <item>1198.950000000000045</item>
+            <item>1206.529999999999973</item>
+            <item>1213.549999999999955</item>
+            <item>1220.539999999999964</item>
+            <item>1220.829999999999927</item>
+            <item>1230.269999999999982</item>
+            <item>1236.190000000000055</item>
+            <item>1242.360000000000127</item>
+            <item>1247.480000000000018</item>
+            <item>1254.779999999999973</item>
+            <item>1257.730000000000018</item>
+            <item>1261.490000000000009</item>
+            <item>1264.5</item>
+            <item>1267.259999999999991</item>
+            <item>1271.529999999999973</item>
+            <item>1272.230000000000018</item>
+            <item>1273.3900000000001</item>
+            <item>1273.789999999999964</item>
+            <item>1273.829999999999927</item>
+            <item>1268.110000000000127</item>
+            <item>1269.549999999999955</item>
+            <item>1267.860000000000127</item>
+            <item>1266.079999999999927</item>
+            <item>1263.220000000000027</item>
+            <item>1233.829999999999927</item>
+            <item>1242.710000000000036</item>
+            <item>1238.150000000000091</item>
+            <item>1235.579999999999927</item>
+            <item>1229.900000000000091</item>
+            <item>1220.660000000000082</item>
+            <item>1215.400000000000091</item>
+            <item>1208.130000000000109</item>
+            <item>1200.6400000000001</item>
+            <item>1192.370000000000118</item>
+            <item>1198.150000000000091</item>
+            <item>1181.650000000000091</item>
+            <item>1171.960000000000036</item>
+            <item>1160.420000000000073</item>
+            <item>1149.930000000000064</item>
+            <item>1131.049999999999955</item>
+            <item>1123.880000000000109</item>
+            <item>1112.380000000000109</item>
+            <item>1101.370000000000118</item>
+            <item>1089.289999999999964</item>
+            <item>1077.980000000000018</item>
+            <item>1064.900000000000091</item>
+            <item>1052.1400000000001</item>
+            <item>1039.099999999999909</item>
+            <item>1026.019999999999982</item>
+            <item>983.618999999999915</item>
+            <item>985.139999999999986</item>
+            <item>971.938999999999965</item>
+            <item>961.57000000000005</item>
+            <item>948.256999999999948</item>
+            <item>925.813000000000102</item>
+            <item>917.154999999999973</item>
+            <item>903.955000000000041</item>
+            <item>891.708999999999946</item>
+            <item>878.628999999999905</item>
+            <item>872.388000000000034</item>
+            <item>856.081999999999994</item>
+            <item>843.296000000000049</item>
+            <item>829.993000000000052</item>
+            <item>817.532000000000039</item>
+          </emergenceRate>
+          <kappa>
+            <item>0.061055851982383</item>
+            <item>0.061055851982383</item>
+            <item>0.061055851982383</item>
+            <item>0.061055851982383</item>
+            <item>0.061006359838411</item>
+            <item>0.061006359838411</item>
+            <item>0.061006359838411</item>
+            <item>0.061246167311367</item>
+            <item>0.061246167311367</item>
+            <item>0.061246167311367</item>
+            <item>0.061246167311367</item>
+            <item>0.061246167311367</item>
+            <item>0.061055851982383</item>
+          </kappa>
+          <N_v>
+            <item>2170.96117181841646</item>
+            <item>2139.052930730043954</item>
+            <item>2107.422584693998033</item>
+            <item>2076.11520709663273</item>
+            <item>2464.697482112404487</item>
+            <item>2432.471344173499347</item>
+            <item>2400.062566380753651</item>
+            <item>2358.402145473051405</item>
+            <item>2325.919431827853714</item>
+            <item>2293.424280401836313</item>
+            <item>2260.963521736983694</item>
+            <item>2228.59194917876448</item>
+            <item>2203.102340711893248</item>
+          </N_v>
+          <O_v>
+            <item>34.090079842443373</item>
+            <item>33.615644554853404</item>
+            <item>33.141812824199263</item>
+            <item>32.669308413240358</item>
+            <item>38.252691025389325</item>
+            <item>37.809825597538563</item>
+            <item>37.360052212352969</item>
+            <item>36.904215375027306</item>
+            <item>36.443178813896296</item>
+            <item>35.977825226581174</item>
+            <item>35.509010490196701</item>
+            <item>35.037555057549902</item>
+            <item>34.564315807918497</item>
+          </O_v>
+          <S_v>
+            <item>2.584360256841929</item>
+            <item>2.553116050867254</item>
+            <item>2.521492688430893</item>
+            <item>2.489550504928233</item>
+            <item>2.838666479956403</item>
+            <item>2.813502572495767</item>
+            <item>2.787433681437566</item>
+            <item>2.760515297165965</item>
+            <item>2.732800569578899</item>
+            <item>2.704349386746562</item>
+            <item>2.675219717734168</item>
+            <item>2.645472931948078</item>
+            <item>2.61516548163925</item>
+          </S_v>
+        </emergence>
+        <mosq emergenceRateFilename="Nv0scenarioFullInterventionSet.txt" extrinsicIncubationPeriod="10" mosqEntoAvailability="0.007" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
       </anopheles>
     </vector>
   </entoData>
-  <parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
-    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+
+  <parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
+    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
-    <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+    <parameter include="false" name="Xstar_p" number="4" value="1514.385853233699891"/>
     <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-    <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-    <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+    <parameter include="false" name="sigma2i" number="6" value="10.173598698525799"/>
+    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.31132510304451"/>
+    <parameter include="false" name="CumulativeHstar" number="8" value="97.334652723897705"/>
     <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
     <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
     <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
     <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
-    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
-    <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001039"/>
+    <parameter include="false" name="alpha" number="14" value="142601.912520000012591"/>
     <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
     <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
     <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
     <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
-    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.539046599999999"/>
     <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
-    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.599999999976717"/>
     <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
     <parameter include="false" name="Immune effector decay" number="23" value="0"/>
     <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
     <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
     <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
     <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
-    <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+    <parameter include="false" name="Ystar0" number="28" value="296.302437899999973"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
   </parameters>
+
 </scenario>
-
-
-

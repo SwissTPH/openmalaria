@@ -53,8 +53,18 @@ const scnXml::CaseManagements* getCaseManagements();
 /// Get the HealthSystem xml object
 const scnXml::HealthSystem& getHealthSystem();
 
-// Change xml data for certain interventions
-void changeHealthSystem (const scnXml::HealthSystem*);
+/** Get a mutable version of scenario element.
+ *
+ * This is the only entry point for changing the scenario document.
+ * 
+ * You should set "documentChanged = true;" if you want your changes saved. */
+scnXml::Scenario& getMutableScenario();
+
+/** Change the element returned by getHealthSystem() to newHS.
+ *
+ * This doesn't change the scenario document, but just a local pointer, so it's
+ * safe to use when editing and saving the document. */
+void changeHealthSystem (const scnXml::HealthSystem* newHS);
 
 /// Get the intervention from interventions->timed with time time.
 /// @returns NULL if not available

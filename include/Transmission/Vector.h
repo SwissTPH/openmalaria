@@ -38,7 +38,7 @@ class VectorTransmission : public TransmissionModel {
 public:
   friend class PerHostTransmission;
   
-  VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population);
+  VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize);
   virtual ~VectorTransmission();
   
   /** Initialise the main simulation.

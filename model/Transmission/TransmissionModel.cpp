@@ -36,12 +36,12 @@
 #include <gsl/gsl_vector.h> 
 
 
-TransmissionModel* TransmissionModel::createTransmissionModel (const std::list<Human>& population) {
+TransmissionModel* TransmissionModel::createTransmissionModel (const std::list<Human>& population, int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
   const scnXml::EntoData::VectorOptional& vectorData = getEntoData().getVector();
   if (vectorData.present())
-    return new VectorTransmission(vectorData.get(), population);
+    return new VectorTransmission(vectorData.get(), population, populationSize);
   else {
     const scnXml::EntoData::NonVectorOptional& nonVectorData = getEntoData().getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...

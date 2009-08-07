@@ -37,7 +37,7 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel (const std::list<Human>& population);
+  static TransmissionModel* createTransmissionModel (const std::list<Human>& population, int populationSize);
   
   //! Reads all entomological parameters from the input datafile. 
   TransmissionModel();
@@ -98,7 +98,8 @@ protected:
   vector<double> initialisationEIR; 
 
   /** kappa[] is the probability of infection of a mosquito at each bite.
-   *
+   * It is calculated as the average infectiousness per human.
+   * 
    * Checkpointed. */
   vector<double> kappa; 
   

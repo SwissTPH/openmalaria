@@ -107,7 +107,6 @@ public:
    * These are set by CalcInitMosqEmergeRate(). */
   vector<double> N_v, O_v, S_v;
   
-private:
   //BEGIN data
   // n and m from the model are not renamed such here; they are:
   // nHostTypesInit, nMalHostTypesInit
@@ -117,6 +116,7 @@ private:
   /// Ask not why we call mt, mt. We use mt to index the system.
   /// It is the maximum number of time steps we go back for \f$N_v\f$ and \f$O_v\f$.
   size_t mt;
+private:
   /// \f$\eta\f$: The order of the system.
   size_t eta;
   //@}
@@ -161,9 +161,11 @@ private:
    * where \f$t \in \mathbb{N}\f$. */
   gsl_vector** Lambda;
   
+public:
   /// The periodic orbit of all eta state variables.
   gsl_vector** x_p;
   
+private:
   /// @brief Cached memory; values only have meaning within some functions.
   //@{
   gsl_vector* memVectorEta;	///< eta long vector

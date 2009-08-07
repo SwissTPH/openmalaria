@@ -20,6 +20,13 @@
 #include "util/vectors.h"
 #include <cstring>
 
+
+void vectorScale (vector<double>& vec, double a) {
+  for (size_t i = 0; i < vec.size(); ++i)
+    vec[i] *= a;
+}
+
+
 bool approxEqual (const double a, const double b) {
   const double LIM = 1e-6;
   return (fabs(a-b) <= max(fabs(a),fabs(b)) * LIM);

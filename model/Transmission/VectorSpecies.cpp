@@ -31,7 +31,7 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, vector<double>& initialisationEIR) {
+void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
   scnXml::Mosq mosq = anoph.getMosq();
   
@@ -95,14 +95,21 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   // -----  if we have emerge rate data to use or validate  -----
   if (anoph.getEmergence().present()) {
     const scnXml::Emergence& emergeData = anoph.getEmergence().get();
-    mosqEmergeRate = readDoubleList (emergeData.getEmergenceRate(), N_v_length);
+    
+    mosqEmergeRate = readDoubleList (emergeData.getEmergenceRate(), daysInYear);
+    vectorScale (mosqEmergeRate, populationSize);
+    
     P_dif = readDoubleList (emergeData.getKappa(), N_v_length);
     if (!FCEIR.size())
       initFeedingCycleProbs (sIndex, population, P_dif);
     //else: validate kappa (in P_dif) and calculate P_* after initialisation phase
+    
     N_v = readDoubleList (emergeData.getN_v(), N_v_length);
+    vectorScale (N_v, populationSize);
     O_v = readDoubleList (emergeData.getO_v(), N_v_length);
+    vectorScale (O_v, populationSize);
     S_v = readDoubleList (emergeData.getS_v(), N_v_length);
+    vectorScale (S_v, populationSize);
   }
   
   
@@ -173,6 +180,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
   // If EIR data was provided, validate EIR or do emergence rate calculations
   // and switch to calculating a dynamic EIR.
   if (FCEIR.size()) {
+    //BEGIN Validate kappa, initialise P_A, P_df, P_dif
     if (Simulation::simulationTime*Global::interval < N_v_length)
       throw xml_scenario_error ("Initialization phase too short");
     vector<double> kappaDaily (N_v_length, 0.0);
@@ -188,9 +196,15 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     bool valid = approxEqual (kappaDaily, P_dif);
     
     double availability = initFeedingCycleProbs (sIndex, population, kappaDaily);
+    //END Validate kappa, initialise P_A, P_df, P_dif
     
+    //BEGIN Validate or calculate mosqEmergeRate
     // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
-    VectorEmergence emerge (mosqRestDuration, EIPDuration, populationSize, availability / populationSize, mosqSeekingDeathRate, mosqSeekingDuration, probMosqBiting, probMosqFindRestSite, probMosqSurvivalResting, probMosqSurvivalOvipositing);
+    VectorEmergence emerge (mosqRestDuration, EIPDuration,
+			    populationSize, availability / populationSize,
+			    mosqSeekingDeathRate, mosqSeekingDuration,
+			    probMosqBiting, probMosqFindRestSite,
+			    probMosqSurvivalResting, probMosqSurvivalOvipositing);
     
     
     /* We can either take the EIR from the initialisation stage and expand to
@@ -203,68 +217,94 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       rotateArray(EIRInit, EIRRotateAngle);
     
     
-    //FIXME: rehash this once XML elements have been generated
-    mosqEmergeRate.resize (daysInYear);
-    {
-    ifstream file (emergenceRateFilename.c_str());
-    if(file.good()) {	// file exists since it opened succesfully
-      for (int i = 0; i < daysInYear; i++){
-	file >> mosqEmergeRate[i];
-      }
-      cout << "Read emergence rates from file: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
-    }else{
+    if (mosqEmergeRate.size() == 0) {	// not set; we'll need an estimate
+      mosqEmergeRate.resize (daysInYear);
       // The root finding algorithm needs some estimate to start from. It's accuracy isn't that important since it should converge in a single step anyway.
       double temp = populationSize*availability;
       for (int i = 0; i < daysInYear; i++) {
 	mosqEmergeRate[i] = EIRInit[i]*temp;
       }
-      cout << "Guessed emergence rates: " << mosqEmergeRate[0] << ", " << mosqEmergeRate[1] << "..." << endl;
-    }
-    file.close();
     }
     
     //TODO validate as separate function, do all validation first, then all calculations if anything isn't valid
     
-    valid = valid && emerge.CalcInitMosqEmergeRate(
+    if (!emerge.CalcInitMosqEmergeRate(
 	convertLengthToFullYear (kappa),
 	EIRInit,
-	mosqEmergeRate);
+	mosqEmergeRate))
+      valid = false;
+    //END Validate or calculate mosqEmergeRate
     
-    //FIXME
-    // Now we've calculated the emergence rate, save it:
-    ofstream file (emergenceRateFilename.c_str());
-    for (int i = 0; i < daysInYear; ++i)
-      file << mosqEmergeRate[i] << endl;
-    file.close();
-    
-    
-    
+    //BEGIN Get and validate N_v, O_v and S_v
     if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
       throw xml_scenario_error ("Initialization phase or daysInYear too short");
     vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
     
+    // Retrieve the periodic orbits for Nv, Ov, and Sv.
+    size_t indexSv = 2*emerge.mt;
     for (int day = endDay - N_v_length; day < endDay; ++day) {
       size_t t = day % N_v_length;
       size_t i = (daysInYear + day - endDay) % daysInYear;
       
-      Nv[t] = emerge.N_v[i];
-      Ov[t] = emerge.O_v[i];
-      Sv[t] = emerge.S_v[i];
+      Nv[t] = gsl_vector_get(emerge.x_p[i], 0);
+      Ov[t] = gsl_vector_get(emerge.x_p[i], emerge.mt);
+      Sv[t] = gsl_vector_get(emerge.x_p[i], indexSv);
     }
     
-    if (N_v.size()) {
-      if (!valid ||
-	!approxEqual (N_v, Nv) ||
-	!approxEqual (O_v, Ov) ||
-	!approxEqual (S_v, Sv)) {
-	  cerr << "Warning: parameters associated with emergence rate are not accurate; new values output." << endl;
-	  //TODO: save out parameters
-	}
-    }
-    // Set anyway; no harm if they already have good values
+    valid = valid
+      && approxEqual (N_v, Nv)
+      && approxEqual (O_v, Ov)
+      && approxEqual (S_v, Sv);
+    
+    // Set whether or not valid; no harm if they already have good values
     N_v = Nv;
     O_v = Ov;
     S_v = Sv;
+    //END Get and validate N_v, O_v and S_v
+    
+    if (N_v.size()) {
+      if (valid)
+	cerr << "Emergence rate parameters in scenario document were accurate." << endl;
+      else
+	cerr << "Warning: emergence rate parameters in scenario document were not accurate." << endl;
+    }
+    
+    //BEGIN Write out new values
+    if (!valid) {
+      cerr << "Parameters associated with emergence rate have been generated will be saved." << endl;;
+      
+      scnXml::DoubleList sxEmergeRate, sxKappa, sxNv, sxOv, sxSv;
+      typedef scnXml::DoubleList::ItemSequence DLIS;
+      
+      vector<double> tp (mosqEmergeRate);
+      vectorScale (tp, 1.0 / populationSize);
+      sxEmergeRate.setItem (DLIS (tp.begin(), tp.end()));
+      
+      sxKappa.setItem (DLIS (kappaDaily.begin(), kappaDaily.end()));
+      
+      tp = Nv;
+      vectorScale (tp, 1.0 / populationSize);
+      sxNv.setItem (DLIS (tp.begin(), tp.end()));
+      
+      tp = Ov;
+      vectorScale (tp, 1.0 / populationSize);
+      sxOv.setItem (DLIS (tp.begin(), tp.end()));
+      
+      tp = Sv;
+      vectorScale (tp, 1.0 / populationSize);
+      sxSv.setItem (DLIS (tp.begin(), tp.end()));
+      
+      scnXml::Emergence sxEmerge (sxEmergeRate, sxKappa, sxNv, sxOv, sxSv);
+      
+      // Assumptions: EntoData.Vector element exists, anophleses[sIndex] exists
+      scnXml::Anopheles& sxAnoph = getMutableScenario()
+	.getEntoData()
+	.getVector().get()
+	.getAnopheles()[sIndex];
+      sxAnoph.setEmergence (sxEmerge);
+      documentChanged = true;
+    }
+    //END Write out new values
     
     FCEIR.resize(0, 0.0);	// indicate EIR-driven mode is no longer being used (although this is ignored)
   }

@@ -333,7 +333,7 @@
 	    <xs:element name="emergenceRate" type="doubleList">
 	      <xs:annotation>
 		<xs:documentation>
-		  Mosquitoes per human emerging per day of the year.
+		  Mosquitoes emerging per day of the year, per human.
 		</xs:documentation>
 		<xs:appinfo>length:365;units:Mosquitoes per human;min:0;max:inf;</xs:appinfo>
 	      </xs:annotation>
@@ -351,7 +351,7 @@
 	      <xs:annotation>
 		<xs:documentation>
 		  Total population of mosquitoes over the last
-		  mosqRestDuration+extrinsicIncubationPeriod days.
+		  mosqRestDuration+extrinsicIncubationPeriod days, per human.
 		</xs:documentation>
 		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
 	      </xs:annotation>
@@ -360,7 +360,7 @@
 	      <xs:annotation>
 		<xs:documentation>
 		  Population of infected mosquitoes over the last
-		  mosqRestDuration+extrinsicIncubationPeriod days.
+		  mosqRestDuration+extrinsicIncubationPeriod days, per human.
 		</xs:documentation>
 		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
 	      </xs:annotation>
@@ -369,7 +369,7 @@
 	      <xs:annotation>
 		<xs:documentation>
 		  Population of infectious mosquitoes over the last
-		  mosqRestDuration+extrinsicIncubationPeriod days.
+		  mosqRestDuration+extrinsicIncubationPeriod days, per human.
 		</xs:documentation>
 		<xs:appinfo>units:individuals;min:0;max:inf;</xs:appinfo>
 	      </xs:annotation>

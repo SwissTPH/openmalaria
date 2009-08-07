@@ -33,7 +33,7 @@ using namespace std;
 using namespace scnXml;
 
 /// Current schema version.
-const int SCHEMA_VERSION = 7;
+const int SCHEMA_VERSION = 8;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
@@ -44,7 +44,7 @@ std::string xmlFileName;
 bool documentChanged = false;
 
 /** @brief The xml data structure. */
-const Scenario* scenario = NULL;
+Scenario* scenario = NULL;
 const Monitoring * monitoring;
 const Interventions * interventions;
 const EntoData * entoData;	// May be replaced by a changeEIR intervention
@@ -167,6 +167,10 @@ const HealthSystem& getHealthSystem() {
   if (healthSystem == NULL)
     throw xml_scenario_error("heathSystem element requested but not present");
   return *healthSystem;
+}
+
+scnXml::Scenario& getMutableScenario() {
+  return *scenario;
 }
 
 void changeHealthSystem (const HealthSystem* hs) {
