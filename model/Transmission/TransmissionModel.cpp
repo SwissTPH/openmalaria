@@ -51,7 +51,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 }
 
 TransmissionModel::TransmissionModel() :
-    annualEIR(0.0)
+    simulationMode(equilibriumMode), annualEIR(0.0)
 {
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
@@ -65,7 +65,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
-  if (Global::simulationMode == equilibriumMode)
+  if (simulationMode == equilibriumMode)
     return initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
 	host.entoAvailabilityNV(ageInYears);
   else

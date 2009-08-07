@@ -65,11 +65,12 @@ NonVectorTransmission::~NonVectorTransmission () {}
 void NonVectorTransmission::initMainSimulation (const std::list<Human>&, int){
   // initialKappa is used in calculateEIR
   copyToInitialKappa();
+  simulationMode = get_mode();
 }
 
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
-  Global::simulationMode = transientEIRknown;
+  simulationMode = transientEIRknown;
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
@@ -106,7 +107,7 @@ void NonVectorTransmission::copyToInitialKappa () {
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
-  switch (Global::simulationMode) {
+  switch (simulationMode) {
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array

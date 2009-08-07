@@ -38,7 +38,6 @@ int Global::interval;
 size_t Global::intervalsPerYear;
 double Global::yearsPerInterval;
 int Global::maxAgeIntervals;
-int Global::simulationMode;
 int Global::latentp;
 
 CLO::CLO Global::clOptions = CLO::NONE;

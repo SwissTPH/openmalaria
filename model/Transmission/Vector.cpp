@@ -65,6 +65,7 @@ void VectorTransmission::initMainSimulation(const std::list<Human>& population, 
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);
+  simulationMode = get_mode();
 }
 
 /** Calculate EIR for host, using the fixed point of difference eqns. */
@@ -85,7 +86,7 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::advancePeriod (const std::list<Human>& population, int simulationTime) {
-  if (Global::simulationMode == equilibriumMode) return;
+  if (simulationMode == equilibriumMode) return;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].advancePeriod (population, simulationTime, i);
 }

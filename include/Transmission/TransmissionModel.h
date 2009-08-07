@@ -88,6 +88,9 @@ protected:
    * \param host The human to calculate EIR for (not used by all models). */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
   
+  /** The type of EIR calculation. */
+  int simulationMode;
+  
   /** EIR per time step during the pre-intervention phase.
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention

@@ -185,7 +185,7 @@ namespace Outcome {
 */
   enum Value {
     
-    // non treatedsimulationMode
+    // non treated
     NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED,
     //for outpatients
     NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS,
@@ -287,15 +287,22 @@ enum SimulationMode {
    * intensity. The seasonal pattern and intensity of the EIR do not change
    * over years. */
   equilibriumMode = 2,
+  
   /** Transient EIR known
    * 
    * This is used to simulate an intervention that changes EIR, and where we
    * have measurements of the EIR over time during the intervention period. */
   transientEIRknown = 3,
-  /** EIRchanges
+  
+  /** EIR changes
    * 
-   * The EIR changes dynamically during the intervention phase as a function of
-   * the characteristics of the interventions. */
+   * The simulation is driven by the EIR which changes dynamically during the
+   * intervention phase as a function of the characteristics of the
+   * interventions.
+   * 
+   * Dependending on whether the Vector or NonVector model is in use, this EIR
+   * may be calculated from a mosquito emergence rate or be an input EIR
+   * scaled by the relative infectiousness of the humans. */
   dynamicEIR = 4,
 };
 

@@ -52,7 +52,6 @@ Simulation::Simulation() :
   
   Population::init();
   _population = new Population();
-  Global::simulationMode=equilibriumMode;
   simulationDuration=get_simulation_duration();
   relTimeInMainSim=simulationDuration/(1.0*simulationDuration+Global::maxAgeIntervals);
   DrugModel::init();
@@ -89,7 +88,6 @@ void Simulation::mainSimulation(){
   timeStep=0;
   _population->preMainSimInit();
   gMainSummary->initialiseSummaries();
-  Global::simulationMode=get_mode();
   
   while(timeStep <= simulationDuration) {
     _population->implementIntervention(timeStep);
