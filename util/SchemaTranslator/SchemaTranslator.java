@@ -46,7 +46,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 7;
+    static final int CURRENT_VERSION = 8;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -426,7 +426,23 @@ public class SchemaTranslator {
     // Nothing old needs to be changed.
     public void translate6To7() throws Exception {
     }
-
+    
+    // Version 8 moved emergence rates and some other parameters into the XML
+    // file. The relevant test scenarios have already been converted.
+    public void translate7To8() throws Exception {
+	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
+	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+	if (vect != null) {
+	    Element anoph = (Element) vect.getElementsByTagName("anopheles").item(0);
+	    Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
+	    // This was required, so this if should always be true:
+	    if (mosq.getAttribute("emergenceRateFilename") != null) {
+		System.err.println("Warning: emergence rate data is now stored in the scenario document. Update by hand or run with \"openMalaria --enableERC\"");
+		mosq.removeAttribute("emergenceRateFilename");
+	    }
+	}
+    }
+    
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {
             String[] children = file.list();

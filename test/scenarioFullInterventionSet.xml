@@ -680,7 +680,7 @@
             <item>2.61516548163925</item>
           </S_v>
         </emergence>
-        <mosq emergenceRateFilename="Nv0scenarioFullInterventionSet.txt" extrinsicIncubationPeriod="10" mosqEntoAvailability="0.007" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
+        <mosq extrinsicIncubationPeriod="10" mosqEntoAvailability="0.007" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
       </anopheles>
     </vector>
   </entoData>

@@ -47,8 +47,6 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   probMosqSurvivalResting = mosq.getMosqProbResting();
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
-  emergenceRateFilename = mosq.getEmergenceRateFilename();
-  
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
@@ -241,14 +239,15 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
     
     // Retrieve the periodic orbits for Nv, Ov, and Sv.
-    size_t indexSv = 2*emerge.mt;
+    gsl_vector** x_p;
+    size_t mt = emerge.getN_vO_vS_v (x_p);
     for (int day = endDay - N_v_length; day < endDay; ++day) {
       size_t t = day % N_v_length;
       size_t i = (daysInYear + day - endDay) % daysInYear;
       
-      Nv[t] = gsl_vector_get(emerge.x_p[i], 0);
-      Ov[t] = gsl_vector_get(emerge.x_p[i], emerge.mt);
-      Sv[t] = gsl_vector_get(emerge.x_p[i], indexSv);
+      Nv[t] = gsl_vector_get(x_p[i], 0);
+      Ov[t] = gsl_vector_get(x_p[i], mt);
+      Sv[t] = gsl_vector_get(x_p[i], 2*mt);
     }
     
     valid = valid

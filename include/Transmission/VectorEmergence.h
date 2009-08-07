@@ -100,23 +100,30 @@ public:
 			      vector<double>& mosqEmergeRate);
   
   
-  /** Mosquito population (total, infected, infectious) periodic orbit over
-   * the year. Used to initialise values for the following variables of the
-   * Vector model: \f$N_v^{(p)}(t), O_v^{(p)}(t), S_v^{(p)}(t)\f$.
+  /** Get the N_v, O_v and S_v periodic parameters.
    *
-   * These are set by CalcInitMosqEmergeRate(). */
-  vector<double> N_v, O_v, S_v;
+   * @param x_pVec Pass a gsl_vector** type to point to the x_p vector.
+   * @returns mt
+   * 
+   * From these, you can retrieve:
+   * N_v[i] = gsl_vector_get(x_p[i], 0);
+   * O_v[i] = gsl_vector_get(x_p[i], mt);
+   * S_v[i] = gsl_vector_get(x_p[i], 2*mt);
+   *
+   * Warning: The x_p vector is freed by the VectorEmergence destructor. Don't
+   * use the returned reference after this destructor runs! */
+  inline size_t getN_vO_vS_v (gsl_vector**& x_pVec) {
+    x_pVec = x_p;
+    return mt;
+  }
   
+private:
   //BEGIN data
-  // n and m from the model are not renamed such here; they are:
-  // nHostTypesInit, nMalHostTypesInit
-  
   ///@brief Parameters that help to describe the order of the system.
   //@{
   /// Ask not why we call mt, mt. We use mt to index the system.
   /// It is the maximum number of time steps we go back for \f$N_v\f$ and \f$O_v\f$.
   size_t mt;
-private:
   /// \f$\eta\f$: The order of the system.
   size_t eta;
   //@}
@@ -161,11 +168,9 @@ private:
    * where \f$t \in \mathbb{N}\f$. */
   gsl_vector** Lambda;
   
-public:
   /// The periodic orbit of all eta state variables.
   gsl_vector** x_p;
   
-private:
   /// @brief Cached memory; values only have meaning within some functions.
   //@{
   gsl_vector* memVectorEta;	///< eta long vector

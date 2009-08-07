@@ -315,18 +315,6 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
   // Calculate final periodic orbit.
   CalcLambda(N_v0);
   CalcXP(inv1Xtp);
-  /*FIXME
-  // Retrieve the periodic orbits for Nv, Ov, and Sv.
-  N_v.resize (theta_p);
-  O_v.resize (theta_p);
-  S_v.resize (theta_p);
-  size_t indexSv = 2*mt;
-  for (size_t i=0; i<theta_p; i++){
-    N_v[i] = gsl_vector_get(x_p[i], 0);
-    O_v[i] = gsl_vector_get(x_p[i], mt);
-    S_v[i] = gsl_vector_get(x_p[i], indexSv);
-  }
-  */
   
   // Copy the mosquito emergence rate to the C array.
   memcpy (&mosqEmergeRate[0], N_v0->data, theta_p * sizeof (double));

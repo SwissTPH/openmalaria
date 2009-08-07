@@ -92,6 +92,45 @@ public:
       throw xml_scenario_error ("Neither eir nor emergence rate data available to drive simulation");
   }
   
+  /** @brief Baseline parameters which may be varied per host
+   *
+   * These may be varied per-human to account for interventions and innate
+   * resistances. */
+  //@{
+  /** Availability rate (α_i) */
+  double entoAvailability;
+  
+  /** Probability of mosquito successfully biting host (P_B_i) */
+  double probMosqBiting;
+  
+  /** Probability of mosquito escaping human and finding a resting site without
+   * dying, after biting the human (P_C_i). */
+  double probMosqFindRestSite;
+  
+  /** Probability of mosquito successfully resting after finding a resting site
+   * (P_D_i). */
+  double probMosqSurvivalResting;
+  //@}
+  
+  /** @brief Intervention description parameters */
+  //@{
+  /** Effectiveness of net in preventing a mosquito from finding an individual,
+   * but not killing the mosquito. (1 - this) multiplies availability. */
+  WeibullDecayedValue ITNDeterrency;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
+   * an individual. */
+  WeibullDecayedValue ITNPreprandialKillingEffect;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to escape
+   * after feeding on an individual. */
+  WeibullDecayedValue ITNPostprandialKillingEffect;
+  /** Effectiveness of IRS in preventing a mosquito from finding an individual,
+   * but not killing the mosquito. (1 - this) multiplies availability. */
+  WeibullDecayedValue IRSDeterrency;
+  /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
+  WeibullDecayedValue IRSKillingEffect;
+  //@}
+  
+private:
   ///@brief Parameters which may vary per mosquito species
   //@{
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
@@ -123,49 +162,6 @@ public:
    * Currently assumed constant, although NC's non-autonomous model provides
    * an alternative. */
   double probMosqSurvivalOvipositing;
-  //@}
-  
-  /** @brief Baseline parameters which may be varied per host
-   *
-   * These may be varied per-human to account for interventions and innate
-   * resistances. */
-  //@{
-  /** Availability rate (α_i) */
-  double entoAvailability;
-  
-  /** Probability of mosquito successfully biting host (P_B_i) */
-  double probMosqBiting;
-  
-  /** Probability of mosquito escaping human and finding a resting site without
-   * dying, after biting the human (P_C_i). */
-  double probMosqFindRestSite;
-  
-  /** Probability of mosquito successfully resting after finding a resting site
-   * (P_D_i). */
-  double probMosqSurvivalResting;
-  //@}
-  
-  /** Per time-step partial calculation of EIR.
-  *
-  * See comment in advancePeriod() for details of how the EIR is calculated. */
-  double partialEIR;
-  
-  /** @brief Intervention description parameters */
-  //@{
-  /** Effectiveness of net in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue ITNDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
-   * an individual. */
-  WeibullDecayedValue ITNPreprandialKillingEffect;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to escape
-   * after feeding on an individual. */
-  WeibullDecayedValue ITNPostprandialKillingEffect;
-  /** Effectiveness of IRS in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue IRSDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  WeibullDecayedValue IRSKillingEffect;
   //@}
   
 private:
@@ -223,11 +219,12 @@ private:
   vector<double> FCEIR;
   /** Angle to rotate EIR: Should be between 0 and 2Pi. */
   double EIRRotateAngle;
-  
-  //FIXME: remove
-  /** The filename to which emergence rates are loaded & saved. */
-  string emergenceRateFilename;
   //@}
+  
+  /** Per time-step partial calculation of EIR.
+  *
+  * See comment in advancePeriod() for details of how the EIR is calculated. */
+  double partialEIR;
   
   
   /* Functions */
