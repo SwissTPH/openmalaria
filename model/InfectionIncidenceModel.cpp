@@ -20,7 +20,7 @@
 
 #include "global.h"
 #include "InfectionIncidenceModel.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "inputData.h"
 #include "Transmission/PerHost.h"
 
@@ -134,11 +134,11 @@ double InfectionIncidenceModel::getAvailabilityFactor(double baseAvailability) {
   return baseAvailability;
 }
 double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
-  return W_GAMMA(BaselineAvailabilityShapeParam,
+  return gsl::rngGamma(BaselineAvailabilityShapeParam,
 		 baseAvailability/BaselineAvailabilityShapeParam);
 }
 double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
-  return W_LOGNORMAL(log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
+  return gsl::rngLogNormal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 		     BaselineAvailabilityShapeParam);
 }
 
@@ -159,13 +159,13 @@ double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEI
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  return W_GAMMA(InfectionrateShapeParam,
-		  effectiveEIR * susceptibility() / InfectionrateShapeParam);
+  return gsl::rngGamma(InfectionrateShapeParam,
+      effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
-  return sampleFromLogNormal(W_UNIFORM(),
-			     log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
-			     InfectionrateShapeParam);
+  return gsl::sampleFromLogNormal(gsl::rngUniform(),
+      log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
+      InfectionrateShapeParam);
 }
 
 double InfectionIncidenceModel::susceptibility () {
@@ -209,7 +209,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
     _pinfected = 1.0;
   
   if (expectedNumInfections > 0.0000001)
-    return W_POISSON(expectedNumInfections);
+    return gsl::rngPoisson(expectedNumInfections);
   else
     return 0;
 }

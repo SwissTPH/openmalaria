@@ -146,14 +146,14 @@ public:
     for (int i = 0; i < YEAR_LEN; i++)
       emergeRate[i] = EIRInit[i]*temp;
     
-    vector<double> in1 = vectorGsl2Std(input1CalcUpsilonOneHost);
+    vector<double> in1 = vectors::gsl2std(input1CalcUpsilonOneHost);
     emerge->CalcInitMosqEmergeRate(in1,
 				   EIRInit,
 				   emergeRate);
     
     // Requires a slightly higher error tolerance. NC did say the results he
     // gave (output1CalcInitMosqEmergeRate) were off by about 1e-10.
-    checkEqual (vectorStd2Gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, "output1CalcInitMosqEmergeRate", 1e-6);
+    checkEqual (vectors::std2gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, "output1CalcInitMosqEmergeRate", 1e-6);
   }
   
   void testCalcUpsilonOneHost () {

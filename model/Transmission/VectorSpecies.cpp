@@ -21,7 +21,6 @@
 #include "Transmission/VectorEmergence.h"
 #include "Transmission/PerHost.h"
 #include "inputData.h"
-#include "xmlHelperFuncs.h"
 #include "human.h"
 #include "simulation.h"
 #include "util/vectors.h"
@@ -94,20 +93,20 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
   if (anoph.getEmergence().present()) {
     const scnXml::Emergence& emergeData = anoph.getEmergence().get();
     
-    mosqEmergeRate = readDoubleList (emergeData.getEmergenceRate(), daysInYear);
-    vectorScale (mosqEmergeRate, populationSize);
+    mosqEmergeRate = vectors::DoubleList2std (emergeData.getEmergenceRate(), daysInYear);
+    vectors::scale (mosqEmergeRate, populationSize);
     
-    P_dif = readDoubleList (emergeData.getKappa(), N_v_length);
+    P_dif = vectors::DoubleList2std (emergeData.getKappa(), N_v_length);
     if (!FCEIR.size())
       initFeedingCycleProbs (sIndex, population, P_dif);
     //else: validate kappa (in P_dif) and calculate P_* after initialisation phase
     
-    N_v = readDoubleList (emergeData.getN_v(), N_v_length);
-    vectorScale (N_v, populationSize);
-    O_v = readDoubleList (emergeData.getO_v(), N_v_length);
-    vectorScale (O_v, populationSize);
-    S_v = readDoubleList (emergeData.getS_v(), N_v_length);
-    vectorScale (S_v, populationSize);
+    N_v = vectors::DoubleList2std (emergeData.getN_v(), N_v_length);
+    vectors::scale (N_v, populationSize);
+    O_v = vectors::DoubleList2std (emergeData.getO_v(), N_v_length);
+    vectors::scale (O_v, populationSize);
+    S_v = vectors::DoubleList2std (emergeData.getS_v(), N_v_length);
+    vectors::scale (S_v, populationSize);
   }
   
   
@@ -191,7 +190,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
 	kappa[(day / Global::interval - 1) % Global::intervalsPerYear];
     }
     
-    bool valid = approxEqual (kappaDaily, P_dif);
+    bool valid = vectors::approxEqual (kappaDaily, P_dif);
     
     double availability = initFeedingCycleProbs (sIndex, population, kappaDaily);
     //END Validate kappa, initialise P_A, P_df, P_dif
@@ -251,9 +250,9 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     }
     
     valid = valid
-      && approxEqual (N_v, Nv)
-      && approxEqual (O_v, Ov)
-      && approxEqual (S_v, Sv);
+      && vectors::approxEqual (N_v, Nv)
+      && vectors::approxEqual (O_v, Ov)
+      && vectors::approxEqual (S_v, Sv);
     
     // Set whether or not valid; no harm if they already have good values
     N_v = Nv;
@@ -276,21 +275,21 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       typedef scnXml::DoubleList::ItemSequence DLIS;
       
       vector<double> tp (mosqEmergeRate);
-      vectorScale (tp, 1.0 / populationSize);
+      vectors::scale (tp, 1.0 / populationSize);
       sxEmergeRate.setItem (DLIS (tp.begin(), tp.end()));
       
       sxKappa.setItem (DLIS (kappaDaily.begin(), kappaDaily.end()));
       
       tp = Nv;
-      vectorScale (tp, 1.0 / populationSize);
+      vectors::scale (tp, 1.0 / populationSize);
       sxNv.setItem (DLIS (tp.begin(), tp.end()));
       
       tp = Ov;
-      vectorScale (tp, 1.0 / populationSize);
+      vectors::scale (tp, 1.0 / populationSize);
       sxOv.setItem (DLIS (tp.begin(), tp.end()));
       
       tp = Sv;
-      vectorScale (tp, 1.0 / populationSize);
+      vectors::scale (tp, 1.0 / populationSize);
       sxSv.setItem (DLIS (tp.begin(), tp.end()));
       
       scnXml::Emergence sxEmerge (sxEmergeRate, sxKappa, sxNv, sxOv, sxSv);

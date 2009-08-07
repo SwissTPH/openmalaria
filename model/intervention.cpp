@@ -22,7 +22,7 @@
 
 #include "intervention.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 
 enum VaccineType {
   preerythrocytic_reduces_h = 1,
@@ -46,7 +46,7 @@ double Vaccine::getEfficacy (int numPrevDoses) {
     numPrevDoses = initialMeanEfficacy.size() - 1;
   if (initialMeanEfficacy[numPrevDoses] <  1) {
     double a = efficacyB * initialMeanEfficacy[numPrevDoses] / (1.0-initialMeanEfficacy[numPrevDoses]);
-    return W_BETA(a, efficacyB);
+    return gsl::rngBeta (a, efficacyB);
   }
   else
     return 1.0;

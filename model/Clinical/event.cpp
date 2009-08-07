@@ -22,7 +22,7 @@
 #include "Clinical/event.h"
 #include "simulation.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include <algorithm>
 #include "Clinical/ClinicalModel.h"
 #include "summary.h"

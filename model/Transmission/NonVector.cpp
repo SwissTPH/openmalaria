@@ -21,7 +21,7 @@
 #include "Transmission/PerHost.h"
 #include "inputData.h"
 #include "simulation.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include <cfloat>
 
 //static (class) variables

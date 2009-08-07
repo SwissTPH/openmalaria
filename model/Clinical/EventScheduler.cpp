@@ -20,7 +20,7 @@
 
 #include "Clinical/EventScheduler.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "WithinHost/WithinHostModel.h"
 #include "simulation.h"
 #include "Clinical/DecisionEnums.d"
@@ -190,7 +190,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   if (pgState & Pathogenesis::COMPLICATED) {
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
       // force recovery after 10 days
-      if (W_UNIFORM() < 0.02)
+      if (gsl::rngUniform() < 0.02)
 	reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
       pgState = Pathogenesis::NONE;
     } else {
@@ -203,7 +203,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       const double pRecover = 0.1;
       const double pSequelae = 0.02;
       const double pDeath = 0.03;
-      double rand = W_UNIFORM();
+      double rand = gsl::rngUniform();
       if (rand < pRecover) {
 	if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
 	  reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
@@ -279,7 +279,7 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
   }
   
-  double randCum = W_UNIFORM();
+  double randCum = gsl::rngUniform();
   size_t decisionIndex = 0;
   while (endPoints->cumProbs[decisionIndex] < randCum)
     ++decisionIndex;

@@ -117,13 +117,13 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
   
   // This initially contains the initial estimate of the mosquito emergence
   // rate. This is used by the root finding algorithm to calculate N_v0.
-  gsl_vector* N_v0 = vectorStd2Gsl (mosqEmergeRate, theta_p);
+  gsl_vector* N_v0 = vectors::std2gsl (mosqEmergeRate, theta_p);
   PrintVector("Nv0", N_v0);
   
-  gsl_vector* K_vi = vectorStd2Gsl (FHumanInfectivityInitVector, theta_p);
+  gsl_vector* K_vi = vectors::std2gsl (FHumanInfectivityInitVector, theta_p);
   
   // Output Parameters (for the model):
-  gsl_vector* Xi_i = vectorStd2Gsl (FEIRInitVector, theta_p);
+  gsl_vector* Xi_i = vectors::std2gsl (FEIRInitVector, theta_p);
   
   // The number of infectious mosquitoes over every day of the cycle.
   // calculated from the EIR data.

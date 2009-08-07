@@ -20,7 +20,7 @@
 
 */
 #include "population.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "timer.h"
 #include "inputData.h"
 #include "human.h"
@@ -140,7 +140,7 @@ void Population::estimateRemovalRates () {
   maxcal=500000;
   npar=2;
   iw=3;
-  rss=w_minimize_calc_rss(&p1, &p2);
+  rss=gsl::minimizeCalc_rss(&p1, &p2);
 }
 
 void Population::setupPyramid(bool isCheckpoint){
@@ -420,7 +420,7 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
   
   for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter) {
     double ageYears = iter->getAgeInYears();
-    if ((ageYears > minAge) && (ageYears < maxAge) && W_UNIFORM() < coverage)
+    if ((ageYears > minAge) && (ageYears < maxAge) && gsl::rngUniform() < coverage)
       // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
       ((*iter).*intervention)();
   }

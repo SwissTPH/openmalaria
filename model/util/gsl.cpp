@@ -23,7 +23,7 @@ using namespace std;
 #include <gsl/gsl_multimin.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "inputData.h"
 #include "population.h"
 #include "global.h"
@@ -34,21 +34,57 @@ gsl_multimin_fminimizer *s;
 gsl_multimin_function minex_func;
 
 
-void GSL_SETUP(){
-  //use the mersenne twister generator
-  generator = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set (generator, getISeed());
-  T = gsl_multimin_fminimizer_nmsimplex;
+// -----  random number generation  -----
+
+double gsl::rngUniform (){
+  return gsl_rng_uniform (generator);
 }
 
-void  GSL_TEARDOWN(){
-  gsl_rng_free (generator);
+double gsl::rngGauss (double mean, double std){
+  return gsl_ran_gaussian(generator,std)+mean;
 }
 
-double sampleFromLogNormal(double normp, double meanlog, double stdlog){
+double gsl::rngGamma (double a, double b){
+  /*double xi, eta_m, V2m, V2m_1;
+  int m;
+  double delta= *a;
+  if (delta > 1) {
+    xi=gsl_ran_gamma(generator, *a, *b);
+  }
+  else{    
+    m=0;  
+    double e=2.71828182;
+    double v0 = e/(e + delta);
+    do{
+      m++;
+      V2m_1 = gsl_rng_uniform (generator);
+      V2m = gsl_rng_uniform (generator);
+      if (V2m_1 <= v0){
+        xi = pow(V2m_1,1.0/delta);
+        eta_m = V2m*pow(xi,delta - 1);
+      }
+      else{ 
+        xi = 1.0 - log(V2m_1);
+        eta_m = V2m*pow(e,-xi);
+      };
+// TODO: it looks like the following might give more sensible answers if log transformed 
+  } while ( eta_m > pow(xi,delta - 1)*pow(e,-xi) );
+
+
+}
+  return xi;
+*/
+  return gsl_ran_gamma(generator, a, b);
+}
+
+double gsl::rngLogNormal (double mean, double std){
+  return gsl_ran_lognormal (generator, mean, std);
+}
+
+double gsl::sampleFromLogNormal(double normp, double meanlog, double stdlog){
   // Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
-
-  double zval=W_UGAUSS_PINV(normp);
+  
+  double zval = gsl::cdfUGaussianPInv (normp);
     /*
   Why not zval=W_UGAUSS?
   where normp is distributed uniformly over [0,1],
@@ -60,24 +96,38 @@ double sampleFromLogNormal(double normp, double meanlog, double stdlog){
   return exp(meanlog+stdlog*((float)zval));
 }
 
-double W_BETA(double a, double b){
+double gsl::rngBeta (double a, double b){
   return gsl_ran_beta (generator,a,b);
 }
 
-double W_GAUSS(double mean, double std){
-  return gsl_ran_gaussian(generator,std)+mean;
+int gsl::rngPoisson(double lambda){
+  if (!finite(lambda)) {
+    //This would lead to an inifinite loop in gsl_ran_poisson
+    cerr << "lambda isInf" << endl;
+    exit(-1);
+  }
+  return gsl_ran_poisson (generator, lambda);
 }
 
-double  wCalcRSS(const gsl_vector *v, void* params){
+
+// -----  ?  -----
+
+double gsl::cdfUGaussianP (double x){
+  return gsl_cdf_ugaussian_P(x);
+}
+
+double gsl::cdfUGaussianPInv (double p){
+  return gsl_cdf_ugaussian_Pinv(p);
+}
+
+double wCalcRSS(const gsl_vector *v, void* params){
   double x, y;  
   x = gsl_vector_get(v, 0);
   y = gsl_vector_get(v, 1);
 
   return Population::setDemoParameters(x,y); 
 }
-
-double w_minimize_calc_rss(double *param1,double *param2){
-   
+double gsl::minimizeCalc_rss(double *param1,double *param2){
   gsl_multimin_fminimizer *s = NULL;
   gsl_vector *ss, *x;
   const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
@@ -122,65 +172,21 @@ double w_minimize_calc_rss(double *param1,double *param2){
   return rss;
 }
 
-double W_UGAUSS_P(double x){
-  return gsl_cdf_ugaussian_P(x);
+
+// -----  Setup & cleanup  -----
+
+void gsl::setUp (){
+  //use the mersenne twister generator
+  generator = gsl_rng_alloc(gsl_rng_mt19937);
+  gsl_rng_set (generator, getISeed());
+  T = gsl_multimin_fminimizer_nmsimplex;
 }
 
-double W_UGAUSS_PINV(double p){
-  return gsl_cdf_ugaussian_Pinv(p);
+void gsl::tearDown (){
+  gsl_rng_free (generator);
 }
 
-double W_LOGNORMAL(double mean, double std){
-  return gsl_ran_lognormal (generator, mean, std);
-}
-
-int W_POISSON(double lambda){
-  if (!finite(lambda)) {
-    //This would lead to an inifinite loop in gsl_ran_poisson
-    cerr << "lambda isInf" << endl;
-    exit(-1);
-  }
-  return gsl_ran_poisson (generator, lambda);
-}
-
-double W_GAMMA(double a, double b){
-  /*double xi, eta_m, V2m, V2m_1;
-  int m;
-  double delta= *a;
-  if (delta > 1) {
-    xi=gsl_ran_gamma(generator, *a, *b);
-  }
-  else{    
-    m=0;  
-    double e=2.71828182;
-    double v0 = e/(e + delta);
-    do{
-      m++;
-      V2m_1 = gsl_rng_uniform (generator);
-      V2m = gsl_rng_uniform (generator);
-      if (V2m_1 <= v0){
-        xi = pow(V2m_1,1.0/delta);
-        eta_m = V2m*pow(xi,delta - 1);
-      }
-      else{ 
-        xi = 1.0 - log(V2m_1);
-        eta_m = V2m*pow(e,-xi);
-      };
-// TODO: it looks like the following might give more sensible answers if log transformed 
-  } while ( eta_m > pow(xi,delta - 1)*pow(e,-xi) );
-
-
-}
-  return xi;
-*/
-  return gsl_ran_gamma(generator, a, b);
-}
-
-double W_UNIFORM(){
-  return gsl_rng_uniform (generator);
-}
-
-void load_rng_state(int seedFileNumber){
+void gsl::rngLoadState (int seedFileNumber){
   ostringstream seedN;
   seedN << string("seed") << seedFileNumber;
   FILE * f = fopen(seedN.str().c_str(), "rb");
@@ -192,7 +198,7 @@ void load_rng_state(int seedFileNumber){
   }
 }
 
-void save_rng_state(int seedFileNumber){
+void gsl::rngSaveState (int seedFileNumber){
   ostringstream seedN;
   seedN << string("seed") << seedFileNumber;
   FILE * f = fopen(seedN.str().c_str(), "wb");

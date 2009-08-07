@@ -6,7 +6,7 @@
 set (Model_CPP
   WeibullDecayedValue.cpp population.cpp timer.cpp InfectionIncidenceModel.cpp
   gzstream.C simulation.cpp summary.cpp BoincWrapper.cpp global.cpp
-  intervention.cpp proteome.cpp human.cpp GSLWrapper.cpp
+  intervention.cpp proteome.cpp human.cpp
 )
 aux_source_directory (Clinical Clinical_CPP)
 aux_source_directory (Drug Drug_CPP)

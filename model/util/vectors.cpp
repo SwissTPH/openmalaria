@@ -21,18 +21,18 @@
 #include <cstring>
 
 
-void vectorScale (vector<double>& vec, double a) {
+void vectors::scale (vector<double>& vec, double a) {
   for (size_t i = 0; i < vec.size(); ++i)
     vec[i] *= a;
 }
 
 
-bool approxEqual (const double a, const double b) {
+bool vectors::approxEqual (const double a, const double b) {
   const double LIM = 1e-6;
   return (fabs(a-b) <= max(fabs(a),fabs(b)) * LIM);
 }
 
-bool approxEqual (const vector<double>& vec1, const vector<double>& vec2) {
+bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2) {
   if (vec1.size() != vec2.size())
     return false;
   for (size_t i = 0; i < vec1.size(); ++i) {
@@ -43,14 +43,14 @@ bool approxEqual (const vector<double>& vec1, const vector<double>& vec2) {
 }
 
 
-vector<double> vectorGsl2Std (const gsl_vector* vec) {
+vector<double> vectors::gsl2std (const gsl_vector* vec) {
   vector<double> ret (vec->size);
   memcpy (&ret[0], vec->data, ret.size()*sizeof(double));
   return ret;
 }
 
 
-gsl_vector* vectorStd2Gsl (const vector<double>& vec, size_t length) {
+gsl_vector* vectors::std2gsl (const vector<double>& vec, size_t length) {
   if (vec.size() != length)
     throw length_error ("vectorStd2Gsl: vec has incorrect length");
   gsl_vector* ret = gsl_vector_alloc (length);
@@ -58,8 +58,19 @@ gsl_vector* vectorStd2Gsl (const vector<double>& vec, size_t length) {
   return ret;
 }
 
-gsl_vector* vectorStd2Gsl (const double* vec, size_t length) {
+gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
   gsl_vector* ret = gsl_vector_alloc (length);
   memcpy (ret->data, vec, length * sizeof(double));
+  return ret;
+}
+
+
+vector<double> vectors::DoubleList2std (const scnXml::DoubleList& list, size_t length) {
+  const scnXml::DoubleList::ItemSequence seq = list.getItem();
+  if (seq.size() != length)
+    throw xml_scenario_error ("readDoubleList: XML list has wrong length");
+  vector<double> ret (length);
+  for (size_t i = 0; i < length; ++i)
+    ret[i] = seq[i];
   return ret;
 }

@@ -20,7 +20,7 @@
 
 */
 
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "human.h"
 #include "WithinHost/Descriptive.h"
 #include "simulation.h"
@@ -38,8 +38,8 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
     WithinHostModel(), drugProxy(DrugModel::createDrugModel ()), _MOI(0),
     _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
     patentInfections(0)
-  {
-  _innateImmunity=(double)W_GAUSS(0, sigma_i);
+{
+  _innateImmunity = gsl::rngGauss(0, sigma_i);
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :

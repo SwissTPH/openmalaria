@@ -22,7 +22,7 @@
 #include "global.h"
 #include "simulation.h"
 #include "summary.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "Clinical/ClinicalModel.h"
 #include <limits>
 
@@ -130,12 +130,12 @@ bool OldCaseManagement::uncomplicatedEvent(Event& latestReport, bool isMalaria, 
     int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
                                : Diagnosis::NON_MALARIA_FEVER;
     int nextRegimen=getNextRegimen(Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
-    if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (W_UNIFORM())){
+    if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (gsl::rngUniform())){
       _latestRegimen=nextRegimen;
       _tLastTreatment=Simulation::simulationTime;
       Simulation::gMainSummary->reportTreatment(agegroup, _latestRegimen);
       
-      if (probParasitesCleared[nextRegimen-1] > W_UNIFORM()){
+      if (probParasitesCleared[nextRegimen-1] > gsl::rngUniform()){
 	latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS);
 	return true;
       }
@@ -203,7 +203,7 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
   NOT TREATED
   */
   
-  double prandom=(W_UNIFORM());
+  double prandom=(gsl::rngUniform());
   
   if (q[2] <= prandom) {
     _tLastTreatment = Simulation::simulationTime;

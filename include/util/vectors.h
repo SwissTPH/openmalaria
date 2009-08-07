@@ -22,37 +22,49 @@
 
 #include "global.h"
 #include <gsl/gsl_vector.h>
+#include "scenario.hxx"
 
 
-//NOTE: maybe put everything in a Vectors namespace?
-
-///@brief Basic operations on std::vector
-/// Scale all elements of a vector by a in-situ
-void vectorScale (vector<double>& vec, double a);
-
-
-///@brief Comparissons on std::vector
-//@{
-/// Return true if, approximately, a == b
-bool approxEqual (const double a, const double b);
-
-/// Returns true if vec1 and vec2 have equal length and all elements are approximately equal.
-bool approxEqual (const vector<double>& vec1, const vector<double>& vec2);
-//@}
-
-
-///@brief Convertions between gsl_vector and std::vector<double>
-//@{
-/** Convert a gsl_vector to a std::vector<double>. */
-vector<double> vectorGsl2Std (const gsl_vector* vec);
-
-/** Convert a std::vector<double> to a gsl_vector (newly allocated).
- *
- * @param vec Input vector
- * @param length Allows length to be validated. If
- *	(vec.size() != length) an exception is thrown. */
-gsl_vector* vectorStd2Gsl (const vector<double>& vec, size_t length);
-/// Ditto, but taking values from a double[].
-gsl_vector* vectorStd2Gsl (const double* vec, size_t length);
-//@}
+namespace vectors {
+  ///@brief Basic operations on std::vector
+  /// Scale all elements of a vector by a in-situ
+  void scale (vector<double>& vec, double a);
+  
+  
+  ///@brief Comparissons on std::vector
+  //@{
+  /// Return true if, approximately, a == b
+  bool approxEqual (const double a, const double b);
+  
+  /// Returns true if vec1 and vec2 have equal length and all elements are approximately equal.
+  bool approxEqual (const vector<double>& vec1, const vector<double>& vec2);
+  //@}
+  
+  
+  ///@brief Convertions between gsl_vector and std::vector<double>
+  //@{
+  /** Convert a gsl_vector to a std::vector<double>. */
+  vector<double> gsl2std (const gsl_vector* vec);
+  
+  /** Convert a std::vector<double> to a gsl_vector (newly allocated).
+   *
+   * @param vec Input vector
+   * @param length Allows length to be validated. If
+   *	(vec.size() != length) an exception is thrown. */
+  gsl_vector* std2gsl (const vector<double>& vec, size_t length);
+  /// Ditto, but taking values from a double[].
+  gsl_vector* std2gsl (const double* vec, size_t length);
+  //@}
+  
+  
+  ///@brief Convertions between scnXml::DoubleList and std::vector<double>
+  //@{
+  
+  /** Reads a generic list of doubles from XML.
+   *
+   * @param list XML element to read from.
+   * @param length Expected length of list. Will throw if not correct. */
+  vector<double> DoubleList2std (const scnXml::DoubleList& list, size_t length);
+  //@}
+}
 #endif

@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pathogenesis/Mueller.h"
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 
 using namespace std;
 
@@ -90,7 +90,7 @@ PathogenesisModel* PathogenesisModel::createPathogenesisModel(istream& in) {
 }
 
 bool PathogenesisModel::eventNeonatalMortality() {
-  return W_UNIFORM() <= _riskFromMaternalInfection;
+  return gsl::rngUniform() <= _riskFromMaternalInfection;
 }
 
 void PathogenesisModel::setRiskFromMaternalInfection(int nCounter, int pCounter){
@@ -140,15 +140,15 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
   double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
   pCoinfection*=_comorbidityFactor;
   
-  if ((W_UNIFORM()) < prEpisode) {
+  if ((gsl::rngUniform()) < prEpisode) {
     //Fixed severe threshold
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
     Pathogenesis::State ret;
-    if (W_UNIFORM() < prSevereEpisode)
+    if (gsl::rngUniform() < prSevereEpisode)
       ret = Pathogenesis::STATE_SEVERE;
-    else if (W_UNIFORM() < pCoinfection)
+    else if (gsl::rngUniform() < pCoinfection)
       ret = Pathogenesis::STATE_COINFECTION;
     else
       ret = Pathogenesis::STATE_MALARIA;
@@ -159,7 +159,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     */
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
-    if (W_UNIFORM() < indirectRisk)
+    if (gsl::rngUniform() < indirectRisk)
       ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
@@ -167,7 +167,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     //TODO: should this be stored in the XML file?
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
-    if ((W_UNIFORM()) < prNonMalariaFever)
+    if ((gsl::rngUniform()) < prNonMalariaFever)
       return Pathogenesis::SICK;
   }
   return Pathogenesis::NONE;

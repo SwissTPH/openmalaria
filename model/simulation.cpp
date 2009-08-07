@@ -23,7 +23,7 @@
 
 #include "BoincWrapper.h"
 
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "population.h"
 #include "summary.h"
 #include "Drug/DrugModel.h"
@@ -46,7 +46,7 @@ Simulation::Simulation() :
   // Initialize input variables and allocate memory.
   // We try to make initialization hierarchical (i.e. most classes initialise
   // through Population::init).
-  GSL_SETUP();
+  gsl::setUp();
   
   gMainSummary = new Summary();
   
@@ -63,7 +63,7 @@ Simulation::~Simulation(){
   Population::clear();
   delete gMainSummary;
   
-  GSL_TEARDOWN();
+  gsl::tearDown();
 }
 
 int Simulation::start(){
@@ -148,7 +148,7 @@ void Simulation::writeCheckpoint(){
   // Get next checkpoint number:
   checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
   
-  save_rng_state (checkpointNum);
+  gsl::rngSaveState (checkpointNum);
   
   // Open the next checkpoint file for writing:
   ostringstream name;
@@ -206,7 +206,7 @@ void Simulation::readCheckpoint() {
     in.close();
   }
   
-  load_rng_state(checkpointNum);
+  gsl::rngLoadState (checkpointNum);
   cerr << "Loaded checkpoint from: " << name.str() << endl;
 }
 

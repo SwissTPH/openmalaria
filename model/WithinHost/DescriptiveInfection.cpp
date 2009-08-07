@@ -21,7 +21,7 @@
 
 #include "WithinHost/DescriptiveInfection.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include <algorithm>
 #include <sstream>
 #include <string.h>
@@ -158,7 +158,7 @@ int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
     double sdlogdur=0.80000001192092895508;
-    double dur=W_LOGNORMAL(meanlogdur, sdlogdur);
+    double dur=gsl::rngLogNormal(meanlogdur, sdlogdur);
     return 1+(int)floor(dur);
 }
 
@@ -217,7 +217,7 @@ void DescriptiveInfection::determineDensities(int simulationTime, double cumulat
 	sample the maximum density over the T-1 remaining days in the
 	time interval, (where T is the duration of the time interval)
 	*/
-	double normp = pow(W_UNIFORM(), 1.0 / (Global::interval-1));
+	double normp = pow(gsl::rngUniform(), 1.0 / (Global::interval-1));
 	/*
 	To mimic sampling T-1 repeated values, we transform the sampling
 	distribution and use only one sampled value, which has the sampling
@@ -227,10 +227,10 @@ void DescriptiveInfection::determineDensities(int simulationTime, double cumulat
 	exponent (1/(T-1)) arises because each of T-1 sampled
 	values would have this probability of being the maximum. 
 	*/
-	timeStepMaxDensity = sampleFromLogNormal(normp, meanlog, stdlog);
+	timeStepMaxDensity = gsl::sampleFromLogNormal(normp, meanlog, stdlog);
       }
       //calculate the expected density on the day of sampling
-      _density=sampleFromLogNormal(W_UNIFORM(), meanlog, stdlog);
+      _density = gsl::sampleFromLogNormal(gsl::rngUniform(), meanlog, stdlog);
       timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
     }
     if (_density > maxDens || timeStepMaxDensity > maxDens) {

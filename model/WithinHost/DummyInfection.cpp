@@ -21,7 +21,7 @@
 
 #include "WithinHost/DummyInfection.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include <algorithm>
 #include <sstream>
 #include <string.h>

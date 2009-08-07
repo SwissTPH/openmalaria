@@ -24,7 +24,7 @@
 #include <vector>
 
 #include "proteome.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 
 using namespace std;
 
@@ -195,7 +195,7 @@ void ProteomeInstance::init (Mutation* mutation) {
 
 ProteomeInstance* ProteomeInstance::newInfection() {
   const double percRes = 0.0;		// proportion of resistant infections
-  if (W_UNIFORM() < percRes) {
+  if (gsl::rngUniform() < percRes) {
     return &instances[1];
   } else {
     return &instances[0];

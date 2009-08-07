@@ -20,7 +20,7 @@
 
 #include "WithinHost/OldIPTInfection.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 
 // static IPT variables
 int OldIPTInfection::numberOfGenoTypes;
@@ -72,7 +72,7 @@ OldIPTInfection::OldIPTInfection(int lastSPdose, int simulationTime) :
 {
   _gType.ID=0;
   
-    double uniformRandomVariable=(W_UNIFORM());
+  double uniformRandomVariable=(gsl::rngUniform());
     double lowerIntervalBound=0.0;
     double upperIntervalBound=genotypeFreq[0];
     //This Loop assigns the infection a genotype according to its frequency

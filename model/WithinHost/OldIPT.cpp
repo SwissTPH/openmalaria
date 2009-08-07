@@ -22,7 +22,7 @@
 #include "WithinHost/OldIPTInfection.h"
 #include "human.h"
 #include "simulation.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "summary.h"
 #include "intervention.h"
 #include "inputData.h"
@@ -167,7 +167,7 @@ void OldIPTWithinHostModel::IPTSetLastSPDose (int agetstep, int ageGroup) {
   
   for (int i=0;i<numberOfIPTiDoses; i++) {
     if (iptiTargetagetstep[i] == agetstep) {
-      if (W_UNIFORM() <  iptiCoverage[i]) {
+      if (gsl::rngUniform() <  iptiCoverage[i]) {
         _lastIptiOrPlacebo=Simulation::simulationTime;
         /*
         iptiEffect denotes treatment or placebo group
@@ -209,7 +209,7 @@ void OldIPTWithinHostModel::SPAction(Human& human){
       OldIPTInfection* infec = dynamic_cast<OldIPTInfection*> (*iter);
       if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
       size_t genoTypeIndex = infec->getGenoTypeID()-1;
-      if ((W_UNIFORM() <= OldIPTInfection::genotypeACR[genoTypeIndex]) &&
+      if ((gsl::rngUniform() <= OldIPTInfection::genotypeACR[genoTypeIndex]) &&
 	  (Simulation::simulationTime - _lastSPDose <= OldIPTInfection::genotypeProph[genoTypeIndex])) {
         delete *iter;
         iter=infections.erase(iter);

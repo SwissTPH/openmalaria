@@ -29,7 +29,7 @@
 
 #include "simulation.h"
 #include "inputData.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "summary.h"
 #include "intervention.h"
 #include "Transmission/TransmissionModel.h"
@@ -94,38 +94,38 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   
   if (Global::modelVersion & TRANS_HET) {
     availabilityFactor=0.2;
-    if (W_UNIFORM() < 0.5) {
+    if (gsl::rngUniform() < 0.5) {
       availabilityFactor=1.8;
     }
   }
   if (Global::modelVersion & COMORB_HET) {
     _comorbidityFactor=0.2;
-    if (W_UNIFORM() < 0.5) {
+    if (gsl::rngUniform() < 0.5) {
       _comorbidityFactor=1.8;
     }	
   }
   if (Global::modelVersion & TREAT_HET) {
     _treatmentSeekingFactor=0.2;
-    if (W_UNIFORM() < 0.5) {            
+    if (gsl::rngUniform() < 0.5) {            
       _treatmentSeekingFactor=1.8;
     }	
   }
   if (Global::modelVersion & TRANS_TREAT_HET) {
     _treatmentSeekingFactor=0.2;
     availabilityFactor=1.8;
-    if (W_UNIFORM()<0.5) {
+    if (gsl::rngUniform()<0.5) {
       _treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
   } else if (Global::modelVersion & COMORB_TRANS_HET) {
-    if (W_UNIFORM()<0.5) {
+    if (gsl::rngUniform()<0.5) {
       _treatmentSeekingFactor=0.2;
     } else {
       _treatmentSeekingFactor=1.8;
     }
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
-    if (W_UNIFORM()<0.5) {
+    if (gsl::rngUniform()<0.5) {
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
     }
@@ -133,7 +133,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
-    if (W_UNIFORM()<0.5) {
+    if (gsl::rngUniform()<0.5) {
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
@@ -263,7 +263,7 @@ void Human::updateInterventionStatus() {
     */
     if (Simulation::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
-	if (W_UNIFORM() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
+	if (gsl::rngUniform() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
 	    Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps) {
           vaccinate();
           Simulation::gMainSummary->reportEPIVaccination(ageGroup());
@@ -333,7 +333,7 @@ double Human::infectiousness(){
     }
     else {
       double zval=(log(x)+mu)/sqrt(1.0/tau);
-      double pone=W_UGAUSS_P(zval);
+      double pone = gsl::cdfUGaussianP (zval);
       transmit=(pone*pone);
       //transmit has to be between 0 and 1
       transmit=std::max(transmit, 0.0);

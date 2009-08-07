@@ -20,7 +20,7 @@
 
 */
 
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "human.h"
 #include "WithinHost/Dummy.h"
 #include "simulation.h"

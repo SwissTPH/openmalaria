@@ -19,7 +19,7 @@
 */
 
 #include "WithinHost/Empirical.h"
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -190,12 +190,12 @@ if (_laggedLogDensities[0]>-999999.9) {
     int tries1=0;
     double logDensity=9999.9;
     while ((logDensity>upperLimitoflogDensity) && (tries1<10)) {
-      double b_1=W_GAUSS(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
-      double b_2=W_GAUSS(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
-      double b_3=W_GAUSS(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
+      double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
+      double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
+      double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
       double expectedlogDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
       //include sampling error
-      logDensity=W_GAUSS(expectedlogDensity,sigma_noise(ageOfInfection));
+      logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
      //include drug and immunity effects via growthRateMultiplier 
       logDensity=logDensity+log(_patentGrowthRateMultiplier);
       tries1++;
@@ -221,7 +221,7 @@ return newDensity*_overallMultiplier;
 
 double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){
   double beta=alpha*(1-mu)/mu;
-  double nonInflatedValue=upperBound+log(W_BETA(alpha, beta));
+  double nonInflatedValue=upperBound+log(gsl::rngBeta(alpha, beta));
   double inflatedValue;
   int tries=0;
   do {
@@ -235,7 +235,7 @@ double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double 
 double EmpiricalInfection::samplePatentValue(double mu, double sigma, double lowerBound){
   double returnValue;
   do {
-    double nonInflatedValue=W_GAUSS(mu, sigma);
+    double nonInflatedValue=gsl::rngGauss(mu, sigma);
     returnValue=getInflatedDensity(nonInflatedValue);
   } while (returnValue<lowerBound);
   return returnValue;
@@ -246,7 +246,7 @@ double EmpiricalInfection::sigma_noise(int ageOfInfection) {
 }
 
 double EmpiricalInfection::getInflatedDensity(double nonInflatedDensity){  
-  double inflatedLogDensity=log(_inflationMean)+W_GAUSS(nonInflatedDensity,sqrt(_inflationVariance));
+  double inflatedLogDensity=log(_inflationMean)+gsl::rngGauss(nonInflatedDensity,sqrt(_inflationVariance));
 return exp(inflatedLogDensity);
 }
 

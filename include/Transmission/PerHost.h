@@ -21,7 +21,7 @@
 #define Hmod_PerHostTransmission
 
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
-#include "GSLWrapper.h"
+#include "util/gsl.h"
 #include "simulation.h"
 #include "inputData.h"
 
@@ -109,7 +109,7 @@ public:
   inline void continousItnDistribution (int ageTSteps) {
     if (Simulation::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
       && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
-      if (W_UNIFORM() < cntItnCoverage[nextItnDistribution])
+      if (gsl::rngUniform() < cntItnCoverage[nextItnDistribution])
 	setupITN ();
       ++nextItnDistribution;
     }
