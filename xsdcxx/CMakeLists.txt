@@ -7,7 +7,8 @@ add_custom_command (OUTPUT ${CMAKE_BINARY_DIR}/xsdcxx/scenario.cxx ${CMAKE_BINAR
     COMMAND ${XSD_EXECUTABLE} cxx-tree
       --type-naming ucc --function-naming java
       --namespace-map =scnXml
-      --generate-inline --generate-doxygen --generate-intellisense
+      --generate-serialization --generate-inline
+      --generate-doxygen --generate-intellisense
       ${XSD_FILE}
     MAIN_DEPENDENCY ${XSD_FILE}
     COMMENT "Compiling ${XSD_FILE}"

@@ -61,7 +61,7 @@ int main(int argc, char* argv[]){
     exitStatus = -1;
   }
   
-  try {	// free XML memory (if allocated)
+  try {	// free XML memory (if allocated), and potentially save changes
     cleanDocument();
   } catch (...) {
     cerr << "cleanDocument failed" << endl;

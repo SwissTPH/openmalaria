@@ -63,89 +63,38 @@ const scnXml::Intervention* getInterventionByTime(int time);
 /// Get a parameter from the parameter list. i should be less than Params::MAX.
 double getParameter (size_t i);
 
-// Other parameter-getters
-// WARNING: not all these functions may exist
+/// Set true if the xml document has been changed and should be saved.
+extern bool documentChanged;
 
-double get_parameter(int); 
+// -----  Other parameter-getters (old functions)  -----
 
+// For WHM:
 double get_detectionlimit(); 
-double get_eir_daily(int); 
-int is_survey(int); 
+int get_analysis_no(); 
+
+// For summary:
 int get_number_of_surveys(); 
 int get_time_of_survey(int ); 
-int get_summary_option();	 
-int get_model_version(); 
-int get_mode(); 
+int get_summary_option();
 int get_assim_mode(); 
-int get_wu_id();
-int get_release();
-double get_maximum_ageyrs(); 
 double get_lowerbound(); 
-int get_number_of_agegroups(); 
-double get_upperbound(int ); 
-int get_analysis_no(); 
-int get_populationsize(); 
-double get_growthrate(); 
 
+// For global / simulation:
+int get_model_version();
+double get_maximum_ageyrs();
 int get_simulation_duration(); 
-double get_p_sequelae(int ); 
-int get_number_of_cfrgroups(); 
-double get_cfr_lb(int ); 
-double get_cfr(int ); 
-
-int get_vaccine_type(); 
-int get_vaccine_effect(); 
-int get_number_of_epi_doses(); 
-int get_number_of_init_eff(); 
-double get_target_age_yrs(int ); 
-double get_efficacy(int ,int ); 
-double get_efficacy_b(int ); 
-double get_vaccine_halflife_yrs(int ); 
-double get_coverage_epi_vaccine(int ); 
-double get_pu0(); 
-double get_pu1(); 
-double get_sporogony_gonotrophy(); 
-double get_itn_halflife_yrs(); 
-double get_demo_lowerbound(); 
-double get_demo_upperbound(int ); 
-double get_popperc(int); 
-
-double get_delta(); 
 int get_latentp(); 
 int get_interval(); 
-double get_ipti_effect(); 
-double get_genotype_freq(int ); 
-double get_genotype_acr(int ); 
-int get_genotype_proph(int ); 
-int get_genotype_tolperiod(int ); 
-double get_genotype_atten(int ); 
-int get_is_ipti(); 
-int get_number_of_genotypes(); 
-double get_ipti_coverage(int ); 
-double get_ipti_target_age_yrs(int ); 
-int get_number_of_ipti_doses(); 
 
-int get_number_of_proteins(); 
-char* get_protein_name_i(int); 
-void get_protein_name(char*, int, int); 
-int get_protein_number_of_mutations(int); 
-int get_protein_mutation_position(int, int); 
-int get_number_of_proteome_instances(); 
-double get_pi_proportion(int); 
-double get_pi_fitness(int); 
-int get_pi_number_of_alleles(int); 
-char* get_allele_name_i(int, int); 
-void get_allele_name(char*, int, int, int); 
-int get_allele_cnv(int, int); 
-char* get_allele_aminos_i(int, int); 
-void get_allele_aminos(char*, int, int, int); 
+// For population:
+int get_wu_id();
+int get_populationsize(); 
 
-int get_decision_id(int, double); 
-int get_n_medicate(int, double); 
-double get_cmp_qty(int, int, double); 
-int get_cmp_time(int, int, double); 
-void get_cmp_name(char*, int, int, int, double); 
+// For transmission:
+int get_mode(); 
+double get_growthrate(); 
+
+// For GSL:
 int getISeed(); 
 
 #endif
-

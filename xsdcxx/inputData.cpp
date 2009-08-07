@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
 using namespace std;
 // This namespace should make it obvious when types come from scenario.hxx and
@@ -37,6 +38,10 @@ const int SCHEMA_VERSION = 7;
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
 const int OLDEST_COMPATIBLE = 5;
+/// Sometimes used to save changes to the xml.
+std::string xmlFileName;
+/// Set true if the xml document is changed and should be saved
+bool documentChanged = false;
 
 /** @brief The xml data structure. */
 const Scenario* scenario = NULL;
@@ -87,6 +92,7 @@ void initTimedInterventions() {
 
 
 void createDocument(std::string lXmlFile) {
+  xmlFileName = lXmlFile;
   //Parses the document
     scenario = (parseScenario (lXmlFile)).release();
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
@@ -115,6 +121,28 @@ void createDocument(std::string lXmlFile) {
 }
 
 void cleanDocument() {
+  if (documentChanged) {
+    // get the "basename" (file name without path) of xmlFileName as a C string:
+    const char* lastFS = strrchr (xmlFileName.c_str(), '/');
+    const char* lastBS = strrchr (xmlFileName.c_str(), '\\');
+    const char* baseName = lastBS > lastFS ? lastBS : lastFS;
+    if (baseName == NULL)	// no path separator found; use whole string
+      baseName = xmlFileName.c_str();
+    else
+      ++baseName;		// start at next character
+    
+    ofstream outStream (baseName);
+    ostringstream schema;
+    schema << "scenario_" << SCHEMA_VERSION << ".xsd";
+    
+    xml_schema::NamespaceInfomap map;
+    map[""].name = "";
+    map[""].schema = schema.str();
+    serializeScenario (outStream, *scenario, map);
+    
+    outStream.close();
+  }
+  
   // Destructors should handle cleanup
   if (scenario != NULL)
     delete scenario;
@@ -152,8 +180,6 @@ double getParameter (size_t i) {
 
 // ----- Member access functions (bridges) -----
 // This is largely unmodified from the old xerces version.
-// Naming convention can be changed, but was chosen to minimize changes in the
-// code below.
 
 int get_simulation_duration(){ 
   return scenario->getSimulationDuration();
@@ -161,14 +187,6 @@ int get_simulation_duration(){
 
 double get_detectionlimit(){ 
   return  monitoring->getSurveys().getDetectionLimit();	
-}
-
-int is_survey(int time) {
-  const Surveys::SurveyTimeSequence& times = monitoring->getSurveys().getSurveyTime();
-  for (Surveys::SurveyTimeConstIterator it = times.begin(); it != times.end(); ++it)
-    if (time == *it)
-      return true;
-  return false;
 }
 
 int get_summary_option(){ 
@@ -224,10 +242,6 @@ int get_populationsize(){
 }
 
 
-double get_demo_lowerbound(){ 
-  return demography->getAgeGroup().getLowerbound();
-}
-
 double get_growthrate(){
   if (demography->getGrowthRate().present())
     return demography->getGrowthRate().get();
@@ -242,104 +256,6 @@ int get_latentp(){
 int get_interval(){ 
   return parameters->getInterval();
 }
-double get_delta(){ 
-  return parameters->getDelta();
-}
-
-/*
-int get_number_of_proteins(){ 
-  return proteome ? proteome->getContent().getNumProteins() : 0;
-}
-
-void get_fortran_string(char* result, int length, char* orig) {
-  int gotNull = 0;
-  for(int i=0;i<length; i++) {
-    if (orig[i] == 0) {
-      gotNull = 1;
-    }
-    if (gotNull) {
-      result[i] = ' ';
-    }
-    else {
-      result[i] = orig[i];
-    }
-  }
-}
-
-char* get_protein_name_i(int index){
-  return proteome->getContent().getProtein(index - 1).getName();
-}
-
-void get_protein_name(char* result, int length, int index) { 
-  get_fortran_string(
-                     result, length,
-                     proteome->getContent().getProtein(index - 1).getName());
-}
-
-int get_protein_number_of_mutations(int index){ 
-  return proteome->getContent().getProtein(index - 1).getNumMutations();
-}
-
-int get_protein_mutation_position(int gindex, int mindex){ 
-  return proteome->getContent()->getProtein(gindex - 1)->getMutation(mindex - 1)->getPosition();
-}
-
-int get_number_of_proteome_instances(){
-  return proteome ? proteome->getDistribution()->getNumProteomeInstances() : 0;
-}
-
-double get_pi_proportion(int giindex){ 
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getProportion();
-}
-
-double get_pi_fitness(int giindex){ 
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getFitness();
-}
-
-/* Probably to deprecate *//*
-int get_pi_number_of_alleles(int giindex){ 
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getNumAlleles();
-}
-
-char* get_allele_name_i(int giindex, int aindex){
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getAllele(aindex - 1)->getName();
-}
-
-void get_allele_name(char* result, int length, int giindex, int aindex) { 
-  get_fortran_string(
-                     result, length,
-                     proteome->getDistribution()->getProteomeInstance(giindex - 1)->getAllele(aindex - 1)->getName());
-}
-
-/* For future use *//*
-int get_allele_cnv(int giindex, int aindex){ 
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getAllele(aindex - 1)->getCNV();
-}
-
-char* get_allele_aminos_i(int giindex, int aindex) {
-  return proteome->getDistribution()->getProteomeInstance(giindex - 1)->getAllele(aindex - 1)->getAminos();
-}
-
-void get_allele_aminos(char* result, int length, int giindex, int aindex) { 
-  get_fortran_string(
-                     result, length,
-                     proteome->getDistribution()->getProteomeInstance(giindex - 1)->getAllele(aindex - 1)->getAminos());
-}*/
-
-/*
-double get_cmp_qty(int decisionID, int medicateID, double age){ 
-  return caseManagements->getCaseManagementbyAge(age)->getDecisions()->getDecision(decisionID-1)->getMedicate(medicateID-1)->getQTY();
-}
-
-int get_cmp_time(int decisionID, int medicateID, double age){ 
-  return caseManagements->getCaseManagementbyAge(age)->getDecisions()->getDecision(decisionID-1)->getMedicate(medicateID-1)->getTime();
-}
-
-void get_cmp_name(char* result, int length,int decisionID, int medicateID, double age){ 
-  get_fortran_string(
-                     result, length,
-                     caseManagements->getCaseManagementbyAge(age)->getDecisions()->getDecision(decisionID-1)->getMedicate(medicateID-1)->getName());
-}*/
 
 int getISeed(){
   return parameters->getIseed();
