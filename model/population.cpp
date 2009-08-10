@@ -242,9 +242,9 @@ void Population::update1(){
   
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
   int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y
-  //Nsize is the population size at time t allowing population growth
-  int Nsize = (int)(_populationSize * exp(rho*Simulation::simulationTime));
-  int survivsSoFar = 0;
+  //targetPop is the population size at time t allowing population growth
+  int targetPop = (int)(_populationSize * exp(rho*Simulation::simulationTime));
+  int cumPop = 0;
   
   // Is the individual in the age range to be pregnant? Set when age reaches appropriate range.
   bool isAtRiskOfFirstPregnancy = false;
@@ -272,36 +272,36 @@ void Population::update1(){
       continue;
     }
     
-    //else update the individual
-      ++survivsSoFar;
-      
-      double ageYears = iter->getAgeInYears();
-      double availability = iter->perHostTransmission.entoAvailabilityNV(ageYears);
-      sumWeight += availability;
-      sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
-      
-      // kappaByAge and nByAge are used in the screensaver only
-      int ia = iter->ageGroup() - 1;
-      kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
-      ++nByAge[ia];
-      
-      /*
-      TODO: we need to check the order (ok) that all data
-      is in a defined state when used.
-      We call outmigrate if this is the last human in the list
-      or if their dob differs from the next one (ie last in 5day agegroup)
-      */
-      //std::cout  << "before om if" <<iter->hData.dob<<" "<<iter->hData.ID<<std::endl;  
-      if (iter == last ||	// Last human
-          // Copy iter, increment, and compare getDateOfBirth:
-          (++HumanIter(iter))->getDateOfBirth() != iter->getDateOfBirth())
-        if (outmigrate(*iter, Nsize, survivsSoFar)) {
-          iter->destroy();
-          iter = _population.erase(iter);
-          continue;
-        }
+    //BEGIN summarise infectiousness
+    double ageYears = iter->getAgeInYears();
+    double availability = iter->perHostTransmission.entoAvailabilityNV(ageYears);
+    sumWeight += availability;
+    sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
     
-    //Determine risk from maternal infection from   
+    // kappaByAge and nByAge are used in the screensaver only
+    int ia = iter->ageGroup() - 1;
+    kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
+    ++nByAge[ia];
+    //END summarise infectiousness
+    
+    
+    //BEGIN Population size & age structure
+    ++cumPop;
+    
+    // We call outMigrate if this is the last human in the list
+    // or if their dob differs from the next one (ie last in 5day agegroup)
+    if (iter == last ||	// Last human
+      // Copy iter, increment, and compare getDateOfBirth:
+      (++HumanIter(iter))->getDateOfBirth() != iter->getDateOfBirth())
+      if (outMigrate(*iter, targetPop, cumPop)) {
+	--cumPop;
+	iter->destroy();
+	iter = _population.erase(iter);
+	continue;
+      }
+    //END Population size & age structure
+    
+    //BEGIN Determine risk from maternal infection
     if(ageYears < 25.0) {
       if (ageYears >= 20.0) {
 	/* updates the counts of the number of individuals of child bearing age
@@ -323,6 +323,7 @@ void Population::update1(){
 	PathogenesisModel::setRiskFromMaternalInfection(nCounter, pCounter);
       }
     }
+    //END Determine risk from maternal infection
     
     ++iter;
   }	// end of per-human updates
@@ -334,16 +335,16 @@ void Population::update1(){
     SharedGraphics::copyKappa(kappaByAge);
   }
   
-  // increase population size to Nsize
-  while (survivsSoFar < Nsize) {
+  // increase population size to targetPop
+  while (cumPop < targetPop) {
     newHuman(Simulation::simulationTime);
     //++nCounter;
-    ++survivsSoFar;
+    ++cumPop;
   }
   
   // Calculate kappa (total infectiousness)
   // Currently we use the same summed weights as before. Doing them here would
-  // be different because of outmigrated individuals and new births.
+  // be different because of out-migrated individuals and new births.
   _transmissionModel->updateKappa (sumWeight, sumWt_kappa);
   
   delete [] nByAge;
@@ -423,22 +424,21 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
 }
 
 
-short Population::outmigrate(Human& current, int Nsize, int &survivsSoFar){
+bool Population::outMigrate(Human& current, int targetPop, int cumPop){
   // maximum remaining lifespan in timesteps:
   int j=_maxTimestepsPerLife-(Simulation::simulationTime-current.getDateOfBirth());
   
-  double targetPop=cumpc[j-1] * Nsize;	//target population in age group of current human
+  double targetCumPop=cumpc[j-1] * targetPop;	//target population in age group of current human
   
-  // Actual number of people so far = Survivsofar
+  // Actual number of people so far = cumPop
   // Number to be removed is the difference, rounded to the nearest integer
-  int outmigrs = survivsSoFar - (int)floor(targetPop+0.5);
-  // We can't outmigrate more than one person at once:
-  if (outmigrs > 1) outmigrs = 1;
-  if (outmigrs == 1){
-    --survivsSoFar;
+  int outmigrs = cumPop - (int)floor(targetCumPop+0.5);
+  // We can't out-migrate more than one person at once;
+  // just return whether or not to out-migrate this human:
+  if (outmigrs >= 1)
     return true;
-  }
-  return false;
+  else
+    return false;
 }
 
 // Static method used by estimateRemovalRates

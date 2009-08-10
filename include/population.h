@@ -88,8 +88,16 @@ public:
   //! Makes a survey
   void newSurvey();
  
-  //! remove human from the list
-  short outmigrate(Human& current, int Nsize, int &survivsSoFar);
+  /** Determine whether to remove the human current in order to preserve or
+   * obtain the desired age structure.
+   * 
+   * @param current The human in question.
+   * @param targetPop The total target population size at this time
+   * @param cumPop The total number of individuals younger than or the same age
+   *	as this individual (including this individual).
+   *
+   * @returns True if current should be removed from the population. */
+  bool outMigrate(Human& current, int targetPop, int cumPop);
   
   // Static:
   /** For input values for alpha1 and mu1, the fit to field data (residualSS)
