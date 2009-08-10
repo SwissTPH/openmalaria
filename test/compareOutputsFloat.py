@@ -3,6 +3,63 @@
 import sys
 import string
 import math
+import unittest
+
+# Careful with NaN, +/- inf and 0 values! Note: inf == inf
+# Check a and b are approximately equal. Return true if:
+#   a equals b to at least log10(relPrecision) significant figures
+#   or at least log10(absPrecision) decimal places.
+# This should work for small and large values, when one is zero, and when
+# either is infinite or an NaN.
+# 
+# What it is limited by, is testing of small values with relative precision
+# when it should also allow for large values being rounded to zero.
+# Possibly considering the case where a or b is zero explicitly would help, but
+# might lead to confusing outcomes.
+def approx_equal (a,b, relPrecision, absPrecision):
+    if math.isinf(a) or math.isinf(b):
+        return False
+    tolerance = relPrecision * max(math.fabs(a),math.fabs(b))
+    tolerance = max(tolerance, absPrecision)
+    return (math.fabs(a-b) < tolerance)
+
+def approx_equal_6 (a,b):
+    return approx_equal (a, b, 1e-6, 1e-6)
+
+class TestApproxEqual (unittest.TestCase):
+    def testNaN (self):
+        Inf = 1e10000
+        NaN = Inf * 0
+        self.assert_ (not approx_equal_6 (NaN, 1))
+        self.assert_ (not approx_equal_6 (NaN, 0))
+        self.assert_ (not approx_equal_6 (NaN, NaN))
+        self.assert_ (not approx_equal_6 (NaN, Inf))
+    
+    def testInf (self):
+        Inf = 1e10000
+        self.assert_ (not approx_equal_6 (Inf, 1))
+        self.assert_ (not approx_equal_6 (Inf, 0))
+        self.assert_ (not approx_equal_6 (Inf, Inf))
+        self.assert_ (not approx_equal_6 (Inf, -Inf))
+    
+    def testZero (self):
+        self.assert_ (not approx_equal_6 (0, 1e-6))
+        self.assert_ (    approx_equal_6 (0, 1e-7))
+    
+    def testRegular (self):
+        self.assert_ (not approx_equal_6 (1, 0))
+        self.assert_ (not approx_equal_6 (1, 0.999999))
+        self.assert_ (    approx_equal_6 (1, 0.9999995))
+        self.assert_ (not approx_equal_6 (1000000, 999999))
+        self.assert_ (    approx_equal_6 (1000000, 999999.5))
+        # these are considered equal because of absolute precision limitation rather than relative:
+        self.assert_ (    approx_equal_6 (0.000001, 0.0000005))
+        # this is roughly on the verge of what isn't considered equal:
+        self.assert_ (not approx_equal_6 (0.000001, 0.000002))
+        # if we only want to test relative precision:
+        self.assert_ (not approx_equal (0.000001, 0.000000999999,  1e-6, 0))
+        self.assert_ (    approx_equal (0.000001, 0.0000009999995, 1e-6, 0))
+
 
 def main(*args):
   if (4!=len(args)):
@@ -36,14 +93,14 @@ def main(*args):
       print '+',line2,
       return 2
     
-    # Compare with relative precision. Although openMalaria normally rounds it's output to less decimal places than this...
-    if math.fabs(value1 - value2) > 0.0000001 * max(math.fabs(value1),math.fabs(value2)):
-      print "Different values output {0}".format(line_count)
+    # Compare with relative precision.
+    if not approx_equal_6 (value1, value2):
+      print "Different values output on line {0}".format(line_count)
       print '-',line1,
       print '+',line2,
       for j in range(0, pre_lines-1):
-	print '-',prev_lines1[j],
-	print '+',prev_lines2[j],
+        print '-',prev_lines1[j],
+        print '+',prev_lines2[j],
       return 1
     
     if(line_count % 100000 == 0):
@@ -61,4 +118,6 @@ def main(*args):
   return 0
 
 if __name__ == '__main__':
-  sys.exit(main(*sys.argv))
+    #uncomment to run unittests:
+    #unittest.main()
+    sys.exit(main(*sys.argv))
