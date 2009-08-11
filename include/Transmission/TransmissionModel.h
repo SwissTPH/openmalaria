@@ -122,9 +122,13 @@ protected:
    * Checkpointed. */
   double annualEIR;
   
-  /** Sum of all EIR exhibited per day-of-year.
-   *
-   * Use the average (i.e. divide by eirPerDayOfYearEntries). */
+  //TODO: checkpoint
+  /// Sum of all EIR returned in this timestep
+  double timeStepTotalEir;
+  /// Divisor of timeStepTotalEir to get average.
+  int timeStepTotalEirEntries;
+  
+  /** Average EIR exhibited over the last year per day. */
   vector<double> eirPerDayOfYear;
   /** Number of times an eir has been added, per day-of-year. */
   vector<int> eirPerDayOfYearEntries;

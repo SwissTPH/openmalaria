@@ -154,7 +154,7 @@ private:
   static double rho;
   //@}
   
-  /// Target cumulative percentage of population by age
+  /// Target cumulative percentage of population by age, from oldest age to youngest.
   //TODO5D
   static double *cumpc;
 
@@ -167,7 +167,9 @@ private:
   //! TransmissionModel model
   TransmissionModel* _transmissionModel;
   
-  /// The simulated human population
+  /** The simulated human population
+   *
+   * The list of all humans, ordered from oldest to youngest. */
   std::list<Human> _population;
   
   /// Iterator type of _population

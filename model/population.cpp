@@ -351,6 +351,7 @@ void Population::update1(){
   delete [] kappaByAge;
 }
 
+
 void Population::newSurvey () {
   for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
     iter->summarize();
