@@ -23,7 +23,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Quarterly Surveys">
-    <surveys detectionLimit="40" summaryOption="1073741823">
+    <surveys detectionLimit="40" summaryOption="268435455">
       <surveyTime>1</surveyTime>
       <surveyTime>19</surveyTime>
       <surveyTime>37</surveyTime>
