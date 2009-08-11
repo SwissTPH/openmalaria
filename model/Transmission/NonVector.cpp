@@ -66,6 +66,8 @@ void NonVectorTransmission::initMainSimulation (const std::list<Human>&, int){
   // initialKappa is used in calculateEIR
   copyToInitialKappa();
   simulationMode = get_mode();
+  if (simulationMode < 2 || simulationMode > 4)
+    throw xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
 }
 
 

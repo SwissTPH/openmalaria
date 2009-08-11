@@ -158,12 +158,11 @@
       </xs:attribute>
       <xs:attribute name="mode" use="required">
         <xs:annotation>
-          <xs:documentation>Simulation mode</xs:documentation>
+          <xs:documentation>Transmission simulation mode</xs:documentation>
           <xs:appinfo>units:Code;</xs:appinfo>
         </xs:annotation>
         <xs:simpleType>
           <xs:restriction base="xs:int">
-            <xs:enumeration value="1" />
             <xs:enumeration value="2" />
             <xs:enumeration value="3" />
             <xs:enumeration value="4" />

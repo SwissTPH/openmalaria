@@ -75,7 +75,9 @@ void VectorTransmission::initMainSimulation(const std::list<Human>& population, 
   cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);
-  simulationMode = dynamicEIR;	// currently always the case post-initialisation
+  simulationMode = get_mode();	// allow forcing equilibrium mode like with non-vector model
+  if (simulationMode != 2 && simulationMode != 4)
+    throw xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
