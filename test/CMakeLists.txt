@@ -9,7 +9,7 @@ set (OM_BOXTEST_SCHEMA_NAME "scenario_7.xsd")
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.py ${CMAKE_CURRENT_BINARY_DIR}/run.py @ONLY)
 
 # working tests:
-set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq)
+set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq Vector)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})

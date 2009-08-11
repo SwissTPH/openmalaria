@@ -60,6 +60,18 @@ public:
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime);
   
 private:
+  /** Return the index in speciesIndex of mosquito, throwing if not found. */
+  size_t getSpeciesIndex (string mosquito) {
+    map<string,size_t>::const_iterator sIndex = speciesIndex.find (mosquito);
+    if (sIndex == speciesIndex.end()) {
+      ostringstream oss;
+      oss << "Intervention description for unincluded anopheles species \""
+	  << mosquito << '"';
+      throw xml_scenario_error(oss.str());
+    }
+    return sIndex->second;
+  }
+  
   /** The number of discrete species of anopheles mosquitos to be modelled.
    *
    * Must be the same as species.size(). */
@@ -67,6 +79,16 @@ private:
   
   /** Per anopheles species data. */
   vector<VectorTransmissionSpecies> species;
+  
+  /** A map of anopheles species/variant name to an index in species.
+   *
+   * When the main ento data is read from XML, each anopheles section is read
+   * into one index of the species array. The name and this index are added
+   * here.
+   * 
+   * Other data read from XML should look up the name here and use the index
+   * found. */
+  map<string,size_t> speciesIndex;
   
   /*NOTE: add NonHumanHosts data here:
   per-species parameters

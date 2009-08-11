@@ -48,12 +48,16 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
     throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
   species.resize (numSpecies);
   
-  species[0].initialise (anophelesList[0], 0, population, populationSize, initialisationEIR);
-  simulationMode = species[0].getSimulationMode();
-  for (size_t i = 1; i < numSpecies; ++i) {
-    species[i].initialise (anophelesList[i], i, population, populationSize, initialisationEIR);
+  simulationMode = -1;
+  for (size_t i = 0; i < numSpecies; ++i) {
+    string name = species[i].initialise (anophelesList[i], i,
+					 population, populationSize,
+					 initialisationEIR);
+    speciesIndex[name] = i;
     
-    if (simulationMode != species[i].getSimulationMode())
+    if (simulationMode == -1)
+      simulationMode = species[i].getSimulationMode();
+    else if (simulationMode != species[i].getSimulationMode())
       // Probably fourier eir data present only for some species
       throw xml_scenario_error("Vector model requests EIR-driven initialisation for some species but not others");
   }
@@ -64,6 +68,24 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
   
     // Calculate total annual EIR
     annualEIR += initialisationEIR[i];
+  }
+  
+  
+  // -----  Initialise interventions  -----
+  const scnXml::Interventions& xmlInterventions = getInterventions();
+  if (xmlInterventions.getITNDescription().present()) {
+    const scnXml::ITNDescription::AnophelesSequence& itnSeq = xmlInterventions.getITNDescription().get().getAnopheles();
+    for (size_t i = 0; i < itnSeq.size(); ++i) {
+      const scnXml::Anopheles1& itnDesc = itnSeq[i];
+      species[getSpeciesIndex(itnDesc.getMosquito())].setITNDescription (itnDesc);
+    }
+  }
+  if (xmlInterventions.getIRSDescription().present()) {
+    const scnXml::IRSDescription::AnophelesSequence& irsSeq = xmlInterventions.getIRSDescription().get().getAnopheles();
+    for (size_t i = 0; i < irsSeq.size(); ++i) {
+      const scnXml::Anopheles2& irsDesc = irsSeq[i];
+      species[getSpeciesIndex(irsDesc.getMosquito())].setIRSDescription (irsDesc);
+    }
   }
 }
 VectorTransmission::~VectorTransmission () {

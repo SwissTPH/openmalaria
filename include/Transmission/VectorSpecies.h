@@ -23,11 +23,9 @@
 #include "global.h"
 #include "Transmission/PerHost.h"
 #include "WeibullDecayedValue.h"
+#include "scenario.hxx"
 #include <list>
 
-namespace scnXml {
-  class Anopheles;
-}
 class Human;
 
 /** Per-species data for vector control.
@@ -51,7 +49,7 @@ public:
    * @param anoph Data structure from XML to use
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  void initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& EIR);
+  string initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& EIR);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();
@@ -90,6 +88,19 @@ public:
       return dynamicEIR;
     else
       throw xml_scenario_error ("Neither eir nor emergence rate data available to drive simulation");
+  }
+  
+  /** Set an ITN description for this anopheles species. */
+  inline void setITNDescription (const scnXml::Anopheles1& itnDesc) {
+    ITNDeterrency = itnDesc.getDeterrency ();
+    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
+    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+  }
+  
+  /** Set an IRS description for this anopheles species. */
+  inline void setIRSDescription (const scnXml::Anopheles2& irsDesc) {
+    IRSDeterrency = irsDesc.getDeterrency ();
+    IRSKillingEffect = irsDesc.getKillingEffect ();
   }
   
   /** @brief Baseline parameters which may be varied per host

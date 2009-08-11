@@ -30,7 +30,7 @@
 #include <fstream>
 
 
-void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
+string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
   scnXml::Mosq mosq = anoph.getMosq();
   
@@ -109,26 +109,7 @@ void VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size
     vectors::scale (S_v, populationSize);
   }
   
-  
-  // -----  Initialise interventions  -----
-  const scnXml::Interventions& xmlInterventions = getInterventions();
-  if (xmlInterventions.getITNDescription().present()) {
-    const scnXml::ITNDescription::AnophelesSequence& itnSeq = xmlInterventions.getITNDescription().get().getAnopheles();
-    if (itnSeq.size() > sIndex) {
-      const scnXml::Anopheles1& itnDesc = itnSeq[sIndex];
-      ITNDeterrency = itnDesc.getDeterrency ();
-      ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
-      ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
-    }
-  }
-  if (xmlInterventions.getIRSDescription().present()) {
-    const scnXml::IRSDescription::AnophelesSequence& irsSeq = xmlInterventions.getIRSDescription().get().getAnopheles();
-    if (irsSeq.size() > sIndex) {
-      const scnXml::Anopheles2& irsDesc = irsSeq[sIndex];
-      IRSDeterrency = irsDesc.getDeterrency ();
-      IRSKillingEffect = irsDesc.getKillingEffect ();
-    }
-  }
+  return anoph.getMosquito();
 }
 
 void VectorTransmissionSpecies::destroy () {
