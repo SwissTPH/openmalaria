@@ -406,6 +406,10 @@ void Population::implementIntervention (int time) {
   if (interv->getIRS().present()) {
     massIntervention (interv->getIRS().get(), &Human::setupIRS);
   }
+  
+  if (interv->getLarviciding().present()) {
+    _transmissionModel->intervLarviciding (interv->getLarviciding().get());
+  }
 }
 
 void Population::massIntervention (const scnXml::Mass& mass, void (Human::*intervention)())

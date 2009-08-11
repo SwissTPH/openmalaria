@@ -754,7 +754,32 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-    </xs:sequence>
+      <xs:element minOccurs="0" name="larviciding">
+        <xs:annotation>
+          <xs:documentation>
+            Simple larviciding intervention description.
+          </xs:documentation>
+        </xs:annotation>
+	<xs:complexType>
+	  <xs:attribute name="effectiveness" type="xs:double" use="required">
+	    <xs:annotation>
+	      <xs:documentation>
+		Proportion to reduce emergence rates by.
+	      </xs:documentation>
+	      <xs:appinfo>units:none;min:0;max:1;</xs:appinfo>
+	    </xs:annotation>
+	  </xs:attribute>
+	  <xs:attribute name="duration" type="xs:int" use="required">
+	    <xs:annotation>
+	      <xs:documentation>
+		Number of days for which the intervention is active.
+	      </xs:documentation>
+	      <xs:appinfo>units:days;min:0;max:inf;</xs:appinfo>
+	    </xs:annotation>
+	  </xs:attribute>
+	</xs:complexType>
+      </xs:element>
+   </xs:sequence>
     <xs:attribute name="time" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>

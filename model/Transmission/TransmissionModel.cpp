@@ -119,6 +119,8 @@ void TransmissionModel::summarize (Summary& summary) {
   summary.setKappaPerDayOfYear (kappa);
 }
 
+void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {}
+
 
 // -----  checkpointing  -----
 

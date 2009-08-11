@@ -24,6 +24,7 @@
 #include "global.h"
 #include <string.h>
 #include "human.h"
+#include "scenario.hxx"
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintSmoothArray
@@ -80,6 +81,9 @@ public:
    * main simulation phase, it may be calculated or obtained from data in the
    * XML file. */
   double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears);
+  
+  /** Set the larviciding intervention params. */
+  virtual void intervLarviciding (const scnXml::Larviciding&);
   
 protected:
   /** Calculates the EIR (in adults), during the main simulation phase.

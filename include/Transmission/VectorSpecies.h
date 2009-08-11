@@ -60,8 +60,13 @@ public:
   
   /** Called per time-step. Does most of calculation of EIR.
    *
-   * @param sIndex Index of the type of mosquito in per-type/species lists. */
-  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex);
+   * @param population The human population; so we can sum up availability and
+   *	infectiousness.
+   * @param simulationTime
+   * @param sIndex Index of the type of mosquito in per-type/species lists.
+   * @param larvicidingIneffectiveness Multiplier for emergence rates, to
+   *	simplistically simulate larviciding. */
+  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, int larvicidingIneffectiveness);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
@@ -236,7 +241,6 @@ private:
   *
   * See comment in advancePeriod() for details of how the EIR is calculated. */
   double partialEIR;
-  
   
   /* Functions */
   

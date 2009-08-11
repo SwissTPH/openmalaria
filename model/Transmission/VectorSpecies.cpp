@@ -292,7 +292,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
 
 
 // Every Global::interval days:
-void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex) {
+void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, int larvicidingIneffectiveness) {
   /* Largely equations correspond to Nakul Chitnis's model in
     "A mathematic model for the dynamics of malaria in
     mosquitoes feeding on a heterogeneous host population" [MMDM]
@@ -374,7 +374,7 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
     P_dif[t] = intP_dif;
     
     
-    N_v[t] = mosqEmergeRate[day%daysInYear]
+    N_v[t] = mosqEmergeRate[day%daysInYear] * larvicidingIneffectiveness
         + P_A[t1]  * N_v[t1]
         + P_df[ttau] * N_v[ttau];
     O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])

@@ -59,7 +59,7 @@ def linkOrCopy (src, dest):
 def runScenario(options,omOptions,name):
   scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
   if options.xmlValidate:
-    return subprocess.call (["xmllint","--noout","--schema","@OM_BOXTEST_SCHEMA_NAME@",scenarioSrc],
+    return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],
 			 cwd=testBuildDir)
   
   cmd=options.wrapArgs+[openMalariaExec,"--scenario",scenarioSrc]+omOptions

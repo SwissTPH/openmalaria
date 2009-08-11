@@ -59,6 +59,8 @@ public:
   /** This needs to be called every interval. */
   virtual void advancePeriod (const std::list<Human>& population, int simulationTime);
   
+  virtual void intervLarviciding (const scnXml::Larviciding&);
+  
 private:
   /** Return the index in speciesIndex of mosquito, throwing if not found. */
   size_t getSpeciesIndex (string mosquito) {
@@ -93,5 +95,11 @@ private:
   /*NOTE: add NonHumanHosts data here:
   per-species parameters
   number of hosts */
+  
+  /** Timestep at which larviciding effects dissappear. */
+  int larvicidingEndStep;
+  /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
+   * this parameter. */
+  double larvicidingIneffectiveness;
 };
 #endif
