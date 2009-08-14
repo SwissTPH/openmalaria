@@ -41,17 +41,26 @@ if (OM_CXXTEST_GUI)
 endif (OM_CXXTEST_GUI)
 
 
+# For yaml-cpp. Temporarily here while I'm trialing the use of yaml with unittest data.
+find_library (YAML_CPP_LIB NAMES yaml-cpp)
+
+
 include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/unittest
   ${CMAKE_BINARY_DIR}/xsdcxx
 )
 
-set (OM_CXXTEST_HEADERS PerHostSuite.h VectorEmergenceSuite.h)
+set (OM_CXXTEST_HEADERS
+  PerHostSuite.h
+  VectorEmergenceSuite.h
+  VectorSpeciesSuite.h
+  ExtraAsserts.h	# must appear after at least some of the above
+)
 
 if (OM_CXXTEST_INTERPRETER)
   add_custom_command (OUTPUT tests.cpp
-    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
+    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_GUI_ARG} --runner=ParenPrinter --abort-on-fail -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
       ${OM_CXXTEST_HEADERS}
     DEPENDS ${OM_CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -62,8 +71,10 @@ else (OM_CXXTEST_INTERPRETER)
   message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp which is required to run the unittests.")
 endif (OM_CXXTEST_INTERPRETER)
 
-# This file is needed. "run" won't search for it, so it must be in the current directory.
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/VectorEmergenceSuite.txt ${CMAKE_CURRENT_BINARY_DIR}/VectorEmergenceSuite.txt COPYONLY)
+# These files are needed. "run" won't search for them, so they must be in the current directory.
+foreach (DATA_FILE VectorEmergenceSuite.txt VectorSpeciesSuite.yaml)
+  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
+endforeach (DATA_FILE)
 
 add_executable (run tests.cpp)
 target_link_libraries (run
@@ -75,6 +86,7 @@ target_link_libraries (run
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
+  ${YAML_CPP_LIB}
 )
 
 if (MSVC)

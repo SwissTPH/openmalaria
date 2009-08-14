@@ -27,11 +27,15 @@
 #include <stdexcept>
 using namespace std;
 
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include "util/vectors.h"
+
 #include <cxxtest/TestSuite.h>
+#include "ExtraAsserts.h"
 
 #include "Transmission/VectorEmergence.h"
 #include "Transmission/VectorSpecies.h"
-#include "util/vectors.h"
 
 // We want to hide normal output, so route it here instead of cout
 ofstream null("\0");
@@ -153,16 +157,16 @@ public:
     
     // Requires a slightly higher error tolerance. NC did say the results he
     // gave (output1CalcInitMosqEmergeRate) were off by about 1e-10.
-    checkEqual (vectors::std2gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, "output1CalcInitMosqEmergeRate", 1e-6);
+    TS_ASSERT_VECTOR_APPROX_TOL (vectors::std2gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, 1e-6, 1e-6);
   }
   
   void testCalcUpsilonOneHost () {
     double PA, PAi;
     emerge->CalcUpsilonOneHost (&PA, &PAi, input1CalcUpsilonOneHost);
-    checkApproxEq (PA,  5.4803567e-002);
-    checkApproxEq (PAi, 7.7334254e-001);
+    TS_ASSERT_APPROX (PA,  5.4803567e-002);
+    TS_ASSERT_APPROX (PAi, 7.7334254e-001);
     for (int i = 0; i < YEAR_LEN; ++i)
-      checkEqual (emerge->Upsilon[i], output1CalcUpsilonOneHost[i], "output1CalcUpsilonOneHost");
+      TS_ASSERT_VECTOR_APPROX (emerge->Upsilon[i], output1CalcUpsilonOneHost[i]);
   }
   
   void testCalcSvDiff () {
@@ -174,7 +178,7 @@ public:
     
     gsl_vector *SvDiff = gsl_vector_calloc (YEAR_LEN);
     emerge->CalcSvDiff (SvDiff, input1CalcSvDiff, input2CalcSvDiff, input3CalcSvDiff);
-    checkEqual (SvDiff, output1CalcSvDiff, "output1CalcSvDiff");
+    TS_ASSERT_VECTOR_APPROX (SvDiff, output1CalcSvDiff);
     
     emerge->Upsilon = origUpsilon;
     */
@@ -183,7 +187,7 @@ public:
   void testCalcLambda () {
     emerge->CalcLambda (input1CalcLambda);
     for (int i = 0; i < YEAR_LEN; ++i)
-      checkEqual (emerge->Lambda[i], output1CalcLambda[i], "output1CalcLambda");
+      TS_ASSERT_VECTOR_APPROX (emerge->Lambda[i], output1CalcLambda[i]);
   }
   
   void testCalcXP () {
@@ -194,7 +198,7 @@ public:
     
     emerge->CalcXP (input1CalcXP);
     for (int i = 0; i < YEAR_LEN; ++i)
-      checkEqual (emerge->x_p[i], output1CalcXP[i], "output1CalcXP");
+      TS_ASSERT_VECTOR_APPROX (emerge->x_p[i], output1CalcXP[i]);
     
     emerge->Lambda = origLambda;
     emerge->Upsilon = origUpsilon;
@@ -205,9 +209,9 @@ public:
     double sumKPlus;
     double sumKLPlus[2];
     emerge->CalcPSTS (&sumKPlus, sumKLPlus, 5.4803567e-002, 6.1014058e-001);
-    checkApproxEq (sumKPlus, 3.0034309e-003);
-    checkApproxEq (sumKLPlus[0], 6.1014058e-001);
-    checkApproxEq (sumKLPlus[1], 3.3437880e-002);
+    TS_ASSERT_APPROX (sumKPlus, 3.0034309e-003);
+    TS_ASSERT_APPROX (sumKLPlus[0], 6.1014058e-001);
+    TS_ASSERT_APPROX (sumKLPlus[1], 3.3437880e-002);
   }
   
   void testFuncX () {
@@ -216,28 +220,28 @@ public:
     
     gsl_matrix *X = gsl_matrix_calloc (17,17);
     emerge->FuncX (X, 10, 0);
-    checkEqual (X, output1FuncX, "output1FuncX");
+    TS_ASSERT_VECTOR_APPROX (X, output1FuncX);
     gsl_matrix_free (X);
     
     emerge->Upsilon = origUpsilon;
   }
   
   void testCalcSpectralRadius () {
-    checkApproxEq (emerge->CalcSpectralRadius (input1CalcSpectralRadius), 2.3950405e-001);
+    TS_ASSERT_APPROX (emerge->CalcSpectralRadius (input1CalcSpectralRadius), 2.3950405e-001);
   }
   
   void testCalcInv1minusA () {
     // Considered an input: eta = 17
     gsl_matrix* inv1A = gsl_matrix_calloc(17,17);
     emerge->CalcInv1minusA (inv1A, input1CalcInv1minusA);
-    checkEqual (inv1A, output1CalcInv1minusA, "output1CalcInv1minusA");
+    TS_ASSERT_VECTOR_APPROX (inv1A, output1CalcInv1minusA);
     gsl_matrix_free (inv1A);
   }
   
   void testCalSvfromEIRdata () {
     gsl_vector *Sv = gsl_vector_calloc (10);
     emerge->CalSvfromEIRdata (Sv, 7.7334254e-001, input1CalSvfromEIRdata);
-    checkEqual (Sv, output1CalSvfromEIRdata, "output1CalSvfromEIRdata");
+    TS_ASSERT_VECTOR_APPROX (Sv, output1CalSvfromEIRdata);
     gsl_vector_free (Sv);
   }
   
@@ -308,28 +312,6 @@ private:
     for (int i = 0; i < num; ++i)
       gsl_vector_free (vec[i]);
     delete[] vec;
-  }
-  
-  // Probably using max and fabs twice isn't very efficient, but performance
-  // isn't likely to be an issue here.
-  void checkApproxEq (double a, double b) {
-    TS_ASSERT_DELTA (a, b, 1e-7 * max(fabs(a),fabs(b)));
-  }
-  void checkApproxEqM (const char* msg, double a, double b, double relErrLim) {
-    TSM_ASSERT_DELTA (msg, a, b, relErrLim * max(fabs(a),fabs(b)));
-  }
-  
-  void checkEqual (gsl_matrix* A, gsl_matrix* B, const char* msg, double relErrLim = 1e-7) {
-    TSM_ASSERT_EQUALS (msg, A->size1, B->size1);
-    TSM_ASSERT_EQUALS (msg, A->size2, B->size2);
-    for (int i = 0; i < A->size1; ++i)
-      for (int j = 0; j < A->size2; ++j)
-	checkApproxEqM (msg, gsl_matrix_get(A,i,j), gsl_matrix_get(B,i,j), relErrLim);
-  }
-  void checkEqual (gsl_vector* A, gsl_vector* B, const char* msg, double relErrLim = 1e-7) {
-    TSM_ASSERT_EQUALS (msg, A->size, B->size);
-    for (int i = 0; i < A->size; ++i)
-      checkApproxEqM (msg, gsl_vector_get(A,i), gsl_vector_get(B,i), relErrLim);
   }
   
   VectorEmergence *emerge;

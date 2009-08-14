@@ -269,6 +269,7 @@ private:
   static void rotateArray(vector<double>& rArray, double rAngle);
   
   friend class VectorEmergenceSuite;
+  friend class VectorSpeciesSuite;
 };
 
 #endif
