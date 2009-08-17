@@ -51,6 +51,8 @@ string Global::parseCommandLine (int argc, char* argv[]) {
   bool fileGiven = false;
   string scenarioFile = "scenario.xml";
   
+  /* Simple command line parser. Seems to work fine.
+   * If an extension is wanted, http://tclap.sourceforge.net/ looks good. */
   for (int i = 1; i < argc; ++i) {
     string clo = argv[i];
     
@@ -92,6 +94,16 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	cerr << "Unrecognised option: --" << clo << endl << endl;
 	cloHelp = true;
       }
+    } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
+      for (size_t i = 1; i < clo.size(); ++i) {
+	if (clo[i] == 'm') {
+	  clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
+	} else if (clo[i] == 'c') {
+	  clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
+	} else if (clo[i] == 'h') {
+	  cloHelp = true;
+	}
+      }
     } else {
       cerr << "Unexpected parameter: " << clo << endl << endl;
       cloHelp = true;
@@ -101,17 +113,17 @@ string Global::parseCommandLine (int argc, char* argv[]) {
   if (cloHelp) {
     cout << "Usage: " << argv[0] << " [options]" << endl << endl
     << "Options:"<<endl
-    << "  --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
-    << "  --print-model		Print which model version flags are set (as binary with right-most"<<endl
+    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
+    << " -m --print-model	Print which model version flags are set (as binary with right-most"<<endl
     << "			digit representing option 0) and exit." << endl
-    << "  --enableERC		Allow Emergence Rate Calculations (otherwise will stop if the"<<endl
+    << "    --enableERC		Allow Emergence Rate Calculations (otherwise will stop if the"<<endl
     << "			values read from file are inaccurate)."<<endl
-    << "  --checkpoint		Forces checkpointing once during simulation (during initialisation"<<endl
+    << " -c --checkpoint	Forces checkpointing once during simulation (during initialisation"<<endl
     << "			period), exiting after completing each"<<endl
     << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
-    << "  --compress-checkpoints=boolean" << endl
+    << "    --compress-checkpoints=boolean" << endl
     << "			Set checkpoint compression on or off. Default is on." <<endl
-    << "  --help		Print this message." << endl
+    << " -h --help		Print this message." << endl
     ;
     throw cmd_exit ("Printed help");
   }
