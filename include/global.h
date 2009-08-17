@@ -120,8 +120,14 @@ public:
   ///@brief Command-line options
   //@{
   static CLO::CLO clOptions;
+  static string clResourcePath;
   static bool compressCheckpoints;
   //@}
+  
+  /** Prepend if path is relative, prepend it with clResourcePath.
+   * Then passes the resulting (or original) path through
+   * BoincWrapper::resolveFile() and returns the result. */
+  static string lookupResource (const string& path);
   
 private:
   /// Sets modelVersion, checking for incompatible versions.

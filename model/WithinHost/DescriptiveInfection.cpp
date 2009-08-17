@@ -26,8 +26,6 @@
 #include <sstream>
 #include <string.h>
 
-#include "util/BoincWrapper.h"
-
 //static (class) variables
 
 double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
@@ -51,7 +49,7 @@ void DescriptiveInfection::initParameters (){
   xNuStar=getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
   string densities_filename;
-  densities_filename = BoincWrapper::resolveFile("densities.csv");
+  densities_filename = Global::lookupResource ("densities.csv");
 
   fstream f_MTherapyDensities(densities_filename.c_str(),ios::in);
 

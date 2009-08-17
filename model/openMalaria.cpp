@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
     
     BoincWrapper::init();
     
-    scenario_name = BoincWrapper::resolveFile (scenario_name.c_str());
+    scenario_name = Global::lookupResource (scenario_name.c_str());
     
     //Change it and read it with boinc
     createDocument(scenario_name);

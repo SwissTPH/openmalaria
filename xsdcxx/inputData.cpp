@@ -94,6 +94,9 @@ void initTimedInterventions() {
 void createDocument(std::string lXmlFile) {
   xmlFileName = lXmlFile;
   //Parses the document
+  //NOTE: it'd be nice if this used Global::lookupResource for the schema.
+  // The only way I can see of making it do (part) of this is to change
+  // directory, which is either platform specific or requires more dependencies.
     scenario = (parseScenario (lXmlFile)).release();
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
       ostringstream msg;

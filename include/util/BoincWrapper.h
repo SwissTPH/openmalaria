@@ -38,7 +38,7 @@ namespace BoincWrapper {
   void finish (int err);
   
   /// Calls boinc_resolve_filename_s with inName, returning the result.
-  string resolveFile (const char* inName);
+  string resolveFile (const string& inName);
   
   /// Report the proportion of work done
   void reportProgress (double progress);

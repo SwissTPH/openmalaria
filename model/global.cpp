@@ -21,10 +21,12 @@
 */
 
 #include <cstdlib>
-#include "global.h"
-#include "inputData.h"
 #include <cmath>
 #include <stdexcept>
+
+#include "global.h"
+#include "inputData.h"
+#include "util/BoincWrapper.h"
 
 /*
 Contains global variables and constants and utility functions that are used in different modules.
@@ -41,10 +43,18 @@ int Global::maxAgeIntervals;
 int Global::latentp;
 
 CLO::CLO Global::clOptions = CLO::NONE;
+string Global::clResourcePath;
 bool Global::compressCheckpoints = true;
 
 vector<int> Global::infantIntervalsAtRisk;
 vector<int> Global::infantDeaths;
+
+string parseNextArg (int argc, char* argv[], int& i) {
+  ++i;
+  if (i >= argc)
+    throw runtime_error ("Expected an argument following the last option");
+  return string(argv[i]);
+}
 
 string Global::parseCommandLine (int argc, char* argv[]) {
   bool cloHelp = false;
@@ -60,19 +70,15 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     if (clo.size() >= 2 && *clo.data() == '-' && clo.data()[1] == '-') {
       clo.assign (clo, 2, clo.size()-2);
       
-      if (clo == "scenario") {
-	if (!fileGiven) {
-	  ++i;
-	  if (i >= argc) {
-	    cerr << "Expected: --scenario filename" << endl << endl;
-	    cloHelp = true;
-	    break;
-	  }
-	  scenarioFile = argv[i];
-	  fileGiven = true;
-	} else {
-	  cerr << "Only one scenario file may be given." << endl;
-	}
+      if (clo == "resource-path") {
+	if (clResourcePath.size())
+	  throw runtime_error ("--resource-path (or -p) may only be given once");
+	clResourcePath = parseNextArg (argc, argv, i).append ("/");
+      } else if (clo == "scenario") {
+	if (fileGiven)
+	  throw runtime_error ("--scenario argument may only be given once");
+	scenarioFile = parseNextArg (argc, argv, i);
+	fileGiven = true;
       } else if (clo == "print-model") {
 	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
       } else if (clo == "enableERC") {
@@ -95,12 +101,18 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	cloHelp = true;
       }
     } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
-      for (size_t i = 1; i < clo.size(); ++i) {
-	if (clo[i] == 'm') {
+      for (size_t j = 1; j < clo.size(); ++j) {
+	if (clo[j] == 'p') {
+	  if (j + 1 != clo.size())
+	    throw runtime_error ("a path must be given as next argument after -p");
+	  if (clResourcePath.size())
+	    throw runtime_error ("--resource-path (or -p) may only be given once");
+	  clResourcePath = parseNextArg (argc, argv, i).append ("/");
+	} else if (clo[j] == 'm') {
 	  clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
-	} else if (clo[i] == 'c') {
+	} else if (clo[j] == 'c') {
 	  clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
-	} else if (clo[i] == 'h') {
+	} else if (clo[j] == 'h') {
 	  cloHelp = true;
 	}
       }
@@ -113,7 +125,10 @@ string Global::parseCommandLine (int argc, char* argv[]) {
   if (cloHelp) {
     cout << "Usage: " << argv[0] << " [options]" << endl << endl
     << "Options:"<<endl
+    << " -p --resource-path	Path to look up input resources with relative URLs (defaults to"<<endl
+    << "			working directory). Not used for output files."<<endl
     << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
+    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
     << " -m --print-model	Print which model version flags are set (as binary with right-most"<<endl
     << "			digit representing option 0) and exit." << endl
     << "    --enableERC		Allow Emergence Rate Calculations (otherwise will stop if the"<<endl
@@ -144,6 +159,19 @@ void Global::initGlobal () {
   infantIntervalsAtRisk.resize(intervalsPerYear);
   latentp=get_latentp();
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
+}
+
+string Global::lookupResource (const string& path) {
+  string ret;
+  if (path.size() >= 1 && path[0] == '/') {
+    // UNIX absolute path
+  } else if (path.size() >= 3 && path[1] == ':' && path[2] == '\\') {
+    // Windows absolute path.. at least probably
+  } else {	// relative
+    ret = clResourcePath;
+  }
+  ret.append (path);
+  return BoincWrapper::resolveFile (ret);
 }
 
 void Global::setModelVersion () {

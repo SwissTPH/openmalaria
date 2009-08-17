@@ -62,7 +62,7 @@ def runScenario(options,omOptions,name):
     return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],
 			 cwd=testBuildDir)
   
-  cmd=options.wrapArgs+[openMalariaExec,"--scenario",scenarioSrc]+omOptions
+  cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
   
   if not options.run:
     print "\033[1;32m",cmd,"\033[0;00m"
@@ -74,9 +74,7 @@ def runScenario(options,omOptions,name):
   checkFile=os.path.join(simDir,"checkpoint")
   
   # Link or copy required files.
-  densities_csv=os.path.join(simDir,"densities.csv")
   scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
-  linkOrCopy (os.path.join(testSrcDir,"densities.csv"), densities_csv)
   linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
   
   if options.logging:
@@ -101,7 +99,6 @@ def runScenario(options,omOptions,name):
     lastTime=checkTime
   
   if options.cleanup:
-    os.remove(densities_csv)
     os.remove(scenario_xsd)
     for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?"))):
       if os.path.isfile(f):
@@ -146,7 +143,7 @@ def evalOptions (args):
   parser.add_option("-n","--dry-run", action="store_false", dest="run", default=True,
 		    help="Don't actually run openMalaria, just output the commandline.")
   parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
-		    help="Don't clean up expected files from the temparary dir (checkpoint files, densities.csv and @OM_BOXTEST_SCHEMA_NAME@)")
+		    help="Don't clean up expected files from the temparary dir (checkpoint files and @OM_BOXTEST_SCHEMA_NAME@)")
   parser.add_option("--valid","--validate",
 		    action="store_true", dest="xmlValidate", default=False,
 		    help="Validate the XML file(s) using xmllint and the latest schema.")

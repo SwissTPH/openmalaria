@@ -34,8 +34,8 @@ namespace BoincWrapper {
     exit(err);	// doesn't return
   }
   
-  string resolveFile (const char* inName) {
-    return string (inName);
+  string resolveFile (const string& inName) {
+    return inName;
   }
 
   void reportProgress (double progress) {}
@@ -67,7 +67,7 @@ namespace BoincWrapper {
     boinc_finish(err);	// doesn't return
   }
   
-  string resolveFile (const char* inName) {
+  string resolveFile (const string& inName) {
     string ret;
     int err = boinc_resolve_filename_s(inName,ret);
     if (err) {
