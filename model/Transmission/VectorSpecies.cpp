@@ -362,9 +362,12 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   for (int day = simulationTime * Global::interval; day < endDay; ++day) {
     // Indecies for today, yesterday and mosqRestDuration days back:
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
-    size_t t    = day % N_v_length;
-    size_t t1   = (day - 1) % N_v_length;
-    size_t ttau = (day - mosqRestDuration) % N_v_length;
+    // Use dMod rather than day when subtracting something then using modulus
+    size_t dMod = day + N_v_length;
+    assert (dMod >= (size_t)N_v_length);
+    size_t t    = dMod % N_v_length;
+    size_t t1   = (dMod - 1) % N_v_length;
+    size_t ttau = (dMod - mosqRestDuration) % N_v_length;
     
     
     // These only need to be calculated once per timestep, but should be
@@ -383,46 +386,46 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
     
     
     //BEGIN S_v
-    // Set up array with n in 1..θ_s−1 for f_τ(day-n) (NDEMD eq. 1.7)
+    // Set up array with n in 1..θ_s−1 for f_τ(dMod-n) (NDEMD eq. 1.7)
     size_t fProdEnd = 2*mosqRestDuration;
     for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
       ftauArray[n] =
-          ftauArray[n-1] * P_A[(day-n)%N_v_length];
+          ftauArray[n-1] * P_A[(dMod-n)%N_v_length];
     }
-    ftauArray[fProdEnd] += P_df[(day-fProdEnd)%N_v_length];
+    ftauArray[fProdEnd] += P_df[(dMod-fProdEnd)%N_v_length];
     
     for (int n = fProdEnd+1; n < EIPDuration; ++n) {
-      size_t tn = (day-n)%N_v_length;
+      size_t tn = (dMod-n)%N_v_length;
       ftauArray[n] =
           P_df[tn] * ftauArray[n - mosqRestDuration]
           + P_A[tn] * ftauArray[n-1];
     }
     
     double sum = 0.0;
-    size_t ts = day - EIPDuration;
+    size_t ts = dMod - EIPDuration;
     for (int l = 1; l < mosqRestDuration; ++l) {
-      size_t tsl = (ts - l) % N_v_length;	// index day - theta_s - l
+      size_t tsl = (ts - l) % N_v_length;	// index dMod - theta_s - l
       sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * ftauArray[EIPDuration+l-mosqRestDuration];
     }
     
     
-    // Set up array with n in 1..θ_s−τ for f(day-n) (NDEMD eq. 1.6)
+    // Set up array with n in 1..θ_s−τ for f(dMod-n) (NDEMD eq. 1.6)
     for (int n = 1; n <= mosqRestDuration; ++n) {
       fArray[n] =
-          fArray[n-1] * P_A[(day-n)%N_v_length];
+          fArray[n-1] * P_A[(dMod-n)%N_v_length];
     }
     fArray[mosqRestDuration] += P_df[ttau];
     
     fProdEnd = EIPDuration-mosqRestDuration;
     for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-      size_t tn = (day-n)%N_v_length;
+      size_t tn = (dMod-n)%N_v_length;
       fArray[n] =
           P_df[tn] * fArray[n - mosqRestDuration]
           + P_A[tn] * fArray[n-1];
     }
     
     
-    ts = ts % N_v_length;	// index day - theta_s
+    ts = ts % N_v_length;	// index dMod - theta_s
     S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
         + sum
         + P_A[t1]*S_v[t1]
