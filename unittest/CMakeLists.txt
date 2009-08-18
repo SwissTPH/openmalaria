@@ -44,10 +44,12 @@ endif (OM_CXXTEST_GUI)
 # For yaml-cpp. Temporarily here while I'm trialing the use of yaml with unittest data.
 find_library (YAML_CPP_LIB NAMES yaml-cpp)
 
-
-include_directories (SYSTEM
+set (CMAKE_CONFIGURED 1)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_DIR}/configured/TestPaths.h @ONLY)
+include_directories (
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/unittest
+  ${CMAKE_BINARY_DIR}/unittest
   ${CMAKE_BINARY_DIR}/xsdcxx
 )
 
@@ -60,7 +62,7 @@ set (OM_CXXTEST_HEADERS
 
 if (OM_CXXTEST_INTERPRETER)
   add_custom_command (OUTPUT tests.cpp
-    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_GUI_ARG} --runner=ParenPrinter --abort-on-fail -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
+    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
       ${OM_CXXTEST_HEADERS}
     DEPENDS ${OM_CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -72,9 +74,10 @@ else (OM_CXXTEST_INTERPRETER)
 endif (OM_CXXTEST_INTERPRETER)
 
 # These files are needed. "run" won't search for them, so they must be in the current directory.
-foreach (DATA_FILE VectorEmergenceSuite.txt VectorSpeciesSuite.yaml)
-  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
-endforeach (DATA_FILE)
+#foreach (DATA_FILE VectorEmergenceSuite.txt VectorSpeciesSuite.yaml)
+#  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
+#endforeach (DATA_FILE)
+configure_file (${CMAKE_SOURCE_DIR}/test/scenario_8.xsd ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (run tests.cpp)
 target_link_libraries (run

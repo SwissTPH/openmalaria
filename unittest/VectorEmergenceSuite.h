@@ -32,6 +32,7 @@ using namespace std;
 #include "util/vectors.h"
 
 #include <cxxtest/TestSuite.h>
+#include "configured/TestPaths.h"	// from config; but must be included from the build dir
 #include "ExtraAsserts.h"
 
 #include "Transmission/VectorEmergence.h"
@@ -56,7 +57,9 @@ class VectorEmergenceSuite : public CxxTest::TestSuite
 {
 public:
   VectorEmergenceSuite () {
-    ifstream file ("VectorEmergenceSuite.txt");
+    Global::clResourcePath = UnittestSourceDir;
+    string yamlFile = Global::lookupResource ("VectorEmergenceSuite.txt");
+    ifstream file (yamlFile.c_str());
     if (!file.good()) throw runtime_error ("Unable to read VectorEmergenceSuite.txt");
     
     output1CalcInitMosqEmergeRate = readVector (file, "output1CalcInitMosqEmergeRate", YEAR_LEN);

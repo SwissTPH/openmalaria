@@ -127,7 +127,7 @@ private:
   int timestepITN;
   int timestepIRS;
   
-  int nextItnDistribution;
+  size_t nextItnDistribution;
   
   
   ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability

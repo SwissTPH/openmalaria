@@ -59,6 +59,7 @@ def linkOrCopy (src, dest):
 def runScenario(options,omOptions,name):
   scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
   if options.xmlValidate:
+    # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]
     return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],
 			 cwd=testBuildDir)
   

@@ -134,8 +134,6 @@ protected:
   
   /** Average EIR exhibited over the last year per day. */
   vector<double> eirPerDayOfYear;
-  /** Number of times an eir has been added, per day-of-year. */
-  vector<int> eirPerDayOfYearEntries;
 };
 
 #endif

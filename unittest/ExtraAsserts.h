@@ -21,6 +21,10 @@
 /** This module adds some extra *TS_ASSERT_* macros for CxxTest, and a test
  * suite to check these work as intended.
  * 
+ * General methodology: use TS_* for most asserts; ETS_* when a failed
+ * assertion should stop the test (prevent invalid defreferences, etc.).
+ * #define a new test rather than use [E]TSM_* asserts.
+ * 
  * TS_ASSERT_IS_NAN (x):
  * Simply asserts that x != x.
  * 
@@ -82,8 +86,11 @@
 #   define TS_ASSERT_VECTOR_APPROX_TOL(x,y,r,a) ___TS_ASSERT_VECTOR_APPROX(__FILE__,__LINE__,x,y,r,a)
 
 // No explicit accuracy:
-#   define ETS_ASSERT_VECTOR_APPROX(x,y) ___ETS_ASSERT_VECTOR_APPROX(__FILE__,__LINE__,x,y, DEF_REL_PRECISION, DEF_ABS_PRECISION)
-#   define TS_ASSERT_VECTOR_APPROX(x,y) ___TS_ASSERT_VECTOR_APPROX(__FILE__,__LINE__,x,y, DEF_REL_PRECISION, DEF_ABS_PRECISION)
+#   define _ETS_ASSERT_VECTOR_APPROX(f,l,x,y) ___ETS_ASSERT_VECTOR_APPROX(f,l,x,y, DEF_REL_PRECISION, DEF_ABS_PRECISION)
+#   define _TS_ASSERT_VECTOR_APPROX(f,l,x,y) ___TS_ASSERT_VECTOR_APPROX(f,l,x,y, DEF_REL_PRECISION, DEF_ABS_PRECISION)
+
+#   define ETS_ASSERT_VECTOR_APPROX(x,y) _ETS_ASSERT_VECTOR_APPROX(__FILE__,__LINE__,x,y)
+#   define TS_ASSERT_VECTOR_APPROX(x,y) _TS_ASSERT_VECTOR_APPROX(__FILE__,__LINE__,x,y)
 
 
 /** Functions to check approximate equality and some other IEEE 754 stuff. */

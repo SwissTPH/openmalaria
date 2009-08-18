@@ -93,6 +93,8 @@ private:
   /** The estimated proportion of total simulation time we spend in
    * mainSimulation. Used to give BOINC a hint on the progress. */
   double relTimeInMainSim;
+  
+  friend class VectorSpeciesSuite;
 };
 
 #endif

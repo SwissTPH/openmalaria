@@ -52,6 +52,9 @@ int main(int argc, char* argv[]){
     }	// simulation's destructor runs
   } catch (const cmd_exit& e) {	// this is not an error, but exiting due to command line
     cout << e.what() << "; exiting..." << endl;
+  } catch (const ::xsd::cxx::tree::exception<char>& e) {
+    cout << "XSD Exception: " << e.what() << '\n' << e << endl;
+    exitStatus = -1;
   } catch (const exception& e) {
     cerr << "Exception: " << e.what() << endl;
     exitStatus = -1;

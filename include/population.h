@@ -183,6 +183,8 @@ private:
     random integer number should do the job
   */
   int _workUnitIdentifier;
+  
+  friend class VectorSpeciesSuite;
 };
 
 #endif

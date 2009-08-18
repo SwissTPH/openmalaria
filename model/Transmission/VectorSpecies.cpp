@@ -99,7 +99,7 @@ string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, si
     P_dif = vectors::DoubleList2std (emergeData.getKappa(), N_v_length);
     if (!FCEIR.size())
       initFeedingCycleProbs (sIndex, population, P_dif);
-    //else: validate kappa (in P_dif) and calculate P_* after initialisation phase
+    //else: kappa is validated (from P_dif) and P_* calculated by initMainSimulation
     
     N_v = vectors::DoubleList2std (emergeData.getN_v(), N_v_length);
     vectors::scale (N_v, populationSize);
@@ -235,18 +235,18 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       && vectors::approxEqual (O_v, Ov)
       && vectors::approxEqual (S_v, Sv);
     
-    // Set whether or not valid; no harm if they already have good values
-    N_v = Nv;
-    O_v = Ov;
-    S_v = Sv;
-    //END Get and validate N_v, O_v and S_v
-    
     if (N_v.size()) {
       if (valid)
 	cerr << "Emergence rate parameters in scenario document were accurate." << endl;
       else
 	cerr << "Warning: emergence rate parameters in scenario document were not accurate." << endl;
     }
+    
+    // Set whether or not valid; no harm if they already have good values
+    N_v = Nv;
+    O_v = Ov;
+    S_v = Sv;
+    //END Get and validate N_v, O_v and S_v
     
     //BEGIN Write out new values
     if (!valid) {

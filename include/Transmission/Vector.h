@@ -36,8 +36,6 @@ namespace scnXml {
 //! Transmission models, Chitnis et al
 class VectorTransmission : public TransmissionModel {
 public:
-  friend class PerHostTransmission;
-  
   VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize);
   virtual ~VectorTransmission();
   
@@ -101,5 +99,8 @@ private:
   /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
    * this parameter. */
   double larvicidingIneffectiveness;
+  
+  friend class PerHostTransmission;
+  friend class VectorSpeciesSuite;
 };
 #endif
