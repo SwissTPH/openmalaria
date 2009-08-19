@@ -42,9 +42,10 @@ namespace CLO {
      * http://en.wikipedia.org/wiki/Flag_byte */
     NONE		= 0x0,
     
-    PRINT_MODEL_VERSION	= 0x1,
-    TEST_CHECKPOINTING	= 0x2,
-    ENABLE_ERC		= 0x4,
+    PRINT_MODEL_VERSION	= 0x1,	// outputs modelVersion in a human-readable form
+    TEST_CHECKPOINTING	= 0x2,	// forces a checkpoint in the middle of initialisation, followed by exiting
+    ENABLE_ERC		= 0x4,	// allows (~8 hour) emergence rate calculations (if not present and emergence rates are invalid, code throws)
+    NO_ERC_VALIDATION	= 0x8,	// skips (93 second) emergence rate check (hence emergence rates are never calculated)
   };
 }
 

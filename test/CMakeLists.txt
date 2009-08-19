@@ -13,6 +13,7 @@ set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq Vector)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
-    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- --checkpoint ${TEST_NAME})
+    # Run each test with checkpointing. We don't need to do emergence rate validation, because any changes should affect the results anyway.
+    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- --checkpoint --noErcValidation ${TEST_NAME})
   endforeach (TEST_NAME)
 endif (PYTHON_EXECUTABLE)

@@ -94,7 +94,6 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
-  cerr << "Warning: using incomplete VectorTransmission transmission model!" << endl;
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].initMainSimulation (i, population, populationSize, kappa);
   simulationMode = get_mode();	// allow forcing equilibrium mode like with non-vector model
