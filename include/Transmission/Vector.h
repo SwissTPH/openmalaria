@@ -94,12 +94,6 @@ private:
   per-species parameters
   number of hosts */
   
-  /** Timestep at which larviciding effects dissappear. */
-  int larvicidingEndStep;
-  /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
-   * this parameter. */
-  double larvicidingIneffectiveness;
-  
   friend class PerHostTransmission;
   friend class VectorSpeciesSuite;
 };

@@ -199,7 +199,9 @@
         <vaccinate coverage="0.95"/>
       </intervention>
       <intervention time="100">
-	<larviciding effectiveness="0.75" duration="1825"/>
+	<larviciding>
+	  <anopheles mosquito="gambiae_ss" effectiveness="0.75" duration="1825"/>
+	</larviciding>
       </intervention>
       <intervention time="366">
         <vaccinate coverage="0.95"/>

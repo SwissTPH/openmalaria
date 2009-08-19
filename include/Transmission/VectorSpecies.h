@@ -42,11 +42,19 @@ class Human;
 class VectorTransmissionSpecies
 {
 public:
+  VectorTransmissionSpecies () :
+    larvicidingEndStep (std::numeric_limits<int>::max()),
+    larvicidingIneffectiveness (1.0)
+  {}
+  
   ///@brief Initialisation and destruction
   //@{
   /** Called to initialise variables instead of a constructor.
    *
    * @param anoph Data structure from XML to use
+   * @param sIndex Index in VectorTransmission.species of this class.
+   * @param population The human population
+   * @param populationSize Number of humans (use instead of population.size())
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
   string initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& EIR);
@@ -66,7 +74,7 @@ public:
    * @param sIndex Index of the type of mosquito in per-type/species lists.
    * @param larvicidingIneffectiveness Multiplier for emergence rates, to
    *	simplistically simulate larviciding. */
-  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, int larvicidingIneffectiveness);
+  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
@@ -107,6 +115,8 @@ public:
     IRSDeterrency = irsDesc.getDeterrency ();
     IRSKillingEffect = irsDesc.getKillingEffect ();
   }
+  
+  void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
   /** @brief Baseline parameters which may be varied per host
    *
@@ -241,6 +251,12 @@ private:
   *
   * See comment in advancePeriod() for details of how the EIR is calculated. */
   double partialEIR;
+  
+  /** Timestep at which larviciding effects dissappear. */
+  int larvicidingEndStep;
+  /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
+   * this parameter. */
+  double larvicidingIneffectiveness;
   
   /* Functions */
   

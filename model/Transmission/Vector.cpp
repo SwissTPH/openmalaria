@@ -87,9 +87,6 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
       species[getSpeciesIndex(irsDesc.getMosquito())].setIRSDescription (irsDesc);
     }
   }
-  
-  larvicidingEndStep = std::numeric_limits<int>::max();
-  larvicidingIneffectiveness = 1.0;
 }
 VectorTransmission::~VectorTransmission () {
   for (size_t i = 0; i < numSpecies; ++i)
@@ -116,17 +113,13 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::advancePeriod (const std::list<Human>& population, int simulationTime) {
-  if (simulationTime >= larvicidingEndStep) {
-    larvicidingEndStep = std::numeric_limits<int>::max();
-    larvicidingIneffectiveness = 1.0;
-  }
-  
   if (simulationMode == equilibriumMode) return;
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].advancePeriod (population, simulationTime, i, larvicidingIneffectiveness);
+    species[i].advancePeriod (population, simulationTime, i);
 }
 
-void VectorTransmission::intervLarviciding (const scnXml::Larviciding& elt) {
-  larvicidingIneffectiveness = 1 - elt.getEffectiveness();
-  larvicidingEndStep = Simulation::simulationTime + (elt.getDuration() / Global::interval);
+void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
+  const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();
+  for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
+    species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
 }

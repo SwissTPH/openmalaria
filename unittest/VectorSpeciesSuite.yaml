@@ -70,6 +70,6 @@ calculateEirLarviciding:
     P_df:  *bPd
     P_dif: *bPi
     N_v:    [206440.5841, 203406.477, 200399.8321, 197423.3208, 210017.3305, 123864.7263, 60949.5137, 29991.13089, 27437.13052, 19740.0153, 215391.1027, 212308.3767, 209495.7333]
-    O_v:   *bOv
+    O_v:   *bOv    # O_v would also be affected if P_dif was non-zero
     S_v:   *bSv
 

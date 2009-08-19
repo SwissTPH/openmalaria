@@ -242,7 +242,6 @@ public:
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
-    //BUG: why isn't O_v affected (for last two days)?
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
   

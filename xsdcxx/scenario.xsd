@@ -761,22 +761,9 @@
           </xs:documentation>
         </xs:annotation>
 	<xs:complexType>
-	  <xs:attribute name="effectiveness" type="xs:double" use="required">
-	    <xs:annotation>
-	      <xs:documentation>
-		Proportion to reduce emergence rates by.
-	      </xs:documentation>
-	      <xs:appinfo>units:none;min:0;max:1;</xs:appinfo>
-	    </xs:annotation>
-	  </xs:attribute>
-	  <xs:attribute name="duration" type="xs:int" use="required">
-	    <xs:annotation>
-	      <xs:documentation>
-		Number of days for which the intervention is active.
-	      </xs:documentation>
-	      <xs:appinfo>units:days;min:0;max:inf;</xs:appinfo>
-	    </xs:annotation>
-	  </xs:attribute>
+	<xs:sequence>
+	  <xs:element name="anopheles" type="larvicidingAnopheles" maxOccurs="unbounded"/>
+	</xs:sequence>
 	</xs:complexType>
       </xs:element>
    </xs:sequence>
@@ -786,6 +773,25 @@
           Time step of intervention
         </xs:documentation>
         <xs:appinfo>units:Number;min:1;max:10000;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="larvicidingAnopheles">
+    <xs:attribute name="mosquito" type="xs:string" use="required"/>
+    <xs:attribute name="effectiveness" type="xs:double" use="required">
+      <xs:annotation>
+	<xs:documentation>
+	  Proportion to reduce emergence rates by.
+	</xs:documentation>
+	<xs:appinfo>units:none;min:0;max:1;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="duration" type="xs:int" use="required">
+      <xs:annotation>
+	<xs:documentation>
+	  Number of days for which the intervention is active.
+	</xs:documentation>
+	<xs:appinfo>units:days;min:0;max:inf;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

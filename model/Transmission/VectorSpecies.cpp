@@ -292,7 +292,13 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
 
 
 // Every Global::interval days:
-void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, int larvicidingIneffectiveness) {
+void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex) {
+  if (simulationTime >= larvicidingEndStep) {
+    larvicidingEndStep = std::numeric_limits<int>::max();
+    larvicidingIneffectiveness = 1.0;
+  }
+  
+  
   /* Largely equations correspond to Nakul Chitnis's model in
     "A mathematic model for the dynamics of malaria in
     mosquitoes feeding on a heterogeneous host population" [MMDM]
@@ -435,6 +441,12 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
     
     partialEIR += S_v[t] * P_Ai_base;
   }
+}
+
+
+void VectorTransmissionSpecies::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
+  larvicidingIneffectiveness = 1 - elt.getEffectiveness();
+  larvicidingEndStep = Simulation::simulationTime + (elt.getDuration() / Global::interval);
 }
 
 

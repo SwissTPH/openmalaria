@@ -119,7 +119,9 @@ void TransmissionModel::summarize (Summary& summary) {
   summary.setKappaPerDayOfYear (kappa);
 }
 
-void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {}
+void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
+  throw xml_scenario_error ("larviciding when not using a Vector model");
+}
 
 
 // -----  checkpointing  -----
