@@ -41,18 +41,10 @@
 /** Read an array into a vector. */
 template<class T>
 void operator>> (const YAML::Node& node, vector<T>& vec) {
-  /* doesn't work! 
   vec.resize (node.size());
-  for (size_t i = 0; i < node.size(); ++i) {
-    cout << "iteartion: " << i<<endl;
-    node[i] >> vec[i];
-  }*/
-  vec.resize (node.size());
-  vec.resize (0);
-  T t;
-  for (YAML::Iterator it = node.begin(); it != node.end(); ++it) {
-    *it >> t;
-    vec.push_back (t);
+  size_t i = 0;
+  for (YAML::Iterator it = node.begin(); it != node.end(); ++it, ++i) {
+    vec[i] = it->Read<double>();
   }
 }
 /** As above, but with function syntax. */
@@ -237,8 +229,9 @@ public:
   
   void testCalculateEirLarviciding () {
     const YAML::Node& node = doc["calculateEirLarviciding"];
-    node["Larviciding"]["effectiveness"] >> vtm->larvicidingIneffectiveness;
-    vtm->larvicidingEndStep = 1000;
+    node["Larviciding"]["effectiveness"] >> species->larvicidingIneffectiveness;
+    species->larvicidingIneffectiveness = 1 - species->larvicidingIneffectiveness;
+    species->larvicidingEndStep = 1000;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
