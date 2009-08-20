@@ -69,7 +69,7 @@ namespace BoincWrapper {
   
   string resolveFile (const string& inName) {
     string ret;
-    int err = boinc_resolve_filename_s(inName,ret);
+    int err = boinc_resolve_filename_s(inName.c_str(),ret);
     if (err) {
       stringstream t;
       t << "APP. boinc_resolve_filename_s failed with code: "<<err;
