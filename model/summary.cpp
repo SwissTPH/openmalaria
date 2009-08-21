@@ -64,8 +64,6 @@ void Summary::initialiseSummaries () {
     _surveysTimeIntervals[i]=get_time_of_survey(i);
   }
 
-  _summaryDimensionX=numberOfSurveys+1;
-  _summaryDimensionY=_numOfAgeGroups;
   _summaryOption=get_summary_option();
   _assimilatorMode=get_assim_mode();
 
@@ -97,8 +95,9 @@ void Summary::initialiseSummaries () {
   _numMassVaccines.resize(numberOfSurveys+1);
   _numIPTDoses.resize(numberOfSurveys+1);
   _annualAverageKappa.resize(numberOfSurveys+1);
-  _eirPerDayOfYear.resize(numberOfSurveys+1);
+  _innoculationsPerDayOfYear.resize(numberOfSurveys+1);
   _kappaPerDayOfYear.resize(numberOfSurveys+1);
+  _innoculationsPerAgeGroup.resize(numberOfSurveys+1);
   
   for (int i=0;i<numberOfSurveys+1;i++){
 
@@ -142,7 +141,7 @@ void Summary::clearSummaryParameters () {
 
 
 void Summary::report(Event& event){
-  int reportAgeGroup = event.getAgeGroup() - 1;
+  int reportAgeGroup = event.getAgeGroup();
   int surveyPeriod = event.getSurveyPeriod() - 1;
 
   //No reporting during warmup
@@ -227,24 +226,24 @@ void Summary::report(Pathogenesis::State state, int ageGroup,int surveyPeriod) {
   // sickness when the patient has indirect death.
   if (state & Pathogenesis::MALARIA) {
     if (state & Pathogenesis::COMPLICATED)
-      _numSevereEpisodes[surveyPeriod-1][ageGroup-1]++;
+      _numSevereEpisodes[surveyPeriod-1][ageGroup]++;
     else // UC or UC2
-      _numUncomplicatedEpisodes[surveyPeriod-1][ageGroup-1]++;
+      _numUncomplicatedEpisodes[surveyPeriod-1][ageGroup]++;
   } else if (state & Pathogenesis::SICK) {
-    _numNonMalariaFever[surveyPeriod-1][ageGroup-1]++;
+    _numNonMalariaFever[surveyPeriod-1][ageGroup]++;
   }	// also possibility of nothing, but not reported in this case
   
   if (state & Pathogenesis::DIRECT_DEATH)
-    _numDirectDeaths[surveyPeriod-1][ageGroup-1]++;
+    _numDirectDeaths[surveyPeriod-1][ageGroup]++;
   else if (state & Pathogenesis::INDIRECT_MORTALITY)
-    _numIndirectDeaths[surveyPeriod-1][ageGroup-1]++;
+    _numIndirectDeaths[surveyPeriod-1][ageGroup]++;
   else if (state & Pathogenesis::SEQUELAE)
-    _numSequelae[surveyPeriod-1][ageGroup-1]++;
+    _numSequelae[surveyPeriod-1][ageGroup]++;
   
   //TODO: we don't know whether patient was in hospital or not
-  //_numHospitalRecoveries[surveyPeriod-1][ageGroup-1]++;
-  //_numHospitalSequelae[surveyPeriod-1][ageGroup-1]++;
-  //_numHospitalDeaths[surveyPeriod-1][ageGroup-1]++;
+  //_numHospitalRecoveries[surveyPeriod-1][ageGroup]++;
+  //_numHospitalSequelae[surveyPeriod-1][ageGroup]++;
+  //_numHospitalDeaths[surveyPeriod-1][ageGroup]++;
 }
 
 void Summary::reportTreatment (int ageGroup, int regimen) {
@@ -255,13 +254,13 @@ void Summary::reportTreatment (int ageGroup, int regimen) {
 
     switch (regimen) {
     case 1:
-      _numTreatments1[_surveyPeriod-1][ageGroup - 1]++;
+      _numTreatments1[_surveyPeriod-1][ageGroup]++;
       break;
     case 2:
-      _numTreatments2[_surveyPeriod-1][ageGroup - 1]++;
+      _numTreatments2[_surveyPeriod-1][ageGroup]++;
       break;
     case 3:
-      _numTreatments3[_surveyPeriod-1][ageGroup - 1]++;
+      _numTreatments3[_surveyPeriod-1][ageGroup]++;
       break;
     default:
       //Regimen not conclusive
@@ -276,7 +275,7 @@ void Summary::reportEPIVaccination (int ageGroup) {
     if ( _surveyPeriod <  1) 
       return ;
     
-    _numEPIVaccines[_surveyPeriod-1][ageGroup - 1]++;
+    _numEPIVaccines[_surveyPeriod-1][ageGroup]++;
 }
 
 void Summary::reportMassVaccination (int ageGroup) {
@@ -285,7 +284,7 @@ void Summary::reportMassVaccination (int ageGroup) {
   if ( _surveyPeriod <  1) 
     return;
   
-  _numMassVaccines[_surveyPeriod-1][ageGroup - 1]++;
+  _numMassVaccines[_surveyPeriod-1][ageGroup]++;
 
 }
 
@@ -295,15 +294,15 @@ void Summary::reportIPTDose (int ageGroup) {
     if ( _surveyPeriod <  1) 
       return;
 
-    _numIPTDoses[_surveyPeriod-1][ageGroup - 1]++;
+    _numIPTDoses[_surveyPeriod-1][ageGroup]++;
 }
 
 int Summary::ageGroup(double age){
     if (age < _lowerbound)
-      return _numOfAgeGroups;
+      return _numOfAgeGroups-1;
     
-    int valageGroup=1;
-    while( age > _upperbound[valageGroup - 1]) {
+    int valageGroup=0;
+    while( age > _upperbound[valageGroup]) {
       valageGroup++;
     }
     return valageGroup;
@@ -430,11 +429,14 @@ void Summary::writeSummaryArrays () {
                << "\t" <<infantAllCauseMort() <<  lineEnd;
   }
   
-  if (isOptionIncluded(_summaryOption, eirPerDayOfYear)) {
-    writeArray(outputFile, eirPerDayOfYear, _assimilatorMode, _eirPerDayOfYear);
+  if (isOptionIncluded(_summaryOption, innoculationsPerDayOfYear)) {
+    writeArray(outputFile, innoculationsPerDayOfYear, _assimilatorMode, _innoculationsPerDayOfYear);
   }
   if (isOptionIncluded(_summaryOption, kappaPerDayOfYear)) {
     writeArray(outputFile, kappaPerDayOfYear, _assimilatorMode, _kappaPerDayOfYear);
+  }
+  if (isOptionIncluded(_summaryOption, innoculationsPerAgeGroup)) {
+    writeArray(outputFile, innoculationsPerAgeGroup, _assimilatorMode, _innoculationsPerAgeGroup);
   }
   
   outputFile.close();
@@ -454,70 +456,43 @@ double Summary::infantAllCauseMort(){
   delete[] intervalSurviv;
   return (1-infantProductLimit)*1000+_nonMalariaMortality;
 }
+
 void Summary::addToHost(double age, int value){
-
-  int agegrp = this->ageGroup(age);
-  _numHosts[_surveyPeriod-1][agegrp - 1]+=value;
-
+  _numHosts[_surveyPeriod-1][ageGroup(age)]+=value;
 }
 
 void Summary::addToInfectedHost(double age, int value){
-
-  int agegrp = this->ageGroup(age);
-  _numInfectedHosts[_surveyPeriod-1][agegrp - 1]+=value;
-
+  _numInfectedHosts[_surveyPeriod-1][ageGroup(age)]+=value;
 }
 
 void Summary::addToTotalInfections(double age, int value){
-
-  int agegrp = this->ageGroup(age);
-  _totalInfections[_surveyPeriod-1][agegrp - 1]+=value;
-  
+  _totalInfections[_surveyPeriod-1][ageGroup(age)]+=value;
 }
-
 
 void Summary::addToTotalPatentInfections(double age, int value){
-
-  int agegrp = this->ageGroup(age);
-  _totalPatentInfections[_surveyPeriod-1][agegrp - 1]+=value;
-}        
+  _totalPatentInfections[_surveyPeriod-1][ageGroup(age)]+=value;
+}
 
 void Summary::addToPatentHost(double age, int value){
-
-  int agegrp = this->ageGroup(age);
-  _numPatentHosts[_surveyPeriod-1][agegrp - 1]+=value;
- 
+  _numPatentHosts[_surveyPeriod-1][ageGroup(age)]+=value;
 }
-        
+
 void Summary::addToSumLogDensity(double age, double value){
-
-  int agegrp = this->ageGroup(age);
-  _sumLogDensity[_surveyPeriod-1][agegrp - 1]+=value;
-
-}    
-
+  _sumLogDensity[_surveyPeriod-1][ageGroup(age)]+=value;
+}
 
 void Summary::addToExpectedInfected(double age, double value){
-
-  int agegrp = this->ageGroup(age);
-  _numExpectedInfected[_surveyPeriod-1][agegrp - 1]+=value;
-
+  _numExpectedInfected[_surveyPeriod-1][ageGroup(age)]+=value;
 }
 
 void Summary::addToPyrogenicThreshold(double age, double value){
-
-  int agegrp = this->ageGroup(age);
-  _pyrogenicThreshold[_surveyPeriod-1][agegrp - 1]+=value;
-
+  _pyrogenicThreshold[_surveyPeriod-1][ageGroup(age)]+=value;
 }
-    
+
 void Summary::addToSumX(double age, double value){
+  _sumX[_surveyPeriod-1][ageGroup(age)]+=value;
+}
 
-  int agegrp = this->ageGroup(age);
-  _sumX[_surveyPeriod-1][agegrp - 1]+=value;
-
-} 
-  
 void Summary::setAnnualAverageKappa(double kappa){
 
   _annualAverageKappa[_surveyPeriod - 1]=kappa; 

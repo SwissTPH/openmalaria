@@ -108,14 +108,17 @@ def runScenario(options,omOptions,name):
   ret = 1
   if os.path.isfile(outFile):
     print "\033[1;34m",
-    ret = compareOuts.main (*["",os.path.join(testSrcDir,"original%s.txt"%name), outFile, 1])
+    original = os.path.join(testSrcDir,"original%s.txt"%name)
+    ret = compareOuts.main (*["", original, outFile, 2])
     if ret == 0 and options.cleanup:
       os.remove(outFile)
+    elif options.diff:
+      subprocess.call (["kdiff3",original,outFile])
   else:
     stderrFile=os.path.join(simDir,"stderr.txt")
     if os.path.isfile (stderrFile):
       print "\033[0;31mNo results output; error messages:"
-      se = file.open(stderrFile)
+      se = open(stderrFile)
       se.read()
       se.close()
     else:
@@ -145,6 +148,8 @@ def evalOptions (args):
 		    help="Don't actually run openMalaria, just output the commandline.")
   parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
 		    help="Don't clean up expected files from the temparary dir (checkpoint files and @OM_BOXTEST_SCHEMA_NAME@)")
+  parser.add_option("-d","--diff", action="store_true", dest="diff", default=False,
+            help="Launch a diff program (kdiff3) on the output if validation fails")
   parser.add_option("--valid","--validate",
 		    action="store_true", dest="xmlValidate", default=False,
 		    help="Validate the XML file(s) using xmllint and the latest schema.")

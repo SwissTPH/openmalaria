@@ -179,11 +179,14 @@ class Summary {
   void setAnnualAverageKappa(double kappa);
   void setNumTransmittingHosts(double value);
   
-  void setEirPerDayOfYear (vector<double> v) {
-    _eirPerDayOfYear[_surveyPeriod-1] = v;
+  void setInnoculationsPerDayOfYear (vector<double>& v) {
+    _innoculationsPerDayOfYear[_surveyPeriod-1] = v;
   }
-  void setKappaPerDayOfYear (vector<double> v) {
+  void setKappaPerDayOfYear (vector<double>& v) {
     _kappaPerDayOfYear[_surveyPeriod-1] = v;
+  }
+  void setInnoculationsPerAgeGroup (vector<double>& v) {
+    _innoculationsPerAgeGroup[_surveyPeriod-1] = v;	// copies v, not just its reference
   }
   
  private:
@@ -191,9 +194,9 @@ class Summary {
   //! X-dimension of summary arrays
   /*! Is numberOfSurveys+1 for all summaries */
   int _summaryDimensionX;    
-  //! Y-dimension of summary arrays 
-  /*! Is noOfAgeGroups for all age-specific summaries */
-  int _summaryDimensionY; 
+  
+  ///@brief All of these arrays are per survey-period (length numberOfSurveys+1, outer array), and most are per age-group (length _numOfAgeGroups).
+  //@{
   vector< vector<int> > _numHosts; //!< number of hosts
   vector< vector<int> > _numInfectedHosts; //!< number of infected hosts 
   //! expected number of infected hosts //!< expected number of infected hosts 
@@ -233,10 +236,14 @@ class Summary {
   vector< double > _annualAverageKappa; //!< Annual Average Kappa
   //! Number of episodes (non-malaria fever)
   vector< vector<int> > _numNonMalariaFever; 
-  /// Average of all EIR exhibited per day-of-year.
-  vector< vector<double> > _eirPerDayOfYear;
+  /// Innoculations per human (all ages) per day of year, over the last year.
+  vector< vector<double> > _innoculationsPerDayOfYear;
   /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
   vector< vector<double> > _kappaPerDayOfYear;
+  /** The total number of innoculations per age group, summed over the
+   * reporting period. */
+  vector< vector<double> > _innoculationsPerAgeGroup;
+  //@}
   
   //! Time intervals for all surveys specified in the XML
   vector<int> _surveysTimeIntervals; 
@@ -318,9 +325,12 @@ class Summary {
     // Number of episodes (non-malaria fever)
     nNMFever= 27,
     // EIR per day of year, summed over all years
-    eirPerDayOfYear = 28,
+    innoculationsPerDayOfYear = 28,
     // Kappa per day of year, for the last year
-    kappaPerDayOfYear = 29
+    kappaPerDayOfYear = 29,
+    /** Report the total number of innoculations per age group, summed over the
+     * reporting period. */
+    innoculationsPerAgeGroup = 30,
     
     // Note: can't use values greater than 31 without forcing a 64-bit type
   };

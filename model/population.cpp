@@ -279,7 +279,7 @@ void Population::update1(){
     sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
     
     // kappaByAge and nByAge are used in the screensaver only
-    int ia = iter->ageGroup() - 1;
+    int ia = iter->ageGroup();
     kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
     ++nByAge[ia];
     //END summarise infectiousness

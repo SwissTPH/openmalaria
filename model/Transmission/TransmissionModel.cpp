@@ -55,9 +55,9 @@ TransmissionModel::TransmissionModel() :
 {
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);
-  timeStepTotalEir = 0.0;
-  timeStepTotalEirEntries = 0;
-  eirPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
+  innoculationsPerAgeGroup.resize (Simulation::gMainSummary->getNumOfAgeGroups(), 0.0);
+  innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
+  timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
 }
 
 TransmissionModel::~TransmissionModel () {
@@ -75,8 +75,9 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
   else
     EIR = calculateEIR (simulationTime, host, ageInYears);
   
-  timeStepTotalEir += EIR;
-  timeStepTotalEirEntries ++;
+  int ageGroup = Simulation::gMainSummary->ageGroup (ageInYears);
+  timeStepEntoInnocs[ageGroup] += EIR;
+  timeStepNumEntoInnocs ++;
   return EIR;
 }
 
@@ -106,17 +107,26 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
     }
   }
   
-  eirPerDayOfYear[tmod] = timeStepTotalEir / timeStepTotalEirEntries;
-  timeStepTotalEir = 0.0;
-  timeStepTotalEirEntries = 0;
+  double timeStepTotal = 0.0;
+  for (size_t group = 0; group < timeStepEntoInnocs.size(); ++group) {
+    timeStepTotal += timeStepEntoInnocs[group];
+    innoculationsPerAgeGroup[group] += timeStepEntoInnocs[group];
+    // Reset to zero:
+    timeStepEntoInnocs[group] = 0.0;
+  }
+  innoculationsPerDayOfYear[tmod] = timeStepTotal / timeStepNumEntoInnocs;
+  timeStepNumEntoInnocs = 0;
 }
 
 void TransmissionModel::summarize (Summary& summary) {
   summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
   summary.setAnnualAverageKappa(_annualAverageKappa);
   
-  summary.setEirPerDayOfYear (eirPerDayOfYear);
+  summary.setInnoculationsPerDayOfYear (innoculationsPerDayOfYear);
   summary.setKappaPerDayOfYear (kappa);
+  
+  summary.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
+  innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
 }
 
 void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {

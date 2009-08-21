@@ -65,7 +65,8 @@ public:
   
   /** Set kappa for current interval in year from infectiousness of humans.
    *
-   * Also updates _annualAverageKappa.
+   * Also updates _annualAverageKappa, and reporting of entomological
+   * innoculations.
    * 
    * NOTE: could be combined with advancePeriod(), but is currently called at
    * a different time. */
@@ -126,14 +127,21 @@ protected:
    * Checkpointed. */
   double annualEIR;
   
-  //TODO: checkpoint
-  /// Sum of all EIR returned in this timestep
-  double timeStepTotalEir;
-  /// Divisor of timeStepTotalEir to get average.
-  int timeStepTotalEirEntries;
+  //TODO: checkpointing for the below
+  /** Innoculations per human (all ages) per day of year.
+   * 
+   * Contains values from today to the previous timestep, one year ago,
+   * including the initialisation phase. */
+  vector<double> innoculationsPerDayOfYear;
   
-  /** Average EIR exhibited over the last year per day. */
-  vector<double> eirPerDayOfYear;
+  /** The total number of innoculations per age group, summed over the
+   * reporting period. */
+  vector<double> innoculationsPerAgeGroup;
+  
+  /// Sum of all EIR returned in this timestep, per age group
+  vector<double> timeStepEntoInnocs;
+  /// Total number of EIRs output in the timestep (roughly equal to populationSize)
+  size_t timeStepNumEntoInnocs;
 };
 
 #endif
