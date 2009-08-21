@@ -449,6 +449,10 @@ bool Population::outMigrate(Human& current, int targetPop, int cumPop){
 // Static method used by estimateRemovalRates
 double Population::setDemoParameters (double param1, double param2) {
   rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
+  if (rho != 0.0)
+    // Issue: in this case the total population size differs from _populationSize,
+    // however, some code currently uses this as the total population size.
+    throw xml_scenario_error ("Population growth rate provided.");
   
   const double IMR=0.1;
   double M_inf=-log(1-IMR);
