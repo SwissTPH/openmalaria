@@ -25,12 +25,14 @@ option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamica
 MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
 
 if (MSVC)
-  option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRDT[D].lib when linking. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
+  option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRT[D].lib when linking. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
   # set a temporary variable, since cache variables don't get rewritten
   if (OM_USE_LIBCMT)
-    set (OM_LINK_FLAGS "/NODEFAULTLIB:MSVCRDT /NODEFAULTLIB:MSVCRDTD")
-  else (OM_USE_LIBCMT)
+    set (OM_LINK_FLAGS "/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
+    set (OM_COMPILE_FLAGS "/DXERCES_STATIC_LIBRARY")
+    else (OM_USE_LIBCMT)
     set (OM_LINK_FLAGS "/NODEFAULTLIB:LIBCMT")
+    set (OM_COMPILE_FLAGS)
   endif (OM_USE_LIBCMT)
 endif (MSVC)
 
@@ -97,7 +99,10 @@ target_link_libraries (openMalaria
 )
 
 if (MSVC)
-  set_target_properties (openMalaria PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
+  set_target_properties (openMalaria PROPERTIES
+    LINK_FLAGS "${OM_LINK_FLAGS}"
+    COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
+  )
 endif (MSVC)
 
 # -----  OM_BOXTEST - black-box & unit testing  -----

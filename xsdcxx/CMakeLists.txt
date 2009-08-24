@@ -29,5 +29,8 @@ add_library (xsdcxx
 )
 
 if (MSVC)
-  set_target_properties (xsdcxx PROPERTIES LINK_FLAGS "${OM_LINK_FLAGS}")
+  set_target_properties (openMalaria PROPERTIES
+    LINK_FLAGS "${OM_LINK_FLAGS}"
+    COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
+  )
 endif (MSVC)
