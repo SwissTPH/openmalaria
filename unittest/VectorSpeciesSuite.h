@@ -177,6 +177,7 @@ public:
     
     // Run advancePeriod and getEIR for each human. Don't care about eir returned by getEIR;
     // just test vtm->eirPerDayOfYear and species parameters.
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -188,6 +189,7 @@ public:
     species->ITNDeterrency = yaml2WeibullDecayedValue(node["Deterrency"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -199,6 +201,7 @@ public:
     species->ITNPreprandialKillingEffect = yaml2WeibullDecayedValue(node["PreprandialKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -210,6 +213,7 @@ public:
     species->ITNPostprandialKillingEffect = yaml2WeibullDecayedValue(node["PostprandialKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -221,6 +225,7 @@ public:
     species->IRSKillingEffect = yaml2WeibullDecayedValue(node["RestKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupIRS();
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -232,6 +237,7 @@ public:
     node["Larviciding"]["effectiveness"] >> species->larvicidingIneffectiveness;
     species->larvicidingIneffectiveness = 1 - species->larvicidingIneffectiveness;
     species->larvicidingEndStep = 1000;
+    vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
@@ -239,7 +245,7 @@ public:
   }
   
   void doAssertSpecies (const char *f, unsigned l, const YAML::Node& node) {
-    ETS_ASSERT_EQUALS (vtm->timeStepTotalEirEntries, simulation->_population->_populationSize);
+    ETS_ASSERT_EQUALS ((int)vtm->timeStepNumEntoInnocs, simulation->_population->_populationSize);
     /* Print values so they can easily be copied into expected output:
     cout << endl << setprecision(10);
     cout << "average EIR: " << vtm->timeStepTotalEir / vtm->timeStepTotalEirEntries;
@@ -252,7 +258,10 @@ public:
     */
     double avEIR;
     node["averageEIR"] >> avEIR;
-    TS_ASSERT_APPROX (vtm->timeStepTotalEir / vtm->timeStepTotalEirEntries, avEIR);
+    double result = 0.0;
+    for (vector<double>::const_iterator it = vtm->timeStepEntoInnocs.begin(); it != vtm->timeStepEntoInnocs.end(); ++it)
+      result += *it;
+    TS_ASSERT_APPROX (result / vtm->timeStepNumEntoInnocs, avEIR);
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_A, yaml2Std<double> (node["P_A"]));
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_df, yaml2Std<double> (node["P_df"]));
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_dif, yaml2Std<double> (node["P_dif"]));
