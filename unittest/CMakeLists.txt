@@ -97,7 +97,7 @@ target_link_libraries (run
 )
 
 if (MSVC)
-  set_target_properties (openMalaria PROPERTIES
+  set_target_properties (run PROPERTIES
     LINK_FLAGS "${OM_LINK_FLAGS}"
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )

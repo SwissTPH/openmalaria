@@ -52,7 +52,7 @@ add_library (model
 )
 
 if (MSVC)
-  set_target_properties (openMalaria PROPERTIES
+  set_target_properties (model PROPERTIES
     LINK_FLAGS "${OM_LINK_FLAGS}"
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )

@@ -171,7 +171,8 @@ string Global::lookupResource (const string& path) {
   string ret;
   if (path.size() >= 1 && path[0] == '/') {
     // UNIX absolute path
-  } else if (path.size() >= 3 && path[1] == ':' && path[2] == '\\') {
+  } else if (path.size() >= 3 && path[1] == ':'
+	  && (path[2] == '\\' || path[2] == '/')) {
     // Windows absolute path.. at least probably
   } else {	// relative
     ret = clResourcePath;
