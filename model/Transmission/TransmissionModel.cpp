@@ -142,6 +142,11 @@ void TransmissionModel::write(ostream& out) const {
     out << kappa[i] << endl;
   out << _annualAverageKappa << endl;
   out << _sumAnnualKappa << endl;
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    out << innoculationsPerDayOfYear[i] << endl;
+  out << innoculationsPerAgeGroup.size() << endl;
+  for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
+    out << innoculationsPerAgeGroup[i] << endl;
 }
 void TransmissionModel::read(istream& in) {
   in >> annualEIR;
@@ -149,4 +154,12 @@ void TransmissionModel::read(istream& in) {
     in >> kappa[i];
   in >> _annualAverageKappa;
   in >> _sumAnnualKappa;
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    in >> innoculationsPerDayOfYear[i];
+  size_t size;
+  in >> size;
+  if (size != innoculationsPerAgeGroup.size())
+    throw checkpoint_error ("innoculationsPerAgeGroup has wrong size");
+  for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
+    in >> innoculationsPerAgeGroup[i];
 }
