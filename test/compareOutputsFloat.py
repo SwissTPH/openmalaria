@@ -5,6 +5,10 @@ import string
 import math
 import unittest
 
+# Could use math.isinf, but it's not present in python 2.5
+def isinf (a):
+    return (a-a) != 0
+
 # Careful with NaN, +/- inf and 0 values! Note: inf == inf
 # Check a and b are approximately equal. Return true if:
 #   a equals b to at least log10(relPrecision) significant figures
@@ -17,7 +21,7 @@ import unittest
 # Possibly considering the case where a or b is zero explicitly would help, but
 # might lead to confusing outcomes.
 def approx_equal (a,b, relPrecision, absPrecision):
-    if math.isinf(a) or math.isinf(b):
+    if isinf(a) or isinf(b):
         return False
     tolerance = relPrecision * max(math.fabs(a),math.fabs(b))
     tolerance = max(tolerance, absPrecision)

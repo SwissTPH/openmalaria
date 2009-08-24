@@ -47,7 +47,7 @@ def findFile (*names):
        newest=path
   return newest
 
-openMalariaExec=findFile (*["../openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"])
+openMalariaExec=findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"])
 
 def linkOrCopy (src, dest):
   if hasattr(os, 'symlink'):
