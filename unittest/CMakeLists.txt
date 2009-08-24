@@ -47,6 +47,9 @@ endif (OM_CXXTEST_GUI)
 
 # For yaml-cpp. Temporarily here while I'm trialing the use of yaml with unittest data.
 find_library (YAML_CPP_LIB NAMES yaml-cpp)
+if (NOT YAML_CPP_LIB)
+  message (FATAL_ERROR "Unable to find yaml-cpp library. (You can avoid this dependency by disabling OM_CXXTEST_ENABLE)")
+endif (NOT YAML_CPP_LIB)
 
 set (CMAKE_CONFIGURED 1)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_DIR}/configured/TestPaths.h @ONLY)

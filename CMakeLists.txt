@@ -25,7 +25,8 @@ option (BUILD_SHARED_LIBS "Link xsdcxx, WithinHostModel, etc. libraries dynamica
 MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
 
 if (MSVC)
-  option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRT[D].lib when linking. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
+  # This is now the OM_STATICALLY_LINK for windows
+  option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRT[D].lib when linking, and link statically. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
   # set a temporary variable, since cache variables don't get rewritten
   if (OM_USE_LIBCMT)
     set (OM_LINK_FLAGS "/NODEFAULTLIB:MSVCRT /NODEFAULTLIB:MSVCRTD")
@@ -46,8 +47,23 @@ find_package (Z)
 
 option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
 if (OM_BOINC_INTEGRATION)
-  find_library (BOINC_LIB boinc PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib)
-  find_library (BOINC_API_LIB boinc_api PATHS ${CMAKE_SOURCE_DIR}/../boinc/api)
+  if (OM_USE_LIBCMT) # pick only the right libs
+    set (BOINC_LIB_POSTFIX "_staticcrt")
+  else (OM_USE_LIBCMT)
+    set (BOINC_LIB_POSTFIX "")
+  endif (OM_USE_LIBCMT)
+  message (STATUS "Looking for: boinc${BOINC_LIB_POSTFIX}")
+  message (STATUS "in: ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release")
+  find_library (BOINC_LIB boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
+    PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib
+    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release
+    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Debug
+  )
+  find_library (BOINC_API_LIB boinc_api${BOINC_LIB_POSTFIX} libboincapi${BOINC_LIB_POSTFIX}
+    PATHS ${CMAKE_SOURCE_DIR}/../boinc/api
+    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release
+    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Debug
+  )
   include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
   if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
     message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
