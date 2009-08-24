@@ -43,8 +43,6 @@ class Summary {
   Summary();
   virtual ~Summary();
 
-  void printHosts(ostream& out);
-
   //! Initialisation Routine. This will have to be moved to the class constructor
   void initialiseSummaries ();
 
@@ -180,13 +178,13 @@ class Summary {
   void setNumTransmittingHosts(double value);
   
   void setInnoculationsPerDayOfYear (vector<double>& v) {
-    _innoculationsPerDayOfYear[_surveyPeriod-1] = v;
+    _innoculationsPerDayOfYear[_surveyPeriod] = v;
   }
   void setKappaPerDayOfYear (vector<double>& v) {
-    _kappaPerDayOfYear[_surveyPeriod-1] = v;
+    _kappaPerDayOfYear[_surveyPeriod] = v;
   }
   void setInnoculationsPerAgeGroup (vector<double>& v) {
-    _innoculationsPerAgeGroup[_surveyPeriod-1] = v;	// copies v, not just its reference
+    _innoculationsPerAgeGroup[_surveyPeriod] = v;	// copies v, not just its reference
   }
   
  private:
