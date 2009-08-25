@@ -850,7 +850,7 @@
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="tolPeriod" type="xs:int" use="required" />
-          <xs:attribute name="atten" type="xs:int" use="required">
+          <xs:attribute name="atten" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation />
               <xs:appinfo />
@@ -1296,17 +1296,14 @@
                             <xs:attribute name="name" type="xs:string" use="required">
                               <xs:annotation>
                                 <xs:documentation>
-                                  Name
-                                  of
-                                  drug
-                                  compound
+                                  Name of drug compound
                                 </xs:documentation>
                                 <xs:appinfo>
                                   units:string;
                                 </xs:appinfo>
                               </xs:annotation>
                             </xs:attribute>
-                            <xs:attribute name="qty" type="xs:int" use="required">
+                            <xs:attribute name="qty" type="xs:double" use="required">
                               <xs:annotation>
                                 <xs:documentation>Quantity of drug compound</xs:documentation>
                                 <xs:appinfo>units:Number;</xs:appinfo>
@@ -1315,10 +1312,7 @@
                             <xs:attribute name="time" type="xs:int" use="required">
                               <xs:annotation>
                                 <xs:documentation>
-                                  Time
-                                  step
-                                  of
-                                  intervention
+                                  Time step of intervention
                                 </xs:documentation>
                                 <xs:appinfo>
                                   units:Number;min:1;max:10000;
