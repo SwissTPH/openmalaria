@@ -101,6 +101,10 @@ public:
   inline void setupIRS () {
     timestepIRS = Simulation::simulationTime;
   }
+  /// Give individual a new VA intervention as of time timeStep.
+  inline void setupVA () {
+    timestepVA = Simulation::simulationTime;
+  }
   
   /** Distribute ITNs to individuals of the correct age (to model ITN
    * distribution along with measles vaccines, etc.). */
@@ -126,6 +130,7 @@ private:
   
   int timestepITN;
   int timestepIRS;
+  int timestepVA;
   
   size_t nextItnDistribution;
   

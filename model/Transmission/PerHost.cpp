@@ -55,7 +55,7 @@ void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
 // -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () :
-    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER),
+    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER), timestepVA(TIMESTEP_NEVER),
     nextItnDistribution(0)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
@@ -72,6 +72,7 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
   in >> _entoAvailability;
   in >> timestepITN;
   in >> timestepIRS;
+  in >> timestepVA;
   in >> nextItnDistribution;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
@@ -85,6 +86,7 @@ void PerHostTransmission::write (ostream& out) const {
   out << _entoAvailability << endl;
   out << timestepITN << endl;
   out << timestepIRS << endl;
+  out << timestepVA << endl;
   out << nextItnDistribution << endl;
   for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
     hMI->write (out);
@@ -98,7 +100,8 @@ void PerHostTransmission::write (ostream& out) const {
 double PerHostTransmission::entoAvailabilityPartial (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability
     * (1.0 - speciesStatic->ITNDeterrency (Simulation::simulationTime - timestepITN))
-    * (1.0 - speciesStatic->IRSDeterrency (Simulation::simulationTime - timestepIRS));
+    * (1.0 - speciesStatic->IRSDeterrency (Simulation::simulationTime - timestepIRS))
+    * (1.0 - speciesStatic->VADeterrency  (Simulation::simulationTime - timestepVA));
 }
 double PerHostTransmission::probMosqBiting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
   return species[speciesIndex].probMosqBiting

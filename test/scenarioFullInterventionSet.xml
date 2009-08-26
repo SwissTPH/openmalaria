@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<scenario analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="100" schemaVersion="8" simulationDuration="1465" wuID="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="scenario_8.xsd">
+<scenario analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="100" schemaVersion="9" simulationDuration="1465" wuID="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="scenario_009.xsd">
 
   <demography name="Ifakara">
     <ageGroup lowerbound="0">
@@ -176,6 +176,11 @@
         <killingEffect halflife="0.5" initial="0.24"/>
       </anopheles>
     </IRSDescription>
+    <VADescription name="hypothetical deterrency">
+      <anopheles mosquito="gambiae_ss">
+	<deterrency halflife="4" initial="0.2"/>
+      </anopheles>
+    </VADescription>
     <continuous>
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>
@@ -194,6 +199,7 @@
         <vaccinate coverage="0.95"/>
         <ITN coverage="0.95"/>
         <IRS coverage="0.95"/>
+	<VectorAvailability coverage="0.7" />
       </intervention>
       <intervention time="13">
         <vaccinate coverage="0.95"/>

@@ -116,6 +116,10 @@ public:
     IRSKillingEffect = irsDesc.getKillingEffect ();
   }
   
+  inline void setVADescription (const scnXml::Anopheles3& vaDesc) {
+    VADeterrency = vaDesc.getDeterrency ();
+  }
+  
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
   /** @brief Baseline parameters which may be varied per host
@@ -154,6 +158,9 @@ public:
   WeibullDecayedValue IRSDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
   WeibullDecayedValue IRSKillingEffect;
+  /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
+   * but not killing the mosquito. (1 - this) multiplies availability. */
+  WeibullDecayedValue VADeterrency;
   //@}
   
 private:

@@ -406,6 +406,9 @@ void Population::implementIntervention (int time) {
   if (interv->getIRS().present()) {
     massIntervention (interv->getIRS().get(), &Human::setupIRS);
   }
+  if (interv->getVectorAvailability().present()) {
+    massIntervention (interv->getVectorAvailability().get(), &Human::setupVA);
+  }
   
   if (interv->getLarviciding().present()) {
     _transmissionModel->intervLarviciding (interv->getLarviciding().get());

@@ -125,6 +125,8 @@ public:
   void setupITN ();
   /// Give human a new IRS
   void setupIRS ();
+  /// Give human a new VA intervention
+  void setupVA ();
   
   ///@name static public
   //@{

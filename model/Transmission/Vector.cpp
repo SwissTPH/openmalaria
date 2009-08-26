@@ -87,6 +87,13 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
       species[getSpeciesIndex(irsDesc.getMosquito())].setIRSDescription (irsDesc);
     }
   }
+  if (xmlInterventions.getVADescription().present()) {
+    const scnXml::VADescription::AnophelesSequence& seq = xmlInterventions.getVADescription().get().getAnopheles();
+    for (size_t i = 0; i < seq.size(); ++i) {
+      const scnXml::Anopheles3& desc = seq[i];
+      species[getSpeciesIndex(desc.getMosquito())].setVADescription (desc);
+    }
+  }
 }
 VectorTransmission::~VectorTransmission () {
   for (size_t i = 0; i < numSpecies; ++i)

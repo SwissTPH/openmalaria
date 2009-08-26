@@ -290,6 +290,9 @@ void Human::setupITN () {
 void Human::setupIRS () {
   perHostTransmission.setupIRS ();
 }
+void Human::setupVA () {
+  perHostTransmission.setupVA ();
+}
 
 
 void Human::summarize(){
