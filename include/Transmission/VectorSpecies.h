@@ -125,7 +125,9 @@ public:
   /** @brief Baseline parameters which may be varied per host
    *
    * These may be varied per-human to account for interventions and innate
-   * resistances. */
+   * resistances.
+   * 
+   * Read from XML by initialise; no need to checkpoint. */
   //@{
   /** Availability rate (α_i) */
   double entoAvailability;
@@ -142,7 +144,9 @@ public:
   double probMosqSurvivalResting;
   //@}
   
-  /** @brief Intervention description parameters */
+  /** @brief Intervention description parameters
+   *
+   * Read from XML by VectorTransmission constructor. No need to checkpoint. */
   //@{
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
@@ -164,12 +168,10 @@ public:
   //@}
   
 private:
-  ///@brief Parameters which may vary per mosquito species
+  /** @brief Parameters which may vary per mosquito species
+   *
+   * Read from XML by initialise; no need to checkpoint. */
   //@{
-  /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-   * Units: Animals per day. Length: daysInYear. */
-  vector<double> mosqEmergeRate;
-  
   /** Death rate of mosquitoes while host-seeking (μ_vA).
    * Unit: animals/day. */
   double mosqSeekingDeathRate;	// TODO: varies over time
@@ -197,6 +199,12 @@ private:
   double probMosqSurvivalOvipositing;
   //@}
   
+  /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
+   * Units: Animals per day. Length: daysInYear.
+   * 
+   * Should be set by either initialise or initMainSimulation; no need to checkpoint. */
+  vector<double> mosqEmergeRate;
+  
 private:
   /* Parameters from model */
   /* Partial (derived) parameters from model */
@@ -206,10 +214,18 @@ private:
    * the arrays need to be, but simplifies code with no real impact.
    * 
    * Should equal EIPDuration + mosqRestDuration to allow values up to
-   * θ_s + τ - 1 days back, plus current day. */
+   * θ_s + τ - 1 days back, plus current day.
+   * 
+   * Set by initialise; no need to checkpoint. */
   int N_v_length;
   
-  ///@brief Parameter arrays N_v_length long.
+  /** @brief Parameter arrays N_v_length long.
+   *
+   * P_A, P_df and P_dif are set by initFeedingCycleProbs; both these and N_v,
+   * O_v and S_v may be set either by initialise or by initMainSimulation, from
+   * which they can be reset.
+   * They should be checkpointed for the main simulation and if the vector
+   * model is used during initialisation. */
   //@{
   /** @brief Probability of a mosquito not finding a host one night. */
   vector<double> P_A;
@@ -233,17 +249,25 @@ private:
   vector<double> N_v, O_v, S_v;
   //@}
   
-  /** Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
-   * Values are recalculated each step, only first few elements are stored
-   * across steps.
-   * Length: EIPDuration (θ_s). */
+  /** @brief Used for calculations within advancePeriod. Only saved for optimisation.
+   *
+   * Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
+   * Values are recalculated each step; only fArray[0] and
+   * ftauArray[0..mosqRestDuration] are stored across steps for optimisation.
+   * 
+   * Length: EIPDuration (θ_s).
+   * 
+   * Don't need to be checkpointed, but some values need to be initialised. */
   //@{
   vector<double> fArray;
   vector<double> ftauArray;
   //@}
   
   
-  /** @brief Parameters used during the initialisation phase. */
+  /** @brief Parameters used during the initialisation phase.
+   *
+   * Need to be available to initMainSimulation, but can be reinitialised
+   * (no need to checkpoint). */
   //@{
   /** FCEIR[] is the array of parameters of the Fourier approximation to the
    * annual EIR. Currently always set in the TransmissionModel constructor
@@ -256,14 +280,22 @@ private:
   
   /** Per time-step partial calculation of EIR.
   *
-  * See comment in advancePeriod() for details of how the EIR is calculated. */
+  * See comment in advancePeriod() for details of how the EIR is calculated.
+  * 
+  * Doesn't need to be checkpointed (is recalculated each step). */
   double partialEIR;
   
+  /** @brief Simple larviciding intervention.
+   *
+   * Would need to be checkpointed for main simulation; not used during
+   * initialisation period (so can be reinitialised). */
+  //@{
   /** Timestep at which larviciding effects dissappear. */
   int larvicidingEndStep;
   /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
    * this parameter. */
   double larvicidingIneffectiveness;
+  //@}
   
   /* Functions */
   

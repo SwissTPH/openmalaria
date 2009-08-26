@@ -51,7 +51,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const std::list<H
 }
 
 TransmissionModel::TransmissionModel() :
-    simulationMode(equilibriumMode), annualEIR(0.0)
+    simulationMode(equilibriumMode), annualEIR(0.0), timeStepNumEntoInnocs (0)
 {
   kappa.resize (Global::intervalsPerYear);
   initialisationEIR.resize (Global::intervalsPerYear);

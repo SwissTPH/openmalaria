@@ -56,10 +56,13 @@ public:
   }
   //@}
   
+  ///@brief Initialisation / checkpionting
+  //@{
   PerHostTransmission ();
   void initialise (TransmissionModel& tm, double availabilityFactor);
   PerHostTransmission (istream& in, TransmissionModel&);
   void write (ostream& out) const;
+  //@}
   
   /** @brief Get model parameters for species[speciesIndex].
    *

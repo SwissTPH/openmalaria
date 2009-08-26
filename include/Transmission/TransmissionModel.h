@@ -127,7 +127,11 @@ protected:
    * Checkpointed. */
   double annualEIR;
   
-  //TODO: checkpointing for the below
+  /** @brief Variables for reporting of entomological innoculations to humans.
+   *
+   * innoculationsPer... arrays are checkpointed; timesStep... variables aren't
+   * since they're calculated per step. */
+  //@{
   /** Innoculations per human (all ages) per day of year.
    * 
    * Contains values from today to the previous timestep, one year ago,
@@ -142,6 +146,7 @@ protected:
   vector<double> timeStepEntoInnocs;
   /// Total number of EIRs output in the timestep (roughly equal to populationSize)
   size_t timeStepNumEntoInnocs;
+  //@}
 };
 
 #endif

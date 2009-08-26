@@ -72,6 +72,10 @@ private:
     return sIndex->second;
   }
   
+  /** @brief Access to per (anopheles) species data.
+   *
+   * Set by constructor so don't checkpoint. */
+  //@{
   /** The number of discrete species of anopheles mosquitos to be modelled.
    *
    * Must be the same as species.size(). */
@@ -89,6 +93,7 @@ private:
    * Other data read from XML should look up the name here and use the index
    * found. */
   map<string,size_t> speciesIndex;
+  //@}
   
   /*NOTE: add NonHumanHosts data here:
   per-species parameters

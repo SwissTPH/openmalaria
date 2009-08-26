@@ -98,8 +98,21 @@ string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, si
     vectors::scale (mosqEmergeRate, populationSize);
     
     P_dif = vectors::DoubleList2std (emergeData.getKappa(), N_v_length);
-    if (!FCEIR.size())
+    if (!FCEIR.size()) {
+      cerr << "Warning: running the vector code during initialisation probably isn't valid." << endl;
+      /* Explanation:
+       * Normally an entomological infection rate of mosquitoes to humans is
+       * forced during initialisation. Without this, some infections are
+       * introduced into humans by initially infected mosquitoes (O_v and S_v),
+       * but since humans are initially uninfected and have no immunity, no new
+       * mosquitoes will be infected initially. There has been some argument
+       * that the whole system should in any case reach an equilibrium state by
+       * the end of the initialisation phase, but there are no guarantees since
+       * the whole system is dynamic, not forced.
+       * 
+       * Currently this is used for a unittest. */
       initFeedingCycleProbs (sIndex, population, P_dif);
+    }
     //else: kappa is validated (from P_dif) and P_* calculated by initMainSimulation
     
     N_v = vectors::DoubleList2std (emergeData.getN_v(), N_v_length);
