@@ -27,8 +27,8 @@
 #include "intervention.h" 
 #include "inputData.h"
 #include "Transmission/NonVector.h"
-#include "Transmission/Vector.h"
-#include "Transmission/PerHost.h"
+#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/PerHostTransmission.h"
 #include "simulation.h"
 #include "summary.h"
 #include <math.h> 

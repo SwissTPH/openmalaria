@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 #include "Transmission/NonVector.h"
-#include "Transmission/PerHost.h"
+#include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 #include "simulation.h"
 #include "util/gsl.h"

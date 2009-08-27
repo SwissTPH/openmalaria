@@ -17,9 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/VectorSpecies.h"
-#include "Transmission/VectorEmergence.h"
-#include "Transmission/PerHost.h"
+#include "Transmission/Vector/VectorAnopheles.h"
+#include "Transmission/Vector/VectorEmergence.h"
+#include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 #include "human.h"
 #include "simulation.h"
@@ -31,7 +31,7 @@
 #include <ctime>
 
 
-string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
+string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
   scnXml::Mosq mosq = anoph.getMosq();
   
@@ -41,10 +41,7 @@ string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, si
   mosqSeekingDeathRate = mosq.getMosqSeekingDeathRate();
   mosqSeekingDuration = mosq.getMosqSeekingDuration();
   
-  entoAvailability = mosq.getMosqEntoAvailability();
-  probMosqBiting = mosq.getMosqProbBiting();
-  probMosqFindRestSite = mosq.getMosqProbFindRestSite();
-  probMosqSurvivalResting = mosq.getMosqProbResting();
+  humanBase.initialise (mosq);
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
@@ -126,14 +123,14 @@ string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, si
   return anoph.getMosquito();
 }
 
-void VectorTransmissionSpecies::destroy () {
+void VectorAnopheles::destroy () {
 }
 
-double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population) {
+double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population) {
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
   double leaveSeekingStateRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveSeekingStateRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
+    leaveSeekingStateRate += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
   /* FIXME
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
     leaveSeekingStateRate += nnh->perHostTransmission.entoAvailabilityPartial (this, sIndex); */
@@ -147,9 +144,9 @@ double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double
   intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
-      host.probMosqBiting(this, sIndex) *
-      host.probMosqResting(this, sIndex);
+    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears()) *
+      host.probMosqBiting(humanBase, sIndex) *
+      host.probMosqResting(humanBase, sIndex);
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
@@ -167,7 +164,7 @@ double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double
   return P_Ai_base;
 }
 
-void VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
+void VectorAnopheles::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
   //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
   
   double intP_A, intP_df, intP_dif;
@@ -183,7 +180,7 @@ void VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std:
   }
 }
 
-void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
+void VectorAnopheles::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
   // If EIR data was provided, validate EIR or do emergence rate calculations
   // and switch to calculating a dynamic EIR.
   if (FCEIR.size()) {
@@ -214,14 +211,14 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       //BEGIN Validate or calculate mosqEmergeRate
       double sumAvailability = 0.0;
       for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-	sumAvailability += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
+	sumAvailability += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
       
       // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
       VectorEmergence emerge (mosqRestDuration, EIPDuration,
-			      populationSize, sumAvailability / populationSize,
+			      populationSize,
 			      mosqSeekingDeathRate, mosqSeekingDuration,
-			      probMosqBiting, probMosqFindRestSite,
-			      probMosqSurvivalResting, probMosqSurvivalOvipositing);
+			      sumAvailability,
+			      humanBase, probMosqSurvivalOvipositing);
       
       
       /* We can either take the EIR from the initialisation stage and expand to
@@ -334,7 +331,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
 
 
 // Every Global::interval days:
-void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex) {
+void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex) {
   if (simulationTime >= larvicidingEndStep) {
     larvicidingEndStep = std::numeric_limits<int>::max();
     larvicidingIneffectiveness = 1.0;
@@ -463,13 +460,13 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
 }
 
 
-void VectorTransmissionSpecies::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
+void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
   larvicidingEndStep = Simulation::simulationTime + (elt.getDuration() / Global::interval);
 }
 
 
-vector<double> VectorTransmissionSpecies::convertLengthToFullYear (vector<double>& ShortArray) {
+vector<double> VectorAnopheles::convertLengthToFullYear (vector<double>& ShortArray) {
   vector<double> FullArray (daysInYear);
   for (size_t i=0; i < Global::intervalsPerYear; i++) {
     for (int j=0; j < Global::interval; j++) {
@@ -480,7 +477,7 @@ vector<double> VectorTransmissionSpecies::convertLengthToFullYear (vector<double
 }
 
 
-void VectorTransmissionSpecies::calcInverseDFTExp(vector<double>& tArray, vector<double>& FC) {
+void VectorAnopheles::calcInverseDFTExp(vector<double>& tArray, vector<double>& FC) {
   if (FC.size() % 2 == 0)
     throw xml_scenario_error("The number of Fourier coefficents should be odd.");
   
@@ -501,7 +498,7 @@ void VectorTransmissionSpecies::calcInverseDFTExp(vector<double>& tArray, vector
   }
 }
 
-void VectorTransmissionSpecies::rotateArray(vector<double>& rArray, double rAngle) {
+void VectorAnopheles::rotateArray(vector<double>& rArray, double rAngle) {
   vector<double> tempArray (rArray.size());
   size_t rotIndex = size_t ((rAngle*rArray.size())/(2.0*M_PI));
 

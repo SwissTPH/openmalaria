@@ -4,7 +4,7 @@
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  WeibullDecayedValue.cpp population.cpp InfectionIncidenceModel.cpp
+  population.cpp InfectionIncidenceModel.cpp
   gzstream.C simulation.cpp summary.cpp global.cpp
   intervention.cpp proteome.cpp human.cpp
 )
@@ -12,6 +12,7 @@ aux_source_directory (Clinical Clinical_CPP)
 aux_source_directory (Drug Drug_CPP)
 aux_source_directory (Pathogenesis Pathogenesis_CPP)
 aux_source_directory (Transmission Transmission_CPP)
+aux_source_directory (Transmission/Vector TransmissionVector_CPP)
 aux_source_directory (WithinHost WithinHost_CPP)
 aux_source_directory (util util_CPP)
 
@@ -21,6 +22,7 @@ aux_source_directory (${CMAKE_SOURCE_DIR}/include/Clinical Clinical_H)
 aux_source_directory (${CMAKE_SOURCE_DIR}/include/Drug Drug_H)
 aux_source_directory (${CMAKE_SOURCE_DIR}/include/Pathogenesis Pathogenesis_H)
 aux_source_directory (${CMAKE_SOURCE_DIR}/include/Transmission Transmission_H)
+aux_source_directory (${CMAKE_SOURCE_DIR}/include/Transmission/Vector TransmissionVector_H)
 aux_source_directory (${CMAKE_SOURCE_DIR}/include/WithinHost WithinHost_H)
 aux_source_directory (${CMAKE_SOURCE_DIR}/include/util util_H)
 
@@ -41,6 +43,7 @@ add_library (model
   ${Drug_CPP}
   ${Pathogenesis_CPP}
   ${Transmission_CPP}
+  ${TransmissionVector_CPP}
   ${WithinHost_CPP}
   ${util_CPP}
   ${Model_H}
@@ -48,6 +51,7 @@ add_library (model
   ${Drug_H}
   ${Pathogenesis_H}
   ${Transmission_H}
+  ${TransmissionVector_H}
   ${WithinHost_H}
 )
 
@@ -64,6 +68,7 @@ source_group (model\\Clinical FILES ${Clinical_CPP})
 source_group (model\\Drug FILES ${Drug_CPP})
 source_group (model\\Pathogenesis FILES ${Pathogenesis_CPP})
 source_group (model\\Transmission FILES ${Transmission_CPP})
+source_group (model\\Transmission\\Vector FILES ${TransmissionVector_CPP})
 source_group (model\\WithinHost FILES ${WithinHost_CPP})
 source_group (model\\util FILES ${util_CPP})
 
@@ -72,5 +77,6 @@ source_group (include\\Clinical FILES ${Clinical_H})
 source_group (include\\Drug FILES ${Drug_H})
 source_group (include\\Pathogenesis FILES ${Pathogenesis_H})
 source_group (include\\Transmission FILES ${Transmission_H})
+source_group (include\\Transmission\\Vector FILES ${TransmissionVector_H})
 source_group (include\\WithinHost FILES ${WithinHost_H})
 source_group (include\\util FILES ${util_H})

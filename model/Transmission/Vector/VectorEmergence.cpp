@@ -22,7 +22,7 @@
    ---         (to calculate mosquito emergence rates).         --- */
 
 
-#include "Transmission/VectorEmergence.h"
+#include "Transmission/Vector/VectorEmergence.h"
 #include "global.h"
 #include "util/vectors.h"
 
@@ -57,17 +57,16 @@
   * As far as possible, we try to use gsl_vectors instead of arrays to allow more
   * flexibility. */
 VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration,
-    int populationSize, double entoAvailability, double mosqSeekingDeathRate,
-    double mosqSeekingDuration, double probMosqBiting, double probMosqFindRestSite,
-    double probMosqSurvivalResting, double probMosqSurvivalOvipositing,
+    int populationSize, double mosqSeekingDeathRate, double mosqSeekingDuration,
+    double populationAvailability,
+    HostCategoryAnopheles& hB, double probMosqSurvivalOvipositing,
     int yearLength, ostream& traceOut, const char* logFileName) :
   counterSvDiff(0),
   theta_p (yearLength), tau(mosqRestDuration), theta_s(EIPDuration),
-  N_i(populationSize),
-  alpha_i(entoAvailability),
+  humanPopulationSize(populationSize),
   mu_vA(mosqSeekingDeathRate), theta_d(mosqSeekingDuration),
-  P_B_i(probMosqBiting), P_C_i(probMosqFindRestSite),
-  P_D_i(probMosqSurvivalResting), P_E_i(probMosqSurvivalOvipositing),
+  humanPopulationAvailability(populationAvailability),
+  humanBase(hB), P_E_i(probMosqSurvivalOvipositing),
   trace (traceOut), logFile (logFileName)
 {
   mt = theta_s + tau -1;
@@ -147,14 +146,6 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
   // \f$(\mathbb{I}-X_{\theta_p})^{-1}\f$.
   // The inverse of the identity matrix minus X_t_p.
   gsl_matrix* inv1Xtp = gsl_matrix_calloc(eta, eta);
-
-# ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
-  // We now try to print these parameters to file to make sure that 
-  // they show what we want them to show.
-  PrintParameters(theta_p, tau, theta_s, N_i, alpha_i,
-                  mu_vA, theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi, Xi_i);
-  // The parameter values look correct.
-# endif
   
   // Derived Parameters
   
@@ -363,19 +354,19 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gs
 	
 	// Refer to papers noted above for equations.
         // P_A and P_Ai are described in CalcInitMosqEmergeRate.
-  double totalAvailability = alpha_i * N_i;
+  double totalAvailability = humanPopulationAvailability;
   /* FIXME
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
     totalAvailability += nnh->availability; */
   double P_A = exp(-(totalAvailability + mu_vA)*theta_d);
-  double P_Ai = (1-P_A)*(alpha_i*N_i)/(totalAvailability + mu_vA);
+  double P_Ai = (1-P_A) * humanPopulationAvailability/(totalAvailability + mu_vA);
 	// \f$P_{df}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle.
 	// Only part of calculation here; rest after P_df has been used to calculate P_dif and P_duf
-  double P_df = P_Ai*P_B_i*P_C_i*P_D_i*P_E_i;
+  double P_df = P_Ai*humanBase.probMosqBitingAndResting()*P_E_i;
 
 	// Evaluate P_dif and P_duf.
-	// We would add P_Ai*P_B_i*P_C_i*P_D_i*P_E_i*kappa for non-human hosts, except kappa is always zero
+	// We would add P_Ai*humanBase.probMosqBitingAndResting()*P_E_i*kappa for non-human hosts, except kappa is always zero
 	
 	// P_dif:
   gsl_vector_memcpy(P_dif, K_vi);
@@ -711,9 +702,9 @@ void VectorEmergence::CalcInv1minusA(gsl_matrix* inv1A, const gsl_matrix* A) con
 
 void VectorEmergence::CalSvfromEIRdata(gsl_vector* Sv, double P_Ai, const gsl_vector* Xi_i) const
 {
-  // Sv(t) = Xi_i(t)*(N_i/(P_Ai*P_B_i))
+  // Sv(t) = Xi_i(t)*(humanPopulationSize/(P_Ai*humanBase.probMosqBiting))
   gsl_vector_memcpy(Sv, Xi_i);
-  gsl_vector_scale(Sv, N_i/(P_Ai*P_B_i));	
+  gsl_vector_scale(Sv, humanPopulationSize/(P_Ai*humanBase.probMosqBiting));	
 }
 
 
@@ -735,41 +726,6 @@ void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_f
 	<< "\t||f||_1 = " << gsl_blas_dasum(srootfind->f)	// Calculate the \f$l^1\f$ norm of f.
 	<< endl;
 }
-
-#ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
-void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
-		double N_i, double alpha_i, double mu_vA,
-		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
-		const gsl_vector* K_vi, const gsl_vector* Xi_i) const
-{
-  logFile << "theta_p = " << theta_p << ";" << endl;
-  logFile << "tau = " << tau << ";" << endl;
-  logFile << "theta_s = " << theta_s << ";" << endl;
-
-  logFile << "N_i = " << N_i << ";" << endl;
-  logFile << "alpha_i = " << alpha_i << ";" << endl;
-  logFile << "mu_vA = " << mu_vA << ";" << endl;
-  logFile << "theta_d = " << theta_d << ";" << endl;
-  logFile << "P_B_i = " << P_B_i << ";" << endl;
-  logFile << "P_C_i = " << P_C_i << ";" << endl;
-  logFile << "P_D_i = " << P_D_i << ";" << endl;
-  logFile << "P_E_i = " << P_E_i << ";" << endl;
-
-	
-  PrintVector("K_vi", K_vi);
-
-  PrintVector("Xi_i", Xi_i);
-
-  // Let's do this properly.
-  for (size_t i=0; i<theta_p; i++){
-    logFile << "K_vi(" <<  i+1 << ") = " <<  gsl_vector_get(K_vi, i) << ";" << endl;
-  }
-
-  for (size_t i=0; i<theta_p; i++){
-    logFile << "Xi_i(" <<  i+1 << ") = " <<  gsl_vector_get(Xi_i,i) << ";" << endl;
-  }
-}
-#endif
 
 #ifdef VectorTransmission_PRINT_CalcUpsilonOneHost	// only use
 void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t theta_p,

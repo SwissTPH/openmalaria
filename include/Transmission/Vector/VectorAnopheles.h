@@ -17,13 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorTransmissionSpecies
-#define Hmod_VectorTransmissionSpecies
+#ifndef Hmod_VectorAnopheles
+#define Hmod_VectorAnopheles
 
 #include "global.h"
-#include "Transmission/PerHost.h"
-#include "WeibullDecayedValue.h"
-#include "scenario.hxx"
+#include "Transmission/Vector/HostCategoryAnopheles.h"
+#include "Transmission/PerHostTransmission.h"
 #include <list>
 
 class Human;
@@ -41,10 +40,10 @@ typedef vector<void*> NonHumanHostsType;	//FIXME
  * 
  * Instead of storing static variables in this class, store them in
  * the VectorTransmission class. */
-class VectorTransmissionSpecies
+class VectorAnopheles
 {
 public:
-  VectorTransmissionSpecies () :
+  VectorAnopheles () :
     larvicidingEndStep (std::numeric_limits<int>::max()),
     larvicidingIneffectiveness (1.0)
   {}
@@ -88,10 +87,10 @@ public:
   double calculateEIR (size_t sIndex, PerHostTransmission& host) {
     /* Calculates EIR per individual (hence N_i == 1).
      *
-     * See comment in VectorTransmissionSpecies.advancePeriod for method. */
+     * See comment in VectorAnopheles.advancePeriod for method. */
     return partialEIR
-      * host.entoAvailabilityPartial(this, sIndex)
-      * host.probMosqBiting(this, sIndex);	// probability of biting, once commited
+      * host.entoAvailabilityPartial(humanBase, sIndex)
+      * host.probMosqBiting(humanBase, sIndex);	// probability of biting, once commited
   }
   
   /** Return the SimulationMode the model is expecting to be run in for this
@@ -105,71 +104,59 @@ public:
       throw xml_scenario_error ("Neither eir nor emergence rate data available to drive simulation");
   }
   
-  /** Set an ITN description for this anopheles species. */
-  inline void setITNDescription (const scnXml::Anopheles1& itnDesc) {
-    ITNDeterrency = itnDesc.getDeterrency ();
-    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
-    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+  inline HostCategoryAnopheles& getHumanBase () {
+    return humanBase;
   }
   
-  /** Set an IRS description for this anopheles species. */
-  inline void setIRSDescription (const scnXml::Anopheles2& irsDesc) {
-    IRSDeterrency = irsDesc.getDeterrency ();
-    IRSKillingEffect = irsDesc.getKillingEffect ();
+  /** @brief Set up intervention descriptions for humans, for this anopheles
+   * species.
+   *
+   * Currently no interventions for non-human hosts, although planned.
+   * 
+   * NOTE: can't we have
+   * interventions {
+   *   anopheles 1 {
+   *     xxxDescription
+   *     yyyDescription
+   *   }
+   *   anopheles 2 ...
+   * }
+   * in the XML instead of
+   * interventions {
+   *   xxxDescription {
+   *     anopheles 1
+   *     anopheles 2
+   *   }
+   *   yyyDescription ...
+   * }
+   * ? Then can just pass relevent interventions.anopheles section straight to
+   * humanBase. */
+  //@{
+  inline void setITNDescription (const scnXml::Anopheles1& desc) {
+    humanBase.setITNDescription (desc);
   }
-  
-  inline void setVADescription (const scnXml::Anopheles3& vaDesc) {
-    VADeterrency = vaDesc.getDeterrency ();
+  inline void setIRSDescription (const scnXml::Anopheles2& desc) {
+    humanBase.setIRSDescription (desc);
   }
+  inline void setVADescription (const scnXml::Anopheles3& desc) {
+    humanBase.setVADescription (desc);
+  }
+  //@}
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
+private:
   /** @brief Baseline parameters which may be varied per host
    *
-   * These may be varied per-human to account for interventions and innate
-   * resistances.
+   * Includes model parameters which may be varied per-individual to account
+   * for interventions and innate resistances, and intervention effect
+   * descriptions.
    * 
    * Read from XML by initialise; no need to checkpoint. */
   //@{
-  /** Availability rate (α_i) */
-  double entoAvailability;
-  
-  /** Probability of mosquito successfully biting host (P_B_i) */
-  double probMosqBiting;
-  
-  /** Probability of mosquito escaping human and finding a resting site without
-   * dying, after biting the human (P_C_i). */
-  double probMosqFindRestSite;
-  
-  /** Probability of mosquito successfully resting after finding a resting site
-   * (P_D_i). */
-  double probMosqSurvivalResting;
+  HostCategoryAnopheles humanBase;
   //@}
   
-  /** @brief Intervention description parameters
-   *
-   * Read from XML by VectorTransmission constructor. No need to checkpoint. */
-  //@{
-  /** Effectiveness of net in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue ITNDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
-   * an individual. */
-  WeibullDecayedValue ITNPreprandialKillingEffect;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to escape
-   * after feeding on an individual. */
-  WeibullDecayedValue ITNPostprandialKillingEffect;
-  /** Effectiveness of IRS in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue IRSDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  WeibullDecayedValue IRSKillingEffect;
-  /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue VADeterrency;
-  //@}
-  
-private:
   /** @brief Parameters which may vary per mosquito species
    *
    * Read from XML by initialise; no need to checkpoint. */
@@ -335,7 +322,7 @@ private:
   static void rotateArray(vector<double>& rArray, double rAngle);
   
   friend class VectorEmergenceSuite;
-  friend class VectorSpeciesSuite;
+  friend class VectorAnophelesSuite;
 };
 
 #endif

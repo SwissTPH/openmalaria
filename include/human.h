@@ -19,7 +19,7 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "global.h"
-#include "Transmission/PerHost.h"
+#include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 

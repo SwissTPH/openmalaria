@@ -23,7 +23,7 @@
 
 /* Entomology model coordinator: Nakul Chitnis. */ 
 
-#include "Transmission/Vector.h"
+#include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
 #include <fstream>
 

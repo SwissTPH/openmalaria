@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WeibullDecayedValue.h"
+#include "util/WeibullDecayedValue.h"
 #include "inputData.h"
 
 void WeibullDecayedValue::setParameters (double initial, double halflife, double k) {

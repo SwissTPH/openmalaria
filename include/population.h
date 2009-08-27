@@ -184,7 +184,7 @@ private:
   */
   int _workUnitIdentifier;
   
-  friend class VectorSpeciesSuite;
+  friend class VectorAnophelesSuite;
 };
 
 #endif

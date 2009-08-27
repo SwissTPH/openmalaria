@@ -1,5 +1,5 @@
 ---
-VectorSpeciesSuite:
+VectorAnophelesSuite:
   
 calcInverseDFTExp:
   fourierCoefficients: [-0.926517, -0.692164, 0.002098, 0.401189, -0.375356]

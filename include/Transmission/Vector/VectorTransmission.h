@@ -24,8 +24,8 @@
  */ 
 
 /* We also include library headers here. */ 
-#include "TransmissionModel.h"
-#include "Transmission/VectorSpecies.h"
+#include "Transmission/TransmissionModel.h"
+#include "Transmission/Vector/VectorAnopheles.h"
 
 //#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
@@ -82,7 +82,7 @@ private:
   size_t numSpecies;
   
   /** Per anopheles species data. */
-  vector<VectorTransmissionSpecies> species;
+  vector<VectorAnopheles> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *
@@ -100,6 +100,6 @@ private:
   number of hosts */
   
   friend class PerHostTransmission;
-  friend class VectorSpeciesSuite;
+  friend class VectorAnophelesSuite;
 };
 #endif

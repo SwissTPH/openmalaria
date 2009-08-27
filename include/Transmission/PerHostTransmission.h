@@ -24,11 +24,11 @@
 #include "util/gsl.h"
 #include "simulation.h"
 #include "inputData.h"
+#include "Transmission/Vector/HostCategoryAnopheles.h"
 
 class Summary;
 class HostMosquitoInteraction;
 class TransmissionModel;
-class VectorTransmissionSpecies;
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
@@ -69,18 +69,18 @@ public:
    * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
   /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
-  inline double entoAvailability (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex, double ageYears) const {
-    return entoAvailabilityPartial (speciesStatic, speciesIndex) * getRelativeAvailability (ageYears);
+  inline double entoAvailability (HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
+    return entoAvailabilityPartial (base, speciesIndex) * getRelativeAvailability (ageYears);
   }
   /** Availability of host to mosquitoes (α_i).
    *
    * The full availability is entoAvailability(human->getAgeInYears()). */
-  double entoAvailabilityPartial (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
+  double entoAvailabilityPartial (HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqBiting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
+  double probMosqBiting (HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
    * place after biting and then resting (P_C_i * P_D_i). */
-  double probMosqResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
+  double probMosqResting (HostCategoryAnopheles& base, size_t speciesIndex) const;
   //@}
   
   /** Get the availability of this host to mosquitoes relative to other hosts.
@@ -167,7 +167,7 @@ class HostMosquitoInteraction
 public:
   /** In lieu of a constructor initialises elements, using the passed base to
    * get baseline parameters. */
-  void initialise (VectorTransmissionSpecies* base, double availabilityFactor);
+  void initialise (HostCategoryAnopheles& base, double availabilityFactor);
   
   void read (istream& in);
   void write (ostream& out) const;

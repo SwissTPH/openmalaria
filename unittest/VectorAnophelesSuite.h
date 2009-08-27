@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_VectorSpeciesSuite
-#define Hmod_VectorSpeciesSuite
+#ifndef Hmod_VectorAnophelesSuite
+#define Hmod_VectorAnophelesSuite
 
 #include "global.h"
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
@@ -34,8 +34,8 @@
 
 #include "population.h"
 #include "human.h"
-#include "Transmission/Vector.h"
-#include "Transmission/VectorSpecies.h"
+#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/Vector/VectorAnopheles.h"
 
 
 /** Read an array into a vector. */
@@ -73,14 +73,14 @@ WeibullDecayedValue yaml2WeibullDecayedValue (const YAML::Node& node) {
 
 
 // The assert we use in calculateEIR unittests. It tests vtm and species params against node.
-#   define TS_ASSERT_SPECIES_APPROX(node) VectorSpeciesSuite::doAssertSpecies(__FILE__,__LINE__, (node))
+#   define TS_ASSERT_SPECIES_APPROX(node) VectorAnophelesSuite::doAssertSpecies(__FILE__,__LINE__, (node))
 
 
-/** Unit test for VectorTransmissionSpecies code.
+/** Unit test for VectorAnopheles code.
  *
  * Possible tests to write:
  * 
-VectorSpecies unit testing:
+VectorAnopheles unit testing:
   initialise:
     read parameters from XML
     calculate EIR array from fourier series, rotate and add to return param
@@ -101,12 +101,12 @@ VectorSpecies unit testing:
   rotateArray:
     offsets all element indicies by some x mod length
  */
-class VectorSpeciesSuite : public CxxTest::TestSuite
+class VectorAnophelesSuite : public CxxTest::TestSuite
 {
 public:
-  VectorSpeciesSuite() {
+  VectorAnophelesSuite() {
     Global::clResourcePath = UnittestSourceDir;
-    ifstream file(Global::lookupResource ("VectorSpeciesSuite.yaml").c_str());
+    ifstream file(Global::lookupResource ("VectorAnophelesSuite.yaml").c_str());
     
     YAML::Parser parser(file);
     parser.GetNextDocument(doc);
@@ -124,7 +124,7 @@ public:
   void setUp () {
     try {
     // "unused" node, but it still checks element exists (confirming correct data file)
-    /*const YAML::Node& node =*/ doc["VectorSpeciesSuite"];
+    /*const YAML::Node& node =*/ doc["VectorAnophelesSuite"];
     
     createDocument (UnittestScenario);
     Global::initGlobal();
@@ -186,7 +186,7 @@ public:
   
   void testCalculateEirDeterrency () {
     const YAML::Node& node = doc["calculateEirDeterrency"];
-    species->ITNDeterrency = yaml2WeibullDecayedValue(node["Deterrency"]);
+    species->humanBase.ITNDeterrency = yaml2WeibullDecayedValue(node["Deterrency"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
@@ -198,7 +198,7 @@ public:
   
   void testCalculateEirPreprandialKilling () {
     const YAML::Node& node = doc["calculateEirPreprandialKilling"];
-    species->ITNPreprandialKillingEffect = yaml2WeibullDecayedValue(node["PreprandialKilling"]);
+    species->humanBase.ITNPreprandialKillingEffect = yaml2WeibullDecayedValue(node["PreprandialKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
@@ -210,7 +210,7 @@ public:
   
   void testCalculateEirPostprandialKilling () {
     const YAML::Node& node = doc["calculateEirPostprandialKilling"];
-    species->ITNPostprandialKillingEffect = yaml2WeibullDecayedValue(node["PostprandialKilling"]);
+    species->humanBase.ITNPostprandialKillingEffect = yaml2WeibullDecayedValue(node["PostprandialKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
@@ -222,7 +222,7 @@ public:
   
   void testCalculateEirRestKilling () {
     const YAML::Node& node = doc["calculateEirRestKilling"];
-    species->IRSKillingEffect = yaml2WeibullDecayedValue(node["RestKilling"]);
+    species->humanBase.IRSKillingEffect = yaml2WeibullDecayedValue(node["RestKilling"]);
     for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupIRS();
     vtm->timeStepNumEntoInnocs = 0;
@@ -275,7 +275,7 @@ private:
   int simulationTime;
   Simulation *simulation;
   VectorTransmission *vtm;
-  VectorTransmissionSpecies *species;
+  VectorAnopheles *species;
   list<Human> *population;
 };
 

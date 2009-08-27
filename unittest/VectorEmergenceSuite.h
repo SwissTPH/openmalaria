@@ -35,8 +35,8 @@ using namespace std;
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
 #include "ExtraAsserts.h"
 
-#include "Transmission/VectorEmergence.h"
-#include "Transmission/VectorSpecies.h"
+#include "Transmission/Vector/VectorEmergence.h"
+#include "Transmission/Vector/VectorAnopheles.h"
 
 // We want to hide normal output, so route it here instead of cout
 ofstream null("\0");
@@ -47,7 +47,7 @@ ofstream null("\0");
   // Population size (N_i)
   const int POP_SIZE = 1000;
   // Average availability (α_i)
-  const double AVG_AVAIL = 0.0072;
+  const double SUM_AVAIL = 0.0072 * POP_SIZE;
   
 /** Tests on the Vector Control Emergence Rate calculation code.
  *
@@ -126,11 +126,14 @@ public:
   
   // Create and destroy emerge for each test, so tests can't affect one another:
   void setUp () {
+    hostBase.probMosqBiting = 0.95;
+    hostBase.probMosqFindRestSite = 0.95;
+    hostBase.probMosqSurvivalResting = 0.94;
     emerge = new VectorEmergence (3, 5,		// mosqRestDuration (τ), EIPDuration (θ_s)
-	  POP_SIZE, AVG_AVAIL,
+	  POP_SIZE,
 	  1.6, 0.33,	// mosqSeekingDeathRate (μ_vA), mosqSeekingDuration (θ_d)
-	  .95, .95,		// probMosqBiting (P_B_i), probMosqFindRestSite (P_C_i)
-	  .94, .93,		// probMosqSurvivalResting (P_D_i), probMosqSurvivalOvipositing (P_E)
+	  SUM_AVAIL,
+	  hostBase, .93,// probMosqSurvivalOvipositing (P_E)
 	  YEAR_LEN,
 	  null, "\0");	// traceOut, logFileName
   }
@@ -149,7 +152,7 @@ public:
     
     // Produce a rough estimate, which IS NOT the same as expected output:
     vector<double> emergeRate (YEAR_LEN);
-    const double temp = POP_SIZE*POP_SIZE*AVG_AVAIL;
+    const double temp = POP_SIZE*SUM_AVAIL;
     for (int i = 0; i < YEAR_LEN; i++)
       emergeRate[i] = EIRInit[i]*temp;
     
@@ -323,6 +326,7 @@ private:
   }
   
   VectorEmergence *emerge;
+  HostCategoryAnopheles hostBase;
   
   gsl_vector *output1CalcInitMosqEmergeRate;
   gsl_vector *input1CalcUpsilonOneHost;

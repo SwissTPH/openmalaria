@@ -23,7 +23,7 @@
 #define Hmod_PerHostSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Transmission/PerHost.h"
+#include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 
 class PerHostSuite : public CxxTest::TestSuite

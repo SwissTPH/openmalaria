@@ -19,7 +19,6 @@
 
 /// This is a header for VectorTransmission's functions which are only used internally.
 
-#include <vector>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_multiroots.h>
@@ -27,7 +26,7 @@
 #include <fstream>
 #include <limits>
 #include "global.h"
-using namespace std;
+#include "Transmission/Vector/HostCategoryAnopheles.h"
 
 #define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 #define VectorTransmission_PRINT_CalcUpsilonOneHost
@@ -56,8 +55,8 @@ class VectorEmergence {
 public:
   /** Initialises some data elements */
   VectorEmergence(int mosqRestDuration, int EIPDuration, int populationSize,
-		  double entoAvailability, double mosqSeekingDeathRate, double mosqSeekingDuration,
-		  double probMosqBiting, double probMosqFindRestSite, double probMosqSurvivalResting,
+		  double mosqSeekingDeathRate, double mosqSeekingDuration,
+		  double populationAvailability, HostCategoryAnopheles& humanBase,
 		  double probMosqSurvivalOvipositing,
 		  int yearLength = daysInYear, ostream& traceOut = cout,
 		  const char* logFileName = "output_ento_para.txt");
@@ -135,13 +134,12 @@ private:
   size_t tau;
   size_t theta_s;
   
-  int N_i;
-  double alpha_i;
+  int humanPopulationSize;
   double mu_vA;
   double theta_d;
-  double P_B_i;
-  double P_C_i;
-  double P_D_i;
+  double humanPopulationAvailability;
+  // use humanPopulationAvailability instead of humanBase.entoAvailability here
+  HostCategoryAnopheles& humanBase;
   double P_E_i;
   
   /** The set of theta_p matrices that determine the dynamics of the system
@@ -372,19 +370,6 @@ double binomial(int n, int k) const;
   * All parameters are IN parameters.
  */
 void PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind) const;
-
-/** PrintParameters() prints the input parameters to a given file. 
-  * We currently use this to make sure that the inputs we have in C
-  * are what we expect from what we've sent from Fortran. 
-  *
-  * We may transform/copy this into a new function that does more.
-  * 
-  * All parameters are IN parameters.
- */
-void PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
-		double N_i, double alpha_i, double mu_vA,
-		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
-		const gsl_vector* K_vi, const gsl_vector* Xi_i) const;
 
 /** PrintUpsilon() prints the intermediate results while calculating 
   * Upsilon.
