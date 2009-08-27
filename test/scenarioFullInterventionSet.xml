@@ -261,7 +261,7 @@
   <entoData name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss">
-        <eir EIRRotateAngle="0" a0="-2.5889", a1="0.8968", b1="2.678", a2="-0.4551" b2="2.599" />
+        <eir EIRRotateAngle="0" a0="-2.5889" a1="0.8968" b1="2.678" a2="-0.4551" b2="2.599" />
         <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00085" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
         <nonHumanHosts mosqEntoAvailability="0.055" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
       </anopheles>
@@ -271,7 +271,7 @@
         <nonHumanHosts mosqEntoAvailability="0.045" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
       </anopheles>
       <anopheles mosquito="arabiensis">
-        <eir EIRRotateAngle="0" a0="-0.39166" a1="0.8968", b1="2.678", a2="-0.4551" b2="2.599" />
+        <eir EIRRotateAngle="0" a0="-0.39166" a1="0.8968" b1="2.678" a2="-0.4551" b2="2.599" />
         <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
         <nonHumanHosts mosqEntoAvailability="0.012" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
       </anopheles>
