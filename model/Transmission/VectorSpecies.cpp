@@ -129,31 +129,39 @@ string VectorTransmissionSpecies::initialise (const scnXml::Anopheles& anoph, si
 void VectorTransmissionSpecies::destroy () {
 }
 
-double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
-  //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
-  //BEGIN P_A, P_Ai, P_df, P_dif
-  // Per Global::interval (hosts don't update per day):
+double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population) {
   double leaveHostRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
     leaveHostRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
   
   // Probability of a mosquito not finding a host this day:
-  double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
-  
-  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
+  intP_A = exp(-leaveHostRate * mosqSeekingDuration);
   
   // NC's non-autonomous model provides two methods for calculating P_df and
   // P_dif; here we assume that P_E is constant.
-  double intP_df = 0.0;
+  intP_df = 0.0;
+  intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
     double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(this, sIndex) *
-	host.probMosqFindRestSite(this, sIndex) *
-	host.probMosqSurvivalResting(this, sIndex);
+    host.probMosqBiting(this, sIndex) *
+    host.probMosqFindRestSite(this, sIndex) *
+    host.probMosqSurvivalResting(this, sIndex);
     intP_df += prod;
+    intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
+  
+  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+  intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
+  return P_Ai_base;
+}
+
+void VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
+  //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
+  
+  double intP_A, intP_df, intP_dif;
+  calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population);
   
   P_A  .resize (N_v_length);
   P_df .resize (N_v_length);
@@ -163,9 +171,6 @@ double VectorTransmissionSpecies::initFeedingCycleProbs (size_t sIndex, const st
     P_df[t]	= intP_df;
     P_dif[t]	= intP_df * kappaDaily[t];
   }
-  //END P_A, P_Ai, P_df, P_dif
-  
-  return leaveHostRate - mosqSeekingDeathRate;
 }
 
 void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
@@ -187,7 +192,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
     
     bool valid = vectors::approxEqual (kappaDaily, P_dif);
     
-    double availability = initFeedingCycleProbs (sIndex, population, kappaDaily);
+    initFeedingCycleProbs (sIndex, population, kappaDaily);
     //END Validate kappa, initialise P_A, P_df, P_dif
     
     /* This (timely) check of emergence rates and N/O/S_v is skipped if
@@ -197,9 +202,13 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       time_t seconds = time (NULL);
       cout << "Starting emergence rate validation" << endl;
       //BEGIN Validate or calculate mosqEmergeRate
+      double sumAvailability = 0.0;
+      for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+	sumAvailability += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
+      
       // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
       VectorEmergence emerge (mosqRestDuration, EIPDuration,
-			      populationSize, availability / populationSize,
+			      populationSize, sumAvailability / populationSize,
 			      mosqSeekingDeathRate, mosqSeekingDuration,
 			      probMosqBiting, probMosqFindRestSite,
 			      probMosqSurvivalResting, probMosqSurvivalOvipositing);
@@ -218,7 +227,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       if (mosqEmergeRate.size() == 0) {	// not set; we'll need an estimate
 	mosqEmergeRate.resize (daysInYear);
 	// The root finding algorithm needs some estimate to start from. It's accuracy isn't that important since it should converge in a single step anyway.
-	double temp = populationSize*availability;
+	double temp = populationSize*sumAvailability;
 	for (int i = 0; i < daysInYear; i++) {
 	  mosqEmergeRate[i] = EIRInit[i]*temp;
 	}
@@ -353,31 +362,8 @@ void VectorTransmissionSpecies::advancePeriod (const std::list<Human>& populatio
   
   
   //BEGIN P_A, P_Ai, P_df, P_dif
-  // Per Global::interval (hosts don't update per day):
-  double leaveHostRate = mosqSeekingDeathRate;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
-  
-  // Probability of a mosquito not finding a host this day:
-  double intP_A = exp(-leaveHostRate * mosqSeekingDuration);
-  
-  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
-  
-  // NC's non-autonomous model provides two methods for calculating P_df and
-  // P_dif; here we assume that P_E is constant.
-  double intP_df = 0.0;
-  double intP_dif = 0.0;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-    const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
-	host.probMosqBiting(this, sIndex) *
-	host.probMosqFindRestSite(this, sIndex) *
-	host.probMosqSurvivalResting(this, sIndex);
-    intP_df += prod;
-    intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
-  }
-  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-  intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
+  double intP_A, intP_df, intP_dif;
+  double P_Ai_base = calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population);
   //END P_A, P_Ai, P_df, P_dif
   
   // Summed per day:

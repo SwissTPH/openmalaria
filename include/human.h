@@ -27,7 +27,9 @@
 class TransmissionModel;
 class ClinicalModel;
 
-//! Model of a human individual 
+/** Interface to all sub-models storing data per-human individual.
+ *
+ * Still contains some data, but most is now contained in sub-models. */
 class Human {
 public:
   

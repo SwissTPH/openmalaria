@@ -299,6 +299,13 @@ private:
   
   /* Functions */
   
+  /** Calculates P_Ai_base, P_A, P_df and P_dif.
+   *
+   * @returns P_Ai_base
+   * 
+   * First 3 parameters are just outputs. */
+  double calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population);
+  
   /** Initialise P_A, P_df and P_dif using model parameters and the supplied
    * kappaDaily array.
    * 
@@ -306,7 +313,7 @@ private:
    * @param population List of humans
    * @param kappaDaily Infectiousness of humans, per day, for last N_v_length days
    */
-  double initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily);
+  void initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily);
   
   /** This subroutine converts ShortArray to a vector<double> of length
    * daysInYear by copying and duplicating elements to fill the gaps. */
