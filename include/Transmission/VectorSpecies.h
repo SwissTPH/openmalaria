@@ -27,6 +27,8 @@
 #include <list>
 
 class Human;
+typedef vector<void*> NonHumanHostsType;	//FIXME
+
 
 /** Per-species data for vector control.
  *
@@ -205,7 +207,9 @@ private:
    * Should be set by either initialise or initMainSimulation; no need to checkpoint. */
   vector<double> mosqEmergeRate;
   
-private:
+  /** Non-human host data. */
+  NonHumanHostsType nonHumanHosts;
+  
   /* Parameters from model */
   /* Partial (derived) parameters from model */
   

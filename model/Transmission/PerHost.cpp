@@ -107,13 +107,12 @@ double PerHostTransmission::probMosqBiting (VectorTransmissionSpecies* speciesSt
   return species[speciesIndex].probMosqBiting
     * (1.0 - speciesStatic->ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqFindRestSite (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
-  return species[speciesIndex].probMosqFindRestSite
+double PerHostTransmission::probMosqResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
+  double P_C_i = species[speciesIndex].probMosqFindRestSite
     * (1.0 - speciesStatic->ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
-}
-double PerHostTransmission::probMosqSurvivalResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const {
-  return species[speciesIndex].probMosqSurvivalResting
+  double P_D_i = species[speciesIndex].probMosqSurvivalResting
     * (1.0 - speciesStatic->IRSKillingEffect (Simulation::simulationTime - timestepIRS));
+  return P_C_i * P_D_i;
 }
 
 

@@ -63,7 +63,6 @@ VectorEmergence::VectorEmergence(int mosqRestDuration, int EIPDuration,
     int yearLength, ostream& traceOut, const char* logFileName) :
   counterSvDiff(0),
   theta_p (yearLength), tau(mosqRestDuration), theta_s(EIPDuration),
-  nMalHostTypes(1), nHostTypes(nMalHostTypes /* TODO: plus num non-human host types */),
   N_i(populationSize),
   alpha_i(entoAvailability),
   mu_vA(mosqSeekingDeathRate), theta_d(mosqSeekingDuration),
@@ -111,6 +110,7 @@ VectorEmergence::~VectorEmergence () {
 
 bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfectivityInitVector,
 					     const vector<double>& FEIRInitVector,
+					     const NonHumanHostsType& nonHumanHosts,
 					     vector<double>& mosqEmergeRate)
 {
   PrintVector ("kappa", FHumanInfectivityInitVector);
@@ -151,7 +151,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
 # ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate
   // We now try to print these parameters to file to make sure that 
   // they show what we want them to show.
-  PrintParameters(theta_p, tau, theta_s, nHostTypes, nMalHostTypes, N_i, alpha_i,
+  PrintParameters(theta_p, tau, theta_s, N_i, alpha_i,
                   mu_vA, theta_d, P_B_i, P_C_i, P_D_i, P_E_i, K_vi, Xi_i);
   // The parameter values look correct.
 # endif
@@ -173,7 +173,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
   // defining most parameters as scalars. If we do change things later, which we
   // may, then we will change the code accordingly. We will need to go through
   // a lot of changes anyway. 
-  CalcUpsilonOneHost(&P_A, &P_Ai, K_vi);
+  CalcUpsilonOneHost(&P_A, &P_Ai, K_vi, nonHumanHosts);
   
   // Calculate \f$X_{\theta_p}\f$.
   // Refer to Cushing (1995) and the paper for the periodic entomological model
@@ -202,7 +202,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
     ostringstream msg;
     msg << "The spectral radius of X_t_p = "<< srXtp << "; expected to be less than 1.\n";
     msg << "Warning: No globally asymptotically stable periodic orbit. \n";
-    msg << "Warning: All results from the entomologoical model may be meaningless. \n";
+    msg << "Warning: All results from the entomologoical model may be meaningless.";
     throw xml_scenario_error (msg.str());
   }
   
@@ -260,7 +260,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
 				      theta_p);
     
     // Set root-finding function.
-    gsl_multiroot_function frootfind;
+      gsl_multiroot_function frootfind;
     frootfind.f = &CalcSvDiff_rf;
     frootfind.n = theta_p;
     frootfind.params = &pararootfind;
@@ -332,7 +332,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
 }
 
 
-void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi)
+void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi, const NonHumanHostsType& nonHumanHosts)
 {
 	// \f$P_{dif}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle and gets infected.
@@ -363,16 +363,19 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gs
 	
 	// Refer to papers noted above for equations.
         // P_A and P_Ai are described in CalcInitMosqEmergeRate.
-  double P_A = exp(-(alpha_i*N_i+mu_vA)*theta_d);
-  double P_Ai = (1-P_A)*(alpha_i*N_i)/(alpha_i*N_i+mu_vA);
+  double totalAvailability = alpha_i * N_i;
+  /* FIXME
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
+    totalAvailability += nnh->availability; */
+  double P_A = exp(-(totalAvailability + mu_vA)*theta_d);
+  double P_Ai = (1-P_A)*(alpha_i*N_i)/(totalAvailability + mu_vA);
 	// \f$P_{df}\f$: Probability that a mosquito finds a host on a given
 	// night and then completes the feeding cycle.
+	// Only part of calculation here; rest after P_df has been used to calculate P_dif and P_duf
   double P_df = P_Ai*P_B_i*P_C_i*P_D_i*P_E_i;
 
 	// Evaluate P_dif and P_duf.
-	// Note that these formulae are invalid for nHostTypes>1.
-	// We can generalize these to any nHostTypes later 
-	// - perhaps in a different function.
+	// We would add P_Ai*P_B_i*P_C_i*P_D_i*P_E_i*kappa for non-human hosts, except kappa is always zero
 	
 	// P_dif:
   gsl_vector_memcpy(P_dif, K_vi);
@@ -382,7 +385,10 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gs
   gsl_vector_set_all(P_duf, 1.0);
   gsl_vector_sub(P_duf, K_vi);
   gsl_vector_scale(P_duf, P_df);
-	
+  /* FIXME
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
+    P_df += nnh->availability * nnh->probSurviveCycle;
+	*/
 
   sumkplus = 0;
   sumkplusPtr = &sumkplus;
@@ -557,6 +563,7 @@ void VectorEmergence::CalcXP(const gsl_matrix* inv1Xtp)
 	// number here] for the expression for \f$x_0\f$.
   for(size_t i=0; i < theta_p; i++){
     FuncX(mtemp, theta_p, i+1);
+    // vtemp = 1.0 * mtemp * Lambda[i] + 1.0 * vtemp :
     gsl_blas_dgemv(CblasNoTrans, 1.0, mtemp, const_cast<const gsl_vector*>(Lambda[i]), 1.0, vtemp);
 		// gsl_vector_add(vtempsum, vtemp);
   }
@@ -731,15 +738,13 @@ void VectorEmergence::PrintRootFindingStateTS(size_t iter, const gsl_multiroot_f
 
 #ifdef VectorTransmission_PRINT_CalcInitMosqEmergeRate	// only use
 void VectorEmergence::PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
-		size_t n, size_t m, double N_i, double alpha_i, double mu_vA,
+		double N_i, double alpha_i, double mu_vA,
 		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
 		const gsl_vector* K_vi, const gsl_vector* Xi_i) const
 {
   logFile << "theta_p = " << theta_p << ";" << endl;
   logFile << "tau = " << tau << ";" << endl;
   logFile << "theta_s = " << theta_s << ";" << endl;
-  logFile << "n = " << n << ";" << endl;
-  logFile << "m = " << m << ";" << endl;
 
   logFile << "N_i = " << N_i << ";" << endl;
   logFile << "alpha_i = " << alpha_i << ";" << endl;

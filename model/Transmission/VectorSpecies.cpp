@@ -130,12 +130,16 @@ void VectorTransmissionSpecies::destroy () {
 }
 
 double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population) {
-  double leaveHostRate = mosqSeekingDeathRate;
+  // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
+  double leaveSeekingStateRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveHostRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
+    leaveSeekingStateRate += h->perHostTransmission.entoAvailability(this, sIndex, h->getAgeInYears());
+  /* FIXME
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
+    leaveSeekingStateRate += nnh->perHostTransmission.entoAvailabilityPartial (this, sIndex); */
   
   // Probability of a mosquito not finding a host this day:
-  intP_A = exp(-leaveHostRate * mosqSeekingDuration);
+  intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
   
   // NC's non-autonomous model provides two methods for calculating P_df and
   // P_dif; here we assume that P_E is constant.
@@ -144,14 +148,20 @@ double VectorTransmissionSpecies::calcCycleProbabilities (double& intP_A, double
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
     double prod = host.entoAvailability(this, sIndex, h->getAgeInYears()) *
-    host.probMosqBiting(this, sIndex) *
-    host.probMosqFindRestSite(this, sIndex) *
-    host.probMosqSurvivalResting(this, sIndex);
+      host.probMosqBiting(this, sIndex) *
+      host.probMosqResting(this, sIndex);
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
+  /* FIXME
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
+    intP_df += nnh->availability * nnh->probSurviveCycle;
+    //FIXME: but initFeedingCycleProbs wants without to use for P_dif!
+    // Note: in model, we do the same for intP_dif, except in this case it's
+    // multiplied by infectiousness of host to mosquito which is zero.
+  } */
   
-  double P_Ai_base = (1.0 - intP_A) / leaveHostRate;
+  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
   return P_Ai_base;
@@ -237,6 +247,7 @@ void VectorTransmissionSpecies::initMainSimulation (size_t sIndex, const std::li
       
       if (!emerge.CalcInitMosqEmergeRate(convertLengthToFullYear (kappa),
 					 EIRInit,
+					 nonHumanHosts,
 					 mosqEmergeRate)) {
 	valid = false;	// test failed; emergence rates recalculated
       }

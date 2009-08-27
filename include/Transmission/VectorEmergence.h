@@ -37,6 +37,7 @@ using namespace std;
 #define VectorTransmission_PRINT_CalcSpectralRadius
 #define VectorTransmission_PRINT_CalcInv1minusA
 
+typedef vector<void*> NonHumanHostsType;	//FIXME
 
 /** Container for functions used to calculate the mosquito emergence rate.
  *
@@ -97,6 +98,7 @@ public:
    * \param mosqEmergeRate is both an input (guessed or read from file) and output (calculated emergence rate-. */
   bool CalcInitMosqEmergeRate(const vector<double>& FHumanInfectivityInitVector,
 			      const vector<double>& FEIRInitVector,
+			      const NonHumanHostsType& nonHumanHosts,
 			      vector<double>& mosqEmergeRate);
   
   
@@ -132,16 +134,6 @@ private:
   size_t theta_p;
   size_t tau;
   size_t theta_s;
-  
-  //TODO: No support for nMalHostTypesInit, nHostTypesInit != 1 (these aren't variables even used).
-  /** Number of type of malaria-susceptible hosts.
-   *
-   * Dimensionless. \f$m\f$ in model. Scalar. */
-  int nMalHostTypes;
-  /** Number of types of hosts.
-   *
-   * Dimensionless. \f$n\f$ in model. Scalar. */
-  int nHostTypes;
   
   int N_i;
   double alpha_i;
@@ -220,7 +212,7 @@ private:
  * 
  * PAPtr, and PAiPtr are OUT parameters.
  * All other parameters are IN parameters. */
-void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi);
+void CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gsl_vector* K_vi, const NonHumanHostsType& nonHumanHosts);
 
 /** CalcSvDiff returns the difference between Sv for the periodic 
  * orbit for the given Nv0 and from the EIR data.
@@ -390,7 +382,7 @@ void PrintRootFindingStateTS(size_t iter, const gsl_multiroot_fsolver* srootfind
   * All parameters are IN parameters.
  */
 void PrintParameters(size_t theta_p, size_t tau, size_t theta_s,
-		size_t n, size_t m, double N_i, double alpha_i, double mu_vA,
+		double N_i, double alpha_i, double mu_vA,
 		double theta_d, double P_B_i, double P_C_i, double P_D_i, double P_E_i,
 		const gsl_vector* K_vi, const gsl_vector* Xi_i) const;
 

@@ -154,8 +154,11 @@ public:
       emergeRate[i] = EIRInit[i]*temp;
     
     vector<double> in1 = vectors::gsl2std(input1CalcUpsilonOneHost);
+    //FIXME
+    NonHumanHostsType NonHumanHosts;
     emerge->CalcInitMosqEmergeRate(in1,
 				   EIRInit,
+				   NonHumanHosts,
 				   emergeRate);
     
     // Requires a slightly higher error tolerance. NC did say the results he
@@ -165,7 +168,9 @@ public:
   
   void testCalcUpsilonOneHost () {
     double PA, PAi;
-    emerge->CalcUpsilonOneHost (&PA, &PAi, input1CalcUpsilonOneHost);
+    //FIXME
+    NonHumanHostsType NonHumanHosts;
+    emerge->CalcUpsilonOneHost (&PA, &PAi, input1CalcUpsilonOneHost, NonHumanHosts);
     TS_ASSERT_APPROX (PA,  5.4803567e-002);
     TS_ASSERT_APPROX (PAi, 7.7334254e-001);
     for (int i = 0; i < YEAR_LEN; ++i)

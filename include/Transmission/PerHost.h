@@ -79,10 +79,8 @@ public:
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
   double probMosqBiting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
-  * place after biting (P_C_i). */
-  double probMosqFindRestSite (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
-  /** Probability of a mosquito succesfully resting (P_D_i). */
-  double probMosqSurvivalResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
+   * place after biting and then resting (P_C_i * P_D_i). */
+  double probMosqResting (VectorTransmissionSpecies* speciesStatic, size_t speciesIndex) const;
   //@}
   
   /** Get the availability of this host to mosquitoes relative to other hosts.
