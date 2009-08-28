@@ -91,10 +91,6 @@ VectorAnopheles unit testing:
     runs VectorEmergence code
     validates emerge params
     prints out new scenario file
-  advancePeriod:
-    calculates partialEIR, and some intermediaries
-    test with no interventions, and each intervention singly
-    depends on: a human population with PerHostTransmission elements
   convertLengthToFullYear:
     resizes an array
   rotateArray:
@@ -117,6 +113,10 @@ public:
    *
    * Rather than directly initialise the elements we want to use, try to set up
    * the whole simulation. I thought it'd be easier...
+   *
+   * We load the emergence rates in from the scenario. They are currently wrong
+   * (although still usable for alteration-notifying unittests).
+   * Better if we used the cut-down model of VectorEmergenceSuite to generate.
    *
    * Note that using doc["key"] to access map elements isn't speed-optimal when
    * many key-value pairs exist, but for a small number it should be fine. */
@@ -250,25 +250,28 @@ public:
     for (vector<double>::const_iterator it = vtm->timeStepEntoInnocs.begin(); it != vtm->timeStepEntoInnocs.end(); ++it)
       resultEIR += *it;
     
-    /*/ Print values so they can easily be copied into expected output:
-    cout << endl << setprecision(10);
-    cout << "average EIR: " << resultEIR / vtm->timeStepNumEntoInnocs;
-    cout << "\nP_A:\t" << species->P_A;
-    cout << "\nP_df:\t" << species->P_df;
-    cout << "\nP_dif:\t" << species->P_dif;
-    cout << "\nN_v:\t" << species->N_v;
-    cout << "\nO_v:\t" << species->O_v;
-    cout << "\nS_v:\t" << species->S_v;
-    */
     double avEIR;
     node["averageEIR"] >> avEIR;
-    TS_ASSERT_APPROX (resultEIR / vtm->timeStepNumEntoInnocs, avEIR);
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->P_A, yaml2Std<double> (node["P_A"]));
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->P_df, yaml2Std<double> (node["P_df"]));
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->P_dif, yaml2Std<double> (node["P_dif"]));
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->N_v, yaml2Std<double> (node["N_v"]));
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->O_v, yaml2Std<double> (node["O_v"]));
-    _TS_ASSERT_VECTOR_APPROX (f,l, species->S_v, yaml2Std<double> (node["S_v"]));
+    ETS_ASSERT_APPROX (resultEIR / vtm->timeStepNumEntoInnocs, avEIR);
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->P_A, yaml2Std<double> (node["P_A"]));
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->P_df, yaml2Std<double> (node["P_df"]));
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->P_dif, yaml2Std<double> (node["P_dif"]));
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->N_v, yaml2Std<double> (node["N_v"]));
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->O_v, yaml2Std<double> (node["O_v"]));
+    _ETS_ASSERT_VECTOR_APPROX (f,l, species->S_v, yaml2Std<double> (node["S_v"]));
+    
+    if (CxxTest::tracker().testFailed()) {
+      cout << "Unittest failed; new output:\n";
+      // Print values so they can easily be copied into expected output:
+      cout << setprecision(10);
+      cout << "averageEIR: " << resultEIR / vtm->timeStepNumEntoInnocs;
+      cout << "\nP_A:\t" << species->P_A;
+      cout << "\nP_df:\t" << species->P_df;
+      cout << "\nP_dif:\t" << species->P_dif;
+      cout << "\nN_v:\t" << species->N_v;
+      cout << "\nO_v:\t" << species->O_v;
+      cout << "\nS_v:\t" << species->S_v << endl;;
+    }
   }
   
 private:
