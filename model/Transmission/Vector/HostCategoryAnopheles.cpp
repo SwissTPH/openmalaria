@@ -33,3 +33,21 @@ void HostCategoryAnopheles::operator= (const scnXml::NonHumanHosts& nnh) {
   probMosqFindRestSite = nnh.getMosqProbFindRestSite();
   probMosqSurvivalResting = nnh.getMosqProbResting();
 }
+
+void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
+  if (intervDesc.getITNDescription().present()) {
+    const scnXml::ITNDescription& itnDesc = intervDesc.getITNDescription().get();
+    ITNDeterrency = itnDesc.getDeterrency ();
+    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
+    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
+  }
+  if (intervDesc.getIRSDescription().present()) {
+    const scnXml::IRSDescription& irsDesc = intervDesc.getIRSDescription().get();
+    IRSDeterrency = irsDesc.getDeterrency ();
+    IRSKillingEffect = irsDesc.getKillingEffect ();
+  }
+  if (intervDesc.getVADescription().present()) {
+    const scnXml::VADescription& vaDesc = intervDesc.getVADescription().get();
+    VADeterrency = vaDesc.getDeterrency ();
+  }
+}

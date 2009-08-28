@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<scenario analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="1000" schemaVersion="9" simulationDuration="1465" wuID="0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="scenario_009.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="48" name="Full set of interventions" popSize="1000" schemaVersion="9" simulationDuration="1465" wuID="0" xsi:noNamespaceSchemaLocation="scenario_9.xsd">
 
   <demography name="Ifakara">
     <ageGroup lowerbound="0">
@@ -163,24 +162,20 @@
       <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
       <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
     </iptiDescription>
-    <ITNDescription name="LLIN test">
-      <anopheles mosquito="gambiae_ss">
+    <anopheles mosquito="gambiae_ss">
+      <ITNDescription name="LLIN test">
         <deterrency halflife="3" initial="0.44"/>
         <preprandialKillingEffect halflife="3" initial="0.27"/>
         <postprandialKillingEffect halflife="3" initial="0.27"/>
-      </anopheles>
-    </ITNDescription>
-    <IRSDescription name="DDT test">
-      <anopheles mosquito="gambiae_ss">
+      </ITNDescription>
+      <IRSDescription name="DDT test">
         <deterrency halflife="0.5" initial="0.56"/>
         <killingEffect halflife="0.5" initial="0.24"/>
-      </anopheles>
-    </IRSDescription>
-    <VADescription name="hypothetical deterrency">
-      <anopheles mosquito="gambiae_ss">
+      </IRSDescription>
+      <VADescription name="hypothetical deterrency">
 	<deterrency halflife="4" initial="0.2"/>
-      </anopheles>
-    </VADescription>
+      </VADescription>
+    </anopheles>
     <continuous>
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>
@@ -199,14 +194,14 @@
         <vaccinate coverage="0.95"/>
         <ITN coverage="0.95"/>
         <IRS coverage="0.95"/>
-	<VectorAvailability coverage="0.7" />
+	<VectorAvailability coverage="0.7"/>
       </intervention>
       <intervention time="13">
         <vaccinate coverage="0.95"/>
       </intervention>
       <intervention time="100">
 	<larviciding>
-	  <anopheles mosquito="gambiae_ss" effectiveness="0.75" duration="1825"/>
+	  <anopheles duration="1825" effectiveness="0.75" mosquito="gambiae_ss"/>
 	</larviciding>
       </intervention>
       <intervention time="366">
@@ -261,19 +256,19 @@
   <entoData name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss">
-        <eir EIRRotateAngle="0" a0="-2.5889" a1="0.8968" b1="2.678" a2="-0.4551" b2="2.599" />
+        <eir EIRRotateAngle="0" a0="-2.5889" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
         <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00085" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts name="unprotectedAnimals" mosqEntoAvailability="0.055" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
+        <nonHumanHosts mosqEntoAvailability="0.055" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="funestus">
-        <eir EIRRotateAngle="0" a0="-1.019" a1="2.444" b1="-3.684" a2="-0.0491" b2="-0.1335" />
+        <eir EIRRotateAngle="0" a0="-1.019" a1="2.444" a2="-0.0491" b1="-3.684" b2="-0.1335"/>
         <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.0022" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.65" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts name="unprotectedAnimals" mosqEntoAvailability="0.045" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
+        <nonHumanHosts mosqEntoAvailability="0.045" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="arabiensis">
-        <eir EIRRotateAngle="0" a0="-0.39166" a1="0.8968" b1="2.678" a2="-0.4551" b2="2.599" />
+        <eir EIRRotateAngle="0" a0="-0.39166" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
         <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts name="unprotectedAnimals" mosqEntoAvailability="0.012" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99"/>
+        <nonHumanHosts mosqEntoAvailability="0.012" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
       </anopheles>
     </vector>
   </entoData>

@@ -72,27 +72,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
   
   
   // -----  Initialise interventions  -----
-  const scnXml::Interventions& xmlInterventions = getInterventions();
-  if (xmlInterventions.getITNDescription().present()) {
-    const scnXml::ITNDescription::AnophelesSequence& itnSeq = xmlInterventions.getITNDescription().get().getAnopheles();
-    for (size_t i = 0; i < itnSeq.size(); ++i) {
-      const scnXml::Anopheles1& itnDesc = itnSeq[i];
-      species[getSpeciesIndex(itnDesc.getMosquito())].setITNDescription (itnDesc);
-    }
-  }
-  if (xmlInterventions.getIRSDescription().present()) {
-    const scnXml::IRSDescription::AnophelesSequence& irsSeq = xmlInterventions.getIRSDescription().get().getAnopheles();
-    for (size_t i = 0; i < irsSeq.size(); ++i) {
-      const scnXml::Anopheles2& irsDesc = irsSeq[i];
-      species[getSpeciesIndex(irsDesc.getMosquito())].setIRSDescription (irsDesc);
-    }
-  }
-  if (xmlInterventions.getVADescription().present()) {
-    const scnXml::VADescription::AnophelesSequence& seq = xmlInterventions.getVADescription().get().getAnopheles();
-    for (size_t i = 0; i < seq.size(); ++i) {
-      const scnXml::Anopheles3& desc = seq[i];
-      species[getSpeciesIndex(desc.getMosquito())].setVADescription (desc);
-    }
+  const scnXml::Interventions::AnophelesSequence& intervSeq = getInterventions().getAnopheles();
+  for (scnXml::Interventions::AnophelesSequence::const_iterator it = intervSeq.begin(); it != intervSeq.end(); ++it) {
+    species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it);
   }
 }
 VectorTransmission::~VectorTransmission () {

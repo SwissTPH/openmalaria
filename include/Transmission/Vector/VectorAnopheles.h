@@ -106,40 +106,12 @@ public:
     return humanBase;
   }
   
-  /** @brief Set up intervention descriptions for humans, for this anopheles
-   * species.
+  /** Set up intervention descriptions for humans, for this anopheles species.
    *
-   * Currently no interventions for non-human hosts, although planned.
-   * 
-   * NOTE: can't we have
-   * interventions {
-   *   anopheles 1 {
-   *     xxxDescription
-   *     yyyDescription
-   *   }
-   *   anopheles 2 ...
-   * }
-   * in the XML instead of
-   * interventions {
-   *   xxxDescription {
-   *     anopheles 1
-   *     anopheles 2
-   *   }
-   *   yyyDescription ...
-   * }
-   * ? Then can just pass relevent interventions.anopheles section straight to
-   * humanBase. */
-  //@{
-  inline void setITNDescription (const scnXml::Anopheles1& desc) {
-    humanBase.setITNDescription (desc);
+   * Currently no interventions for non-human hosts, although planned. */
+  inline void setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
+    humanBase.setInterventionDescription (intervDesc);
   }
-  inline void setIRSDescription (const scnXml::Anopheles2& desc) {
-    humanBase.setIRSDescription (desc);
-  }
-  inline void setVADescription (const scnXml::Anopheles3& desc) {
-    humanBase.setVADescription (desc);
-  }
-  //@}
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   

@@ -43,22 +43,8 @@ public:
   void operator= (const scnXml::Mosq&);
   void operator= (const scnXml::NonHumanHosts&);
   
-  /** Set an ITN description for this anopheles species. */
-  inline void setITNDescription (const scnXml::Anopheles1& itnDesc) {
-    ITNDeterrency = itnDesc.getDeterrency ();
-    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect ();
-    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect ();
-  }
-  
-  /** Set an IRS description for this anopheles species. */
-  inline void setIRSDescription (const scnXml::Anopheles2& irsDesc) {
-    IRSDeterrency = irsDesc.getDeterrency ();
-    IRSKillingEffect = irsDesc.getKillingEffect ();
-  }
-  
-  inline void setVADescription (const scnXml::Anopheles3& vaDesc) {
-    VADeterrency = vaDesc.getDeterrency ();
-  }
+  /** Set up any vector-model intervention parameters. */
+  void setInterventionDescription (const scnXml::Anopheles1& intervDesc);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;

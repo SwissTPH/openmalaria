@@ -577,9 +577,16 @@
     <xs:sequence>
       <xs:element maxOccurs="3" minOccurs="0" name="vaccineDescription" type="vaccineDescription" />
       <xs:element maxOccurs="1" minOccurs="0" name="iptiDescription" type="iptDescription" />
-      <xs:element maxOccurs="1" minOccurs="0" name="ITNDescription" type="ITNDescription" />
-      <xs:element maxOccurs="1" minOccurs="0" name="IRSDescription" type="IRSDescription" />
-      <xs:element maxOccurs="1" minOccurs="0" name="VADescription" type="VADescription" />
+      <xs:element name="anopheles" minOccurs="0" maxOccurs="unbounded">
+	<xs:complexType>
+	  <xs:sequence>
+	    <xs:element maxOccurs="1" minOccurs="0" name="ITNDescription" type="ITNDescription" />
+	    <xs:element maxOccurs="1" minOccurs="0" name="IRSDescription" type="IRSDescription" />
+	    <xs:element maxOccurs="1" minOccurs="0" name="VADescription" type="VADescription" />
+	  </xs:sequence>
+	  <xs:attribute name="mosquito" type="xs:string" use="required" />
+	</xs:complexType>
+      </xs:element>
       <xs:element minOccurs="0" name="continuous" type="continuous">
         <xs:annotation>
           <xs:documentation />
@@ -900,9 +907,6 @@
   </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:sequence>
-      <xs:element name="anopheles" maxOccurs="unbounded">
-	<xs:complexType>
-	  <xs:sequence>
     <xs:element name="deterrency" type="WeibullDecayedProportion">
       <xs:annotation>
 	<xs:documentation>
@@ -927,10 +931,6 @@
 	<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:element>
-	  </xs:sequence>
-	  <xs:attribute name="mosquito" type="xs:string" use="required" />
-	</xs:complexType>
-      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -943,9 +943,6 @@
   </xs:complexType>
   <xs:complexType name="IRSDescription">
     <xs:sequence>
-      <xs:element name="anopheles" maxOccurs="unbounded">
-	<xs:complexType>
-	  <xs:sequence>
     <xs:element name="deterrency" type="WeibullDecayedProportion">
       <xs:annotation>
 	<xs:documentation>
@@ -962,10 +959,6 @@
 	<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:element>
-	  </xs:sequence>
-	  <xs:attribute name="mosquito" type="xs:string" use="required" />
-	</xs:complexType>
-      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -978,9 +971,6 @@
   </xs:complexType>
   <xs:complexType name="VADescription">
     <xs:sequence>
-      <xs:element name="anopheles" maxOccurs="unbounded">
-	<xs:complexType>
-	  <xs:sequence>
 	    <xs:element name="deterrency" type="WeibullDecayedProportion">
 	      <xs:annotation>
 		<xs:documentation>
@@ -989,10 +979,6 @@
 		<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
 	      </xs:annotation>
 	    </xs:element>
-	  </xs:sequence>
-	  <xs:attribute name="mosquito" type="xs:string" use="required" />
-	</xs:complexType>
-      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
