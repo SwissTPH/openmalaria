@@ -222,6 +222,10 @@ void VectorAnopheles::initMainSimulation (size_t sIndex, const std::list<Human>&
       double sumAvailability = 0.0;
       for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
 	sumAvailability += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+      // Use if you want to recalculate the constant in HostMosquitoInteraction::initialise:
+      //cout << "Average human availability: " << setprecision(12) << sumAvailability/populationSize << endl;
+      //NOTE: could check averageAvailability is reasonably close to humanBase.entoAvailability
+      // (though it's not clear what to do and how much of a problem it is if this isn't the case).
       
       // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
       VectorEmergence emerge (mosqRestDuration, EIPDuration,

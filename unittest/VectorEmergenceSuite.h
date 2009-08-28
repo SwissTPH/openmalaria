@@ -34,7 +34,6 @@ using namespace std;
 #include <cxxtest/TestSuite.h>
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
 #include "ExtraAsserts.h"
-#include <iomanip>
 
 #include "Transmission/Vector/VectorEmergence.h"
 #include "Transmission/Vector/VectorAnopheles.h"

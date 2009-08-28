@@ -120,7 +120,13 @@ double PerHostTransmission::probMosqResting (HostCategoryAnopheles& base, size_t
 void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double availabilityFactor)
 {
   //TODO: vary to simulate heterogeneity
-  entoAvailability = base.entoAvailability * availabilityFactor;
+  
+  // We multiply the availability by a constant, to account for reduced availability due to age
+  // and therefore make the average availability of the population just base.entoAvailability.
+  // Search "Average human availability" in files to output for recalculation.
+  //TODO: confirm mean heterogeneity from InfectionIncidenceModel is 1.
+  // This value is the multiplicative mean of values calculated from scenarioVector and scenarioFullInterventionSet (both with popSize=1000)
+  entoAvailability = base.entoAvailability * availabilityFactor * 1.286683772215131;
   probMosqBiting = base.probMosqBiting;
   probMosqFindRestSite = base.probMosqFindRestSite;
   probMosqSurvivalResting = base.probMosqSurvivalResting;

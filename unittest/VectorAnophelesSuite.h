@@ -28,7 +28,6 @@
 #include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <algorithm>
-#include <iomanip>
 #include <list>
 #include <xsd/cxx/tree/exceptions.hxx>
 
