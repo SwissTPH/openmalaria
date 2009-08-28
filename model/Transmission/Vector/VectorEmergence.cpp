@@ -355,9 +355,9 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gs
 	// Refer to papers noted above for equations.
         // P_A and P_Ai are described in CalcInitMosqEmergeRate.
   double totalAvailability = humanPopulationAvailability;
-  /* FIXME
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
-    totalAvailability += nnh->availability; */
+    totalAvailability += nnh->entoAvailability;
+  
   double P_A = exp(-(totalAvailability + mu_vA)*theta_d);
   double P_Ai = (1-P_A) * humanPopulationAvailability/(totalAvailability + mu_vA);
 	// \f$P_{df}\f$: Probability that a mosquito finds a host on a given
@@ -376,11 +376,11 @@ void VectorEmergence::CalcUpsilonOneHost(double* PAPtr, double* PAiPtr, const gs
   gsl_vector_set_all(P_duf, 1.0);
   gsl_vector_sub(P_duf, K_vi);
   gsl_vector_scale(P_duf, P_df);
-  /* FIXME
+  
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
-    P_df += nnh->availability * nnh->probSurviveCycle;
-	*/
-
+    P_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
+  
+  
   sumkplus = 0;
   sumkplusPtr = &sumkplus;
 

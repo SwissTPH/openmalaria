@@ -26,8 +26,6 @@
 #include <list>
 
 class Human;
-typedef vector<void*> NonHumanHostsType;	//FIXME
-
 
 /** Per-species data for vector control.
  *
@@ -295,7 +293,7 @@ private:
    * @returns P_Ai_base
    * 
    * First 3 parameters are just outputs. */
-  double calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population);
+  double calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population, bool);
   
   /** Initialise P_A, P_df and P_dif using model parameters and the supplied
    * kappaDaily array.

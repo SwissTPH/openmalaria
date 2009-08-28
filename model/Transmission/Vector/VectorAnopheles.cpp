@@ -33,7 +33,7 @@
 
 string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
-  scnXml::Mosq mosq = anoph.getMosq();
+  const scnXml::Mosq mosq = anoph.getMosq();
   
   mosqRestDuration = mosq.getMosqRestDuration();
   EIPDuration = mosq.getExtrinsicIncubationPeriod();
@@ -41,13 +41,19 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   mosqSeekingDeathRate = mosq.getMosqSeekingDeathRate();
   mosqSeekingDuration = mosq.getMosqSeekingDuration();
   
-  humanBase.initialise (mosq);
+  humanBase = mosq;
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
   N_v_length = EIPDuration + mosqRestDuration;
+  
+  const scnXml::Anopheles::NonHumanHostsSequence& otherHosts = anoph.getNonHumanHosts();
+  nonHumanHosts.resize (otherHosts.size());
+  for (size_t i = 0; i < otherHosts.size(); ++i) {
+    nonHumanHosts[i] = otherHosts[i];
+  }
   
   
   // -----  allocate memory  -----
@@ -126,14 +132,13 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 void VectorAnopheles::destroy () {
 }
 
-double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population) {
+double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population, bool withoutInfectiousnessP_dif = false) {
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
   double leaveSeekingStateRate = mosqSeekingDeathRate;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
     leaveSeekingStateRate += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
-  /* FIXME
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
-    leaveSeekingStateRate += nnh->perHostTransmission.entoAvailabilityPartial (this, sIndex); */
+    leaveSeekingStateRate += nnh->entoAvailability;
   
   // Probability of a mosquito not finding a host this day:
   intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
@@ -150,13 +155,18 @@ double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df,
     intP_df += prod;
     intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
   }
-  /* FIXME
+  
+  /* For initialisation, we multiply later by the whole population's kappa.
+  In this case this function is only called once so performance is less
+  important (this allows avoiding code duplication). */
+  if (withoutInfectiousnessP_dif)
+    intP_dif = intP_df;
+  
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
-    intP_df += nnh->availability * nnh->probSurviveCycle;
-    //FIXME: but initFeedingCycleProbs wants without to use for P_dif!
+    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
     // Note: in model, we do the same for intP_dif, except in this case it's
     // multiplied by infectiousness of host to mosquito which is zero.
-  } */
+  }
   
   double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
@@ -168,7 +178,7 @@ void VectorAnopheles::initFeedingCycleProbs (size_t sIndex, const std::list<Huma
   //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
   
   double intP_A, intP_df, intP_dif;
-  calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population);
+  calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population, true);
   
   P_A  .resize (N_v_length);
   P_df .resize (N_v_length);
@@ -176,7 +186,7 @@ void VectorAnopheles::initFeedingCycleProbs (size_t sIndex, const std::list<Huma
   for (int t = 0; t < N_v_length; ++t) {
     P_A[t]	= intP_A;
     P_df[t]	= intP_df;
-    P_dif[t]	= intP_df * kappaDaily[t];
+    P_dif[t]	= intP_dif * kappaDaily[t];
   }
 }
 

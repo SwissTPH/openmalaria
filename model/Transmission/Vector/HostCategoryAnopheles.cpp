@@ -19,9 +19,17 @@
 
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 
-void HostCategoryAnopheles::initialise (scnXml::Mosq& mosq) {
+// NOTE: should Mosq be an extension of NonHumanHosts type or NonHumanHosts a sub-object of Mosq? This is duplicate functionality.
+void HostCategoryAnopheles::operator= (const scnXml::Mosq& mosq) {
   entoAvailability = mosq.getMosqEntoAvailability();
   probMosqBiting = mosq.getMosqProbBiting();
   probMosqFindRestSite = mosq.getMosqProbFindRestSite();
   probMosqSurvivalResting = mosq.getMosqProbResting();
+}
+
+void HostCategoryAnopheles::operator= (const scnXml::NonHumanHosts& nnh) {
+  entoAvailability = nnh.getMosqEntoAvailability();
+  probMosqBiting = nnh.getMosqProbBiting();
+  probMosqFindRestSite = nnh.getMosqProbFindRestSite();
+  probMosqSurvivalResting = nnh.getMosqProbResting();
 }

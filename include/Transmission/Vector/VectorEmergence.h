@@ -36,7 +36,6 @@
 #define VectorTransmission_PRINT_CalcSpectralRadius
 #define VectorTransmission_PRINT_CalcInv1minusA
 
-typedef vector<void*> NonHumanHostsType;	//FIXME
 
 /** Container for functions used to calculate the mosquito emergence rate.
  *

@@ -84,7 +84,7 @@ endif (OM_CXXTEST_INTERPRETER)
 #foreach (DATA_FILE VectorEmergenceSuite.txt VectorSpeciesSuite.yaml)
 #  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
 #endforeach (DATA_FILE)
-configure_file (${CMAKE_SOURCE_DIR}/test/scenario_8.xsd ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+#configure_file (${CMAKE_SOURCE_DIR}/test/${OM_LATEST_SCHEMA} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (run tests.cpp)
 target_link_libraries (run
@@ -108,7 +108,7 @@ endif (MSVC)
 
 add_test (unittest run -keep)
 set_tests_properties (unittest
-  PROPERTIES PASS_REGULAR_EXPRESSION "Running [0-9]+ tests.*OK!")
+  PROPERTIES PASS_REGULAR_EXPRESSION "^Running [0-9]+ tests.*OK![ \r\n]*$")
 
 mark_as_advanced (
   OM_CXXTEST_GUI_ARG

@@ -399,6 +399,7 @@
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
+	  <xs:attribute name="name" type="xs:string" use="required" />
           <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
@@ -425,15 +426,6 @@
           <xs:complexType>
             <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
-              <xs:element name="nonHumanHosts" minOccurs="0" maxOccurs="unbounded">
-                <xs:annotation>
-                  <xs:documentation>Populations of non-human hosts (must also have species-specific parameters).</xs:documentation>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:attribute name="name" type="xs:string" use="optional" />
-                  <xs:attribute name="populationSize" type="xs:int" use="required" />
-                </xs:complexType>
-              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

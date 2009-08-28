@@ -45,7 +45,6 @@ public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();
   
-  //FIXME: do implementing models need checkpointing?
   void write(ostream& out) const;
   void read(istream& in);
   //@}

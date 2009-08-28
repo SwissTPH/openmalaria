@@ -34,7 +34,14 @@
 class HostCategoryAnopheles
 {
 public:
-  void initialise (scnXml::Mosq& mosq);
+  /** Initialise entoAvailability and probMosq... to 0. */
+  HostCategoryAnopheles () :
+    entoAvailability(0.0), probMosqBiting(0.0),
+    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0)
+  {}
+  
+  void operator= (const scnXml::Mosq&);
+  void operator= (const scnXml::NonHumanHosts&);
   
   /** Set an ITN description for this anopheles species. */
   inline void setITNDescription (const scnXml::Anopheles1& itnDesc) {
@@ -53,7 +60,7 @@ public:
     VADeterrency = vaDesc.getDeterrency ();
   }
   
-  inline double probMosqBitingAndResting() {
+  inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
   }
   
@@ -95,4 +102,6 @@ public:
   WeibullDecayedValue VADeterrency;
   //@}
 };
+typedef vector<HostCategoryAnopheles> NonHumanHostsType;
+
 #endif

@@ -5,7 +5,7 @@
 find_package (Python)
 
 # Testing via run.sh or run.py script:
-set (OM_BOXTEST_SCHEMA_NAME "scenario_8.xsd")
+set (OM_BOXTEST_SCHEMA_NAME ${OM_LATEST_SCHEMA})
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.py ${CMAKE_CURRENT_BINARY_DIR}/run.py @ONLY)
 
 # working tests:

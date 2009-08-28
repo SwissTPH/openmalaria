@@ -246,9 +246,14 @@ public:
   
   void doAssertSpecies (const char *f, unsigned l, const YAML::Node& node) {
     ETS_ASSERT_EQUALS ((int)vtm->timeStepNumEntoInnocs, simulation->_population->_populationSize);
-    /* Print values so they can easily be copied into expected output:
+    
+    double resultEIR = 0.0;
+    for (vector<double>::const_iterator it = vtm->timeStepEntoInnocs.begin(); it != vtm->timeStepEntoInnocs.end(); ++it)
+      resultEIR += *it;
+    
+    /*/ Print values so they can easily be copied into expected output:
     cout << endl << setprecision(10);
-    cout << "average EIR: " << vtm->timeStepTotalEir / vtm->timeStepTotalEirEntries;
+    cout << "average EIR: " << resultEIR / vtm->timeStepNumEntoInnocs;
     cout << "\nP_A:\t" << species->P_A;
     cout << "\nP_df:\t" << species->P_df;
     cout << "\nP_dif:\t" << species->P_dif;
@@ -258,10 +263,7 @@ public:
     */
     double avEIR;
     node["averageEIR"] >> avEIR;
-    double result = 0.0;
-    for (vector<double>::const_iterator it = vtm->timeStepEntoInnocs.begin(); it != vtm->timeStepEntoInnocs.end(); ++it)
-      result += *it;
-    TS_ASSERT_APPROX (result / vtm->timeStepNumEntoInnocs, avEIR);
+    TS_ASSERT_APPROX (resultEIR / vtm->timeStepNumEntoInnocs, avEIR);
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_A, yaml2Std<double> (node["P_A"]));
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_df, yaml2Std<double> (node["P_df"]));
     _TS_ASSERT_VECTOR_APPROX (f,l, species->P_dif, yaml2Std<double> (node["P_dif"]));

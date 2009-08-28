@@ -34,6 +34,7 @@ using namespace std;
 #include <cxxtest/TestSuite.h>
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
 #include "ExtraAsserts.h"
+#include <iomanip>
 
 #include "Transmission/Vector/VectorEmergence.h"
 #include "Transmission/Vector/VectorAnopheles.h"
@@ -63,6 +64,7 @@ public:
     if (!file.good()) throw runtime_error ("Unable to read VectorEmergenceSuite.txt");
     
     output1CalcInitMosqEmergeRate = readVector (file, "output1CalcInitMosqEmergeRate", YEAR_LEN);
+    output1CalcInitMosqEmergeRateWithNonHumans = readVector (file, "output1CalcInitMosqEmergeRateWithNonHumans", YEAR_LEN);
     
     input1CalcUpsilonOneHost = readVector (file, "input1CalcUpsilonOneHost", YEAR_LEN);
     output1CalcUpsilonOneHost = readMatrices(file, "output1CalcUpsilonOneHost", 17, YEAR_LEN);
@@ -94,6 +96,7 @@ public:
   }
   ~VectorEmergenceSuite () {
     gsl_vector_free (output1CalcInitMosqEmergeRate);
+    gsl_vector_free (output1CalcInitMosqEmergeRateWithNonHumans);
     
     gsl_vector_free (input1CalcUpsilonOneHost);
     freeMatrices (output1CalcUpsilonOneHost, YEAR_LEN);
@@ -157,7 +160,6 @@ public:
       emergeRate[i] = EIRInit[i]*temp;
     
     vector<double> in1 = vectors::gsl2std(input1CalcUpsilonOneHost);
-    //FIXME
     NonHumanHostsType NonHumanHosts;
     emerge->CalcInitMosqEmergeRate(in1,
 				   EIRInit,
@@ -169,9 +171,38 @@ public:
     TS_ASSERT_VECTOR_APPROX_TOL (vectors::std2gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRate, 1e-6, 1e-6);
   }
   
+  // Run a test with the same values as before, but including non-human hosts.
+  // These values are not the same as NC's latest; but the idea is to have
+  // something comparable to output without non-humans, and without updating
+  // old values.
+  void testCalcInitMosqEmergeRateWithNonHumans () {
+    Global::clOptions = static_cast<CLO::CLO> (Global::clOptions | CLO::ENABLE_ERC);
+    
+    vector<double> EIRInit(YEAR_LEN, 0.0);
+    for (int i = 0; i < YEAR_LEN; ++i)
+      EIRInit[i] = gsl_vector_get(input1CalSvfromEIRdata, i);
+    
+    // Produce a rough estimate, which IS NOT the same as expected output:
+    vector<double> emergeRate (YEAR_LEN);
+    const double temp = POP_SIZE*SUM_AVAIL;
+    for (int i = 0; i < YEAR_LEN; i++)
+      emergeRate[i] = EIRInit[i]*temp;
+    
+    vector<double> in1 = vectors::gsl2std(input1CalcUpsilonOneHost);
+    NonHumanHostsType NonHumanHosts;
+    HostCategoryAnopheles nnh (hostBase);	// copy
+    nnh.entoAvailability = 0.055;		// with higher availability
+    NonHumanHosts.push_back (nnh);
+    emerge->CalcInitMosqEmergeRate(in1,
+				   EIRInit,
+				   NonHumanHosts,
+				   emergeRate);
+    
+    TS_ASSERT_VECTOR_APPROX (vectors::std2gsl(emergeRate, YEAR_LEN), output1CalcInitMosqEmergeRateWithNonHumans);
+  }
+  
   void testCalcUpsilonOneHost () {
     double PA, PAi;
-    //FIXME
     NonHumanHostsType NonHumanHosts;
     emerge->CalcUpsilonOneHost (&PA, &PAi, input1CalcUpsilonOneHost, NonHumanHosts);
     TS_ASSERT_APPROX (PA,  5.4803567e-002);
@@ -259,13 +290,16 @@ public:
 private:
   void checkNextString (istream& in, string expect) {
     string name;
-    in >> name;
+    while (in.good() && name.empty())
+      in >> name;
+    if (in.eof())
+      throw runtime_error ("Unexpected EOF");
     if (expect != name) {
       ostringstream msg;
       msg << "Next item expected in VectorEmergenceSuite.txt: "
       << expect
-      << ", got: "
-      << name;
+      << ", got: \""
+      << name << '"';
       throw runtime_error (msg.str());
     }
   }
@@ -329,6 +363,7 @@ private:
   HostCategoryAnopheles hostBase;
   
   gsl_vector *output1CalcInitMosqEmergeRate;
+  gsl_vector *output1CalcInitMosqEmergeRateWithNonHumans;
   gsl_vector *input1CalcUpsilonOneHost;
   gsl_matrix **output1CalcUpsilonOneHost;
   gsl_vector *input1CalcSvDiff, *input2CalcSvDiff, *output1CalcSvDiff;
