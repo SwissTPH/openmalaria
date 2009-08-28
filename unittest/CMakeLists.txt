@@ -89,7 +89,6 @@ endif (OM_CXXTEST_INTERPRETER)
 add_executable (run tests.cpp)
 target_link_libraries (run
   model
-  xsdcxx
   ${OM_CXXTEST_GUI_LIB}
   ${GSL_LIBRARIES}
   ${XERCESC_LIBRARIES}

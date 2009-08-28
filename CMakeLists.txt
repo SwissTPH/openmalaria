@@ -78,7 +78,6 @@ endif (OM_BOINC_INTEGRATION)
 
 # -----  Compile code  -----
 
-add_subdirectory (xsdcxx)
 add_subdirectory (model)
 
 
@@ -99,7 +98,7 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/xsdcxx
+  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model
 )
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
@@ -107,7 +106,6 @@ add_executable (openMalaria model/openMalaria.cpp)
 
 target_link_libraries (openMalaria
   model
-  xsdcxx
   ${GSL_LIBRARIES}
   ${XERCESC_LIBRARIES}
   ${Z_LIBRARIES}
