@@ -123,6 +123,7 @@ bool VectorEmergence::CalcInitMosqEmergeRate(const vector<double>& FHumanInfecti
   
   // Output Parameters (for the model):
   gsl_vector* Xi_i = vectors::std2gsl (FEIRInitVector, theta_p);
+  PrintVector("Xi_i", Xi_i);
   
   // The number of infectious mosquitoes over every day of the cycle.
   // calculated from the EIR data.
@@ -735,6 +736,7 @@ void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t the
   logFile << "P_A = " << P_A << endl;
   logFile << "P_Ai = " << P_Ai << endl;
   logFile << "P_df = " << P_df << endl;
+  logFile << endl;
 
   /*
   for (size_t i=0; i<theta_p; i++)
@@ -745,24 +747,10 @@ void VectorEmergence::PrintUpsilon(const gsl_matrix *const * Upsilon, size_t the
   */
 
   // Print some Upsilon[k].
-  size_t k=0;
-
-  logFile << "Upsilon[" << k << "] =" << endl;
-  for (size_t i=0; i < eta; i++){
-    for (size_t j=0; j < eta; j++){
-      logFile << gsl_matrix_get(Upsilon[k], i, j) << endl;
-    }
-    logFile << endl;
-  }
-  
-  k = theta_p - 1;
-
-  logFile << "Upsilon[" << k << "] =" << endl;
-  for (size_t i=0; i < eta; i++){
-    for (size_t j=0; j < eta; j++){
-      logFile << gsl_matrix_get(Upsilon[k], i, j) << endl;
-    }
-    logFile << endl;
+  PrintMatrix("Upsilon_0", Upsilon[0], eta, eta);
+  if(theta_p==365)
+  {
+    PrintMatrix("Upsilon_364", Upsilon[364], eta, eta);
   }
 }
 #endif
@@ -781,17 +769,16 @@ void VectorEmergence::PrintXP(const gsl_vector *const * x_p, size_t eta, size_t 
 }
 #endif
 
-#if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcInv1minusA
+#if defined VectorTransmission_PRINT_CalcInitMosqEmergeRate || defined VectorTransmission_PRINT_CalcInv1minusA || defined VectorTransmission_PRINT_CalcUpsilonOneHost
 void VectorEmergence::PrintMatrix(const char matrixname[], const gsl_matrix* A, 
                  size_t RowLength, size_t ColLength) const
 {
-  logFile << "" << matrixname << " =" << endl;
   for (size_t i=0; i < ColLength; i++){
     for (size_t j=0; j < RowLength; j++){
-      logFile << "" << gsl_matrix_get(A, i, j) << endl;
+      logFile << matrixname << "(" <<  i+1 << "," << j+1 <<") = " <<  gsl_matrix_get(A, i, j) << ";" << endl;
     }
-    logFile << endl;
   }
+  logFile << endl;
 }
 #endif
 
@@ -802,6 +789,7 @@ void VectorEmergence::PrintVector(const char* vectorname, const gsl_vector* v) c
     double temp = gsl_vector_get(v, i);
     logFile << vectorname << "(" <<  i+1 << ") = " <<  temp << ";" << endl;
   }
+  logFile << endl;
 }
 #endif
 
@@ -814,4 +802,5 @@ void VectorEmergence::PrintVector(const char* vectorname, const vector<double>& 
   for (unsigned int i=0; i < v.size(); i++){
     logFile << vectorname << "(" <<  i+1 << ") = " <<  v[i] << ";" << endl;
   }
+  logFile << endl;
 }
