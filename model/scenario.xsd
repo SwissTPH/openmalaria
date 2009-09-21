@@ -55,6 +55,14 @@
             <xs:appinfo>units:List of elements;</xs:appinfo>
           </xs:annotation>
         </xs:element>
+	<xs:element name="drugDescription" type="drugDescription" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Drug model parameters
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
         <xs:element name="parameters" type="parameters">
           <xs:annotation>
             <xs:documentation>
@@ -1378,6 +1386,183 @@
         <xs:appinfo>units:Time steps;min:1;max:100;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  
+    <xs:complexType name="drugDescription">
+      <xs:sequence>
+        <xs:element name="genome">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="content">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element
+                      maxOccurs="unbounded" type="gene" name="gene" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="distribution">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element
+                      maxOccurs="unbounded" type="genomeInstance"
+                      name="genomeInstance" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="drugs">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="compound">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="pk" type="pk" />
+                    <xs:element name="pd">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element
+                            maxOccurs="unbounded" type="genomeRule" name="genomeRule" />
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="acronym"
+                    use="required" type="xs:string" />
+                  <xs:attribute name="name"
+                    use="required" type="xs:string" />
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="synergy" use="optional"
+              type="xs:string" />
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+
+  <xs:complexType name="gene">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="mutation"
+        type="mutation" />
+    </xs:sequence>
+    <xs:attribute name="name" use="required" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="mutation">
+    <xs:attribute name="cost" use="required" type="xs:double" />
+    <xs:attribute name="position" use="required" type="xs:integer" />
+  </xs:complexType>
+
+  <xs:complexType name="genomeInstance">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" type="allele"
+        name="allele" />
+    </xs:sequence>
+    <xs:attribute name="proportion" use="required"
+      type="xs:integer" />
+  </xs:complexType>
+
+  <xs:complexType name="allele">
+    <xs:attribute name="mutations" use="required" type="xs:integer" />
+    <xs:attribute name="name" use="required" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="pkBase">
+    <xs:attribute name="F" use="required" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>
+          Bioavailability (unsure of the units we will be
+          using)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="Vd" use="required" type="xs:double">
+      <xs:annotation>
+        <xs:documentation>
+          Volume of Distribution (l/kg)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="t12" use="required" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>Half-life (days)</xs:documentation>
+        <xs:appinfo>units:Number;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="pk">
+    <xs:complexContent>
+      <xs:extension base="pkBase">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded"
+            name="ageGroup" type="pkAgeGroup" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="pkAgeGroup">
+    <xs:complexContent>
+      <xs:extension base="pkBase">
+        <xs:attribute name="minAge" type="xs:double" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="genomeRuleBase">
+    <xs:attribute name="c50" use="required" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>
+          Half maximal effect concentration (mg/l)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="k1" use="required" type="xs:double">
+      <xs:annotation>
+        <xs:documentation>
+          Maximal parasite killing rate (per day)
+        </xs:documentation>
+        <xs:appinfo>units:Proportion;min:0;max:1;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="n" use="required" type="xs:integer">
+      <xs:annotation>
+        <xs:documentation>
+          Slope of the concentration effect curve (no units)
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="genomeRule">
+    <xs:complexContent>
+      <xs:extension base="genomeRuleBase">
+        <xs:sequence>
+          <xs:element minOccurs="0" maxOccurs="unbounded"
+            name="matchMutation" type="matchMutation" />
+          <xs:element minOccurs="0" maxOccurs="unbounded"
+            name="ageGroup" type="genomeRuleAgeGroup" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="genomeRuleAgeGroup">
+    <xs:complexContent>
+      <xs:extension base="genomeRuleBase">
+        <xs:attribute name="minAge" type="xs:double" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="matchMutation">
+    <xs:attribute name="present" use="required" type="xs:boolean"/>
+    <xs:attribute name="gene" use="required" type="xs:string" />
+    <xs:attribute name="pos" use="required" type="xs:integer" />
   </xs:complexType>
   
   <!-- standard types used -->

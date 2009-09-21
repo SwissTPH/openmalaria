@@ -46,7 +46,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 9;
+    static final int CURRENT_VERSION = 10;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -446,6 +446,11 @@ public class SchemaTranslator {
     // This changed some stuff to do with non-human hosts that wasn't used
     // before and added a VectorAvailability intervention.
     public void translate8To9() throws Exception {
+    }
+    
+    // Version 10 introduced PKPD description parameters. No changes to
+    // existing elements.
+    public void translate9To10() throws Exception {
     }
     
     private void visitAllFiles(File file, File outDir) throws Exception {
