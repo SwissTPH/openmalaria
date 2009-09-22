@@ -66,7 +66,7 @@ public:
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity (which units?).
    * \param time       - Time in minutes (or hours?) since start of the simulation tStep.
-   *  \param weight    - Weight of human */
+   *  \param weight    - Weight of human in kg */
   virtual void medicate(string drugAbbrev, double qty, int time, double weight) {}
   
   /// Called each timestep immediately after the drug acts on any infections.

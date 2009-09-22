@@ -65,6 +65,7 @@ set (OM_CXXTEST_HEADERS
   VectorEmergenceSuite.h
   VectorAnophelesSuite.h
   ExtraAsserts.h	# must appear after at least some of the above
+  PkPdDrugSuite.h
 )
 
 if (OM_CXXTEST_INTERPRETER)
