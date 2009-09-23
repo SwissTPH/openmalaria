@@ -30,7 +30,7 @@ class PkPdDrugSuite : public CxxTest::TestSuite
 {
 public:
   PkPdDrugSuite () {
-    Global::interval = 5;
+    Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
     Global::modelVersion = INCLUDES_PK_PD;
     DrugModel::init ();
   }
@@ -56,6 +56,13 @@ public:
     proxy->medicate ("CQ", 250000, 0, 21, 60);
     proxy->decayDrugs ();
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.13760869542580346);
+  }
+  
+  void testCq2Doses () {
+    proxy->medicate ("CQ", 250000, 0, 60);
+    proxy->decayDrugs ();
+    proxy->medicate ("CQ", 250000, 0, 60);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.07150144786339767);
   }
   
   PkPdDrug *proxy;
