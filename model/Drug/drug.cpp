@@ -22,6 +22,7 @@
 
 #include "Drug/drug.h"
 
+#include <assert.h>
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
@@ -30,137 +31,76 @@
 using namespace std;
 
 /*
- * Private variables
+ * Static variables and functions
  */
 
-static int withinHostTimestep;
-static int simulatorTimestep;
-static ProteomeManager* manager;
+map<string,DrugType> DrugType::available; 
+double Drug::minutesPerTimeStep;
 
-/*
- * Auxilliary functions
- */
 
-void initDrugModule(int _withinHostTimestep, int _simulatorTimestep){
-  DrugRegistry* registry;
-  registry = DrugRegistry::getRegistry();
-  withinHostTimestep = _withinHostTimestep;
-  simulatorTimestep  = _simulatorTimestep;
-  Mutation* crt76 = manager->getMutation(string("CRT"), 76, 'T');
-  Drug* s;
-  // = new Drug("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
-  //registry->addDrug(s);
-  s = new Drug("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
-  vector<Mutation*> crt76L = vector<Mutation*>();
+void DrugType::init () {
+  Drug::init ();
+  Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
+  DrugType* s;
+  //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
+  //DrugType::addDrug(s);
+  s = new DrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
   s->addPDRule(vector<Mutation*>(), 68.0);
   s->parseProteomeInstances();
-  registry->addDrug(s);
-
+  DrugType::addDrug(s);
+}
+void Drug::init () {
+  minutesPerTimeStep = Global::interval * 24*60;
 }
 
-/*
- * Drug and Dose code
- */
-
-Dose::Dose(int _time, double _quantity) {
-  time = _time;
-  quantity = _quantity;
+void DrugType::addDrug(DrugType* drug) {
+  string abbrev = drug->abbreviation;
+  // Check drug doesn't already exist
+  if (available.find (abbrev) != available.end())
+    throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
+  
+  available.insert (pair<string,DrugType>(abbrev, *drug));
 }
 
-Dose::Dose(const Dose& _original) {
-  time = _original.time;
-  quantity = _original.quantity;
+const DrugType* DrugType::getDrug(string _abbreviation) {
+  map<string,DrugType>::const_iterator i = available.find (_abbreviation);
+  if (i == available.end())
+    throw xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
+  
+  return &i->second;
 }
 
-Dose::~Dose() {
-}
 
-Dose &Dose::operator=(const Dose &rhs) {
-  this->time = rhs.time;
-  this->quantity = rhs.quantity;
-  return *this;
-}
+// -----  Non-static DrugType functions  -----
 
-int Dose::operator==(const Dose &rhs) const {
-  return (time==rhs.time) && (quantity==rhs.quantity);
-}
-
-int Dose::operator<(const Dose &rhs) const {
-  return time<rhs.time;
-}
-
-ostream& operator<<(ostream& out, const Dose& dose) {
-  out << dose.time << endl;
-  out << dose.quantity << endl;
-  return out;
-}
-
-Drug::Drug(const Drug &_original) {
-  name = _original.name;
-  abbreviation = _original.abbreviation;
-  absorptionFactor = _original.absorptionFactor;
-  halfLife = _original.halfLife;
-  requiredMutations = _original.requiredMutations;
-  pdParameters = _original.pdParameters;
-  proteomePDParameters = _original.proteomePDParameters;
-
-  _concentration = 0;
-  _nextConcentration = 0;
-  doses = vector<Dose*>();
-  onHuman = true;
-}
-
-Drug::Drug(string _name, string _abbreviation,
-    double _absorptionFactor, double _halfLife) {
+DrugType::DrugType (string _name, string _abbreviation,
+    double _absorptionFactor, double _halfLife)
+{
   name = _name;
   abbreviation = _abbreviation;
   absorptionFactor = _absorptionFactor;
   halfLife = _halfLife;
-  requiredMutations=new vector<vector<Mutation*> >();
-  pdParameters=new vector<double>();
-  proteomePDParameters=new map<int,double>();
-
-  doses = vector<Dose*>();
-  _concentration = 0;
-  onHuman = false;
 }
+DrugType::~DrugType () {}
 
-Drug::~Drug() {
-  //We don't need to clear mutations as they are pointers to canonics, right?
-  //delete requiredMutations;
-  //delete pdParams;
-  //delete proteomePDParams;
-  vector<Dose*>::iterator it;
-  for(it=doses.begin(); it!=doses.end(); it++) {
-    delete (*it);
-  }
-}
-
-istream& operator>>(istream& in, Drug& drug) {
-  //Human is not saved. This is correct.
-  int numRules;
-  int numCachedRules;
-  int numDoses;
-  int i;
-  vector<Dose*>::const_iterator itD;
-  vector<double>::const_iterator itPP;
-  map<int,double>::const_iterator itPPD;
-  in >> drug.name;
-  in >> drug.abbreviation;
-  in >> drug.absorptionFactor;
-  in >> drug.halfLife; 
-  in >> numRules;
-  Global::validateListSize (numRules);
-  drug.requiredMutations = new vector< vector<Mutation*> >();
-  for (i=0; i<numRules; i++) {
+/* Checkpointing functions, which we shouldn't need now. If they are needed:
+DrugType::DrugType (istream& in) {
+  int num;
+  in >> abbreviation;
+  in >> name;
+  in >> absorptionFactor;
+  in >> halfLife; 
+  in >> num;
+  Global::validateListSize (num);
+  for (int i=0; i<num; i++) {
     vector <Mutation*> rule = vector<Mutation*>();
     int numMuts;
-    int j;
     in >> numMuts;
     Global::validateListSize (numMuts);
-    for (j=0; j<numMuts; j++) {
+    for (int j=0; j<numMuts; j++) {
       string proteinName;
       int position;
       char allele;
@@ -168,55 +108,34 @@ istream& operator>>(istream& in, Drug& drug) {
       in >> position;
       in >> allele;
       rule.push_back(
-          manager->getMutation(proteinName, position, allele));
+          ProteomeManager::getMutation(proteinName, position, allele));
     }
-    drug.requiredMutations->push_back(rule);
+    requiredMutations.push_back(rule);
   }
-  in >> numRules;
-  Global::validateListSize (numRules);
-  drug.pdParameters = new vector<double>();
-  for (i=0; i<numRules; i++) {
+  in >> num;
+  Global::validateListSize (num);
+  for (int i=0; i<num; i++) {
     double parameter;
     in >> parameter;
-    drug.pdParameters->push_back(parameter);
+    pdParameters.push_back(parameter);
   }
-  in >> numCachedRules;
-  Global::validateListSize (numCachedRules);
-  drug.proteomePDParameters = new map<int, double>();
-  for (i=0; i<numCachedRules; i++) {
+  in >> num;
+  Global::validateListSize (num);
+  for (int i=0; i<num; i++) {
     int proteomeID;
     double parameter;
     in >> proteomeID;
     in >> parameter;
-    (*drug.proteomePDParameters)[proteomeID] = parameter;
+    proteomePDParameters[proteomeID] = parameter;
   }
-  in >> drug._concentration;
-  in >> drug._nextConcentration;
-  in >> numDoses;
-  Global::validateListSize (numDoses);
-  drug.doses = vector<Dose*>();
-  for (i=0; i<numDoses; i++) {
-    int time;
-    double quantity;
-    in >> time;
-    in >> quantity;
-    drug.doses.push_back(new Dose(time, quantity));
-  }
-  return in;
 }
-
-ostream& operator<<(ostream& out, const Drug& drug) {
-  //Human is not saved. This is correct.
-  vector<Dose*>::const_iterator itD;
-  vector< vector<Mutation*> >::const_iterator itRM;
-  vector<double>::const_iterator itPP;
-  map<int,double>::const_iterator itPPD;
-  out << drug.name << endl;
-  out << drug.abbreviation << endl;
-  out << drug.absorptionFactor << endl;
-  out << drug.halfLife << endl; 
-  out << drug.requiredMutations->size() << endl;
-  for (itRM=drug.requiredMutations->begin(); itRM!=drug.requiredMutations->end(); itRM++) {
+void DrugType::write (ostream& out) const {
+  out << abbreviation << endl;
+  out << name << endl;
+  out << absorptionFactor << endl;
+  out << halfLife << endl; 
+  out << requiredMutations.size() << endl;
+  for (vector< vector<Mutation*> >::const_iterator itRM=requiredMutations.begin(); itRM!=requiredMutations.end(); itRM++) {
     vector<Mutation*>::const_iterator itM;
     out << (*itRM).size() << endl;
     for (itM=(*itRM).begin(); itM!=(*itRM).end(); itM++) {
@@ -225,233 +144,111 @@ ostream& operator<<(ostream& out, const Drug& drug) {
       out << (*itM)->getAllele() << endl;
     }
   }
-  out << drug.pdParameters->size() << endl;
-  for (itPP=drug.pdParameters->begin(); itPP!=drug.pdParameters->end(); itPP++) {
+  out << pdParameters.size() << endl;
+  for (vector<double>::const_iterator itPP=pdParameters.begin(); itPP!=pdParameters.end(); itPP++) {
     out << *itPP << endl ;
   }
-  out << drug.proteomePDParameters->size() << endl;
-  for (itPPD=drug.proteomePDParameters->begin(); itPPD!=drug.proteomePDParameters->end(); itPPD++) {
+  out << proteomePDParameters.size() << endl;
+  for (map<int,double>::const_iterator itPPD=proteomePDParameters.begin(); itPPD!=proteomePDParameters.end(); itPPD++) {
     out << (*itPPD).first << endl ;
     out << (*itPPD).second << endl ;
   }
-  out << drug._concentration << endl;
-  out << drug._nextConcentration << endl;
-  out << drug.doses.size() << endl;
-  for (itD=drug.doses.begin(); itD!=drug.doses.end(); itD++) {
-    out << **itD;
+}
+*/
+
+
+void DrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
+  requiredMutations.push_back(ruleRequiredMutations);
+  pdParameters.push_back(pdFactor);
+}
+
+void DrugType::parseProteomeInstances() {
+  vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
+  int numRules = requiredMutations.size();
+  for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {
+    //cerr << " Here goes instance";
+    for(int rule=0; rule<numRules; rule++) {
+      if (it->hasMutations(requiredMutations[rule])) {
+	proteomePDParameters[it->getProteomeID()] = pdParameters[rule];
+	//cerr << " rule: " << rule << "\n";
+	break;
+      }
+    }
   }
-  return out;
 }
 
-Drug& Drug::operator=(const Drug &rhs) {
-  this->name = rhs.name;
-  this->abbreviation = rhs.abbreviation;
-  this->requiredMutations = rhs.requiredMutations;
-  this->pdParameters = rhs.pdParameters;
-  this->proteomePDParameters = rhs.proteomePDParameters;
 
-  this->doses = doses; //Maybe list should be (shallow) copied? not know...
-  this->_concentration = _concentration;
-  this->_nextConcentration = _nextConcentration;
-  return *this;
+// -----  Dose methods  -----
+
+Dose::Dose (istream& in) {
+  in >> x;
+  in >> y;
+}
+void Dose::write (ostream& out) const {
+  out << x << endl;
+  out << y << endl;
 }
 
-int Drug::operator==(const Drug &rhs) const {
-  return abbreviation==rhs.abbreviation;
+/*
+ * Drug code
+ */
+
+Drug::Drug(const DrugType* type) :
+  typeData (type),
+  _concentration (0),
+  _nextConcentration (0)
+{}
+Drug::Drug (const DrugType* type, istream& in) :
+  typeData (type)
+{
+  in >> _concentration;
+  // No need to checkpoint; just recalculate _nextConcentration
+  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+  int num;
+  in >> num;
+  Global::validateListSize (num);
+  for (int i = 0; i < num; ++i)
+    doses.push_back (Dose (in));
 }
 
-int Drug::operator<(const Drug &rhs) const {
-  return abbreviation<rhs.abbreviation;
+void Drug::write (ostream& out) const {
+  out << _concentration << endl;
+  assert (doses.size() == 0);	// doses not used yet (remove this eventually)
+  out << doses.size() << endl;
+  for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)
+    it->write (out);
 }
 
-void Drug::setConcentration(double concentration) {
-  _concentration = concentration;
-  _nextConcentration = calculateDecay(withinHostTimestep);
-}
 
-void Drug::addConcentration(double concentration) {
-  _concentration += concentration;
-  _nextConcentration = calculateDecay(withinHostTimestep);
+void Drug::addDose (double concentration, int delay) {
+  if (delay == 0) {
+    _concentration += concentration;
+    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+  } else {
+    assert (false);	//NOTE: Not properly dealt with yet (as it is only relevant for ACTs).
+    // Only adding doses for this timestep is supported
+    assert (delay>0 && delay<minutesPerTimeStep);
+    double nextConcentration = concentration*decayFactor (minutesPerTimeStep-delay);
+    doses.push_back (Dose (nextConcentration, 0 /*FIXME*/));
+  }
 }
 
 double Drug::calculateDrugFactor(ProteomeInstance* infProteome) const {
   //Returning an average of 2 points
-  //The wackiness below is because of const requirements (which operator[] on maps does not supply)
-  double param = (*(proteomePDParameters->find(infProteome->getProteomeID()))).second;
+  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
   return exp(-(startFactor + endFactor)/2);
 }
 
-double Drug::calculateDecay(int time) const {
+double Drug::decayFactor (double time) {
   //k = log(2)/halfLife
-  return _concentration * exp(-time*log(2.0)/halfLife);
+  return exp(-time*log(2.0)/typeData->halfLife);
 }
 
-void Drug::decay() {
+bool Drug::decay() {
   _concentration = _nextConcentration;
-  _nextConcentration = calculateDecay(withinHostTimestep);
+  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+  //TODO: if concentration is negligible, return true to clean up this object
+  return false;
 }
-
-
-Drug Drug::use() {
-  // To be removed?
-  Drug usedDrug = Drug(*this);
-  return usedDrug;
-}
-
-void Drug::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
-  requiredMutations->push_back(ruleRequiredMutations);
-  pdParameters->push_back(pdFactor);
-}
-
-void Drug::parseProteomeInstances() {
-  vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
-  vector<ProteomeInstance>::const_iterator it;
-  int numRules = requiredMutations->size();
-  for (it=instances.begin(); it !=instances.end(); it++) {
-    //cerr << " Here goes instance";
-    for(int rule=0; rule<numRules; rule++) {
-      if (it->hasMutations((*requiredMutations)[rule])) {
-        (*proteomePDParameters)[it->getProteomeID()] = (*pdParameters)[rule];
-        //cerr << " rule: " << rule << "\n";
-        break;
-      }
-    }
-  }
-
-}
-
-/*
- * DrugProxy code
- */
-
-DrugProxy::DrugProxy() :
-    _drugs()	// initialise empty list
-{
-  registry = DrugRegistry::getRegistry();
-}
-
-void DrugProxy::destroy() {
-  list<Drug*>::const_iterator it;
-  for(it=_drugs.begin(); it!=_drugs.end(); it++) {
-    delete (*it);
-  }
-  _drugs.clear();
-}
-
-void DrugProxy::medicate(string _drugAbbrev, double _qty, int _time, double weight) {
-  /* We ignore time for now (as it is only relevant for ACTs).
-   *   As such, no doses are created, but concentration is updated.
-   */
-  //cerr << "Medicating with: " << _drugAbbrev << " " << _qty << "\n";
-  Drug* myDrug = NULL;
-  list<Drug*>::iterator it;
-  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
-    if ((*it)->getAbbreviation() == _drugAbbrev) {
-      myDrug = (*it);
-      break;
-    }
-  }
-  if (myDrug == NULL) {
-    myDrug = registry->getDrug(_drugAbbrev);
-    if (myDrug == NULL) {
-      ostringstream temp;
-      temp << "prescribed non-existant drug " << _drugAbbrev;
-      throw xml_scenario_error (temp.str());
-    }
-    _drugs.push_back(myDrug);
-  }
-  myDrug->addConcentration(_qty*myDrug->getAbsorptionFactor()/weight);
-}
-
-double DrugProxy::calculateDrugsFactor(ProteomeInstance* infProteome) {
-  //We will choose for now the smallest (ie, most impact)
-  list<Drug*>::const_iterator it;
-  double factor = 1; //no effect
-  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
-    double drugFactor;
-    drugFactor = (*it)->calculateDrugFactor(infProteome);
-    if (drugFactor< factor) {
-      factor = drugFactor;
-    }
-  }
-  return factor;
-}
-
-void DrugProxy::decayDrugs() {
-  list<Drug*>::iterator it;
-  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
-    (*it)->decay();
-  }
-}
-
-void DrugProxy::write (ostream& out) const {
-  out << _drugs.size() << endl;
-  list<Drug*>::const_iterator it;
-  for (it=_drugs.begin(); it!=_drugs.end(); it++) {
-    out << **it;
-  }
-}
-
-void DrugProxy::read (istream& in) {
-  int numDrugs;
-  in >> numDrugs;
-  Global::validateListSize (numDrugs);
-  for (int i=0; i<numDrugs; i++) {
-    Drug* drug = new Drug("", "", 0, 0);
-    in >> *drug;
-    _drugs.push_back(drug);
-  }
-}
-
-
-/*
- * DrugRegistry code
- */
-
-DrugRegistry* DrugRegistry::instance = 0;
-vector<Drug*> DrugRegistry::drugs = vector<Drug*>(); 
-
-DrugRegistry::DrugRegistry() {
-}
-
-ostream& operator<<(ostream& out, const DrugRegistry& registry) {
-  vector<Drug*>::const_iterator it;
-  out << string("Drugs available:\n");
-  for (it=registry.drugs.begin(); it!=registry.drugs.end(); it++) {
-    out << string("  ") << **it;
-    out << string("\n") ;
-  }
-  return out;
-}
-
-DrugRegistry* DrugRegistry::getRegistry() {
-  if (instance == 0) {
-    instance = new DrugRegistry;
-  }
-  return instance;
-}
-
-void DrugRegistry::addDrug(Drug* _drug) throw(int) {
-  // Check drug doesn't already exist
-  if (find (drugs.begin(), drugs.end(), _drug) == drugs.end()) {
-    drugs.push_back(_drug);
-  } else {	//Element exists, we throw
-    throw invalid_argument (string ("Drug already in registry: ").append(_drug->getAbbreviation()));
-  }
-}
-
-Drug* DrugRegistry::getDrug(string _abbreviation) throw(int) {
-  vector<Drug*>::iterator i;
-  for(i=drugs.begin(); i!=drugs.end(); ++i) {
-    if ((**i).getAbbreviation() == _abbreviation) {
-        Drug* myDrug = *i;
-        Drug* cloneDrug  = new Drug(*myDrug);
-        return cloneDrug;
-    }
-  }
-  return NULL;
-}
-
-

@@ -148,7 +148,7 @@ void DescriptiveWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, 120.0 * wtprop[getAgeGroup(age)]);
+  drugProxy->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
 }
 
 

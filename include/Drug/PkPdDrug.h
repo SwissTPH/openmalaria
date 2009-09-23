@@ -29,8 +29,10 @@
  * (Excuse the horrible class name, but it allows keeping to the usual naming
  * convention.)
  * 
- * Most of the implementation is contained in the drug.h/drug.cpp files, and
- * this class is just a wrapper to minimize changes to those files. */
+ * Holds per-human data for Tiago / the Liverpool school of medicine's
+ * drug model.
+ * 
+ * Some of the implementation is contained in the drug.h/drug.cpp files. */
 class PkPdDrug : public DrugModel {
 public:
   ///@brief Static functions
@@ -43,13 +45,12 @@ public:
   virtual ~PkPdDrug ();
   void write (ostream& out);
   
-  void medicate(string drugAbbrev, double qty, int time, double weight);
+  void medicate(string drugAbbrev, double qty, int time, double age, double weight);
   void decayDrugs ();
-  
   double getDrugFactor (ProteomeInstance* infProteome);
   
 private:
-  DrugProxy _proxy;
+  list<Drug> _drugs;
 };
 
 #endif

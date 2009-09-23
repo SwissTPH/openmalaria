@@ -24,7 +24,7 @@
 #define Hmod_drug
 
 #include <string>
-#include <list>
+#include <deque>
 #include <map>
 #include <vector>
 #include "global.h"
@@ -33,43 +33,66 @@
 using namespace std;
 
 
-class Human;
+/** Information about each (type of) drug (rather than each use of a drug).
+ *
+ * Static data contains a list of all available drug types.
+ * 
+ * No DrugType data is checkpointed, because it is loaded by init() from XML
+ * data. (Although if it cannot be reproduced by reloading it should be
+ * checkpointed.) */
+class DrugType {
+public:
+  ///@brief Static functions
+  //@{
+  /** Initialise the drug model. Called at start of simulation. */
+  static void init ();
+  
+  //! Adds a new drug to the list
+  static void addDrug(DrugType* drug);
 
-//! Initialises the drug module.
-/*!
-  \param withinHostTimeStep is the within host timestep in minutes.
-  \param simulatorTimeStep is the simulator timestep in minutes.
- */
-void initDrugModule(int _withinHostTimeStep, int _simulatorTimeStep);
+  /** Find a DrugType by its abbreviation, and create a new Drug from that.
+   *
+   * Throws if the drug isn't found, so you can rely on it returning a valid
+   * drug if it returns (doesn't throw). */
+  static const DrugType* getDrug(string abbreviation);
+  //@}
+  
+  ///@brief Non static (per instance) functions
+  //@{
+  /** Create a new DrugType.
+   *
+   * @param name	Name of the drug
+   * @param abbreviation	Abbreviated name (e.g. CQ)
+   * @param absorptionFactor	
+   * @param halfLife	Half life of decay, in minutes
+   */
+  DrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
+  ~DrugType ();
+  /* Checkpointing functions, which we shouldn't need now. If they are needed:
+  /// Load an instance from a checkpoint.
+  DrugType (istream& in);
+  /// Write instance data to a checkpoint.
+  void write (ostream& out) const;
+  */
 
-//! Drug Dose.
-class Dose {
-  //!In minutes from start of simulator step
-  int time;
+  //! Adds a PD Rule.
+  /*! The order of rule adding is important! The first add should be the
+   *  one with most mutations (typically the most resistant), the last
+   *  one should be the sensitive (ie vector<mutation> = 0).
+   */
+  void addPDRule(vector<Mutation*> requiredMutations, double pdFactor);
 
-  //! units?
-  double quantity;
-
-  public:
-  ~Dose();
-  Dose(const Dose &_original);
-  Dose(int _time, double _quantity);
-  Dose &operator=(const Dose &rhs);
-  int operator==(const Dose &rhs) const;
-  int operator<(const Dose &rhs) const;
-  friend ostream& operator<<(ostream& out, const Dose &dose);
-  friend istream& operator>>(istream& out, Dose &dose);
-};
-
-//! A class holding drug info.
-/*!
-  Holds all information pertaining drugs.
-
-  For now there is a single class implementing a simple PK/PD model.
-
-  In the future this will probably become abstract and subclasses be implemented.
- */
-class Drug {
+  //! Parses the proteme instances.
+  /*! Creates an association between ProteomeInstance and PD factor.
+   *  This is solely for performance purposes.
+   */
+  void parseProteomeInstances();
+  //@}
+  
+private:
+  // The list of available drugs. Not checkpointed; should be set up by init().
+  static map<string,DrugType> available;
+  
   //BEGIN Drug-type fields (same for all drugs of same type)
   //! The drug abbreviated name, used for registry lookups.
   string abbreviation;
@@ -87,122 +110,84 @@ class Drug {
    * The order is important, the first one takes precedence
    *   (a map cannot impement this).
    */
-  vector< vector<Mutation*> >* requiredMutations;
+  vector< vector<Mutation*> > requiredMutations;
   //! PD parameters (check requiredMutations)
-  vector<double>* pdParameters;
+  vector<double> pdParameters;
   //! Fast data structure to know the PD param per proteome
-  map<int,double>* proteomePDParameters;
+  map<int,double> proteomePDParameters;
   //END
+  
+  // Allow the Drug class to access private members
+  friend class Drug;
+};
 
+/** A simple class to hold dose info. */
+class Dose {
+public:
+  /** Create a new dose. */
+  Dose (double x, double y) {
+    this->x = x;
+    this->y = y;
+  }
+  /** Load from a checkpoint. */
+  Dose (istream& in);
+  /** Write a checkpoint. */
+  void write (ostream& out) const;
+  
+  /// Some type of data is wanted... (concentration at start of next timestep, and integral of concentration for this timestep?)
+  double x,y;
+};
 
-  //Below here, fields should only be instantiated for humans.
-
-  //! The human where it is used
-  Human* human;
-  //! A list (really a list) of doses.
-  vector<Dose*> doses;
-  //! Drug concentration (ng/mL ?).
-  double _concentration;
-  //! Drug concentration on the next cycle.
-  double _nextConcentration;
-  //!Used on human (reference to original drug structure)
-  bool onHuman;
-
-
-  public:
-  Drug(const Drug &_original);
-  Drug &operator=(const Drug &rhs);
-  int operator==(const Drug &rhs) const;
-  int operator<(const Drug &rhs) const;
-
-  Drug(string _name, string _abbreviation,
-      double _absorptionFactor, double _halfLife);
-  ~Drug();
-  friend ostream& operator<<(ostream& out, const Drug& drug);
-  friend istream& operator>>(istream& in, Drug& drug);
-
-  string getAbbreviation() const { return abbreviation;}
-  double getAbsorptionFactor() const { return absorptionFactor;}
-  double getHalfLife() const { return halfLife;}
-  void setConcentration(double concentration);
+/** A class holding drug use info.
+ *
+ * Each human has an instance for each type of drug present in their blood. */
+class Drug {
+public:
+  /** Initialise the drug model. Called at start of simulation. */
+  static void init ();
+  
+  /** Create a new instance. */
+  Drug (const DrugType*);
+  /** Load an instance from a checkpoint. */
+  Drug (const DrugType*, istream& in);
+  /** Write instance data to a checkpoint. */
+  void write (ostream& out) const;
+  
+  string getAbbreviation() const { return typeData->abbreviation;}
+  double getAbsorptionFactor() const { return typeData->absorptionFactor;}
+  //double getHalfLife() const { return typeData->halfLife;}
+  
+  /** Add amount to the concentration of drug, at time delay past the start of
+   * the current timestep. */
+  void addDose (double amount, int delay);
+  
   double getConcentration() const { return _concentration;}
   double getNextConcentration() const { return _nextConcentration;}
-  void addConcentration(double concentration);
   double calculateDrugFactor(ProteomeInstance* infProteome) const;
-  double calculateDecay(int _time) const;
-  void decay();
-
-  //! A new instance is returned for usage
-  Drug use();
-
-  //! Adds a PD Rule.
-  /*! The order of rule adding is important! The first add should be the
-   *  one with most mutations (typically the most resistant), the last
-   *  one should be the sensitive (ie vector<mutation> = 0).
-   */
-  void addPDRule(vector<Mutation*> requiredMutations, double pdFactor);
-
-  //! Parses the proteme instances.
-  /*! Creates an association between ProteomeInstance and PD factor.
-   *  This is solely for performance purposes.
-   */
-  void parseProteomeInstances();
-
-};
-
-
-//! The list of available drugs. Singleton, use getRegistry.
-/*! This should really be a pointer to a class,
-    and an instancer called on request from getDrug.
- */
-class DrugRegistry {
-  static vector<Drug*> drugs;
-  static DrugRegistry* instance;
-
-  DrugRegistry();
-  friend ostream& operator<<(ostream& out, const DrugRegistry& registry);
-  friend istream& operator>>(istream& in, DrugRegistry& registry);
-
-  public:
-  static DrugRegistry* getRegistry();
-
-  //! Adds a new drug to the list
-  static void addDrug(Drug* drug) throw (int);
-
-  //!Returns a drug
-  static Drug* getDrug(string abbreviation) throw (int);
-
-};
-
-//! Responsible interactions with the within host and clinical modules.
-/*! Acts as a proxy, this has the following benefits:
- *    1. WH module only needs to call PD once (and not once for each drug)
- *    2. Ditto for general human maintenance of PK levels
- *    3. Can decide as to sinergy among drugs
- */
-class DrugProxy {
-  list<Drug*> _drugs;
-  DrugRegistry* registry;
-  
-  public:
-  DrugProxy();
-  /// Destructor. NOTE: could it be a normal dtor?
-  void destroy();
-  
-  //! Medicates an individual.
-  /*! \param drugAbbrev - The drug abbreviation.
-   *  \param qty      - the quantity (which units?).
-   *  \param time     - Time in minutes since start of the simulation tStep.
-   *  \param weight   - Weight of human
+  /** Called per timestep to reduce concentrations.
    *
-   *  Medicate has to be called in correct time order (ie first lower times).
-   */
-  void medicate(string drugAbbrev, double qty, int time, double weight);
-  double calculateDrugsFactor(ProteomeInstance* infProteome);
-  void decayDrugs();
-
-  void write (ostream& out) const;
-  void read (istream& in);
+   * If remaining concentration is negligible, return true, and this class
+   * object will be deleted. */
+  bool decay();
+  
+private:
+  /** Calculate multiplier to decay a concentration by a duration of time
+   *
+   * @param time Duration in minutes to decay over */
+  double decayFactor (double time);
+  
+  static double minutesPerTimeStep;
+  
+  /// Always links a drug instance to its drug-type data
+  const DrugType* typeData;
+  
+  //! Drug concentration (ng/mL ?).
+  double _concentration;
+  //! Drug concentration on the next cycle (always should be whatever calcNextConcentration sets).
+  double _nextConcentration;
+  
+  /// Per-dose information. Still to be properly defined.
+  deque<Dose> doses;
 };
 
 #endif

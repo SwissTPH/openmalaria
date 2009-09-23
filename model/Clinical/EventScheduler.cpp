@@ -62,7 +62,7 @@ void ClinicalEventScheduler::init () {
       for (size_t j = 0; j < mSeq.size(); ++j) {
 	ct.medications[j].abbrev = mSeq[j].getName();
 	ct.medications[j].qty = mSeq[j].getQty();
-	ct.medications[j].delay = mSeq[j].getTime();
+	ct.medications[j].time = mSeq[j].getTime();
       }
       endPoints.decisions[it->getId()] = ct;
     }
@@ -123,7 +123,7 @@ ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
     MedicateData md;
     in >> md.abbrev;
     in >> md.qty;
-    in >> md.delay;
+    in >> md.time;
     in >> md.seekingDelay;
     medicateQueue.push_back (md);
   }
@@ -143,7 +143,7 @@ void ClinicalEventScheduler::write (ostream& out) {
   for (list<MedicateData>::iterator i = medicateQueue.begin(); i != medicateQueue.end(); ++i) {
     out << i->abbrev << endl;
     out << i->qty << endl;
-    out << i->delay << endl;
+    out << i->time << endl;
     out << i->seekingDelay << endl;
   }
   out << lastCmDecision << endl;
@@ -229,7 +229,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     list<MedicateData>::iterator next = it;
     ++next;
     if (it->seekingDelay == 0) {	// Medicate today's medications
-      withinHostModel.medicate(it->abbrev, it->qty, it->delay, ageYears);
+      withinHostModel.medicate(it->abbrev, it->qty, it->time, ageYears);
       medicateQueue.erase(it);
       //TODO sort out reporting
     } else {			// and decrement treatment seeking delay for the rest

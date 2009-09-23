@@ -65,9 +65,10 @@ public:
    *
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity (which units?).
-   * \param time       - Time in minutes (or hours?) since start of the simulation tStep.
-   *  \param weight    - Weight of human in kg */
-  virtual void medicate(string drugAbbrev, double qty, int time, double weight) {}
+   * \param time       - Time in minutes since start of this time step to medicate at
+   * \param age        - Age of human in years
+   * \param weight     - Weight (mass) of human in kg */
+  virtual void medicate(string drugAbbrev, double qty, int time, double age, double weight) {}
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?

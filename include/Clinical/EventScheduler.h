@@ -72,7 +72,7 @@ private:
   struct MedicateData {
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed
-    int delay;		/// Delay before medicating after seeking treatment, in hours(?)
+    int time;		/// Time of day to medicate at (minutes from start)
     int seekingDelay;	/// Delay before treatment seeking in days
   };
   

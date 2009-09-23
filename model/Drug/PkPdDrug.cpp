@@ -24,37 +24,71 @@
 // -----  static functions  -----
 
 void PkPdDrug::init() {
-  initDrugModule(5*24*60, 24*60);
+  DrugType::init();
 }
 
 
-// -----  non-static functions  -----
+// -----  non-static set up / tear down functions  -----
 
-PkPdDrug::PkPdDrug () :
-    _proxy()
-{
-}
+PkPdDrug::PkPdDrug () {}
+PkPdDrug::~PkPdDrug () {}
 
 PkPdDrug::PkPdDrug (istream& in) {
-  _proxy.read (in);
+  int numDrugs;
+  in >> numDrugs;
+  Global::validateListSize (numDrugs);
+  for (int i=0; i<numDrugs; i++) {
+    string abbrev;
+    in >> abbrev;
+    _drugs.push_back (Drug (DrugType::getDrug(abbrev), in));
+  }
 }
-
-PkPdDrug::~PkPdDrug () {
-  _proxy.destroy();
-}
-
 void PkPdDrug::write (ostream& out) {
-  _proxy.write (out);
+  Global::validateListSize (_drugs.size());//FIXME: remove
+  out << _drugs.size() << endl;
+  for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+    out << it->getAbbreviation() << endl;
+    it->write (out);
+  }
 }
 
-void PkPdDrug::medicate(string _drugAbbrev, double _qty, int _time, double weight) {
-  _proxy.medicate (_drugAbbrev, _qty, _time, weight);
+
+// -----  non-static simulation time functions  -----
+
+void PkPdDrug::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+  list<Drug>::iterator drug = _drugs.begin();
+  while (drug != _drugs.end()) {
+    if (drug->getAbbreviation() == drugAbbrev)
+      goto medicateGotDrug;
+    ++drug;
+  }
+  // No match, so insert one:
+  _drugs.push_front (Drug(DrugType::getDrug(drugAbbrev)));
+  drug = _drugs.begin();	// the drug we just added
+  
+  medicateGotDrug:
+  drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
 }
 
+struct DecayPredicate {
+  bool operator() (Drug& drug) {
+    return drug.decay ();
+  }
+};
 void PkPdDrug::decayDrugs () {
-  _proxy.decayDrugs();
+  // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
+  _drugs.remove_if (DecayPredicate());
 }
 
 double PkPdDrug::getDrugFactor (ProteomeInstance* infProteome) {
-  return _proxy.calculateDrugsFactor (infProteome);
+  // We will choose for now the smallest (ie, most impact)
+  
+  double factor = 1.0; //no effect
+  for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+    double drugFactor = it->calculateDrugFactor(infProteome);
+    if (drugFactor < factor) {
+      factor = drugFactor;
+    }
+  }
+  return factor;
 }
