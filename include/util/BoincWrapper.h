@@ -47,6 +47,14 @@ namespace BoincWrapper {
   int timeToCheckpoint();
   /// Call when a checkpoint's completed
   void checkpointCompleted();
+  
+  /** Checks the current stream position (assumed to be end of file), resets
+   * the stream, generates an MD5 sum from the stream (to EOF), and checks the
+   * stream position is back where it started.
+   * 
+   * The idea of this is to generate a checksum of the file in a slightly
+   * secure way by not closing and reopening the file. */
+  void generateChecksum (istream& in);
 }
 
 /// Memory shared with graphics app:

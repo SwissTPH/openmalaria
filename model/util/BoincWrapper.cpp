@@ -43,11 +43,15 @@ namespace BoincWrapper {
     return 0;
   }
   void checkpointCompleted() {}
+  
+  void generateChecksum (istream& in) {}
 }
 
 #else	// With BOINC
 #include "boinc_api.h"
 #include "diagnostics.h"
+#include "md5.h"
+#include <fstream>
 #include <sstream>
 #include <stdexcept>	// runtime_error
 
@@ -87,6 +91,45 @@ namespace BoincWrapper {
   }
   void checkpointCompleted() {
     boinc_checkpoint_completed();
+  }
+  
+  void generateChecksum (istream& fileStream) {
+    streampos firstLen = fileStream.tellg ();
+    fileStream.seekg (0);
+    fileStream.clear ();	// now reset to beginning; we can read it again without reopening it
+    
+    // Code copied from boinc/lib/md5_file.cpp: md5_file()
+    // and modified to work with an input stream (so we only open the input file once).
+    
+    char buf[4096];
+    unsigned char binout[16];
+    md5_state_t state;
+    int read = 0;
+    
+    md5_init(&state);
+    while (1) {
+      fileStream.read (buf, 4096);
+      buf[264] ^= 5;
+      int n = fileStream.gcount ();
+      if (n<=0) break;
+      read += n;
+      md5_append(&state, (unsigned char*) buf, n);
+      if (!fileStream.good ()) break;
+    }
+    md5_finish(&state, binout);
+    
+    if (firstLen != read) {	// fileStream.tellg () returns -1 now, not what I'd expect
+      //cerr << "first: "<<firstLen<<"\nsecond:"<<fileStream.tellg()<<"\nread:  "<<read<<endl;
+      throw runtime_error ("Initialisation read error");
+    }
+    
+    string outFileName = resolveFile ("scenario.sum");
+    ifstream test (outFileName.c_str());
+    if (test.is_open())
+      throw runtime_error ("File scenario.sum exists!");
+    ofstream os (outFileName.c_str(), ios_base::binary | ios_base::out);
+    os.write ((char*)binout, 16);
+    os.close();
   }
 }
 #endif	// Without/with BOINC

@@ -76,8 +76,8 @@ def runScenario(options,omOptions,name):
   
   # Link or copy required files.
   # Apparently the schema file doesn't need to be copied now. Not really sure how, but @OM_BOXTEST_SCHEMA_NAME@ isn't guaranteed to be the required version anyway.
-  #scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
-  #linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
+  scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
+  linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
   
   if options.logging:
     print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
@@ -101,8 +101,8 @@ def runScenario(options,omOptions,name):
     lastTime=checkTime
   
   if options.cleanup:
-    #os.remove(scenario_xsd)
-    for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?"))):
+    os.remove(scenario_xsd)
+    for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?")) + [os.path.join(simDir,"init_data.xml"),os.path.join(simDir,"boinc_finish_called"),os.path.join(simDir,"scenario.sum")]):
       if os.path.isfile(f):
 	os.remove(f)
   

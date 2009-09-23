@@ -21,6 +21,7 @@
 #include "inputData.h"
 #include "scenario.hxx"
 #include "global.h"
+#include "util/BoincWrapper.h"
 
 #include <iostream>
 #include <sstream>
@@ -97,7 +98,15 @@ void createDocument(std::string lXmlFile) {
   //NOTE: it'd be nice if this used Global::lookupResource for the schema.
   // The only way I can see of making it do (part) of this is to change
   // directory, which is either platform specific or requires more dependencies.
-    scenario = (parseScenario (lXmlFile)).release();
+    ifstream fileStream (lXmlFile.c_str());
+    // Interesting... if the file name is passed instead of an input stream,
+    // the schema file doesn't need to be in the current directory.
+    // Note that the schema location can be set manually by passing properties,
+    // but we won't necessarily have the right schema version associated with
+    // the XML file in that case.
+    scenario = (parseScenario (fileStream)).release();
+    BoincWrapper::generateChecksum (fileStream);
+    fileStream.close ();
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
       ostringstream msg;
       msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
