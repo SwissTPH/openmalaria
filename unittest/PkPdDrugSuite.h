@@ -49,20 +49,20 @@ public:
   
   void testCq () {
     proxy->medicate ("CQ", 250000, 0, 21, 60);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.12794177390385896);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.12427429993973554);
   }
   
   void testCqDecayed () {
     proxy->medicate ("CQ", 250000, 0, 21, 60);
     proxy->decayDrugs ();
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.13760869542580346);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.12608995630400068);
   }
   
   void testCq2Doses () {
     proxy->medicate ("CQ", 250000, 0, 60);
     proxy->decayDrugs ();
     proxy->medicate ("CQ", 250000, 0, 60);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.07150144786339767);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.06809903879225410);
   }
   
   PkPdDrug *proxy;
