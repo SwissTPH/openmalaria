@@ -55,10 +55,7 @@ public:
       estimateRemovalRates and sets up the initial population according to
       these */
   void setupPyramid(bool isCheckpoint);
-
-  //! Initialise arrays for recording infant mortality
-  void initialiseInfantArrays();
- 
+  
   //! Write checkpoint
   void write (ostream& out);
   /// Read checkpoint
@@ -76,18 +73,26 @@ public:
   */
   void implementIntervention(int time);
   
-  //! Initialise human list
-  void initialiseHumanList();
+  //! Makes a survey
+  void newSurvey();
+ 
+  // Static:
+  /** For input values for alpha1 and mu1, the fit to field data (residualSS)
+   * is calculated and returned function called iteratively by
+   * estimateRemovalRates. */
+  static double setDemoParameters (double param1, double param2);
   
+private:
   //! Creates initializes and add to the population list a new uninfected human
   /*! 
      \param dob date of birth (usually current time)
   */
   void newHuman(int dob);
-
-  //! Makes a survey
-  void newSurvey();
- 
+  
+  /** Return the expected population size of individuals aged ageTSteps or
+   * older, based on a total population size of targetPop. */
+  int targetCumPop (int ageTSteps, int targetPop);
+  
   /** Determine whether to remove the human current in order to preserve or
    * obtain the desired age structure.
    * 
@@ -99,13 +104,6 @@ public:
    * @returns True if current should be removed from the population. */
   bool outMigrate(Human& current, int targetPop, int cumPop);
   
-  // Static:
-  /** For input values for alpha1 and mu1, the fit to field data (residualSS)
-   * is calculated and returned function called iteratively by
-   * estimateRemovalRates. */
-  static double setDemoParameters (double param1, double param2);
-  
-private:
   /** Generic function to activate some intervention on all humans within the
    * age range and passing the compliance test given by mass.
    * 
@@ -154,7 +152,10 @@ private:
   static double rho;
   //@}
   
-  /// Target cumulative percentage of population by age, from oldest age to youngest.
+  /** Target cumulative percentage of population by age, from oldest age to youngest.
+   *
+   * cumpc[_maxTimestepsPerLife+1-i] gives the proportion (actually not
+   * percentage) of people, aged i timesteps or older. */
   //TODO5D
   static double *cumpc;
 

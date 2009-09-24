@@ -54,6 +54,15 @@ double *Population::cumpc;
 
 int Population::IDCounter;
 
+// Theoretical optimisation: don't include individuals who will die before the
+// start of the main simulation in the initialisation.
+// Two consequences:
+// setRiskFromMaternalInfection uses some of these individuals. Could enforce
+// this for initialisation, or just ignore (probably won't have much effect).
+// And it's practially impossible to keep the same random number stream, so
+// comparing results for testing isn't easy.
+const bool InitPopOpt = false;
+
 Population::Population()
     : _populationSize(get_populationsize())
 {
@@ -84,7 +93,10 @@ void Population::clear(){
 void Population::preMainSimInit () {
   _transmissionModel->initMainSimulation(_population, _populationSize);
 
-  initialiseInfantArrays();
+  for (size_t i=0;i<Global::intervalsPerYear; i++) {
+    Global::infantIntervalsAtRisk[i]=0;
+    Global::infantDeaths[i]=0;
+  }
 }
 
 void Population::estimateRemovalRates () {
@@ -162,24 +174,14 @@ void Population::setupPyramid(bool isCheckpoint){
     //Scale using the total cumpc
     cumpc[j]=cumpc[j]/totalCumPC;
     if (!isCheckpoint){
-      int N_new=(int)floor(cumpc[j]*_populationSize+0.5)-cumulativePop;
-      for (int j1=1;j1<=N_new; j1++){
-	newHuman(-iage);
+      int targetPop = (int)floor(cumpc[j]*_populationSize+0.5);
+      while (cumulativePop < targetPop) {
+	if (InitPopOpt && iage > 0) {}	// only those with age 0 should be created here
+	else newHuman(-iage);
 	++cumulativePop;
       }
     }
   }
-}
-
-void Population::initialiseInfantArrays(){
-  for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    Global::infantIntervalsAtRisk[i]=0;
-    Global::infantDeaths[i]=0;
-  }
-}
-
-void Population::initialiseHumanList(){
-  IDCounter=0;
 }
 
 void Population::write (ostream& out) {
@@ -202,7 +204,6 @@ void Population::write (ostream& out) {
 
 void Population::read (istream& in) {
   //Start reading a checkpoint
-  initialiseHumanList();
   _transmissionModel->read (in);
   in >> _populationSize;
   if (_populationSize != get_populationsize())
@@ -336,6 +337,12 @@ void Population::update1(){
   }
   
   // increase population size to targetPop
+  if (InitPopOpt && Simulation::simulationTime < Global::maxAgeIntervals) {
+    // We only want people at oldest,
+    //  Global::maxAgeIntervals - (Global::maxAgeIntervals-Simulation::simulationTime)
+    // Hence pop size available is (total - popSize for anyone older):
+    targetPop = targetPop - targetCumPop(Simulation::simulationTime+1, targetPop);
+  }
   while (cumPop < targetPop) {
     newHuman(Simulation::simulationTime);
     //++nCounter;
@@ -431,22 +438,18 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
   }
 }
 
-
+int Population::targetCumPop (int ageTSteps, int targetPop) {
+  return (int)floor(cumpc[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
+}
 bool Population::outMigrate(Human& current, int targetPop, int cumPop){
-  // maximum remaining lifespan in timesteps:
-  int j=_maxTimestepsPerLife-(Simulation::simulationTime-current.getDateOfBirth());
-  
-  double targetCumPop=cumpc[j-1] * targetPop;	//target population in age group of current human
+  int age=(Simulation::simulationTime-current.getDateOfBirth());
   
   // Actual number of people so far = cumPop
-  // Number to be removed is the difference, rounded to the nearest integer
-  int outmigrs = cumPop - (int)floor(targetCumPop+0.5);
-  // We can't out-migrate more than one person at once;
-  // just return whether or not to out-migrate this human:
-  if (outmigrs >= 1)
-    return true;
-  else
-    return false;
+  // Number to be removed is the difference between this and target population
+  //FIXME: The -2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
+  int outmigrs = cumPop - targetCumPop (age+2, targetPop);
+  // We can't out-migrate more than one person at once, so just return whether or not to out-migrate this human:
+  return outmigrs >= 1;
 }
 
 // Static method used by estimateRemovalRates

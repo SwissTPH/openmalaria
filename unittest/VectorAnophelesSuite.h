@@ -132,7 +132,6 @@ public:
     // Normally done by Simulation::start():
     simulation->simulationTime = 0;
     simulation->_population->estimateRemovalRates();
-    simulation->_population->initialiseHumanList();
     simulation->_population->setupPyramid(false);
     simulation->simulationTime = simulationTime = 1;
     

@@ -74,7 +74,6 @@ int Simulation::start(){
   else {
     simulationTime = 0;
     _population->estimateRemovalRates();
-    _population->initialiseHumanList();
     _population->setupPyramid(false);
   }
   updateOneLifespan();
