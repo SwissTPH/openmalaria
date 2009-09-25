@@ -82,7 +82,7 @@ def runScenario(options,omOptions,name):
   if options.logging:
     print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
   
-  lastTime=time.time()
+  startTime=lastTime=time.time()
   # While no output and cmd exits successfully:
   while (not os.path.isfile(outFile)):
     if options.logging:
@@ -99,6 +99,8 @@ def runScenario(options,omOptions,name):
     if not checkTime > lastTime:
       break
     lastTime=checkTime
+  
+  print "Done in {0} seconds".format(time.time()-startTime)
   
   if options.cleanup:
     os.remove(scenario_xsd)

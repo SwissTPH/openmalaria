@@ -196,6 +196,7 @@ void Population::write (ostream& out) {
   out << _workUnitIdentifier << endl;
 
   //Write human data
+  out << _population.size() << endl;	// this may not be equal to _populationSize due to startup optimisation
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
     out << *iter;
@@ -222,13 +223,16 @@ void Population::read (istream& in) {
   }
 
   //Start reading the human data
+  int popSize;
+  in >> popSize;
+  if (popSize > _populationSize)
+    throw checkpoint_error ("population size exceeds that given in scenario.xml");
   int indCounter = 0;	// Number of individuals read from checkpoint
-  while(!(in.eof()||_populationSize==indCounter)){
-      //continue: Fortran cont is probably not C cont
+  while(!(in.eof()||popSize==indCounter)){
     _population.push_back(Human(in, *_transmissionModel));
     indCounter++;
   }
-  if (_populationSize != indCounter)
+  if (popSize != indCounter)
     throw checkpoint_error("can't read whole population (out of data)");
 }
 
