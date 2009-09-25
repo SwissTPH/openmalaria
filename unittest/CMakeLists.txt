@@ -53,6 +53,7 @@ endif (NOT YAML_CPP_LIB)
 
 set (CMAKE_CONFIGURED 1)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_DIR}/configured/TestPaths.h @ONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/scenario.xml ${CMAKE_CURRENT_BINARY_DIR}/configured/scenario.xml @ONLY)
 include_directories (
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/unittest

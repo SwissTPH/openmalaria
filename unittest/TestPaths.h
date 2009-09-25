@@ -7,5 +7,5 @@ assert (false);
 #endif
 
 const char* UnittestSourceDir = "@CMAKE_CURRENT_SOURCE_DIR@/";	// must end with '/'
-const char* UnittestScenario = "@CMAKE_CURRENT_SOURCE_DIR@/scenario.xml";
+const char* UnittestScenario = "@CMAKE_CURRENT_BINARY_DIR@/configured/scenario.xml";
 #endif
