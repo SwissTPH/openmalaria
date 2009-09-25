@@ -68,16 +68,9 @@ void EmpiricalInfection::initParameters(){
   _overallMultiplier= 0.697581;
   _subPatentLimit=10.0/_overallMultiplier; 
   _maximumPermittedAmplificationPerCycle=1000.0;
-  const int MAX_LENGTH = 1000;
-  char autoRegressionParameters [MAX_LENGTH];
-  strcpy(autoRegressionParameters,"autoRegressionParameters.csv");
-  fstream f_autoRegressionParameters(autoRegressionParameters,ios::in);
-  int day;
-  if (!f_autoRegressionParameters.is_open()){
-    //If File cannot be accessed:
-    cerr << "file not found: autoRegressionParameters.csv" << endl;
-    exit(-1);
-  }
+  fstream f_autoRegressionParameters(Global::lookupResource("autoRegressionParameters.csv").c_str(),ios::in);
+  if (!f_autoRegressionParameters.is_open())
+    throw runtime_error ("file not found: autoRegressionParameters.csv");
 
   //read header of file (unused)
   string csvLine;
@@ -100,7 +93,8 @@ void EmpiricalInfection::initParameters(){
     getline(csvStream, csvField7, ',');
 
     istringstream csvNum1(csvField1), csvNum2(csvField2), csvNum3(csvField3), csvNum4(csvField4), csvNum5(csvField5), csvNum6(csvField6), csvNum7 (csvField7);
-   
+    
+    int day;
     csvNum1 >> day;
     if (day >= _maximumDurationInDays)
       throw runtime_error ("EmpiricalInfection::init(): invalid day");
@@ -115,40 +109,43 @@ void EmpiricalInfection::initParameters(){
   
 }
 
+/* Initialises a new infection by assigning the densities for the last 3 prepatent days
+*/
+EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplier) :
+  Infection(startTime)
+{
+  //sample the parasite densities for the last 3 prepatent days
+  //note that the lag decreases with time
+  _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
+  _laggedLogDensities[1]=sampleSubPatentValue(_alpha2,_mu2,log(_subPatentLimit)); 
+  _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
+  //only the immediately preceding value is modified by the growth rate multiplier
+  _laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier); 
+  _startTime=startTime;
+  _patentGrowthRateMultiplier = growthRateMultiplier;
+}
 EmpiricalInfection::~EmpiricalInfection() {
 }
 void EmpiricalInfection::destroy() {
   //XXX destroy the proteome?
 }
 
+EmpiricalInfection::EmpiricalInfection (istream& in) :
+  Infection(in)
+{
+  in >> _laggedLogDensities[0];
+  in >> _laggedLogDensities[1];
+  in >> _laggedLogDensities[2];
+  in >> _startTime;
+  in >> _patentGrowthRateMultiplier;
+}
 void EmpiricalInfection::write (ostream& out) const {
-  out << _duration << endl;
-  out << _startdate << endl;
-  out << _density << endl;
+  writeInfection (out);
   out << _laggedLogDensities[0] << endl;
   out << _laggedLogDensities[1] << endl;
   out << _laggedLogDensities[2] << endl;
   out << _startTime << endl;
   out << _patentGrowthRateMultiplier << endl;
-
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << _proteome->getProteomeID() << endl;
-  }
-}
-
-EmpiricalInfection::EmpiricalInfection (istream& in) {
-  in >> _duration;
-  in >> _startdate;
-  in >> _density;
-  in >> _laggedLogDensities[0];
-  in >> _laggedLogDensities[1];
-  in >> _laggedLogDensities[2];
-  in >> _startTime;
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    int proteomeID;
-    in >> proteomeID;
-    _proteome = ProteomeInstance::getProteome(proteomeID);
-  }
 }
 
 
@@ -162,19 +159,6 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
   _patentGrowthRateMultiplier = multiplier;
 }
 
-/* Initialises a new infection by assigning the densities for the last 3 prepatent days
-*/
-EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplier){
-  //sample the parasite densities for the last 3 prepatent days
-  //note that the lag decreases with time
-  _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
-  _laggedLogDensities[1]=sampleSubPatentValue(_alpha2,_mu2,log(_subPatentLimit)); 
-  _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
-  //only the immediately preceding value is modified by the growth rate multiplier
-  _laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier); 
-  _startTime=startTime;
-  _patentGrowthRateMultiplier = growthRateMultiplier;
-}
 
 double EmpiricalInfection::determineWithinHostDensity(){
 int ageOfInfection=1; //time-_startTime;

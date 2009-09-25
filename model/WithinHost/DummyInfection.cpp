@@ -38,7 +38,9 @@ void DummyInfection::destroy() {
 void DummyInfection::init (){
 }
 
-DummyInfection::DummyInfection(int simulationTime){
+DummyInfection::DummyInfection(int simulationTime) :
+  Infection (simulationTime)
+{
     //Initialize current infection data
     _startdate=simulationTime;
     _density=4;
@@ -60,25 +62,12 @@ int DummyInfection::infectionDuration(){
 }
 
 void DummyInfection::write (ostream& out) const {
-  out << _duration << endl; 
-  out << _startdate << endl; 
-  out << _density << endl; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << _proteome->getProteomeID() << endl; 
-  }
+  writeInfection (out);
 }
 
-DummyInfection::DummyInfection (istream& in) {
-  in >> _duration; 
-  in >> _startdate; 
-  in >> _density; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    int proteomeID;
-    in >> proteomeID;
-    _proteome = ProteomeInstance::getProteome(proteomeID);
-  } else
-    _proteome = NULL;
-}
+DummyInfection::DummyInfection (istream& in) :
+  Infection (in)
+{}
 
 void DummyInfection::determineWithinHostDensity(){
   const double GROWTH_RATE = 8.0;

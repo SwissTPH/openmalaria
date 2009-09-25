@@ -29,7 +29,16 @@ class Infection {
 public:
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
-   
+  
+  Infection (int now) :
+    _duration(0),
+    _startdate(now),
+    _density(0.0)
+  {}
+  Infection (istream& in);
+  
+  void writeInfection (ostream& out) const;
+  
   //! Get proteome
   inline ProteomeInstance* getProteome() const {
     return _proteome;

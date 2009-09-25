@@ -22,3 +22,23 @@
 
 float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
+
+Infection::Infection (istream& in) {
+  in >> _duration;
+  in >> _startdate;
+  in >> _density;
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    int proteomeID;
+    in >> proteomeID;
+    _proteome = ProteomeInstance::getProteome(proteomeID);
+  } else
+    _proteome = NULL;
+}
+void Infection::writeInfection (ostream& out) const {
+  out << _duration << endl; 
+  out << _startdate << endl; 
+  out << _density << endl; 
+  if (Global::modelVersion & INCLUDES_PK_PD) {
+    out << _proteome->getProteomeID() << endl; 
+  }
+}

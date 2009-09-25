@@ -103,11 +103,10 @@ void DescriptiveInfection::clearParameters () {}
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection(int simulationTime)
+DescriptiveInfection::DescriptiveInfection(int simulationTime) :
+  Infection(simulationTime)
 {
     //Initialize current infection data
-    _startdate=simulationTime;
-    _density=0.0;
     _duration=infectionDuration();
     _cumulativeExposureJ=0.0;
     
@@ -123,26 +122,15 @@ DescriptiveInfection::~DescriptiveInfection() {
   //}
 }
 
-DescriptiveInfection::DescriptiveInfection (istream& in) {
-  in >> _duration; 
-  in >> _startdate; 
-  in >> _density; 
+DescriptiveInfection::DescriptiveInfection (istream& in) :
+  Infection (in)
+{
   in >> _cumulativeExposureJ; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    int proteomeID;
-    in >> proteomeID; 
-    _proteome = ProteomeInstance::getProteome(proteomeID);
-  }
 }
 
 void DescriptiveInfection::write (ostream& out) const {
-  out << _duration << endl; 
-  out << _startdate << endl; 
-  out << _density << endl; 
+  writeInfection (out);
   out << _cumulativeExposureJ << endl; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << _proteome->getProteomeID() << endl; 
-  }
 }
 
 
