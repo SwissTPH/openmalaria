@@ -68,6 +68,8 @@ void WithinHostModel::init() {
   } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
     EmpiricalInfection::initParameters();
   } else {
+    if (Global::modelVersion & INCLUDES_PK_PD)
+      throw xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     DescriptiveInfection::initParameters ();
     OldIPTWithinHostModel::initParameters();
   }

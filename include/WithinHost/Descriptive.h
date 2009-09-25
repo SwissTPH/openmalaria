@@ -25,7 +25,6 @@
 
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DescriptiveInfection.h"
-#include "Drug/DrugModel.h"
 
 using namespace std;
 
@@ -94,9 +93,6 @@ protected:
   virtual void IPTattenuateAsexualMinTotalDensity (Human&);
   
   static const int MAX_INFECTIONS;
-  
-  /// Encapsulates drug code for each human
-  DrugModel* drugProxy;
   
   //!multiplicity of infection
   int _MOI;

@@ -102,6 +102,8 @@ void EmpiricalInfection::initParameters(){
     istringstream csvNum1(csvField1), csvNum2(csvField2), csvNum3(csvField3), csvNum4(csvField4), csvNum5(csvField5), csvNum6(csvField6), csvNum7 (csvField7);
    
     csvNum1 >> day;
+    if (day >= _maximumDurationInDays)
+      throw runtime_error ("EmpiricalInfection::init(): invalid day");
     csvNum2 >> _mu_beta1[day];
     csvNum3 >> _sigma_beta1[day];
     csvNum4 >> _mu_beta2[day];

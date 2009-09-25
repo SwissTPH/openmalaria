@@ -35,7 +35,7 @@ const int DescriptiveWithinHostModel::MAX_INFECTIONS = 21;
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-    WithinHostModel(), drugProxy(DrugModel::createDrugModel ()), _MOI(0),
+    WithinHostModel(), _MOI(0),
     _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
     patentInfections(0)
 {
@@ -43,7 +43,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
-    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
+    WithinHostModel(in)
 {
   readDescriptiveWHM (in);
   
@@ -52,14 +52,13 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in, bool) :
-    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
+    WithinHostModel(in)
 {
   readDescriptiveWHM (in);
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
-  delete drugProxy;
 }
 
 
@@ -87,8 +86,6 @@ void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
   out << totalDensity << endl;
   out << timeStepMaxDensity << endl;
   
-  drugProxy->write (out);
-  
   out << _MOI << endl;
   out << patentInfections << endl;
   out << _cumulativeh << endl;
@@ -102,13 +99,7 @@ void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
 
 // -----  Update function, called each step  -----
 
-void DescriptiveWithinHostModel::update () {
-  std::list<DescriptiveInfection*>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    (*i)->multiplyDensity(exp(-drugProxy->getDrugFactor((*i)->getProteome())));
-  }
-  drugProxy->decayDrugs();
-}
+void DescriptiveWithinHostModel::update () {}
 
 
 // -----  Simple infection adders/removers  -----
@@ -144,12 +135,7 @@ void DescriptiveWithinHostModel::clearAllInfections(){
   _MOI=0;
 }
 
-
-// -----  medicate drugs -----
-
-void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
-}
+void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {}
 
 
 // -----  immunity  -----
