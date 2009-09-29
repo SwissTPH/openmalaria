@@ -281,11 +281,12 @@ void Population::update1(){
     double ageYears = iter->getAgeInYears();
     double availability = iter->perHostTransmission.entoAvailabilityNV(ageYears);
     sumWeight += availability;
-    sumWt_kappa += availability*iter->withinHostModel->getProbTransmissionToMosquito();
+    availability *= iter->probTransmissionToMosquito();
+    sumWt_kappa += availability;	//TODO: move with all kappa stuff to NonVector
     
     // kappaByAge and nByAge are used in the screensaver only
     int ia = iter->ageGroup();
-    kappaByAge[ia] += iter->withinHostModel->getProbTransmissionToMosquito();
+    kappaByAge[ia] += availability;	// TODO: set independantly in Vector & NonVector models from something
     ++nByAge[ia];
     //END summarise infectiousness
     
@@ -318,7 +319,7 @@ void Population::update1(){
 	  isAtRiskOfFirstPregnancy = true;
 	}
 	nCounter ++;
-	if (iter->withinHostModel->parasiteDensityDetectible()){
+	if (iter->detectibleInfection()){
 	  pCounter ++;
 	}
       }

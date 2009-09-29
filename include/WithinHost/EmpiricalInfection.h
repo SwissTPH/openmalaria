@@ -47,6 +47,7 @@ public:
   */
   int getEndDate();
 
+  //FIXME: we're using _density here, but it's never set by calculations!
   /// Multiplies the density by x.
   void multiplyDensity(double x) { _density *= x; };
   //! Get the density of the infection

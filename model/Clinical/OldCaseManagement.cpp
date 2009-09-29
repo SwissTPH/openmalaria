@@ -41,9 +41,9 @@ double OldCaseManagement::probSequelaeUntreated[2];
 // -----  static init  -----
 
 int OldCaseManagement::init (){
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    throw xml_scenario_error ("Warning: OldCaseManagement is not compatible with INCLUDES_PK_PD");
-  }
+  if (Global::modelVersion & INCLUDES_PK_PD)
+    throw xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
+  
   _oddsRatioThreshold = exp(getParameter(Params::LOG_ODDS_RATIO_CF_COMMUNITY));
   
   const scnXml::HealthSystem& healthSystem = getHealthSystem();

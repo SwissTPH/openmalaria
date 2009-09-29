@@ -66,11 +66,11 @@ void WithinHostModel::init() {
   if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
     DummyInfection::init ();
   } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
-    EmpiricalInfection::initParameters();
+    EmpiricalInfection::initParameters();	// 1-day timestep check
   } else {
     if (Global::modelVersion & INCLUDES_PK_PD)
       throw xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
-    DescriptiveInfection::initParameters ();
+    DescriptiveInfection::initParameters ();	// 5-day timestep check
     OldIPTWithinHostModel::initParameters();
   }
 }
@@ -108,9 +108,13 @@ WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
 
 WithinHostModel::WithinHostModel(istream& in) {
   in >> _cumulativeInfections; 
-  in >> _pTransToMosq; 
   in >> totalDensity;
   in >> timeStepMaxDensity;
+}
+void WithinHostModel::writeWHM (ostream& out) const {
+  out << _cumulativeInfections << endl;
+  out << totalDensity << endl;
+  out << timeStepMaxDensity << endl;
 }
 
 void WithinHostModel::clearInfections (bool) {

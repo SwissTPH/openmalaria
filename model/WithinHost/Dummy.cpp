@@ -39,6 +39,11 @@ DummyWithinHostModel::DummyWithinHostModel() :
     _MOI(0), patentInfections(0)
 {}
 
+DummyWithinHostModel::~DummyWithinHostModel() {
+  clearAllInfections();
+  delete drugProxy;
+}
+
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
@@ -56,11 +61,22 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
   for(int i=0;i<_MOI;++i)
     infections.push_back(DummyInfection(in));
 }
-
-DummyWithinHostModel::~DummyWithinHostModel() {
-  clearAllInfections();
-  delete drugProxy;
+void DummyWithinHostModel::write(ostream& out) const {
+  writeWHM (out);
+  drugProxy->write (out);
+  
+  out << _MOI << endl; 
+  out << patentInfections << endl; 
+  out << cumulativeY << endl;
+  out << cumulativeh << endl;
+  out << _cumulativeh << endl;
+  out << _cumulativeY << endl;
+  out << _cumulativeYlag << endl;
+  
+  for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    iter->write (out);
 }
+
 
 // -----  Update function, called each step  -----
 
@@ -143,7 +159,6 @@ void DummyWithinHostModel::immunityPenalisation() {
 void DummyWithinHostModel::calculateDensities(Human& human) {
   _cumulativeYlag = _cumulativeY;
   
-  _pTransToMosq = 0.0;
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
@@ -166,7 +181,6 @@ void DummyWithinHostModel::calculateDensities(Human& human) {
       _cumulativeY += Global::interval*i->getDensity();
     }
   }
-  _pTransToMosq = human.infectiousness();
 }
 
 // -----  Summarize  -----
@@ -181,27 +195,4 @@ void DummyWithinHostModel::summarize(double age) {
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
   }
-}
-
-
-// -----  Data checkpointing  -----
-
-void DummyWithinHostModel::write(ostream& out) const {
-  out << _cumulativeInfections << endl; 
-  out << _pTransToMosq << endl;  
-  out << totalDensity << endl;
-  out << timeStepMaxDensity << endl;
-  
-  drugProxy->write (out);
-  
-  out << _MOI << endl; 
-  out << patentInfections << endl; 
-  out << cumulativeY << endl;
-  out << cumulativeh << endl;
-  out << _cumulativeh << endl;
-  out << _cumulativeY << endl;
-  out << _cumulativeYlag << endl;
-
-  for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    iter->write (out);
 }

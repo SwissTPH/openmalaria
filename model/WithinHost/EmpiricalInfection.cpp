@@ -51,6 +51,9 @@ double EmpiricalInfection::_overallMultiplier;
 
 
 void EmpiricalInfection::initParameters(){
+  if (Global::interval != 1)
+    throw domain_error ("EmpiricalInfection only supports using an interval of 1");
+  
   // alpha1 corresponds to 1 day before first patent, alpha2 2 days before first patent etc.
   _alpha1=0.2647;
   _alpha2=2.976;
@@ -161,48 +164,48 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 
 double EmpiricalInfection::determineWithinHostDensity(){
-int ageOfInfection=1; //time-_startTime;
-double newDensity=-9.99;  
-double logInflatedDensity=-9999999.99;
-if (_laggedLogDensities[0]>-999999.9) {
-//to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
-  double L[3];
-  for (int i=0;i<3;i++) L[i]=_laggedLogDensities[i];
-// constraints to ensure the density is defined and not exploding
-  double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
-  double amplificationPerCycle=999999.9;
-  int tries0=0;
-  while (((newDensity <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
-    int tries1=0;
-    double logDensity=9999.9;
-    while ((logDensity>upperLimitoflogDensity) && (tries1<10)) {
-      double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
-      double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
-      double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
-      double expectedlogDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
-      //include sampling error
-      logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
-     //include drug and immunity effects via growthRateMultiplier 
-      logDensity=logDensity+log(_patentGrowthRateMultiplier);
-      tries1++;
+  int ageOfInfection=1; //time-_startTime;
+  double newDensity=-9.99;  
+  double logInflatedDensity=-9999999.99;
+  if (_laggedLogDensities[0]>-999999.9) {
+    //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
+#   define L _laggedLogDensities
+    // constraints to ensure the density is defined and not exploding
+    double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
+    double amplificationPerCycle=999999.9;
+    int tries0=0;
+    while (((newDensity <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
+      int tries1=0;
+      double logDensity=9999.9;
+      while ((logDensity>upperLimitoflogDensity) && (tries1<10)) {
+	double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
+	double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
+	double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
+	double expectedlogDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
+	//include sampling error
+	logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
+	//include drug and immunity effects via growthRateMultiplier 
+	logDensity=logDensity+log(_patentGrowthRateMultiplier);
+	tries1++;
+      }
+      if (tries1 > 9) logDensity=upperLimitoflogDensity;
+      newDensity= getInflatedDensity(logDensity); 
+      if ((ageOfInfection==0) && (newDensity < _subPatentLimit)) newDensity=-9.9; 
+      tries0++;
+      if (tries0 > 9) newDensity=_maximumPermittedAmplificationPerCycle*exp(L[1]);
+      logInflatedDensity=log(newDensity);
+      amplificationPerCycle=newDensity/exp(L[1]);
     }
-    if (tries1 > 9) logDensity=upperLimitoflogDensity;
-    newDensity= getInflatedDensity(logDensity); 
-    if ((ageOfInfection==0) && (newDensity < _subPatentLimit)) newDensity=-9.9; 
-    tries0++;
-    if (tries0 > 9) newDensity=_maximumPermittedAmplificationPerCycle*exp(L[1]);
-    logInflatedDensity=log(newDensity);
-    amplificationPerCycle=newDensity/exp(L[1]);
+#   undef L
   }
-}
-_laggedLogDensities[2]=_laggedLogDensities[1];
-_laggedLogDensities[1]=_laggedLogDensities[0];
-_laggedLogDensities[0]=logInflatedDensity;
-if (newDensity*_overallMultiplier< _extinctionLevel) {
-  _laggedLogDensities[0]=-9999999.99;
-  newDensity=-9.99;
-}
-return newDensity*_overallMultiplier;
+  _laggedLogDensities[2]=_laggedLogDensities[1];
+  _laggedLogDensities[1]=_laggedLogDensities[0];
+  _laggedLogDensities[0]=logInflatedDensity;
+  if (newDensity*_overallMultiplier< _extinctionLevel) {
+    _laggedLogDensities[0]=-9999999.99;
+    newDensity=-9.99;
+  }
+  return newDensity*_overallMultiplier;
 }
 
 double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){

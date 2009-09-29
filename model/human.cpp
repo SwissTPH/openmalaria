@@ -66,18 +66,14 @@ void Human::clear() {	// static clear
 Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) :
     perHostTransmission(),
     infIncidence(InfectionIncidenceModel::createModel()),
-    withinHostModel(WithinHostModel::createWithinHostModel())
+    withinHostModel(WithinHostModel::createWithinHostModel()),
+    _dateOfBirth(dateOfBirth), _ID(ID),
+    _lastVaccineDose(0),
+    _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0)
 {
-  //std::cout<<"newH:ID dateOfBirth "<<ID<<" "<<dateOfBirth<<std::endl;
-  _BSVEfficacy=0.0;
-  _dateOfBirth=dateOfBirth;
-  if ((Simulation::timeStep >= 0 && _dateOfBirth != simulationTime) || _dateOfBirth > simulationTime)
+  if (_dateOfBirth != simulationTime && (Simulation::timeStep >= 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
   
-  _ID=ID;
-  _lastVaccineDose=0;
-  _PEVEfficacy=0.0;
-  _TBVEfficacy=0.0;
   for (int i=0;i<4; i++) {
     _ylag[i]=0.0;
   }
@@ -198,12 +194,12 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
   withinHostModel->clearOldInfections();
   
   // _ylag is designed for a 5-day timestep model
+  //TODO equiv for 1-day tstep
   if ((Simulation::simulationTime*Global::interval) % 5 == 0) {
     for (int i=3;i>0; i--) {
       _ylag[i]=_ylag[i-1];
     }
   }
-  //NOTE: should this not also run only every 5 days?
   _ylag[0]=withinHostModel->getTotalDensity();
   
   withinHostModel->calculateDensities(*this);
@@ -316,35 +312,36 @@ double Human::getAgeInYears() const{
 }
 
 
-double Human::infectiousness(){
-  double transmit;
+double Human::probTransmissionToMosquito() const {
+  /* This model is only really valid for 5-day timesteps; if it's needed for
+  a one-day timestep, it should be redesigned; design of this model is
+  described in AJTMH pp.32-33*/
+  //FIXME: implement something valid for 1-day timestep
+  // Also TODO: do we have to use a run-time switch here? Make interval compile-time constant?
+  
+  int ageTimeSteps=Simulation::simulationTime-_dateOfBirth;
+  if (ageTimeSteps*Global::interval <= 20 || Simulation::simulationTime*Global::interval <= 20)
+    return 0.0;
+  
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
+  static const double beta1=1.0;
   static const double beta2=0.46;
   static const double beta3=0.17;
   static const double tau= 0.066;
   static const double mu= -8.1;
-  int ageTimeSteps=Simulation::simulationTime-_dateOfBirth;
-  /*
-    Original infectiousness model based on 5 day intervals updates
-    lagged variables only every 5 days and cannot compute infectiousness
-    for the first 20 days of the simulation
-  */
-  if ((ageTimeSteps*Global::interval >  20) && (Simulation::simulationTime*Global::interval >  20)) {
-    double x=_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
-    if ( x <  0.001) {
-      transmit=0.0;
-    }
-    else {
-      double zval=(log(x)+mu)/sqrt(1.0/tau);
-      double pone = gsl::cdfUGaussianP (zval);
-      transmit=(pone*pone);
-      //transmit has to be between 0 and 1
-      transmit=std::max(transmit, 0.0);
-      transmit=std::min(transmit, 1.0);
-    }
-  } else {
-    transmit=0.0;
-  }
+  
+  // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before:
+  double x=beta1*_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
+  if (x < 0.001)
+    return 0.0;
+  
+  double zval=(log(x)+mu)/sqrt(1.0/tau);
+  double pone = gsl::cdfUGaussianP (zval);
+  double transmit=(pone*pone);
+  //transmit has to be between 0 and 1
+  transmit=std::max(transmit, 0.0);
+  transmit=std::min(transmit, 1.0);
+  
   //	Include here the effect of transmission-blocking vaccination
   return transmit*(1.0-_TBVEfficacy);
 }

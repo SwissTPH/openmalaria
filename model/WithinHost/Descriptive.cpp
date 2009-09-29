@@ -81,11 +81,7 @@ void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
 }
 
 void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
-  out << _cumulativeInfections << endl;
-  out << _pTransToMosq << endl;
-  out << totalDensity << endl;
-  out << timeStepMaxDensity << endl;
-  
+  writeWHM (out);
   out << _MOI << endl;
   out << patentInfections << endl;
   out << _cumulativeh << endl;
@@ -169,7 +165,6 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
   _cumulativeYlag = _cumulativeY;
   
   double ageyears = human.getAgeInYears();
-  _pTransToMosq = 0.0;
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
@@ -230,7 +225,6 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
     
     IPTattenuateAsexualMinTotalDensity(human);
   }
-  _pTransToMosq = human.infectiousness();
 }
 
 void DescriptiveWithinHostModel::SPAction(Human&){}

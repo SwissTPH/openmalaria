@@ -84,7 +84,7 @@ VectorTransmission::~VectorTransmission () {
 
 void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].initMainSimulation (i, population, populationSize, kappa);
+    species[i].initMainSimulation (i, population, populationSize, kappa);	//FIXME: don't use kappa in Vector model
   simulationMode = get_mode();	// allow forcing equilibrium mode like with non-vector model
   if (simulationMode != 2 && simulationMode != 4)
     throw xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");

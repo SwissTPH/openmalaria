@@ -56,14 +56,14 @@ public:
   /// @brief Constructors, destructors and checkpointing functions
   //@{
   WithinHostModel() :
-    _cumulativeInfections(0), _pTransToMosq(0.0),
+    _cumulativeInfections(0),
     totalDensity(0.0), timeStepMaxDensity(0.0)
   {}
   WithinHostModel(istream& in);
   virtual ~WithinHostModel() {}
   
-  virtual void write(ostream& out) const =0;
-  //@}
+  void writeWHM(ostream& out) const;
+  virtual void write(ostream& out) const =0; //@}
   
   virtual void update() =0;
 
@@ -74,7 +74,7 @@ public:
   /*!  Clears all infections which have expired (their startdate+duration is less
   than the current time). */
   virtual void clearOldInfections() =0;
-  /** Conditionally clears all infections.
+  /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
    * uses IPT code to determine whether to clear all infections or do nothing
@@ -107,7 +107,6 @@ public:
   
   virtual bool parasiteDensityDetectible() const =0;
   
-  inline double getProbTransmissionToMosquito() const {return _pTransToMosq;}
   inline double getTotalDensity() const {return totalDensity;}
   inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
   
@@ -125,9 +124,6 @@ protected:
   
   //!Cumulative number of infections since birth
   int _cumulativeInfections;
-  
-  //!probability that a mosquito will become infected if feeds on individual
-  double _pTransToMosq;
   
   //!Total asexual blood stage density
   double totalDensity;

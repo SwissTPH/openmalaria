@@ -37,6 +37,8 @@ vector<ClinicalEventScheduler::CaseManagementEndPoints> ClinicalEventScheduler::
 void ClinicalEventScheduler::init () {
   if (Global::interval != 1)
     throw xml_scenario_error("ClinicalEventScheduler is only designed for a 1-day timestep.");
+  if (!(Global::modelVersion & INCLUDES_PK_PD))
+    throw xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
   if (getCaseManagements() == NULL)
     throw xml_scenario_error ("ClinicalEventScheduler selected without caseManagements data in XML");
   

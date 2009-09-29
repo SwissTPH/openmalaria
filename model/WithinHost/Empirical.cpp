@@ -38,6 +38,10 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
     _MOI(0), patentInfections(0)
 {
 }
+EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
+  clearAllInfections();
+  delete drugProxy;
+}
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
@@ -51,11 +55,17 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
   for(int i=0;i<_MOI;++i)
     infections.push_back(EmpiricalInfection(in));
 }
-
-EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
-  clearAllInfections();
-  delete drugProxy;
+void EmpiricalWithinHostModel::write(ostream& out) const {
+  writeWHM (out);
+  drugProxy->write (out);
+  
+  out << _MOI << endl; 
+  out << patentInfections << endl; 
+  
+  for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    iter->write (out);
 }
+
 
 // -----  Update function, called each step  -----
 
@@ -113,7 +123,6 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, d
 // -----  Density calculations  -----
 
 void EmpiricalWithinHostModel::calculateDensities(Human& human) {
-  
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
@@ -127,7 +136,6 @@ void EmpiricalWithinHostModel::calculateDensities(Human& human) {
     if (i->getDensity() > detectionLimit) {
       patentInfections++;
     }
-    _pTransToMosq = human.infectiousness();
   }
 }
 
@@ -145,23 +153,6 @@ void EmpiricalWithinHostModel::summarize(double age) {
   }
 }
 
-
-// -----  Data checkpointing  -----
-
-void EmpiricalWithinHostModel::write(ostream& out) const {
-  out << _cumulativeInfections << endl; 
-  out << _pTransToMosq << endl;  
-  out << totalDensity << endl;
-  out << timeStepMaxDensity << endl;
-  
-  drugProxy->write (out);
-  
-  out << _MOI << endl; 
-  out << patentInfections << endl; 
-
-  for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    iter->write (out);
-}
 
 //Immunity?
 

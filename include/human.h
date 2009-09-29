@@ -113,15 +113,14 @@ public:
    * @brief Functions only used by oldWithinHostModel.cpp */
   //@{
   double getBSVEfficacy() {return _BSVEfficacy;}
-  
-  /*!  Determines the probability that the individual transmits to a feeding
-    mosquito */
-  double infectiousness();
-
   //@}
   
   /// For direct interactions with within host model
   void clearInfections();
+  
+  /// Calculate chance of a biting mosquito becoming infected
+  //TODO: per genotype?
+  double probTransmissionToMosquito() const;
   
   /// Give human a new ITN
   void setupITN ();
@@ -129,6 +128,11 @@ public:
   void setupIRS ();
   /// Give human a new VA intervention
   void setupVA ();
+  
+  /** Does the Human have a detectible infection? */
+  inline bool detectibleInfection () {
+    return withinHostModel->parasiteDensityDetectible();
+  }
   
   ///@name static public
   //@{
@@ -148,10 +152,10 @@ public:
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
   
+private:
   /// The WithinHostModel models parasite density and immunity
   WithinHostModel *withinHostModel;
   
-private:
   /*! Update the number of doses and the date of the most recent vaccination in
    * this human */
   void vaccinate();
@@ -164,8 +168,9 @@ private:
   
   ///@brief Private variables
   //@{
-  //!Total asexual blood stage density
+  //! Total asexual blood stage density over last few timesteps (designed for a 5-day timestep only)
   double _ylag[4];
+  
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
   //!unique identifier

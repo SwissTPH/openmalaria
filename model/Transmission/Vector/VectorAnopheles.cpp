@@ -153,7 +153,7 @@ double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df,
       host.probMosqBiting(humanBase, sIndex) *
       host.probMosqResting(humanBase, sIndex);
     intP_df += prod;
-    intP_dif += prod * h->withinHostModel->getProbTransmissionToMosquito();
+    intP_dif += prod * h->probTransmissionToMosquito();
   }
   
   /* For initialisation, we multiply later by the whole population's kappa.
@@ -186,7 +186,7 @@ void VectorAnopheles::initFeedingCycleProbs (size_t sIndex, const std::list<Huma
   for (int t = 0; t < N_v_length; ++t) {
     P_A[t]	= intP_A;
     P_df[t]	= intP_df;
-    P_dif[t]	= intP_dif * kappaDaily[t];
+    P_dif[t]	= intP_dif * kappaDaily[t];	// FIXME: don't use kappa for initialisation (only use for non-vector model) - initialise by calling advancePeriod or similar per timestep?
   }
 }
 
