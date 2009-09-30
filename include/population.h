@@ -164,10 +164,12 @@ private:
 
   //! Size of the human population   
   int _populationSize;
-
+  
+public:
   //! TransmissionModel model
   TransmissionModel* _transmissionModel;
   
+private:
   /** The simulated human population
    *
    * The list of all humans, ordered from oldest to youngest. */

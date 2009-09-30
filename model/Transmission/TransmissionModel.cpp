@@ -68,12 +68,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
-  double EIR;
-  if (simulationMode == equilibriumMode)
-    EIR = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear] *
-	host.entoAvailabilityNV(ageInYears);
-  else
-    EIR = calculateEIR (simulationTime, host, ageInYears);
+  double EIR = calculateEIR (simulationTime, host, ageInYears);
   
   int ageGroup = Simulation::gMainSummary->ageGroup (ageInYears);
   timeStepEntoInnocs[ageGroup] += EIR;

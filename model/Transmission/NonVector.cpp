@@ -76,8 +76,8 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (static_cast<int>(nDays.size()) <= Simulation::simulationDuration) {
-    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Simulation::simulationDuration+1 << endl;
+  if (static_cast<int>(nDays.size()) < get_simulation_duration()+1) {
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << get_simulation_duration()+1 << endl;
     throw xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
@@ -110,6 +110,9 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
+    case equilibriumMode:
+      eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
+      break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array

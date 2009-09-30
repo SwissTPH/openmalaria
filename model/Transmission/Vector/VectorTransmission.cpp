@@ -25,6 +25,7 @@
 
 #include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
+#include "util/vectors.h"
 #include <fstream>
 
 
@@ -48,18 +49,11 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
     throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
   species.resize (numSpecies);
   
-  simulationMode = -1;
   for (size_t i = 0; i < numSpecies; ++i) {
     string name = species[i].initialise (anophelesList[i], i,
 					 population, populationSize,
 					 initialisationEIR);
     speciesIndex[name] = i;
-    
-    if (simulationMode == -1)
-      simulationMode = species[i].getSimulationMode();
-    else if (simulationMode != species[i].getSimulationMode())
-      // Probably fourier eir data present only for some species
-      throw xml_scenario_error("Vector model requests EIR-driven initialisation for some species but not others");
   }
   
   // We want the EIR to effectively be the sum of the EIR for each day in the interval
@@ -82,9 +76,20 @@ VectorTransmission::~VectorTransmission () {
     species[i].destroy();
 }
 
+void VectorTransmission::endVectorInitPeriod () {
+  simulationMode = dynamicEIR;
+}
+
 void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
-  for (size_t i = 0; i < numSpecies; ++i)
-    species[i].initMainSimulation (i, population, populationSize, kappa);	//FIXME: don't use kappa in Vector model
+  //FIXME: params passed probably aren't needed now
+  
+  // Check every time at end of init that, to a low tolerence,
+  // the average EIR produced is what was expected:
+  if (!vectors::approxEqual(initialisationEIR, innoculationsPerDayOfYear)) {
+    cerr << "Generated EIR not as expected (expected, generated):\n";
+    cerr << initialisationEIR << '\n' << innoculationsPerDayOfYear << endl;
+  }
+  
   simulationMode = get_mode();	// allow forcing equilibrium mode like with non-vector model
   if (simulationMode != 2 && simulationMode != 4)
     throw xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
@@ -101,9 +106,8 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::advancePeriod (const std::list<Human>& population, int simulationTime) {
-  if (simulationMode == equilibriumMode) return;
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].advancePeriod (population, simulationTime, i);
+    species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {

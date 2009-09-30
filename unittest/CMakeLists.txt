@@ -63,7 +63,6 @@ include_directories (
 
 set (OM_CXXTEST_HEADERS
   PerHostTransmissionSuite.h
-  VectorEmergenceSuite.h
   VectorAnophelesSuite.h
   ExtraAsserts.h	# must appear after at least some of the above
   PkPdDrugSuite.h

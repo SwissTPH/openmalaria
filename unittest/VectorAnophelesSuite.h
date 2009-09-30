@@ -35,6 +35,7 @@
 #include "human.h"
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/Vector/VectorAnopheles.h"
+#include "util/vectors.h"
 
 
 /** Read an array into a vector. */

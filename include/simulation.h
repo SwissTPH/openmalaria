@@ -36,7 +36,7 @@ public:
   // This variable should not be public.)
   // Units: interval * 1 day?
   static int simulationTime;
-  
+    
   /** Time counter during the main simulation.
    *
    * Maximum value during update1(): simulationDuration */
@@ -44,10 +44,7 @@ public:
 
   // Summary generator 
   static Summary* gMainSummary;
-
-  /** Duration of the main simulation (post-warmup), in 5 day intervals. */
-  static int simulationDuration;
-
+  
   //!  Inititalise all step specific constants and variables.
   Simulation();
   ~Simulation();
@@ -62,7 +59,10 @@ public:
     (iii)	the intervention packages defined in Intervention()
     (iv)	the survey times defined in Survey() */
   void mainSimulation();
-
+  
+  /// Initialisation phase for Vector model
+  void vectorInitialisation();
+  
   /*! Run the simulation using the equilibrium inoculation rates over one complete
     lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
     classes. Don't report any events */
@@ -90,9 +90,11 @@ private:
   
   string checkpointName;
   
-  /** The estimated proportion of total simulation time we spend in
-   * mainSimulation. Used to give BOINC a hint on the progress. */
-  double relTimeInMainSim;
+  static int vectorInitEnd;
+  /// vectorInitEnd + length of one lifespan
+  static int uOLSInitEnd;
+  /// uOLSInitEnd + length of main sim + 1 for consistency
+  static int simulationEnd;
   
   friend class VectorAnophelesSuite;
 };

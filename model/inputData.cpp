@@ -34,7 +34,7 @@ using namespace std;
 using namespace scnXml;
 
 /// Current schema version.
-const int SCHEMA_VERSION = 10;
+const int SCHEMA_VERSION = 11;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
@@ -96,17 +96,19 @@ void createDocument(std::string lXmlFile) {
   xmlFileName = lXmlFile;
   //Parses the document
   //NOTE: it'd be nice if this used Global::lookupResource for the schema.
-  // The only way I can see of making it do (part) of this is to change
-  // directory, which is either platform specific or requires more dependencies.
-    ifstream fileStream (lXmlFile.c_str());
-    // Interesting... if the file name is passed instead of an input stream,
-    // the schema file doesn't need to be in the current directory.
+# ifdef WITHOUT_BOINC
+    // We don't need a checksum when not run with BOINC, so open by filename,
+    // which allows using the filename to help find the schema file.
     // Note that the schema location can be set manually by passing properties,
     // but we won't necessarily have the right schema version associated with
     // the XML file in that case.
+    scenario = (parseScenario (lXmlFile.c_str())).release();
+# else
+    ifstream fileStream (lXmlFile.c_str());
     scenario = (parseScenario (fileStream)).release();
     BoincWrapper::generateChecksum (fileStream);
     fileStream.close ();
+#endif
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
       ostringstream msg;
       msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;

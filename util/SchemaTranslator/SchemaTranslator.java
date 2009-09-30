@@ -46,7 +46,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 10;
+    static final int CURRENT_VERSION = 11;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -451,6 +451,26 @@ public class SchemaTranslator {
     // Version 10 introduced PKPD description parameters. No changes to
     // existing elements.
     public void translate9To10() throws Exception {
+    }
+    
+    // Version 11 removes cached emerge rates from the schema
+    public void translate10To11() throws Exception {
+	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
+	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+	if (vect != null) {
+	    NodeList species = vect.getElementsByTagName("anopheles");
+	    for (int i = 0; i < species.getLength(); ++i) {
+		Element anoph = (Element) species.item(i);
+		Node er = anoph.getElementsByTagName("emergence").item(0);
+		if (er != null)
+		    anoph.removeChild (er);
+		// These are from the parameter values based on Anopheles gambiae in 
+		// Namawala, Tanzania, from the paper on comparing interventions.
+		anoph.setAttribute ("propInfected", "0.078");
+		anoph.setAttribute ("propInfectious", "0.021");
+	    }
+	    System.err.println ("New attributes propInfected and propInfectious created with default values - please correct (for each anopheles section)!");
+	}
     }
     
     private void visitAllFiles(File file, File outDir) throws Exception {

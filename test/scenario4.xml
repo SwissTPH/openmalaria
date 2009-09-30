@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="0" name="test D94" popSize="500" schemaVersion="10" simulationDuration="385" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_10.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="0" name="test D94" popSize="500" schemaVersion="11" simulationDuration="385" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_11.xsd">
   <demography name="test">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>

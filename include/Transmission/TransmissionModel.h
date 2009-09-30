@@ -53,6 +53,14 @@ public:
   void summarize (Summary&);
   
   
+  /** How many intervals are needed for vector initialisation before
+   * updateOneLifespan() ? */
+  virtual int vectorInitDuration () {
+    return 0;	// Non-vector model doesn't need it
+  }
+  /** Called at end of vector initialisation stage. */
+  virtual void endVectorInitPeriod () {}
+  
   /** Initialise the main simulation.
    *
    * Although we should have (population.size() == populationSize), it appears

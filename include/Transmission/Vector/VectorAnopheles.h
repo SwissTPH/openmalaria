@@ -62,7 +62,7 @@ public:
   void destroy ();
   
   /** Calls calMosqEmergeRate() and initialises arrays. */
-  void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
+  //void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
   //@}
   
   /** Called per time-step. Does most of calculation of EIR.
@@ -71,9 +71,8 @@ public:
    *	infectiousness.
    * @param simulationTime
    * @param sIndex Index of the type of mosquito in per-type/species lists.
-   * @param larvicidingIneffectiveness Multiplier for emergence rates, to
-   *	simplistically simulate larviciding. */
-  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex);
+   * @param isDynamic True to use full model; false to drive model from current contents of S_v. */
+  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
@@ -89,17 +88,6 @@ public:
     return partialEIR
       * host.entoAvailabilityPartial(humanBase, sIndex)
       * host.probMosqBiting(humanBase, sIndex);	// probability of biting, once commited
-  }
-  
-  /** Return the SimulationMode the model is expecting to be run in for this
-   * species. Currently all species must run in the same mode. */
-  SimulationMode getSimulationMode () {
-    if (FCEIR.size())
-      return equilibriumMode;
-    else if (N_v.size())
-      return dynamicEIR;
-    else
-      throw xml_scenario_error ("Neither eir nor emergence rate data available to drive simulation");
   }
   
   inline HostCategoryAnopheles& getHumanBase () {
@@ -167,8 +155,16 @@ private:
   /** Non-human host data. */
   NonHumanHostsType nonHumanHosts;
   
-  /* Parameters from model */
-  /* Partial (derived) parameters from model */
+  /* Parameters and partial (derived) parameters from model */
+  
+  /** @brief S_v used to force an EIR during vector init.
+   * Length: Global::intervalsPerYear.
+   * Lookup value at (simulationTime % intervalsPerYear).*/
+  vector<double> forcedS_v;
+  /** Conversion factors from S_v to N_v and O_v, for initialisation values of
+   * N_v and O_v. */
+  double initNvFromSv;
+  double initOvFromSv;	///< ditto
   
   /** N_v_length-1 is the number of previous days for which some parameters are
    * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
@@ -182,7 +178,7 @@ private:
   
   /** @brief Parameter arrays N_v_length long.
    *
-   * P_A, P_df and P_dif are set by initFeedingCycleProbs; both these and N_v,
+   * P_A, P_df and P_dif are set in advancePeriod(); both these and N_v,
    * O_v and S_v may be set either by initialise or by initMainSimulation, from
    * which they can be reset.
    * They should be checkpointed for the main simulation and if the vector
@@ -225,20 +221,6 @@ private:
   //@}
   
   
-  /** @brief Parameters used during the initialisation phase.
-   *
-   * Need to be available to initMainSimulation, but can be reinitialised
-   * (no need to checkpoint). */
-  //@{
-  /** FCEIR[] is the array of parameters of the Fourier approximation to the
-   * annual EIR. Currently always set in the TransmissionModel constructor
-   * (with length 5). We will need to deal with this cleanly later.
-   * We use the order, a0, a1, b1, a2, b2, ... */
-  vector<double> FCEIR;
-  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
-  double EIRRotateAngle;
-  //@}
-  
   /** Per time-step partial calculation of EIR.
   *
   * See comment in advancePeriod() for details of how the EIR is calculated.
@@ -259,22 +241,6 @@ private:
   //@}
   
   /* Functions */
-  
-  /** Calculates P_Ai_base, P_A, P_df and P_dif.
-   *
-   * @returns P_Ai_base
-   * 
-   * First 3 parameters are just outputs. */
-  double calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population, bool);
-  
-  /** Initialise P_A, P_df and P_dif using model parameters and the supplied
-   * kappaDaily array.
-   * 
-   * @param sIndex Index of *this in VectorTransmission.species
-   * @param population List of humans
-   * @param kappaDaily Infectiousness of humans, per day, for last N_v_length days
-   */
-  void initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily);
   
   /** This subroutine converts ShortArray to a vector<double> of length
    * daysInYear by copying and duplicating elements to fill the gaps. */

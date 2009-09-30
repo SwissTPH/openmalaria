@@ -18,7 +18,6 @@
  */
 
 #include "Transmission/Vector/VectorAnopheles.h"
-#include "Transmission/Vector/VectorEmergence.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 #include "human.h"
@@ -67,285 +66,97 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
     ftauArray[i] = 0.0;
   ftauArray[mosqRestDuration] = 1.0;
   
+  N_v  .resize (N_v_length);
+  O_v  .resize (N_v_length);
+  S_v  .resize (N_v_length);
+  P_A  .resize (N_v_length);
+  P_df .resize (N_v_length);
+  P_dif.resize (N_v_length);
   
-  // -----  if we're driving initialisation from EIR data  -----
-  if (anoph.getEir().present()) {
-    const scnXml::Eir& eirData = anoph.getEir().get();
-    FCEIR.resize (5);
-    FCEIR[0] = eirData.getA0();
-    FCEIR[1] = eirData.getA1();
-    FCEIR[2] = eirData.getB1();
-    FCEIR[3] = eirData.getA2();
-    FCEIR[4] = eirData.getB2();
-    EIRRotateAngle = eirData.getEIRRotateAngle();
-    
-    vector<double> speciesEIR (Global::intervalsPerYear);
-    
-    // Calculate forced EIR for pre-intervention phase from FCEIR:
-    calcInverseDFTExp(speciesEIR, FCEIR);
-    
-    if(EIRRotateAngle != 0.0)
-      rotateArray(speciesEIR, EIRRotateAngle);
-    
-    // Add to the TransmissionModel's EIR, used for the initalization phase:
-    for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-      initialisationEIR[i] += speciesEIR[i];
+  
+  // -----  EIR  -----
+  const scnXml::Eir& eirData = anoph.getEir();
+  
+  /** FCEIR[] is the array of parameters of the Fourier approximation to the
+   * annual EIR. We use the order, a0, a1, b1, a2, b2, ... */
+  vector<double> FCEIR (5);
+  FCEIR[0] = eirData.getA0();
+  FCEIR[1] = eirData.getA1();
+  FCEIR[2] = eirData.getB1();
+  FCEIR[3] = eirData.getA2();
+  FCEIR[4] = eirData.getB2();
+  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
+  double EIRRotateAngle = eirData.getEIRRotateAngle();
+  
+  vector<double> speciesEIR (Global::intervalsPerYear);
+  
+  // Calculate forced EIR for pre-intervention phase from FCEIR:
+  calcInverseDFTExp(speciesEIR, FCEIR);
+  
+  if(EIRRotateAngle != 0.0)
+    rotateArray(speciesEIR, EIRRotateAngle);
+  
+  // Add to the TransmissionModel's EIR, used for the initalization phase:
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
+    initialisationEIR[i] += speciesEIR[i];
+  
+  
+  // -----  N_v0, N_v, O_v, S_v  -----
+  //BEGIN P_A, P_Ai, P_df, P_dif
+  // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
+  double leaveSeekingStateRate = mosqSeekingDeathRate;
+  
+  // speciesEIR is average EIR per human over human population
+  // that is, 1/populationSize * sum_{i in population} (P_Ai * P_B_i)
+  // let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
+  double sumPFindBite = 0.0;
+  
+  // NC's non-autonomous model provides two methods for calculating P_df and
+  // P_dif; here we assume that P_E is constant.
+  double intP_df = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    const PerHostTransmission& host = h->perHostTransmission;
+    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+    leaveSeekingStateRate += prod;
+    prod *= host.probMosqBiting(humanBase, sIndex);
+    sumPFindBite += prod;
+    intP_df += prod * host.probMosqResting(humanBase, sIndex);
   }
   
-  
-  // -----  if we have emerge rate data to use or validate  -----
-  if (anoph.getEmergence().present()) {
-    const scnXml::Emergence& emergeData = anoph.getEmergence().get();
-    
-    mosqEmergeRate = vectors::DoubleList2std (emergeData.getEmergenceRate(), daysInYear);
-    vectors::scale (mosqEmergeRate, populationSize);
-    
-    P_dif = vectors::DoubleList2std (emergeData.getKappa(), N_v_length);
-    if (!FCEIR.size()) {
-      cerr << "Warning: running the vector code during initialisation probably isn't valid." << endl;
-      /* Explanation:
-       * Normally an entomological infection rate of mosquitoes to humans is
-       * forced during initialisation. Without this, some infections are
-       * introduced into humans by initially infected mosquitoes (O_v and S_v),
-       * but since humans are initially uninfected and have no immunity, no new
-       * mosquitoes will be infected initially. There has been some argument
-       * that the whole system should in any case reach an equilibrium state by
-       * the end of the initialisation phase, but there are no guarantees since
-       * the whole system is dynamic, not forced.
-       * 
-       * Currently this is used for a unittest. */
-      initFeedingCycleProbs (sIndex, population, P_dif);
-    }
-    //else: kappa is validated (from P_dif) and P_* calculated by initMainSimulation
-    
-    N_v = vectors::DoubleList2std (emergeData.getN_v(), N_v_length);
-    vectors::scale (N_v, populationSize);
-    O_v = vectors::DoubleList2std (emergeData.getO_v(), N_v_length);
-    vectors::scale (O_v, populationSize);
-    S_v = vectors::DoubleList2std (emergeData.getS_v(), N_v_length);
-    vectors::scale (S_v, populationSize);
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
+    leaveSeekingStateRate += nnh->entoAvailability;
+    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
+    // Note: in model, we do the same for intP_dif, except in this case it's
+    // multiplied by infectiousness of host to mosquito which is zero.
   }
   
+  // Probability of a mosquito not finding a host this day:
+  double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+  
+  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
+  sumPFindBite *= P_Ai_base;
+  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+  //END P_A, P_Ai, P_df, P_dif
+  
+  //FIXME: these S_v, etc are a year long - not N_v_length! How long init, and how to drive?
+  forcedS_v = speciesEIR;
+  vectors::scale (forcedS_v, populationSize / sumPFindBite);
+  initNvFromSv = 1.0 / anoph.getPropInfectious();
+  initOvFromSv = initNvFromSv * anoph.getPropInfected();
+  mosqEmergeRate = forcedS_v;
+  vectors::scale (mosqEmergeRate, initNvFromSv * (1.0 - intP_A - intP_df));
+  cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
+  
+  // All set up to drive simulation from S_v
   return anoph.getMosquito();
 }
 
 void VectorAnopheles::destroy () {
 }
 
-double VectorAnopheles::calcCycleProbabilities (double& intP_A, double& intP_df, double& intP_dif, size_t sIndex, const std::list<Human>& population, bool withoutInfectiousnessP_dif = false) {
-  // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
-  double leaveSeekingStateRate = mosqSeekingDeathRate;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    leaveSeekingStateRate += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
-  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
-    leaveSeekingStateRate += nnh->entoAvailability;
-  
-  // Probability of a mosquito not finding a host this day:
-  intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-  
-  // NC's non-autonomous model provides two methods for calculating P_df and
-  // P_dif; here we assume that P_E is constant.
-  intP_df = 0.0;
-  intP_dif = 0.0;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-    const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears()) *
-      host.probMosqBiting(humanBase, sIndex) *
-      host.probMosqResting(humanBase, sIndex);
-    intP_df += prod;
-    intP_dif += prod * h->probTransmissionToMosquito();
-  }
-  
-  /* For initialisation, we multiply later by the whole population's kappa.
-  In this case this function is only called once so performance is less
-  important (this allows avoiding code duplication). */
-  if (withoutInfectiousnessP_dif)
-    intP_dif = intP_df;
-  
-  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
-    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
-    // Note: in model, we do the same for intP_dif, except in this case it's
-    // multiplied by infectiousness of host to mosquito which is zero.
-  }
-  
-  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
-  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-  intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
-  return P_Ai_base;
-}
-
-void VectorAnopheles::initFeedingCycleProbs (size_t sIndex, const std::list<Human>& population, vector<double>& kappaDaily) {
-  //Note: kappaDaily may be [a reference to] P_dif, so don't access it after setting P_dif.
-  
-  double intP_A, intP_df, intP_dif;
-  calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population, true);
-  
-  P_A  .resize (N_v_length);
-  P_df .resize (N_v_length);
-  P_dif.resize (N_v_length);
-  for (int t = 0; t < N_v_length; ++t) {
-    P_A[t]	= intP_A;
-    P_df[t]	= intP_df;
-    P_dif[t]	= intP_dif * kappaDaily[t];	// FIXME: don't use kappa for initialisation (only use for non-vector model) - initialise by calling advancePeriod or similar per timestep?
-  }
-}
-
-void VectorAnopheles::initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa) {
-  // If EIR data was provided, validate EIR or do emergence rate calculations
-  // and switch to calculating a dynamic EIR.
-  if (FCEIR.size()) {
-    //BEGIN Validate kappa, initialise P_A, P_df, P_dif
-    if (Simulation::simulationTime*Global::interval < N_v_length)
-      throw xml_scenario_error ("Initialization phase too short");
-    vector<double> kappaDaily (N_v_length, 0.0);
-    
-    // For day over N_v_length days prior to the next timestep's day.
-    int endDay = (Simulation::simulationTime+1) * Global::interval;
-    for (int day = endDay - N_v_length; day < endDay; ++day) {
-      // Should correspond to index of kappa updated by updateKappa:
-      kappaDaily[day % N_v_length] =
-	kappa[(day / Global::interval - 1) % Global::intervalsPerYear];
-    }
-    
-    bool valid = vectors::approxEqual (kappaDaily, P_dif);
-    
-    initFeedingCycleProbs (sIndex, population, kappaDaily);
-    //END Validate kappa, initialise P_A, P_df, P_dif
-    
-    /* This (timely) check of emergence rates and N/O/S_v is skipped if
-     * a -v or --noErcValidation option is present
-     * AND kappaDaily was valid. */
-    if (!valid || !(Global::clOptions & CLO::NO_ERC_VALIDATION)) {
-      time_t seconds = time (NULL);
-      cout << "Starting emergence rate validation" << endl;
-      //BEGIN Validate or calculate mosqEmergeRate
-      double sumAvailability = 0.0;
-      for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-	sumAvailability += h->perHostTransmission.entoAvailability(humanBase, sIndex, h->getAgeInYears());
-      // Use if you want to recalculate the constant in HostMosquitoInteraction::initialise:
-      //cout << "Average human availability: " << setprecision(12) << sumAvailability/populationSize << endl;
-      //NOTE: could check averageAvailability is reasonably close to humanBase.entoAvailability
-      // (though it's not clear what to do and how much of a problem it is if this isn't the case).
-      
-      // A class encapsulating VectorInternal code. Destructor frees memory at end of this function.
-      VectorEmergence emerge (mosqRestDuration, EIPDuration,
-			      populationSize,
-			      mosqSeekingDeathRate, mosqSeekingDuration,
-			      sumAvailability,
-			      humanBase, probMosqSurvivalOvipositing);
-      
-      
-      /* We can either take the EIR from the initialisation stage and expand to
-       * length daysInYear without smoothing:
-       *	EIRInit = convertLengthToFullYear(speciesEIR);
-       * or recalculate from fourier coefficients to get a smooth array: */
-      vector<double> EIRInit(daysInYear, 0.0);
-      calcInverseDFTExp(EIRInit, FCEIR);
-      if(EIRRotateAngle != 0.0)
-	rotateArray(EIRInit, EIRRotateAngle);
-      
-      
-      if (mosqEmergeRate.size() == 0) {	// not set; we'll need an estimate
-	mosqEmergeRate.resize (daysInYear);
-	// The root finding algorithm needs some estimate to start from. It's accuracy isn't that important since it should converge in a single step anyway.
-	double temp = populationSize*sumAvailability;
-	for (int i = 0; i < daysInYear; i++) {
-	  mosqEmergeRate[i] = EIRInit[i]*temp;
-	}
-      }
-      
-      //TODO validate as separate function, do all validation first, then all calculations if anything isn't valid
-      
-      if (!emerge.CalcInitMosqEmergeRate(convertLengthToFullYear (kappa),
-					 EIRInit,
-					 nonHumanHosts,
-					 mosqEmergeRate)) {
-	valid = false;	// test failed; emergence rates recalculated
-      }
-      //END Validate or calculate mosqEmergeRate
-      
-      //BEGIN Get and validate N_v, O_v and S_v
-      if (Simulation::simulationTime*Global::interval < N_v_length || N_v_length > daysInYear)
-	throw xml_scenario_error ("Initialization phase or daysInYear too short");
-      vector<double> Nv(N_v_length), Ov(N_v_length), Sv(N_v_length);
-      
-      // Retrieve the periodic orbits for Nv, Ov, and Sv.
-      gsl_vector** x_p;
-      size_t mt = emerge.getN_vO_vS_v (x_p);
-      for (int day = endDay - N_v_length; day < endDay; ++day) {
-	size_t t = day % N_v_length;
-	size_t i = (daysInYear + day - endDay) % daysInYear;
-	
-	Nv[t] = gsl_vector_get(x_p[i], 0);
-	Ov[t] = gsl_vector_get(x_p[i], mt);
-	Sv[t] = gsl_vector_get(x_p[i], 2*mt);
-      }
-      
-      valid = valid
-	&& vectors::approxEqual (N_v, Nv)
-	&& vectors::approxEqual (O_v, Ov)
-	&& vectors::approxEqual (S_v, Sv);
-      
-      if (N_v.size()) {
-	if (valid)
-	  cerr << "Emergence rate parameters in scenario document were accurate." << endl;
-	else
-	  cerr << "Warning: emergence rate parameters in scenario document were not accurate." << endl;
-      }
-      
-      // Set whether or not valid; no harm if they already have good values
-      N_v = Nv;
-      O_v = Ov;
-      S_v = Sv;
-      //END Get and validate N_v, O_v and S_v
-      
-      //BEGIN Write out new values
-      if (!valid) {
-	cerr << "Parameters associated with emergence rate have been generated will be saved." << endl;;
-	
-	scnXml::DoubleList sxEmergeRate, sxKappa, sxNv, sxOv, sxSv;
-	typedef scnXml::DoubleList::ItemSequence DLIS;
-	
-	vector<double> tp (mosqEmergeRate);
-	vectors::scale (tp, 1.0 / populationSize);
-	sxEmergeRate.setItem (DLIS (tp.begin(), tp.end()));
-	
-	sxKappa.setItem (DLIS (kappaDaily.begin(), kappaDaily.end()));
-	
-	tp = Nv;
-	vectors::scale (tp, 1.0 / populationSize);
-	sxNv.setItem (DLIS (tp.begin(), tp.end()));
-	
-	tp = Ov;
-	vectors::scale (tp, 1.0 / populationSize);
-	sxOv.setItem (DLIS (tp.begin(), tp.end()));
-	
-	tp = Sv;
-	vectors::scale (tp, 1.0 / populationSize);
-	sxSv.setItem (DLIS (tp.begin(), tp.end()));
-	
-	scnXml::Emergence sxEmerge (sxEmergeRate, sxKappa, sxNv, sxOv, sxSv);
-	
-	// Assumptions: EntoData.Vector element exists, anophleses[sIndex] exists
-	scnXml::Anopheles& sxAnoph = getMutableScenario()
-	  .getEntoData()
-	  .getVector().get()
-	  .getAnopheles()[sIndex];
-	sxAnoph.setEmergence (sxEmerge);
-	documentChanged = true;
-      }
-      //END Write out new values
-      cout << "Finished validating/calculation emergence rates ("<< (time (NULL) - seconds) <<" seconds)" << endl;
-    }
-    
-    FCEIR.resize(0, 0.0);	// indicate EIR-driven mode is no longer being used (although this is ignored)
-  }
-  // else: we're already in dynamic EIR calculation mode
-}
-
 
 // Every Global::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex) {
+void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic) {
   if (simulationTime >= larvicidingEndStep) {
     larvicidingEndStep = std::numeric_limits<int>::max();
     larvicidingIneffectiveness = 1.0;
@@ -368,7 +179,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
   (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
     α_i[t] = host.entoAvailability (index, h->getAgeInYears())
-  Let P_Ai_base[t] = (1 - P_A[t]) / sum_{h in hosts} α_h[t].
+    Let P_Ai_base[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
   
   Note that although the model allows α_i and P_B_i to vary per-day, they only
   vary per Global::interval of the main simulation. Hence:
@@ -384,8 +195,36 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   
   
   //BEGIN P_A, P_Ai, P_df, P_dif
-  double intP_A, intP_df, intP_dif;
-  double P_Ai_base = calcCycleProbabilities (intP_A, intP_df, intP_dif, sIndex, population);
+  // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
+  double leaveSeekingStateRate = mosqSeekingDeathRate;
+  
+  // NC's non-autonomous model provides two methods for calculating P_df and
+  // P_dif; here we assume that P_E is constant.
+  double intP_df = 0.0;
+  double intP_dif = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    const PerHostTransmission& host = h->perHostTransmission;
+    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+    leaveSeekingStateRate += prod;
+    prod *= host.probMosqBiting(humanBase, sIndex)
+         *  host.probMosqResting(humanBase, sIndex);
+    intP_df += prod;
+    intP_dif += prod * h->probTransmissionToMosquito();
+  }
+  
+  for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
+    leaveSeekingStateRate += nnh->entoAvailability;
+    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
+    // Note: in model, we do the same for intP_dif, except in this case it's
+    // multiplied by infectiousness of host to mosquito which is zero.
+  }
+  
+  // Probability of a mosquito not finding a host this day:
+  double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+  
+  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
+  intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+  intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
   //END P_A, P_Ai, P_df, P_dif
   
   // Summed per day:
@@ -412,6 +251,11 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     P_df[t] = intP_df;
     P_dif[t] = intP_dif;
     
+    
+    // If in dynamicEIR mode, update N_v, O_v and S_v
+    // Otherwise we just use whichever values these were initialised to to
+    // drive the system.
+    if (isDynamic) {
     
     N_v[t] = mosqEmergeRate[day%daysInYear] * larvicidingIneffectiveness
         + P_A[t1]  * N_v[t1]
@@ -467,7 +311,11 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
         + P_A[t1]*S_v[t1]
         + P_df[ttau]*S_v[ttau];
     //END S_v
-    
+    } else {
+      S_v[t] = forcedS_v[simulationTime % Global::intervalsPerYear];
+      N_v[t] = S_v[t] * initNvFromSv;
+      O_v[t] = S_v[t] * initOvFromSv;
+    }
     
     partialEIR += S_v[t] * P_Ai_base;
   }

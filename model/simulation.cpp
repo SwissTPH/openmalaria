@@ -28,14 +28,17 @@
 #include "summary.h"
 #include "Drug/DrugModel.h"
 #include "global.h"
+#include "Transmission/TransmissionModel.h"
 #include "inputData.h"
 #include <fstream>
 #include "gzstream.h"
 
-int Simulation::simulationDuration;
+int Simulation::vectorInitEnd;
+int Simulation::uOLSInitEnd;
+int Simulation::simulationEnd;
 int Simulation::simulationTime;
-Summary* Simulation::gMainSummary;
 int Simulation::timeStep = TIMESTEP_NEVER;
+Summary* Simulation::gMainSummary;
 
 static const char* const CHECKPOINT = "checkpoint";
 static const int NUM_CHECKPOINTS = 2;
@@ -52,8 +55,10 @@ Simulation::Simulation() :
   
   Population::init();
   _population = new Population();
-  simulationDuration=get_simulation_duration();
-  relTimeInMainSim=simulationDuration/(1.0*simulationDuration+Global::maxAgeIntervals);
+  vectorInitEnd = _population->_transmissionModel->vectorInitDuration();
+  uOLSInitEnd = vectorInitEnd + Global::maxAgeIntervals;
+  // +1 here because this gives same length as before, using '<' instead of '<=' operator for consistency:
+  simulationEnd = uOLSInitEnd + get_simulation_duration() + 1;
   DrugModel::init();
 }
 
@@ -76,10 +81,43 @@ int Simulation::start(){
     _population->estimateRemovalRates();
     _population->setupPyramid(false);
   }
+  
+  vectorInitialisation();
   updateOneLifespan();
-
   mainSimulation();
   return 0;
+}
+
+void Simulation::vectorInitialisation () {
+  while(simulationTime < vectorInitEnd) {
+    ++simulationTime;
+    _population->update1();
+    
+    BoincWrapper::reportProgress (double(simulationTime) / vectorInitEnd);
+    if (BoincWrapper::timeToCheckpoint()) {
+      writeCheckpoint();
+      BoincWrapper::checkpointCompleted();
+    }
+  }
+  _population->_transmissionModel->endVectorInitPeriod ();
+}
+
+void Simulation::updateOneLifespan () {
+  int testCheckpointStep = -1;
+  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+    testCheckpointStep = vectorInitEnd + (uOLSInitEnd - vectorInitEnd) / 2;
+  while(simulationTime < uOLSInitEnd) {
+    ++simulationTime;
+    _population->update1();
+    
+    BoincWrapper::reportProgress (double(simulationTime) / uOLSInitEnd);
+    if (BoincWrapper::timeToCheckpoint() || simulationTime == testCheckpointStep) {
+      writeCheckpoint();
+      BoincWrapper::checkpointCompleted();
+      if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+	throw cmd_exit ("Checkpoint test: written checkpoint");
+    }
+  }
 }
 
 void Simulation::mainSimulation(){
@@ -88,12 +126,11 @@ void Simulation::mainSimulation(){
   _population->preMainSimInit();
   gMainSummary->initialiseSummaries();
   
-  while(timeStep <= simulationDuration) {
+  while(simulationTime < simulationEnd) {
     _population->implementIntervention(timeStep);
-#ifndef WITHOUT_BOINC
     //Calculate the current progress
-    BoincWrapper::reportProgress(relTimeInMainSim*(double(timeStep)/simulationDuration)+(1-relTimeInMainSim));
-#endif
+    BoincWrapper::reportProgress(double(simulationTime) / simulationEnd);
+    
     ++simulationTime;
     _population->update1();
     ++timeStep;
@@ -104,26 +141,6 @@ void Simulation::mainSimulation(){
   }
   delete _population;
   gMainSummary->writeSummaryArrays();
-}
-
-void Simulation::updateOneLifespan () {
-  int testCheckpointStep = -1;
-  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
-    testCheckpointStep = Global::maxAgeIntervals / 2;
-  while(simulationTime < Global::maxAgeIntervals) {
-    ++simulationTime;
-    _population->update1();
-    
-#ifndef WITHOUT_BOINC
-    BoincWrapper::reportProgress (double(simulationTime) / Global::maxAgeIntervals * (1-relTimeInMainSim));
-#endif
-    if (BoincWrapper::timeToCheckpoint() || simulationTime == testCheckpointStep) {
-      writeCheckpoint();
-      BoincWrapper::checkpointCompleted();
-      if (Global::clOptions & CLO::TEST_CHECKPOINTING)
-	throw cmd_exit ("Checkpoint test: written checkpoint");
-    }
-  }
 }
 
 

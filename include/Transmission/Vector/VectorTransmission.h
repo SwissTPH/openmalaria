@@ -39,6 +39,17 @@ public:
   VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize);
   virtual ~VectorTransmission();
   
+  /** Length with which to force input EIR prior to switching to dynamic EIR
+   * and starting updateOneLifespan(). Note: no explicit reason why these
+   * events should coincide. */
+  virtual int vectorInitDuration () {
+    // NOTE: One year should be ample time to infect a significant number of
+    // humans and start the infection cycle, but probably not long enough to
+    // reach an equilibrium state.
+    return Global::intervalsPerYear;
+  }
+  virtual void endVectorInitPeriod ();
+  
   /** Initialise the main simulation.
    * 
    * Calculates mosquito emergence rate.

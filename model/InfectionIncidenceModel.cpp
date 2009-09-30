@@ -190,7 +190,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   //NOTE: error check (should be OK if kappa is checked, for nonVector model)
   if (!finite(effectiveEIR)) {
     ostringstream out;
-    out << "Error: effectiveEIR is not finite: " << effectiveEIR << endl;
+    out << "effectiveEIR is not finite: " << effectiveEIR << endl;
     throw overflow_error (out.str());
   }
   
