@@ -42,6 +42,7 @@ class VectorAnopheles
 {
 public:
   VectorAnopheles () :
+    partialEIR(0.0),
     larvicidingEndStep (std::numeric_limits<int>::max()),
     larvicidingIneffectiveness (1.0)
   {}

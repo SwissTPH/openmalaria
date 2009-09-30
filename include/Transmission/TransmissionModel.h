@@ -88,10 +88,16 @@ public:
   
   /** Returns the EIR, per host and per time step.
    *
+   * Non-vector:
    * During the pre-intervention phase, the EIR is forced, using values from
-   * the XML file (possibly generated from fourier coefficients). During the
-   * main simulation phase, it may be calculated or obtained from data in the
-   * XML file. */
+   * the XML file. During the main simulation phase, it may be calculated or
+   * obtained from data in the XML file.
+   *
+   * Vector:
+   * During vector initialisation phase, EIR is forced based on the EIR given
+   * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
+   * the simulation switches to using dynamic EIR. advancePeriod _must_ be
+   * called before this function in order to return the correct value. */
   double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears);
   
   /** Set the larviciding intervention params. */
