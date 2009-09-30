@@ -36,8 +36,12 @@ namespace scnXml {
 //! Transmission models, Chitnis et al
 class VectorTransmission : public TransmissionModel {
 public:
-  VectorTransmission(const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize);
+  VectorTransmission(const scnXml::Vector vectorData);
   virtual ~VectorTransmission();
+  
+  /** Extra initialisation, requiring information from the human population
+   * structure. */
+  virtual void setupNv0 (const std::list<Human>& population, int populationSize);
   
   /** Length with which to force input EIR prior to switching to dynamic EIR
    * and starting updateOneLifespan(). Note: no explicit reason why these

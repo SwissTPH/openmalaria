@@ -36,6 +36,8 @@
 using namespace std;
 
 
+// -----  static data / methods  -----
+
 double Population::ageGroupBounds[ngroups+1];
 double Population::ageGroupPercent[ngroups];
 
@@ -61,12 +63,26 @@ int Population::IDCounter;
 // this for initialisation, or just ignore (probably won't have much effect).
 // And it's practially impossible to keep the same random number stream, so
 // comparing results for testing isn't easy.
+//
+// No longer possible due to new Vector init.
 const bool InitPopOpt = false;
+
+
+void Population::init(){
+  Human::initHumanParameters();
+}
+
+void Population::clear(){
+  Human::clear();
+}
+
+
+// -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population()
     : _populationSize(get_populationsize())
 {
-  _transmissionModel = TransmissionModel::createTransmissionModel(_population, _populationSize);
+  _transmissionModel = TransmissionModel::createTransmissionModel();
 
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
@@ -82,22 +98,59 @@ Population::~Population() {
   delete _transmissionModel;  
 }
 
-void Population::init(){
-  Human::initHumanParameters();
+void Population::read (istream& in) {
+  //Start reading a checkpoint
+  _transmissionModel->read (in);
+  in >> _populationSize;
+  if (_populationSize != get_populationsize())
+    throw checkpoint_error("population size incorrect");
+  in >> IDCounter;
+  in >> mu0;
+  in >> mu1;
+  in >> alpha0;
+  in >> alpha1;
+  in >> rho;
+  in >> _workUnitIdentifier;
+
+  if (_workUnitIdentifier !=  get_wu_id()) {
+    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
+    exit(-9);
+  }
+
+  //Start reading the human data
+  int popSize;
+  in >> popSize;
+  if (popSize > _populationSize)
+    throw checkpoint_error ("population size exceeds that given in scenario.xml");
+  int indCounter = 0;	// Number of individuals read from checkpoint
+  while(!(in.eof()||popSize==indCounter)){
+    _population.push_back(Human(in, *_transmissionModel));
+    indCounter++;
+  }
+  if (popSize != indCounter)
+    throw checkpoint_error("can't read whole population (out of data)");
 }
+void Population::write (ostream& out) {
+  _transmissionModel->write (out);
+  out << _populationSize << endl;
+  out << IDCounter << endl;
+  out << mu0 << endl;
+  out << mu1 << endl;
+  out << alpha0 << endl;
+  out << alpha1 << endl ;
+  out << rho << endl; 
+  out << _workUnitIdentifier << endl;
 
-void Population::clear(){
-  Human::clear();
-}
-
-void Population::preMainSimInit () {
-  _transmissionModel->initMainSimulation(_population, _populationSize);
-
-  for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    Global::infantIntervalsAtRisk[i]=0;
-    Global::infantDeaths[i]=0;
+  //Write human data
+  out << _population.size() << endl;	// this may not be equal to _populationSize due to startup optimisation
+  HumanIter iter;
+  for(iter=_population.begin(); iter != _population.end(); ++iter){
+    out << *iter;
   }
 }
+
+
+// -----  static & non-static methods: further set up  -----
 
 void Population::estimateRemovalRates () {
   // mu1, alpha1: These are estimated here
@@ -154,7 +207,53 @@ void Population::estimateRemovalRates () {
   rss=gsl::minimizeCalc_rss(&p1, &p2);
 }
 
-void Population::setupPyramid(bool isCheckpoint){
+// Static method used by estimateRemovalRates
+double Population::setDemoParameters (double param1, double param2) {
+  rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
+  if (rho != 0.0)
+    // Issue: in this case the total population size differs from _populationSize,
+    // however, some code currently uses this as the total population size.
+    throw xml_scenario_error ("Population growth rate provided.");
+  
+  const double IMR=0.1;
+  double M_inf=-log(1-IMR);
+  
+  mu1	= exp(param1) / 100;
+  alpha1= exp(param2) / 100;
+  alpha0= 4.0;
+  mu0	= (M_inf - mu1 * (exp(alpha1*0.5) - 1) * alpha0) /
+      (alpha1 * (1 - exp(-alpha0*0.5)));
+  
+  double sumpred=0.0;
+  for (int i=0; i<ngroups-1; i++) {
+    double midpt = (ageGroupBounds[i+1] + ageGroupBounds[i])*0.5;
+    M1[i] = mu0 * (1.0 - exp(-alpha0*midpt)) / alpha0;
+    M2[i] = mu1 * (exp(alpha1*midpt) - 1.0) / alpha1;
+    M[i]  = M1[i] + M2[i];
+    pred[i] = (ageGroupBounds[i+1] - ageGroupBounds[i])
+        * exp(-rho*midpt - M[i]);
+    sumpred += pred[i];
+  }
+  for (int i=0; i<ngroups-1; i++) {
+    pred[i] = pred[i] / sumpred * 100.0;
+  }
+  double L_inf = exp(-rho*0.5 - M[1]);
+  double M_nn  =-log(1.0 - 0.4*(1 - exp(-M[1])));
+  double L1    = 1.0/12.0 * exp(-rho/24.0 - M_nn);
+  double perc_inf = ageGroupPercent[0] + ageGroupPercent[1];
+  ageGroupPercent[0] = perc_inf * L1 / L_inf;
+  ageGroupPercent[1] = perc_inf - ageGroupPercent[0];
+  
+  double valsetDemoParameters=0.0;
+  for (int i=0; i<ngroups-1; i++) {
+    double residual = log(pred[i]) - log(ageGroupPercent[i]);
+    valsetDemoParameters += residual*residual;
+  }
+  return valsetDemoParameters;
+}
+
+void Population::setupPyramid(bool isCheckpoint) {
+  // 1. Calculate cumpc
   cumpc[0] = 0.0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     double ageYears = (_maxTimestepsPerLife-j-1) * Global::yearsPerInterval;
@@ -173,6 +272,7 @@ void Population::setupPyramid(bool isCheckpoint){
     int iage=_maxTimestepsPerLife-j-1;
     //Scale using the total cumpc
     cumpc[j]=cumpc[j]/totalCumPC;
+    // 2. Create humans
     if (!isCheckpoint){
       int targetPop = (int)floor(cumpc[j]*_populationSize+0.5);
       while (cumulativePop < targetPop) {
@@ -182,59 +282,22 @@ void Population::setupPyramid(bool isCheckpoint){
       }
     }
   }
+  
+  // 3. Vector setup dependant on human population
+  _transmissionModel->setupNv0 (_population, _populationSize);
 }
 
-void Population::write (ostream& out) {
-  _transmissionModel->write (out);
-  out << _populationSize << endl;
-  out << IDCounter << endl;
-  out << mu0 << endl;
-  out << mu1 << endl;
-  out << alpha0 << endl;
-  out << alpha1 << endl ;
-  out << rho << endl; 
-  out << _workUnitIdentifier << endl;
+void Population::preMainSimInit () {
+  _transmissionModel->initMainSimulation(_population, _populationSize);
 
-  //Write human data
-  out << _population.size() << endl;	// this may not be equal to _populationSize due to startup optimisation
-  HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter){
-    out << *iter;
+  for (size_t i=0;i<Global::intervalsPerYear; i++) {
+    Global::infantIntervalsAtRisk[i]=0;
+    Global::infantDeaths[i]=0;
   }
 }
 
-void Population::read (istream& in) {
-  //Start reading a checkpoint
-  _transmissionModel->read (in);
-  in >> _populationSize;
-  if (_populationSize != get_populationsize())
-    throw checkpoint_error("population size incorrect");
-  in >> IDCounter;
-  in >> mu0;
-  in >> mu1;
-  in >> alpha0;
-  in >> alpha1;
-  in >> rho;
-  in >> _workUnitIdentifier;
 
-  if (_workUnitIdentifier !=  get_wu_id()) {
-    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
-    exit(-9);
-  }
-
-  //Start reading the human data
-  int popSize;
-  in >> popSize;
-  if (popSize > _populationSize)
-    throw checkpoint_error ("population size exceeds that given in scenario.xml");
-  int indCounter = 0;	// Number of individuals read from checkpoint
-  while(!(in.eof()||popSize==indCounter)){
-    _population.push_back(Human(in, *_transmissionModel));
-    indCounter++;
-  }
-  if (popSize != indCounter)
-    throw checkpoint_error("can't read whole population (out of data)");
-}
+// -----  non-static methods: simulation loop  -----
 
 void Population::newHuman(int dob){
   ++IDCounter;
@@ -363,6 +426,22 @@ void Population::update1(){
   delete [] kappaByAge;
 }
 
+int Population::targetCumPop (int ageTSteps, int targetPop) {
+  return (int)floor(cumpc[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
+}
+bool Population::outMigrate(Human& current, int targetPop, int cumPop){
+  int age=(Simulation::simulationTime-current.getDateOfBirth());
+  
+  // Actual number of people so far = cumPop
+  // Number to be removed is the difference between this and target population
+  //FIXME: The -2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
+  int outmigrs = cumPop - targetCumPop (age+2, targetPop);
+  // We can't out-migrate more than one person at once, so just return whether or not to out-migrate this human:
+  return outmigrs >= 1;
+}
+
+
+// -----  non-static methods: summarising and interventions  -----
 
 void Population::newSurvey () {
   for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
@@ -441,63 +520,4 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
       // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
       ((*iter).*intervention)();
   }
-}
-
-int Population::targetCumPop (int ageTSteps, int targetPop) {
-  return (int)floor(cumpc[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
-}
-bool Population::outMigrate(Human& current, int targetPop, int cumPop){
-  int age=(Simulation::simulationTime-current.getDateOfBirth());
-  
-  // Actual number of people so far = cumPop
-  // Number to be removed is the difference between this and target population
-  //FIXME: The -2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
-  int outmigrs = cumPop - targetCumPop (age+2, targetPop);
-  // We can't out-migrate more than one person at once, so just return whether or not to out-migrate this human:
-  return outmigrs >= 1;
-}
-
-// Static method used by estimateRemovalRates
-double Population::setDemoParameters (double param1, double param2) {
-  rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
-  if (rho != 0.0)
-    // Issue: in this case the total population size differs from _populationSize,
-    // however, some code currently uses this as the total population size.
-    throw xml_scenario_error ("Population growth rate provided.");
-  
-  const double IMR=0.1;
-  double M_inf=-log(1-IMR);
-  
-  mu1	= exp(param1) / 100;
-  alpha1= exp(param2) / 100;
-  alpha0= 4.0;
-  mu0	= (M_inf - mu1 * (exp(alpha1*0.5) - 1) * alpha0) /
-      (alpha1 * (1 - exp(-alpha0*0.5)));
-  
-  double sumpred=0.0;
-  for (int i=0; i<ngroups-1; i++) {
-    double midpt = (ageGroupBounds[i+1] + ageGroupBounds[i])*0.5;
-    M1[i] = mu0 * (1.0 - exp(-alpha0*midpt)) / alpha0;
-    M2[i] = mu1 * (exp(alpha1*midpt) - 1.0) / alpha1;
-    M[i]  = M1[i] + M2[i];
-    pred[i] = (ageGroupBounds[i+1] - ageGroupBounds[i])
-        * exp(-rho*midpt - M[i]);
-    sumpred += pred[i];
-  }
-  for (int i=0; i<ngroups-1; i++) {
-    pred[i] = pred[i] / sumpred * 100.0;
-  }
-  double L_inf = exp(-rho*0.5 - M[1]);
-  double M_nn  =-log(1.0 - 0.4*(1 - exp(-M[1])));
-  double L1    = 1.0/12.0 * exp(-rho/24.0 - M_nn);
-  double perc_inf = ageGroupPercent[0] + ageGroupPercent[1];
-  ageGroupPercent[0] = perc_inf * L1 / L_inf;
-  ageGroupPercent[1] = perc_inf - ageGroupPercent[0];
-  
-  double valsetDemoParameters=0.0;
-  for (int i=0; i<ngroups-1; i++) {
-    double residual = log(pred[i]) - log(ageGroupPercent[i]);
-    valsetDemoParameters += residual*residual;
-  }
-  return valsetDemoParameters;
 }

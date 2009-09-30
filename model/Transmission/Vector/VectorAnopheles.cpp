@@ -30,7 +30,7 @@
 #include <ctime>
 
 
-string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& initialisationEIR) {
+string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
   const scnXml::Mosq mosq = anoph.getMosq();
   
@@ -73,7 +73,6 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   P_df .resize (N_v_length);
   P_dif.resize (N_v_length);
   
-  
   // -----  EIR  -----
   const scnXml::Eir& eirData = anoph.getEir();
   
@@ -100,7 +99,13 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     initialisationEIR[i] += speciesEIR[i];
   
+  forcedS_v = speciesEIR;
+  initNvFromSv = 1.0 / anoph.getPropInfectious();
+  initOvFromSv = initNvFromSv * anoph.getPropInfected();
   
+  return anoph.getMosquito();
+}
+void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& population, int populationSize) {
   // -----  N_v0, N_v, O_v, S_v  -----
   //BEGIN P_A, P_Ai, P_df, P_dif
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
@@ -139,16 +144,13 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   //END P_A, P_Ai, P_df, P_dif
   
   //FIXME: these S_v, etc are a year long - not N_v_length! How long init, and how to drive?
-  forcedS_v = speciesEIR;
+  // forcedS_v was set to speciesEIR
   vectors::scale (forcedS_v, populationSize / sumPFindBite);
-  initNvFromSv = 1.0 / anoph.getPropInfectious();
-  initOvFromSv = initNvFromSv * anoph.getPropInfected();
   mosqEmergeRate = forcedS_v;
   vectors::scale (mosqEmergeRate, initNvFromSv * (1.0 - intP_A - intP_df));
   cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
   
   // All set up to drive simulation from S_v
-  return anoph.getMosquito();
 }
 
 void VectorAnopheles::destroy () {

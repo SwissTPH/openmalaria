@@ -52,11 +52,17 @@ public:
    *
    * @param anoph Data structure from XML to use
    * @param sIndex Index in VectorTransmission.species of this class.
-   * @param population The human population
-   * @param populationSize Number of humans (use instead of population.size())
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
-  string initialise (const scnXml::Anopheles& anoph, size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& EIR);
+  string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
+  /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
+   * on the human population structure.
+   * 
+   * @param sIndex Index in VectorTransmission.species of this class.
+   * @param population The human population
+   * @param populationSize Number of humans (use instead of population.size())
+   */
+  void setupNv0 (size_t sIndex, const std::list<Human>& population, int populationSize);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();

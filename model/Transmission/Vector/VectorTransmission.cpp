@@ -34,7 +34,7 @@
  *****************************************************************************/
 
 
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const std::list<Human>& population, int populationSize) {
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
     throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
   
@@ -51,7 +51,6 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
   
   for (size_t i = 0; i < numSpecies; ++i) {
     string name = species[i].initialise (anophelesList[i], i,
-					 population, populationSize,
 					 initialisationEIR);
     speciesIndex[name] = i;
   }
@@ -74,6 +73,12 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, const s
 VectorTransmission::~VectorTransmission () {
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].destroy();
+}
+
+void VectorTransmission::setupNv0 (const std::list<Human>& population, int populationSize) {
+  for (size_t i = 0; i < numSpecies; ++i) {
+    species[i].setupNv0 (i, population, populationSize);
+  }
 }
 
 void VectorTransmission::endVectorInitPeriod () {

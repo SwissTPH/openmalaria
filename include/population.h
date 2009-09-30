@@ -33,33 +33,40 @@ namespace scnXml {
 //! The simulated human population
 class Population{
 public:
-  Population();
-  //! Clears human collection.
-  ~Population();
-  
   /// Call static inits of sub-models
   static void init();
   
   /// Calls static clear on sub-models to free memory
   static void clear();
   
-  /** Initialisation run between initial one-lifespan run of simulation and
-   * actual simulation. */
-  void preMainSimInit ();
-
-   /*! Estimates demography parameters to define a smooth curve for the target
+  
+   Population();
+  //! Clears human collection.
+  ~Population();
+  
+  /// Read checkpoint
+  void read (istream& in);
+  //! Write checkpoint
+  void write (ostream& out);
+  
+  
+  /*! Estimates demography parameters to define a smooth curve for the target
       population age-distribution (age in years) */
   void estimateRemovalRates();
-
+  
+  /** For input values for alpha1 and mu1, the fit to field data (residualSS)
+   * is calculated and returned function called iteratively by
+   * estimateRemovalRates. */
+  static double setDemoParameters (double param1, double param2);
+  
   /*! Takes the best-fitting demography parameters estimated by
       estimateRemovalRates and sets up the initial population according to
       these */
   void setupPyramid(bool isCheckpoint);
   
-  //! Write checkpoint
-  void write (ostream& out);
-  /// Read checkpoint
-  void read (istream& in);
+  /** Initialisation run between initial one-lifespan run of simulation and
+   * actual simulation. */
+  void preMainSimInit ();
   
   //! Updates all individuals in the list for one time-step
   /*!  Also updates the population-level measures such as infectiousness, and
@@ -67,20 +74,13 @@ public:
        necessary */
   void update1();
   
-  //! Checks for time-based interventions and implements them
-  /*!   
-       \param time Current time (in tsteps) 
-  */
-  void implementIntervention(int time);
-  
   //! Makes a survey
   void newSurvey();
- 
-  // Static:
-  /** For input values for alpha1 and mu1, the fit to field data (residualSS)
-   * is calculated and returned function called iteratively by
-   * estimateRemovalRates. */
-  static double setDemoParameters (double param1, double param2);
+  
+  /** Checks for time-based interventions and implements them
+   *
+   * \param time Current time (in tsteps) */
+  void implementIntervention(int time);
   
 private:
   //! Creates initializes and add to the population list a new uninfected human
@@ -112,6 +112,7 @@ private:
    * @param intervention A member-function pointer to a "void func ()" function
    *	within human which activates the intervention. */
   void massIntervention (const scnXml::Mass& mass, void (Human::*intervention)());
+  
   
   /** This is the maximum age of an individual that the simulation program can
    * handle. Max age for a scenario is given in the  the xml file. */
