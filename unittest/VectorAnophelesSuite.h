@@ -32,7 +32,7 @@
 #include <xsd/cxx/tree/exceptions.hxx>
 
 #include "population.h"
-#include "human.h"
+#include "Human.h"
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "util/vectors.h"

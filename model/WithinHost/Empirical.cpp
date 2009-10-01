@@ -21,7 +21,6 @@
 */
 
 #include "util/gsl.h"
-#include "human.h"
 #include "WithinHost/Empirical.h"
 #include "simulation.h"
 #include "summary.h"
@@ -122,7 +121,7 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, d
 
 // -----  Density calculations  -----
 
-void EmpiricalWithinHostModel::calculateDensities(Human& human) {
+void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;

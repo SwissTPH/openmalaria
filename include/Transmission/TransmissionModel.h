@@ -23,7 +23,7 @@
 
 #include "global.h"
 #include <string.h>
-#include "human.h"
+#include "Human.h"
 #include "scenario.hxx"
 
 // Define these to print out various arrays:

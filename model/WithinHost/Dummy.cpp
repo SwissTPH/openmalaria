@@ -21,7 +21,6 @@
 */
 
 #include "util/gsl.h"
-#include "human.h"
 #include "WithinHost/Dummy.h"
 #include "simulation.h"
 #include "summary.h"
@@ -156,7 +155,7 @@ void DummyWithinHostModel::immunityPenalisation() {
 
 // -----  Density calculations  -----
 
-void DummyWithinHostModel::calculateDensities(Human& human) {
+void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   _cumulativeYlag = _cumulativeY;
   
   patentInfections = 0;

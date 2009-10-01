@@ -30,9 +30,6 @@
 
 using namespace std;
 
-class Human;
-class Event;
-
 /*! Within Host Model abstract class.
  * Dont forget to create friend << and >> for subclasses.
  */
@@ -86,7 +83,11 @@ public:
    * \param age	= Age in years of human. */
   virtual void medicate(string drugName, double qty, int time, double age) =0;
 
-  virtual void calculateDensities(Human&) =0;
+  /** Update the parasite densities of infections.
+   *
+   * @param ageInYears Age of human
+   * @param BSVEfficacy Efficacy of blood-stage vaccine */
+  virtual void calculateDensities(double ageInYears, double BSVEfficacy) =0;
   
   //! Returns Cumulative Infections
   int getCumulativeInfections() {return _cumulativeInfections;};

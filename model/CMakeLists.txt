@@ -6,7 +6,7 @@
 set (Model_CPP
   population.cpp InfectionIncidenceModel.cpp
   gzstream.C simulation.cpp summary.cpp global.cpp
-  intervention.cpp proteome.cpp human.cpp
+  intervention.cpp proteome.cpp Human.cpp
   inputData.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
 )

@@ -22,7 +22,7 @@
 
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/Descriptive.h"
-#include "WithinHost/OldIPT.h"
+#include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/Dummy.h"
 #include "WithinHost/Empirical.h"
 #include "inputData.h"
@@ -71,12 +71,12 @@ void WithinHostModel::init() {
     if (Global::modelVersion & INCLUDES_PK_PD)
       throw xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     DescriptiveInfection::initParameters ();	// 5-day timestep check
-    OldIPTWithinHostModel::initParameters();
+    DescriptiveIPTWithinHost::initParameters();
   }
 }
 
 void WithinHostModel::clear() {
-  OldIPTWithinHostModel::clearParameters();
+  DescriptiveIPTWithinHost::clearParameters();
   DescriptiveInfection::clearParameters();
 }
 
@@ -86,8 +86,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
   } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
     return new EmpiricalWithinHostModel();
   } else {
-    if (OldIPTWithinHostModel::iptActive)
-      return new OldIPTWithinHostModel();
+    if (DescriptiveIPTWithinHost::iptActive)
+      return new DescriptiveIPTWithinHost();
     else
       return new DescriptiveWithinHostModel();
   }
@@ -99,8 +99,8 @@ WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
   } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
     return new EmpiricalWithinHostModel(in);
   } else {
-    if (OldIPTWithinHostModel::iptActive)
-      return new OldIPTWithinHostModel(in);
+    if (DescriptiveIPTWithinHost::iptActive)
+      return new DescriptiveIPTWithinHost(in);
     else
       return new DescriptiveWithinHostModel(in);
   }

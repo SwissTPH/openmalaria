@@ -28,8 +28,6 @@
 
 using namespace std;
 
-class Human;
-
 /*! Old Within Host Model class.
  */
 class DescriptiveWithinHostModel : public WithinHostModel {
@@ -72,7 +70,7 @@ public:
   
   void medicate(string drugName, double qty, int time, double age);
 
-  void calculateDensities(Human&);
+  void calculateDensities(double ageInYears, double BSVEfficacy);
   
   /*! Until now, this only includes decay of immunity against
   asexual blood stages */
@@ -87,10 +85,10 @@ public:
 protected:
   /*!  SP drug action applies to each infection depending on genotype and when
   the individual had their last dose of SP */
-  virtual void SPAction(Human&);
+  virtual void SPAction();
   
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
-  virtual void IPTattenuateAsexualMinTotalDensity (Human&);
+  virtual void IPTattenuateAsexualMinTotalDensity ();
   
   static const int MAX_INFECTIONS;
   

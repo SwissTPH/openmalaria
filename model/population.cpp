@@ -23,7 +23,7 @@
 #include "util/BoincWrapper.h"
 #include "util/gsl.h"
 #include "inputData.h"
-#include "human.h"
+#include "Human.h"
 #include "simulation.h"
 #include "intervention.h"
 #include "Transmission/TransmissionModel.h"
@@ -145,7 +145,7 @@ void Population::write (ostream& out) {
   out << _population.size() << endl;	// this may not be equal to _populationSize due to startup optimisation
   HumanIter iter;
   for(iter=_population.begin(); iter != _population.end(); ++iter){
-    out << *iter;
+    iter->write (out);
   }
 }
 

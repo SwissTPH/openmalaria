@@ -20,7 +20,7 @@
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
-#include "human.h"
+#include "Human.h"
 #include "simulation.h"
 #include "util/vectors.h"
 

@@ -21,7 +21,6 @@
 */
 
 #include "util/gsl.h"
-#include "human.h"
 #include "WithinHost/Descriptive.h"
 #include "simulation.h"
 #include "intervention.h"
@@ -159,12 +158,9 @@ void DescriptiveWithinHostModel::immunityPenalisation() {
 
 // -----  Density calculations  -----
 
-// NOTE: refering back to human so much isn't good programming practice. Could
-// some variables be stored locally?
-void DescriptiveWithinHostModel::calculateDensities(Human& human) {
+void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   _cumulativeYlag = _cumulativeY;
   
-  double ageyears = human.getAgeInYears();
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
@@ -175,7 +171,7 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
     double cumulativeY=_cumulativeY;
     
     // IPTi SP dose clears infections at the time that blood-stage parasites appear     
-    SPAction(human);
+    SPAction();
     
     std::list<DescriptiveInfection*>::iterator iter;
     for(iter=infections.begin(); iter!=infections.end(); iter++){
@@ -185,7 +181,7 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
       if (Global::modelVersion & MAX_DENS_RESET) {
         infStepMaxDens=0.0;
       }
-      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageyears, cumulativeh , infStepMaxDens);
+      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageInYears, cumulativeh , infStepMaxDens);
       (*iter)->multiplyDensity(exp(-_innateImmunity));
 
         /*
@@ -197,7 +193,7 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
       }
         //Include here the effect of blood stage vaccination
       if (Vaccine::BSV.active) {
-	double factor = 1.0-human.getBSVEfficacy();
+	double factor = 1.0 - BSVEfficacy;
 	(*iter)->multiplyDensity(factor);
 	infStepMaxDens *= factor;
       }
@@ -223,13 +219,13 @@ void DescriptiveWithinHostModel::calculateDensities(Human& human) {
       _cumulativeY += Global::interval*(*iter)->getDensity();
     }
     
-    IPTattenuateAsexualMinTotalDensity(human);
+    IPTattenuateAsexualMinTotalDensity();
   }
 }
 
-void DescriptiveWithinHostModel::SPAction(Human&){}
+void DescriptiveWithinHostModel::SPAction(){}
 void DescriptiveWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection&) {}
-void DescriptiveWithinHostModel::IPTattenuateAsexualMinTotalDensity (Human&) {}
+void DescriptiveWithinHostModel::IPTattenuateAsexualMinTotalDensity () {}
 
 // -----  Summarize  -----
 

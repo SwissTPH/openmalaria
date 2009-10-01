@@ -31,8 +31,6 @@
 
 using namespace std;
 
-class Human;
-
 /*! EmpiricalDummy Within Host Model class.
  */
 class EmpiricalWithinHostModel : public WithinHostModel {
@@ -58,7 +56,7 @@ public:
   
   void medicate(string drugName, double qty, int time, double age);
 
-  void calculateDensities(Human&);
+  void calculateDensities(double ageInYears, double BSVEfficacy);
   
   /*! Until now, this only includes decay of immunity against
   asexual blood stages */
