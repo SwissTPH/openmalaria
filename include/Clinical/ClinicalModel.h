@@ -71,8 +71,8 @@ public:
    * @param ageYears = Age of human. */
   void update (WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps);
   
-  /** For infants, updates the Global::infantIntervalsAtRisk and potentially
-   * Global::infantDeaths arrays. */
+  /** For infants, updates the infantIntervalsAtRisk and potentially
+   * infantDeaths arrays. */
   void updateInfantDeaths (int ageTimeSteps);
   
   /** Was the last diagnosis severe malaria?
@@ -101,6 +101,9 @@ public:
    * NOTE: notation: episode/event */
   static int reportingPeriodMemory;
   
+  static vector<int> infantDeaths;
+  static vector<int> infantIntervalsAtRisk;
+  
 protected:
   /// Constructor.
   ClinicalModel (double cF);
@@ -119,6 +122,14 @@ protected:
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
   Event latestReport;
+  
+  /** @brief Positive values of _doomed variable (codes). */
+  enum {
+    DOOMED_TOO_OLD = 1,		///< died because reached age limit
+    DOOMED_COMPLICATED = 4,	///< died from severe malaria or malaria with a coinfection
+    DOOMED_NEONATAL = 6,	///< died due to mother's malaria infection
+    DOOMED_INDIRECT = 7,	///< died indirectly from malaria (after a delay)
+  };
   
   /** Can indicate that the individual is dead or about to die.
    *

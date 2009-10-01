@@ -110,13 +110,6 @@ public:
   static int maxAgeIntervals;
    //pre-erythrocytic latent period, in time steps
   static int latentp;
-  
-/*
-  Size of the human population
-  Moved from population.f so that transmission model.f can see it.
-*/
-  static vector<int> infantDeaths;
-  static vector<int> infantIntervalsAtRisk;
   //@}
   
   ///@brief Command-line options

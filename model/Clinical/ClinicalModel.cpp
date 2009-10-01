@@ -26,11 +26,15 @@
 #include "inputData.h"
 
 int ClinicalModel::reportingPeriodMemory;
+vector<int> ClinicalModel::infantIntervalsAtRisk;
+vector<int> ClinicalModel::infantDeaths;
 
 
 // -----  static methods  -----
 
 void ClinicalModel::init () {
+  infantDeaths.resize(Global::intervalsPerYear);
+  infantIntervalsAtRisk.resize(Global::intervalsPerYear);
   PathogenesisModel::init();
   if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
     ClinicalEventScheduler::init();
@@ -75,7 +79,7 @@ ClinicalModel::ClinicalModel (istream& in) :
 
 bool ClinicalModel::isDead (int ageTimeSteps) {
   if (ageTimeSteps > Global::maxAgeIntervals)	// too old (reached age limit)
-    _doomed = 1;
+    _doomed = DOOMED_TOO_OLD;
   if (_doomed > 0)	// killed by some means
     return true;	// remove from population
   return false;
@@ -88,21 +92,14 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical episode 6 intervals before
     latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-    /*
-    doomed=7 is the code for indirect death, and 6 for neonatal death.
-    Individuals with positive doomed values are removed at the start of
-    the next time step. They cannot be removed immediately because 
-    their deaths need to be counted.
-    */
-    _doomed  = 7;
-    //Indirect Neonatal mortality
+    _doomed = DOOMED_INDIRECT;
     return;
   }
-  // Neonatal mortality:
   if(ageTimeSteps == 1) {
+    // Chance of neonatal mortality:
     if (PathogenesisModel::eventNeonatalMortality()) {
       latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
-      _doomed  = 6;
+      _doomed = DOOMED_NEONATAL;
       return;
     }
   }
@@ -113,9 +110,11 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
   // update array for the infant death rates
   if (ageTimeSteps <= (int)Global::intervalsPerYear){
-    ++Global::infantIntervalsAtRisk[ageTimeSteps-1];
-    if ((_doomed == 4) || (_doomed == -30) || (_doomed == 6)){
-      ++Global::infantDeaths[ageTimeSteps-1];
+    ++infantIntervalsAtRisk[ageTimeSteps-1];
+    // Testing _doomed == -30 gives very slightly different results than
+    // testing _doomed == DOOMED_INDIRECT (due to sim. end?)
+    if (_doomed == DOOMED_COMPLICATED || _doomed == -30 || _doomed == DOOMED_NEONATAL){
+      ++infantDeaths[ageTimeSteps-1];
     }
   }
 }

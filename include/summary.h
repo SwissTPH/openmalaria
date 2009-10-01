@@ -246,11 +246,10 @@ class Summary {
   //! Time intervals for all surveys specified in the XML
   vector<int> _surveysTimeIntervals; 
   int _summaryOption; //!< Binary encoded list of outputs of interest
-  //! Assimilator mode
-  /*! 0 for fitting give the complete output for fitting mode 1 for predictions
-      give only one column to keep file sizes small.only the value column is
-      recorded */
-  int _assimilatorMode; 
+  /** Assimilator mode
+   *
+   * If true, skip the first 3 columns of output to reduce file size. */
+  bool _assimilatorMode; 
   //! Number of agegroups given in the XML
   //! Plus 1 for individual older than the highest upperbound
   int _numOfAgeGroups; 
@@ -337,18 +336,14 @@ class Summary {
     return allOptions & (1 << option);
   };
 };
-  
-  /** Line end character. Use Unix line endings to save a little size. */
-  const char lineEnd = '\n';
 
-  template <class T>
-    void writeArray(ostream& file, int measure, 
-                    int assimilationMode, vector< vector<T> >& array);
+/** Line end character. Use Unix line endings to save a little size. */
+const char lineEnd = '\n';
 
-  template <class T>
-    void writeArray(ostream& file, int measure, 
-                    int assimilationMode, vector<T>& array);
+template <class T>
+void writeArray(ostream& file, int measure, bool assimilationMode, vector< vector<T> >& array);
 
-
+template <class T>
+void writeArray(ostream& file, int measure, bool assimilationMode, vector<T>& array);
 
 #endif

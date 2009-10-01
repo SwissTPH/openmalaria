@@ -81,7 +81,7 @@ def main(*args):
         print "Usage: compareLogs.py logfile1 logfile2 [max different lines to print]"
         return 1
     
-    print "Comparing "+args[1]+" with "+args[2]
+    print "Comparing: "+args[1]+" "+args[2]
     file1=open(args[1], 'r')
     file2=open(args[2], 'r')
     line_count=0
@@ -134,12 +134,13 @@ def main(*args):
             diff=perMeasureDiffSum[measure]
             print "Diff sum for measure {0: >3}:{1: >12.5f}\tabs: {2: >12.5f}\t(ratio: {3: >9.5f}; from {4:>3} diffs)".format(measure,diff,val,diff/val,perMeasureNumDiff.get(measure,0))
     
+    # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
-        print "No significant differences (total relative diff: {0}), ok...".format(totalRelDiff)
+        print "No significant differences (total relative diff: {0}), ok...".format(totalRelDiff/1.e6)
+        return 0
     else:
-        print "{0} significant differences (total relative diff: {1})!".format(numDiffs,totalRelDiff)
+        print "{0} significant differences (total relative diff: {1})!".format(numDiffs,totalRelDiff/1.e6)
         return 1
-    return 0
 
 if __name__ == '__main__':
     #uncomment to run unittests:

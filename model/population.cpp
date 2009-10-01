@@ -291,8 +291,8 @@ void Population::preMainSimInit () {
   _transmissionModel->initMainSimulation(_population, _populationSize);
 
   for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    Global::infantIntervalsAtRisk[i]=0;
-    Global::infantDeaths[i]=0;
+    ClinicalModel::infantIntervalsAtRisk[i]=0;
+    ClinicalModel::infantDeaths[i]=0;
   }
 }
 

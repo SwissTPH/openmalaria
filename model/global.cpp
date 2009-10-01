@@ -46,9 +46,6 @@ CLO::CLO Global::clOptions = CLO::NONE;
 string Global::clResourcePath;
 bool Global::compressCheckpoints = true;
 
-vector<int> Global::infantIntervalsAtRisk;
-vector<int> Global::infantDeaths;
-
 string parseNextArg (int argc, char* argv[], int& i) {
   ++i;
   if (i >= argc)
@@ -161,8 +158,6 @@ void Global::initGlobal () {
   }
   intervalsPerYear = daysInYear/interval;
   yearsPerInterval = double(interval) / double(daysInYear);
-  infantDeaths.resize(intervalsPerYear);
-  infantIntervalsAtRisk.resize(intervalsPerYear);
   latentp=get_latentp();
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
 }

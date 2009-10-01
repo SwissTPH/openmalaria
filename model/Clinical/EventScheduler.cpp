@@ -212,7 +212,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
 	pgState = Pathogenesis::NONE;
       } else if (rand < pRecover+pDeath) {
 	reportState = Pathogenesis::State (reportState | Pathogenesis::DIRECT_DEATH);
-	_doomed = 4;	// kill human (removed from simulation next timestep)
+	_doomed = DOOMED_COMPLICATED;	// kill human (removed from simulation next timestep)
       }
       // else stay in this state
     }

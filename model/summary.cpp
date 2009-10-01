@@ -25,6 +25,7 @@
 #include "inputData.h"
 
 #include "Clinical/event.h"
+#include "Clinical/ClinicalModel.h"
 #include "util/BoincWrapper.h"
 
 Summary::Summary() : _surveyPeriod(-1) {
@@ -407,8 +408,9 @@ void Summary::writeSummaryArrays () {
   }
   //Infant mortality rate is a single number, therefore treated separately
   if ( isOptionIncluded(_summaryOption, imr_summary)) {
-    outputFile << "\t" << 1 << "\t" << 1 << "\t" << imr_summary 
-               << "\t" <<infantAllCauseMort() <<  lineEnd;
+    if (!_assimilatorMode)
+      outputFile << 1 << "\t" << 1 << "\t" << imr_summary;
+    outputFile << "\t" <<infantAllCauseMort() <<  lineEnd;
   }
   
   if (isOptionIncluded(_summaryOption, innoculationsPerDayOfYear)) {
@@ -426,17 +428,13 @@ void Summary::writeSummaryArrays () {
 }
 
 double Summary::infantAllCauseMort(){
-  //DOCU
-
-  double infantProductLimit=1.0;
-  double* intervalSurviv = new double[Global::intervalsPerYear];
+  double infantProductLimit=1.0;	// use to calculate proportion surviving
   for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    intervalSurviv[i]=(Global::infantIntervalsAtRisk[i]-Global::infantDeaths[i]);
-    intervalSurviv[i]=intervalSurviv[i]/(Global::infantIntervalsAtRisk[i]);
-    infantProductLimit=infantProductLimit*intervalSurviv[i];
+    // multiply by proportion of infants surviving at each interval
+    infantProductLimit *= double(ClinicalModel::infantIntervalsAtRisk[i]-ClinicalModel::infantDeaths[i]) / double(ClinicalModel::infantIntervalsAtRisk[i]);
   }
-  delete[] intervalSurviv;
-  return (1-infantProductLimit)*1000+_nonMalariaMortality;
+  // This is proportion dying multiplied by 1000 plus ... - but why 1000?
+  return (1.0 - infantProductLimit) * 1000.0 + _nonMalariaMortality;
 }
 
 void Summary::addToHost(double age, int value){
@@ -488,44 +486,27 @@ void Summary::setNumTransmittingHosts(double value){
 }
 
 template <class T>
-void writeArray(ostream& file, int measure, 
-                int assimilatorMode, vector<T>& array){
-
-  for (int i=0; i<(int)array.size()-1; i++){
- 
-      if (assimilatorMode ==  1)
-        file << "\t" << array[i] << lineEnd;
-      else
-        file << i+1 << "\t" << 0 << "\t" 
-             << measure << "\t" <<  array[i] <<  lineEnd;
-      
-    }
-
+void writeArray(ostream& file, int measure, bool assimilatorMode, vector<T>& array){
+  for (int i=0; i<(int)array.size()-1; i++) {
+    if (!assimilatorMode)
+      file << i+1 << "\t" << 0 << "\t" << measure;
+    file << "\t" << array[i] << lineEnd;
+  }
 }
 
 template <class T>
-void writeArray(ostream& file, int measure, 
-                int assimilatorMode, vector< vector<T> >& array){
+void writeArray(ostream& file, int measure, bool assimilatorMode, vector< vector<T> >& array){
   /*
     Write one of the summary arrays to the output file.
     unit: I/O unit
     measure: id of the measure recorded in this array (eg. nHosts,nPatent)
     sArray: summary array to be written to disk
-  */ 
-
+  */
   for (int i=0; i< (int) array.size()-1; i++){
     for(int j=0; j< (int) array[i].size()-1; j++){
- 
-      if (assimilatorMode ==  1)
-        file << "\t" << array[i][j] << lineEnd;
-      else
-        file << i+1 << "\t" << j+1 << "\t" 
-             << measure << "\t" <<  array[i][j] <<  lineEnd;
-
+      if (!assimilatorMode)
+        file << i+1 << "\t" << j+1 << "\t" << measure;
+      file << "\t" << array[i][j] << lineEnd;
     }
   }
-  
 }
-
-
-
