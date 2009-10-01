@@ -69,9 +69,7 @@
               Parameters for mathematical model
             </xs:documentation>
             <xs:appinfo>
-              <xs:appinfo>
-                units:List of elements;
-              </xs:appinfo>
+              units:List of elements;
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
@@ -384,7 +382,7 @@
             <xs:documentation>Parameters for the vector transmission model.</xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:sequence>	
+            <xs:sequence>
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
             </xs:sequence>
           </xs:complexType>
@@ -1339,7 +1337,7 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
+
     <xs:complexType name="drugDescription">
       <xs:sequence>
         <xs:element name="genome">
@@ -1516,7 +1514,7 @@
     <xs:attribute name="gene" use="required" type="xs:string" />
     <xs:attribute name="pos" use="required" type="xs:integer" />
   </xs:complexType>
-  
+
   <!-- standard types used -->
   <xs:complexType name="doubleList">
     <xs:sequence>
