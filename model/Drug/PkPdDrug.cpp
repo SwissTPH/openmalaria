@@ -44,7 +44,6 @@ PkPdDrug::PkPdDrug (istream& in) {
   }
 }
 void PkPdDrug::write (ostream& out) {
-  Global::validateListSize (_drugs.size());//FIXME: remove
   out << _drugs.size() << endl;
   for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     out << it->getAbbreviation() << endl;

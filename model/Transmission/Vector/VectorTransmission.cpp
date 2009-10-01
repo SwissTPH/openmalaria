@@ -85,9 +85,7 @@ void VectorTransmission::endVectorInitPeriod () {
   simulationMode = dynamicEIR;
 }
 
-void VectorTransmission::initMainSimulation(const std::list<Human>& population, int populationSize) {
-  //FIXME: params passed probably aren't needed now
-  
+void VectorTransmission::initMainSimulation() {
   // Check every time at end of init that, to a low tolerence,
   // the average EIR produced is what was expected:
   if (!vectors::approxEqual(initialisationEIR, innoculationsPerDayOfYear)) {

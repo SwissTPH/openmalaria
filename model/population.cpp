@@ -288,7 +288,7 @@ void Population::setupPyramid(bool isCheckpoint) {
 }
 
 void Population::preMainSimInit () {
-  _transmissionModel->initMainSimulation(_population, _populationSize);
+  _transmissionModel->initMainSimulation();
 
   for (size_t i=0;i<Global::intervalsPerYear; i++) {
     ClinicalModel::infantIntervalsAtRisk[i]=0;
@@ -434,7 +434,7 @@ bool Population::outMigrate(Human& current, int targetPop, int cumPop){
   
   // Actual number of people so far = cumPop
   // Number to be removed is the difference between this and target population
-  //FIXME: The -2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
+  //FIXME: The +2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
   int outmigrs = cumPop - targetCumPop (age+2, targetPop);
   // We can't out-migrate more than one person at once, so just return whether or not to out-migrate this human:
   return outmigrs >= 1;

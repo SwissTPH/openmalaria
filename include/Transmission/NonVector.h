@@ -33,7 +33,7 @@ public:
   NonVectorTransmission(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorTransmission();
   //! initialise the main simulation 
-  void initMainSimulation (const std::list<Human>&, int);
+  void initMainSimulation ();
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);

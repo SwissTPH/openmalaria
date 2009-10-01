@@ -62,7 +62,7 @@ NonVectorTransmission::~NonVectorTransmission () {}
 
 
 //! initialise the main simulation 
-void NonVectorTransmission::initMainSimulation (const std::list<Human>&, int){
+void NonVectorTransmission::initMainSimulation (){
   // initialKappa is used in calculateEIR
   copyToInitialKappa();
   simulationMode = get_mode();

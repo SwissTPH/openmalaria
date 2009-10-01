@@ -54,15 +54,8 @@ public:
   }
   virtual void endVectorInitPeriod ();
   
-  /** Initialise the main simulation.
-   * 
-   * Calculates mosquito emergence rate.
-   * 
-   * \param populationSize The total number of hosts.
-   * 
-   * Emergence rate calculations assume only one type of host; i.e. it calculates
-   * the rate for a stable situation before interventions are introduced. */
-  void initMainSimulation (const std::list<Human>& population, int populationSize); 
+  /** Initialise the main simulation. */
+  void initMainSimulation ();
 
   /** Calculates EIR (in adults).
    * 

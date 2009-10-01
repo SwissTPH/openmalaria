@@ -185,11 +185,9 @@ private:
   
   /** @brief Parameter arrays N_v_length long.
    *
-   * P_A, P_df and P_dif are set in advancePeriod(); both these and N_v,
-   * O_v and S_v may be set either by initialise or by initMainSimulation, from
-   * which they can be reset.
-   * They should be checkpointed for the main simulation and if the vector
-   * model is used during initialisation. */
+   * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod().
+   * 
+   * They should be checkpointed. */
   //@{
   /** @brief Probability of a mosquito not finding a host one night. */
   vector<double> P_A;

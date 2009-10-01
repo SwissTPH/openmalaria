@@ -143,12 +143,11 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   //END P_A, P_Ai, P_df, P_dif
   
-  //FIXME: these S_v, etc are a year long - not N_v_length! How long init, and how to drive?
   // forcedS_v was set to speciesEIR
   vectors::scale (forcedS_v, populationSize / sumPFindBite);
   mosqEmergeRate = forcedS_v;
   vectors::scale (mosqEmergeRate, initNvFromSv * (1.0 - intP_A - intP_df));
-  cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
+//   cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
   
   // All set up to drive simulation from S_v
 }

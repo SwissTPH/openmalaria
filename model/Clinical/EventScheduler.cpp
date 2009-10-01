@@ -275,7 +275,7 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
       Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 1);
     }
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
-    if (withinHostModel.getTotalDensity() > 0.0)  // FIXME use a detectible parasite density
+    if (withinHostModel.parasiteDensityDetectible())
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithParasites;
     else
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
