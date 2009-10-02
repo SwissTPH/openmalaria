@@ -108,9 +108,9 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 
 // Every Global::interval days:
-void VectorTransmission::advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa) {
+void VectorTransmission::vectorUpdate (const std::list<Human>& population, int simulationTime) {
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR, sumWeight, sumWt_kappa, kappaByAge, nByAge);
+    species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {

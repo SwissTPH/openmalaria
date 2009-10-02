@@ -60,7 +60,7 @@ public:
   /** Initialise the main simulation. */
   void initMainSimulation ();
   
-  virtual void advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa);
+  virtual void vectorUpdate (const std::list<Human>& population, int simulationTime);
   
   /** Calculates EIR (in adults).
    * 

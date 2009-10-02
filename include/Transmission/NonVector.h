@@ -50,8 +50,6 @@ public:
   /** Little function to copy kappa to initialKappa. */
   void copyToInitialKappa ();
   
-  virtual void advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa);
-  
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
    * 

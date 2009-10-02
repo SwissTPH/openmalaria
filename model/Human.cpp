@@ -200,6 +200,7 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   clinicalModel->update (*withinHostModel, getAgeInYears(), Simulation::simulationTime-_dateOfBirth);
   withinHostModel->update();
   clinicalModel->updateInfantDeaths (ageTimeSteps);
+  _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
   return false;
 }
 
@@ -308,7 +309,7 @@ void Human::summarize(){
 }
 
 
-double Human::probTransmissionToMosquito() const {
+double Human::calcProbTransmissionToMosquito() const {
   /* This model is only really valid for 5-day timesteps; if it's needed for
   a one-day timestep, it should be redesigned; design of this model is
   described in AJTMH pp.32-33*/

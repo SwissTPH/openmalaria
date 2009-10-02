@@ -52,36 +52,41 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 }
 
 TransmissionModel::TransmissionModel() :
-    simulationMode(equilibriumMode), annualEIR(0.0), timeStepNumEntoInnocs (0)
+    simulationMode(equilibriumMode), _sumAnnualKappa(0.0), annualEIR(0.0), timeStepNumEntoInnocs (0)
 {
-  kappa.resize (Global::intervalsPerYear);
+  kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
   innoculationsPerAgeGroup.resize (Simulation::gMainSummary->getNumOfAgeGroups(), 0.0);
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
   timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
   
   noOfAgeGroupsSharedMem = std::max(Simulation::gMainSummary->getNumOfAgeGroups(),KappaArraySize);
-  kappaByAge = new double[noOfAgeGroupsSharedMem];
-  nByAge = new int[noOfAgeGroupsSharedMem];
 }
 
-TransmissionModel::~TransmissionModel () {
-  delete [] nByAge;
-  delete [] kappaByAge;
-}
+TransmissionModel::~TransmissionModel () {}
 
-void TransmissionModel::advanceStep (const std::list<Human>& population, int simulationTime) {
+void TransmissionModel::updateKappa (const std::list<Human>& population, int simulationTime) {
   // We calculate kappa for output and non-vector model, and kappaByAge for
   // the shared graphics.
   
   double sumWt_kappa= 0.0;
   double sumWeight  = 0.0;
-  for (size_t i=0; i<noOfAgeGroupsSharedMem; i++) {
-    kappaByAge[i] = 0.0;
-    nByAge[i] = 0;
+  kappaByAge.assign (noOfAgeGroupsSharedMem, 0.0);
+  nByAge.assign (noOfAgeGroupsSharedMem, 0);
+  
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    double ageYears = h->getAgeInYears();
+    double t = h->perHostTransmission.entoAvailabilityNV(ageYears);
+    sumWeight += t;
+    t *= h->probTransmissionToMosquito();
+    sumWt_kappa += t;
+    
+    // kappaByAge and nByAge are used in the screensaver only
+    int ia = h->ageGroup();
+    kappaByAge[ia] += t;
+    ++nByAge[ia];
   }
   
-  advanceStepCalcs (population, simulationTime, sumWeight, sumWt_kappa);
 #ifndef NDEBUG
   if (sumWeight < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
     throw range_error ("sumWeight is invalid");
@@ -91,18 +96,15 @@ void TransmissionModel::advanceStep (const std::list<Human>& population, int sim
   kappa[tmod] = sumWt_kappa / sumWeight;
   
   //Calculate time-weighted average of kappa
-  if (tmod == 0) {
-    _sumAnnualKappa = 0.0;
-  }
   _sumAnnualKappa += kappa[tmod] * initialisationEIR[tmod];
   if (tmod == Global::intervalsPerYear - 1) {
-    if (annualEIR == 0) {
+    if (annualEIR == 0.0) {
       _annualAverageKappa=0;
       cerr << "aE.eq.0" << endl;
-    }
-    else {
+    } else {
       _annualAverageKappa = _sumAnnualKappa / annualEIR;
     }
+    _sumAnnualKappa = 0.0;
   }
   
   double timeStepTotal = 0.0;
@@ -119,7 +121,7 @@ void TransmissionModel::advanceStep (const std::list<Human>& population, int sim
   if (Simulation::simulationTime % 6 ==  0) {
     for (int i = 0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++)
       kappaByAge[i] /= nByAge[i];
-    SharedGraphics::copyKappa(kappaByAge);
+    SharedGraphics::copyKappa(&kappaByAge[0]);
   }
 }
 

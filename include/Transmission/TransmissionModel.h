@@ -76,9 +76,13 @@ public:
   
   /** Needs to be called each step of the simulation
    *
-   * Summarises infectiousness of humans and of mosquitoes.
    * Runs internal calculations of Vector model. */
-  void advanceStep (const std::list<Human>& population, int simulationTime);
+  virtual void vectorUpdate (const std::list<Human>& population, int simulationTime) {};
+  
+  /** Needs to be called each step of the simulation
+   *
+   * Summarises infectiousness of humans and of mosquitoes. */
+  void updateKappa (const std::list<Human>& population, int simulationTime);
   
   /** Little function to copy kappa to initialKappa. */
   virtual void copyToInitialKappa () {}
@@ -101,9 +105,6 @@ public:
   virtual void intervLarviciding (const scnXml::Larviciding&);
   
 protected:
-  /// Part of advanceStep calculations done by sub-models.
-  virtual void advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa)=0;
-  
   /** Calculates the EIR (in adults), during the main simulation phase.
    * 
    * \param simulationTime Time since start of simulation.
@@ -167,11 +168,12 @@ protected:
   size_t timeStepNumEntoInnocs;
   //@}
   
-  ///@brief Variables for shared graphics kappa-by-age graph
+  /** @brief Variables for shared graphics kappa-by-age graph
+   * Don't need checkpointing; only kept here to save reallocating each step. */
   //@{
   size_t noOfAgeGroupsSharedMem;
-  double *kappaByAge;
-  int *nByAge;
+  vector<double> kappaByAge;
+  vector<int> nByAge;
   //@}
 };
 

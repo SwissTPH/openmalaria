@@ -123,7 +123,9 @@ public:
   
   /// Calculate chance of a biting mosquito becoming infected
   //TODO: per genotype?
-  double probTransmissionToMosquito() const;
+  inline double probTransmissionToMosquito() const {
+    return _probTransmissionToMosquito;
+  }
   
   
   ///@name static public
@@ -151,6 +153,8 @@ private:
   /*! Update the number of doses and the date of the most recent vaccination in
    * this human */
   void vaccinate();
+  
+  double calcProbTransmissionToMosquito() const;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
@@ -180,6 +184,9 @@ private:
   //!Remaining efficacy of Transmission-blocking vaccines
   double _TBVEfficacy;
   //@}
+  
+  /// Cached value of calcProbTransmissionToMosquito; checkpointed
+  double _probTransmissionToMosquito;
   
   void clearInfection(Infection *iCurrent);
 };

@@ -264,7 +264,8 @@ class Summary {
   */
   int _surveyPeriod; 
   double _nonMalariaMortality; //!< Non-malaria mortality in under 1year olds.
-
+  
+  /// Enumeration of reporting options
   enum Measure{
 
     nHost = 0,
@@ -279,7 +280,7 @@ class Summary {
     sumlogDens= 5,
     // Total infections
     totalInfs= 6,
-    // Number of hosts transmitting to mosquitoes
+    /// Infectiousness of human population to mosquitoes
     nTransmit= 7,
     // total patent infections
     totalPatentInf= 8,
@@ -317,7 +318,7 @@ class Summary {
     nHospitalSeqs= 24,
     // IPT doses
     nIPTDoses= 25,
-    // Annual average kappa
+    /// Calculated once a year as sum of human infectiousness divided by initial EIR summed over a year
     annAvgK= 26,
     // Number of episodes (non-malaria fever)
     nNMFever= 27,
