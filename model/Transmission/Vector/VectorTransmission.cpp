@@ -118,3 +118,13 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
   for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
     species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
 }
+
+
+void VectorTransmission::writeV (ostream& out) const {
+  for (size_t i = 0; i < numSpecies; ++i)
+    species[i].write (out);
+}
+void VectorTransmission::readV (istream& in) {
+  for (size_t i = 0; i < numSpecies; ++i)
+    species[i].read (in);
+}

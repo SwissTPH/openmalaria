@@ -51,6 +51,9 @@ public:
   
   void write(ostream& out) const;
   void read(istream& in);
+  // Virtual checkpointing functions (overridable by subclasses):
+  virtual void writeV(ostream& out) const {};
+  virtual void readV(istream& in) {};
   //@}
   
   /// Set a couple of summary items
@@ -110,7 +113,7 @@ protected:
    * \param host The human to calculate EIR for (not used by all models). */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
   
-  /** The type of EIR calculation. */
+  /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   
   /** EIR per time step during the pre-intervention phase.
@@ -159,9 +162,11 @@ protected:
    * reporting period. */
   vector<double> innoculationsPerAgeGroup;
   
-  /// Sum of all EIR returned in this timestep, per age group
+  /** Sum of all EIR returned in this timestep, per age group
+   * Doesn't need to be checkpointed. */
   vector<double> timeStepEntoInnocs;
-  /// Total number of EIRs output in the timestep (roughly equal to populationSize)
+  /** Total number of EIRs output in the timestep (roughly equal to populationSize)
+   * Doesn't need to be checkpointed. */
   size_t timeStepNumEntoInnocs;
   //@}
 };

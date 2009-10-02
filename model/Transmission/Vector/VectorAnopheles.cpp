@@ -370,3 +370,26 @@ void VectorAnopheles::rotateArray(vector<double>& rArray, double rAngle) {
   }
   rArray = tempArray;
 }
+
+
+
+void VectorAnopheles::write (ostream& out) const {
+  for (int i = 0; i < N_v_length; ++i) {
+    out << P_A[i] << endl;
+    out << P_df[i] << endl;
+    out << P_dif[i] << endl;
+    out << N_v[i] << endl;
+    out << O_v[i] << endl;
+    out << S_v[i] << endl;
+  }
+}
+void VectorAnopheles::read (istream& in) {
+  for (int i = 0; i < N_v_length; ++i) {
+    in >> P_A[i];
+    in >> P_df[i];
+    in >> P_dif[i];
+    in >> N_v[i];
+    in >> O_v[i];
+    in >> S_v[i];
+  }
+}

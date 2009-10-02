@@ -80,7 +80,8 @@ private:
   //! Variance of Infection Rate according to fielddata 
   static const double totalInfectionrateVariance; 
   
-  //! The duration of sporogony in time steps 
+  //! The duration of sporogony in time steps
+  // doesn't need checkpointing
   int nspore;
   //@}
   

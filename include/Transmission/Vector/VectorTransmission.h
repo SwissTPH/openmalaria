@@ -39,6 +39,9 @@ public:
   VectorTransmission(const scnXml::Vector vectorData);
   virtual ~VectorTransmission();
   
+  virtual void writeV(ostream& out) const;
+  virtual void readV(istream& in);
+  
   /** Extra initialisation, requiring information from the human population
    * structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize);
@@ -89,7 +92,10 @@ private:
    * Must be the same as species.size(). */
   size_t numSpecies;
   
-  /** Per anopheles species data. */
+  /** Per anopheles species data.
+   *
+   * Array will be recreated by constructor, but some members of VectorAnopheles
+   * need to be checkpointed. */
   vector<VectorAnopheles> species;
   
   /** A map of anopheles species/variant name to an index in species.
@@ -99,7 +105,7 @@ private:
    * here.
    * 
    * Other data read from XML should look up the name here and use the index
-   * found. */
+   * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
   //@}
   

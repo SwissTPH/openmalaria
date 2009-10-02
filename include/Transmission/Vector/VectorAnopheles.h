@@ -56,6 +56,10 @@ public:
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
   string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
+  
+  void write(ostream& out) const;
+  void read(istream& in);
+  
   /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
    * on the human population structure.
    * 
@@ -156,20 +160,21 @@ private:
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
    * Units: Animals per day. Length: daysInYear.
    * 
-   * Should be set by either initialise or initMainSimulation; no need to checkpoint. */
+   * Should be set by setupNv0; no need to checkpoint. */
   vector<double> mosqEmergeRate;
   
-  /** Non-human host data. */
+  /** Non-human host data. Doesn't need checkpointing. */
   NonHumanHostsType nonHumanHosts;
   
   /* Parameters and partial (derived) parameters from model */
   
   /** @brief S_v used to force an EIR during vector init.
    * Length: Global::intervalsPerYear.
-   * Lookup value at (simulationTime % intervalsPerYear).*/
+   * Lookup value at (simulationTime % intervalsPerYear).
+   * Set by initialise() and setupNv0(); doesn't need checkpointing. */
   vector<double> forcedS_v;
   /** Conversion factors from S_v to N_v and O_v, for initialisation values of
-   * N_v and O_v. */
+   * N_v and O_v. Don't need checkpointing. */
   double initNvFromSv;
   double initOvFromSv;	///< ditto
   

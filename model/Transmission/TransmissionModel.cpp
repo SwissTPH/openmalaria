@@ -132,23 +132,26 @@ void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
 // -----  checkpointing  -----
 
 void TransmissionModel::write(ostream& out) const {
-  out << annualEIR << endl;
+  out << simulationMode << endl;
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     out << kappa[i] << endl;
   out << _annualAverageKappa << endl;
   out << _sumAnnualKappa << endl;
+  out << annualEIR << endl;
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     out << innoculationsPerDayOfYear[i] << endl;
   out << innoculationsPerAgeGroup.size() << endl;
   for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
     out << innoculationsPerAgeGroup[i] << endl;
+  writeV (out);
 }
 void TransmissionModel::read(istream& in) {
-  in >> annualEIR;
+  in >> simulationMode;
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     in >> kappa[i];
   in >> _annualAverageKappa;
   in >> _sumAnnualKappa;
+  in >> annualEIR;
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     in >> innoculationsPerDayOfYear[i];
   size_t size;
@@ -157,4 +160,5 @@ void TransmissionModel::read(istream& in) {
     throw checkpoint_error ("innoculationsPerAgeGroup has wrong size");
   for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
     in >> innoculationsPerAgeGroup[i];
+  readV (in);
 }
