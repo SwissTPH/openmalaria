@@ -113,7 +113,7 @@ public:
   inline int getDateOfBirth() {return _dateOfBirth;};
   
   /** Does the Human have a detectible infection? */
-  inline bool detectibleInfection () {
+  inline bool detectibleInfection () const {
     return withinHostModel->parasiteDensityDetectible();
   }
   //@}

@@ -7,7 +7,7 @@ set (Model_CPP
   population.cpp InfectionIncidenceModel.cpp
   gzstream.C simulation.cpp summary.cpp global.cpp
   intervention.cpp proteome.cpp Human.cpp
-  inputData.cpp
+  inputData.cpp NeonatalMortality.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
 )
 aux_source_directory (Clinical Clinical_CPP)

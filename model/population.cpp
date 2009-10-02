@@ -30,6 +30,7 @@
 #include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "summary.h"
 #include "Pathogenesis/PathogenesisModel.h"
+#include "NeonatalMortality.h"
 #include <math.h>
 
 using namespace std;
@@ -69,6 +70,7 @@ const bool InitPopOpt = false;
 
 void Population::init(){
   Human::initHumanParameters();
+  NeonatalMortality::init();
 }
 
 void Population::clear(){
@@ -303,14 +305,9 @@ void Population::newHuman(int dob){
 }
 
 void Population::update1(){
-  int nCounter=0;	//NCounter is the number of indivs per demogr age group
-  int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y
   //targetPop is the population size at time t allowing population growth
   int targetPop = (int)(_populationSize * exp(rho*Simulation::simulationTime));
   int cumPop = 0;
-  
-  // Is the individual in the age range to be pregnant? Set when age reaches appropriate range.
-  bool isAtRiskOfFirstPregnancy = false;
   
   // Update each human in turn
   //std::cout<<" time " <<t<<std::endl;
@@ -347,34 +344,10 @@ void Population::update1(){
 	continue;
       }
     //END Population size & age structure
-    
-    //BEGIN Determine risk from maternal infection
-    double ageYears = iter->getAgeInYears();
-    if(ageYears < 25.0) {
-      if (ageYears >= 20.0) {
-	/* updates the counts of the number of individuals of child bearing age
-	and the numbers of these with patent parasitemia */
-	
-	if(!isAtRiskOfFirstPregnancy) {
-	  nCounter = 0;
-	  pCounter = 0;
-	  isAtRiskOfFirstPregnancy = true;
-	}
-	nCounter ++;
-	if (iter->detectibleInfection()){
-	  pCounter ++;
-	}
-      }
-      
-      if(isAtRiskOfFirstPregnancy && ageYears < 20.0) {
-	isAtRiskOfFirstPregnancy = false;	// only call once per time-step
-	PathogenesisModel::setRiskFromMaternalInfection(nCounter, pCounter);
-      }
-    }
-    //END Determine risk from maternal infection
-    
     ++iter;
   }	// end of per-human updates
+  
+  NeonatalMortality::update (_population);
   
   // increase population size to targetPop
   if (InitPopOpt && Simulation::simulationTime < Global::maxAgeIntervals) {

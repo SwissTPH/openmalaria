@@ -43,12 +43,6 @@ public:
   static PathogenesisModel* createPathogenesisModel(double cF);
   /** Create a sub-class instance, loading from a checkpoint. */
   static PathogenesisModel* createPathogenesisModel(istream& in);
-
-  /** Called for each birth; returns true if infant dies due to mother's
-   * infection. */
-  static bool eventNeonatalMortality();
-  /** Calculates the risk of neonatal mortality. */
-  static void setRiskFromMaternalInfection(int nCounter, int pCounter);
   
   // non-static
   virtual ~PathogenesisModel() {}
@@ -85,13 +79,6 @@ private:	// static
   static double critAgeComorb_30;
   //comorbidity prevalence at birth as a risk factor for severe
   static double comorbintercept_24;
-  
-  /** Probability for a newborn to die (indirect death) because the mother is
-   * infected. Depends on the prevalence of parasitaemia in mother at some
-   * previous t. */
-  static double _riskFromMaternalInfection;
-  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
-  static std::vector<double> _prevalenceByGestationalAge;
   
 protected:	// non-static
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;

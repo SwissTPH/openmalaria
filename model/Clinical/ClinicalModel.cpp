@@ -22,6 +22,7 @@
 
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
+#include "NeonatalMortality.h"
 #include "simulation.h"
 #include "inputData.h"
 
@@ -97,7 +98,7 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
-    if (PathogenesisModel::eventNeonatalMortality()) {
+    if (NeonatalMortality::eventNeonatalMortality()) {
       latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
       _doomed = DOOMED_NEONATAL;
       return;
