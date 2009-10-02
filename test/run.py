@@ -60,8 +60,7 @@ def runScenario(options,omOptions,name):
   scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
   if options.xmlValidate:
     # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]
-    return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],
-			 cwd=testBuildDir)
+    return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],cwd=testBuildDir)
   
   cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
   
@@ -106,17 +105,22 @@ def runScenario(options,omOptions,name):
     os.remove(scenario_xsd)
     for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?")) + [os.path.join(simDir,"init_data.xml"),os.path.join(simDir,"boinc_finish_called"),os.path.join(simDir,"scenario.sum")]):
       if os.path.isfile(f):
-	os.remove(f)
+        os.remove(f)
   
   ret = 1
   if os.path.isfile(outFile):
     print "\033[1;34m",
     original = os.path.join(testSrcDir,"original%s.txt"%name)
+    outLoc = os.path.join(testBuildDir,"original%s.txt"%name)
     ret = compareOuts.main (*["", original, outFile, 2])
     if ret == 0 and options.cleanup:
       os.remove(outFile)
-    elif options.diff:
-      subprocess.call (["kdiff3",original,outFile])
+      if os.path.isfile(outLoc):
+        os.remove(outLoc)
+    else:
+      shutil.copy2(outFile, outLoc)
+      if options.diff:
+        subprocess.call (["kdiff3",original,outFile])
   else:
     stderrFile=os.path.join(simDir,"stderr.txt")
     if os.path.isfile (stderrFile):
@@ -142,7 +146,7 @@ def setWrapArgs(option, opt_str, value, parser, *args, **kwargs):
 def evalOptions (args):
   parser = OptionParser(usage="Usage: %prog [options] [-- openMalaria options] [scenarios]",
 			description="""Scenarios to be run must be of the form scenarioXX.xml; if any are passed on the command line, XX is substituted for each given; if not then all files of the form scenario*.xml are run as test scenarios.
-			You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
+You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
   
   parser.add_option("-q","--quiet",
 		    action="store_false", dest="logging", default=True,

@@ -93,17 +93,19 @@ def main(*args):
         line_count+=1
         
         line_items1=string.split(line1)
-        h_id1=int(line_items1[1])
-        loc_id1=line_items1[2]
+        survey1=int(line_items1[0])
+        ageGroup1=int(line_items1[1])
+        measure1=line_items1[2]
         value1=float(line_items1[3])
         
         line2=file2.readline()
         line_items2=string.split(line2)
-        h_id2=int(line_items2[1])
-        loc_id2=line_items2[2]
+        survey2=int(line_items2[0])
+        ageGroup2=int(line_items2[1])
+        measure2=line_items2[2]
         value2=float(line_items2[3])
         
-        if (loc_id1!=loc_id2) or (h_id1!=h_id2):
+        if (survey1 != survey2) or (measure1!=measure2) or (ageGroup1!=ageGroup2):
             print "Different summary outputs {0}:".format(line_count)
             print '-',line1,
             print '+',line2,
@@ -112,15 +114,15 @@ def main(*args):
         # Compare with relative precision.
         if not approx_equal_6 (value1, value2):
             numDiffs += 1
-            perMeasureNumDiff[h_id1] = perMeasureNumDiff.get(h_id1,0) + 1;
+            perMeasureNumDiff[measure1] = perMeasureNumDiff.get(measure1,0) + 1;
             if (numDiffs <= maxDiffsToPrint):
-                print "line {0:>5}, survey {1:>3}, age group {2:>3}, measure {3:>3}:{4:>12.5f} ->{5:>12.5f}".format(line_count,line_items1[0],loc_id1,h_id1,value1,value2)
+                print "line {0:>5}, survey {1:>3}, age group {2:>3}, measure {3:>3}:{4:>12.5f} ->{5:>12.5f}".format(line_count,survey1,ageGroup1,measure1,value1,value2)
                 if (numDiffs == maxDiffsToPrint):
                     print "[won't print any more line-by-line diffs]"
         
         # Sum up total difference per measure
-        perMeasureDiffSum[h_id1]    = perMeasureDiffSum.get(h_id1,0.0)    + value2 - value1
-        perMeasureDiffAbsSum[h_id1] = perMeasureDiffAbsSum.get(h_id1,0.0) + math.fabs(value2-value1)
+        perMeasureDiffSum[measure1]    = perMeasureDiffSum.get(measure1,0.0)    + value2 - value1
+        perMeasureDiffAbsSum[measure1] = perMeasureDiffAbsSum.get(measure1,0.0) + math.fabs(value2-value1)
         
         if(line_count % 100000 == 0):
             print (line_count)

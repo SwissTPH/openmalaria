@@ -323,11 +323,6 @@ void Population::update1(){
     ++iter;
   }
   
-  //FIXME: This should be done before Human::update() for the vector model.
-  // Currently refactoring... vector results _may_ be valid like this anyway.
-  // This should be called before humans contract new infections in the simulation step.
-  _transmissionModel->advanceStep (_population, Simulation::simulationTime);
-  
   for (HumanIter iter = _population.begin(); iter != _population.end();){
     //BEGIN Population size & age structure
     ++cumPop;
@@ -361,6 +356,11 @@ void Population::update1(){
     //++nCounter;
     ++cumPop;
   }
+  
+  //FIXME: This should be done before Human::update() for the vector model.
+  // Currently refactoring... vector results _may_ be valid like this anyway.
+  // This should be called before humans contract new infections in the simulation step.
+  _transmissionModel->advanceStep (_population, Simulation::simulationTime);
 }
 
 int Population::targetCumPop (int ageTSteps, int targetPop) {
