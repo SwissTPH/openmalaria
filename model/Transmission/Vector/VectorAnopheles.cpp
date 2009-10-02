@@ -157,7 +157,7 @@ void VectorAnopheles::destroy () {
 
 
 // Every Global::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic) {
+void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic, double& sumWeight, double& sumWt_kappa, double* kappaByAge, int* nByAge) {
   if (simulationTime >= larvicidingEndStep) {
     larvicidingEndStep = std::numeric_limits<int>::max();
     larvicidingIneffectiveness = 1.0;
@@ -206,11 +206,19 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
     double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+    sumWeight += prod;
     leaveSeekingStateRate += prod;
-    prod *= host.probMosqBiting(humanBase, sIndex)
-         *  host.probMosqResting(humanBase, sIndex);
-    intP_df += prod;
-    intP_dif += prod * h->probTransmissionToMosquito();
+    double prod2 = host.probMosqBiting(humanBase, sIndex)
+		 * host.probMosqResting(humanBase, sIndex);
+    intP_df += prod * prod2;
+    prod *= h->probTransmissionToMosquito();
+    sumWt_kappa += prod;
+    intP_dif += prod * prod2;
+    
+    // kappaByAge and nByAge are used in the screensaver only
+    int ia = h->ageGroup();
+    kappaByAge[ia] += prod;
+    ++nByAge[ia];
   }
   
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {

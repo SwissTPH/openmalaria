@@ -31,6 +31,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "simulation.h"
 #include "summary.h"
+#include "util/BoincWrapper.h"
 #include <math.h> 
 #include <cfloat>
 #include <gsl/gsl_vector.h> 
@@ -58,34 +59,36 @@ TransmissionModel::TransmissionModel() :
   innoculationsPerAgeGroup.resize (Simulation::gMainSummary->getNumOfAgeGroups(), 0.0);
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
   timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
+  
+  noOfAgeGroupsSharedMem = std::max(Simulation::gMainSummary->getNumOfAgeGroups(),KappaArraySize);
+  kappaByAge = new double[noOfAgeGroupsSharedMem];
+  nByAge = new int[noOfAgeGroupsSharedMem];
 }
 
 TransmissionModel::~TransmissionModel () {
+  delete [] nByAge;
+  delete [] kappaByAge;
 }
 
-double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears) {
-  /* For the NonVector model, the EIR should just be multiplied by the
-   * availability. For the Vector model, the availability is also required
-   * for internal calculations, but again the EIR should be multiplied by the
-   * availability. */
-  double EIR = calculateEIR (simulationTime, host, ageInYears);
+void TransmissionModel::advanceStep (const std::list<Human>& population, int simulationTime) {
+  // We calculate kappa for output and non-vector model, and kappaByAge for
+  // the shared graphics.
   
-  int ageGroup = Simulation::gMainSummary->ageGroup (ageInYears);
-  timeStepEntoInnocs[ageGroup] += EIR;
-  timeStepNumEntoInnocs ++;
-  return EIR;
-}
-
-void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
-  //NOTE: error check
+  double sumWt_kappa= 0.0;
+  double sumWeight  = 0.0;
+  for (size_t i=0; i<noOfAgeGroupsSharedMem; i++) {
+    kappaByAge[i] = 0.0;
+    nByAge[i] = 0;
+  }
+  
+  advanceStepCalcs (population, simulationTime, sumWeight, sumWt_kappa);
+#ifndef NDEBUG
   if (sumWeight < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
     throw range_error ("sumWeight is invalid");
+#endif
   
   size_t tmod = (Simulation::simulationTime-1) % Global::intervalsPerYear;
   kappa[tmod] = sumWt_kappa / sumWeight;
-#ifdef DEBUG_PRINTING
-  cout << Simulation::simulationTime << '\t' << kappa[tmod] << endl;
-#endif
   
   //Calculate time-weighted average of kappa
   if (tmod == 0) {
@@ -111,6 +114,26 @@ void TransmissionModel::updateKappa (double sumWeight, double sumWt_kappa) {
   }
   innoculationsPerDayOfYear[tmod] = timeStepTotal / timeStepNumEntoInnocs;
   timeStepNumEntoInnocs = 0;
+  
+  // Shared graphics: report infectiousness
+  if (Simulation::simulationTime % 6 ==  0) {
+    for (int i = 0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++)
+      kappaByAge[i] /= nByAge[i];
+    SharedGraphics::copyKappa(kappaByAge);
+  }
+}
+
+double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears) {
+  /* For the NonVector model, the EIR should just be multiplied by the
+   * availability. For the Vector model, the availability is also required
+   * for internal calculations, but again the EIR should be multiplied by the
+   * availability. */
+  double EIR = calculateEIR (simulationTime, host, ageInYears);
+  
+  int ageGroup = Simulation::gMainSummary->ageGroup (ageInYears);
+  timeStepEntoInnocs[ageGroup] += EIR;
+  timeStepNumEntoInnocs ++;
+  return EIR;
 }
 
 void TransmissionModel::summarize (Summary& summary) {

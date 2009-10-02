@@ -20,7 +20,6 @@
 
 */
 #include "population.h"
-#include "util/BoincWrapper.h"
 #include "util/gsl.h"
 #include "inputData.h"
 #include "Human.h"
@@ -296,7 +295,6 @@ void Population::preMainSimInit () {
   }
 }
 
-
 // -----  non-static methods: simulation loop  -----
 
 void Population::newHuman(int dob){
@@ -305,9 +303,6 @@ void Population::newHuman(int dob){
 }
 
 void Population::update1(){
-  // This should be called before humans contract new infections in the simulation step.
-  _transmissionModel->advancePeriod (_population, Simulation::simulationTime);
-  
   int nCounter=0;	//NCounter is the number of indivs per demogr age group
   int pCounter=0;	//PCounter is the number with patent infections, needed for prev in 20-25y
   //targetPop is the population size at time t allowing population growth
@@ -316,17 +311,6 @@ void Population::update1(){
   
   // Is the individual in the age range to be pregnant? Set when age reaches appropriate range.
   bool isAtRiskOfFirstPregnancy = false;
-  
-  int noOfAgeGroupsSharedMem = std::max(Simulation::gMainSummary->getNumOfAgeGroups(),KappaArraySize);
-  double* kappaByAge = new double[noOfAgeGroupsSharedMem];
-  int* nByAge = new int[noOfAgeGroupsSharedMem];
-  for (int i=0; i<noOfAgeGroupsSharedMem; i++) {
-    kappaByAge[i] = 0.0;
-    nByAge[i] = 0;
-  }
-  //  Initialise the variable used for calculating infectiousness
-  double sumWt_kappa= 0.0;
-  double sumWeight  = 0.0;
   
   // Update each human in turn
   //std::cout<<" time " <<t<<std::endl;
@@ -339,21 +323,15 @@ void Population::update1(){
       iter=_population.erase(iter);
       continue;
     }
-    
-    //BEGIN summarise infectiousness
-    double ageYears = iter->getAgeInYears();
-    double availability = iter->perHostTransmission.entoAvailabilityNV(ageYears);
-    sumWeight += availability;
-    availability *= iter->probTransmissionToMosquito();
-    sumWt_kappa += availability;	//TODO: move with all kappa stuff to NonVector
-    
-    // kappaByAge and nByAge are used in the screensaver only
-    int ia = iter->ageGroup();
-    kappaByAge[ia] += availability;	// TODO: set independantly in Vector & NonVector models from something
-    ++nByAge[ia];
-    //END summarise infectiousness
-    
-    
+    ++iter;
+  }
+  
+  //FIXME: This should be done before Human::update() for the vector model.
+  // Currently refactoring... vector results _may_ be valid like this anyway.
+  // This should be called before humans contract new infections in the simulation step.
+  _transmissionModel->advanceStep (_population, Simulation::simulationTime);
+  
+  for (HumanIter iter = _population.begin(); iter != _population.end();){
     //BEGIN Population size & age structure
     ++cumPop;
     
@@ -371,6 +349,7 @@ void Population::update1(){
     //END Population size & age structure
     
     //BEGIN Determine risk from maternal infection
+    double ageYears = iter->getAgeInYears();
     if(ageYears < 25.0) {
       if (ageYears >= 20.0) {
 	/* updates the counts of the number of individuals of child bearing age
@@ -397,13 +376,6 @@ void Population::update1(){
     ++iter;
   }	// end of per-human updates
   
-  // Shared graphics: report infectiousness
-  if (Simulation::simulationTime % 6 ==  0) {
-    for (int i=0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++)
-      kappaByAge[i] /= nByAge[i];
-    SharedGraphics::copyKappa(kappaByAge);
-  }
-  
   // increase population size to targetPop
   if (InitPopOpt && Simulation::simulationTime < Global::maxAgeIntervals) {
     // We only want people at oldest,
@@ -416,14 +388,6 @@ void Population::update1(){
     //++nCounter;
     ++cumPop;
   }
-  
-  // Calculate kappa (total infectiousness)
-  // Currently we use the same summed weights as before. Doing them here would
-  // be different because of out-migrated individuals and new births.
-  _transmissionModel->updateKappa (sumWeight, sumWt_kappa);
-  
-  delete [] nByAge;
-  delete [] kappaByAge;
 }
 
 int Population::targetCumPop (int ageTSteps, int targetPop) {
@@ -440,6 +404,8 @@ bool Population::outMigrate(Human& current, int targetPop, int cumPop){
   return outmigrs >= 1;
 }
 
+
+// -----  non-static methods: summarising and interventions  -----
 
 // -----  non-static methods: summarising and interventions  -----
 

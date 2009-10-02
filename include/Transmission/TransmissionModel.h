@@ -74,17 +74,11 @@ public:
    * that it's better not to use population.size(). */
   virtual void initMainSimulation ()=0; 
   
-  /// Needs to be called each step of the simulation
-  virtual void advancePeriod (const std::list<Human>& population, int simulationTime) {}
-  
-  /** Set kappa for current interval in year from infectiousness of humans.
+  /** Needs to be called each step of the simulation
    *
-   * Also updates _annualAverageKappa, and reporting of entomological
-   * innoculations.
-   * 
-   * NOTE: could be combined with advancePeriod(), but is currently called at
-   * a different time. */
-  void updateKappa (double sumWeight, double sumWt_kappa);
+   * Summarises infectiousness of humans and of mosquitoes.
+   * Runs internal calculations of Vector model. */
+  void advanceStep (const std::list<Human>& population, int simulationTime);
   
   /** Little function to copy kappa to initialKappa. */
   virtual void copyToInitialKappa () {}
@@ -99,7 +93,7 @@ public:
    * Vector:
    * During vector initialisation phase, EIR is forced based on the EIR given
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
-   * the simulation switches to using dynamic EIR. advancePeriod _must_ be
+   * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
   double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears);
   
@@ -107,6 +101,9 @@ public:
   virtual void intervLarviciding (const scnXml::Larviciding&);
   
 protected:
+  /// Part of advanceStep calculations done by sub-models.
+  virtual void advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa)=0;
+  
   /** Calculates the EIR (in adults), during the main simulation phase.
    * 
    * \param simulationTime Time since start of simulation.
@@ -126,7 +123,7 @@ protected:
    * It is calculated as the average infectiousness per human.
    * 
    * Checkpointed. */
-  vector<double> kappa; 
+  vector<double> kappa;
   
 private:
   /*! annAvgKappa is the overall proportion of mosquitoes that get infected
@@ -168,6 +165,13 @@ protected:
   /** Total number of EIRs output in the timestep (roughly equal to populationSize)
    * Doesn't need to be checkpointed. */
   size_t timeStepNumEntoInnocs;
+  //@}
+  
+  ///@brief Variables for shared graphics kappa-by-age graph
+  //@{
+  size_t noOfAgeGroupsSharedMem;
+  double *kappaByAge;
+  int *nByAge;
   //@}
 };
 

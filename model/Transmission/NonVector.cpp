@@ -106,6 +106,22 @@ void NonVectorTransmission::copyToInitialKappa () {
   }
 }
 
+
+void NonVectorTransmission::advanceStepCalcs (const std::list<Human>& population, int simulationTime, double& sumWeight, double& sumWt_kappa) {
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    double ageYears = h->getAgeInYears();
+    double t = h->perHostTransmission.entoAvailabilityNV(ageYears);
+    sumWeight += t;
+    t *= h->probTransmissionToMosquito();
+    sumWt_kappa += t;
+    
+    // kappaByAge and nByAge are used in the screensaver only
+    int ia = h->ageGroup();
+    kappaByAge[ia] += t;
+    ++nByAge[ia];
+  }
+}
+
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;

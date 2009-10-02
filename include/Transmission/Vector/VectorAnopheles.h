@@ -83,7 +83,7 @@ public:
    * @param simulationTime
    * @param sIndex Index of the type of mosquito in per-type/species lists.
    * @param isDynamic True to use full model; false to drive model from current contents of S_v. */
-  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic);
+  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic, double& sumWeight, double& sumWt_kappa, double* kappaByAge, int* nByAge);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
