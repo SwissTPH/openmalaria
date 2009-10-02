@@ -40,7 +40,6 @@ int Global::interval;
 size_t Global::intervalsPerYear;
 double Global::yearsPerInterval;
 int Global::maxAgeIntervals;
-int Global::latentp;
 
 CLO::CLO Global::clOptions = CLO::NONE;
 string Global::clResourcePath;
@@ -158,7 +157,6 @@ void Global::initGlobal () {
   }
   intervalsPerYear = daysInYear/interval;
   yearsPerInterval = double(interval) / double(daysInYear);
-  latentp=get_latentp();
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
 }
 

@@ -28,6 +28,7 @@
 
 //static (class) variables
 
+int DescriptiveInfection::latentp;
 double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
 double DescriptiveInfection::alpha_m;
 double DescriptiveInfection::decayM;
@@ -41,6 +42,7 @@ void DescriptiveInfection::initParameters (){
   if (Global::interval != 5)
     throw domain_error ("DescriptiveInfection only supports using an interval of 5");
   
+  latentp=get_latentp();
   cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
   cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
   alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
@@ -151,7 +153,7 @@ int DescriptiveInfection::infectionDuration(){
 void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageYears, double cumulativeh, double &timeStepMaxDensity)
 {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  int infage=1+simulationTime-_startdate-Global::latentp;
+  int infage=1+simulationTime-_startdate-latentp;
   if ( infage >  0) {
     if ( infage <=  maxDur) {
       int iduration=_duration/Global::interval;

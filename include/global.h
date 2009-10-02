@@ -108,8 +108,6 @@ public:
   static double yearsPerInterval;
   // Maximum age of individuals in a scenario in time intervals
   static int maxAgeIntervals;
-   //pre-erythrocytic latent period, in time steps
-  static int latentp;
   //@}
   
   ///@brief Command-line options

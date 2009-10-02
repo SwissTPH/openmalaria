@@ -124,6 +124,10 @@ public:
   float getCumulativeHstar() const {return cumulativeHstar;};
   float getCumulativeYstar() const {return cumulativeYstar;};
   
+  /// pre-erythrocytic latent period, in time steps
+  //Note: here for convenience; used by DescriptiveInfection and DescriptiveIPT
+  static int latentp;
+  
 protected:
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ; 
