@@ -19,15 +19,10 @@
 
 #ifndef Hmod_VectorTransmission
 #define Hmod_VectorTransmission
-/* This file should contain the headers of all routines that we write in the C
- * program.
- */ 
 
-/* We also include library headers here. */ 
+#include "global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Vector/VectorAnopheles.h"
-
-//#define VectorTransmission_PRINT_CalcInitMosqEmergeRate
 
 namespace scnXml {
   class Vector;
@@ -107,10 +102,6 @@ private:
    * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
   //@}
-  
-  /*NOTE: add NonHumanHosts data here:
-  per-species parameters
-  number of hosts */
   
   friend class PerHostTransmission;
   friend class VectorAnophelesSuite;

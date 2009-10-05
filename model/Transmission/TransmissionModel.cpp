@@ -53,6 +53,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 
 TransmissionModel::TransmissionModel() :
     simulationMode(equilibriumMode), _sumAnnualKappa(0.0), annualEIR(0.0), timeStepNumEntoInnocs (0)
+#ifdef OMV_CSV_REPORTING
+  , csvReporting ("vector.csv", ios::app)
+#endif
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
@@ -63,7 +66,11 @@ TransmissionModel::TransmissionModel() :
   noOfAgeGroupsSharedMem = std::max(Simulation::gMainSummary->getNumOfAgeGroups(),KappaArraySize);
 }
 
-TransmissionModel::~TransmissionModel () {}
+TransmissionModel::~TransmissionModel () {
+#ifdef OMV_CSV_REPORTING
+  csvReporting.close();
+#endif
+}
 
 void TransmissionModel::updateKappa (const std::list<Human>& population, int simulationTime) {
   // We calculate kappa for output and non-vector model, and kappaByAge for
@@ -92,7 +99,7 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
     throw range_error ("sumWeight is invalid");
 #endif
   
-  size_t tmod = (Simulation::simulationTime-1) % Global::intervalsPerYear;
+  size_t tmod = (simulationTime-1) % Global::intervalsPerYear;
   kappa[tmod] = sumWt_kappa / sumWeight;
   
   //Calculate time-weighted average of kappa
@@ -123,6 +130,10 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
       kappaByAge[i] /= nByAge[i];
     SharedGraphics::copyKappa(&kappaByAge[0]);
   }
+  
+#ifdef OMV_CSV_REPORTING
+  csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear] << ',' << kappa[tmod] << ',' << innoculationsPerDayOfYear[tmod] << endl;
+#endif
 }
 
 double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears) {

@@ -175,6 +175,11 @@ protected:
   vector<double> kappaByAge;
   vector<int> nByAge;
   //@}
+  
+#ifdef OMV_CSV_REPORTING
+  /// This is used to output infectiousness, etc. as a csv file, when included
+  ofstream csvReporting;
+#endif
 };
 
 #endif

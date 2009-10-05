@@ -67,14 +67,24 @@ int Population::IDCounter;
 // No longer possible due to new Vector init.
 const bool InitPopOpt = false;
 
+#ifdef OMP_CSV_REPORTING
+ofstream csvReporting;
+#endif
+
 
 void Population::init(){
   Human::initHumanParameters();
   NeonatalMortality::init();
+#ifdef OMP_CSV_REPORTING
+  csvReporting.open ("population.csv", ios::app);
+#endif
 }
 
 void Population::clear(){
   Human::clear();
+#ifdef OMP_CSV_REPORTING
+  csvReporting.close();
+#endif
 }
 
 
@@ -357,6 +367,22 @@ void Population::update1(){
   }
   
   _transmissionModel->updateKappa (_population, Simulation::simulationTime);
+  
+#ifdef OMP_CSV_REPORTING
+  if (Simulation::simulationTime % (Global::intervalsPerYear*5)==0) {
+    csvReporting << Simulation::simulationTime << ',';
+    list<Human>::reverse_iterator it = _population.rbegin();
+    for (double ageLim = 0; ageLim <= maxLifetimeDays/365.0; ageLim += 1) {
+      int counter=0;
+      while (it != _population.rend() && it->getAgeInYears() < ageLim) {
+	++counter;
+	++it;
+      }
+      csvReporting << counter << ',';
+    }
+    csvReporting << endl;
+  }
+#endif
 }
 
 int Population::targetCumPop (int ageTSteps, int targetPop) {

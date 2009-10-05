@@ -231,6 +231,9 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   // Summed per day:
   partialEIR = 0.0;
   
+#ifdef OMV_CSV_REPORTING
+  double outN_v0 = 0.0, outN_v = 0.0, outO_v = 0.0, outS_v = 0.0;
+#endif
   
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses Global::interval day (currently 5 day) time steps.
@@ -258,7 +261,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     // drive the system.
     if (isDynamic) {
     
-    N_v[t] = mosqEmergeRate[day%daysInYear] * larvicidingIneffectiveness
+    N_v[t] = mosqEmergeRate[simulationTime % Global::intervalsPerYear] * larvicidingIneffectiveness
         + P_A[t1]  * N_v[t1]
         + P_df[ttau] * N_v[ttau];
     O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
@@ -319,7 +322,18 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     }
     
     partialEIR += S_v[t] * P_Ai_base;
+    
+#ifdef OMV_CSV_REPORTING
+    outN_v += N_v[t];
+    outN_v0 += mosqEmergeRate[simulationTime % Global::intervalsPerYear];
+    outO_v += O_v[t];
+    outS_v += S_v[t];
+#endif
   }
+  
+#ifdef OMV_CSV_REPORTING
+  (*csvReporting) << outN_v0/Global::interval << ',' << outN_v/Global::interval << ',' << outO_v/Global::interval << ',' << outS_v/Global::interval << ',';
+#endif
 }
 
 

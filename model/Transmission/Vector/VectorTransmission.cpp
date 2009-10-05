@@ -34,7 +34,8 @@
  *****************************************************************************/
 
 
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
+{
   if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
     throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
   
@@ -47,18 +48,30 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData) {
   numSpecies = anophelesList.size();
   if (numSpecies < 1)
     throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-  species.resize (numSpecies);
+  species.resize (numSpecies, VectorAnopheles(csvReporting));
+  
+#ifdef OMV_CSV_REPORTING
+  csvReporting << "simulation time,";
+#endif
   
   for (size_t i = 0; i < numSpecies; ++i) {
     string name = species[i].initialise (anophelesList[i], i,
 					 initialisationEIR);
     speciesIndex[name] = i;
+    
+#ifdef OMV_CSV_REPORTING
+    csvReporting << "N_v0("<<i<<"),N_v("<<i<<"),O_v("<<i<<"),S_v("<<i<<"),";
+#endif
   }
+  
+#ifdef OMV_CSV_REPORTING
+  csvReporting << "vector emergence,human infectiousness,innoculations per human" << endl;
+#endif
   
   // We want the EIR to effectively be the sum of the EIR for each day in the interval
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {
     initialisationEIR[i] *= Global::interval;
-  
+    
     // Calculate total annual EIR
     annualEIR += initialisationEIR[i];
   }
@@ -109,6 +122,9 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::vectorUpdate (const std::list<Human>& population, int simulationTime) {
+#ifdef OMV_CSV_REPORTING
+  csvReporting << simulationTime << ',';
+#endif
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);
 }

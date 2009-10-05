@@ -41,10 +41,17 @@ class Human;
 class VectorAnopheles
 {
 public:
-  VectorAnopheles () :
+  VectorAnopheles (
+#ifdef OMV_CSV_REPORTING
+  ofstream& csvR
+#endif
+  ) :
     partialEIR(0.0),
     larvicidingEndStep (std::numeric_limits<int>::max()),
     larvicidingIneffectiveness (1.0)
+#ifdef OMV_CSV_REPORTING
+  , csvReporting(&csvR)
+#endif
   {}
   
   ///@brief Initialisation and destruction
@@ -269,6 +276,11 @@ private:
   
   friend class VectorEmergenceSuite;
   friend class VectorAnophelesSuite;
+  
+#ifdef OMV_CSV_REPORTING
+  /// This is used to output infectiousness, etc. as a csv file, when included
+  ofstream* csvReporting;
+#endif
 };
 
 #endif
