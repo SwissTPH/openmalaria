@@ -37,6 +37,7 @@ Constants (parameter)
 
 ModelVersion Global::modelVersion;
 int Global::interval;
+int Global::intervalsPer5Days;
 size_t Global::intervalsPerYear;
 double Global::yearsPerInterval;
 int Global::maxAgeIntervals;
@@ -155,6 +156,7 @@ void Global::initGlobal () {
     cerr << "daysInYear not a multiple of interval" << endl;
     exit(-12);
   }
+  intervalsPer5Days = 5/interval;
   intervalsPerYear = daysInYear/interval;
   yearsPerInterval = double(interval) / double(daysInYear);
   maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;

@@ -102,6 +102,8 @@ public:
 
   /// temporal resolution of simulation, in days
   static int interval;
+  /// Number of timesteps in 5 days
+  static int intervalsPer5Days;
    //Simulation time steps per year
   static size_t intervalsPerYear;
   // 1.0/intervalsPerYear

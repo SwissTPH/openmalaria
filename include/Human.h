@@ -164,8 +164,12 @@ private:
   
   ///@brief Private variables
   //@{
-  //! Total asexual blood stage density over last few timesteps (designed for a 5-day timestep only)
-  double _ylag[4];
+  /** Total asexual blood stage density over last 20 days (need samples from 10, 15 and 20 days ago)
+   *
+   * _ylag[simulationTime % _ylagLen] corresponds to current timestep. */
+  double* _ylag;
+  /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
+  static int _ylagLen;
   
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;

@@ -47,6 +47,8 @@
 #define isnan(x) ((x) != (x))
 #endif
 
+int Human::_ylagLen;
+
 
 // -----  Static functions  -----
 
@@ -57,6 +59,7 @@ void Human::initHumanParameters () {	// static
   WithinHostModel::init();
   ClinicalModel::init();
   Vaccine::initParameters();
+  _ylagLen = Global::intervalsPer5Days * 4;
 }
 
 void Human::clear() {	// static clear
@@ -79,7 +82,8 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   if (_dateOfBirth != simulationTime && (Simulation::timeStep >= 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
   
-  for (int i=0;i<4; i++) {
+  _ylag = new double[_ylagLen];
+  for (int i=0;i<_ylagLen; i++) {
     _ylag[i]=0.0;
   }
   
@@ -157,16 +161,17 @@ Human::Human(istream& in, TransmissionModel& tm) :
   in >> _BSVEfficacy; 
   in >> _PEVEfficacy; 
   in >> _TBVEfficacy; 
-  in >> _ylag[0]; 
-  in >> _ylag[1]; 
-  in >> _ylag[2]; 
-  in >> _ylag[3]; 
+  _ylag = new double[_ylagLen];
+  for (int i=0;i<_ylagLen; i++) {
+    in >> _ylag[i];
+  }
 }
 
 void Human::destroy() {
   delete infIncidence;
   delete withinHostModel;
   delete clinicalModel;
+  delete _ylag;
 }
 
 void Human::write (ostream& out) const{
@@ -180,10 +185,9 @@ void Human::write (ostream& out) const{
   out << _BSVEfficacy << endl; 
   out << _PEVEfficacy << endl; 
   out << _TBVEfficacy << endl; 
-  out << _ylag[0] << endl; 
-  out << _ylag[1] << endl; 
-  out << _ylag[2] << endl; 
-  out << _ylag[3] << endl; 
+  for (int i=0;i<_ylagLen; i++) {
+    out << _ylag[i] << endl;
+  }
 }
 
 
@@ -213,14 +217,8 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
   
   withinHostModel->clearOldInfections();
   
-  // _ylag is designed for a 5-day timestep model
-  //TODO equiv for 1-day tstep
-  if ((Simulation::simulationTime*Global::interval) % 5 == 0) {
-    for (int i=3;i>0; i--) {
-      _ylag[i]=_ylag[i-1];
-    }
-  }
-  _ylag[0]=withinHostModel->getTotalDensity();
+  // Cache total density for infectiousness calculations
+  _ylag[Simulation::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
   
   withinHostModel->calculateDensities(getAgeInYears(), _BSVEfficacy);
 }
@@ -310,12 +308,9 @@ void Human::summarize(){
 
 
 double Human::calcProbTransmissionToMosquito() const {
-  /* This model is only really valid for 5-day timesteps; if it's needed for
-  a one-day timestep, it should be redesigned; design of this model is
-  described in AJTMH pp.32-33*/
-  //FIXME: implement something valid for 1-day timestep
-  // Also TODO: do we have to use a run-time switch here? Make interval compile-time constant?
-  
+  /* This model was designed for 5-day timesteps. We use the same model
+  (sampling 10, 15 and 20 days ago) for 1-day timesteps to avoid having to
+  (design and analyse a new model. Description: AJTMH pp.32-33 */
   int ageTimeSteps=Simulation::simulationTime-_dateOfBirth;
   if (ageTimeSteps*Global::interval <= 20 || Simulation::simulationTime*Global::interval <= 20)
     return 0.0;
@@ -327,8 +322,12 @@ double Human::calcProbTransmissionToMosquito() const {
   static const double tau= 0.066;
   static const double mu= -8.1;
   
-  // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before:
-  double x=beta1*_ylag[1]+beta2*_ylag[2]+beta3*_ylag[3];
+  // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
+  // These values are one timestep more recent than that, however the calculated
+  // value is not used until the next timestep when then ages would be correct.
+  double x = beta1 * _ylag[(Simulation::simulationTime-2*Global::intervalsPer5Days+1) % _ylagLen]
+	   + beta2 * _ylag[(Simulation::simulationTime-3*Global::intervalsPer5Days+1) % _ylagLen]
+	   + beta3 * _ylag[(Simulation::simulationTime-4*Global::intervalsPer5Days+1) % _ylagLen];
   if (x < 0.001)
     return 0.0;
   
