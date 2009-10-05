@@ -48,10 +48,11 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   numSpecies = anophelesList.size();
   if (numSpecies < 1)
     throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-  species.resize (numSpecies, VectorAnopheles(csvReporting));
-  
 #ifdef OMV_CSV_REPORTING
+  species.resize (numSpecies, VectorAnopheles(csvReporting));
   csvReporting << "simulation time,";
+#else
+  species.resize (numSpecies, VectorAnopheles());
 #endif
   
   for (size_t i = 0; i < numSpecies; ++i) {
