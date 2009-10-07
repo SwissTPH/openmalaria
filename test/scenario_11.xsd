@@ -69,7 +69,7 @@
               Parameters for mathematical model
             </xs:documentation>
             <xs:appinfo>
-              units:List of elements;
+	      units:List of elements;
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
@@ -292,8 +292,8 @@
   <!--Entomology-->
   <xs:complexType name="EIRDaily">
     <xs:annotation>
-      <xs:documentation>Value of daily EIR</xs:documentation>
-      <xs:appinfo>units:Number;min:1;</xs:appinfo>
+      <xs:documentation>Value of daily EIR; when multiple values are given for a single timestep they are averaged.</xs:documentation>
+      <xs:appinfo>units:Innoculations per person per day;</xs:appinfo>
     </xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:double">
@@ -310,8 +310,9 @@
       <xs:element name="eir">
 	<xs:annotation>
 	  <xs:documentation>
-	    Description of entomological inoculation rate, used to calculate vector emergence rate.
+	    Description of target entomological inoculation rate, used to calculate the vector emergence rate. An EIR array is generated from the exponent of the inverse discrete fourier transform of these parameters.
 	  </xs:documentation>
+	  <xs:appinfo>units:Innoculations per person per day;</xs:appinfo>
 	</xs:annotation>
 	<xs:complexType>
 	  <xs:attribute name="a0" type="xs:double" use="required" />
@@ -382,7 +383,7 @@
             <xs:documentation>Parameters for the vector transmission model.</xs:documentation>
           </xs:annotation>
           <xs:complexType>
-            <xs:sequence>
+            <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
             </xs:sequence>
           </xs:complexType>
@@ -1337,7 +1338,7 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-
+  
     <xs:complexType name="drugDescription">
       <xs:sequence>
         <xs:element name="genome">
@@ -1514,7 +1515,7 @@
     <xs:attribute name="gene" use="required" type="xs:string" />
     <xs:attribute name="pos" use="required" type="xs:integer" />
   </xs:complexType>
-
+  
   <!-- standard types used -->
   <xs:complexType name="doubleList">
     <xs:sequence>

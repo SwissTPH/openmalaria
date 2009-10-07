@@ -69,9 +69,7 @@
               Parameters for mathematical model
             </xs:documentation>
             <xs:appinfo>
-              <xs:appinfo>
-                units:List of elements;
-              </xs:appinfo>
+	      units:List of elements;
             </xs:appinfo>
           </xs:annotation>
         </xs:element>
@@ -294,8 +292,8 @@
   <!--Entomology-->
   <xs:complexType name="EIRDaily">
     <xs:annotation>
-      <xs:documentation>Value of daily EIR</xs:documentation>
-      <xs:appinfo>units:Number;min:1;</xs:appinfo>
+      <xs:documentation>Value of daily EIR; when multiple values are given for a single timestep they are averaged.</xs:documentation>
+      <xs:appinfo>units:Innoculations per person per day;</xs:appinfo>
     </xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:double">
@@ -312,8 +310,9 @@
       <xs:element name="eir">
 	<xs:annotation>
 	  <xs:documentation>
-	    Description of entomological inoculation rate, used to calculate vector emergence rate.
+	    Description of target entomological inoculation rate, used to calculate the vector emergence rate. An EIR array is generated from the exponent of the inverse discrete fourier transform of these parameters.
 	  </xs:documentation>
+	  <xs:appinfo>units:Innoculations per person per day;</xs:appinfo>
 	</xs:annotation>
 	<xs:complexType>
 	  <xs:attribute name="a0" type="xs:double" use="required" />
