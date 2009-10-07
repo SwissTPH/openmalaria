@@ -27,8 +27,13 @@
 
 namespace vectors {
   ///@brief Basic operations on std::vector
+  //@{
   /// Scale all elements of a vector by a in-situ
   void scale (vector<double>& vec, double a);
+  
+  /// Return sum of all elements
+  double sum (vector<double>& vec);
+  //@}
   
   
   ///@brief Comparissons on std::vector
