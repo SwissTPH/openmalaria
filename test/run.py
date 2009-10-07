@@ -112,7 +112,11 @@ def runScenario(options,omOptions,name):
     print "\033[1;34m",
     original = os.path.join(testSrcDir,"original%s.txt"%name)
     outLoc = os.path.join(testBuildDir,"original%s.txt"%name)
-    ret = compareOuts.main (*["", original, outFile, 2])
+    if os.path.isfile(original):
+      ret = compareOuts.main (*["", original, outFile, 2])
+    else:
+      ret = 3
+      print "\033[1;31mNo original results to compare with."
     if ret == 0 and options.cleanup:
       os.remove(outFile)
       if os.path.isfile(outLoc):
@@ -134,7 +138,7 @@ def runScenario(options,omOptions,name):
   try:
     os.rmdir(simDir)
   except OSError:
-    print "Directory %s not empty, so not deleted!" % simDir
+    print "\033[0;31mDirectory %s not empty, so not deleted!" % simDir
   
   print "\033[0;00m"
   return ret
@@ -164,10 +168,10 @@ You can pass options to openMalaria by first specifying -- (to end options passe
 		    callback_args=(["gdb","--args"],),
 		    help="Run openMalaria through gdb.")
   parser.add_option("--valgrind", action="callback", callback=setWrapArgs,
-		    callback_args=(["valgrind","--gen-suppressions=yes","leak-check=full"],),
+		    callback_args=(["valgrind","--gen-suppressions=yes","--leak-check=full"],),
 		    help="Run openMalaria through valgrind.")
   parser.add_option("--valgrind-track-origins", action="callback", callback=setWrapArgs,
-		    callback_args=(["valgrind","--gen-suppressions=yes","leak-check=full","--track-origins=yes"],),
+		    callback_args=(["valgrind","--gen-suppressions=yes","--leak-check=full","--track-origins=yes"],),
 		    help="As --valgrind, but pass --track-origins=yes option (1/2 performance).")
   (options, others) = parser.parse_args(args=args)
   

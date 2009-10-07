@@ -77,15 +77,13 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     withinHostModel(WithinHostModel::createWithinHostModel()),
     _dateOfBirth(dateOfBirth), _ID(ID),
     _lastVaccineDose(0),
-    _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0)
+    _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
+    _probTransmissionToMosquito(0.0)
 {
   if (_dateOfBirth != simulationTime && (Simulation::timeStep >= 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
   
-  _ylag = new double[_ylagLen];
-  for (int i=0;i<_ylagLen; i++) {
-    _ylag[i]=0.0;
-  }
+  _ylag.assign (_ylagLen, 0.0);
   
   
   /* Human heterogeneity; affects:
@@ -161,17 +159,17 @@ Human::Human(istream& in, TransmissionModel& tm) :
   in >> _BSVEfficacy; 
   in >> _PEVEfficacy; 
   in >> _TBVEfficacy; 
-  _ylag = new double[_ylagLen];
+  _ylag.resize (_ylagLen);
   for (int i=0;i<_ylagLen; i++) {
     in >> _ylag[i];
   }
+  in >> _probTransmissionToMosquito;
 }
 
 void Human::destroy() {
   delete infIncidence;
   delete withinHostModel;
   delete clinicalModel;
-  delete _ylag;
 }
 
 void Human::write (ostream& out) const{
@@ -188,6 +186,7 @@ void Human::write (ostream& out) const{
   for (int i=0;i<_ylagLen; i++) {
     out << _ylag[i] << endl;
   }
+  out << _probTransmissionToMosquito << endl;
 }
 
 
