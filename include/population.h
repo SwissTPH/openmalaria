@@ -93,17 +93,6 @@ private:
    * older, based on a total population size of targetPop. */
   int targetCumPop (int ageTSteps, int targetPop);
   
-  /** Determine whether to remove the human current in order to preserve or
-   * obtain the desired age structure.
-   * 
-   * @param current The human in question.
-   * @param targetPop The total target population size at this time
-   * @param cumPop The total number of individuals younger than or the same age
-   *	as this individual (including this individual).
-   *
-   * @returns True if current should be removed from the population. */
-  bool outMigrate(Human& current, int targetPop, int cumPop);
-  
   /** Generic function to activate some intervention on all humans within the
    * age range and passing the compliance test given by mass.
    * 

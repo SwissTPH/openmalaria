@@ -337,18 +337,16 @@ void Population::update1(){
     
     //BEGIN Population size & age structure
     ++cumPop;
+    int age=(Simulation::simulationTime-iter->getDateOfBirth());
     
-    // We call outMigrate if this is the last human in the list
-    // or if their dob differs from the next one (ie last in 5day agegroup)
-    if (iter == last ||	// Last human
-      // Copy iter, increment, and compare getDateOfBirth:
-      (++HumanIter(iter))->getDateOfBirth() != iter->getDateOfBirth())
-      if (outMigrate(*iter, targetPop, cumPop)) {
-	--cumPop;
-	iter->destroy();
-	iter = _population.erase(iter);
-	continue;
-      }
+    // if (Actual number of people so far > target population size for this age) ...
+    //FIXME: The +2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
+    if (cumPop > targetCumPop (age+2, targetPop)) {
+      --cumPop;
+      iter->destroy();
+      iter = _population.erase(iter);
+      continue;
+    }
     //END Population size & age structure
     ++iter;
   }	// end of per-human updates
@@ -388,19 +386,7 @@ void Population::update1(){
 int Population::targetCumPop (int ageTSteps, int targetPop) {
   return (int)floor(cumpc[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
 }
-bool Population::outMigrate(Human& current, int targetPop, int cumPop){
-  int age=(Simulation::simulationTime-current.getDateOfBirth());
-  
-  // Actual number of people so far = cumPop
-  // Number to be removed is the difference between this and target population
-  //FIXME: The +2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
-  int outmigrs = cumPop - targetCumPop (age+2, targetPop);
-  // We can't out-migrate more than one person at once, so just return whether or not to out-migrate this human:
-  return outmigrs >= 1;
-}
 
-
-// -----  non-static methods: summarising and interventions  -----
 
 // -----  non-static methods: summarising and interventions  -----
 
