@@ -90,7 +90,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   vector<double> speciesEIR (Global::intervalsPerYear);
   
   // Calculate forced EIR for pre-intervention phase from FCEIR:
-  calcInverseDFTExp(speciesEIR, FCEIR);
+  calcFourierEIR (speciesEIR, FCEIR);
   
   if(EIRRotateAngle != 0.0)
     rotateArray(speciesEIR, EIRRotateAngle);
@@ -147,12 +147,52 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   vectors::scale (forcedS_v, populationSize / sumPFindBite);
   mosqEmergeRate = forcedS_v;
   vectors::scale (mosqEmergeRate, initNvFromSv * (1.0 - intP_A - intP_df));
-//   cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
+  
+  for (int t = 0; t < N_v_length; ++t) {
+    P_A[t] = intP_A;
+    P_df[t] = intP_df;
+    P_dif[t] = 0.0;	// humans start off with no infectiousness.. so just wait
+    //t in: sTime*Global::interval..((sTime+1)*Global::interval-1)
+    int sTime = t / Global::interval;
+    S_v[t] = forcedS_v[sTime % Global::intervalsPerYear];
+    N_v[t] = S_v[t] * initNvFromSv;
+    O_v[t] = S_v[t] * initOvFromSv;
+  }
+  
+  sumAnnualForcedS_v = vectors::sum (forcedS_v);
+  
+  // cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
+  // cout << "init:\t"<<'\t'<<intP_A<<'\t'<<P_Ai_base <<'\t'<< intP_df <<'\t'<<endl;
   
   // All set up to drive simulation from S_v
 }
 
 void VectorAnopheles::destroy () {
+}
+
+bool VectorAnopheles::vectorInitIterate () {
+  // We optimise summing of N_v and O_v assuming this:
+  if (Simulation::simulationTime % Global::intervalsPerYear != 0)
+    cerr << "vectorInitIterate should only be called at end of year (due to sumAnnualS_v summing)" << endl;
+  
+  // Try to match S_v against its predicted value. Don't try with N_v or O_v
+  // because the predictions will change - would be chasing a moving target!
+  double factor = sumAnnualForcedS_v / sumAnnualS_v;
+  cout << "Pre-calced Sv, dynamic Sv (from N sums):\t"<<sumAnnualForcedS_v<<'\t'<<sumAnnualS_v<<" ("<<nAnnualSums<<')'<<endl;
+  if (!(factor > 1e-6 && factor < 1e6))	// unlikely, but might as well check incase either operand was zero
+    throw runtime_error ("factor out of bounds");
+  
+  const double LIMIT = 0.01;
+  if (fabs(factor - 1.0) > LIMIT) {
+    cout << "Vector iteration: adjusting with factor "<<factor<<endl;
+    // Adjusting mosqEmergeRate is the important bit. The rest should just bring things to a stable state quicker.
+    vectors::scale (mosqEmergeRate, factor);
+    //vectors::scale (N_v, factor);
+    //vectors::scale (O_v, factor);
+    //vectors::scale (S_v, factor);
+    return true;
+  }
+  return false;
 }
 
 
@@ -228,8 +268,15 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
   //END P_A, P_Ai, P_df, P_dif
   
+  //cout << "t"<<simulationTime<<":\t"<<'\t'<<intP_A<<'\t'<<P_Ai_base <<'\t'<< intP_df <<'\t'<<intP_dif<<endl;
+  
   // Summed per day:
   partialEIR = 0.0;
+  if (simulationTime % Global::intervalsPerYear == 0) {
+    sumAnnualS_v = 0.0;
+    nAnnualSums = 0;
+    cout << simulationTime << endl;;
+  }
   
 #ifdef OMV_CSV_REPORTING
   double outN_v0 = 0.0, outN_v = 0.0, outO_v = 0.0, outS_v = 0.0;
@@ -255,11 +302,6 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     P_df[t] = intP_df;
     P_dif[t] = intP_dif;
     
-    
-    // If in dynamicEIR mode, update N_v, O_v and S_v
-    // Otherwise we just use whichever values these were initialised to to
-    // drive the system.
-    if (isDynamic) {
     
     N_v[t] = mosqEmergeRate[simulationTime % Global::intervalsPerYear] * larvicidingIneffectiveness
         + P_A[t1]  * N_v[t1]
@@ -315,11 +357,9 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
         + P_A[t1]*S_v[t1]
         + P_df[ttau]*S_v[ttau];
     //END S_v
-    } else {
-      S_v[t] = forcedS_v[simulationTime % Global::intervalsPerYear];
-      N_v[t] = S_v[t] * initNvFromSv;
-      O_v[t] = S_v[t] * initOvFromSv;
-    }
+    
+    sumAnnualS_v += S_v[t];
+    ++nAnnualSums;
     
     partialEIR += S_v[t] * P_Ai_base;
     
@@ -354,7 +394,7 @@ vector<double> VectorAnopheles::convertLengthToFullYear (vector<double>& ShortAr
 }
 
 
-void VectorAnopheles::calcInverseDFTExp(vector<double>& tArray, vector<double>& FC) {
+void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC) {
   if (FC.size() % 2 == 0)
     throw xml_scenario_error("The number of Fourier coefficents should be odd.");
   
@@ -371,7 +411,7 @@ void VectorAnopheles::calcInverseDFTExp(vector<double>& tArray, vector<double>& 
     for(int n=1;n<=Fn;n++){
       temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
     }
-    tArray[t] = exp(temp);
+    tArray[t] = exp(temp) * Global::interval;	// input EIR is per-capita per-day, so scale to per-interval
   }
 }
 

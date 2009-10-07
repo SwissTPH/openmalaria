@@ -65,8 +65,14 @@ public:
   virtual int vectorInitDuration () {
     return 0;	// Non-vector model doesn't need it
   }
-  /** Called at end of vector initialisation stage. */
-  virtual void endVectorInitPeriod () {}
+  /** Called after end of vectorInitDuration() and after init iterations.
+   *
+   * Should determine whether another init iteration is needed, make necessary
+   * adjustments, and return number of timesteps to run this initialisation for
+   * (0 if a further iteration is not needed). */
+  virtual int vectorInitIterate () {
+    return 0;
+  }
   
   /** Initialise the main simulation.
    *
@@ -114,7 +120,10 @@ protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   
-  /** EIR per time step during the pre-intervention phase.
+  /** EIR per time step during the pre-intervention phase (slightly different
+   * usage for Vector and NonVector models; in both cases one year long).
+   *
+   * Units: average innoculations per adult per timestep
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */

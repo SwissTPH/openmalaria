@@ -79,6 +79,12 @@ public:
   /** Called to free memory instead of a destructor. */
   void destroy ();
   
+  /** Work out whether another interation is needed for initialisation and if
+   * so, make necessary changes.
+   * 
+   * @returns true if another iteration is needed. */
+  bool vectorInitIterate ();
+  
   /** Calls calMosqEmergeRate() and initialises arrays. */
   //void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
   //@}
@@ -245,6 +251,9 @@ private:
   * Doesn't need to be checkpointed (is recalculated each step). */
   double partialEIR;
   
+  double sumAnnualForcedS_v, sumAnnualS_v;
+  int nAnnualSums;
+  
   /** @brief Simple larviciding intervention.
    *
    * Would need to be checkpointed for main simulation; not used during
@@ -263,13 +272,15 @@ private:
    * daysInYear by copying and duplicating elements to fill the gaps. */
   static vector<double> convertLengthToFullYear (vector<double>& ShortArray); 
   
-  /**
-   *  Given a sequence of Fourier coefficients, FC, of odd length,
-   *  this routine calculates the exponent of the inverse discrete
-   *  Fourier transform into an array, tArray.
-   *
-   * tArray is an OUT parameter, FC is an IN parameter. */
-  static void calcInverseDFTExp(vector<double>& tArray, vector<double>& FC);
+  /** Given an input EIR as a sequence of Fourier coefficients, with odd length,
+   * calculate an array of EIR per interval over a year.
+   * 
+   * (Which is the exponent of the inverse discrete Fourier transform scaled by
+   * the number of days in an interval.)
+   * 
+   * @param tArray Array to fill with EIR values. Length should already be set.
+   * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...). */
+  static void calcFourierEIR (vector<double>& tArray, vector<double>& FC);
 
   /// Shifts elements of rArray clockwise by rAngle.
   static void rotateArray(vector<double>& rArray, double rAngle);

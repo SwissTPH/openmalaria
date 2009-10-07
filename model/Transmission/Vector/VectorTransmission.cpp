@@ -95,8 +95,17 @@ void VectorTransmission::setupNv0 (const std::list<Human>& population, int popul
   }
 }
 
-void VectorTransmission::endVectorInitPeriod () {
-  simulationMode = dynamicEIR;
+int VectorTransmission::vectorInitIterate () {
+  bool iterate = false;
+  for (size_t i = 0; i < numSpecies; ++i)
+    iterate |= species[i].vectorInitIterate ();
+  if (iterate) {
+    simulationMode = equilibriumMode;
+    return Global::intervalsPerYear*5;	//TODO: how long?
+  } else {
+    simulationMode = dynamicEIR;
+    return 0;
+  }
 }
 
 void VectorTransmission::initMainSimulation() {
@@ -113,6 +122,9 @@ void VectorTransmission::initMainSimulation() {
 }
 
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
+  if (simulationMode == equilibriumMode)
+    return initialisationEIR[simulationTime%Global::intervalsPerYear] * host.entoAvailabilityNV(ageInYears);
+  
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].calculateEIR (i, host);

@@ -41,16 +41,18 @@ public:
    * structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize);
   
-  /** Length with which to force input EIR prior to switching to dynamic EIR
-   * and starting updateOneLifespan(). Note: no explicit reason why these
-   * events should coincide. */
+  /** Length with which to force vector calculations, while waiting for human
+   * population to stabilise. */
   virtual int vectorInitDuration () {
-    // NOTE: One year should be ample time to infect a significant number of
-    // humans and start the infection cycle, but probably not long enough to
-    // reach an equilibrium state.
-    return Global::intervalsPerYear;
+    // 30 years allows human availability & infectiousness to stabilise somewhat, at least according to one scenario.
+    return Global::intervalsPerYear*30;
   }
-  virtual void endVectorInitPeriod ();
+  /** Called after end of vectorInitDuration() and after init iterations.
+   *
+   * Should determine whether another init iteration is needed, make necessary
+   * adjustments, and return number of timesteps to run this initialisation for
+   * (0 if a further iteration is not needed). */
+  virtual int vectorInitIterate ();
   
   /** Initialise the main simulation. */
   void initMainSimulation ();

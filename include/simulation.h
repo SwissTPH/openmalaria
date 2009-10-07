@@ -90,11 +90,8 @@ private:
   
   string checkpointName;
   
-  static int vectorInitEnd;
-  /// vectorInitEnd + length of one lifespan
-  static int uOLSInitEnd;
-  /// uOLSInitEnd + length of main sim + 1 for consistency
-  static int simulationEnd;
+  static int simPeriodEnd;
+  static int totalSimDuration;
   
   friend class VectorAnophelesSuite;
 };

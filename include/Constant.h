@@ -285,7 +285,10 @@ enum SimulationMode {
    * This is used for the warm-up period and if we want to separate direct
    * effect of an intervention from indirect effects via transmission
    * intensity. The seasonal pattern and intensity of the EIR do not change
-   * over years. */
+   * over years.
+   * 
+   * For the vector model, this runs most calculations dynamically but still
+   * forces the EIR. */
   equilibriumMode = 2,
   
   /** Transient EIR known
