@@ -35,7 +35,7 @@ public:
   }
   
   void testRelativeAvailability () {
-    TS_ASSERT_DELTA (PerHostTransmission::getRelativeAvailability(7.0), 0.51263046437755255, 0.00000000000000000);
+    TS_ASSERT_DELTA (PerHostTransmission::relativeAvailabilityAge (7.0), 0.51263046437755255, 0.00000000000000000);
   }
 };
 

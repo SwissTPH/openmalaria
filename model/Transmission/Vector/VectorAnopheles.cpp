@@ -121,7 +121,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   double intP_df = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex);
     sumPFindBite += prod;
@@ -246,7 +246,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   double intP_dif = 0.0;
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailability(humanBase, sIndex, h->getAgeInYears());
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex)
 	  * host.probMosqResting(humanBase, sIndex);

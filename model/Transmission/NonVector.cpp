@@ -139,7 +139,7 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     throw overflow_error(msg.str());
   }
 #endif
-  return eir * perHost.entoAvailabilityNV(ageInYears);
+  return eir * perHost.relativeAvailabilityHetAge (ageInYears);
 }
 
 

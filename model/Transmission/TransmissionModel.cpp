@@ -83,7 +83,7 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
   
   for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     double ageYears = h->getAgeInYears();
-    double t = h->perHostTransmission.entoAvailabilityNV(ageYears);
+    double t = h->perHostTransmission.relativeAvailabilityHetAge(ageYears) * PerHostTransmission::ageCorrectionFactor;
     sumWeight += t;
     t *= h->probTransmissionToMosquito();
     sumWt_kappa += t;

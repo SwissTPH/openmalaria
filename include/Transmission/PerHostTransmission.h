@@ -44,14 +44,20 @@ public:
    * Pass getInterventions() from inputData. */
   static void initParameters (const scnXml::Interventions&);
   
+  /** Correction factor for getRelativeAvailability. */
+  static double ageCorrectionFactor;
+  
   //! Calculates the adjustment for body size in exposure to mosquitoes 
   /*! 
   The bites are assumed proportional to average surface area for hosts of the given age. 
   Linear interpolation is used to calculate this from the input array of surface areas. 
   \param ageyrs age in years 
   \return the ratio of bites received by the host to the average for an adult 
-  */ 
-  static inline double getRelativeAvailability (double ageyrs) {
+   *
+   * Age factor of availiability; to be multiplied by partial availability.
+   * 
+   * Mean output should be 1.0/ageCorrectionFactor. */
+  static double relativeAvailabilityAge (double ageyrs) {
     return ageSpecificRelativeAvailability[WithinHostModel::getAgeGroup(ageyrs)];
   }
   //@}
@@ -68,14 +74,20 @@ public:
    *
    * @param speciesIndex = Index in species list of this mosquito type. */
   //@{
-  /// Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
-  inline double entoAvailability (HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
-    return entoAvailabilityPartial (base, speciesIndex) * getRelativeAvailability (ageYears);
-  }
-  /** Availability of host to mosquitoes (α_i).
+  /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
    *
-   * The full availability is entoAvailability(human->getAgeInYears()). */
-  double entoAvailabilityPartial (HostCategoryAnopheles& base, size_t speciesIndex) const;
+   * Mean should be same as entoAvailabilityHetVecItv(). */
+  inline double entoAvailabilityFull (HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
+    return entoAvailabilityHetVecItv (base, speciesIndex)
+         * relativeAvailabilityAge (ageYears) * ageCorrectionFactor;
+  }
+  /** @brief Availability of host to mosquitoes (α_i) excluding age factor.
+   *
+   * (Includes heterogeneity, intervention, and human-to-vector availability
+   * rate factors.)
+   * 
+   * Assume mean is human-to-vector availability rate factor. */
+  double entoAvailabilityHetVecItv (HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
   double probMosqBiting (HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
@@ -84,14 +96,24 @@ public:
   //@}
   
   /** Get the availability of this host to mosquitoes relative to other hosts.
+   * (Includes heterogeneity and age effects; for non-vector model this is the
+   * whole availability factor.)
    *
-   * Used to drive a simulation from an input EIR. */
-  inline double entoAvailabilityNV (double ageYears) const {
-    return _entoAvailability * getRelativeAvailability (ageYears);
+   * Used to drive a simulation from an input EIR.
+   * Is relativeAvailabilityHet()*relativeAvailabilityAge(ageYears).
+   * 
+   * Mean output is less than 1.0 (roughly 1.0/ageCorrectionFactor);
+   * this is to avoid changing all NonVector model results. */
+  inline double relativeAvailabilityHetAge (double ageYears) const {
+    return _relativeAvailabilityHet
+        * relativeAvailabilityAge (ageYears);
   }
-  /// Just return _entoAvailability (ONLY for HeterogeneityWorkaroundII)
-  inline double entoAvailabilityNVPartial () const {
-    return _entoAvailability;
+  /** Relative availability of host to mosquitoes excluding age factor.
+   *
+   * (ONLY for HeterogeneityWorkaroundII, and documentation purposes.)
+   * Assume mean is 1.0. */
+  inline double relativeAvailabilityHet () const {
+    return _relativeAvailabilityHet;
   }
   
   /// Give individual a new ITN as of time timeStep.
@@ -109,14 +131,7 @@ public:
   
   /** Distribute ITNs to individuals of the correct age (to model ITN
    * distribution along with measles vaccines, etc.). */
-  inline void continousItnDistribution (int ageTSteps) {
-    if (Simulation::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
-      && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
-      if (gsl::rngUniform() < cntItnCoverage[nextItnDistribution])
-	setupITN ();
-      ++nextItnDistribution;
-    }
-  }
+  void continousItnDistribution (int ageTSteps);
   
   
 private:
@@ -124,7 +139,7 @@ private:
   
   // Heterogeneity factor in availability; this is already multiplied into the
   // entoAvailability param stored in HostMosquitoInteraction.
-  double _entoAvailability;
+  double _relativeAvailabilityHet;
   
   // (simulationTime - timestepXXX) is the age of the intervention.
   // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.

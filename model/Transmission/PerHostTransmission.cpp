@@ -27,6 +27,7 @@
 // -----  PerHostTransmission static  -----
 
 const double PerHostTransmission::bsa_prop[WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+double PerHostTransmission::ageCorrectionFactor = 1.286683772215131;	// This factor was calculated at some point. It shouldn't be used now, but better not to leave uninitialised.
 double PerHostTransmission::ageSpecificRelativeAvailability[WithinHostModel::nages];
 vector<double> PerHostTransmission::cntItnTargetAgeTStep;
 vector<double> PerHostTransmission::cntItnCoverage;
@@ -58,7 +59,7 @@ PerHostTransmission::PerHostTransmission () :
     nextItnDistribution(0)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
-  _entoAvailability = availabilityFactor;
+  _relativeAvailabilityHet = availabilityFactor;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
   if (vTM) {
     species.resize (vTM->numSpecies);
@@ -68,7 +69,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 }
 
 PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
-  in >> _entoAvailability;
+  in >> _relativeAvailabilityHet;
   in >> timestepITN;
   in >> timestepIRS;
   in >> timestepVA;
@@ -82,7 +83,7 @@ PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
 }
 
 void PerHostTransmission::write (ostream& out) const {
-  out << _entoAvailability << endl;
+  out << _relativeAvailabilityHet << endl;
   out << timestepITN << endl;
   out << timestepIRS << endl;
   out << timestepVA << endl;
@@ -96,7 +97,7 @@ void PerHostTransmission::write (ostream& out) const {
 // conceivable Weibull params that the value is 0.0 when rounded to a double.
 // Performance-wise, an if() might give a small performance gain when
 // interventions aren't present.
-double PerHostTransmission::entoAvailabilityPartial (HostCategoryAnopheles& base, size_t speciesIndex) const {
+double PerHostTransmission::entoAvailabilityHetVecItv (HostCategoryAnopheles& base, size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability
     * (1.0 - base.ITNDeterrency (Simulation::simulationTime - timestepITN))
     * (1.0 - base.IRSDeterrency (Simulation::simulationTime - timestepIRS))
@@ -114,6 +115,15 @@ double PerHostTransmission::probMosqResting (HostCategoryAnopheles& base, size_t
   return P_C_i * P_D_i;
 }
 
+void PerHostTransmission::continousItnDistribution (int ageTSteps) {
+  if (Simulation::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
+    && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
+    if (gsl::rngUniform() < cntItnCoverage[nextItnDistribution])
+      setupITN ();
+    ++nextItnDistribution;
+  }
+}
+
 
 // ----- HostMosquitoInteraction non-static -----
 
@@ -121,12 +131,7 @@ void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double av
 {
   //TODO: vary to simulate heterogeneity
   
-  // We multiply the availability by a constant, to account for reduced availability due to age
-  // and therefore make the average availability of the population just base.entoAvailability.
-  // Search "Average human availability" in files to output for recalculation.
-  //TODO: confirm mean heterogeneity from InfectionIncidenceModel is 1.
-  // This value is the multiplicative mean of values calculated from scenarioVector and scenarioFullInterventionSet (both with popSize=1000)
-  entoAvailability = base.entoAvailability * availabilityFactor * 1.286683772215131;
+  entoAvailability = base.entoAvailability * availabilityFactor;
   probMosqBiting = base.probMosqBiting;
   probMosqFindRestSite = base.probMosqFindRestSite;
   probMosqSurvivalResting = base.probMosqSurvivalResting;

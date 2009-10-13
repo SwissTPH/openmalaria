@@ -153,7 +153,7 @@ private:
   static int IDCounter;
 
   //! Size of the human population   
-  int _populationSize;
+  int populationSize;
   
 public:
   //! TransmissionModel model
@@ -163,9 +163,9 @@ private:
   /** The simulated human population
    *
    * The list of all humans, ordered from oldest to youngest. */
-  std::list<Human> _population;
+  std::list<Human> population;
   
-  /// Iterator type of _population
+  /// Iterator type of population
   typedef std::list<Human>::iterator HumanIter;
 
   //! max lifespan in intervals

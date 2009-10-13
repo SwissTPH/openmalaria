@@ -91,7 +91,7 @@ void Population::clear(){
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population()
-    : _populationSize(get_populationsize())
+    : populationSize(get_populationsize())
 {
   _transmissionModel = TransmissionModel::createTransmissionModel();
 
@@ -103,7 +103,7 @@ Population::Population()
 }
 
 Population::~Population() {
-  for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter){
+  for(HumanIter iter=population.begin(); iter != population.end(); ++iter){
     iter->destroy();
   }
   delete _transmissionModel;  
@@ -112,8 +112,8 @@ Population::~Population() {
 void Population::read (istream& in) {
   //Start reading a checkpoint
   _transmissionModel->read (in);
-  in >> _populationSize;
-  if (_populationSize != get_populationsize())
+  in >> populationSize;
+  if (populationSize != get_populationsize())
     throw checkpoint_error("population size incorrect");
   in >> IDCounter;
   in >> mu0;
@@ -131,11 +131,11 @@ void Population::read (istream& in) {
   //Start reading the human data
   int popSize;
   in >> popSize;
-  if (popSize > _populationSize)
+  if (popSize > populationSize)
     throw checkpoint_error ("population size exceeds that given in scenario.xml");
   int indCounter = 0;	// Number of individuals read from checkpoint
   while(!(in.eof()||popSize==indCounter)){
-    _population.push_back(Human(in, *_transmissionModel));
+    population.push_back(Human(in, *_transmissionModel));
     indCounter++;
   }
   if (popSize != indCounter)
@@ -143,7 +143,7 @@ void Population::read (istream& in) {
 }
 void Population::write (ostream& out) {
   _transmissionModel->write (out);
-  out << _populationSize << endl;
+  out << populationSize << endl;
   out << IDCounter << endl;
   out << mu0 << endl;
   out << mu1 << endl;
@@ -153,9 +153,9 @@ void Population::write (ostream& out) {
   out << _workUnitIdentifier << endl;
 
   //Write human data
-  out << _population.size() << endl;	// this may not be equal to _populationSize due to startup optimisation
+  out << population.size() << endl;	// this may not be equal to populationSize due to startup optimisation
   HumanIter iter;
-  for(iter=_population.begin(); iter != _population.end(); ++iter){
+  for(iter=population.begin(); iter != population.end(); ++iter){
     iter->write (out);
   }
 }
@@ -222,7 +222,7 @@ void Population::estimateRemovalRates () {
 double Population::setDemoParameters (double param1, double param2) {
   rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
   if (rho != 0.0)
-    // Issue: in this case the total population size differs from _populationSize,
+    // Issue: in this case the total population size differs from populationSize,
     // however, some code currently uses this as the total population size.
     throw xml_scenario_error ("Population growth rate provided.");
   
@@ -285,7 +285,7 @@ void Population::setupPyramid(bool isCheckpoint) {
     cumpc[j]=cumpc[j]/totalCumPC;
     // 2. Create humans
     if (!isCheckpoint){
-      int targetPop = (int)floor(cumpc[j]*_populationSize+0.5);
+      int targetPop = (int)floor(cumpc[j]*populationSize+0.5);
       while (cumulativePop < targetPop) {
 	if (InitPopOpt && iage > 0) {}	// only those with age 0 should be created here
 	else newHuman(-iage);
@@ -295,7 +295,7 @@ void Population::setupPyramid(bool isCheckpoint) {
   }
   
   // 3. Vector setup dependant on human population
-  _transmissionModel->setupNv0 (_population, _populationSize);
+  _transmissionModel->setupNv0 (population, populationSize);
 }
 
 void Population::preMainSimInit () {
@@ -311,27 +311,34 @@ void Population::preMainSimInit () {
 
 void Population::newHuman(int dob){
   ++IDCounter;
-  _population.push_back(Human(*_transmissionModel, IDCounter, dob, Simulation::simulationTime));
+  population.push_back(Human(*_transmissionModel, IDCounter, dob, Simulation::simulationTime));
 }
 
 void Population::update1(){
-  NeonatalMortality::update (_population);
+  // Calculate relative availability correction, so calls from vectorUpdate,
+  // etc., will have a mean of 1.0.
+  double meanRelativeAvailability = 0.0;
+  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+    meanRelativeAvailability += PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
+  PerHostTransmission::ageCorrectionFactor = populationSize / meanRelativeAvailability;
+  
+  NeonatalMortality::update (population);
   // This should be called before humans contract new infections in the simulation step.
-  _transmissionModel->vectorUpdate (_population, Simulation::simulationTime);
+  _transmissionModel->vectorUpdate (population, Simulation::simulationTime);
   
   //targetPop is the population size at time t allowing population growth
-  int targetPop = (int)(_populationSize * exp(rho*Simulation::simulationTime));
+  int targetPop = (int)(populationSize * exp(rho*Simulation::simulationTime));
   int cumPop = 0;
   
   // Update each human in turn
   //std::cout<<" time " <<t<<std::endl;
-  HumanIter last = _population.end();
+  HumanIter last = population.end();
   --last;
-  for (HumanIter iter = _population.begin(); iter != _population.end();){
+  for (HumanIter iter = population.begin(); iter != population.end();){
     // Update human, and remove if too old:
     if (iter->update(Simulation::simulationTime,_transmissionModel)){
       iter->destroy();
-      iter=_population.erase(iter);
+      iter=population.erase(iter);
       continue;
     }
     
@@ -344,7 +351,7 @@ void Population::update1(){
     if (cumPop > targetCumPop (age+2, targetPop)) {
       --cumPop;
       iter->destroy();
-      iter = _population.erase(iter);
+      iter = population.erase(iter);
       continue;
     }
     //END Population size & age structure
@@ -364,15 +371,15 @@ void Population::update1(){
     ++cumPop;
   }
   
-  _transmissionModel->updateKappa (_population, Simulation::simulationTime);
+  _transmissionModel->updateKappa (population, Simulation::simulationTime);
   
 #ifdef OMP_CSV_REPORTING
   if (Simulation::simulationTime % (Global::intervalsPerYear*5)==0) {
     csvReporting << Simulation::simulationTime << ',';
-    list<Human>::reverse_iterator it = _population.rbegin();
+    list<Human>::reverse_iterator it = population.rbegin();
     for (double ageLim = 0; ageLim <= maxLifetimeDays/365.0; ageLim += 1) {
       int counter=0;
-      while (it != _population.rend() && it->getAgeInYears() < ageLim) {
+      while (it != population.rend() && it->getAgeInYears() < ageLim) {
 	++counter;
 	++it;
       }
@@ -391,7 +398,7 @@ int Population::targetCumPop (int ageTSteps, int targetPop) {
 // -----  non-static methods: summarising and interventions  -----
 
 void Population::newSurvey () {
-  for(HumanIter iter=_population.begin(); iter != _population.end(); iter++){
+  for(HumanIter iter=population.begin(); iter != population.end(); iter++){
     iter->summarize();
   }
   _transmissionModel->summarize (*Simulation::gMainSummary);
@@ -461,7 +468,7 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
       mass.getMaxAge().get() : 100.0;
   double coverage = mass.getCoverage();
   
-  for(HumanIter iter=_population.begin(); iter != _population.end(); ++iter) {
+  for(HumanIter iter=population.begin(); iter != population.end(); ++iter) {
     double ageYears = iter->getAgeInYears();
     if ((ageYears > minAge) && (ageYears < maxAge) && gsl::rngUniform() < coverage)
       // This is UGLY syntax. It just means call intervention() on the human pointed by iter.

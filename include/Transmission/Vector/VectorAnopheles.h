@@ -110,7 +110,7 @@ public:
      *
      * See comment in VectorAnopheles.advancePeriod for method. */
     return partialEIR
-      * host.entoAvailabilityPartial(humanBase, sIndex)
+      * host.entoAvailabilityHetVecItv (humanBase, sIndex)
       * host.probMosqBiting(humanBase, sIndex);	// probability of biting, once commited
   }
   
