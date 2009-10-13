@@ -251,8 +251,8 @@ private:
   * Doesn't need to be checkpointed (is recalculated each step). */
   double partialEIR;
   
-  double sumAnnualForcedS_v, sumAnnualS_v;
-  int nAnnualSums;
+  double sumAnnualForcedS_v;
+  vector<double> annualS_v;
   
   /** @brief Simple larviciding intervention.
    *

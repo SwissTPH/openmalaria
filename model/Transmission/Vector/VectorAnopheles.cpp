@@ -159,7 +159,8 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
     O_v[t] = S_v[t] * initOvFromSv;
   }
   
-  sumAnnualForcedS_v = vectors::sum (forcedS_v);
+  sumAnnualForcedS_v = vectors::sum (forcedS_v) * Global::interval;
+  annualS_v.assign (Global::intervalsPerYear, 0.0);
   
   // cout << "N_v0, S_v:\n" << mosqEmergeRate << '\n' << forcedS_v << endl;
   // cout << "init:\t"<<'\t'<<intP_A<<'\t'<<P_Ai_base <<'\t'<< intP_df <<'\t'<<endl;
@@ -177,8 +178,8 @@ bool VectorAnopheles::vectorInitIterate () {
   
   // Try to match S_v against its predicted value. Don't try with N_v or O_v
   // because the predictions will change - would be chasing a moving target!
-  double factor = sumAnnualForcedS_v / sumAnnualS_v;
-  cout << "Pre-calced Sv, dynamic Sv (from N sums):\t"<<sumAnnualForcedS_v<<'\t'<<sumAnnualS_v<<" ("<<nAnnualSums<<')'<<endl;
+  double factor = sumAnnualForcedS_v / vectors::sum(annualS_v);
+  cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
   if (!(factor > 1e-6 && factor < 1e6))	// unlikely, but might as well check incase either operand was zero
     throw runtime_error ("factor out of bounds");
   
@@ -272,11 +273,8 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   
   // Summed per day:
   partialEIR = 0.0;
-  if (simulationTime % Global::intervalsPerYear == 0) {
-    sumAnnualS_v = 0.0;
-    nAnnualSums = 0;
-    cout << simulationTime << endl;;
-  }
+  size_t iStep = simulationTime % Global::intervalsPerYear;
+  annualS_v[iStep] = 0.0;
   
 #ifdef OMV_CSV_REPORTING
   double outN_v0 = 0.0, outN_v = 0.0, outO_v = 0.0, outS_v = 0.0;
@@ -303,7 +301,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     P_dif[t] = intP_dif;
     
     
-    N_v[t] = mosqEmergeRate[simulationTime % Global::intervalsPerYear] * larvicidingIneffectiveness
+    N_v[t] = mosqEmergeRate[iStep] * larvicidingIneffectiveness
         + P_A[t1]  * N_v[t1]
         + P_df[ttau] * N_v[ttau];
     O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
@@ -358,8 +356,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
         + P_df[ttau]*S_v[ttau];
     //END S_v
     
-    sumAnnualS_v += S_v[t];
-    ++nAnnualSums;
+    annualS_v[iStep] += S_v[t];
     
     partialEIR += S_v[t] * P_Ai_base;
     
