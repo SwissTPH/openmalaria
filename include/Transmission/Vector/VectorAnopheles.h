@@ -168,28 +168,45 @@ private:
    * Currently assumed constant, although NC's non-autonomous model provides
    * an alternative. */
   double probMosqSurvivalOvipositing;
+  
+  /** Non-human host data. Doesn't need checkpointing. */
+  NonHumanHostsType nonHumanHosts;
   //@}
+  
+  /** Fourier coefficients for EIR / forcedS_v series, input from XML file.
+   * 
+   * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
+   * 
+   * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn]. */
+  vector<double> FSCoeffic;
+  
+  /// Rotation angle (in radians) for emergence rate. Both offset for EIR given in XML file and
+  /// offset needed to fit target EIR (delayed from emergence rate).
+  double FSRotateAngle;
   
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
    * Units: Animals per day. Length: daysInYear.
    * 
-   * Should be set by setupNv0; no need to checkpoint. */
+   * Set by setupNv0, then adjusted; should be checkpointed. */
   vector<double> mosqEmergeRate;
-  
-  /** Non-human host data. Doesn't need checkpointing. */
-  NonHumanHostsType nonHumanHosts;
   
   /* Parameters and partial (derived) parameters from model */
   
   /** @brief S_v used to force an EIR during vector init.
-   * Length: Global::intervalsPerYear.
-   * Lookup value at (simulationTime % intervalsPerYear).
-   * Set by initialise() and setupNv0(); doesn't need checkpointing. */
+   * Length: daysInYear
+   * 
+   * Should be checkpointed. */
   vector<double> forcedS_v;
-  /** Conversion factors from S_v to N_v and O_v, for initialisation values of
-   * N_v and O_v. Don't need checkpointing. */
+  
+  /** Conversion factor from forcedS_v to mosqEmergeRate.
+   *
+   * Also has another temporary use between initialise and setupNv0 calls.
+   * Should be checkpointed. */
+  double initNv0FromSv;	///< ditto
+  
+  /** Conversion factor from forcedS_v to (initial values of) N_v.
+   * Should be checkpointed. */
   double initNvFromSv;
-  double initOvFromSv;	///< ditto
   
   /** N_v_length-1 is the number of previous days for which some parameters are
    * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
@@ -251,8 +268,11 @@ private:
   * Doesn't need to be checkpointed (is recalculated each step). */
   double partialEIR;
   
+  /** Used by vectorInitIterate to calculate scaling factor.
+   *
+   * Length of annualS_v is daysInYear. */
   double sumAnnualForcedS_v;
-  vector<double> annualS_v;
+  vector<double> annualS_v;	///< ditto
   
   /** @brief Simple larviciding intervention.
    *
@@ -272,11 +292,11 @@ private:
    * daysInYear by copying and duplicating elements to fill the gaps. */
   static vector<double> convertLengthToFullYear (vector<double>& ShortArray); 
   
-  /** Given an input EIR as a sequence of Fourier coefficients, with odd length,
-   * calculate an array of EIR per interval over a year.
+  /** Given an input sequence of Fourier coefficients, with odd length,
+   * calculate the exponential of the corresponding fourier series.
    * 
-   * (Which is the exponent of the inverse discrete Fourier transform scaled by
-   * the number of days in an interval.)
+   * Note: output is per-interval in tArray. When length is intervalsPerYear,
+   * you may want to scale the output by days-per-interval.
    * 
    * @param tArray Array to fill with EIR values. Length should already be set.
    * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).

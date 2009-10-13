@@ -66,7 +66,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   }
   
 #ifdef OMV_CSV_REPORTING
-  csvReporting << "input EIR,human infectiousness,innoculations per human" << endl;
+  csvReporting << "input EIR,resultant EIR,human infectiousness,human availability" << endl;
 #endif
   
   // We want the EIR to effectively be the sum of the EIR for each day in the interval

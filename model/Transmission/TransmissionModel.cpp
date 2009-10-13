@@ -132,7 +132,11 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
   }
   
 #ifdef OMV_CSV_REPORTING
-  csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear] << ',' << kappa[tmod] << ',' << innoculationsPerDayOfYear[tmod] << endl;
+  csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear]
+	       << ',' << innoculationsPerDayOfYear[tmod]
+	       << ',' << kappa[tmod]
+	       << ',' << PerHostTransmission::ageCorrectionFactor
+	       << ','<< endl;
 #endif
 }
 
