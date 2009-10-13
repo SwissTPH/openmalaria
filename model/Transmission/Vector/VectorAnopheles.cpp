@@ -84,16 +84,11 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   FCEIR[2] = eirData.getB1();
   FCEIR[3] = eirData.getA2();
   FCEIR[4] = eirData.getB2();
-  /** Angle to rotate EIR: Should be between 0 and 2Pi. */
-  double EIRRotateAngle = eirData.getEIRRotateAngle();
   
   vector<double> speciesEIR (Global::intervalsPerYear);
   
   // Calculate forced EIR for pre-intervention phase from FCEIR:
-  calcFourierEIR (speciesEIR, FCEIR);
-  
-  if(EIRRotateAngle != 0.0)
-    rotateArray(speciesEIR, EIRRotateAngle);
+  calcFourierEIR (speciesEIR, FCEIR, eirData.getEIRRotateAngle());
   
   // Add to the TransmissionModel's EIR, used for the initalization phase:
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
@@ -391,7 +386,7 @@ vector<double> VectorAnopheles::convertLengthToFullYear (vector<double>& ShortAr
 }
 
 
-void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC) {
+void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle) {
   if (FC.size() % 2 == 0)
     throw xml_scenario_error("The number of Fourier coefficents should be odd.");
   
@@ -404,22 +399,12 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
   // Calculate inverse discrete Fourier transform
   for (size_t t=0; t<tArray.size(); t++){
     double temp = FC[0];
-    double wt = w*(t+1);
+    double wt = w*t - rAngle;
     for(int n=1;n<=Fn;n++){
       temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
     }
     tArray[t] = exp(temp) * Global::interval;	// input EIR is per-capita per-day, so scale to per-interval
   }
-}
-
-void VectorAnopheles::rotateArray(vector<double>& rArray, double rAngle) {
-  vector<double> tempArray (rArray.size());
-  size_t rotIndex = size_t ((rAngle*rArray.size())/(2.0*M_PI));
-
-  for (size_t i=0; i < rArray.size(); i++) {
-    tempArray[(i+rotIndex) % rArray.size()] = rArray[i];
-  }
-  rArray = tempArray;
 }
 
 
