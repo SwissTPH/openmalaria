@@ -81,7 +81,7 @@ def main(*args):
         print "Usage: compareLogs.py logfile1 logfile2 [max different lines to print]"
         return 1
     
-    print "Comparing: "+args[1]+" "+args[2]
+    print args[0]+" "+args[1]+" "+args[2]+" "+str(maxDiffsToPrint)
     file1=open(args[1], 'r')
     file2=open(args[2], 'r')
     line_count=0

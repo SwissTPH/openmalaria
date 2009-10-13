@@ -357,13 +357,13 @@
     <xs:attribute name="mosquito" type="xs:string" use="required" />
     <xs:attribute name="propInfected" type="xs:double" use="required">
       <xs:annotation>
-	<xs:documentation>Proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t).</xs:documentation>
+	<xs:documentation>Initial guess of the proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t). Only used as a starting value.</xs:documentation>
 	<xs:appinfo>units:Proportion;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="propInfectious" type="xs:double" use="required">
       <xs:annotation>
-	<xs:documentation>Proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t).</xs:documentation>
+	<xs:documentation>Initial guess of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
 	<xs:appinfo>units:Proportion;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>

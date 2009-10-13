@@ -27,7 +27,7 @@ namespace Nv0DelayFitting {
 template <class T>
 struct eDFunctor
 {
-  eDFunctor(double r, const vector<T>& fc_, const vector<T>& samples_) : p(samples_.size()), existingR(r), fc(fc_), logSamples(samples_) {
+  eDFunctor(double r, const vector<T>& fc_, const vector<T>& samples_) : p(samples_.size()), fcR(r), fc(fc_), logSamples(samples_) {
     if (fc.size() % 2 == 0)
       throw runtime_error("The number of Fourier coefficents should be odd.");
     w = 2*M_PI / T(p);
@@ -43,7 +43,7 @@ struct eDFunctor
     
     // Calculate inverse discrete Fourier transform
     for (size_t t=0; t<p; t++) {
-      T wt = w*t+d;
+      T wt = w*t+fcR+d;
       T val = fc[0], dval = 0.0, ddval = 0.0;
       for(size_t n=1;n<=fn;n++){
 	T temp = fc[2*n-1]*cos(n*wt) + fc[2*n]*sin(n*wt);	// value
@@ -64,7 +64,7 @@ struct eDFunctor
   }
   private:
     size_t p, fn;
-    T w,existingR;
+    T w,fcR;
     const vector<T>& fc;
     vector<T> logSamples;
 };
@@ -72,20 +72,23 @@ struct eDFunctor
 
 /** Calculate rotation angle needed to match up fourier series defined by fc with samples.
  *
- * @param existingR Existing angle (in radians) to rotate by.
+ * The series given by fc and fcR is rotated to match samples, and negative
+ * this angle is returned (i.e. amount samples should be rotated by).
+ *
+ * @param fcR Angle (in radians) to rotate by, before matching.
  * @param fc Fourier coefficients for S_v series (a0, a1, b1, ...)
  * @param samples The calculated S_v values we want to match
  * @returns Angle to rotate by (including existingR).
  */
 template <class T>
-T fit (double existingR, const vector<T>& fc, const vector<T>& samples)
+T fit (double fcR, const vector<T>& fc, const vector<T>& samples)
 {
   T min = 0.0;
   T max = 2*M_PI;	// can we provide better bounds?
   T guess = 0.0;
   int digits = std::numeric_limits<T>::digits / 2;	//TODO: check how many digits we should provide
   //TODO: see whether halley_iterate or schroeder_iterate is faster
-  return -boost::math::tools::halley_iterate(eDFunctor<T>(existingR, fc, samples), guess, min, max, digits) + existingR;
+  return -boost::math::tools::halley_iterate (eDFunctor<T>(fcR, fc, samples), guess, min, max, digits);
 }
 }
 #endif

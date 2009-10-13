@@ -83,7 +83,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   FSCoeffic[2] = eirData.getB1();
   FSCoeffic[3] = eirData.getA2();
   FSCoeffic[4] = eirData.getB2();
-  FSRotateAngle = eirData.getEIRRotateAngle();
+  EIRRotateAngle = eirData.getEIRRotateAngle();
   
   // Calculate forced EIR for pre-intervention phase from FSCoeffic:
   vector<double> speciesEIR (Global::intervalsPerYear);
@@ -95,9 +95,9 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
     initialisationEIR[i] += speciesEIR[i];
   
   // Set other data used for mosqEmergeRate calculation:
-  //FSRotateAngle -= (EIPDuration+10)/365.*2.*M_PI;	// usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
+  FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;	// usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
   //FIXME: to check this works, starting with a wacky value:
-  FSRotateAngle = M_PI/2.;
+  //FSRotateAngle += -M_PI/8.;
   initNvFromSv = 1.0 / anoph.getPropInfectious();
   initNv0FromSv = initNvFromSv * anoph.getPropInfected();	// temporarily use of initNv0FromSv
   
@@ -181,7 +181,8 @@ bool VectorAnopheles::vectorInitIterate () {
   if (!(factor > 1e-6 && factor < 1e6))	// unlikely, but might as well check incase either operand was zero
     throw runtime_error ("factor out of bounds");
   
-  const double LIMIT = 0.01;
+  //NOTE: how accurate do we want fits to be? Results seem to be stocastically something like 1-5% different.
+  const double LIMIT = 0.05;
   if (fabs(factor - 1.0) > LIMIT) {
     cout << "Vector iteration: adjusting with factor "<<factor<<endl;
     // Adjusting mosqEmergeRate is the important bit. The rest should just bring things to a stable state quicker.
@@ -194,10 +195,11 @@ bool VectorAnopheles::vectorInitIterate () {
     //vectors::scale (S_v, factor);
     return true;	// we scaled mosqEmergeRate; iterate again
   } else {
+    return false;	//TODO: EIR fitting offset. For now skip and just use guess.
     // Once the amplitude is approximately correct, we try to find the offset
-    double oldRotateAngle = FSRotateAngle;
-    FSRotateAngle = Nv0DelayFitting::fit<double> (FSRotateAngle, FSCoeffic, annualS_v);
-    cout << "Vector iteration: rotating with angle (in radians): " << FSRotateAngle << endl;
+    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, annualS_v);
+    cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
+    FSRotateAngle += rAngle;	// annualS_v was already rotated by old value of FSRotateAngle, so increment
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
@@ -205,7 +207,7 @@ bool VectorAnopheles::vectorInitIterate () {
     
     sumAnnualForcedS_v = vectors::sum (forcedS_v) * Global::interval;
     
-    return ((FSRotateAngle - oldRotateAngle) > LIMIT * 2*M_PI / Global::intervalsPerYear);	// iterate again if result wasn't close
+    return (rAngle > LIMIT * 2*M_PI / Global::intervalsPerYear);	// iterate again if result wasn't close
   }
 }
 
@@ -294,7 +296,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses Global::interval day (currently 5 day) time steps.
   int firstDay = simulationTime * Global::interval;
-  for (size_t i = 0; i < Global::interval; ++i) {
+  for (size_t i = 0; i < (size_t)Global::interval; ++i) {
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
     size_t dMod = i + firstDay + N_v_length;

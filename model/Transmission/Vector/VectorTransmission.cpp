@@ -101,7 +101,7 @@ int VectorTransmission::vectorInitIterate () {
     iterate |= species[i].vectorInitIterate ();
   if (iterate) {
     simulationMode = equilibriumMode;
-    return Global::intervalsPerYear*5;	//TODO: how long?
+    return Global::intervalsPerYear*2;	//TODO: how long?
   } else {
     simulationMode = dynamicEIR;
     return 0;
