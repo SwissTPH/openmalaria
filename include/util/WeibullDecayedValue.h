@@ -21,7 +21,7 @@
 #ifndef Hmod_WeibullDecayedValue
 #define Hmod_WeibullDecayedValue
 
-#include "global.h"
+#include "Global.h"
 #include "simulation.h"
 
 namespace scnXml {

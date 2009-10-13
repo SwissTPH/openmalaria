@@ -19,7 +19,7 @@
 #include "Clinical/OldCaseManagement.h"
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
-#include "global.h"
+#include "Global.h"
 #include "simulation.h"
 #include "summary.h"
 #include "util/gsl.h"

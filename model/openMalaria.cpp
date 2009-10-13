@@ -25,7 +25,7 @@ using namespace std;
 #include "util/gsl.h"	//Include wrapper for GSL library
 #include "inputData.h"	//Include parser for the input
 
-#include "global.h"
+#include "Global.h"
 #include "simulation.h"
 
 

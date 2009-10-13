@@ -78,7 +78,7 @@ def main(*args):
     elif (len(args) == 3):
         pass
     else:
-        print "Usage: compareLogs.py logfile1 logfile2 [max different lines to print]"
+        print "Usage: "+args[0]+" logfile1 logfile2 [max different lines to print]"
         return 1
     
     print args[0]+" "+args[1]+" "+args[2]+" "+str(maxDiffsToPrint)

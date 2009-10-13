@@ -23,7 +23,7 @@
 #ifndef Hmod_PathogenesisModel
 #define Hmod_PathogenesisModel
 
-#include "global.h"
+#include "Global.h"
 #include "summary.h"
 
 class WithinHostModel;

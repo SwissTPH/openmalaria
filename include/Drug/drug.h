@@ -27,7 +27,7 @@
 #include <deque>
 #include <map>
 #include <vector>
-#include "global.h"
+#include "Global.h"
 #include "proteome.h"
 
 using namespace std;

@@ -20,7 +20,7 @@
 #ifndef Hmod_VectorAnopheles
 #define Hmod_VectorAnopheles
 
-#include "global.h"
+#include "Global.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "Transmission/PerHostTransmission.h"
 #include <list>
@@ -176,16 +176,17 @@ private:
   double EIRRotateAngle;
   //@}
   
+  /// Rotation angle (in radians) for emergence rate. Both offset for EIR given in XML file and
+  /// offset needed to fit target EIR (delayed from emergence rate). Checkpoint.
+  double FSRotateAngle;
+  
   /** Fourier coefficients for EIR / forcedS_v series, input from XML file.
    * 
    * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
    * 
-   * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn]. */
+   * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
+   * Doesn't currently need checkpointing. */
   vector<double> FSCoeffic;
-  
-  /// Rotation angle (in radians) for emergence rate. Both offset for EIR given in XML file and
-  /// offset needed to fit target EIR (delayed from emergence rate).
-  double FSRotateAngle;
   
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
    * Units: Animals per day. Length: daysInYear.
@@ -200,6 +201,12 @@ private:
    * 
    * Should be checkpointed. */
   vector<double> forcedS_v;
+  
+  /** Used by vectorInitIterate to calculate scaling factor.
+  *
+  * Length of annualS_v is daysInYear. Checkpoint. */
+  vector<double> annualS_v;
+  double sumAnnualForcedS_v;	///< ditto
   
   /** Conversion factor from forcedS_v to mosqEmergeRate.
    *
@@ -270,12 +277,6 @@ private:
   * 
   * Doesn't need to be checkpointed (is recalculated each step). */
   double partialEIR;
-  
-  /** Used by vectorInitIterate to calculate scaling factor.
-   *
-   * Length of annualS_v is daysInYear. */
-  double sumAnnualForcedS_v;
-  vector<double> annualS_v;	///< ditto
   
   /** @brief Simple larviciding intervention.
    *

@@ -23,7 +23,7 @@
 #ifndef Hmod_predetMorb
 #define Hmod_predetMorb
 
-#include "global.h"
+#include "Global.h"
 #include "Pathogenesis/Pyrogen.h"
 
 using namespace std;

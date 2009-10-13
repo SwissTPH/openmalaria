@@ -23,7 +23,7 @@
 #ifndef Hmod_empiricalwithinhost
 #define Hmod_empiricalwithinhost
 
-#include "global.h"
+#include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/EmpiricalInfection.h"
 #include "Drug/DrugModel.h"

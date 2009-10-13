@@ -21,7 +21,7 @@
 #ifndef Hmod_TransmissionModel 
 #define Hmod_TransmissionModel 
 
-#include "global.h"
+#include "Global.h"
 #include <string.h>
 #include "Human.h"
 #include "scenario.hxx"

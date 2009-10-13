@@ -20,7 +20,7 @@
 #ifndef Hmod_VectorTransmission
 #define Hmod_VectorTransmission
 
-#include "global.h"
+#include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Vector/VectorAnopheles.h"
 

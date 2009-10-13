@@ -20,7 +20,7 @@
 
 #include "inputData.h"
 #include "scenario.hxx"
-#include "global.h"
+#include "Global.h"
 #include "util/BoincWrapper.h"
 
 #include <iostream>

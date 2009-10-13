@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "global.h"
+#include "Global.h"
 
 // Forward declare: doesn't need to be known about here
 namespace scnXml {

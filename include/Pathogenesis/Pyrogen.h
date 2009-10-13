@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #ifndef Hmod_pyrogenMorb
 #define Hmod_pyrogenMorb
 
-#include "global.h"
+#include "Global.h"
 #include "Pathogenesis/PathogenesisModel.h"
 
 using namespace std;

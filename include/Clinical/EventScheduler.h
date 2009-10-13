@@ -21,7 +21,7 @@
 #ifndef Hmod_ClinicalEventSchduler
 #define Hmod_ClinicalEventSchduler
 
-#include "global.h"
+#include "Global.h"
 #include "Clinical/ClinicalModel.h"
 #include <map>
 #include <list>

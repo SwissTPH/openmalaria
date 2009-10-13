@@ -23,7 +23,7 @@
 #ifndef Hmod_dummywithinhost
 #define Hmod_dummywithinhost
 
-#include "global.h"
+#include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DummyInfection.h"
 #include "Drug/DrugModel.h"

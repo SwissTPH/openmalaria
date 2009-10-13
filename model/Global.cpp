@@ -24,7 +24,7 @@
 #include <cmath>
 #include <stdexcept>
 
-#include "global.h"
+#include "Global.h"
 #include "inputData.h"
 #include "util/BoincWrapper.h"
 
@@ -78,10 +78,6 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	fileGiven = true;
       } else if (clo == "print-model") {
 	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
-      } else if (clo == "enableERC") {
-	clOptions = CLO::CLO (clOptions | CLO::ENABLE_ERC);
-      } else if (clo == "noErcValidation") {
-	clOptions = CLO::CLO (clOptions | CLO::NO_ERC_VALIDATION);
       } else if (clo == "checkpoint") {
 	clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
       } else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
@@ -107,8 +103,6 @@ string Global::parseCommandLine (int argc, char* argv[]) {
 	  if (clResourcePath.size())
 	    throw runtime_error ("--resource-path (or -p) may only be given once");
 	  clResourcePath = parseNextArg (argc, argv, i).append ("/");
-	} else if (clo[j] == 'v') {
-	  clOptions = CLO::CLO (clOptions | CLO::NO_ERC_VALIDATION);
 	} else if (clo[j] == 'm') {
 	  clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
 	} else if (clo[j] == 'c') {
@@ -132,10 +126,6 @@ string Global::parseCommandLine (int argc, char* argv[]) {
     << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
     << " -m --print-model	Print which model version flags are set (as binary with right-most"<<endl
     << "			digit representing option 0) and exit." << endl
-    << "    --enableERC		Allow Emergence Rate Calculations (otherwise will stop if the"<<endl
-    << "			values read from file are inaccurate)."<<endl
-    << " -v --noErcValidation	Disables most of the emergence rate validation when human"<<endl
-    << "			infectiousness validates."<<endl
     << " -c --checkpoint	Forces checkpointing once during simulation (during initialisation"<<endl
     << "			period), exiting after completing each"<<endl
     << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl

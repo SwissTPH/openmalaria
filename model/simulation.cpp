@@ -27,7 +27,7 @@
 #include "population.h"
 #include "summary.h"
 #include "Drug/DrugModel.h"
-#include "global.h"
+#include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "inputData.h"
 #include <fstream>
@@ -68,8 +68,8 @@ Simulation::~Simulation(){
 
 int Simulation::start(){
   if (isCheckpoint()) {
-    readCheckpoint();
     _population->setupPyramid(true);
+    readCheckpoint();
   }
   else {
     simulationTime = 0;

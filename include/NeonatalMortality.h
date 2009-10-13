@@ -21,7 +21,7 @@
 #ifndef Hmod_NeonatalMortality
 #define Hmod_NeonatalMortality
 
-#include "global.h"
+#include "Global.h"
 #include <list>
 
 class Human;

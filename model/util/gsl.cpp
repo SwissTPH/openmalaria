@@ -26,7 +26,7 @@ using namespace std;
 #include "util/gsl.h"
 #include "inputData.h"
 #include "population.h"
-#include "global.h"
+#include "Global.h"
 
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;

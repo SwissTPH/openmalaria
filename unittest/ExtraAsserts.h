@@ -50,7 +50,7 @@
 #define Hmod_ExtraAsserts
 
 #include <cxxtest/TestSuite.h>
-#include "global.h"
+#include "Global.h"
 #include <limits>
 #include <cmath>
 

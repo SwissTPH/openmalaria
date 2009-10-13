@@ -23,7 +23,7 @@
 #ifndef Hmod_whost
 #define Hmod_whost
 
-#include "global.h"
+#include "Global.h"
 #include "WithinHost/Infection.h"
 
 #include <list>

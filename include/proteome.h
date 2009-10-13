@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "global.h"
+#include "Global.h"
 
 using namespace std;
 

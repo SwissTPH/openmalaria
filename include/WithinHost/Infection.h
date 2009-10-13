@@ -21,7 +21,7 @@
 #ifndef Hmod_Infection
 #define Hmod_Infection
 
-#include "global.h"
+#include "Global.h"
 #include "proteome.h"
 
 

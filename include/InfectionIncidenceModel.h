@@ -21,7 +21,7 @@
 #ifndef Hmod_InfectionIncidence
 #define Hmod_InfectionIncidence
 
-#include "global.h"
+#include "Global.h"
 #include "summary.h"
 #include "inputData.h"
 #include "intervention.h"

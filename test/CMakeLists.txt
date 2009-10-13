@@ -14,6 +14,7 @@ set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT DummyPKPD CevCq)
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
     # Run each test with checkpointing. We don't need to do emergence rate validation, because any changes should affect the results anyway.
-    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- --checkpoint --noErcValidation ${TEST_NAME})
+    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- ${TEST_NAME})
   endforeach (TEST_NAME)
+  add_test (VecTest ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- VecTest)	# checkpointing broken
 endif (PYTHON_EXECUTABLE)

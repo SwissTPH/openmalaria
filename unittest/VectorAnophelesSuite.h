@@ -21,7 +21,7 @@
 #ifndef Hmod_VectorAnophelesSuite
 #define Hmod_VectorAnophelesSuite
 
-#include "global.h"
+#include "Global.h"
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
 #include <cxxtest/TestSuite.h>
 #include "ExtraAsserts.h"

@@ -20,7 +20,7 @@
 #ifndef Hmod_UtilVectors
 #define Hmod_UtilVectors
 
-#include "global.h"
+#include "Global.h"
 #include <gsl/gsl_vector.h>
 #include "scenario.hxx"
 

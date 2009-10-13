@@ -18,7 +18,7 @@
  */
 #ifndef Hmod_population
 #define Hmod_population
-#include "global.h"
+#include "Global.h"
 #include <list>
 #include <fstream>
 #include <vector>

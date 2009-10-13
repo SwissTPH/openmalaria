@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <math.h>
-#include "global.h"
+#include "Global.h"
 #include <ostream>
 
 /*

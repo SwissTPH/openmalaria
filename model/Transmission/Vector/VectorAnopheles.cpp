@@ -390,6 +390,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
 
 
 void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
+  cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
   larvicidingEndStep = Simulation::simulationTime + (elt.getDuration() / Global::interval);
 }
@@ -419,6 +420,15 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
 
 
 void VectorAnopheles::write (ostream& out) const {
+  out << FSRotateAngle << endl;
+  for (size_t i = 0; i < daysInYear; ++i) {
+    out << mosqEmergeRate[i] << endl;
+    out << forcedS_v[i] << endl;
+    out << annualS_v[i] << endl;
+  }
+  out << initNv0FromSv << endl;
+  out << initNvFromSv << endl;
+  out << sumAnnualForcedS_v << endl;
   for (int i = 0; i < N_v_length; ++i) {
     out << P_A[i] << endl;
     out << P_df[i] << endl;
@@ -427,8 +437,19 @@ void VectorAnopheles::write (ostream& out) const {
     out << O_v[i] << endl;
     out << S_v[i] << endl;
   }
+  out << larvicidingEndStep << endl;
+  out << larvicidingIneffectiveness << endl;
 }
 void VectorAnopheles::read (istream& in) {
+  in >> FSRotateAngle;
+  for (size_t i = 0; i < daysInYear; ++i) {
+    in >> mosqEmergeRate[i];
+    in >> forcedS_v[i];
+    in >> annualS_v[i];
+  }
+  in >> initNv0FromSv;
+  in >> initNvFromSv;
+  in >> sumAnnualForcedS_v;
   for (int i = 0; i < N_v_length; ++i) {
     in >> P_A[i];
     in >> P_df[i];
@@ -437,4 +458,6 @@ void VectorAnopheles::read (istream& in) {
     in >> O_v[i];
     in >> S_v[i];
   }
+  in >> larvicidingEndStep;
+  in >> larvicidingIneffectiveness;
 }

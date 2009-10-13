@@ -17,8 +17,8 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef Hmod_global
-#define Hmod_global
+#ifndef Hmod_Global
+#define Hmod_Global
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4290)	// disable some warnings on MSVC
@@ -45,8 +45,6 @@ namespace CLO {
     
     PRINT_MODEL_VERSION	= 0x1,	// outputs modelVersion in a human-readable form
     TEST_CHECKPOINTING	= 0x2,	// forces a checkpoint in the middle of initialisation, followed by exiting
-    ENABLE_ERC		= 0x4,	// allows (~8 hour) emergence rate calculations (if not present and emergence rates are invalid, code throws)
-    NO_ERC_VALIDATION	= 0x8,	// skips (93 second) emergence rate check (hence emergence rates are never calculated)
   };
 }
 

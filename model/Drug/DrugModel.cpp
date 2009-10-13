@@ -19,7 +19,7 @@
 */
 
 #include "Drug/DrugModel.h"
-#include "global.h"
+#include "Global.h"
 #include "proteome.h"
 
 // submodels:
