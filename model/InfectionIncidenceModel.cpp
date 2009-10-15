@@ -18,7 +18,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Global.h"
 #include "InfectionIncidenceModel.h"
 #include "util/gsl.h"
 #include "inputData.h"

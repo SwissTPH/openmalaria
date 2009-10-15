@@ -52,8 +52,6 @@ double Population::alpha0;
 double Population::alpha1;
 double Population::rho;
 
-double *Population::cumpc;
-
 int Population::IDCounter;
 
 // Theoretical optimisation: don't include individuals who will die before the
@@ -97,7 +95,7 @@ Population::Population()
 
   _workUnitIdentifier=get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
-  cumpc = (double*)malloc(((_maxTimestepsPerLife))*sizeof(double));
+  cumAgeProp.resize (_maxTimestepsPerLife);
 
   IDCounter=0;
 }
@@ -264,8 +262,8 @@ double Population::setDemoParameters (double param1, double param2) {
 }
 
 void Population::setupPyramid(bool isCheckpoint) {
-  // 1. Calculate cumpc
-  cumpc[0] = 0.0;
+  // 1. Calculate cumAgeProp
+  cumAgeProp[0] = 0.0;
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     double ageYears = (_maxTimestepsPerLife-j-1) * Global::yearsPerInterval;
     double M1s=(mu0 * (1.0-exp(-alpha0*ageYears)) / alpha0);
@@ -275,17 +273,17 @@ void Population::setupPyramid(bool isCheckpoint) {
     if (j < _maxTimestepsPerLife-Global::maxAgeIntervals){
       predperc=0.0;
     }
-    cumpc[j] = cumpc[j-1] + predperc;
+    cumAgeProp[j] = cumAgeProp[j-1] + predperc;
   }
   int cumulativePop=0;
-  double totalCumPC = cumpc[_maxTimestepsPerLife-1];
+  double totalCumPC = cumAgeProp[_maxTimestepsPerLife-1];
   for (int j=1;j<_maxTimestepsPerLife; j++) {
     int iage=_maxTimestepsPerLife-j-1;
-    //Scale using the total cumpc
-    cumpc[j]=cumpc[j]/totalCumPC;
+    //Scale using the total cumAgeProp
+    cumAgeProp[j]=cumAgeProp[j]/totalCumPC;
     // 2. Create humans
     if (!isCheckpoint){
-      int targetPop = (int)floor(cumpc[j]*populationSize+0.5);
+      int targetPop = (int)floor(cumAgeProp[j]*populationSize+0.5);
       while (cumulativePop < targetPop) {
 	if (InitPopOpt && iage > 0) {}	// only those with age 0 should be created here
 	else newHuman(-iage);
@@ -391,7 +389,7 @@ void Population::update1(){
 }
 
 int Population::targetCumPop (int ageTSteps, int targetPop) {
-  return (int)floor(cumpc[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
+  return (int)floor(cumAgeProp[_maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
 }
 
 

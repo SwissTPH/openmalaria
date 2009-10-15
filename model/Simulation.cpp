@@ -64,13 +64,12 @@ Simulation::~Simulation(){
 }
 
 int Simulation::start(){
+  simulationTime = 0;
+  _population->estimateRemovalRates();
   if (isCheckpoint()) {
     _population->setupPyramid(true);
     readCheckpoint();
-  }
-  else {
-    simulationTime = 0;
-    _population->estimateRemovalRates();
+  } else {
     _population->setupPyramid(false);
   }
   

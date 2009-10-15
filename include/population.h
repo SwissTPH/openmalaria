@@ -61,7 +61,9 @@ public:
   
   /*! Takes the best-fitting demography parameters estimated by
       estimateRemovalRates and sets up the initial population according to
-      these */
+      these.
+   *
+   * Sets cumAgeProp, and, when !isCheckpoint, creates humans.*/
   void setupPyramid(bool isCheckpoint);
   
   /** Initialisation run between initial one-lifespan run of simulation and
@@ -144,10 +146,9 @@ private:
   
   /** Target cumulative percentage of population by age, from oldest age to youngest.
    *
-   * cumpc[_maxTimestepsPerLife+1-i] gives the proportion (actually not
-   * percentage) of people, aged i timesteps or older. */
-  //TODO5D
-  static double *cumpc;
+   * cumAgeProp[_maxTimestepsPerLife+1-i] gives the proportion of people aged i timesteps or older.
+   */
+  vector<double> cumAgeProp;
 
   /// ID passed to last Human created. Checkpointed.
   static int IDCounter;

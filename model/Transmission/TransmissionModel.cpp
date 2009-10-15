@@ -23,7 +23,6 @@
 #define _USE_MATH_DEFINES
 
 #include "Transmission/TransmissionModel.h"
-#include "Global.h" 
 #include "intervention.h" 
 #include "inputData.h"
 #include "Transmission/NonVector.h"
