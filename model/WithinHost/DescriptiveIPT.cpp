@@ -20,7 +20,7 @@
 
 #include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/DescriptiveIPTInfection.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "util/gsl.h"
 #include "summary.h"
 #include "intervention.h"

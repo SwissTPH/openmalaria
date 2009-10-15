@@ -22,7 +22,7 @@
 
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 #include "util/gsl.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "inputData.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 

@@ -20,7 +20,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "Global.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "summary.h"
 #include "util/gsl.h"
 #include "Clinical/ClinicalModel.h"

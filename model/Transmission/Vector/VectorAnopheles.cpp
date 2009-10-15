@@ -22,7 +22,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 #include "Human.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "util/vectors.h"
 
 #include <gsl/gsl_blas.h>
@@ -421,7 +421,7 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
 
 void VectorAnopheles::write (ostream& out) const {
   out << FSRotateAngle << endl;
-  for (size_t i = 0; i < daysInYear; ++i) {
+  for (int i = 0; i < daysInYear; ++i) {
     out << mosqEmergeRate[i] << endl;
     out << forcedS_v[i] << endl;
     out << annualS_v[i] << endl;
@@ -442,7 +442,7 @@ void VectorAnopheles::write (ostream& out) const {
 }
 void VectorAnopheles::read (istream& in) {
   in >> FSRotateAngle;
-  for (size_t i = 0; i < daysInYear; ++i) {
+  for (int i = 0; i < daysInYear; ++i) {
     in >> mosqEmergeRate[i];
     in >> forcedS_v[i];
     in >> annualS_v[i];

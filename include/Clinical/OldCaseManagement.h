@@ -21,7 +21,7 @@
 
 #include "WithinHost/WithinHostModel.h"
 #include "Clinical/event.h"
-#include "simulation.h"
+#include "Simulation.h"
 
 namespace scnXml {
   class HealthSystem;

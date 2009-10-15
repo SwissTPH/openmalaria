@@ -23,7 +23,7 @@
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "NeonatalMortality.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "inputData.h"
 
 int ClinicalModel::reportingPeriodMemory;

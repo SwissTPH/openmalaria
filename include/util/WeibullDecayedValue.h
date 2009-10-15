@@ -22,7 +22,7 @@
 #define Hmod_WeibullDecayedValue
 
 #include "Global.h"
-#include "simulation.h"
+#include "Simulation.h"
 
 namespace scnXml {
   class WeibullDecayedProportion;

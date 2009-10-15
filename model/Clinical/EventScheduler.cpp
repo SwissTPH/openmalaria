@@ -22,7 +22,7 @@
 #include "inputData.h"
 #include "util/gsl.h"
 #include "WithinHost/WithinHostModel.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "Clinical/DecisionEnums.d"
 
 //TODO: move to XML

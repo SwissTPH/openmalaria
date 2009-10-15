@@ -29,7 +29,7 @@
 #include "Transmission/NonVector.h"
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/PerHostTransmission.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "summary.h"
 #include "util/BoincWrapper.h"
 #include <math.h> 

@@ -18,9 +18,9 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hsimulation
-#define Hsimulation
-#include <string>
+#ifndef Hmod_Simulation
+#define Hmod_Simulation
+#include "Global.h"
 
 using namespace std;
 
@@ -31,9 +31,6 @@ class Summary;
 //! Main simulation class
 class Simulation{
 public: 
- 
-  //Time since start of the simulation (TODO: Temporary step in refactoring.
-  // This variable should not be public.)
   // Units: interval * 1 day?
   static int simulationTime;
     
@@ -87,8 +84,6 @@ private:
   void write (ostream& out);
   void read (istream& in);
   //@}
-  
-  string checkpointName;
   
   static int simPeriodEnd;
   static int totalSimDuration;

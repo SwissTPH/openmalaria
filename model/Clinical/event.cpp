@@ -20,7 +20,7 @@
 
 */
 #include "Clinical/event.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "inputData.h"
 #include "util/gsl.h"
 #include <algorithm>

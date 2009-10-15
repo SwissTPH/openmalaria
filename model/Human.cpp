@@ -27,7 +27,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "simulation.h"
+#include "Simulation.h"
 #include "inputData.h"
 #include "util/gsl.h"
 #include "summary.h"

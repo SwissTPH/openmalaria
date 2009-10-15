@@ -19,7 +19,7 @@
 
 */
 
-#include "simulation.h"
+#include "Simulation.h"
 
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
@@ -39,11 +39,8 @@ int Simulation::simulationTime;
 int Simulation::timeStep = TIMESTEP_NEVER;
 Summary* Simulation::gMainSummary;
 
-static const char* const CHECKPOINT = "checkpoint";
-static const int NUM_CHECKPOINTS = 2;
 
-Simulation::Simulation() :
-    checkpointName(CHECKPOINT)
+Simulation::Simulation()
 {
   // Initialize input variables and allocate memory.
   // We try to make initialization hierarchical (i.e. most classes initialise
@@ -151,6 +148,8 @@ void Simulation::mainSimulation(){
 }
 
 
+const char* CHECKPOINT = "checkpoint";
+
 bool Simulation::isCheckpoint(){
   ifstream checkpointFile(CHECKPOINT,ios::in);
   // If not open, file doesn't exist (or is inaccessible)
@@ -158,6 +157,9 @@ bool Simulation::isCheckpoint(){
 }
 
 void Simulation::writeCheckpoint(){
+  // We alternate between two checkpoints, in case program is closed while writing.
+  const int NUM_CHECKPOINTS = 2;
+  
   // Set so that first checkpoint has number 0
   int checkpointNum = NUM_CHECKPOINTS - 1;
   {	// Get checkpoint number, if any
@@ -175,7 +177,7 @@ void Simulation::writeCheckpoint(){
   
   // Open the next checkpoint file for writing:
   ostringstream name;
-  name << checkpointName << checkpointNum;
+  name << CHECKPOINT << checkpointNum;
   if (Global::compressCheckpoints) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -217,7 +219,7 @@ void Simulation::readCheckpoint() {
   }
   // Open the latest file
   ostringstream name;
-  name << checkpointName << checkpointNum;	// try uncompressed
+  name << CHECKPOINT << checkpointNum;	// try uncompressed
   ifstream in(name.str().c_str(), ios::in | ios::binary);
   if (in.good()) {
     read (in);

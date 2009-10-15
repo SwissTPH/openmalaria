@@ -23,7 +23,7 @@
 #include "util/gsl.h"
 #include "inputData.h"
 #include "Human.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "intervention.h"
 #include "Transmission/TransmissionModel.h"
 #include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention

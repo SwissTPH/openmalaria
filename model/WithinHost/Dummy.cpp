@@ -22,7 +22,7 @@
 
 #include "util/gsl.h"
 #include "WithinHost/Dummy.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "summary.h"
 #include "inputData.h"
 

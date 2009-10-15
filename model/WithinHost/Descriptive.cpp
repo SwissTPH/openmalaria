@@ -22,7 +22,7 @@
 
 #include "util/gsl.h"
 #include "WithinHost/Descriptive.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "intervention.h"
 #include "summary.h"
 

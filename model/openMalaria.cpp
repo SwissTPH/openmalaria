@@ -26,7 +26,7 @@ using namespace std;
 #include "inputData.h"	//Include parser for the input
 
 #include "Global.h"
-#include "simulation.h"
+#include "Simulation.h"
 
 
 /** main() - initializes and shuts down BOINC and GSL, loads scenario XML and

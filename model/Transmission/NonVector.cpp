@@ -20,7 +20,7 @@
 #include "Transmission/NonVector.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
-#include "simulation.h"
+#include "Simulation.h"
 #include "util/gsl.h"
 #include <cfloat>
 
