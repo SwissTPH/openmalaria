@@ -119,19 +119,18 @@ DescriptiveInfection::DescriptiveInfection(int simulationTime) :
 }
 
 DescriptiveInfection::~DescriptiveInfection() {
-  //if (modelVersion & INCLUDES_PK_PD) {
-  //  delete _proteome;
-  //}
 }
 
 DescriptiveInfection::DescriptiveInfection (istream& in) :
   Infection (in)
 {
+  in >> _duration;
   in >> _cumulativeExposureJ; 
 }
 
 void DescriptiveInfection::write (ostream& out) const {
   writeInfection (out);
+  out << _duration << endl; 
   out << _cumulativeExposureJ << endl; 
 }
 

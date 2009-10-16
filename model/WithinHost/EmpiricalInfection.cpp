@@ -26,7 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-//static (class) variables
+
+// -----  static class members (variables & functions)  -----
+
 double EmpiricalInfection::_maximumPermittedAmplificationPerCycle;
 double EmpiricalInfection::_subPatentLimit;
 double EmpiricalInfection::_lambda;
@@ -109,8 +111,10 @@ void EmpiricalInfection::initParameters(){
     csvNum7 >> _sigma_beta3[day];
   }  
   f_autoRegressionParameters.close();
-  
 }
+
+
+// -----  non-static class members (Construction and destruction, checkpointing)  -----
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
@@ -124,13 +128,9 @@ EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplie
   _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
   //only the immediately preceding value is modified by the growth rate multiplier
   _laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier); 
-  _startTime=startTime;
   _patentGrowthRateMultiplier = growthRateMultiplier;
 }
 EmpiricalInfection::~EmpiricalInfection() {
-}
-void EmpiricalInfection::destroy() {
-  //XXX destroy the proteome?
 }
 
 EmpiricalInfection::EmpiricalInfection (istream& in) :
@@ -139,7 +139,6 @@ EmpiricalInfection::EmpiricalInfection (istream& in) :
   in >> _laggedLogDensities[0];
   in >> _laggedLogDensities[1];
   in >> _laggedLogDensities[2];
-  in >> _startTime;
   in >> _patentGrowthRateMultiplier;
 }
 void EmpiricalInfection::write (ostream& out) const {
@@ -147,25 +146,23 @@ void EmpiricalInfection::write (ostream& out) const {
   out << _laggedLogDensities[0] << endl;
   out << _laggedLogDensities[1] << endl;
   out << _laggedLogDensities[2] << endl;
-  out << _startTime << endl;
   out << _patentGrowthRateMultiplier << endl;
 }
 
 
-int EmpiricalInfection::getEndDate(){
-  return _startdate+_duration/Global::interval;
-}
-
-
+// -----  non-static class members (other functions)  -----
 
 void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
   _patentGrowthRateMultiplier = multiplier;
 }
 
 
-double EmpiricalInfection::determineWithinHostDensity(){
-  int ageOfInfection=1; //time-_startTime;
-  double newDensity=-9.99;  
+bool EmpiricalInfection::updateDensity(int simulationTime) {
+  int ageOfInfection = simulationTime - _startdate;	// age in days
+  if (ageOfInfection > _maximumDurationInDays)
+    return true;	// cut-off point
+  
+  _density=-9.99;  
   double logInflatedDensity=-9999999.99;
   if (_laggedLogDensities[0]>-999999.9) {
     //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
@@ -174,38 +171,41 @@ double EmpiricalInfection::determineWithinHostDensity(){
     double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
     double amplificationPerCycle=999999.9;
     int tries0=0;
-    while (((newDensity <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
+    while (((_density <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
       int tries1=0;
       double logDensity=9999.9;
       while ((logDensity>upperLimitoflogDensity) && (tries1<10)) {
 	double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
 	double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
 	double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
-	double expectedlogDensity=b_1*(L[0]+L[1]+L[2])/3+b_2*(L[2]-L[0])/2+b_3*(L[2]+L[0]-2*L[1])/4;
+	double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
+				  + b_2 * (L[2]-L[0]) / 2
+				  + b_3 * (L[2]+L[0]-2*L[1]) / 4;
+	
 	//include sampling error
 	logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
 	//include drug and immunity effects via growthRateMultiplier 
-	logDensity=logDensity+log(_patentGrowthRateMultiplier);
+	logDensity += log(_patentGrowthRateMultiplier);
 	tries1++;
       }
       if (tries1 > 9) logDensity=upperLimitoflogDensity;
-      newDensity= getInflatedDensity(logDensity); 
-      if ((ageOfInfection==0) && (newDensity < _subPatentLimit)) newDensity=-9.9; 
+      _density= getInflatedDensity(logDensity); 
+      if ((ageOfInfection==0) && (_density < _subPatentLimit)) _density=-9.9; 
       tries0++;
-      if (tries0 > 9) newDensity=_maximumPermittedAmplificationPerCycle*exp(L[1]);
-      logInflatedDensity=log(newDensity);
-      amplificationPerCycle=newDensity/exp(L[1]);
+      if (tries0 > 9) _density=_maximumPermittedAmplificationPerCycle*exp(L[1]);
+      logInflatedDensity=log(_density);
+      amplificationPerCycle=_density/exp(L[1]);
     }
 #   undef L
   }
   _laggedLogDensities[2]=_laggedLogDensities[1];
   _laggedLogDensities[1]=_laggedLogDensities[0];
   _laggedLogDensities[0]=logInflatedDensity;
-  if (newDensity*_overallMultiplier< _extinctionLevel) {
+  if (_density*_overallMultiplier< _extinctionLevel) {
     _laggedLogDensities[0]=-9999999.99;
-    newDensity=-9.99;
+    return true;
   }
-  return newDensity*_overallMultiplier;
+  return false;
 }
 
 double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){
@@ -234,9 +234,9 @@ double EmpiricalInfection::sigma_noise(int ageOfInfection) {
   return _sigma0_res+_sigmat_res*((double)ageOfInfection);
 }
 
-double EmpiricalInfection::getInflatedDensity(double nonInflatedDensity){  
+double EmpiricalInfection::getInflatedDensity(double nonInflatedDensity){
   double inflatedLogDensity=log(_inflationMean)+gsl::rngGauss(nonInflatedDensity,sqrt(_inflationVariance));
-return exp(inflatedLogDensity);
+  return exp(inflatedLogDensity);
 }
 
 void EmpiricalInfection::overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier){

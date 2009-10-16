@@ -30,9 +30,6 @@
 DummyInfection::~DummyInfection() {
 }
 void DummyInfection::destroy() {
-  //if (modelVersion & INCLUDES_PK_PD) {
-  //  delete _proteome;
-  //}
 }
 
 void DummyInfection::init (){
@@ -63,11 +60,14 @@ int DummyInfection::infectionDuration(){
 
 void DummyInfection::write (ostream& out) const {
   writeInfection (out);
+  out << _duration << endl; 
 }
 
 DummyInfection::DummyInfection (istream& in) :
   Infection (in)
-{}
+{
+  in >> _duration;
+}
 
 void DummyInfection::determineWithinHostDensity(){
   const double GROWTH_RATE = 8.0;

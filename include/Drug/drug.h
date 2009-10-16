@@ -163,7 +163,7 @@ public:
   
   double getConcentration() const { return _concentration;}
   double getNextConcentration() const { return _nextConcentration;}
-  double calculateDrugFactor(ProteomeInstance* infProteome) const;
+  double calculateDrugFactor(const ProteomeInstance* infProteome) const;
   /** Called per timestep to reduce concentrations.
    *
    * If remaining concentration is negligible, return true, and this class

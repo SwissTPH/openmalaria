@@ -31,7 +31,6 @@ public:
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
   
   Infection (int now) :
-    _duration(0),
     _startdate(now),
     _density(0.0)
   {}
@@ -40,16 +39,14 @@ public:
   void writeInfection (ostream& out) const;
   
   //! Get proteome
-  inline ProteomeInstance* getProteome() const {
+  inline const ProteomeInstance* getProteome() const {
     return _proteome;
   }
   
 protected:
   //! Proteome (used in a different situation than genotype) 
-  ProteomeInstance* _proteome; 
+  const ProteomeInstance* _proteome; 
   
-  //! Arbitrary maximum duration of the infection
-  int _duration; 
   //! Start date of the infection
   int _startdate; 
   //! Current density of the infection

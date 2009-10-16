@@ -90,6 +90,9 @@ class DummyInfection : public Infection {
 
   float getCumulativeHstar() const {return cumulativeHstar;};
   float getCumulativeYstar() const {return cumulativeYstar;};
+  
+  //! Arbitrary maximum duration of the infection
+  int _duration; 
 };
 
 #endif

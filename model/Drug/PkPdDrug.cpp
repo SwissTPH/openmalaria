@@ -79,7 +79,7 @@ void PkPdDrug::decayDrugs () {
   _drugs.remove_if (DecayPredicate());
 }
 
-double PkPdDrug::getDrugFactor (ProteomeInstance* infProteome) {
+double PkPdDrug::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect

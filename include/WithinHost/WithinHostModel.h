@@ -68,9 +68,10 @@ public:
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection() =0;
-  /*!  Clears all infections which have expired (their startdate+duration is less
-  than the current time). */
-  virtual void clearOldInfections() =0;
+  /*! Clears all infections which have expired (their startdate+duration is less
+   * than the current time).
+   * Not always needed (infections may be cleared after updating). */
+  virtual void clearOldInfections() {}
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it

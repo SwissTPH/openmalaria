@@ -22,36 +22,38 @@
 
 class EmpiricalInfection : public Infection {
 public:
+  ///@brief Static methods
+  //@{
+  /// Static (shared) data initialisation
+  static void initParameters();
+  
+  /// only for parameterisation?
+  static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
+  //@}
+  
+  /// @brief Construction and destruction, checkpointing
+  //@{
   /// Per instance initialisation; create new inf.
   EmpiricalInfection(int startTime, double growthRateMultiplier);
-
-  /** Checkpoint-reading constructor */
-  EmpiricalInfection (istream& in);
-
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to
    * the population list. destroy() does the real freeing and must be
    * called explicitly. */
   ~EmpiricalInfection();
-  void destroy();
-
-
+  
+  /** Checkpoint-reading constructor */
+  EmpiricalInfection (istream& in);
+  /** Write a checkpoint */
   void write (ostream& out) const;
-
-  static void init ();
-
-  //! Get the last timestep before the infection is cleared.
-  /*!
-    \return The interval before clearance.
-  */
-  int getEndDate();
-
+  //@}
+  
+  //BEGIN FIXME: do we want these?
   //FIXME: we're using _density here, but it's never set by calculations!
   /// Multiplies the density by x.
   void multiplyDensity(double x) { _density *= x; };
   //! Get the density of the infection
-  double getDensity() { return _density; };
+  inline double getDensity() { return _density * _overallMultiplier; };
 
   //! Start date of the infection
   int getStartDate() { return _startdate; };
@@ -59,27 +61,28 @@ public:
 
   //! Set patent growth rate multiplier
   void setPatentGrowthRateMultiplier(double multiplier);
-
-  int getDuration() { return _duration; };
-
-
-
-  /// Static (shared) data initialisation
-  static void initParameters();
+  //END
   
-  /// update
-  double determineWithinHostDensity();
+  /** Update: calculate new density.
+   *
+   * Currently sets _laggedLogDensities[0] to a large negative number when the
+   * infection goes extinct.
+   * 
+   * @param simulationTime Simulation timestep (expected to be a 1-day timestep)
+   * @returns True when the infection goes extinct. */
+  bool updateDensity (int simulationTime);
   
-  /// only for parameterisation?
-  static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
-
-
 private:
   double getInflatedDensity(double nonInflatedDensity);
   double sigma_noise(int ageOfInfection);
   double samplePatentValue(double mu, double sigma, double lowerBound);
   double sampleSubPatentValue(double mu, double sigma, double upperBound);
-  //the following were meant to be static but this lead to a linker error
+  
+  double _laggedLogDensities[3];
+  double _patentGrowthRateMultiplier;
+  
+  ///@brief Static variables
+  //@{
   static const int _maximumDurationInDays=418; 
   static double _maximumPermittedAmplificationPerCycle;
   static double _subPatentLimit;
@@ -102,8 +105,5 @@ private:
   static double _inflationVariance;
   static double _extinctionLevel;
   static double _overallMultiplier;
-  // the following are not static
-  double _laggedLogDensities[3];
-  int _startTime;
-  double _patentGrowthRateMultiplier;
+  //@}
 };

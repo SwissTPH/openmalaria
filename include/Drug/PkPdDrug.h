@@ -47,7 +47,7 @@ public:
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
   void decayDrugs ();
-  double getDrugFactor (ProteomeInstance* infProteome);
+  double getDrugFactor (const ProteomeInstance* infProteome);
   
 private:
   list<Drug> _drugs;

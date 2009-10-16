@@ -233,7 +233,7 @@ void Drug::addDose (double concentration, int delay) {
   }
 }
 
-double Drug::calculateDrugFactor(ProteomeInstance* infProteome) const {
+double Drug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
   //Returning an average of 2 points
   double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
   double startFactor = 3.8/(1+param/_concentration);

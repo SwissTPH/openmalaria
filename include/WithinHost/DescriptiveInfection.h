@@ -129,9 +129,11 @@ public:
   static int latentp;
   
 protected:
+  //! Arbitrary maximum duration of the infection
+  int _duration; 
+  
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ; 
-  
   
 private:
   // -----  static  -----

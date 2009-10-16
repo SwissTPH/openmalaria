@@ -184,7 +184,7 @@ vector<ProteomeInstance> ProteomeInstance::instances;
 
 void ProteomeInstance::init (Mutation* mutation) {
   currentID = 0;
-  // We store objects, not instances - so this creates two objects, using the
+  // We store objects, not pointers - so this creates two objects, using the
   // default constructor. Then we don't need to free memory each object.
   // Note: can't add both at once, as the constructors must be called in the right order.
   instances.resize (1);
@@ -193,7 +193,7 @@ void ProteomeInstance::init (Mutation* mutation) {
 }
 
 
-ProteomeInstance* ProteomeInstance::newInfection() {
+const ProteomeInstance* ProteomeInstance::newInfection() {
   const double percRes = 0.0;		// proportion of resistant infections
   if (gsl::rngUniform() < percRes) {
     return &instances[1];
