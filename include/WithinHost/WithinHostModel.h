@@ -53,7 +53,6 @@ public:
   /// @brief Constructors, destructors and checkpointing functions
   //@{
   WithinHostModel() :
-    _cumulativeInfections(0),
     totalDensity(0.0), timeStepMaxDensity(0.0)
   {}
   WithinHostModel(istream& in);
@@ -83,9 +82,6 @@ public:
    * @param ageInYears Age of human
    * @param BSVEfficacy Efficacy of blood-stage vaccine */
   virtual void calculateDensities(double ageInYears, double BSVEfficacy) =0;
-  
-  //! Returns Cumulative Infections
-  int getCumulativeInfections() {return _cumulativeInfections;};
   
   /// Only do anything when IPT is present:
   //@{
@@ -117,9 +113,6 @@ protected:
    * active, just calls this function (although this needs to be changed for
    * PK_PD integration). */
   virtual void clearAllInfections() =0;
-  
-  //!Cumulative number of infections since birth
-  int _cumulativeInfections;
   
   //!Total asexual blood stage density
   double totalDensity;

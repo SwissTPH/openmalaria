@@ -70,6 +70,9 @@ private:
   /// Timestep of last IPTi or placebo dose given (TIMESTEP_NEVER if never given).
   int _lastIptiOrPlacebo;
   
+  //!Cumulative number of infections since birth
+  int _cumulativeInfections;
+  
   // -----  static data  -----
   
   ///Number of IPTi doses

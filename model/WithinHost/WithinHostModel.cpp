@@ -107,12 +107,10 @@ WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
 }
 
 WithinHostModel::WithinHostModel(istream& in) {
-  in >> _cumulativeInfections; 
   in >> totalDensity;
   in >> timeStepMaxDensity;
 }
 void WithinHostModel::writeWHM (ostream& out) const {
-  out << _cumulativeInfections << endl;
   out << totalDensity << endl;
   out << timeStepMaxDensity << endl;
 }

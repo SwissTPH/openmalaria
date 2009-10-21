@@ -101,7 +101,6 @@ void DescriptiveWithinHostModel::update () {}
 
 void DescriptiveWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    _cumulativeInfections++;
     infections.push_back(new DescriptiveInfection(Simulation::simulationTime));
     _MOI++;
   }

@@ -78,7 +78,8 @@ void DescriptiveIPTWithinHost::clearParameters () {
 }
 
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
-    _SPattenuationt(TIMESTEP_NEVER), _lastSPDose (TIMESTEP_NEVER), _lastIptiOrPlacebo (TIMESTEP_NEVER)
+    _SPattenuationt(TIMESTEP_NEVER), _lastSPDose (TIMESTEP_NEVER), _lastIptiOrPlacebo (TIMESTEP_NEVER),
+    _cumulativeInfections(0)
 {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     throw xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
@@ -98,6 +99,7 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost (istream& in) :
   in >> _SPattenuationt;
   in >> _lastSPDose; 
   in >> _lastIptiOrPlacebo;
+  in >> _cumulativeInfections;
 }
 
 void DescriptiveIPTWithinHost::write(ostream& out) const {
@@ -106,6 +108,7 @@ void DescriptiveIPTWithinHost::write(ostream& out) const {
   out << _SPattenuationt << endl;
   out << _lastSPDose << endl; 
   out << _lastIptiOrPlacebo << endl;
+  out << _cumulativeInfections << endl;
 }
 
 
