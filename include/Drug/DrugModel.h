@@ -94,7 +94,7 @@ public:
    * the return value of this infection. The WithinHostModels are responsible
    * for clearing infections once the parasite density is negligible. */
   virtual double getDrugFactor (const ProteomeInstance* infProteome) {
-    return 0.0;
+    return 1.0;
   }
 };
 

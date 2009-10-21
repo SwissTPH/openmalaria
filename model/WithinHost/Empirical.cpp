@@ -76,7 +76,6 @@ void EmpiricalWithinHostModel::update () {
 
 void EmpiricalWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    _cumulativeInfections++;
     infections.push_back(EmpiricalInfection(Simulation::simulationTime, 1));
     _MOI++;
   }
@@ -102,7 +101,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   totalDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
-    double survivalFactor = (1.0-BSVEfficacy) * exp(-drugProxy->getDrugFactor(i->getProteome()));
+    double survivalFactor = (1.0-BSVEfficacy) * drugProxy->getDrugFactor(i->getProteome());
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {
@@ -118,6 +117,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     }
     ++i;
   }
+  timeStepMaxDensity = totalDensity;	// For 1-step model this is the same, but Pathogenesis model still expects it
   drugProxy->decayDrugs();
 }
 

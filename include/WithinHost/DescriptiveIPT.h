@@ -44,6 +44,7 @@ public:
   /// Conditionally clear all infections
   virtual void clearInfections (bool isSevere);
   /// Conditionally set last SP dose
+  //TODO virtual void updateImmuneStatus();
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (int ageGroup);
@@ -68,7 +69,6 @@ private:
   int _lastSPDose;
   /// Timestep of last IPTi or placebo dose given (TIMESTEP_NEVER if never given).
   int _lastIptiOrPlacebo;
-  
   
   // -----  static data  -----
   

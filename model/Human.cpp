@@ -197,11 +197,20 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   if (clinicalModel->isDead(ageTimeSteps))
     return true;
   
-  updateInterventionStatus(); 
-  withinHostModel->updateImmuneStatus();
+  //withinHostModel->IPTSetLastSPDose	in(iptiEffect) out(_lastIptiOrPlacebo,_lastSPDose,reportIPTDose)
+  updateInterventionStatus();
+  withinHostModel->updateImmuneStatus();	// inout(_cumulativeh,_cumulativeY)
+  //withinHostModel->newInfection	inout(_MOI,_cumulativeInfections,infections)
+  //withinHostModel->getTotalDensity	in (totalDensity)
+  //withinHostModel->calculateDensities	inout(infections,_MOI)...
   updateInfection(transmissionModel);
+  //withinHostModel.getTimeStepMaxDensity	in(timeStepMaxDensity)
+  //withinHostModel.getTotalDensity	in (totalDensity)
+  //old?withinHostModel.immunityPenalisation	inout(_cumulativeY) in(_cumulativeYlag)
+  //old?withinHostModel.clearInfections	in(_lastIptiOrPlacebo,iptiEffect) inout(_lastSPDose,infections) out(_MOI)
+  //new?withinHostModel.parasiteDensityDetectible	in(totalDensity)
+  //new?withinHostModel.medicate	inout(drugProxy)
   clinicalModel->update (*withinHostModel, getAgeInYears(), Simulation::simulationTime-_dateOfBirth);
-  withinHostModel->update();
   clinicalModel->updateInfantDeaths (ageTimeSteps);
   _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
   return false;
@@ -213,8 +222,6 @@ void Human::updateInfection(TransmissionModel* transmissionModel){
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
   }
-  
-  withinHostModel->clearOldInfections();
   
   // Cache total density for infectiousness calculations
   _ylag[Simulation::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();

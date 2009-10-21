@@ -62,16 +62,10 @@ public:
   void writeWHM(ostream& out) const;
   virtual void write(ostream& out) const =0; //@}
   
-  virtual void update() =0;
-
   virtual void summarize(double age) =0;
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection() =0;
-  /*! Clears all infections which have expired (their startdate+duration is less
-   * than the current time).
-   * Not always needed (infections may be cleared after updating). */
-  virtual void clearOldInfections() {}
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
@@ -82,7 +76,7 @@ public:
   /** Medicate drugs (wraps drug's medicate).
    *
    * \param age	= Age in years of human. */
-  virtual void medicate(string drugName, double qty, int time, double age) =0;
+  virtual void medicate(string drugName, double qty, int time, double age) {}
 
   /** Update the parasite densities of infections.
    *

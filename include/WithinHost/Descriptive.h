@@ -60,16 +60,10 @@ public:
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
-
-  /*!  Clears all infections which have expired (their startdate+duration is less
-  than the current time). */
-  virtual void clearOldInfections();
-
+  
   //! Clears all infections in an individual
   virtual void clearAllInfections();
   
-  void medicate(string drugName, double qty, int time, double age);
-
   void calculateDensities(double ageInYears, double BSVEfficacy);
   
   /*! Until now, this only includes decay of immunity against

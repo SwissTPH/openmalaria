@@ -48,8 +48,6 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
 {
   in >> _MOI; 
   in >> patentInfections; 
-  in >> cumulativeY;
-  in >> cumulativeh;
   in >> _cumulativeh;
   in >> _cumulativeY;
   in >> _cumulativeYlag;
@@ -66,8 +64,6 @@ void DummyWithinHostModel::write(ostream& out) const {
   
   out << _MOI << endl; 
   out << patentInfections << endl; 
-  out << cumulativeY << endl;
-  out << cumulativeh << endl;
   out << _cumulativeh << endl;
   out << _cumulativeY << endl;
   out << _cumulativeYlag << endl;
@@ -77,39 +73,12 @@ void DummyWithinHostModel::write(ostream& out) const {
 }
 
 
-// -----  Update function, called each step  -----
-
-void DummyWithinHostModel::update () {
-  std::list<DummyInfection>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
-  }
-  drugProxy->decayDrugs();
-}
-
-
 // -----  Simple infection adders/removers  -----
 
 void DummyWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    _cumulativeInfections++;
-    infections.push_back(DummyInfection(Simulation::simulationTime));
+        infections.push_back(DummyInfection(Simulation::simulationTime));
     _MOI++;
-  }
-}
-
-void DummyWithinHostModel::clearOldInfections(){
-  std::list<DummyInfection>::iterator iter=infections.begin();
-  while(iter != infections.end()){
-    int enddate=iter->getEndDate();
-    if (Simulation::simulationTime >= enddate) {
-      iter->destroy();
-      iter=infections.erase(iter);
-      _MOI--;
-    }
-    else{
-      iter++;
-    }
   }
 }
 
@@ -161,25 +130,30 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  if (_cumulativeInfections >  0) {
-    cumulativeh=_cumulativeh;
-    cumulativeY=_cumulativeY;
-    std::list<DummyInfection>::iterator i;
-    for(i=infections.begin(); i!=infections.end(); i++){
-      i->determineWithinHostDensity();
-      timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
-      
-      totalDensity += i->getDensity();
-      //Compute the proportion of parasites remaining after innate blood stage effect
-      if (i->getDensity() > detectionLimit) {
-        patentInfections++;
-      }
-      if (i->getStartDate() == (Simulation::simulationTime-1)) {
-        _cumulativeh++;
-      }
-      _cumulativeY += Global::interval*i->getDensity();
+  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); i++) {
+    if (Simulation::simulationTime >= i->getEndDate()) {
+      i->destroy();
+      i=infections.erase(i);
+      _MOI--;
+      continue;
     }
+    
+    i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
+    i->determineWithinHostDensity();
+    timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
+    
+    totalDensity += i->getDensity();
+    //Compute the proportion of parasites remaining after innate blood stage effect
+    if (i->getDensity() > detectionLimit) {
+      patentInfections++;
+    }
+    if (i->getStartDate() == (Simulation::simulationTime-1)) {
+      _cumulativeh++;
+    }
+    _cumulativeY += Global::interval*i->getDensity();
   }
+  
+  drugProxy->decayDrugs();
 }
 
 // -----  Summarize  -----

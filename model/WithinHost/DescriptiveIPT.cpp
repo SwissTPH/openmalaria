@@ -97,7 +97,7 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost (istream& in) :
   
   in >> _SPattenuationt;
   in >> _lastSPDose; 
-  in >> _lastIptiOrPlacebo; 
+  in >> _lastIptiOrPlacebo;
 }
 
 void DescriptiveIPTWithinHost::write(ostream& out) const {
@@ -105,7 +105,7 @@ void DescriptiveIPTWithinHost::write(ostream& out) const {
   
   out << _SPattenuationt << endl;
   out << _lastSPDose << endl; 
-  out << _lastIptiOrPlacebo << endl; 
+  out << _lastIptiOrPlacebo << endl;
 }
 
 
@@ -234,7 +234,8 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection&
 }
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
-  if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY) {
+  //NOTE: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
+  if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY && _cumulativeInfections > 0) {
     if (_SPattenuationt > Simulation::simulationTime && totalDensity < 10) {
       totalDensity = 10;
       _cumulativeY += 10;

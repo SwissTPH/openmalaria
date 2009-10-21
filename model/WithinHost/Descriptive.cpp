@@ -107,20 +107,6 @@ void DescriptiveWithinHostModel::newInfection(){
   }
 }
 
-void DescriptiveWithinHostModel::clearOldInfections(){
-  std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-  while(iter != infections.end()){
-    if (Simulation::simulationTime >= (*iter)->getEndDate()) {
-      delete *iter;
-      iter=infections.erase(iter);
-      _MOI--;
-    }
-    else{
-      iter++;
-    }
-  }
-}
-
 void DescriptiveWithinHostModel::clearAllInfections(){
   std::list<DescriptiveInfection*>::iterator i;
   for(i=infections.begin(); i != infections.end(); i++){
@@ -129,8 +115,6 @@ void DescriptiveWithinHostModel::clearAllInfections(){
   infections.clear();
   _MOI=0;
 }
-
-void DescriptiveWithinHostModel::medicate(string drugName, double qty, int time, double age) {}
 
 
 // -----  immunity  -----
@@ -159,68 +143,78 @@ void DescriptiveWithinHostModel::immunityPenalisation() {
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
+  std::list<DescriptiveInfection*>::iterator iter=infections.begin();
+  while(iter != infections.end()){
+    if (Simulation::simulationTime >= (*iter)->getEndDate()) {
+      delete *iter;
+      iter=infections.erase(iter);
+      _MOI--;
+    }
+    else{
+      iter++;
+    }
+  }//TODO cleanup
+  
   _cumulativeYlag = _cumulativeY;
   
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  if (_cumulativeInfections >  0) {
-    // Values of _cumulativeh/Y at beginning of step
-    // (values are adjusted for each infection)
-    double cumulativeh=_cumulativeh;
-    double cumulativeY=_cumulativeY;
+  
+  // Values of _cumulativeh/Y at beginning of step
+  // (values are adjusted for each infection)
+  double cumulativeh=_cumulativeh;
+  double cumulativeY=_cumulativeY;
+  
+  // IPTi SP dose clears infections at the time that blood-stage parasites appear     
+  SPAction();
+  
+  for(iter=infections.begin(); iter!=infections.end(); iter++){
+    //std::cout<<"uis: "<<infData->duration<<std::endl;
+    double infStepMaxDens = timeStepMaxDensity;
     
-    // IPTi SP dose clears infections at the time that blood-stage parasites appear     
-    SPAction();
+    if (Global::modelVersion & MAX_DENS_RESET) {
+      infStepMaxDens=0.0;
+    }
+    (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageInYears, cumulativeh , infStepMaxDens);
+    (*iter)->multiplyDensity(exp(-_innateImmunity));
     
-    std::list<DescriptiveInfection*>::iterator iter;
-    for(iter=infections.begin(); iter!=infections.end(); iter++){
-      //std::cout<<"uis: "<<infData->duration<<std::endl;
-      double infStepMaxDens = timeStepMaxDensity;
-      
-      if (Global::modelVersion & MAX_DENS_RESET) {
-        infStepMaxDens=0.0;
-      }
-      (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageInYears, cumulativeh , infStepMaxDens);
-      (*iter)->multiplyDensity(exp(-_innateImmunity));
-
-        /*
-      Possibly a better model version ensuring that the effect of variation in innate immunity
-          is reflected in case incidence would have the following here:
-        */
-      if (Global::modelVersion & INNATE_MAX_DENS) {
-        infStepMaxDens *= exp(-_innateImmunity);
-      }
-        //Include here the effect of blood stage vaccination
-      if (Vaccine::BSV.active) {
-	double factor = 1.0 - BSVEfficacy;
-	(*iter)->multiplyDensity(factor);
-	infStepMaxDens *= factor;
-      }
-      
-      // Include here the effect of attenuated infections by SP concentrations
-      IPTattenuateAsexualDensity (**iter);
-      
-      if (Global::modelVersion & MAX_DENS_CORRECTION) {
-        infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
-      }
-      timeStepMaxDensity = infStepMaxDens;
-      
-      totalDensity += (*iter)->getDensity();
-      //Compute the proportion of parasites remaining after innate blood stage effect
-      if ((*iter)->getDensity() > detectionLimit) {
-        patentInfections++;
-      }
-      if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
-        _cumulativeh++;
-      }
-      (*iter)->setDensity(std::min(maxDens, (*iter)->getDensity()));
-      (*iter)->setCumulativeExposureJ((*iter)->getCumulativeExposureJ()+Global::interval*(*iter)->getDensity());
-      _cumulativeY += Global::interval*(*iter)->getDensity();
+    /*
+    Possibly a better model version ensuring that the effect of variation in innate immunity
+    is reflected in case incidence would have the following here:
+    */
+    if (Global::modelVersion & INNATE_MAX_DENS) {
+      infStepMaxDens *= exp(-_innateImmunity);
+    }
+    //Include here the effect of blood stage vaccination
+    if (Vaccine::BSV.active) {
+      double factor = 1.0 - BSVEfficacy;
+      (*iter)->multiplyDensity(factor);
+      infStepMaxDens *= factor;
     }
     
-    IPTattenuateAsexualMinTotalDensity();
+    // Include here the effect of attenuated infections by SP concentrations
+    IPTattenuateAsexualDensity (**iter);
+    
+    if (Global::modelVersion & MAX_DENS_CORRECTION) {
+      infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
+    }
+    timeStepMaxDensity = infStepMaxDens;
+    
+    totalDensity += (*iter)->getDensity();
+    //Compute the proportion of parasites remaining after innate blood stage effect
+    if ((*iter)->getDensity() > detectionLimit) {
+      patentInfections++;
+    }
+    if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
+      _cumulativeh++;
+    }
+    (*iter)->setDensity(std::min(maxDens, (*iter)->getDensity()));
+    (*iter)->setCumulativeExposureJ((*iter)->getCumulativeExposureJ()+Global::interval*(*iter)->getDensity());
+    _cumulativeY += Global::interval*(*iter)->getDensity();
   }
+  
+  IPTattenuateAsexualMinTotalDensity();
 }
 
 void DescriptiveWithinHostModel::SPAction(){}

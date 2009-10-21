@@ -39,18 +39,12 @@ public:
   DummyWithinHostModel(istream& in);
   ~DummyWithinHostModel();
   
-
-  virtual void update();
   
   virtual void summarize(double age);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
-
-  /*!  Clears all infections which have expired (their startdate+duration is less
-  than the current time). */
-  virtual void clearOldInfections();
-
+  
   //! Clears all infections in an individual
   virtual void clearAllInfections();
   
@@ -81,9 +75,6 @@ private:
   double _cumulativeY;
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
-  
-  double cumulativeY;
-  double cumulativeh;
   
   //!multiplicity of infection
   int _MOI;
