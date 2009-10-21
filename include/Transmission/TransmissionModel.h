@@ -45,8 +45,8 @@ public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();
   
-  /** Extra initialisation, requiring information from the human population
-   * structure. Only for Vector model. */
+  /** Extra initialisation when not loading from a checkpoint, requiring
+   * information from the human population structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize) {}
   
   void write(ostream& out) const;

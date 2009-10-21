@@ -56,24 +56,6 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   }
   
   
-  // -----  allocate memory  -----
-  // Set up fArray and ftauArray. Each step, all elements not set here are
-  // calculated, even if they aren't directly used in the end;
-  // however all calculated values are used in calculating the next value.
-  fArray.resize(EIPDuration-mosqRestDuration+1);
-  fArray[0] = 1.0;
-  ftauArray.resize(EIPDuration);
-  for (int i = 0; i < mosqRestDuration; ++i)
-    ftauArray[i] = 0.0;
-  ftauArray[mosqRestDuration] = 1.0;
-  
-  N_v  .resize (N_v_length);
-  O_v  .resize (N_v_length);
-  S_v  .resize (N_v_length);
-  P_A  .resize (N_v_length);
-  P_df .resize (N_v_length);
-  P_dif.resize (N_v_length);
-  
   // -----  EIR  -----
   const scnXml::Eir& eirData = anoph.getEir();
   
@@ -100,6 +82,30 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   //FSRotateAngle += -M_PI/8.;
   initNvFromSv = 1.0 / anoph.getPropInfectious();
   initNv0FromSv = initNvFromSv * anoph.getPropInfected();	// temporarily use of initNv0FromSv
+  
+  
+  // -----  allocate memory  -----
+  // Set up fArray and ftauArray. Each step, all elements not set here are
+  // calculated, even if they aren't directly used in the end;
+  // however all calculated values are used in calculating the next value.
+  fArray.resize(EIPDuration-mosqRestDuration+1);
+  fArray[0] = 1.0;
+  ftauArray.resize(EIPDuration);
+  for (int i = 0; i < mosqRestDuration; ++i)
+    ftauArray[i] = 0.0;
+  ftauArray[mosqRestDuration] = 1.0;
+  
+  N_v  .resize (N_v_length);
+  O_v  .resize (N_v_length);
+  S_v  .resize (N_v_length);
+  P_A  .resize (N_v_length);
+  P_df .resize (N_v_length);
+  P_dif.resize (N_v_length);
+  
+  annualS_v.assign (daysInYear, 0.0);
+  forcedS_v.resize (daysInYear);
+  mosqEmergeRate.resize (daysInYear);	// Only needs to be done here if loading from checkpoint
+  
   
   return anoph.getMosquito();
 }
@@ -144,7 +150,6 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   double initOvFromSv = initNv0FromSv;	// temporarily use of initNv0FromSv
   
   FSCoeffic[0] += log (populationSize / sumPFindBite);	// same as multiplying resultant eir since calcFourierEIR takes exp(...)
-  forcedS_v.resize (daysInYear);
   calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
   
   mosqEmergeRate = forcedS_v;
@@ -163,7 +168,6 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   }
   
   sumAnnualForcedS_v = vectors::sum (forcedS_v) * Global::interval;
-  annualS_v.assign (daysInYear, 0.0);
   
   // All set up to drive simulation from forcedS_v
 }
@@ -421,6 +425,7 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
 
 void VectorAnopheles::write (ostream& out) const {
   out << FSRotateAngle << endl;
+  out << FSCoeffic[0] << endl;
   for (int i = 0; i < daysInYear; ++i) {
     out << mosqEmergeRate[i] << endl;
     out << forcedS_v[i] << endl;
@@ -442,6 +447,7 @@ void VectorAnopheles::write (ostream& out) const {
 }
 void VectorAnopheles::read (istream& in) {
   in >> FSRotateAngle;
+  in >> FSCoeffic[0];
   for (int i = 0; i < daysInYear; ++i) {
     in >> mosqEmergeRate[i];
     in >> forcedS_v[i];

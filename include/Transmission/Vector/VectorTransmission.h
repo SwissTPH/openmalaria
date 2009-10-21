@@ -37,8 +37,8 @@ public:
   virtual void writeV(ostream& out) const;
   virtual void readV(istream& in);
   
-  /** Extra initialisation, requiring information from the human population
-   * structure. */
+  /** Extra initialisation when not loading from a checkpoint, requiring
+   * information from the human population structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize);
   
   /** Length with which to force vector calculations, while waiting for human

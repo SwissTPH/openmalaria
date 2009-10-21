@@ -278,11 +278,14 @@ void Population::setupPyramid(bool isCheckpoint) {
   int cumulativePop=0;
   double totalCumPC = cumAgeProp[_maxTimestepsPerLife-1];
   for (int j=1;j<_maxTimestepsPerLife; j++) {
-    int iage=_maxTimestepsPerLife-j-1;
     //Scale using the total cumAgeProp
     cumAgeProp[j]=cumAgeProp[j]/totalCumPC;
+  }
+  
+  if (!isCheckpoint) {
     // 2. Create humans
-    if (!isCheckpoint){
+    for (int j=1;j<_maxTimestepsPerLife; j++) {
+      int iage=_maxTimestepsPerLife-j-1;
       int targetPop = (int)floor(cumAgeProp[j]*populationSize+0.5);
       while (cumulativePop < targetPop) {
 	if (InitPopOpt && iage > 0) {}	// only those with age 0 should be created here
@@ -290,10 +293,10 @@ void Population::setupPyramid(bool isCheckpoint) {
 	++cumulativePop;
       }
     }
+    
+    // 3. Vector setup dependant on human population
+    _transmissionModel->setupNv0 (population, populationSize);
   }
-  
-  // 3. Vector setup dependant on human population
-  _transmissionModel->setupNv0 (population, populationSize);
 }
 
 void Population::preMainSimInit () {

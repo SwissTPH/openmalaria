@@ -97,17 +97,17 @@ void PerHostTransmission::write (ostream& out) const {
 // conceivable Weibull params that the value is 0.0 when rounded to a double.
 // Performance-wise, an if() might give a small performance gain when
 // interventions aren't present.
-double PerHostTransmission::entoAvailabilityHetVecItv (HostCategoryAnopheles& base, size_t speciesIndex) const {
+double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   return species[speciesIndex].entoAvailability
     * (1.0 - base.ITNDeterrency (Simulation::simulationTime - timestepITN))
     * (1.0 - base.IRSDeterrency (Simulation::simulationTime - timestepIRS))
     * (1.0 - base.VADeterrency  (Simulation::simulationTime - timestepVA));
 }
-double PerHostTransmission::probMosqBiting (HostCategoryAnopheles& base, size_t speciesIndex) const {
+double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   return species[speciesIndex].probMosqBiting
     * (1.0 - base.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
 }
-double PerHostTransmission::probMosqResting (HostCategoryAnopheles& base, size_t speciesIndex) const {
+double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_C_i = species[speciesIndex].probMosqFindRestSite
     * (1.0 - base.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
   double P_D_i = species[speciesIndex].probMosqSurvivalResting

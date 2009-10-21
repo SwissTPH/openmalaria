@@ -57,7 +57,7 @@ public:
   void operator= (const scnXml::WeibullDecayedProportion&);
   
   /** Return the value decayed to age ageTSteps. */
-  double operator() (int ageTSteps);
+  double operator() (int ageTSteps) const;
   
 private:
   double _initial, _k;

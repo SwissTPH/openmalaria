@@ -33,6 +33,6 @@ void WeibullDecayedValue::operator= (const scnXml::WeibullDecayedProportion& elt
   _constOverLambda = Global::yearsPerInterval / (elt.getHalflife() * pow(log(2.0), -1.0/_k));
 }
 
-double WeibullDecayedValue::operator() (int ageTSteps) {
+double WeibullDecayedValue::operator() (int ageTSteps) const {
   return _initial * exp(-pow(ageTSteps * _constOverLambda, _k));
 }

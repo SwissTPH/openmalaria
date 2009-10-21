@@ -68,12 +68,14 @@ public:
   void read(istream& in);
   
   /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
-   * on the human population structure.
+   * on the human population structure (when not loading from a checkpoint).
    * 
    * @param sIndex Index in VectorTransmission.species of this class.
    * @param population The human population
    * @param populationSize Number of humans (use instead of population.size())
-   */
+   *
+   * Can only usefully run its calculations when not checkpointing, due to
+   * population not being the same when loaded from a checkpoint. */
   void setupNv0 (size_t sIndex, const std::list<Human>& population, int populationSize);
   
   /** Called to free memory instead of a destructor. */
@@ -185,13 +187,13 @@ private:
    * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
    * 
    * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
-   * Doesn't currently need checkpointing. */
+   * FSCoeffic[0] needs checkpointing, the rest doesn't. */
   vector<double> FSCoeffic;
   
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
    * Units: Animals per day. Length: daysInYear.
    * 
-   * Set by setupNv0, then adjusted; should be checkpointed. */
+   * Should be checkpointed. */
   vector<double> mosqEmergeRate;
   
   /* Parameters and partial (derived) parameters from model */
@@ -262,7 +264,8 @@ private:
    * Values are recalculated each step; only fArray[0] and
    * ftauArray[0..mosqRestDuration] are stored across steps for optimisation.
    * 
-   * Length: EIPDuration (θ_s).
+   * Length (fArray): EIPDuration - mosqRestDuration + 1 (θ_s - τ + 1)
+   * Length (ftauArray): EIPDuration (θ_s)
    * 
    * Don't need to be checkpointed, but some values need to be initialised. */
   //@{

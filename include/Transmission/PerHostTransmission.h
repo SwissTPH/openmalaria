@@ -77,7 +77,7 @@ public:
   /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
    *
    * Mean should be same as entoAvailabilityHetVecItv(). */
-  inline double entoAvailabilityFull (HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
+  inline double entoAvailabilityFull (const HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
     return entoAvailabilityHetVecItv (base, speciesIndex)
          * relativeAvailabilityAge (ageYears) * ageCorrectionFactor;
   }
@@ -87,12 +87,12 @@ public:
    * rate factors.)
    * 
    * Assume mean is human-to-vector availability rate factor. */
-  double entoAvailabilityHetVecItv (HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqBiting (HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
    * place after biting and then resting (P_C_i * P_D_i). */
-  double probMosqResting (HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const;
   //@}
   
   /** Get the availability of this host to mosquitoes relative to other hosts.
