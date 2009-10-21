@@ -69,8 +69,9 @@ public:
    * infection goes extinct.
    * 
    * @param simulationTime Simulation timestep (expected to be a 1-day timestep)
+   * @param survivalFactor Density multiplier to introduce drug & vaccine effects
    * @returns True when the infection goes extinct. */
-  bool updateDensity (int simulationTime);
+  bool updateDensity (int simulationTime, double survivalFactor);
   
 private:
   double getInflatedDensity(double nonInflatedDensity);

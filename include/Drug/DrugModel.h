@@ -30,7 +30,13 @@ class ProteomeInstance;
  * drug proxies.
  * 
  * Note that there currently needn't be a drug model, in which case an instance
- * of this class is created (which while inefficient, allows nicer code). */
+ * of this class is created (which while inefficient, allows nicer code).
+ * 
+ * Calling order within a timestep (see doc for medicate for details):
+ *  * getDrugFactor() for each infection
+ *  * decayDrugs()
+ *  * medicate()
+ */
 class DrugModel {
 public:
   ///@brief Static functions
@@ -67,7 +73,15 @@ public:
    * \param qty        - the quantity (which units?).
    * \param time       - Time in minutes since start of this time step to medicate at
    * \param age        - Age of human in years
-   * \param weight     - Weight (mass) of human in kg */
+   * \param weight     - Weight (mass) of human in kg
+   * 
+   * Due to the fact we're using a discrete timestep model, the case-management
+   * update (calling medicate) and within-host model update (calling
+   * getDrugFactor) cannot [easily] have immediate effects on each other. The
+   * implementation we use is that the within-host model update (calculating
+   * new infection densities) happens first; hence medicate() will always be
+   * called after getDrugFactor in a timestep, and a time of zero means the
+   * dose has effect from the start of the following timestep. */
   virtual void medicate(string drugAbbrev, double qty, int time, double age, double weight) {}
   
   /// Called each timestep immediately after the drug acts on any infections.

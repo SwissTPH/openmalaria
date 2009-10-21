@@ -69,11 +69,6 @@ void EmpiricalWithinHostModel::write(ostream& out) const {
 // -----  Update function, called each step  -----
 
 void EmpiricalWithinHostModel::update () {
-  std::list<EmpiricalInfection>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    i->multiplyDensity(exp(-drugProxy->getDrugFactor(i->getProteome())));
-  }
-  drugProxy->decayDrugs();
 }
 
 
@@ -105,18 +100,17 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, d
 void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   patentInfections = 0;
   totalDensity = 0.0;
-  timeStepMaxDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
-    if (i->updateDensity(Simulation::simulationTime)) {
-      i = infections.erase(i);
+    double survivalFactor = (1.0-BSVEfficacy) * exp(-drugProxy->getDrugFactor(i->getProteome()));
+    
+    // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
+    if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {
+      i = infections.erase(i);	// i points to next infection now so don't increment with ++i
       --_MOI;
-      continue;
+      continue;	// infection no longer exists so skip the rest
     }
     
-    //FIXME: timeStepMaxDensity was meant to be the highest total density of any day within a 5-day interval wasn't it?
-    // In which case, here it should be equal to totalDensity!
-    timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
     totalDensity += i->getDensity();
     //Compute the proportion of parasites remaining after innate blood stage effect
     if (i->getDensity() > detectionLimit) {
@@ -124,6 +118,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     }
     ++i;
   }
+  drugProxy->decayDrugs();
 }
 
 // -----  Summarize  -----

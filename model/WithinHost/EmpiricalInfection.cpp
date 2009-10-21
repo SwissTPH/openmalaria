@@ -127,7 +127,7 @@ EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplie
   _laggedLogDensities[1]=sampleSubPatentValue(_alpha2,_mu2,log(_subPatentLimit)); 
   _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
   //only the immediately preceding value is modified by the growth rate multiplier
-  _laggedLogDensities[0]=_laggedLogDensities[0]+ log(growthRateMultiplier); 
+  _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
 }
 EmpiricalInfection::~EmpiricalInfection() {
@@ -157,55 +157,65 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 }
 
 
-bool EmpiricalInfection::updateDensity(int simulationTime) {
+// TODO: TS needs to improve documentation of this function.
+const int EI_MAX_SAMPLES = 10;
+bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor) {
+  //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
+  # define L _laggedLogDensities
+  
   int ageOfInfection = simulationTime - _startdate;	// age in days
-  if (ageOfInfection > _maximumDurationInDays)
+  if (ageOfInfection > _maximumDurationInDays || !(L[0] > -999999.9))	// NOTE: second test is extremely unlikely to fail
     return true;	// cut-off point
   
-  _density=-9.99;  
-  double logInflatedDensity=-9999999.99;
-  if (_laggedLogDensities[0]>-999999.9) {
-    //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
-#   define L _laggedLogDensities
-    // constraints to ensure the density is defined and not exploding
-    double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
-    double amplificationPerCycle=999999.9;
-    int tries0=0;
-    while (((_density <0) || (amplificationPerCycle > _maximumPermittedAmplificationPerCycle)) && (tries0<10)){
-      int tries1=0;
-      double logDensity=9999.9;
-      while ((logDensity>upperLimitoflogDensity) && (tries1<10)) {
-	double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
-	double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
-	double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
-	double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
-				  + b_2 * (L[2]-L[0]) / 2
-				  + b_3 * (L[2]+L[0]-2*L[1]) / 4;
-	
-	//include sampling error
-	logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
-	//include drug and immunity effects via growthRateMultiplier 
-	logDensity += log(_patentGrowthRateMultiplier);
-	tries1++;
-      }
-      if (tries1 > 9) logDensity=upperLimitoflogDensity;
-      _density= getInflatedDensity(logDensity); 
-      if ((ageOfInfection==0) && (_density < _subPatentLimit)) _density=-9.9; 
-      tries0++;
-      if (tries0 > 9) _density=_maximumPermittedAmplificationPerCycle*exp(L[1]);
-      logInflatedDensity=log(_density);
-      amplificationPerCycle=_density/exp(L[1]);
+  // constraints to ensure the density is defined and not exploding
+  double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
+  double amplificationPerCycle;
+  for (int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
+    double logDensity;
+    for (int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
+      double b_1=gsl::rngGauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
+      double b_2=gsl::rngGauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
+      double b_3=gsl::rngGauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
+      double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
+      + b_2 * (L[2]-L[0]) / 2
+      + b_3 * (L[2]+L[0]-2*L[1]) / 4;
+      
+      //include sampling error
+      logDensity=gsl::rngGauss(expectedlogDensity,sigma_noise(ageOfInfection));
+      //include drug and immunity effects via growthRateMultiplier 
+      logDensity += log(_patentGrowthRateMultiplier);
+      
+      if (logDensity <= upperLimitoflogDensity)	//got an acceptable density, we're done
+	break;	// most of the time this should happen first try
     }
-#   undef L
+    if (!(logDensity <= upperLimitoflogDensity))	// in case all the above attempts fail, cap logDensity
+      logDensity=upperLimitoflogDensity;
+    
+    _density= getInflatedDensity(logDensity); 
+    
+    _density *= survivalFactor;	// Apply drug and vaccine effects
+    
+    // Infections that get killed before they become patent:
+    if ((ageOfInfection==0) && (_density < _subPatentLimit))
+      _density=0.0;
+    
+    amplificationPerCycle=_density/exp(L[1]);
+    if (_density >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle)
+      break;	// We're done. Hopefully usually with the first try.
   }
+  if (!(_density >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle))	// in case the above tries fail
+    _density = _maximumPermittedAmplificationPerCycle*exp(L[1]);
+  
   _laggedLogDensities[2]=_laggedLogDensities[1];
   _laggedLogDensities[1]=_laggedLogDensities[0];
-  _laggedLogDensities[0]=logInflatedDensity;
-  if (_density*_overallMultiplier< _extinctionLevel) {
-    _laggedLogDensities[0]=-9999999.99;
-    return true;
-  }
-  return false;
+  _laggedLogDensities[0]=log(_density);
+  
+  // Note: here use a positive test for survival, since if _density became an NaN tests against it will return false:
+  if (_density*_overallMultiplier > _extinctionLevel)
+    return false;	// Still parasites; infection didn't go extinct
+  else
+    return true;	// parasites are extinct; infection will be removed from model
+# undef L
 }
 
 double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){
