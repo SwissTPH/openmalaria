@@ -32,6 +32,9 @@
 using namespace std;
 
 /*! Dummy Within Host Model class.
+ *
+ * This was never meant to generate output making much sense, just some kind of
+ * parasite densities which respond to drug effects, etc.
  */
 class DummyWithinHostModel : public WithinHostModel {
 public:
@@ -51,12 +54,6 @@ public:
   void medicate(string drugName, double qty, int time, double age);
 
   void calculateDensities(double ageInYears, double BSVEfficacy);
-  
-  /*! Until now, this only includes decay of immunity against
-  asexual blood stages */
-  virtual void updateImmuneStatus();
-  
-  virtual void immunityPenalisation();
   
   void write(ostream& out) const;
   

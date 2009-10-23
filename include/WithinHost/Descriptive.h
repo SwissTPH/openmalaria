@@ -47,10 +47,9 @@ protected:
    * Same as the other checkpointing constructor except that
    * this one doesn't load infections. */
   DescriptiveWithinHostModel(istream& in, bool derived);
+private:
   /// Called by both checkpointing constructors
   void readDescriptiveWHM(istream& in);
-  /// Called by write() and derived write() functions.
-  void writeDescriptiveWHM(ostream& out) const;
   //@}
   
 public:
@@ -65,12 +64,6 @@ public:
   virtual void clearAllInfections();
   
   void calculateDensities(double ageInYears, double BSVEfficacy);
-  
-  /*! Until now, this only includes decay of immunity against
-  asexual blood stages */
-  virtual void updateImmuneStatus();
-  
-  virtual void immunityPenalisation();
   
   bool parasiteDensityDetectible() const {
     return totalDensity > detectionLimit;
@@ -95,15 +88,7 @@ protected:
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<DescriptiveInfection*> infections;
   
-  //!Cumulative parasite density since birth
-  double _cumulativeY;
-  
 private:
-  //!Number of infections received since birth
-  double _cumulativeh;
-  //!cumulativeY from previous timestep
-  double _cumulativeYlag;
-  
   //!innate ability to control parasite densities
   double _innateImmunity;
   

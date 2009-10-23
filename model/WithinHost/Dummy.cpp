@@ -59,7 +59,7 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
     infections.push_back(DummyInfection(in));
 }
 void DummyWithinHostModel::write(ostream& out) const {
-  writeWHM (out);
+  WithinHostModel::write (out);
   drugProxy->write (out);
   
   out << _MOI << endl; 
@@ -99,33 +99,10 @@ void DummyWithinHostModel::medicate(string drugName, double qty, int time, doubl
 }
 
 
-// -----  immunity  -----
-
-void DummyWithinHostModel::updateImmuneStatus(){
-  if (immEffectorRemain < 1){
-    _cumulativeh*=immEffectorRemain;
-    _cumulativeY*=immEffectorRemain;
-  }
-  if (asexImmRemain < 1){
-    _cumulativeh*=asexImmRemain/
-        (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
-    _cumulativeY*=asexImmRemain/
-        (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
-  }
-}
-
-void DummyWithinHostModel::immunityPenalisation() {
-  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
-  if (_cumulativeY <  0) {
-    _cumulativeY=0.0;
-  }
-}
-
-
 // -----  Density calculations  -----
 
 void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
-  _cumulativeYlag = _cumulativeY;
+  updateImmuneStatus ();	// inout(_cumulativeh,_cumulativeY)
   
   patentInfections = 0;
   totalDensity = 0.0;

@@ -70,6 +70,8 @@ void timer::stopCheckpoint (){
 }
 
 #else
+#include <stdio.h>	// perror
+
 //Pthread version
 int res;
 pthread_t timer_thread;

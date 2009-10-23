@@ -55,7 +55,7 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
     infections.push_back(EmpiricalInfection(in));
 }
 void EmpiricalWithinHostModel::write(ostream& out) const {
-  writeWHM (out);
+  WithinHostModel::write (out);
   drugProxy->write (out);
   
   out << _MOI << endl; 
@@ -102,6 +102,8 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy) * drugProxy->getDrugFactor(i->getProteome());
+    //TODO: immunity
+    // Do we want to introduce innate immunity (_innateImmunity in Descriptive)?
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {
@@ -133,13 +135,4 @@ void EmpiricalWithinHostModel::summarize(double age) {
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
   }
-}
-
-
-//Immunity?
-
-void EmpiricalWithinHostModel::updateImmuneStatus() {
-}
-
-void EmpiricalWithinHostModel::immunityPenalisation() {
 }

@@ -103,7 +103,7 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost (istream& in) :
 }
 
 void DescriptiveIPTWithinHost::write(ostream& out) const {
-  writeDescriptiveWHM (out);
+  DescriptiveWithinHostModel::write (out);
   
   out << _SPattenuationt << endl;
   out << _lastSPDose << endl; 

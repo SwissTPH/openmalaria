@@ -35,7 +35,6 @@ const int DescriptiveWithinHostModel::MAX_INFECTIONS = 21;
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
     WithinHostModel(), _MOI(0),
-    _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
     patentInfections(0)
 {
   _innateImmunity = gsl::rngGauss(0, sigma_i);
@@ -64,33 +63,24 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 // -----  Data checkpointing  -----
 
 void DescriptiveWithinHostModel::write(ostream& out) const {
-  writeDescriptiveWHM (out);
+  WithinHostModel::write (out);
+  out << _MOI << endl;
+  out << patentInfections << endl;
+  out << _innateImmunity << endl;
+  
+  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
+    (*iter)->write (out);
 }
 
 void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
   in >> _MOI;
   in >> patentInfections; 
-  in >> _cumulativeh;
-  in >> _cumulativeY;
-  in >> _cumulativeYlag;
   in >> _innateImmunity;
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
     throw checkpoint_error ("_MOI");
 }
 
-void DescriptiveWithinHostModel::writeDescriptiveWHM(ostream& out) const {
-  writeWHM (out);
-  out << _MOI << endl;
-  out << patentInfections << endl;
-  out << _cumulativeh << endl;
-  out << _cumulativeY << endl;
-  out << _cumulativeYlag << endl;
-  out << _innateImmunity << endl;
-  
-  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    (*iter)->write (out);
-}
 
 // -----  Update function, called each step  -----
 
@@ -116,32 +106,10 @@ void DescriptiveWithinHostModel::clearAllInfections(){
 }
 
 
-// -----  immunity  -----
-
-void DescriptiveWithinHostModel::updateImmuneStatus(){
-  if (immEffectorRemain < 1){
-    _cumulativeh*=immEffectorRemain;
-    _cumulativeY*=immEffectorRemain;
-  }
-  if (asexImmRemain < 1){
-    _cumulativeh*=asexImmRemain/
-        (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
-    _cumulativeY*=asexImmRemain/
-        (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
-  }
-}
-
-void DescriptiveWithinHostModel::immunityPenalisation() {
-  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
-  if (_cumulativeY <  0) {
-    _cumulativeY=0.0;
-  }
-}
-
-
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
+  updateImmuneStatus ();	// inout(_cumulativeh,_cumulativeY)
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
     if (Simulation::simulationTime >= (*iter)->getEndDate()) {
@@ -153,8 +121,6 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
       iter++;
     }
   }//TODO cleanup
-  
-  _cumulativeYlag = _cumulativeY;
   
   patentInfections = 0;
   totalDensity = 0.0;
@@ -222,10 +188,12 @@ void DescriptiveWithinHostModel::IPTattenuateAsexualMinTotalDensity () {}
 
 // -----  Summarize  -----
 
+// TODO: can summarize move to WithinHostModel ?
 void DescriptiveWithinHostModel::summarize(double age) {
   if (_MOI > 0) {
     Simulation::gMainSummary->addToInfectedHost(age,1);
     Simulation::gMainSummary->addToTotalInfections(age, _MOI);
+    // TODO: patentInfections doesn't really need to be calculated each timestep and stored! calculate it here instead.
     Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
   }
   if (parasiteDensityDetectible()) {

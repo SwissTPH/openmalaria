@@ -199,7 +199,6 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   
   //withinHostModel->IPTSetLastSPDose	in(iptiEffect) out(_lastIptiOrPlacebo,_lastSPDose,reportIPTDose)
   updateInterventionStatus();
-  withinHostModel->updateImmuneStatus();	// inout(_cumulativeh,_cumulativeY)
   //withinHostModel->newInfection	inout(_MOI,_cumulativeInfections,infections)
   //withinHostModel->getTotalDensity	in (totalDensity)
   //withinHostModel->calculateDensities	inout(infections,_MOI)...

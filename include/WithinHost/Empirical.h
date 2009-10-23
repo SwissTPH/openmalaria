@@ -56,12 +56,6 @@ public:
    * and drug efficacies. */
   void calculateDensities(double ageInYears, double BSVEfficacy);
   
-  /*! Until now, this only includes decay of immunity against
-  asexual blood stages */
-  virtual void updateImmuneStatus();
-  
-  virtual void immunityPenalisation();
-  
   void write(ostream& out) const;
   
   bool parasiteDensityDetectible() const {

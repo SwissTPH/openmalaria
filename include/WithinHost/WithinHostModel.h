@@ -53,13 +53,14 @@ public:
   /// @brief Constructors, destructors and checkpointing functions
   //@{
   WithinHostModel() :
+    _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
     totalDensity(0.0), timeStepMaxDensity(0.0)
   {}
   WithinHostModel(istream& in);
   virtual ~WithinHostModel() {}
   
-  void writeWHM(ostream& out) const;
-  virtual void write(ostream& out) const =0; //@}
+  virtual void write(ostream& out) const;
+  //@}
   
   virtual void summarize(double age) =0;
   
@@ -83,7 +84,7 @@ public:
    * @param BSVEfficacy Efficacy of blood-stage vaccine */
   virtual void calculateDensities(double ageInYears, double BSVEfficacy) =0;
   
-  /// Only do anything when IPT is present:
+  ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
   virtual void IPTSetLastSPDose (int agetstep, int ageGroup) {}
@@ -91,12 +92,36 @@ public:
   virtual void IPTiTreatment (int ageGroup);
   //@}
   
-  /*! Until now, this only includes decay of immunity against
-  asexual blood stages */
-  virtual void updateImmuneStatus() =0;
+  ///@brief Immunity model
+  //@{
+  /// Called to effect some penalty on immunity − but what? Please document.
+  void immunityPenalisation();
   
-  virtual void immunityPenalisation() =0;
+protected:
+  /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
+   * have already been incremented.
+   * 
+   * Applies decay of immunity against asexual blood stages, if present. */
+  void updateImmuneStatus();
   
+  /** @returns A multiplier describing the proportion of parasites surviving
+   * immunity effects this timestep.
+   * 
+   * Note that in the Descriptive model this multiplies log(density), but the
+   * new density has no effect on future densities, wheras the Empirical model
+   * multiplies the actual density (which then affects density on the following
+   * timestep). */
+  double immunitySurvivalFactor ();
+  
+  //!Cumulative parasite density since birth
+  double _cumulativeY;
+  //!Number of infections received since birth
+  double _cumulativeh;
+  //!cumulativeY from previous timestep
+  double _cumulativeYlag;
+  //@}
+  
+public:
   virtual bool parasiteDensityDetectible() const =0;
   
   inline double getTotalDensity() const {return totalDensity;}

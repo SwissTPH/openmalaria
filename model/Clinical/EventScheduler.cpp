@@ -188,6 +188,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
     _doomed = -Global::interval;	// start indirect mortality countdown
   
+  //TODO: Also call immunityPenalisation() like previous model?
   
   if (pgState & Pathogenesis::COMPLICATED) {
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
