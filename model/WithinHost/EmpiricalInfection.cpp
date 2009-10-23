@@ -142,7 +142,7 @@ EmpiricalInfection::EmpiricalInfection (istream& in) :
   in >> _patentGrowthRateMultiplier;
 }
 void EmpiricalInfection::write (ostream& out) const {
-  writeInfection (out);
+  Infection::write (out);
   out << _laggedLogDensities[0] << endl;
   out << _laggedLogDensities[1] << endl;
   out << _laggedLogDensities[2] << endl;

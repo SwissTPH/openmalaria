@@ -33,7 +33,7 @@ Infection::Infection (istream& in) {
   } else
     _proteome = NULL;
 }
-void Infection::writeInfection (ostream& out) const {
+void Infection::write (ostream& out) const {
   out << _startdate << endl; 
   out << _density << endl; 
   if (Global::modelVersion & INCLUDES_PK_PD) {

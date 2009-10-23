@@ -114,9 +114,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection (istream& in) :
 }
 
 void DescriptiveIPTInfection::write (ostream& out) const {
-  writeInfection (out);
-  out << _duration << endl; 
-  out << _cumulativeExposureJ << endl; 
+  DescriptiveInfection::write (out);
   out << _gType.ID << endl; 
   out << _SPattenuate << endl; 
 }

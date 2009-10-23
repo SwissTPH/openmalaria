@@ -59,7 +59,7 @@ int DummyInfection::infectionDuration(){
 }
 
 void DummyInfection::write (ostream& out) const {
-  writeInfection (out);
+  Infection::write (out);
   out << _duration << endl; 
 }
 

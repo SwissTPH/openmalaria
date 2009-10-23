@@ -36,7 +36,7 @@ public:
   {}
   Infection (istream& in);
   
-  void writeInfection (ostream& out) const;
+  virtual void write (ostream& out) const;
   
   //! Get proteome
   inline const ProteomeInstance* getProteome() const {

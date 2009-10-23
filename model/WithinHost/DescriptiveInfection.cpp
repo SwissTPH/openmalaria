@@ -129,7 +129,7 @@ DescriptiveInfection::DescriptiveInfection (istream& in) :
 }
 
 void DescriptiveInfection::write (ostream& out) const {
-  writeInfection (out);
+  Infection::write (out);
   out << _duration << endl; 
   out << _cumulativeExposureJ << endl; 
 }
