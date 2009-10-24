@@ -8,25 +8,54 @@ set (Model_CPP
   gzstream.C Simulation.cpp summary.cpp Global.cpp
   intervention.cpp proteome.cpp Human.cpp
   inputData.cpp NeonatalMortality.cpp
+  
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
+  
+  Clinical/ClinicalModel.cpp
+  Clinical/EventScheduler.cpp
+  Clinical/ImmediateOutcomes.cpp
+  Clinical/OldCaseManagement.cpp
+  Clinical/event.cpp
+  
+  Drug/DrugModel.cpp
+  Drug/PkPdDrug.cpp
+  Drug/drug.cpp
+  
+  Pathogenesis/PathogenesisModel.cpp
+  Pathogenesis/Mueller.cpp
+  Pathogenesis/Pyrogen.cpp
+  Pathogenesis/Predet.cpp
+  
+  Transmission/TransmissionModel.cpp
+  Transmission/NonVector.cpp
+  Transmission/PerHostTransmission.cpp
+  Transmission/Vector/VectorTransmission.cpp
+  Transmission/Vector/VectorAnopheles.cpp
+  Transmission/Vector/HostCategoryAnopheles.cpp
+  
+  WithinHost/WithinHostModel.cpp
+  WithinHost/Infection.cpp
+  WithinHost/Descriptive.cpp
+  WithinHost/DescriptiveInfection.cpp
+  WithinHost/DescriptiveIPT.cpp
+  WithinHost/DescriptiveIPTInfection.cpp
+  WithinHost/Dummy.cpp
+  WithinHost/DummyInfection.cpp
+  WithinHost/Empirical.cpp
+  WithinHost/EmpiricalInfection.cpp
+  
+  util/BoincWrapper.cpp
+  util/timer.cpp
+  util/gsl.cpp
+  util/vectors.cpp
+  util/WeibullDecayedValue.cpp
 )
-aux_source_directory (Clinical Clinical_CPP)
-aux_source_directory (Drug Drug_CPP)
-aux_source_directory (Pathogenesis Pathogenesis_CPP)
-aux_source_directory (Transmission Transmission_CPP)
-aux_source_directory (Transmission/Vector TransmissionVector_CPP)
-aux_source_directory (WithinHost WithinHost_CPP)
-aux_source_directory (util util_CPP)
 
-# Headers - only included so they show up in the Visual Studio project:
-aux_source_directory (${CMAKE_SOURCE_DIR}/include Model_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/Clinical Clinical_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/Drug Drug_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/Pathogenesis Pathogenesis_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/Transmission Transmission_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/Transmission/Vector TransmissionVector_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/WithinHost WithinHost_H)
-aux_source_directory (${CMAKE_SOURCE_DIR}/include/util util_H)
+# Headers - only included so they show up in IDEs:
+file (GLOB Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
+file (GLOB SubModel_H "${CMAKE_SOURCE_DIR}/include/*/*.h")
+#message("Headers: " ${Model_H})
+#message("Sub-model headers: " ${SubModel_H})
 
 set (XSD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/scenario.xsd)
 add_custom_command (
@@ -55,21 +84,9 @@ include_directories (
 
 add_library (model
   ${Model_CPP}
-  ${Clinical_CPP}
-  ${Drug_CPP}
-  ${Pathogenesis_CPP}
-  ${Transmission_CPP}
-  ${TransmissionVector_CPP}
-  ${WithinHost_CPP}
-  ${util_CPP}
   ${Model_H}
+  ${SubModel_H}
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
-  ${Clinical_H}
-  ${Drug_H}
-  ${Pathogenesis_H}
-  ${Transmission_H}
-  ${TransmissionVector_H}
-  ${WithinHost_H}
 )
 
 if (MSVC)
@@ -81,6 +98,7 @@ endif (MSVC)
 
 
 #for Visual Studio file groupings:
+#TODO: check are these actaully wanted now? They won't work anyway now, because most XX_CPP / xx_H macros aren't set.
 source_group (model\\Clinical FILES ${Clinical_CPP})
 source_group (model\\Drug FILES ${Drug_CPP})
 source_group (model\\Pathogenesis FILES ${Pathogenesis_CPP})
