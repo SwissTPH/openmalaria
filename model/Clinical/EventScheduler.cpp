@@ -132,9 +132,7 @@ ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
   in >> lastCmDecision;
 }
 void ClinicalEventScheduler::write (ostream& out) {
-  pathogenesisModel->write (out);
-  out << latestReport;
-  out << _doomed << endl; 
+  ClinicalModel::write(out);
   out << pgState << endl;
   out << reportState << endl;
   out << pgChangeTimestep << endl;

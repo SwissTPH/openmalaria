@@ -74,6 +74,11 @@ ClinicalModel::ClinicalModel (istream& in) :
   in >> latestReport;
   in >> _doomed; 
 }
+void ClinicalModel::write (ostream& out) {
+  pathogenesisModel->write (out);
+  out << latestReport << endl;
+  out << _doomed << endl;
+}
 
 
 // -----  other non-static methods  -----

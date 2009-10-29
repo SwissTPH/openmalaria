@@ -55,7 +55,7 @@ public:
   /// Destructor
   virtual ~ClinicalModel ();
   /// Write a checkpoint
-  virtual void write (ostream& out) =0;
+  virtual void write (ostream& out);
   
   /** Kills the human if ageTimeSteps reaches the simulation age limit.
    *
