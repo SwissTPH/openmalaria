@@ -26,7 +26,6 @@
 #include "Simulation.h"
 #include "inputData.h"
 
-int ClinicalModel::reportingPeriodMemory;
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
 

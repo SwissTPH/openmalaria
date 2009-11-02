@@ -53,7 +53,7 @@
     </ageGroup>
   </monitoring>
   <interventions name="No intervention"/>
-  <caseManagements name="test" reportingPeriodMemory="30">
+  <caseManagements name="test" reportingPeriodMemory="28">
     <caseManagement maxAgeYrs="5.0">
       <uc1>
         <endPoint decision="00100" p="0.42"/>

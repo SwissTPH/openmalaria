@@ -53,7 +53,7 @@
     </ageGroup>
   </monitoring>
   <interventions name="No intervention"/>
-  <caseManagements name="test" reportingPeriodMemory="30">
+  <caseManagements name="test" reportingPeriodMemory="28">
     <caseManagement maxAgeYrs="5.0">
     <uc1><endPoint decision="00112" p="0.11064960000000001"/><endPoint decision="00102" p="0.0"/><endPoint decision="00010" p="0.07536100000000001"/><endPoint decision="00101" p="0.0"/><endPoint decision="00110" p="0.27662400000000004"/><endPoint decision="00100" p="0.0"/><endPoint decision="00111" p="0.16597440000000002"/><endPoint decision="00000" p="0.007875"/><endPoint decision="00001" p="0.004725"/><endPoint decision="00002" p="0.00315"/><endPoint decision="1" p="0.28028000000000003"/><endPoint decision="00011" p="0.0452166"/><endPoint decision="00012" p="0.030144400000000005"/></uc1>
     <uc2><endPoint decision="00112" p="0.12739440000000002"/><endPoint decision="00102" p="0.0"/><endPoint decision="00010" p="0.08185400000000001"/><endPoint decision="00101" p="0.0"/><endPoint decision="00110" p="0.31848600000000005"/><endPoint decision="00100" p="0.0"/><endPoint decision="00111" p="0.19109159999999997"/><endPoint decision="00000" p="0.0082"/><endPoint decision="00001" p="0.00492"/><endPoint decision="00002" p="0.0032800000000000004"/><endPoint decision="1" p="0.18292"/><endPoint decision="00011" p="0.0491124"/><endPoint decision="00012" p="0.03274160000000001"/></uc2>

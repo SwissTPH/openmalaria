@@ -144,12 +144,12 @@ void Summary::clearSummaryParameters () {
 void Summary::report(Episode& event){
   int ageGroup = event.getAgeGroup();
   int surveyPeriod = event.getSurveyPeriod();
-
+  Pathogenesis::State state = event.getState();
+  
   //No reporting during warmup
   if (surveyPeriod < 0)
     return;
   
-  Pathogenesis::State state = event.getState();
   if (state & Pathogenesis::MALARIA) {
     if (state & Pathogenesis::COMPLICATED)
       _numSevereEpisodes[surveyPeriod][ageGroup]++;
@@ -177,31 +177,6 @@ void Summary::report(Episode& event){
       _numSequelae[surveyPeriod][ageGroup]++;
     // Don't care about out-of-hospital recoveries
   }
-}
-
-void Summary::report(Pathogenesis::State state, int ageGroup,int surveyPeriod) {
-  //No reporting during warmup
-  if (surveyPeriod < 0)
-    return;
-  
-  if (state & Pathogenesis::MALARIA) {
-    if (state & Pathogenesis::COMPLICATED)
-      _numSevereEpisodes[surveyPeriod][ageGroup]++;
-    else // UC or UC2
-      _numUncomplicatedEpisodes[surveyPeriod][ageGroup]++;
-  } else if (state & Pathogenesis::SICK) {
-    _numNonMalariaFever[surveyPeriod][ageGroup]++;
-  }	// also possibility of nothing, but not reported in this case
-  
-  if (state & Pathogenesis::DIRECT_DEATH)
-    _numDirectDeaths[surveyPeriod][ageGroup]++;
-  else if (state & Pathogenesis::SEQUELAE)
-    _numSequelae[surveyPeriod][ageGroup]++;
-  
-  //TODO: we don't know whether patient was in hospital or not
-  //_numHospitalRecoveries[surveyPeriod][ageGroup]++;
-  //_numHospitalSequelae[surveyPeriod][ageGroup]++;
-  //_numHospitalDeaths[surveyPeriod][ageGroup]++;
 }
 
 void Summary::reportTreatment (int ageGroup, int regimen) {

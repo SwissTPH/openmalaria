@@ -49,20 +49,13 @@ class Summary {
   //! Clearing Routine. This will have to be moved to the class destructor
   void clearSummaryParameters();
 
-  //! Called for all episodes which are reported from ClinicalImmediateOutcomes.
-  /*  
-      \param diagnosis the final diagnosis
-      \param outcome the clinical outcome
-      \param ageGrp age group of the patient
-      \param surveyPer survey period. 
-      Events are assigned to a period between 2 surveys, period 1 is
-      between start of mainsimulation and the first survey. Events after the last 
-    are assigned to survey period (number of surveys)+1.
-  */
+  /** Report a clinical episode.
+   *
+   * From event.getState(), an episode is reported based on severity (SICK,
+   * MALARIA or COMPLICATED), and any outcomes are reported: RECOVERY (in
+   * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
+   * (both in and out of hospital). */
   void report(Episode& event);
-  
-  /// Report episode for ClinicalEventScheduler.
-  void report(Pathogenesis::State state, int ageGroup,int surveyPeriod);
   
   //! Report a first or second line, or inpatient treatment
   void reportTreatment(int ageGroup, int regimen);

@@ -46,10 +46,23 @@ public:
    * @param newState The severity (diagnosis) and outcome.
    */
   void update(int simulationTime, int ageGroup, Pathogenesis::State newState);
-
+  
+  /** Return true if on last timestep that would be considered part of current
+   * espisode (or later). */
+  inline bool episodeEnd (int simulationTime) {
+    return simulationTime >= (_time + reportingPeriodMemory);
+  }
+  
   Pathogenesis::State getState() const {return _state;};
   int getAgeGroup() const {return _ageGroup;};
   int getSurveyPeriod() const {return _surveyPeriod;};
+  
+  /** The maximum age, in timesteps, of when a sickness event occurred, for
+   * another event to be considered part of the same episode.
+   * 
+   * Used by both the clinical models in roughly the same way, but will have
+   * different values in each to match Global::interval. */
+  static int reportingPeriodMemory;
   
 private:
   /// Timestep of event (TIMESTEP_NEVER if no event).

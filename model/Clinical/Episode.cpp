@@ -20,12 +20,14 @@
 
 #include "Clinical/Episode.h"
 #include "Simulation.h"
-#include "Clinical/ClinicalModel.h"
 #include "summary.h"
+
+int Episode::reportingPeriodMemory;
+
 
 void Episode::update (int simulationTime, int ageGroup, Pathogenesis::State newState)
 {
-  if (simulationTime > (_time + ClinicalModel::reportingPeriodMemory)) {
+  if (simulationTime > (_time + reportingPeriodMemory)) {
     if (_time != TIMESTEP_NEVER) {
       Simulation::gMainSummary->report (*this);
     }

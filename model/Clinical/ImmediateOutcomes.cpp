@@ -24,7 +24,7 @@
 // -----  static init  -----
 
 void ClinicalImmediateOutcomes::initParameters () {
-  reportingPeriodMemory = OldCaseManagement::init();
+  Episode::reportingPeriodMemory = OldCaseManagement::init();
 }
 
 

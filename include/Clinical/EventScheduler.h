@@ -56,17 +56,8 @@ private:
   
   /// Current state of sickness
   Pathogenesis::State pgState;
-  /// Worst state within reporting period
-  Pathogenesis::State reportState;
   /// Time of last state-change; only meaningful if pgState & Pathogenesis::SICK.
   int pgChangeTimestep;
-  /// Time when first entered a sick state (for reporting).
-  int episodeStartTimestep;
-  //! survey period during which the event occured
-  //! TODO: we could use the survey array to map time to survey period. slower, but less memory.
-  int _surveyPeriod;
-  //! agegroup of the individual which experienced the episode
-  int _ageGroup;
   
   /// Data used for a withinHostModel->medicate() call
   struct MedicateData {
