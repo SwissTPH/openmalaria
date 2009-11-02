@@ -177,13 +177,10 @@ namespace Outcome {
   for non-treated
 */
   enum Value {
-    
     // non treated
-    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED,
     //for outpatients
-    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS,
     //for inpatients
-    NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS,
+    NO_EVENT,
     //for non-treated
     PARASITES_ARE_CLEARED_PATIENT_RECOVERS_NON_TREATED,
     //for outpatients
@@ -202,7 +199,6 @@ namespace Outcome {
     PATIENT_DIES_NON_TREATED,
     //for inpatients
     PATIENT_DIES_INPATIENTS,
-    INDIRECT_DEATH
   };
 }
 

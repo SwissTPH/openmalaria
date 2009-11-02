@@ -159,17 +159,9 @@ void Summary::report(Event& event){
     } else
       _numNonMalariaFever[surveyPeriod][reportAgeGroup]++;
   }
-  if (state & Pathogenesis::INDIRECT_MORTALITY)
-    _numIndirectDeaths[surveyPeriod][reportAgeGroup]++;
   
   switch (event.getOutcome()) {
-  case Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED:
-    //do nothing
-    break;
-  case Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS:
-    //do nothing
-    break;
-  case Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS:
+  case Outcome::NO_EVENT:
     //do nothing
     break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_NON_TREATED:
@@ -180,8 +172,8 @@ void Summary::report(Event& event){
     break;
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS:
     _numHospitalRecoveries[surveyPeriod][reportAgeGroup]++;
-    //TODO: we curr do not distinquish between treated vs untreated seqs.
     break;
+  //TODO: we curr do not distinquish between treated vs untreated seqs.
   case Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED:
     _numSequelae[surveyPeriod][reportAgeGroup]++;
     break;
@@ -202,9 +194,6 @@ void Summary::report(Event& event){
   case Outcome::PATIENT_DIES_INPATIENTS:
     _numDirectDeaths[surveyPeriod][reportAgeGroup]++;
     _numHospitalDeaths[surveyPeriod][reportAgeGroup]++;
-    break;
-  case Outcome::INDIRECT_DEATH:
-    //do nothing
     break;
   default:
     //Outcome not conclusive
@@ -231,8 +220,6 @@ void Summary::report(Pathogenesis::State state, int ageGroup,int surveyPeriod) {
   
   if (state & Pathogenesis::DIRECT_DEATH)
     _numDirectDeaths[surveyPeriod][ageGroup]++;
-  else if (state & Pathogenesis::INDIRECT_MORTALITY)
-    _numIndirectDeaths[surveyPeriod][ageGroup]++;
   else if (state & Pathogenesis::SEQUELAE)
     _numSequelae[surveyPeriod][ageGroup]++;
   

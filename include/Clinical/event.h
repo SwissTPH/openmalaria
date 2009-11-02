@@ -58,7 +58,8 @@ private:
   int _surveyPeriod;
   //! agegroup of the individual which experienced the episode
   int _ageGroup;
-  //! final diagnosis, severe if one of the clinical events was severe, else uncomplicated
+  /// Descriptor of state, containing reporting info. Not all information will
+  /// be reported (e.g. indirect deaths are reported independantly).
   Pathogenesis::State _state;
   //! maximum of recovered, sequelae, death
   int _outcome;

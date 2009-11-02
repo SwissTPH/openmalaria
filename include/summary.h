@@ -66,6 +66,12 @@ class Summary {
   
   //! Report a first or second line, or inpatient treatment
   void reportTreatment(int ageGroup, int regimen);
+  
+  /// Report an indirect death (separated from report(Event) due to independant usage)
+  void reportIndirectDeath (double age) {
+    if (_surveyPeriod < 0) return;
+    _numIndirectDeaths[_surveyPeriod][ageGroup(age)]++;
+  }
 
   //! Report every vaccine dose given via EPI (differs from Mass for costing)
   /*!

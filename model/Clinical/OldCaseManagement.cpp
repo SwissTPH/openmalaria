@@ -140,11 +140,13 @@ bool OldCaseManagement::uncomplicatedEvent(Event& latestReport, bool isMalaria, 
 	return true;
       }
       else {
-	latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_OUTPATIENTS);
+	// No change in parasitological status: treated outside of hospital
+	latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_EVENT);
       }
     }
     else {
-      latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+      // No change in parasitological status: non-treated
+      latestReport.update(Simulation::simulationTime, agegroup, entrypoint, Outcome::NO_EVENT);
     }
   return false;
 }
@@ -232,7 +234,8 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
       latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
     }
     else /*if (q[5] > prandom)*/ {
-      latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
+      // No change in parasitological status: in-hospital patients
+      latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_EVENT);
     }
     return false;
   }
@@ -244,7 +247,8 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
     latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
   }
   else /*if (q[2] > prandom)*/ {
-    latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+    // No change in parasitological status: non-treated
+    latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_EVENT);
   }
   return false;
 }
