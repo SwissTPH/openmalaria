@@ -27,22 +27,20 @@
 #include "Clinical/ClinicalModel.h"
 #include "summary.h"
 
-void Event::update(int simulationTime, int ageGroup, int diagnosis, int outcome){
-  if ((diagnosis == Diagnosis::INDIRECT_MALARIA_DEATH) || (simulationTime>(_time + ClinicalModel::reportingPeriodMemory))){
+void Event::update(int simulationTime, int ageGroup, Pathogenesis::State newState, int outcome){
+  if ((newState == Pathogenesis::INDIRECT_MORTALITY) || (simulationTime>(_time + ClinicalModel::reportingPeriodMemory))){
     if (_time!=TIMESTEP_NEVER){
       Simulation::gMainSummary->report(*this);
     }
     _time=simulationTime;
     _surveyPeriod=Simulation::gMainSummary->getSurveyPeriod();
     _ageGroup=ageGroup;
-    _diagnosis=diagnosis;
+    _state=newState;
     _outcome=outcome;
-    _recurrence=1;
   }
   else {
     _outcome=std::max(outcome, _outcome);
-    _diagnosis=std::max(diagnosis, _diagnosis);
-    _recurrence++;
+    _state = Pathogenesis::State(_state | newState);
   }
 }
 
@@ -57,9 +55,9 @@ ostream& operator<<(ostream& out, const Event& event){
   if (event._time == TIMESTEP_NEVER) return out;
   out << event._surveyPeriod << endl;
   out << event._ageGroup << endl;
-  out << event._diagnosis << endl;
+  out << event._state << endl;
   out << event._outcome << endl;
-  return out << event._recurrence << endl;
+  return out;
 }
 
 istream& operator>>(istream& in, Event& event){
@@ -67,8 +65,9 @@ istream& operator>>(istream& in, Event& event){
   if (event._time == TIMESTEP_NEVER) return in;
   in >> event._surveyPeriod;
   in >> event._ageGroup;
-  in >> event._diagnosis;
+  int temp;
+  in >> temp;
+  event._state = Pathogenesis::State(temp);
   in >> event._outcome;
-  in >> event._recurrence;
   return in;
 }

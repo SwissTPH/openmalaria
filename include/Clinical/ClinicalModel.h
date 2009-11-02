@@ -78,7 +78,7 @@ public:
   /** Was the last diagnosis severe malaria?
    * FIXME: update or remove */
   inline bool latestDiagnosisIsSevereMalaria () {
-    return latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA;
+    return latestReport.getState() == Pathogenesis::STATE_SEVERE;
   }
   
   /** Used with IPT within host model to potentially skip summarizing.

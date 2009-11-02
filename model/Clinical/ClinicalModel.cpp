@@ -97,14 +97,14 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical episode 6 intervals before
-    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Pathogenesis::INDIRECT_MORTALITY, Outcome::INDIRECT_DEATH);
     _doomed = DOOMED_INDIRECT;
     return;
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
     if (NeonatalMortality::eventNeonatalMortality()) {
-      latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Diagnosis::INDIRECT_MALARIA_DEATH, Outcome::INDIRECT_DEATH);
+      latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), Pathogenesis::INDIRECT_MORTALITY, Outcome::INDIRECT_DEATH);
       _doomed = DOOMED_NEONATAL;
       return;
     }

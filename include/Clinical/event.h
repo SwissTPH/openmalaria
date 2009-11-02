@@ -43,9 +43,9 @@ public:
     \param diagnosis
     \outcome 
   */
-  void update(int simulationTime, int ageGroup, int diagnosis, int outcome);
+  void update(int simulationTime, int ageGroup, Pathogenesis::State newState, int outcome);
 
-  int getDiagnosis() const {return _diagnosis;};
+  Pathogenesis::State getState() const {return _state;};
   int getAgeGroup() const {return _ageGroup;};
   int getSurveyPeriod() const {return _surveyPeriod;};
   int getOutcome() const {return _outcome;};
@@ -59,11 +59,9 @@ private:
   //! agegroup of the individual which experienced the episode
   int _ageGroup;
   //! final diagnosis, severe if one of the clinical events was severe, else uncomplicated
-  int _diagnosis;
+  Pathogenesis::State _state;
   //! maximum of recovered, sequelae, death
   int _outcome;
-  //! The total(!) number of clinical events that occured during this caseManagementMemory period
-  int _recurrence;
 };
 
 #endif

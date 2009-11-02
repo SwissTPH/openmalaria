@@ -117,7 +117,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
   
   if (effectiveTreatment) {
     if (!(Global::modelVersion & INCLUDES_PK_PD))
-      withinHostModel.clearInfections(latestReport.getDiagnosis() == Diagnosis::SEVERE_MALARIA);
+      withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
   }
 }
 
@@ -127,8 +127,8 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
 bool OldCaseManagement::uncomplicatedEvent(Event& latestReport, bool isMalaria, double ageYears){
   //ageGroup is not optimized
   int agegroup=Simulation::gMainSummary->ageGroup(ageYears);
-    int entrypoint = isMalaria ? Diagnosis::UNCOMPLICATED_MALARIA
-                               : Diagnosis::NON_MALARIA_FEVER;
+    Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA
+                               : Pathogenesis::SICK;
     int nextRegimen=getNextRegimen(Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
     if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (gsl::rngUniform())){
       _latestRegimen=nextRegimen;
@@ -165,7 +165,7 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
   and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
   do we want to change this section of code rather than just introducing the new alternative (TS))
   */ 
-  int nextRegimen=getNextRegimen(Simulation::simulationTime, Diagnosis::SEVERE_MALARIA, _tLastTreatment, _latestRegimen);
+  int nextRegimen=getNextRegimen(Simulation::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment, _latestRegimen);
   
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
@@ -212,39 +212,39 @@ bool OldCaseManagement::severeMalaria(Event& latestReport, double ageYears, int&
     
     if (q[5] <= prandom) {
       if (q[6] > prandom) {
-	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+	latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PATIENT_DIES_INPATIENTS);
 	doomed  = 4;
       }
       else if (q[7] > prandom) {
-	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+	latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
       }
       else /*if (q[8] > prandom)*/
       {
-	latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
+	latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS);
       }
       return true;
     }
     if (q[3] > prandom) {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PATIENT_DIES_INPATIENTS);
       doomed  = 4;
     }
     else if (q[4] > prandom) {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS);
     }
     else /*if (q[5] > prandom)*/ {
-      latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
+      latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_INPATIENTS);
     }
     return false;
   }
   if (q[0] > prandom) {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PATIENT_DIES_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PATIENT_DIES_NON_TREATED);
     doomed  = 4;
   }
   else if (q[1] > prandom) {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED);
   }
   else /*if (q[2] > prandom)*/ {
-    latestReport.update(Simulation::simulationTime, agegroup, Diagnosis::SEVERE_MALARIA, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
+    latestReport.update(Simulation::simulationTime, agegroup, Pathogenesis::STATE_SEVERE, Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED);
   }
   return false;
 }
@@ -278,7 +278,7 @@ double OldCaseManagement::getCommunityCaseFatalityRate(double caseFatalityRatio)
 }
 
 int OldCaseManagement::getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen) {
-  if (diagnosis == Diagnosis::SEVERE_MALARIA)
+  if (diagnosis == Pathogenesis::STATE_SEVERE)
     return 3;
   
   if (tLastTreated+ClinicalModel::reportingPeriodMemory > simulationTime)

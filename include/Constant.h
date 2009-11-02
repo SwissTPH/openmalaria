@@ -171,13 +171,6 @@ namespace Pathogenesis {
   };
 }
 
-namespace Diagnosis {
-  enum Value { NON_MALARIA_FEVER,
-               UNCOMPLICATED_MALARIA,
-               SEVERE_MALARIA,
-               INDIRECT_MALARIA_DEATH };
-}
-
 namespace Outcome {
 /*
   Possibilities for outcomes are:

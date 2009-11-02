@@ -148,25 +148,20 @@ void Summary::report(Event& event){
   //No reporting during warmup
   if (surveyPeriod < 0)
     return;
-
-  switch (event.getDiagnosis()) {
-  case Diagnosis::NON_MALARIA_FEVER:
-    _numNonMalariaFever[surveyPeriod][reportAgeGroup]++;
-    break;
-  case Diagnosis::UNCOMPLICATED_MALARIA:
-    _numUncomplicatedEpisodes[surveyPeriod][reportAgeGroup]++;
-    break;
-  case Diagnosis::SEVERE_MALARIA:
-    _numSevereEpisodes[surveyPeriod][reportAgeGroup]++;
-    break;
-  case Diagnosis::INDIRECT_MALARIA_DEATH:
-    _numIndirectDeaths[surveyPeriod][reportAgeGroup]++;
-    break;
-  default:
-    //Diagnosis not conclusive
-    cout << "diag nc or non-malaria fever" << lineEnd;
-    break;
+  
+  Pathogenesis::State state = event.getState();
+  if (state & Pathogenesis::SICK) {
+    if (state & Pathogenesis::MALARIA) {
+      if (state & Pathogenesis::COMPLICATED)
+	_numSevereEpisodes[surveyPeriod][reportAgeGroup]++;
+      else
+	_numUncomplicatedEpisodes[surveyPeriod][reportAgeGroup]++;
+    } else
+      _numNonMalariaFever[surveyPeriod][reportAgeGroup]++;
   }
+  if (state & Pathogenesis::INDIRECT_MORTALITY)
+    _numIndirectDeaths[surveyPeriod][reportAgeGroup]++;
+  
   switch (event.getOutcome()) {
   case Outcome::NO_CHANGE_IN_PARASITOLOGICAL_STATUS_NON_TREATED:
     //do nothing
