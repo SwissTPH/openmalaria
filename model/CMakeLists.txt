@@ -15,7 +15,7 @@ set (Model_CPP
   Clinical/EventScheduler.cpp
   Clinical/ImmediateOutcomes.cpp
   Clinical/OldCaseManagement.cpp
-  Clinical/event.cpp
+  Clinical/Episode.cpp
   
   Drug/DrugModel.cpp
   Drug/PkPdDrug.cpp

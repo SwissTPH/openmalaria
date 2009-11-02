@@ -189,10 +189,15 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   //TODO: Also call immunityPenalisation() like previous model?
   
   if (pgState & Pathogenesis::COMPLICATED) {
+    //TODO: Also set Pathogenesis::EVENT_IN_HOSPITAL where relevant:
+    //reportState = Pathogenesis::State (reportState | Pathogenesis::EVENT_IN_HOSPITAL);
+    
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
       // force recovery after 10 days
       if (gsl::rngUniform() < 0.02)
 	reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
+      else
+	reportState = Pathogenesis::State (reportState | Pathogenesis::RECOVERY);
       pgState = Pathogenesis::NONE;
     } else {
       //TODO: insert correct probabilities
@@ -208,6 +213,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       if (rand < pRecover) {
 	if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
 	  reportState = Pathogenesis::State (reportState | Pathogenesis::SEQUELAE);
+	else
+	  reportState = Pathogenesis::State (reportState | Pathogenesis::RECOVERY);
 	pgState = Pathogenesis::NONE;
       } else if (rand < pRecover+pDeath) {
 	reportState = Pathogenesis::State (reportState | Pathogenesis::DIRECT_DEATH);

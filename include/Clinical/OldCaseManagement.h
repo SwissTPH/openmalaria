@@ -20,7 +20,7 @@
 #define Hcase_management
 
 #include "WithinHost/WithinHostModel.h"
-#include "Clinical/event.h"
+#include "Clinical/Episode.h"
 #include "Simulation.h"
 
 namespace scnXml {
@@ -46,7 +46,7 @@ public:
    * @param ageYears = Age of human.
    * @param doomed = _doomed variable of Human; used to kill the human.
    *	Passing like this isn't ideal. */
-  void doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Event& latestReport, double ageYears, int& doomed);
+  void doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed);
   
   inline bool recentTreatment() {
     return (Simulation::simulationTime-_tLastTreatment >= 1 &&
@@ -56,12 +56,15 @@ public:
   void write(ostream& out) const;
   
 private:
-   /*! should return true in case of effective or partially effective
-  treatment, false otherwise */
-   bool uncomplicatedEvent(Event& latestReport, bool isMalaria, double ageYears);
+   /** Called when a non-severe/complicated malaria sickness occurs.
+    *
+    * @returns True in case of effective or partially effective treatment, false otherwise. */
+   bool uncomplicatedEvent(Episode& latestReport, bool isMalaria, double ageYears);
 
-  //! returns true in case of effective treatment, false otherwise
-  bool severeMalaria(Event& latestReport, double ageYears, int& doomed);
+   /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
+    *
+    * @returns True in case of effective or partially effective treatment, false otherwise. */
+  bool severeMalaria(Episode& latestReport, double ageYears, int& doomed);
   
   //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
   int _latestRegimen;

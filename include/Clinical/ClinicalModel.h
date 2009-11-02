@@ -22,7 +22,7 @@
 #define Hmod_ClinicalModel
 
 #include "Pathogenesis/PathogenesisModel.h"
-#include "event.h"
+#include "Episode.h"
 
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
@@ -121,7 +121,7 @@ protected:
   
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
-  Event latestReport;
+  Episode latestReport;
   
   /** @brief Positive values of _doomed variable (codes). */
   enum {

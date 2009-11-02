@@ -30,7 +30,7 @@
 using namespace std;
 
 // Forward Declaration
-class Event;
+class Episode;
 
 //! It stores survey data and performes file I/O 
 /*!
@@ -59,7 +59,7 @@ class Summary {
       between start of mainsimulation and the first survey. Events after the last 
     are assigned to survey period (number of surveys)+1.
   */
-  void report(Event& event);
+  void report(Episode& event);
   
   /// Report episode for ClinicalEventScheduler.
   void report(Pathogenesis::State state, int ageGroup,int surveyPeriod);

@@ -150,55 +150,31 @@ namespace Pathogenesis {
     /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
      * Many are designed to be "flags", so the value corresponds to a single bit:
      * http://en.wikipedia.org/wiki/Flag_byte
+     * Max: 0x4000
      * (note & | ^ are C++'s binary AND, OR and XOR operators). */
     NONE		= 0,		///< Not sick
     
-    // Flags:
+    // Flags for current state/worst state to report:
     SICK		= 0x1,		///< Sick (may or may not be from malaria)
     MALARIA		= 0x2,		///< Malaria sickness
     SEVERE		= 0x8,		///< Severe malaria case
-    COINFECTION		= 0x10,		///< Malaria with a coinfection
+    COINFECTION		= 0x4,		///< Malaria with a coinfection
     /// Used by ClinicalEventScheduler to indicate a second bout of malarial sickness within the same episode (roughly)
-    SECOND_CASE		= 0x400,
-    COMPLICATED		= 0x200,	///< Flag used to indicate SEVERE and/or COINFECTION
-    SEQUELAE		= 0x20,		///< Used for reporting sequelae from COMPLICATED sickness
+    SECOND_CASE		= 0x10,
+    COMPLICATED		= 0x20,		///< Flag used to indicate SEVERE and/or COINFECTION
+    
+    // Flag used by pathogenesis model to tell the clinical model that individual will die; not used for reporting:
     INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
-    DIRECT_DEATH	= 0x1000,	///< Used for reporting death from COMPLICATED sickness
+    
+    // Flags for outcome reporting:
+    EVENT_IN_HOSPITAL	= 0x400,	///< Indicates recovery/sequelae/death event occurred in hospital − only set on one of these events
+    DIRECT_DEATH	= 0x1000,	///< Used for reporting death (from COMPLICATED sickness)
+    SEQUELAE		= 0x2000,	///< Reporting recovered with sequelae (from COMPLICATED sickness)
+    RECOVERY		= 0x4000,	///< Report that individual fully recovered
     
     STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
     STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
     STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
-  };
-}
-
-namespace Outcome {
-/*
-  Possibilities for outcomes are:
-  for non-treated
-*/
-  enum Value {
-    // non treated
-    //for outpatients
-    //for inpatients
-    NO_EVENT,
-    //for non-treated
-    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_NON_TREATED,
-    //for outpatients
-    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_OUTPATIENTS,
-    //for inpatients
-    PARASITES_ARE_CLEARED_PATIENT_RECOVERS_INPATIENTS,
-    //for non-treated
-    PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED,
-    //for inpatients
-    PARASITES_ARE_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS,
-    //for non-treated
-    PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_NON_TREATED,
-    //for inpatients
-    PARASITES_NOT_CLEARED_PATIENT_HAS_SEQUELAE_INPATIENTS,
-    //for non-treated
-    PATIENT_DIES_NON_TREATED,
-    //for inpatients
-    PATIENT_DIES_INPATIENTS,
   };
 }
 
