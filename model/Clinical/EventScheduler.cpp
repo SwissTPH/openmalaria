@@ -162,37 +162,66 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   if (pgState & Pathogenesis::COMPLICATED) {
     //TODO: Also set Pathogenesis::EVENT_IN_HOSPITAL where relevant:
     //reportState = Pathogenesis::State (reportState | Pathogenesis::EVENT_IN_HOSPITAL);
-    
+    const double pSequelae = 0.02; //prob of sequelae is constant of recovereds
+	// TODO pSequelae should come from xml
     if (Simulation::simulationTime >= pgChangeTimestep + 10) {
       // force recovery after 10 days
-      if (gsl::rngUniform() < 0.02)
+      if (gsl::rngUniform() < pSequelae)
 	pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
       else
 	pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
       latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
       pgState = Pathogenesis::NONE;
     } else {
+	  // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
+	  // TODO how shall these be entered into cml/code - can we have them as list or vector?
       //TODO: insert correct probabilities
-      if (lastCmDecision & MANAGEMENT_GOOD) {
-	// Good management
-      } else {
-	// bad
+	  int daySinceSevere = Simulation::simulationTime - pgChangeTimestep;
+      int severeTreatmentType == (lastCmDecision & TREATMENT_MASK);
+      if (daySinceSevere >=  3){
+	    //case-fatality rate is constant at from day 3 onwards, depends on quality of management and severe treatment
+	    if (lastCmDecision & MANAGEMENT_GOOD) {
+	      // Good management
+	      // TODO assumed multiplicative CF rates for management quality and severe treatment, but it maybe another function
+	      const double pDeath = CF_managment_good(3)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
+	      const double pRecover = 0.2; //TODO insert correct probablity from xml
+	    } else {
+	      // bad
+	      const double pDeath = CF_managment_bad(3)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
+	      const double pRecover = 0.2; //TODO insert correct probablity from xml
+	    }
+	  } else{ 
+	    // case-fatality rate depends on time since severe (up till 2 days)
+	    if (lastCmDecision & MANAGEMENT_GOOD) {
+	      // Good management
+	      const double pDeath = CF_managment_good(daySinceSevere)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
+	      const double pRecover = 0.2; //TODO insert correct probablity from xml
+	    } else {
+	      // bad
+	      const double pDeath = CF_managment_bad(daySinceSevere)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
+	      const double pRecover = 0.2; //TODO insert correct probablity from xml
+	    }
       }
-      const double pRecover = 0.1;
-      const double pSequelae = 0.02;
-      const double pDeath = 0.03;
+	  
+      // old //if (lastCmDecision & MANAGEMENT_GOOD) {
+	// old //// Good management
+      // old //} else {
+	// old //// bad
+      // old //}
+      // old //const double pRecover = 0.1;     
+      // old //const double pDeath = 0.03;
       double rand = gsl::rngUniform();
       if (rand < pRecover) {
-	if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
-	  pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	else
-	  pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
-	pgState = Pathogenesis::NONE;
+	    if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
+	    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	    else
+		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
+	    pgState = Pathogenesis::NONE;
       } else if (rand < pRecover+pDeath) {
-	pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-	latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
-	_doomed = DOOMED_COMPLICATED;	// kill human (removed from simulation next timestep)
+	    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+	    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
+	    _doomed = DOOMED_COMPLICATED;	// kill human (removed from simulation next timestep)
       }
       // else stay in this state
     }
