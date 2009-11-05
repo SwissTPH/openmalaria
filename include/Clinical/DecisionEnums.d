@@ -52,7 +52,9 @@
  * The MASK values are used to filter bits associated with a decision; e.g.
  * (x & QUALITY_MASK) can only have values QUALITY_BAD or QUALITY_GOOD.
  * 
- * TSDELAY is slightly different; (x & TSDELAY_MASK) << TSDELAY_LSHIFT yields
+ * Treatment type names aren't yet final.
+ * 
+ * TSDELAY is slightly different; (x & TSDELAY_MASK) >> TSDELAY_SHIFT yields
  * an integer in the range [0,15] which is the delay in days. */
 enum DecisionEnums {
     /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
@@ -88,18 +90,22 @@ enum DecisionEnums {
     ADHERENCE_GOOD	= 0x2000,
     ADHERENCE_MASK	= 0x2000,
     
-    MANAGEMENT_BAD	= 0x0000,
-    MANAGEMENT_GOOD	= 0x4000,
-    MANAGEMENT_MASK	= 0x4000,
-    
+    //TODO: completely rename (w/wo pre-ref, w/wo hospital, hospital delay (0,1 or 2?)
     TREATMENT_NO_AM	= 0x0,
     TREATMENT_PREREF	= 0x10000,
     TREATMENT_DELREF	= 0x20000,
-    TREATMENT_PREREF_IMMREF	= 0x50000,
-    TREATMENT_PREREF_DELREF	= 0x30000,
-    TREATMENT_PARENTAL	= 0x80000,
+    TREATMENT_PREREF_IMMREF	= 0x30000,
+    TREATMENT_PREREF_DELREF	= 0x40000,
+    TREATMENT_PARENTAL	= 0x50000,
+    TREATMENT_DELREF_GOOD	= 0x60000,
+    TREATMENT_PREREF_IMMREF_GOOD	= 0x70000,
+    TREATMENT_PREREF_DELREF_GOOD	= 0x80000,
+    TREATMENT_PARENTAL_GOOD	= 0x90000,
+    TREATMENT_NUM_TYPES	= 10,
+    TREATMENT_SHIFT	= 16,
     TREATMENT_MASK	= 0xF0000,
     
-    TSDELAY_LSHIFT	= 20,
+    TSDELAY_NUM_MAX	= 3,
+    TSDELAY_SHIFT	= 20,
     TSDELAY_MASK	= 0xF00000,
 };

@@ -23,8 +23,9 @@
 #include "util/gsl.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Simulation.h"
-#include "Clinical/DecisionEnums.d"
 
+double ClinicalEventScheduler::pDeathTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
+double ClinicalEventScheduler::pRecoverTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
 vector<double> ClinicalEventScheduler::caseManagementMaxAge;
 vector<ClinicalEventScheduler::CaseManagementEndPoints> ClinicalEventScheduler::caseManagementEndPoints;
 
@@ -41,7 +42,13 @@ void ClinicalEventScheduler::init ()
     throw xml_scenario_error ("ClinicalEventScheduler selected without caseManagements data in XML");
 
   Episode::reportingPeriodMemory = getCaseManagements()->getReportingPeriodMemory();
-
+  
+  //TODO: set properly from XML; also probability of sequelae
+  for (size_t t = 0; t < TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS; ++t) {
+    pDeathTable[t] = 0.03;
+    pRecoverTable[t] = 0.1;
+  }
+  
   const scnXml::CaseManagements::CaseManagementSequence& managements = getCaseManagements()->getCaseManagement();
   caseManagementMaxAge.resize (managements.size());
   caseManagementEndPoints.resize (managements.size());
@@ -178,35 +185,16 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
       latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
       pgState = Pathogenesis::NONE;
-    } else if (daySinceSevere >= 1) {
-      double pDeath = 0.0, pRecover = 0.0;
-
+    } else if (daySinceSevere >= 1) {	//TODO: do we delay one day?
       // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
-      // TODO how shall these be entered into cml/code - can we have them as list or vector?
-      //TODO: insert correct probabilities
-      int severeTreatmentType = (lastCmDecision & TREATMENT_MASK);
-      int delayIndex = daySinceSevere-1;
-      if (delayIndex > 2) delayIndex = 2;
+      int delayIndex = daySinceSevere-1;	//TODO: is this right?
+      if (delayIndex > 2) delayIndex = 2;	// use 3rd-day's value for any later days
+      int index = (lastCmDecision & TREATMENT_MASK) >> TREATMENT_SHIFT;
+      if (index >= TREATMENT_NUM_TYPES) throw runtime_error ("CM returned invalid treatment type");
+      index += delayIndex * TREATMENT_NUM_TYPES;
+      double pDeath = pDeathTable[index];
+      double pRecover = pRecoverTable[index];
       
-      //case-fatality rate is constant at from day 3 onwards, depends on quality of management and severe treatment
-      if (lastCmDecision & MANAGEMENT_GOOD) {
-	// Good management
-	// TODO assumed multiplicative CF rates for management quality and severe treatment, but it maybe another function
-	pDeath = caseFatalityGoodMangP[delayIndex] * CF_severeTreatmentType (severeTreatmentType); // can we write these as a list/vector
-	pRecover = pRecoverSevereGoodMang[delayIndex]; //TODO insert correct probablity from xml
-      } else {
-	// bad
-	pDeath = caseFatalityBadMangP[delayIndex] * CF_severeTreatmentType (severeTreatmentType); // can we write these as a list/vector
-	pRecover = pRecoverSevereBadMang[delayIndex]; //TODO insert correct probablity from xml
-      }
-      
-      // old //if (lastCmDecision & MANAGEMENT_GOOD) {
-      // old //// Good management
-      // old //} else {
-      // old //// bad
-      // old //}
-      // old //const double pRecover = 0.1;
-      // old //const double pDeath = 0.03;
       double rand = gsl::rngUniform();
       if (rand < pRecover) {
         if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)

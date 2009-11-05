@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Clinical/ClinicalModel.h"
+#include "Clinical/DecisionEnums.d"
 #include <map>
 #include <list>
 
@@ -99,11 +100,9 @@ private:
     map<size_t,CaseTreatment> decisions;
   };
   
-  //TODO: set from xml
-  static double caseFatalityGoodMangP[3];
-  static double caseFatalityBadMangP[3];
-  static double pRecoverSevereGoodMang[3];
-  static double pRecoverSevereBadMang[3];
+  const static size_t PTABLE_NUM_DAYS = 3;
+  static double pDeathTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
+  static double pRecoverTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
   
   /** Age groups */
   static vector<double> caseManagementMaxAge;
