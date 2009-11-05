@@ -99,6 +99,12 @@ private:
     map<size_t,CaseTreatment> decisions;
   };
   
+  //TODO: set from xml
+  static double caseFatalityGoodMangP[3];
+  static double caseFatalityBadMangP[3];
+  static double pRecoverSevereGoodMang[3];
+  static double pRecoverSevereBadMang[3];
+  
   /** Age groups */
   static vector<double> caseManagementMaxAge;
   /** Case management data, per age group. */

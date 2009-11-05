@@ -1,18 +1,18 @@
 /*
  This file is part of OpenMalaria.
- 
+
  Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
+
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or (at
  your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,16 +31,17 @@ vector<ClinicalEventScheduler::CaseManagementEndPoints> ClinicalEventScheduler::
 
 // -----  static init  -----
 
-void ClinicalEventScheduler::init () {
+void ClinicalEventScheduler::init ()
+{
   if (Global::interval != 1)
-    throw xml_scenario_error("ClinicalEventScheduler is only designed for a 1-day timestep.");
-  if (!(Global::modelVersion & INCLUDES_PK_PD))
+    throw xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
+  if (! (Global::modelVersion & INCLUDES_PK_PD))
     throw xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
   if (getCaseManagements() == NULL)
     throw xml_scenario_error ("ClinicalEventScheduler selected without caseManagements data in XML");
-  
+
   Episode::reportingPeriodMemory = getCaseManagements()->getReportingPeriodMemory();
-  
+
   const scnXml::CaseManagements::CaseManagementSequence& managements = getCaseManagements()->getCaseManagement();
   caseManagementMaxAge.resize (managements.size());
   caseManagementEndPoints.resize (managements.size());
@@ -52,25 +53,26 @@ void ClinicalEventScheduler::init () {
     endPoints.caseSev = readEndPoints (managements[i].getSev());
     endPoints.caseNMFWithParasites = readEndPoints (managements[i].getNmfP());
     endPoints.caseNMFWithoutParasites = readEndPoints (managements[i].getNmfNP());
-    
+
     const scnXml::Decisions::DecisionSequence& dSeq = managements[i].getDecisions().getDecision();
     for (scnXml::Decisions::DecisionSequence::const_iterator it = dSeq.begin(); it != dSeq.end(); ++it) {
       CaseTreatment ct;
       const scnXml::Decision::MedicateSequence& mSeq = it->getMedicate();
       ct.medications.resize (mSeq.size());
       for (size_t j = 0; j < mSeq.size(); ++j) {
-	ct.medications[j].abbrev = mSeq[j].getName();
-	ct.medications[j].qty = mSeq[j].getQty();
-	ct.medications[j].time = mSeq[j].getTime();
+        ct.medications[j].abbrev = mSeq[j].getName();
+        ct.medications[j].qty = mSeq[j].getQty();
+        ct.medications[j].time = mSeq[j].getTime();
       }
-      endPoints.decisions[it->getId()] = ct;
+      endPoints.decisions[it->getId() ] = ct;
     }
   }
   if (caseManagementMaxAge[managements.size()-1] <= get_maximum_ageyrs())
     throw xml_scenario_error ("CaseManagements data doesn't cover all ages");
 }
 
-ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints (const scnXml::CaseType& caseType) {
+ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints (const scnXml::CaseType& caseType)
+{
   CaseTypeEndPoints ret;
   const scnXml::CaseType::EndPointSequence& caseTypeSeq = caseType.getEndPoint();
   ret.cumProbs.resize (caseTypeSeq.size());
@@ -83,7 +85,7 @@ ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints 
   }
   // Test cumP is approx. 1.0 (in case the XML is wrong).
   if (cumP < 0.999 || cumP > 1.001)
-    throw xml_scenario_error("EndPoint probabilities don't add up to 1.0 (CaseManagements)");
+    throw xml_scenario_error ("EndPoint probabilities don't add up to 1.0 (CaseManagements)");
   // In any case, force it exactly 1.0 (because it could be slightly less,
   // meaning a random number x could have cumP<x<1.0, causing index errors.
   ret.cumProbs[caseTypeSeq.size()-1] = 1.0;
@@ -95,7 +97,7 @@ ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints 
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     ClinicalModel (cF),
-    pgState(Pathogenesis::NONE), pgChangeTimestep(TIMESTEP_NEVER)
+    pgState (Pathogenesis::NONE), pgChangeTimestep (TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -117,8 +119,9 @@ ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
   }
   in >> lastCmDecision;
 }
-void ClinicalEventScheduler::write (ostream& out) {
-  ClinicalModel::write(out);
+void ClinicalEventScheduler::write (ostream& out)
+{
+  ClinicalModel::write (out);
   out << pgState << endl;
   out << pgChangeTimestep << endl;
   out << medicateQueue.size() << endl;
@@ -134,99 +137,93 @@ void ClinicalEventScheduler::write (ostream& out) {
 
 // -----  other methods  -----
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears)
+{
   // Run pathogenesisModel
   Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
-  
+
   /* Literally, if differences between (the combination of pgState and newState)
    * and pgState include SICK, MALARIA or COMPLICATED
    * or a second case of MALARIA and at least 3 days since last change */
-  if ((((newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
-      (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3))
-  {
-    if ((newState & pgState) & Pathogenesis::MALARIA)
+  if ( ( ( (newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
+       (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3)) {
+    if ( (newState & pgState) & Pathogenesis::MALARIA)
       newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
     pgState = Pathogenesis::State (pgState | newState);
-    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
+    latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
     pgChangeTimestep = Simulation::simulationTime;
-    
+
     doCaseManagement (withinHostModel, ageYears);
   }
-  
-  
+
+
   if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
-    _doomed = -Global::interval;	// start indirect mortality countdown
-  
+    _doomed = -Global::interval; // start indirect mortality countdown
+
   //TODO: Also call immunityPenalisation() like previous model?
-  
+
   if (pgState & Pathogenesis::COMPLICATED) {
     //TODO: Also set Pathogenesis::EVENT_IN_HOSPITAL where relevant:
     //reportState = Pathogenesis::State (reportState | Pathogenesis::EVENT_IN_HOSPITAL);
     const double pSequelae = 0.02; //prob of sequelae is constant of recovereds
-	// TODO pSequelae should come from xml
-    if (Simulation::simulationTime >= pgChangeTimestep + 10) {
+    // TODO pSequelae should come from xml
+    
+    int daySinceSevere = Simulation::simulationTime - pgChangeTimestep;
+    
+    if (daySinceSevere >= 10) {
       // force recovery after 10 days
       if (gsl::rngUniform() < pSequelae)
-	pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+        pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
       else
-	pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-      latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
+        pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+      latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
       pgState = Pathogenesis::NONE;
-    } else {
-	  // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
-	  // TODO how shall these be entered into cml/code - can we have them as list or vector?
+    } else if (daySinceSevere >= 1) {
+      double pDeath = 0.0, pRecover = 0.0;
+
+      // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
+      // TODO how shall these be entered into cml/code - can we have them as list or vector?
       //TODO: insert correct probabilities
-	  int daySinceSevere = Simulation::simulationTime - pgChangeTimestep;
-      int severeTreatmentType == (lastCmDecision & TREATMENT_MASK);
-      if (daySinceSevere >=  3){
-	    //case-fatality rate is constant at from day 3 onwards, depends on quality of management and severe treatment
-	    if (lastCmDecision & MANAGEMENT_GOOD) {
-	      // Good management
-	      // TODO assumed multiplicative CF rates for management quality and severe treatment, but it maybe another function
-	      const double pDeath = CF_managment_good(3)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
-	      const double pRecover = 0.2; //TODO insert correct probablity from xml
-	    } else {
-	      // bad
-	      const double pDeath = CF_managment_bad(3)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
-	      const double pRecover = 0.2; //TODO insert correct probablity from xml
-	    }
-	  } else{ 
-	    // case-fatality rate depends on time since severe (up till 2 days)
-	    if (lastCmDecision & MANAGEMENT_GOOD) {
-	      // Good management
-	      const double pDeath = CF_managment_good(daySinceSevere)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
-	      const double pRecover = 0.2; //TODO insert correct probablity from xml
-	    } else {
-	      // bad
-	      const double pDeath = CF_managment_bad(daySinceSevere)*CF_severeTreatmentType(severeTreatmentType); // can we write these as a list/vector
-	      const double pRecover = 0.2; //TODO insert correct probablity from xml
-	    }
+      int severeTreatmentType = (lastCmDecision & TREATMENT_MASK);
+      int delayIndex = daySinceSevere-1;
+      if (delayIndex > 2) delayIndex = 2;
+      
+      //case-fatality rate is constant at from day 3 onwards, depends on quality of management and severe treatment
+      if (lastCmDecision & MANAGEMENT_GOOD) {
+	// Good management
+	// TODO assumed multiplicative CF rates for management quality and severe treatment, but it maybe another function
+	pDeath = caseFatalityGoodMangP[delayIndex] * CF_severeTreatmentType (severeTreatmentType); // can we write these as a list/vector
+	pRecover = pRecoverSevereGoodMang[delayIndex]; //TODO insert correct probablity from xml
+      } else {
+	// bad
+	pDeath = caseFatalityBadMangP[delayIndex] * CF_severeTreatmentType (severeTreatmentType); // can we write these as a list/vector
+	pRecover = pRecoverSevereBadMang[delayIndex]; //TODO insert correct probablity from xml
       }
-	  
+      
       // old //if (lastCmDecision & MANAGEMENT_GOOD) {
-	// old //// Good management
+      // old //// Good management
       // old //} else {
-	// old //// bad
+      // old //// bad
       // old //}
-      // old //const double pRecover = 0.1;     
+      // old //const double pRecover = 0.1;
       // old //const double pDeath = 0.03;
       double rand = gsl::rngUniform();
       if (rand < pRecover) {
-	    if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
-	    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	    else
-		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
-	    pgState = Pathogenesis::NONE;
-      } else if (rand < pRecover+pDeath) {
-	    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-	    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
-	    _doomed = DOOMED_COMPLICATED;	// kill human (removed from simulation next timestep)
+        if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
+          pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+        else
+          pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+        latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+        pgState = Pathogenesis::NONE;
+      } else if (rand < pRecover + pDeath) {
+        pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+        latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+        _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
       }
       // else stay in this state
     }
-  } else if (pgState & Pathogenesis::SICK && latestReport.episodeEnd(Simulation::simulationTime)) {
-    // Episode timeout: force recovery. 
+  } else if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Simulation::simulationTime)) {
+    // Episode timeout: force recovery.
     // NOTE: An uncomplicated case occuring before this reset could be counted
     // UC2 but with treatment only occuring after this reset (when the case
     // should be counted UC) due to a treatment-seeking-delay. This can't be
@@ -234,33 +231,34 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     // a catch-22 situation, so DH, MP and VC decided to leave it like this.
     //TODO: also report EVENT_IN_HOSPITAL where relevant (patient _can_ be in a severe state)
     pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-    latestReport.update(Simulation::simulationTime, Simulation::gMainSummary->ageGroup(ageYears), pgState);
+    latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
     pgState = Pathogenesis::NONE;
   }
-  
+
   for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
     list<MedicateData>::iterator next = it;
     ++next;
-    if (it->seekingDelay == 0) {	// Medicate today's medications
-      withinHostModel.medicate(it->abbrev, it->qty, it->time, ageYears);
-      medicateQueue.erase(it);
+    if (it->seekingDelay == 0) { // Medicate today's medications
+      withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
+      medicateQueue.erase (it);
       //TODO sort out reporting
-    } else {			// and decrement treatment seeking delay for the rest
+    } else {   // and decrement treatment seeking delay for the rest
       it->seekingDelay--;
     }
     it = next;
   }
 }
 
-void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears)
+{
 #ifndef NDEBUG
-  if (!(pgState & Pathogenesis::SICK))
-    throw domain_error("doCaseManagement shouldn't be called if not sick");
+  if (! (pgState & Pathogenesis::SICK))
+    throw domain_error ("doCaseManagement shouldn't be called if not sick");
 #endif
-  
+
   // We always remove any queued medications.
   medicateQueue.clear();
-  
+
   size_t ageIndex = 0;
   while (ageYears > caseManagementMaxAge[ageIndex]) {
     ++ageIndex;
@@ -268,39 +266,39 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
     if (ageIndex >= caseManagementMaxAge.size()) {
       ostringstream x;
       x << "Individual's age (" << ageYears << ") is over maximum age which has caseManagement data in XML (" << caseManagementMaxAge[ageIndex-1] << ")";
-      throw xml_scenario_error(x.str());
+      throw xml_scenario_error (x.str());
     }
 #endif
   }
-  
+
   const CaseTypeEndPoints* endPoints;
-  if (pgState & Pathogenesis::MALARIA) {	// NOTE: report treatment shouldn't be done like this so it's handled correctly when treatment is cancelled
+  if (pgState & Pathogenesis::MALARIA) { // NOTE: report treatment shouldn't be done like this so it's handled correctly when treatment is cancelled
     if (pgState & Pathogenesis::COMPLICATED) {
       endPoints = &caseManagementEndPoints[ageIndex].caseSev;
-      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 3);
+      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 3);
     } else if (pgState & Pathogenesis::SECOND_CASE) {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC2;
-      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 2);
+      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 2);
     } else {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC1;
-      Simulation::gMainSummary->reportTreatment(Simulation::gMainSummary->ageGroup(ageYears), 1);
+      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 1);
     }
-  } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ {	// sick but not from malaria
+  } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ { // sick but not from malaria
     if (withinHostModel.parasiteDensityDetectible())
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithParasites;
     else
       endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
   }
-  
+
   double randCum = gsl::rngUniform();
   size_t decisionIndex = 0;
   while (endPoints->cumProbs[decisionIndex] < randCum)
     ++decisionIndex;
-  
+
   CaseTreatment& decision = caseManagementEndPoints[ageIndex].decisions[endPoints->decisions[decisionIndex]];
   for (vector<MedicateData>::iterator it = decision.medications.begin(); it != decision.medications.end(); ++it) {
     medicateQueue.push_back (*it);
-    medicateQueue.back().seekingDelay = endPoints->decisions[decisionIndex] % 10;	// last digit
+    medicateQueue.back().seekingDelay = endPoints->decisions[decisionIndex] % 10; // last digit
     lastCmDecision = endPoints->decisions[decisionIndex];
   }
 }
