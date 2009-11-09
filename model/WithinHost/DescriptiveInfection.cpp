@@ -204,14 +204,11 @@ void DescriptiveInfection::determineDensities(int simulationTime, double ageInYe
   }
   
   _density *= expInnateImm;
+  /* MAX_DENS_BUG: Possibly a better model version ensuring that the effect of
+   * variation in innate immunity is reflected in case incidence would have the
+   * following here:
+   * timeStepMaxDensity *= expInnateImm; */
   
-  /*
-  Possibly a better model version ensuring that the effect of variation in innate immunity
-  is reflected in case incidence would have the following here:
-  */
-  if (Global::modelVersion & INNATE_MAX_DENS) {
-    timeStepMaxDensity *= expInnateImm;
-  }
   //Include here the effect of blood stage vaccination
   if (Vaccine::BSV.active) {
     double factor = 1.0 - BSVEfficacy;

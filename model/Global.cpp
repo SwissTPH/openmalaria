@@ -207,7 +207,7 @@ void Global::setModelVersion () {
       throw xml_scenario_error (msg.str());
     }
   if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
-    cerr << "Warning: model version used is deprecated" << endl;
+    throw xml_scenario_error ("These bug-fixes are disabled to preserve result consistency.");
   
   if (clOptions & CLO::PRINT_MODEL_VERSION) {
     cout << "Model flags:";

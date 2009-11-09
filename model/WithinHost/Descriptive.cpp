@@ -136,18 +136,13 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   
   for(iter=infections.begin(); iter!=infections.end(); iter++){
     //std::cout<<"uis: "<<infData->duration<<std::endl;
+    // MAX_DENS_BUG: should be: infStepMaxDens = 0.0;
     double infStepMaxDens = timeStepMaxDensity;
-    
-    if (Global::modelVersion & MAX_DENS_RESET) {
-      infStepMaxDens=0.0;
-    }
     (*iter)->determineDensities(Simulation::simulationTime, ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
     
     IPTattenuateAsexualDensity (*iter);
     
-    if (Global::modelVersion & MAX_DENS_CORRECTION) {
-      infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
-    }
+    // MAX_DENS_BUG: should be: timeStepMaxDensity = std::max(infStepMaxDens, timeStepMaxDensity);
     timeStepMaxDensity = infStepMaxDens;
     
     totalDensity += (*iter)->getDensity();

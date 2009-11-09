@@ -61,7 +61,12 @@ enum ModelVersion {
   /** Infections are introduced without using preerythrocytic immunity. */
   NO_PRE_ERYTHROCYTIC = 1 << 5,
   
-  /// BugFix in previous versions.  This option is not currently implemented.
+  /** @brief Bug fixes in Descriptive & DescriptiveIPT within-host models.
+   *
+   * Really, the code makes more sense if all these are used. But, they make
+   * little difference to results (from memory), and changing the code would
+   * invalidate past parameterisation results. Search MAX_DENS_BUG for more.
+   * (DH & TS) */
   // @{
   MAX_DENS_CORRECTION = 1 << 6,
   INNATE_MAX_DENS = 1 << 7,
