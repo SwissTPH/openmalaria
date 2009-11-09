@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include "intervention.h"
 #include "WithinHost/Infection.h"
+#include "Simulation.h"
 #include <fstream>
 
 
@@ -76,31 +77,28 @@ public:
   /*!
     \return The interval before clearance.
   */
-  int getEndDate();
-
-  /// Multiplies the density by x.
-  void multiplyDensity(double x) { _density *= x; };
+  bool expired () {
+    return Simulation::simulationTime >= _startdate+_duration;
+  }
+  
   //! Get the density of the infection
-  double getDensity() { return _density; };
-  void setDensity(double density) { _density = density;};
+  double getDensity() { return _density; }
 
   //! Start date of the infection
-  int getStartDate() { return _startdate; };
+  int getStartDate() { return _startdate; }
   
-  int getDuration() { return _duration; };
-
-  double getCumulativeExposureJ() {return _cumulativeExposureJ;};
-
-  void setCumulativeExposureJ(double exposure) { _cumulativeExposureJ=exposure; };
-
   //! Determines parasite density of an individual infection.
   /*!
     \param cumulativeY Previous exposure, in cumulative number of parasites.
     \param ageyears Age in years.
     \param cumulativeh cumulative number of inoculations
   */
-  void determineDensities(int simulationTime, double cumulativeY, double ageyears, double cumulativeh, double &timeStepMaxDensity);
-
+  //TODO: compact arguments (e.g. pass expInnateImm * BSVEfficacy)
+  void determineDensities(int simulationTime, double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy);
+  /// Final part of determineDensities calculation.
+  /// Separated out to preserve order.
+  void determineDensityFinal ();
+  
   //! Initialises infection duration.
   /*! 
     Initialises infection duration sampling from log normal distribution using parameters for 53 patients from Georgia.
@@ -115,25 +113,17 @@ public:
     \param funit Checkpoint file.
   */
   void writeInfectionToFile (fstream& funit);
-
-  double getAlpha_m() const {return alpha_m;}
-  double getDecayM() const {return decayM;}
-  double getSigma0sq() const {return sigma0sq;}
-  double getXNuStar() const {return xNuStar;}
-  double getMeanLogParasiteCount(int pos) const {return meanLogParasiteCount[pos];}
-  float getCumulativeHstar() const {return cumulativeHstar;};
-  float getCumulativeYstar() const {return cumulativeYstar;};
+  
+  /// Includes the effect of attenuated infections by SP concentrations, when using IPT
+  virtual void IPTattenuateAsexualDensity () {}
   
   /// pre-erythrocytic latent period, in time steps
   //Note: here for convenience; used by DescriptiveInfection and DescriptiveIPT
   static int latentp;
   
 protected:
-  //! Arbitrary maximum duration of the infection
+  //! Arbitrary maximum duration of the infection, in timesteps
   int _duration; 
-  
-  //! Cumulative parasite density, since start of this infection
-  double _cumulativeExposureJ; 
   
 private:
   // -----  static  -----
@@ -145,14 +135,6 @@ private:
   */
   static double meanLogParasiteCount[maxDur*maxDur];
  
-  static double alpha_m; //!< Maternal protection at birth
-
-  /*!
-    More or less (up to 0.693) inverse quantity of alphaMStar (AJTM p. 9 eq. 12),
-    decay rate of maternal protection in years^(-1).
-  */
-  static double decayM;
-
   static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
 
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13

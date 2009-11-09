@@ -30,6 +30,8 @@ public:
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
   
+  static void init();
+  
   Infection (int now) :
     _startdate(now),
     _density(0.0)
@@ -51,6 +53,29 @@ protected:
   int _startdate; 
   //! Current density of the infection
   double _density;
+  
+  //! Cumulative parasite density, since start of this infection
+  double _cumulativeExposureJ;	//FIXME: check usage across WHMs is consistent
+  
+  
+  /** @returns A multiplier describing the proportion of parasites surviving
+   * immunity effects this timestep.
+   * 
+   * Note that in the Descriptive model this multiplies log(density), but the
+   * new density has no effect on future densities, wheras the Empirical model
+   * multiplies the actual density (which then affects density on the following
+   * timestep). */
+  double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
+  
+private:
+  static double alpha_m; //!< Maternal protection at birth
+  
+  /*!
+  More or less (up to 0.693) inverse quantity of alphaMStar (AJTM p. 9 eq. 12),
+  decay rate of maternal protection in years^(-1).
+  */
+  static double decayM;
+  
 };
 
 #endif

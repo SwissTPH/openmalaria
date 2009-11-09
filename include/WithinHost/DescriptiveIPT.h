@@ -56,8 +56,8 @@ protected:
   the individual had their last dose of SP */
   void SPAction();
   
-  void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
-  void IPTattenuateAsexualMinTotalDensity ();
+  virtual void IPTattenuateAsexualMinTotalDensity ();
+  virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf);
   
   virtual void write(ostream& out) const;
   

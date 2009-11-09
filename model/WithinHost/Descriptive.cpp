@@ -112,7 +112,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   updateImmuneStatus ();	// inout(_cumulativeh,_cumulativeY)
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
-    if (Simulation::simulationTime >= (*iter)->getEndDate()) {
+    if ((*iter)->expired()) {
       delete *iter;
       iter=infections.erase(iter);
       _MOI--;
@@ -141,25 +141,9 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     if (Global::modelVersion & MAX_DENS_RESET) {
       infStepMaxDens=0.0;
     }
-    (*iter)->determineDensities(Simulation::simulationTime, cumulativeY, ageInYears, cumulativeh , infStepMaxDens);
-    (*iter)->multiplyDensity(exp(-_innateImmunity));
+    (*iter)->determineDensities(Simulation::simulationTime, ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
     
-    /*
-    Possibly a better model version ensuring that the effect of variation in innate immunity
-    is reflected in case incidence would have the following here:
-    */
-    if (Global::modelVersion & INNATE_MAX_DENS) {
-      infStepMaxDens *= exp(-_innateImmunity);
-    }
-    //Include here the effect of blood stage vaccination
-    if (Vaccine::BSV.active) {
-      double factor = 1.0 - BSVEfficacy;
-      (*iter)->multiplyDensity(factor);
-      infStepMaxDens *= factor;
-    }
-    
-    // Include here the effect of attenuated infections by SP concentrations
-    IPTattenuateAsexualDensity (**iter);
+    IPTattenuateAsexualDensity (*iter);
     
     if (Global::modelVersion & MAX_DENS_CORRECTION) {
       infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
@@ -174,17 +158,12 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
       _cumulativeh++;
     }
-    (*iter)->setDensity(std::min(maxDens, (*iter)->getDensity()));
-    (*iter)->setCumulativeExposureJ((*iter)->getCumulativeExposureJ()+Global::interval*(*iter)->getDensity());
+    (*iter)->determineDensityFinal ();
     _cumulativeY += Global::interval*(*iter)->getDensity();
   }
   
   IPTattenuateAsexualMinTotalDensity();
 }
-
-void DescriptiveWithinHostModel::SPAction(){}
-void DescriptiveWithinHostModel::IPTattenuateAsexualDensity (DescriptiveInfection&) {}
-void DescriptiveWithinHostModel::IPTattenuateAsexualMinTotalDensity () {}
 
 // -----  Summarize  -----
 

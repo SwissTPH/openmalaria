@@ -30,8 +30,6 @@
 
 int DescriptiveInfection::latentp;
 double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
-double DescriptiveInfection::alpha_m;
-double DescriptiveInfection::decayM;
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
@@ -43,10 +41,6 @@ void DescriptiveInfection::initParameters (){
     throw domain_error ("DescriptiveInfection only supports using an interval of 5");
   
   latentp=get_latentp();
-  cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
-  cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
-  alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
-  decayM=getParameter(Params::DECAY_M);
   sigma0sq=getParameter(Params::SIGMA0_SQ);
   xNuStar=getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
@@ -137,25 +131,21 @@ void DescriptiveInfection::write (ostream& out) const {
 
 // -----  other  -----
 
-int DescriptiveInfection::getEndDate(){
-  return _startdate+_duration/Global::interval;
-}
-
 int DescriptiveInfection::infectionDuration(){
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
     double sdlogdur=0.80000001192092895508;
     double dur=gsl::rngLogNormal(meanlogdur, sdlogdur);
-    return 1+(int)floor(dur);
+    return (1+(int)floor(dur)) / Global::interval;
 }
 
-void DescriptiveInfection::determineDensities(int simulationTime, double cumulativeY, double ageYears, double cumulativeh, double &timeStepMaxDensity)
+void DescriptiveInfection::determineDensities(int simulationTime, double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy)
 {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+simulationTime-_startdate-latentp;
   if ( infage >  0) {
     if ( infage <=  maxDur) {
-      int iduration=_duration/Global::interval;
+      int iduration=_duration;
       if ( iduration >  maxDur)
 	iduration=maxDur;
       
@@ -166,28 +156,11 @@ void DescriptiveInfection::determineDensities(int simulationTime, double cumulat
     if (_density < 1.0)
       _density=1.0;
     
-    //effect of cumulative Parasite density (named Dy in AJTM)
-    double dY;
-    //effect of number of infections experienced since birth (named Dh in AJTM)
-    double dH;
-    //effect of age-dependent maternal immunity (named Dm in AJTM)
-    double dA;
-    
-    if (cumulativeh <= 1.0) {
-      dY=1.0;
-      dH=1.0;
-    } else {
-      dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
-      //TODO: compare this with the asex paper
-      dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
-    }
-    dA = 1.0 - alpha_m * exp(-decayM * ageYears);
-    double survival = std::min(dY*dH*dA, 1.0);
     /*
     The expected parasite density in the non naive host. 
     As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
     */
-    _density = exp(log(_density) * survival);
+    _density = exp(log(_density) * immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
     //Perturb _density using a lognormal 
     double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));
     double stdlog = sqrt(varlog);
@@ -229,4 +202,26 @@ void DescriptiveInfection::determineDensities(int simulationTime, double cumulat
   else {
     _density = 0.0;
   }
+  
+  _density *= expInnateImm;
+  
+  /*
+  Possibly a better model version ensuring that the effect of variation in innate immunity
+  is reflected in case incidence would have the following here:
+  */
+  if (Global::modelVersion & INNATE_MAX_DENS) {
+    timeStepMaxDensity *= expInnateImm;
+  }
+  //Include here the effect of blood stage vaccination
+  if (Vaccine::BSV.active) {
+    double factor = 1.0 - BSVEfficacy;
+    _density *= factor;
+    timeStepMaxDensity *= factor;
+  }
+}
+
+//FIXME: would make sense is this was also part of determineDensities
+void DescriptiveInfection::determineDensityFinal () {
+  _density = std::min(maxDens, _density);
+  _cumulativeExposureJ += Global::interval * _density;
 }

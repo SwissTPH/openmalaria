@@ -104,15 +104,6 @@ protected:
    * Applies decay of immunity against asexual blood stages, if present. */
   void updateImmuneStatus();
   
-  /** @returns A multiplier describing the proportion of parasites surviving
-   * immunity effects this timestep.
-   * 
-   * Note that in the Descriptive model this multiplies log(density), but the
-   * new density has no effect on future densities, wheras the Empirical model
-   * multiplies the actual density (which then affects density on the following
-   * timestep). */
-  double immunitySurvivalFactor ();
-  
   //!Cumulative parasite density since birth
   double _cumulativeY;
   //!Number of infections received since birth

@@ -19,9 +19,20 @@
 */
 
 #include "WithinHost/Infection.h"
+#include "inputData.h"
 
 float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
+double Infection::alpha_m;
+double Infection::decayM;
+
+void Infection::init () {
+  cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
+  cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
+  alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
+  decayM=getParameter(Params::DECAY_M);
+}
+
 
 Infection::Infection (istream& in) {
   in >> _startdate;
@@ -39,4 +50,25 @@ void Infection::write (ostream& out) const {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     out << _proteome->getProteomeID() << endl; 
   }
+}
+
+
+double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY) {
+  //effect of cumulative Parasite density (named Dy in AJTM)
+  double dY;
+  //effect of number of infections experienced since birth (named Dh in AJTM)
+  double dH;
+  //effect of age-dependent maternal immunity (named Dm in AJTM)
+  double dA;
+  
+  if (cumulativeh <= 1.0) {
+    dY=1.0;
+    dH=1.0;
+  } else {
+    dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
+    //TODO: compare this with the asex paper
+    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
+  }
+  dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
+  return std::min(dY*dH*dA, 1.0);
 }

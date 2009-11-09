@@ -69,7 +69,14 @@ public:
    * Avoid making these virtual by casting DescriptiveInfection references to
    * DescriptiveIPTInfection type. */
   int getGenoTypeID() { return _gType.ID; };
-  bool getSPattenuate() { return _SPattenuate; };
+  
+  /// Return: _SPattenuate == 1. Name by DH.
+  bool doSPAttenuation () { return _SPattenuate == 1; }
+  double asexualAttenuation ();
+  /// Extraction by DH; probably not most accurate name.
+  double getAsexualAttenuationEndDate () {
+    return _startdate + _duration * genotypeAtten[_gType.ID-1];
+  }
   
 private:
   //! Genotype responsible for infection

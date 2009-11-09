@@ -44,6 +44,7 @@ double WithinHostModel::detectionLimit;
 // -----  Initialization  -----
 
 void WithinHostModel::init() {
+  Infection::init();
   sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
   immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
   immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
@@ -139,9 +140,6 @@ size_t WithinHostModel::getAgeGroup (double age) {
 
 
 // -----  immunity  -----
-
-double WithinHostModel::immunitySurvivalFactor () {
-}
 
 void WithinHostModel::updateImmuneStatus(){
   if (immEffectorRemain < 1){

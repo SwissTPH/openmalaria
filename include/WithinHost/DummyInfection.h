@@ -88,9 +88,6 @@ class DummyInfection : public Infection {
   */
   void writeInfectionToFile (fstream& funit);
 
-  float getCumulativeHstar() const {return cumulativeHstar;};
-  float getCumulativeYstar() const {return cumulativeYstar;};
-  
   //! Arbitrary maximum duration of the infection
   int _duration; 
 };

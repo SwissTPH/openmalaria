@@ -118,3 +118,10 @@ void DescriptiveIPTInfection::write (ostream& out) const {
   out << _gType.ID << endl; 
   out << _SPattenuate << endl; 
 }
+
+
+double DescriptiveIPTInfection::asexualAttenuation () {
+  double attFact = 1.0 / genotypeAtten[_gType.ID-1];
+  _density *= attFact;
+  return attFact;
+}

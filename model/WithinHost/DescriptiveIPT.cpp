@@ -210,6 +210,7 @@ void DescriptiveIPTWithinHost::SPAction(){
     if (1 + Simulation::simulationTime - (*iter)->getStartDate() > DescriptiveInfection::latentp) {
       DescriptiveIPTInfection* infec = dynamic_cast<DescriptiveIPTInfection*> (*iter);
       if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
+      //FIXME: put this if logic in DescriptiveIPTInfection and remove getGenoTypeID
       size_t genoTypeIndex = infec->getGenoTypeID()-1;
       if ((gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[genoTypeIndex]) &&
 	  (Simulation::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[genoTypeIndex])) {
@@ -225,17 +226,6 @@ void DescriptiveIPTWithinHost::SPAction(){
   }
 }
 
-void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection& dinfec) {
-  if (!(Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY)) return;
-  
-  DescriptiveIPTInfection& infec = dynamic_cast<DescriptiveIPTInfection&> (dinfec);
-    if (infec.getSPattenuate() == 1) {
-      infec.multiplyDensity(1.0/DescriptiveIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1]);
-      timeStepMaxDensity=(double)timeStepMaxDensity/DescriptiveIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1];
-      _SPattenuationt=(int)std::max(_SPattenuationt*1.0, (infec.getStartDate()+(infec.getDuration()/Global::interval) * DescriptiveIPTInfection::genotypeAtten[infec.getGenoTypeID() - 1]));
-    }
-}
-
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
   //NOTE: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
   if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY && _cumulativeInfections > 0) {
@@ -243,5 +233,19 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
       totalDensity = 10;
       _cumulativeY += 10;
     }
+  }
+}
+
+void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection* inf) {
+  if (!(Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY)) return;
+  
+  DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
+  if (iptInf == NULL)
+    throw invalid_argument ("inf should be a DescriptiveIPTInfection");
+  if (iptInf->doSPAttenuation()) {
+    double attFact = iptInf->asexualAttenuation();
+    timeStepMaxDensity *= attFact;
+    _SPattenuationt = (int) std::max(double(_SPattenuationt),
+				     iptInf->getAsexualAttenuationEndDate());
   }
 }

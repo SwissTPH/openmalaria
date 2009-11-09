@@ -70,12 +70,14 @@ public:
   }
   
 protected:
+  ///@brief IPT extensions − empty otherwise
+  //@{
   /*!  SP drug action applies to each infection depending on genotype and when
   the individual had their last dose of SP */
-  virtual void SPAction();
-  
-  virtual void IPTattenuateAsexualDensity (DescriptiveInfection& infec);
-  virtual void IPTattenuateAsexualMinTotalDensity ();
+  virtual void SPAction() {}
+  virtual void IPTattenuateAsexualMinTotalDensity () {}
+  virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
+  //@}
   
   static const int MAX_INFECTIONS;
   
