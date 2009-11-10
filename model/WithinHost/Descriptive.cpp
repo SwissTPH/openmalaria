@@ -138,7 +138,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     //std::cout<<"uis: "<<infData->duration<<std::endl;
     // MAX_DENS_BUG: should be: infStepMaxDens = 0.0;
     double infStepMaxDens = timeStepMaxDensity;
-    (*iter)->determineDensities(Simulation::simulationTime, ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
+    (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
     
     IPTattenuateAsexualDensity (*iter);
     

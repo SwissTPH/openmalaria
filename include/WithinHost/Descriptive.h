@@ -29,6 +29,9 @@
 using namespace std;
 
 /*! Old Within Host Model class.
+ *
+ * Note: this implementation has a few bugs with (hopefully) small effect, not
+ * fixed in order to preserve results (search MAX_DENS_BUG, also in Constant.h).
  */
 class DescriptiveWithinHostModel : public WithinHostModel {
 public:

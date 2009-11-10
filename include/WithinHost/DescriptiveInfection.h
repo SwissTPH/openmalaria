@@ -87,16 +87,18 @@ public:
   //! Start date of the infection
   int getStartDate() { return _startdate; }
   
-  //! Determines parasite density of an individual infection.
-  /*!
-    \param cumulativeY Previous exposure, in cumulative number of parasites.
-    \param ageyears Age in years.
-    \param cumulativeh cumulative number of inoculations
-  */
-  //TODO: compact arguments (e.g. pass expInnateImm * BSVEfficacy)
-  void determineDensities(int simulationTime, double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy);
+  /** Determines parasite density of an individual infection (5-day timestep update)
+   *
+   * @param ageInYears Age of human
+   * @param cumulativeh Cumulative number of infections
+   * @param cumulativeY Previous exposure (cumulative parasite density)
+   * @param timeStepMaxDensity (In-out param) Used to return the maximum parasite density over a 5-day interval.
+   * @param expInnateImm Density multiplier for innate immunity.
+   * @param BSVEfficacy Density multiplier for Blood-Stage Vaccine effect.
+   */
+  void determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy);
   /// Final part of determineDensities calculation.
-  /// Separated out to preserve order.
+  /// Separated out to preserve order of operations.
   void determineDensityFinal ();
   
   //! Initialises infection duration.

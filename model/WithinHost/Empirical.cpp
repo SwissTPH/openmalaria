@@ -101,9 +101,10 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   totalDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
-    double survivalFactor = (1.0-BSVEfficacy) * drugProxy->getDrugFactor(i->getProteome());
-    //TODO: immunity
-    // Do we want to introduce innate immunity (_innateImmunity in Descriptive)?
+    double survivalFactor = (1.0-BSVEfficacy);
+    survivalFactor *= drugProxy->getDrugFactor(i->getProteome());
+    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
+    //TODO: innate immunity (_innateImmunity in Descriptive)
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {

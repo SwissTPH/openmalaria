@@ -45,6 +45,16 @@ public:
     return _proteome;
   }
   
+  
+  /** @returns A multiplier describing the proportion of parasites surviving
+   * immunity effects this timestep.
+   * 
+   * Note that in the Descriptive model this multiplies log(density), but the
+   * new density has no effect on future densities, wheras the Empirical model
+   * multiplies the actual density (which then affects density on the following
+   * timestep). */
+  double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
+  
 protected:
   //! Proteome (used in a different situation than genotype) 
   const ProteomeInstance* _proteome; 
@@ -56,16 +66,6 @@ protected:
   
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ;	//FIXME: check usage across WHMs is consistent
-  
-  
-  /** @returns A multiplier describing the proportion of parasites surviving
-   * immunity effects this timestep.
-   * 
-   * Note that in the Descriptive model this multiplies log(density), but the
-   * new density has no effect on future densities, wheras the Empirical model
-   * multiplies the actual density (which then affects density on the following
-   * timestep). */
-  double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
   
 private:
   static double alpha_m; //!< Maternal protection at birth
