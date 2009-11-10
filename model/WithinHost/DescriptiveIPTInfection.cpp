@@ -70,7 +70,7 @@ void DescriptiveIPTInfection::clearParameters () {
 DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose, int simulationTime) :
   DescriptiveInfection(simulationTime), _SPattenuate(false)
 {
-  _gType.ID=0;
+  _gType.ID=-1;
   
   double uniformRandomVariable=(gsl::rngUniform());
     double lowerIntervalBound=0.0;
@@ -79,7 +79,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose, int simulationT
     for (int genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
       if (uniformRandomVariable > lowerIntervalBound &&
 	uniformRandomVariable < upperIntervalBound){
-	_gType.ID=genotypeCounter;
+	_gType.ID=genotypeCounter - 1;
       }
       lowerIntervalBound=upperIntervalBound;
       /*
@@ -100,8 +100,8 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose, int simulationT
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (simulationTime-lastSPdose > genotypeProph[_gType.ID-1] &&
-      simulationTime-lastSPdose <= genotypeProph[_gType.ID-1] + genotypeTolPeriod[_gType.ID-1]){
+    if (simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
+      simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
       _SPattenuate=true;
     }
 }
@@ -121,7 +121,7 @@ void DescriptiveIPTInfection::write (ostream& out) const {
 
 
 double DescriptiveIPTInfection::asexualAttenuation () {
-  double attFact = 1.0 / genotypeAtten[_gType.ID-1];
+  double attFact = 1.0 / genotypeAtten[_gType.ID];
   _density *= attFact;
   return attFact;
 }

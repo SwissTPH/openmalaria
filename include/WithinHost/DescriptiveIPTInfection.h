@@ -21,6 +21,7 @@
 #ifndef Hmod_DescriptiveIPTInfection
 #define Hmod_DescriptiveIPTInfection
 #include "DescriptiveInfection.h"
+#include "util/gsl.h"
 
 
 struct genotype {
@@ -64,18 +65,18 @@ public:
   
   virtual void write (ostream& out) const;
   
-  /** @name Getter functions
-   *
-   * Avoid making these virtual by casting DescriptiveInfection references to
-   * DescriptiveIPTInfection type. */
-  int getGenoTypeID() { return _gType.ID; };
+  /** The event that the last SP dose clears parasites. */
+  bool eventSPClears (int _lastSPDose) {
+    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[_gType.ID]) &&
+    (Simulation::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[_gType.ID]);
+  }
   
   /// Return: _SPattenuate == 1. Name by DH.
   bool doSPAttenuation () { return _SPattenuate == 1; }
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   double getAsexualAttenuationEndDate () {
-    return _startdate + _duration * genotypeAtten[_gType.ID-1];
+    return _startdate + _duration * genotypeAtten[_gType.ID];
   }
   
 private:

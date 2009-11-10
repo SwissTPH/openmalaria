@@ -210,10 +210,7 @@ void DescriptiveIPTWithinHost::SPAction(){
     if (1 + Simulation::simulationTime - (*iter)->getStartDate() > DescriptiveInfection::latentp) {
       DescriptiveIPTInfection* infec = dynamic_cast<DescriptiveIPTInfection*> (*iter);
       if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
-      //FIXME: put this if logic in DescriptiveIPTInfection and remove getGenoTypeID
-      size_t genoTypeIndex = infec->getGenoTypeID()-1;
-      if ((gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[genoTypeIndex]) &&
-	  (Simulation::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[genoTypeIndex])) {
+      if (infec->eventSPClears(_lastSPDose)) {
         delete *iter;
         iter=infections.erase(iter);
         _MOI--;
