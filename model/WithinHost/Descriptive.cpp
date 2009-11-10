@@ -28,14 +28,11 @@
 
 using namespace std;
 
-const int DescriptiveWithinHostModel::MAX_INFECTIONS = 21;
-
 
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-    WithinHostModel(), _MOI(0),
-    patentInfections(0)
+    WithinHostModel(), _MOI(0)
 {
   _innateImmunity = gsl::rngGauss(0, sigma_i);
 }
@@ -65,7 +62,6 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 void DescriptiveWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
   out << _MOI << endl;
-  out << patentInfections << endl;
   out << _innateImmunity << endl;
   
   for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
@@ -74,7 +70,6 @@ void DescriptiveWithinHostModel::write(ostream& out) const {
 
 void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
   in >> _MOI;
-  in >> patentInfections; 
   in >> _innateImmunity;
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
@@ -122,7 +117,6 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     }
   }//TODO cleanup
   
-  patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
   
@@ -146,10 +140,6 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     timeStepMaxDensity = infStepMaxDens;
     
     totalDensity += (*iter)->getDensity();
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    if ((*iter)->getDensity() > detectionLimit) {
-      patentInfections++;
-    }
     if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
       _cumulativeh++;
     }
@@ -164,12 +154,19 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
 
 // TODO: can summarize move to WithinHostModel ?
 void DescriptiveWithinHostModel::summarize(double age) {
-  if (_MOI > 0) {
+  if (!infections.empty()) {
+    int patentInfections = 0;
+    for (std::list<DescriptiveInfection*>::iterator iter=infections.begin();
+    iter != infections.end(); ++iter){
+      if ((*iter)->getDensity() > detectionLimit)
+	patentInfections++;
+    }
     Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, _MOI);
-    // TODO: patentInfections doesn't really need to be calculated each timestep and stored! calculate it here instead.
+    Simulation::gMainSummary->addToTotalInfections(age, infections.size());
     Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
   }
+  // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
+  // (and are applied after calculateDensities()); here we report the last calculated density.
   if (parasiteDensityDetectible()) {
     Simulation::gMainSummary->addToPatentHost(age, 1);
     Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));

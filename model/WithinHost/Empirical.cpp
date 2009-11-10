@@ -28,8 +28,6 @@
 
 using namespace std;
 
-const int EmpiricalWithinHostModel::MAX_INFECTIONS = 21;
-
 // -----  Initialization  -----
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :

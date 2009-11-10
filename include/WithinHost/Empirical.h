@@ -76,8 +76,6 @@ private:
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<EmpiricalInfection> infections;
-  
-  static const int MAX_INFECTIONS;
 };
 
 #endif

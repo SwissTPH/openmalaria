@@ -28,8 +28,6 @@
 
 using namespace std;
 
-const int DummyWithinHostModel::MAX_INFECTIONS = 21;
-
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :

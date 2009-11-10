@@ -135,8 +135,7 @@ protected:
   /** Maximum parasite density during the previous 5-day interval. */
   double timeStepMaxDensity;
   
-  /* Static private */
-  
+  //BEGIN Static Vars
 //Standard dev innate immunity for densities
   static double sigma_i;
 // contribution of parasite densities to acquired immunity in the presence of fever
@@ -160,6 +159,11 @@ protected:
   */
   static double detectionLimit;
   
+  /** The maximum number of infections a human can have. The only real reason
+   * for this limit is to prevent incase bad input from causing the number of
+   * infections to baloon stupidly. */
+  static const int MAX_INFECTIONS = 21;
+  
   ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
   //@{
 public:
@@ -176,6 +180,7 @@ protected:
   in the reference age group. */
   static const double wtprop[nages];
   //@}
+  //END Static vars
 };
 
 #endif

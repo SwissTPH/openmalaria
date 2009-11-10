@@ -82,8 +82,6 @@ protected:
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}
   
-  static const int MAX_INFECTIONS;
-  
   //!multiplicity of infection
   int _MOI;
   
@@ -96,9 +94,6 @@ protected:
 private:
   //!innate ability to control parasite densities
   double _innateImmunity;
-  
-  //!Number of infections with densities above the limit of detection
-  int patentInfections;
 };
 
 #endif
