@@ -62,7 +62,7 @@ public:
   virtual void write(ostream& out) const;
   //@}
   
-  virtual void summarize(double age) =0;
+  void summarize(double age);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection() =0;
@@ -84,6 +84,17 @@ public:
    * @param BSVEfficacy Efficacy of blood-stage vaccine */
   virtual void calculateDensities(double ageInYears, double BSVEfficacy) =0;
   
+  bool parasiteDensityDetectible() const {
+    return totalDensity > detectionLimit;
+  }
+  
+  inline double getTotalDensity() const {return totalDensity;}
+  inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
+  
+  /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
+  /// and wtprop for this age (in years). Also used by PerHostTransmission.
+  static size_t getAgeGroup (double age);
+  
   ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
@@ -104,6 +115,12 @@ protected:
    * Applies decay of immunity against asexual blood stages, if present. */
   void updateImmuneStatus();
   
+  /** For summarizing:
+   * @returns Total number of infections.
+   * @param patentInfections Out param: the number of patent infections
+	    (only set if return-value is non-zero). */
+  virtual int countInfections (int& patentInfections) =0;
+  
   //!Cumulative parasite density since birth
   double _cumulativeY;
   //!Number of infections received since birth
@@ -112,17 +129,6 @@ protected:
   double _cumulativeYlag;
   //@}
   
-public:
-  virtual bool parasiteDensityDetectible() const =0;
-  
-  inline double getTotalDensity() const {return totalDensity;}
-  inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
-  
-  /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
-  /// and wtprop for this age (in years). Also used by PerHostTransmission.
-  static size_t getAgeGroup (double age);
-  
-protected:
   /** Literally just removes all infections in an individual.
    *
    * Normally clearInfections() would be called instead, which, when IPT is not

@@ -23,7 +23,6 @@
 #include "util/gsl.h"
 #include "WithinHost/Empirical.h"
 #include "Simulation.h"
-#include "summary.h"
 #include "inputData.h"
 
 using namespace std;
@@ -32,7 +31,7 @@ using namespace std;
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
     WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
-    _MOI(0), patentInfections(0)
+    _MOI(0)
 {
 }
 EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
@@ -44,7 +43,6 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
     WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
 {
   in >> _MOI; 
-  in >> patentInfections; 
   
   if (_MOI < 0 || _MOI > MAX_INFECTIONS)
     throw checkpoint_error ("_MOI");
@@ -57,7 +55,6 @@ void EmpiricalWithinHostModel::write(ostream& out) const {
   drugProxy->write (out);
   
   out << _MOI << endl; 
-  out << patentInfections << endl; 
   
   for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
@@ -95,7 +92,6 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, d
 // -----  Density calculations  -----
 
 void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
-  patentInfections = 0;
   totalDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
@@ -112,26 +108,22 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     }
     
     totalDensity += i->getDensity();
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    if (i->getDensity() > detectionLimit) {
-      patentInfections++;
-    }
     ++i;
   }
   timeStepMaxDensity = totalDensity;	// For 1-step model this is the same, but Pathogenesis model still expects it
   drugProxy->decayDrugs();
 }
 
+
 // -----  Summarize  -----
 
-void EmpiricalWithinHostModel::summarize(double age) {
-  if (_MOI > 0) {
-    Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, _MOI);
-    Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+int EmpiricalWithinHostModel::countInfections (int& patentInfections) {
+  if (infections.empty()) return 0;
+  patentInfections = 0;
+  for (std::list<EmpiricalInfection>::iterator iter=infections.begin();
+       iter != infections.end(); ++iter){
+    if (iter->getDensity() > detectionLimit)
+      patentInfections++;
   }
-  if (parasiteDensityDetectible()) {
-    Simulation::gMainSummary->addToPatentHost(age, 1);
-    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
-  }
+  return infections.size();
 }

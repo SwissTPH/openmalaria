@@ -23,7 +23,6 @@
 #include "util/gsl.h"
 #include "WithinHost/Dummy.h"
 #include "Simulation.h"
-#include "summary.h"
 #include "inputData.h"
 
 using namespace std;
@@ -131,16 +130,16 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   drugProxy->decayDrugs();
 }
 
+
 // -----  Summarize  -----
 
-void DummyWithinHostModel::summarize(double age) {
-  if (_MOI > 0) {
-    Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, _MOI);
-    Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+int DummyWithinHostModel::countInfections (int& patentInfections) {
+  if (infections.empty()) return 0;
+  patentInfections = 0;
+  for (std::list<DummyInfection>::iterator iter=infections.begin();
+       iter != infections.end(); ++iter){
+    if (iter->getDensity() > detectionLimit)
+      patentInfections++;
   }
-  if (parasiteDensityDetectible()) {
-    Simulation::gMainSummary->addToPatentHost(age, 1);
-    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
-  }
+  return infections.size();
 }

@@ -58,8 +58,6 @@ private:
 public:
   virtual void update();
   
-  virtual void summarize(double age);
-  
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
   
@@ -68,11 +66,9 @@ public:
   
   void calculateDensities(double ageInYears, double BSVEfficacy);
   
-  bool parasiteDensityDetectible() const {
-    return totalDensity > detectionLimit;
-  }
-  
 protected:
+  virtual int countInfections (int& patentInfections);
+  
   ///@brief IPT extensions − empty otherwise
   //@{
   /*!  SP drug action applies to each infection depending on genotype and when

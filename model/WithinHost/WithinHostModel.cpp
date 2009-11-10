@@ -25,6 +25,8 @@
 #include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/Dummy.h"
 #include "WithinHost/Empirical.h"
+#include "Simulation.h"
+#include "summary.h"
 #include "inputData.h"
 #include <stdexcept>
 
@@ -159,5 +161,24 @@ void WithinHostModel::immunityPenalisation() {
   _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
   if (_cumulativeY <  0) {
     _cumulativeY=0.0;
+  }
+}
+
+
+// -----  Summarize  -----
+
+void WithinHostModel::summarize(double age) {
+  int patentInfections;
+  int numInfections = countInfections (patentInfections);
+  if (numInfections) {
+    Simulation::gMainSummary->addToInfectedHost(age,1);
+    Simulation::gMainSummary->addToTotalInfections(age, numInfections);
+    Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+  }
+  // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
+  // (and are applied after calculateDensities()); here we report the last calculated density.
+  if (parasiteDensityDetectible()) {
+    Simulation::gMainSummary->addToPatentHost(age, 1);
+    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
   }
 }

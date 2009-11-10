@@ -22,9 +22,7 @@
 
 #include "util/gsl.h"
 #include "WithinHost/Descriptive.h"
-#include "Simulation.h"
 #include "intervention.h"
-#include "summary.h"
 
 using namespace std;
 
@@ -150,25 +148,16 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   IPTattenuateAsexualMinTotalDensity();
 }
 
+
 // -----  Summarize  -----
 
-// TODO: can summarize move to WithinHostModel ?
-void DescriptiveWithinHostModel::summarize(double age) {
-  if (!infections.empty()) {
-    int patentInfections = 0;
-    for (std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-    iter != infections.end(); ++iter){
-      if ((*iter)->getDensity() > detectionLimit)
-	patentInfections++;
-    }
-    Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, infections.size());
-    Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
+  if (infections.empty()) return 0;
+  patentInfections = 0;
+  for (std::list<DescriptiveInfection*>::iterator iter=infections.begin();
+       iter != infections.end(); ++iter){
+    if ((*iter)->getDensity() > detectionLimit)
+      patentInfections++;
   }
-  // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
-  // (and are applied after calculateDensities()); here we report the last calculated density.
-  if (parasiteDensityDetectible()) {
-    Simulation::gMainSummary->addToPatentHost(age, 1);
-    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
-  }
+  return infections.size();
 }

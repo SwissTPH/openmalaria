@@ -27,7 +27,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/EmpiricalInfection.h"
 #include "Drug/DrugModel.h"
-;
+
 
 using namespace std;
 
@@ -41,8 +41,6 @@ public:
   
 
   virtual void update();
-  
-  virtual void summarize(double age);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
@@ -58,18 +56,15 @@ public:
   
   void write(ostream& out) const;
   
-  bool parasiteDensityDetectible() const {
-    return totalDensity > detectionLimit;
-  }
-  
-private:
+  protected:
+    virtual int countInfections (int& patentInfections);
+    
+  private:
   /// Encapsulates drug code for each human
   DrugModel* drugProxy;
   
   //!multiplicity of infection
   int _MOI;
-  //!Number of infections with densities above the limit of detection
-  int patentInfections;
   
   /** The list of all infections this human has.
    * 
