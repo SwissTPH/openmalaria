@@ -61,12 +61,6 @@ void EmpiricalWithinHostModel::write(ostream& out) const {
 }
 
 
-// -----  Update function, called each step  -----
-
-void EmpiricalWithinHostModel::update () {
-}
-
-
 // -----  Simple infection adders/removers  -----
 
 void EmpiricalWithinHostModel::newInfection(){

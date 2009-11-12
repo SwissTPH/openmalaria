@@ -75,11 +75,6 @@ void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
 }
 
 
-// -----  Update function, called each step  -----
-
-void DescriptiveWithinHostModel::update () {}
-
-
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveWithinHostModel::newInfection(){

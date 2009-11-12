@@ -56,8 +56,6 @@ private:
   //@}
   
 public:
-  virtual void update();
-  
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
   
