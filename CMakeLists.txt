@@ -45,6 +45,8 @@ find_package (XSD)
 find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
+# help for windows installer
+set (BOOST_ROOT "C:\\Program Files\\boost\\boost_1_40")
 find_package( Boost 1.36.0 )
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})

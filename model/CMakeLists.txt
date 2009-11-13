@@ -53,9 +53,8 @@ set (Model_CPP
 
 # Headers - only included so they show up in IDEs:
 file (GLOB Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
-file (GLOB SubModel_H "${CMAKE_SOURCE_DIR}/include/*/*.h")
-#message("Headers: " ${Model_H})
-#message("Sub-model headers: " ${SubModel_H})
+file (GLOB SModel_H "${CMAKE_SOURCE_DIR}/include/*/*.h")
+file (GLOB SSModel_H "${CMAKE_SOURCE_DIR}/include/*/*/*.h")
 
 set (XSD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/scenario.xsd)
 add_custom_command (
@@ -85,7 +84,8 @@ include_directories (
 add_library (model
   ${Model_CPP}
   ${Model_H}
-  ${SubModel_H}
+  ${SModel_H}
+  ${SSModel_H}
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
 )
 
@@ -95,23 +95,3 @@ if (MSVC)
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
 endif (MSVC)
-
-
-#for Visual Studio file groupings:
-#TODO: check are these actaully wanted now? They won't work anyway now, because most XX_CPP / xx_H macros aren't set.
-source_group (model\\Clinical FILES ${Clinical_CPP})
-source_group (model\\Drug FILES ${Drug_CPP})
-source_group (model\\Pathogenesis FILES ${Pathogenesis_CPP})
-source_group (model\\Transmission FILES ${Transmission_CPP})
-source_group (model\\Transmission\\Vector FILES ${TransmissionVector_CPP})
-source_group (model\\WithinHost FILES ${WithinHost_CPP})
-source_group (model\\util FILES ${util_CPP})
-
-source_group (include FILES ${Model_H})
-source_group (include\\Clinical FILES ${Clinical_H})
-source_group (include\\Drug FILES ${Drug_H})
-source_group (include\\Pathogenesis FILES ${Pathogenesis_H})
-source_group (include\\Transmission FILES ${Transmission_H})
-source_group (include\\Transmission\\Vector FILES ${TransmissionVector_H})
-source_group (include\\WithinHost FILES ${WithinHost_H})
-source_group (include\\util FILES ${util_H})
