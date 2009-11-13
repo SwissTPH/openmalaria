@@ -38,10 +38,8 @@ class EmpiricalWithinHostModel : public WithinHostModel
     EmpiricalWithinHostModel();
     EmpiricalWithinHostModel (istream& in);
     ~EmpiricalWithinHostModel();
-
-
-    virtual void summarize (double age);
-
+    
+    
     //! Create a new infection requires that the human is allocated and current
     virtual void newInfection();
 
@@ -55,10 +53,8 @@ class EmpiricalWithinHostModel : public WithinHostModel
     void calculateDensities (double ageInYears, double BSVEfficacy);
 
     void write (ostream& out) const;
-
-    bool parasiteDensityDetectible() const {
-      return totalDensity > detectionLimit;
-    }
+    
+    virtual int countInfections (int& patentInfections);
 
   private:
     /// Encapsulates drug code for each human
@@ -66,8 +62,6 @@ class EmpiricalWithinHostModel : public WithinHostModel
 
     //!multiplicity of infection
     int _MOI;
-    //!Number of infections with densities above the limit of detection
-    int patentInfections;
 
     /** The list of all infections this human has.
      *
