@@ -122,14 +122,15 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   SPAction();
   
   for(iter=infections.begin(); iter!=infections.end(); iter++){
-    //std::cout<<"uis: "<<infData->duration<<std::endl;
-    // MAX_DENS_BUG: should be: infStepMaxDens = 0.0;
+    // With option MAX_DENS_RESET this would be: infStepMaxDens = 0.0;
+    // However, when using MAX_DENS_CORRECTION this is irrelevant.
     double infStepMaxDens = timeStepMaxDensity;
     (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
     
     IPTattenuateAsexualDensity (*iter);
     
-    // MAX_DENS_BUG: should be: timeStepMaxDensity = std::max(infStepMaxDens, timeStepMaxDensity);
+    if (Global::modelVersion & MAX_DENS_CORRECTION)
+	infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
     timeStepMaxDensity = infStepMaxDens;
     
     totalDensity += (*iter)->getDensity();

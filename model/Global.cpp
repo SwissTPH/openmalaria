@@ -206,8 +206,8 @@ void Global::setModelVersion () {
       //Note: this can occur if a version is listed as "incompatible with itself" in the above table
       throw xml_scenario_error (msg.str());
     }
-  if (modelVersion & (MAX_DENS_CORRECTION | INNATE_MAX_DENS | MAX_DENS_RESET))
-    throw xml_scenario_error ("These bug-fixes are disabled to preserve result consistency.");
+    if ((modelVersion & MAX_DENS_RESET) && !(modelVersion & MAX_DENS_CORRECTION))
+      throw xml_scenario_error ("MAX_DENS_RESET without MAX_DENS_CORRECTION doesn't make sense.");
   
   if (clOptions & CLO::PRINT_MODEL_VERSION) {
     cout << "Model flags:";

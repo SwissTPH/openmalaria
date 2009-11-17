@@ -63,10 +63,11 @@ enum ModelVersion {
   
   /** @brief Bug fixes in Descriptive & DescriptiveIPT within-host models.
    *
-   * Really, the code makes more sense if all these are used. But, they make
-   * little difference to results (from memory), and changing the code would
-   * invalidate past parameterisation results. Search MAX_DENS_BUG for more.
-   * (DH & TS) */
+   * Really, the code makes more sense if all these are used. But, they are
+   * not always used in order to preserve consistant results.
+   * 
+   * MAX_DENS_RESET is not used since it is unneeded when MAX_DENS_CORRECTION
+   * is present and wouldn't make sense when not. */
   // @{
   MAX_DENS_CORRECTION = 1 << 6,
   INNATE_MAX_DENS = 1 << 7,

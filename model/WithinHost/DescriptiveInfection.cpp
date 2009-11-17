@@ -207,8 +207,9 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
   _density *= expInnateImm;
   /* MAX_DENS_BUG: Possibly a better model version ensuring that the effect of
    * variation in innate immunity is reflected in case incidence would have the
-   * following here:
-   * timeStepMaxDensity *= expInnateImm; */
+   * following: */
+  if (Global::modelVersion & INNATE_MAX_DENS)
+      timeStepMaxDensity *= expInnateImm;
   
   //Include here the effect of blood stage vaccination
   if (Vaccine::BSV.active) {
@@ -218,7 +219,7 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
   }
 }
 
-//FIXME: would make sense is this was also part of determineDensities
+//Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
 void DescriptiveInfection::determineDensityFinal () {
   _density = std::min(maxDens, _density);
   _cumulativeExposureJ += Global::interval * _density;
