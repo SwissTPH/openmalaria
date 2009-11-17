@@ -104,32 +104,33 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); i++) {
+  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); ) {
     if (Simulation::simulationTime >= i->getEndDate()) {
-      i->destroy();
       i=infections.erase(i);
       _MOI--;
+      continue;
+    }
+    else {
+      i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
+      i->determineWithinHostDensity();
+      timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
+    
+      totalDensity += i->getDensity();
+      //Compute the proportion of parasites remaining after innate blood stage effect
+      if (i->getDensity() > detectionLimit) {
+        patentInfections++;
+      }
+      if (i->getStartDate() == (Simulation::simulationTime-1)) {
+        _cumulativeh++;
+      }
+      _cumulativeY += Global::interval*i->getDensity();
 	  if (i == infections.end()) {
-		  break;
-	  }
-	  else {
-          continue;
-	  }
+        break;
+      }
+      else {
+        i++;
+      }
     }
-    
-    i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
-    i->determineWithinHostDensity();
-    timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
-    
-    totalDensity += i->getDensity();
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    if (i->getDensity() > detectionLimit) {
-      patentInfections++;
-    }
-    if (i->getStartDate() == (Simulation::simulationTime-1)) {
-      _cumulativeh++;
-    }
-    _cumulativeY += Global::interval*i->getDensity();
   }
   
   drugProxy->decayDrugs();
