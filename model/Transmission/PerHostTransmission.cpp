@@ -91,26 +91,34 @@ void PerHostTransmission::write (ostream& out) const {
     hMI->write (out);
 }
 
-// NOTE: in the case an ITN / IRS is not present, this is only an approximation.
-// But (Simulation::simulationTime - TIMESTEP_NEVER) is easily large enough for
-// conceivable Weibull params that the value is 0.0 when rounded to a double.
-// Performance-wise, an if() might give a small performance gain when
-// interventions aren't present.
+// Note: in the case an intervention is not present, we can use the approximation
+// of Weibull decay over (Simulation::simulationTime - TIMESTEP_NEVER) timesteps
+// (easily large enough for conceivable Weibull params that the value is 0.0 when
+// rounded to a double. Performance-wise it's perhaps slightly slower than using
+// an if() when interventions aren't present.
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
-  return species[speciesIndex].entoAvailability
-    * (1.0 - base.ITNDeterrency (Simulation::simulationTime - timestepITN))
-    * (1.0 - base.IRSDeterrency (Simulation::simulationTime - timestepIRS))
-    * (1.0 - base.VADeterrency  (Simulation::simulationTime - timestepVA));
+  double alpha_i = species[speciesIndex].entoAvailability;
+  if (timestepITN >= 0)
+    alpha_i *= (1.0 - base.ITNDeterrency (Simulation::simulationTime - timestepITN));
+  if (timestepIRS >= 0)
+    alpha_i *= (1.0 - base.IRSDeterrency (Simulation::simulationTime - timestepIRS));
+  if (timestepVA >= 0)
+    alpha_i *= (1.0 - base.VADeterrency  (Simulation::simulationTime - timestepVA));
+  return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
-  return species[speciesIndex].probMosqBiting
-    * (1.0 - base.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
+  double P_B_i = species[speciesIndex].probMosqBiting;
+  if (timestepITN >= 0)
+    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
+  return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
-  double P_C_i = species[speciesIndex].probMosqFindRestSite
-    * (1.0 - base.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
-  double P_D_i = species[speciesIndex].probMosqSurvivalResting
-    * (1.0 - base.IRSKillingEffect (Simulation::simulationTime - timestepIRS));
+  double P_C_i = species[speciesIndex].probMosqFindRestSite;
+  if (timestepITN >= 0)
+    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
+  double P_D_i = species[speciesIndex].probMosqSurvivalResting;
+  if (timestepIRS >= 0)
+    P_D_i *= (1.0 - base.IRSKillingEffect (Simulation::simulationTime - timestepIRS));
   return P_C_i * P_D_i;
 }
 

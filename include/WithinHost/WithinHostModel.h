@@ -137,9 +137,14 @@ protected:
    * PK_PD integration). */
   virtual void clearAllInfections() =0;
   
-  //!Total asexual blood stage density
+  /// Total asexual blood stage density (sum of density of infections).
   double totalDensity;
-  /** Maximum parasite density during the previous 5-day interval. */
+  
+  /** Maximum parasite density of any infection during the previous interval.
+   *
+   * With 5-day timesteps, this is not just the maximum density of any infection
+   * at the end of the timestep, but something designed to emulate the maximum
+   * of 5 daily samples. */
   double timeStepMaxDensity;
   
   //BEGIN Static Vars

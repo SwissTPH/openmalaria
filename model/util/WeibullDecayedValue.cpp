@@ -31,6 +31,8 @@ void WeibullDecayedValue::operator= (const scnXml::WeibullDecayedProportion& elt
   _k = elt.getWeibullk().present() ?
     elt.getWeibullk().get() : 1.0;
   _constOverLambda = Global::yearsPerInterval / (elt.getHalflife() * pow(log(2.0), -1.0/_k));
+//   cout << "WeibullDecayedValue parameters: _initial="<<_initial<<" _k="<<_k<<" _constOverLambda="<<_constOverLambda<<endl;
+//   cout << "Value after 1 year: "<<(*this)(Global::intervalsPerYear)<<endl;
 }
 
 double WeibullDecayedValue::operator() (int ageTSteps) const {

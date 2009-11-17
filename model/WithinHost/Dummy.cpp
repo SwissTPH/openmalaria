@@ -114,7 +114,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     
     i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
     i->determineWithinHostDensity();
-    timeStepMaxDensity=std::max((double)i->getDensity(), timeStepMaxDensity);
+    timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
     
     totalDensity += i->getDensity();
     //Compute the proportion of parasites remaining after innate blood stage effect

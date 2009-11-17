@@ -87,6 +87,7 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, d
 
 void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   totalDensity = 0.0;
+  timeStepMaxDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy);
@@ -101,10 +102,11 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
       continue;	// infection no longer exists so skip the rest
     }
     
-    totalDensity += i->getDensity();
+    double dens = i->getDensity();
+    totalDensity += dens;
+    timeStepMaxDensity = max(timeStepMaxDensity, dens);
     ++i;
   }
-  timeStepMaxDensity = totalDensity;	// For 1-step model this is the same, but Pathogenesis model still expects it
   drugProxy->decayDrugs();
 }
 
