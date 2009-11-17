@@ -1,0 +1,32 @@
+As a brief description of which scenarios are here (of the form scenarioX.xml):
+(any undocumented entries were introduced before I started working on openmalaria)
+
+Notes:
+  P = passes (without checkpointing)
+  C = passes with checkpointing
+  T = part of test
+
+Name	notes	model-version flags	description
+
+1	T
+2	T
+3	T
+4	T
+5	T
+6	T
+9	T	1<<10
+10		1<<12 1<<14		(broken)
+11	T	1<<21
+12	T	1<<16
+
+DummyPKPD T	1<<9 1<<12 1<<13	A basic test of the EventScheduler and Tiago's drug code
+CevCq	T	1<<9 1<<12 1<<13	As DummyPKPD; slightly better perhaps
+EmpTest		1<<12 1<<13 1<<22	A broken test for the Empirical within-host model
+
+IPT
+
+Vector	P	1<<4 1<<5		Vector model scenario; used for various tests and has changed a few times
+VecTest	P	1<<4 1<<5		Like Vector but intended to remain unchanged as a test-case
+VecConstEIR	1<<4 1<<5		Like VecTest but with constant EIR over the year
+FullInterventionSet	1<<4 1<<5	Based off Vector but with many interventions added and 3 vector species; a test-case of more-or-less everything the Vector model can do, all at once.
+NamawalaArabiensis	1<<4 1<<5	Based off Vector, with different mosquito parameters

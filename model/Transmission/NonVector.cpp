@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "Simulation.h"
 #include "util/gsl.h"
+#include "Surveys.h"	// sim-end timestep
 #include <cfloat>
 
 //static (class) variables
@@ -76,8 +77,8 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (static_cast<int>(nDays.size()) < get_simulation_duration()+1) {
-    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << get_simulation_duration()+1 << endl;
+  if (static_cast<int>(nDays.size()) < Surveys.getFinalTimestep()+1) {
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Surveys.getFinalTimestep()+1 << endl;
     throw xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.

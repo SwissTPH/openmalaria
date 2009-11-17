@@ -41,7 +41,7 @@ public:
   PyrogenPathogenesis(double cF);
   PyrogenPathogenesis(istream& in);
   virtual ~PyrogenPathogenesis() {}
-  virtual void summarize (Summary& summary, double age);
+  virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup);
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   void write(ostream& out) const;
   

@@ -25,6 +25,7 @@
 
 #include "Global.h"
 #include "WithinHost/Infection.h"
+#include "Survey.h"
 
 #include <list>
 
@@ -62,7 +63,7 @@ public:
   virtual void write(ostream& out) const;
   //@}
   
-  void summarize(double age);
+  void summarize(Survey& survey, SurveyAgeGroup ageGroup);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection() =0;
@@ -98,9 +99,9 @@ public:
   ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
-  virtual void IPTSetLastSPDose (int agetstep, int ageGroup) {}
+  virtual void IPTSetLastSPDose (int agetstep, SurveyAgeGroup ageGroup) {}
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
-  virtual void IPTiTreatment (int ageGroup);
+  virtual void IPTiTreatment (SurveyAgeGroup ageGroup);
   //@}
   
   ///@brief Immunity model

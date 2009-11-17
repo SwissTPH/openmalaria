@@ -28,7 +28,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention
 #include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
-#include "summary.h"
+#include "Surveys.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "NeonatalMortality.h"
 #include <math.h>
@@ -399,11 +399,11 @@ int Population::targetCumPop (int ageTSteps, int targetPop) {
 // -----  non-static methods: summarising and interventions  -----
 
 void Population::newSurvey () {
+  Survey& current = *Surveys.current;
   for(HumanIter iter=population.begin(); iter != population.end(); iter++){
-    iter->summarize();
+    iter->summarize(current);
   }
-  _transmissionModel->summarize (*Simulation::gMainSummary);
-  Simulation::gMainSummary->incrementSurveyPeriod();
+  _transmissionModel->summarize (current);
 }
 
 void Population::implementIntervention (int time) {

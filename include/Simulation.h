@@ -38,9 +38,6 @@ public:
    *
    * Maximum value during update1(): simulationDuration */
   static int timeStep;
-
-  // Summary generator 
-  static Summary* gMainSummary;
   
   //!  Inititalise all step specific constants and variables.
   Simulation();

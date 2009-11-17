@@ -19,7 +19,6 @@
 */
 #include "Transmission/PerHostTransmission.h"
 #include "Transmission/Vector/VectorTransmission.h"	//TODO: remove dependency
-#include "summary.h"
 #include "intervention.h"
 #include "inputData.h"
 

@@ -25,7 +25,7 @@
 #include "util/timer.h"
 #include "util/gsl.h"
 #include "population.h"
-#include "summary.h"
+#include "Surveys.h"
 #include "Drug/DrugModel.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
@@ -37,7 +37,6 @@ int Simulation::simPeriodEnd;
 int Simulation::totalSimDuration;
 int Simulation::simulationTime;
 int Simulation::timeStep = TIMESTEP_NEVER;
-Summary* Simulation::gMainSummary;
 
 
 Simulation::Simulation()
@@ -46,9 +45,7 @@ Simulation::Simulation()
   // We try to make initialization hierarchical (i.e. most classes initialise
   // through Population::init).
   gsl::setUp();
-  
-  gMainSummary = new Summary();
-  
+  Surveys.init();
   Population::init();
   _population = new Population();
   DrugModel::init();
@@ -56,9 +53,7 @@ Simulation::Simulation()
 
 Simulation::~Simulation(){
   //free memory
-  gMainSummary->clearSummaryParameters();
   Population::clear();
-  delete gMainSummary;
   
   gsl::tearDown();
 }
@@ -74,7 +69,8 @@ int Simulation::start(){
   }
   
   simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
-  totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + get_simulation_duration() + 1;
+  // +1 to let final survey run
+  totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
   
   while (simulationTime < simPeriodEnd) {
     vectorInitialisation();
@@ -86,8 +82,7 @@ int Simulation::start(){
   simPeriodEnd += Global::maxAgeIntervals;
   updateOneLifespan();
   
-  // +1 here because this gives same length as before, using '<' instead of '<=' operator for consistency:
-  simPeriodEnd += get_simulation_duration() + 1;
+  simPeriodEnd = totalSimDuration;
   mainSimulation();
   return 0;
 }
@@ -127,9 +122,14 @@ void Simulation::mainSimulation(){
   //TODO5D
   timeStep=0;
   _population->preMainSimInit();
-  gMainSummary->initialiseSummaries();
+  _population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
+  Surveys.incrementSurveyPeriod();
   
   while(simulationTime < simPeriodEnd) {
+    if (timeStep == Surveys.currentTimestep) {
+      _population->newSurvey();
+      Surveys.incrementSurveyPeriod();
+    }
     _population->implementIntervention(timeStep);
     //Calculate the current progress
     BoincWrapper::reportProgress(double(simulationTime) / totalSimDuration);
@@ -137,13 +137,11 @@ void Simulation::mainSimulation(){
     ++simulationTime;
     _population->update1();
     ++timeStep;
-    if (timeStep == gMainSummary->getSurveyTimeInterval(gMainSummary->getSurveyPeriod())) {
-      _population->newSurvey();
-    }
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
   }
+  cout << "timeStep: "<<timeStep << endl;
   delete _population;
-  gMainSummary->writeSummaryArrays();
+  Surveys.writeSummaryArrays();
 }
 
 

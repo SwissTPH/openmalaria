@@ -22,6 +22,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
+#include "Survey.h"
 
 // Forward declaration
 class TransmissionModel;
@@ -104,7 +105,7 @@ public:
   void clearInfections();
   
   //! Determines the age group of a human
-  int ageGroup() const;
+  SurveyAgeGroup ageGroup() const;
   
   //! Get the age in years, based on current simulationTime.
   double getAgeInYears() const;
@@ -119,7 +120,7 @@ public:
   //@}
   
   //! Summarize the state of a human individual.
-  void summarize();
+  void summarize(Survey& survey);
   
   /// Calculate chance of a biting mosquito becoming infected
   //TODO: per genotype?

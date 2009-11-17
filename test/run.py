@@ -113,11 +113,12 @@ def runScenario(options,omOptions,name):
         original = os.path.join(testSrcDir,"original%s.txt"%name)
         outLoc = os.path.join(testBuildDir,"original%s.txt"%name)
         if os.path.isfile(original):
-            ret = compareOuts.main (*["", original, outFile, 2])
+            ret,ident = compareOuts.main (original, outFile, 3)
         else:
             ret = 3
+            ident = False
             print "\033[1;31mNo original results to compare with."
-        if ret == 0 and options.cleanup:
+        if ident and options.cleanup:
             os.remove(outFile)
             if os.path.isfile(outLoc):
                 os.remove(outLoc)

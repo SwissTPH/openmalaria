@@ -83,8 +83,6 @@ double get_detectionlimit();
 int get_analysis_no(); 
 
 // For summary:
-int get_number_of_surveys(); 
-int get_time_of_survey(int ); 
 int get_summary_option();
 int get_assim_mode(); 
 double get_lowerbound(); 
@@ -92,7 +90,6 @@ double get_lowerbound();
 // For global / simulation:
 int get_model_version();
 double get_maximum_ageyrs();
-int get_simulation_duration(); 
 int get_latentp(); 
 int get_interval(); 
 

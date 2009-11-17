@@ -26,7 +26,6 @@
 #include "WithinHost/Dummy.h"
 #include "WithinHost/Empirical.h"
 #include "Simulation.h"
-#include "summary.h"
 #include "inputData.h"
 #include <stdexcept>
 
@@ -128,7 +127,7 @@ void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 
-void WithinHostModel::IPTiTreatment (int ageGroup) {
+void WithinHostModel::IPTiTreatment (SurveyAgeGroup ageGroup) {
   throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
@@ -167,18 +166,18 @@ void WithinHostModel::immunityPenalisation() {
 
 // -----  Summarize  -----
 
-void WithinHostModel::summarize(double age) {
+void WithinHostModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
   int patentInfections;
   int numInfections = countInfections (patentInfections);
   if (numInfections) {
-    Simulation::gMainSummary->addToInfectedHost(age,1);
-    Simulation::gMainSummary->addToTotalInfections(age, numInfections);
-    Simulation::gMainSummary->addToTotalPatentInfections(age, patentInfections);
+    survey.reportInfectedHosts(ageGroup,1);
+    survey.addToInfections(ageGroup, numInfections);
+    survey.addToPatentInfections(ageGroup, patentInfections);
   }
   // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
   // (and are applied after calculateDensities()); here we report the last calculated density.
   if (parasiteDensityDetectible()) {
-    Simulation::gMainSummary->addToPatentHost(age, 1);
-    Simulation::gMainSummary->addToSumLogDensity(age, log(totalDensity));
+    survey.reportPatentHosts(ageGroup, 1);
+    survey.addToLogDensity(ageGroup, log(totalDensity));
   }
 }

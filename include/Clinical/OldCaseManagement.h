@@ -63,7 +63,9 @@ private:
 
    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
     *
-    * @returns True in case of effective or partially effective treatment, false otherwise. */
+    * @returns True in case of effective or partially effective treatment, false otherwise.
+    * 
+    * Note: sets doomed = 4 if patient dies. */
   bool severeMalaria(Episode& latestReport, double ageYears, int& doomed);
   
   //!indicates the latest treatment regimen(1st, 2nd or 3rd line)

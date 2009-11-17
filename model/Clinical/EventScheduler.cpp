@@ -23,6 +23,7 @@
 #include "util/gsl.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Simulation.h"
+#include "Surveys.h"
 
 double ClinicalEventScheduler::pDeathTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
 double ClinicalEventScheduler::pRecoverTable[TREATMENT_NUM_TYPES * PTABLE_NUM_DAYS];
@@ -104,7 +105,7 @@ ClinicalEventScheduler::CaseTypeEndPoints ClinicalEventScheduler::readEndPoints 
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
     ClinicalModel (cF),
-    pgState (Pathogenesis::NONE), pgChangeTimestep (TIMESTEP_NEVER)
+    pgState(Pathogenesis::NONE), pgChangeTimestep(TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -157,10 +158,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     if ( (newState & pgState) & Pathogenesis::MALARIA)
       newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
     pgState = Pathogenesis::State (pgState | newState);
-    latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+    SurveyAgeGroup ageGroup = ageYears;
+    latestReport.update(Simulation::simulationTime, ageGroup, pgState);
     pgChangeTimestep = Simulation::simulationTime;
 
-    doCaseManagement (withinHostModel, ageYears);
+    doCaseManagement (withinHostModel, ageYears, ageGroup);
   }
 
 
@@ -180,10 +182,10 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     if (daySinceSevere >= 10) {
       // force recovery after 10 days
       if (gsl::rngUniform() < pSequelae)
-        pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
       else
-        pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-      latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+	pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+      latestReport.update(Simulation::simulationTime, SurveyAgeGroup(ageYears), pgState);
       pgState = Pathogenesis::NONE;
     } else if (daySinceSevere >= 1) {	//TODO: do we delay one day?
       // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
@@ -198,14 +200,14 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
       double rand = gsl::rngUniform();
       if (rand < pRecover) {
         if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
-          pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-        else
-          pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-        latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+	  pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	else
+	  pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	latestReport.update(Simulation::simulationTime, SurveyAgeGroup(ageYears), pgState);
         pgState = Pathogenesis::NONE;
       } else if (rand < pRecover + pDeath) {
-        pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-        latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+	pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+	latestReport.update(Simulation::simulationTime, SurveyAgeGroup(ageYears), pgState);
         _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
       }
       // else stay in this state
@@ -219,16 +221,16 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
     // a catch-22 situation, so DH, MP and VC decided to leave it like this.
     //TODO: also report EVENT_IN_HOSPITAL where relevant (patient _can_ be in a severe state)
     pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-    latestReport.update (Simulation::simulationTime, Simulation::gMainSummary->ageGroup (ageYears), pgState);
+    latestReport.update(Simulation::simulationTime, SurveyAgeGroup(ageYears), pgState);
     pgState = Pathogenesis::NONE;
   }
 
   for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
     list<MedicateData>::iterator next = it;
     ++next;
-    if (it->seekingDelay == 0) { // Medicate today's medications
-      withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
-      medicateQueue.erase (it);
+    if (it->seekingDelay == 0) {	// Medicate today's medications
+      withinHostModel.medicate(it->abbrev, it->qty, it->time, ageYears);
+      medicateQueue.erase(it);
       //TODO sort out reporting
     } else {   // and decrement treatment seeking delay for the rest
       it->seekingDelay--;
@@ -237,7 +239,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   }
 }
 
-void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears)
+void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup)
 {
 #ifndef NDEBUG
   if (! (pgState & Pathogenesis::SICK))
@@ -263,13 +265,13 @@ void ClinicalEventScheduler::doCaseManagement (WithinHostModel& withinHostModel,
   if (pgState & Pathogenesis::MALARIA) { // NOTE: report treatment shouldn't be done like this so it's handled correctly when treatment is cancelled
     if (pgState & Pathogenesis::COMPLICATED) {
       endPoints = &caseManagementEndPoints[ageIndex].caseSev;
-      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 3);
+      Surveys.current->reportTreatments3(ageGroup, 1);
     } else if (pgState & Pathogenesis::SECOND_CASE) {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC2;
-      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 2);
+      Surveys.current->reportTreatments2(ageGroup, 1);
     } else {
       endPoints = &caseManagementEndPoints[ageIndex].caseUC1;
-      Simulation::gMainSummary->reportTreatment (Simulation::gMainSummary->ageGroup (ageYears), 1);
+      Surveys.current->reportTreatments1(ageGroup, 1);
     }
   } else /*if (pgState & Pathogenesis::SICK) [true by above check]*/ { // sick but not from malaria
     if (withinHostModel.parasiteDensityDetectible())

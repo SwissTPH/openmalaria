@@ -53,7 +53,7 @@ public:
   void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
   
 private:
-  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears);
+  void doCaseManagement (WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
   
   /// Current state of sickness
   Pathogenesis::State pgState;

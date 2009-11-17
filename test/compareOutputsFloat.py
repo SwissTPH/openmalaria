@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#FIXME: won't compare one file equal to itself now.
 import sys
 import string
 import math
@@ -71,80 +72,139 @@ class TestApproxEqual (unittest.TestCase):
         self.assert_ (    approx_equal (0.000001, 0.0000009999995, 1e-6, 0))
 
 
-def main(*args):
-    maxDiffsToPrint=6
-    if (len(args) == 4):
-        maxDiffsToPrint=int(args[3])
-    elif (len(args) == 3):
-        pass
-    else:
-        print "Usage: "+args[0]+" logfile1 logfile2 [max different lines to print]"
-        return 1
+class ValIdentifier:
+    def __init__(self,s,g,m):
+        self.survey = s
+        self.ageGroup = g
+        self.measure = m
+    def __eq__(self,other):
+        return (self.survey == other.survey) and (self.ageGroup == other.ageGroup) and (self.measure == other.measure)
+    def __hash__(self):
+        return self.survey.__hash__() ^ self.ageGroup.__hash__() ^ self.measure.__hash__()
+
+class TestValIdentifier (unittest.TestCase):
+    def setUp(self):
+        self.a1 = ValIdentifier(2,4,0);
+        self.a2 = ValIdentifier(2,4,0);
+        self.a3 = ValIdentifier(2,2,0);
+        self.b1 = ValIdentifier(0,16,5);
+        self.b2 = ValIdentifier(0,16,5);
+    def testEq (self):
+        self.assert_ (self.a1.survey == self.a2.survey)
+        self.assert_ (self.a1 == self.a2)
+        self.assert_ (self.b1 == self.b2)
+        self.assert_ (self.a1 != self.a3)
+    def testHash (self):
+        self.assert_ (self.a1.__hash__ == self.a2.__hash__)
+        self.assert_ (self.b1.__hash__ == self.b2.__hash__)
+
+
+def charEqual (fn1,fn2):
+    MAX=10*1024
+    f1 = open(fn1,'r')
+    f2 = open(fn2,'r')
+    while True:
+        s1 = f1.read(MAX)
+        s2 = f2.read(MAX)
+        if (len(s1)==0) or (len(s2)==0):
+            # end of one or both files; equal if it's the end of both
+            return len(s1) == len(s2)
+        if s1 != s2:
+            return False
+
+def ReadEntries (fname):
+    values=dict()
+    fileObj = open(fname, 'r')
+    for line in fileObj:
+        items=string.split(line)
+        key=ValIdentifier(int(items[0]),int(items[1]),int(items[2]))
+        values[key]=float(items[3])
+    return values
+
+def main(fn1,fn2,maxDiffsToPrint=6):
+    """Takes names of the two files to compare and optionally an argument describing
+the maximum number of differences to print directly (note: order is not intuitive).
+Returns a tuple ret,ident; ret is 0 if test passes (output considered near-enough equal),
+ident is 1 if files are binary-equal."""
+    ret=0
+    print "compareOutputsFloat.py "+fn1+" "+fn2+" "+str(maxDiffsToPrint)
     
-    print args[0]+" "+args[1]+" "+args[2]+" "+str(maxDiffsToPrint)
-    file1=open(args[1], 'r')
-    file2=open(args[2], 'r')
-    line_count=0
+    # Read both files and combine into a map of key to pairs (v1, v2)
+    try:
+        if charEqual (fn1,fn2):
+            print "Files are identical"
+            return 0,True
+        print "Files aren't binary-equal"
+        
+        values1=ReadEntries(fn1)
+        values2=ReadEntries(fn2)
+    except IOError as e:
+        print str(e)
+        return 1,False
+    values=dict()
+    for (k,v1) in values1.iteritems():
+        v2=None
+        if (k in values2):
+            v2=values2[k]
+            del values2[k]
+        values[k] = (v1,v2)
+    for (k,v2) in values2.iteritems():
+        values[k] = (None,v2)
+    
+    # Go through all values:
+    numPrinted=0
     numDiffs=0
+    numMissing1=0
+    numMissing2=0
     perMeasureNumDiff = dict()
     perMeasureDiffSum = dict()
     perMeasureDiffAbsSum = dict()
-    for line1 in file1:
-        line_count+=1
-        
-        line_items1=string.split(line1)
-        survey1=int(line_items1[0])
-        ageGroup1=int(line_items1[1])
-        measure1=line_items1[2]
-        value1=float(line_items1[3])
-        
-        line2=file2.readline()
-        line_items2=string.split(line2)
-        survey2=int(line_items2[0])
-        ageGroup2=int(line_items2[1])
-        measure2=line_items2[2]
-        value2=float(line_items2[3])
-        
-        if (survey1 != survey2) or (measure1!=measure2) or (ageGroup1!=ageGroup2):
-            print "Different summary outputs {0}:".format(line_count)
-            print '-',line1,
-            print '+',line2,
-            return 2
-        
-        # Compare with relative precision.
-        if not approx_equal_6 (value1, value2):
+    for (k,(v1,v2)) in values.iteritems():
+        if v1==None:
+            numMissing1 += 1
+        elif v2==None:
+            numMissing2 += 1
+        # Compare with relative precision
+        elif not approx_equal_6 (v1, v2):
             numDiffs += 1
-            perMeasureNumDiff[measure1] = perMeasureNumDiff.get(measure1,0) + 1;
-            if (numDiffs <= maxDiffsToPrint):
-                print "line {0:>5}, survey {1:>3}, age group {2:>3}, measure {3:>3}:{4:>12.5f} ->{5:>12.5f}".format(line_count,survey1,ageGroup1,measure1,value1,value2)
-                if (numDiffs == maxDiffsToPrint):
-                    print "[won't print any more line-by-line diffs]"
+            # Sum up total difference per measure
+            perMeasureDiffSum[k.measure]    = perMeasureDiffSum.get(k.measure,0.0)    + v2 - v1
+            perMeasureDiffAbsSum[k.measure] = perMeasureDiffAbsSum.get(k.measure,0.0) + math.fabs(v2-v1)
+        else:
+            continue
         
-        # Sum up total difference per measure
-        perMeasureDiffSum[measure1]    = perMeasureDiffSum.get(measure1,0.0)    + value2 - value1
-        perMeasureDiffAbsSum[measure1] = perMeasureDiffAbsSum.get(measure1,0.0) + math.fabs(value2-value1)
-        
-        if(line_count % 100000 == 0):
-            print (line_count)
+        numPrinted += 1
+        perMeasureNumDiff[k.measure] = perMeasureNumDiff.get(k.measure,0) + 1;
+        if (numPrinted <= maxDiffsToPrint):
+            print "survey {1:>3}, age group {2:>3}, measure {3:>3}:{4:>12.5} ->{5:>12.5}".format(0,k.survey,k.ageGroup,k.measure,v1,v2)
+            if (numPrinted == maxDiffsToPrint):
+                print "[won't print any more line-by-line diffs]"
     
-    if (file2.readline() != ""):
-        print "file {0} has more lines than {1}".format(args[2],args[1])
-        return 3
+    if (numMissing1 > 0) or (numMissing2 > 0):
+        print "{0} entries missing from first file, {1} from second".format(numMissing1,numMissing2)
+        ret = 3
     
-    for (measure,val) in perMeasureDiffAbsSum.iteritems():
+    for (k.measure,val) in perMeasureDiffAbsSum.iteritems():
         if val > 1e-6:
-            diff=perMeasureDiffSum[measure]
-            print "Diff sum for measure {0: >3}:{1: >12.5f}\tabs: {2: >12.5f}\t(ratio: {3: >9.5f}; from {4:>3} diffs)".format(measure,diff,val,diff/val,perMeasureNumDiff.get(measure,0))
+            diff=perMeasureDiffSum[k.measure]
+            print "Diff sum for measure {0: >3}:{1: >12.5f}\tabs: {2: >12.5f}\t(ratio: {3: >9.5f}; from {4:>3} diffs)".format(k.measure,diff,val,diff/val,perMeasureNumDiff.get(k.measure,0))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
         print "No significant differences (total relative diff: {0}), ok...".format(totalRelDiff/1.e6)
-        return 0
+        return ret,False
     else:
         print "{0} significant differences (total relative diff: {1})!".format(numDiffs,totalRelDiff/1.e6)
-        return 1
+        return 1,False
 
 if __name__ == '__main__':
     #uncomment to run unittests:
     #unittest.main()
-    sys.exit(main(*sys.argv))
+    if (len(sys.argv) == 4):
+        ret,ident = main (sys.argv[1],sys.argv[2],int(sys.argv[3]))
+    elif (len(sys.argv) == 3):
+        ret,ident = main (sys.argv[1],sys.argv[2])
+    else:
+        print "Usage: "+sys.argv[0]+" logfile1 logfile2 [max different lines to print]"
+        ret=-1
+    sys.exit(ret)

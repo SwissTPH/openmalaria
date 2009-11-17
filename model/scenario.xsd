@@ -116,16 +116,6 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="simulationDuration" type="xs:int" use="required">
-        <xs:annotation>
-          <xs:documentation>
-            Duration of main simulation
-          </xs:documentation>
-          <xs:appinfo>
-            units:Time steps;min:1;max:36500;
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="modelVersion" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>Model Version</xs:documentation>
@@ -433,7 +423,9 @@
             <xs:element name="surveyTime" type="xs:int">
               <xs:annotation>
                 <xs:documentation>
-                  Survey time
+                  Survey time; 0 means just before start of main sim and is a valid survey-point.
+                  Reported data is either from a point-time survey (immediate data) or is collected over the previous year (data from previous timesteps-per-year period).
+                  Simulation will end immediately after last survey is taken.
                 </xs:documentation>
                 <xs:appinfo>
                   units:Number;min:0;

@@ -199,10 +199,6 @@ double getParameter (size_t i) {
 // ----- Member access functions (bridges) -----
 // This is largely unmodified from the old xerces version.
 
-int get_simulation_duration(){ 
-  return scenario->getSimulationDuration();
-}
-
 double get_detectionlimit(){ 
   return  monitoring->getSurveys().getDetectionLimit();	
 }
@@ -241,14 +237,6 @@ const Intervention* getInterventionByTime(int time){
     return i->second;
   else
     return NULL;
-}
-
-int get_number_of_surveys(){ 
-  return monitoring->getSurveys().getSurveyTime().size();
-}
-
-int get_time_of_survey(int index){
-  return monitoring->getSurveys().getSurveyTime()[index];
 }
 
 int get_analysis_no(){	 

@@ -50,6 +50,16 @@ public:
   static ClinicalModel* createClinicalModel (double cF, double tSF);
   /** Load a ClinicalModel from a checkpoint. */
   static ClinicalModel* createClinicalModel (istream& in);
+  
+  /** Calculate infant mortality as deaths/1000 livebirths for the whole main-
+   * simulation period (not as deaths/1000 years-at-risk per survey).
+   * 
+   * This mimicks field data on all-cause mortality in infants.
+   * Uses the kaplan-meier method because the demography was set up to provide
+   * a stable age-distribution but unfortunately does not accurately describe
+   * death rates. The kaplan-meier estimate is the product of the proportion of
+   * infants survivng at each interval. */
+  static double infantAllCauseMort();
   //@}
   
   /// Destructor
@@ -90,10 +100,14 @@ public:
   }
   
   /// Summarize PathogenesisModel details
-  void summarize (Summary& summary, double age);
+  void summarize (Survey& survey, SurveyAgeGroup ageGroup);
   
+  //TODO: make private
   static vector<int> infantDeaths;
   static vector<int> infantIntervalsAtRisk;
+  
+private:
+  static double _nonMalariaMortality; //!< Non-malaria mortality in under 1year olds.
   
 protected:
   /// Constructor.

@@ -25,6 +25,7 @@
 #include <string.h>
 #include "Human.h"
 #include "scenario.hxx"
+#include <fstream>
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintSmoothArray
@@ -57,7 +58,7 @@ public:
   //@}
   
   /// Set a couple of summary items
-  void summarize (Summary&);
+  void summarize (Survey& survey);
   
   
   /** How many intervals are needed for vector initialisation before

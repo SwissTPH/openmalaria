@@ -29,7 +29,6 @@
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/PerHostTransmission.h"
 #include "Simulation.h"
-#include "summary.h"
 #include "util/BoincWrapper.h"
 #include <math.h> 
 #include <cfloat>
@@ -58,11 +57,11 @@ TransmissionModel::TransmissionModel() :
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
-  innoculationsPerAgeGroup.resize (Simulation::gMainSummary->getNumOfAgeGroups(), 0.0);
+  innoculationsPerAgeGroup.resize (SurveyAgeGroup::getNumGroups(), 0.0);
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
   timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
   
-  noOfAgeGroupsSharedMem = std::max(Simulation::gMainSummary->getNumOfAgeGroups(),KappaArraySize);
+  noOfAgeGroupsSharedMem = std::max(innoculationsPerAgeGroup.size(),SharedGraphics::KappaArraySize);
 }
 
 TransmissionModel::~TransmissionModel () {
@@ -88,9 +87,9 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
     sumWt_kappa += t;
     
     // kappaByAge and nByAge are used in the screensaver only
-    int ia = h->ageGroup();
-    kappaByAge[ia] += t;
-    ++nByAge[ia];
+    SurveyAgeGroup ag = h->ageGroup();
+    kappaByAge[ag.i()] += t;
+    ++nByAge[ag.i()];
   }
   
 #ifndef NDEBUG
@@ -125,7 +124,7 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
   
   // Shared graphics: report infectiousness
   if (Simulation::simulationTime % 6 ==  0) {
-    for (int i = 0; i < Simulation::gMainSummary->getNumOfAgeGroups(); i++)
+    for (int i = 0; i < SurveyAgeGroup::getNumGroups(); i++)
       kappaByAge[i] /= nByAge[i];
     SharedGraphics::copyKappa(&kappaByAge[0]);
   }
@@ -146,20 +145,20 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
    * availability. */
   double EIR = calculateEIR (simulationTime, host, ageInYears);
   
-  int ageGroup = Simulation::gMainSummary->ageGroup (ageInYears);
-  timeStepEntoInnocs[ageGroup] += EIR;
+  SurveyAgeGroup ageGroup (ageInYears);
+  timeStepEntoInnocs[ageGroup.i()] += EIR;
   timeStepNumEntoInnocs ++;
   return EIR;
 }
 
-void TransmissionModel::summarize (Summary& summary) {
-  summary.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
-  summary.setAnnualAverageKappa(_annualAverageKappa);
+void TransmissionModel::summarize (Survey& survey) {
+  survey.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
+  survey.setAnnualAverageKappa(_annualAverageKappa);
   
-  summary.setInnoculationsPerDayOfYear (innoculationsPerDayOfYear);
-  summary.setKappaPerDayOfYear (kappa);
+  survey.setInnoculationsPerDayOfYear (innoculationsPerDayOfYear);
+  survey.setKappaPerDayOfYear (kappa);
   
-  summary.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
+  survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
   innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
 }
 

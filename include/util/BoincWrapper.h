@@ -62,7 +62,7 @@ namespace SharedGraphics {
   /// Creates shared memory and sets up updates.
   void init();
   
-  #define KappaArraySize 12
+  const size_t KappaArraySize = 12;
   /// Function to set kappa in shared memory:
   void copyKappa(double *kappa);
 }

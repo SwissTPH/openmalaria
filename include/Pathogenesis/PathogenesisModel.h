@@ -24,7 +24,7 @@
 #define Hmod_PathogenesisModel
 
 #include "Global.h"
-#include "summary.h"
+#include "Survey.h"
 
 class WithinHostModel;
 
@@ -57,7 +57,7 @@ public:
    *
    * Only PyrogenPathogenesis implements this; other models don't have anything
    * to add to the summary. */
-  virtual void summarize (Summary& summary, double age) {}
+  virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup) {}
   
   /// @brief Checkpointing functions
   //@{
