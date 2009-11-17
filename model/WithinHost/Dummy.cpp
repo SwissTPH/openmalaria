@@ -109,7 +109,12 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
       i->destroy();
       i=infections.erase(i);
       _MOI--;
-      continue;
+	  if (i == infections.end()) {
+		  break;
+	  }
+	  else {
+          continue;
+	  }
     }
     
     i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
