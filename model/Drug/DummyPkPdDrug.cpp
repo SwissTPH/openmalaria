@@ -18,22 +18,22 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Drug/PkPdDrug.h"
+#include "Drug/DummyPkPdDrug.h"
 #include "Drug/drug.h"
 
 // -----  static functions  -----
 
-void PkPdDrug::init() {
+void DummyPkPdDrug::init() {
   DrugType::init();
 }
 
 
 // -----  non-static set up / tear down functions  -----
 
-PkPdDrug::PkPdDrug () {}
-PkPdDrug::~PkPdDrug () {}
+DummyPkPdDrug::DummyPkPdDrug () {}
+DummyPkPdDrug::~DummyPkPdDrug () {}
 
-PkPdDrug::PkPdDrug (istream& in) {
+DummyPkPdDrug::DummyPkPdDrug (istream& in) {
   int numDrugs;
   in >> numDrugs;
   Global::validateListSize (numDrugs);
@@ -43,7 +43,7 @@ PkPdDrug::PkPdDrug (istream& in) {
     _drugs.push_back (Drug (DrugType::getDrug(abbrev), in));
   }
 }
-void PkPdDrug::write (ostream& out) {
+void DummyPkPdDrug::write (ostream& out) {
   out << _drugs.size() << endl;
   for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     out << it->getAbbreviation() << endl;
@@ -54,7 +54,7 @@ void PkPdDrug::write (ostream& out) {
 
 // -----  non-static simulation time functions  -----
 
-void PkPdDrug::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+void DummyPkPdDrug::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
   list<Drug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -74,12 +74,12 @@ struct DecayPredicate {
     return drug.decay ();
   }
 };
-void PkPdDrug::decayDrugs () {
+void DummyPkPdDrug::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
 }
 
-double PkPdDrug::getDrugFactor (const ProteomeInstance* infProteome) {
+double DummyPkPdDrug::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect

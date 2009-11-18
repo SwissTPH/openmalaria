@@ -65,7 +65,7 @@ set (OM_CXXTEST_HEADERS
   PerHostTransmissionSuite.h
   #VectorAnophelesSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
-  PkPdDrugSuite.h
+  DummyPkPdDrugSuite.h
 )
 
 if (OM_CXXTEST_INTERPRETER)

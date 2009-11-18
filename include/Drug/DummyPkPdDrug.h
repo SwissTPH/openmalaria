@@ -18,13 +18,13 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_PK_PD_Drug
-#define Hmod_PK_PD_Drug
+#ifndef Hmod_DUMMY_PK_PD_Drug
+#define Hmod_DUMMY_PK_PD_Drug
 
 #include "Drug/DrugModel.h"
 #include "Drug/drug.h"
 
-/** Pharmacokinetic and pharmacodynamics drug model.
+/** Pharmacokinetic and pharmacodynamics drug model. Dummy version
  *
  * (Excuse the horrible class name, but it allows keeping to the usual naming
  * convention.)
@@ -33,16 +33,16 @@
  * drug model.
  * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
-class PkPdDrug : public DrugModel {
+class DummyPkPdDrug : public DrugModel {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
   
-  PkPdDrug ();
-  PkPdDrug (istream& in);
-  virtual ~PkPdDrug ();
+  DummyPkPdDrug ();
+  DummyPkPdDrug (istream& in);
+  virtual ~DummyPkPdDrug ();
   void write (ostream& out);
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);

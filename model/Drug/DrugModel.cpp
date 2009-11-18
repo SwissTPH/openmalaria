@@ -23,7 +23,7 @@
 #include "proteome.h"
 
 // submodels:
-#include "Drug/PkPdDrug.h"
+#include "Drug/DummyPkPdDrug.h"
 
 
 // -----  static functions  -----
@@ -31,7 +31,7 @@
 void DrugModel::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
-    PkPdDrug::init();
+    DummyPkPdDrug::init();
   }
 }
 
@@ -48,14 +48,14 @@ void DrugModel::writeStatic (ostream& out) {
 
 DrugModel* DrugModel::createDrugModel () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new PkPdDrug ();
+    return new DummyPkPdDrug ();
   }
   return new DrugModel();
 }
 
 DrugModel* DrugModel::createDrugModel (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new PkPdDrug (in);
+    return new DummyPkPdDrug (in);
   }
   return new DrugModel(in);
 }
