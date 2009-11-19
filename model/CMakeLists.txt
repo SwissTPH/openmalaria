@@ -18,7 +18,7 @@ set (Model_CPP
   Clinical/Episode.cpp
   
   Drug/DrugModel.cpp
-  Drug/DummyPkPdDrug.cpp
+  Drug/DummyPkPdDrugModel.cpp
   Drug/drug.cpp
   
   Pathogenesis/PathogenesisModel.cpp

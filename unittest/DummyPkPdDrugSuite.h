@@ -23,7 +23,7 @@
 #define Hmod_DummyPkPdDrugSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Drug/DummyPkPdDrug.h"
+#include "Drug/DummyPkPdDrugModel.h"
 #include "ExtraAsserts.h"
 
 class DummyPkPdDrugSuite : public CxxTest::TestSuite
@@ -36,7 +36,7 @@ public:
   }
   
   void setUp () {
-    proxy = new DummyPkPdDrug ();
+    proxy = new DummyPkPdDrugModel ();
     proteome = &ProteomeInstance::instances[0];
   }
   void tearDown () {
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.06809903879225410);
   }
   
-  DummyPkPdDrug *proxy;
+  DummyPkPdDrugModel *proxy;
   ProteomeInstance *proteome;
 };
 
