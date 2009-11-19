@@ -120,6 +120,7 @@ private:
   
   // Allow the Drug class to access private members
   friend class Drug;
+  friend class DummyPkPdDrug;
 };
 
 #endif

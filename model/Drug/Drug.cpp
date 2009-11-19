@@ -81,19 +81,6 @@ void Drug::addDose (double concentration, int delay) {
   }
 }
 
-double Drug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
-  //Returning an average of 2 points
-  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
-  double startFactor = 3.8/(1+param/_concentration);
-  double endFactor = 3.8/(1+param/_nextConcentration);
-  return exp(-(startFactor + endFactor)/2);
-}
-
-double Drug::decayFactor (double time) {
-  //k = log(2)/halfLife
-  return exp(-time*log(2.0)/typeData->halfLife);
-}
-
 bool Drug::decay() {
   _concentration = _nextConcentration;
   _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);

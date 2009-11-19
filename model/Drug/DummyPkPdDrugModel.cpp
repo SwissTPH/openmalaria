@@ -19,7 +19,7 @@
 */
 
 #include "Drug/DummyPkPdDrugModel.h"
-#include "Drug/Drug.h"
+#include "Drug/DummyPkPdDrug.h"
 
 // -----  static functions  -----
 
@@ -40,12 +40,13 @@ DummyPkPdDrugModel::DummyPkPdDrugModel (istream& in) {
   for (int i=0; i<numDrugs; i++) {
     string abbrev;
     in >> abbrev;
-    _drugs.push_back (Drug (DrugType::getDrug(abbrev), in));
+    _drugs.push_back (DummyPkPdDrug (DrugType::getDrug(abbrev), in));
   }
 }
-void DummyPkPdDrugModel::write (ostream& out) {
+
+void DummyPkPdDrugModel::write (ostream& out) const {
   out << _drugs.size() << endl;
-  for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+  for (list<DummyPkPdDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     out << it->getAbbreviation() << endl;
     it->write (out);
   }
@@ -55,14 +56,14 @@ void DummyPkPdDrugModel::write (ostream& out) {
 // -----  non-static simulation time functions  -----
 
 void DummyPkPdDrugModel::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
-  list<Drug>::iterator drug = _drugs.begin();
+  list<DummyPkPdDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
       goto medicateGotDrug;
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (Drug(DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (DummyPkPdDrug(DrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
@@ -83,7 +84,7 @@ double DummyPkPdDrugModel::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect
-  for (list<Drug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+  for (list<DummyPkPdDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     double drugFactor = it->calculateDrugFactor(infProteome);
     if (drugFactor < factor) {
       factor = drugFactor;

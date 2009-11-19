@@ -22,7 +22,7 @@
 #define Hmod_DUMMY_PK_PD_Drug_Model
 
 #include "Drug/DrugModel.h"
-#include "Drug/Drug.h"
+#include "Drug/DummyPkPdDrug.h"
 
 /** Pharmacokinetic and pharmacodynamics drug model. Dummy version
  *
@@ -43,14 +43,14 @@ public:
   DummyPkPdDrugModel ();
   DummyPkPdDrugModel (istream& in);
   virtual ~DummyPkPdDrugModel ();
-  void write (ostream& out);
+  virtual void write (ostream& out) const;
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
   void decayDrugs ();
   double getDrugFactor (const ProteomeInstance* infProteome);
   
 private:
-  list<Drug> _drugs;
+  list<DummyPkPdDrug> _drugs;
 };
 
 #endif

@@ -20,6 +20,7 @@ set (Model_CPP
   Drug/Dose.cpp
   Drug/Drug.cpp
   Drug/DrugModel.cpp
+  Drug/DummyPkPdDrug.cpp
   Drug/DummyPkPdDrugModel.cpp
   Drug/DrugType.cpp
   

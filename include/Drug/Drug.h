@@ -43,12 +43,6 @@ public:
   /** Initialise the drug model. Called at start of simulation. */
   static void init ();
   
-  /** Create a new instance. */
-  Drug (const DrugType*);
-  /** Load an instance from a checkpoint. */
-  Drug (const DrugType*, istream& in);
-  /** Write instance data to a checkpoint. */
-  void write (ostream& out) const;
   
   string getAbbreviation() const { return typeData->abbreviation;}
   double getAbsorptionFactor() const { return typeData->absorptionFactor;}
@@ -60,18 +54,24 @@ public:
   
   double getConcentration() const { return _concentration;}
   double getNextConcentration() const { return _nextConcentration;}
-  double calculateDrugFactor(const ProteomeInstance* infProteome) const;
+  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const {};
   /** Called per timestep to reduce concentrations.
    *
    * If remaining concentration is negligible, return true, and this class
    * object will be deleted. */
   bool decay();
   
-private:
+protected:
+  /** Create a new instance. */
+  Drug (const DrugType*);
+  /** Load an instance from a checkpoint. */
+  Drug (const DrugType*, istream& in);
+  /** Write instance data to a checkpoint. */
+  void write (ostream& out) const;
   /** Calculate multiplier to decay a concentration by a duration of time
    *
    * @param time Duration in minutes to decay over */
-  double decayFactor (double time);
+  virtual double decayFactor (double time) {};
   
   static double minutesPerTimeStep;
   
