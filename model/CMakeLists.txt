@@ -17,9 +17,11 @@ set (Model_CPP
   Clinical/OldCaseManagement.cpp
   Clinical/Episode.cpp
   
+  Drug/Dose.cpp
+  Drug/Drug.cpp
   Drug/DrugModel.cpp
   Drug/DummyPkPdDrugModel.cpp
-  Drug/drug.cpp
+  Drug/DrugType.cpp
   
   Pathogenesis/PathogenesisModel.cpp
   Pathogenesis/Mueller.cpp

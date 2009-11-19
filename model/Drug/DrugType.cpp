@@ -20,7 +20,8 @@
 
 */
 
-#include "Drug/drug.h"
+#include "Drug/Drug.h"
+#include "Drug/DrugType.h"
 
 #include <assert.h>
 #include <cmath>
@@ -35,7 +36,6 @@ using namespace std;
  */
 
 map<string,DrugType> DrugType::available; 
-double Drug::minutesPerTimeStep;
 
 
 void DrugType::init () {
@@ -51,9 +51,6 @@ void DrugType::init () {
   s->addPDRule(vector<Mutation*>(), 68.0);
   s->parseProteomeInstances();
   DrugType::addDrug(s);
-}
-void Drug::init () {
-  minutesPerTimeStep = Global::interval * 24*60;
 }
 
 void DrugType::addDrug(DrugType* drug) {
@@ -177,78 +174,3 @@ void DrugType::parseProteomeInstances() {
   }
 }
 
-
-// -----  Dose methods  -----
-
-Dose::Dose (istream& in) {
-  in >> x;
-  in >> y;
-}
-void Dose::write (ostream& out) const {
-  out << x << endl;
-  out << y << endl;
-}
-
-/*
- * Drug code
- */
-
-Drug::Drug(const DrugType* type) :
-  typeData (type),
-  _concentration (0),
-  _nextConcentration (0)
-{}
-Drug::Drug (const DrugType* type, istream& in) :
-  typeData (type)
-{
-  in >> _concentration;
-  // No need to checkpoint; just recalculate _nextConcentration
-  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-  int num;
-  in >> num;
-  Global::validateListSize (num);
-  for (int i = 0; i < num; ++i)
-    doses.push_back (Dose (in));
-}
-
-void Drug::write (ostream& out) const {
-  out << _concentration << endl;
-  assert (doses.size() == 0);	// doses not used yet (remove this eventually)
-  out << doses.size() << endl;
-  for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)
-    it->write (out);
-}
-
-
-void Drug::addDose (double concentration, int delay) {
-  if (delay == 0) {
-    _concentration += concentration;
-    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-  } else {
-    assert (false);	//NOTE: Not properly dealt with yet (as it is only relevant for ACTs).
-    // Only adding doses for this timestep is supported
-    assert (delay>0 && delay<minutesPerTimeStep);
-    double nextConcentration = concentration*decayFactor (minutesPerTimeStep-delay);
-    doses.push_back (Dose (nextConcentration, 0 /*FIXME*/));
-  }
-}
-
-double Drug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
-  //Returning an average of 2 points
-  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
-  double startFactor = 3.8/(1+param/_concentration);
-  double endFactor = 3.8/(1+param/_nextConcentration);
-  return exp(-(startFactor + endFactor)/2);
-}
-
-double Drug::decayFactor (double time) {
-  //k = log(2)/halfLife
-  return exp(-time*log(2.0)/typeData->halfLife);
-}
-
-bool Drug::decay() {
-  _concentration = _nextConcentration;
-  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-  //TODO: if concentration is negligible, return true to clean up this object
-  return false;
-}

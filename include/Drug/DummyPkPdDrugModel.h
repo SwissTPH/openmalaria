@@ -22,7 +22,7 @@
 #define Hmod_DUMMY_PK_PD_Drug_Model
 
 #include "Drug/DrugModel.h"
-#include "Drug/drug.h"
+#include "Drug/Drug.h"
 
 /** Pharmacokinetic and pharmacodynamics drug model. Dummy version
  *

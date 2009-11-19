@@ -20,13 +20,14 @@
 
 */
 
-#ifndef Hmod_drug
-#define Hmod_drug
+#ifndef Hmod_drug_type
+#define Hmod_drug_type
 
 #include <string>
 #include <deque>
 #include <map>
 #include <vector>
+#include "Dose.h"
 #include "Global.h"
 #include "proteome.h"
 
@@ -119,75 +120,6 @@ private:
   
   // Allow the Drug class to access private members
   friend class Drug;
-};
-
-/** A simple class to hold dose info. */
-class Dose {
-public:
-  /** Create a new dose. */
-  Dose (double x, double y) {
-    this->x = x;
-    this->y = y;
-  }
-  /** Load from a checkpoint. */
-  Dose (istream& in);
-  /** Write a checkpoint. */
-  void write (ostream& out) const;
-  
-  /// Some type of data is wanted... (concentration at start of next timestep, and integral of concentration for this timestep?)
-  double x,y;
-};
-
-/** A class holding drug use info.
- *
- * Each human has an instance for each type of drug present in their blood. */
-class Drug {
-public:
-  /** Initialise the drug model. Called at start of simulation. */
-  static void init ();
-  
-  /** Create a new instance. */
-  Drug (const DrugType*);
-  /** Load an instance from a checkpoint. */
-  Drug (const DrugType*, istream& in);
-  /** Write instance data to a checkpoint. */
-  void write (ostream& out) const;
-  
-  string getAbbreviation() const { return typeData->abbreviation;}
-  double getAbsorptionFactor() const { return typeData->absorptionFactor;}
-  //double getHalfLife() const { return typeData->halfLife;}
-  
-  /** Add amount to the concentration of drug, at time delay past the start of
-   * the current timestep. */
-  void addDose (double amount, int delay);
-  
-  double getConcentration() const { return _concentration;}
-  double getNextConcentration() const { return _nextConcentration;}
-  double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-  /** Called per timestep to reduce concentrations.
-   *
-   * If remaining concentration is negligible, return true, and this class
-   * object will be deleted. */
-  bool decay();
-  
-private:
-  /** Calculate multiplier to decay a concentration by a duration of time
-   *
-   * @param time Duration in minutes to decay over */
-  double decayFactor (double time);
-  
-  static double minutesPerTimeStep;
-  
-  /// Always links a drug instance to its drug-type data
-  const DrugType* typeData;
-  
-  //! Drug concentration (ng/mL ?).
-  double _concentration;
-  //! Drug concentration on the next cycle (always should be whatever calcNextConcentration sets).
-  double _nextConcentration;
-  
-  /// Per-dose information. Still to be properly defined.
-  deque<Dose> doses;
 };
 
 #endif

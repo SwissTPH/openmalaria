@@ -19,7 +19,7 @@
 */
 
 #include "Drug/DummyPkPdDrugModel.h"
-#include "Drug/drug.h"
+#include "Drug/Drug.h"
 
 // -----  static functions  -----
 
