@@ -73,6 +73,8 @@ private:
   /// Decision ID of last case management run
   int lastCmDecision;
   
+  ///@brief Static data, set up by init
+  //@{
   /** Cumulative probabilities and decisions for a case type */
   struct CaseTypeEndPoints {
     vector<double> cumProbs;
@@ -110,5 +112,6 @@ private:
   static vector<CaseManagementEndPoints> caseManagementEndPoints;
   
   static CaseTypeEndPoints readEndPoints (const scnXml::CaseType& caseType);
+  //@}
 };
 #endif

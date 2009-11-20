@@ -96,6 +96,7 @@ void Population::clear(){
 
 void Population::staticRead (istream& in) {
   NeonatalMortality::read (in);
+  ClinicalModel::staticRead(in);
   
   in >> IDCounter;
   in >> mu0;
@@ -112,6 +113,7 @@ void Population::staticRead (istream& in) {
 }
 void Population::staticWrite (ostream& out) {
   NeonatalMortality::write (out);
+  ClinicalModel::staticWrite(out);
   
   out << IDCounter << endl;
   out << mu0 << endl;

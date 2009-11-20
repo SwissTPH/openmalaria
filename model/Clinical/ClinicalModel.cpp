@@ -46,6 +46,19 @@ void ClinicalModel::init () {
     ClinicalImmediateOutcomes::initParameters();
 }
 
+void ClinicalModel::staticRead (istream& in) {
+  for (int i = 0; i < Global::intervalsPerYear; ++i) {
+    in >> infantDeaths[i];
+    in >> infantIntervalsAtRisk[i];
+  }
+}
+void ClinicalModel::staticWrite (ostream& out) {
+  for (int i = 0; i < Global::intervalsPerYear; ++i) {
+    out << infantDeaths[i] << endl;;
+    out << infantIntervalsAtRisk[i] << endl;
+  }
+}
+
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
   if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
     return new ClinicalEventScheduler (cF, tSF);

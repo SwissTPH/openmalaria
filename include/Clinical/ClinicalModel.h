@@ -43,6 +43,10 @@ public:
   /// Initialise whichever model is in use.
   static void init ();
   
+  /// Static checkpointing
+  static void staticRead (istream& in);
+  static void staticWrite (ostream& out);
+  
   /** Return a new ClinicalModel.
    *
    * @param cF 	comorbidity factor, passed to PathogenesisModel

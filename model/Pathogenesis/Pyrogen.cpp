@@ -70,6 +70,6 @@ void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
 }
 
 void PyrogenPathogenesis::write(ostream& out) const {
-  out << _comorbidityFactor << endl;
+  PathogenesisModel::write(out);
   out << _pyrogenThres << endl;
 }
