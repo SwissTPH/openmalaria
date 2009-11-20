@@ -30,7 +30,7 @@ using namespace std;
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
+    WithinHostModel(), drugProxy(DrugInteractions::createDrugInteractions ()),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     _MOI(0), patentInfections(0)
 {}
@@ -41,7 +41,7 @@ DummyWithinHostModel::~DummyWithinHostModel() {
 }
 
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
-    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
+    WithinHostModel(in), drugProxy(DrugInteractions::createDrugInteractions (in))
 {
   in >> _MOI; 
   in >> patentInfections; 

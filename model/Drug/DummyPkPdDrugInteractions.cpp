@@ -18,22 +18,22 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Drug/DummyPkPdDrugModel.h"
+#include "Drug/DummyPkPdDrugInteractions.h"
 #include "Drug/DummyPkPdDrug.h"
 
 // -----  static functions  -----
 
-void DummyPkPdDrugModel::init() {
+void DummyPkPdDrugInteractions::init() {
   DrugType::init();
 }
 
 
 // -----  non-static set up / tear down functions  -----
 
-DummyPkPdDrugModel::DummyPkPdDrugModel () {}
-DummyPkPdDrugModel::~DummyPkPdDrugModel () {}
+DummyPkPdDrugInteractions::DummyPkPdDrugInteractions () {}
+DummyPkPdDrugInteractions::~DummyPkPdDrugInteractions () {}
 
-DummyPkPdDrugModel::DummyPkPdDrugModel (istream& in) {
+DummyPkPdDrugInteractions::DummyPkPdDrugInteractions (istream& in) {
   int numDrugs;
   in >> numDrugs;
   Global::validateListSize (numDrugs);
@@ -44,7 +44,7 @@ DummyPkPdDrugModel::DummyPkPdDrugModel (istream& in) {
   }
 }
 
-void DummyPkPdDrugModel::write (ostream& out) const {
+void DummyPkPdDrugInteractions::write (ostream& out) const {
   out << _drugs.size() << endl;
   for (list<DummyPkPdDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     out << it->getAbbreviation() << endl;
@@ -55,7 +55,7 @@ void DummyPkPdDrugModel::write (ostream& out) const {
 
 // -----  non-static simulation time functions  -----
 
-void DummyPkPdDrugModel::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+void DummyPkPdDrugInteractions::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
   list<DummyPkPdDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -75,12 +75,12 @@ struct DecayPredicate {
     return drug.decay ();
   }
 };
-void DummyPkPdDrugModel::decayDrugs () {
+void DummyPkPdDrugInteractions::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
 }
 
-double DummyPkPdDrugModel::getDrugFactor (const ProteomeInstance* infProteome) {
+double DummyPkPdDrugInteractions::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect

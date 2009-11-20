@@ -19,9 +19,9 @@ set (Model_CPP
   
   Drug/Dose.cpp
   Drug/Drug.cpp
-  Drug/DrugModel.cpp
+  Drug/DrugInteractions.cpp
   Drug/DummyPkPdDrug.cpp
-  Drug/DummyPkPdDrugModel.cpp
+  Drug/DummyPkPdDrugInteractions.cpp
   Drug/DrugType.cpp
   
   Pathogenesis/PathogenesisModel.cpp

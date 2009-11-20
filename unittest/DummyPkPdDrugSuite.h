@@ -23,7 +23,7 @@
 #define Hmod_DummyPkPdDrugSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Drug/DummyPkPdDrugModel.h"
+#include "Drug/DummyPkPdDrugInteractions.h"
 #include "ExtraAsserts.h"
 
 class DummyPkPdDrugSuite : public CxxTest::TestSuite
@@ -32,11 +32,11 @@ public:
   DummyPkPdDrugSuite () {
     Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
     Global::modelVersion = INCLUDES_PK_PD;
-    DrugModel::init ();
+    DrugInteractions::init ();
   }
   
   void setUp () {
-    proxy = new DummyPkPdDrugModel ();
+    proxy = new DummyPkPdDrugInteractions ();
     proteome = &ProteomeInstance::instances[0];
   }
   void tearDown () {
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.06809903879225410);
   }
   
-  DummyPkPdDrugModel *proxy;
+  DummyPkPdDrugInteractions *proxy;
   ProteomeInstance *proteome;
 };
 

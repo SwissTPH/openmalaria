@@ -18,46 +18,46 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Drug/DrugModel.h"
+#include "Drug/DrugInteractions.h"
 #include "Global.h"
 #include "proteome.h"
 
 // submodels:
-#include "Drug/DummyPkPdDrugModel.h"
+#include "Drug/DummyPkPdDrugInteractions.h"
 
 
 // -----  static functions  -----
 
-void DrugModel::init () {
+void DrugInteractions::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
-    DummyPkPdDrugModel::init();
+    DummyPkPdDrugInteractions::init();
   }
 }
 
-void DrugModel::readStatic (istream& in) {
+void DrugInteractions::readStatic (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     ProteomeManager::read (in);
   }
 }
-void DrugModel::writeStatic (ostream& out) {
+void DrugInteractions::writeStatic (ostream& out) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     ProteomeManager::write (out);
   }
 }
 
-DrugModel* DrugModel::createDrugModel () {
+DrugInteractions* DrugInteractions::createDrugInteractions () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new DummyPkPdDrugModel ();
+    return new DummyPkPdDrugInteractions ();
   }
-  return new DrugModel();
+  return new DrugInteractions();
 }
 
-DrugModel* DrugModel::createDrugModel (istream& in) {
+DrugInteractions* DrugInteractions::createDrugInteractions (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new DummyPkPdDrugModel (in);
+    return new DummyPkPdDrugInteractions (in);
   }
-  return new DrugModel(in);
+  return new DrugInteractions(in);
 }
 
 // -----  non-static functions  -----

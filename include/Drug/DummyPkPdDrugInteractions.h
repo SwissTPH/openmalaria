@@ -18,31 +18,28 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_DUMMY_PK_PD_Drug_Model
-#define Hmod_DUMMY_PK_PD_Drug_Model
+#ifndef Hmod_DUMMY_PK_PD_Drug_Interactions
+#define Hmod_DUMMY_PK_PD_Drug_Interactions
 
-#include "Drug/DrugModel.h"
+#include "Drug/DrugInteractions.h"
 #include "Drug/DummyPkPdDrug.h"
 
-/** Pharmacokinetic and pharmacodynamics drug model. Dummy version
+/** Pharmacokinetic and pharmacodynamics drug Interactions. Dummy version
  *
- * (Excuse the horrible class name, but it allows keeping to the usual naming
- * convention.)
- * 
  * Holds per-human data for Tiago / the Liverpool school of medicine's
  * drug model.
  * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
-class DummyPkPdDrugModel : public DrugModel {
+class DummyPkPdDrugInteractions : public DrugInteractions {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
   
-  DummyPkPdDrugModel ();
-  DummyPkPdDrugModel (istream& in);
-  virtual ~DummyPkPdDrugModel ();
+  DummyPkPdDrugInteractions ();
+  DummyPkPdDrugInteractions (istream& in);
+  virtual ~DummyPkPdDrugInteractions ();
   virtual void write (ostream& out) const;
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);

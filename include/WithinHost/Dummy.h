@@ -26,7 +26,7 @@
 #include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DummyInfection.h"
-#include "Drug/DrugModel.h"
+#include "Drug/DrugInteractions.h"
 ;
 
 using namespace std;
@@ -60,7 +60,7 @@ public:
     
 private:
   /// Encapsulates drug code for each human
-  DrugModel* drugProxy;
+  DrugInteractions* drugProxy;
   
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth

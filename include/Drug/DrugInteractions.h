@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_DrugModel
-#define Hmod_DrugModel
+#ifndef Hmod_DrugInteractions
+#define Hmod_DrugInteractions
 
 #include <fstream>
 using namespace std;
@@ -37,7 +37,7 @@ class ProteomeInstance;
  *  * decayDrugs()
  *  * medicate()
  */
-class DrugModel {
+class DrugInteractions {
 public:
   ///@brief Static functions
   //@{
@@ -48,20 +48,20 @@ public:
   /// Write static variables to checkpoint
   static void writeStatic (ostream& out);
   
-  /// Create a new DrugModel
-  static DrugModel* createDrugModel ();
-  /// Load a DrugModel from a checkpoint
-  static DrugModel* createDrugModel (istream& in);
+  /// Create a new DrugInteractions
+  static DrugInteractions* createDrugInteractions ();
+  /// Load a DrugInteractions from a checkpoint
+  static DrugInteractions* createDrugInteractions (istream& in);
   //@}
   
   /// @brief Constructors, destructor and checkpointing
   //@{
   /// Create a new instance
-  DrugModel () {}
+  DrugInteractions () {}
   /// Load an instance from a checkpoint
-  DrugModel (istream& in) {}
+  DrugInteractions (istream& in) {}
   /// Destroy an instance
-  virtual ~DrugModel () {}
+  virtual ~DrugInteractions () {}
   /// Write checkpoint
   virtual void write (ostream& out) {}
   //@}

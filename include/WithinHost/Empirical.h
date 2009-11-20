@@ -26,7 +26,7 @@
 #include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/EmpiricalInfection.h"
-#include "Drug/DrugModel.h"
+#include "Drug/DrugInteractions.h"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ class EmpiricalWithinHostModel : public WithinHostModel
 
   private:
     /// Encapsulates drug code for each human
-    DrugModel* drugProxy;
+    DrugInteractions* drugProxy;
 
     //!multiplicity of infection
     int _MOI;

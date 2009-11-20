@@ -30,7 +30,7 @@ using namespace std;
 // -----  Initialization  -----
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
-    WithinHostModel(), drugProxy(DrugModel::createDrugModel ()),
+    WithinHostModel(), drugProxy(DrugInteractions::createDrugInteractions ()),
     _MOI(0)
 {
 }
@@ -40,7 +40,7 @@ EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
 }
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
-    WithinHostModel(in), drugProxy(DrugModel::createDrugModel (in))
+    WithinHostModel(in), drugProxy(DrugInteractions::createDrugInteractions (in))
 {
   in >> _MOI; 
   
