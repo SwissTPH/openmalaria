@@ -63,7 +63,7 @@ public:
   /// Destroy an instance
   virtual ~DrugInteractions () {}
   /// Write checkpoint
-  virtual void write (ostream& out) {}
+  virtual void write (ostream& out) {};
   //@}
   
   /** Medicate drugs to an individual, which act on infections the following
@@ -82,11 +82,11 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, int time, double age, double weight) {}
+  virtual void medicate(string drugAbbrev, double qty, int time, double age, double weight)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?
-  virtual void decayDrugs () {}
+  virtual void decayDrugs () {};
   
   /** This is how drugs act on infections.
    *

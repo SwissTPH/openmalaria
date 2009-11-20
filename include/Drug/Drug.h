@@ -71,7 +71,7 @@ protected:
   /** Calculate multiplier to decay a concentration by a duration of time
    *
    * @param time Duration in minutes to decay over */
-  virtual double decayFactor (double time) {};
+  virtual double decayFactor (double time) {} ;
   
   static double minutesPerTimeStep;
   

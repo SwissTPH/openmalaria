@@ -20,9 +20,11 @@ set (Model_CPP
   Drug/Dose.cpp
   Drug/Drug.cpp
   Drug/DrugInteractions.cpp
+  Drug/DrugType.cpp
   Drug/DummyPkPdDrug.cpp
   Drug/DummyPkPdDrugInteractions.cpp
-  Drug/DrugType.cpp
+  Drug/PkPdDrug.cpp
+  Drug/PkPdDrugInteractions.cpp
   
   Pathogenesis/PathogenesisModel.cpp
   Pathogenesis/Mueller.cpp
