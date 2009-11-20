@@ -228,6 +228,19 @@ void Global::validateListSize (long length) {
   }
 }
 
+void Global::read (istream& in) {
+  int tOpt;
+  string tResPath;
+  in >> tOpt;
+  in >> tResPath;
+  assert (tOpt == clOptions);
+  assert (tResPath == clResourcePath);
+}
+void Global::write (ostream& out) {
+  out << clOptions << endl;
+  out << clResourcePath << endl;
+}
+
 xml_scenario_error::xml_scenario_error(const string&  __arg)
   : runtime_error(__arg) { }
 

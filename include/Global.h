@@ -122,6 +122,12 @@ public:
   static bool compressCheckpoints;
   //@}
   
+  /** @brief Checkpointing.
+   *
+   * Not really required; more to confirm things are expected. */
+  void read (istream& in);
+  void write (ostream& out);	///< ditto
+  
   /** Prepend if path is relative, prepend it with clResourcePath.
    * Then passes the resulting (or original) path through
    * BoincWrapper::resolveFile() and returns the result. */

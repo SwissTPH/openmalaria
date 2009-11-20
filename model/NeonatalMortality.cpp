@@ -31,6 +31,17 @@ void NeonatalMortality::init() {
   _prevalenceByGestationalAge.assign(timeStepsPer5Months, 0.0);
 }
 
+void NeonatalMortality::read (istream& in) {
+  in >> _riskFromMaternalInfection;
+  for (vector<double>::iterator it = _prevalenceByGestationalAge.begin(); it != _prevalenceByGestationalAge.end(); ++it)
+    in >> (*it);
+}
+void NeonatalMortality::write (ostream& out) {
+  out << _riskFromMaternalInfection << endl;
+  for (vector<double>::iterator it = _prevalenceByGestationalAge.begin(); it != _prevalenceByGestationalAge.end(); ++it)
+    out << *it << endl;
+}
+
 bool NeonatalMortality::eventNeonatalMortality() {
   return gsl::rngUniform() <= _riskFromMaternalInfection;
 }

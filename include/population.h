@@ -39,6 +39,10 @@ public:
   /// Calls static clear on sub-models to free memory
   static void clear();
   
+  /// Checkpointing for static data members
+  static void staticRead (istream& in);
+  static void staticWrite (ostream& out);	///< ditto
+  
   
    Population();
   //! Clears human collection.
@@ -148,7 +152,7 @@ private:
    *
    * cumAgeProp[_maxTimestepsPerLife+1-i] gives the proportion of people aged i timesteps or older.
    */
-  vector<double> cumAgeProp;
+  static vector<double> cumAgeProp;
 
   /// ID passed to last Human created. Checkpointed.
   static int IDCounter;
@@ -170,13 +174,13 @@ private:
   typedef std::list<Human>::iterator HumanIter;
 
   //! max lifespan in intervals
-  int _maxTimestepsPerLife;
+  static int _maxTimestepsPerLife;
 
   /*!
     this is needed to prevent checkpoint cheats. Ideally a unique identifier per workunit, but a
     random integer number should do the job
   */
-  int _workUnitIdentifier;
+  static int _workUnitIdentifier;
   
   friend class VectorAnophelesSuite;
 };

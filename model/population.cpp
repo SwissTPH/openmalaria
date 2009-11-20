@@ -51,8 +51,11 @@ double Population::mu1;
 double Population::alpha0;
 double Population::alpha1;
 double Population::rho;
+vector<double> Population::cumAgeProp;
 
 int Population::IDCounter;
+int Population::_maxTimestepsPerLife;
+int Population::_workUnitIdentifier;
 
 // Theoretical optimisation: don't include individuals who will die before the
 // start of the main simulation in the initialisation.
@@ -76,6 +79,12 @@ void Population::init(){
 #ifdef OMP_CSV_REPORTING
   csvReporting.open ("population.csv", ios::app);
 #endif
+  
+  _workUnitIdentifier=get_wu_id();
+  _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
+  cumAgeProp.resize (_maxTimestepsPerLife);
+  
+  IDCounter=0;
 }
 
 void Population::clear(){
@@ -85,6 +94,34 @@ void Population::clear(){
 #endif
 }
 
+void Population::staticRead (istream& in) {
+  NeonatalMortality::read (in);
+  
+  in >> IDCounter;
+  in >> mu0;
+  in >> mu1;
+  in >> alpha0;
+  in >> alpha1;
+  in >> rho;
+  in >> _workUnitIdentifier;
+  
+  if (_workUnitIdentifier !=  get_wu_id()) {
+    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
+    exit(-9);
+  }
+}
+void Population::staticWrite (ostream& out) {
+  NeonatalMortality::write (out);
+  
+  out << IDCounter << endl;
+  out << mu0 << endl;
+  out << mu1 << endl;
+  out << alpha0 << endl;
+  out << alpha1 << endl ;
+  out << rho << endl; 
+  out << _workUnitIdentifier << endl;
+}
+
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
@@ -92,12 +129,6 @@ Population::Population()
     : populationSize(get_populationsize())
 {
   _transmissionModel = TransmissionModel::createTransmissionModel();
-
-  _workUnitIdentifier=get_wu_id();
-  _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
-  cumAgeProp.resize (_maxTimestepsPerLife);
-
-  IDCounter=0;
 }
 
 Population::~Population() {
@@ -110,15 +141,11 @@ Population::~Population() {
 void Population::read (istream& in) {
   //Start reading a checkpoint
   _transmissionModel->read (in);
+  NeonatalMortality::read (in);
+  
   in >> populationSize;
   if (populationSize != get_populationsize())
     throw checkpoint_error("population size incorrect");
-  in >> IDCounter;
-  in >> mu0;
-  in >> mu1;
-  in >> alpha0;
-  in >> alpha1;
-  in >> rho;
   in >> _workUnitIdentifier;
 
   if (_workUnitIdentifier !=  get_wu_id()) {
@@ -141,13 +168,9 @@ void Population::read (istream& in) {
 }
 void Population::write (ostream& out) {
   _transmissionModel->write (out);
+  NeonatalMortality::write (out);
+  
   out << populationSize << endl;
-  out << IDCounter << endl;
-  out << mu0 << endl;
-  out << mu1 << endl;
-  out << alpha0 << endl;
-  out << alpha1 << endl ;
-  out << rho << endl; 
   out << _workUnitIdentifier << endl;
 
   //Write human data

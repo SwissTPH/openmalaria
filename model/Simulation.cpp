@@ -201,6 +201,10 @@ void Simulation::write (ostream& out) {
   timer::startCheckpoint ();
   out.precision(20);
   out << simulationTime << endl;
+  out << timeStep << endl;
+  out << simPeriodEnd << endl;
+  out << totalSimDuration << endl;
+  Population::staticWrite(out);
   _population->write (out);
   DrugModel::writeStatic (out);
   timer::stopCheckpoint ();
@@ -232,10 +236,18 @@ void Simulation::readCheckpoint() {
   
   gsl::rngLoadState (checkpointNum);
   cerr << "Loaded checkpoint from: " << name.str() << endl;
+  
+  // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
+  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+    writeCheckpoint();
 }
 
 void Simulation::read (istream& in) {
   in >> simulationTime;
+  in >> timeStep;
+  in >> simPeriodEnd;
+  in >> totalSimDuration;
+  Population::staticRead(in);
   _population->read(in);
   DrugModel::readStatic (in);
   
