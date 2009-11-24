@@ -19,24 +19,24 @@
 */
 // Unittest for the drug model
 
-#ifndef Hmod_DummyPkPdDrugSuite
-#define Hmod_DummyPkPdDrugSuite
+#ifndef Hmod_HoshenPkPdSuite
+#define Hmod_HoshenPkPdSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Drug/DummyPkPdDrugInteractions.h"
+#include "PkPd/HoshenPkPdModel.h"
 #include "ExtraAsserts.h"
 
-class DummyPkPdDrugSuite : public CxxTest::TestSuite
+class HoshenPkPdSuite : public CxxTest::TestSuite
 {
 public:
-  DummyPkPdDrugSuite () {
+  HoshenPkPdSuite () {
     Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
     Global::modelVersion = INCLUDES_PK_PD;
-    DrugInteractions::init ();
+    PkPdModel::init ();
   }
   
   void setUp () {
-    proxy = new DummyPkPdDrugInteractions ();
+    proxy = new HoshenPkPdModel ();
     proteome = &ProteomeInstance::instances[0];
   }
   void tearDown () {
@@ -65,7 +65,7 @@ public:
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome), 0.06809903879225410);
   }
   
-  DummyPkPdDrugInteractions *proxy;
+  HoshenPkPdModel *proxy;
   ProteomeInstance *proteome;
 };
 

@@ -18,28 +18,29 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_DUMMY_PK_PD_Drug_Interactions
-#define Hmod_DUMMY_PK_PD_Drug_Interactions
+#ifndef Hmod_IhKwPkPdModel
+#define Hmod_IhKwPkPdModel
 
-#include "Drug/DrugInteractions.h"
-#include "Drug/DummyPkPdDrug.h"
+#include "PkPd/PkPdModel.h"
+#include "PkPd/Drug/IhKwDrug.h"
 
-/** Pharmacokinetic and pharmacodynamics drug Interactions. Dummy version
+/** Pharmacokinetic and pharmacodynamics interface, used by each human's
+ * within-host model.
  *
- * Holds per-human data for Tiago / the Liverpool school of medicine's
- * drug model.
+ * Placeholder for IH & KW's new PKPD model. Named in honour of the creators-to-
+ * be (rename if you're more inspired).
  * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
-class DummyPkPdDrugInteractions : public DrugInteractions {
+class IhKwPkPdModel : public PkPdModel {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
   
-  DummyPkPdDrugInteractions ();
-  DummyPkPdDrugInteractions (istream& in);
-  virtual ~DummyPkPdDrugInteractions ();
+  IhKwPkPdModel ();
+  IhKwPkPdModel (istream& in);
+  virtual ~IhKwPkPdModel ();
   virtual void write (ostream& out) const;
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
@@ -47,7 +48,7 @@ public:
   double getDrugFactor (const ProteomeInstance* infProteome);
   
 private:
-  list<DummyPkPdDrug> _drugs;
+  list<IhKwDrug> _drugs;
 };
 
 #endif

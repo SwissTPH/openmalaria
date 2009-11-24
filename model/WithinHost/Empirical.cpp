@@ -30,17 +30,17 @@ using namespace std;
 // -----  Initialization  -----
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
-    WithinHostModel(), drugProxy(DrugInteractions::createDrugInteractions ()),
+    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
     _MOI(0)
 {
 }
 EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
   clearAllInfections();
-  delete drugProxy;
+  delete pkpdModel;
 }
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
-    WithinHostModel(in), drugProxy(DrugInteractions::createDrugInteractions (in))
+    WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
 {
   in >> _MOI; 
   
@@ -52,7 +52,7 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
 }
 void EmpiricalWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
-  drugProxy->write (out);
+  pkpdModel->write (out);
   
   out << _MOI << endl; 
   
@@ -79,7 +79,7 @@ void EmpiricalWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
+  pkpdModel->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
 }
 
 
@@ -91,7 +91,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy);
-    survivalFactor *= drugProxy->getDrugFactor(i->getProteome());
+    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     //TODO: innate immunity (_innateImmunity in Descriptive)
     
@@ -107,7 +107,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     timeStepMaxDensity = max(timeStepMaxDensity, dens);
     ++i;
   }
-  drugProxy->decayDrugs();
+  pkpdModel->decayDrugs();
 }
 
 

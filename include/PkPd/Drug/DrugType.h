@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_drug_type
-#define Hmod_drug_type
+#ifndef Hmod_DrugType
+#define Hmod_DrugType
 
 #include <string>
 #include <deque>
@@ -46,9 +46,10 @@ public:
   ///@brief Static functions
   //@{
   /** Initialise the drug model. Called at start of simulation. */
+  //TODO: data from XML.
   static void init ();
   
-  //! Adds a new drug to the list
+  //! Adds a new drug type to the list
   static void addDrug(DrugType* drug);
 
   /** Find a DrugType by its abbreviation, and create a new Drug from that.
@@ -120,7 +121,8 @@ private:
   
   // Allow the Drug class to access private members
   friend class Drug;
-  friend class DummyPkPdDrug;
+  friend class HoshenDrug;
+  friend class IhKwDrug;
 };
 
 #endif

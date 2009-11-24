@@ -20,24 +20,39 @@
 
 */
 
-#include "Drug/Dose.h"
+#include "PkPd/Drug/HoshenDrug.h"
 
-//#include <assert.h>
-//#include <cmath>
-//#include <algorithm>
-//#include <stdexcept>
-//#include <sstream>
+#include <assert.h>
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+#include <sstream>
 
 using namespace std;
 
-// -----  Dose methods  -----
-
-Dose::Dose (istream& in) {
-  in >> x;
-  in >> y;
+HoshenDrug::HoshenDrug(const DrugType* type) : Drug(type) {
 }
-void Dose::write (ostream& out) const {
-  out << x << endl;
-  out << y << endl;
+
+HoshenDrug::HoshenDrug (const DrugType* type, istream& in) :
+  Drug(type, in) {
+}
+
+void HoshenDrug::write (ostream& out) const {
+    Drug::write(out);
+}
+
+
+
+double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
+  //Returning an average of 2 points
+  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
+  double startFactor = 3.8/(1+param/_concentration);
+  double endFactor = 3.8/(1+param/_nextConcentration);
+  return exp(-(startFactor + endFactor)/2);
+}
+
+double HoshenDrug::decayFactor (double time) {
+  //k = log(2)/halfLife
+  return exp(-time*log(2.0)/typeData->halfLife);
 }
 

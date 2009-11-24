@@ -26,9 +26,10 @@
 #include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/EmpiricalInfection.h"
-#include "Drug/DrugInteractions.h"
+#include "PkPd/PkPdModel.h"
 
 using namespace std;
+
 
 /*! EmpiricalDummy Within Host Model class.
  */
@@ -56,7 +57,7 @@ class EmpiricalWithinHostModel : public WithinHostModel
     
   private:
     /// Encapsulates drug code for each human
-    DrugInteractions* drugProxy;
+    PkPdModel* pkpdModel;
 
     //!multiplicity of infection
     int _MOI;

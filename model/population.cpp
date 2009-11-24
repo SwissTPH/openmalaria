@@ -31,6 +31,7 @@
 #include "Surveys.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "NeonatalMortality.h"
+#include "PkPd/PkPdModel.h"
 #include <math.h>
 
 using namespace std;
@@ -76,6 +77,7 @@ ofstream csvReporting;
 void Population::init(){
   Human::initHumanParameters();
   NeonatalMortality::init();
+  PkPdModel::init();
 #ifdef OMP_CSV_REPORTING
   csvReporting.open ("population.csv", ios::app);
 #endif
@@ -97,6 +99,7 @@ void Population::clear(){
 void Population::staticRead (istream& in) {
   NeonatalMortality::read (in);
   ClinicalModel::staticRead(in);
+  PkPdModel::readStatic (in);
   
   in >> IDCounter;
   in >> mu0;
@@ -108,6 +111,7 @@ void Population::staticRead (istream& in) {
 void Population::staticWrite (ostream& out) {
   NeonatalMortality::write (out);
   ClinicalModel::staticWrite(out);
+  PkPdModel::writeStatic (out);
   
   out << IDCounter << endl;
   out << mu0 << endl;

@@ -17,19 +17,18 @@ set (Model_CPP
   Clinical/OldCaseManagement.cpp
   Clinical/Episode.cpp
   
-  Drug/Dose.cpp
-  Drug/Drug.cpp
-  Drug/DrugInteractions.cpp
-  Drug/DrugType.cpp
-  Drug/DummyPkPdDrug.cpp
-  Drug/DummyPkPdDrugInteractions.cpp
-  Drug/PkPdDrug.cpp
-  Drug/PkPdDrugInteractions.cpp
-  
   Pathogenesis/PathogenesisModel.cpp
   Pathogenesis/Mueller.cpp
   Pathogenesis/Pyrogen.cpp
   Pathogenesis/Predet.cpp
+  
+  PkPd/PkPdModel.cpp
+  PkPd/HoshenPkPdModel.cpp
+  PkPd/IhKwPkPdModel.cpp
+  PkPd/Drug/Drug.cpp
+  PkPd/Drug/DrugType.cpp
+  PkPd/Drug/HoshenDrug.cpp
+  PkPd/Drug/IhKwDrug.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp
@@ -57,9 +56,7 @@ set (Model_CPP
 )
 
 # Headers - only included so they show up in IDEs:
-file (GLOB Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
-file (GLOB SModel_H "${CMAKE_SOURCE_DIR}/include/*/*.h")
-file (GLOB SSModel_H "${CMAKE_SOURCE_DIR}/include/*/*/*.h")
+file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
 
 set (XSD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/scenario.xsd)
 add_custom_command (
@@ -89,8 +86,6 @@ include_directories (
 add_library (model
   ${Model_CPP}
   ${Model_H}
-  ${SModel_H}
-  ${SSModel_H}
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
 )
 

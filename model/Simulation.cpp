@@ -26,7 +26,6 @@
 #include "util/gsl.h"
 #include "population.h"
 #include "Surveys.h"
-#include "Drug/DrugInteractions.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "inputData.h"
@@ -48,7 +47,6 @@ Simulation::Simulation()
   Surveys.init();
   Population::init();
   _population = new Population();
-  DrugInteractions::init();
 }
 
 Simulation::~Simulation(){
@@ -206,7 +204,6 @@ void Simulation::write (ostream& out) {
   out << totalSimDuration << endl;
   Population::staticWrite(out);
   _population->write (out);
-  DrugInteractions::writeStatic (out);
   timer::stopCheckpoint ();
 }
 
@@ -249,7 +246,6 @@ void Simulation::read (istream& in) {
   in >> totalSimDuration;
   Population::staticRead(in);
   _population->read(in);
-  DrugInteractions::readStatic (in);
   
   // Read trailing white-space (final endl has not yet been read):
   while (in.good() && isspace (in.peek()))

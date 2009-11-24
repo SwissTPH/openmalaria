@@ -26,10 +26,10 @@
 #include "Global.h"
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DummyInfection.h"
-#include "Drug/DrugInteractions.h"
-;
+#include "PkPd/PkPdModel.h"
 
 using namespace std;
+
 
 /*! Dummy Within Host Model class.
  *
@@ -58,7 +58,7 @@ public:
     
 private:
   /// Encapsulates drug code for each human
-  DrugInteractions* drugProxy;
+  PkPdModel* pkpdModel;
   
   //TODO: check why we have 2 cumulativeh and cumulativeY params
   //!Number of infections received since birth

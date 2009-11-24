@@ -149,7 +149,7 @@ public:
   /** True if this ProteomeInstance has all mutations in _mutations. */
   bool hasMutations(vector<Mutation*> _mutations) const;
   
-  friend class DummyPkPdDrugSuite;
+  friend class HoshenPkPdSuite;
 };
 
 /** Methods getInfection and getProteome are used in Infection code. */

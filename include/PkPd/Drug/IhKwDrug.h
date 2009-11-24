@@ -20,39 +20,40 @@
 
 */
 
-#include "Drug/DummyPkPdDrug.h"
+#ifndef Hmod_IhKwDrug
+#define Hmod_IhKwDrug
 
-#include <assert.h>
-#include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
+#include <string>
+#include <deque>
+#include <map>
+#include <vector>
+#include "Drug.h"
+#include "Dose.h"
+#include "Global.h"
+#include "proteome.h"
 
 using namespace std;
 
-DummyPkPdDrug::DummyPkPdDrug(const DrugType* type) : Drug(type) {
-}
 
-DummyPkPdDrug::DummyPkPdDrug (const DrugType* type, istream& in) :
-  Drug(type, in) {
-}
+/** A class holding pkpd drug use info.
+ *
+ * Each human has an instance for each type of drug present in their blood. */
+class IhKwDrug : public Drug {
+public:
+  /** Create a new instance. */
+  IhKwDrug (const DrugType*);
+  /** Load an instance from a checkpoint. */
+  IhKwDrug (const DrugType*, istream& in);
+  void write (ostream& out) const;
 
-void DummyPkPdDrug::write (ostream& out) const {
-    Drug::write(out);
-}
+  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
 
+protected:
+  /** Calculate multiplier to decay a concentration by a duration of time
+    *
+    * @param time Duration in minutes to decay over */
+  virtual double decayFactor (double time);
 
+};
 
-double DummyPkPdDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
-  //Returning an average of 2 points
-  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
-  double startFactor = 3.8/(1+param/_concentration);
-  double endFactor = 3.8/(1+param/_nextConcentration);
-  return exp(-(startFactor + endFactor)/2);
-}
-
-double DummyPkPdDrug::decayFactor (double time) {
-  //k = log(2)/halfLife
-  return exp(-time*log(2.0)/typeData->halfLife);
-}
-
+#endif

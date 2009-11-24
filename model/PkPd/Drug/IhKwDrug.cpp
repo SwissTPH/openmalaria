@@ -20,42 +20,35 @@
 
 */
 
-#ifndef Hmod_dummypkpddrug
-#define Hmod_dummypkpddrug
+#include "PkPd/Drug/IhKwDrug.h"
 
-#include <string>
-#include <deque>
-#include <map>
-#include <vector>
-#include "Drug.h"
-#include "Dose.h"
-#include "DrugType.h"
-#include "Global.h"
-#include "proteome.h"
+#include <assert.h>
+#include <cmath>
+#include <algorithm>
+#include <stdexcept>
+#include <sstream>
 
 using namespace std;
 
+IhKwDrug::IhKwDrug(const DrugType* type) : Drug(type) {
+}
 
-/** A class holding dummy pkpd drug use info.
- *
- * Each human has an instance for each type of drug present in their blood. */
-class DummyPkPdDrug : public Drug {
-public:
-  /** Create a new instance. */
-  DummyPkPdDrug (const DrugType*);
-  /** Load an instance from a checkpoint. */
-  DummyPkPdDrug (const DrugType*, istream& in);
-  void write (ostream& out) const;
+IhKwDrug::IhKwDrug (const DrugType* type, istream& in) :
+  Drug(type, in) {
+}
 
-  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-
-protected:
-  /** Calculate multiplier to decay a concentration by a duration of time
-    *
-    * @param time Duration in minutes to decay over */
-  virtual double decayFactor (double time);
+void IhKwDrug::write (ostream& out) const {
+    Drug::write(out);
+}
 
 
-};
 
-#endif
+double IhKwDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
+    //TBD
+    return 0.0;	// TODO (best always return _something_, even if nonsense)
+}
+
+double IhKwDrug::decayFactor (double time) {
+    //TBD
+    return 0.0;	// TODO (best always return _something_, even if nonsense)
+}

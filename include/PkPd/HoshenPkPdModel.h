@@ -18,26 +18,29 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_PK_PD_Drug_Interactions
-#define Hmod_PK_PD_Drug_Interactions
+#ifndef Hmod_HoshenPkPdModel
+#define Hmod_HoshenPkPdModel
 
-#include "Drug/DrugInteractions.h"
-#include "Drug/PkPdDrug.h"
+#include "PkPd/PkPdModel.h"
+#include "PkPd/Drug/HoshenDrug.h"
 
-/** Pharmacokinetic and pharmacodynamics drug Interactions. 
+/** Pharmacokinetic and pharmacodynamics drug model, using the Hoshen
+ * model.
  *
+ * Holds per-human data for Tiago / the Liverpool school of medicine's
+ * Hoshen PKPD model.
  * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
-class PkPdDrugInteractions : public DrugInteractions {
+class HoshenPkPdModel : public PkPdModel {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
   
-  PkPdDrugInteractions ();
-  PkPdDrugInteractions (istream& in);
-  virtual ~PkPdDrugInteractions ();
+  HoshenPkPdModel ();
+  HoshenPkPdModel (istream& in);
+  virtual ~HoshenPkPdModel ();
   virtual void write (ostream& out) const;
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
@@ -45,7 +48,7 @@ public:
   double getDrugFactor (const ProteomeInstance* infProteome);
   
 private:
-  list<PkPdDrug> _drugs;
+  list<HoshenDrug> _drugs;
 };
 
 #endif

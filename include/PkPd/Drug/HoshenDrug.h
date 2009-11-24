@@ -20,35 +20,40 @@
 
 */
 
-#include "Drug/PkPdDrug.h"
+#ifndef Hmod_HoshenDrug
+#define Hmod_HoshenDrug
 
-#include <assert.h>
-#include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
+#include <string>
+#include <deque>
+#include <map>
+#include <vector>
+#include "Drug.h"
+#include "Dose.h"
+#include "DrugType.h"
+#include "Global.h"
+#include "proteome.h"
 
 using namespace std;
 
-PkPdDrug::PkPdDrug(const DrugType* type) : Drug(type) {
-}
 
-PkPdDrug::PkPdDrug (const DrugType* type, istream& in) :
-  Drug(type, in) {
-}
+/** A class holding hoshen pkpd drug use info.
+ *
+ * Each human has an instance for each type of drug present in their blood. */
+class HoshenDrug : public Drug {
+public:
+  /** Create a new instance. */
+  HoshenDrug (const DrugType*);
+  /** Load an instance from a checkpoint. */
+  HoshenDrug (const DrugType*, istream& in);
+  void write (ostream& out) const;
 
-void PkPdDrug::write (ostream& out) const {
-    Drug::write(out);
-}
+  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
 
+protected:
+  /** Calculate multiplier to decay a concentration by a duration of time
+    *
+    * @param time Duration in minutes to decay over */
+  virtual double decayFactor (double time);
+};
 
-
-double PkPdDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
-    //TBD
-    return 0.0;	// TODO (best always return _something_, even if nonsense)
-}
-
-double PkPdDrug::decayFactor (double time) {
-    //TBD
-    return 0.0;	// TODO (best always return _something_, even if nonsense)
-}
+#endif

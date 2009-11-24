@@ -20,8 +20,7 @@
 
 */
 
-#include "Drug/Drug.h"
-#include "Drug/DrugType.h"
+#include "PkPd/Drug/DrugType.h"
 
 #include <assert.h>
 #include <cmath>
@@ -39,7 +38,6 @@ map<string,DrugType> DrugType::available;
 
 
 void DrugType::init () {
-  Drug::init ();
   Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
   DrugType* s;
   //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values

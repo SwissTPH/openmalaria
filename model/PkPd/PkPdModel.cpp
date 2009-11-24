@@ -18,46 +18,61 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Drug/DrugInteractions.h"
+#include "PkPd/PkPdModel.h"
 #include "Global.h"
 #include "proteome.h"
 
 // submodels:
-#include "Drug/DummyPkPdDrugInteractions.h"
+#include "PkPd/HoshenPkPdModel.h"
+#include "PkPd/IhKwPkPdModel.h"
 
+
+// Temporary switch to use the IhKw model − this may eventually be determined by XML data or XML model version.
+const bool Use_IhKw = false;
 
 // -----  static functions  -----
 
-void DrugInteractions::init () {
+void PkPdModel::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
-    DummyPkPdDrugInteractions::init();
+    DrugType::init();
+    Drug::init ();
+    if (Use_IhKw)
+      IhKwPkPdModel::init();
+    else
+      HoshenPkPdModel::init();
   }
 }
 
-void DrugInteractions::readStatic (istream& in) {
+void PkPdModel::readStatic (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     ProteomeManager::read (in);
   }
 }
-void DrugInteractions::writeStatic (ostream& out) {
+void PkPdModel::writeStatic (ostream& out) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     ProteomeManager::write (out);
   }
 }
 
-DrugInteractions* DrugInteractions::createDrugInteractions () {
+PkPdModel* PkPdModel::createPkPdModel () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new DummyPkPdDrugInteractions ();
+    if (Use_IhKw)
+      return new IhKwPkPdModel ();
+    else
+      return new HoshenPkPdModel ();
   }
-  return new DrugInteractions();
+  return new PkPdModel();
 }
 
-DrugInteractions* DrugInteractions::createDrugInteractions (istream& in) {
+PkPdModel* PkPdModel::createPkPdModel (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    return new DummyPkPdDrugInteractions (in);
+    if (Use_IhKw)
+      return new IhKwPkPdModel (in);
+    else
+      return new HoshenPkPdModel (in);
   }
-  return new DrugInteractions(in);
+  return new PkPdModel(in);
 }
 
 // -----  non-static functions  -----

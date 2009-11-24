@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_drug
-#define Hmod_drug
+#ifndef Hmod_Drug
+#define Hmod_Drug
 
 #include <string>
 #include <deque>
@@ -35,7 +35,8 @@
 using namespace std;
 
 
-/** A class holding drug use info.
+/** A class holding drug use info. This is an abstract base class, so it doesn't
+ * include all details required.
  *
  * Each human has an instance for each type of drug present in their blood. */
 class Drug {

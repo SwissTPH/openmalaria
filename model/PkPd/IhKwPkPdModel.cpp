@@ -18,35 +18,33 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Drug/DummyPkPdDrugInteractions.h"
-#include "Drug/DummyPkPdDrug.h"
+#include "PkPd/IhKwPkPdModel.h"
 
 // -----  static functions  -----
 
-void DummyPkPdDrugInteractions::init() {
-  DrugType::init();
+void IhKwPkPdModel::init() {
 }
 
 
 // -----  non-static set up / tear down functions  -----
 
-DummyPkPdDrugInteractions::DummyPkPdDrugInteractions () {}
-DummyPkPdDrugInteractions::~DummyPkPdDrugInteractions () {}
+IhKwPkPdModel::IhKwPkPdModel () {}
+IhKwPkPdModel::~IhKwPkPdModel () {}
 
-DummyPkPdDrugInteractions::DummyPkPdDrugInteractions (istream& in) {
+IhKwPkPdModel::IhKwPkPdModel (istream& in) {
   int numDrugs;
   in >> numDrugs;
   Global::validateListSize (numDrugs);
   for (int i=0; i<numDrugs; i++) {
     string abbrev;
     in >> abbrev;
-    _drugs.push_back (DummyPkPdDrug (DrugType::getDrug(abbrev), in));
+    _drugs.push_back (IhKwDrug (DrugType::getDrug(abbrev), in));
   }
 }
 
-void DummyPkPdDrugInteractions::write (ostream& out) const {
+void IhKwPkPdModel::write (ostream& out) const {
   out << _drugs.size() << endl;
-  for (list<DummyPkPdDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+  for (list<IhKwDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     out << it->getAbbreviation() << endl;
     it->write (out);
   }
@@ -55,15 +53,15 @@ void DummyPkPdDrugInteractions::write (ostream& out) const {
 
 // -----  non-static simulation time functions  -----
 
-void DummyPkPdDrugInteractions::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
-  list<DummyPkPdDrug>::iterator drug = _drugs.begin();
+void IhKwPkPdModel::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+  list<IhKwDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
       goto medicateGotDrug;
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (DummyPkPdDrug(DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (IhKwDrug(DrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
@@ -75,16 +73,16 @@ struct DecayPredicate {
     return drug.decay ();
   }
 };
-void DummyPkPdDrugInteractions::decayDrugs () {
+void IhKwPkPdModel::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
 }
 
-double DummyPkPdDrugInteractions::getDrugFactor (const ProteomeInstance* infProteome) {
+double IhKwPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect
-  for (list<DummyPkPdDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+  for (list<IhKwDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
     double drugFactor = it->calculateDrugFactor(infProteome);
     if (drugFactor < factor) {
       factor = drugFactor;

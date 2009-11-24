@@ -30,18 +30,18 @@ using namespace std;
 // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), drugProxy(DrugInteractions::createDrugInteractions ()),
+    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     _MOI(0), patentInfections(0)
 {}
 
 DummyWithinHostModel::~DummyWithinHostModel() {
   clearAllInfections();
-  delete drugProxy;
+  delete pkpdModel;
 }
 
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
-    WithinHostModel(in), drugProxy(DrugInteractions::createDrugInteractions (in))
+    WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
 {
   in >> _MOI; 
   in >> patentInfections; 
@@ -57,7 +57,7 @@ DummyWithinHostModel::DummyWithinHostModel(istream& in) :
 }
 void DummyWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
-  drugProxy->write (out);
+  pkpdModel->write (out);
   
   out << _MOI << endl; 
   out << patentInfections << endl; 
@@ -92,7 +92,7 @@ void DummyWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DummyWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  drugProxy->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
+  pkpdModel->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
 }
 
 
@@ -111,7 +111,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
       continue;
     }
     else {
-      i->multiplyDensity(drugProxy->getDrugFactor(i->getProteome()));
+      i->multiplyDensity(pkpdModel->getDrugFactor(i->getProteome()));
       i->determineWithinHostDensity();
       timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
     
@@ -133,7 +133,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     }
   }
   
-  drugProxy->decayDrugs();
+  pkpdModel->decayDrugs();
 }
 
 

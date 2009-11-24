@@ -18,26 +18,27 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_DrugInteractions
-#define Hmod_DrugInteractions
+#ifndef Hmod_PkPdModel
+#define Hmod_PkPdModel
 
 #include <fstream>
 using namespace std;
 
 class ProteomeInstance;
 
-/** Encapsulates both the static operations for drug models and the per-human
+/** Encapsulates both the static operations for PKPD models and the per-human
  * drug proxies.
  * 
- * Note that there currently needn't be a drug model, in which case an instance
- * of this class is created (which while inefficient, allows nicer code).
+ * Note that there currently needn't be a PKPD model, in which case an instance
+ * of this class is created (allowing nicer code). Therefore all methods have an
+ * empty implementation in this class.
  * 
  * Calling order within a timestep (see doc for medicate for details):
  *  * getDrugFactor() for each infection
  *  * decayDrugs()
  *  * medicate()
  */
-class DrugInteractions {
+class PkPdModel {
 public:
   ///@brief Static functions
   //@{
@@ -48,20 +49,23 @@ public:
   /// Write static variables to checkpoint
   static void writeStatic (ostream& out);
   
-  /// Create a new DrugInteractions
-  static DrugInteractions* createDrugInteractions ();
-  /// Load a DrugInteractions from a checkpoint
-  static DrugInteractions* createDrugInteractions (istream& in);
+  /** Factory function to create a drug interface, type dependant on run-time
+   * options.
+   * 
+   * Currently may return one of: PkPdModel, HoshenPkPdModel, IhKwPkPdModel. */
+  static PkPdModel* createPkPdModel ();
+  /** As above, but loads from a checkpoint. */
+  static PkPdModel* createPkPdModel (istream& in);
   //@}
   
   /// @brief Constructors, destructor and checkpointing
   //@{
   /// Create a new instance
-  DrugInteractions () {}
+  PkPdModel () {}
   /// Load an instance from a checkpoint
-  DrugInteractions (istream& in) {}
+  PkPdModel (istream& in) {}
   /// Destroy an instance
-  virtual ~DrugInteractions () {}
+  virtual ~PkPdModel () {}
   /// Write checkpoint
   virtual void write (ostream& out) {};
   //@}
