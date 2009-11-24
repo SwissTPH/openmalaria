@@ -50,8 +50,10 @@ Drug::Drug (const DrugType* type, istream& in) :
   typeData (type)
 {
   in >> _concentration;
-  // No need to checkpoint; just recalculate _nextConcentration
-  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+  in >> _nextConcentration;
+  // Note: can't calculate _nextConcentration from _concentration using
+  // decayFactor() here, because decayFactor is virtual.
+  
   int num;
   in >> num;
   Global::validateListSize (num);
@@ -61,6 +63,7 @@ Drug::Drug (const DrugType* type, istream& in) :
 
 void Drug::write (ostream& out) const {
   out << _concentration << endl;
+  out <<_nextConcentration << endl;
   assert (doses.size() == 0);	// doses not used yet (remove this eventually)
   out << doses.size() << endl;
   for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)

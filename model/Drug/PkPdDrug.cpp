@@ -45,9 +45,10 @@ void PkPdDrug::write (ostream& out) const {
 
 double PkPdDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
     //TBD
+    return 0.0;	// TODO (best always return _something_, even if nonsense)
 }
 
 double PkPdDrug::decayFactor (double time) {
     //TBD
+    return 0.0;	// TODO (best always return _something_, even if nonsense)
 }
-

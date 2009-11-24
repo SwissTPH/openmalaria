@@ -54,7 +54,7 @@ public:
   
   double getConcentration() const { return _concentration;}
   double getNextConcentration() const { return _nextConcentration;}
-  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const {};
+  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const =0;
   /** Called per timestep to reduce concentrations.
    *
    * If remaining concentration is negligible, return true, and this class
@@ -71,7 +71,7 @@ protected:
   /** Calculate multiplier to decay a concentration by a duration of time
    *
    * @param time Duration in minutes to decay over */
-  virtual double decayFactor (double time) {} ;
+  virtual double decayFactor (double time) =0;
   
   static double minutesPerTimeStep;
   
