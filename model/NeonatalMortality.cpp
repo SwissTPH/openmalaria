@@ -33,6 +33,7 @@ void NeonatalMortality::init() {
 
 void NeonatalMortality::read (istream& in) {
   in >> _riskFromMaternalInfection;
+  // _prevalenceByGestationalAge is already allocated
   for (vector<double>::iterator it = _prevalenceByGestationalAge.begin(); it != _prevalenceByGestationalAge.end(); ++it)
     in >> (*it);
 }

@@ -104,12 +104,6 @@ void Population::staticRead (istream& in) {
   in >> alpha0;
   in >> alpha1;
   in >> rho;
-  in >> _workUnitIdentifier;
-  
-  if (_workUnitIdentifier !=  get_wu_id()) {
-    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
-    exit(-9);
-  }
 }
 void Population::staticWrite (ostream& out) {
   NeonatalMortality::write (out);
@@ -121,7 +115,6 @@ void Population::staticWrite (ostream& out) {
   out << alpha0 << endl;
   out << alpha1 << endl ;
   out << rho << endl; 
-  out << _workUnitIdentifier << endl;
 }
 
 
@@ -143,7 +136,6 @@ Population::~Population() {
 void Population::read (istream& in) {
   //Start reading a checkpoint
   _transmissionModel->read (in);
-  NeonatalMortality::read (in);
   
   in >> populationSize;
   if (populationSize != get_populationsize())
@@ -170,7 +162,6 @@ void Population::read (istream& in) {
 }
 void Population::write (ostream& out) {
   _transmissionModel->write (out);
-  NeonatalMortality::write (out);
   
   out << populationSize << endl;
   out << _workUnitIdentifier << endl;

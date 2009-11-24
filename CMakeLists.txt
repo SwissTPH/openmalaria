@@ -39,6 +39,12 @@ if (MSVC)
 endif (MSVC)
 
 
+option (OM_VECTOR_OUTPUT "Write per-timestep vector statistics to vector.csv" OFF)
+if (OM_VECTOR_OUTPUT)
+    add_definitions (OM_CSV_REPORTING)
+endif (OM_VECTOR_OUTPUT)
+
+
 # -----  Find dependencies  -----
 
 find_package (XSD)
