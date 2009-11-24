@@ -55,7 +55,6 @@ void SurveysType::incrementSurveyPeriod()
     // In this case, currentTimestep gets set to -1 so no further surveys get taken
     _surveyPeriod = 0;
   current = &_survey[_surveyPeriod];
-  cout << "New survey period: " << _surveyPeriod << "; timestep: " << currentTimestep << endl;
 }
 
 void SurveysType::writeSummaryArrays ()

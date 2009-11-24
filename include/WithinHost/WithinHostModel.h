@@ -65,7 +65,7 @@ public:
   
   void summarize(Survey& survey, SurveyAgeGroup ageGroup);
   
-  //! Create a new infection requires that the human is allocated and current
+  /// Create a new infection within this human
   virtual void newInfection() =0;
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *

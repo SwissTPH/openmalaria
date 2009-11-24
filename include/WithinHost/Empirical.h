@@ -36,26 +36,24 @@ class EmpiricalWithinHostModel : public WithinHostModel
 {
   public:
     EmpiricalWithinHostModel();
-    EmpiricalWithinHostModel (istream& in);
     ~EmpiricalWithinHostModel();
     
+    EmpiricalWithinHostModel (istream& in);
+    virtual void write (ostream& out) const;
     
-    //! Create a new infection requires that the human is allocated and current
+    
     virtual void newInfection();
-
-    //! Clears all infections in an individual
     virtual void clearAllInfections();
-
-    void medicate (string drugName, double qty, int time, double age);
-
+    
+    virtual void medicate (string drugName, double qty, int time, double age);
+    
     /** Update densities for timestep (taking into account blood-stage vaccine
      * and drug efficacies. */
-    void calculateDensities (double ageInYears, double BSVEfficacy);
-
-    void write (ostream& out) const;
+    virtual void calculateDensities (double ageInYears, double BSVEfficacy);
     
+  protected:
     virtual int countInfections (int& patentInfections);
-
+    
   private:
     /// Encapsulates drug code for each human
     DrugInteractions* drugProxy;

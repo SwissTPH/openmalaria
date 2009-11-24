@@ -39,21 +39,19 @@ using namespace std;
 class DummyWithinHostModel : public WithinHostModel {
 public:
   DummyWithinHostModel();
-  DummyWithinHostModel(istream& in);
   ~DummyWithinHostModel();
   
+  DummyWithinHostModel(istream& in);
+  virtual void write(ostream& out) const;
   
-  //! Create a new infection requires that the human is allocated and current
+
   virtual void newInfection();
-  
-  //! Clears all infections in an individual
   virtual void clearAllInfections();
   
-  void medicate(string drugName, double qty, int time, double age);
-
-  void calculateDensities(double ageInYears, double BSVEfficacy);
+  virtual void medicate(string drugName, double qty, int time, double age);
   
-  void write(ostream& out) const;
+  virtual void calculateDensities(double ageInYears, double BSVEfficacy);
+  
   
   protected:
     virtual int countInfections (int& patentInfections);

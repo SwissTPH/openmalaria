@@ -41,6 +41,11 @@ public:
   DescriptiveWithinHostModel(istream& in);
   virtual ~DescriptiveWithinHostModel();
   
+  virtual void newInfection();
+  virtual void clearAllInfections();
+  
+  virtual void calculateDensities(double ageInYears, double BSVEfficacy);
+  
   /** @brief Checkpointing of variables */
   //@{
   virtual void write(ostream& out) const;
@@ -56,14 +61,6 @@ private:
   //@}
   
 public:
-  //! Create a new infection requires that the human is allocated and current
-  virtual void newInfection();
-  
-  //! Clears all infections in an individual
-  virtual void clearAllInfections();
-  
-  void calculateDensities(double ageInYears, double BSVEfficacy);
-  
 protected:
   virtual int countInfections (int& patentInfections);
   

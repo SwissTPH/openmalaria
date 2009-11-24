@@ -47,13 +47,13 @@ void ClinicalModel::init () {
 }
 
 void ClinicalModel::staticRead (istream& in) {
-  for (int i = 0; i < Global::intervalsPerYear; ++i) {
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i) {
     in >> infantDeaths[i];
     in >> infantIntervalsAtRisk[i];
   }
 }
 void ClinicalModel::staticWrite (ostream& out) {
-  for (int i = 0; i < Global::intervalsPerYear; ++i) {
+  for (size_t i = 0; i < Global::intervalsPerYear; ++i) {
     out << infantDeaths[i] << endl;;
     out << infantIntervalsAtRisk[i] << endl;
   }
