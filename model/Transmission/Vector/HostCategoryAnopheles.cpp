@@ -53,17 +53,17 @@ void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1
   }
 }
 void HostCategoryAnopheles::checkInterventionDescriptions (string species) {
-    if (getActiveInterventions() & Interventions::ITN) {
+    if (getActiveInterventions()[Interventions::ITN]) {
 	if (ITNDeterrency.notSet() ||
 	    ITNPreprandialKillingEffect.notSet() ||
 	    ITNPostprandialKillingEffect.notSet())
 	    throw xml_scenario_error (string("ITN intervention without description for ").append(species));
     }
-    if (getActiveInterventions() & Interventions::IRS) {
+    if (getActiveInterventions()[Interventions::IRS]) {
 	if (IRSDeterrency.notSet() || IRSKillingEffect.notSet())
 	    throw xml_scenario_error (string("IRS intervention without description for ").append(species));
     }
-    if (getActiveInterventions() & Interventions::VEC_AVAIL) {
+    if (getActiveInterventions()[Interventions::VEC_AVAIL]) {
 	if (VADeterrency.notSet())
 	    throw xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
     }

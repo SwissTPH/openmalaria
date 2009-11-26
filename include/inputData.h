@@ -24,9 +24,10 @@
 #ifndef INPUTDATABOINC_H
 #define INPUTDATABOINC_H
 
-#include "Constant.h"
+#include "Global.h"
 #include <scenario.hxx>
 #include <string>
+#include <bitset>
 class Anopheles;
 
 
@@ -71,7 +72,7 @@ void changeHealthSystem (const scnXml::HealthSystem* newHS);
 const scnXml::Intervention* getInterventionByTime(int time);
 
 /// Returns and enum representing which interventions are active.
-const Interventions::Flags getActiveInterventions ();
+const bitset<Interventions::SIZE> getActiveInterventions ();
 
 
 /// Get a parameter from the parameter list. i should be less than Params::MAX.

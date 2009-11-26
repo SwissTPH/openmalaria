@@ -58,7 +58,7 @@ void Vaccine::initParameters()
     const scnXml::Interventions& interventions = getInterventions();
     const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
     if (vaccDesc.size() == 0) {
-        if (getActiveInterventions() & Interventions::VACCINE)
+        if (getActiveInterventions()[Interventions::VACCINE])
             throw xml_scenario_error ("Vaccine intervention without description");
         return;
     }

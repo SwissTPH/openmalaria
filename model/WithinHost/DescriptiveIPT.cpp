@@ -42,7 +42,7 @@ void DescriptiveIPTWithinHost::initParameters () {
   const scnXml::Interventions& xmlInterventions = getInterventions();
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) {
-      if (getActiveInterventions() & Interventions::IPTI)
+      if (getActiveInterventions()[Interventions::IPTI])
 	  throw xml_scenario_error ("IPTI used without description");
       return;
   }

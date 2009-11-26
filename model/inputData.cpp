@@ -20,7 +20,6 @@
 
 #include "inputData.h"
 #include "scenario.hxx"
-#include "Global.h"
 #include "util/BoincWrapper.h"
 
 #include <iostream>
@@ -54,7 +53,7 @@ const scnXml::Parameters * parameters;
 // Initialized (derived) values:
 double parameterValues[Params::MAX];
 std::map<int, const scnXml::Intervention*> timedInterventions;
-int activeInterventions;
+bitset<Interventions::SIZE> activeInterventions;
 
 // Initialization functions:
 
@@ -79,11 +78,11 @@ void initTimedInterventions()
     if (interventions->getContinuous().present()) {
         const scnXml::Continuous& contI = interventions->getContinuous().get();
         if (contI.getVaccine().size())
-            activeInterventions |= Interventions::VACCINE;
+            activeInterventions.set (Interventions::VACCINE, true);
 	if (contI.getITN().size())
-	    activeInterventions |= Interventions::ITN;
+	    activeInterventions.set (Interventions::ITN, true);
 	if (contI.getIpti().size())
-	    activeInterventions |= Interventions::IPTI;
+	    activeInterventions.set (Interventions::IPTI, true);
     }
 
     if (interventions->getTimed().present()) {
@@ -99,23 +98,23 @@ void initTimedInterventions()
             timedInterventions[time] = & (*it);
 
             if (it->getChangeHS().present())
-                activeInterventions |= Interventions::CHANGE_HS;
+                activeInterventions.set (Interventions::CHANGE_HS, true);
             if (it->getChangeEIR().present())
-                activeInterventions |= Interventions::CHANGE_EIR;
+                activeInterventions.set (Interventions::CHANGE_EIR, true);
             if (it->getVaccinate().present())
-                activeInterventions |= Interventions::VACCINE;
+                activeInterventions.set (Interventions::VACCINE, true);
             if (it->getMDA().present())
-                activeInterventions |= Interventions::MDA;
+                activeInterventions.set (Interventions::MDA, true);
             if (it->getIpti().present())
-                activeInterventions |= Interventions::IPTI;
+                activeInterventions.set (Interventions::IPTI, true);
             if (it->getITN().present())
-                activeInterventions |= Interventions::ITN;
+                activeInterventions.set (Interventions::ITN, true);
             if (it->getIRS().present())
-                activeInterventions |= Interventions::IRS;
+                activeInterventions.set (Interventions::IRS, true);
             if (it->getVectorAvailability().present())
-                activeInterventions |= Interventions::VEC_AVAIL;
+                activeInterventions.set (Interventions::VEC_AVAIL, true);
             if (it->getLarviciding().present())
-                activeInterventions |= Interventions::LARVICIDING;
+                activeInterventions.set (Interventions::LARVICIDING, true);
         }
     }
 }
@@ -287,9 +286,9 @@ const scnXml::Intervention* getInterventionByTime (int time)
     else
         return NULL;
 }
-const Interventions::Flags getActiveInterventions ()
+const bitset<Interventions::SIZE> getActiveInterventions ()
 {
-    return Interventions::Flags (activeInterventions);
+    return activeInterventions;
 }
 
 int get_analysis_no()
