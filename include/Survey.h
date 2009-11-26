@@ -21,6 +21,7 @@
 #define Hmod_Survey
 
 #include "Global.h"
+#include <bitset>
 
 /** Enumeration of reporting options
  *
@@ -154,7 +155,7 @@ class Survey {
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
-    static bool active[NUM_SUMMARY_OPTIONS];
+    static bitset<NUM_SUMMARY_OPTIONS> active;
     
     /** Assimilator mode
      *

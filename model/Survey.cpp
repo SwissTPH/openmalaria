@@ -26,7 +26,7 @@
 
 double SurveyAgeGroup::_lowerbound;
 vector<double> SurveyAgeGroup::_upperbound;
-bool Survey::active[NUM_SUMMARY_OPTIONS];
+bitset<NUM_SUMMARY_OPTIONS> Survey::active;
 bool Survey::_assimilatorMode;
 
 
