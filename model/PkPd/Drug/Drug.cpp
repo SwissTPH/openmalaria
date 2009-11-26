@@ -53,35 +53,18 @@ Drug::Drug (const DrugType* type, istream& in) :
   in >> _nextConcentration;
   // Note: can't calculate _nextConcentration from _concentration using
   // decayFactor() here, because decayFactor is virtual.
-  
-  int num;
-  in >> num;
-  Global::validateListSize (num);
-  for (int i = 0; i < num; ++i)
-    doses.push_back (Dose (in));
 }
 
 void Drug::write (ostream& out) const {
   out << _concentration << endl;
   out <<_nextConcentration << endl;
-  assert (doses.size() == 0);	// doses not used yet (remove this eventually)
-  out << doses.size() << endl;
-  for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)
-    it->write (out);
 }
 
 
 void Drug::addDose (double concentration, int delay) {
-  if (delay == 0) {
+    assert (delay == 0);
     _concentration += concentration;
     _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-  } else {
-    assert (false);	//NOTE: Not properly dealt with yet (as it is only relevant for ACTs).
-    // Only adding doses for this timestep is supported
-    assert (delay>0 && delay<minutesPerTimeStep);
-    double nextConcentration = concentration*decayFactor (minutesPerTimeStep-delay);
-    doses.push_back (Dose (nextConcentration, 0 /*FIXME*/));
-  }
 }
 
 bool Drug::decay() {

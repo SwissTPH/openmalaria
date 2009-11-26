@@ -45,7 +45,11 @@ public:
   /** Load an instance from a checkpoint. */
   IhKwDrug (const DrugType*, istream& in);
   void write (ostream& out) const;
-
+  
+  /** Add amount to the concentration of drug, at time delay past the start of
+   * the current timestep. */
+  void addDose (double amount, int delay);
+  
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
 
 protected:
@@ -54,6 +58,9 @@ protected:
     * @param time Duration in minutes to decay over */
   virtual double decayFactor (double time);
 
+  
+  /// Per-dose information. Still to be properly defined.
+  deque<Dose> doses;
 };
 
 #endif

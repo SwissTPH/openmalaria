@@ -27,7 +27,6 @@
 #include <deque>
 #include <map>
 #include <vector>
-#include "Dose.h"
 #include "DrugType.h"
 #include "Global.h"
 #include "proteome.h"
@@ -49,12 +48,10 @@ public:
   double getAbsorptionFactor() const { return typeData->absorptionFactor;}
   //double getHalfLife() const { return typeData->halfLife;}
   
-  /** Add amount to the concentration of drug, at time delay past the start of
-   * the current timestep. */
+  /** Add amount to the concentration of drug at time the start of the current
+   * timestep (delay is expected to be 0). */
   void addDose (double amount, int delay);
   
-  double getConcentration() const { return _concentration;}
-  double getNextConcentration() const { return _nextConcentration;}
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const =0;
   /** Called per timestep to reduce concentrations.
    *
@@ -72,6 +69,7 @@ protected:
   /** Calculate multiplier to decay a concentration by a duration of time
    *
    * @param time Duration in minutes to decay over */
+  
   virtual double decayFactor (double time) =0;
   
   static double minutesPerTimeStep;
@@ -83,9 +81,6 @@ protected:
   double _concentration;
   //! Drug concentration on the next cycle (always should be whatever calcNextConcentration sets).
   double _nextConcentration;
-  
-  /// Per-dose information. Still to be properly defined.
-  deque<Dose> doses;
 };
 
 #endif

@@ -34,13 +34,32 @@ IhKwDrug::IhKwDrug(const DrugType* type) : Drug(type) {
 }
 
 IhKwDrug::IhKwDrug (const DrugType* type, istream& in) :
-  Drug(type, in) {
+  Drug(type, in)
+{
+  int num;
+  in >> num;
+  Global::validateListSize (num);
+  for (int i = 0; i < num; ++i)
+    doses.push_back (Dose (in));
 }
 
 void IhKwDrug::write (ostream& out) const {
     Drug::write(out);
+    
+    out << doses.size() << endl;
+    for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)
+      it->write (out);
 }
 
+
+void IhKwDrug::addDose (double concentration, int delay) {
+    //NOTE: old code; I'm sure it's not correct for the new model
+    
+    // Only adding doses for this timestep is supported
+    assert (delay>0 && delay<minutesPerTimeStep);
+    double nextConcentration = concentration*decayFactor (minutesPerTimeStep-delay);
+    doses.push_back (Dose (nextConcentration, 0 /*FIXME*/));
+}
 
 
 double IhKwDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
