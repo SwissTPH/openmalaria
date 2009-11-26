@@ -33,7 +33,10 @@ namespace scnXml {
 
 /** Vaccine intervention parameters.
  * 
- * Used to represent PEV, BSV and TBV vaccines. */
+ * Used to represent PEV, BSV and TBV vaccines.
+ * Each that has a descriptor is applied
+ * simultaneously by a continuous or timed intervention strategy (no
+ * way to determine which are used). */
 class Vaccine {
 public:
   // Static:

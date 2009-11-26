@@ -70,6 +70,10 @@ void changeHealthSystem (const scnXml::HealthSystem* newHS);
 /// @returns NULL if not available
 const scnXml::Intervention* getInterventionByTime(int time);
 
+/// Returns and enum representing which interventions are active.
+const Interventions::Flags getActiveInterventions ();
+
+
 /// Get a parameter from the parameter list. i should be less than Params::MAX.
 double getParameter (size_t i);
 

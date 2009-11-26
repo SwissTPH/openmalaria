@@ -41,7 +41,11 @@ int DescriptiveIPTWithinHost::iptiEffect;
 void DescriptiveIPTWithinHost::initParameters () {
   const scnXml::Interventions& xmlInterventions = getInterventions();
   iptActive = xmlInterventions.getIptiDescription().present();
-  if (!iptActive) return;
+  if (!iptActive) {
+      if (getActiveInterventions() & Interventions::IPTI)
+	  throw xml_scenario_error ("IPTI used without description");
+      return;
+  }
   
   if (Global::interval != 5)
     throw domain_error ("IPT code only supports using an interval of 5");

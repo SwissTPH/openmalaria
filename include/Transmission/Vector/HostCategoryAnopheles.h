@@ -45,6 +45,8 @@ public:
   
   /** Set up any vector-model intervention parameters. */
   void setInterventionDescription (const scnXml::Anopheles1& intervDesc);
+  /** Check required intervention descriptions are present. */
+  void checkInterventionDescriptions (string species);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;

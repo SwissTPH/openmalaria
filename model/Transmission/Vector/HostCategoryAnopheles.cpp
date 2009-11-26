@@ -18,6 +18,7 @@
  */
 
 #include "Transmission/Vector/HostCategoryAnopheles.h"
+#include "inputData.h"
 
 // NOTE: should Mosq be an extension of NonHumanHosts type or NonHumanHosts a sub-object of Mosq? This is duplicate functionality.
 void HostCategoryAnopheles::operator= (const scnXml::Mosq& mosq) {
@@ -50,4 +51,20 @@ void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1
     const scnXml::VADescription& vaDesc = intervDesc.getVADescription().get();
     VADeterrency = vaDesc.getDeterrency ();
   }
+}
+void HostCategoryAnopheles::checkInterventionDescriptions (string species) {
+    if (getActiveInterventions() & Interventions::ITN) {
+	if (ITNDeterrency.notSet() ||
+	    ITNPreprandialKillingEffect.notSet() ||
+	    ITNPostprandialKillingEffect.notSet())
+	    throw xml_scenario_error (string("ITN intervention without description for ").append(species));
+    }
+    if (getActiveInterventions() & Interventions::IRS) {
+	if (IRSDeterrency.notSet() || IRSKillingEffect.notSet())
+	    throw xml_scenario_error (string("IRS intervention without description for ").append(species));
+    }
+    if (getActiveInterventions() & Interventions::VEC_AVAIL) {
+	if (VADeterrency.notSet())
+	    throw xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
+    }
 }

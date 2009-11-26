@@ -41,10 +41,6 @@
   Constants common to all humans
   Decay in anti-toxic immunity
 */
-//TODOConversion
-#ifdef _WIN32
-#define isnan(x) ((x) != (x))
-#endif
 
 int Human::_ylagLen;
 

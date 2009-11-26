@@ -194,7 +194,7 @@ void Simulation::writeCheckpoint(){
 
 void Simulation::write (ostream& out) {
   if (out == NULL || !out.good())
-    throw new checkpoint_error ("Unable to write to file");
+    throw checkpoint_error ("Unable to write to file");
   
   timer::startCheckpoint ();
   out.precision(20);

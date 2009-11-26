@@ -280,4 +280,19 @@ enum SimulationMode {
   dynamicEIR = 4,
 };
 
+/** Used to describe which interventions are in use. */
+namespace Interventions {
+    enum Flags {
+	CHANGE_HS	= 1 << 0,
+	CHANGE_EIR	= 1 << 1,
+	VACCINE		= 1 << 2,	// any vaccine
+	MDA		= 1 << 3,
+	IPTI		= 1<<4,
+	ITN		= 1 << 5,
+	IRS		= 1 << 6,
+	VEC_AVAIL	= 1<<7,
+	LARVICIDING	= 1<<8,
+    };
+}
+
 #endif

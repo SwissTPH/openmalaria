@@ -126,6 +126,10 @@ public:
   inline void setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
     humanBase.setInterventionDescription (intervDesc);
   }
+  /** Check all required intervention descriptions are present. */
+  inline void checkInterventionDescriptions (string species) {
+      humanBase.checkInterventionDescriptions (species);
+  }
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   

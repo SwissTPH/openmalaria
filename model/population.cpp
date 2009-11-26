@@ -431,6 +431,10 @@ void Population::implementIntervention (int time) {
   if (interv == NULL)
     return;
   
+  // Given an intervention descriptor for this time point, check which
+  // interventions are included. All should check when data loading that they
+  // have data if used according to getActiveInterventions().
+  
   if (interv->getChangeHS().present()) {
     if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
       throw xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
