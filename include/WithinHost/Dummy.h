@@ -68,8 +68,6 @@ private:
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
   
-  //!multiplicity of infection
-  int _MOI;
   //!Number of infections with densities above the limit of detection
   int patentInfections;
   

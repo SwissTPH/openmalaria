@@ -20,7 +20,6 @@
 
 */
 
-#include "util/gsl.h"
 #include "WithinHost/Empirical.h"
 #include "Simulation.h"
 #include "inputData.h"
@@ -30,10 +29,8 @@ using namespace std;
 // -----  Initialization  -----
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
-    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
-    _MOI(0)
-{
-}
+    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ())
+{}
 EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
   clearAllInfections();
   delete pkpdModel;
@@ -42,19 +39,12 @@ EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
 EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
     WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
 {
-  in >> _MOI; 
-  
-  if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-    throw checkpoint_error ("_MOI");
-  
   for(int i=0;i<_MOI;++i)
     infections.push_back(EmpiricalInfection(in));
 }
 void EmpiricalWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
   pkpdModel->write (out);
-  
-  out << _MOI << endl; 
   
   for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
@@ -90,10 +80,9 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   timeStepMaxDensity = 0.0;
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
-    double survivalFactor = (1.0-BSVEfficacy);
+    double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
     survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
-    //TODO: innate immunity (_innateImmunity in Descriptive)
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {

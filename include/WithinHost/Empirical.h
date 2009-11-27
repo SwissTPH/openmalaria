@@ -59,9 +59,6 @@ class EmpiricalWithinHostModel : public WithinHostModel
     /// Encapsulates drug code for each human
     PkPdModel* pkpdModel;
 
-    //!multiplicity of infection
-    int _MOI;
-
     /** The list of all infections this human has.
      *
      * Since infection models and within host models are very much intertwined,

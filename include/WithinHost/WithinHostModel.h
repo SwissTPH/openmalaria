@@ -53,10 +53,7 @@ public:
   
   /// @brief Constructors, destructors and checkpointing functions
   //@{
-  WithinHostModel() :
-    _cumulativeY(0.0), _cumulativeh(0.0), _cumulativeYlag(0.0),
-    totalDensity(0.0), timeStepMaxDensity(0.0)
-  {}
+  WithinHostModel();
   WithinHostModel(istream& in);
   virtual ~WithinHostModel() {}
   
@@ -122,10 +119,13 @@ protected:
 	    (only set if return-value is non-zero). */
   virtual int countInfections (int& patentInfections) =0;
   
-  //!Cumulative parasite density since birth
-  double _cumulativeY;
+  //!innate ability to control parasite densities
+  double _innateImmSurvFact;
+  
   //!Number of infections received since birth
   double _cumulativeh;
+  //!Cumulative parasite density since birth
+  double _cumulativeY;
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
   //@}
@@ -136,6 +136,9 @@ protected:
    * active, just calls this function (although this needs to be changed for
    * PK_PD integration). */
   virtual void clearAllInfections() =0;
+  
+  //!multiplicity of infection
+  int _MOI;
   
   /// Total asexual blood stage density (sum of density of infections).
   double totalDensity;

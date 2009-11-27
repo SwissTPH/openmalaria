@@ -55,13 +55,8 @@ protected:
    * Same as the other checkpointing constructor except that
    * this one doesn't load infections. */
   DescriptiveWithinHostModel(istream& in, bool derived);
-private:
-  /// Called by both checkpointing constructors
-  void readDescriptiveWHM(istream& in);
   //@}
   
-public:
-protected:
   virtual int countInfections (int& patentInfections);
   
   ///@brief IPT extensions − empty otherwise
@@ -73,18 +68,11 @@ protected:
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}
   
-  //!multiplicity of infection
-  int _MOI;
-  
   /** The list of all infections this human has.
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
   std::list<DescriptiveInfection*> infections;
-  
-private:
-  //!innate ability to control parasite densities
-  double _innateImmunity;
 };
 
 #endif

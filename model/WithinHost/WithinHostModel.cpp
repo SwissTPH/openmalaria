@@ -27,6 +27,7 @@
 #include "WithinHost/Empirical.h"
 #include "Simulation.h"
 #include "inputData.h"
+#include "util/gsl.h"
 #include <stdexcept>
 
 using namespace std;
@@ -42,7 +43,7 @@ double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
 
-// -----  Initialization  -----
+// -----  static functions  -----
 
 void WithinHostModel::init() {
   Infection::init();
@@ -77,6 +78,14 @@ void WithinHostModel::init() {
   }
 }
 
+size_t WithinHostModel::getAgeGroup (double age) {
+    for (size_t i = 0; i < nages; ++i) {
+	if (agemax[i] > age)
+	    return i;
+    }
+    return nages-1;	// final category
+}
+
 void WithinHostModel::clear() {
   DescriptiveIPTWithinHost::clearParameters();
   DescriptiveInfection::clearParameters();
@@ -108,19 +117,37 @@ WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
   }
 }
 
+
+// -----  Non-static  -----
+
+WithinHostModel::WithinHostModel () :
+    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
+    _MOI(0), totalDensity(0.0), timeStepMaxDensity(0.0)
+{
+    _innateImmSurvFact = exp(-gsl::rngGauss(0, sigma_i));
+}
+
 WithinHostModel::WithinHostModel(istream& in) {
-  in >> totalDensity;
-  in >> timeStepMaxDensity;
-  in >> _cumulativeh;
-  in >> _cumulativeY;
-  in >> _cumulativeYlag;
+    in >> _innateImmSurvFact;
+    in >> _cumulativeh;
+    in >> _cumulativeY;
+    in >> _cumulativeYlag;
+    
+    in >> _MOI;
+    if (_MOI < 0 || _MOI > MAX_INFECTIONS)
+	throw checkpoint_error ("_MOI");
+    in >> totalDensity;
+    in >> timeStepMaxDensity;
 }
 void WithinHostModel::write (ostream& out) const {
-  out << totalDensity << endl;
-  out << timeStepMaxDensity << endl;
-  out << _cumulativeh << endl;
-  out << _cumulativeY << endl;
-  out << _cumulativeYlag << endl;
+    out << _innateImmSurvFact << endl;
+    out << _cumulativeh << endl;
+    out << _cumulativeY << endl;
+    out << _cumulativeYlag << endl;
+    
+    out << _MOI << endl;
+    out << totalDensity << endl;
+    out << timeStepMaxDensity << endl;
 }
 
 void WithinHostModel::clearInfections (bool) {
@@ -129,14 +156,6 @@ void WithinHostModel::clearInfections (bool) {
 
 void WithinHostModel::IPTiTreatment (SurveyAgeGroup ageGroup) {
   throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
-}
-
-size_t WithinHostModel::getAgeGroup (double age) {
-  for (size_t i = 0; i < nages; ++i) {
-    if (agemax[i] > age)
-      return i;
-  }
-  return nages-1;	// final category
 }
 
 

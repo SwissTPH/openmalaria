@@ -139,7 +139,7 @@ int DescriptiveInfection::infectionDuration(){
     return (1+(int)floor(dur)) / Global::interval;
 }
 
-void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy)
+void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
 {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
   int infage=1+Simulation::simulationTime-_startdate-latentp;
@@ -204,12 +204,12 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
   }
   
   //Compute the proportion of parasites remaining after innate blood stage effect
-  _density *= expInnateImm;
+  _density *= innateImmSurvFact;
   /* MAX_DENS_BUG: Possibly a better model version ensuring that the effect of
    * variation in innate immunity is reflected in case incidence would have the
    * following: */
   if (Global::modelVersion & INNATE_MAX_DENS)
-      timeStepMaxDensity *= expInnateImm;
+      timeStepMaxDensity *= innateImmSurvFact;
   
   //Include here the effect of blood stage vaccination
   if (Vaccine::BSV.active) {

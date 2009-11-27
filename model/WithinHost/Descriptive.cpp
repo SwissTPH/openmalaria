@@ -20,7 +20,6 @@
 
 */
 
-#include "util/gsl.h"
 #include "WithinHost/Descriptive.h"
 #include "intervention.h"
 
@@ -30,25 +29,19 @@ using namespace std;
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-    WithinHostModel(), _MOI(0)
-{
-  _innateImmunity = gsl::rngGauss(0, sigma_i);
-}
+    WithinHostModel()
+{}
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
     WithinHostModel(in)
 {
-  readDescriptiveWHM (in);
-  
   for(int i=0;i<_MOI;++i)
     infections.push_back(new DescriptiveInfection(in));
 }
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in, bool) :
     WithinHostModel(in)
-{
-  readDescriptiveWHM (in);
-}
+{}
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
@@ -59,19 +52,9 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 
 void DescriptiveWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
-  out << _MOI << endl;
-  out << _innateImmunity << endl;
   
   for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     (*iter)->write (out);
-}
-
-void DescriptiveWithinHostModel::readDescriptiveWHM (istream& in) {
-  in >> _MOI;
-  in >> _innateImmunity;
-  
-  if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-    throw checkpoint_error ("_MOI");
 }
 
 
@@ -125,7 +108,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     // With option MAX_DENS_RESET this would be: infStepMaxDens = 0.0;
     // However, when using MAX_DENS_CORRECTION this is irrelevant.
     double infStepMaxDens = timeStepMaxDensity;
-    (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, exp(-_innateImmunity), BSVEfficacy);
+    (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
     
     IPTattenuateAsexualDensity (*iter);
     

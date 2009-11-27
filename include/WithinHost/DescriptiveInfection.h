@@ -93,10 +93,10 @@ public:
    * @param cumulativeh Cumulative number of infections
    * @param cumulativeY Previous exposure (cumulative parasite density)
    * @param timeStepMaxDensity (In-out param) Used to return the maximum parasite density over a 5-day interval.
-   * @param expInnateImm Density multiplier for innate immunity.
+   * @param innateImmSurvFact Density multiplier for innate immunity.
    * @param BSVEfficacy Density multiplier for Blood-Stage Vaccine effect.
    */
-  void determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double expInnateImm, double BSVEfficacy);
+  void determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy);
   /// Final part of determineDensities calculation.
   /// Separated out to preserve order of operations.
   void determineDensityFinal ();

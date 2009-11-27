@@ -20,7 +20,6 @@
 
 */
 
-#include "util/gsl.h"
 #include "WithinHost/Dummy.h"
 #include "Simulation.h"
 #include "inputData.h"
@@ -32,7 +31,7 @@ using namespace std;
 DummyWithinHostModel::DummyWithinHostModel() :
     WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
-    _MOI(0), patentInfections(0)
+    patentInfections(0)
 {}
 
 DummyWithinHostModel::~DummyWithinHostModel() {
@@ -43,14 +42,7 @@ DummyWithinHostModel::~DummyWithinHostModel() {
 DummyWithinHostModel::DummyWithinHostModel(istream& in) :
     WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
 {
-  in >> _MOI; 
   in >> patentInfections; 
-  in >> _cumulativeh;
-  in >> _cumulativeY;
-  in >> _cumulativeYlag;
-  
-  if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-    throw checkpoint_error ("_MOI");
   
   for(int i=0;i<_MOI;++i)
     infections.push_back(DummyInfection(in));
@@ -59,11 +51,7 @@ void DummyWithinHostModel::write(ostream& out) const {
   WithinHostModel::write (out);
   pkpdModel->write (out);
   
-  out << _MOI << endl; 
   out << patentInfections << endl; 
-  out << _cumulativeh << endl;
-  out << _cumulativeY << endl;
-  out << _cumulativeYlag << endl;
   
   for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
     iter->write (out);
@@ -111,7 +99,10 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
       continue;
     }
     else {
-      i->multiplyDensity(pkpdModel->getDrugFactor(i->getProteome()));
+	double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
+	survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
+	survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
+	i->multiplyDensity(survivalFactor);
       i->determineWithinHostDensity();
       timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
     
