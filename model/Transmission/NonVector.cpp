@@ -102,7 +102,7 @@ void NonVectorTransmission::copyToInitialKappa () {
   initialKappa = kappa;
   //NOTE: error check
   for (size_t  i = 0; i < initialKappa.size(); ++i) {
-    if (!initialKappa[i] > 0.0)	// if not positive
+    if (!(initialKappa[i] > 0.0))	// if not positive
       throw range_error ("initialKappa is invalid");
   }
 }

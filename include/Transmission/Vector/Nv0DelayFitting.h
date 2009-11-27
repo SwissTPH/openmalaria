@@ -48,8 +48,8 @@ struct eDFunctor
       for(size_t n=1;n<=fn;n++){
 	T temp = fc[2*n-1]*cos(n*wt) + fc[2*n]*sin(n*wt);	// value
 	val  += temp;
-	dval += n*fc[2*n]*cos(n*wt) - n*fc[2*n-1]*sin(n*wt);	// first derivative wrt d
-	ddval = -n*n*temp;					// 2nd derivative wrt d
+	dval += (n*fc[2*n]*cos(n*wt)) - (n*fc[2*n-1]*sin(n*wt));	// first derivative wrt d
+	ddval = -(n*n*temp);					// 2nd derivative wrt d
       }
       
       // The difference of logarithms of sample and fourier value
