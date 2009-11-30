@@ -104,7 +104,6 @@ DescriptiveInfection::DescriptiveInfection(int simulationTime) :
 {
     //Initialize current infection data
     _duration=infectionDuration();
-    _cumulativeExposureJ=0.0;
     
     if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeInstance::newInfection();
@@ -119,13 +118,11 @@ DescriptiveInfection::DescriptiveInfection (istream& in) :
   Infection (in)
 {
   in >> _duration;
-  in >> _cumulativeExposureJ; 
 }
 
 void DescriptiveInfection::write (ostream& out) const {
   Infection::write (out);
   out << _duration << endl; 
-  out << _cumulativeExposureJ << endl; 
 }
 
 

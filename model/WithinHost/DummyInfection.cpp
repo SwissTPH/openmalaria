@@ -78,4 +78,5 @@ void DummyInfection::determineWithinHostDensity(){
   } else {
     _density = (int(_density*GROWTH_RATE) % 20000);
   }
+  _cumulativeExposureJ += Global::interval * _density;
 }

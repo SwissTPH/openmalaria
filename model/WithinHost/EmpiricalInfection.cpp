@@ -210,6 +210,8 @@ bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor
   _laggedLogDensities[1]=_laggedLogDensities[0];
   _laggedLogDensities[0]=log(_density);
   
+  _cumulativeExposureJ += Global::interval * _density;
+  
   // Note: here use a positive test for survival, since if _density became an NaN tests against it will return false:
   if (_density*_overallMultiplier > _extinctionLevel)
     return false;	// Still parasites; infection didn't go extinct

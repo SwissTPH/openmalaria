@@ -92,14 +92,11 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  // NOTE: moving the `++i` from the for (..) statement to the end of it's block
-  // changes the CevCq test results. Can't see why; leave it here anyway.
-  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); ++i) {
+  
+  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end();) {
     if (Simulation::simulationTime >= i->getEndDate()) {
       i=infections.erase(i);
       _MOI--;
-      if (i == infections.end())
-	  break;
       continue;
     }
     
@@ -119,6 +116,8 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
 	_cumulativeh++;
     }
     _cumulativeY += Global::interval*i->getDensity();
+    
+    ++i;
   }
   
   pkpdModel->decayDrugs();

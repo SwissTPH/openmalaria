@@ -37,6 +37,7 @@ void Infection::init () {
 Infection::Infection (istream& in) {
   in >> _startdate;
   in >> _density;
+  in >> _cumulativeExposureJ; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
     int proteomeID;
     in >> proteomeID;
@@ -47,6 +48,7 @@ Infection::Infection (istream& in) {
 void Infection::write (ostream& out) const {
   out << _startdate << endl; 
   out << _density << endl; 
+  out << _cumulativeExposureJ << endl; 
   if (Global::modelVersion & INCLUDES_PK_PD) {
     out << _proteome->getProteomeID() << endl; 
   }
@@ -68,7 +70,10 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
     //TODO: compare this with the asex paper
     dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
+    if (dH > 1.0) {cout << "";}	//FIXME cleanup
+    if (dY > 1.0) {cout << "";}
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
+  if (dA > 1.0) {cout << "";}
   return std::min(dY*dH*dA, 1.0);
 }

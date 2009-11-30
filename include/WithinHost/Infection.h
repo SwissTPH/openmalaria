@@ -33,9 +33,11 @@ public:
   static void init();
   
   Infection (int now) :
+    _proteome(NULL),
     _startdate(now),
-    _density(0.0)
-  {}
+    _density(0.0),
+    _cumulativeExposureJ(0.0)
+    {}
   Infection (istream& in);
   
   virtual void write (ostream& out) const;
@@ -65,7 +67,7 @@ protected:
   double _density;
   
   //! Cumulative parasite density, since start of this infection
-  double _cumulativeExposureJ;	//FIXME: check usage across WHMs is consistent
+  double _cumulativeExposureJ;
   
 private:
   static double alpha_m; //!< Maternal protection at birth

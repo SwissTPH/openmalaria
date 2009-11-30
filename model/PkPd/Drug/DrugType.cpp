@@ -42,7 +42,7 @@ void DrugType::init () {
   DrugType* s;
   //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
   //DrugType::addDrug(s);
-  s = new DrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  s = new DrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen	//FIXME: memory leak
   vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);

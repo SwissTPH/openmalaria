@@ -11,5 +11,6 @@ util/CaseManagementTree/*.class
 util/CaseManagementTree/CaseManagementTree
 .sconsign.dblite
 build
+rel-build
 lib
 test/compareOutputsFloat.pyc
