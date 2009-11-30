@@ -94,7 +94,6 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   timeStepMaxDensity = 0.0;
   // NOTE: moving the `++i` from the for (..) statement to the end of it's block
   // changes the CevCq test results. Can't see why; leave it here anyway.
-  // TODO: increase length of dummy infections or EIR for DummyPKPD and CevCq?
   for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); ++i) {
     if (Simulation::simulationTime >= i->getEndDate()) {
       i=infections.erase(i);

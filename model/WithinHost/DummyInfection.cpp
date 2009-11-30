@@ -40,8 +40,8 @@ DummyInfection::DummyInfection(int simulationTime) :
 {
     //Initialize current infection data
     _startdate=simulationTime;
-    _density=8;	// increased by DH to avoid zeros in initialKappa
-    _duration=infectionDuration(); 
+    _density=16;	// increased by DH to avoid zeros in initialKappa
+    _duration=100;	// arbitrary max duration
     
     if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeInstance::newInfection();
@@ -51,11 +51,6 @@ DummyInfection::DummyInfection(int simulationTime) :
 
 int DummyInfection::getEndDate(){
   return _startdate+_duration/Global::interval;
-}
-
-int DummyInfection::infectionDuration(){
-    //We set some arbitrary maximum duration.
-    return 100;
 }
 
 void DummyInfection::write (ostream& out) const {

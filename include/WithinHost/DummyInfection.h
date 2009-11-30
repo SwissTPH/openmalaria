@@ -31,9 +31,7 @@
   Models related to the within-host dynamics of infections.
 */
 class DummyInfection : public Infection {
- //TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
-  public:
-
+public:
   //! Constructor
   DummyInfection(int simulationTime);
   
@@ -66,28 +64,12 @@ class DummyInfection : public Infection {
   //! Start date of the infection
   int getStartDate() { return _startdate; };
   
-  int getDuration() { return _duration; };
-
   /*
   //! Dummy function. Should override \sa determineDensities.
   */ 
   void determineWithinHostDensity();
-
-  //! Initialises infection duration.
-  /*! 
-    Initialises infection duration sampling from log normal distribution using parameters for 53 patients from Georgia.
-    Mean log duration of an infection values from AJTM p.9 eq.5.
-    \return The duration in simulation intervals.
-  */
-  int infectionDuration();
-
   
-  //! Write an infection to the checkpointing file.
-  /*!
-    \param funit Checkpoint file.
-  */
-  void writeInfectionToFile (fstream& funit);
-
+private:
   //! Arbitrary maximum duration of the infection
   int _duration; 
 };
