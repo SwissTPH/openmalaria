@@ -12,8 +12,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.py ${CMAKE_CURRENT_BINARY_DIR}/r
 set (OM_BOXTEST_NAMES 1 3 4 5 6 11 12 IPT)
 # tests with broken checkpointing:
 # some of this checkpointing was broken in r569
-set (OM_BOXTEST_NC_NAMES 2 9 VecTest VecConstEIR)
-# tests currently broken: CevCq (since r563), DummyPKPD (since what may become r582)
+set (OM_BOXTEST_NC_NAMES 2 9 VecTest VecConstEIR CevCq DummyPKPD)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
