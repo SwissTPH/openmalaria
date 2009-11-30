@@ -92,36 +92,34 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); ) {
+  // NOTE: moving the `++i` from the for (..) statement to the end of it's block
+  // changes the CevCq test results. Can't see why; leave it here anyway.
+  // TODO: increase length of dummy infections or EIR for DummyPKPD and CevCq?
+  for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end(); ++i) {
     if (Simulation::simulationTime >= i->getEndDate()) {
       i=infections.erase(i);
       _MOI--;
+      if (i == infections.end())
+	  break;
       continue;
     }
-    else {
-	double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-	survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
-	survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
-	i->multiplyDensity(survivalFactor);
-      i->determineWithinHostDensity();
-      timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
     
-      totalDensity += i->getDensity();
-      //Compute the proportion of parasites remaining after innate blood stage effect
-      if (i->getDensity() > detectionLimit) {
-        patentInfections++;
-      }
-      if (i->getStartDate() == (Simulation::simulationTime-1)) {
-        _cumulativeh++;
-      }
-      _cumulativeY += Global::interval*i->getDensity();
-	  if (i == infections.end()) {
-        break;
-      }
-      else {
-        i++;
-      }
+    double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
+    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
+    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
+    i->multiplyDensity(survivalFactor);
+    i->determineWithinHostDensity();
+    timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
+    
+    totalDensity += i->getDensity();
+    //Compute the proportion of parasites remaining after innate blood stage effect
+    if (i->getDensity() > detectionLimit) {
+	patentInfections++;
     }
+    if (i->getStartDate() == (Simulation::simulationTime-1)) {
+	_cumulativeh++;
+    }
+    _cumulativeY += Global::interval*i->getDensity();
   }
   
   pkpdModel->decayDrugs();
