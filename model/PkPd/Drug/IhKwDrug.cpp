@@ -30,10 +30,10 @@
 
 using namespace std;
 
-IhKwDrug::IhKwDrug(const DrugType* type) : Drug(type) {
+IhKwDrug::IhKwDrug(const IhKwDrugType* type) : Drug(type) {
 }
 
-IhKwDrug::IhKwDrug (const DrugType* type, istream& in) :
+IhKwDrug::IhKwDrug (const IhKwDrugType* type, istream& in) :
   Drug(type, in)
 {
   int num;

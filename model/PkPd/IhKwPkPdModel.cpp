@@ -38,7 +38,7 @@ IhKwPkPdModel::IhKwPkPdModel (istream& in) {
   for (int i=0; i<numDrugs; i++) {
     string abbrev;
     in >> abbrev;
-    _drugs.push_back (IhKwDrug (DrugType::getDrug(abbrev), in));
+    _drugs.push_back (IhKwDrug ((IhKwDrugType*)DrugType::getDrug(abbrev), in));
   }
 }
 
@@ -61,7 +61,7 @@ void IhKwPkPdModel::medicate(string drugAbbrev, double qty, int time, double age
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (IhKwDrug(DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (IhKwDrug((IhKwDrugType*)DrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

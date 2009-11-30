@@ -45,7 +45,7 @@ public:
   
   
   string getAbbreviation() const { return typeData->abbreviation;}
-  double getAbsorptionFactor() const { return typeData->absorptionFactor;}
+  //double getAbsorptionFactor() const { return typeData->absorptionFactor;}
   //double getHalfLife() const { return typeData->halfLife;}
   
   /** Add amount to the concentration of drug at time the start of the current

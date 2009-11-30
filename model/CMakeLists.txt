@@ -28,7 +28,9 @@ set (Model_CPP
   PkPd/Drug/Drug.cpp
   PkPd/Drug/DrugType.cpp
   PkPd/Drug/HoshenDrug.cpp
+  PkPd/Drug/HoshenDrugType.cpp
   PkPd/Drug/IhKwDrug.cpp
+  PkPd/Drug/IhKwDrugType.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp

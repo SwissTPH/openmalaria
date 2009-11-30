@@ -19,6 +19,7 @@
 */
 
 #include "PkPd/PkPdModel.h"
+#include "PkPd/Drug/HoshenDrugType.h"
 #include "Global.h"
 #include "proteome.h"
 
@@ -35,12 +36,16 @@ const bool Use_IhKw = false;
 void PkPdModel::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
-    DrugType::init();
-    Drug::init ();
-    if (Use_IhKw)
+    if (Use_IhKw) {
+      IhKwDrugType::init();
+      IhKwDrug::init ();
       IhKwPkPdModel::init();
-    else
+    }
+    else {
+      HoshenDrugType::init();
+      HoshenDrug::init ();
       HoshenPkPdModel::init();
+    }
   }
 }
 

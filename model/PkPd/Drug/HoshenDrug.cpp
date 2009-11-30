@@ -30,10 +30,10 @@
 
 using namespace std;
 
-HoshenDrug::HoshenDrug(const DrugType* type) : Drug(type) {
+HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(type) {
 }
 
-HoshenDrug::HoshenDrug (const DrugType* type, istream& in) :
+HoshenDrug::HoshenDrug (const HoshenDrugType* type, istream& in) :
   Drug(type, in) {
 }
 
@@ -45,7 +45,7 @@ void HoshenDrug::write (ostream& out) const {
 
 double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
   //Returning an average of 2 points
-  double param = typeData->proteomePDParameters.find(infProteome->getProteomeID())->second;
+  double param = ((HoshenDrugType*)typeData)->proteomePDParameters.find(infProteome->getProteomeID())->second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
   return exp(-(startFactor + endFactor)/2);
@@ -53,6 +53,6 @@ double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) cons
 
 double HoshenDrug::decayFactor (double time) {
   //k = log(2)/halfLife
-  return exp(-time*log(2.0)/typeData->halfLife);
+  return exp(-time*log(2.0)/((HoshenDrugType*)typeData)->halfLife);
 }
 

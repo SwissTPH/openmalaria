@@ -31,6 +31,7 @@
 #include "Dose.h"
 #include "Global.h"
 #include "proteome.h"
+#include "IhKwDrugType.h"
 
 using namespace std;
 
@@ -41,9 +42,9 @@ using namespace std;
 class IhKwDrug : public Drug {
 public:
   /** Create a new instance. */
-  IhKwDrug (const DrugType*);
+  IhKwDrug (const IhKwDrugType*);
   /** Load an instance from a checkpoint. */
-  IhKwDrug (const DrugType*, istream& in);
+  IhKwDrug (const IhKwDrugType*, istream& in);
   void write (ostream& out) const;
   
   /** Add amount to the concentration of drug, at time delay past the start of
@@ -51,6 +52,8 @@ public:
   void addDose (double amount, int delay);
   
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
+  double getAbsorptionFactor() const { return ((IhKwDrugType*)typeData)->absorptionFactor;}
+
 
 protected:
   /** Calculate multiplier to decay a concentration by a duration of time

@@ -38,7 +38,7 @@ HoshenPkPdModel::HoshenPkPdModel (istream& in) {
   for (int i=0; i<numDrugs; i++) {
     string abbrev;
     in >> abbrev;
-    _drugs.push_back (HoshenDrug (DrugType::getDrug(abbrev), in));
+    _drugs.push_back (HoshenDrug ((HoshenDrugType*)DrugType::getDrug(abbrev), in));
   }
 }
 
@@ -61,7 +61,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double a
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (HoshenDrug(DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (HoshenDrug((HoshenDrugType*)DrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

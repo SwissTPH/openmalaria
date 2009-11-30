@@ -20,7 +20,7 @@
 
 */
 
-#include "PkPd/Drug/DrugType.h"
+#include "PkPd/Drug/HoshenDrugType.h"
 
 #include <assert.h>
 #include <cmath>
@@ -34,39 +34,35 @@ using namespace std;
  * Static variables and functions
  */
 
-map<string,DrugType*> DrugType::available; 
+//map<string,HoshenDrugType*> HoshenDrugType::available; 
 
-
-
-void DrugType::init () {
+void HoshenDrugType::init () {
+  DrugType::init();
+  Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
+  HoshenDrugType* s;
+  //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
+  //DrugType::addDrug(s);
+  s = new HoshenDrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  vector<Mutation*> crt76L;
+  crt76L.push_back(crt76);
+  s->addPDRule(crt76L, 204.0);
+  s->addPDRule(vector<Mutation*>(), 68.0);
+  s->parseProteomeInstances();
+  DrugType::addDrug(s);
 }
-
-
-void DrugType::addDrug(DrugType* drug) {
-  string abbrev = drug->abbreviation;
-  // Check drug doesn't already exist
-    if (available.find (abbrev) != available.end())
-    throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
-  
-  available.insert (pair<string,DrugType*>(abbrev, drug));
-}
-
-const DrugType* DrugType::getDrug(string _abbreviation) {
-  map<string,DrugType*>::const_iterator i = available.find (_abbreviation);
-  if (i == available.end())
-    throw xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
-  
-  return i->second;
-}
-
 
 // -----  Non-static DrugType functions  -----
 
-DrugType::DrugType (string _name, string _abbreviation) {
-  name = _name;
-  abbreviation = _abbreviation;
+HoshenDrugType::HoshenDrugType (string _name, string _abbreviation,
+    double _absorptionFactor, double _halfLife)
+: DrugType(_name, _abbreviation)
+{
+  //name = _name;
+  //abbreviation = _abbreviation;
+  absorptionFactor = _absorptionFactor;
+  halfLife = _halfLife;
 }
-DrugType::~DrugType () {}
+HoshenDrugType::~HoshenDrugType () {}
 
 /* Checkpointing functions, which we shouldn't need now. If they are needed:
 DrugType::DrugType (istream& in) {
@@ -139,4 +135,23 @@ void DrugType::write (ostream& out) const {
 */
 
 
+void HoshenDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
+  requiredMutations.push_back(ruleRequiredMutations);
+  pdParameters.push_back(pdFactor);
+}
+
+void HoshenDrugType::parseProteomeInstances() {
+  vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
+  int numRules = requiredMutations.size();
+  for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {
+    //cerr << " Here goes instance";
+    for(int rule=0; rule<numRules; rule++) {
+      if (it->hasMutations(requiredMutations[rule])) {
+	proteomePDParameters[it->getProteomeID()] = pdParameters[rule];
+	//cerr << " rule: " << rule << "\n";
+	break;
+      }
+    }
+  }
+}
 

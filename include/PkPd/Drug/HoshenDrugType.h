@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_DrugType
-#define Hmod_DrugType
+#ifndef Hmod_HoshenDrugType
+#define Hmod_HoshenDrugType
 
 #include <string>
 #include <deque>
@@ -30,6 +30,7 @@
 #include "Dose.h"
 #include "Global.h"
 #include "proteome.h"
+#include "DrugType.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ using namespace std;
  * No DrugType data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
-class DrugType {
+class HoshenDrugType : public DrugType {
 public:
   ///@brief Static functions
   //@{
@@ -49,15 +50,6 @@ public:
   //TODO: data from XML.
   static void init ();
   
-  //! Adds a new drug type to the list
-  static void addDrug(DrugType* drug);
-
-  /** Find a DrugType by its abbreviation, and create a new Drug from that.
-   *
-   * Throws if the drug isn't found, so you can rely on it returning a valid
-   * drug if it returns (doesn't throw). */
-  static const DrugType* getDrug(string abbreviation);
-  //@}
   
   ///@brief Non static (per instance) functions
   //@{
@@ -65,32 +57,54 @@ public:
    *
    * @param name	Name of the drug
    * @param abbreviation	Abbreviated name (e.g. CQ)
+   * @param absorptionFactor	
+   * @param halfLife	Half life of decay, in minutes
    */
-  DrugType (string name, string abbreviation);
-  ~DrugType ();
+  HoshenDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
+  ~HoshenDrugType ();
   /* Checkpointing functions, which we shouldn't need now. If they are needed:
   /// Load an instance from a checkpoint.
-  DrugType (istream& in);
+  HoshenDrugType (istream& in);
   /// Write instance data to a checkpoint.
   void write (ostream& out) const;
   */
+
+  //! Adds a PD Rule.
+  /*! The order of rule adding is important! The first add should be the
+   *  one with most mutations (typically the most resistant), the last
+   *  one should be the sensitive (ie vector<mutation> = 0).
+   */
+  void addPDRule(vector<Mutation*> requiredMutations, double pdFactor);
 
   //! Parses the proteme instances.
   /*! Creates an association between ProteomeInstance and PD factor.
    *  This is solely for performance purposes.
    */
-  virtual void parseProteomeInstances() {};
+  virtual void parseProteomeInstances();
   //@}
   
-protected:
+private:
   // The list of available drugs. Not checkpointed; should be set up by init().
-  static map<string,DrugType*> available;
+  //static map<string,HoshenDrugType> available;
   
-  //BEGIN Drug-type fields (same for all drugs of same type)
-  //! The drug abbreviated name, used for registry lookups.
-  string abbreviation;
-  //! The drug name.
-  string name; 
+  //! Absorption factor.
+  /*! Absorption = dose * factor / weight
+   */
+  double absorptionFactor;
+  //! Half-life (in minutes)
+  double halfLife;
+  //! Pharma dynamic list of parameters.
+  /*! A ordered list of required mutations.
+   * The parameter value can be found on pdParameters.
+   * The order is important, the first one takes precedence
+   *   (a map cannot impement this).
+   */
+  vector< vector<Mutation*> > requiredMutations;
+  //! PD parameters (check requiredMutations)
+  vector<double> pdParameters;
+  //! Fast data structure to know the PD param per proteome
+  map<int,double> proteomePDParameters;
+  //END
   
   // Allow the Drug class to access private members
   friend class Drug;

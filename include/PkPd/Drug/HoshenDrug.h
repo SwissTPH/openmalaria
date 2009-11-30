@@ -29,7 +29,7 @@
 #include <vector>
 #include "Drug.h"
 #include "Dose.h"
-#include "DrugType.h"
+#include "HoshenDrugType.h"
 #include "Global.h"
 #include "proteome.h"
 
@@ -42,10 +42,12 @@ using namespace std;
 class HoshenDrug : public Drug {
 public:
   /** Create a new instance. */
-  HoshenDrug (const DrugType*);
+  HoshenDrug (const HoshenDrugType*);
   /** Load an instance from a checkpoint. */
-  HoshenDrug (const DrugType*, istream& in);
+  HoshenDrug (const HoshenDrugType*, istream& in);
   void write (ostream& out) const;
+
+  double getAbsorptionFactor() const { return ((HoshenDrugType*)typeData)->absorptionFactor;}
 
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
 
