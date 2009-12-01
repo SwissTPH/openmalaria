@@ -176,8 +176,8 @@ void WithinHostModel::updateImmuneStatus(){
 }
 
 void WithinHostModel::immunityPenalisation() {
-  _cumulativeY=(double)_cumulativeYlag-(immPenalty_22*(_cumulativeY-_cumulativeYlag));
-  if (_cumulativeY <  0) {
+  _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
+  if (_cumulativeY < 0) {
     _cumulativeY=0.0;
   }
 }

@@ -169,8 +169,12 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
   if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
     _doomed = -Global::interval; // start indirect mortality countdown
 
-  //TODO: Also call immunityPenalisation() like previous model?
-
+  if (pgState & Pathogenesis::MALARIA) {
+      if (Global::modelVersion & PENALISATION_EPISODES) {
+	  withinHostModel.immunityPenalisation();
+      }
+  }
+  
   if (pgState & Pathogenesis::COMPLICATED) {
     //TODO: Also set Pathogenesis::EVENT_IN_HOSPITAL where relevant:
     //reportState = Pathogenesis::State (reportState | Pathogenesis::EVENT_IN_HOSPITAL);
