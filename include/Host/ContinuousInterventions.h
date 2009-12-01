@@ -21,24 +21,47 @@
 #ifndef Hmod_ContinuousInterventions
 #define Hmod_ContinuousInterventions
 
+#include "Global.h"
+#include <limits>
+#include <map>
+
 class InterventionsPerAge {
     public:
 	InterventionsPerAge (int timeStep) :
-	    ageTimeSteps(timeStep)
+	    ageTimeSteps(timeStep),
+	    covVaccine(numeric_limits<double>::quiet_NaN()),
+	    covITN(numeric_limits<double>::quiet_NaN()),
+	    covIPTI(numeric_limits<double>::quiet_NaN())
 	{}
 	
 	inline int getAgeTimeSteps () {
 	    return ageTimeSteps;
 	}
 	
+        void addVaccine(double cov) {
+	    covVaccine = cov;
+	}
+	void addITN(double cov) {
+	    covITN = cov;
+	}
+	void addIPTI(double cov) {
+	    covIPTI = cov;
+	}
+	
     private:
+	InterventionsPerAge () {}	// ctor only for use by map; an assignment takes place after creation
+	friend InterventionsPerAge& std::map<int,InterventionsPerAge>::operator[](const int&);
+	
 	int ageTimeSteps;
+	double covVaccine;
+	double covITN;
+	double covIPTI;
 };
 
-class ContinousInterventions {
+class ContinuousInterventions {
     public:
-	ContinousInterventions () :
-	    next(-1)
+	ContinuousInterventions () :
+	    next(0)
 	{}
 	
 	void deploy (int ageTS);
@@ -46,7 +69,7 @@ class ContinousInterventions {
 	static void initParameters ();
 	
     private:
-	int next;	// index
+	size_t next;	// index
 	
 	static vector<InterventionsPerAge> intervs;
 };

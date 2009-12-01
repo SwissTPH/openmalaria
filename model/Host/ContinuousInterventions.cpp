@@ -24,15 +24,49 @@
 vector<InterventionsPerAge> ContinuousInterventions::intervs;
 
 
-InterventionsPerAge::
+//InterventionsPerAge::
 
-ContinuousInterventions:deploy (int ageTS) {
-    if (next >= 0 && intervs[next].getAgeTimeSteps() == ageTS) {
-	...
+void ContinuousInterventions::deploy (int ageTS) {
+    if (next < intervs.size() && intervs[next].getAgeTimeSteps() == ageTS) {
+	
+	//...
+	
+	++next;
     }
 }
 
 
-static void ContinuousInterventions::initParameters () {
-    scnXml::Inte
+void ContinuousInterventions::initParameters () {
+    const scnXml::Interventions::ContinuousOptional& ctsXml = getInterventions().getContinuous();
+    if (!ctsXml.present()) return;
+    
+    map<int,InterventionsPerAge> parsedIntervs;
+    
+    const scnXml::Continuous::VaccineSequence& vseq = ctsXml.get().getVaccine();
+    for (scnXml::Continuous::VaccineConstIterator itv = vseq.begin(); itv != vseq.end(); ++itv) {
+	int ageTS = (int) floor (itv->getTargetAgeYrs() * daysInYear / (double) Global::interval);
+	if (parsedIntervs.count(ageTS) == 0)
+	    parsedIntervs[ageTS] = InterventionsPerAge(ageTS);
+	parsedIntervs[ageTS].addVaccine (itv->getCoverage());
+    }
+    
+    const scnXml::Continuous::ITNSequence& iseq = ctsXml.get().getITN();
+    for (scnXml::Continuous::ITNConstIterator itv = iseq.begin(); itv != iseq.end(); ++itv) {
+	int ageTS = (int) floor (itv->getTargetAgeYrs() * daysInYear / (double) Global::interval);
+	if (parsedIntervs.count(ageTS) == 0)
+	    parsedIntervs[ageTS] = InterventionsPerAge(ageTS);
+	parsedIntervs[ageTS].addITN (itv->getCoverage());
+    }
+    
+    const scnXml::Continuous::IptiSequence& ipseq = ctsXml.get().getVaccine();
+    for (scnXml::Continuous::IptiConstIterator itv = ipseq.begin(); itv != ipseq.end(); ++itv) {
+	int ageTS = (int) floor (itv->getTargetAgeYrs() * daysInYear / (double) Global::interval);
+	if (parsedIntervs.count(ageTS) == 0)
+	    parsedIntervs[ageTS] = InterventionsPerAge(ageTS);
+	parsedIntervs[ageTS].addIPTI (itv->getCoverage());
+    }
+    
+    intervs.reserve(parsedIntervs.size());
+    for (map<int,InterventionsPerAge>::const_iterator it = parsedIntervs.begin(); it != parsedIntervs.end(); ++it)
+	intervs.push_back (it->second);
 }

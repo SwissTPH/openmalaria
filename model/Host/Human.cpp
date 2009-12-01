@@ -23,6 +23,7 @@
 
 #include "Host/intervention.h"
 #include "Host/InfectionIncidenceModel.h"
+#include "Host/ContinuousInterventions.h"
 #include "Clinical/ClinicalModel.h"
 #include "WithinHost/DescriptiveIPT.h"	// only for summarizing
 
@@ -54,6 +55,7 @@ void Human::initHumanParameters () {	// static
   InfectionIncidenceModel::init();
   WithinHostModel::init();
   ClinicalModel::init();
+  ContinuousInterventions::initParameters();
   Vaccine::initParameters();
   _ylagLen = Global::intervalsPer5Days * 4;
 }
