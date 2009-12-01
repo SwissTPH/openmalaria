@@ -73,7 +73,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     perHostTransmission(),
     infIncidence(InfectionIncidenceModel::createModel()),
     withinHostModel(WithinHostModel::createWithinHostModel()),
-    _dateOfBirth(dateOfBirth), _ID(ID),
+    _dateOfBirth(dateOfBirth), /*_ID(ID),*/
     _lastVaccineDose(0),
     _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
     _probTransmissionToMosquito(0.0)
@@ -152,7 +152,7 @@ Human::Human(istream& in, TransmissionModel& tm) :
     clinicalModel(ClinicalModel::createClinicalModel(in))
 {
   in >> _dateOfBirth; 
-  in >> _ID; 
+  //in >> _ID; 
   in >> _lastVaccineDose; 
   in >> _BSVEfficacy; 
   in >> _PEVEfficacy; 
@@ -176,7 +176,7 @@ void Human::write (ostream& out) const{
   withinHostModel->write (out);
   clinicalModel->write (out);
   out << _dateOfBirth << endl; 
-  out << _ID << endl ; 
+  //out << _ID << endl ; 
   out << _lastVaccineDose << endl;
   out << _BSVEfficacy << endl; 
   out << _PEVEfficacy << endl; 
@@ -194,6 +194,9 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   int ageTimeSteps = simulationTime-_dateOfBirth;
   if (clinicalModel->isDead(ageTimeSteps))
     return true;
+  
+  // Comments here refer to which WHM functions get called, and which parameters
+  // read/set, by the next call. Temporary for some WHM refactoring (TODO).
   
   //withinHostModel->IPTSetLastSPDose	in(iptiEffect) out(_lastIptiOrPlacebo,_lastSPDose,reportIPTDose)
   updateInterventionStatus();
@@ -246,10 +249,11 @@ void Human::updateInterventionStatus() {
       TODO: The tstep conditional is appropriate if we assume there is no intervention during warmup
       It won't work if we introduce interventions into a scenario with a pre-existing intervention.
     */
+    //_ctsIntervs.deploy(ageTimeSteps);
     if (Simulation::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
-	if (gsl::rngUniform() <  Vaccine::vaccineCoverage[_lastVaccineDose] &&
-	    Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps) {
+	  if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps &&
+	      gsl::rngUniform() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
           vaccinate();
           Surveys.current->reportEPIVaccinations (ageGroup(), 1);
         }

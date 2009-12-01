@@ -58,6 +58,10 @@ class InterventionsPerAge {
 	double covIPTI;
 };
 
+/** A continuous intervention scheduler.
+ *
+ * Groups all continuously deployed interventions together, deploying each when the
+ * host reaches the target age. */
 class ContinuousInterventions {
     public:
 	ContinuousInterventions () :
