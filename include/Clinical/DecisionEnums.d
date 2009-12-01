@@ -60,7 +60,8 @@ enum DecisionEnums {
     /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
      * Many are designed to be "flags", so the value corresponds to a single bit:
      * http://en.wikipedia.org/wiki/Flag_byte
-     * (note & | ^ are C++'s binary AND, OR and XOR operators). */
+     * (note & | ^ are C++'s binary AND, OR and XOR operators).
+     * Maximum value I'd recommend using as a flag: 0x4000_0000 */
     NONE		= 0x0,
     
     TEST_NONE		= 0x0,
@@ -79,16 +80,23 @@ enum DecisionEnums {
     DRUG_NO_AM		= 0x000,	///< no anti-malarial drug
     DRUG_SP		= 0x100,
     DRUG_AL		= 0x200,
-    DRUG_QN		= 0x300,	///< value can be changed, but (value-1) won't match desicionID in VC's case management tree
+    DRUG_QN		= 0x300,	///< Quinine; value can be changed, but (value-1) won't match desicionID in VC's case management tree
+    DRUG_AS		= 0x400,	///< Artesunate
     DRUG_MASK		= 0xF00,
     
-    QUALITY_BAD		= 0x0000,
-    QUALITY_GOOD	= 0x1000,
-    QUALITY_MASK	= 0x1000,
+    ADHERENCE_FULL	= 0x0000,
+    ADHERENCE_MISSED_FIRST	= 0x1000,	///< 1st or 2nd dose missed
+    ADHERENCE_MISSED_LAST	= 0x2000,
+    ADHERENCE_SELECTIVE	= 0x3000,	///< TODO: define exactly what this means
+    ADHERENCE_MASK	= 0x3000,
     
-    ADHERENCE_BAD	= 0x0000,
-    ADHERENCE_GOOD	= 0x2000,
-    ADHERENCE_MASK	= 0x2000,
+    QUALITY_BAD		= 0x0000,
+    QUALITY_GOOD	= 0x4000,
+    QUALITY_MASK	= 0x4000,
+    
+    MANAGEMENT_BAD	= 0x0000,
+    MANAGEMENT_GOOD	= 0x8000,
+    MANAGEMENT_MASK	= 0x8000,
     
     //TODO: completely rename (w/wo pre-ref, w/wo hospital, hospital delay (0,1 or 2?)
     TREATMENT_NO_AM	= 0x0,

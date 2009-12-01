@@ -33,7 +33,7 @@ using namespace std;
  */
 
 void initProteomeModule() {
-  Protein* crt = new Protein(string("CRT"));
+  Protein* crt = new Protein(string("CRT"));	//FIXME: memory leak
   ProteinPosition* pos = new ProteinPosition(crt, 76, 'K');
   Mutation* mutation = new Mutation(pos, 'T');
   ProteomeManager::addProtein(crt);
