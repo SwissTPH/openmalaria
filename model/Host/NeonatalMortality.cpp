@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "NeonatalMortality.h"
-#include "Human.h"
+#include "Host/NeonatalMortality.h"
+#include "Host/Human.h"
 #include "util/gsl.h"
 
 double NeonatalMortality::_riskFromMaternalInfection = 0.0;

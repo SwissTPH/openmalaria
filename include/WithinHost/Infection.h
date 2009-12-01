@@ -22,7 +22,7 @@
 #define Hmod_Infection
 
 #include "Global.h"
-#include "proteome.h"
+#include "Host/proteome.h"
 
 
 class Infection {

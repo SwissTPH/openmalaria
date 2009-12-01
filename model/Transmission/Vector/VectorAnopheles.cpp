@@ -20,8 +20,9 @@
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "Transmission/Vector/Nv0DelayFitting.h"
 #include "Transmission/PerHostTransmission.h"
+#include "Host/Human.h"
+
 #include "inputData.h"
-#include "Human.h"
 #include "Simulation.h"
 #include "util/vectors.h"
 

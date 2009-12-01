@@ -21,10 +21,9 @@
 
 #ifndef Hmod_DummyInfection
 #define Hmod_DummyInfection
-#include <fcntl.h>
-#include "intervention.h"
 #include "WithinHost/Infection.h"
 #include <fstream>
+#include <fcntl.h>
 
 //!  Models of infection.
 /*!

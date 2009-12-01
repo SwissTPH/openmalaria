@@ -22,10 +22,11 @@
 
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
-#include "NeonatalMortality.h"
+#include "Host/NeonatalMortality.h"
+
 #include "Simulation.h"
 #include "inputData.h"
-#include <Surveys.h>
+#include "Surveys.h"
 
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;

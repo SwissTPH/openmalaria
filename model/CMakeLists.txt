@@ -4,12 +4,20 @@
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  population.cpp InfectionIncidenceModel.cpp
-  gzstream.C Simulation.cpp Surveys.cpp Survey.cpp Global.cpp
-  intervention.cpp proteome.cpp Human.cpp
-  inputData.cpp NeonatalMortality.cpp
-  
+  Simulation.cpp
+  Global.cpp
+  population.cpp
+  inputData.cpp
+  Surveys.cpp
+  Survey.cpp
+  gzstream.C
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
+  
+  Host/Human.cpp
+  Host/InfectionIncidenceModel.cpp
+  Host/NeonatalMortality.cpp
+  Host/intervention.cpp
+  Host/proteome.cpp
   
   Clinical/ClinicalModel.cpp
   Clinical/EventScheduler.cpp

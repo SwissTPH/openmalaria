@@ -30,7 +30,7 @@
 #include "Drug.h"
 #include "Dose.h"
 #include "Global.h"
-#include "proteome.h"
+#include "Host/proteome.h"
 #include "IhKwDrugType.h"
 
 using namespace std;

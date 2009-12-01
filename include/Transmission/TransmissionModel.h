@@ -22,10 +22,10 @@
 #define Hmod_TransmissionModel 
 
 #include "Global.h"
-#include <string.h>
-#include "Human.h"
+#include "Host/Human.h"
 #include "scenario.hxx"
 #include <fstream>
+#include <string.h>
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintSmoothArray

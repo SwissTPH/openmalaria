@@ -19,22 +19,23 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
-#include "Human.h"
+#include "Host/Human.h"
+
+#include "Host/intervention.h"
+#include "Host/InfectionIncidenceModel.h"
+#include "Clinical/ClinicalModel.h"
+#include "WithinHost/DescriptiveIPT.h"	// only for summarizing
+
+#include "inputData.h"
+#include "util/gsl.h"
+#include "Transmission/TransmissionModel.h"
+#include "Surveys.h"
 
 #include <string>
 #include <string.h>
 #include <math.h>
 #include <algorithm>
 #include <stdexcept>
-
-#include "inputData.h"
-#include "util/gsl.h"
-#include "intervention.h"
-#include "Transmission/TransmissionModel.h"
-#include "InfectionIncidenceModel.h"
-#include "Clinical/ClinicalModel.h"
-#include "WithinHost/DescriptiveIPT.h"	// only for summarizing
-#include "Surveys.h"
 
 
 /*

@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Survey.h"
 #include "inputData.h"
-#include "intervention.h"
 
 class PerHostTransmission;
 

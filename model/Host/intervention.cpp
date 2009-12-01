@@ -20,7 +20,7 @@
 
 */
 
-#include "intervention.h"
+#include "Host/intervention.h"
 #include "inputData.h"
 #include "util/gsl.h"
 

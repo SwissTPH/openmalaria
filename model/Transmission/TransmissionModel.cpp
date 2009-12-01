@@ -23,13 +23,14 @@
 #define _USE_MATH_DEFINES
 
 #include "Transmission/TransmissionModel.h"
-#include "intervention.h" 
-#include "inputData.h"
 #include "Transmission/NonVector.h"
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/PerHostTransmission.h"
+
+#include "inputData.h"
 #include "Simulation.h"
 #include "util/BoincWrapper.h"
+
 #include <math.h> 
 #include <cfloat>
 #include <gsl/gsl_vector.h> 

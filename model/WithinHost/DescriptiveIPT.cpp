@@ -22,7 +22,6 @@
 #include "WithinHost/DescriptiveIPTInfection.h"
 #include "Simulation.h"
 #include "util/gsl.h"
-#include "intervention.h"
 #include "inputData.h"
 #include "Surveys.h"
 

@@ -20,11 +20,11 @@
 
 */
 
+#include "Host/proteome.h"
+#include "util/gsl.h"
+
 #include <string>
 #include <vector>
-
-#include "proteome.h"
-#include "util/gsl.h"
 
 using namespace std;
 

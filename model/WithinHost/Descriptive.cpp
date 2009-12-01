@@ -21,7 +21,6 @@
 */
 
 #include "WithinHost/Descriptive.h"
-#include "intervention.h"
 
 using namespace std;
 

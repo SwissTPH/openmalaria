@@ -22,7 +22,7 @@
 #define Hmod_Dose
 
 #include "Global.h"
-#include "proteome.h"
+#include "Host/proteome.h"
 
 using namespace std;
 

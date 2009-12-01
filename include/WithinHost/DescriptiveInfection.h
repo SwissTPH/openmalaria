@@ -21,11 +21,10 @@
 
 #ifndef Hmod_DescriptiveInfection
 #define Hmod_DescriptiveInfection
-#include <fcntl.h>
-#include "intervention.h"
 #include "WithinHost/Infection.h"
 #include "Simulation.h"
 #include <fstream>
+#include <fcntl.h>
 
 
 //Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?

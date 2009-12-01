@@ -21,7 +21,7 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/HoshenDrugType.h"
 #include "Global.h"
-#include "proteome.h"
+#include "Host/proteome.h"
 
 // submodels:
 #include "PkPd/HoshenPkPdModel.h"

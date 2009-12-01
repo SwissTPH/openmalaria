@@ -19,19 +19,21 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
+#include "Simulation.h"
 #include "population.h"
 #include "util/gsl.h"
 #include "inputData.h"
-#include "Human.h"
-#include "Simulation.h"
-#include "intervention.h"
-#include "Transmission/TransmissionModel.h"
-#include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention
-#include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
 #include "Surveys.h"
+
+#include "Transmission/TransmissionModel.h"
+#include "Transmission/NonVector.h"	// changeEIR intervention deals directly with this model
+
+#include "Host/Human.h"
+#include "Host/NeonatalMortality.h"
+#include "Clinical/ImmediateOutcomes.h"		// for changeHS intervention
 #include "Pathogenesis/PathogenesisModel.h"
-#include "NeonatalMortality.h"
 #include "PkPd/PkPdModel.h"
+
 #include <math.h>
 
 using namespace std;

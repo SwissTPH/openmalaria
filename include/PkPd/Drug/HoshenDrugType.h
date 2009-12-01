@@ -29,7 +29,7 @@
 #include <vector>
 #include "Dose.h"
 #include "Global.h"
-#include "proteome.h"
+#include "Host/proteome.h"
 #include "DrugType.h"
 
 using namespace std;
