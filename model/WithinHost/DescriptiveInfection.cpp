@@ -20,6 +20,7 @@
 */
 
 #include "WithinHost/DescriptiveInfection.h"
+#include "Host/intervention.h"
 #include "inputData.h"
 #include "util/gsl.h"
 #include <algorithm>
