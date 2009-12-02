@@ -16,7 +16,6 @@ set (Model_CPP
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
-  Host/ContinuousInterventions.cpp
   Host/intervention.cpp
   Host/proteome.cpp
   

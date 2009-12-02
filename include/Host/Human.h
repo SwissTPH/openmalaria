@@ -19,7 +19,6 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
-#include "Host/ContinuousInterventions.h"
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
@@ -179,7 +178,8 @@ private:
   // !unique identifier
   //int _ID;
   
-  ContinuousInterventions _ctsIntervs;
+  /// Counter for the next continuous intervention to roll out (excl. vaccine and IPTI)
+  size_t _nextCtsInterv;
   
   /** Number of vaccine doses this individual has received.
    *
