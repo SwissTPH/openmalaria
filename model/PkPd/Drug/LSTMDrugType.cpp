@@ -20,7 +20,7 @@
 
 */
 
-#include "PkPd/Drug/IhKwDrugType.h"
+#include "PkPd/Drug/LSTMDrugType.h"
 
 #include <assert.h>
 #include <cmath>
@@ -34,13 +34,13 @@ using namespace std;
  * Static variables and functions
  */
 
-void IhKwDrugType::init () {
+void LSTMDrugType::init () {
   DrugType::init();
   Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
-  IhKwDrugType* s;
+  LSTMDrugType* s;
   //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
   //DrugType::addDrug(s);
-  s = new IhKwDrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  s = new LSTMDrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
   vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
@@ -51,7 +51,7 @@ void IhKwDrugType::init () {
 
 // -----  Non-static DrugType functions  -----
 
-IhKwDrugType::IhKwDrugType (string _name, string _abbreviation,
+LSTMDrugType::LSTMDrugType (string _name, string _abbreviation,
     double _absorptionFactor, double _halfLife)
 : DrugType(_name, _abbreviation)
 {
@@ -60,7 +60,7 @@ IhKwDrugType::IhKwDrugType (string _name, string _abbreviation,
   absorptionFactor = _absorptionFactor;
   halfLife = _halfLife;
 }
-IhKwDrugType::~IhKwDrugType () {}
+LSTMDrugType::~LSTMDrugType () {}
 
 /* Checkpointing functions, which we shouldn't need now. If they are needed:
 DrugType::DrugType (istream& in) {
@@ -133,12 +133,12 @@ void DrugType::write (ostream& out) const {
 */
 
 
-void IhKwDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
+void LSTMDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
   requiredMutations.push_back(ruleRequiredMutations);
   pdParameters.push_back(pdFactor);
 }
 
-void IhKwDrugType::parseProteomeInstances() {
+void LSTMDrugType::parseProteomeInstances() {
   vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
   int numRules = requiredMutations.size();
   for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {

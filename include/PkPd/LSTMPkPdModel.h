@@ -18,11 +18,11 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_IhKwPkPdModel
-#define Hmod_IhKwPkPdModel
+#ifndef Hmod_LSTMPkPdModel
+#define Hmod_LSTMPkPdModel
 
 #include "PkPd/PkPdModel.h"
-#include "PkPd/Drug/IhKwDrug.h"
+#include "PkPd/Drug/LSTMDrug.h"
 
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
  * within-host model.
@@ -31,16 +31,16 @@
  * be (rename if you're more inspired).
  * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
-class IhKwPkPdModel : public PkPdModel {
+class LSTMPkPdModel : public PkPdModel {
 public:
   ///@brief Static functions
   //@{
   static void init ();
   //@}
   
-  IhKwPkPdModel ();
-  IhKwPkPdModel (istream& in);
-  virtual ~IhKwPkPdModel ();
+  LSTMPkPdModel ();
+  LSTMPkPdModel (istream& in);
+  virtual ~LSTMPkPdModel ();
   virtual void write (ostream& out) const;
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
@@ -48,7 +48,7 @@ public:
   double getDrugFactor (const ProteomeInstance* infProteome);
   
 private:
-  list<IhKwDrug> _drugs;
+  list<LSTMDrug> _drugs;
 };
 
 #endif

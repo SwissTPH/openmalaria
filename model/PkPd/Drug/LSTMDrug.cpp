@@ -20,7 +20,7 @@
 
 */
 
-#include "PkPd/Drug/IhKwDrug.h"
+#include "PkPd/Drug/LSTMDrug.h"
 
 #include <assert.h>
 #include <cmath>
@@ -30,10 +30,10 @@
 
 using namespace std;
 
-IhKwDrug::IhKwDrug(const IhKwDrugType* type) : Drug(type) {
+LSTMDrug::LSTMDrug(const LSTMDrugType* type) : Drug(type) {
 }
 
-IhKwDrug::IhKwDrug (const IhKwDrugType* type, istream& in) :
+LSTMDrug::LSTMDrug (const LSTMDrugType* type, istream& in) :
   Drug(type, in)
 {
   int num;
@@ -43,7 +43,7 @@ IhKwDrug::IhKwDrug (const IhKwDrugType* type, istream& in) :
     doses.push_back (Dose (in));
 }
 
-void IhKwDrug::write (ostream& out) const {
+void LSTMDrug::write (ostream& out) const {
     Drug::write(out);
     
     out << doses.size() << endl;
@@ -52,7 +52,7 @@ void IhKwDrug::write (ostream& out) const {
 }
 
 
-void IhKwDrug::addDose (double concentration, int delay) {
+void LSTMDrug::addDose (double concentration, int delay) {
     //NOTE: old code; I'm sure it's not correct for the new model
     
     // Only adding doses for this timestep is supported
@@ -62,12 +62,12 @@ void IhKwDrug::addDose (double concentration, int delay) {
 }
 
 
-double IhKwDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
+double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
     //TBD
     return 0.0;	// TODO (best always return _something_, even if nonsense)
 }
 
-double IhKwDrug::decayFactor (double time) {
+double LSTMDrug::decayFactor (double time) {
     //TBD
     return 0.0;	// TODO (best always return _something_, even if nonsense)
 }

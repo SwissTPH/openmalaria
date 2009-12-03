@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_IhKwDrugType
-#define Hmod_IhKwDrugType
+#ifndef Hmod_LSTMDrugType
+#define Hmod_LSTMDrugType
 
 #include <string>
 #include <deque>
@@ -42,7 +42,7 @@ using namespace std;
  * No DrugType data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
-class IhKwDrugType : public DrugType {
+class LSTMDrugType : public DrugType {
 public:
   ///@brief Static functions
   //@{
@@ -60,11 +60,11 @@ public:
    * @param absorptionFactor	
    * @param halfLife	Half life of decay, in minutes
    */
-  IhKwDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
-  ~IhKwDrugType ();
+  LSTMDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
+  ~LSTMDrugType ();
   /* Checkpointing functions, which we shouldn't need now. If they are needed:
   /// Load an instance from a checkpoint.
-  IhKwDrugType (istream& in);
+  LSTMDrugType (istream& in);
   /// Write instance data to a checkpoint.
   void write (ostream& out) const;
   */
@@ -85,7 +85,7 @@ public:
   
 private:
   // The list of available drugs. Not checkpointed; should be set up by init().
-  //static map<string,IhKwDrugType> available;
+  //static map<string,LSTMDrugType> available;
   
   //! Absorption factor.
   /*! Absorption = dose * factor / weight
@@ -108,7 +108,7 @@ private:
   
   // Allow the Drug class to access private members
   friend class Drug;
-  friend class IhKwDrug;
+  friend class LSTMDrug;
 };
 
 #endif

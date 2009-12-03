@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_IhKwDrug
-#define Hmod_IhKwDrug
+#ifndef Hmod_LSTMDrug
+#define Hmod_LSTMDrug
 
 #include <string>
 #include <deque>
@@ -31,7 +31,7 @@
 #include "Dose.h"
 #include "Global.h"
 #include "Host/proteome.h"
-#include "IhKwDrugType.h"
+#include "LSTMDrugType.h"
 
 using namespace std;
 
@@ -39,12 +39,12 @@ using namespace std;
 /** A class holding pkpd drug use info.
  *
  * Each human has an instance for each type of drug present in their blood. */
-class IhKwDrug : public Drug {
+class LSTMDrug : public Drug {
 public:
   /** Create a new instance. */
-  IhKwDrug (const IhKwDrugType*);
+  LSTMDrug (const LSTMDrugType*);
   /** Load an instance from a checkpoint. */
-  IhKwDrug (const IhKwDrugType*, istream& in);
+  LSTMDrug (const LSTMDrugType*, istream& in);
   void write (ostream& out) const;
   
   /** Add amount to the concentration of drug, at time delay past the start of
@@ -52,7 +52,7 @@ public:
   void addDose (double amount, int delay);
   
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-  double getAbsorptionFactor() const { return ((IhKwDrugType*)typeData)->absorptionFactor;}
+  double getAbsorptionFactor() const { return ((LSTMDrugType*)typeData)->absorptionFactor;}
 
 
 protected:

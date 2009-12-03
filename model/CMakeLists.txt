@@ -32,13 +32,13 @@ set (Model_CPP
   
   PkPd/PkPdModel.cpp
   PkPd/HoshenPkPdModel.cpp
-  PkPd/IhKwPkPdModel.cpp
+  PkPd/LSTMPkPdModel.cpp
   PkPd/Drug/Drug.cpp
   PkPd/Drug/DrugType.cpp
   PkPd/Drug/HoshenDrug.cpp
   PkPd/Drug/HoshenDrugType.cpp
-  PkPd/Drug/IhKwDrug.cpp
-  PkPd/Drug/IhKwDrugType.cpp
+  PkPd/Drug/LSTMDrug.cpp
+  PkPd/Drug/LSTMDrugType.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp

@@ -25,21 +25,21 @@
 
 // submodels:
 #include "PkPd/HoshenPkPdModel.h"
-#include "PkPd/IhKwPkPdModel.h"
+#include "PkPd/LSTMPkPdModel.h"
 
 
-// Temporary switch to use the IhKw model − this may eventually be determined by XML data or XML model version.
-const bool Use_IhKw = false;
+// Temporary switch to use the LSTM model − this may eventually be determined by XML data or XML model version.
+const bool Use_LSTM = false;
 
 // -----  static functions  -----
 
 void PkPdModel::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
     initProteomeModule();
-    if (Use_IhKw) {
-      IhKwDrugType::init();
-      IhKwDrug::init ();
-      IhKwPkPdModel::init();
+    if (Use_LSTM) {
+      LSTMDrugType::init();
+      LSTMDrug::init ();
+      LSTMPkPdModel::init();
     }
     else {
       HoshenDrugType::init();
@@ -62,8 +62,8 @@ void PkPdModel::writeStatic (ostream& out) {
 
 PkPdModel* PkPdModel::createPkPdModel () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    if (Use_IhKw)
-      return new IhKwPkPdModel ();
+    if (Use_LSTM)
+      return new LSTMPkPdModel ();
     else
       return new HoshenPkPdModel ();
   }
@@ -72,8 +72,8 @@ PkPdModel* PkPdModel::createPkPdModel () {
 
 PkPdModel* PkPdModel::createPkPdModel (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    if (Use_IhKw)
-      return new IhKwPkPdModel (in);
+    if (Use_LSTM)
+      return new LSTMPkPdModel (in);
     else
       return new HoshenPkPdModel (in);
   }
