@@ -33,6 +33,39 @@
 class Summary;
 class PerHostTransmission;
 
+
+/** There are 3 simulation modes. */
+enum SimulationMode {
+  /** Equilibrium mode
+   * 
+   * This is used for the warm-up period and if we want to separate direct
+   * effect of an intervention from indirect effects via transmission
+   * intensity. The seasonal pattern and intensity of the EIR do not change
+   * over years.
+   * 
+   * For the vector model, this runs most calculations dynamically but still
+   * forces the EIR. */
+  equilibriumMode = 2,
+  
+  /** Transient EIR known
+   * 
+   * This is used to simulate an intervention that changes EIR, and where we
+   * have measurements of the EIR over time during the intervention period. */
+  transientEIRknown = 3,
+  
+  /** EIR changes
+   * 
+   * The simulation is driven by the EIR which changes dynamically during the
+   * intervention phase as a function of the characteristics of the
+   * interventions.
+   * 
+   * Dependending on whether the Vector or NonVector model is in use, this EIR
+   * may be calculated from a mosquito emergence rate or be an input EIR
+   * scaled by the relative infectiousness of the humans. */
+  dynamicEIR = 4,
+};
+
+
 //! Abstract base class, defines behaviour of transmission models
 class TransmissionModel {
 public:

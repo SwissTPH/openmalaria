@@ -25,6 +25,7 @@
 
 #include "Global.h"
 #include "Survey.h"
+#include "Pathogenesis/State.h"
 
 class WithinHostModel;
 

@@ -22,6 +22,7 @@
 #define Hmod_Episode
 
 #include "Global.h"
+#include "Pathogenesis/State.h"
 #include "Survey.h"	//SurveyAgeGroup
 #include <ostream>
 

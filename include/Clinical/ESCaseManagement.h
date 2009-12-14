@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Clinical/ESDecision.h"
+#include "Pathogenesis/State.h"
 #include "Survey.h"
 #include "inputData.h"
 

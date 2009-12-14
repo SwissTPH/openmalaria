@@ -32,6 +32,8 @@ enum ModelVersion {
    * clinical episode, so that clinical episodes have a negative effect on
    * blood stage immunity.
    * 
+   * (ImmediateOutcomes model: per event; EventScheduler: once per event.)
+   * 
    * Default: Clinical events have no effect on immune status except
    * secondarily via effects of treatment. */
   PENALISATION_EPISODES = 1 << 1,
@@ -146,46 +148,6 @@ enum ModelVersion {
   NUM_VERSIONS = 23,
 };
 
-/// Namespace enclosing pathogenesis output enumeration.
-namespace Pathogenesis {
-  /** Types of sickness; used by case management.
-   *
-   * Most values are flags which can be combined in any form. A few
-   * combinations set follow. */
-  enum State {
-    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
-     * Many are designed to be "flags", so the value corresponds to a single bit:
-     * http://en.wikipedia.org/wiki/Flag_byte
-     * Max: 0x4000
-     * (note & | ^ are C++'s binary AND, OR and XOR operators). */
-    NONE		= 0,		///< Not sick
-    
-    // Flags for current state/worst state to report:
-    SICK		= 0x1,		///< Sick (may or may not be from malaria)
-    MALARIA		= 0x2,		///< Malaria sickness
-    SEVERE		= 0x8,		///< Severe malaria case
-    COINFECTION		= 0x4,		///< Malaria with a coinfection
-    /// Used by ClinicalEventScheduler to indicate a second bout of malarial sickness within the same episode (roughly)
-    SECOND_CASE		= 0x10,
-    COMPLICATED		= 0x20,		///< Flag used to indicate SEVERE and/or COINFECTION
-    
-    MORBIDITY_MASK	= 0x3F,		///< Mask coving all above states
-    
-    // Flag used by pathogenesis model to tell the clinical model that individual will die; not used for reporting:
-    INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
-    
-    // Flags for outcome reporting:
-    EVENT_IN_HOSPITAL	= 0x400,	///< Indicates recovery/sequelae/death event occurred in hospital − only set on one of these events (ImmediateOutcomes only)
-    DIRECT_DEATH	= 0x1000,	///< Used for reporting death (from COMPLICATED sickness)
-    SEQUELAE		= 0x2000,	///< Reporting recovered with sequelae (from COMPLICATED sickness)
-    RECOVERY		= 0x4000,	///< Report that individual fully recovered
-    
-    STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
-    STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
-    STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
-  };
-}
-
 namespace Params {
   enum Params {
     /// @b Used in NoVectorControl
@@ -250,37 +212,6 @@ const int TIMESTEP_NEVER = -0x3FFFFFFF;
 
 /// Days in a year. Should be a multiple of interval.
 const int daysInYear= 365;
-
-/** There are 3 simulation modes. */
-enum SimulationMode {
-  /** Equilibrium mode
-   * 
-   * This is used for the warm-up period and if we want to separate direct
-   * effect of an intervention from indirect effects via transmission
-   * intensity. The seasonal pattern and intensity of the EIR do not change
-   * over years.
-   * 
-   * For the vector model, this runs most calculations dynamically but still
-   * forces the EIR. */
-  equilibriumMode = 2,
-  
-  /** Transient EIR known
-   * 
-   * This is used to simulate an intervention that changes EIR, and where we
-   * have measurements of the EIR over time during the intervention period. */
-  transientEIRknown = 3,
-  
-  /** EIR changes
-   * 
-   * The simulation is driven by the EIR which changes dynamically during the
-   * intervention phase as a function of the characteristics of the
-   * interventions.
-   * 
-   * Dependending on whether the Vector or NonVector model is in use, this EIR
-   * may be calculated from a mosquito emergence rate or be an input EIR
-   * scaled by the relative infectiousness of the humans. */
-  dynamicEIR = 4,
-};
 
 /** Used to describe which interventions are in use. */
 namespace Interventions {

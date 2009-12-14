@@ -124,6 +124,12 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         latestReport.update (Simulation::simulationTime, ageGroup, pgState);
         pgChangeTimestep = Simulation::simulationTime;
 	
+	if (pgState & Pathogenesis::MALARIA) {
+	    if (Global::modelVersion & PENALISATION_EPISODES) {
+		withinHostModel.immunityPenalisation();
+	    }
+	}
+	
         lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    //TODO: report sequelae?
@@ -150,13 +156,6 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
 
     if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
         _doomed = -Global::interval; // start indirect mortality countdown
-    
-    //FIXME: shouldn't this be only at the start of the event (only once per event)?
-    if (pgState & Pathogenesis::MALARIA) {
-        if (Global::modelVersion & PENALISATION_EPISODES) {
-            withinHostModel.immunityPenalisation();
-        }
-    }
     
     //FIXME: do we need to force time-outs now?
     if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Simulation::simulationTime)) {
