@@ -82,8 +82,12 @@ namespace OM { namespace util { namespace checkpoint {
     inline void operator& (bool x, ostream& stream) { stream << x << endl; }
     inline void operator& (bool& x, istream& stream) { stream >> x; }
     
-    inline void operator& (char x, ostream& stream) { stream << x << endl; }
-    inline void operator& (char& x, istream& stream) { stream >> x; }
+    inline void operator& (signed char x, ostream& stream) { stream << static_cast<short>(x) << endl; }
+    inline void operator& (signed char& x, istream& stream) {
+	short s;
+	stream >> s;
+	x = s;
+    }
     
     inline void operator& (short x, ostream& stream) { stream << x << endl; }
     inline void operator& (short& x, istream& stream) { stream >> x; }
@@ -97,8 +101,12 @@ namespace OM { namespace util { namespace checkpoint {
     inline void operator& (long long x, ostream& stream) { stream << x << endl; }
     inline void operator& (long long& x, istream& stream) { stream >> x; }
     
-    inline void operator& (unsigned char x, ostream& stream) { stream << x << endl; }
-    inline void operator& (unsigned char& x, istream& stream) { stream >> x; }
+    inline void operator& (unsigned char x, ostream& stream) { stream << static_cast<unsigned short>(x) << endl; }
+    inline void operator& (unsigned char& x, istream& stream) {
+	unsigned short us;
+	stream >> us;
+	x = us;
+    }
     
     inline void operator& (unsigned short x, ostream& stream) { stream << x << endl; }
     inline void operator& (unsigned short& x, istream& stream) { stream >> x; }
