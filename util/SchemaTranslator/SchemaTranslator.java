@@ -1,8 +1,6 @@
 // This file is part of OpenMalaria.
 // Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 
-// kate: tab-width 8; indent-width 4;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -46,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 11;
+    static final int CURRENT_VERSION = 12;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -113,6 +111,10 @@ public class SchemaTranslator {
     private void translateFile(File documentFile, File outDir) throws Exception {
         scenarioDocument = _builder.parse(documentFile);
         String schemaFileName = translateDocument();
+	if (schemaFileName == null) {
+	    System.err.println ("Update of "+documentFile+" failed.");
+	    return;
+	}
         if (doTranslation) {
             File outFile = new File(outDir, documentFile.getName());
             outFile.createNewFile();
@@ -196,7 +198,7 @@ public class SchemaTranslator {
     private String translateDocument() throws NoSuchMethodException, Exception,
             IllegalAccessException, InvocationTargetException {
         scenarioElement = scenarioDocument.getDocumentElement();
-        System.out.println("Updating: " + scenarioElement.getAttribute("name"));
+//         System.out.println("Updating: " + scenarioElement.getAttribute("name"));
         // 0 if no current version (getAttribute returns ""):
         int schemaVersion = Integer.parseInt("0"
                 + scenarioElement.getAttribute("schemaVersion"));
@@ -215,16 +217,18 @@ public class SchemaTranslator {
             Method method = cls.getMethod(translateMeth, new Class[] {});
             if (method == null)
                 throw new Exception("Method " + translateMeth + " not found");
-            method.invoke(this, new Object[] {});
+            if (!(Boolean) method.invoke(this, new Object[] {}))
+		return null;
         }
         return schemaFileName;
     }
 
     // / Exactly what version 1 is has been forgotten; it's merged into 2.
-    public void translate0To1() {
+    public Boolean translate0To1() {
+	return true;
     }
 
-    public void translate1To2() {
+    public Boolean translate1To2() {
         scenarioElement.setAttribute("xmlns:xsi",
                 "http://www.w3.org/2001/XMLSchema-instance");
         // Done by translate() method
@@ -289,9 +293,11 @@ public class SchemaTranslator {
                 el.removeAttribute("best");
             }
         }
+        return true;
     }
 
-    public void translate2To3() {
+    public Boolean translate2To3() {
+	return true;
     }
 
     /*
@@ -300,7 +306,7 @@ public class SchemaTranslator {
      * parameters have been removed, many have been added, and eipDuration has
      * been moved from param.
      */
-    public void translate3To4() {
+    public Boolean translate3To4() {
         Element params = (Element) scenarioElement.getElementsByTagName(
                 "parameters").item(0);
         Attr eip = null;
@@ -370,10 +376,11 @@ public class SchemaTranslator {
                 }
             }
         }
+        return true;
     }
 
     // modelVersion flags 1<<2, 1<<4 or 1<<5 have changed
-    public void translate4To5() throws Exception {
+    public Boolean translate4To5() throws Exception {
         int ver = Integer
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
         if ((ver & 0x68) != 0) {// modelVersion with flags 1<<2, 1<<4 or 1<<5
@@ -387,9 +394,10 @@ public class SchemaTranslator {
 		throw new Exception ("Error: Scenario had a combination of InfectionIncidenceModel flags - this was invalid!");
 	    }
 	}
+	return true;
     }
 
-    public void translate5To6() throws Exception {
+    public Boolean translate5To6() throws Exception {
         int ver = Integer
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
         Element cMs = (Element) scenarioElement.getElementsByTagName(
@@ -408,7 +416,7 @@ public class SchemaTranslator {
                         .println("Warning: caseManagement element present but not used (updating anyway)");
         }
         if (cMs == null)
-            return; // element may not exist, in which case there's nothing to
+            return true; // element may not exist, in which case there's nothing to
         // do
         NodeList cMList = cMs.getElementsByTagName("caseManagement");
         for (int i = 0; i < cMList.getLength(); ++i) {
@@ -420,16 +428,18 @@ public class SchemaTranslator {
             scenarioDocument.renameNode(nmfP, null, "nmfP");
             cM.insertBefore(nmfP, nmfNP);
         }
+        return true;
     }
     
     // Version 7 added elements for ITN and IRS intervention descriptions.
     // Nothing old needs to be changed.
-    public void translate6To7() throws Exception {
+    public Boolean translate6To7() throws Exception {
+	return true;
     }
     
     // Version 8 moved emergence rates and some other parameters into the XML
     // file. The relevant test scenarios have already been converted.
-    public void translate7To8() throws Exception {
+    public Boolean translate7To8() throws Exception {
 	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
 	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
 	if (vect != null) {
@@ -441,20 +451,23 @@ public class SchemaTranslator {
 		mosq.removeAttribute("emergenceRateFilename");
 	    }
 	}
+	return true;
     }
     
     // This changed some stuff to do with non-human hosts that wasn't used
     // before and added a VectorAvailability intervention.
-    public void translate8To9() throws Exception {
+    public Boolean translate8To9() throws Exception {
+	return true;
     }
     
     // Version 10 introduced PKPD description parameters. No changes to
     // existing elements.
-    public void translate9To10() throws Exception {
+    public Boolean translate9To10() throws Exception {
+	return true;
     }
     
     // Version 11 removes cached emerge rates from the schema
-    public void translate10To11() throws Exception {
+    public Boolean translate10To11() throws Exception {
 	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
 	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
 	if (vect != null) {
@@ -471,6 +484,19 @@ public class SchemaTranslator {
 	    }
 	    System.err.println ("New attributes propInfected and propInfectious created with default values - please correct (for each anopheles section)!");
 	}
+	return true;
+    }
+    
+    // Version 12 removed the simulationDuration attribute and changed the
+    // event-scheduler data (no real scenarios yet so this is not auto-updated).
+    public Boolean translate11To12() throws Exception {
+	Element cms = (Element) scenarioElement.getElementsByTagName("caseManagements").item(0);
+	if (cms != null) {
+	    System.err.println ("Please replace the caseManagements element with an EventScheduler element (auto-update not implemented)");
+	    return false;
+	}
+	scenarioElement.removeAttribute ("simulationDuration");
+	return true;
     }
     
     private void visitAllFiles(File file, File outDir) throws Exception {
