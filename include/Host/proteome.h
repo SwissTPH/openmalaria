@@ -31,12 +31,23 @@
 using namespace std;
 
 class Mutation;
-
-//! Initialises the proteome module.
-void initProteomeModule();
-
-class Mutation;
 class ProteinPosition;
+
+/* NOTE:
+Could replace the vectors/lists with maps and rewrite as something like:
+    class ProteinSet {
+	map<name,ProteinPositionSet> proteins;
+	...
+    }
+Advantage: makes it clear when elements are keys and that there are no duplicate keys
+(without duplicating keys in data).
+
+Or could just replace the whole thing with a list of mutations, with position and protein and
+mutation names as enums.
+*/
+
+// Note: All data here (apart from pointer values) is reproducibly reloadable from the XML data, so
+// checkpointing is not needed.
 
 /** Only used within proteome code. */
 class Protein {
@@ -44,23 +55,16 @@ class Protein {
   vector<ProteinPosition*> positions;
   
 public:
-  Protein(string _name);
-  /** @brief Create, reading from checkpoint */
-  Protein(istream& in);
-  ~Protein();
+  Protein(string _name) : name(_name) {}
+  ~Protein ();
   
-  inline string getName() const {
-    return name;
-  }
   void addPosition(ProteinPosition* _position);
   Mutation* getMutation(int _position, char _allele) throw(int);
-  void write (ostream& out);
-  
-  /// Checkpointing
-  template<class S>
-  void operator& (S& stream) {
-      name & stream;
-      positions & stream;	//TODO: check this won't compile due to no pointer support
+  inline bool isNamed (const string _name) const {
+      return name == _name;
+  }
+  inline bool operator==(const Protein& rhs) const {
+      return name == rhs.name;
   }
 };
 
@@ -73,22 +77,19 @@ class ProteinPosition {
   
 public:
   ProteinPosition(Protein* _protein, int _position, char _wildType);
-  /** @brief Create, reading from checkpoint */
-  ProteinPosition(Protein* _protein, istream& in);
   ~ProteinPosition();
   
   void addMutation(Mutation* _mutation);
   inline Protein* getProtein() {
     return protein;
   }
-  inline string getProteinName() {
-    return protein->getName();
-  }
   Mutation* getMutation(char _allele) throw(int);
   inline int getPosition() const {
     return position;
   }
-  void write (ostream& out);
+  inline bool operator==(const ProteinPosition& rhs) const {
+      return position == rhs.position && (*protein) == (*rhs.protein);
+  }
 };
 
 /** Used by proteome and drug code. */
@@ -99,22 +100,25 @@ class Mutation {
 public:
   Mutation(ProteinPosition* _position, char _allele);
   ~Mutation();
-  inline string getProteinName() const {
-    return position->getProteinName();
-  }
+  
   inline int getPosition() const {
     return position->getPosition();
   }
   inline char getAllele() const {
     return allele;
   }
-  int operator==(const Mutation& rhs) const;
+  inline bool operator==(const Mutation& rhs) const {
+      return allele == rhs.allele && (*position) == (*rhs.position);
+  }
 };
 
-/** Each infection has an instance of this class. */
+/** Each infection has an instance of this class.
+ *
+ * Static data here currently doesn't need checkpointing. */
 class ProteomeInstance {
   static int currentID;
   static vector<ProteomeInstance> instances;
+  
   
   int proteomeID;
   //TODO: Fitness
@@ -130,6 +134,7 @@ class ProteomeInstance {
 public:
   /** Creates all unique instances of proteome. */
   static void init (Mutation*);
+  static void cleanup ();
   
   /** Drug code needs a list of all instances. */
   static inline vector<ProteomeInstance> getInstances() {
@@ -159,14 +164,18 @@ public:
   friend class HoshenPkPdSuite;
 };
 
-/** Methods getInfection and getProteome are used in Infection code. */
+/** Manages the list of proteins and (through these) the mutations.
+ *
+ * Static data here is set-up directly from XML and doesn't need checkpointing. */
 class ProteomeManager {
   static vector<Protein*> proteins;
   
 public:
-  static void addProtein(Protein* _protein);
-  static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
-  static void write (ostream& out);
-  static void read (istream& in);
+    //! Initialises the proteome module.
+    static void init ();
+    static void cleanup ();
+    
+    static void addProtein(Protein* _protein);
+    static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
 };
 #endif

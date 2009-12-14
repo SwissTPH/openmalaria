@@ -35,7 +35,7 @@ const bool Use_LSTM = false;
 
 void PkPdModel::init () {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    initProteomeModule();
+    ProteomeManager::init ();
     if (Use_LSTM) {
       LSTMDrugType::init();
       LSTMDrug::init ();
@@ -48,15 +48,20 @@ void PkPdModel::init () {
     }
   }
 }
+void PkPdModel::cleanup () {
+    if (Global::modelVersion & INCLUDES_PK_PD) {
+	ProteomeManager::cleanup ();
+    }
+}
 
 void PkPdModel::readStatic (istream& in) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::read (in);
+//     ProteomeManager::read (in);
   }
 }
 void PkPdModel::writeStatic (ostream& out) {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    ProteomeManager::write (out);
+//     ProteomeManager::write (out);
   }
 }
 

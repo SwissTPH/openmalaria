@@ -92,6 +92,7 @@ void Population::init(){
 }
 
 void Population::clear(){
+    PkPdModel::cleanup ();
   Human::clear();
 #ifdef OMP_CSV_REPORTING
   csvReporting.close();

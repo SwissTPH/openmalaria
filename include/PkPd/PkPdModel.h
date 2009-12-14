@@ -43,6 +43,7 @@ public:
   ///@brief Static functions
   //@{
   static void init ();
+  static void cleanup ();
   
   /// Read static variables from checkpoint
   static void readStatic (istream& in);
