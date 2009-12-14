@@ -196,28 +196,36 @@ void Global::setModelVersion () {
     0,	// 21
     DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD) // 22
   };
-  
-  for (size_t i = 0; i < NUM_VERSIONS; ++i)
-    if (((modelVersion >> i) & 1) &&
-          modelVersion & INCOMPATIBLITITIES[i]) {
-      ostringstream msg;
-      msg << hex << "Incompatible model versions: flag 0x" << (1<<i)
-	  << " is incompatible with flags: 0x" << (modelVersion & INCOMPATIBLITITIES[i]);
-      //Note: this can occur if a version is listed as "incompatible with itself" in the above table
-      throw xml_scenario_error (msg.str());
+    
+    if (clOptions & CLO::PRINT_MODEL_VERSION) {
+	cout << "Model flags:";
+	for (int i = 0; i < NUM_VERSIONS; ++i) {
+	    if ((modelVersion >> i) & 1)
+		cout << " 1<<"<<i;
+	}
+	cout << endl;
+    }
+    
+    for (size_t i = 0; i < NUM_VERSIONS; ++i) {
+	if (((modelVersion >> i) & 1) &&
+	    modelVersion & INCOMPATIBLITITIES[i]) {
+	    ostringstream msg;
+	    msg << "Incompatible model versions: flag 1<<" << i
+	        << " is incompatible with flags: ";
+	    int incompat = (modelVersion & INCOMPATIBLITITIES[i]);
+	    for (int i = 0; i < NUM_VERSIONS; ++i) {
+		if ((incompat >> i) & 1)
+		    msg << " 1<<"<<i;
+	    }
+		//Note: this can occur if a version is listed as "incompatible with itself" in the above table
+	    throw xml_scenario_error (msg.str());
+	}
     }
     if ((modelVersion & MAX_DENS_RESET) && !(modelVersion & MAX_DENS_CORRECTION))
-      throw xml_scenario_error ("MAX_DENS_RESET without MAX_DENS_CORRECTION doesn't make sense.");
-  
-  if (clOptions & CLO::PRINT_MODEL_VERSION) {
-    cout << "Model flags:";
-    for (int i = 0; i < NUM_VERSIONS; ++i) {
-      if ((modelVersion >> i) & 1)
-	cout << " 1<<"<<i;
-    }
-    cout << endl;
-    throw cmd_exit ("Printed model version");
-  }
+	throw xml_scenario_error ("MAX_DENS_RESET without MAX_DENS_CORRECTION doesn't make sense.");
+    
+    if (clOptions & CLO::PRINT_MODEL_VERSION)
+	throw cmd_exit ("Printed model version");
 }
 
 void Global::validateListSize (long length) {

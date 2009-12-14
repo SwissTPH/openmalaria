@@ -1247,7 +1247,7 @@
 				</xs:attribute>
 			    </xs:complexType>
 			</xs:element>
-			<xs:element name="CM_leaf" minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="CM_leaf" minOccurs="1" maxOccurs="unbounded">
 			    <xs:annotation>
 				<xs:documentation>
 				    End points of the case management tree, listing treatments.
@@ -1318,30 +1318,32 @@
 		</xs:annotation>
 		<xs:complexType>
 		    <xs:sequence>
-			<xs:element name="pDeath">
+			<xs:element name="path" minOccurs="1" maxOccurs="unbounded">
 			    <xs:annotation>
 				<xs:documentation>
-				    Table to give the probability of death.
-				    This probability is applied once-only for each case, irrespective of the branch (thus
-				    entries with p=0 for UC cases are probably needed).
+				    Parameters for a path through the case-management tree (i.e. table row).
 				</xs:documentation>
 			    </xs:annotation>
 			    <xs:complexType>
 				<xs:attribute name="ID" type="xs:int" use="required"/>
-				<xs:attribute name="p" type="xs:double" use="required"/>
-			    </xs:complexType>
-			</xs:element>
-			<xs:element name="hospitalizationDuration">
-			    <xs:annotation>
-				<xs:documentation>
-				    Table to give the median length of stay in hospital.
-				    (Use median rather than a distribution because data should be more reliable and the effect
-				    of heterogeneity should be small.)
-				</xs:documentation>
-			    </xs:annotation>
-			    <xs:complexType>
-				<xs:attribute name="ID" type="xs:int" use="required"/>
-				<xs:attribute name="days" type="xs:int" use="required"/>
+				<xs:attribute name="pDeath" type="xs:double" use="required">
+				    <xs:annotation>
+					<xs:documentation>
+					    The probability of death.
+					    This probability is applied once-only for each case, irrespective of the branch (thus
+					    entries with p=0 for UC cases are probably needed).
+					</xs:documentation>
+				    </xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="hospitalizationDuration" type="xs:int" use="required">
+				    <xs:annotation>
+					<xs:documentation>
+					    The median length of stay in hospital.
+					    (Use median rather than a distribution because data should be more reliable and the effect
+					    of heterogeneity should be small.)
+					</xs:documentation>
+				    </xs:annotation>
+				</xs:attribute>
 			    </xs:complexType>
 			</xs:element>
 		    </xs:sequence>
