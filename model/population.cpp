@@ -100,7 +100,7 @@ void Population::clear(){
 
 void Population::staticRead (istream& in) {
   NeonatalMortality::read (in);
-  ClinicalModel::staticRead(in);
+  Clinical::ClinicalModel::staticRead(in);
   PkPdModel::readStatic (in);
   
   in >> IDCounter;
@@ -112,7 +112,7 @@ void Population::staticRead (istream& in) {
 }
 void Population::staticWrite (ostream& out) {
   NeonatalMortality::write (out);
-  ClinicalModel::staticWrite(out);
+  Clinical::ClinicalModel::staticWrite(out);
   PkPdModel::writeStatic (out);
   
   out << IDCounter << endl;
@@ -325,8 +325,8 @@ void Population::preMainSimInit () {
   _transmissionModel->initMainSimulation();
 
   for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    ClinicalModel::infantIntervalsAtRisk[i]=0;
-    ClinicalModel::infantDeaths[i]=0;
+    Clinical::ClinicalModel::infantIntervalsAtRisk[i]=0;
+    Clinical::ClinicalModel::infantDeaths[i]=0;
   }
 }
 
@@ -441,7 +441,7 @@ void Population::implementIntervention (int time) {
     if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
       throw xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
     changeHealthSystem (&interv->getChangeHS().get());
-    ClinicalImmediateOutcomes::initParameters();	// should re-read all parameters
+    Clinical::ClinicalImmediateOutcomes::initParameters();	// should re-read all parameters
     
     //FIXME: surely we shouldn't do this at all? (DH)
     //TODO: Do we also need to re-init the kappa array?

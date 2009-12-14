@@ -22,7 +22,7 @@
 #include "Simulation.h"
 #include "Surveys.h"
 
-int Episode::reportingPeriodMemory;
+int Episode::healthSystemMemory;
 
 
 Episode::Episode (istream& in) : _ageGroup(0) {
@@ -51,7 +51,7 @@ void Episode::write (ostream& out) {
 
 void Episode::update (int simulationTime, SurveyAgeGroup ageGroup, Pathogenesis::State newState)
 {
-  if (simulationTime > (_time + reportingPeriodMemory)) {
+  if (simulationTime > (_time + healthSystemMemory)) {
     report ();
     
     _time = simulationTime;

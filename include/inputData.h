@@ -49,8 +49,8 @@ const scnXml::Interventions& getInterventions();
 const scnXml::EntoData& getEntoData();
 /// Get the Demography xml object
 const scnXml::Demography& getDemography();
-/// Get the CaseManagements xml object
-const scnXml::CaseManagements* getCaseManagements();
+/// Get the EventScheduler xml object
+const scnXml::EventScheduler& getEventScheduler();
 /// Get the HealthSystem xml object
 const scnXml::HealthSystem& getHealthSystem();
 

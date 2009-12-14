@@ -45,8 +45,8 @@ const scnXml::Monitoring * monitoring;
 const scnXml::Interventions * interventions;
 const scnXml::EntoData * entoData; // May be replaced by a changeEIR intervention
 const scnXml::Demography * demography;
-const scnXml::HealthSystem * healthSystem; // May be replaced by a changeHS intervention
-const scnXml::CaseManagements * caseManagements; // Optional (may be NULL)
+const scnXml::HealthSystem * healthSystem; // May be replaced by a changeHS intervention or not present
+const scnXml::EventScheduler * eventScheduler; // Optional (may be NULL)
 const scnXml::Parameters * parameters;
 //Proteome * proteome;
 
@@ -154,8 +154,8 @@ void createDocument (std::string lXmlFile)
         healthSystem = &scenario->getHealthSystem().get();
     else
         healthSystem = NULL;
-    caseManagements = scenario->getCaseManagements().present() ?
-                      &scenario->getCaseManagements().get() : NULL;
+    eventScheduler = scenario->getEventScheduler().present() ?
+                      &scenario->getEventScheduler().get() : NULL;
     parameters = &scenario->getParameters();
     //proteome = &scenario->getProteome();
 
@@ -208,9 +208,11 @@ const scnXml::Demography& getDemography()
 {
     return *demography;
 }
-const scnXml::CaseManagements* getCaseManagements()
+const scnXml::EventScheduler& getEventScheduler ()
 {
-    return caseManagements;
+    if (eventScheduler == NULL)
+	throw xml_scenario_error ("EventScheduler requested but not in XML");
+    return *eventScheduler;
 }
 const scnXml::HealthSystem& getHealthSystem()
 {

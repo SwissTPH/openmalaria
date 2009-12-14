@@ -53,7 +53,7 @@ void Human::initHumanParameters () {	// static
   PerHostTransmission::initParameters(getInterventions());
   InfectionIncidenceModel::init();
   WithinHostModel::init();
-  ClinicalModel::init();
+  Clinical::ClinicalModel::init();
   Vaccine::initParameters();
   _ylagLen = Global::intervalsPer5Days * 4;
 }
@@ -139,7 +139,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
     }
   }
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel=ClinicalModel::createClinicalModel (_comorbidityFactor, _treatmentSeekingFactor);
+  clinicalModel = Clinical::ClinicalModel::createClinicalModel (_comorbidityFactor, _treatmentSeekingFactor);
 }
 
 // Load human from checkpoint
@@ -147,7 +147,7 @@ Human::Human(istream& in, TransmissionModel& tm) :
     perHostTransmission(in, tm),
     infIncidence(InfectionIncidenceModel::createModel(in)),
     withinHostModel(WithinHostModel::createWithinHostModel(in)),
-    clinicalModel(ClinicalModel::createClinicalModel(in))
+    clinicalModel(Clinical::ClinicalModel::createClinicalModel(in))
 {
   in >> _dateOfBirth; 
   //in >> _ID; 

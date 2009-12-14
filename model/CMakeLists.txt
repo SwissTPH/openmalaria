@@ -21,6 +21,7 @@ set (Model_CPP
   
   Clinical/ClinicalModel.cpp
   Clinical/EventScheduler.cpp
+  Clinical/ESCaseManagement.cpp
   Clinical/ImmediateOutcomes.cpp
   Clinical/OldCaseManagement.cpp
   Clinical/Episode.cpp

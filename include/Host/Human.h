@@ -26,7 +26,9 @@
 
 // Forward declaration
 class TransmissionModel;
-class ClinicalModel;
+namespace Clinical {
+    class ClinicalModel;
+}
 
 /** Interface to all sub-models storing data per-human individual.
  *
@@ -160,7 +162,7 @@ private:
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
    * and clinical outcomes (morbidity, reporting). */
-  ClinicalModel *clinicalModel;
+  Clinical::ClinicalModel *clinicalModel;
   //@}
   
   ///@brief Private variables

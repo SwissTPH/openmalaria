@@ -285,7 +285,7 @@ int OldCaseManagement::getNextRegimen (int simulationTime, int diagnosis, int tL
   if (diagnosis == Pathogenesis::STATE_SEVERE)
     return 3;
 
-  if (tLastTreated + Episode::reportingPeriodMemory > simulationTime)
+  if (tLastTreated + Episode::healthSystemMemory > simulationTime)
     return 2;
 
   return 1;

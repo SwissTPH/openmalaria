@@ -41,18 +41,15 @@
  * 
  * Decisions are:
  *  Testing method (or no test),
- *  Result of testing for parasites,
+ *  Result of testing for parasites (outcome of test; may not be accurate),
  *  Anti-malarial drug prescribed,
- *  Quality of prescribed AM (anti-malarial),
- *  Adherence of patient taking prescribed AM,
- *  Quality of case management (applicable to severe cases),
- *  Treatment type for severe cases (inc. in/outside a hospital),
- *  Treatment seeking delay (usually 0-2 days).
+ *  Adherence of patient taking prescribed AM (UC),
+ *  Quality of prescribed AM (anti-malarial) (UC),
+ *  Treatment type for severe cases (inc. in/outside a hospital, pre-referals, quality of case management) (severe),
+ *  Treatment seeking delay (usually 0-2 days) (UC).
  * 
  * The MASK values are used to filter bits associated with a decision; e.g.
  * (x & QUALITY_MASK) can only have values QUALITY_BAD or QUALITY_GOOD.
- * 
- * Treatment type names aren't yet final.
  * 
  * TSDELAY is slightly different; (x & TSDELAY_MASK) >> TSDELAY_SHIFT yields
  * an integer in the range [0,15] which is the delay in days. */
@@ -62,58 +59,55 @@ enum DecisionEnums {
      * http://en.wikipedia.org/wiki/Flag_byte
      * (note & | ^ are C++'s binary AND, OR and XOR operators).
      * Maximum value I'd recommend using as a flag: 0x4000_0000 */
-    NONE		= 0x0,
+    NONE				= 0x0,
     
-    TEST_NONE		= 0x0,
-    TEST_MICROSCOPY	= 0x1,
-    TEST_RDT		= 0x2,
-    TEST_MASK		= 0xF,
+    /** MUST correspond to Pathogenesis::MORBIDITY_MASK.
+     *
+     * Pathogenesis constants from Constant.h within this mask may be used. */
+    MORBIDITY_MASK		= 0x3F,
     
-    RESULT_TRUE_POS	= 0x10,
-    RESULT_FALSE_NEG	= 0x20,
-    RESULT_TRUE_NEG	= 0x30,
-    RESULT_FALSE_POS	= 0x40,
-    RESULT_TRUE		= 0x50,		///< true positive but malaria not cause of sickness
-    RESULT_FALSE	= 0x60,		///< false negative where malaria is not cause
-    RESULT_MASK		= 0xF0,
+    AGE_OVER5			= 0x80,
     
-    DRUG_NO_AM		= 0x000,	///< no anti-malarial drug
-    DRUG_SP		= 0x100,
-    DRUG_AL		= 0x200,
-    DRUG_QN		= 0x300,	///< Quinine; value can be changed, but (value-1) won't match desicionID in VC's case management tree
-    DRUG_AS		= 0x400,	///< Artesunate
-    DRUG_MASK		= 0xF00,
+    TEST_NONE			= 0x0,
+    TEST_MICROSCOPY	= 0x100,
+    TEST_RDT			= 0x200,
+    TEST_MASK			= 0x300,
     
-    ADHERENCE_FULL	= 0x0000,
-    ADHERENCE_MISSED_FIRST	= 0x1000,	///< 1st or 2nd dose missed
-    ADHERENCE_MISSED_LAST	= 0x2000,
-    ADHERENCE_SELECTIVE	= 0x3000,	///< TODO: define exactly what this means
-    ADHERENCE_MASK	= 0x3000,
+    RESULT_POSITIVE	= 0x400,
+    RESULT_NEGATIVE	= 0x800,
+    RESULT_DETERMINE	= 0xC00,
+    RESULT_MASK		= 0xC00,
     
-    QUALITY_BAD		= 0x0000,
-    QUALITY_GOOD	= 0x4000,
-    QUALITY_MASK	= 0x4000,
+    DRUG_NO_AM		= 0x0000,	///< no anti-malarial drug
+    DRUG_SP			= 0x1000,
+    DRUG_AL			= 0x2000,
+    DRUG_IV_QN		= 0x8000,	///< Quinine
+    DRUG_IV_AS		= 0x9000,	///< Artesunate
+    DRUG_FIRST_SEV	= 0x8000,
+    DRUG_NUM_SEV		= 2,		///< Number of sequenctial severe drugs listed
+    DRUG_MASK		= 0xF000,
     
-    MANAGEMENT_BAD	= 0x0000,
-    MANAGEMENT_GOOD	= 0x8000,
-    MANAGEMENT_MASK	= 0x8000,
+    ADHERENCE_FULL	= 0x00000,
+    ADHERENCE_MISSED_FIRST	= 0x10000,	///< 1st or 2nd dose missed
+    ADHERENCE_MISSED_LAST	= 0x20000,
+    ADHERENCE_SELECTIVE	= 0x30000,	///< TODO: define exactly what this means
+    ADHERENCE_MASK	= 0x30000,
     
-    //TODO: completely rename (w/wo pre-ref, w/wo hospital, hospital delay (0,1 or 2?)
-    TREATMENT_NO_AM	= 0x0,
-    TREATMENT_PREREF	= 0x10000,
-    TREATMENT_DELREF	= 0x20000,
-    TREATMENT_PREREF_IMMREF	= 0x30000,
-    TREATMENT_PREREF_DELREF	= 0x40000,
-    TREATMENT_PARENTAL	= 0x50000,
-    TREATMENT_DELREF_GOOD	= 0x60000,
-    TREATMENT_PREREF_IMMREF_GOOD	= 0x70000,
-    TREATMENT_PREREF_DELREF_GOOD	= 0x80000,
-    TREATMENT_PARENTAL_GOOD	= 0x90000,
-    TREATMENT_NUM_TYPES	= 10,
-    TREATMENT_SHIFT	= 16,
-    TREATMENT_MASK	= 0xF0000,
+    QUALITY_GOOD		= 0x00000,
+    QUALITY_BAD		= 0x80000,
+    QUALITY_MASK		= 0x80000,
+    
+    // Following is organised into one block with 16 potential values:
+    TREATMENT_NO_HOSPITAL	= 0x0,	// no hospitalization: no seeking or preref only
+    TREATMENT_HOSPITAL	= 0x100000,	// immediate hospitalization
+    TREATMENT_DEL_HOSPITAL	= 0x200000,	// hospitalization one day later
+    TREATMENT_UNUSED_TYPE = 0x300000,	// could be used in the future
+    TREATMENT_PREREF		= 0x400000,	// combine with above for pre-referal suppository
+    TREATMENT_CM_GOOD	= 0x800000,	// combine with above for good case management in hospital
+    TREATMENT_NUM_TYPES	= 16,
+    TREATMENT_MASK	= 0xF00000,
     
     TSDELAY_NUM_MAX	= 3,
-    TSDELAY_SHIFT	= 20,
-    TSDELAY_MASK	= 0xF00000,
+    TSDELAY_SHIFT	= 24,
+    TSDELAY_MASK	= 0x3000000,
 };

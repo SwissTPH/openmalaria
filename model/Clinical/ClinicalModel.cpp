@@ -28,6 +28,8 @@
 #include "inputData.h"
 #include "Surveys.h"
 
+namespace Clinical {
+
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
 double ClinicalModel::_nonMalariaMortality;
@@ -155,4 +157,6 @@ void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
 
 void ClinicalModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
   pathogenesisModel->summarize (survey, ageGroup);
+}
+
 }

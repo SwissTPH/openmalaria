@@ -24,6 +24,8 @@
 #include "Clinical/ClinicalModel.h"
 #include "OldCaseManagement.h"
 
+namespace Clinical {
+
 /** This implementation of the model is intended to use the old case-management
  * model with immediate outcomes of clinical events (immediate recovery with
  * total parasite clearance or immediate death). */
@@ -53,4 +55,6 @@ private:
   /// The CaseManagementModel decides how to treat ill individuals
   OldCaseManagement * caseManagement;
 };
+
+}
 #endif

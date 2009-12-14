@@ -24,6 +24,8 @@
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 
+namespace Clinical {
+
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
  * model (or in a simpler case, directly clearing infections).
@@ -149,4 +151,6 @@ protected:
    * immediately? See above enum for positive values used. */
   int _doomed;
 };
+
+}
 #endif

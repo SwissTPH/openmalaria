@@ -50,7 +50,7 @@ public:
   /** Return true if on last timestep that would be considered part of current
    * espisode (or later). */
   inline bool episodeEnd (int simulationTime) {
-    return simulationTime >= (_time + reportingPeriodMemory);
+    return simulationTime >= (_time + healthSystemMemory);
   }
   
   Pathogenesis::State getState() const {return _state;};
@@ -60,7 +60,7 @@ public:
    * 
    * Used by both the clinical models in roughly the same way, but will have
    * different values in each to match Global::interval. */
-  static int reportingPeriodMemory;
+  static int healthSystemMemory;
   
 private:
   /** Report a clinical episode.

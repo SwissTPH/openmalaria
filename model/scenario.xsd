@@ -31,22 +31,24 @@
             <xs:appinfo>units:List of elements;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element minOccurs="0" name="caseManagements" type="caseManagements">
-          <xs:annotation>
-            <xs:documentation>
-              List of case managment interventions
-            </xs:documentation>
-            <xs:appinfo>units:List of elements;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="healthSystem" type="healthSystem" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>
-              Description of health system
-            </xs:documentation>
-            <xs:appinfo>units:List of elements;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
+	<xs:choice>
+	    <xs:element name="EventScheduler" type="EventScheduler">
+	    <xs:annotation>
+		<xs:documentation>
+		    Description of case management and clinical events.
+		</xs:documentation>
+		<xs:appinfo>units:List of elements;</xs:appinfo>
+	    </xs:annotation>
+	    </xs:element>
+	    <xs:element name="healthSystem" type="healthSystem">
+	    <xs:annotation>
+		<xs:documentation>
+		Description of (old) health system model.
+		</xs:documentation>
+		<xs:appinfo>units:List of elements;</xs:appinfo>
+	    </xs:annotation>
+	    </xs:element>
+	</xs:choice>
         <xs:element name="entoData" type="entoData">
           <xs:annotation>
             <xs:documentation>
@@ -1187,149 +1189,185 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="caseType">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="endPoint">
-        <xs:complexType>
-          <xs:attribute name="decision" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Foreign key reference to outcome node
-              </xs:documentation>
-              <xs:appinfo>
-                constraints:in
-                scenario.casemanagements.casemanagement.decision.id
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="p" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Probability of outcome
-              </xs:documentation>
-              <xs:appinfo>
-                units:Proportion;min:0;max:1;constraints:
-                sum(p)=1
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="caseManagements">
-    <xs:annotation>
-      <xs:documentation>
-        List of age-specific case managment descriptions
-      </xs:documentation>
-      <xs:appinfo>units:List of elements;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="caseManagement">
-        <xs:annotation>
-          <xs:documentation>
-            Age-specific case management description,
-            describes entry-points and decisions, with
-            entry-point-specific decision probabilities
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="uc1" type="caseType" />
-            <xs:element name="uc2" type="caseType" />
-            <xs:element name="sev" type="caseType" />
-            <xs:element name="nmfP" type="caseType" />
-            <xs:element name="nmfNP" type="caseType" />
-            <xs:element name="decisions">
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element maxOccurs="unbounded" name="decision">
-                    <xs:annotation>
-                      <xs:documentation>
-                        describes treatment
-                        decisions, a list of medicate descisions.
-                      </xs:documentation>
-                      <xs:appinfo>
-                        units:List of elements;
-                      </xs:appinfo>
-                    </xs:annotation>
-                    <xs:complexType>
-                      <xs:sequence>
-                        <xs:element maxOccurs="unbounded" name="medicate">
-                          <xs:complexType>
-                            <xs:attribute name="name" type="xs:string" use="required">
-                              <xs:annotation>
-                                <xs:documentation>
-                                  Name of drug compound
-                                </xs:documentation>
-                                <xs:appinfo>
-                                  units:string;
-                                </xs:appinfo>
-                              </xs:annotation>
-                            </xs:attribute>
-                            <xs:attribute name="qty" type="xs:double" use="required">
-                              <xs:annotation>
-                                <xs:documentation>Quantity of drug compound</xs:documentation>
-                                <xs:appinfo>units:Number;</xs:appinfo>
-                              </xs:annotation>
-                            </xs:attribute>
-                            <xs:attribute name="time" type="xs:int" use="required">
-                              <xs:annotation>
-                                <xs:documentation>
-                                  Time step of intervention
-                                </xs:documentation>
-                                <xs:appinfo>
-                                  units:Number;min:1;max:10000;
-                                </xs:appinfo>
-                              </xs:annotation>
-                            </xs:attribute>
-                          </xs:complexType>
-                        </xs:element>
-                      </xs:sequence>
-                      <xs:attribute name="id" type="xs:int" use="required">
-                        <xs:annotation>
-                          <xs:documentation>Key of decision</xs:documentation>
-                          <xs:appinfo>units:Number</xs:appinfo>
-                        </xs:annotation>
-                      </xs:attribute>
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="maxAgeYrs" type="xs:decimal" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Upper bound of age group
-              </xs:documentation>
-              <xs:appinfo>
-                units:Years;min:0;max:100;
-              </xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of age specific intervention
-        </xs:documentation>
-        <xs:appinfo>units:string;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="reportingPeriodMemory" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Follow-up period during which a recurrence is
-          considered to be a treatment failure
-        </xs:documentation>
-        <xs:appinfo>units:Time steps;min:1;max:100;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
+    <xs:complexType name="EventScheduler">
+	<xs:sequence>
+	    <xs:element name="CaseManagementTree">
+		<xs:annotation>
+		    <xs:documentation>
+			Partial description of the case management tree. The tree consists of:
+			Probability branches: map an ID to another ID (the outcome) stochastically.
+			Test branches: map an ID with a special flag to another ID; these are hard-coded.
+			Leaf nodes: these map an ID to a list of drug medications.
+			
+			Test branches are used if a flag requests a test (currently only RESULT_DETERMINE for parasite
+			tests). Otherwise a probability or leaf branch is used by masking the current ID with mask
+			(attribute for this element).
+		    </xs:documentation>
+		    <xs:appinfo>units:List of elements;</xs:appinfo>
+		</xs:annotation>
+		<xs:complexType>
+		    <xs:sequence>
+			<xs:element name="CM_pBranchSet" maxOccurs="unbounded" minOccurs="0">
+			    <xs:annotation>
+				<xs:documentation>
+				    A probability branch node: contains a list of outcome nodes along with
+				    probabilities, which link to another probability/test branch or leaf node.
+				</xs:documentation>
+			    </xs:annotation>
+			    <xs:complexType>
+				<xs:sequence>
+				    <xs:element name="CM_pBranch" maxOccurs="unbounded" minOccurs="1">
+					<xs:complexType>
+					    <xs:attribute name="outcome" type="xs:int" use="required">
+						<xs:annotation>
+						    <xs:documentation>
+							ID of next probability/test branch or leaf node.
+						    </xs:documentation>
+						</xs:annotation>
+					    </xs:attribute>
+					    <xs:attribute name="p" type="xs:double" use="required">
+						<xs:annotation>
+						    <xs:documentation>
+							Probability of this outcome
+						    </xs:documentation>
+						<xs:appinfo>
+						    units:Proportion;min:0;max:1;constraints:
+						    sum(p)=1
+						</xs:appinfo>
+						</xs:annotation>
+					    </xs:attribute>
+					</xs:complexType>
+				    </xs:element>
+				</xs:sequence>
+				<xs:attribute name="ID" type="xs:int" use="required">
+				    <xs:annotation>
+					<xs:documentation>Decision identifier.</xs:documentation>
+					<xs:appinfo>units:ID</xs:appinfo>
+				    </xs:annotation>
+				</xs:attribute>
+			    </xs:complexType>
+			</xs:element>
+			<xs:element name="CM_leaf" minOccurs="0" maxOccurs="unbounded">
+			    <xs:annotation>
+				<xs:documentation>
+				    End points of the case management tree, listing treatments.
+				</xs:documentation>
+			    </xs:annotation>
+			    <xs:complexType>
+				<xs:sequence>
+				    <xs:element name="medicate" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+					    <xs:attribute name="name" type="xs:string" use="required">
+					    <xs:annotation>
+						<xs:documentation>
+						Abbreviated name of drug compound
+						</xs:documentation>
+						<xs:appinfo>
+						units:string;
+						</xs:appinfo>
+					    </xs:annotation>
+					    </xs:attribute>
+					    <xs:attribute name="qty" type="xs:double" use="required">
+					    <xs:annotation>
+						<xs:documentation>Quantity of drug compound</xs:documentation>
+						<xs:appinfo>units:mg;</xs:appinfo>
+					    </xs:annotation>
+					    </xs:attribute>
+					    <xs:attribute name="time" type="xs:int" use="required">
+					    <xs:annotation>
+						<xs:documentation>
+						    Number of minutes past start of timestep the drug is medicated at (usually 0).
+						</xs:documentation>
+						<xs:appinfo>
+						units:Minutes;min:0;
+						</xs:appinfo>
+					    </xs:annotation>
+					    </xs:attribute>
+					</xs:complexType>
+				    </xs:element>
+				</xs:sequence>
+				<xs:attribute name="ID" type="xs:int" use="required">
+				    <xs:annotation>
+					<xs:documentation>Decision identifier.</xs:documentation>
+					<xs:appinfo>units:ID</xs:appinfo>
+				    </xs:annotation>
+				</xs:attribute>
+			    </xs:complexType>
+			</xs:element>
+		    </xs:sequence>
+		    <xs:attribute name="mask" type="xs:int" use="required">
+			<xs:annotation>
+			<xs:documentation>
+			    Value used to mask decision ids before selecting a branch/leaf.
+			</xs:documentation>
+			<xs:appinfo>
+			    units:None;min:0;max:0xFFFFFFFF;
+			</xs:appinfo>
+			</xs:annotation>
+		    </xs:attribute>
+		</xs:complexType>
+	    </xs:element>
+	    <xs:element name="ClinicalOutcome">
+		<xs:annotation>
+		    <xs:documentation>
+			Tables describing the probability of death and the expected length of hospital stay.
+			
+			The ID looked up in each table is the final outcome ID of the case-management tree binary or-ed
+			with the mask given here.
+		    </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+		    <xs:sequence>
+			<xs:element name="pDeath">
+			    <xs:annotation>
+				<xs:documentation>
+				    Table to give the probability of death.
+				    This probability is applied once-only for each case, irrespective of the branch (thus
+				    entries with p=0 for UC cases are probably needed).
+				</xs:documentation>
+			    </xs:annotation>
+			    <xs:complexType>
+				<xs:attribute name="ID" type="xs:int" use="required"/>
+				<xs:attribute name="p" type="xs:double" use="required"/>
+			    </xs:complexType>
+			</xs:element>
+			<xs:element name="hospitalizationDuration">
+			    <xs:annotation>
+				<xs:documentation>
+				    Table to give the median length of stay in hospital.
+				    (Use median rather than a distribution because data should be more reliable and the effect
+				    of heterogeneity should be small.)
+				</xs:documentation>
+			    </xs:annotation>
+			    <xs:complexType>
+				<xs:attribute name="ID" type="xs:int" use="required"/>
+				<xs:attribute name="days" type="xs:int" use="required"/>
+			    </xs:complexType>
+			</xs:element>
+		    </xs:sequence>
+		    <xs:attribute name="mask" type="xs:int" use="required">
+			<xs:annotation>
+			<xs:documentation>
+			    Value used to mask the final ID from the case-management tree before looking up values here.
+			</xs:documentation>
+			<xs:appinfo>
+			    units:None;min:0;max:0xFFFFFFFF;
+			</xs:appinfo>
+			</xs:annotation>
+		    </xs:attribute>
+		</xs:complexType>
+	    </xs:element>
+	</xs:sequence>
+	<xs:attribute name="healthSystemMemory" type="xs:int" use="required">
+	<xs:annotation>
+	    <xs:documentation>
+	    Follow-up period during which a recurrence is
+	    considered to be a treatment failure
+	    </xs:documentation>
+	    <xs:appinfo>units:Time steps;min:1;max:100;</xs:appinfo>
+	</xs:annotation>
+	</xs:attribute>
+    </xs:complexType>
   
     <xs:complexType name="drugDescription">
       <xs:sequence>

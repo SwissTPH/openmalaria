@@ -21,10 +21,12 @@
 #include "Clinical/ImmediateOutcomes.h"
 
 
+namespace Clinical {
+
 // -----  static init  -----
 
 void ClinicalImmediateOutcomes::initParameters () {
-  Episode::reportingPeriodMemory = OldCaseManagement::init();
+  Episode::healthSystemMemory = OldCaseManagement::init();
 }
 
 
@@ -56,4 +58,6 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHostModel& withinHostMod
 				    latestReport,
 				    ageYears,
 				    _doomed);
+}
+
 }

@@ -169,6 +169,8 @@ namespace Pathogenesis {
     SECOND_CASE		= 0x10,
     COMPLICATED		= 0x20,		///< Flag used to indicate SEVERE and/or COINFECTION
     
+    MORBIDITY_MASK	= 0x3F,		///< Mask coving all above states
+    
     // Flag used by pathogenesis model to tell the clinical model that individual will die; not used for reporting:
     INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
     
