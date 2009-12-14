@@ -140,30 +140,26 @@ Population::~Population() {
 }
 
 void Population::checkpoint (istream& stream) {
-  //Start reading a checkpoint
-  if (populationSize != get_populationsize())
-    throw checkpoint_error("population size incorrect");
-  
-  _workUnitIdentifier & stream;
-  if (_workUnitIdentifier !=  get_wu_id()) {
-    cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
-    exit(-9);
-  }
-
-  //Start reading the human data
-  int popSize;
-  popSize & stream;
-  if (popSize != populationSize)
-    throw checkpoint_error ("population size exceeds that given in scenario.xml");
-  while(popSize > 0 && !stream.eof()){
-    // Note: calling this constructor of Human is slightly wasteful, but avoids the need for another
-    // ctor and leaves less opportunity for uninitialized memory.
-    population.push_back(Human(*_transmissionModel, 0,0,0));
-    population.back() & stream;
-    --popSize;
-  }
-  if (int(population.size()) != populationSize)
-    throw checkpoint_error("can't read whole population (out of data)");
+    // Validate scenario.xml and checkpoint files correspond:
+    _workUnitIdentifier & stream;
+    if (_workUnitIdentifier !=  get_wu_id()) {
+	cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
+	exit(-9);
+    }
+    
+    int popSize;
+    popSize & stream;
+    if (popSize != populationSize)
+	throw checkpoint_error ("population size exceeds that given in scenario.xml");
+    while(popSize > 0 && !stream.eof()){
+	// Note: calling this constructor of Human is slightly wasteful, but avoids the need for another
+	// ctor and leaves less opportunity for uninitialized memory.
+	population.push_back(Human(*_transmissionModel, 0,0,0));
+	population.back() & stream;
+	--popSize;
+    }
+    if (int(population.size()) != populationSize)
+	throw checkpoint_error("can't read whole population (out of data)");
 }
 void Population::checkpoint (ostream& stream) {
   _workUnitIdentifier & stream;

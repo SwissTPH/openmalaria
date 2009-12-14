@@ -231,7 +231,8 @@ void Simulation::checkpoint (istream& stream) {
   timeStep & stream;
   simPeriodEnd & stream;
   totalSimDuration & stream;
-  Population::staticRead(stream);
+  // FIXME: appears problematic (though may not be needed):
+//   Population::staticRead(stream);
   (*_population) & stream;
   Surveys & stream;
   
@@ -262,7 +263,7 @@ void Simulation::checkpoint (ostream& stream) {
   timeStep & stream;
   simPeriodEnd & stream;
   totalSimDuration & stream;
-  Population::staticWrite(stream);
+//   Population::staticWrite(stream);
   (*_population) & stream;
   Surveys & stream;
   

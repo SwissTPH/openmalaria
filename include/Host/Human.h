@@ -64,13 +64,13 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       _ylag & stream;
-      _dateOfBirth & stream; 
-      //_ID & stream ; 
+      _dateOfBirth & stream;
+      //_ID & stream;
       _nextCtsInterv & stream;
       _lastVaccineDose & stream;
-      _BSVEfficacy & stream; 
-      _PEVEfficacy & stream; 
-      _TBVEfficacy & stream; 
+      _BSVEfficacy & stream;
+      _PEVEfficacy & stream;
+      _TBVEfficacy & stream;
       _probTransmissionToMosquito & stream;
   }
   //@}
