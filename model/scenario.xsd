@@ -1307,7 +1307,7 @@
 		    </xs:attribute>
 		</xs:complexType>
 	    </xs:element>
-	    <xs:element name="ClinicalOutcome">
+	    <xs:element name="ClinicalOutcomes">
 		<xs:annotation>
 		    <xs:documentation>
 			Tables describing the probability of death and the expected length of hospital stay.
@@ -1318,7 +1318,7 @@
 		</xs:annotation>
 		<xs:complexType>
 		    <xs:sequence>
-			<xs:element name="path" minOccurs="1" maxOccurs="unbounded">
+			<xs:element name="outcomes" minOccurs="1" maxOccurs="unbounded">
 			    <xs:annotation>
 				<xs:documentation>
 				    Parameters for a path through the case-management tree (i.e. table row).
@@ -1333,21 +1333,33 @@
 					    This probability is applied once-only for each case, irrespective of the branch (thus
 					    entries with p=0 for UC cases are probably needed).
 					</xs:documentation>
+					<xs:appinfo>units:None;min:0;max:1;</xs:appinfo>
 				    </xs:annotation>
 				</xs:attribute>
-				<xs:attribute name="hospitalizationDuration" type="xs:int" use="required">
+				<xs:attribute name="hospitalizationDaysDeath" type="xs:int" use="required">
 				    <xs:annotation>
 					<xs:documentation>
-					    The median length of stay in hospital.
+					    The median length of stay in hospital, given the patient dies directly from this event.
 					    (Use median rather than a distribution because data should be more reliable and the effect
 					    of heterogeneity should be small.)
 					</xs:documentation>
+					<xs:appinfo>units:Days;min:0;</xs:appinfo>
+				    </xs:annotation>
+				</xs:attribute>
+				<xs:attribute name="hospitalizationDaysRecover" type="xs:int" use="required">
+				    <xs:annotation>
+					<xs:documentation>
+					    The median length of stay in hospital, given the patient recovers from this event.
+					    (Use median rather than a distribution because data should be more reliable and the effect
+					    of heterogeneity should be small.)
+					</xs:documentation>
+					<xs:appinfo>units:Days;min:0;</xs:appinfo>
 				    </xs:annotation>
 				</xs:attribute>
 			    </xs:complexType>
 			</xs:element>
 		    </xs:sequence>
-		    <xs:attribute name="mask" type="xs:int" use="required">
+		    <xs:attribute name="severeMask" type="xs:int" use="required">
 			<xs:annotation>
 			<xs:documentation>
 			    Value used to mask the final ID from the case-management tree before looking up values here.

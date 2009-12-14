@@ -287,6 +287,9 @@ public:
   void setInnoculationsPerAgeGroup (vector<double>& v) {
     _innoculationsPerAgeGroup = v;	// copies v, not just its reference
   }
+  void reportHospitalizationDays (int days) {
+      //FIXME: report
+  }
   
 private:
   /// Resize all vectors

@@ -40,6 +40,7 @@ struct MedicateData {
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed
     int time;		/// Time of day to medicate at (minutes from start)
+    //FIXME: this should be total days delay; time should always be <24*60
     int seekingDelay;	/// Delay before treatment seeking in days
 };
 
@@ -57,6 +58,7 @@ struct CaseTreatment {
     
     /// Add medications into medicate queue
     inline void apply (list<MedicateData>& medicateQueue, cmid id) {
+	// Extract treatment-seeking delay from id (branch of our case-management tree)
 	int delay = (id & Decision::TSDELAY_MASK) >> Decision::TSDELAY_SHIFT;
 	assert (delay <= Decision::TSDELAY_NUM_MAX);
 	
@@ -72,11 +74,6 @@ struct CaseTreatment {
 
 /** Tracks clinical status (sickness), does case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
- * 
- * TODO: Case management cleanup
- * Case management delayed calls to medicate(), to allow cancelling when
- * patient becomes severe (from uncomplicated) or dies.
- * Reporting of parasitological status (not model specific).
  */
 class ESCaseManagement {
     public:
@@ -113,8 +110,10 @@ class ESCaseManagement {
 	
 	//FIXME: use hash-map instead
 	typedef map<cmid,CMNode*> TreeType;
+	/// Tree probability-branches and leaf nodes.
 	static TreeType cmTree;
 	
+	/// Mask applied to id before lookup in cmTree.
 	static cmid cmMask;
 };
 

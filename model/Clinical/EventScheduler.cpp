@@ -28,6 +28,9 @@
 
 namespace Clinical {
 
+ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
+cmid ClinicalEventScheduler::outcomeMask;
+
 
 // -----  static init  -----
 
@@ -37,16 +40,21 @@ void ClinicalEventScheduler::init ()
         throw xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
     if (! (Global::modelVersion & INCLUDES_PK_PD))
         throw xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
-
-    Episode::healthSystemMemory = getEventScheduler().getHealthSystemMemory();
-
-    //TODO: set properly from XML; also probability of sequelae
-    /*for (size_t t = 0; t < PTABLE_SIZE; ++t) {
-        pDeathTable[t] = 0.03;
-        pRecoverTable[t] = 0.1;
-    }*/
-
+    
+    const scnXml::EventScheduler& ev = getEventScheduler();
+    Episode::healthSystemMemory = ev.getHealthSystemMemory();
+    
     ESCaseManagement::init ();
+    
+    const scnXml::ClinicalOutcomes::OutcomesSequence& ocSeq = ev.getClinicalOutcomes().getOutcomes();
+    for (scnXml::ClinicalOutcomes::OutcomesConstIterator it = ocSeq.begin(); it != ocSeq.end(); ++it) {
+	OutcomeData od;
+	od.pDeath = it->getPDeath();
+	od.hospitalizationDaysDeath = it->getHospitalizationDaysDeath ();
+	od.hospitalizationDaysRecover = it->getHospitalizationDaysRecover ();
+	outcomes[it->getID()] = od;
+    }
+    outcomeMask = ev.getClinicalOutcomes().getSevereMask();
 }
 
 
@@ -97,85 +105,61 @@ void ClinicalEventScheduler::write (ostream& out)
 void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears)
 {
     // Run pathogenesisModel
+    // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE, though considering
+    // the model's not designed to handle "coninfections" as presented by the Pathogenesis model
+    // this is unimportant.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
-
+    
+    //TODO: changes to this condition (pending discussion)
     /* Literally, if differences between (the combination of pgState and newState)
      * and pgState include SICK, MALARIA or COMPLICATED
      * or a second case of MALARIA and at least 3 days since last change */
     if ( ( ( (newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
-            (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3)) {
+            (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3))
+    {
         if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
         SurveyAgeGroup ageGroup = ageYears;
         latestReport.update (Simulation::simulationTime, ageGroup, pgState);
         pgChangeTimestep = Simulation::simulationTime;
-
-        ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	
+        lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	if (pgState & Pathogenesis::COMPLICATED) {
+	    //TODO: report sequelae?
+	    // pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	    
+	    cmid id = lastCmDecision & outcomeMask;
+	    OutcomeType::const_iterator oi = outcomes.find (id);
+	    if (oi != outcomes.end ()) {
+		if (gsl::rngUniform() < oi->second.pDeath) {
+		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysDeath);
+		    
+		    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		    latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
+		    _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
+		} else {
+		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysRecover);
+		}
+	    }
+	    // FIXME: pgState still affects other things! Reset at some point?
+	    //  pgState = Pathogenesis::NONE;
+	}
     }
 
 
     if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
         _doomed = -Global::interval; // start indirect mortality countdown
-
+    
+    //FIXME: shouldn't this be only at the start of the event (only once per event)?
     if (pgState & Pathogenesis::MALARIA) {
         if (Global::modelVersion & PENALISATION_EPISODES) {
             withinHostModel.immunityPenalisation();
         }
     }
-
-    if (pgState & Pathogenesis::COMPLICATED) {
-        //TODO: Also set Pathogenesis::EVENT_IN_HOSPITAL where relevant:
-        //reportState = Pathogenesis::State (reportState | Pathogenesis::EVENT_IN_HOSPITAL);
-        const double pSequelae = 0.02; //prob of sequelae is constant of recovereds
-        // TODO pSequelae should come from xml
-
-        int daySinceSevere = Simulation::simulationTime - pgChangeTimestep;
-
-        if (daySinceSevere >= 10) {
-            // force recovery after 10 days
-            if (gsl::rngUniform() < pSequelae)
-                pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-            else
-                pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-            latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
-            pgState = Pathogenesis::NONE;
-        } else if (daySinceSevere >= 1) { //TODO: do we delay one day?
-            // determine case fatality rates for day1, day2, day3 (remaining days are at day 3 probabilities)
-            int delayIndex = daySinceSevere - 1; //TODO: is this right?
-            if (delayIndex > 2) delayIndex = 2; // use 3rd-day's value for any later days
-            // NOTE: delayIndex removed from lookup since it's not in VC's tables
-
-            /*FIXME
-	    int index = (lastCmDecision & TREATMENT_MASK) >> TREATMENT_SHIFT;
-            int drugIndex = lastCmDecision & DRUG_MASK;
-            if (index >= TREATMENT_NUM_TYPES || drugIndex < DRUG_FIRST_SEV) {
-                stringstream msg;
-                msg << "CM decision invalid: 0x" << hex << lastCmDecision;
-                throw runtime_error (msg.str());
-            }
-            drugIndex = (drugIndex - DRUG_FIRST_SEV) >> DRUG_SHIFT;
-            index += drugIndex * TREATMENT_NUM_TYPES;*/
-	    
-            double pDeath = 0.03;	//pDeathTable[index];
-            double pRecover = 0.1;	//pRecoverTable[index];
-
-            double rand = gsl::rngUniform();
-            if (rand < pRecover) {
-                if (rand < pSequelae*pRecover && Simulation::simulationTime >= pgChangeTimestep + 5)
-                    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-                else
-                    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-                latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
-                pgState = Pathogenesis::NONE;
-            } else if (rand < pRecover + pDeath) {
-                pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-                latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
-                _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
-            }
-            // else stay in this state
-        }
-    } else if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Simulation::simulationTime)) {
+    
+    //FIXME: do we need to force time-outs now?
+    if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Simulation::simulationTime)) {
         // Episode timeout: force recovery.
         // NOTE: An uncomplicated case occuring before this reset could be counted
         // UC2 but with treatment only occuring after this reset (when the case
@@ -187,7 +171,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
         pgState = Pathogenesis::NONE;
     }
-
+    
+    // Apply pending medications
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
         list<MedicateData>::iterator next = it;
         ++next;

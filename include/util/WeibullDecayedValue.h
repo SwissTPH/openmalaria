@@ -22,7 +22,6 @@
 #define Hmod_WeibullDecayedValue
 
 #include "Global.h"
-#include "Simulation.h"
 
 #include <limits>
 #include <boost/math/special_functions/fpclassify.hpp>

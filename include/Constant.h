@@ -175,7 +175,7 @@ namespace Pathogenesis {
     INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
     
     // Flags for outcome reporting:
-    EVENT_IN_HOSPITAL	= 0x400,	///< Indicates recovery/sequelae/death event occurred in hospital − only set on one of these events
+    EVENT_IN_HOSPITAL	= 0x400,	///< Indicates recovery/sequelae/death event occurred in hospital − only set on one of these events (ImmediateOutcomes only)
     DIRECT_DEATH	= 0x1000,	///< Used for reporting death (from COMPLICATED sickness)
     SEQUELAE		= 0x2000,	///< Reporting recovered with sequelae (from COMPLICATED sickness)
     RECOVERY		= 0x4000,	///< Report that individual fully recovered
