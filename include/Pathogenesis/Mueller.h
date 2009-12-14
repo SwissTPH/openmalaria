@@ -34,8 +34,6 @@ class MuellerPathogenesis : public PathogenesisModel {
 public:
   MuellerPathogenesis(double cF) :
     PathogenesisModel(cF) {}
-  MuellerPathogenesis(istream& in) :
-    PathogenesisModel(in) {}
   ~MuellerPathogenesis() {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);

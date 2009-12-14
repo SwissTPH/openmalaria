@@ -142,47 +142,10 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   clinicalModel = Clinical::ClinicalModel::createClinicalModel (_comorbidityFactor, _treatmentSeekingFactor);
 }
 
-// Load human from checkpoint
-Human::Human(istream& in, TransmissionModel& tm) :
-    perHostTransmission(in, tm),
-    infIncidence(InfectionIncidenceModel::createModel(in)),
-    withinHostModel(WithinHostModel::createWithinHostModel(in)),
-    clinicalModel(Clinical::ClinicalModel::createClinicalModel(in))
-{
-  in >> _dateOfBirth; 
-  //in >> _ID; 
-  in >> _lastVaccineDose; 
-  in >> _BSVEfficacy; 
-  in >> _PEVEfficacy; 
-  in >> _TBVEfficacy; 
-  _ylag.resize (_ylagLen);
-  for (int i=0;i<_ylagLen; i++) {
-    in >> _ylag[i];
-  }
-  in >> _probTransmissionToMosquito;
-}
-
 void Human::destroy() {
   delete infIncidence;
   delete withinHostModel;
   delete clinicalModel;
-}
-
-void Human::write (ostream& out) const{
-  perHostTransmission.write (out);
-  infIncidence->write (out);
-  withinHostModel->write (out);
-  clinicalModel->write (out);
-  out << _dateOfBirth << endl; 
-  //out << _ID << endl ; 
-  out << _lastVaccineDose << endl;
-  out << _BSVEfficacy << endl; 
-  out << _PEVEfficacy << endl; 
-  out << _TBVEfficacy << endl; 
-  for (int i=0;i<_ylagLen; i++) {
-    out << _ylag[i] << endl;
-  }
-  out << _probTransmissionToMosquito << endl;
 }
 
 

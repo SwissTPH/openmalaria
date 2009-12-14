@@ -24,6 +24,9 @@
 #include "inputData.h"
 #include "util/gsl.h"
 
+using namespace OM::util::errors;
+
+
 enum VaccineType {
     preerythrocytic_reduces_h = 1,
     erythrocytic_reduces_y = 2,

@@ -48,10 +48,14 @@ public:
   //! Clears human collection.
   ~Population();
   
-  /// Read checkpoint
-  void read (istream& in);
-  //! Write checkpoint
-  void write (ostream& out);
+  /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	populationSize & stream;
+	(*_transmissionModel) & stream;
+	
+	checkpoint (stream);
+    }
   
   
   /*! Estimates demography parameters to define a smooth curve for the target
@@ -107,6 +111,9 @@ private:
    * @param intervention A member-function pointer to a "void func ()" function
    *	within human which activates the intervention. */
   void massIntervention (const scnXml::Mass& mass, void (Human::*intervention)());
+  
+  void checkpoint (istream& stream);
+  void checkpoint (ostream& stream);
   
   
   /** This is the maximum age of an individual that the simulation program can

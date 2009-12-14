@@ -67,13 +67,13 @@ public:
   //Non-static:
   Vaccine() : active(false), decay(1.0) {}
   
-  /// True if this vaccine is in use
-  bool active;
-  
   /** Get the efficacy of the vaccine.
    * 
    * @param numPrevDoses The number of prior vaccinations of the individual. */
   double getEfficacy (int numPrevDoses);
+  
+  /// True if this vaccine is in use
+  bool active;
   
   /// exp(-Decay rate)
   double decay;

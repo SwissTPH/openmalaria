@@ -43,11 +43,6 @@ PyrogenPathogenesis::PyrogenPathogenesis(double cF) :
      PathogenesisModel (cF), _pyrogenThres (initPyroThres)
 {}
 
-PyrogenPathogenesis::PyrogenPathogenesis(istream& in) :
-     PathogenesisModel (in)
-{
-  in >> _pyrogenThres;
-}
 
 double PyrogenPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
   updatePyrogenThres(totalDensity);
@@ -69,7 +64,12 @@ void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
   }
 }
 
-void PyrogenPathogenesis::write(ostream& out) const {
-  PathogenesisModel::write(out);
-  out << _pyrogenThres << endl;
+
+void PyrogenPathogenesis::checkpoint (istream& stream) {
+    PathogenesisModel::checkpoint (stream);
+    _pyrogenThres & stream;
+}
+void PyrogenPathogenesis::checkpoint (ostream& stream) {
+    PathogenesisModel::checkpoint (stream);
+    _pyrogenThres & stream;
 }

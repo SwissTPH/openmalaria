@@ -33,6 +33,7 @@ double InfectionIncidenceModel::Simm;
 double InfectionIncidenceModel::Xstar_pInv;
 double InfectionIncidenceModel::EstarInv;
 
+
 // -----  static initialisation  -----
 
 void InfectionIncidenceModel::init () {
@@ -94,38 +95,6 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
 InfectionIncidenceModel::InfectionIncidenceModel () :
   _pinfected(0.0), _cumulativeEIRa(0.0)
 {}
-
-
-// -----  checkpointing  -----
-
-InfectionIncidenceModel* InfectionIncidenceModel::createModel (istream& in) {
-  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
-    return new NegBinomMAII (in);
-  } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
-    return new LogNormalMAII (in);
-  } else {
-    if (Global::modelVersion & ANY_TRANS_HET)
-      return new HeterogeneityWorkaroundII(in);
-    else
-      return new InfectionIncidenceModel(in);
-  }
-}
-
-InfectionIncidenceModel::InfectionIncidenceModel (istream& in) {
-  in >> _cumulativeEIRa;
-  in >> _pinfected;
-}
-NegBinomMAII::NegBinomMAII (istream& in) :
-  InfectionIncidenceModel(in)
-{}
-LogNormalMAII::LogNormalMAII (istream& in) :
-  InfectionIncidenceModel(in)
-{}
-
-void InfectionIncidenceModel::write (ostream& out) const {
-  out << _cumulativeEIRa << endl; 
-  out << _pinfected << endl; 
-}
 
 
 // -----  non-static methods  -----

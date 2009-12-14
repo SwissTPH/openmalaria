@@ -30,7 +30,7 @@ void ClinicalImmediateOutcomes::initParameters () {
 }
 
 
-// -----  construction, destruction and checkpointing  -----
+// -----  construction and destruction  -----
 
 ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
     ClinicalModel (cF),
@@ -38,15 +38,6 @@ ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
 {}
 ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
   delete caseManagement; 
-}
-
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (istream& in) :
-    ClinicalModel (in),
-    caseManagement(new OldCaseManagement (in))
-{}
-void ClinicalImmediateOutcomes::write (ostream& out) {
-  ClinicalModel::write (out);
-  caseManagement->write (out);
 }
 
 
@@ -58,6 +49,16 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHostModel& withinHostMod
 				    latestReport,
 				    ageYears,
 				    _doomed);
+}
+
+
+void ClinicalImmediateOutcomes::checkpoint (istream& stream) {
+    ClinicalModel::checkpoint (stream);
+    (*caseManagement) & stream;
+}
+void ClinicalImmediateOutcomes::checkpoint (ostream& stream) {
+    ClinicalModel::checkpoint (stream);
+    (*caseManagement) & stream;
 }
 
 }

@@ -39,15 +39,18 @@ protected:
 
 public:
   PyrogenPathogenesis(double cF);
-  PyrogenPathogenesis(istream& in);
   virtual ~PyrogenPathogenesis() {}
   virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup);
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
-  void write(ostream& out) const;
   
   // Static:
   static void init();
-
+  
+protected:
+    
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
 private:
   // Ystar2: critical value in determining increase in pyrogenic threshold
   static double Ystar2_13;

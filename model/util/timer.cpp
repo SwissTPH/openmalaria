@@ -27,11 +27,14 @@
 #endif
 
 #include "util/timer.h"
-#include "boinc_bridge.h"
 #include <iostream>
+#include <cstdlib>
+
 using namespace std;
 
 bool finishedCP=false;
+
+//NOTE: is calling exit from another thread even valid?
 
 #ifdef _WIN32
 HANDLE timer_threadCP;

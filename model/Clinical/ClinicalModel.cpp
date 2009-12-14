@@ -68,12 +68,6 @@ ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
   else
     return new ClinicalImmediateOutcomes (cF, tSF);
 }
-ClinicalModel* ClinicalModel::createClinicalModel (istream& in) {
-  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
-    return new ClinicalEventScheduler (in);
-  else
-    return new ClinicalImmediateOutcomes (in);
-}
 
 double ClinicalModel::infantAllCauseMort(){
   double infantPropSurviving=1.0;	// use to calculate proportion surviving
@@ -96,18 +90,6 @@ ClinicalModel::ClinicalModel (double cF) :
 ClinicalModel::~ClinicalModel () {
   delete pathogenesisModel;
   // latestReport is reported, if any, by destructor
-}
-
-ClinicalModel::ClinicalModel (istream& in) :
-    pathogenesisModel(PathogenesisModel::createPathogenesisModel(in)),
-    latestReport(in)
-{
-  in >> _doomed; 
-}
-void ClinicalModel::write (ostream& out) {
-  pathogenesisModel->write (out);
-  latestReport.write(out);
-  out << _doomed << endl;
 }
 
 
@@ -157,6 +139,18 @@ void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
 
 void ClinicalModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
   pathogenesisModel->summarize (survey, ageGroup);
+}
+
+
+void ClinicalModel::checkpoint (istream& stream) {
+    (*pathogenesisModel) & stream;
+    latestReport & stream;
+    _doomed & stream;
+}
+void ClinicalModel::checkpoint (ostream& stream) {
+    (*pathogenesisModel) & stream;
+    latestReport & stream;
+    _doomed & stream;
 }
 
 }

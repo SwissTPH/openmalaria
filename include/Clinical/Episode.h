@@ -36,10 +36,8 @@
 class Episode{
 public:
   Episode() : _time(TIMESTEP_NEVER), _ageGroup(0) {};
-  Episode (istream& in);
   ~Episode();
-  void write (ostream& out);
-
+  
   /** Report an episode, its severity, and any outcomes it entails.
    *
    * @param simulationTime Time of report (i.e. now)
@@ -55,6 +53,11 @@ public:
   }
   
   Pathogenesis::State getState() const {return _state;};
+  
+  /// Checkpointing
+  void operator& (istream& stream);
+  void operator& (ostream& stream);	///< ditto
+  
   
   /** The maximum age, in timesteps, of when a sickness event occurred, for
    * another event to be considered part of the same episode.

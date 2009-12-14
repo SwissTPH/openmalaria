@@ -64,6 +64,9 @@ private:
   void updateEIR (int day, double EIRdaily); 
   double averageEIR (const scnXml::NonVector& nonVectorData); 
   
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
+  
 //! multiplier used to calculate a positive EIR value where the measured value is zero
 /* 
   0.01 was old pv(30) Now a constant. min_EIR_mult multiplies the average EIR to obtain a value used for the EIR during periods when it is too low 
@@ -86,7 +89,6 @@ private:
   //@}
   
   /// EIR per time interval during the intervention period 
-  //TODO: checkpoint for intervention-phase checkpointing
   vector<double> interventionEIR;
   
   /** initialKappa[] is the value of kappa during the pre-intervention phase.

@@ -38,9 +38,10 @@ LSTMDrug::LSTMDrug (const LSTMDrugType* type, istream& in) :
 {
   int num;
   in >> num;
-  Global::validateListSize (num);
-  for (int i = 0; i < num; ++i)
+  validateListSize (num);
+  for (int i = 0; i < num; ++i) {
     doses.push_back (Dose (in));
+  }
 }
 
 void LSTMDrug::write (ostream& out) const {

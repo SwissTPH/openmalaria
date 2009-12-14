@@ -118,9 +118,7 @@ void EmpiricalInfection::initParameters(){
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
-EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplier) :
-  Infection(startTime)
-{
+EmpiricalInfection::EmpiricalInfection(double growthRateMultiplier) {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time
   _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
@@ -129,24 +127,11 @@ EmpiricalInfection::EmpiricalInfection(int startTime, double growthRateMultiplie
   //only the immediately preceding value is modified by the growth rate multiplier
   _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
+  
+  if (Global::modelVersion & INCLUDES_PK_PD)
+      _proteome = ProteomeInstance::newInfection();
 }
 EmpiricalInfection::~EmpiricalInfection() {
-}
-
-EmpiricalInfection::EmpiricalInfection (istream& in) :
-  Infection(in)
-{
-  in >> _laggedLogDensities[0];
-  in >> _laggedLogDensities[1];
-  in >> _laggedLogDensities[2];
-  in >> _patentGrowthRateMultiplier;
-}
-void EmpiricalInfection::write (ostream& out) const {
-  Infection::write (out);
-  out << _laggedLogDensities[0] << endl;
-  out << _laggedLogDensities[1] << endl;
-  out << _laggedLogDensities[2] << endl;
-  out << _patentGrowthRateMultiplier << endl;
 }
 
 
@@ -257,4 +242,22 @@ void EmpiricalInfection::overrideInflationFactors(double inflationMean, double i
   _extinctionLevel=extinctionLevel;
   _overallMultiplier=overallMultiplier;
   _subPatentLimit=10.0/_overallMultiplier;
+}
+
+
+// -----  checkpointing  -----
+
+void EmpiricalInfection::checkpoint (istream& stream) {
+    Infection::checkpoint (stream);
+    _laggedLogDensities[0] & stream;
+    _laggedLogDensities[1] & stream;
+    _laggedLogDensities[2] & stream;
+    _patentGrowthRateMultiplier & stream;
+}
+void EmpiricalInfection::checkpoint (ostream& stream) {
+    Infection::checkpoint (stream);
+    _laggedLogDensities[0] & stream;
+    _laggedLogDensities[1] & stream;
+    _laggedLogDensities[2] & stream;
+    _patentGrowthRateMultiplier & stream;
 }

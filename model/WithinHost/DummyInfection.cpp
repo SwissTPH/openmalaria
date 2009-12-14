@@ -27,41 +27,19 @@
 #include <string.h>
 
 
-DummyInfection::~DummyInfection() {
-}
-void DummyInfection::destroy() {
-}
-
 void DummyInfection::init (){
 }
 
-DummyInfection::DummyInfection(int simulationTime) :
-  Infection (simulationTime)
-{
-    //Initialize current infection data
-    _startdate=simulationTime;
+DummyInfection::DummyInfection() {
     _density=16;	// increased by DH to avoid zeros in initialKappa
     _duration=100;	// arbitrary max duration
     
     if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeInstance::newInfection();
-    else
-      _proteome = NULL;
 }
 
 int DummyInfection::getEndDate(){
   return _startdate+_duration/Global::interval;
-}
-
-void DummyInfection::write (ostream& out) const {
-  Infection::write (out);
-  out << _duration << endl; 
-}
-
-DummyInfection::DummyInfection (istream& in) :
-  Infection (in)
-{
-  in >> _duration;
 }
 
 void DummyInfection::determineWithinHostDensity(){
@@ -79,4 +57,14 @@ void DummyInfection::determineWithinHostDensity(){
     _density = (int(_density*GROWTH_RATE) % 20000);
   }
   _cumulativeExposureJ += Global::interval * _density;
+}
+
+
+void DummyInfection::checkpoint (istream& stream) {
+    Infection::checkpoint (stream);
+    _duration & stream;
+}
+void DummyInfection::checkpoint (ostream& stream) {
+    Infection::checkpoint (stream);
+    _duration & stream;
 }

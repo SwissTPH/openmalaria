@@ -83,11 +83,11 @@ public:
    * information from the human population structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize) {}
   
-  void write(ostream& out) const;
-  void read(istream& in);
-  // Virtual checkpointing functions (overridable by subclasses):
-  virtual void writeV(ostream& out) const {};
-  virtual void readV(istream& in) {};
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
   //@}
   
   /// Set a couple of summary items
@@ -150,6 +150,9 @@ protected:
    * \param simulationTime Time since start of simulation.
    * \param host The human to calculate EIR for (not used by all models). */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;

@@ -37,22 +37,27 @@ class Human;
  * (potentially) species-specific per-population data.
  * 
  * Instead of storing static variables in this class, store them in
- * the VectorTransmission class. */
+ * the VectorTransmission class.
+ * 
+ * Variable names largely come from Nakul Chitnis's paper:
+ * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
+ * a heterogeneous host population" (3rd Oct. 2007). */
 class VectorAnopheles
 {
 public:
-  VectorAnopheles (
 #ifdef OMV_CSV_REPORTING
-  ofstream& csvR
+    VectorAnopheles (ofstream& csvR) :
+	partialEIR(0.0),
+	larvicidingEndStep (std::numeric_limits<int>::max()),
+	larvicidingIneffectiveness (1.0),
+	csvReporting(&csvR)
+    {}
 #endif
-  ) :
-    partialEIR(0.0),
-    larvicidingEndStep (std::numeric_limits<int>::max()),
-    larvicidingIneffectiveness (1.0)
-#ifdef OMV_CSV_REPORTING
-  , csvReporting(&csvR)
-#endif
-  {}
+    VectorAnopheles () :
+	partialEIR(0.0),
+	larvicidingEndStep (std::numeric_limits<int>::max()),
+	larvicidingIneffectiveness (1.0)
+    {}
   
   ///@brief Initialisation and destruction
   //@{
@@ -63,9 +68,6 @@ public:
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
    */
   string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
-  
-  void write(ostream& out) const;
-  void read(istream& in);
   
   /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
    * on the human population structure (when not loading from a checkpoint).
@@ -132,6 +134,40 @@ public:
   }
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
+  
+  /// Checkpointing
+  //NOTE: below comments about what does and doesn't need checkpointing are ignored here.
+  template<class S>
+  void operator& (S& stream) {
+    humanBase & stream;
+    mosqSeekingDeathRate & stream;	
+    mosqSeekingDuration & stream;
+    mosqRestDuration & stream;
+    EIPDuration & stream;
+    probMosqSurvivalOvipositing & stream;
+    nonHumanHosts & stream;
+    EIRRotateAngle & stream;
+    FSRotateAngle & stream;
+    FSCoeffic & stream;
+    mosqEmergeRate & stream;
+    forcedS_v & stream;
+    annualS_v & stream;
+    sumAnnualForcedS_v & stream;
+    initNv0FromSv & stream;
+    initNvFromSv & stream;
+    N_v_length & stream;
+    P_A & stream;
+    P_df & stream;
+    P_dif & stream;
+    N_v & stream;
+    O_v & stream;
+    S_v & stream;
+    fArray & stream;
+    ftauArray & stream;
+    partialEIR & stream;
+    larvicidingEndStep & stream;
+    larvicidingIneffectiveness & stream;
+  }
   
 private:
   /** @brief Baseline parameters which may be varied per host
@@ -322,6 +358,8 @@ private:
   
 #ifdef OMV_CSV_REPORTING
   /// This is used to output infectiousness, etc. as a csv file, when included
+  //TODO: replace this reporting system
+  //NOTE: this is not checkpointed
   ofstream* csvReporting;
 #endif
 };

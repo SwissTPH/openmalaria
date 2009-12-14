@@ -100,30 +100,14 @@ void DescriptiveInfection::clearParameters () {}
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection(int simulationTime) :
-  Infection(simulationTime)
-{
-    //Initialize current infection data
+DescriptiveInfection::DescriptiveInfection() {
     _duration=infectionDuration();
     
     if (Global::modelVersion & INCLUDES_PK_PD)
       _proteome = ProteomeInstance::newInfection();
-    else
-      _proteome = NULL;
 }
 
 DescriptiveInfection::~DescriptiveInfection() {
-}
-
-DescriptiveInfection::DescriptiveInfection (istream& in) :
-  Infection (in)
-{
-  in >> _duration;
-}
-
-void DescriptiveInfection::write (ostream& out) const {
-  Infection::write (out);
-  out << _duration << endl; 
 }
 
 
@@ -221,4 +205,14 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 void DescriptiveInfection::determineDensityFinal () {
   _density = std::min(maxDens, _density);
   _cumulativeExposureJ += Global::interval * _density;
+}
+
+
+void DescriptiveInfection::checkpoint (istream& stream) {
+    Infection::checkpoint (stream);
+    _duration & stream;
+}
+void DescriptiveInfection::checkpoint (ostream& stream) {
+    Infection::checkpoint (stream);
+    _duration & stream;
 }

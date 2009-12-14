@@ -34,7 +34,7 @@ LSTMPkPdModel::~LSTMPkPdModel () {}
 LSTMPkPdModel::LSTMPkPdModel (istream& in) {
   int numDrugs;
   in >> numDrugs;
-  Global::validateListSize (numDrugs);
+  validateListSize (numDrugs);
   for (int i=0; i<numDrugs; i++) {
     string abbrev;
     in >> abbrev;

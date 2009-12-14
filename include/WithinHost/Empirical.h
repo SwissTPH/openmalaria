@@ -35,12 +35,9 @@ using namespace std;
  */
 class EmpiricalWithinHostModel : public WithinHostModel
 {
-  public:
+public:
     EmpiricalWithinHostModel();
     ~EmpiricalWithinHostModel();
-    
-    EmpiricalWithinHostModel (istream& in);
-    virtual void write (ostream& out) const;
     
     
     virtual void newInfection();
@@ -52,10 +49,13 @@ class EmpiricalWithinHostModel : public WithinHostModel
      * and drug efficacies. */
     virtual void calculateDensities (double ageInYears, double BSVEfficacy);
     
-  protected:
+protected:
     virtual int countInfections (int& patentInfections);
     
-  private:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
+private:
     /// Encapsulates drug code for each human
     PkPdModel* pkpdModel;
 

@@ -49,7 +49,15 @@ class WeibullDecayedValue
                 _initial (numeric_limits< double >::signaling_NaN()),
                 _k (numeric_limits< double >::signaling_NaN()),
                 _constOverLambda (numeric_limits< double >::signaling_NaN()) {}
-
+	
+	/// Checkpointing
+	template<class S>
+	void operator& (S& stream) {
+	    _initial & stream;
+	    _k & stream;
+	    _constOverLambda & stream;
+	}
+	
         /** Set the initial value and the Weibull distribution parameters.
          *
          * @param initial Initial value (returned by operator(0))

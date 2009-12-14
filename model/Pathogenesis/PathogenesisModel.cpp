@@ -68,30 +68,12 @@ PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
     }
   }
 }
-
-PathogenesisModel* PathogenesisModel::createPathogenesisModel(istream& in) {
-  if (Global::modelVersion & PREDETERMINED_EPISODES) {
-    return new PredetPathogenesis(in);
-  }
-  else {
-    if (Global::modelVersion & MUELLER_PRESENTATION_MODEL) {
-      return new MuellerPathogenesis(in);
-    }
-    else {
-      return new PyrogenPathogenesis(in);
-    }
-  }
-}
 //END static
 
 
 PathogenesisModel::PathogenesisModel(double cF) :
     _comorbidityFactor(cF)
 {}
-PathogenesisModel::PathogenesisModel(istream& in)
-{
-  in >> _comorbidityFactor;
-}
 
 Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHostModel& withinHostModel) {
   double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
@@ -134,6 +116,10 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
   return Pathogenesis::NONE;
 }
 
-void PathogenesisModel::write(ostream& out) const {
-  out << _comorbidityFactor << endl;
+
+void PathogenesisModel::checkpoint (istream& stream) {
+  _comorbidityFactor & stream;
+}
+void PathogenesisModel::checkpoint (ostream& stream) {
+    _comorbidityFactor & stream;
 }

@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "util/gsl.h"
 
+using namespace OM::util::errors;
 
 namespace Clinical {
 

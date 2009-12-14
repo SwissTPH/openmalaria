@@ -60,16 +60,18 @@ public:
    * to add to the summary. */
   virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup) {}
   
-  /// @brief Checkpointing functions
-  //@{
-  virtual void write(ostream& out) const;
-  //@}
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
   
 protected:
   /** Create a PathogenesisModel. */
   PathogenesisModel(double cF);
-  /** Create a PathogenesisModel. */
-  PathogenesisModel(istream& in);
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
 private:	// static
   //comorbidity prevalence at birth as a risk factor for indirect

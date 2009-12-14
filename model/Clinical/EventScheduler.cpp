@@ -25,6 +25,7 @@
 #include "Simulation.h"
 #include "Surveys.h"
 
+using namespace OM::util::errors;
 
 namespace Clinical {
 
@@ -65,39 +66,6 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         pgState (Pathogenesis::NONE), pgChangeTimestep (TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
-
-ClinicalEventScheduler::ClinicalEventScheduler (istream& in) :
-        ClinicalModel (in)
-{
-    int x;
-    in >> x;
-    pgState = (Pathogenesis::State) x;
-    in >> pgChangeTimestep;
-    in >> x;
-    for (; x > 0; --x) {
-        MedicateData md;
-        in >> md.abbrev;
-        in >> md.qty;
-        in >> md.time;
-        in >> md.seekingDelay;
-        medicateQueue.push_back (md);
-    }
-    in >> lastCmDecision;
-}
-void ClinicalEventScheduler::write (ostream& out)
-{
-    ClinicalModel::write (out);
-    out << pgState << endl;
-    out << pgChangeTimestep << endl;
-    out << medicateQueue.size() << endl;
-    for (list<MedicateData>::iterator i = medicateQueue.begin(); i != medicateQueue.end(); ++i) {
-        out << i->abbrev << endl;
-        out << i->qty << endl;
-        out << i->time << endl;
-        out << i->seekingDelay << endl;
-    }
-    out << lastCmDecision << endl;
-}
 
 
 // -----  other methods  -----
@@ -184,6 +152,24 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         }
         it = next;
     }
+}
+
+
+void ClinicalEventScheduler::checkpoint (istream& stream) {
+    ClinicalModel::checkpoint (stream);
+    int s;
+    s & stream;
+    pgState = Pathogenesis::State(s);
+    pgChangeTimestep & stream;
+    medicateQueue & stream;
+    lastCmDecision & stream;
+}
+void ClinicalEventScheduler::checkpoint (ostream& stream) {
+    ClinicalModel::checkpoint (stream);
+    pgState & stream;
+    pgChangeTimestep & stream;
+    medicateQueue & stream;
+    lastCmDecision & stream;
 }
 
 }

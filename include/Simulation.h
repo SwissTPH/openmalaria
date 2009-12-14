@@ -78,8 +78,8 @@ private:
   void writeCheckpoint();
   void readCheckpoint();
   
-  void write (ostream& out);
-  void read (istream& in);
+  void checkpoint (istream& stream);
+  void checkpoint (ostream& stream);
   //@}
   
   static int simPeriodEnd;

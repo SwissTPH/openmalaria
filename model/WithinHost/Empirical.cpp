@@ -36,26 +36,12 @@ EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
   delete pkpdModel;
 }
 
-EmpiricalWithinHostModel::EmpiricalWithinHostModel(istream& in) :
-    WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
-{
-  for(int i=0;i<_MOI;++i)
-    infections.push_back(EmpiricalInfection(in));
-}
-void EmpiricalWithinHostModel::write(ostream& out) const {
-  WithinHostModel::write (out);
-  pkpdModel->write (out);
-  
-  for(std::list<EmpiricalInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    iter->write (out);
-}
-
 
 // -----  Simple infection adders/removers  -----
 
 void EmpiricalWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    infections.push_back(EmpiricalInfection(Simulation::simulationTime, 1));
+    infections.push_back(EmpiricalInfection(1));
     _MOI++;
   }
 }
@@ -111,4 +97,18 @@ int EmpiricalWithinHostModel::countInfections (int& patentInfections) {
       patentInfections++;
   }
   return infections.size();
+}
+
+
+void EmpiricalWithinHostModel::checkpoint (istream& stream) {
+    WithinHostModel::checkpoint (stream);
+    pkpdModel = PkPdModel::createPkPdModel (stream);
+    infections & stream;
+    if (int(infections.size()) != _MOI)
+	throw OM::util::errors::checkpoint_error ("_MOI mismatch");
+}
+void EmpiricalWithinHostModel::checkpoint (ostream& stream) {
+    WithinHostModel::checkpoint (stream);
+    pkpdModel->write (stream);
+    infections & stream;
 }

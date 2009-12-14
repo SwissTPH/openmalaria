@@ -22,6 +22,7 @@
 #define Hmod_Infection
 
 #include "Global.h"
+#include "Simulation.h"
 #include "Host/proteome.h"
 
 
@@ -32,15 +33,12 @@ public:
   
   static void init();
   
-  Infection (int now) :
+  Infection () :
     _proteome(NULL),
-    _startdate(now),
+    _startdate(Simulation::simulationTime),
     _density(0.0),
     _cumulativeExposureJ(0.0)
     {}
-  Infection (istream& in);
-  
-  virtual void write (ostream& out) const;
   
   //! Get proteome
   inline const ProteomeInstance* getProteome() const {
@@ -57,7 +55,16 @@ public:
    * timestep). */
   double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
   
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
+  
 protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
   //! Proteome (used in a different situation than genotype) 
   const ProteomeInstance* _proteome; 
   

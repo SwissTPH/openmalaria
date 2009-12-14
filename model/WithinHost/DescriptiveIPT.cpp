@@ -42,7 +42,7 @@ void DescriptiveIPTWithinHost::initParameters () {
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) {
       if (getActiveInterventions()[Interventions::IPTI])
-	  throw xml_scenario_error ("IPTI used without description");
+	  throw OM::util::errors::xml_scenario_error ("IPTI used without description");
       return;
   }
   
@@ -85,33 +85,9 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
     _cumulativeInfections(0)
 {
   if (Global::modelVersion & INCLUDES_PK_PD) {
-    throw xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
+    throw OM::util::errors::xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
     // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
   }
-}
-
-
-// -----  Data checkpointing  -----
-
-DescriptiveIPTWithinHost::DescriptiveIPTWithinHost (istream& in) :
-    DescriptiveWithinHostModel(in, true)
-{
-  for(int i=0;i<_MOI;++i)
-    infections.push_back(new DescriptiveIPTInfection(in));
-  
-  in >> _SPattenuationt;
-  in >> _lastSPDose; 
-  in >> _lastIptiOrPlacebo;
-  in >> _cumulativeInfections;
-}
-
-void DescriptiveIPTWithinHost::write(ostream& out) const {
-  DescriptiveWithinHostModel::write (out);
-  
-  out << _SPattenuationt << endl;
-  out << _lastSPDose << endl; 
-  out << _lastIptiOrPlacebo << endl;
-  out << _cumulativeInfections << endl;
 }
 
 
@@ -120,7 +96,7 @@ void DescriptiveIPTWithinHost::write(ostream& out) const {
 void DescriptiveIPTWithinHost::newInfection(){
   if (_MOI <= MAX_INFECTIONS) {
     _cumulativeInfections++;
-    infections.push_back(new DescriptiveIPTInfection(_lastSPDose, Simulation::simulationTime));
+    infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     _MOI++;
   }
 }
@@ -248,4 +224,22 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection*
     _SPattenuationt = (int) std::max(double(_SPattenuationt),
 				     iptInf->getAsexualAttenuationEndDate());
   }
+}
+
+
+// -----  Data checkpointing  -----
+
+void DescriptiveIPTWithinHost::checkpoint (istream& stream) {
+    DescriptiveWithinHostModel::checkpoint (stream);
+    _SPattenuationt & stream;
+    _lastSPDose & stream; 
+    _lastIptiOrPlacebo & stream;
+    _cumulativeInfections & stream;
+}
+void DescriptiveIPTWithinHost::checkpoint (ostream& stream) {
+    DescriptiveWithinHostModel::checkpoint (stream);
+    _SPattenuationt & stream;
+    _lastSPDose & stream; 
+    _lastIptiOrPlacebo & stream;
+    _cumulativeInfections & stream;
 }

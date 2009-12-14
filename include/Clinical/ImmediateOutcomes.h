@@ -39,16 +39,17 @@ public:
   static void initParameters ();
   
   ClinicalImmediateOutcomes (double cF, double tSF);
-  ClinicalImmediateOutcomes (istream& in);
   ~ClinicalImmediateOutcomes ();
-  
-  void write (ostream& out);
   
   void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
   
   inline bool recentTreatment() {
     return caseManagement->recentTreatment();
   }
+  
+protected:
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
 private:
   //TODO move implementation into class?

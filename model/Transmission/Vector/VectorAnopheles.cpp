@@ -46,7 +46,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-    throw xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
+    throw OM::util::errors::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
   N_v_length = EIPDuration + mosqRestDuration;
   
@@ -403,7 +403,7 @@ void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt
 
 void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle) {
   if (FC.size() % 2 == 0)
-    throw xml_scenario_error("The number of Fourier coefficents should be odd.");
+      throw OM::util::errors::xml_scenario_error("The number of Fourier coefficents should be odd.");
   
   // Frequency
   double w = 2*M_PI / double(tArray.size());
@@ -420,51 +420,4 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
     }
     tArray[t] = exp(temp);
   }
-}
-
-
-
-void VectorAnopheles::write (ostream& out) const {
-  out << FSRotateAngle << endl;
-  out << FSCoeffic[0] << endl;
-  for (int i = 0; i < daysInYear; ++i) {
-    out << mosqEmergeRate[i] << endl;
-    out << forcedS_v[i] << endl;
-    out << annualS_v[i] << endl;
-  }
-  out << initNv0FromSv << endl;
-  out << initNvFromSv << endl;
-  out << sumAnnualForcedS_v << endl;
-  for (int i = 0; i < N_v_length; ++i) {
-    out << P_A[i] << endl;
-    out << P_df[i] << endl;
-    out << P_dif[i] << endl;
-    out << N_v[i] << endl;
-    out << O_v[i] << endl;
-    out << S_v[i] << endl;
-  }
-  out << larvicidingEndStep << endl;
-  out << larvicidingIneffectiveness << endl;
-}
-void VectorAnopheles::read (istream& in) {
-  in >> FSRotateAngle;
-  in >> FSCoeffic[0];
-  for (int i = 0; i < daysInYear; ++i) {
-    in >> mosqEmergeRate[i];
-    in >> forcedS_v[i];
-    in >> annualS_v[i];
-  }
-  in >> initNv0FromSv;
-  in >> initNvFromSv;
-  in >> sumAnnualForcedS_v;
-  for (int i = 0; i < N_v_length; ++i) {
-    in >> P_A[i];
-    in >> P_df[i];
-    in >> P_dif[i];
-    in >> N_v[i];
-    in >> O_v[i];
-    in >> S_v[i];
-  }
-  in >> larvicidingEndStep;
-  in >> larvicidingIneffectiveness;
 }

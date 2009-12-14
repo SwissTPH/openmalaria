@@ -50,7 +50,7 @@ int main(int argc, char* argv[]){
       Simulation simulation;	// constructor runs
       simulation.start();
     }	// simulation's destructor runs
-  } catch (const cmd_exit& e) {	// this is not an error, but exiting due to command line
+  } catch (const OM::util::errors::cmd_exit& e) {	// this is not an error, but exiting due to command line
     cout << e.what() << "; exiting..." << endl;
   } catch (const ::xsd::cxx::tree::exception<char>& e) {
     cout << "XSD Exception: " << e.what() << '\n' << e << endl;

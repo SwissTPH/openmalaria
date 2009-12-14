@@ -29,6 +29,8 @@
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
 const double NonVectorTransmission::min_EIR_mult= 0.01; 
 
+using namespace OM::util::errors;
+
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
 {
   nspore = nonVectorData.getEipDuration() / Global::interval;
@@ -155,4 +157,18 @@ double NonVectorTransmission::averageEIR (const scnXml::NonVector& nonVectorData
     valaverageEIR += (double)daily[i];
   }
   return valaverageEIR / i;
+}
+
+
+// -----  checkpointing  -----
+
+void NonVectorTransmission::checkpoint (istream& stream) {
+    nspore & stream;
+    interventionEIR & stream;
+    initialKappa & stream;
+}
+void NonVectorTransmission::checkpoint (ostream& stream) {
+    nspore & stream;
+    interventionEIR & stream;
+    initialKappa & stream;
 }

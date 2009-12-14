@@ -37,6 +37,8 @@ double OldCaseManagement::cureRate[3];
 double OldCaseManagement::probSequelaeTreated[2];
 double OldCaseManagement::probSequelaeUntreated[2];
 
+using namespace OM::util::errors;
+
 
 // -----  static init  -----
 
@@ -78,19 +80,6 @@ OldCaseManagement::OldCaseManagement (double tSF) :
 }
 OldCaseManagement::~OldCaseManagement()
 {
-}
-
-OldCaseManagement::OldCaseManagement (istream& in)
-{
-  in >> _treatmentSeekingFactor;
-  in >> _tLastTreatment;
-  in >> _latestRegimen;
-}
-void OldCaseManagement::write (ostream& out) const
-{
-  out << _treatmentSeekingFactor << endl;
-  out << _tLastTreatment << endl;
-  out << _latestRegimen << endl;
 }
 
 

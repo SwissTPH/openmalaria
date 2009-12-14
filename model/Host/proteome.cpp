@@ -56,7 +56,7 @@ Protein::Protein(istream& in) {
   positions = vector<ProteinPosition*>();
   size_t numPositions;
   in >> numPositions;
-  Global::validateListSize (numPositions);
+  validateListSize (numPositions);
   for(size_t i=0; i<numPositions; i++) {
     //Object will add itself to this->positions
     new ProteinPosition (this, in);
@@ -112,7 +112,7 @@ ProteinPosition::ProteinPosition(Protein* _protein, istream& in) {
   in >> wildType;
   size_t numMutations;
   in >> numMutations;
-  Global::validateListSize (numMutations);
+  validateListSize (numMutations);
   for(size_t j=0; j<numMutations; j++) {
     char allele;
     in >> allele;
@@ -300,7 +300,7 @@ void ProteomeManager::read (istream& in) {
   
   size_t numProteins;
   in >> numProteins;
-  Global::validateListSize (numProteins);
+  validateListSize (numProteins);
   for(size_t i=0; i<numProteins; i++) {
     proteins.push_back(new Protein(in));
   }

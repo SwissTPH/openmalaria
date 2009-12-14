@@ -46,18 +46,18 @@ public:
   
   /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();
-  
-  /// Create an instance, loading from a checkpoint.
-  static WithinHostModel* createWithinHostModel (istream& in);
   //@}
   
   /// @brief Constructors, destructors and checkpointing functions
   //@{
   WithinHostModel();
-  WithinHostModel(istream& in);
   virtual ~WithinHostModel() {}
   
-  virtual void write(ostream& out) const;
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
   //@}
   
   void summarize(Survey& survey, SurveyAgeGroup ageGroup);
@@ -118,6 +118,9 @@ protected:
    * @param patentInfections Out param: the number of patent infections
 	    (only set if return-value is non-zero). */
   virtual int countInfections (int& patentInfections) =0;
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
   //!innate ability to control parasite densities
   double _innateImmSurvFact;

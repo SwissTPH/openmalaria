@@ -55,6 +55,13 @@ public:
   void addPosition(ProteinPosition* _position);
   Mutation* getMutation(int _position, char _allele) throw(int);
   void write (ostream& out);
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      name & stream;
+      positions & stream;	//TODO: check this won't compile due to no pointer support
+  }
 };
 
 /** Only used within proteome code. */

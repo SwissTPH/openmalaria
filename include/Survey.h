@@ -113,9 +113,11 @@ class SurveyAgeGroup {
   public:
     /** Find the age group for the given age ageYears. */
     SurveyAgeGroup (double ageYears);
-    /** Used for checkpointing. */
-    void read (istream& in) {
-      in >> _i;
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	_i & stream;
     }
     
     /** Get the represented index. */
@@ -289,6 +291,40 @@ public:
   }
   void reportHospitalizationDays (int days) {
       //FIXME: report
+  }
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+    _numHosts & stream;
+    _numInfectedHosts & stream;
+    _numExpectedInfected & stream;
+    _numPatentHosts & stream;
+    _sumLogPyrogenicThreshold & stream;
+    _sumLogDensity & stream;
+    _sumInfections & stream;
+    _numTransmittingHosts & stream;
+    _sumPatentInfections & stream;
+    _sumPyrogenicThreshold & stream;
+    _numTreatments1 & stream;
+    _numTreatments2 & stream;
+    _numTreatments3 & stream;
+    _numUncomplicatedEpisodes & stream;
+    _numSevereEpisodes & stream;
+    _numSequelae & stream;
+    _numHospitalDeaths & stream;
+    _numIndirectDeaths & stream;
+    _numDirectDeaths & stream;
+    _numEPIVaccinations & stream;
+    _numMassVaccinations & stream; 
+    _numHospitalRecoveries & stream;
+    _numHospitalSequelae & stream;
+    _numIPTDoses & stream;
+    _annualAverageKappa & stream;
+    _numNonMalariaFevers & stream; 
+    _innoculationsPerDayOfYear & stream;
+    _kappaPerDayOfYear & stream;
+    _innoculationsPerAgeGroup & stream;
   }
   
 private:

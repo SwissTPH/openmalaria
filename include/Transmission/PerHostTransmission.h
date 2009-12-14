@@ -66,8 +66,6 @@ public:
   //@{
   PerHostTransmission ();
   void initialise (TransmissionModel& tm, double availabilityFactor);
-  PerHostTransmission (istream& in, TransmissionModel&);
-  void write (ostream& out) const;
   //@}
   
   /** @brief Get model parameters for species[speciesIndex].
@@ -133,6 +131,17 @@ public:
    * distribution along with measles vaccines, etc.). */
   void continousItnDistribution (int ageTSteps);
   
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      species & stream;
+      _relativeAvailabilityHet & stream;
+      timestepITN & stream;
+      timestepIRS & stream;
+      timestepVA & stream;
+      nextItnDistribution & stream;
+  }
+  
   
 private:
   vector<HostMosquitoInteraction> species;
@@ -184,8 +193,14 @@ public:
    * get baseline parameters. */
   void initialise (HostCategoryAnopheles& base, double availabilityFactor);
   
-  void read (istream& in);
-  void write (ostream& out) const;
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      entoAvailability & stream;
+      probMosqBiting & stream;
+      probMosqFindRestSite & stream;
+      probMosqSurvivalResting & stream;
+  }
   
 private:
   ///@brief Rate/probabilities before interventions. See functions.

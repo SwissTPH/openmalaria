@@ -67,8 +67,8 @@ void DescriptiveIPTInfection::clearParameters () {
 
 // -----  non-static init/destruction  -----
 
-DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose, int simulationTime) :
-  DescriptiveInfection(simulationTime), _SPattenuate(false)
+DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
+  DescriptiveInfection(), _SPattenuate(false)
 {
   _gType.ID=-1;
   
@@ -100,23 +100,10 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose, int simulationT
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
-      simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
+    if (Simulation::simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
+	Simulation::simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
       _SPattenuate=true;
     }
-}
-
-DescriptiveIPTInfection::DescriptiveIPTInfection (istream& in) :
-  DescriptiveInfection (in)
-{
-  in >> _gType.ID; 
-  in >> _SPattenuate; 
-}
-
-void DescriptiveIPTInfection::write (ostream& out) const {
-  DescriptiveInfection::write (out);
-  out << _gType.ID << endl; 
-  out << _SPattenuate << endl; 
 }
 
 
@@ -124,4 +111,16 @@ double DescriptiveIPTInfection::asexualAttenuation () {
   double attFact = 1.0 / genotypeAtten[_gType.ID];
   _density *= attFact;
   return attFact;
+}
+
+
+void DescriptiveIPTInfection::checkpoint (istream& stream) {
+  DescriptiveInfection::checkpoint (stream);
+  _gType & stream; 
+  _SPattenuate & stream; 
+}
+void DescriptiveIPTInfection::checkpoint (ostream& stream) {
+    DescriptiveInfection::checkpoint (stream);
+    _gType & stream; 
+    _SPattenuate & stream; 
 }

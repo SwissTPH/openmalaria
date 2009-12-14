@@ -54,7 +54,7 @@ void DrugType::addDrug(DrugType* drug) {
 const DrugType* DrugType::getDrug(string _abbreviation) {
   map<string,DrugType*>::const_iterator i = available.find (_abbreviation);
   if (i == available.end())
-    throw xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
+    throw OM::util::errors::xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
   
   return i->second;
 }

@@ -47,9 +47,14 @@ public:
   static void init();
   /// Create a new instance
   static InfectionIncidenceModel* createModel ();
-  /// Read from a checkpoint
-  static InfectionIncidenceModel* createModel (istream& in);
   //@}
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      _pinfected & stream;
+      _cumulativeEIRa & stream;
+  }
   
 protected:
   /// Create a new model
@@ -86,7 +91,6 @@ public:
    * stochastic process. */
   int numNewInfections(double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans);
   
-protected:
   /// Calculates the expected number of infections, excluding vaccine effects
   virtual double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
   

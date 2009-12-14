@@ -22,11 +22,12 @@
 
 #include <cstdlib>
 #include <cmath>
-#include <stdexcept>
 
 #include "Global.h"
 #include "inputData.h"
 #include "util/BoincWrapper.h"
+
+using namespace OM::util::errors;
 
 /*
 Contains global variables and constants and utility functions that are used in different modules.
@@ -228,14 +229,6 @@ void Global::setModelVersion () {
 	throw cmd_exit ("Printed model version");
 }
 
-void Global::validateListSize (long length) {
-  if (length < 0 || length > 1000) {
-    ostringstream s;
-    s << "List length out of range: " << length;
-    throw checkpoint_error(s.str());
-  }
-}
-
 void Global::read (istream& in) {
   int tOpt;
   string tResPath;
@@ -248,12 +241,3 @@ void Global::write (ostream& out) {
   out << clOptions << endl;
   out << clResourcePath << endl;
 }
-
-xml_scenario_error::xml_scenario_error(const string&  __arg)
-  : runtime_error(__arg) { }
-
-checkpoint_error::checkpoint_error(const string&  __arg)
-  : runtime_error(string("Error reading checkpoint: ").append(__arg)) { }
-
-cmd_exit::cmd_exit(const string& __arg)
-  : runtime_error(__arg) { }

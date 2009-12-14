@@ -34,27 +34,6 @@ void Infection::init () {
 }
 
 
-Infection::Infection (istream& in) {
-  in >> _startdate;
-  in >> _density;
-  in >> _cumulativeExposureJ; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    int proteomeID;
-    in >> proteomeID;
-    _proteome = ProteomeInstance::getProteome(proteomeID);
-  } else
-    _proteome = NULL;
-}
-void Infection::write (ostream& out) const {
-  out << _startdate << endl; 
-  out << _density << endl; 
-  out << _cumulativeExposureJ << endl; 
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    out << _proteome->getProteomeID() << endl; 
-  }
-}
-
-
 double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY) {
   //effect of cumulative Parasite density (named Dy in AJTM)
   double dY;
@@ -76,4 +55,24 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
   if (dA > 1.0) {cout << "";}
   return std::min(dY*dH*dA, 1.0);
+}
+
+
+void Infection::checkpoint (istream& stream) {
+    _startdate & stream;
+    _density & stream;
+    _cumulativeExposureJ & stream; 
+    if (Global::modelVersion & INCLUDES_PK_PD) {
+	int proteomeID;
+	proteomeID & stream;
+	_proteome = ProteomeInstance::getProteome(proteomeID);
+    } else
+	_proteome = NULL;
+}
+void Infection::checkpoint (ostream& stream) {
+    _startdate & stream;
+    _density & stream;
+    _cumulativeExposureJ & stream; 
+    if (Global::modelVersion & INCLUDES_PK_PD)
+	_proteome->getProteomeID() & stream;
 }

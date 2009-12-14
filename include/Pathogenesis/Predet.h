@@ -34,8 +34,6 @@ class PredetPathogenesis : public PyrogenPathogenesis {
 public:
   PredetPathogenesis (double cF) :
     PyrogenPathogenesis(cF) {}
-  PredetPathogenesis (istream& in) :
-    PyrogenPathogenesis(in) {}
   ~PredetPathogenesis() {}
   
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);

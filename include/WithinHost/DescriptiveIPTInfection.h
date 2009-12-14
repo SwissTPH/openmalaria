@@ -25,7 +25,6 @@
 
 
 struct genotype {
-  int ID;
   //!In order to save memory, we just define the ID of the genotype. Attributes of the
   //!genotype can be accessed via arrays in mod_intervention.
   //!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
@@ -35,6 +34,13 @@ struct genotype {
   //!proph: Prophylactic effect of SP (measured in time steps)
   //!tolperiod: time window of tolerance period
   //!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
+  int ID;
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      ID & stream;
+  }
 };
 
 namespace scnXml {
@@ -54,16 +60,11 @@ public:
   //@{
   //! Constructor
   /*! \param lastSPdose Time interval of last SP Dose. */
-  DescriptiveIPTInfection(int lastSPdose, int simulationTime);
-  
-  /** Checkpoint-reading constructor */
-  DescriptiveIPTInfection (istream& in);
+  DescriptiveIPTInfection(int lastSPdose);
   
   /** Destructor */
   virtual ~DescriptiveIPTInfection() {}
   //@}
-  
-  virtual void write (ostream& out) const;
   
   /** The event that the last SP dose clears parasites. */
   bool eventSPClears (int _lastSPDose) {
@@ -79,6 +80,10 @@ public:
     return _startdate + _duration * genotypeAtten[_gType.ID];
   }
   
+protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
 private:
   //! Genotype responsible for infection
   genotype _gType;

@@ -54,8 +54,6 @@ public:
    * @param cF 	comorbidity factor, passed to PathogenesisModel
    * @param tSF	treatment seeking factor, passed to CaseManagementModel */
   static ClinicalModel* createClinicalModel (double cF, double tSF);
-  /** Load a ClinicalModel from a checkpoint. */
-  static ClinicalModel* createClinicalModel (istream& in);
   
   /** Calculate infant mortality as deaths/1000 livebirths for the whole main-
    * simulation period (not as deaths/1000 years-at-risk per survey).
@@ -70,8 +68,6 @@ public:
   
   /// Destructor
   virtual ~ClinicalModel ();
-  /// Write a checkpoint
-  virtual void write (ostream& out);
   
   /** Kills the human if ageTimeSteps reaches the simulation age limit.
    *
@@ -108,6 +104,12 @@ public:
   /// Summarize PathogenesisModel details
   void summarize (Survey& survey, SurveyAgeGroup ageGroup);
   
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
+  
   //TODO: make private
   static vector<int> infantDeaths;
   static vector<int> infantIntervalsAtRisk;
@@ -126,6 +128,10 @@ protected:
    * @param withinHostModel = WithinHostModel of human.
    * @param ageYears = Age of human. */
   virtual void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) =0;
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
+  
   
   /// The PathogenesisModel introduces illness dependant on parasite density
   PathogenesisModel *pathogenesisModel;

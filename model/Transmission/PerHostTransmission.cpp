@@ -66,29 +66,6 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
   }
 }
 
-PerHostTransmission::PerHostTransmission (istream& in, TransmissionModel& tm) {
-  in >> _relativeAvailabilityHet;
-  in >> timestepITN;
-  in >> timestepIRS;
-  in >> timestepVA;
-  in >> nextItnDistribution;
-  VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
-  if (vTM) {
-    species.resize (vTM->numSpecies);
-    for (vector<HostMosquitoInteraction>::iterator hMI = species.begin(); hMI != species.end(); ++hMI)
-      hMI->read (in);
-  }
-}
-
-void PerHostTransmission::write (ostream& out) const {
-  out << _relativeAvailabilityHet << endl;
-  out << timestepITN << endl;
-  out << timestepIRS << endl;
-  out << timestepVA << endl;
-  out << nextItnDistribution << endl;
-  for (vector<HostMosquitoInteraction>::const_iterator hMI = species.begin(); hMI != species.end(); ++hMI)
-    hMI->write (out);
-}
 
 // Note: in the case an intervention is not present, we can use the approximation
 // of Weibull decay over (Simulation::simulationTime - TIMESTEP_NEVER) timesteps
@@ -141,18 +118,4 @@ void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double av
   probMosqBiting = base.probMosqBiting;
   probMosqFindRestSite = base.probMosqFindRestSite;
   probMosqSurvivalResting = base.probMosqSurvivalResting;
-}
-
-void HostMosquitoInteraction::read (istream& in) {
-  in >> entoAvailability;
-  in >> probMosqBiting;
-  in >> probMosqFindRestSite;
-  in >> probMosqSurvivalResting;
-}
-
-void HostMosquitoInteraction::write (ostream& out) const {
-  out << entoAvailability << endl;
-  out << probMosqBiting << endl;
-  out << probMosqFindRestSite << endl;
-  out << probMosqSurvivalResting << endl;
 }

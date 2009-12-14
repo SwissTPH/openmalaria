@@ -61,16 +61,11 @@ public:
   ///@name CTOR & DTOR
   //@{
   //! Constructor
-  DescriptiveInfection(int simulationTime);
-  
-  /** Checkpoint-reading constructor */
-  DescriptiveInfection (istream& in);
+  DescriptiveInfection();
   
   /** Destructor */
   virtual ~DescriptiveInfection();
   //@}
-  
-  virtual void write (ostream& out) const;
   
   //! Get the last timestep before the infection is cleared.
   /*!
@@ -123,6 +118,9 @@ public:
   static int latentp;
   
 protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
   //! Arbitrary maximum duration of the infection, in timesteps
   int _duration; 
   

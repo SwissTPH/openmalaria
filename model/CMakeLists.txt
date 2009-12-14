@@ -64,6 +64,8 @@ set (Model_CPP
   util/gsl.cpp
   util/vectors.cpp
   util/WeibullDecayedValue.cpp
+  util/errors.cpp
+  util/checkpoint.cpp
 )
 
 # Headers - only included so they show up in IDEs:

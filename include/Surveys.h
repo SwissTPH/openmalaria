@@ -73,7 +73,16 @@ class SurveysType
       return _surveysTimeIntervals[_survey.size()-2];	// final entry is a concatenated -1
     }
     //@}
-
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	(*current) & stream;
+	_surveysTimeIntervals & stream;
+	_surveyPeriod & stream;
+	_survey & stream;
+    }
+    
   private:
     //! Time intervals for all surveys specified in the XML, appended with -1
     vector<int> _surveysTimeIntervals;

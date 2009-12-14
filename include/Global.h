@@ -30,7 +30,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#include "Constant.h"
 #include <fcntl.h>
 #include <math.h>
 #include <vector>
@@ -39,6 +38,11 @@
 #include <iostream>
 #include <iomanip>
 using namespace std;
+
+#include "Constant.h"
+#include "util/errors.hpp"
+#include "util/checkpoint.hpp"
+using namespace OM::util::checkpoint;
 
 
 /// Command-Line Option possibilities
@@ -76,20 +80,6 @@ public:
    * @throws cmd_exit if we should stop before running the simulation because
    * of an option. */
   static void initGlobal ();
-  
-  /** For checking the number of elements in a list is sensible when loading
-   * checkpoints.
-   *
-   * While loading checkpoints, if memory is allocated in a loop using a
-   * variable loaded from the checkpoint file, it should be checked that length
-   * is sensible. This function is a convenient way to do that (although the
-   * limit isn't large enough to account for population size).
-   * 
-   * The reason for this check is that if the checkpoint is read wrongly,
-   * variables often get completely wrong values which can cause memory
-   * allocation to grind the computer to a halt. In this case the values are
-   * usually bad enough that a lenient check will still catch them. */
-  static void validateListSize (long length);
   
   /// Variables that must be checkpointed.
   //@{
@@ -137,31 +127,6 @@ public:
 private:
   /// Sets modelVersion, checking for incompatible versions.
   static void setModelVersion ();
-};
-
-/** Thrown to indicate an error in the scenario.xml file.  */
-class xml_scenario_error : public runtime_error
-{
-  public:
-    explicit xml_scenario_error(const string&  __arg);
-};
-
-/** Thrown to indicate an error while loading/saving a checkpoint.
- *
- * Prepends "Error reading checkpoint: " to the message. */
-class checkpoint_error : public runtime_error
-{
-  public:
-    explicit checkpoint_error(const string&  __arg);
-};
-
-/** Thrown to halt, when a command-line argument prompts an early exit.
- *
- * (Not an error; exits with status 0.) */
-class cmd_exit : public runtime_error
-{
-  public:
-    explicit cmd_exit(const string& __arg);
 };
 
 #endif

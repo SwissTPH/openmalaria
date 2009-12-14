@@ -31,29 +31,8 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
     WithinHostModel()
 {}
 
-DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in) :
-    WithinHostModel(in)
-{
-  for(int i=0;i<_MOI;++i)
-    infections.push_back(new DescriptiveInfection(in));
-}
-
-DescriptiveWithinHostModel::DescriptiveWithinHostModel(istream& in, bool) :
-    WithinHostModel(in)
-{}
-
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
   clearAllInfections();
-}
-
-
-// -----  Data checkpointing  -----
-
-void DescriptiveWithinHostModel::write(ostream& out) const {
-  WithinHostModel::write (out);
-  
-  for(std::list<DescriptiveInfection*>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    (*iter)->write (out);
 }
 
 
@@ -61,7 +40,7 @@ void DescriptiveWithinHostModel::write(ostream& out) const {
 
 void DescriptiveWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    infections.push_back(new DescriptiveInfection(Simulation::simulationTime));
+    infections.push_back(new DescriptiveInfection());
     _MOI++;
   }
 }
@@ -138,4 +117,21 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
       patentInfections++;
   }
   return infections.size();
+}
+
+
+// -----  Data checkpointing  -----
+
+void DescriptiveWithinHostModel::checkpoint (istream& stream) {
+    WithinHostModel::checkpoint (stream);
+    for(int i=0;i<_MOI;++i) {
+	newInfection();	// create infections using a virtual function call
+	(*infections.back()) & stream;	// then load from checkpoint
+    }
+}
+void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
+    WithinHostModel::checkpoint (stream);
+    BOOST_FOREACH (DescriptiveInfection* inf, infections) {
+	(*inf) & stream;
+    }
 }

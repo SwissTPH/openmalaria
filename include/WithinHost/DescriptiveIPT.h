@@ -30,13 +30,12 @@ public:
   ///@name Static init/cleanup
   //@{
   /** Determines whether IPT is present or not (iptActive), and if so
-   * initialises parameters here and in OldIPTInfection. */
+   * initialises parameters here and in DescriptiveIPTInfection. */
   static void initParameters();
   static void clearParameters();
   //@}
   
   DescriptiveIPTWithinHost ();
-  DescriptiveIPTWithinHost (istream& in);
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
@@ -59,7 +58,8 @@ protected:
   virtual void IPTattenuateAsexualMinTotalDensity ();
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf);
   
-  virtual void write(ostream& out) const;
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
 private:
   //! time at which attenuated infection 'would' end if SP present

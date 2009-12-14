@@ -32,20 +32,7 @@
 class DummyInfection : public Infection {
 public:
   //! Constructor
-  DummyInfection(int simulationTime);
-  
-  /** Checkpoint-reading constructor */
-  DummyInfection (istream& in);
-  
-  /** Destructor
-   * 
-   * NOTE: this destructor does nothing to allow shallow copying to the
-   * population list. destroy() does the real freeing and must be
-   * called explicitly. */
-  ~DummyInfection();
-  void destroy();
-  
-  void write (ostream& out) const;
+  DummyInfection();
   
   static void init ();
   
@@ -68,6 +55,10 @@ public:
   */ 
   void determineWithinHostDensity();
   
+protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
 private:
   //! Arbitrary maximum duration of the infection
   int _duration; 

@@ -36,7 +36,7 @@
 
 #include <math.h>
 
-using namespace std;
+using namespace OM::util::errors;
 
 
 // -----  static data / methods  -----
@@ -139,15 +139,12 @@ Population::~Population() {
   delete _transmissionModel;  
 }
 
-void Population::read (istream& in) {
+void Population::checkpoint (istream& stream) {
   //Start reading a checkpoint
-  _transmissionModel->read (in);
-  
-  in >> populationSize;
   if (populationSize != get_populationsize())
     throw checkpoint_error("population size incorrect");
-  in >> _workUnitIdentifier;
-
+  
+  _workUnitIdentifier & stream;
   if (_workUnitIdentifier !=  get_wu_id()) {
     cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
     exit(-9);
@@ -155,28 +152,26 @@ void Population::read (istream& in) {
 
   //Start reading the human data
   int popSize;
-  in >> popSize;
-  if (popSize > populationSize)
+  popSize & stream;
+  if (popSize != populationSize)
     throw checkpoint_error ("population size exceeds that given in scenario.xml");
-  int indCounter = 0;	// Number of individuals read from checkpoint
-  while(!(in.eof()||popSize==indCounter)){
-    population.push_back(Human(in, *_transmissionModel));
-    indCounter++;
+  while(popSize > 0 && !stream.eof()){
+    // Note: calling this constructor of Human is slightly wasteful, but avoids the need for another
+    // ctor and leaves less opportunity for uninitialized memory.
+    population.push_back(Human(*_transmissionModel, 0,0,0));
+    population.back() & stream;
+    --popSize;
   }
-  if (popSize != indCounter)
+  if (int(population.size()) != populationSize)
     throw checkpoint_error("can't read whole population (out of data)");
 }
-void Population::write (ostream& out) {
-  _transmissionModel->write (out);
-  
-  out << populationSize << endl;
-  out << _workUnitIdentifier << endl;
+void Population::checkpoint (ostream& stream) {
+  _workUnitIdentifier & stream;
 
   //Write human data
-  out << population.size() << endl;	// this may not be equal to populationSize due to startup optimisation
-  HumanIter iter;
-  for(iter=population.begin(); iter != population.end(); ++iter){
-    iter->write (out);
+  population.size() & stream;	// this may not be equal to populationSize due to startup optimisation
+  for(HumanIter iter=population.begin(); iter != population.end(); ++iter){
+    (*iter) & stream;
   }
 }
 

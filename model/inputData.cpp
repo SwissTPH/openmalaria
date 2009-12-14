@@ -26,7 +26,9 @@
 #include <sstream>
 #include <fstream>
 #include <map>
-using namespace std;
+
+using namespace OM::util::errors;
+
 
 /// Current schema version.
 const int SCHEMA_VERSION = 12;

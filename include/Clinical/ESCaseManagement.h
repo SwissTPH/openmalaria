@@ -38,6 +38,15 @@ namespace Clinical {
 
 /// Data used for a withinHostModel->medicate() call
 struct MedicateData {
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	abbrev & stream;
+	qty & stream;
+	time & stream;
+	seekingDelay & stream;
+    }
+    
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed
     int time;		/// Time of day to medicate at (minutes from start)

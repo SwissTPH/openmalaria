@@ -31,21 +31,18 @@ public:
   static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);
   //@}
   
-  /// @brief Construction and destruction, checkpointing
+  /// @brief Construction and destruction
   //@{
+  /// For checkpointing (don't use for anything else)
+  EmpiricalInfection() {}
   /// Per instance initialisation; create new inf.
-  EmpiricalInfection(int startTime, double growthRateMultiplier);
+  EmpiricalInfection(double growthRateMultiplier);
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to
    * the population list. destroy() does the real freeing and must be
    * called explicitly. */
   ~EmpiricalInfection();
-  
-  /** Checkpoint-reading constructor */
-  EmpiricalInfection (istream& in);
-  /** Write a checkpoint */
-  void write (ostream& out) const;
   //@}
   
   //BEGIN FIXME: do we want these?
@@ -73,6 +70,10 @@ public:
    * @returns True when the infection goes extinct. */
   bool updateDensity (int simulationTime, double survivalFactor);
   
+protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
 private:
   double getInflatedDensity(double nonInflatedDensity);
   double sigma_noise(int ageOfInfection);

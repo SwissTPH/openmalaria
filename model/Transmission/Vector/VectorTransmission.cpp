@@ -17,22 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// Variable names largely come from Nakul Chitnis's paper:
-// "A mathematical model for the dynamics of malaria in mosquitoes feeding on
-// a heterogeneous host population" (3rd Oct. 2007).
-
-/* Entomology model coordinator: Nakul Chitnis. */ 
-
 #include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
 #include "util/vectors.h"
 #include <fstream>
 
 
-/*****************************************************************************
- *                       New code, written in C++                            *
- *****************************************************************************/
-
+using namespace OM::util::errors;
 
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
 {
@@ -152,11 +143,11 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
 }
 
 
-void VectorTransmission::writeV (ostream& out) const {
-  for (size_t i = 0; i < numSpecies; ++i)
-    species[i].write (out);
+void VectorTransmission::checkpoint (istream& stream) {
+    TransmissionModel::checkpoint (stream);
+    species & stream;
 }
-void VectorTransmission::readV (istream& in) {
-  for (size_t i = 0; i < numSpecies; ++i)
-    species[i].read (in);
+void VectorTransmission::checkpoint (ostream& stream) {
+    TransmissionModel::checkpoint (stream);
+    species & stream;
 }

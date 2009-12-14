@@ -30,31 +30,11 @@ using namespace std;
 
 DummyWithinHostModel::DummyWithinHostModel() :
     WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
-    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     patentInfections(0)
 {}
 
 DummyWithinHostModel::~DummyWithinHostModel() {
-  clearAllInfections();
   delete pkpdModel;
-}
-
-DummyWithinHostModel::DummyWithinHostModel(istream& in) :
-    WithinHostModel(in), pkpdModel(PkPdModel::createPkPdModel (in))
-{
-  in >> patentInfections; 
-  
-  for(int i=0;i<_MOI;++i)
-    infections.push_back(DummyInfection(in));
-}
-void DummyWithinHostModel::write(ostream& out) const {
-  WithinHostModel::write (out);
-  pkpdModel->write (out);
-  
-  out << patentInfections << endl; 
-  
-  for(std::list<DummyInfection>::const_iterator iter=infections.begin(); iter != infections.end(); iter++)
-    iter->write (out);
 }
 
 
@@ -62,16 +42,12 @@ void DummyWithinHostModel::write(ostream& out) const {
 
 void DummyWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-        infections.push_back(DummyInfection(Simulation::simulationTime));
+        infections.push_back(DummyInfection());
     _MOI++;
   }
 }
 
 void DummyWithinHostModel::clearAllInfections(){
-  std::list<DummyInfection>::iterator i;
-  for(i=infections.begin(); i != infections.end(); i++){
-    i->destroy();
-  }
   infections.clear();
   _MOI=0;
 }
@@ -135,4 +111,20 @@ int DummyWithinHostModel::countInfections (int& patentInfections) {
       patentInfections++;
   }
   return infections.size();
+}
+
+
+void DummyWithinHostModel::checkpoint (istream& stream) {
+    WithinHostModel::checkpoint (stream);
+    pkpdModel = PkPdModel::createPkPdModel (stream);
+    patentInfections & stream;
+    infections & stream;
+    if (int(infections.size()) != _MOI)
+	throw OM::util::errors::checkpoint_error ("_MOI mismatch");
+}
+void DummyWithinHostModel::checkpoint (ostream& stream) {
+    WithinHostModel::checkpoint (stream);
+    pkpdModel->write (stream);
+    patentInfections & stream;
+    infections & stream;
 }

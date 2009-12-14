@@ -21,6 +21,8 @@
 #ifndef MO_PATHOGENISIS_STATE
 #define MO_PATHOGENISIS_STATE
 
+#include <iostream>
+
 /// Namespace enclosing pathogenesis output enumeration.
 namespace Pathogenesis {
   /** Types of sickness; used by case management.

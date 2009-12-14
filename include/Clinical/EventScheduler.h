@@ -40,13 +40,14 @@ public:
   static void init ();
   
   ClinicalEventScheduler (double cF, double tSF);
-  ClinicalEventScheduler (istream& in);
   ~ClinicalEventScheduler ();
   
-  void write (ostream& out);
-  
   void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
-  
+   
+protected:
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
+ 
 private:
   /// Current state of sickness
   Pathogenesis::State pgState;

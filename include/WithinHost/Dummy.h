@@ -41,10 +41,7 @@ public:
   DummyWithinHostModel();
   ~DummyWithinHostModel();
   
-  DummyWithinHostModel(istream& in);
-  virtual void write(ostream& out) const;
   
-
   virtual void newInfection();
   virtual void clearAllInfections();
   
@@ -53,20 +50,15 @@ public:
   virtual void calculateDensities(double ageInYears, double BSVEfficacy);
   
   
-  protected:
+protected:
     virtual int countInfections (int& patentInfections);
+    
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
     
 private:
   /// Encapsulates drug code for each human
   PkPdModel* pkpdModel;
-  
-  //TODO: check why we have 2 cumulativeh and cumulativeY params
-  //!Number of infections received since birth
-  double _cumulativeh;
-  //!Cumulative parasite density since birth
-  double _cumulativeY;
-  //!cumulativeY from previous timestep
-  double _cumulativeYlag;
   
   //!Number of infections with densities above the limit of detection
   int patentInfections;

@@ -35,6 +35,7 @@
 #include <cfloat>
 #include <gsl/gsl_vector.h> 
 
+using namespace OM::util::errors;
 
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
@@ -170,34 +171,33 @@ void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
 
 // -----  checkpointing  -----
 
-void TransmissionModel::write(ostream& out) const {
-  out << simulationMode << endl;
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    out << kappa[i] << endl;
-  out << _annualAverageKappa << endl;
-  out << _sumAnnualKappa << endl;
-  out << annualEIR << endl;
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    out << innoculationsPerDayOfYear[i] << endl;
-  out << innoculationsPerAgeGroup.size() << endl;
-  for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
-    out << innoculationsPerAgeGroup[i] << endl;
-  writeV (out);
+void TransmissionModel::checkpoint (istream& stream) {
+    simulationMode & stream;
+    initialisationEIR & stream;
+    kappa & stream;
+    _annualAverageKappa & stream;
+    _sumAnnualKappa & stream;
+    annualEIR & stream;
+    innoculationsPerDayOfYear & stream;
+    innoculationsPerAgeGroup & stream;
+    timeStepEntoInnocs & stream;
+    timeStepNumEntoInnocs & stream;
+    noOfAgeGroupsSharedMem & stream;
+    kappaByAge & stream;
+    nByAge & stream;
 }
-void TransmissionModel::read(istream& in) {
-  in >> simulationMode;
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    in >> kappa[i];
-  in >> _annualAverageKappa;
-  in >> _sumAnnualKappa;
-  in >> annualEIR;
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i)
-    in >> innoculationsPerDayOfYear[i];
-  size_t size;
-  in >> size;
-  if (size != innoculationsPerAgeGroup.size())
-    throw checkpoint_error ("innoculationsPerAgeGroup has wrong size");
-  for (size_t i = 0; i < innoculationsPerAgeGroup.size(); ++i)
-    in >> innoculationsPerAgeGroup[i];
-  readV (in);
+void TransmissionModel::checkpoint (ostream& stream) {
+    simulationMode & stream;
+    initialisationEIR & stream;
+    kappa & stream;
+    _annualAverageKappa & stream;
+    _sumAnnualKappa & stream;
+    annualEIR & stream;
+    innoculationsPerDayOfYear & stream;
+    innoculationsPerAgeGroup & stream;
+    timeStepEntoInnocs & stream;
+    timeStepNumEntoInnocs & stream;
+    noOfAgeGroupsSharedMem & stream;
+    kappaByAge & stream;
+    nByAge & stream;
 }

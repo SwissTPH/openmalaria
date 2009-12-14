@@ -46,12 +46,6 @@ public:
    * \param simulationTime Simulation timestep */
   Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime);
 
-  /**  Initialise all variables of a human datatype including infectionlist and
-   * and druglist.
-   * \param funit checkpoint input stream
-   * \param tm Transmission model in use */
-  Human(istream& funit, TransmissionModel& tm);
-  
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying of a
@@ -62,7 +56,23 @@ public:
   /// The real destructor
   void destroy();
   
-  void write (ostream& out) const;
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      perHostTransmission & stream;
+      (*infIncidence) & stream;
+      (*withinHostModel) & stream;
+      (*clinicalModel) & stream;
+      _ylag & stream;
+      _dateOfBirth & stream; 
+      //_ID & stream ; 
+      _nextCtsInterv & stream;
+      _lastVaccineDose & stream;
+      _BSVEfficacy & stream; 
+      _PEVEfficacy & stream; 
+      _TBVEfficacy & stream; 
+      _probTransmissionToMosquito & stream;
+  }
   //@}
   
   /** @brief Per timestep update functions
@@ -138,7 +148,17 @@ public:
   static void clear();
   //@}
   
+private:
+  /*! Update the number of doses and the date of the most recent vaccination in
+   * this human */
+  void vaccinate();
   
+  double calcProbTransmissionToMosquito() const;
+  
+  void clearInfection(Infection *iCurrent);
+  
+  
+public:
   /** @brief Models
    *
    * These contain various sub-models used by Humans. */
@@ -152,12 +172,6 @@ public:
 private:
   /// The WithinHostModel models parasite density and immunity
   WithinHostModel *withinHostModel;
-  
-  /*! Update the number of doses and the date of the most recent vaccination in
-   * this human */
-  void vaccinate();
-  
-  double calcProbTransmissionToMosquito() const;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
@@ -181,7 +195,7 @@ private:
   //int _ID;
   
   /// Counter for the next continuous intervention to roll out (excl. vaccine and IPTI)
-  size_t _nextCtsInterv;
+  size_t _nextCtsInterv;	//FIXME: isn't this a relic of my failed cts interv design?
   
   /** Number of vaccine doses this individual has received.
    *
@@ -199,8 +213,6 @@ private:
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
-  
-  void clearInfection(Infection *iCurrent);
 };
 
 #endif

@@ -53,7 +53,13 @@ public:
 	    Simulation::simulationTime-_tLastTreatment <= 4);
   }
   
-  void write(ostream& out) const;
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      _latestRegimen & stream;
+      _tLastTreatment & stream;
+      _treatmentSeekingFactor & stream;
+  }
   
 private:
    /** Called when a non-severe/complicated malaria sickness occurs.

@@ -34,9 +34,6 @@ public:
   VectorTransmission(const scnXml::Vector vectorData);
   virtual ~VectorTransmission();
   
-  virtual void writeV(ostream& out) const;
-  virtual void readV(istream& in);
-  
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
   virtual void setupNv0 (const std::list<Human>& population, int populationSize);
@@ -66,6 +63,10 @@ public:
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
   
+protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
 private:
   /** Return the index in speciesIndex of mosquito, throwing if not found. */
   size_t getSpeciesIndex (string mosquito) {
@@ -74,7 +75,7 @@ private:
       ostringstream oss;
       oss << "Intervention description for unincluded anopheles species \""
 	  << mosquito << '"';
-      throw xml_scenario_error(oss.str());
+      throw OM::util::errors::xml_scenario_error(oss.str());
     }
     return sIndex->second;
   }

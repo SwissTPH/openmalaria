@@ -25,27 +25,9 @@
 int Episode::healthSystemMemory;
 
 
-Episode::Episode (istream& in) : _ageGroup(0) {
-  in >> _time;
-  if (_time != TIMESTEP_NEVER) {
-    in >> _surveyPeriod;
-    _ageGroup.read (in);
-    int temp;
-    in >> temp;
-    _state = Pathogenesis::State (temp);
-  }
-}
 Episode::~Episode ()
 {
   report ();
-}
-void Episode::write (ostream& out) {
-  out << _time << endl;
-  if (_time != TIMESTEP_NEVER) {
-    out << _surveyPeriod << endl;
-    out << _ageGroup.i() << endl;
-    out << _state << endl;
-  }
 }
 
 
@@ -103,4 +85,23 @@ void Episode::report () {
 	.reportSequelae (_ageGroup, 1);
     // Don't care about out-of-hospital recoveries
   }
+}
+
+void Episode::operator& (istream& stream) {
+    _time & stream;
+    if (_time != TIMESTEP_NEVER) {
+	_surveyPeriod & stream;
+	_ageGroup & stream;
+	int s;
+	s & stream;
+	_state = Pathogenesis::State(s);
+    }
+}
+void Episode::operator& (ostream& stream) {
+    _time & stream;
+    if (_time != TIMESTEP_NEVER) {
+	_surveyPeriod & stream;
+	_ageGroup & stream;
+	_state & stream;
+    }
 }

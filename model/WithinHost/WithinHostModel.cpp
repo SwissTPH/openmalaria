@@ -72,7 +72,7 @@ void WithinHostModel::init() {
     EmpiricalInfection::initParameters();	// 1-day timestep check
   } else {
     if (Global::modelVersion & INCLUDES_PK_PD)
-      throw xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
+	throw OM::util::errors::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }
@@ -104,19 +104,6 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
   }
 }
 
-WithinHostModel* WithinHostModel::createWithinHostModel (istream& in) {
-  if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
-    return new DummyWithinHostModel(in);
-  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
-    return new EmpiricalWithinHostModel(in);
-  } else {
-    if (DescriptiveIPTWithinHost::iptActive)
-      return new DescriptiveIPTWithinHost(in);
-    else
-      return new DescriptiveWithinHostModel(in);
-  }
-}
-
 
 // -----  Non-static  -----
 
@@ -127,35 +114,13 @@ WithinHostModel::WithinHostModel () :
     _innateImmSurvFact = exp(-gsl::rngGauss(0, sigma_i));
 }
 
-WithinHostModel::WithinHostModel(istream& in) {
-    in >> _innateImmSurvFact;
-    in >> _cumulativeh;
-    in >> _cumulativeY;
-    in >> _cumulativeYlag;
-    
-    in >> _MOI;
-    if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-	throw checkpoint_error ("_MOI");
-    in >> totalDensity;
-    in >> timeStepMaxDensity;
-}
-void WithinHostModel::write (ostream& out) const {
-    out << _innateImmSurvFact << endl;
-    out << _cumulativeh << endl;
-    out << _cumulativeY << endl;
-    out << _cumulativeYlag << endl;
-    
-    out << _MOI << endl;
-    out << totalDensity << endl;
-    out << timeStepMaxDensity << endl;
-}
 
 void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 
 void WithinHostModel::IPTiTreatment (SurveyAgeGroup ageGroup) {
-  throw xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
+  throw OM::util::errors::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
 
@@ -199,4 +164,27 @@ void WithinHostModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
     survey.reportPatentHosts(ageGroup, 1);
     survey.addToLogDensity(ageGroup, log(totalDensity));
   }
+}
+
+
+void WithinHostModel::checkpoint (istream& stream) {
+    _innateImmSurvFact & stream;
+    _cumulativeh & stream;
+    _cumulativeY & stream;
+    _cumulativeYlag & stream;
+    _MOI & stream;
+    totalDensity & stream;
+    timeStepMaxDensity & stream;
+    
+    if (_MOI < 0 || _MOI > MAX_INFECTIONS)
+	throw OM::util::errors::checkpoint_error ("_MOI");
+}
+void WithinHostModel::checkpoint (ostream& stream) {
+    _innateImmSurvFact & stream;
+    _cumulativeh & stream;
+    _cumulativeY & stream;
+    _cumulativeYlag & stream;
+    _MOI & stream;
+    totalDensity & stream;
+    timeStepMaxDensity & stream;
 }

@@ -32,6 +32,8 @@
 #include <fstream>
 #include "gzstream.h"
 
+using namespace OM::util::errors;
+
 int Simulation::simPeriodEnd;
 int Simulation::totalSimDuration;
 int Simulation::simulationTime;
@@ -176,11 +178,11 @@ void Simulation::writeCheckpoint(){
   if (Global::compressCheckpoints) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
-    write (out);
+    checkpoint (out);
     out.close();
   } else {
     ofstream out(name.str().c_str(), ios::out | ios::binary);
-    write (out);
+    checkpoint (out);
     out.close();
   }
   
@@ -190,21 +192,6 @@ void Simulation::writeCheckpoint(){
     checkpointFile << checkpointNum;
     checkpointFile.close();
   }
-}
-
-void Simulation::write (ostream& out) {
-  if (out == NULL || !out.good())
-    throw checkpoint_error ("Unable to write to file");
-  
-  timer::startCheckpoint ();
-  out.precision(20);
-  out << simulationTime << endl;
-  out << timeStep << endl;
-  out << simPeriodEnd << endl;
-  out << totalSimDuration << endl;
-  Population::staticWrite(out);
-  _population->write (out);
-  timer::stopCheckpoint ();
 }
 
 void Simulation::readCheckpoint() {
@@ -220,14 +207,14 @@ void Simulation::readCheckpoint() {
   name << CHECKPOINT << checkpointNum;	// try uncompressed
   ifstream in(name.str().c_str(), ios::in | ios::binary);
   if (in.good()) {
-    read (in);
+    checkpoint (in);
     in.close();
   } else {
     name << ".gz";				// then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     if (!in.good())
       throw checkpoint_error ("Unable to read file");
-    read (in);
+    checkpoint (in);
     in.close();
   }
   
@@ -239,20 +226,21 @@ void Simulation::readCheckpoint() {
     writeCheckpoint();
 }
 
-void Simulation::read (istream& in) {
-  in >> simulationTime;
-  in >> timeStep;
-  in >> simPeriodEnd;
-  in >> totalSimDuration;
-  Population::staticRead(in);
-  _population->read(in);
+void Simulation::checkpoint (istream& stream) {
+  simulationTime & stream;
+  timeStep & stream;
+  simPeriodEnd & stream;
+  totalSimDuration & stream;
+  Population::staticRead(stream);
+  (*_population) & stream;
+  Surveys & stream;
   
   // Read trailing white-space (final endl has not yet been read):
-  while (in.good() && isspace (in.peek()))
-    in.get();
-  if (!in.eof()) {	// if anything else is left
+  while (stream.good() && isspace (stream.peek()))
+    stream.get();
+  if (!stream.eof()) {	// if anything else is left
     cerr << "Error (checkpointing): not the whole checkpointing file was read;";
-    ifstream *ifCP = dynamic_cast<ifstream*> (&in);
+    ifstream *ifCP = dynamic_cast<ifstream*> (&stream);
     if (ifCP) {
       streampos i = ifCP->tellg();
       ifCP->seekg(0, ios_base::end);
@@ -260,6 +248,23 @@ void Simulation::read (istream& in) {
       ifCP->seekg (i);
     } else	// igzstream can't seek
       cerr << " remainder:" << endl;
-    cerr << endl << in.rdbuf() << endl;
+    cerr << endl << stream.rdbuf() << endl;
   }
+}
+
+void Simulation::checkpoint (ostream& stream) {
+  if (stream == NULL || !stream.good())
+    throw checkpoint_error ("Unable to write to file");
+  
+  timer::startCheckpoint ();
+  stream.precision(20);
+  simulationTime & stream;
+  timeStep & stream;
+  simPeriodEnd & stream;
+  totalSimDuration & stream;
+  Population::staticWrite(stream);
+  (*_population) & stream;
+  Surveys & stream;
+  
+  timer::stopCheckpoint ();
 }

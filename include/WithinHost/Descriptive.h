@@ -37,8 +37,6 @@ class DescriptiveWithinHostModel : public WithinHostModel {
 public:
   /// Create a new WHM
   DescriptiveWithinHostModel();
-  /// Load a DescriptiveWithinHostModel, including infections.
-  DescriptiveWithinHostModel(istream& in);
   virtual ~DescriptiveWithinHostModel();
   
   virtual void newInfection();
@@ -46,17 +44,7 @@ public:
   
   virtual void calculateDensities(double ageInYears, double BSVEfficacy);
   
-  /** @brief Checkpointing of variables */
-  //@{
-  virtual void write(ostream& out) const;
 protected:
-  /** Special checkpointing constructor for derived use.
-   *
-   * Same as the other checkpointing constructor except that
-   * this one doesn't load infections. */
-  DescriptiveWithinHostModel(istream& in, bool derived);
-  //@}
-  
   virtual int countInfections (int& patentInfections);
   
   ///@brief IPT extensions − empty otherwise
@@ -67,6 +55,9 @@ protected:
   virtual void IPTattenuateAsexualMinTotalDensity () {}
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
   /** The list of all infections this human has.
    * 
