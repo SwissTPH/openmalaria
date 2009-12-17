@@ -25,7 +25,11 @@
 #include "Transmission/PerHostTransmission.h"
 #include <list>
 
-class Human;
+namespace OM {
+    namespace Host {
+	class Human;
+    }
+namespace Transmission {
 
 /** Per-species data for vector control.
  *
@@ -78,7 +82,7 @@ public:
    *
    * Can only usefully run its calculations when not checkpointing, due to
    * population not being the same when loaded from a checkpoint. */
-  void setupNv0 (size_t sIndex, const std::list<Human>& population, int populationSize);
+  void setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize);
   
   /** Called to free memory instead of a destructor. */
   void destroy ();
@@ -90,7 +94,7 @@ public:
   bool vectorInitIterate ();
   
   /** Calls calMosqEmergeRate() and initialises arrays. */
-  //void initMainSimulation (size_t sIndex, const std::list<Human>& population, int populationSize, vector<double>& kappa);
+  //void initMainSimulation (size_t sIndex, const std::list<Host::Human>& population, int populationSize, vector<double>& kappa);
   //@}
   
   /** Called per time-step. Does most of calculation of EIR.
@@ -100,7 +104,7 @@ public:
    * @param simulationTime
    * @param sIndex Index of the type of mosquito in per-type/species lists.
    * @param isDynamic True to use full model; false to drive model from current contents of S_v. */
-  void advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic);
+  void advancePeriod (const std::list<Host::Human>& population, int simulationTime, size_t sIndex, bool isDynamic);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
@@ -231,7 +235,7 @@ private:
   vector<double> FSCoeffic;
   
   /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-   * Units: Animals per day. Length: daysInYear.
+   * Units: Animals per day. Length: Global::DAYS_IN_YEAR.
    * 
    * Should be checkpointed. */
   vector<double> mosqEmergeRate;
@@ -239,14 +243,14 @@ private:
   /* Parameters and partial (derived) parameters from model */
   
   /** @brief S_v used to force an EIR during vector init.
-   * Length: daysInYear
+   * Length: Global::DAYS_IN_YEAR
    * 
    * Should be checkpointed. */
   vector<double> forcedS_v;
   
   /** Used by vectorInitIterate to calculate scaling factor.
   *
-  * Length of annualS_v is daysInYear. Checkpoint. */
+  * Length of annualS_v is Global::DAYS_IN_YEAR. Checkpoint. */
   vector<double> annualS_v;
   double sumAnnualForcedS_v;	///< ditto
   
@@ -336,7 +340,7 @@ private:
   /* Functions */
   
   /** This subroutine converts ShortArray to a vector<double> of length
-   * daysInYear by copying and duplicating elements to fill the gaps. */
+   * Global::DAYS_IN_YEAR by copying and duplicating elements to fill the gaps. */
   static vector<double> convertLengthToFullYear (vector<double>& ShortArray); 
   
   /** Given an input sequence of Fourier coefficients, with odd length,
@@ -364,4 +368,5 @@ private:
 #endif
 };
 
+} }
 #endif

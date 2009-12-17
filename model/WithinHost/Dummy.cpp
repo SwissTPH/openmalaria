@@ -21,15 +21,16 @@
 */
 
 #include "WithinHost/Dummy.h"
-#include "Simulation.h"
 #include "inputData.h"
+#include "util/errors.hpp"
 
 using namespace std;
 
-// -----  Initialization  -----
+namespace OM { namespace WithinHost {
+    // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ()),
+    WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ()),
     patentInfections(0)
 {}
 
@@ -70,7 +71,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
   timeStepMaxDensity = 0.0;
   
   for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end();) {
-    if (Simulation::simulationTime >= i->getEndDate()) {
+    if (Global::simulationTime >= i->getEndDate()) {
       i=infections.erase(i);
       _MOI--;
       continue;
@@ -88,7 +89,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     if (i->getDensity() > detectionLimit) {
 	patentInfections++;
     }
-    if (i->getStartDate() == (Simulation::simulationTime-1)) {
+    if (i->getStartDate() == (Global::simulationTime-1)) {
 	_cumulativeh++;
     }
     _cumulativeY += Global::interval*i->getDensity();
@@ -116,11 +117,11 @@ int DummyWithinHostModel::countInfections (int& patentInfections) {
 
 void DummyWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel = PkPdModel::createPkPdModel (stream);
+    pkpdModel = PkPd::PkPdModel::createPkPdModel (stream);
     patentInfections & stream;
     infections & stream;
     if (int(infections.size()) != _MOI)
-	throw OM::util::errors::checkpoint_error ("_MOI mismatch");
+	throw util::checkpoint_error ("_MOI mismatch");
 }
 void DummyWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
@@ -128,3 +129,5 @@ void DummyWithinHostModel::checkpoint (ostream& stream) {
     patentInfections & stream;
     infections & stream;
 }
+
+} }

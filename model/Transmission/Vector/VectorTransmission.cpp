@@ -20,15 +20,18 @@
 #include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
 #include "util/vectors.h"
+#include "util/ModelOptions.hpp"
+
 #include <fstream>
 
-
-using namespace OM::util::errors;
+namespace OM { namespace Transmission {
+    using namespace OM::util;
 
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
 {
-  if ((Global::modelVersion & (NEGATIVE_BINOMIAL_MASS_ACTION|LOGNORMAL_MASS_ACTION))==0)
-    throw xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
+  if (!util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION)
+      && !util::ModelOptions::option(util::LOGNORMAL_MASS_ACTION))
+    throw util::xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
   
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
@@ -38,7 +41,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
   numSpecies = anophelesList.size();
   if (numSpecies < 1)
-    throw xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
+    throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
 #ifdef OMV_CSV_REPORTING
   species.resize (numSpecies, VectorAnopheles(csvReporting));
   csvReporting << "simulation time,";
@@ -70,7 +73,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   
   
   // -----  Initialise interventions  -----
-  const scnXml::Interventions::AnophelesSequence& intervSeq = getInterventions().getAnopheles();
+  const scnXml::Interventions::AnophelesSequence& intervSeq = InputData.getInterventions().getAnopheles();
   for (scnXml::Interventions::AnophelesSequence::const_iterator it = intervSeq.begin(); it != intervSeq.end(); ++it) {
     species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it);
   }
@@ -82,7 +85,7 @@ VectorTransmission::~VectorTransmission () {
     species[i].destroy();
 }
 
-void VectorTransmission::setupNv0 (const std::list<Human>& population, int populationSize) {
+void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
   for (size_t i = 0; i < numSpecies; ++i) {
     species[i].setupNv0 (i, population, populationSize);
   }
@@ -109,9 +112,9 @@ void VectorTransmission::initMainSimulation() {
     cerr << initialisationEIR << '\n' << innoculationsPerDayOfYear << endl;
   }
   
-  simulationMode = get_mode();	// allow forcing equilibrium mode like with non-vector model
+  simulationMode = InputData.get_mode();	// allow forcing equilibrium mode like with non-vector model
   if (simulationMode != 2 && simulationMode != 4)
-    throw xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
+    throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
@@ -128,7 +131,7 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 
 // Every Global::interval days:
-void VectorTransmission::vectorUpdate (const std::list<Human>& population, int simulationTime) {
+void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {
 #ifdef OMV_CSV_REPORTING
   csvReporting << simulationTime << ',';
 #endif
@@ -151,3 +154,5 @@ void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
     species & stream;
 }
+
+} }

@@ -27,7 +27,11 @@
 #include "Survey.h"
 #include "Pathogenesis/State.h"
 
-class WithinHostModel;
+namespace OM {
+    namespace WithinHost {
+	class WithinHostModel;
+    }
+namespace Pathogenesis {
 
 /*! PathogenesisModel abstract base class. 
  *
@@ -52,7 +56,7 @@ public:
    *
    * May introduce severe or uncomplicated cases of malaria, as well as non-
    * malaria fevers. */
-  Pathogenesis::State determineState(double ageYears, WithinHostModel& withinHostModel);
+  State determineState(double ageYears, WithinHost::WithinHostModel& withinHostModel);
   
   /** Summarize PathogenesisModel details
    *
@@ -90,4 +94,5 @@ protected:	// non-static
   double _comorbidityFactor; 
 };
 
+} }
 #endif

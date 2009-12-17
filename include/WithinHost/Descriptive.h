@@ -28,6 +28,8 @@
 
 using namespace std;
 
+namespace OM { namespace WithinHost {
+
 /*! Old Within Host Model class.
  *
  * Note: this implementation has a few bugs with (hopefully) small effect
@@ -66,4 +68,5 @@ protected:
   std::list<DescriptiveInfection*> infections;
 };
 
+} }
 #endif

@@ -23,6 +23,8 @@
 #include "util/WeibullDecayedValue.h"
 #include "scenario.hxx"
 
+namespace OM { namespace Transmission {
+    
 /** Stores vector model data applicable between a category of host and a
  * mosquito species.
  * 
@@ -88,23 +90,24 @@ public:
   //@{
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue ITNDeterrency;
+  util::WeibullDecayedValue ITNDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
    * an individual. */
-  WeibullDecayedValue ITNPreprandialKillingEffect;
+  util::WeibullDecayedValue ITNPreprandialKillingEffect;
   /** (1 - this) is the proportion of mosquitoes killed when trying to escape
    * after feeding on an individual. */
-  WeibullDecayedValue ITNPostprandialKillingEffect;
+  util::WeibullDecayedValue ITNPostprandialKillingEffect;
   /** Effectiveness of IRS in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue IRSDeterrency;
+  util::WeibullDecayedValue IRSDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  WeibullDecayedValue IRSKillingEffect;
+  util::WeibullDecayedValue IRSKillingEffect;
   /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  WeibullDecayedValue VADeterrency;
+  util::WeibullDecayedValue VADeterrency;
   //@}
 };
 typedef vector<HostCategoryAnopheles> NonHumanHostsType;
 
+} }
 #endif

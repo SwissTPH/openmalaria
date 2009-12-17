@@ -23,15 +23,19 @@
 
 #include "Global.h"
 #include "Host/Human.h"
+#include "util/errors.hpp"
 #include "scenario.hxx"
+
 #include <fstream>
 #include <string.h>
 
 // Define these to print out various arrays:
 //#define TransmissionModel_PrintSmoothArray
 
-class Summary;
-class PerHostTransmission;
+namespace OM {
+    class Summary;
+namespace Transmission {
+    class PerHostTransmission;
 
 
 /** There are 3 simulation modes. */
@@ -81,7 +85,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Human>& population, int populationSize) {}
+  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize) {}
   
   /// Checkpointing
   template<class S>
@@ -117,15 +121,19 @@ public:
   /** Needs to be called each step of the simulation
    *
    * Runs internal calculations of Vector model. */
-  virtual void vectorUpdate (const std::list<Human>& population, int simulationTime) {};
+  virtual void vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {};
   
   /** Needs to be called each step of the simulation
    *
    * Summarises infectiousness of humans and of mosquitoes. */
-  void updateKappa (const std::list<Human>& population, int simulationTime);
+  void updateKappa (const std::list<Host::Human>& population, int simulationTime);
   
   /** Little function to copy kappa to initialKappa. */
   virtual void copyToInitialKappa () {}
+  
+  virtual void changeEIRIntervention (const scnXml::NonVector&) {
+      throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
+  }
   
   /** Returns the EIR, per host and per time step.
    *
@@ -228,4 +236,5 @@ protected:
 #endif
 };
 
+} }
 #endif

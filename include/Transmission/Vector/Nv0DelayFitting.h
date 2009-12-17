@@ -23,6 +23,11 @@
 #include <boost/foreach.hpp>
 #include <boost/math/tools/roots.hpp>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+namespace OM { namespace Transmission {
 namespace Nv0DelayFitting {
 template <class T>
 struct eDFunctor
@@ -91,4 +96,5 @@ T fit (double fcR, const vector<T>& fc, const vector<T>& samples)
   return -boost::math::tools::halley_iterate (eDFunctor<T>(fcR, fc, samples), guess, min, max, digits);
 }
 }
+} }
 #endif

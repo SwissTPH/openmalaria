@@ -26,7 +26,7 @@
 
 #ifdef WITHOUT_BOINC
 #include <stdlib.h>	// exit()
-namespace BoincWrapper {
+namespace OM { namespace util { namespace BoincWrapper {
   void init () {
     cout << "BoincWrapper: not using BOINC" << endl;
   }
@@ -45,7 +45,7 @@ namespace BoincWrapper {
   void checkpointCompleted() {}
   
   void generateChecksum (istream& in) {}
-}
+} } }
 
 #else	// With BOINC
 #include "boinc_api.h"
@@ -55,7 +55,7 @@ namespace BoincWrapper {
 #include <sstream>
 #include <stdexcept>	// runtime_error
 
-namespace BoincWrapper {
+namespace OM { namespace util { namespace BoincWrapper {
   void init () {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
     int err = boinc_init();
@@ -131,13 +131,13 @@ namespace BoincWrapper {
     os.write ((char*)binout, 16);
     os.close();
   }
-}
+} } }
 #endif	// Without/with BOINC
 
-namespace SharedGraphics {
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
 #include "ShmStruct.h"
 #include "graphics2.h"
+namespace OM { namespace util { namespace SharedGraphics {
   UC_SHMEM* shmem = NULL;
   void update_shmem() {
     shmem->fraction_done = boinc_get_fraction_done();
@@ -165,8 +165,10 @@ namespace SharedGraphics {
     memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
   }
 
+} } }
 #else
+namespace OM { namespace util { namespace SharedGraphics {
   void init() {}
   void copyKappa(double *kappa){}
+} } }
 #endif
-}

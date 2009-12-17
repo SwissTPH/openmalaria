@@ -21,6 +21,8 @@
 #ifndef GSL_WRAPPER_H
 #define GSL_WRAPPER_H
 
+// Note: should be in namespace util too but can't see much point here.
+namespace OM {
 ///@brief A wrapper about some GSL functionality, and some additional functionality based on GSL routines.
 namespace gsl {
   ///@brief Random number generators
@@ -63,5 +65,6 @@ namespace gsl {
   void rngSaveState(int seedFileNumber);
   void rngLoadState(int seedFileNumber);
   //@}
+}
 }
 #endif

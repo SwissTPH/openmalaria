@@ -20,12 +20,16 @@
 
 #include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/DescriptiveIPTInfection.h"
-#include "Simulation.h"
 #include "util/gsl.h"
+#include "util/errors.hpp"
+#include "util/ModelOptions.hpp"
 #include "inputData.h"
 #include "Surveys.h"
 
-bool DescriptiveIPTWithinHost::iptActive = false;
+#include <cmath>
+
+namespace OM { namespace WithinHost {
+    bool DescriptiveIPTWithinHost::iptActive = false;
 
 // -----  static data  -----
 
@@ -38,11 +42,11 @@ int DescriptiveIPTWithinHost::iptiEffect;
 // -----  init  -----
 
 void DescriptiveIPTWithinHost::initParameters () {
-  const scnXml::Interventions& xmlInterventions = getInterventions();
+    const scnXml::Interventions& xmlInterventions = InputData.getInterventions();
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) {
-      if (getActiveInterventions()[Interventions::IPTI])
-	  throw OM::util::errors::xml_scenario_error ("IPTI used without description");
+      if (InputData.getActiveInterventions()[Interventions::IPTI])
+	  throw util::xml_scenario_error ("IPTI used without description");
       return;
   }
   
@@ -62,7 +66,7 @@ void DescriptiveIPTWithinHost::initParameters () {
     iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
     iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
     for (int i=0;i<numberOfIPTiDoses; i++) {
-      iptiTargetagetstep[i] = static_cast<int>(floor(xmlIpti[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval)));
+      iptiTargetagetstep[i] = static_cast<int>(floor(xmlIpti[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval)));
       iptiCoverage[i] = xmlIpti[i].getCoverage();
     }
   } else
@@ -81,11 +85,11 @@ void DescriptiveIPTWithinHost::clearParameters () {
 }
 
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
-    _SPattenuationt(TIMESTEP_NEVER), _lastSPDose (TIMESTEP_NEVER), _lastIptiOrPlacebo (TIMESTEP_NEVER),
+    _SPattenuationt(Global::TIMESTEP_NEVER), _lastSPDose (Global::TIMESTEP_NEVER), _lastIptiOrPlacebo (Global::TIMESTEP_NEVER),
     _cumulativeInfections(0)
 {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
-    throw OM::util::errors::xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
+    throw util::xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
     // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
   }
 }
@@ -106,34 +110,34 @@ void DescriptiveIPTWithinHost::newInfection(){
 void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
   if (isSevere) {
-  } else if(Simulation::simulationTime-_lastIptiOrPlacebo <= fortnight) {
+  } else if(Global::simulationTime-_lastIptiOrPlacebo <= fortnight) {
           // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
-  } else if(Simulation::simulationTime-_lastSPDose <=  fortnight) {
+  } else if(Global::simulationTime-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
     TODO: if this code is to survive, then the iptiEffect values should be 
     symbolic constants
           */
   } else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
-    _lastSPDose=Simulation::simulationTime+1;
+    _lastSPDose=Global::simulationTime+1;
   } else if( iptiEffect ==  3 ||  iptiEffect ==  13) {
   } else if(iptiEffect >=  14 && iptiEffect < 30) {
   } else {
-    _lastSPDose=Simulation::simulationTime+1;
+    _lastSPDose=Global::simulationTime+1;
     // SPAction will first act at the beginning of the next Global::interval
   }
   clearAllInfections();
 }
 
 void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ageGroup) {
-  if (Simulation::timeStep < 0) return;
+  if (Global::timeStep < 0) return;
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
   static int IPT_MAX_INTERVAL[9] = { 61, 67,  0,  6, 12, 55, 49, 43, 31 };
   
   if (iptiEffect >= 14 && iptiEffect <= 22) {
-    int yearInterval = Simulation::simulationTime % Global::intervalsPerYear;
+    int yearInterval = Global::simulationTime % Global::intervalsPerYear;
     int min = IPT_MIN_INTERVAL[iptiEffect-14];
     int max = IPT_MAX_INTERVAL[iptiEffect-14];
     // We're using modular arithmatic here, to represent a time period 5*18 days long.
@@ -149,13 +153,13 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ag
   for (int i=0;i<numberOfIPTiDoses; i++) {
     if (iptiTargetagetstep[i] == agetstep) {
       if (gsl::rngUniform() <  iptiCoverage[i]) {
-        _lastIptiOrPlacebo=Simulation::simulationTime;
+        _lastIptiOrPlacebo=Global::simulationTime;
         /*
         iptiEffect denotes treatment or placebo group
         and also the treatment given when sick (trial-dependent)
         */
         if (iptiEffect >=  10) {
-          _lastSPDose=Simulation::simulationTime;
+          _lastSPDose=Global::simulationTime;
           Surveys.current->reportIPTDoses (ageGroup, 1);
         }
       }
@@ -166,12 +170,12 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ag
 void DescriptiveIPTWithinHost::IPTiTreatment (SurveyAgeGroup ageGroup) {
   //Set the last SP Dose given for the eligible humans - is this all we need to do?
   
-  _lastIptiOrPlacebo = Simulation::simulationTime;
+  _lastIptiOrPlacebo = Global::simulationTime;
   
   // iptiEffect denotes treatment or placebo group
   // and also the treatment given when sick (trial-dependent)
   if (iptiEffect >= 10){
-    _lastSPDose = Simulation::simulationTime;
+    _lastSPDose = Global::simulationTime;
     Surveys.current->reportIPTDoses (ageGroup, 1);
   }
 }
@@ -186,7 +190,7 @@ void DescriptiveIPTWithinHost::SPAction(){
 
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()) {
-    if (1 + Simulation::simulationTime - (*iter)->getStartDate() > DescriptiveInfection::latentp) {
+    if (1 + Global::simulationTime - (*iter)->getStartDate() > DescriptiveInfection::latentp) {
       DescriptiveIPTInfection* infec = dynamic_cast<DescriptiveIPTInfection*> (*iter);
       if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
       if (infec->eventSPClears(_lastSPDose)) {
@@ -204,8 +208,8 @@ void DescriptiveIPTWithinHost::SPAction(){
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
   //NOTE: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
-  if (Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY && _cumulativeInfections > 0) {
-    if (_SPattenuationt > Simulation::simulationTime && totalDensity < 10) {
+  if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeInfections > 0) {
+    if (_SPattenuationt > Global::simulationTime && totalDensity < 10) {
       totalDensity = 10;
       _cumulativeY += 10;
     }
@@ -213,7 +217,7 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
 }
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection* inf) {
-  if (!(Global::modelVersion & ATTENUATION_ASEXUAL_DENSITY)) return;
+  if (!(util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY))) return;
   
   DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
   if (iptInf == NULL)
@@ -243,3 +247,5 @@ void DescriptiveIPTWithinHost::checkpoint (ostream& stream) {
     _lastIptiOrPlacebo & stream;
     _cumulativeInfections & stream;
 }
+
+} }

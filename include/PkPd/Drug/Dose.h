@@ -22,9 +22,11 @@
 #define Hmod_Dose
 
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 
 using namespace std;
+
+namespace OM { namespace PkPd {
 
 /** A simple class to hold dose info.
  *
@@ -52,5 +54,5 @@ public:
   /// Some type of data is wanted... (concentration at start of next timestep, and integral of concentration for this timestep?)
   double x,y;
 };
-
+} }
 #endif

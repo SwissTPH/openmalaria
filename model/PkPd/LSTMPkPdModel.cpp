@@ -20,6 +20,8 @@
 
 #include "PkPd/LSTMPkPdModel.h"
 
+namespace OM { namespace PkPd {
+    
 // -----  static functions  -----
 
 void LSTMPkPdModel::init() {
@@ -90,3 +92,5 @@ double LSTMPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
   }
   return factor;
 }
+
+} }

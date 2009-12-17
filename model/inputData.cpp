@@ -21,45 +21,24 @@
 #include "inputData.h"
 #include "scenario.hxx"
 #include "util/BoincWrapper.h"
+#include "util/errors.hpp"
 
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <map>
 
-using namespace OM::util::errors;
-
-
-/// Current schema version.
+namespace OM {
+    /// Current schema version.
 const int SCHEMA_VERSION = 12;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
 const int OLDEST_COMPATIBLE = 5;
-/// Sometimes used to save changes to the xml.
-std::string xmlFileName;
-/// Set true if the xml document is changed and should be saved
-bool documentChanged = false;
-
-/** @brief The xml data structure. */
-scnXml::Scenario* scenario = NULL;
-const scnXml::Monitoring * monitoring;
-const scnXml::Interventions * interventions;
-const scnXml::EntoData * entoData; // May be replaced by a changeEIR intervention
-const scnXml::Demography * demography;
-const scnXml::HealthSystem * healthSystem; // May be replaced by a changeHS intervention or not present
-const scnXml::EventScheduler * eventScheduler; // Optional (may be NULL)
-const scnXml::Parameters * parameters;
-//Proteome * proteome;
-
-// Initialized (derived) values:
-double parameterValues[Params::MAX];
-std::map<int, const scnXml::Intervention*> timedInterventions;
-bitset<Interventions::SIZE> activeInterventions;
 
 // Initialization functions:
 
-void initParameterValues()
+void InputDataType::initParameterValues()
 {
     // initialize all to zero
     for (size_t i = 0; i < Params::MAX; ++i)
@@ -75,7 +54,7 @@ void initParameterValues()
     }
 }
 
-void initTimedInterventions()
+void InputDataType::initTimedInterventions()
 {
     if (interventions->getContinuous().present()) {
         const scnXml::Continuous& contI = interventions->getContinuous().get();
@@ -95,7 +74,7 @@ void initTimedInterventions()
             if (timedInterventions.count (time)) {
                 ostringstream msg;
                 msg << "Error: multiple timed interventions with time: " << time;
-                throw xml_scenario_error (msg.str());
+                throw util::xml_scenario_error (msg.str());
             }
             timedInterventions[time] = & (*it);
 
@@ -122,7 +101,7 @@ void initTimedInterventions()
 }
 
 
-void createDocument (std::string lXmlFile)
+void InputDataType::createDocument (std::string lXmlFile)
 {
     xmlFileName = lXmlFile;
     //Parses the document
@@ -143,10 +122,10 @@ void createDocument (std::string lXmlFile)
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
         ostringstream msg;
         msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
-        throw xml_scenario_error (msg.str());
+        throw util::xml_scenario_error (msg.str());
     }
     if (scenario->getSchemaVersion() > SCHEMA_VERSION)
-        throw xml_scenario_error ("Error: new schema version unsupported");
+        throw util::xml_scenario_error ("Error: new schema version unsupported");
 
     monitoring = &scenario->getMonitoring();
     interventions = &scenario->getInterventions();
@@ -165,7 +144,7 @@ void createDocument (std::string lXmlFile)
     initTimedInterventions();
 }
 
-void cleanDocument()
+void InputDataType::cleanDocument()
 {
     if (documentChanged) {
         // get the "basename" (file name without path) of xmlFileName as a C string:
@@ -194,46 +173,46 @@ void cleanDocument()
         delete scenario;
 }
 
-const scnXml::Monitoring& getMonitoring()
+const scnXml::Monitoring& InputDataType::getMonitoring()
 {
     return *monitoring;
 }
-const scnXml::Interventions& getInterventions()
+const scnXml::Interventions& InputDataType::getInterventions()
 {
     return *interventions;
 }
-const scnXml::EntoData& getEntoData()
+const scnXml::EntoData& InputDataType::getEntoData()
 {
     return *entoData;
 }
-const scnXml::Demography& getDemography()
+const scnXml::Demography& InputDataType::getDemography()
 {
     return *demography;
 }
-const scnXml::EventScheduler& getEventScheduler ()
+const scnXml::EventScheduler& InputDataType::getEventScheduler ()
 {
     if (eventScheduler == NULL)
-	throw xml_scenario_error ("EventScheduler requested but not in XML");
+	throw util::xml_scenario_error ("EventScheduler requested but not in XML");
     return *eventScheduler;
 }
-const scnXml::HealthSystem& getHealthSystem()
+const scnXml::HealthSystem& InputDataType::getHealthSystem()
 {
     if (healthSystem == NULL)
-        throw xml_scenario_error ("heathSystem element requested but not present");
+        throw util::xml_scenario_error ("heathSystem element requested but not present");
     return *healthSystem;
 }
 
-scnXml::Scenario& getMutableScenario()
+scnXml::Scenario& InputDataType::getMutableScenario()
 {
     return *scenario;
 }
 
-void changeHealthSystem (const scnXml::HealthSystem* hs)
+void InputDataType::changeHealthSystem (const scnXml::HealthSystem* hs)
 {
     healthSystem = hs;
 }
 
-double getParameter (size_t i)
+double InputDataType::getParameter (size_t i)
 {
     return parameterValues[i];
 }
@@ -242,47 +221,47 @@ double getParameter (size_t i)
 // ----- Member access functions (bridges) -----
 // This is largely unmodified from the old xerces version.
 
-double get_detectionlimit()
+double InputDataType::get_detectionlimit()
 {
     return  monitoring->getSurveys().getDetectionLimit();
 }
 
-int get_summary_option()
+int InputDataType::get_summary_option()
 {
     return monitoring->getSurveys().getSummaryOption();
 }
 
-int get_model_version()
+int InputDataType::get_model_version()
 {
     return scenario->getModelVersion();
 }
 
-int get_mode()
+int InputDataType::get_mode()
 {
     return scenario->getMode();
 }
 
-int get_assim_mode()
+int InputDataType::get_assim_mode()
 {
     return scenario->getAssimMode();
 }
 
-int get_wu_id()
+int InputDataType::get_wu_id()
 {
     return scenario->getWuID();
 }
 
-double get_maximum_ageyrs()
+double InputDataType::get_maximum_ageyrs()
 {
     return scenario->getMaximumAgeYrs();
 }
 
-double get_lowerbound()
+double InputDataType::get_lowerbound()
 {
     return monitoring->getAgeGroup().getLowerbound();
 }
 
-const scnXml::Intervention* getInterventionByTime (int time)
+const scnXml::Intervention* InputDataType::getInterventionByTime (int time)
 {
     std::map<int, const scnXml::Intervention*>::iterator i = timedInterventions.find (time);
     if (i != timedInterventions.end())
@@ -290,23 +269,23 @@ const scnXml::Intervention* getInterventionByTime (int time)
     else
         return NULL;
 }
-const bitset<Interventions::SIZE> getActiveInterventions ()
+const bitset<Interventions::SIZE> InputDataType::getActiveInterventions ()
 {
     return activeInterventions;
 }
 
-int get_analysis_no()
+int InputDataType::get_analysis_no()
 {
     return scenario->getAnalysisNo();
 }
 
-int get_populationsize()
+int InputDataType::get_populationsize()
 {
     return scenario->getPopSize();
 }
 
 
-double get_growthrate()
+double InputDataType::get_growthrate()
 {
     if (demography->getGrowthRate().present())
         return demography->getGrowthRate().get();
@@ -314,18 +293,20 @@ double get_growthrate()
         return 0.;
 }
 
-int get_latentp()
+int InputDataType::get_latentp()
 {
     return parameters->getLatentp();
 }
 
-int get_interval()
+int InputDataType::get_interval()
 {
     return parameters->getInterval();
 }
 
-int getISeed()
+int InputDataType::getISeed()
 {
     return parameters->getIseed();
 }
 
+InputDataType InputData;
+}

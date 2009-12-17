@@ -21,7 +21,7 @@
 #include "Clinical/ImmediateOutcomes.h"
 
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 // -----  static init  -----
 
@@ -43,7 +43,7 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears) {
   caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,
 				    latestReport,
@@ -61,4 +61,4 @@ void ClinicalImmediateOutcomes::checkpoint (ostream& stream) {
     (*caseManagement) & stream;
 }
 
-}
+} }

@@ -18,9 +18,12 @@
  */
 
 #include "util/vectors.h"
+#include "util/errors.hpp"
 #include <cstring>
+#include <cmath>
 
-
+namespace OM { namespace util {
+    
 void vectors::scale (vector<double>& vec, double a) {
   for (size_t i = 0; i < vec.size(); ++i)
     vec[i] *= a;
@@ -75,9 +78,11 @@ gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
 vector<double> vectors::DoubleList2std (const scnXml::DoubleList& list, size_t length) {
   const scnXml::DoubleList::ItemSequence seq = list.getItem();
   if (seq.size() != length)
-    throw OM::util::errors::xml_scenario_error ("readDoubleList: XML list has wrong length");
+    throw xml_scenario_error ("readDoubleList: XML list has wrong length");
   vector<double> ret (length);
   for (size_t i = 0; i < length; ++i)
     ret[i] = seq[i];
   return ret;
 }
+
+} }

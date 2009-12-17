@@ -21,7 +21,7 @@
 #ifndef Hmod_ESDecision
 #define Hmod_ESDecision
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 typedef int cmid;	// case management desicion ID
 
@@ -31,5 +31,5 @@ namespace Decision {
 #include "Clinical/DecisionEnums.d"
 }
 
-};
+} }
 #endif

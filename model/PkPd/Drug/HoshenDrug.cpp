@@ -22,14 +22,10 @@
 
 #include "PkPd/Drug/HoshenDrug.h"
 
-#include <assert.h>
 #include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
 
-using namespace std;
-
+namespace OM { namespace PkPd {
+    
 HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(type) {
 }
 
@@ -48,11 +44,12 @@ double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) cons
   double param = ((HoshenDrugType*)typeData)->proteomePDParameters.find(infProteome->getProteomeID())->second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
-  return exp(-(startFactor + endFactor)/2);
+  return std::exp(-(startFactor + endFactor)/2);
 }
 
 double HoshenDrug::decayFactor (double time) {
   //k = log(2)/halfLife
-  return exp(-time*log(2.0)/((HoshenDrugType*)typeData)->halfLife);
+  return std::exp(-time*log(2.0)/((HoshenDrugType*)typeData)->halfLife);
 }
 
+} }

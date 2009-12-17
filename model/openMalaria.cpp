@@ -17,40 +17,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <fstream>
-
-using namespace std;
-
 #include "util/BoincWrapper.h"
-#include "util/gsl.h"	//Include wrapper for GSL library
 #include "inputData.h"	//Include parser for the input
 
 #include "Global.h"
 #include "Simulation.h"
+#include "util/CommandLine.hpp"
 
-
-/** main() - initializes and shuts down BOINC and GSL, loads scenario XML and
+/** main() — initializes and shuts down BOINC, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]){
   int exitStatus = 0;
   try {
     string scenario_name =
-      Global::parseCommandLine (argc, argv);
+      OM::util::CommandLine::parse (argc, argv);
     
-    BoincWrapper::init();
+    OM::util::BoincWrapper::init();
     
-    scenario_name = Global::lookupResource (scenario_name.c_str());
+    scenario_name = OM::util::CommandLine::lookupResource (scenario_name.c_str());
     
     //Change it and read it with boinc
-    createDocument(scenario_name);
+    OM::InputData.createDocument(scenario_name);
     
-    Global::initGlobal();
+    OM::Global::init ();
     
     {
-      Simulation simulation;	// constructor runs
+      OM::Simulation simulation;	// constructor runs
       simulation.start();
     }	// simulation's destructor runs
-  } catch (const OM::util::errors::cmd_exit& e) {	// this is not an error, but exiting due to command line
+  } catch (const OM::util::cmd_exit& e) {	// this is not an error, but exiting due to command line
     cout << e.what() << "; exiting..." << endl;
   } catch (const ::xsd::cxx::tree::exception<char>& e) {
     cout << "XSD Exception: " << e.what() << '\n' << e << endl;
@@ -64,10 +59,10 @@ int main(int argc, char* argv[]){
   }
   
   try {	// free XML memory (if allocated), and potentially save changes
-    cleanDocument();
+    OM::InputData.cleanDocument();
   } catch (...) {
     cerr << "cleanDocument failed" << endl;
     exitStatus = -1;
   }
-  BoincWrapper::finish(exitStatus);	// Never returns
+  OM::util::BoincWrapper::finish(exitStatus);	// Never returns
 }

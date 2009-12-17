@@ -22,11 +22,14 @@
 #include "WithinHost/DummyInfection.h"
 #include "inputData.h"
 #include "util/gsl.h"
+#include "util/ModelOptions.hpp"
+
 #include <algorithm>
 #include <sstream>
 #include <string.h>
 
-
+namespace OM { namespace WithinHost {
+    
 void DummyInfection::init (){
 }
 
@@ -34,8 +37,8 @@ DummyInfection::DummyInfection() {
     _density=16;	// increased by DH to avoid zeros in initialKappa
     _duration=100;	// arbitrary max duration
     
-    if (Global::modelVersion & INCLUDES_PK_PD)
-      _proteome = ProteomeInstance::newInfection();
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 
 int DummyInfection::getEndDate(){
@@ -68,3 +71,5 @@ void DummyInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
     _duration & stream;
 }
+
+} }

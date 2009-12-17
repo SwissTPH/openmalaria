@@ -25,6 +25,8 @@
 #include <fstream>
 #include <fcntl.h>
 
+namespace OM { namespace WithinHost {
+
 //!  Models of infection.
 /*!
   Models related to the within-host dynamics of infections.
@@ -64,5 +66,5 @@ private:
   int _duration; 
 };
 
+} }
 #endif
-

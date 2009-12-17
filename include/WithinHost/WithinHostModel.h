@@ -31,6 +31,8 @@
 
 using namespace std;
 
+namespace OM { namespace WithinHost {
+    
 /*! Within Host Model abstract class.
  * Dont forget to create friend << and >> for subclasses.
  */
@@ -201,4 +203,5 @@ protected:
   //END Static vars
 };
 
+} }
 #endif

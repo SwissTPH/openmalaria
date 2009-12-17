@@ -20,16 +20,15 @@
 #include "Transmission/NonVector.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
-#include "Simulation.h"
 #include "util/gsl.h"
 #include "Surveys.h"	// sim-end timestep
 #include <cfloat>
 
+namespace OM { namespace Transmission {
+    
 //static (class) variables
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
 const double NonVectorTransmission::min_EIR_mult= 0.01; 
-
-using namespace OM::util::errors;
 
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
 {
@@ -68,9 +67,9 @@ NonVectorTransmission::~NonVectorTransmission () {}
 void NonVectorTransmission::initMainSimulation (){
   // initialKappa is used in calculateEIR
   copyToInitialKappa();
-  simulationMode = get_mode();
+  simulationMode = InputData.get_mode();
   if (simulationMode < 2 || simulationMode > 4)
-    throw xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
+    throw util::xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
 }
 
 
@@ -81,7 +80,7 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   interventionEIR.assign (nDays.size(), 0.0);
   if (static_cast<int>(nDays.size()) < Surveys.getFinalTimestep()+1) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Surveys.getFinalTimestep()+1 << endl;
-    throw xml_scenario_error ("Insufficient intervention phase EIR values provided");
+    throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
@@ -109,6 +108,10 @@ void NonVectorTransmission::copyToInitialKappa () {
   }
 }
 
+void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) {
+    setTransientEIR (ed);
+}
+
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
@@ -120,18 +123,19 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array
-      eir = interventionEIR[Simulation::timeStep];
+      // TODO: check usage of timestep is safe (check transient EIR cannot be enterred before intervention sim)
+      eir = interventionEIR[Global::timeStep];
       break;
     case dynamicEIR:
       eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
-      if (Simulation::timeStep != 0) {
+      if (Global::timeStep >= 0) {
 	eir *=
             kappa[(simulationTime-nspore-1) % Global::intervalsPerYear] /
             initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear];
       }
       break;
     default:	// Anything else.. don't continue silently
-      throw xml_scenario_error ("Invalid simulation mode");
+      throw util::xml_scenario_error ("Invalid simulation mode");
   }
 #ifndef NDEBUG
   if (!finite(eir)) {
@@ -172,3 +176,5 @@ void NonVectorTransmission::checkpoint (ostream& stream) {
     interventionEIR & stream;
     initialKappa & stream;
 }
+
+} }

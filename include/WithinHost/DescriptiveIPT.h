@@ -23,6 +23,8 @@
 
 #include "WithinHost/Descriptive.h"
 
+namespace OM { namespace WithinHost {
+    
 /** Extension to the DescriptiveWithinHostModel, including IPT (intermittent
  * preventative treatment) plus a simple drug-action model (SPAction). */
 class DescriptiveIPTWithinHost : public DescriptiveWithinHostModel {
@@ -84,4 +86,5 @@ private:
   static int iptiEffect;
 };
 
+} }
 #endif

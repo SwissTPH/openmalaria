@@ -23,14 +23,17 @@
 #include "Clinical/ClinicalModel.h"
 
 #include <fstream>
+#include <stdexcept>
 
+namespace OM {
+    
 SurveysType Surveys;
 
 void SurveysType::init ()
 {
   _surveyPeriod = 0;
 
-  const scnXml::Surveys::SurveyTimeSequence& survs = getMonitoring().getSurveys().getSurveyTime();
+  const scnXml::Surveys::SurveyTimeSequence& survs = InputData.getMonitoring().getSurveys().getSurveyTime();
 
   _surveysTimeIntervals.resize (survs.size() + 1);
   for (size_t i = 0; i < survs.size(); i++) {
@@ -59,7 +62,7 @@ void SurveysType::incrementSurveyPeriod()
 
 void SurveysType::writeSummaryArrays ()
 {
-  string output_filename = BoincWrapper::resolveFile ("output.txt");
+  string output_filename = util::BoincWrapper::resolveFile ("output.txt");
   ifstream test (output_filename.c_str());
   if (test.is_open())
     throw runtime_error ("File output.txt exists!");
@@ -84,4 +87,5 @@ void SurveysType::writeSummaryArrays ()
   }
 
   outputFile.close();
+}
 }

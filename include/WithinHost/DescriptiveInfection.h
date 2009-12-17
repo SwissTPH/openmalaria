@@ -22,11 +22,10 @@
 #ifndef Hmod_DescriptiveInfection
 #define Hmod_DescriptiveInfection
 #include "WithinHost/Infection.h"
-#include "Simulation.h"
 #include <fstream>
 #include <fcntl.h>
 
-
+namespace OM { namespace WithinHost {
 //Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?
 const int maxDur=84;
 
@@ -72,7 +71,7 @@ public:
     \return The interval before clearance.
   */
   bool expired () {
-    return Simulation::simulationTime >= _startdate+_duration;
+    return Global::simulationTime >= _startdate+_duration;
   }
   
   //! Get the density of the infection
@@ -139,5 +138,5 @@ private:
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
 };
 
+} }
 #endif
-

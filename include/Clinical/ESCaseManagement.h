@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "Clinical/ESDecision.h"
 #include "Pathogenesis/State.h"
+#include "WithinHost/WithinHostModel.h"
 #include "Survey.h"
 #include "inputData.h"
 
@@ -32,9 +33,7 @@
 #include <map>
 
 
-class WithinHostModel;
-
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 /// Data used for a withinHostModel->medicate() call
 struct MedicateData {
@@ -89,7 +88,7 @@ class ESCaseManagement {
     public:
 	static void init ();
 	
-	static cmid execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
+	static cmid execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
 	
     private:
 	static pair<cmid,CaseTreatment&> traverse (cmid id);
@@ -127,5 +126,5 @@ class ESCaseManagement {
 	static cmid cmMask;
 };
 
-}
+} }
 #endif

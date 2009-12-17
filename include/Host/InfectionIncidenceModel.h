@@ -23,10 +23,11 @@
 
 #include "Global.h"
 #include "Survey.h"
+#include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 
-class PerHostTransmission;
-
+namespace OM { namespace Host {
+    
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
  *
@@ -89,10 +90,10 @@ public:
    * 
    * Secondly calculates the number of new infections to introduce via a
    * stochastic process. */
-  int numNewInfections(double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans);
+  int numNewInfections(double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans);
   
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
+  virtual double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
   
   double susceptibility ();
   
@@ -142,7 +143,7 @@ public:
     InfectionIncidenceModel (in) {}
   virtual ~HeterogeneityWorkaroundII() {}
 protected:
-  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans);
+  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
 };
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
@@ -151,7 +152,7 @@ public:
   virtual ~NegBinomMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
@@ -160,7 +161,8 @@ public:
   virtual ~LogNormalMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&);
 };
 
+} }
 #endif

@@ -20,6 +20,8 @@
 
 #include "WithinHost/Infection.h"
 
+namespace OM { namespace WithinHost {
+    
 class EmpiricalInfection : public Infection {
 public:
   ///@brief Static methods
@@ -109,3 +111,5 @@ private:
   static double _overallMultiplier;
   //@}
 };
+
+} }

@@ -28,6 +28,8 @@ namespace scnXml {
   class Vector;
 }
 
+namespace OM { namespace Transmission {
+    
 //! Transmission models, Chitnis et al
 class VectorTransmission : public TransmissionModel {
 public:
@@ -36,7 +38,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Human>& population, int populationSize);
+  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
   
   /** Length with which to force vector calculations, while waiting for human
    * population to stabilise. */
@@ -54,7 +56,7 @@ public:
   /** Initialise the main simulation. */
   void initMainSimulation ();
   
-  virtual void vectorUpdate (const std::list<Human>& population, int simulationTime);
+  virtual void vectorUpdate (const std::list<Host::Human>& population, int simulationTime);
   
   /** Calculates EIR (in adults).
    * 
@@ -75,7 +77,7 @@ private:
       ostringstream oss;
       oss << "Intervention description for unincluded anopheles species \""
 	  << mosquito << '"';
-      throw OM::util::errors::xml_scenario_error(oss.str());
+      throw util::xml_scenario_error(oss.str());
     }
     return sIndex->second;
   }
@@ -109,4 +111,6 @@ private:
   friend class PerHostTransmission;
   friend class VectorAnophelesSuite;
 };
+
+} }
 #endif

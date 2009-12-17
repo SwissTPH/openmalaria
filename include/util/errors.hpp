@@ -24,7 +24,7 @@
 using namespace std;
 
 /** Standard exception classes for OpenMalaria. */
-namespace OM { namespace util { namespace errors {
+namespace OM { namespace util {
     
     /** Thrown to indicate an error in the scenario.xml file.  */
     class xml_scenario_error : public runtime_error
@@ -51,5 +51,5 @@ namespace OM { namespace util { namespace errors {
 	    explicit cmd_exit(const string& __arg);
     };
     
-} } }
+} }
 #endif

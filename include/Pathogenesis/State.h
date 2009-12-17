@@ -23,8 +23,7 @@
 
 #include <iostream>
 
-/// Namespace enclosing pathogenesis output enumeration.
-namespace Pathogenesis {
+namespace OM { namespace Pathogenesis {
   /** Types of sickness; used by case management.
    *
    * Most values are flags which can be combined in any form. A few
@@ -61,5 +60,6 @@ namespace Pathogenesis {
     STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
     STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
   };
-}
+
+} }
 #endif

@@ -30,6 +30,7 @@
 #include "util/gsl.h"
 #include "Transmission/TransmissionModel.h"
 #include "Surveys.h"
+#include "util/ModelOptions.hpp"
 
 #include <string>
 #include <string.h>
@@ -37,29 +38,24 @@
 #include <algorithm>
 #include <stdexcept>
 
-
-/*
-  Constants common to all humans
-  Decay in anti-toxic immunity
-*/
-
-int Human::_ylagLen;
+namespace OM { namespace Host {
+    int Human::_ylagLen;
 
 
 // -----  Static functions  -----
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
-  PerHostTransmission::initParameters(getInterventions());
+  Transmission::PerHostTransmission::initParameters(InputData.getInterventions());
   InfectionIncidenceModel::init();
-  WithinHostModel::init();
+  WithinHost::WithinHostModel::init();
   Clinical::ClinicalModel::init();
   Vaccine::initParameters();
   _ylagLen = Global::intervalsPer5Days * 4;
 }
 
 void Human::clear() {	// static clear
-  WithinHostModel::clear();
+  WithinHost::WithinHostModel::clear();
   Vaccine::clearParameters();
 }
 
@@ -67,16 +63,16 @@ void Human::clear() {	// static clear
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) :
+Human::Human(Transmission::TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) :
     perHostTransmission(),
     infIncidence(InfectionIncidenceModel::createModel()),
-    withinHostModel(WithinHostModel::createWithinHostModel()),
+    withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
     _dateOfBirth(dateOfBirth), /*_ID(ID),*/
     _lastVaccineDose(0),
     _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
     _probTransmissionToMosquito(0.0)
 {
-  if (_dateOfBirth != simulationTime && (Simulation::timeStep >= 0 || _dateOfBirth > simulationTime))
+  if (_dateOfBirth != simulationTime && (Global::simulationTime > 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
   
   _ylag.assign (_ylagLen, 0.0);
@@ -85,38 +81,38 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
   /* Human heterogeneity; affects:
    * _comorbidityFactor (stored in PathogenesisModel)
    * _treatmentSeekingFactor (stored in CaseManagementModel)
-   * availabilityFactor (stored in PerHostTransmission)
+   * availabilityFactor (stored in Transmission::PerHostTransmission)
    */
   double _comorbidityFactor = 1.0;
   double _treatmentSeekingFactor = 1.0;
   double availabilityFactor = 1.0;
   
-  if (Global::modelVersion & TRANS_HET) {
+  if (util::ModelOptions::option (util::TRANS_HET)) {
     availabilityFactor=0.2;
     if (gsl::rngUniform() < 0.5) {
       availabilityFactor=1.8;
     }
   }
-  if (Global::modelVersion & COMORB_HET) {
+  if (util::ModelOptions::option (util::COMORB_HET)) {
     _comorbidityFactor=0.2;
     if (gsl::rngUniform() < 0.5) {
       _comorbidityFactor=1.8;
     }	
   }
-  if (Global::modelVersion & TREAT_HET) {
+  if (util::ModelOptions::option (util::TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
     if (gsl::rngUniform() < 0.5) {            
       _treatmentSeekingFactor=1.8;
     }	
   }
-  if (Global::modelVersion & TRANS_TREAT_HET) {
+  if (util::ModelOptions::option (util::TRANS_TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
     availabilityFactor=1.8;
     if (gsl::rngUniform()<0.5) {
       _treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
-  } else if (Global::modelVersion & COMORB_TRANS_HET) {
+  } else if (util::ModelOptions::option (util::COMORB_TRANS_HET)) {
     if (gsl::rngUniform()<0.5) {
       _treatmentSeekingFactor=0.2;
     } else {
@@ -128,7 +124,7 @@ Human::Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime)
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
     }
-  } else if (Global::modelVersion & TRIPLE_HET) {
+  } else if (util::ModelOptions::option (util::TRIPLE_HET)) {
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
@@ -151,7 +147,7 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
+bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
   int ageTimeSteps = simulationTime-_dateOfBirth;
   if (clinicalModel->isDead(ageTimeSteps))
     return true;
@@ -171,27 +167,27 @@ bool Human::update(int simulationTime, TransmissionModel* transmissionModel) {
   //old?withinHostModel.clearInfections	in(_lastIptiOrPlacebo,iptiEffect) inout(_lastSPDose,infections) out(_MOI)
   //new?withinHostModel.parasiteDensityDetectible	in(totalDensity)
   //new?withinHostModel.medicate	inout(drugProxy)
-  clinicalModel->update (*withinHostModel, getAgeInYears(), Simulation::simulationTime-_dateOfBirth);
+  clinicalModel->update (*withinHostModel, getAgeInYears(), Global::simulationTime-_dateOfBirth);
   clinicalModel->updateInfantDeaths (ageTimeSteps);
   _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
   return false;
 }
 
-void Human::updateInfection(TransmissionModel* transmissionModel){
-  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Simulation::simulationTime, perHostTransmission, getAgeInYears()),
+void Human::updateInfection(Transmission::TransmissionModel* transmissionModel){
+  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, getAgeInYears()),
 					      _PEVEfficacy, perHostTransmission);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
   }
   
   // Cache total density for infectiousness calculations
-  _ylag[Simulation::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
+  _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
   
   withinHostModel->calculateDensities(getAgeInYears(), _BSVEfficacy);
 }
 
 void Human::updateInterventionStatus() {
-  int ageTimeSteps = Simulation::simulationTime-_dateOfBirth;
+  int ageTimeSteps = Global::simulationTime-_dateOfBirth;
   if (Vaccine::anyVaccine) {
     /*
       Update the effect of the vaccine
@@ -211,7 +207,7 @@ void Human::updateInterventionStatus() {
       It won't work if we introduce interventions into a scenario with a pre-existing intervention.
     */
     //_ctsIntervs.deploy(ageTimeSteps);
-    if (Simulation::timeStep >= 0) {
+    if (Global::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	  if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps &&
 	      gsl::rngUniform() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
@@ -259,12 +255,12 @@ SurveyAgeGroup Human::ageGroup() const{
 }
 
 double Human::getAgeInYears() const{
-  return double((Simulation::simulationTime-_dateOfBirth)*Global::interval) / daysInYear;
+  return double((Global::simulationTime-_dateOfBirth)*Global::interval) / Global::DAYS_IN_YEAR;
 }
 
 
 void Human::summarize(Survey& survey) {
-  if (DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment())
+  if (WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment())
     return;	//NOTE: do we need this?
   
   SurveyAgeGroup ageGrp = ageGroup();
@@ -279,8 +275,8 @@ double Human::calcProbTransmissionToMosquito() const {
   /* This model was designed for 5-day timesteps. We use the same model
   (sampling 10, 15 and 20 days ago) for 1-day timesteps to avoid having to
   (design and analyse a new model. Description: AJTMH pp.32-33 */
-  int ageTimeSteps=Simulation::simulationTime-_dateOfBirth;
-  if (ageTimeSteps*Global::interval <= 20 || Simulation::simulationTime*Global::interval <= 20)
+  int ageTimeSteps=Global::simulationTime-_dateOfBirth;
+  if (ageTimeSteps*Global::interval <= 20 || Global::simulationTime*Global::interval <= 20)
     return 0.0;
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
@@ -293,9 +289,9 @@ double Human::calcProbTransmissionToMosquito() const {
   // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
   // These values are one timestep more recent than that, however the calculated
   // value is not used until the next timestep when then ages would be correct.
-  double x = beta1 * _ylag[(Simulation::simulationTime-2*Global::intervalsPer5Days+1) % _ylagLen]
-	   + beta2 * _ylag[(Simulation::simulationTime-3*Global::intervalsPer5Days+1) % _ylagLen]
-	   + beta3 * _ylag[(Simulation::simulationTime-4*Global::intervalsPer5Days+1) % _ylagLen];
+  double x = beta1 * _ylag[(Global::simulationTime-2*Global::intervalsPer5Days+1) % _ylagLen]
+	   + beta2 * _ylag[(Global::simulationTime-3*Global::intervalsPer5Days+1) % _ylagLen]
+	   + beta3 * _ylag[(Global::simulationTime-4*Global::intervalsPer5Days+1) % _ylagLen];
   if (x < 0.001)
     return 0.0;
   
@@ -309,3 +305,5 @@ double Human::calcProbTransmissionToMosquito() const {
   //	Include here the effect of transmission-blocking vaccination
   return transmit*(1.0-_TBVEfficacy);
 }
+
+} }

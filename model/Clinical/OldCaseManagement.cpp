@@ -17,15 +17,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 #include "Clinical/OldCaseManagement.h"
+#include "Clinical/ClinicalModel.h"
+
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "Global.h"
-#include "Simulation.h"
 #include "Surveys.h"
 #include "util/gsl.h"
-#include "Clinical/ClinicalModel.h"
-#include <limits>
+#include "util/ModelOptions.hpp"
+#include "util/errors.hpp"
 
+#include <limits>
+#include <cmath>
+
+namespace OM { namespace Clinical {
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
 double OldCaseManagement::_oddsRatioThreshold;
 bool OldCaseManagement::_noMortality;
@@ -37,19 +42,17 @@ double OldCaseManagement::cureRate[3];
 double OldCaseManagement::probSequelaeTreated[2];
 double OldCaseManagement::probSequelaeUntreated[2];
 
-using namespace OM::util::errors;
-
 
 // -----  static init  -----
 
 int OldCaseManagement::init ()
 {
-  if (Global::modelVersion & INCLUDES_PK_PD)
-    throw xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+    throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
 
-  _oddsRatioThreshold = exp (getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
+  _oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
 
-  const scnXml::HealthSystem& healthSystem = getHealthSystem();
+  const scnXml::HealthSystem& healthSystem = InputData.getHealthSystem();
 
   setParasiteCaseParameters (healthSystem);
 
@@ -62,7 +65,7 @@ int OldCaseManagement::init ()
         goto gotItem;
       }
     }
-    throw xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
+    throw util::xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
   gotItem:; // alternative to for ... break ... else
   }
 
@@ -75,7 +78,7 @@ int OldCaseManagement::init ()
 // -----  non-static construction/desctruction/checkpointing  -----
 
 OldCaseManagement::OldCaseManagement (double tSF) :
-    _latestRegimen (0), _tLastTreatment (TIMESTEP_NEVER), _treatmentSeekingFactor (tSF)
+    _latestRegimen (0), _tLastTreatment (Global::TIMESTEP_NEVER), _treatmentSeekingFactor (tSF)
 {
 }
 OldCaseManagement::~OldCaseManagement()
@@ -85,7 +88,7 @@ OldCaseManagement::~OldCaseManagement()
 
 // -----  other public  -----
 
-void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed)
+void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed)
 {
   bool effectiveTreatment = false;
 
@@ -102,7 +105,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
       doomed = -Global::interval;
 
-    if (Global::modelVersion & PENALISATION_EPISODES) {
+    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
       withinHostModel.immunityPenalisation();
     }
   } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
@@ -110,7 +113,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
   }
 
   if (effectiveTreatment) {
-    if (! (Global::modelVersion & INCLUDES_PK_PD))
+    if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
       withinHostModel.clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
   }
 }
@@ -123,12 +126,12 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
   SurveyAgeGroup ageGroup(ageYears);
   Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA
                                    : Pathogenesis::SICK;
-  int nextRegimen = getNextRegimen (Simulation::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
+  int nextRegimen = getNextRegimen (Global::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
   bool successfulTreatment = false;
   
   if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (gsl::rngUniform())) {
     _latestRegimen = nextRegimen;
-    _tLastTreatment = Simulation::simulationTime;
+    _tLastTreatment = Global::simulationTime;
       Surveys.current->reportTreatment(ageGroup, _latestRegimen);
 
     if (probParasitesCleared[nextRegimen-1] > gsl::rngUniform()) {
@@ -141,7 +144,7 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
   } else {
     // No change in parasitological status: non-treated
   }
-  latestReport.update (Simulation::simulationTime, ageGroup, entrypoint);
+  latestReport.update (Global::simulationTime, ageGroup, entrypoint);
   return successfulTreatment;
 }
 
@@ -157,7 +160,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
   and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
   do we want to change this section of code rather than just introducing the new alternative (TS))
   */
-  int nextRegimen = getNextRegimen (Simulation::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment, _latestRegimen);
+  int nextRegimen = getNextRegimen (Global::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment, _latestRegimen);
 
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
@@ -198,42 +201,42 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
   double prandom = (gsl::rngUniform());
 
   if (q[2] <= prandom) { // Patient gets in-hospital treatment
-    _tLastTreatment = Simulation::simulationTime;
+    _tLastTreatment = Global::simulationTime;
     _latestRegimen = nextRegimen;
     Surveys.current->reportTreatment(ageGroup,_latestRegimen);
 
     Pathogenesis::State sevTreated = Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::EVENT_IN_HOSPITAL);
     if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
       if (q[6] > prandom) {
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::DIRECT_DEATH));
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::DIRECT_DEATH));
         doomed  = 4;
       } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::SEQUELAE));
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::SEQUELAE));
       } else { /*if (q[8] > prandom)*/
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::RECOVERY));
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::RECOVERY));
       }
       return true;
     } else { // Treated but parasites not cleared (in hospital)
       if (q[3] > prandom) {
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::DIRECT_DEATH));
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::DIRECT_DEATH));
         doomed  = 4;
       } else if (q[4] > prandom) { // sequelae without parasite clearance
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::SEQUELAE));
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::SEQUELAE));
       } else { /*if (q[5] > prandom)*/
         // No change in parasitological status: in-hospital patients
-        latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE); // no event
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE); // no event
       }
       return false;
     }
   } else { // Not treated
     if (q[0] > prandom) {
-      latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::DIRECT_DEATH));
+      latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::DIRECT_DEATH));
       doomed  = 4;
     } else if (q[1] > prandom) {
-      latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::SEQUELAE));
+      latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::SEQUELAE));
     } else { /*if (q[2] > prandom)*/
       // No change in parasitological status: non-treated
-      latestReport.update (Simulation::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE);
+      latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE);
     }
     return false;
   }
@@ -241,7 +244,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
 
 void OldCaseManagement::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
 {
-  const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = getHealthSystem().getCFR().getGroup();
+    const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = InputData.getHealthSystem().getCFR().getGroup();
 
   int numOfGroups = xmlGroupSeq.size();
   _inputAge.resize (numOfGroups + 1);
@@ -314,7 +317,7 @@ double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firs
   else if (firstLineDrug == "selfTreatment")
     return td.getSelfTreatment().getValue();
   else {
-    throw xml_scenario_error ("healthSystem.drugRegimen->firstLine has bad value");
+    throw util::xml_scenario_error ("healthSystem.drugRegimen->firstLine has bad value");
   }
 }
 
@@ -391,3 +394,5 @@ void OldCaseManagement::setParasiteCaseParameters (const scnXml::HealthSystem& h
   //calculate probParasitesCleared 2 : cool :)
   probParasitesCleared[2] = 0;
 }
+
+} }

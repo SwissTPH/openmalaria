@@ -20,9 +20,9 @@
 #ifndef OM_util_checkpoint
 #define OM_util_checkpoint
 
-#include "util/errors.hpp"
 #include <iostream>
 #include <boost/foreach.hpp>
+#include <vector>
 #include <list>
 using namespace std;
 

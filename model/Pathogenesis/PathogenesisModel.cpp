@@ -27,10 +27,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "util/gsl.h"
+#include "util/ModelOptions.hpp"
 
+#include <cmath>
 using namespace std;
 
-
+namespace OM { namespace Pathogenesis {
+    
 //BEGIN static
 double PathogenesisModel::indirRiskCoFactor_18;
 double PathogenesisModel::sevMal_21;
@@ -39,16 +42,16 @@ double PathogenesisModel::critAgeComorb_30;
 
 
 void PathogenesisModel::init() {
-  indirRiskCoFactor_18=(1-exp(-getParameter(Params::INDIRECT_RISK_COFACTOR)));
-  sevMal_21=getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
-  comorbintercept_24=1-exp(-getParameter(Params::COMORBIDITY_INTERCEPT));
-  critAgeComorb_30=getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
+  indirRiskCoFactor_18=(1-exp(-InputData.getParameter(Params::INDIRECT_RISK_COFACTOR)));
+  sevMal_21=InputData.getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
+  comorbintercept_24=1-exp(-InputData.getParameter(Params::COMORBIDITY_INTERCEPT));
+  critAgeComorb_30=InputData.getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
   
-  if (Global::modelVersion & PREDETERMINED_EPISODES) {
+  if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
     //no separate init:
     PyrogenPathogenesis::init();
   } else {
-    if (Global::modelVersion & MUELLER_PRESENTATION_MODEL)
+    if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL))
       MuellerPathogenesis::init();
     else
       PyrogenPathogenesis::init();
@@ -56,11 +59,11 @@ void PathogenesisModel::init() {
 }
 
 PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
-  if (Global::modelVersion & PREDETERMINED_EPISODES) {
+  if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
     return new PredetPathogenesis(cF);
   }
   else {
-    if (Global::modelVersion & MUELLER_PRESENTATION_MODEL) {
+    if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL)) {
       return new MuellerPathogenesis(cF);
     }
     else {
@@ -75,7 +78,7 @@ PathogenesisModel::PathogenesisModel(double cF) :
     _comorbidityFactor(cF)
 {}
 
-Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHostModel& withinHostModel) {
+Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHost::WithinHostModel& withinHostModel) {
   double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
   double prEpisode = getPEpisode(timeStepMaxDensity, withinHostModel.getTotalDensity());
   
@@ -106,7 +109,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
       ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
-  } else if(Global::modelVersion & NON_MALARIA_FEVERS) {
+  } else if(util::ModelOptions::option (util::NON_MALARIA_FEVERS)) {
     //TODO: should this be stored in the XML file?
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
@@ -123,3 +126,5 @@ void PathogenesisModel::checkpoint (istream& stream) {
 void PathogenesisModel::checkpoint (ostream& stream) {
     _comorbidityFactor & stream;
 }
+
+} }

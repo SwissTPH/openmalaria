@@ -24,6 +24,8 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/LSTMDrug.h"
 
+namespace OM { namespace PkPd {
+    
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
  * within-host model.
  *
@@ -51,4 +53,5 @@ private:
   list<LSTMDrug> _drugs;
 };
 
+} }
 #endif

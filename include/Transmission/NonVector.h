@@ -26,6 +26,8 @@ namespace scnXml {
   class NonVector;
 }
 
+namespace OM { namespace Transmission {
+    
 //! Base transmission model, as used in Phase A
 class NonVectorTransmission : public TransmissionModel { 
 public:
@@ -49,6 +51,8 @@ public:
   
   /** Little function to copy kappa to initialKappa. */
   void copyToInitialKappa ();
+  
+  virtual void changeEIRIntervention (const scnXml::NonVector&);
   
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
@@ -96,4 +100,5 @@ private:
    * Doesn't need to be checkpointed. */
   vector<double> initialKappa; 
 };
+} }
 #endif

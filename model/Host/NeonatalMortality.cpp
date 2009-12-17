@@ -22,6 +22,8 @@
 #include "Host/Human.h"
 #include "util/gsl.h"
 
+namespace OM { namespace Host {
+    
 double NeonatalMortality::_riskFromMaternalInfection = 0.0;
 std::vector<double> NeonatalMortality::_prevalenceByGestationalAge;
 
@@ -47,12 +49,12 @@ bool NeonatalMortality::eventNeonatalMortality() {
   return gsl::rngUniform() <= _riskFromMaternalInfection;
 }
 
-void NeonatalMortality::update (const list<Human>& population) {
+void NeonatalMortality::update (const list<Host::Human>& population) {
   // For individuals in the age range 20-25, we sum:
   int nCounter=0;	// total number
   int pCounter=0;	// number with patent infections, needed for prev in 20-25y
   
-  for (std::list<Human>::const_iterator iter = population.begin(); iter != population.end(); ++iter){
+  for (std::list<Host::Human>::const_iterator iter = population.begin(); iter != population.end(); ++iter){
     double ageYears = iter->getAgeInYears();
     // Note: since we're using a linked list, we have to iterate until we reach
     // the individuals we're interested in. Due to population structure, it's
@@ -96,3 +98,5 @@ void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pC
   //equation (1) p 75 AJTMH 75 suppl 2
   _riskFromMaternalInfection = gEst * pBirthPrim * (1.0-exp(-prevpg/critPrev2025));
 }
+
+} }

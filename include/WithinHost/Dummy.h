@@ -30,7 +30,8 @@
 
 using namespace std;
 
-
+namespace OM { namespace WithinHost {
+    
 /*! Dummy Within Host Model class.
  *
  * This was never meant to generate output making much sense, just some kind of
@@ -58,7 +59,7 @@ protected:
     
 private:
   /// Encapsulates drug code for each human
-  PkPdModel* pkpdModel;
+  PkPd::PkPdModel* pkpdModel;
   
   //!Number of infections with densities above the limit of detection
   int patentInfections;
@@ -70,4 +71,5 @@ private:
   std::list<DummyInfection> infections;
 };
 
+} }
 #endif

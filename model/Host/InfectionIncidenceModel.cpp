@@ -23,7 +23,12 @@
 #include "util/gsl.h"
 #include "inputData.h"
 #include "Transmission/PerHostTransmission.h"
+#include "util/ModelOptions.hpp"
 
+#include <stdexcept>
+
+namespace OM { namespace Host {
+    
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 double InfectionIncidenceModel::InfectionrateShapeParam;
 
@@ -37,13 +42,13 @@ double InfectionIncidenceModel::EstarInv;
 // -----  static initialisation  -----
 
 void InfectionIncidenceModel::init () {
-  BaselineAvailabilityShapeParam=getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
+  BaselineAvailabilityShapeParam=InputData.getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
   
-  gamma_p=getParameter(Params::GAMMA_P);
-  Sinf=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
-  Simm=getParameter(Params::SIMM);
-  EstarInv = 1.0/getParameter(Params::E_STAR);
-  Xstar_pInv = 1.0/getParameter(Params::X_STAR_P);
+  gamma_p=InputData.getParameter(Params::GAMMA_P);
+  Sinf=1-exp(-InputData.getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
+  Simm=InputData.getParameter(Params::SIMM);
+  EstarInv = 1.0/InputData.getParameter(Params::E_STAR);
+  Xstar_pInv = 1.0/InputData.getParameter(Params::X_STAR_P);
   
   //TODO: Sanity check for sqrt and division by zero
   //! constant defining the constraint for the Gamma shape parameters
@@ -60,10 +65,10 @@ void InfectionIncidenceModel::init () {
   r_square_Gamma=0.649;
   //such that r_square_LogNormal =0.5
   
-  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+  if (util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION)) {
     InfectionrateShapeParam = (BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
-  } else if (Global::modelVersion & LOGNORMAL_MASS_ACTION) {
+  } else if (util::ModelOptions::option (util::LOGNORMAL_MASS_ACTION)) {
     //! constant defining the constraint for the log Normal variance
     /// Used for the case where availability is assumed log Normally distributed
     double r_square_LogNormal = log(1.0+r_square_Gamma);
@@ -72,7 +77,7 @@ void InfectionIncidenceModel::init () {
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   
-  if (Global::modelVersion & ANY_TRANS_HET)
+  if (util::ModelOptions::option (util::ANY_TRANS_HET))
     cerr << "Warning: will use heterogeneity workaround." << endl;
 }
 
@@ -80,12 +85,12 @@ void InfectionIncidenceModel::init () {
 // -----  non-static non-checkpointing constructors  -----
 
 InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
-  if (Global::modelVersion & NEGATIVE_BINOMIAL_MASS_ACTION) {
+  if (util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION)) {
     return new NegBinomMAII ();
-  } else if(Global::modelVersion & LOGNORMAL_MASS_ACTION) {
+  } else if(util::ModelOptions::option (util::LOGNORMAL_MASS_ACTION)) {
     return new LogNormalMAII ();
   } else {
-    if (Global::modelVersion & ANY_TRANS_HET)
+    if (util::ModelOptions::option (util::ANY_TRANS_HET))
       return new HeterogeneityWorkaroundII();
     else
       return new InfectionIncidenceModel();
@@ -116,29 +121,29 @@ void InfectionIncidenceModel::summarize (Survey& survey, SurveyAgeGroup ageGroup
 }
 
 
-double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/Global::interval*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission& phTrans) {
+double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans) {
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/(Global::interval*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
   return gsl::rngGamma(InfectionrateShapeParam,
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
-double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, PerHostTransmission&) {
+double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
   return gsl::sampleFromLogNormal(gsl::rngUniform(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
 }
 
 double InfectionIncidenceModel::susceptibility () {
-  if (Global::modelVersion & NO_PRE_ERYTHROCYTIC) {
+  if (util::ModelOptions::option (util::NO_PRE_ERYTHROCYTIC)) {
     //! The average proportion of bites from sporozoite positive mosquitoes resulting in infection. 
     /*! 
     This is computed as 0.19 (the value S from a neg bin mass action model fitted 
@@ -154,7 +159,7 @@ double InfectionIncidenceModel::susceptibility () {
   }
 }
 
-int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, PerHostTransmission& phTrans) {
+int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans) {
   double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
   //NOTE: error check (should be OK if kappa is checked, for nonVector model)
   if (!finite(effectiveEIR)) {
@@ -182,3 +187,5 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   else
     return 0;
 }
+
+} }

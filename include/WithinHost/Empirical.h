@@ -30,7 +30,8 @@
 
 using namespace std;
 
-
+namespace OM { namespace WithinHost {
+    
 /*! EmpiricalDummy Within Host Model class.
  */
 class EmpiricalWithinHostModel : public WithinHostModel
@@ -57,7 +58,7 @@ protected:
     
 private:
     /// Encapsulates drug code for each human
-    PkPdModel* pkpdModel;
+    PkPd::PkPdModel* pkpdModel;
 
     /** The list of all infections this human has.
      *
@@ -66,4 +67,5 @@ private:
     std::list<EmpiricalInfection> infections;
 };
 
+} }
 #endif

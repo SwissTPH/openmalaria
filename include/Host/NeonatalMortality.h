@@ -24,7 +24,8 @@
 #include "Global.h"
 #include <list>
 
-class Human;
+namespace OM { namespace Host {
+    class Human;
 
 class NeonatalMortality {
 public:
@@ -39,7 +40,7 @@ public:
   static bool eventNeonatalMortality();
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
-  static void update (const list<Human>& population);
+  static void update (const list<Host::Human>& population);
   
 private:
   /** Calculates the risk of neonatal mortality. */
@@ -53,4 +54,5 @@ private:
   static std::vector<double> _prevalenceByGestationalAge;
 };
 
+} }
 #endif

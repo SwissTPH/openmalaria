@@ -29,11 +29,12 @@
 #include <vector>
 #include "Dose.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /** Information about each (type of) drug (rather than each use of a drug).
  *
  * Static data contains a list of all available drug types.
@@ -68,13 +69,7 @@ public:
    */
   DrugType (string name, string abbreviation);
   ~DrugType ();
-  /* Checkpointing functions, which we shouldn't need now. If they are needed:
-  /// Load an instance from a checkpoint.
-  DrugType (istream& in);
-  /// Write instance data to a checkpoint.
-  void write (ostream& out) const;
-  */
-
+  
   //! Parses the proteme instances.
   /*! Creates an association between ProteomeInstance and PD factor.
    *  This is solely for performance purposes.
@@ -98,4 +93,5 @@ protected:
   friend class IhKwDrug;
 };
 
+} }
 #endif

@@ -30,6 +30,8 @@
 
 using namespace std;
 
+namespace OM { namespace PkPd {
+    
 /*
  * Static variables and functions
  */
@@ -73,3 +75,5 @@ bool Drug::decay() {
   //TODO: if concentration is negligible, return true to clean up this object
   return false;
 }
+
+} }

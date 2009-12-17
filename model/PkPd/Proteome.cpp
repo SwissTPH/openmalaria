@@ -20,7 +20,7 @@
 
 */
 
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 #include "util/gsl.h"
 
 #include <string>
@@ -28,7 +28,8 @@
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /*
  * Protein
  */
@@ -193,3 +194,4 @@ Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char 
   throw(1); // Name not known
 }
 
+} }

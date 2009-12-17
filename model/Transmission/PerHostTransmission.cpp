@@ -21,18 +21,19 @@
 #include "Transmission/Vector/VectorTransmission.h"	//TODO: remove dependency
 #include "inputData.h"
 
-
+namespace OM { namespace Transmission {
+    
 // -----  PerHostTransmission static  -----
 
-const double PerHostTransmission::bsa_prop[WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+const double PerHostTransmission::bsa_prop[WithinHost::WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
 double PerHostTransmission::ageCorrectionFactor = 1.286683772215131;	// This factor was calculated at some point. It shouldn't be used now, but better not to leave uninitialised.
-double PerHostTransmission::ageSpecificRelativeAvailability[WithinHostModel::nages];
+double PerHostTransmission::ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
 vector<double> PerHostTransmission::cntItnTargetAgeTStep;
 vector<double> PerHostTransmission::cntItnCoverage;
 
 
 void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
-  for (size_t i=0; i<WithinHostModel::nages; i++) {
+  for (size_t i=0; i<WithinHost::WithinHostModel::nages; i++) {
     ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
   }
   
@@ -43,7 +44,7 @@ void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
     cntItnCoverage.resize (n);
     
     for (int i=0;i<n; i++) {
-      cntItnTargetAgeTStep[i] = static_cast<int>(floor(seqItn[i].getTargetAgeYrs() * daysInYear / (1.0*Global::interval)));
+      cntItnTargetAgeTStep[i] = static_cast<int>(floor(seqItn[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval)));
       cntItnCoverage[i] = seqItn[i].getCoverage();
     }
   }
@@ -53,7 +54,7 @@ void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
 // -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () :
-    timestepITN(TIMESTEP_NEVER), timestepIRS(TIMESTEP_NEVER), timestepVA(TIMESTEP_NEVER),
+    timestepITN(Global::TIMESTEP_NEVER), timestepIRS(Global::TIMESTEP_NEVER), timestepVA(Global::TIMESTEP_NEVER),
     nextItnDistribution(0)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
@@ -68,38 +69,38 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over (Simulation::simulationTime - TIMESTEP_NEVER) timesteps
+// of Weibull decay over (Global::simulationTime - Global::TIMESTEP_NEVER) timesteps
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double alpha_i = species[speciesIndex].entoAvailability;
   if (timestepITN >= 0)
-    alpha_i *= (1.0 - base.ITNDeterrency (Simulation::simulationTime - timestepITN));
+    alpha_i *= (1.0 - base.ITNDeterrency (Global::simulationTime - timestepITN));
   if (timestepIRS >= 0)
-    alpha_i *= (1.0 - base.IRSDeterrency (Simulation::simulationTime - timestepIRS));
+    alpha_i *= (1.0 - base.IRSDeterrency (Global::simulationTime - timestepIRS));
   if (timestepVA >= 0)
-    alpha_i *= (1.0 - base.VADeterrency  (Simulation::simulationTime - timestepVA));
+    alpha_i *= (1.0 - base.VADeterrency  (Global::simulationTime - timestepVA));
   return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_B_i = species[speciesIndex].probMosqBiting;
   if (timestepITN >= 0)
-    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect (Simulation::simulationTime - timestepITN));
+    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect (Global::simulationTime - timestepITN));
   return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_C_i = species[speciesIndex].probMosqFindRestSite;
   if (timestepITN >= 0)
-    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect (Simulation::simulationTime - timestepITN));
+    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect (Global::simulationTime - timestepITN));
   double P_D_i = species[speciesIndex].probMosqSurvivalResting;
   if (timestepIRS >= 0)
-    P_D_i *= (1.0 - base.IRSKillingEffect (Simulation::simulationTime - timestepIRS));
+    P_D_i *= (1.0 - base.IRSKillingEffect (Global::simulationTime - timestepIRS));
   return P_C_i * P_D_i;
 }
 
 void PerHostTransmission::continousItnDistribution (int ageTSteps) {
-  if (Simulation::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
+  if (Global::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
     && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
     if (gsl::rngUniform() < cntItnCoverage[nextItnDistribution])
       setupITN ();
@@ -119,3 +120,5 @@ void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double av
   probMosqFindRestSite = base.probMosqFindRestSite;
   probMosqSurvivalResting = base.probMosqSurvivalResting;
 }
+
+} }

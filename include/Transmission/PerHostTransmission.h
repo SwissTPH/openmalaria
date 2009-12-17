@@ -22,11 +22,11 @@
 
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 #include "util/gsl.h"
-#include "Simulation.h"
 #include "inputData.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 
-class Summary;
+namespace OM { namespace Transmission {
+    
 class HostMosquitoInteraction;
 class TransmissionModel;
 
@@ -58,7 +58,7 @@ public:
    * 
    * Mean output should be 1.0/ageCorrectionFactor. */
   static double relativeAvailabilityAge (double ageyrs) {
-    return ageSpecificRelativeAvailability[WithinHostModel::getAgeGroup(ageyrs)];
+    return ageSpecificRelativeAvailability[WithinHost::WithinHostModel::getAgeGroup(ageyrs)];
   }
   //@}
   
@@ -116,15 +116,15 @@ public:
   
   /// Give individual a new ITN as of time timeStep.
   inline void setupITN () {
-    timestepITN = Simulation::simulationTime;
+    timestepITN = Global::simulationTime;
   }
   /// Give individual a new IRS as of time timeStep.
   inline void setupIRS () {
-    timestepIRS = Simulation::simulationTime;
+    timestepIRS = Global::simulationTime;
   }
   /// Give individual a new VA intervention as of time timeStep.
   inline void setupVA () {
-    timestepVA = Simulation::simulationTime;
+    timestepVA = Global::simulationTime;
   }
   
   /** Distribute ITNs to individuals of the correct age (to model ITN
@@ -165,7 +165,7 @@ private:
   /** Average number of bites for each age as a proportion of the maximum.
    *
    * Set by constructor. */
-  static double ageSpecificRelativeAvailability[WithinHostModel::nages];
+  static double ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
 
   //! Proportionate body surface area
  /* 
@@ -174,7 +174,7 @@ private:
   Mosteller RD: Simplified Calculation of Body Surface Area. N Engl J Med 1987 Oct 22;317(17):1098 (letter) 
   These values are retained here should they be required for future comparisons 
  */ 
-  static const double bsa_prop[WithinHostModel::nages];
+  static const double bsa_prop[WithinHost::WithinHostModel::nages];
   //@}
   
   /// Target ages at which individuals may receive ITNs
@@ -221,4 +221,5 @@ private:
   //@}
 };
 
+} }
 #endif

@@ -22,17 +22,23 @@
 
 #include "Pathogenesis/Mueller.h"
 #include "inputData.h"
+
+#include <cmath>
 using namespace std;
 
+namespace OM { namespace Pathogenesis {
+    
 double MuellerPathogenesis::rateMultiplier_31;
 double MuellerPathogenesis::densityExponent_32;
 
 void MuellerPathogenesis::init(){
-  rateMultiplier_31=getParameter(Params::MUELLER_RATE_MULTIPLIER);
-  densityExponent_32=getParameter(Params::MUELLER_DENSITY_EXPONENT);
+  rateMultiplier_31=InputData.getParameter(Params::MUELLER_RATE_MULTIPLIER);
+  densityExponent_32=InputData.getParameter(Params::MUELLER_DENSITY_EXPONENT);
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
   double incidenceDensity = rateMultiplier_31 * (pow(totalDensity, densityExponent_32)) * Global::yearsPerInterval;
   return 1-exp(-incidenceDensity);
 }
+
+} }

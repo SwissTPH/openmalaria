@@ -18,17 +18,17 @@
  */
 #ifndef Hmod_population
 #define Hmod_population
+
 #include "Global.h"
+#include "Host/Human.h"
+#include "Transmission/TransmissionModel.h"
+#include "inputData.h"
+
 #include <list>
 #include <fstream>
 #include <vector>
 
-// Forward declarations
-class Human;
-class TransmissionModel;
-namespace scnXml {
-  class Mass;
-}
+namespace OM {
 
 //! The simulated human population
 class Population{
@@ -110,7 +110,7 @@ private:
    *	(proportion of eligible individuals who receive the intervention).
    * @param intervention A member-function pointer to a "void func ()" function
    *	within human which activates the intervention. */
-  void massIntervention (const scnXml::Mass& mass, void (Human::*intervention)());
+  void massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention)());
   
   void checkpoint (istream& stream);
   void checkpoint (ostream& stream);
@@ -169,16 +169,16 @@ private:
   
 public:
   //! TransmissionModel model
-  TransmissionModel* _transmissionModel;
+  Transmission::TransmissionModel* _transmissionModel;
   
 private:
   /** The simulated human population
    *
    * The list of all humans, ordered from oldest to youngest. */
-  std::list<Human> population;
+  std::list<Host::Human> population;
   
   /// Iterator type of population
-  typedef std::list<Human>::iterator HumanIter;
+  typedef std::list<Host::Human>::iterator HumanIter;
 
   //! max lifespan in intervals
   static int _maxTimestepsPerLife;
@@ -192,4 +192,5 @@ private:
   friend class VectorAnophelesSuite;
 };
 
+}
 #endif

@@ -30,6 +30,8 @@
 
 using namespace std;
 
+namespace OM { namespace PkPd {
+    
 /*
  * Static variables and functions
  */
@@ -64,76 +66,6 @@ HoshenDrugType::HoshenDrugType (string _name, string _abbreviation,
 }
 HoshenDrugType::~HoshenDrugType () {}
 
-/* Checkpointing functions, which we shouldn't need now. If they are needed:
-DrugType::DrugType (istream& in) {
-  int num;
-  in >> abbreviation;
-  in >> name;
-  in >> absorptionFactor;
-  in >> halfLife; 
-  in >> num;
-  Global::validateListSize (num);
-  for (int i=0; i<num; i++) {
-    vector <Mutation*> rule = vector<Mutation*>();
-    int numMuts;
-    in >> numMuts;
-    Global::validateListSize (numMuts);
-    for (int j=0; j<numMuts; j++) {
-      string proteinName;
-      int position;
-      char allele;
-      in >> proteinName;
-      in >> position;
-      in >> allele;
-      rule.push_back(
-          ProteomeManager::getMutation(proteinName, position, allele));
-    }
-    requiredMutations.push_back(rule);
-  }
-  in >> num;
-  Global::validateListSize (num);
-  for (int i=0; i<num; i++) {
-    double parameter;
-    in >> parameter;
-    pdParameters.push_back(parameter);
-  }
-  in >> num;
-  Global::validateListSize (num);
-  for (int i=0; i<num; i++) {
-    int proteomeID;
-    double parameter;
-    in >> proteomeID;
-    in >> parameter;
-    proteomePDParameters[proteomeID] = parameter;
-  }
-}
-void DrugType::write (ostream& out) const {
-  out << abbreviation << endl;
-  out << name << endl;
-  out << absorptionFactor << endl;
-  out << halfLife << endl; 
-  out << requiredMutations.size() << endl;
-  for (vector< vector<Mutation*> >::const_iterator itRM=requiredMutations.begin(); itRM!=requiredMutations.end(); itRM++) {
-    vector<Mutation*>::const_iterator itM;
-    out << (*itRM).size() << endl;
-    for (itM=(*itRM).begin(); itM!=(*itRM).end(); itM++) {
-      out << (*itM)->getProteinName() << endl;
-      out << (*itM)->getPosition() << endl;
-      out << (*itM)->getAllele() << endl;
-    }
-  }
-  out << pdParameters.size() << endl;
-  for (vector<double>::const_iterator itPP=pdParameters.begin(); itPP!=pdParameters.end(); itPP++) {
-    out << *itPP << endl ;
-  }
-  out << proteomePDParameters.size() << endl;
-  for (map<int,double>::const_iterator itPPD=proteomePDParameters.begin(); itPPD!=proteomePDParameters.end(); itPPD++) {
-    out << (*itPPD).first << endl ;
-    out << (*itPPD).second << endl ;
-  }
-}
-*/
-
 
 void HoshenDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
   requiredMutations.push_back(ruleRequiredMutations);
@@ -155,3 +87,4 @@ void HoshenDrugType::parseProteomeInstances() {
   }
 }
 
+} }

@@ -34,11 +34,13 @@
 #include "Pathogenesis/PathogenesisModel.h"
 #include "PkPd/PkPdModel.h"
 
+#include "util/errors.hpp"
+#include "util/ModelOptions.hpp"
+
 #include <math.h>
 
-using namespace OM::util::errors;
-
-
+namespace OM {
+    
 // -----  static data / methods  -----
 
 double Population::ageGroupBounds[ngroups+1];
@@ -77,14 +79,14 @@ ofstream csvReporting;
 
 
 void Population::init(){
-  Human::initHumanParameters();
-  NeonatalMortality::init();
-  PkPdModel::init();
+  Host::Human::initHumanParameters();
+  Host::NeonatalMortality::init();
+  PkPd::PkPdModel::init();
 #ifdef OMP_CSV_REPORTING
   csvReporting.open ("population.csv", ios::app);
 #endif
   
-  _workUnitIdentifier=get_wu_id();
+  _workUnitIdentifier=InputData.get_wu_id();
   _maxTimestepsPerLife=maxLifetimeDays/Global::interval;
   cumAgeProp.resize (_maxTimestepsPerLife);
   
@@ -92,17 +94,17 @@ void Population::init(){
 }
 
 void Population::clear(){
-    PkPdModel::cleanup ();
-  Human::clear();
+    PkPd::PkPdModel::cleanup ();
+  Host::Human::clear();
 #ifdef OMP_CSV_REPORTING
   csvReporting.close();
 #endif
 }
 
 void Population::staticRead (istream& in) {
-  NeonatalMortality::read (in);
+  Host::NeonatalMortality::read (in);
   Clinical::ClinicalModel::staticRead(in);
-  PkPdModel::readStatic (in);
+  PkPd::PkPdModel::readStatic (in);
   
   in >> IDCounter;
   in >> mu0;
@@ -112,9 +114,9 @@ void Population::staticRead (istream& in) {
   in >> rho;
 }
 void Population::staticWrite (ostream& out) {
-  NeonatalMortality::write (out);
+  Host::NeonatalMortality::write (out);
   Clinical::ClinicalModel::staticWrite(out);
-  PkPdModel::writeStatic (out);
+  PkPd::PkPdModel::writeStatic (out);
   
   out << IDCounter << endl;
   out << mu0 << endl;
@@ -128,9 +130,9 @@ void Population::staticWrite (ostream& out) {
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population()
-    : populationSize(get_populationsize())
+: populationSize(InputData.get_populationsize())
 {
-  _transmissionModel = TransmissionModel::createTransmissionModel();
+  _transmissionModel = Transmission::TransmissionModel::createTransmissionModel();
 }
 
 Population::~Population() {
@@ -143,24 +145,24 @@ Population::~Population() {
 void Population::checkpoint (istream& stream) {
     // Validate scenario.xml and checkpoint files correspond:
     _workUnitIdentifier & stream;
-    if (_workUnitIdentifier !=  get_wu_id()) {
-	cerr << "cp_ct " << get_wu_id() << ", " << _workUnitIdentifier << endl;
+    if (_workUnitIdentifier !=  InputData.get_wu_id()) {
+	cerr << "cp_ct " << InputData.get_wu_id() << ", " << _workUnitIdentifier << endl;
 	exit(-9);
     }
     
     int popSize;
     popSize & stream;
     if (popSize != populationSize)
-	throw checkpoint_error ("population size exceeds that given in scenario.xml");
+	throw util::checkpoint_error ("population size exceeds that given in scenario.xml");
     while(popSize > 0 && !stream.eof()){
-	// Note: calling this constructor of Human is slightly wasteful, but avoids the need for another
+	// Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
 	// ctor and leaves less opportunity for uninitialized memory.
-	population.push_back(Human(*_transmissionModel, 0,0,0));
+	population.push_back(Host::Human(*_transmissionModel, 0,0,0));
 	population.back() & stream;
 	--popSize;
     }
     if (int(population.size()) != populationSize)
-	throw checkpoint_error("can't read whole population (out of data)");
+	throw util::checkpoint_error("can't read whole population (out of data)");
 }
 void Population::checkpoint (ostream& stream) {
   _workUnitIdentifier & stream;
@@ -199,11 +201,11 @@ void Population::estimateRemovalRates () {
 
   //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
   sumperc=0.0;
-  const scnXml::AgeGroupPerC::GroupSequence& group = getDemography().getAgeGroup().getGroup();
+  const scnXml::AgeGroupPerC::GroupSequence& group = InputData.getDemography().getAgeGroup().getGroup();
   if (group.size() < ngroups-1) {
     ostringstream msg;
     msg << "expected " << ngroups-1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)";
-    throw xml_scenario_error(msg.str());
+    throw util::xml_scenario_error(msg.str());
   }
   //Add age group for first month of life
   ageGroupBounds[0]=0.0;
@@ -232,11 +234,11 @@ void Population::estimateRemovalRates () {
 
 // Static method used by estimateRemovalRates
 double Population::setDemoParameters (double param1, double param2) {
-  rho = get_growthrate() * (0.01 * Global::yearsPerInterval);
+    rho = InputData.get_growthrate() * (0.01 * Global::yearsPerInterval);
   if (rho != 0.0)
     // Issue: in this case the total population size differs from populationSize,
     // however, some code currently uses this as the total population size.
-    throw xml_scenario_error ("Population growth rate provided.");
+    throw util::xml_scenario_error ("Population growth rate provided.");
   
   const double IMR=0.1;
   double M_inf=-log(1-IMR);
@@ -326,23 +328,23 @@ void Population::preMainSimInit () {
 
 void Population::newHuman(int dob){
   ++IDCounter;
-  population.push_back(Human(*_transmissionModel, IDCounter, dob, Simulation::simulationTime));
+  population.push_back(Host::Human(*_transmissionModel, IDCounter, dob, Global::simulationTime));
 }
 
 void Population::update1(){
   // Calculate relative availability correction, so calls from vectorUpdate,
   // etc., will have a mean of 1.0.
   double meanRelativeAvailability = 0.0;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    meanRelativeAvailability += PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
-  PerHostTransmission::ageCorrectionFactor = populationSize / meanRelativeAvailability;
+  for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+    meanRelativeAvailability += Transmission::PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
+  Transmission::PerHostTransmission::ageCorrectionFactor = populationSize / meanRelativeAvailability;
   
-  NeonatalMortality::update (population);
+  Host::NeonatalMortality::update (population);
   // This should be called before humans contract new infections in the simulation step.
-  _transmissionModel->vectorUpdate (population, Simulation::simulationTime);
+  _transmissionModel->vectorUpdate (population, Global::simulationTime);
   
   //targetPop is the population size at time t allowing population growth
-  int targetPop = (int)(populationSize * exp(rho*Simulation::simulationTime));
+  int targetPop = (int)(populationSize * exp(rho*Global::simulationTime));
   int cumPop = 0;
   
   // Update each human in turn
@@ -351,7 +353,7 @@ void Population::update1(){
   --last;
   for (HumanIter iter = population.begin(); iter != population.end();){
     // Update human, and remove if too old:
-    if (iter->update(Simulation::simulationTime,_transmissionModel)){
+    if (iter->update(Global::simulationTime,_transmissionModel)){
       iter->destroy();
       iter=population.erase(iter);
       continue;
@@ -359,7 +361,7 @@ void Population::update1(){
     
     //BEGIN Population size & age structure
     ++cumPop;
-    int age=(Simulation::simulationTime-iter->getDateOfBirth());
+    int age=(Global::simulationTime-iter->getDateOfBirth());
     
     // if (Actual number of people so far > target population size for this age) ...
     //FIXME: The +2 here is to replicate old results. I think it's wrong though. Also, it looks like this code assumes the maximum age of indivs is _maxTimestepsPerLife not Global::maxAgeIntervals.
@@ -374,24 +376,24 @@ void Population::update1(){
   }	// end of per-human updates
   
   // increase population size to targetPop
-  if (InitPopOpt && Simulation::simulationTime < Global::maxAgeIntervals) {
+  if (InitPopOpt && Global::simulationTime < Global::maxAgeIntervals) {
     // We only want people at oldest,
-    //  Global::maxAgeIntervals - (Global::maxAgeIntervals-Simulation::simulationTime)
+    //  Global::maxAgeIntervals - (Global::maxAgeIntervals-Global::simulationTime)
     // Hence pop size available is (total - popSize for anyone older):
-    targetPop = targetPop - targetCumPop(Simulation::simulationTime+1, targetPop);
+    targetPop = targetPop - targetCumPop(Global::simulationTime+1, targetPop);
   }
   while (cumPop < targetPop) {
-    newHuman(Simulation::simulationTime);
+    newHuman(Global::simulationTime);
     //++nCounter;
     ++cumPop;
   }
   
-  _transmissionModel->updateKappa (population, Simulation::simulationTime);
+  _transmissionModel->updateKappa (population, Global::simulationTime);
   
 #ifdef OMP_CSV_REPORTING
-  if (Simulation::simulationTime % (Global::intervalsPerYear*5)==0) {
-    csvReporting << Simulation::simulationTime << ',';
-    list<Human>::reverse_iterator it = population.rbegin();
+  if (Global::simulationTime % (Global::intervalsPerYear*5)==0) {
+    csvReporting << Global::simulationTime << ',';
+    list<Host::Human>::reverse_iterator it = population.rbegin();
     for (double ageLim = 0; ageLim <= maxLifetimeDays/365.0; ageLim += 1) {
       int counter=0;
       while (it != population.rend() && it->getAgeInYears() < ageLim) {
@@ -421,7 +423,7 @@ void Population::newSurvey () {
 }
 
 void Population::implementIntervention (int time) {
-  const scnXml::Intervention* interv = getInterventionByTime (time);
+    const scnXml::Intervention* interv = InputData.getInterventionByTime (time);
   if (interv == NULL)
     return;
   
@@ -430,9 +432,9 @@ void Population::implementIntervention (int time) {
   // have data if used according to getActiveInterventions().
   
   if (interv->getChangeHS().present()) {
-    if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
-      throw xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
-    changeHealthSystem (&interv->getChangeHS().get());
+    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+      throw util::xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
+    InputData.changeHealthSystem (&interv->getChangeHS().get());
     Clinical::ClinicalImmediateOutcomes::initParameters();	// should re-read all parameters
     
     //FIXME: surely we shouldn't do this at all? (DH)
@@ -441,16 +443,11 @@ void Population::implementIntervention (int time) {
   }
   
   if (interv->getChangeEIR().present()) {
-    NonVectorTransmission* nvt = dynamic_cast<NonVectorTransmission*> (_transmissionModel);
-    if (nvt != NULL) {
-      nvt->setTransientEIR(interv->getChangeEIR().get());
-    } else {
-      throw xml_scenario_error("Warning: changeEIR intervention can only be used with NonVectorTransmission model!");
-    }
+    _transmissionModel->changeEIRIntervention (interv->getChangeEIR().get());
   }
   
   if (interv->getVaccinate().present()) {
-    massIntervention (interv->getVaccinate().get(), &Human::massVaccinate);
+    massIntervention (interv->getVaccinate().get(), &Host::Human::massVaccinate);
   }
   if (interv->getMDA().present()) {
     /* TODO: here we assume a 100% clearance rate for the MDA drug we use.
@@ -458,20 +455,20 @@ void Population::implementIntervention (int time) {
     system description. The default clearance rate for MDA should be 100%
     since this simulates what was meant to happen in Garki.  We can change
     this by introducing an optional clearance rate that can be < 100%. */
-    massIntervention(interv->getMDA().get(), &Human::clearInfections);
+    massIntervention(interv->getMDA().get(), &Host::Human::clearInfections);
   }
   if (interv->getIpti().present()) {
-    massIntervention (interv->getIpti().get(), &Human::IPTiTreatment);
+    massIntervention (interv->getIpti().get(), &Host::Human::IPTiTreatment);
   }
   
   if (interv->getITN().present()) {
-    massIntervention (interv->getITN().get(), &Human::setupITN);
+    massIntervention (interv->getITN().get(), &Host::Human::setupITN);
   }
   if (interv->getIRS().present()) {
-    massIntervention (interv->getIRS().get(), &Human::setupIRS);
+    massIntervention (interv->getIRS().get(), &Host::Human::setupIRS);
   }
   if (interv->getVectorAvailability().present()) {
-    massIntervention (interv->getVectorAvailability().get(), &Human::setupVA);
+    massIntervention (interv->getVectorAvailability().get(), &Host::Human::setupVA);
   }
   
   if (interv->getLarviciding().present()) {
@@ -479,7 +476,7 @@ void Population::implementIntervention (int time) {
   }
 }
 
-void Population::massIntervention (const scnXml::Mass& mass, void (Human::*intervention)())
+void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention)())
 {
   double minAge = mass.getMinAge().present() ?
       mass.getMinAge().get() : 0.0;
@@ -493,4 +490,5 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Human::*inter
       // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
       ((*iter).*intervention)();
   }
+}
 }

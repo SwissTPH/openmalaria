@@ -23,10 +23,10 @@
 #include "Host/intervention.h"
 #include "inputData.h"
 #include "util/gsl.h"
+#include "util/errors.hpp"
 
-using namespace OM::util::errors;
-
-
+namespace OM { namespace Host {
+    
 enum VaccineType {
     preerythrocytic_reduces_h = 1,
     erythrocytic_reduces_y = 2,
@@ -58,11 +58,11 @@ double Vaccine::getEfficacy (int numPrevDoses)
 void Vaccine::initParameters()
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-    const scnXml::Interventions& interventions = getInterventions();
+    const scnXml::Interventions& interventions = InputData.getInterventions();
     const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
     if (vaccDesc.size() == 0) {
-        if (getActiveInterventions()[Interventions::VACCINE])
-            throw xml_scenario_error ("Vaccine intervention without description");
+	if (InputData.getActiveInterventions()[Interventions::VACCINE])
+            throw util::xml_scenario_error ("Vaccine intervention without description");
         return;
     }
     anyVaccine = true;
@@ -76,7 +76,7 @@ void Vaccine::initParameters()
         else if (type == transmission_blocking_reduces_k)
             VdTBV = & (*i);
         else
-            throw xml_scenario_error ("vaccineType invalid");
+            throw util::xml_scenario_error ("vaccineType invalid");
     }
 
     //Read in vaccine specifications
@@ -94,9 +94,9 @@ void Vaccine::initParameters()
             if (i >= cVS.size()) {
                 ostringstream msg;
                 msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
-                throw xml_scenario_error (msg.str());
+                throw util::xml_scenario_error (msg.str());
             }
-            targetAgeTStep[i] = (int) floor (cVS[i].getTargetAgeYrs() * daysInYear / (double) Global::interval);
+            targetAgeTStep[i] = (int) floor (cVS[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (double) Global::interval);
             vaccineCoverage[i] = cVS[i].getCoverage();
         }
     }
@@ -121,7 +121,7 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
         if (halfLifeYrs <= 0)
             decay = 1.0;
         else
-            decay = exp (-log (2.0) / (halfLifeYrs * daysInYear / (double) Global::interval));
+            decay = exp (-log (2.0) / (halfLifeYrs * Global::DAYS_IN_YEAR / (double) Global::interval));
     }
 }
 
@@ -134,3 +134,5 @@ void Vaccine::clearParameters ()
         return;
     free (vaccineCoverage);
 }
+
+} }

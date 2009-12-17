@@ -26,6 +26,7 @@
 #include <sstream>
 #include <limits>
 #include <climits>
+#include <iomanip>
 
 using namespace OM::util::checkpoint;
 

@@ -24,11 +24,11 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
 
-#include "Simulation.h"
 #include "inputData.h"
 #include "Surveys.h"
+#include "util/ModelOptions.hpp"
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
@@ -40,10 +40,10 @@ double ClinicalModel::_nonMalariaMortality;
 void ClinicalModel::init () {
   infantDeaths.resize(Global::intervalsPerYear);
   infantIntervalsAtRisk.resize(Global::intervalsPerYear);
-  _nonMalariaMortality=getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
+  _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
   
-  PathogenesisModel::init();
-  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+  Pathogenesis::PathogenesisModel::init();
+  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
     ClinicalEventScheduler::init();
   else
     ClinicalImmediateOutcomes::initParameters();
@@ -63,7 +63,7 @@ void ClinicalModel::staticWrite (ostream& out) {
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
-  if (Global::modelVersion & CLINICAL_EVENT_SCHEDULER)
+  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
     return new ClinicalEventScheduler (cF, tSF);
   else
     return new ClinicalImmediateOutcomes (cF, tSF);
@@ -84,7 +84,7 @@ double ClinicalModel::infantAllCauseMort(){
 // -----  non-static construction, destruction and checkpointing  -----
 
 ClinicalModel::ClinicalModel (double cF) :
-    pathogenesisModel(PathogenesisModel::createPathogenesisModel(cF)),
+    pathogenesisModel(Pathogenesis::PathogenesisModel::createPathogenesisModel(cF)),
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
@@ -103,7 +103,7 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
   return false;
 }
 
-void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps) {
+void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
     _doomed -= Global::interval;
   
@@ -115,7 +115,7 @@ void ClinicalModel::update (WithinHostModel& withinHostModel, double ageYears, i
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
-    if (NeonatalMortality::eventNeonatalMortality()) {
+    if (Host::NeonatalMortality::eventNeonatalMortality()) {
       Surveys.current->reportIndirectDeaths (SurveyAgeGroup(ageYears), 1);
       _doomed = DOOMED_NEONATAL;
       return;
@@ -153,4 +153,4 @@ void ClinicalModel::checkpoint (ostream& stream) {
     _doomed & stream;
 }
 
-}
+} }

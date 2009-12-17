@@ -22,9 +22,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Pathogenesis/Pyrogen.h"
 #include "inputData.h"
+#include <cmath>
 
 using namespace std;
 
+namespace OM { namespace Pathogenesis {
+    
 double PyrogenPathogenesis::initPyroThres;
 double PyrogenPathogenesis::smuY;
 double PyrogenPathogenesis::Ystar2_13;
@@ -32,11 +35,11 @@ double PyrogenPathogenesis::alpha14;
 double PyrogenPathogenesis::Ystar1_26;
 
 void PyrogenPathogenesis::init(){
-  initPyroThres=getParameter(Params::Y_STAR_0);
-  smuY=-log(0.5)/(daysInYear/Global::interval*getParameter(Params::Y_STAR_HALF_LIFE));
-  Ystar2_13=getParameter(Params::Y_STAR_SQ);
-  alpha14=getParameter(Params::ALPHA);
-  Ystar1_26=getParameter(Params::Y_STAR_1);
+  initPyroThres=InputData.getParameter(Params::Y_STAR_0);
+  smuY=-log(0.5)/(Global::DAYS_IN_YEAR/Global::interval*InputData.getParameter(Params::Y_STAR_HALF_LIFE));
+  Ystar2_13=InputData.getParameter(Params::Y_STAR_SQ);
+  alpha14=InputData.getParameter(Params::ALPHA);
+  Ystar1_26=InputData.getParameter(Params::Y_STAR_1);
 }
 
 PyrogenPathogenesis::PyrogenPathogenesis(double cF) :
@@ -73,3 +76,5 @@ void PyrogenPathogenesis::checkpoint (ostream& stream) {
     PathogenesisModel::checkpoint (stream);
     _pyrogenThres & stream;
 }
+
+} }

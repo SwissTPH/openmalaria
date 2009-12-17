@@ -24,28 +24,32 @@
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
 #include "util/gsl.h"
-#include "population.h"
 #include "Surveys.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "inputData.h"
+#include "util/CommandLine.hpp"
+#include "util/ModelOptions.hpp"
+#include "util/errors.hpp"
+
 #include <fstream>
 #include "gzstream.h"
 
-using namespace OM::util::errors;
 
-int Simulation::simPeriodEnd;
-int Simulation::totalSimDuration;
-int Simulation::simulationTime;
-int Simulation::timeStep = TIMESTEP_NEVER;
+namespace OM {
 
+// -----  Set-up & tear-down  -----
 
 Simulation::Simulation()
 {
-  // Initialize input variables and allocate memory.
+    Global::simulationTime = 0;
+    Global::timeStep = -1;
+    
+    // Initialize input variables and allocate memory.
   // We try to make initialization hierarchical (i.e. most classes initialise
   // through Population::init).
   gsl::setUp();
+  util::ModelOptions::set (InputData.get_model_version());
   Surveys.init();
   Population::init();
   _population = new Population();
@@ -58,8 +62,10 @@ Simulation::~Simulation(){
   gsl::tearDown();
 }
 
+
+// -----  run simulations  -----
+
 int Simulation::start(){
-  simulationTime = 0;
   _population->estimateRemovalRates();
   if (isCheckpoint()) {
     _population->setupPyramid(true);
@@ -72,7 +78,7 @@ int Simulation::start(){
   // +1 to let final survey run
   totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
   
-  while (simulationTime < simPeriodEnd) {
+  while (Global::simulationTime < simPeriodEnd) {
     vectorInitialisation();
     int extend = _population->_transmissionModel->vectorInitIterate ();
     simPeriodEnd += extend;
@@ -88,62 +94,62 @@ int Simulation::start(){
 }
 
 void Simulation::vectorInitialisation () {
-  while(simulationTime < simPeriodEnd) {
-    ++simulationTime;
+  while(Global::simulationTime < simPeriodEnd) {
+    ++Global::simulationTime;
     _population->update1();
     
-    BoincWrapper::reportProgress (double(simulationTime) / totalSimDuration);
-    if (BoincWrapper::timeToCheckpoint()) {
+    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
+    if (util::BoincWrapper::timeToCheckpoint()) {
       writeCheckpoint();
-      BoincWrapper::checkpointCompleted();
+      util::BoincWrapper::checkpointCompleted();
     }
   }
 }
 
 void Simulation::updateOneLifespan () {
   int testCheckpointStep = -1;
-  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+  if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
     testCheckpointStep = simPeriodEnd - Global::maxAgeIntervals / 2;
-  while(simulationTime < simPeriodEnd) {
-    ++simulationTime;
+  while(Global::simulationTime < simPeriodEnd) {
+    ++Global::simulationTime;
     _population->update1();
     
-    BoincWrapper::reportProgress (double(simulationTime) / totalSimDuration);
-    if (BoincWrapper::timeToCheckpoint() || simulationTime == testCheckpointStep) {
+    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
+    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
       writeCheckpoint();
-      BoincWrapper::checkpointCompleted();
-      if (Global::clOptions & CLO::TEST_CHECKPOINTING)
-	throw cmd_exit ("Checkpoint test: written checkpoint");
+      util::BoincWrapper::checkpointCompleted();
+      if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+	throw util::cmd_exit ("Checkpoint test: written checkpoint");
     }
   }
 }
 
 void Simulation::mainSimulation(){
-  //TODO5D
-  timeStep=0;
+  Global::timeStep=0;
   _population->preMainSimInit();
   _population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
   Surveys.incrementSurveyPeriod();
   
-  while(simulationTime < simPeriodEnd) {
-    if (timeStep == Surveys.currentTimestep) {
+  while(Global::simulationTime < simPeriodEnd) {
+    if (Global::timeStep == Surveys.currentTimestep) {
       _population->newSurvey();
       Surveys.incrementSurveyPeriod();
     }
-    _population->implementIntervention(timeStep);
+    _population->implementIntervention(Global::timeStep);
     //Calculate the current progress
-    BoincWrapper::reportProgress(double(simulationTime) / totalSimDuration);
+    util::BoincWrapper::reportProgress(double(Global::simulationTime) / totalSimDuration);
     
-    ++simulationTime;
+    ++Global::simulationTime;
     _population->update1();
-    ++timeStep;
+    ++Global::timeStep;
     //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
   }
-  cout << "timeStep: "<<timeStep << endl;
-  delete _population;
+  delete _population;	// must destroy all Human instances to make sure they reported past events
   Surveys.writeSummaryArrays();
 }
 
+
+// -----  checkpointing: set up read/write stream  -----
 
 const char* CHECKPOINT = "checkpoint";
 
@@ -175,7 +181,7 @@ void Simulation::writeCheckpoint(){
   // Open the next checkpoint file for writing:
   ostringstream name;
   name << CHECKPOINT << checkpointNum;
-  if (Global::compressCheckpoints) {
+  if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
     checkpoint (out);
@@ -213,7 +219,7 @@ void Simulation::readCheckpoint() {
     name << ".gz";				// then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     if (!in.good())
-      throw checkpoint_error ("Unable to read file");
+      throw util::checkpoint_error ("Unable to read file");
     checkpoint (in);
     in.close();
   }
@@ -222,50 +228,59 @@ void Simulation::readCheckpoint() {
   cerr << "Loaded checkpoint from: " << name.str() << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
-  if (Global::clOptions & CLO::TEST_CHECKPOINTING)
+  if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
     writeCheckpoint();
 }
 
+
+//   -----  checkpointing: Simulation data  -----
+
 void Simulation::checkpoint (istream& stream) {
-  simulationTime & stream;
-  timeStep & stream;
-  simPeriodEnd & stream;
-  totalSimDuration & stream;
-  // FIXME: appears problematic (though may not be needed):
-//   Population::staticRead(stream);
-  (*_population) & stream;
-  Surveys & stream;
-  
-  // Read trailing white-space (final endl has not yet been read):
-  while (stream.good() && isspace (stream.peek()))
-    stream.get();
-  if (!stream.eof()) {	// if anything else is left
-    cerr << "Error (checkpointing): not the whole checkpointing file was read;";
-    ifstream *ifCP = dynamic_cast<ifstream*> (&stream);
-    if (ifCP) {
-      streampos i = ifCP->tellg();
-      ifCP->seekg(0, ios_base::end);
-      cerr << ifCP->tellg()-i << " bytes remaining:";
-      ifCP->seekg (i);
-    } else	// igzstream can't seek
-      cerr << " remainder:" << endl;
-    cerr << endl << stream.rdbuf() << endl;
-  }
+    util::CommandLine::staticCheckpoint (stream);
+    // FIXME: appears problematic (though may not be needed):
+    //   Population::staticRead(stream);
+    Surveys & stream;
+    
+    Global::simulationTime & stream;
+    Global::timeStep & stream;
+    simPeriodEnd & stream;
+    totalSimDuration & stream;
+    (*_population) & stream;
+    
+    // Read trailing white-space (final endl has not yet been read):
+    while (stream.good() && isspace (stream.peek()))
+	stream.get();
+    if (!stream.eof()) {	// if anything else is left
+	cerr << "Error (checkpointing): not the whole checkpointing file was read;";
+	ifstream *ifCP = dynamic_cast<ifstream*> (&stream);
+	if (ifCP) {
+	    streampos i = ifCP->tellg();
+	    ifCP->seekg(0, ios_base::end);
+	    cerr << ifCP->tellg()-i << " bytes remaining:";
+	    ifCP->seekg (i);
+	} else	// igzstream can't seek
+	    cerr << " remainder:" << endl;
+	cerr << endl << stream.rdbuf() << endl;
+    }
 }
 
 void Simulation::checkpoint (ostream& stream) {
-  if (stream == NULL || !stream.good())
-    throw checkpoint_error ("Unable to write to file");
-  
-  timer::startCheckpoint ();
-  stream.precision(20);
-  simulationTime & stream;
-  timeStep & stream;
-  simPeriodEnd & stream;
-  totalSimDuration & stream;
-//   Population::staticWrite(stream);
-  (*_population) & stream;
-  Surveys & stream;
-  
-  timer::stopCheckpoint ();
+    if (stream == NULL || !stream.good())
+	throw util::checkpoint_error ("Unable to write to file");
+    timer::startCheckpoint ();
+    stream.precision(20);
+    
+    util::CommandLine::staticCheckpoint (stream);
+    //   Population::staticWrite(stream);
+    Surveys & stream;
+    
+    Global::simulationTime & stream;
+    Global::timeStep & stream;
+    simPeriodEnd & stream;
+    totalSimDuration & stream;
+    (*_population) & stream;
+    
+    timer::stopCheckpoint ();
+}
+
 }

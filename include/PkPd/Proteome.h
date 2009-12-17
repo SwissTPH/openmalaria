@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_proteome
-#define Hmod_proteome
+#ifndef Hmod_Proteome
+#define Hmod_Proteome
 
 #include <string>
 #include <vector>
@@ -30,8 +30,9 @@
 
 using namespace std;
 
-class Mutation;
-class ProteinPosition;
+namespace OM { namespace PkPd {
+    class Mutation;
+    class ProteinPosition;
 
 /* NOTE:
 Could replace the vectors/lists with maps and rewrite as something like:
@@ -160,8 +161,6 @@ public:
   }
   /** True if this ProteomeInstance has all mutations in _mutations. */
   bool hasMutations(vector<Mutation*> _mutations) const;
-  
-  friend class HoshenPkPdSuite;
 };
 
 /** Manages the list of proteins and (through these) the mutations.
@@ -178,4 +177,6 @@ public:
     static void addProtein(Protein* _protein);
     static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
 };
+
+} }
 #endif

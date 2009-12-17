@@ -21,10 +21,12 @@
 */
 
 #include "WithinHost/Descriptive.h"
+#include "util/ModelOptions.hpp"
 
 using namespace std;
 
-
+namespace OM { namespace WithinHost {
+    
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
@@ -90,12 +92,12 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     
     IPTattenuateAsexualDensity (*iter);
     
-    if (Global::modelVersion & MAX_DENS_CORRECTION)
+    if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
 	infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
     timeStepMaxDensity = infStepMaxDens;
     
     totalDensity += (*iter)->getDensity();
-    if ((*iter)->getStartDate() == (Simulation::simulationTime-1)) {
+    if ((*iter)->getStartDate() == (Global::simulationTime-1)) {
       _cumulativeh++;
     }
     (*iter)->determineDensityFinal ();
@@ -137,3 +139,5 @@ void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
 	(*inf) & stream;
     }
 }
+
+} }

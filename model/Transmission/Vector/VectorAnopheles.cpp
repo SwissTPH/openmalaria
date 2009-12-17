@@ -31,7 +31,9 @@
 #include <fstream>
 #include <ctime>
 
-
+namespace OM { namespace Transmission {
+    using namespace OM::util;
+    
 string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& initialisationEIR) {
   // -----  Set model variables  -----
   const scnXml::Mosq mosq = anoph.getMosq();
@@ -46,7 +48,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-    throw OM::util::errors::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
+    throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
   N_v_length = EIPDuration + mosqRestDuration;
   
@@ -103,14 +105,14 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   P_df .resize (N_v_length);
   P_dif.resize (N_v_length);
   
-  annualS_v.assign (daysInYear, 0.0);
-  forcedS_v.resize (daysInYear);
-  mosqEmergeRate.resize (daysInYear);	// Only needs to be done here if loading from checkpoint
+  annualS_v.assign (Global::DAYS_IN_YEAR, 0.0);
+  forcedS_v.resize (Global::DAYS_IN_YEAR);
+  mosqEmergeRate.resize (Global::DAYS_IN_YEAR);	// Only needs to be done here if loading from checkpoint
   
   
   return anoph.getMosquito();
 }
-void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& population, int populationSize) {
+void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize) {
   // -----  N_v0, N_v, O_v, S_v  -----
   //BEGIN P_A, P_Ai, P_df, P_dif
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
@@ -124,7 +126,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Human>& populatio
   // NC's non-autonomous model provides two methods for calculating P_df and
   // P_dif; here we assume that P_E is constant.
   double intP_df = 0.0;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+  for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
     double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
     leaveSeekingStateRate += prod;
@@ -218,7 +220,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 
 // Every Global::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Human>& population, int simulationTime, size_t sIndex, bool isDynamic) {
+void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, int simulationTime, size_t sIndex, bool isDynamic) {
   if (simulationTime >= larvicidingEndStep) {
     larvicidingEndStep = std::numeric_limits<int>::max();
     larvicidingIneffectiveness = 1.0;
@@ -264,7 +266,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
   // P_dif; here we assume that P_E is constant.
   double intP_df = 0.0;
   double intP_dif = 0.0;
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+  for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
     double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
     leaveSeekingStateRate += prod;
@@ -311,7 +313,7 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
     size_t t1   = (dMod - 1) % N_v_length;
     size_t ttau = (dMod - mosqRestDuration) % N_v_length;
     // Day of year:
-    size_t dYear = (firstDay + i) % daysInYear;
+    size_t dYear = (firstDay + i) % Global::DAYS_IN_YEAR;
     
     
     // These only need to be calculated once per timestep, but should be
@@ -397,13 +399,13 @@ void VectorAnopheles::advancePeriod (const std::list<Human>& population, int sim
 void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
   cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
-  larvicidingEndStep = Simulation::simulationTime + (elt.getDuration() / Global::interval);
+  larvicidingEndStep = Global::simulationTime + (elt.getDuration() / Global::interval);
 }
 
 
 void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle) {
   if (FC.size() % 2 == 0)
-      throw OM::util::errors::xml_scenario_error("The number of Fourier coefficents should be odd.");
+      throw util::xml_scenario_error("The number of Fourier coefficents should be odd.");
   
   // Frequency
   double w = 2*M_PI / double(tArray.size());
@@ -421,3 +423,5 @@ void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC
     tArray[t] = exp(temp);
   }
 }
+
+} }

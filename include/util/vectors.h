@@ -24,8 +24,7 @@
 #include <gsl/gsl_vector.h>
 #include "scenario.hxx"
 
-
-namespace vectors {
+namespace OM { namespace util { namespace vectors {
   ///@brief Basic operations on std::vector
   //@{
   /// Scale all elements of a vector by a in-situ
@@ -83,4 +82,6 @@ ostream& operator<< (ostream& out, vector<T> vec) {
   out << ']';
   return out;
 }
+
+} }
 #endif

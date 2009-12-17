@@ -21,10 +21,11 @@
 #ifndef Hmod_PkPdModel
 #define Hmod_PkPdModel
 
+#include "PkPd/Proteome.h"
 #include <fstream>
 using namespace std;
 
-class ProteomeInstance;
+namespace OM { namespace PkPd {
 
 /** Encapsulates both the static operations for PKPD models and the per-human
  * drug proxies.
@@ -103,4 +104,5 @@ public:
   }
 };
 
+} }
 #endif

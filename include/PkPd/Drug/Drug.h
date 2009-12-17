@@ -29,11 +29,12 @@
 #include <vector>
 #include "DrugType.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /** A class holding drug use info. This is an abstract base class, so it doesn't
  * include all details required.
  *
@@ -83,4 +84,5 @@ protected:
   double _nextConcentration;
 };
 
+} }
 #endif

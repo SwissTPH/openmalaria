@@ -20,17 +20,22 @@
 
 #include "WithinHost/Infection.h"
 #include "inputData.h"
+#include "util/ModelOptions.hpp"
 
+#include <cmath>
+
+namespace OM { namespace WithinHost {
+    
 float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
 
 void Infection::init () {
-  cumulativeYstar=(float)getParameter(Params::CUMULATIVE_Y_STAR);
-  cumulativeHstar=(float)getParameter(Params::CUMULATIVE_H_STAR);
-  alpha_m=1-exp(-getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
-  decayM=getParameter(Params::DECAY_M);
+  cumulativeYstar=(float)InputData.getParameter(Params::CUMULATIVE_Y_STAR);
+  cumulativeHstar=(float)InputData.getParameter(Params::CUMULATIVE_H_STAR);
+  alpha_m=1-exp(-InputData.getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
+  decayM=InputData.getParameter(Params::DECAY_M);
 }
 
 
@@ -62,10 +67,10 @@ void Infection::checkpoint (istream& stream) {
     _startdate & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    if (Global::modelVersion & INCLUDES_PK_PD) {
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 	int proteomeID;
 	proteomeID & stream;
-	_proteome = ProteomeInstance::getProteome(proteomeID);
+	_proteome = PkPd::ProteomeInstance::getProteome(proteomeID);
     } else
 	_proteome = NULL;
 }
@@ -73,6 +78,8 @@ void Infection::checkpoint (ostream& stream) {
     _startdate & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    if (Global::modelVersion & INCLUDES_PK_PD)
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
 	_proteome->getProteomeID() & stream;
 }
+
+} }

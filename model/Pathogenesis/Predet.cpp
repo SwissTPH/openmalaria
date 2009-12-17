@@ -24,7 +24,8 @@
 
 using namespace std;
 
-
+namespace OM { namespace Pathogenesis {
+    
 double PredetPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
   updatePyrogenThres(totalDensity);
   if ( timeStepMaxDensity > _pyrogenThres) {
@@ -34,3 +35,5 @@ double PredetPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDe
     return 0;
   }
 }
+
+} }

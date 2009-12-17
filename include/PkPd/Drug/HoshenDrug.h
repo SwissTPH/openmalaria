@@ -31,11 +31,12 @@
 #include "Dose.h"
 #include "HoshenDrugType.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /** A class holding hoshen pkpd drug use info.
  *
  * Each human has an instance for each type of drug present in their blood. */
@@ -58,4 +59,5 @@ protected:
   virtual double decayFactor (double time);
 };
 
+} }
 #endif

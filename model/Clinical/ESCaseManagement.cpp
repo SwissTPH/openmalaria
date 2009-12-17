@@ -21,10 +21,9 @@
 #include "Clinical/ESCaseManagement.h"
 #include "inputData.h"
 #include "util/gsl.h"
+#include "util/errors.hpp"
 
-using namespace OM::util::errors;
-
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 ESCaseManagement::TreeType ESCaseManagement::cmTree;
 cmid ESCaseManagement::cmMask;
@@ -32,7 +31,7 @@ cmid ESCaseManagement::cmMask;
 // -----  Static  -----
 
 void ESCaseManagement::init () {
-    const scnXml::CaseManagementTree& xmlCM = getEventScheduler().getCaseManagementTree();
+    const scnXml::CaseManagementTree& xmlCM = InputData.getEventScheduler().getCaseManagementTree();
     for (scnXml::CaseManagementTree::CM_pBranchSetConstIterator it = xmlCM.getCM_pBranchSet().begin(); it != xmlCM.getCM_pBranchSet().end(); ++it) {
 	cmTree[it->getID ()] = new CMPBranchSet (it->getCM_pBranch());
     }
@@ -46,7 +45,7 @@ void ESCaseManagement::init () {
 
 // -----  Non-static  -----
 
-cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
+cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
 #ifndef NDEBUG
     if (! (pgState & Pathogenesis::SICK))
         throw domain_error ("doCaseManagement shouldn't be called if not sick");
@@ -102,7 +101,7 @@ pair<cmid,CaseTreatment&> ESCaseManagement::traverse (cmid id) {
     if (it == cmTree.end()) {
 	ostringstream msg;
 	msg << "No node for id "<<(id&cmMask)<<" (unmasked: "<<id<<")";
-	throw xml_scenario_error (msg.str());
+	throw util::xml_scenario_error (msg.str());
     }
     return it->second->traverse (id);
 }
@@ -120,7 +119,7 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
     }
     // Test cumP is approx. 1.0 (in case the XML is wrong).
     if (pAccumulation < 0.999 || pAccumulation > 1.001)
-	throw xml_scenario_error ("EndPoint probabilities don't add up to 1.0 (CaseManagementTree)");
+	throw util::xml_scenario_error ("EndPoint probabilities don't add up to 1.0 (CaseManagementTree)");
     // In any case, force it exactly 1.0 (because it could be slightly less,
     // meaning a random number x could have cumP<x<1.0, causing index errors.
     branches[branchSeq.size()-1].cumP = 1.0;
@@ -142,4 +141,4 @@ pair<cmid,CaseTreatment&> ESCaseManagement::CMLeaf::traverse (cmid id) {
     return pair<cmid,CaseTreatment&> (id, ct);
 }
 
-}
+} }

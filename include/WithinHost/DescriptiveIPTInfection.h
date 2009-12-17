@@ -23,7 +23,12 @@
 #include "DescriptiveInfection.h"
 #include "util/gsl.h"
 
+namespace scnXml {
+    class Interventions;	// XML data passed to initParameters
+}
 
+namespace OM { namespace WithinHost {
+    
 struct genotype {
   //!In order to save memory, we just define the ID of the genotype. Attributes of the
   //!genotype can be accessed via arrays in mod_intervention.
@@ -42,10 +47,6 @@ struct genotype {
       ID & stream;
   }
 };
-
-namespace scnXml {
-  class Interventions;	// XML data passed to initParameters
-}
 
 /// IPT extension of DescriptiveInfection
 class DescriptiveIPTInfection : public DescriptiveInfection {
@@ -69,7 +70,7 @@ public:
   /** The event that the last SP dose clears parasites. */
   bool eventSPClears (int _lastSPDose) {
     return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[_gType.ID]) &&
-    (Simulation::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[_gType.ID]);
+    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[_gType.ID]);
   }
   
   /// Return: _SPattenuate == 1. Name by DH.
@@ -102,4 +103,5 @@ public:
   //@}
 };
 
+} }
 #endif

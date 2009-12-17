@@ -31,6 +31,8 @@ namespace scnXml
     class WeibullDecayedProportion;
 }
 
+namespace OM { namespace util {
+    
 /** A class representing a value decayed by the Weibull cumulative density
  * function.
  *
@@ -81,4 +83,5 @@ class WeibullDecayedValue
         double _constOverLambda; // Global::yearsPerInterval / lambda
 };
 
+} }
 #endif

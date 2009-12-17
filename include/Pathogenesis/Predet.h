@@ -28,6 +28,7 @@
 
 using namespace std;
 
+namespace OM { namespace Pathogenesis {
 /*! Predetermined episodes presentation model.
  */
 class PredetPathogenesis : public PyrogenPathogenesis {
@@ -39,4 +40,5 @@ public:
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 };
 
+} }
 #endif

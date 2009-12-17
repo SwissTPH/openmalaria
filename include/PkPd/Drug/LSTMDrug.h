@@ -30,12 +30,13 @@
 #include "Drug.h"
 #include "Dose.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 #include "LSTMDrugType.h"
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /** A class holding pkpd drug use info.
  *
  * Each human has an instance for each type of drug present in their blood. */
@@ -66,4 +67,5 @@ protected:
   deque<Dose> doses;
 };
 
+} }
 #endif

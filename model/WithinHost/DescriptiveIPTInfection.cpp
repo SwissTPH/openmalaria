@@ -22,7 +22,8 @@
 #include "inputData.h"
 #include "util/gsl.h"
 
-// static IPT variables
+namespace OM { namespace WithinHost {
+    // static IPT variables
 int DescriptiveIPTInfection::numberOfGenoTypes;
 double *DescriptiveIPTInfection::genotypeFreq;
 int *DescriptiveIPTInfection::genotypeProph;
@@ -100,8 +101,8 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (Simulation::simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
-	Simulation::simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
+    if (Global::simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
+	Global::simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
       _SPattenuate=true;
     }
 }
@@ -124,3 +125,5 @@ void DescriptiveIPTInfection::checkpoint (ostream& stream) {
     _gType & stream; 
     _SPattenuate & stream; 
 }
+
+} }

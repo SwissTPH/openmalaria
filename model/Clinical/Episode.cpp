@@ -19,9 +19,10 @@
 */
 
 #include "Clinical/Episode.h"
-#include "Simulation.h"
 #include "Surveys.h"
 
+
+namespace OM { namespace Clinical {
 int Episode::healthSystemMemory;
 
 
@@ -46,7 +47,7 @@ void Episode::update (int simulationTime, SurveyAgeGroup ageGroup, Pathogenesis:
 }
 
 void Episode::report () {
-  if (_time == TIMESTEP_NEVER)	// Nothing to report
+  if (_time == Global::TIMESTEP_NEVER)	// Nothing to report
     return;
   
   if (_state & Pathogenesis::MALARIA) {
@@ -89,7 +90,7 @@ void Episode::report () {
 
 void Episode::operator& (istream& stream) {
     _time & stream;
-    if (_time != TIMESTEP_NEVER) {
+    if (_time != Global::TIMESTEP_NEVER) {
 	_surveyPeriod & stream;
 	_ageGroup & stream;
 	int s;
@@ -99,9 +100,11 @@ void Episode::operator& (istream& stream) {
 }
 void Episode::operator& (ostream& stream) {
     _time & stream;
-    if (_time != TIMESTEP_NEVER) {
+    if (_time != Global::TIMESTEP_NEVER) {
 	_surveyPeriod & stream;
 	_ageGroup & stream;
 	_state & stream;
     }
 }
+
+} }

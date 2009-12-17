@@ -24,7 +24,7 @@
 #include "Clinical/ClinicalModel.h"
 #include "OldCaseManagement.h"
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 /** This implementation of the model is intended to use the old case-management
  * model with immediate outcomes of clinical events (immediate recovery with
@@ -41,7 +41,7 @@ public:
   ClinicalImmediateOutcomes (double cF, double tSF);
   ~ClinicalImmediateOutcomes ();
   
-  void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
+  void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears);
   
   inline bool recentTreatment() {
     return caseManagement->recentTreatment();
@@ -57,5 +57,5 @@ private:
   OldCaseManagement * caseManagement;
 };
 
-}
+} }
 #endif

@@ -29,12 +29,13 @@
 #include <vector>
 #include "Dose.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 #include "DrugType.h"
 
 using namespace std;
 
-
+namespace OM { namespace PkPd {
+    
 /** Information about each (type of) drug (rather than each use of a drug).
  *
  * Static data contains a list of all available drug types.
@@ -62,13 +63,7 @@ public:
    */
   LSTMDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
   ~LSTMDrugType ();
-  /* Checkpointing functions, which we shouldn't need now. If they are needed:
-  /// Load an instance from a checkpoint.
-  LSTMDrugType (istream& in);
-  /// Write instance data to a checkpoint.
-  void write (ostream& out) const;
-  */
-
+  
   //! Adds a PD Rule.
   /*! The order of rule adding is important! The first add should be the
    *  one with most mutations (typically the most resistant), the last
@@ -111,4 +106,5 @@ private:
   friend class LSTMDrug;
 };
 
+} }
 #endif

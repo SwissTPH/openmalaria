@@ -24,7 +24,7 @@
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
@@ -81,7 +81,7 @@ public:
    * @param withinHostModel = Used to get the parasite density and to medicate
    *	drugs/clear infections.
    * @param ageYears = Age of human. */
-  void update (WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps);
+  void update (WithinHost::WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -127,14 +127,14 @@ protected:
    *
    * @param withinHostModel = WithinHostModel of human.
    * @param ageYears = Age of human. */
-  virtual void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears) =0;
+  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
   
   /// The PathogenesisModel introduces illness dependant on parasite density
-  PathogenesisModel *pathogenesisModel;
+  Pathogenesis::PathogenesisModel *pathogenesisModel;
   
   /** Next event to report.
    * Only reported when the Human dies or a separate episode occurs. */
@@ -158,5 +158,5 @@ protected:
   int _doomed;
 };
 
-}
+} }
 #endif

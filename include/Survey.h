@@ -23,6 +23,8 @@
 #include "Global.h"
 #include <bitset>
 
+namespace OM {
+    
 /** Enumeration of reporting options
  *
  * Most are reported per age-group. */
@@ -378,4 +380,5 @@ void writeArray(ostream& file, int measure, bool assimilationMode, int survey, v
 template <class T>
 void writeArray(ostream& file, int measure, bool assimilationMode, int survey, T& value);
 
+}
 #endif

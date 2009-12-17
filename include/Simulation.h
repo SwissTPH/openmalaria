@@ -20,25 +20,17 @@
 
 #ifndef Hmod_Simulation
 #define Hmod_Simulation
+
 #include "Global.h"
+#include "population.h"
 
 using namespace std;
 
-class TransmissionModel;
-class Population;
-class Summary;
-
+namespace OM {
+    
 //! Main simulation class
 class Simulation{
 public: 
-  // Units: interval * 1 day?
-  static int simulationTime;
-    
-  /** Time counter during the main simulation.
-   *
-   * Maximum value during update1(): simulationDuration */
-  static int timeStep;
-  
   //!  Inititalise all step specific constants and variables.
   Simulation();
   ~Simulation();
@@ -63,8 +55,6 @@ public:
   void updateOneLifespan();
 
 private:
-  Population* _population;
-
   /** @brief checkpointing functions
    *
    * readCheckpoint/writeCheckpoint prepare to read/write the file,
@@ -82,10 +72,14 @@ private:
   void checkpoint (ostream& stream);
   //@}
   
-  static int simPeriodEnd;
-  static int totalSimDuration;
+private:
+  int simPeriodEnd;
+  int totalSimDuration;
   
+  Population* _population;
+
   friend class VectorAnophelesSuite;
 };
 
+}
 #endif

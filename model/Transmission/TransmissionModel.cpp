@@ -19,9 +19,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 */
-//This is needed to get symbols like M_PI with MSVC:
-#define _USE_MATH_DEFINES
-
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/NonVector.h"
 #include "Transmission/Vector/VectorTransmission.h"
@@ -35,18 +32,18 @@
 #include <cfloat>
 #include <gsl/gsl_vector.h> 
 
-using namespace OM::util::errors;
-
+namespace OM { namespace Transmission {
+    
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData::VectorOptional& vectorData = getEntoData().getVector();
+  const scnXml::EntoData::VectorOptional& vectorData = InputData.getEntoData().getVector();
   if (vectorData.present())
     return new VectorTransmission(vectorData.get());
   else {
-    const scnXml::EntoData::NonVectorOptional& nonVectorData = getEntoData().getNonVector();
+      const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData.getEntoData().getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...
-      throw xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
+      throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     return new NonVectorTransmission(nonVectorData.get());
   }
 }
@@ -63,7 +60,7 @@ TransmissionModel::TransmissionModel() :
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
   timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
   
-  noOfAgeGroupsSharedMem = std::max(innoculationsPerAgeGroup.size(),SharedGraphics::KappaArraySize);
+  noOfAgeGroupsSharedMem = std::max(innoculationsPerAgeGroup.size(),util::SharedGraphics::KappaArraySize);
 }
 
 TransmissionModel::~TransmissionModel () {
@@ -72,7 +69,7 @@ TransmissionModel::~TransmissionModel () {
 #endif
 }
 
-void TransmissionModel::updateKappa (const std::list<Human>& population, int simulationTime) {
+void TransmissionModel::updateKappa (const std::list<Host::Human>& population, int simulationTime) {
   // We calculate kappa for output and non-vector model, and kappaByAge for
   // the shared graphics.
   
@@ -81,7 +78,7 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
   kappaByAge.assign (noOfAgeGroupsSharedMem, 0.0);
   nByAge.assign (noOfAgeGroupsSharedMem, 0);
   
-  for (std::list<Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+  for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     double ageYears = h->getAgeInYears();
     double t = h->perHostTransmission.relativeAvailabilityHetAge(ageYears) * PerHostTransmission::ageCorrectionFactor;
     sumWeight += t;
@@ -125,10 +122,10 @@ void TransmissionModel::updateKappa (const std::list<Human>& population, int sim
   timeStepNumEntoInnocs = 0;
   
   // Shared graphics: report infectiousness
-  if (Simulation::simulationTime % 6 ==  0) {
+  if (Global::simulationTime % 6 ==  0) {
     for (int i = 0; i < SurveyAgeGroup::getNumGroups(); i++)
       kappaByAge[i] /= nByAge[i];
-    SharedGraphics::copyKappa(&kappaByAge[0]);
+    util::SharedGraphics::copyKappa(&kappaByAge[0]);
   }
   
 #ifdef OMV_CSV_REPORTING
@@ -154,7 +151,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
 }
 
 void TransmissionModel::summarize (Survey& survey) {
-  survey.setNumTransmittingHosts(kappa[(Simulation::simulationTime-1) % Global::intervalsPerYear]);
+  survey.setNumTransmittingHosts(kappa[(Global::simulationTime-1) % Global::intervalsPerYear]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
   
   survey.setInnoculationsPerDayOfYear (innoculationsPerDayOfYear);
@@ -165,7 +162,7 @@ void TransmissionModel::summarize (Survey& survey) {
 }
 
 void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
-  throw xml_scenario_error ("larviciding when not using a Vector model");
+  throw util::xml_scenario_error ("larviciding when not using a Vector model");
 }
 
 
@@ -201,3 +198,5 @@ void TransmissionModel::checkpoint (ostream& stream) {
     kappaByAge & stream;
     nByAge & stream;
 }
+
+} }

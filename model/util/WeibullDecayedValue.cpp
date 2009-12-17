@@ -21,6 +21,8 @@
 #include "util/WeibullDecayedValue.h"
 #include "inputData.h"
 
+namespace OM { namespace util {
+    
 void WeibullDecayedValue::setParameters (double initial, double halflife, double k) {
   _initial = initial;
   _k = k;
@@ -38,3 +40,5 @@ void WeibullDecayedValue::operator= (const scnXml::WeibullDecayedProportion& elt
 double WeibullDecayedValue::operator() (int ageTSteps) const {
   return _initial * exp(-pow(ageTSteps * _constOverLambda, _k));
 }
+
+} }

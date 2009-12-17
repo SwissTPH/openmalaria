@@ -21,7 +21,10 @@
 #include "inputData.h"
 
 #include <cfloat>
+#include <stdexcept>
 
+namespace OM {
+    
 // -----  Static members  -----
 
 double SurveyAgeGroup::_lowerbound;
@@ -33,14 +36,14 @@ bool Survey::_assimilatorMode;
 void Survey::init () {
   SurveyAgeGroup::init ();
   
-  int sumOpt = get_summary_option();
+  int sumOpt = InputData.get_summary_option();
   for (size_t i = 0; i < NUM_SUMMARY_OPTIONS; ++i)
     active[i] = sumOpt & (1 << i);
 
-  _assimilatorMode = get_assim_mode();
+  _assimilatorMode =InputData. get_assim_mode();
 }
 void SurveyAgeGroup::init () {
-  const scnXml::Monitoring& mon = getMonitoring();
+    const scnXml::Monitoring& mon = InputData.getMonitoring();
   const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
   /* note that the last age group includes individuals who are        *
   * either younger than Lowerbound or older than the last Upperbound */
@@ -224,4 +227,6 @@ void writeArray (ostream& file, int measure, bool assimilatorMode, int survey, T
   if (!assimilatorMode)
     file << survey << "\t" << 0 << "\t" << measure;
   file << "\t" << value << lineEnd;
+}
+
 }

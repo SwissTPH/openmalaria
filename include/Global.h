@@ -17,6 +17,10 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
+
+/** The Global module is only for items wanted nearly everywhere.
+ * It is not for miscelaneous stuff and should only include headers wanted nearly everywhere.
+ */
 #ifndef Hmod_Global
 #define Hmod_Global
 
@@ -26,107 +30,61 @@
 #define finite(x) _finite(x)
 #endif
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
-#include <fcntl.h>
-#include <math.h>
-#include <vector>
-#include <string>
-#include <stdexcept>
-#include <iostream>
-#include <iomanip>
-using namespace std;
-
-#include "Constant.h"
-#include "util/errors.hpp"
 #include "util/checkpoint.hpp"
 using namespace OM::util::checkpoint;
 
-
-/// Command-Line Option possibilities
-namespace CLO {
-  enum CLO {
-    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
-     * Many are designed to be "flags", so the value corresponds to a single bit:
-     * http://en.wikipedia.org/wiki/Flag_byte */
-    NONE		= 0x0,
-    
-    PRINT_MODEL_VERSION	= 0x1,	// outputs modelVersion in a human-readable form
-    TEST_CHECKPOINTING	= 0x2,	// forces a checkpoint in the middle of initialisation, followed by exiting
-  };
+namespace OM {
+    /// Global stuff. (Would have been a class but can't initialize constants in a class; better
+    /// that these values are compile-time known.)
+    namespace Global {
+	/** Sets parameters in Global and performs some checks. */
+	void init ();
+	
+	///@brief Compile-time constants
+	//@{
+	/** Value used as the timestep for an event which has never happened.
+	*
+	* For any simulation timestep, we must have:
+	* ( TIMESTEP_NEVER + simulationTime < 0 )
+	* but since (x - TIMESTEP_NEVER >= y) is often checked, x - TIMESTEP_NEVER
+	* must not overflow for any timestep x (int represents down to -0x7FFFFFFF).
+	*/
+	const int TIMESTEP_NEVER = -0x3FFFFFFF;
+	
+	/// Days in a year. Should be a multiple of interval.
+	const int DAYS_IN_YEAR = 365;
+	//@}
+	
+	///@brief Variables read from XML configuration which remain constant after set up
+	//@{
+	/// temporal resolution of simulation, in days
+	extern int interval;
+	/// Number of timesteps in 5 days (i.e. 5/interval)
+	extern int intervalsPer5Days;
+	/// Simulation time steps per year (DAYS_IN_YEAR / interval)
+	extern size_t intervalsPerYear;
+	/// 1.0/intervalsPerYear
+	extern double yearsPerInterval;
+	/// Maximum age of individuals in a scenario in time intervals
+	extern int maxAgeIntervals;
+	//@}
+	
+	/** @brief Simulation variables, made global to save continuously passing.
+	 *
+	 * Don't add many variables like this.
+	 * 
+	 * These should be considered read-only outside Simulation. */
+	//@{
+	/// Simulation timestep, starting from beginning of initialization.
+	/// (Each step is "interval" long).
+	extern int simulationTime;
+	
+	/** Timestep counter during the main simulation.
+	*
+	* This is <0 during initialization and is incremented from 0 from the start of the intervention
+	* period. */
+	extern int timeStep;
+	//@}
+    };
 }
-
-class Global
-{
-public:
-  /** Looks through all command line options.
-   *
-   * @returns The name of the scenario XML file to use.
-   *
-   * Throws cmd_exit in the case a help message is printed. Help
-   * is printed to cout, which necessitate calling this function
-   * before BOINC is initialised.
-   * 
-   * In other cases command-line parameters cause variables to be set in Global
-   * to achieve the desired result. */
-  static string parseCommandLine (int argc, char* argv[]);
-  
-  /** Sets parameters in Global and performs some checks.
-   *
-   * Also outputs some extra information for command-line options.
-   * 
-   * @throws cmd_exit if we should stop before running the simulation because
-   * of an option. */
-  static void initGlobal ();
-  
-  /// Variables that must be checkpointed.
-  //@{
-
-  /** Model version defines which implementations of hard-coded options should be
-   * used. The integer value of modelVersion passed from the .xml is converted to
-   * binary with each bit corresponding to a different dichotomous option.  The
-   * original default model is modelVersion=0 */
-  static ModelVersion modelVersion;
-  //@}
-  
-  /// Data read from xml which doesn't need to be checkpointed.
-  //@{
-
-  /// temporal resolution of simulation, in days
-  static int interval;
-  /// Number of timesteps in 5 days
-  static int intervalsPer5Days;
-   //Simulation time steps per year
-  static size_t intervalsPerYear;
-  // 1.0/intervalsPerYear
-  static double yearsPerInterval;
-  // Maximum age of individuals in a scenario in time intervals
-  static int maxAgeIntervals;
-  //@}
-  
-  ///@brief Command-line options
-  //@{
-  static CLO::CLO clOptions;
-  static string clResourcePath;
-  static bool compressCheckpoints;
-  //@}
-  
-  /** @brief Checkpointing.
-   *
-   * Not really required; more to confirm things are expected. */
-  void read (istream& in);
-  void write (ostream& out);	///< ditto
-  
-  /** Prepend if path is relative, prepend it with clResourcePath.
-   * Then passes the resulting (or original) path through
-   * BoincWrapper::resolveFile() and returns the result. */
-  static string lookupResource (const string& path);
-  
-private:
-  /// Sets modelVersion, checking for incompatible versions.
-  static void setModelVersion ();
-};
-
 #endif

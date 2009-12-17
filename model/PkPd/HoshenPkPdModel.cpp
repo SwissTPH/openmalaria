@@ -20,6 +20,8 @@
 
 #include "PkPd/HoshenPkPdModel.h"
 
+namespace OM { namespace PkPd {
+    
 // -----  static functions  -----
 
 void HoshenPkPdModel::init() {
@@ -90,3 +92,5 @@ double HoshenPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
   }
   return factor;
 }
+
+} }

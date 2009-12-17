@@ -21,20 +21,22 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/HoshenDrugType.h"
 #include "Global.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
+#include "util/ModelOptions.hpp"
 
 // submodels:
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 
-
+namespace OM { namespace PkPd {
+    
 // Temporary switch to use the LSTM model − this may eventually be determined by XML data or XML model version.
 const bool Use_LSTM = false;
 
 // -----  static functions  -----
 
 void PkPdModel::init () {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
     ProteomeManager::init ();
     if (Use_LSTM) {
       LSTMDrugType::init();
@@ -49,24 +51,24 @@ void PkPdModel::init () {
   }
 }
 void PkPdModel::cleanup () {
-    if (Global::modelVersion & INCLUDES_PK_PD) {
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 	ProteomeManager::cleanup ();
     }
 }
 
 void PkPdModel::readStatic (istream& in) {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 //     ProteomeManager::read (in);
   }
 }
 void PkPdModel::writeStatic (ostream& out) {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 //     ProteomeManager::write (out);
   }
 }
 
 PkPdModel* PkPdModel::createPkPdModel () {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
     if (Use_LSTM)
       return new LSTMPkPdModel ();
     else
@@ -76,7 +78,7 @@ PkPdModel* PkPdModel::createPkPdModel () {
 }
 
 PkPdModel* PkPdModel::createPkPdModel (istream& in) {
-  if (Global::modelVersion & INCLUDES_PK_PD) {
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
     if (Use_LSTM)
       return new LSTMPkPdModel (in);
     else
@@ -85,4 +87,4 @@ PkPdModel* PkPdModel::createPkPdModel (istream& in) {
   return new PkPdModel(in);
 }
 
-// -----  non-static functions  -----
+} }

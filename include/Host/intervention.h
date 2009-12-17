@@ -31,6 +31,8 @@ namespace scnXml {
   class VaccineDescription;
 }
 
+namespace OM { namespace Host {
+
 /** Vaccine intervention parameters.
  * 
  * Used to represent PEV, BSV and TBV vaccines.
@@ -89,4 +91,5 @@ private:
   double efficacyB;
 };
 
+} }
 #endif

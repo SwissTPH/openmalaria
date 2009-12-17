@@ -21,12 +21,13 @@
 
 #include "WithinHost/WithinHostModel.h"
 #include "Clinical/Episode.h"
-#include "Simulation.h"
 
 namespace scnXml {
   class HealthSystem;
 }
 
+namespace OM { namespace Clinical {
+    
 //! Models of treatment seeking and referral
 class OldCaseManagement {
 public:
@@ -46,11 +47,11 @@ public:
    * @param ageYears = Age of human.
    * @param doomed = _doomed variable of Human; used to kill the human.
    *	Passing like this isn't ideal. */
-  void doCaseManagement (Pathogenesis::State pgState, WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed);
+  void doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed);
   
   inline bool recentTreatment() {
-    return (Simulation::simulationTime-_tLastTreatment >= 1 &&
-	    Simulation::simulationTime-_tLastTreatment <= 4);
+    return (Global::simulationTime-_tLastTreatment >= 1 &&
+	    Global::simulationTime-_tLastTreatment <= 4);
   }
   
   /// Checkpointing
@@ -145,4 +146,5 @@ private:
   static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
 };
 
+} }
 #endif

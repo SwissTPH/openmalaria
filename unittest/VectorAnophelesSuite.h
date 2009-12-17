@@ -31,8 +31,7 @@
 #include <list>
 #include <xsd/cxx/tree/exceptions.hxx>
 
-#include "population.h"
-#include "Human.h"
+#include "Host/Human.h"
 #include "Transmission/Vector/VectorTransmission.h"
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "util/vectors.h"
@@ -178,7 +177,7 @@ public:
     // just test vtm->eirPerDayOfYear and species parameters.
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (doc["calculateEIR"]["output"]);
   }
@@ -186,11 +185,11 @@ public:
   void testCalculateEirDeterrency () {
     const YAML::Node& node = doc["calculateEirDeterrency"];
     species->humanBase.ITNDeterrency = yaml2WeibullDecayedValue(node["Deterrency"]);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
@@ -198,11 +197,11 @@ public:
   void testCalculateEirPreprandialKilling () {
     const YAML::Node& node = doc["calculateEirPreprandialKilling"];
     species->humanBase.ITNPreprandialKillingEffect = yaml2WeibullDecayedValue(node["PreprandialKilling"]);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
@@ -210,11 +209,11 @@ public:
   void testCalculateEirPostprandialKilling () {
     const YAML::Node& node = doc["calculateEirPostprandialKilling"];
     species->humanBase.ITNPostprandialKillingEffect = yaml2WeibullDecayedValue(node["PostprandialKilling"]);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupITN();
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
@@ -222,11 +221,11 @@ public:
   void testCalculateEirRestKilling () {
     const YAML::Node& node = doc["calculateEirRestKilling"];
     species->humanBase.IRSKillingEffect = yaml2WeibullDecayedValue(node["RestKilling"]);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       it->setupIRS();
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
@@ -238,7 +237,7 @@ public:
     species->larvicidingEndStep = 1000;
     vtm->timeStepNumEntoInnocs = 0;
     vtm->advancePeriod (*population, simulationTime);
-    for (list<Human>::iterator it = population->begin(); it != population->end(); ++it)
+    for (list<Host::Human>::iterator it = population->begin(); it != population->end(); ++it)
       vtm->getEIR (simulationTime, it->perHostTransmission, it->getAgeInYears());
     TS_ASSERT_SPECIES_APPROX (node["output"]);
   }
@@ -280,7 +279,7 @@ private:
   Simulation *simulation;
   VectorTransmission *vtm;
   VectorAnopheles *species;
-  list<Human> *population;
+  list<Host::Human> *population;
 };
 
 #endif

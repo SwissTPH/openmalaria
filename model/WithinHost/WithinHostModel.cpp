@@ -25,15 +25,17 @@
 #include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/Dummy.h"
 #include "WithinHost/Empirical.h"
-#include "Simulation.h"
 #include "inputData.h"
 #include "util/gsl.h"
-#include <stdexcept>
+#include "util/ModelOptions.hpp"
+#include "util/errors.hpp"
 
+#include <cmath>
 using namespace std;
 
-// NOTE: I'd rather use these than x.99 values, but it changes things!
-//const double WithinHostModel::agemin[nages] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
+namespace OM { namespace WithinHost {
+    // NOTE: I'd rather use these than x.99 values, but it changes things!
+    //const double WithinHostModel::agemin[nages] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
 const double WithinHostModel::agemax[nages] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
 // weight proportions, used by drug code
 const double WithinHostModel::wtprop[nages] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
@@ -47,10 +49,10 @@ double WithinHostModel::detectionLimit;
 
 void WithinHostModel::init() {
   Infection::init();
-  sigma_i=sqrt(getParameter(Params::SIGMA_I_SQ));
-  immPenalty_22=1-exp(getParameter(Params::IMMUNITY_PENALTY));
-  immEffectorRemain=exp(-getParameter(Params::IMMUNE_EFFECTOR_DECAY));
-  asexImmRemain=exp(-getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+  sigma_i=sqrt(InputData.getParameter(Params::SIGMA_I_SQ));
+  immPenalty_22=1-exp(InputData.getParameter(Params::IMMUNITY_PENALTY));
+  immEffectorRemain=exp(-InputData.getParameter(Params::IMMUNE_EFFECTOR_DECAY));
+  asexImmRemain=exp(-InputData.getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
   
   double densitybias;
   /*
@@ -58,21 +60,21 @@ void WithinHostModel::init() {
   or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
   add an attribute to scenario.xml densityQuantification="malariaTherapy|garki|other"
   */
-  if (( get_analysis_no() <  22) || ( get_analysis_no() >  30)) {
-    densitybias=getParameter(Params::DENSITY_BIAS_NON_GARKI);
+  if (( InputData.get_analysis_no() <  22) || (InputData.get_analysis_no() >  30)) {
+    densitybias=InputData.getParameter(Params::DENSITY_BIAS_NON_GARKI);
   }
   else {
-    densitybias=getParameter(Params::DENSITY_BIAS_GARKI);
+    densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
   }
-  detectionLimit=get_detectionlimit()*densitybias;
+  detectionLimit=InputData.get_detectionlimit()*densitybias;
   
-  if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
+  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
     DummyInfection::init ();
-  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
+  } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::initParameters();	// 1-day timestep check
   } else {
-    if (Global::modelVersion & INCLUDES_PK_PD)
-	throw OM::util::errors::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+	throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }
@@ -92,9 +94,9 @@ void WithinHostModel::clear() {
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
-  if (Global::modelVersion & DUMMY_WITHIN_HOST_MODEL) {
+  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
     return new DummyWithinHostModel();
-  } else if (Global::modelVersion & EMPIRICAL_WITHIN_HOST_MODEL) {
+  } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     return new EmpiricalWithinHostModel();
   } else {
     if (DescriptiveIPTWithinHost::iptActive)
@@ -120,7 +122,7 @@ void WithinHostModel::clearInfections (bool) {
 }
 
 void WithinHostModel::IPTiTreatment (SurveyAgeGroup ageGroup) {
-  throw OM::util::errors::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
+  throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
 
@@ -177,7 +179,7 @@ void WithinHostModel::checkpoint (istream& stream) {
     timeStepMaxDensity & stream;
     
     if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-	throw OM::util::errors::checkpoint_error ("_MOI");
+	throw util::checkpoint_error ("_MOI");
 }
 void WithinHostModel::checkpoint (ostream& stream) {
     _innateImmSurvFact & stream;
@@ -188,3 +190,5 @@ void WithinHostModel::checkpoint (ostream& stream) {
     totalDensity & stream;
     timeStepMaxDensity & stream;
 }
+
+} }

@@ -29,7 +29,7 @@ namespace OM { namespace util { namespace checkpoint {
 	if (length < 0 || length > 1000) {
 	    ostringstream s;
 	    s << "List length out of range: " << length;
-	    throw errors::checkpoint_error(s.str());
+	    throw checkpoint_error(s.str());
 	}
     }
     

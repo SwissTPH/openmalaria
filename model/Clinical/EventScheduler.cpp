@@ -22,12 +22,11 @@
 #include "inputData.h"
 #include "util/gsl.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Simulation.h"
 #include "Surveys.h"
+#include "util/ModelOptions.hpp"
+#include "util/errors.hpp"
 
-using namespace OM::util::errors;
-
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
 cmid ClinicalEventScheduler::outcomeMask;
@@ -38,11 +37,11 @@ cmid ClinicalEventScheduler::outcomeMask;
 void ClinicalEventScheduler::init ()
 {
     if (Global::interval != 1)
-        throw xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
-    if (! (Global::modelVersion & INCLUDES_PK_PD))
-        throw xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
+        throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
+    if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
+        throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
-    const scnXml::EventScheduler& ev = getEventScheduler();
+    const scnXml::EventScheduler& ev = InputData.getEventScheduler();
     Episode::healthSystemMemory = ev.getHealthSystemMemory();
     
     ESCaseManagement::init ();
@@ -63,14 +62,14 @@ void ClinicalEventScheduler::init ()
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         ClinicalModel (cF),
-        pgState (Pathogenesis::NONE), pgChangeTimestep (TIMESTEP_NEVER)
+        pgState (Pathogenesis::NONE), pgChangeTimestep (Global::TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 
 // -----  other methods  -----
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears)
+void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears)
 {
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE, though considering
@@ -83,17 +82,17 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
      * and pgState include SICK, MALARIA or COMPLICATED
      * or a second case of MALARIA and at least 3 days since last change */
     if ( ( ( (newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
-            (pgState & newState & Pathogenesis::MALARIA && Simulation::simulationTime >= pgChangeTimestep + 3))
+            (pgState & newState & Pathogenesis::MALARIA && Global::simulationTime >= pgChangeTimestep + 3))
     {
         if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
         SurveyAgeGroup ageGroup = ageYears;
-        latestReport.update (Simulation::simulationTime, ageGroup, pgState);
-        pgChangeTimestep = Simulation::simulationTime;
+        latestReport.update (Global::simulationTime, ageGroup, pgState);
+        pgChangeTimestep = Global::simulationTime;
 	
 	if (pgState & Pathogenesis::MALARIA) {
-	    if (Global::modelVersion & PENALISATION_EPISODES) {
+	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
 		withinHostModel.immunityPenalisation();
 	    }
 	}
@@ -110,7 +109,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
 		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysDeath);
 		    
 		    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-		    latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
+		    latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
+		    //FIXME: kill after hospitalizationDaysDeath
 		    _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
 		} else {
 		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysRecover);
@@ -126,7 +126,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         _doomed = -Global::interval; // start indirect mortality countdown
     
     //FIXME: do we need to force time-outs now?
-    if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Simulation::simulationTime)) {
+    if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Global::simulationTime)) {
         // Episode timeout: force recovery.
         // NOTE: An uncomplicated case occuring before this reset could be counted
         // UC2 but with treatment only occuring after this reset (when the case
@@ -135,7 +135,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHostModel& withinHostModel,
         // a catch-22 situation, so DH, MP and VC decided to leave it like this.
         //TODO: also report EVENT_IN_HOSPITAL where relevant (patient _can_ be in a severe state)
         pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-        latestReport.update (Simulation::simulationTime, SurveyAgeGroup (ageYears), pgState);
+        latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
         pgState = Pathogenesis::NONE;
     }
     
@@ -172,4 +172,4 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     lastCmDecision & stream;
 }
 
-}
+} }

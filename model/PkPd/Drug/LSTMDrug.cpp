@@ -30,6 +30,8 @@
 
 using namespace std;
 
+namespace OM { namespace PkPd {
+    
 LSTMDrug::LSTMDrug(const LSTMDrugType* type) : Drug(type) {
 }
 
@@ -72,3 +74,5 @@ double LSTMDrug::decayFactor (double time) {
     //TBD
     return 0.0;	// TODO (best always return _something_, even if nonsense)
 }
+
+} }

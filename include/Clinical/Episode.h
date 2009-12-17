@@ -26,6 +26,8 @@
 #include "Survey.h"	//SurveyAgeGroup
 #include <ostream>
 
+namespace OM { namespace Clinical {
+    
 /** Summary of clinical events during a caseManagementMemory period, in one individual.
  *
  * Terminology:
@@ -35,7 +37,7 @@
  * bouts of sickness and recovery (the most severe is reported). */
 class Episode{
 public:
-  Episode() : _time(TIMESTEP_NEVER), _ageGroup(0) {};
+  Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup(0) {};
   ~Episode();
   
   /** Report an episode, its severity, and any outcomes it entails.
@@ -87,4 +89,5 @@ private:
   Pathogenesis::State _state;
 };
 
+} }
 #endif

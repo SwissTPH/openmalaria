@@ -30,6 +30,7 @@
 #include <string>
 using namespace std;
 
+namespace OM { namespace util {
 /// Wrapper around BOINC functions
 namespace BoincWrapper {
   /// Initializes BOINC
@@ -67,4 +68,5 @@ namespace SharedGraphics {
   void copyKappa(double *kappa);
 }
 
+} }
 #endif

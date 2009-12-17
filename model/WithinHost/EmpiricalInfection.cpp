@@ -20,13 +20,17 @@
 
 #include "WithinHost/Empirical.h"
 #include "util/gsl.h"
-#include <iostream>
+#include "util/errors.hpp"
+#include "util/CommandLine.hpp"
+#include "util/ModelOptions.hpp"
+
 #include <sstream>
 #include <fstream>
-#include <stdlib.h>
-#include <string.h>
+#include <string>
+#include <cmath>
 
-
+namespace OM { namespace WithinHost {
+    
 // -----  static class members (variables & functions)  -----
 
 double EmpiricalInfection::_maximumPermittedAmplificationPerCycle;
@@ -73,7 +77,7 @@ void EmpiricalInfection::initParameters(){
   _overallMultiplier= 0.697581;
   _subPatentLimit=10.0/_overallMultiplier; 
   _maximumPermittedAmplificationPerCycle=1000.0;
-  fstream f_autoRegressionParameters(Global::lookupResource("autoRegressionParameters.csv").c_str(),ios::in);
+  fstream f_autoRegressionParameters(util::CommandLine::lookupResource("autoRegressionParameters.csv").c_str(),ios::in);
   if (!f_autoRegressionParameters.is_open())
     throw runtime_error ("file not found: autoRegressionParameters.csv");
 
@@ -128,8 +132,8 @@ EmpiricalInfection::EmpiricalInfection(double growthRateMultiplier) {
   _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
   
-  if (Global::modelVersion & INCLUDES_PK_PD)
-      _proteome = ProteomeInstance::newInfection();
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 EmpiricalInfection::~EmpiricalInfection() {
 }
@@ -261,3 +265,5 @@ void EmpiricalInfection::checkpoint (ostream& stream) {
     _laggedLogDensities[2] & stream;
     _patentGrowthRateMultiplier & stream;
 }
+
+} }

@@ -24,6 +24,8 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/HoshenDrug.h"
 
+namespace OM { namespace PkPd {
+    
 /** Pharmacokinetic and pharmacodynamics drug model, using the Hoshen
  * model.
  *
@@ -51,4 +53,5 @@ private:
   list<HoshenDrug> _drugs;
 };
 
+} }
 #endif

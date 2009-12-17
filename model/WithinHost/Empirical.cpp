@@ -21,15 +21,16 @@
 */
 
 #include "WithinHost/Empirical.h"
-#include "Simulation.h"
 #include "inputData.h"
+#include "util/errors.hpp"
 
 using namespace std;
 
-// -----  Initialization  -----
+namespace OM { namespace WithinHost {
+    // -----  Initialization  -----
 
 EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
-    WithinHostModel(), pkpdModel(PkPdModel::createPkPdModel ())
+    WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {}
 EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
   clearAllInfections();
@@ -71,7 +72,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
-    if (i->updateDensity(Simulation::simulationTime, survivalFactor)) {
+    if (i->updateDensity(Global::simulationTime, survivalFactor)) {
       i = infections.erase(i);	// i points to next infection now so don't increment with ++i
       --_MOI;
       continue;	// infection no longer exists so skip the rest
@@ -102,13 +103,15 @@ int EmpiricalWithinHostModel::countInfections (int& patentInfections) {
 
 void EmpiricalWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel = PkPdModel::createPkPdModel (stream);
+    pkpdModel = PkPd::PkPdModel::createPkPdModel (stream);
     infections & stream;
     if (int(infections.size()) != _MOI)
-	throw OM::util::errors::checkpoint_error ("_MOI mismatch");
+	throw util::checkpoint_error ("_MOI mismatch");
 }
 void EmpiricalWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
     pkpdModel->write (stream);
     infections & stream;
 }
+
+} }

@@ -22,10 +22,10 @@
 #define Hmod_Infection
 
 #include "Global.h"
-#include "Simulation.h"
-#include "Host/proteome.h"
+#include "PkPd/Proteome.h"
 
-
+namespace OM { namespace WithinHost {
+    
 class Infection {
 public:
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
@@ -35,13 +35,13 @@ public:
   
   Infection () :
     _proteome(NULL),
-    _startdate(Simulation::simulationTime),
+    _startdate(Global::simulationTime),
     _density(0.0),
     _cumulativeExposureJ(0.0)
     {}
   
   //! Get proteome
-  inline const ProteomeInstance* getProteome() const {
+  inline const PkPd::ProteomeInstance* getProteome() const {
     return _proteome;
   }
   
@@ -66,7 +66,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
   //! Proteome (used in a different situation than genotype) 
-  const ProteomeInstance* _proteome; 
+  const PkPd::ProteomeInstance* _proteome; 
   
   //! Start date of the infection
   int _startdate; 
@@ -87,4 +87,5 @@ private:
   
 };
 
+} }
 #endif

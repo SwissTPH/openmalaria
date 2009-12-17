@@ -17,7 +17,6 @@ set (Model_CPP
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
   Host/intervention.cpp
-  Host/proteome.cpp
   
   Clinical/ClinicalModel.cpp
   Clinical/EventScheduler.cpp
@@ -40,6 +39,7 @@ set (Model_CPP
   PkPd/Drug/HoshenDrugType.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
+  PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp
@@ -66,6 +66,7 @@ set (Model_CPP
   util/WeibullDecayedValue.cpp
   util/errors.cpp
   util/checkpoint.cpp
+    util/Options.cpp
 )
 
 # Headers - only included so they show up in IDEs:

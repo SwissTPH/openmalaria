@@ -24,6 +24,8 @@
 #include "Global.h"
 #include <assert.h>
 
+namespace OM {
+    
 /** Class to collect surveys and write them out. */
 class SurveysType
 {
@@ -95,4 +97,5 @@ class SurveysType
     vector<Survey> _survey;
 };
 extern SurveysType Surveys;
+}
 #endif

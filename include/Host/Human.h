@@ -24,11 +24,14 @@
 #include "WithinHost/WithinHostModel.h"
 #include "Survey.h"
 
-// Forward declaration
-class TransmissionModel;
-namespace Clinical {
-    class ClinicalModel;
-}
+namespace OM {
+    namespace Transmission {
+	class TransmissionModel;
+    }
+    namespace Clinical {
+	class ClinicalModel;
+    }
+namespace Host {
 
 /** Interface to all sub-models storing data per-human individual.
  *
@@ -44,7 +47,7 @@ public:
    * \param dateOfBirth date of birth in time steps (equal to simulationTime,
    *	except for initial population set up)
    * \param simulationTime Simulation timestep */
-  Human(TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime);
+  Human(Transmission::TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime);
 
   /** Destructor
    * 
@@ -80,9 +83,9 @@ public:
   //@{
   /** If the individual is too old, returns true. Otherwise, updates the
    * individual for the time-step. */
-  bool update(int simulationTime, TransmissionModel* transmissionModel);
+  bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
   
-  void updateInfection(TransmissionModel*);
+  void updateInfection(Transmission::TransmissionModel*);
   
   /*! Apply interventions to this human if eligible. Calculate the remaining
       efficacy of the latest vaccination if vaccinated before */
@@ -155,7 +158,7 @@ private:
   
   double calcProbTransmissionToMosquito() const;
   
-  void clearInfection(Infection *iCurrent);
+  void clearInfection(WithinHost::Infection *iCurrent);
   
   
 public:
@@ -164,14 +167,14 @@ public:
    * These contain various sub-models used by Humans. */
   //@{
   /// Contains per-species vector data (VectorTransmission only).
-  PerHostTransmission perHostTransmission;
+  Transmission::PerHostTransmission perHostTransmission;
   
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
   
 private:
   /// The WithinHostModel models parasite density and immunity
-  WithinHostModel *withinHostModel;
+  WithinHost::WithinHostModel *withinHostModel;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
@@ -215,4 +218,5 @@ private:
   double _probTransmissionToMosquito;
 };
 
+} }
 #endif

@@ -27,7 +27,7 @@
 #include <map>
 #include <list>
 
-namespace Clinical {
+namespace OM { namespace Clinical {
 
 /** Tracks clinical status (sickness), triggers case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
@@ -42,7 +42,7 @@ public:
   ClinicalEventScheduler (double cF, double tSF);
   ~ClinicalEventScheduler ();
   
-  void doClinicalUpdate (WithinHostModel& withinHostModel, double ageYears);
+  void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears);
    
 protected:
   virtual void checkpoint (istream& stream);
@@ -84,5 +84,5 @@ private:
   //@}
 };
 
-}
+} }
 #endif

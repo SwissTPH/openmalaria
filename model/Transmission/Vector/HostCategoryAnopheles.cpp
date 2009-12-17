@@ -19,6 +19,9 @@
 
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "inputData.h"
+#include "util/errors.hpp"
+
+namespace OM { namespace Transmission {
 
 // NOTE: should Mosq be an extension of NonHumanHosts type or NonHumanHosts a sub-object of Mosq? This is duplicate functionality.
 void HostCategoryAnopheles::operator= (const scnXml::Mosq& mosq) {
@@ -53,18 +56,20 @@ void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1
   }
 }
 void HostCategoryAnopheles::checkInterventionDescriptions (string species) {
-    if (getActiveInterventions()[Interventions::ITN]) {
+    if (InputData.getActiveInterventions()[Interventions::ITN]) {
 	if (ITNDeterrency.notSet() ||
 	    ITNPreprandialKillingEffect.notSet() ||
 	    ITNPostprandialKillingEffect.notSet())
-	    throw OM::util::errors::xml_scenario_error (string("ITN intervention without description for ").append(species));
+	    throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
     }
-    if (getActiveInterventions()[Interventions::IRS]) {
+    if (InputData.getActiveInterventions()[Interventions::IRS]) {
 	if (IRSDeterrency.notSet() || IRSKillingEffect.notSet())
-	    throw OM::util::errors::xml_scenario_error (string("IRS intervention without description for ").append(species));
+	    throw util::xml_scenario_error (string("IRS intervention without description for ").append(species));
     }
-    if (getActiveInterventions()[Interventions::VEC_AVAIL]) {
+    if (InputData.getActiveInterventions()[Interventions::VEC_AVAIL]) {
 	if (VADeterrency.notSet())
-	    throw OM::util::errors::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
+	    throw util::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
     }
 }
+
+} }

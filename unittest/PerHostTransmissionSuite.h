@@ -26,6 +26,8 @@
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 
+using namespace OM::Transmission;
+
 class PerHostSuite : public CxxTest::TestSuite
 {
 public:

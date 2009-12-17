@@ -23,11 +23,15 @@
 #include "Host/intervention.h"
 #include "inputData.h"
 #include "util/gsl.h"
+#include "util/CommandLine.hpp"
+#include "util/ModelOptions.hpp"
 #include <algorithm>
 #include <sstream>
 #include <string.h>
+#include <stdexcept>
 
-//static (class) variables
+namespace OM { namespace WithinHost {
+    //static (class) variables
 
 int DescriptiveInfection::latentp;
 double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
@@ -41,12 +45,12 @@ void DescriptiveInfection::initParameters (){
   if (Global::interval != 5)
     throw domain_error ("DescriptiveInfection only supports using an interval of 5");
   
-  latentp=get_latentp();
-  sigma0sq=getParameter(Params::SIGMA0_SQ);
-  xNuStar=getParameter(Params::X_NU_STAR);
+  latentp=InputData.get_latentp();
+  sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);
+  xNuStar=InputData.getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
   string densities_filename;
-  densities_filename = Global::lookupResource ("densities.csv");
+  densities_filename = util::CommandLine::lookupResource ("densities.csv");
 
   fstream f_MTherapyDensities(densities_filename.c_str(),ios::in);
 
@@ -103,8 +107,8 @@ void DescriptiveInfection::clearParameters () {}
 DescriptiveInfection::DescriptiveInfection() {
     _duration=infectionDuration();
     
-    if (Global::modelVersion & INCLUDES_PK_PD)
-      _proteome = ProteomeInstance::newInfection();
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 
 DescriptiveInfection::~DescriptiveInfection() {
@@ -124,7 +128,7 @@ int DescriptiveInfection::infectionDuration(){
 void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
 {
   //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  int infage=1+Simulation::simulationTime-_startdate-latentp;
+  int infage=1+Global::simulationTime-_startdate-latentp;
   if ( infage >  0) {
     if ( infage <=  maxDur) {
       int iduration=_duration;
@@ -190,11 +194,11 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
   /* MAX_DENS_BUG: Possibly a better model version ensuring that the effect of
    * variation in innate immunity is reflected in case incidence would have the
    * following: */
-  if (Global::modelVersion & INNATE_MAX_DENS)
+  if (util::ModelOptions::option (util::INNATE_MAX_DENS))
       timeStepMaxDensity *= innateImmSurvFact;
   
   //Include here the effect of blood stage vaccination
-  if (Vaccine::BSV.active) {
+  if (Host::Vaccine::BSV.active) {
     double factor = 1.0 - BSVEfficacy;
     _density *= factor;
     timeStepMaxDensity *= factor;
@@ -216,3 +220,5 @@ void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
     _duration & stream;
 }
+
+} }

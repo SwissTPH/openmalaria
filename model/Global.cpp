@@ -25,219 +25,26 @@
 
 #include "Global.h"
 #include "inputData.h"
-#include "util/BoincWrapper.h"
 
-using namespace OM::util::errors;
-
-/*
-Contains global variables and constants and utility functions that are used in different modules.
-
-Constants (parameter)
-
-*/
-
-ModelVersion Global::modelVersion;
-int Global::interval;
-int Global::intervalsPer5Days;
-size_t Global::intervalsPerYear;
-double Global::yearsPerInterval;
-int Global::maxAgeIntervals;
-
-CLO::CLO Global::clOptions = CLO::NONE;
-string Global::clResourcePath;
-bool Global::compressCheckpoints = true;
-
-string parseNextArg (int argc, char* argv[], int& i) {
-  ++i;
-  if (i >= argc)
-    throw runtime_error ("Expected an argument following the last option");
-  return string(argv[i]);
-}
-
-string Global::parseCommandLine (int argc, char* argv[]) {
-  bool cloHelp = false;
-  bool fileGiven = false;
-  string scenarioFile = "scenario.xml";
-  
-  /* Simple command line parser. Seems to work fine.
-   * If an extension is wanted, http://tclap.sourceforge.net/ looks good. */
-  for (int i = 1; i < argc; ++i) {
-    string clo = argv[i];
+namespace OM {
+    int Global::interval;
+    int Global::intervalsPer5Days;
+    size_t Global::intervalsPerYear;
+    double Global::yearsPerInterval;
+    int Global::maxAgeIntervals;
     
-    // starts "--"
-    if (clo.size() >= 2 && *clo.data() == '-' && clo.data()[1] == '-') {
-      clo.assign (clo, 2, clo.size()-2);
-      
-      if (clo == "resource-path") {
-	if (clResourcePath.size())
-	  throw runtime_error ("--resource-path (or -p) may only be given once");
-	clResourcePath = parseNextArg (argc, argv, i).append ("/");
-      } else if (clo == "scenario") {
-	if (fileGiven)
-	  throw runtime_error ("--scenario argument may only be given once");
-	scenarioFile = parseNextArg (argc, argv, i);
-	fileGiven = true;
-      } else if (clo == "print-model") {
-	clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
-      } else if (clo == "checkpoint") {
-	clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
-      } else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
-	stringstream t;
-	t << clo.substr (21);
-	t >> compressCheckpoints;
-	if (t.fail()) {
-	  cerr << "Expected: --compress-checkpoints=x  where x is 1 or 0" << endl;
-	  cloHelp = true;
-	  break;
+    int Global::simulationTime;
+    int Global::timeStep;
+    
+    void Global::init () {
+	interval=InputData.get_interval();
+	if (Global::DAYS_IN_YEAR % interval !=  0) {
+	    cerr << "Global::DAYS_IN_YEAR not a multiple of interval" << endl;
+	    exit(-12);
 	}
-      } else if (clo == "help") {
-	cloHelp = true;
-      } else {
-	cerr << "Unrecognised option: --" << clo << endl << endl;
-	cloHelp = true;
-      }
-    } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
-      for (size_t j = 1; j < clo.size(); ++j) {
-	if (clo[j] == 'p') {
-	  if (j + 1 != clo.size())
-	    throw runtime_error ("a path must be given as next argument after -p");
-	  if (clResourcePath.size())
-	    throw runtime_error ("--resource-path (or -p) may only be given once");
-	  clResourcePath = parseNextArg (argc, argv, i).append ("/");
-	} else if (clo[j] == 'm') {
-	  clOptions = CLO::CLO (clOptions | CLO::PRINT_MODEL_VERSION);
-	} else if (clo[j] == 'c') {
-	  clOptions = CLO::CLO (clOptions | CLO::TEST_CHECKPOINTING);
-	} else if (clo[j] == 'h') {
-	  cloHelp = true;
-	}
-      }
-    } else {
-      cerr << "Unexpected parameter: " << clo << endl << endl;
-      cloHelp = true;
+	intervalsPer5Days = 5/interval;
+	intervalsPerYear = Global::DAYS_IN_YEAR/interval;
+	yearsPerInterval = double(interval) / double(Global::DAYS_IN_YEAR);
+	maxAgeIntervals=(int)InputData.get_maximum_ageyrs()*intervalsPerYear;
     }
-  }
-  
-  if (cloHelp) {
-    cout << "Usage: " << argv[0] << " [options]" << endl << endl
-    << "Options:"<<endl
-    << " -p --resource-path	Path to look up input resources with relative URLs (defaults to"<<endl
-    << "			working directory). Not used for output files."<<endl
-    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
-    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
-    << " -m --print-model	Print which model version flags are set (as binary with right-most"<<endl
-    << "			digit representing option 0) and exit." << endl
-    << " -c --checkpoint	Forces checkpointing once during simulation (during initialisation"<<endl
-    << "			period), exiting after completing each"<<endl
-    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
-    << "    --compress-checkpoints=boolean" << endl
-    << "			Set checkpoint compression on or off. Default is on." <<endl
-    << " -h --help		Print this message." << endl
-    ;
-    throw cmd_exit ("Printed help");
-  }
-  
-  return scenarioFile;
-}
-
-void Global::initGlobal () {
-  setModelVersion();
-  interval=get_interval();
-  if (daysInYear % interval !=  0) {
-    cerr << "daysInYear not a multiple of interval" << endl;
-    exit(-12);
-  }
-  intervalsPer5Days = 5/interval;
-  intervalsPerYear = daysInYear/interval;
-  yearsPerInterval = double(interval) / double(daysInYear);
-  maxAgeIntervals=(int)get_maximum_ageyrs()*intervalsPerYear;
-}
-
-string Global::lookupResource (const string& path) {
-  string ret;
-  if (path.size() >= 1 && path[0] == '/') {
-    // UNIX absolute path
-  } else if (path.size() >= 3 && path[1] == ':'
-	  && (path[2] == '\\' || path[2] == '/')) {
-    // Windows absolute path.. at least probably
-  } else {	// relative
-    ret = clResourcePath;
-  }
-  ret.append (path);
-  return BoincWrapper::resolveFile (ret);
-}
-
-void Global::setModelVersion () {
-  modelVersion = (ModelVersion) get_model_version();
-  
-  // Or'd flags of incompatibility triangle from
-  // "description of variables for interface" excel sheet
-  const int INCOMPATIBLITITIES[NUM_VERSIONS] = {
-    1,	// non-existent, so make it incompatible with itself
-    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// 1
-    LOGNORMAL_MASS_ACTION | ANY_TRANS_HET,	// 2
-    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// 3
-    ANY_TRANS_HET,	// 4
-    ANY_TRANS_HET,	// 5
-    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// 6
-    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// 7
-    DUMMY_WITHIN_HOST_MODEL,	// 8
-    0,	// 9
-    0,	// 10
-    MUELLER_PRESENTATION_MODEL,	// 11
-    0,	// 12
-    0,	// 13
-    0,	// 14
-    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 15
-    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 16
-    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 17
-    TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,   // 18
-    COMORB_TREAT_HET | TRIPLE_HET,	// 19
-    TRIPLE_HET,	// 20
-    0,	// 21
-    DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD) // 22
-  };
-    
-    if (clOptions & CLO::PRINT_MODEL_VERSION) {
-	cout << "Model flags:";
-	for (int i = 0; i < NUM_VERSIONS; ++i) {
-	    if ((modelVersion >> i) & 1)
-		cout << " 1<<"<<i;
-	}
-	cout << endl;
-    }
-    
-    for (size_t i = 0; i < NUM_VERSIONS; ++i) {
-	if (((modelVersion >> i) & 1) &&
-	    modelVersion & INCOMPATIBLITITIES[i]) {
-	    ostringstream msg;
-	    msg << "Incompatible model versions: flag 1<<" << i
-	        << " is incompatible with flags: ";
-	    int incompat = (modelVersion & INCOMPATIBLITITIES[i]);
-	    for (int i = 0; i < NUM_VERSIONS; ++i) {
-		if ((incompat >> i) & 1)
-		    msg << " 1<<"<<i;
-	    }
-		//Note: this can occur if a version is listed as "incompatible with itself" in the above table
-	    throw xml_scenario_error (msg.str());
-	}
-    }
-    if ((modelVersion & MAX_DENS_RESET) && !(modelVersion & MAX_DENS_CORRECTION))
-	throw xml_scenario_error ("MAX_DENS_RESET without MAX_DENS_CORRECTION doesn't make sense.");
-    
-    if (clOptions & CLO::PRINT_MODEL_VERSION)
-	throw cmd_exit ("Printed model version");
-}
-
-void Global::read (istream& in) {
-  int tOpt;
-  string tResPath;
-  in >> tOpt;
-  in >> tResPath;
-  assert (tOpt == clOptions);
-  assert (tResPath == clResourcePath);
-}
-void Global::write (ostream& out) {
-  out << clOptions << endl;
-  out << clResourcePath << endl;
 }

@@ -25,19 +25,24 @@
 #include <cxxtest/TestSuite.h>
 #include "PkPd/HoshenPkPdModel.h"
 #include "ExtraAsserts.h"
+#include "Global.h"
+#include "util/ModelOptions.hpp"
+
+using namespace OM;
+using namespace OM::PkPd;
 
 class HoshenPkPdSuite : public CxxTest::TestSuite
 {
 public:
   HoshenPkPdSuite () {
     Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
-    Global::modelVersion = INCLUDES_PK_PD;
+    util::ModelOptions::set (util::INCLUDES_PK_PD);
     PkPdModel::init ();
   }
   
   void setUp () {
     proxy = new HoshenPkPdModel ();
-    proteome = &ProteomeInstance::instances[0];
+    proteome = &ProteomeInstance::getInstances()[0];
   }
   void tearDown () {
     delete proxy;

@@ -28,6 +28,8 @@ using namespace std;
 #include "population.h"
 #include "Global.h"
 
+namespace OM { 
+
 gsl_rng * generator;
 const gsl_multimin_fminimizer_type *T;
 gsl_multimin_fminimizer *s;
@@ -178,7 +180,7 @@ double gsl::minimizeCalc_rss(double *param1,double *param2){
 void gsl::setUp (){
   //use the mersenne twister generator
   generator = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set (generator, getISeed());
+  gsl_rng_set (generator, InputData.getISeed());
   T = gsl_multimin_fminimizer_nmsimplex;
 }
 
@@ -206,3 +208,4 @@ void gsl::rngSaveState (int seedFileNumber){
   fclose (f);
 }
 
+}
