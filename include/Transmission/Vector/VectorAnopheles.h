@@ -69,7 +69,7 @@ public:
    *
    * @param anoph Data structure from XML to use
    * @param sIndex Index in VectorTransmission.species of this class.
-   * @param EIR In/out parameter: the EIR used for the pre-intervention phase.
+   * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: innoculations.
    */
   string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
   
@@ -230,6 +230,9 @@ private:
    * 
    * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
    * 
+   * When calcFourierEIR is used to produce an EIR from this over 365
+   * (DAYS_IN_YEAR) elements, the resulting EIR has units innoculations.
+   * 
    * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
    * FSCoeffic[0] needs checkpointing, the rest doesn't. */
   vector<double> FSCoeffic;
@@ -250,7 +253,9 @@ private:
   
   /** Used by vectorInitIterate to calculate scaling factor.
   *
-  * Length of annualS_v is Global::DAYS_IN_YEAR. Checkpoint. */
+  * Length of annualS_v is Global::DAYS_IN_YEAR. Checkpoint.
+  * 
+  * Units of both should be innoculations. */
   vector<double> annualS_v;
   double sumAnnualForcedS_v;	///< ditto
   

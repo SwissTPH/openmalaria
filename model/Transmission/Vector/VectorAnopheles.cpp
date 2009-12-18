@@ -170,7 +170,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
     O_v[t] = S_v[t] * initOvFromSv;
   }
   
-  sumAnnualForcedS_v = vectors::sum (forcedS_v) * Global::interval;
+  sumAnnualForcedS_v = vectors::sum (forcedS_v);
   
   // All set up to drive simulation from forcedS_v
 }

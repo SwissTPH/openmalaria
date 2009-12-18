@@ -63,10 +63,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   csvReporting << "input EIR,resultant EIR,human infectiousness,human availability" << endl;
 #endif
   
-  // We want the EIR to effectively be the sum of the EIR for each day in the interval
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {
-    initialisationEIR[i] *= Global::interval;
-    
     // Calculate total annual EIR
     annualEIR += initialisationEIR[i];
   }
