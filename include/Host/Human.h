@@ -69,7 +69,6 @@ public:
       _ylag & stream;
       _dateOfBirth & stream;
       //_ID & stream;
-      _nextCtsInterv & stream;
       _lastVaccineDose & stream;
       _BSVEfficacy & stream;
       _PEVEfficacy & stream;
@@ -196,9 +195,6 @@ private:
   
   // !unique identifier
   //int _ID;
-  
-  /// Counter for the next continuous intervention to roll out (excl. vaccine and IPTI)
-  size_t _nextCtsInterv;	//FIXME: isn't this a relic of my failed cts interv design?
   
   /** Number of vaccine doses this individual has received.
    *

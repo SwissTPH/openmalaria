@@ -165,7 +165,7 @@ vector<Protein*> ProteomeManager::proteins = vector<Protein*>();
 
 
 void ProteomeManager::init () {
-    Protein* crt = new Protein(string("CRT"));	//FIXME: memory leak
+    Protein* crt = new Protein(string("CRT"));
     ProteinPosition* pos = new ProteinPosition(crt, 76, 'K');
     Mutation* mutation = new Mutation(pos, 'T');
     ProteomeManager::addProtein(crt);

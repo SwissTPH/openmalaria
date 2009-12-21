@@ -50,18 +50,21 @@ class VectorAnopheles
 {
 public:
 #ifdef OMV_CSV_REPORTING
-    VectorAnopheles (ofstream& csvR) :
+    VectorAnopheles (const TransmissionModel* const tm,ofstream& csvR) :
+	transmissionModel(tm),
 	partialEIR(0.0),
 	larvicidingEndStep (std::numeric_limits<int>::max()),
 	larvicidingIneffectiveness (1.0),
 	csvReporting(&csvR)
     {}
-#endif
-    VectorAnopheles () :
+#else
+    VectorAnopheles (const TransmissionModel* const tm) :
+	transmissionModel(tm),
 	partialEIR(0.0),
 	larvicidingEndStep (std::numeric_limits<int>::max()),
 	larvicidingIneffectiveness (1.0)
     {}
+#endif
   
   ///@brief Initialisation and destruction
   //@{
@@ -174,6 +177,9 @@ public:
   }
   
 private:
+    /** Reference back to TransmissionModel base. */
+    const TransmissionModel* transmissionModel;
+    
   /** @brief Baseline parameters which may be varied per host
    *
    * Includes model parameters which may be varied per-individual to account

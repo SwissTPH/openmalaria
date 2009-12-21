@@ -43,10 +43,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   if (numSpecies < 1)
     throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
 #ifdef OMV_CSV_REPORTING
-  species.resize (numSpecies, VectorAnopheles(csvReporting));
+  species.resize (numSpecies, VectorAnopheles(this,csvReporting));
   csvReporting << "simulation time,";
 #else
-  species.resize (numSpecies, VectorAnopheles());
+  species.resize (numSpecies, VectorAnopheles(this));
 #endif
   
   for (size_t i = 0; i < numSpecies; ++i) {
@@ -117,13 +117,13 @@ void VectorTransmission::initMainSimulation() {
 double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) {
   if (simulationMode == equilibriumMode)
     return initialisationEIR[simulationTime%Global::intervalsPerYear]
-	 * host.relativeAvailabilityHetAge (ageInYears) * PerHostTransmission::ageCorrectionFactor;
+	 * host.relativeAvailabilityHetAge (ageInYears) * ageCorrectionFactor;
   
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].calculateEIR (i, host);
   }
-  return EIR * PerHostTransmission::relativeAvailabilityAge (ageInYears) * PerHostTransmission::ageCorrectionFactor;
+  return EIR * PerHostTransmission::relativeAvailabilityAge (ageInYears) * ageCorrectionFactor;
 }
 
 
@@ -145,7 +145,11 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
 
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
-    species & stream;
+#ifdef OMV_CSV_REPORTING
+    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this, csvReporting));
+#else
+    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this));
+#endif
 }
 void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

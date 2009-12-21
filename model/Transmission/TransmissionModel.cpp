@@ -30,7 +30,7 @@
 
 #include <math.h> 
 #include <cfloat>
-#include <gsl/gsl_vector.h> 
+#include <gsl/gsl_vector.h>
 
 namespace OM { namespace Transmission {
     
@@ -49,7 +49,10 @@ TransmissionModel* TransmissionModel::createTransmissionModel () {
 }
 
 TransmissionModel::TransmissionModel() :
-    simulationMode(equilibriumMode), _sumAnnualKappa(0.0), annualEIR(0.0), timeStepNumEntoInnocs (0)
+    ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
+    simulationMode(equilibriumMode),
+    _sumAnnualKappa(0.0), annualEIR(0.0),
+    timeStepNumEntoInnocs (0)
 #ifdef OMV_CSV_REPORTING
   , csvReporting ("vector.csv", ios::app)
 #endif
@@ -69,6 +72,16 @@ TransmissionModel::~TransmissionModel () {
 #endif
 }
 
+
+void TransmissionModel::updateAgeCorrectionFactor (const std::list<Host::Human>& population, int populationSize) {
+    // Calculate relative availability correction, so calls from vectorUpdate,
+    // etc., will have a mean of 1.0.
+    double meanRelativeAvailability = 0.0;
+    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+	meanRelativeAvailability += Transmission::PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
+    ageCorrectionFactor = populationSize / meanRelativeAvailability;
+}
+
 void TransmissionModel::updateKappa (const std::list<Host::Human>& population, int simulationTime) {
   // We calculate kappa for output and non-vector model, and kappaByAge for
   // the shared graphics.
@@ -80,7 +93,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     double ageYears = h->getAgeInYears();
-    double t = h->perHostTransmission.relativeAvailabilityHetAge(ageYears) * PerHostTransmission::ageCorrectionFactor;
+    double t = h->perHostTransmission.relativeAvailabilityHetAge(ageYears) * ageCorrectionFactor;
     sumWeight += t;
     t *= h->probTransmissionToMosquito();
     sumWt_kappa += t;
@@ -132,7 +145,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear]
 	       << ',' << innoculationsPerDayOfYear[tmod]
 	       << ',' << kappa[tmod]
-	       << ',' << PerHostTransmission::ageCorrectionFactor
+	       << ',' << ageCorrectionFactor
 	       << ','<< endl;
 #endif
 }
@@ -169,6 +182,7 @@ void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
 // -----  checkpointing  -----
 
 void TransmissionModel::checkpoint (istream& stream) {
+    ageCorrectionFactor & stream;
     simulationMode & stream;
     initialisationEIR & stream;
     kappa & stream;
@@ -184,6 +198,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     nByAge & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
+    ageCorrectionFactor & stream;
     simulationMode & stream;
     initialisationEIR & stream;
     kappa & stream;

@@ -23,6 +23,8 @@
 #include "util/gsl.h"
 #include "util/errors.hpp"
 
+#include <boost/static_assert.hpp>
+
 namespace OM { namespace Clinical {
 
 ESCaseManagement::TreeType ESCaseManagement::cmTree;
@@ -54,7 +56,7 @@ cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     // We always remove any queued medications.
     medicateQueue.clear();
     
-    //FIXME: static check that Pathogenesis::MORBIDITY_MASK and Decision::MORBIDITY_MASK are equal
+    BOOST_STATIC_ASSERT ( cmid(Pathogenesis::MORBIDITY_MASK) == cmid(Decision::MORBIDITY_MASK) );
     cmid decisionID = pgState & Pathogenesis::MORBIDITY_MASK;;
     if (ageYears > 5.0)
 	decisionID |= Decision::AGE_OVER5;

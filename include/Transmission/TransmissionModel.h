@@ -118,6 +118,13 @@ public:
    * that it's better not to use population.size(). */
   virtual void initMainSimulation ()=0; 
   
+  /** Needs to be called each step of the simulation before nearly anything
+   * else.
+   * 
+   * Calculates the ageCorrectionFactor which is used in much of the
+   * transmission code, including getEIR (used in Human update). */
+  void updateAgeCorrectionFactor (const std::list<Host::Human>& population, int populationSize);
+  
   /** Needs to be called each step of the simulation
    *
    * Runs internal calculations of Vector model. */
@@ -162,6 +169,16 @@ protected:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
+  
+public:
+  /** Correction factor for PerHostTransmission::getRelativeAvailability.
+   *
+   * This parameter is recalculated every time-step; dependant on the population,
+   * thus it is better to store it in a per-population object than as a static
+   * parameter. */
+  double ageCorrectionFactor;
+  
+protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   

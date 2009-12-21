@@ -26,7 +26,6 @@ namespace OM { namespace Transmission {
 // -----  PerHostTransmission static  -----
 
 const double PerHostTransmission::bsa_prop[WithinHost::WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-double PerHostTransmission::ageCorrectionFactor = 1.286683772215131;	// This factor was calculated at some point. It shouldn't be used now, but better not to leave uninitialised.
 double PerHostTransmission::ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
 vector<double> PerHostTransmission::cntItnTargetAgeTStep;
 vector<double> PerHostTransmission::cntItnCoverage;

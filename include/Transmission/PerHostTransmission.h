@@ -44,10 +44,6 @@ public:
    * Pass getInterventions() from inputData. */
   static void initParameters (const scnXml::Interventions&);
   
-  /** Correction factor for getRelativeAvailability. */
-  //FIXME: checkpoint (move to vectortransmission?)
-  static double ageCorrectionFactor;
-  
   //! Calculates the adjustment for body size in exposure to mosquitoes 
   /*! 
   The bites are assumed proportional to average surface area for hosts of the given age. 
@@ -76,7 +72,7 @@ public:
   /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
    *
    * Mean should be same as entoAvailabilityHetVecItv(). */
-  inline double entoAvailabilityFull (const HostCategoryAnopheles& base, size_t speciesIndex, double ageYears) const {
+  inline double entoAvailabilityFull (const HostCategoryAnopheles& base, size_t speciesIndex, double ageYears, double ageCorrectionFactor) const {
     return entoAvailabilityHetVecItv (base, speciesIndex)
          * relativeAvailabilityAge (ageYears) * ageCorrectionFactor;
   }

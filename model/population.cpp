@@ -311,6 +311,9 @@ void Population::setupPyramid(bool isCheckpoint) {
     }
     
     // 3. Vector setup dependant on human population
+    _transmissionModel->updateAgeCorrectionFactor(population, populationSize);
+    //HACK to reproduce previous results:
+    _transmissionModel->ageCorrectionFactor = 1.286683772215131;
     _transmissionModel->setupNv0 (population, populationSize);
   }
 }
@@ -331,14 +334,9 @@ void Population::newHuman(int dob){
   population.push_back(Host::Human(*_transmissionModel, IDCounter, dob, Global::simulationTime));
 }
 
-void Population::update1(){
-  // Calculate relative availability correction, so calls from vectorUpdate,
-  // etc., will have a mean of 1.0.
-  double meanRelativeAvailability = 0.0;
-  for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-    meanRelativeAvailability += Transmission::PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
-  Transmission::PerHostTransmission::ageCorrectionFactor = populationSize / meanRelativeAvailability;
-  
+void Population::update1() {
+    _transmissionModel->updateAgeCorrectionFactor(population, populationSize);
+    
   Host::NeonatalMortality::update (population);
   // This should be called before humans contract new infections in the simulation step.
   _transmissionModel->vectorUpdate (population, Global::simulationTime);

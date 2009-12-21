@@ -167,6 +167,17 @@ namespace OM { namespace util { namespace checkpoint {
 	    y & stream;
 	}
     }
+    /// Version of above taking an element to initialize each element from.
+    template<class T>
+    void checkpoint (vector<T>& x, istream& stream, T templateInstance) {
+	size_t l;
+	l & stream;
+	validateListSize (l);
+	x.resize (l, templateInstance);
+	BOOST_FOREACH (T& y, x) {
+	    y & stream;
+	}
+    }
     
     template<class T>
     void operator& (list<T> x, ostream& stream) {

@@ -79,7 +79,7 @@ void SurveysType::writeSummaryArrays ()
     _survey[i].writeSummaryArrays (outputFile, i);
 
   //Infant mortality rate is a single number, therefore treated separately
-  //FIXME: Fetching data this way is extremely inconsistent with other reporting. Can it not also be constrained to a reporting period?
+  //TODO: Fetching data this way is extremely inconsistent with other reporting. Can it not also be constrained to a reporting period?
   if (Survey::active[imr_summary]) {
     if (!Survey::_assimilatorMode)
       outputFile << 1 << "\t" << 1 << "\t" << imr_summary;
