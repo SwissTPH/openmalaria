@@ -312,8 +312,6 @@ void Population::setupPyramid(bool isCheckpoint) {
     
     // 3. Vector setup dependant on human population
     _transmissionModel->updateAgeCorrectionFactor(population, populationSize);
-    //HACK to reproduce previous results:
-    _transmissionModel->ageCorrectionFactor = 1.286683772215131;
     _transmissionModel->setupNv0 (population, populationSize);
   }
 }
