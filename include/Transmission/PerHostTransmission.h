@@ -45,6 +45,7 @@ public:
   static void initParameters (const scnXml::Interventions&);
   
   /** Correction factor for getRelativeAvailability. */
+  //FIXME: checkpoint (move to vectortransmission?)
   static double ageCorrectionFactor;
   
   //! Calculates the adjustment for body size in exposure to mosquitoes 
@@ -164,7 +165,7 @@ private:
   //@{
   /** Average number of bites for each age as a proportion of the maximum.
    *
-   * Set by constructor. */
+   * Set by constructor from constants (bsa_prop). */
   static double ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
 
   //! Proportionate body surface area

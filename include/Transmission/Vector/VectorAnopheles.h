@@ -140,7 +140,7 @@ public:
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
   /// Checkpointing
-  //NOTE: below comments about what does and doesn't need checkpointing are ignored here.
+  //Note: below comments about what does and doesn't need checkpointing are ignored here.
   template<class S>
   void operator& (S& stream) {
     humanBase & stream;

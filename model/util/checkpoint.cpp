@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
+#include "util/checkpoint.hpp"
 #include "util/errors.hpp"
 
 #include <sstream>
@@ -33,12 +34,19 @@ namespace OM { namespace util { namespace checkpoint {
 	}
     }
     
-    //FIXME: safe?
+    // Note: this won't handle many characters a string might contain.
+    // I use a quick hack to confirm things are expected, doing most of the work on loading.
     void operator& (string x, ostream& stream) {
+	x.length() & stream;
 	stream << x << endl;
     }
     void operator& (string& x, istream& stream) {
+	size_t len;
+	len & stream;
 	stream >> x;
+	if (x.length() != len)
+	    // This means saved string contained spaces or something
+	    throw checkpoint_error ("string error");
     }
     
 } } }
