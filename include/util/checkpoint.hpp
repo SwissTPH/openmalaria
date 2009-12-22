@@ -62,6 +62,12 @@ namespace OM { namespace util { namespace checkpoint {
     
     ///@brief Utility functions
     //@{
+    /** Perform important checks on checkpoint file format.
+     *
+     * Call at beginning of read/write. */
+    void header (ostream& stream);
+    void header (istream& stream);	///< ditto
+    
   /** For checking the number of elements in a list is sensible when loading
    * checkpoints.
    *
@@ -79,55 +85,47 @@ namespace OM { namespace util { namespace checkpoint {
     
     ///@brief Operator& for simple data-types
     //@{
-    inline void operator& (bool x, ostream& stream) { stream << x << endl; }
-    inline void operator& (bool& x, istream& stream) { stream >> x; }
+    void operator& (bool x, ostream& stream);
+    void operator& (bool& x, istream& stream);
     
-    inline void operator& (signed char x, ostream& stream) { stream << static_cast<short>(x) << endl; }
-    inline void operator& (signed char& x, istream& stream) {
-	short s;
-	stream >> s;
-	x = s;
-    }
+    void operator& (signed char x, ostream& stream);
+    void operator& (signed char& x, istream& stream);
     
-    inline void operator& (short x, ostream& stream) { stream << x << endl; }
-    inline void operator& (short& x, istream& stream) { stream >> x; }
+    void operator& (short x, ostream& stream);
+    void operator& (short& x, istream& stream);
     
-    inline void operator& (int x, ostream& stream) { stream << x << endl; }
-    inline void operator& (int& x, istream& stream) { stream >> x; }
+    void operator& (int x, ostream& stream);
+    void operator& (int& x, istream& stream);
     
-    inline void operator& (long x, ostream& stream) { stream << x << endl; }
-    inline void operator& (long& x, istream& stream) { stream >> x; }
+    void operator& (long x, ostream& stream);
+    void operator& (long& x, istream& stream);
     
-    inline void operator& (long long x, ostream& stream) { stream << x << endl; }
-    inline void operator& (long long& x, istream& stream) { stream >> x; }
+    void operator& (long long x, ostream& stream);
+    void operator& (long long& x, istream& stream);
     
-    inline void operator& (unsigned char x, ostream& stream) { stream << static_cast<unsigned short>(x) << endl; }
-    inline void operator& (unsigned char& x, istream& stream) {
-	unsigned short us;
-	stream >> us;
-	x = us;
-    }
+    void operator& (unsigned char x, ostream& stream);
+    void operator& (unsigned char& x, istream& stream);
     
-    inline void operator& (unsigned short x, ostream& stream) { stream << x << endl; }
-    inline void operator& (unsigned short& x, istream& stream) { stream >> x; }
+    void operator& (unsigned short x, ostream& stream);
+    void operator& (unsigned short& x, istream& stream);
     
-    inline void operator& (unsigned int x, ostream& stream) { stream << x << endl; }
-    inline void operator& (unsigned int& x, istream& stream) { stream >> x; }
+    void operator& (unsigned int x, ostream& stream);
+    void operator& (unsigned int& x, istream& stream);
     
-    inline void operator& (unsigned long x, ostream& stream) { stream << x << endl; }
-    inline void operator& (unsigned long& x, istream& stream) { stream >> x; }
+    void operator& (unsigned long x, ostream& stream);
+    void operator& (unsigned long& x, istream& stream);
     
-    inline void operator& (unsigned long long x, ostream& stream) { stream << x << endl; }
-    inline void operator& (unsigned long long& x, istream& stream) { stream >> x; }
+    void operator& (unsigned long long x, ostream& stream);
+    void operator& (unsigned long long& x, istream& stream);
     
-    inline void operator& (float x, ostream& stream) { stream << x << endl; }
-    inline void operator& (float& x, istream& stream) { stream >> x; }
+    void operator& (float x, ostream& stream);
+    void operator& (float& x, istream& stream);
     
-    inline void operator& (double x, ostream& stream) { stream << x << endl; }
-    inline void operator& (double& x, istream& stream) { stream >> x; }
+    void operator& (double x, ostream& stream);
+    void operator& (double& x, istream& stream);
     
-    inline void operator& (long double x, ostream& stream) { stream << x << endl; }
-    inline void operator& (long double& x, istream& stream) { stream >> x; }
+    void operator& (long double x, ostream& stream);
+    void operator& (long double& x, istream& stream);
     //@}
     
     /** @brief Operator& for pointers

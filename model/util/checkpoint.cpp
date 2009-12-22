@@ -21,10 +21,19 @@
 #include "util/checkpoint.hpp"
 #include "util/errors.hpp"
 
+#include <limits>
 #include <sstream>
 using namespace std;
 
 namespace OM { namespace util { namespace checkpoint {
+    
+    // Header test constants
+    const unsigned int h_BOM = 0x50434D4F;	// "OMCP" in little-endian: OpenMalaria CheckPoint
+    const bool h_b = true;
+    const char h_c = 0xA5;	// binary: 10100101; don't care if char is signed as long as first bit is read and written correctly
+    const double h_n0 = -0.0;
+    const double h_nan = numeric_limits<double>::quiet_NaN();
+    
     
     void validateListSize (long length) {
 	if (length < 0 || length > 1000) {
@@ -34,19 +43,179 @@ namespace OM { namespace util { namespace checkpoint {
 	}
     }
     
+    /** @brief Binary checkpointing
+     *
+     * Writes value in direct binary (not suitible for pointers). Currently
+     * machine dependent (don't transfer a checkpoint to another machine).
+     */
+    //@{
+    template<class T>
+    void binary_write (T x, ostream& stream) {
+	stream.write (reinterpret_cast<char*>(&x), sizeof(x));
+    }
+    template<class T>
+    void binary_read (T& x, istream& stream) {
+	stream.read (reinterpret_cast<char*>(&x), sizeof(x));
+	if (!stream || stream.gcount() != sizeof(x))
+	    throw checkpoint_error ("stream read error binary");
+    }
+    //@}
+    
+    void staticChecks () {
+	BOOST_STATIC_ASSERT (sizeof(char) == 1);
+	BOOST_STATIC_ASSERT (sizeof(short int) == 2);
+	BOOST_STATIC_ASSERT (sizeof(int) == 4);
+	BOOST_STATIC_ASSERT (sizeof(float) == 4);
+	BOOST_STATIC_ASSERT (sizeof(double) == 8);
+    }
+    
+    void header (ostream& stream) {
+	staticChecks();
+	
+	binary_write (h_BOM, stream);
+	binary_write (h_b, stream);
+	binary_write (h_c, stream);
+	binary_write (h_n0, stream);
+	binary_write (h_nan, stream);
+    }
+    void header (istream& stream) {
+	staticChecks ();
+	unsigned int BOM;
+	bool b;
+	char c;
+	double n0;
+	double nan;
+	
+	binary_read (BOM, stream);
+	binary_read (b, stream);
+	binary_read (c, stream);
+	binary_read (n0, stream);
+	binary_read (nan, stream);
+	
+	// Check. Use binary check for doubles since it's not the same as numeric ==
+	if (BOM != h_BOM ||
+	    b != h_b ||
+	    c != h_c ||
+	    memcmp (&n0, &h_n0, sizeof(double)) ||
+	    memcmp (&nan, &h_nan, sizeof(double))
+	    )
+	    throw checkpoint_error ("invalid header");
+    }
+    
+    ///@brief Operator& for simple data-types
+    //@{
+    void operator& (bool x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (bool& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (signed char x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (signed char& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (short x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (short& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (int x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (int& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (long x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (long& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (long long x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (long long& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (unsigned char x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (unsigned char& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (unsigned short x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (unsigned short& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (unsigned int x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (unsigned int& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (unsigned long x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (unsigned long& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (unsigned long long x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (unsigned long long& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (float x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (float& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (double x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (double& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    
+    void operator& (long double x, ostream& stream) {
+	binary_write (x, stream);
+    }
+    void operator& (long double& x, istream& stream) {
+	binary_read (x, stream);
+    }
+    //@}
+    
     // Note: this won't handle many characters a string might contain.
     // I use a quick hack to confirm things are expected, doing most of the work on loading.
     void operator& (string x, ostream& stream) {
 	x.length() & stream;
-	stream << x << endl;
+	stream.write (x.c_str(), x.length());
     }
     void operator& (string& x, istream& stream) {
 	size_t len;
 	len & stream;
-	stream >> x;
-	if (x.length() != len)
-	    // This means saved string contained spaces or something
-	    throw checkpoint_error ("string error");
+	x.resize (len);
+	stream.read (&x[0], x.length());
+	if (!stream || stream.gcount() != streamsize(len))
+	    throw checkpoint_error ("stream read error string");
     }
     
 } } }

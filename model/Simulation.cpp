@@ -237,6 +237,7 @@ void Simulation::readCheckpoint() {
 //   -----  checkpointing: Simulation data  -----
 
 void Simulation::checkpoint (istream& stream) {
+    util::checkpoint::header (stream);
     util::CommandLine::staticCheckpoint (stream);
     // FIXME: appears problematic (though may not be needed):
     //   Population::staticRead(stream);
@@ -248,28 +249,20 @@ void Simulation::checkpoint (istream& stream) {
     totalSimDuration & stream;
     (*_population) & stream;
     
-    // Read trailing white-space (final endl has not yet been read):
-    while (stream.good() && isspace (stream.peek()))
-	stream.get();
-    if (!stream.eof()) {	// if anything else is left
-	cerr << "Error (checkpointing): not the whole checkpointing file was read;";
-	ifstream *ifCP = dynamic_cast<ifstream*> (&stream);
-	if (ifCP) {
-	    streampos i = ifCP->tellg();
-	    ifCP->seekg(0, ios_base::end);
-	    cerr << ifCP->tellg()-i << " bytes remaining:";
-	    ifCP->seekg (i);
-	} else	// igzstream can't seek
-	    cerr << " remainder:" << endl;
-	cerr << endl << stream.rdbuf() << endl;
-    }
+    stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
+    if (stream.gcount () != 0) {
+	ostringstream msg;
+	msg << "Checkpointing file has " << stream.gcount() << " bytes remaining." << endl;
+	throw util::checkpoint_error (msg.str());
+    } else if (stream.fail())
+	throw util::checkpoint_error ("stream read error");
 }
 
 void Simulation::checkpoint (ostream& stream) {
+    util::checkpoint::header (stream);
     if (stream == NULL || !stream.good())
 	throw util::checkpoint_error ("Unable to write to file");
     timer::startCheckpoint ();
-    stream.precision(20);
     
     util::CommandLine::staticCheckpoint (stream);
     //   Population::staticWrite(stream);
