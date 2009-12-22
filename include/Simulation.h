@@ -31,54 +31,57 @@ namespace OM {
 //! Main simulation class
 class Simulation{
 public: 
-  //!  Inititalise all step specific constants and variables.
-  Simulation();
-  ~Simulation();
-
-  //! Entry point to simulation.
-  int start();
-
-  //!  This procedure starts with the current state of the simulation 
-  /*! It continues updating    assuming:
-    (i)		the default (exponential) demographic model
-    (ii)	the entomological input defined by the EIRs in intEIR()
-    (iii)	the intervention packages defined in Intervention()
-    (iv)	the survey times defined in Survey() */
-  void mainSimulation();
-  
-  /// Initialisation phase for Vector model
-  void vectorInitialisation();
-  
-  /*! Run the simulation using the equilibrium inoculation rates over one complete
-    lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
-    classes. Don't report any events */
-  void updateOneLifespan();
-
+    //!  Inititalise all step specific constants and variables.
+    Simulation();
+    ~Simulation();
+    
+    //! Entry point to simulation.
+    int start();
+    
 private:
-  /** @brief checkpointing functions
-   *
-   * readCheckpoint/writeCheckpoint prepare to read/write the file,
-   * and read/write read and write the actual data. */
-  //@{
-  //! This function reads the checkpoint from the file in which is written
-  /*! if it exists and initializes all the data return true if the workunit is
-  checkpointed and false otherwise */
-  bool isCheckpoint();
-  
-  void writeCheckpoint();
-  void readCheckpoint();
-  
-  void checkpoint (istream& stream);
-  void checkpoint (ostream& stream);
-  //@}
-  
-private:
-  int simPeriodEnd;
-  int totalSimDuration;
-  
-  Population* _population;
+    /** @brief checkpointing functions
+    *
+    * readCheckpoint/writeCheckpoint prepare to read/write the file,
+    * and read/write read and write the actual data. */
+    //@{
+    //! This function reads the checkpoint from the file in which is written
+    /*! if it exists and initializes all the data return true if the workunit is
+    checkpointed and false otherwise */
+    bool isCheckpoint();
+    
+    void writeCheckpoint();
+    void readCheckpoint();
+    
+    void checkpoint (istream& stream);
+    void checkpoint (ostream& stream);
+    //@}
+    
+    
+    // Data
+    int simPeriodEnd;
+    int totalSimDuration;
+    enum Phase {
+	STARTING_PHASE = 0,
+	/// Initialisation phase for Vector model
+	VECTOR_FITTING,
+	/*! Run the simulation using the equilibrium inoculation rates over one complete
+	    lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
+	    classes. Don't report any events */
+	ONE_LIFE_SPAN,
+	//!  This procedure starts with the current state of the simulation 
+	/*! It continues updating    assuming:
+	    (i)		the default (exponential) demographic model
+	    (ii)	the entomological input defined by the EIRs in intEIR()
+	    (iii)	the intervention packages defined in Intervention()
+	    (iv)	the survey times defined in Survey() */
+	MAIN_PHASE,
+	END_SIM		// should have largest value of all enumerations
+    };
+    int phase;
+    
+    Population* _population;
 
-  friend class VectorAnophelesSuite;
+    friend class VectorAnophelesSuite;
 };
 
 }

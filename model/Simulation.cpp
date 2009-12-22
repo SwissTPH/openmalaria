@@ -40,19 +40,19 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulation::Simulation()
+Simulation::Simulation() : phase(STARTING_PHASE)
 {
     Global::simulationTime = 0;
-    Global::timeStep = -1;
+    Global::timeStep = numeric_limits<int>::min();
     
     // Initialize input variables and allocate memory.
-  // We try to make initialization hierarchical (i.e. most classes initialise
-  // through Population::init).
-  gsl::setUp();
-  util::ModelOptions::set (InputData.get_model_version());
-  Surveys.init();
-  Population::init();
-  _population = new Population();
+    // We try to make initialization hierarchical (i.e. most classes initialise
+    // through Population::init).
+    gsl::setUp();
+    util::ModelOptions::set (InputData.get_model_version());
+    Surveys.init();
+    Population::init();
+    _population = new Population();
 }
 
 Simulation::~Simulation(){
@@ -66,86 +66,77 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-  _population->estimateRemovalRates();
-  if (isCheckpoint()) {
-    _population->setupPyramid(true);
-    readCheckpoint();
-  } else {
-    _population->setupPyramid(false);
-  }
-  
-  simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
-  // +1 to let final survey run
-  totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
-  
-  while (Global::simulationTime < simPeriodEnd) {
-    vectorInitialisation();
-    int extend = _population->_transmissionModel->vectorInitIterate ();
-    simPeriodEnd += extend;
-    totalSimDuration += extend;
-  }
-  
-  simPeriodEnd += Global::maxAgeIntervals;
-  updateOneLifespan();
-  
-  simPeriodEnd = totalSimDuration;
-  mainSimulation();
-  return 0;
-}
-
-void Simulation::vectorInitialisation () {
-  while(Global::simulationTime < simPeriodEnd) {
-    ++Global::simulationTime;
-    _population->update1();
+    simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
+    // +1 to let final survey run
+    totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
+    int testCheckpointStep;	// declare here so goto doesn't cross initialization
     
-    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
-    if (util::BoincWrapper::timeToCheckpoint()) {
-      writeCheckpoint();
-      util::BoincWrapper::checkpointCompleted();
+    _population->estimateRemovalRates();
+    if (isCheckpoint()) {
+	_population->setupPyramid(true);
+	readCheckpoint();
+	goto phaseSteps;	// skip init stuff — don't want to re-run it
+    } else {
+	_population->setupPyramid(false);
     }
-  }
-}
-
-void Simulation::updateOneLifespan () {
-  int testCheckpointStep = -1;
-  if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
-    testCheckpointStep = simPeriodEnd - Global::maxAgeIntervals / 2;
-  while(Global::simulationTime < simPeriodEnd) {
-    ++Global::simulationTime;
-    _population->update1();
     
-    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
-    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
-      writeCheckpoint();
-      util::BoincWrapper::checkpointCompleted();
-      if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
-	throw util::cmd_exit ("Checkpoint test: written checkpoint");
-    }
-  }
-}
-
-void Simulation::mainSimulation(){
-  Global::timeStep=0;
-  _population->preMainSimInit();
-  _population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
-  Surveys.incrementSurveyPeriod();
-  
-  while(Global::simulationTime < simPeriodEnd) {
-    if (Global::timeStep == Surveys.currentTimestep) {
-      _population->newSurvey();
-      Surveys.incrementSurveyPeriod();
-    }
-    _population->implementIntervention(Global::timeStep);
-    //Calculate the current progress
-    util::BoincWrapper::reportProgress(double(Global::simulationTime) / totalSimDuration);
     
-    ++Global::simulationTime;
-    _population->update1();
-    ++Global::timeStep;
-    //FIXME: also write checkpoints here.
-  }
-  delete _population;	// must destroy all Human instances to make sure they reported past events
-  Surveys.writeSummaryArrays();
+    // phase loop
+    while (true) {
+	// phase transition: end of one phase to start of next
+	if (phase == STARTING_PHASE) {
+	    phase = VECTOR_FITTING;
+	} else if (phase == VECTOR_FITTING) {
+	    int extend = _population->_transmissionModel->vectorInitIterate ();
+	    if (extend > 0) {	// repeat phase
+		simPeriodEnd += extend;
+		totalSimDuration += extend;
+	    } else {		// next phase
+		phase = ONE_LIFE_SPAN;
+		simPeriodEnd += Global::maxAgeIntervals;
+	    }
+	} else if (phase == ONE_LIFE_SPAN) {
+	    simPeriodEnd = totalSimDuration;
+	    Global::timeStep=0;
+	    _population->preMainSimInit();
+	    _population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
+	    Surveys.incrementSurveyPeriod();
+	    phase = MAIN_PHASE;
+	} else if (phase == MAIN_PHASE) {
+	    phase = END_SIM;
+	    break;
+	}
+	testCheckpointStep = -1;
+	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+	    testCheckpointStep = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
+	
+	// loop for steps within a phase
+	phaseSteps:
+	while (Global::simulationTime < simPeriodEnd) {
+	    if (Global::timeStep == Surveys.currentTimestep) {
+		_population->newSurvey();
+		Surveys.incrementSurveyPeriod();
+	    }
+	    _population->implementIntervention(Global::timeStep);
+	    
+	    ++Global::simulationTime;
+	    _population->update1();
+	    ++Global::timeStep;
+	    
+	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
+	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
+		writeCheckpoint();
+		util::BoincWrapper::checkpointCompleted();
+		if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
+	    }
+	}
+    }
+    
+    delete _population;	// must destroy all Human instances to make sure they reported past events
+    Surveys.writeSummaryArrays();
+    
+    return 0;
 }
 
 
@@ -247,6 +238,7 @@ void Simulation::checkpoint (istream& stream) {
     Global::timeStep & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
+    phase & stream;
     (*_population) & stream;
     
     stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
@@ -272,6 +264,7 @@ void Simulation::checkpoint (ostream& stream) {
     Global::timeStep & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
+    phase & stream;
     (*_population) & stream;
     
     timer::stopCheckpoint ();
