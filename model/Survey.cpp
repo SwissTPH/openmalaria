@@ -98,23 +98,29 @@ void Survey::allocate ()
   _sumLogPyrogenicThreshold.resize (numAgeGroups);
   _sumLogDensity.resize (numAgeGroups);
   _sumInfections.resize (numAgeGroups);
+  _numTransmittingHosts = numeric_limits<double>::signaling_NaN();
   _sumPatentInfections.resize (numAgeGroups);
   _sumPyrogenicThreshold.resize (numAgeGroups);
   _numTreatments1.resize (numAgeGroups);
   _numTreatments2.resize (numAgeGroups);
   _numTreatments3.resize (numAgeGroups);
-  _numNonMalariaFevers.resize (numAgeGroups);
   _numUncomplicatedEpisodes.resize (numAgeGroups);
   _numSevereEpisodes.resize (numAgeGroups);
-  _numDirectDeaths.resize (numAgeGroups);
-  _numIndirectDeaths.resize (numAgeGroups);
   _numSequelae.resize (numAgeGroups);
   _numHospitalDeaths.resize (numAgeGroups);
-  _numHospitalRecoveries.resize (numAgeGroups);
-  _numHospitalSequelae.resize (numAgeGroups);
+  _numIndirectDeaths.resize (numAgeGroups);
+  _numDirectDeaths.resize (numAgeGroups);
   _numEPIVaccinations.resize (numAgeGroups);
   _numMassVaccinations.resize (numAgeGroups);
+  _numHospitalRecoveries.resize (numAgeGroups);
+  _numHospitalSequelae.resize (numAgeGroups);
   _numIPTDoses.resize (numAgeGroups);
+  _annualAverageKappa = numeric_limits<double>::signaling_NaN();
+  _numNonMalariaFevers.resize (numAgeGroups);
+  // These 3 are set as a whole and so don't require allocation:
+//   _innoculationsPerDayOfYear;
+//   _kappaPerDayOfYear;
+//   _innoculationsPerAgeGroup;
 }
 
 

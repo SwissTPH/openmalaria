@@ -145,14 +145,12 @@ Population::~Population() {
 void Population::checkpoint (istream& stream) {
     // Validate scenario.xml and checkpoint files correspond:
     _workUnitIdentifier & stream;
-    if (_workUnitIdentifier !=  InputData.get_wu_id()) {
-	cerr << "cp_ct " << InputData.get_wu_id() << ", " << _workUnitIdentifier << endl;
-	exit(-9);
-    }
+    if (_workUnitIdentifier !=  InputData.get_wu_id())
+	throw util::checkpoint_error ("invalid work-unit identifier");
     
-    int popSize;
+    size_t popSize;	// must be type of population.size()
     popSize & stream;
-    if (popSize != populationSize)
+    if (popSize != size_t(populationSize))
 	throw util::checkpoint_error ("population size exceeds that given in scenario.xml");
     while(popSize > 0 && !stream.eof()){
 	// Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
@@ -165,13 +163,11 @@ void Population::checkpoint (istream& stream) {
 	throw util::checkpoint_error("can't read whole population (out of data)");
 }
 void Population::checkpoint (ostream& stream) {
-  _workUnitIdentifier & stream;
+    _workUnitIdentifier & stream;
 
-  //Write human data
-  population.size() & stream;	// this may not be equal to populationSize due to startup optimisation
-  for(HumanIter iter=population.begin(); iter != population.end(); ++iter){
-    (*iter) & stream;
-  }
+    population.size() & stream;
+    for(HumanIter iter=population.begin(); iter != population.end(); ++iter)
+	(*iter) & stream;
 }
 
 

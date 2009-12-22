@@ -35,21 +35,19 @@ namespace OM { namespace PkPd {
 class Dose {
 public:
   /** Create a new dose. */
+  Dose () : x(0.0), y(0.0) {}
+  /// ditto
   Dose (double x, double y) {
     this->x = x;
     this->y = y;
   }
-  /** Load from a checkpoint. */
-  Dose (istream& in) {
-    in >> x;
-    in >> y;
-  }
-  
-  /** Write a checkpoint. */
-  void write (ostream& out) const {
-    out << x << endl;
-    out << y << endl;
-  }
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	x & stream;
+	y & stream;
+    }
   
   /// Some type of data is wanted... (concentration at start of next timestep, and integral of concentration for this timestep?)
   double x,y;

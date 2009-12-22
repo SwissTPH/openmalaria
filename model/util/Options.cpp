@@ -147,14 +147,14 @@ namespace OM { namespace util {
     void CommandLine::staticCheckpoint (istream& stream) {
 	string tOpt;
 	string tResPath;
-	stream >> tOpt;
-	stream >> tResPath;
+	tOpt & stream;
+	tResPath & stream;
 	assert (tOpt == options.to_string());
 	assert (tResPath == resourcePath);
     }
     void CommandLine::staticCheckpoint (ostream& stream) {
-	stream << options.to_string() << endl;
-	stream << resourcePath << endl;
+	options.to_string() & stream;
+	resourcePath & stream;
     }
     
     void ModelOptions::set(int opts) {

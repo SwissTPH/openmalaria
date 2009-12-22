@@ -63,6 +63,8 @@ public:
   template<class S>
   void operator& (S& stream) {
       perHostTransmission & stream;
+      // In this case these pointers each refer to one element not stored/pointed
+      // from elsewhere, so this checkpointing technique works.
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;

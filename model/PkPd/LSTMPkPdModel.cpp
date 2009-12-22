@@ -33,23 +33,24 @@ void LSTMPkPdModel::init() {
 LSTMPkPdModel::LSTMPkPdModel () {}
 LSTMPkPdModel::~LSTMPkPdModel () {}
 
-LSTMPkPdModel::LSTMPkPdModel (istream& in) {
-  int numDrugs;
-  in >> numDrugs;
-  validateListSize (numDrugs);
-  for (int i=0; i<numDrugs; i++) {
-    string abbrev;
-    in >> abbrev;
-    _drugs.push_back (LSTMDrug ((LSTMDrugType*)DrugType::getDrug(abbrev), in));
-  }
+void LSTMPkPdModel::checkpoint (istream& stream) {
+    size_t numDrugs;	// type must be same as _drugs.size()
+    numDrugs & stream;
+    validateListSize (numDrugs);
+    for (size_t i=0; i<numDrugs; i++) {
+	string abbrev;
+	abbrev & stream;
+	_drugs.push_back (LSTMDrug ((LSTMDrugType*)DrugType::getDrug(abbrev)));
+	_drugs.back() & stream;
+    }
 }
 
-void LSTMPkPdModel::write (ostream& out) const {
-  out << _drugs.size() << endl;
-  for (list<LSTMDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-    out << it->getAbbreviation() << endl;
-    it->write (out);
-  }
+void LSTMPkPdModel::checkpoint (ostream& stream) {
+    _drugs.size() & stream;
+    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+	it->getAbbreviation() & stream;
+	(*it) & stream;
+    }
 }
 
 

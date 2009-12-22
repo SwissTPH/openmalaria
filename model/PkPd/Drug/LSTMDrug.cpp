@@ -35,23 +35,13 @@ namespace OM { namespace PkPd {
 LSTMDrug::LSTMDrug(const LSTMDrugType* type) : Drug(type) {
 }
 
-LSTMDrug::LSTMDrug (const LSTMDrugType* type, istream& in) :
-  Drug(type, in)
-{
-  int num;
-  in >> num;
-  validateListSize (num);
-  for (int i = 0; i < num; ++i) {
-    doses.push_back (Dose (in));
-  }
+void LSTMDrug::checkpoint (istream& stream) {
+    Drug::checkpoint (stream);
+    doses & stream;
 }
-
-void LSTMDrug::write (ostream& out) const {
-    Drug::write(out);
-    
-    out << doses.size() << endl;
-    for (deque<Dose>::const_iterator it = doses.begin(); it != doses.end(); ++it)
-      it->write (out);
+void LSTMDrug::checkpoint (ostream& stream) {
+    Drug::checkpoint (stream);
+    doses & stream;
 }
 
 

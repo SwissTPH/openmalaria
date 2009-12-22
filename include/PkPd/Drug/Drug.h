@@ -60,17 +60,22 @@ public:
    * object will be deleted. */
   bool decay();
   
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
+  
 protected:
   /** Create a new instance. */
   Drug (const DrugType*);
-  /** Load an instance from a checkpoint. */
-  Drug (const DrugType*, istream& in);
-  /** Write instance data to a checkpoint. */
-  void write (ostream& out) const;
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
+  
   /** Calculate multiplier to decay a concentration by a duration of time
    *
    * @param time Duration in minutes to decay over */
-  
   virtual double decayFactor (double time) =0;
   
   static double minutesPerTimeStep;

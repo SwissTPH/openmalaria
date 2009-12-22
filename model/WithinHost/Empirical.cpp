@@ -103,14 +103,14 @@ int EmpiricalWithinHostModel::countInfections (int& patentInfections) {
 
 void EmpiricalWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel = PkPd::PkPdModel::createPkPdModel (stream);
+    (*pkpdModel) & stream;
     infections & stream;
     if (int(infections.size()) != _MOI)
 	throw util::checkpoint_error ("_MOI mismatch");
 }
 void EmpiricalWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel->write (stream);
+    (*pkpdModel) & stream;
     infections & stream;
 }
 

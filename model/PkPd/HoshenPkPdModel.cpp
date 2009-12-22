@@ -33,23 +33,24 @@ void HoshenPkPdModel::init() {
 HoshenPkPdModel::HoshenPkPdModel () {}
 HoshenPkPdModel::~HoshenPkPdModel () {}
 
-HoshenPkPdModel::HoshenPkPdModel (istream& in) {
-  int numDrugs;
-  in >> numDrugs;
-  validateListSize (numDrugs);
-  for (int i=0; i<numDrugs; i++) {
-    string abbrev;
-    in >> abbrev;
-    _drugs.push_back (HoshenDrug ((HoshenDrugType*)DrugType::getDrug(abbrev), in));
-  }
+void HoshenPkPdModel::checkpoint (istream& stream) {
+    size_t numDrugs;	// type must be same as _drugs.size()
+    numDrugs & stream;
+    validateListSize (numDrugs);
+    for (size_t i=0; i<numDrugs; i++) {
+	string abbrev;
+	abbrev & stream;
+	_drugs.push_back (HoshenDrug ((HoshenDrugType*)DrugType::getDrug(abbrev)));
+	_drugs.back() & stream;
+    }
 }
 
-void HoshenPkPdModel::write (ostream& out) const {
-  out << _drugs.size() << endl;
-  for (list<HoshenDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-    out << it->getAbbreviation() << endl;
-    it->write (out);
-  }
+void HoshenPkPdModel::checkpoint (ostream& stream) {
+    _drugs.size() & stream;
+    for (list<HoshenDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+	it->getAbbreviation() & stream;
+	(*it) & stream;
+    }
 }
 
 

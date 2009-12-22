@@ -23,10 +23,6 @@
 #ifndef Hmod_LSTMDrug
 #define Hmod_LSTMDrug
 
-#include <string>
-#include <deque>
-#include <map>
-#include <vector>
 #include "Drug.h"
 #include "Dose.h"
 #include "Global.h"
@@ -44,19 +40,20 @@ class LSTMDrug : public Drug {
 public:
   /** Create a new instance. */
   LSTMDrug (const LSTMDrugType*);
-  /** Load an instance from a checkpoint. */
-  LSTMDrug (const LSTMDrugType*, istream& in);
-  void write (ostream& out) const;
   
   /** Add amount to the concentration of drug, at time delay past the start of
    * the current timestep. */
   void addDose (double amount, int delay);
   
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-  double getAbsorptionFactor() const { return ((LSTMDrugType*)typeData)->absorptionFactor;}
-
-
+  double getAbsorptionFactor() const {
+      return ((LSTMDrugType*)typeData)->absorptionFactor;
+  }
+  
 protected:
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
+
   /** Calculate multiplier to decay a concentration by a duration of time
     *
     * @param time Duration in minutes to decay over */
@@ -64,7 +61,7 @@ protected:
 
   
   /// Per-dose information. Still to be properly defined.
-  deque<Dose> doses;
+  list<Dose> doses;
 };
 
 } }

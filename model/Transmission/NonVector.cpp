@@ -167,11 +167,13 @@ double NonVectorTransmission::averageEIR (const scnXml::NonVector& nonVectorData
 // -----  checkpointing  -----
 
 void NonVectorTransmission::checkpoint (istream& stream) {
+    TransmissionModel::checkpoint (stream);
     nspore & stream;
     interventionEIR & stream;
     initialKappa & stream;
 }
 void NonVectorTransmission::checkpoint (ostream& stream) {
+    TransmissionModel::checkpoint (stream);
     nspore & stream;
     interventionEIR & stream;
     initialKappa & stream;

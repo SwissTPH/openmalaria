@@ -41,9 +41,10 @@ public:
   //@}
   
   HoshenPkPdModel ();
-  HoshenPkPdModel (istream& in);
   virtual ~HoshenPkPdModel ();
-  virtual void write (ostream& out) const;
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
   void medicate(string drugAbbrev, double qty, int time, double age, double weight);
   void decayDrugs ();

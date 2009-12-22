@@ -142,7 +142,7 @@ void Simulation::mainSimulation(){
     ++Global::simulationTime;
     _population->update1();
     ++Global::timeStep;
-    //Here would be another place to write checkpoints. But then we need to save state of the surveys/events.
+    //FIXME: also write checkpoints here.
   }
   delete _population;	// must destroy all Human instances to make sure they reported past events
   Surveys.writeSummaryArrays();
@@ -158,23 +158,27 @@ bool Simulation::isCheckpoint(){
   // If not open, file doesn't exist (or is inaccessible)
   return checkpointFile.is_open();
 }
+int readCheckpointNum () {
+    ifstream checkpointFile;
+    checkpointFile.open(CHECKPOINT, fstream::in);
+    int checkpointNum;
+    checkpointFile >> checkpointNum;
+    checkpointFile.close();
+    if (!checkpointFile)
+	throw util::checkpoint_error ("error reading from file \"checkpoint\"");
+    return checkpointNum;
+}
 
 void Simulation::writeCheckpoint(){
   // We alternate between two checkpoints, in case program is closed while writing.
   const int NUM_CHECKPOINTS = 2;
   
-  // Set so that first checkpoint has number 0
-  int checkpointNum = NUM_CHECKPOINTS - 1;
-  {	// Get checkpoint number, if any
-    ifstream checkpointFile;
-    checkpointFile.open(CHECKPOINT, fstream::in);
-    if(checkpointFile.is_open()){
-      checkpointFile >> checkpointNum;
-      checkpointFile.close();
+  int checkpointNum = 0;
+    if (isCheckpoint()) {
+	checkpointNum = readCheckpointNum();
+	// Get next checkpoint number:
+	checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
     }
-  }
-  // Get next checkpoint number:
-  checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
   
   gsl::rngSaveState (checkpointNum);
   
@@ -197,17 +201,14 @@ void Simulation::writeCheckpoint(){
     checkpointFile.open(CHECKPOINT,ios::out);
     checkpointFile << checkpointNum;
     checkpointFile.close();
+    if (!checkpointFile)
+	throw util::checkpoint_error ("error writing to file \"checkpoint\"");
   }
 }
 
 void Simulation::readCheckpoint() {
-  int checkpointNum;
-  {	// Find out which checkpoint file is current
-    ifstream checkpointFile;
-    checkpointFile.open(CHECKPOINT, ios::in);
-    checkpointFile >> checkpointNum;
-    checkpointFile.close();
-  }
+    int checkpointNum = readCheckpointNum();
+    
   // Open the latest file
   ostringstream name;
   name << CHECKPOINT << checkpointNum;	// try uncompressed
@@ -281,6 +282,8 @@ void Simulation::checkpoint (ostream& stream) {
     (*_population) & stream;
     
     timer::stopCheckpoint ();
+    if (stream.fail())
+	throw util::checkpoint_error ("stream write error");
 }
 
 }

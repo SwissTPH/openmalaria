@@ -88,4 +88,19 @@ void SurveysType::writeSummaryArrays ()
 
   outputFile.close();
 }
+
+void SurveysType::checkpoint (istream& stream) {
+    currentTimestep & stream;
+    _surveysTimeIntervals & stream;
+    _surveyPeriod & stream;
+    _survey & stream;
+}
+void SurveysType::checkpoint (ostream& stream) {
+    currentTimestep & stream;
+    _surveysTimeIntervals & stream;
+    _surveyPeriod & stream;
+    _survey & stream;
+    current = &_survey[_surveyPeriod];
+}
+
 }

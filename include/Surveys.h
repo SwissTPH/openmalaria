@@ -79,13 +79,13 @@ class SurveysType
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	(*current) & stream;
-	_surveysTimeIntervals & stream;
-	_surveyPeriod & stream;
-	_survey & stream;
+	checkpoint (stream);
     }
     
   private:
+    void checkpoint (istream& stream);
+    void checkpoint (ostream& stream);
+    
     //! Time intervals for all surveys specified in the XML, appended with -1
     vector<int> _surveysTimeIntervals;
     /** Index for the time dimention of the summary arrays

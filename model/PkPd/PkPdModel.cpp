@@ -77,14 +77,4 @@ PkPdModel* PkPdModel::createPkPdModel () {
   return new PkPdModel();
 }
 
-PkPdModel* PkPdModel::createPkPdModel (istream& in) {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-    if (Use_LSTM)
-      return new LSTMPkPdModel (in);
-    else
-      return new HoshenPkPdModel (in);
-  }
-  return new PkPdModel(in);
-}
-
 } }

@@ -117,7 +117,7 @@ int DummyWithinHostModel::countInfections (int& patentInfections) {
 
 void DummyWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel = PkPd::PkPdModel::createPkPdModel (stream);
+    (*pkpdModel) & stream;
     patentInfections & stream;
     infections & stream;
     if (int(infections.size()) != _MOI)
@@ -125,7 +125,7 @@ void DummyWithinHostModel::checkpoint (istream& stream) {
 }
 void DummyWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
-    pkpdModel->write (stream);
+    (*pkpdModel) & stream;
     patentInfections & stream;
     infections & stream;
 }

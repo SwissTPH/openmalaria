@@ -29,15 +29,6 @@ namespace OM { namespace PkPd {
 HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(type) {
 }
 
-HoshenDrug::HoshenDrug (const HoshenDrugType* type, istream& in) :
-  Drug(type, in) {
-}
-
-void HoshenDrug::write (ostream& out) const {
-    Drug::write(out);
-}
-
-
 
 double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
   //Returning an average of 2 points

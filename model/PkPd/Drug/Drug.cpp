@@ -48,18 +48,14 @@ Drug::Drug(const DrugType* type) :
   _concentration (0),
   _nextConcentration (0)
 {}
-Drug::Drug (const DrugType* type, istream& in) :
-  typeData (type)
-{
-  in >> _concentration;
-  in >> _nextConcentration;
-  // Note: can't calculate _nextConcentration from _concentration using
-  // decayFactor() here, because decayFactor is virtual.
-}
 
-void Drug::write (ostream& out) const {
-  out << _concentration << endl;
-  out <<_nextConcentration << endl;
+void Drug::checkpoint (istream& stream) {
+    _concentration & stream;
+    _nextConcentration & stream;
+}
+void Drug::checkpoint (ostream& stream) {
+  _concentration & stream;
+  _nextConcentration & stream;
 }
 
 

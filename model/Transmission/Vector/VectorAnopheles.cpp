@@ -72,7 +72,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   
   // Calculate forced EIR for pre-intervention phase from FSCoeffic:
   vector<double> speciesEIR (Global::intervalsPerYear);
-  calcFourierEIR (speciesEIR, FSCoeffic, FSRotateAngle);
+  calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
   vectors::scale (speciesEIR, Global::interval);	// input EIR is per-capita per-day, so scale to per-interval
   
   // Add to the TransmissionModel's EIR, used for the initalization phase:

@@ -44,10 +44,7 @@ class HoshenDrug : public Drug {
 public:
   /** Create a new instance. */
   HoshenDrug (const HoshenDrugType*);
-  /** Load an instance from a checkpoint. */
-  HoshenDrug (const HoshenDrugType*, istream& in);
-  void write (ostream& out) const;
-
+  
   double getAbsorptionFactor() const { return ((HoshenDrugType*)typeData)->absorptionFactor;}
 
   virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;

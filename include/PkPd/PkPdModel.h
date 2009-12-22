@@ -56,20 +56,20 @@ public:
    * 
    * Currently may return one of: PkPdModel, HoshenPkPdModel, IhKwPkPdModel. */
   static PkPdModel* createPkPdModel ();
-  /** As above, but loads from a checkpoint. */
-  static PkPdModel* createPkPdModel (istream& in);
   //@}
   
   /// @brief Constructors, destructor and checkpointing
   //@{
   /// Create a new instance
   PkPdModel () {}
-  /// Load an instance from a checkpoint
-  PkPdModel (istream& in) {}
   /// Destroy an instance
   virtual ~PkPdModel () {}
-  /// Write checkpoint
-  virtual void write (ostream& out) {};
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      checkpoint (stream);
+  }
   //@}
   
   /** Medicate drugs to an individual, which act on infections the following
@@ -102,6 +102,10 @@ public:
   virtual double getDrugFactor (const ProteomeInstance* infProteome) {
     return 1.0;
   }
+  
+protected:
+  virtual void checkpoint (istream& stream) {}
+  virtual void checkpoint (ostream& stream) {}
 };
 
 } }
