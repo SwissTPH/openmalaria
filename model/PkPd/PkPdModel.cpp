@@ -56,12 +56,12 @@ void PkPdModel::cleanup () {
     }
 }
 
-void PkPdModel::readStatic (istream& in) {
+void PkPdModel::staticCheckpoint (istream& stream) {
   if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 //     ProteomeManager::read (in);
   }
 }
-void PkPdModel::writeStatic (ostream& out) {
+void PkPdModel::staticCheckpoint (ostream& stream) {
   if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
 //     ProteomeManager::write (out);
   }

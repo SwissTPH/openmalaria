@@ -102,28 +102,28 @@ void Population::clear(){
 }
 
 void Population::staticCheckpoint (istream& stream) {
-//   Host::NeonatalMortality::read (stream);
-  Clinical::ClinicalModel::staticCheckpoint(stream);
-//   PkPd::PkPdModel::readStatic (stream);
-  
-  IDCounter & stream;
-  mu0 & stream;
-  mu1 & stream;
-  alpha0 & stream;
-  alpha1 & stream;
-  rho & stream;
+    Host::NeonatalMortality::staticCheckpoint (stream);
+    Clinical::ClinicalModel::staticCheckpoint(stream);
+    PkPd::PkPdModel::staticCheckpoint (stream);
+    
+    IDCounter & stream;
+    mu0 & stream;
+    mu1 & stream;
+    alpha0 & stream;
+    alpha1 & stream;
+    rho & stream;
 }
 void Population::staticCheckpoint (ostream& stream) {
-//   Host::NeonatalMortality::write (stream);
-  Clinical::ClinicalModel::staticCheckpoint (stream);
-//   PkPd::PkPdModel::writeStatic (stream);
-  
-  IDCounter & stream;
-  mu0 & stream;
-  mu1 & stream;
-  alpha0 & stream;
-  alpha1 & stream;
-  rho & stream;
+    Host::NeonatalMortality::staticCheckpoint (stream);
+    Clinical::ClinicalModel::staticCheckpoint (stream);
+    PkPd::PkPdModel::staticCheckpoint (stream);
+    
+    IDCounter & stream;
+    mu0 & stream;
+    mu1 & stream;
+    alpha0 & stream;
+    alpha1 & stream;
+    rho & stream;
 }
 
 

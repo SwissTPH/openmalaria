@@ -33,16 +33,13 @@ void NeonatalMortality::init() {
   _prevalenceByGestationalAge.assign(timeStepsPer5Months, 0.0);
 }
 
-void NeonatalMortality::read (istream& in) {
-  in >> _riskFromMaternalInfection;
-  // _prevalenceByGestationalAge is already allocated
-  for (vector<double>::iterator it = _prevalenceByGestationalAge.begin(); it != _prevalenceByGestationalAge.end(); ++it)
-    in >> (*it);
+void NeonatalMortality::staticCheckpoint (istream& stream) {
+    _riskFromMaternalInfection & stream;
+    _prevalenceByGestationalAge & stream;
 }
-void NeonatalMortality::write (ostream& out) {
-  out << _riskFromMaternalInfection << endl;
-  for (vector<double>::iterator it = _prevalenceByGestationalAge.begin(); it != _prevalenceByGestationalAge.end(); ++it)
-    out << *it << endl;
+void NeonatalMortality::staticCheckpoint (ostream& stream) {
+    _riskFromMaternalInfection & stream;
+    _prevalenceByGestationalAge & stream;
 }
 
 bool NeonatalMortality::eventNeonatalMortality() {

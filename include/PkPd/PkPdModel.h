@@ -46,10 +46,8 @@ public:
   static void init ();
   static void cleanup ();
   
-  /// Read static variables from checkpoint
-  static void readStatic (istream& in);
-  /// Write static variables to checkpoint
-  static void writeStatic (ostream& out);
+  static void staticCheckpoint (istream& stream);
+  static void staticCheckpoint (ostream& stream);
   
   /** Factory function to create a drug interface, type dependant on run-time
    * options.

@@ -32,8 +32,8 @@ public:
   /// Initialisation
   static void init();
   
-  static void read (istream& in);
-  static void write (ostream& out);
+  static void staticCheckpoint (istream& stream);
+  static void staticCheckpoint (ostream& stream);
   
   /** Called for each birth; returns true if infant dies due to mother's
    * infection. */
