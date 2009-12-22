@@ -49,17 +49,13 @@ void ClinicalModel::init () {
     ClinicalImmediateOutcomes::initParameters();
 }
 
-void ClinicalModel::staticRead (istream& in) {
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i) {
-    in >> infantDeaths[i];
-    in >> infantIntervalsAtRisk[i];
-  }
+void ClinicalModel::staticCheckpoint (istream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
 }
-void ClinicalModel::staticWrite (ostream& out) {
-  for (size_t i = 0; i < Global::intervalsPerYear; ++i) {
-    out << infantDeaths[i] << endl;;
-    out << infantIntervalsAtRisk[i] << endl;
-  }
+void ClinicalModel::staticCheckpoint (ostream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {

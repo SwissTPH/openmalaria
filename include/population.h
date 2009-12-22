@@ -40,8 +40,8 @@ public:
   static void clear();
   
   /// Checkpointing for static data members
-  static void staticRead (istream& in);
-  static void staticWrite (ostream& out);	///< ditto
+  static void staticCheckpoint (istream& stream);
+  static void staticCheckpoint (ostream& stream);	///< ditto
   
   
    Population();

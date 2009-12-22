@@ -73,7 +73,7 @@ int Simulation::start(){
     
     _population->estimateRemovalRates();
     if (isCheckpoint()) {
-	_population->setupPyramid(true);
+	_population->setupPyramid(true);	// NOTE: may be unnecessary now with static checkpointing
 	readCheckpoint();
 	goto phaseSteps;	// skip init stuff — don't want to re-run it
     } else {
@@ -230,8 +230,7 @@ void Simulation::readCheckpoint() {
 void Simulation::checkpoint (istream& stream) {
     util::checkpoint::header (stream);
     util::CommandLine::staticCheckpoint (stream);
-    // FIXME: appears problematic (though may not be needed):
-    //   Population::staticRead(stream);
+    Population::staticCheckpoint (stream);
     Surveys & stream;
     
     Global::simulationTime & stream;
@@ -257,7 +256,7 @@ void Simulation::checkpoint (ostream& stream) {
     timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
-    //   Population::staticWrite(stream);
+    Population::staticCheckpoint (stream);
     Surveys & stream;
     
     Global::simulationTime & stream;

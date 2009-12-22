@@ -46,8 +46,8 @@ public:
   static void init ();
   
   /// Static checkpointing
-  static void staticRead (istream& in);
-  static void staticWrite (ostream& out);
+  static void staticCheckpoint (istream& stream);
+  static void staticCheckpoint (ostream& stream);
   
   /** Return a new ClinicalModel.
    *
