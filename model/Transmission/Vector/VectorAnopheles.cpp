@@ -81,8 +81,6 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   
   // Set other data used for mosqEmergeRate calculation:
   FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;	// usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
-  //FIXME: to check this works, starting with a wacky value:
-  //FSRotateAngle += -M_PI/8.;
   initNvFromSv = 1.0 / anoph.getPropInfectious();
   initNv0FromSv = initNvFromSv * anoph.getPropInfected();	// temporarily use of initNv0FromSv
   
@@ -184,7 +182,7 @@ bool VectorAnopheles::vectorInitIterate () {
   // EIR comes directly from S_v, so should fit after we're done.
   
   double factor = sumAnnualForcedS_v / vectors::sum(annualS_v);
-  cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
+//   cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
   if (!(factor > 1e-6 && factor < 1e6))	// unlikely, but might as well check incase either operand was zero
     throw runtime_error ("factor out of bounds");
   
@@ -202,11 +200,10 @@ bool VectorAnopheles::vectorInitIterate () {
     //vectors::scale (S_v, factor);
     return true;	// we scaled mosqEmergeRate; iterate again
   } else {
-    return false;	//TODO: EIR fitting offset. For now skip and just use guess.
     // Once the amplitude is approximately correct, we try to find the offset
     double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, annualS_v);
     cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    FSRotateAngle += rAngle;	// annualS_v was already rotated by old value of FSRotateAngle, so increment
+    FSRotateAngle -= rAngle;	// annualS_v was already rotated by old value of FSRotateAngle, so increment
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;

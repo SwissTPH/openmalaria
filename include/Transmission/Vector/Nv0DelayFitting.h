@@ -62,7 +62,7 @@ struct eDFunctor
       f += diff*diff;				// add diff²
       df += 2*diff * (dval - 0.0);		// add 1st deriv. diff²
       ddf += 2*dval*dval + 2*diff*ddval;	// add 2nd deriv. diff²
-      cout << t << "\t"<< val << "\t" << logSamples[t] << "\t" << diff*diff << "\t" <<2*diff * (dval - 0.0) << "\t" << 2*dval*dval + 2*diff*ddval << endl;
+//       cout << t << "\t"<< val << "\t" << logSamples[t] << "\t" << diff*diff << "\t" <<2*diff * (dval - 0.0) << "\t" << 2*dval*dval + 2*diff*ddval << endl;
     }
     
     return std::tr1::make_tuple(f, df, ddf);

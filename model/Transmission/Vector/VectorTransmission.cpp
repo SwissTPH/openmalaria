@@ -103,7 +103,8 @@ int VectorTransmission::vectorInitIterate () {
 
 void VectorTransmission::initMainSimulation() {
   // Check every time at end of init that, to a low tolerence,
-  // the average EIR produced is what was expected:
+  // the average EIR produced is what was expected.
+  // At least that was the idea; it's become clear the generated EIR is never going to achieve this.
   if (!vectors::approxEqual(initialisationEIR, innoculationsPerDayOfYear)) {
     cerr << "Generated EIR not as expected (expected, generated):\n";
     cerr << initialisationEIR << '\n' << innoculationsPerDayOfYear << endl;

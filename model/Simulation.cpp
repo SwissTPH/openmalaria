@@ -69,7 +69,7 @@ int Simulation::start(){
     simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
     // +1 to let final survey run
     totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
-    int testCheckpointStep;	// declare here so goto doesn't cross initialization
+    int testCheckpointStep = -1;	// declare here so goto doesn't cross initialization
     
     _population->estimateRemovalRates();
     if (isCheckpoint()) {
