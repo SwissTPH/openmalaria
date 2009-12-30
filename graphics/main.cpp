@@ -38,7 +38,7 @@
 #ifdef _WIN32
 #include "boinc_win.h"
 #else
-#include <math.h>
+#include <cmath>
 #include <execinfo.h>
 #endif
 

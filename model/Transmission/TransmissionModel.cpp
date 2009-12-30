@@ -28,7 +28,7 @@
 #include "Simulation.h"
 #include "util/BoincWrapper.h"
 
-#include <math.h> 
+#include <cmath> 
 #include <cfloat>
 #include <gsl/gsl_vector.h>
 

@@ -37,7 +37,7 @@
 #include "util/errors.hpp"
 #include "util/ModelOptions.hpp"
 
-#include <math.h>
+#include <cmath>
 
 namespace OM {
     

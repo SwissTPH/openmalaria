@@ -23,7 +23,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include "Global.h"
 
 // Forward declare: doesn't need to be known about here

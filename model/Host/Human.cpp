@@ -34,7 +34,7 @@
 
 #include <string>
 #include <string.h>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <stdexcept>
 

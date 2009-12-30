@@ -138,7 +138,7 @@ public:
   static void cleanup ();
   
   /** Drug code needs a list of all instances. */
-  static inline vector<ProteomeInstance> getInstances() {
+  static inline vector<ProteomeInstance>& getInstances() {
     return instances;
   }
   
