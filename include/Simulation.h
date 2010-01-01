@@ -22,7 +22,7 @@
 #define Hmod_Simulation
 
 #include "Global.h"
-#include "population.h"
+#include "Population.h"
 
 using namespace std;
 

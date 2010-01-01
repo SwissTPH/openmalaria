@@ -71,12 +71,10 @@ int Simulation::start(){
     totalSimDuration = _population->_transmissionModel->vectorInitDuration() + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
     int testCheckpointStep = -1;	// declare here so goto doesn't cross initialization
     
-    _population->estimateRemovalRates();
     if (isCheckpoint()) {
-	_population->setupPyramid(true);        // NOTE: may be unnecessary now with static checkpointing
 	readCheckpoint();
     } else {
-	_population->setupPyramid(false);
+	_population->createInitialHumans();
     }
     
     

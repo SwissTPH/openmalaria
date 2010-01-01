@@ -6,7 +6,7 @@
 set (Model_CPP
   Simulation.cpp
   Global.cpp
-  population.cpp
+  Population.cpp
   inputData.cpp
   Surveys.cpp
   Survey.cpp
