@@ -31,9 +31,6 @@ using namespace std;
 namespace OM { 
 
 gsl_rng * generator;
-const gsl_multimin_fminimizer_type *T;
-gsl_multimin_fminimizer *s;
-gsl_multimin_function minex_func;
 
 
 // -----  random number generation  -----
@@ -47,35 +44,6 @@ double gsl::rngGauss (double mean, double std){
 }
 
 double gsl::rngGamma (double a, double b){
-  /*double xi, eta_m, V2m, V2m_1;
-  int m;
-  double delta= *a;
-  if (delta > 1) {
-    xi=gsl_ran_gamma(generator, *a, *b);
-  }
-  else{    
-    m=0;  
-    double e=2.71828182;
-    double v0 = e/(e + delta);
-    do{
-      m++;
-      V2m_1 = gsl_rng_uniform (generator);
-      V2m = gsl_rng_uniform (generator);
-      if (V2m_1 <= v0){
-        xi = pow(V2m_1,1.0/delta);
-        eta_m = V2m*pow(xi,delta - 1);
-      }
-      else{ 
-        xi = 1.0 - log(V2m_1);
-        eta_m = V2m*pow(e,-xi);
-      };
-// TODO: it looks like the following might give more sensible answers if log transformed 
-  } while ( eta_m > pow(xi,delta - 1)*pow(e,-xi) );
-
-
-}
-  return xi;
-*/
   return gsl_ran_gamma(generator, a, b);
 }
 
@@ -131,51 +99,44 @@ double wCalcRSS(const gsl_vector *v, void* params){
 
   return (*wCalcRSSFunc)(x,y); 
 }
-double gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double param2){
+// Not thread safe:
+void gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double param2){
+    //FIXME: currently should do the same as before. CHECK!
     wCalcRSSFunc = func;
     
-  gsl_multimin_fminimizer *s = NULL;
-  gsl_vector *ss, *x;
-  const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_function minex_func;
-  double par[2] = { 0.0, 0.0 };
-  ss = gsl_vector_alloc (2);
-
-  gsl_vector_set_all (ss, 0.1);
-
-  x = gsl_vector_alloc (2);
-
-  gsl_vector_set (x, 0, param1);
-  gsl_vector_set (x, 1, param2);
-  minex_func.f = &wCalcRSS;
-  minex_func.params = (void *)&par;
-  minex_func.n = 2;
-
-  s = gsl_multimin_fminimizer_alloc (T, 2);
-  gsl_multimin_fminimizer_set (s, &minex_func, x, ss);
-  size_t iter = 0;
-  int status;
-  double size;
-  do{
-    iter++;
-    status = gsl_multimin_fminimizer_iterate(s);
-      
-    if (status) 
-      break;
-
-    size = gsl_multimin_fminimizer_size (s);
-    status = gsl_multimin_test_size (size, 1e-2);
-
-    if (status == GSL_SUCCESS){
-  //do nothing
-    }     
-  }
-  while (status == GSL_CONTINUE && iter < 100);
-  double rss = s->fval;
-  gsl_vector_free(x);
-  gsl_vector_free(ss);
-  gsl_multimin_fminimizer_free (s);
-  return rss;
+    gsl_vector *stepSize = gsl_vector_alloc (2);
+    gsl_vector_set_all (stepSize, 0.1);
+    
+    gsl_vector *initialValues = gsl_vector_alloc (2);
+    gsl_vector_set (initialValues, 0, param1);
+    gsl_vector_set (initialValues, 1, param2);
+    
+    double par[2] = { 0.0, 0.0 };
+    gsl_multimin_function minex_func;
+    minex_func.f = &wCalcRSS;
+    minex_func.params = (void *)&par;
+    minex_func.n = 2;
+    
+    //NOTE: better algorithms available than nmsimplex
+    const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
+    gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc (T, 2);
+    gsl_multimin_fminimizer_set (minimizer, &minex_func, initialValues, stepSize);
+    
+    for (size_t iter = 0; iter < 100; ++iter) {
+	iter++;
+	if (gsl_multimin_fminimizer_iterate(minimizer))
+	    throw runtime_error ("gsl_multimin_fminimizer_iterate failed");
+	
+	double size = gsl_multimin_fminimizer_size (minimizer);
+	int status = gsl_multimin_test_size (size, 1e-2);
+	if (status == GSL_SUCCESS)
+	    break;
+    }
+    //NOTE: this code doesn't now get the reported minimum, hence it relies on the last iteration
+    // using input values with minimal result. Not documented; no idea if it's true.
+    gsl_vector_free(initialValues);
+    gsl_vector_free(stepSize);
+    gsl_multimin_fminimizer_free (minimizer);
 }
 
 
@@ -185,7 +146,6 @@ void gsl::setUp (){
   //use the mersenne twister generator
   generator = gsl_rng_alloc(gsl_rng_mt19937);
   gsl_rng_set (generator, InputData.getISeed());
-  T = gsl_multimin_fminimizer_nmsimplex;
 }
 
 void gsl::tearDown (){
