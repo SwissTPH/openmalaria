@@ -40,7 +40,8 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulation::Simulation() : phase(STARTING_PHASE)
+Simulation::Simulation()
+: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL)
 {
     Global::simulationTime = 0;
     Global::timeStep = numeric_limits<int>::min();
@@ -66,16 +67,14 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-    simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
     // +1 to let final survey run
-    totalSimDuration = simPeriodEnd + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
+    totalSimDuration = _population->_transmissionModel->vectorInitDuration() + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
     int testCheckpointStep = -1;	// declare here so goto doesn't cross initialization
     
     _population->estimateRemovalRates();
     if (isCheckpoint()) {
-	_population->setupPyramid(true);	// NOTE: may be unnecessary now with static checkpointing
+	_population->setupPyramid(true);        // NOTE: may be unnecessary now with static checkpointing
 	readCheckpoint();
-	goto phaseSteps;	// skip init stuff — don't want to re-run it
     } else {
 	_population->setupPyramid(false);
     }
@@ -83,8 +82,33 @@ int Simulation::start(){
     
     // phase loop
     while (true) {
+	// loop for steps within a phase
+	while (Global::simulationTime < simPeriodEnd) {
+	    // checkpoint
+	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
+		writeCheckpoint();
+		util::BoincWrapper::checkpointCompleted();
+		if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
+	    }
+	    
+	    // interventions
+	    if (Global::timeStep == Surveys.currentTimestep) {
+		_population->newSurvey();
+		Surveys.incrementSurveyPeriod();
+	    }
+	    _population->implementIntervention(Global::timeStep);
+	    
+	    // update
+	    ++Global::simulationTime;
+	    _population->update1();
+	    ++Global::timeStep;
+	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
+	}
+	
 	// phase transition: end of one phase to start of next
 	if (phase == STARTING_PHASE) {
+	    simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
 	    phase = VECTOR_FITTING;
 	} else if (phase == VECTOR_FITTING) {
 	    int extend = _population->_transmissionModel->vectorInitIterate ();
@@ -92,8 +116,8 @@ int Simulation::start(){
 		simPeriodEnd += extend;
 		totalSimDuration += extend;
 	    } else {		// next phase
-		phase = ONE_LIFE_SPAN;
 		simPeriodEnd += Global::maxAgeIntervals;
+		phase = ONE_LIFE_SPAN;
 	    }
 	} else if (phase == ONE_LIFE_SPAN) {
 	    simPeriodEnd = totalSimDuration;
@@ -109,28 +133,6 @@ int Simulation::start(){
 	testCheckpointStep = -1;
 	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
 	    testCheckpointStep = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
-	
-	// loop for steps within a phase
-	phaseSteps:
-	while (Global::simulationTime < simPeriodEnd) {
-	    if (Global::timeStep == Surveys.currentTimestep) {
-		_population->newSurvey();
-		Surveys.incrementSurveyPeriod();
-	    }
-	    _population->implementIntervention(Global::timeStep);
-	    
-	    ++Global::simulationTime;
-	    _population->update1();
-	    ++Global::timeStep;
-	    
-	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
-	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
-		writeCheckpoint();
-		util::BoincWrapper::checkpointCompleted();
-		if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
-		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
-	    }
-	}
     }
     
     delete _population;	// must destroy all Human instances to make sure they reported past events
