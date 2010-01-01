@@ -65,6 +65,14 @@ ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
     return new ClinicalImmediateOutcomes (cF, tSF);
 }
 
+
+void ClinicalModel::initMainSimulation () {
+    for (size_t i=0;i<Global::intervalsPerYear; i++) {
+	Clinical::ClinicalModel::infantIntervalsAtRisk[i]=0;
+	Clinical::ClinicalModel::infantDeaths[i]=0;
+    }
+}
+
 double ClinicalModel::infantAllCauseMort(){
   double infantPropSurviving=1.0;	// use to calculate proportion surviving
   for (size_t i=0;i<Global::intervalsPerYear; i++) {

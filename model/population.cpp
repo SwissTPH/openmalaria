@@ -225,7 +225,7 @@ void Population::estimateRemovalRates () {
   maxcal=500000;
   npar=2;
   iw=3;
-  rss=gsl::minimizeCalc_rss(&p1, &p2);
+  rss=gsl::minimizeCalc_rss(&setDemoParameters, p1, p2);
 }
 
 // Static method used by estimateRemovalRates
@@ -315,10 +315,7 @@ void Population::setupPyramid(bool isCheckpoint) {
 void Population::preMainSimInit () {
   _transmissionModel->initMainSimulation();
 
-  for (size_t i=0;i<Global::intervalsPerYear; i++) {
-    Clinical::ClinicalModel::infantIntervalsAtRisk[i]=0;
-    Clinical::ClinicalModel::infantDeaths[i]=0;
-  }
+  Clinical::ClinicalModel::initMainSimulation ();
 }
 
 // -----  non-static methods: simulation loop  -----

@@ -25,8 +25,8 @@ using namespace std;
 #include <gsl/gsl_randist.h>
 #include "util/gsl.h"
 #include "inputData.h"
-#include "population.h"
 #include "Global.h"
+#include "util/errors.hpp"
 
 namespace OM { 
 
@@ -122,14 +122,18 @@ double gsl::cdfUGaussianPInv (double p){
   return gsl_cdf_ugaussian_Pinv(p);
 }
 
+// function pointer for wCalcRSS's func
+double (*wCalcRSSFunc) (double param1, double param2);
 double wCalcRSS(const gsl_vector *v, void* params){
   double x, y;  
   x = gsl_vector_get(v, 0);
   y = gsl_vector_get(v, 1);
 
-  return Population::setDemoParameters(x,y); 
+  return (*wCalcRSSFunc)(x,y); 
 }
-double gsl::minimizeCalc_rss(double *param1,double *param2){
+double gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double param2){
+    wCalcRSSFunc = func;
+    
   gsl_multimin_fminimizer *s = NULL;
   gsl_vector *ss, *x;
   const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
@@ -141,8 +145,8 @@ double gsl::minimizeCalc_rss(double *param1,double *param2){
 
   x = gsl_vector_alloc (2);
 
-  gsl_vector_set (x, 0, *param1);
-  gsl_vector_set (x, 1, *param2);
+  gsl_vector_set (x, 0, param1);
+  gsl_vector_set (x, 1, param2);
   minex_func.f = &wCalcRSS;
   minex_func.params = (void *)&par;
   minex_func.n = 2;

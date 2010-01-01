@@ -55,6 +55,8 @@ public:
    * @param tSF	treatment seeking factor, passed to CaseManagementModel */
   static ClinicalModel* createClinicalModel (double cF, double tSF);
   
+  static void initMainSimulation ();
+  
   /** Calculate infant mortality as deaths/1000 livebirths for the whole main-
    * simulation period (not as deaths/1000 years-at-risk per survey).
    * 
@@ -110,12 +112,11 @@ public:
       checkpoint (stream);
   }
   
-  //TODO: make private
-  static vector<int> infantDeaths;
-  static vector<int> infantIntervalsAtRisk;
-  
 private:
-  static double _nonMalariaMortality; //!< Non-malaria mortality in under 1year olds.
+    static vector<int> infantDeaths;
+    static vector<int> infantIntervalsAtRisk;
+    
+    static double _nonMalariaMortality; //!< Non-malaria mortality in under 1year olds.
   
 protected:
   /// Constructor.

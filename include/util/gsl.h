@@ -54,7 +54,11 @@ namespace gsl {
   /// ditto
   double cdfUGaussianPInv (double p);
   
-  double minimizeCalc_rss(double* par1, double* par2);
+  /** Presumably from AR.
+   *
+   * @param func A function pointer to the function used for ...
+   */
+  double minimizeCalc_rss(double (*func) (double,double), double param1, double param2);
   
   
   ///@brief Setup & cleanup
