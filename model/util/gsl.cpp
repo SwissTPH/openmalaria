@@ -20,7 +20,6 @@
 #include <string>
 using namespace std;
 #include <gsl/gsl_cdf.h>
-#include <gsl/gsl_multimin.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include "util/gsl.h"
@@ -89,56 +88,6 @@ double gsl::cdfUGaussianP (double x){
 double gsl::cdfUGaussianPInv (double p){
   return gsl_cdf_ugaussian_Pinv(p);
 }
-
-// function pointer for wCalcRSS's func
-double (*wCalcRSSFunc) (double param1, double param2);
-double wCalcRSS(const gsl_vector *v, void* params){
-  double x, y;  
-  x = gsl_vector_get(v, 0);
-  y = gsl_vector_get(v, 1);
-
-  return (*wCalcRSSFunc)(x,y); 
-}
-// Not thread safe:
-void gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double param2){
-    //FIXME: currently should do the same as before. CHECK!
-    wCalcRSSFunc = func;
-    
-    gsl_vector *stepSize = gsl_vector_alloc (2);
-    gsl_vector_set_all (stepSize, 0.1);
-    
-    gsl_vector *initialValues = gsl_vector_alloc (2);
-    gsl_vector_set (initialValues, 0, param1);
-    gsl_vector_set (initialValues, 1, param2);
-    
-    double par[2] = { 0.0, 0.0 };
-    gsl_multimin_function minex_func;
-    minex_func.f = &wCalcRSS;
-    minex_func.params = (void *)&par;
-    minex_func.n = 2;
-    
-    //NOTE: better algorithms available than nmsimplex
-    const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
-    gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc (T, 2);
-    gsl_multimin_fminimizer_set (minimizer, &minex_func, initialValues, stepSize);
-    
-    for (size_t iter = 0; iter < 100; ++iter) {
-	iter++;
-	if (gsl_multimin_fminimizer_iterate(minimizer))
-	    throw runtime_error ("gsl_multimin_fminimizer_iterate failed");
-	
-	double size = gsl_multimin_fminimizer_size (minimizer);
-	int status = gsl_multimin_test_size (size, 1e-2);
-	if (status == GSL_SUCCESS)
-	    break;
-    }
-    //NOTE: this code doesn't now get the reported minimum, hence it relies on the last iteration
-    // using input values with minimal result. Not documented; no idea if it's true.
-    gsl_vector_free(initialValues);
-    gsl_vector_free(stepSize);
-    gsl_multimin_fminimizer_free (minimizer);
-}
-
 
 // -----  Setup & cleanup  -----
 
