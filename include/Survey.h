@@ -129,7 +129,7 @@ class SurveyAgeGroup {
     
     /// Get the total number of age categories (inc. one for indivs. not in any
     /// category given in XML).
-    static inline int getNumGroups () {
+    static inline size_t getNumGroups () {
       return _upperbound.size();
     }
     

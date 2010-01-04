@@ -26,7 +26,6 @@
 #include "Surveys.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/NonVector.h" // changeEIR intervention deals directly with this model
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -296,10 +295,6 @@ void Population::implementIntervention (int time)
             throw util::xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
         InputData.changeHealthSystem (&interv->getChangeHS().get());
         Clinical::ClinicalImmediateOutcomes::initParameters(); // should re-read all parameters
-
-        //FIXME: surely we shouldn't do this at all? (DH)
-        //TODO: Do we also need to re-init the kappa array?
-        _transmissionModel->copyToInitialKappa();
     }
 
     if (interv->getChangeEIR().present()) {

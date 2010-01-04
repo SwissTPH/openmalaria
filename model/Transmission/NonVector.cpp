@@ -66,7 +66,13 @@ NonVectorTransmission::~NonVectorTransmission () {}
 //! initialise the main simulation 
 void NonVectorTransmission::initMainSimulation (){
   // initialKappa is used in calculateEIR
-  copyToInitialKappa();
+  initialKappa = kappa;
+  //NOTE: error check
+  for (size_t  i = 0; i < initialKappa.size(); ++i) {
+      if (!(initialKappa[i] > 0.0))	// if not positive
+	  throw range_error ("initialKappa is invalid");
+  }
+  
   simulationMode = InputData.get_mode();
   if (simulationMode < 2 || simulationMode > 4)
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
@@ -97,15 +103,6 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   for (size_t i = 0; i < interventionEIR.size(); ++i)
     interventionEIR[i] *= Global::interval / nDays[i];
   annualEIR=0.0;
-}
-
-void NonVectorTransmission::copyToInitialKappa () {
-  initialKappa = kappa;
-  //NOTE: error check
-  for (size_t  i = 0; i < initialKappa.size(); ++i) {
-    if (!(initialKappa[i] > 0.0))	// if not positive
-      throw range_error ("initialKappa is invalid");
-  }
 }
 
 void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) {

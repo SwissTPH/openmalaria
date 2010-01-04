@@ -135,9 +135,6 @@ public:
    * Summarises infectiousness of humans and of mosquitoes. */
   void updateKappa (const std::list<Host::Human>& population, int simulationTime);
   
-  /** Little function to copy kappa to initialKappa. */
-  virtual void copyToInitialKappa () {}
-  
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
   }

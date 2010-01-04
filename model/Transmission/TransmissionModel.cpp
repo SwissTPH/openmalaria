@@ -61,9 +61,11 @@ TransmissionModel::TransmissionModel() :
   initialisationEIR.resize (Global::intervalsPerYear);
   innoculationsPerAgeGroup.resize (SurveyAgeGroup::getNumGroups(), 0.0);
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
-  timeStepEntoInnocs.resize (innoculationsPerAgeGroup.size(), 0.0);
+  timeStepEntoInnocs.resize (SurveyAgeGroup::getNumGroups(), 0.0);
   
-  noOfAgeGroupsSharedMem = std::max(innoculationsPerAgeGroup.size(),util::SharedGraphics::KappaArraySize);
+  // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
+  // memory corruption or extra tests when setting/copying values
+  noOfAgeGroupsSharedMem = std::max(SurveyAgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
 }
 
 TransmissionModel::~TransmissionModel () {
@@ -136,7 +138,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   
   // Shared graphics: report infectiousness
   if (Global::simulationTime % 6 ==  0) {
-    for (int i = 0; i < SurveyAgeGroup::getNumGroups(); i++)
+    for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
       kappaByAge[i] /= nByAge[i];
     util::SharedGraphics::copyKappa(&kappaByAge[0]);
   }

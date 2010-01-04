@@ -49,9 +49,6 @@ public:
    * Similar calculation to that used during initialization. */
   void setTransientEIR (const scnXml::NonVector& nonVectorData); 
   
-  /** Little function to copy kappa to initialKappa. */
-  void copyToInitialKappa ();
-  
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
   /** Calculates EIR (in adults) during the main period of the simulation,
