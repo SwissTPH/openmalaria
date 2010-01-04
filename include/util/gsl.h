@@ -54,6 +54,14 @@ namespace gsl {
   /// ditto
   double cdfUGaussianPInv (double p);
   
+  /** Presumably from AR. Searches iteratively for a minimum to function func.
+   *
+   * @param func A function pointer to the function used for ...
+   * @param param1 Initial guess of first param taken by func
+   * @param param2 Initial guess of second
+   */
+  void minimizeCalc_rss(double (*func) (double,double), double param1, double param2);
+  
   
   ///@brief Setup & cleanup
   //@{
