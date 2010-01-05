@@ -73,7 +73,7 @@ namespace OM {
 	 *
 	 * Don't add many variables like this.
 	 * 
-	 * These should be considered read-only outside Simulation. */
+	 * These should be considered read-only outside Simulation. Checkpointed. */
 	//@{
 	/// Simulation timestep, starting from beginning of initialization.
 	/// (Each step is "interval" long).

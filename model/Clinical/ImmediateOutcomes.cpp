@@ -26,7 +26,7 @@ namespace OM { namespace Clinical {
 // -----  static init  -----
 
 void ClinicalImmediateOutcomes::initParameters () {
-  Episode::healthSystemMemory = OldCaseManagement::init();
+  OldCaseManagement::init();
 }
 
 

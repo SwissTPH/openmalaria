@@ -35,7 +35,6 @@ namespace OM { namespace WithinHost {
 
 double EmpiricalInfection::_maximumPermittedAmplificationPerCycle;
 double EmpiricalInfection::_subPatentLimit;
-double EmpiricalInfection::_lambda;
 double EmpiricalInfection::_alpha1;
 double EmpiricalInfection::_alpha2;	
 double EmpiricalInfection::_alpha3;

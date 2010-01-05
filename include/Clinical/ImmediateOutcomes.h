@@ -32,10 +32,7 @@ namespace OM { namespace Clinical {
 class ClinicalImmediateOutcomes : public ClinicalModel
 {
 public:
-  /** Initialises parameters, loading from XML data.
-   *
-   * Also used to re-set parameters for a change-of-health-system intervention.
-   */
+  /** Initialises parameters, loading from XML data. */
   static void initParameters ();
   
   ClinicalImmediateOutcomes (double cF, double tSF);

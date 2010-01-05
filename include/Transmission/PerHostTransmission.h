@@ -158,6 +158,7 @@ private:
   
   
   ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
+  // set by initParameters
   //@{
   /** Average number of bites for each age as a proportion of the maximum.
    *

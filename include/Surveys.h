@@ -96,6 +96,7 @@ class SurveysType
     /// we're not interested in, in order to avoid having to check current is valid.
     vector<Survey> _survey;
 };
+/// Data — entry-point for using Surveys. Checkpointed.
 extern SurveysType Surveys;
 }
 #endif

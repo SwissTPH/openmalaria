@@ -155,7 +155,8 @@ protected:
    * of 5 daily samples. */
   double timeStepMaxDensity;
   
-  //BEGIN Static Vars
+  ///@brief Static parameters, either const or set by init()
+  //@{
 //Standard dev innate immunity for densities
   static double sigma_i;
 // contribution of parasite densities to acquired immunity in the presence of fever
@@ -200,7 +201,7 @@ protected:
   in the reference age group. */
   static const double wtprop[nages];
   //@}
-  //END Static vars
+  //@}
 };
 
 } }

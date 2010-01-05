@@ -118,12 +118,14 @@ class ESCaseManagement {
 	};
 	
 	//FIXME: use hash-map instead
+	//BEGIN Static parameters — set by init()
 	typedef map<cmid,CMNode*> TreeType;
 	/// Tree probability-branches and leaf nodes.
 	static TreeType cmTree;
 	
 	/// Mask applied to id before lookup in cmTree.
 	static cmid cmMask;
+	//END
 };
 
 } }

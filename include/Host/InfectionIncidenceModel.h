@@ -106,7 +106,8 @@ public:
   //!Number of infective bites since birth
   double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
   
-protected:	// Static data
+protected:
+  //BEGIN Static data set by init()
   /* Shape constant of (Gamma) distribution of availability
   real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
   static double BaselineAvailabilityShapeParam;
@@ -128,6 +129,7 @@ protected:	// Static data
   //!1 over the critical value of EIR in Phase A pre-erythrocytic model 
   static double EstarInv;
   //@}
+  //END
 };
 
 /** A workaround to produce the same results as with heterogeneity work-units.

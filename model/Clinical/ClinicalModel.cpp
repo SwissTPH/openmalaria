@@ -52,10 +52,14 @@ void ClinicalModel::init () {
 void ClinicalModel::staticCheckpoint (istream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
+    if (!util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+	OldCaseManagement::staticCheckpoint(stream);
 }
 void ClinicalModel::staticCheckpoint (ostream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
+    if (!util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+	OldCaseManagement::staticCheckpoint(stream);
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {

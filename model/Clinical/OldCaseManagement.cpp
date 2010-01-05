@@ -31,6 +31,8 @@
 #include <cmath>
 
 namespace OM { namespace Clinical {
+
+int OldCaseManagement::healthSystemSource;
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
 double OldCaseManagement::_oddsRatioThreshold;
 bool OldCaseManagement::_noMortality;
@@ -43,39 +45,61 @@ double OldCaseManagement::probSequelaeTreated[2];
 double OldCaseManagement::probSequelaeUntreated[2];
 
 
+// -----  utility  -----
+
+const scnXml::HealthSystem& getHealthSystem (int healthSystemSource) {
+    if (healthSystemSource == -1) {
+	return InputData.getHealthSystem();
+    } else {
+	const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
+	if (interv == NULL || !interv->getChangeHS().present())
+	    throw runtime_error ("healthSystemSource invalid");
+	return interv->getChangeHS().get();
+    }
+    assert(false);	// unreachable
+}
+
 // -----  static init  -----
 
-int OldCaseManagement::init ()
+void OldCaseManagement::init ()
 {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-    throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+	throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
 
-  _oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
+    _oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
+    
+    setHealthSystem(-1);
+}
 
-  const scnXml::HealthSystem& healthSystem = InputData.getHealthSystem();
-
-  setParasiteCaseParameters (healthSystem);
-
-  const scnXml::ByAgeItems::ItemSequence& items = healthSystem.getPSequelaeInpatient().getItem();
-  for (int agegrp = 0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
-    for (size_t i = 0; i < items.size(); i++) {
-      if (items[i].getMaxAgeYrs() > SEQUELAE_AGE_BOUND[agegrp]) {
-        probSequelaeTreated[agegrp] =
-          probSequelaeUntreated[agegrp] = items[i].getValue();
-        goto gotItem;
-      }
+void OldCaseManagement::setHealthSystem (int source) {
+    healthSystemSource = source;
+    const scnXml::HealthSystem& healthSystem = getHealthSystem(healthSystemSource);
+    
+    if (source == -1)
+	Episode::healthSystemMemory = healthSystem.getHealthSystemMemory();
+    else if (Episode::healthSystemMemory != healthSystem.getHealthSystemMemory())
+	throw util::xml_scenario_error ("Change of health system had a different healthSystemMemory");
+    
+    setParasiteCaseParameters (healthSystem);
+    
+    const scnXml::ByAgeItems::ItemSequence& items = healthSystem.getPSequelaeInpatient().getItem();
+    for (int agegrp = 0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
+	for (size_t i = 0; i < items.size(); i++) {
+	    if (items[i].getMaxAgeYrs() > SEQUELAE_AGE_BOUND[agegrp]) {
+		probSequelaeTreated[agegrp] =
+		probSequelaeUntreated[agegrp] = items[i].getValue();
+		goto gotItem;
+	    }
+	}
+	throw util::xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
+	gotItem:; // alternative to for ... break ... else
     }
-    throw util::xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
-  gotItem:; // alternative to for ... break ... else
-  }
-
-  readCaseFatalityRatio (healthSystem);
-
-  return healthSystem.getHealthSystemMemory();
+    
+    readCaseFatalityRatio (healthSystem);
 }
 
 
-// -----  non-static construction/desctruction/checkpointing  -----
+// -----  non-static construction/desctruction  -----
 
 OldCaseManagement::OldCaseManagement (double tSF) :
     _latestRegimen (0), _tLastTreatment (Global::TIMESTEP_NEVER), _treatmentSeekingFactor (tSF)
@@ -85,6 +109,14 @@ OldCaseManagement::~OldCaseManagement()
 {
 }
 
+void OldCaseManagement::staticCheckpoint (ostream& stream) {
+    healthSystemSource & stream;
+}
+void OldCaseManagement::staticCheckpoint (istream& stream) {
+    healthSystemSource & stream;
+    if (healthSystemSource != -1)
+	setHealthSystem(healthSystemSource);
+}
 
 // -----  other public  -----
 
@@ -244,7 +276,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
 
 void OldCaseManagement::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
 {
-    const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = InputData.getHealthSystem().getCFR().getGroup();
+    const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = healthSystem.getCFR().getGroup();
 
   int numOfGroups = xmlGroupSeq.size();
   _inputAge.resize (numOfGroups + 1);

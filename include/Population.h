@@ -168,11 +168,20 @@ private:
         * handle. Max age for a scenario is given in the  the xml file. */
         static const int maxLifetimeDays = 32855;
         static const int ngroups = 20;
-
+	
+	//BEGIN static parameters set by init() or calcCumAgeProp()
         //! max lifespan in intervals
 	static int maxTimestepsPerLife;
-
-        /** The bounds for each age group and percentage of population in this age
+	
+	/** Target cumulative percentage of population by age, from oldest age to youngest.
+	*
+	* cumAgeProp[_maxTimestepsPerLife+1-i] gives the proportion of people aged i timesteps or older.
+	*/
+	static vector<double> cumAgeProp;
+	//END
+	
+	//BEGIN static parameters only used by estimateRemovalRates(), setDemoParameters() and calcCumAgeProp()
+	/** The bounds for each age group and percentage of population in this age
         * group for the field data demography age groups.
         *
         * ageGroupBounds[i] is the lower-bound for group i, ageGroupBounds[i+1] is
@@ -197,7 +206,7 @@ private:
         /** Parameters defining smooth curve of target age-distribution.
         *
         * Set by estimateRemovalRates() (via setDemoParameters()) and used by
-        * setupPyramid(). Checkpointed. */
+        * setupPyramid(). */
         //@{
 	static double mu0;
 	static double mu1;
@@ -205,12 +214,7 @@ private:
 	static double alpha1;
 	static double rho;
         //@}
-
-        /** Target cumulative percentage of population by age, from oldest age to youngest.
-        *
-        * cumAgeProp[_maxTimestepsPerLife+1-i] gives the proportion of people aged i timesteps or older.
-        */
-	static vector<double> cumAgeProp;
+	//END
     };
 };
 

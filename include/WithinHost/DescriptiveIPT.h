@@ -50,6 +50,7 @@ public:
   virtual void IPTiTreatment (SurveyAgeGroup ageGroup);
   
   /// Is IPT present?
+  /// set by initParameters
   static bool iptActive;
   
 protected:
@@ -74,8 +75,8 @@ private:
   //!Cumulative number of infections since birth
   int _cumulativeInfections;
   
-  // -----  static data  -----
-  
+  /// @brief Static data set by initParameters
+  //@{
   ///Number of IPTi doses
   static int numberOfIPTiDoses;
   ///Target age for IPTi doses, in time steps
@@ -84,6 +85,7 @@ private:
   static double *iptiCoverage;
   /// Values (codes)
   static int iptiEffect;
+  //@}
 };
 
 } }

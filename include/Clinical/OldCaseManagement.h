@@ -23,7 +23,7 @@
 #include "Clinical/Episode.h"
 
 namespace scnXml {
-  class HealthSystem;
+    class HealthSystem;
 }
 
 namespace OM { namespace Clinical {
@@ -32,7 +32,17 @@ namespace OM { namespace Clinical {
 class OldCaseManagement {
 public:
   /// Initialize static parameters
-  static int init();
+  static void init();
+  
+  static void staticCheckpoint (istream& stream);
+  static void staticCheckpoint (ostream& stream);
+  
+  /** Load health system data from initial data or an intervention's data (both from XML).
+   * (Re)loads all data affected by this healthSystem element.
+   *
+   * @param source Values have same meaning as healthSystemSource variable. */
+  static void setHealthSystem (int source);
+  
   
   //!Read caseManagement parameters from input file and allocate data structures.
   OldCaseManagement(double tSF);
@@ -101,16 +111,28 @@ private:
   static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen);
 
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
-  //@{
   static void setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem);
-  //@}
   
-  static double probGetsTreatment[3];
-  static double probParasitesCleared[3];
-  static double cureRate[3];
+  //! Reads in the Case Fatality percentages from the XML.
+  /*! This replaces the reading from CaseFatalityByAge.csv.Note that we could
+    calculate and cache the CFR as a function of age in years for better
+    performance. This would require a specification of the resolution.
+  */
+  static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
   
   //log odds ratio of case-fatality in community compared to hospital
+  //set only by init()
   static double _oddsRatioThreshold;
+  
+  /** Describes which health-system descriptor should be used. Checkpointed.
+   *
+   * When -1, InputData.getHealthSystem() should be used. When >=0, the one described in
+   * intervention description at timestep healthSystemSource should be used. */
+  static int healthSystemSource;
+  
+  //BEGIN Static parameters, set by setHealthSystem()
+  // These parameters are reset via a setHealthSystem call on checkpoint
+  // load rather than checkpointed.
   
   /// Age bounds of probSequelae* parameters
   //@{
@@ -126,6 +148,10 @@ private:
    */
   static double probSequelaeUntreated[2];
 
+  static double probGetsTreatment[3];
+  static double probParasitesCleared[3];
+  static double cureRate[3];
+  
   /// shortcut: if there is only one CFR group, and the CFR is 0, set this to true.
   static bool _noMortality;
   
@@ -137,13 +163,7 @@ private:
    * entry. */
   static std::vector<double> _caseFatalityRate;
   //@}
-
-  //! Reads in the Case Fatality percentages from the XML.
-  /*! This replaces the reading from CaseFatalityByAge.csv.Note that we could
-    calculate and cache the CFR as a function of age in years for better
-    performance. This would require a specification of the resolution.
-  */
-  static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
+  //END
 };
 
 } }

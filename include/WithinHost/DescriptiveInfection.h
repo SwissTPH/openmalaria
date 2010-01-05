@@ -113,6 +113,7 @@ public:
   virtual void IPTattenuateAsexualDensity () {}
   
   /// pre-erythrocytic latent period, in time steps
+  /// set by initParameters
   //Note: here for convenience; used by DescriptiveInfection and DescriptiveIPT
   static int latentp;
   
@@ -124,8 +125,8 @@ protected:
   int _duration; 
   
 private:
-  // -----  static  -----
-  
+  /// @brief Static parameters set by initParameters
+  //@{
   //! Density distributions
   /*!
     Mean Log Parasite Count at time step i for an infection that lasts j days.
@@ -136,6 +137,7 @@ private:
   static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
 
   static double xNuStar; //!< XNuStar in AJTM p.9 eq. 13
+  //@}
 };
 
 } }

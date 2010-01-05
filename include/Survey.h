@@ -139,19 +139,22 @@ class SurveyAgeGroup {
     /// Initialize _lowerbound and _upperbound
     static void init ();
     
-    static double _lowerbound; //!< Lower boundary of the youngest agegroup
+    //BEGIN Static parameters only set by init()
+    /// Lower boundary of the youngest agegroup
+    static double _lowerbound;
     /** Upper boundary of agegroups, in years.
      *
      * These are age-groups given in XML plus one with no upper limit for
      * individuals outside other bounds. */
-    static vector<double> _upperbound; 
+    static vector<double> _upperbound;
+    //END
     
     friend class Survey;
 };
 
 /// Data struct for a single survey.
 class Survey {
-  ///@brief Static members (options from XML)
+  ///@brief Static members (options from XML). Parameters only set by init().
   //@{
   private:
     /// Initialize static parameters.

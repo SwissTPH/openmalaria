@@ -86,11 +86,11 @@ private:
   double _patentGrowthRateMultiplier;
   
   ///@brief Static variables
+  ///Set by initParameters and some reset by overrideInflationFactors
   //@{
   static const int _maximumDurationInDays=418; 
   static double _maximumPermittedAmplificationPerCycle;
   static double _subPatentLimit;
-  static double _lambda;
   static double _alpha1;
   static double _alpha2;	
   static double _alpha3;

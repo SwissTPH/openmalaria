@@ -91,7 +91,7 @@ private:
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;
   
-  /// @name genotypes
+  /// @brief genotypes, set by initParameters
   //@{
   static int numberOfGenoTypes;
   static double *genotypeFreq;

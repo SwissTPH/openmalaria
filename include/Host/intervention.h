@@ -38,7 +38,9 @@ namespace OM { namespace Host {
  * Used to represent PEV, BSV and TBV vaccines.
  * Each that has a descriptor is applied
  * simultaneously by a continuous or timed intervention strategy (no
- * way to determine which are used). */
+ * way to determine which are used).
+ *
+ * All parameters (inc. non-static) are only set by initParameters(). */
 class Vaccine {
 public:
   // Static:

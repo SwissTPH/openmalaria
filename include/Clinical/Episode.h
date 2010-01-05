@@ -65,7 +65,10 @@ public:
    * another event to be considered part of the same episode.
    * 
    * Used by both the clinical models in roughly the same way, but will have
-   * different values in each to match Global::interval. */
+   * different values in each to match Global::interval.
+   * 
+   * Set by either ClinicalEventScheduler::init () or
+   * ClinicalImmediateOutcomes::initParameters (). */
   static int healthSystemMemory;
   
 private:

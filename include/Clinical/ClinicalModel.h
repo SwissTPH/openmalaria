@@ -113,10 +113,15 @@ public:
   }
   
 private:
+    ///@brief Infant death summaries (checkpointed).
+    //@{
     static vector<int> infantDeaths;
     static vector<int> infantIntervalsAtRisk;
+    //@}
     
-    static double _nonMalariaMortality; //!< Non-malaria mortality in under 1year olds.
+    /// Non-malaria mortality in under 1year olds.
+    /// Set by init ()
+    static double _nonMalariaMortality;
   
 protected:
   /// Constructor.

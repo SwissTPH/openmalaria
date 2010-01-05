@@ -204,6 +204,7 @@ namespace Interventions {
 	std::map<int, const scnXml::Intervention*> timedInterventions;
 	bitset<Interventions::SIZE> activeInterventions;
     };
+    /// InputData entry point. Most set up done before sim start, but changeHealthSystem() and documentChanged members allow changes which aren't checkpointed. TODO
     extern InputDataType InputData;
 }
 #endif

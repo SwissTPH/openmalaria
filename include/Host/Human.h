@@ -190,6 +190,7 @@ private:
    * _ylag[simulationTime % _ylagLen] corresponds to current timestep. */
   vector<double> _ylag;
   /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
+  /// set by initHumanParameters
   static int _ylagLen;
   
   //!Date of birth, time step since start of warmup

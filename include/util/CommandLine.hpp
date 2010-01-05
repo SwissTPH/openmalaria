@@ -65,6 +65,7 @@ namespace OM { namespace util {
 	static void staticCheckpoint (ostream& stream);	///< ditto
 	
     private:
+	// Static parameters: set by parse _and_ checked on checkpoint load
 	static bitset<NUM_OPTIONS> options;	// boolean options
 	static string resourcePath;
     };

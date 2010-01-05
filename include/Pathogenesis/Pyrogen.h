@@ -54,6 +54,8 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
+  ///@brief Static vars set by init ()
+  //@{
   // Ystar2: critical value in determining increase in pyrogenic threshold
   static double Ystar2_13;
   //alpha: factor determining increase in pyrogenic threshold
@@ -63,6 +65,7 @@ private:
   static double smuY;
   //Pyrogenic threshold at birth (Y*0)
   static double initPyroThres;
+  //@}
 };
 
 } }

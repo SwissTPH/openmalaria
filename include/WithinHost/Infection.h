@@ -28,9 +28,6 @@ namespace OM { namespace WithinHost {
     
 class Infection {
 public:
-  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
-  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
-  
   static void init();
   
   Infection () :
@@ -76,6 +73,12 @@ protected:
   //! Cumulative parasite density, since start of this infection
   double _cumulativeExposureJ;
   
+  /// @brief Static data set by init
+  //@{
+public:
+  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
+  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
+  
 private:
   static double alpha_m; //!< Maternal protection at birth
   
@@ -84,7 +87,7 @@ private:
   decay rate of maternal protection in years^(-1).
   */
   static double decayM;
-  
+  //@}
 };
 
 } }

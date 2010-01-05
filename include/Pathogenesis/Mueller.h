@@ -43,8 +43,11 @@ public:
   static void init();
 
 private:
+  ///@brief static vars set by init()
+  //@{
   static double rateMultiplier_31;
   static double densityExponent_32;
+  //@}
 };
 
 } }

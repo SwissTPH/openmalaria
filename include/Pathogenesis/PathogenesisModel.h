@@ -77,7 +77,9 @@ protected:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
-private:	// static
+private:
+  ///@brief static vars set by init()
+  //@{
   //comorbidity prevalence at birth as a risk factor for indirect
   static double indirRiskCoFactor_18;
   //sevMal: critical density for severe malaria episode (Y*B1)
@@ -86,6 +88,7 @@ private:	// static
   static double critAgeComorb_30;
   //comorbidity prevalence at birth as a risk factor for severe
   static double comorbintercept_24;
+  //@}
   
 protected:	// non-static
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
