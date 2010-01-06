@@ -44,12 +44,16 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 12;
+    static final int CURRENT_VERSION = 13;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
     private static boolean doTranslation = true;
     private static boolean doDBUpdate = false;
+    private enum BugCorrectionBehaviour {
+	none, correct, dontCorrect;
+    }
+    private static BugCorrectionBehaviour maxDensBug = BugCorrectionBehaviour.none; 
 
     public SchemaTranslator() {
         try {
@@ -499,6 +503,64 @@ public class SchemaTranslator {
 	return true;
     }
     
+    // Version 13 replaced the modelVersion list with a ModelOptions section.
+    // As such, old scenarios are definitely incompatible with the new code.
+    public Boolean translate12To13() throws Exception {
+	final int NUM_VERSIONS = 23;
+	String[] num2String = new String[NUM_VERSIONS];
+	num2String[1] = "PENALISATION_EPISODES";
+	num2String[2] = "NEGATIVE_BINOMIAL_MASS_ACTION";
+	num2String[3] = "ATTENUATION_ASEXUAL_DENSITY";
+	num2String[4] = "LOGNORMAL_MASS_ACTION";
+	num2String[5] = "NO_PRE_ERYTHROCYTIC";
+	num2String[6] = "MAX_DENS_CORRECTION";
+	num2String[7] = "INNATE_MAX_DENS";
+	num2String[8] = "MAX_DENS_RESET";
+	num2String[9] = "DUMMY_WITHIN_HOST_MODEL";
+	num2String[10] = "PREDETERMINED_EPISODES";
+	num2String[11] = "NON_MALARIA_FEVERS";
+	num2String[12] = "INCLUDES_PK_PD";
+	num2String[13] = "CLINICAL_EVENT_SCHEDULER";
+	num2String[14] = "MUELLER_PRESENTATION_MODEL";
+	num2String[15] = "TRANS_HET";
+	num2String[16] = "COMORB_HET";
+	num2String[17] = "TREAT_HET";
+	num2String[18] = "COMORB_TRANS_HET";
+	num2String[19] = "TRANS_TREAT_HET";
+	num2String[20] = "COMORB_TREAT_HET";
+	num2String[21] = "TRIPLE_HET";
+	num2String[22] = "EMPIRICAL_WITHIN_HOST_MODEL";
+	
+	Element modelOptions = scenarioDocument.createElement ("ModelOptions");
+	int verFlags = Integer.parseInt (scenarioElement.getAttribute ("modelVersion"));
+	
+	for (int i = 1; i < NUM_VERSIONS; ++i) {
+	    if ((verFlags & (1 << i)) != 0) {
+		Element opt = scenarioDocument.createElement ("option");
+		opt.setAttribute ("name", num2String[i]);
+		opt.setAttribute ("value", "true");
+		modelOptions.appendChild (opt);
+	    }
+	}
+	if ((verFlags & (1 << 6)) == 0 && (verFlags & (1<<9)) == 0 && (verFlags & (1<<22)) == 0) {
+	    if (maxDensBug == BugCorrectionBehaviour.correct) {
+		// option is enabled by default so don't need to add it
+	    } else if (maxDensBug == BugCorrectionBehaviour.dontCorrect) {
+		Element opt = scenarioDocument.createElement ("option");
+		opt.setAttribute ("name", num2String[6]);
+		opt.setAttribute ("value", "false");
+		modelOptions.appendChild (opt);
+	    } else {
+		System.err.println ("scenario doesn't include MAX_DENS_CORRECTION: please specify --maxDensCorrection BOOL");
+		return false;
+	    }
+	}
+	
+	scenarioElement.insertBefore(modelOptions, scenarioElement.getFirstChild());
+	scenarioElement.removeAttribute ("modelVersion");
+	return true;
+    }
+    
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {
             String[] children = file.list();
@@ -529,6 +591,16 @@ public class SchemaTranslator {
                 doTranslation = false;
             } else if (args[i].equals("--update-db")) {
                 doDBUpdate = true;
+	    } else if (args[i].equals("--maxDensCorrection")) {
+		String arg = args[++i];
+		if (arg.equalsIgnoreCase("true")) {
+		    maxDensBug = BugCorrectionBehaviour.correct;
+		} else if (arg.equalsIgnoreCase("false")) {
+		    maxDensBug = BugCorrectionBehaviour.dontCorrect;
+		} else {
+		    System.err.println ("--maxDensCorrection: expected true or false");
+		    System.exit (2);
+		}
             } else {
                 printUsage();
             }
@@ -566,7 +638,8 @@ public class SchemaTranslator {
                         + "--required_version VERSION\tThe version number to update the document(s) to. Default: CURRENT_VERSION"
                         + "--no-validation\t\tDon't validate the result"
                         + "--no-translation\t\tDon't write out the translated result (but still translate internally for validation)"
-                        + "--update-db\t\tUpdate DB entries instead of files ");
+                        + "--update-db\t\tUpdate DB entries instead of files"
+                        + "--maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false to explicitly exclude it.");
         System.exit(1);
     }
 }

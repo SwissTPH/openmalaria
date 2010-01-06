@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" modelVersion="1024" name="Idete Incidence" popSize="300" schemaVersion="12" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_12.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" name="Idete Incidence" popSize="300" schemaVersion="13" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_13.xsd"><ModelOptions><option name="PREDETERMINED_EPISODES" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
