@@ -104,9 +104,6 @@ private:
     void checkpoint (ostream& stream);
 
 
-    /// ID passed to last Human created. Checkpointed.
-    static int IDCounter;
-
     //! Size of the human population
     int populationSize;
 

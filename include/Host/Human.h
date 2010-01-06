@@ -43,11 +43,12 @@ public:
   //@{
   /** Initialise all variables of a human datatype.
    * 
+   * \param tm Transmission model reference (to initialize TM code)
    * \param ID unique identifier
    * \param dateOfBirth date of birth in time steps (equal to simulationTime,
    *	except for initial population set up)
    * \param simulationTime Simulation timestep */
-  Human(Transmission::TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime);
+  Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulationTime);
 
   /** Destructor
    * 
@@ -70,7 +71,6 @@ public:
       (*clinicalModel) & stream;
       _ylag & stream;
       _dateOfBirth & stream;
-      //_ID & stream;
       _lastVaccineDose & stream;
       _BSVEfficacy & stream;
       _PEVEfficacy & stream;
@@ -195,9 +195,6 @@ private:
   
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
-  
-  // !unique identifier
-  //int _ID;
   
   /** Number of vaccine doses this individual has received.
    *

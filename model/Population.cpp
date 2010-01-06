@@ -43,19 +43,7 @@ namespace OM
 
 // -----  Population: static data / methods  -----
 
-int Population::IDCounter;
 int Population::workUnitIdentifier;
-
-// Theoretical optimisation: don't include individuals who will die before the
-// start of the main simulation in the initialisation.
-// Two consequences:
-// setRiskFromMaternalInfection uses some of these individuals. Could enforce
-// this for initialisation, or just ignore (probably won't have much effect).
-// And it's practially impossible to keep the same random number stream, so
-// comparing results for testing isn't easy.
-//
-// No longer possible due to new Vector init.
-const bool InitPopOpt = false;
 
 #ifdef OMP_CSV_REPORTING
 ofstream csvReporting;
@@ -74,7 +62,6 @@ void Population::init()
     AgeStructure::init ();
     
     workUnitIdentifier = InputData.get_wu_id();
-    IDCounter = 0;
 }
 
 void Population::clear()
@@ -92,7 +79,6 @@ void Population::staticCheckpoint (istream& stream)
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
     
-    IDCounter & stream;
     workUnitIdentifier & stream;
     
     // Check scenario.xml and checkpoint files correspond:
@@ -105,7 +91,6 @@ void Population::staticCheckpoint (ostream& stream)
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
     
-    IDCounter & stream;
     workUnitIdentifier & stream;
 }
 
@@ -135,7 +120,7 @@ void Population::checkpoint (istream& stream)
     while (popSize > 0 && !stream.eof()) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back (Host::Human (*_transmissionModel, 0, 0, 0));
+        population.push_back (Host::Human (*_transmissionModel, 0, 0));
         population.back() & stream;
         --popSize;
     }
@@ -162,9 +147,8 @@ void Population::createInitialHumans ()
     for (int iage = AgeStructure::getMaxTimestepsPerLife() - 2; iage >= 0; iage--) {
 	int targetPop = AgeStructure::targetCumPop (2+iage, populationSize);
 	while (cumulativePop < targetPop) {
-	    if (InitPopOpt && iage > 0) {} // only those with age 0 should be created here
-		else newHuman (-iage);
-		++cumulativePop;
+	    newHuman (-iage);
+	    ++cumulativePop;
 	}
     }
     /*    for (int j = 1;j < maxTimestepsPerLife; j++) {
@@ -187,8 +171,7 @@ void Population::createInitialHumans ()
 
 void Population::newHuman (int dob)
 {
-    ++IDCounter;
-    population.push_back (Host::Human (*_transmissionModel, IDCounter, dob, Global::simulationTime));
+    population.push_back (Host::Human (*_transmissionModel, dob, Global::simulationTime));
 }
 
 void Population::update1()
@@ -237,12 +220,6 @@ void Population::update1()
     } // end of per-human updates
 
     // increase population size to targetPop
-    if (InitPopOpt && Global::simulationTime < Global::maxAgeIntervals) {
-        // We only want people at oldest,
-        //  Global::maxAgeIntervals - (Global::maxAgeIntervals-Global::simulationTime)
-        // Hence pop size available is (total - popSize for anyone older):
-        targetPop = targetPop - AgeStructure::targetCumPop (Global::simulationTime + 1, targetPop);
-    }
     while (cumPop < targetPop) {
         newHuman (Global::simulationTime);
         //++nCounter;

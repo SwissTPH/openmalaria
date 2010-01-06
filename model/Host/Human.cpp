@@ -63,11 +63,11 @@ void Human::clear() {	// static clear
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(Transmission::TransmissionModel& tm, int ID, int dateOfBirth, int simulationTime) :
+Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulationTime) :
     perHostTransmission(),
     infIncidence(InfectionIncidenceModel::createModel()),
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
-    _dateOfBirth(dateOfBirth), /*_ID(ID),*/
+    _dateOfBirth(dateOfBirth),
     _lastVaccineDose(0),
     _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
     _probTransmissionToMosquito(0.0)
