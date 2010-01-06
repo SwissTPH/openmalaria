@@ -36,7 +36,7 @@ class HoshenPkPdSuite : public CxxTest::TestSuite
 public:
   HoshenPkPdSuite () {
     Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
-    util::ModelOptions::set (util::INCLUDES_PK_PD);
+    util::ModelOptions::optSet.set (util::INCLUDES_PK_PD);
     PkPdModel::init ();
   }
   

@@ -50,7 +50,7 @@ Simulation::Simulation()
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
     gsl::setUp();
-    util::ModelOptions::set (InputData.get_model_version());
+    util::ModelOptions::init ();
     Surveys.init();
     Population::init();
     _population = new Population();

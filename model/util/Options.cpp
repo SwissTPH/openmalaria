@@ -33,7 +33,7 @@ namespace OM { namespace util {
     
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
-    ModelVersion ModelOptions::modelVersion;
+    std::bitset<NUM_OPTIONS> ModelOptions::optSet;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -157,53 +157,103 @@ namespace OM { namespace util {
 	resourcePath & stream;
     }
     
-    void ModelOptions::set(int opts) {
-	modelVersion = (ModelVersion) opts;
+    void ModelOptions::init () {
+	// Lookup table to translate the strings used in the XML file to the internal enumerated values:
+	map<string,OptionCodes> codeMap;
+	codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
+	codeMap["NEGATIVE_BINOMIAL_MASS_ACTION"] = NEGATIVE_BINOMIAL_MASS_ACTION;
+	codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
+	codeMap["LOGNORMAL_MASS_ACTION"] = LOGNORMAL_MASS_ACTION;
+	codeMap["NO_PRE_ERYTHROCYTIC"] = NO_PRE_ERYTHROCYTIC;
+	codeMap["MAX_DENS_CORRECTION"] = MAX_DENS_CORRECTION;
+	codeMap["INNATE_MAX_DENS"] = INNATE_MAX_DENS;
+	codeMap["MAX_DENS_RESET"] = MAX_DENS_RESET;
+	codeMap["DUMMY_WITHIN_HOST_MODEL"] = DUMMY_WITHIN_HOST_MODEL;
+	codeMap["PREDETERMINED_EPISODES"] = PREDETERMINED_EPISODES;
+	codeMap["NON_MALARIA_FEVERS"] = NON_MALARIA_FEVERS;
+	codeMap["INCLUDES_PK_PD"] = INCLUDES_PK_PD;
+	codeMap["CLINICAL_EVENT_SCHEDULER"] = CLINICAL_EVENT_SCHEDULER;
+	codeMap["MUELLER_PRESENTATION_MODEL"] = MUELLER_PRESENTATION_MODEL;
+	codeMap["TRANS_HET"] = TRANS_HET;
+	codeMap["COMORB_HET"] = COMORB_HET;
+	codeMap["TREAT_HET"] = TREAT_HET;
+	codeMap["COMORB_TRANS_HET"] = COMORB_TRANS_HET;
+	codeMap["TRANS_TREAT_HET"] = TRANS_TREAT_HET;
+	codeMap["COMORB_TREAT_HET"] = COMORB_TREAT_HET;
+	codeMap["TRIPLE_HET"] = TRIPLE_HET;
+	codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
 	
-	// Or'd flags of incompatibility triangle from
-	// "description of variables for interface" excel sheet
-	const int INCOMPATIBLITITIES[NUM_VERSIONS] = {
-	    1,	// non-existent, so make it incompatible with itself
-	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// 1
-	    LOGNORMAL_MASS_ACTION | ANY_TRANS_HET,	// 2
-	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// 3
-	    ANY_TRANS_HET,	// 4
-	    ANY_TRANS_HET,	// 5
-	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// 6
-	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// 7
-	    DUMMY_WITHIN_HOST_MODEL,	// 8
-	    0,	// 9
-	    0,	// 10
-	    MUELLER_PRESENTATION_MODEL,	// 11
-	    0,	// 12
-	    0,	// 13
-	    0,	// 14
-	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 15
-	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 16
-	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,	// 17
-	    TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,   // 18
-	    COMORB_TREAT_HET | TRIPLE_HET,	// 19
-	    TRIPLE_HET,	// 20
-	    0,	// 21
-	    DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD) // 22
-	};
+	// State of all default options:
+	bitset<NUM_OPTIONS> defaultOptSet;
+	defaultOptSet.set (MAX_DENS_CORRECTION);
 	
+	// Set optSet to defaults, then override any given in the XML file:
+	optSet = defaultOptSet;
+	
+	const scnXml::ModelOptions::OptionSequence& optSeq = InputData.getScenario().getModelOptions().getOption();
+	for (scnXml::ModelOptions::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
+	    map<string,OptionCodes>::iterator codeIt = codeMap.find (it->getName());
+	    if (codeIt == codeMap.end()) {
+		ostringstream msg;
+		msg << "Unrecognised option: ";
+		msg << it->getName();
+		throw xml_scenario_error(msg.str());
+	    }
+	    optSet[codeIt->second] = it->getValue();
+	}
+	
+	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_VERSION)) {
-	    cout << "Model flags:";
-	    for (int i = 0; i < NUM_VERSIONS; ++i) {
-		if ((modelVersion >> i) & 1)
-		    cout << " 1<<"<<i;
+	    cout << "Non-default model options:";
+	    for (int i = 0; i < NUM_OPTIONS; ++i) {
+		if (optSet[i] != defaultOptSet[i]) {
+		    // reverse-lookup in map; only used for "--print-model" option so efficiency is unimportant:
+		    for (map<string,OptionCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
+			if (codeIt->second == i) {
+			    cout << "\t" << codeIt->first << "=" << optSet[i];
+			    break;
+			}
+		    }
+		}
 	    }
 	    cout << endl;
 	}
 	
+	/* TODO: test incompatible options
+	// Or'd flags of incompatibility triangle from
+	// "description of variables for interface" excel sheet
+	const int INCOMPATIBLITITIES[NUM_OPTIONS] = {
+	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,	// PENALISATION_EPISODES
+	    LOGNORMAL_MASS_ACTION | ANY_TRANS_HET,	// NEGATIVE_BINOMIAL_MASS_ACTION
+	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,
+	    ANY_TRANS_HET,
+	    ANY_TRANS_HET,
+	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD | ANY_TRANS_HET,	// MAX_DENS_CORRECTION
+	    DUMMY_WITHIN_HOST_MODEL | INCLUDES_PK_PD,
+	    DUMMY_WITHIN_HOST_MODEL,
+	    0,
+	    0,
+	    MUELLER_PRESENTATION_MODEL,
+	    0,
+	    0,
+	    0,
+	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,
+	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,
+	    COMORB_TRANS_HET | TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,
+	    TRANS_TREAT_HET | COMORB_TREAT_HET | TRIPLE_HET,
+	    COMORB_TREAT_HET | TRIPLE_HET,
+	    TRIPLE_HET,
+	    0,
+	    DUMMY_WITHIN_HOST_MODEL | (!INCLUDES_PK_PD)
+	};
+	
 	for (size_t i = 0; i < NUM_VERSIONS; ++i) {
-	    if (((modelVersion >> i) & 1) &&
-		modelVersion & INCOMPATIBLITITIES[i]) {
+	    if (((optSet >> i) & 1) &&
+		optSet & INCOMPATIBLITITIES[i]) {
 		ostringstream msg;
 	    msg << "Incompatible model versions: flag 1<<" << i
 	    << " is incompatible with flags: ";
-	    int incompat = (modelVersion & INCOMPATIBLITITIES[i]);
+	    int incompat = (optSet & INCOMPATIBLITITIES[i]);
 	    for (int i = 0; i < NUM_VERSIONS; ++i) {
 		if ((incompat >> i) & 1)
 		    msg << " 1<<"<<i;
@@ -212,7 +262,8 @@ namespace OM { namespace util {
 	    throw xml_scenario_error (msg.str());
 	    }
 	}
-	if ((modelVersion & MAX_DENS_RESET) && !(modelVersion & MAX_DENS_CORRECTION))
+	*/
+	if ((optSet[MAX_DENS_RESET]) && !(optSet[MAX_DENS_CORRECTION]))
 	    throw xml_scenario_error ("MAX_DENS_RESET without MAX_DENS_CORRECTION doesn't make sense.");
 	
 	if (CommandLine::option (util::CommandLine::PRINT_MODEL_VERSION))

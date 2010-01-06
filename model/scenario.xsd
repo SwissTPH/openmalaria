@@ -7,6 +7,31 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="ModelOptions">
+          <xs:annotation>
+            <xs:documentation>
+              List of true/false options. Each option has a default value (may
+              be true or false) which is used if the option is not listed here.
+              
+              The list of recognised options can be found in the code at:
+              include/util/ModelOptions.hpp and should also be in the wiki.
+            </xs:documentation>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:attribute name="name" type="xs:string" use="required">
+                    <xs:annotation>
+                      <xs:documentation>Option name</xs:documentation>
+		    </xs:annotation>
+		  </xs:attribute>
+		  <xs:attribute name="value" type="xs:boolean" use="required"/>
+		</xs:complexType>
+	      </xs:element>
+	    </xs:sequence>
+	  </xs:complexType>
+        </xs:element>
         <xs:element name="demography" type="demography">
           <xs:annotation>
             <xs:documentation>
@@ -115,14 +140,6 @@
           <xs:documentation>Population size</xs:documentation>
           <xs:appinfo>
             units:Count;min:1;max:100000;
-          </xs:appinfo>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="modelVersion" type="xs:int" use="required">
-        <xs:annotation>
-          <xs:documentation>Model Version</xs:documentation>
-          <xs:appinfo>
-            units:Code;min:0;max:100000000;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>

@@ -77,7 +77,7 @@ void InfectionIncidenceModel::init () {
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
   }
   
-  if (util::ModelOptions::option (util::ANY_TRANS_HET))
+  if (util::ModelOptions::anyTransHet())
     cerr << "Warning: will use heterogeneity workaround." << endl;
 }
 
@@ -90,7 +90,7 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
   } else if(util::ModelOptions::option (util::LOGNORMAL_MASS_ACTION)) {
     return new LogNormalMAII ();
   } else {
-    if (util::ModelOptions::option (util::ANY_TRANS_HET))
+    if (util::ModelOptions::anyTransHet())
       return new HeterogeneityWorkaroundII();
     else
       return new InfectionIncidenceModel();

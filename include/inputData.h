@@ -113,7 +113,10 @@ namespace Interventions {
 	* Some elements in memory have been created. This function deletes the object in memory
 	*/
 	void cleanDocument();
-
+	
+	/// Get the base scenario element
+	const scnXml::Scenario& getScenario();
+	
 	/// Get the Monitoring xml object
 	const scnXml::Monitoring& getMonitoring();
 	/// Get the Interventions xml object
@@ -166,7 +169,6 @@ namespace Interventions {
 	double get_lowerbound(); 
 
 	// For global / simulation:
-	int get_model_version();
 	double get_maximum_ageyrs();
 	int get_latentp(); 
 	int get_interval(); 

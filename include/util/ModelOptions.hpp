@@ -21,10 +21,14 @@
 #ifndef Hmod_util_ModelOptions
 #define Hmod_util_ModelOptions
 
+#include <bitset>
+
+class HoshenPkPdSuite;
+
 namespace OM { namespace util {
     
     /** Flags signalling which versions of some models to use. */
-    enum ModelVersion {
+    enum OptionCodes {
 	/* Values are written here using left-shifts. 1 << x is equal to pow(2,x)
 	* for integers, so each value here has only one bit true in binary, allowing
 	* the bits to be used as flags: http://en.wikipedia.org/wiki/Flag_byte
@@ -39,7 +43,7 @@ namespace OM { namespace util {
 	* 
 	* Default: Clinical events have no effect on immune status except
 	* secondarily via effects of treatment. */
-	PENALISATION_EPISODES = 1 << 1,
+	PENALISATION_EPISODES = 0,
 	
 	/** @brief Baseline availability of humans is sampled from a gamma distribution
 	* Infections introduced by mass action with negative binomial
@@ -47,12 +51,12 @@ namespace OM { namespace util {
 	* 
 	* Default: New infections are introduced via a Poisson process as described
 	* in AJTMH 75 (suppl 2) pp11-18. */
-	NEGATIVE_BINOMIAL_MASS_ACTION = 1 << 2,
+	NEGATIVE_BINOMIAL_MASS_ACTION,
 	
 	/** @brief 
 	* 
 	* Does nothing if IPT is not present. */
-	ATTENUATION_ASEXUAL_DENSITY = 1 << 3,
+	ATTENUATION_ASEXUAL_DENSITY,
 	
 	/** @brief Baseline availability of humans is sampled from a log normal distribution
 	* 
@@ -61,10 +65,10 @@ namespace OM { namespace util {
 	* 
 	* Default: New infections are introduced via a Poisson process as described
 	* in AJTMH 75 (suppl 2) pp11-18. */
-	LOGNORMAL_MASS_ACTION = 1 << 4,
+	LOGNORMAL_MASS_ACTION,
 	
 	/** Infections are introduced without using preerythrocytic immunity. */
-	NO_PRE_ERYTHROCYTIC = 1 << 5,
+	NO_PRE_ERYTHROCYTIC,
 	
 	/** @brief Bug fixes in Descriptive & DescriptiveIPT within-host models.
 	*
@@ -74,45 +78,45 @@ namespace OM { namespace util {
 	* MAX_DENS_RESET is not used since it is unneeded when MAX_DENS_CORRECTION
 	* is present and wouldn't make sense when not. */
 	// @{
-	MAX_DENS_CORRECTION = 1 << 6,
-	INNATE_MAX_DENS = 1 << 7,
-	MAX_DENS_RESET = 1 << 8,
+	MAX_DENS_CORRECTION,
+	INNATE_MAX_DENS,
+	MAX_DENS_RESET,
 	//@}
 	
 	/** @brief Parasite densities are predicted from an autoregressive process
 	*
 	* Default: Parasite densities are determined from the descriptive model
 	* given in AJTMH 75 (suppl 2) pp19-31 .*/
-	DUMMY_WITHIN_HOST_MODEL = 1 << 9,
+	DUMMY_WITHIN_HOST_MODEL,
 	
 	/** Clinical episodes occur if parasitaemia exceeds the pyrogenic threshold.
 	* 
 	* Default: Clinical episodes are a stochastic function as described in AJTMH
 	* 75 (suppl 2) pp56-62. */
-	PREDETERMINED_EPISODES = 1 << 10,
+	PREDETERMINED_EPISODES,
 	
 	/** @brief The presentation model includes simulation of non-malaria fevers
 	* 
 	* Default: Non-malaria fevers are not simulated. */
-	NON_MALARIA_FEVERS = 1 << 11,
+	NON_MALARIA_FEVERS,
 	
 	/** @brief Pharmacokinetic and pharmacodynamics of drugs are simulated
 	* 
 	* Default: Drugs have all or nothing effects (except in certain IPTi
 	* models). */
-	INCLUDES_PK_PD = 1 << 12,
+	INCLUDES_PK_PD,
 	
 	/** @brief Use revised clinical and case management model, ClinicalEventScheduler
 	* 
 	* Default: use the Tediosi et al case management model (Case management as
 	* described in AJTMH 75 (suppl 2) pp90-103), ClinicalImmediateOutcomes. */
-	CLINICAL_EVENT_SCHEDULER = 1 << 13,
+	CLINICAL_EVENT_SCHEDULER,
 	
 	/** @brief Clinical episodes occur in response to a simple parasite density trigger
 	* 
 	* Default: Use the Ross et al presentation model (Clinical episodes are a
 	* stochastic function as described in AJTMH 75 (suppl 2) pp56-62). */
-	MUELLER_PRESENTATION_MODEL = 1 << 14,
+	MUELLER_PRESENTATION_MODEL,
 	
 	/** @brief Simple heterogeneity
 	* 
@@ -124,53 +128,55 @@ namespace OM { namespace util {
 	* compatible. */
 	// @{
 	/// @brief Allow simple heterogeneity in transmission
-	TRANS_HET = 1 << 15,
+	TRANS_HET,
 	/// @brief Allow simple heterogeneity in comorbidity
-	COMORB_HET = 1 << 16,
+	COMORB_HET,
 	/// @brief Allow simple heterogeneity in treatment seeking
-	TREAT_HET = 1 << 17,
+	TREAT_HET,
 	/// @brief Allow correlated heterogeneities in transmission and comorbidity
-	COMORB_TRANS_HET = 1 << 18,
+	COMORB_TRANS_HET,
 	/// @brief Allow correlated heterogeneities in transmission and treatment seeking
-	TRANS_TREAT_HET = 1 << 19,
+	TRANS_TREAT_HET,
 	/// @brief Allow correlated heterogeneities comorbidity and treatment seeking
-	COMORB_TREAT_HET = 1 << 20,
+	COMORB_TREAT_HET,
 	/// @brief Allow correlated heterogeneities in transmission, comorbidity and treatment seeking
-	TRIPLE_HET = 1 << 21,
+	TRIPLE_HET,
 	
 	/** @brief Parasite densities are predicted from an empirical model
 	*/
-	EMPIRICAL_WITHIN_HOST_MODEL = 1 << 22,
-	
-	/// Used to test if any heterogeneity is present
-	ANY_HET = TRANS_HET|COMORB_HET|TREAT_HET|COMORB_TRANS_HET|TRANS_TREAT_HET|TRIPLE_HET,
-	ANY_TRANS_HET =  TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET,
+	EMPIRICAL_WITHIN_HOST_MODEL,
 	// @}
 	
-	// Used by tests; should be 1 plus highest left-shift value of 1
-	NUM_VERSIONS = 23,
+	// Used by tests; should be 1 more than largest option
+	NUM_OPTIONS,
     };
     
     
     /// Encapsulation for "modelVersion" xml attribute
     class ModelOptions {
     public:
-	/** Return true if given option (from CommandLine::Options) is active. */
-	static inline bool option(ModelVersion code) {
-	    return modelVersion & code;
+	/** Return true if given option (from OptionCodes) is active. */
+	static inline bool option(OptionCodes code) {
+	    return optSet[code];
+	}
+	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
+	 * TRIPLE_HET are active. */
+	static inline bool anyTransHet () {
+	    std::bitset<NUM_OPTIONS> anyHet;
+	    anyHet.set (TRANS_HET).set (COMORB_TRANS_HET).set (TRANS_TREAT_HET).set (TRIPLE_HET);
+	    return (optSet & anyHet).any();
 	}
 	
-	/// Set options from opts, checking for incompatible versions.
-	static void set (int opts);
+	/// Set options from XML file
+	static void init ();
 	
     private:
-	/** Model version defines which implementations of hard-coded options should be
-	* used. The integer value of modelVersion passed from the .xml is converted to
-	* binary with each bit corresponding to a different dichotomous option.  The
-	* original default model is modelVersion=0 */
-	// Note: the representation could be changed to use bitset or something, allowing more than 32
-	// options here. XML representation should also be changed (optional attributes? binary string?).
-	static ModelVersion modelVersion;
+	/** Model options.
+	 *
+	 * Default value set by init(). */
+	static std::bitset<NUM_OPTIONS> optSet;
+	
+	friend class ::HoshenPkPdSuite;	// Note: class is in base namespace
     };
 } }
 #endif

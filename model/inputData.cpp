@@ -173,6 +173,11 @@ void InputDataType::cleanDocument()
         delete scenario;
 }
 
+
+const scnXml::Scenario& InputDataType::getScenario() {
+    return *scenario;
+}
+
 const scnXml::Monitoring& InputDataType::getMonitoring()
 {
     return *monitoring;
@@ -229,11 +234,6 @@ double InputDataType::get_detectionlimit()
 int InputDataType::get_summary_option()
 {
     return monitoring->getSurveys().getSummaryOption();
-}
-
-int InputDataType::get_model_version()
-{
-    return scenario->getModelVersion();
 }
 
 int InputDataType::get_mode()
