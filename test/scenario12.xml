@@ -22,7 +22,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography><monitoring name="Matsari Intervention">
-    <surveys detectionLimit="2" summaryOption="41">
+    <SurveyOptions><option name="nHost" value="true"/><option name="nPatent" value="true"/><option name="sumlogDens" value="true"/></SurveyOptions><surveys detectionLimit="2">
       <surveyTime>14</surveyTime>
       <surveyTime>28</surveyTime>
       <surveyTime>42</surveyTime>

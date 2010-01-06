@@ -23,7 +23,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Sugungum Preintervention">
-    <surveys detectionLimit="2" summaryOption="849929">
+    <SurveyOptions><option name="nHost" value="true"/><option name="nPatent" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="nUncomp" value="true"/><option name="nSevere" value="true"/><option name="nIndDeaths" value="true"/><option name="nDirDeaths" value="true"/></SurveyOptions><surveys detectionLimit="2">
       <surveyTime>290</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">

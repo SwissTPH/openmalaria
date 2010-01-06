@@ -19,6 +19,7 @@
 
 #include "Survey.h"
 #include "inputData.h"
+#include "util/errors.hpp"
 
 #include <cfloat>
 #include <stdexcept>
@@ -29,32 +30,98 @@ namespace OM {
 
 double SurveyAgeGroup::_lowerbound;
 vector<double> SurveyAgeGroup::_upperbound;
-bitset<NUM_SUMMARY_OPTIONS> Survey::active;
+bitset<NUM_SURVEY_OPTIONS> Survey::active;
 bool Survey::_assimilatorMode;
 
 
-void Survey::init () {
-  SurveyAgeGroup::init ();
-  
-  int sumOpt = InputData.get_summary_option();
-  for (size_t i = 0; i < NUM_SUMMARY_OPTIONS; ++i)
-    active[i] = sumOpt & (1 << i);
+class SurveyCodeMap {
+    // Lookup table to translate the strings used in the XML file to the internal enumerated values:
+    map<string,SurveyCodes> codeMap;
+    
+    public:
+	SurveyCodeMap () {
+	    codeMap["nHost"] = nHost;
+	    codeMap["nInfect"] = nInfect;
+	    codeMap["nExpectd"] = nExpectd;
+	    codeMap["nPatent"] = nPatent;
+	    codeMap["sumLogPyrogenThres"] = sumLogPyrogenThres;
+	    codeMap["sumlogDens"] = sumlogDens;
+	    codeMap["totalInfs"] = totalInfs;
+	    codeMap["nTransmit"] = nTransmit;
+	    codeMap["totalPatentInf"] = totalPatentInf;
+	    codeMap["contrib"] = contrib;
+	    codeMap["sumPyrogenThresh"] = sumPyrogenThresh;
+	    codeMap["nTreatments1"] = nTreatments1;
+	    codeMap["nTreatments2"] = nTreatments2;
+	    codeMap["nTreatments3"] = nTreatments3;
+	    codeMap["nUncomp"] = nUncomp;
+	    codeMap["nSevere"] = nSevere;
+	    codeMap["nSeq"] = nSeq;
+	    codeMap["nHospitalDeaths"] = nHospitalDeaths;
+	    codeMap["nIndDeaths"] = nIndDeaths;
+	    codeMap["nDirDeaths"] = nDirDeaths;
+	    codeMap["nEPIVaccinations"] = nEPIVaccinations;
+	    codeMap["imr_summary"] = imr_summary;
+	    codeMap["nMassVaccinations"] = nMassVaccinations;
+	    codeMap["nHospitalRecovs"] = nHospitalRecovs;
+	    codeMap["nHospitalSeqs"] = nHospitalSeqs;
+	    codeMap["nIPTDoses"] = nIPTDoses;
+	    codeMap["annAvgK"] = annAvgK;
+	    codeMap["nNMFever"] = nNMFever;
+	    codeMap["innoculationsPerDayOfYear"] = innoculationsPerDayOfYear;
+	    codeMap["kappaPerDayOfYear"] = kappaPerDayOfYear;
+	    codeMap["innoculationsPerAgeGroup"] = innoculationsPerAgeGroup;
+	}
+	
+	SurveyCodes operator[] (const string s) {
+	    map<string,SurveyCodes>::iterator codeIt = codeMap.find (s);
+	    if (codeIt == codeMap.end()) {
+		ostringstream msg;
+		msg << "Unrecognised option: ";
+		msg << s;
+		throw util::xml_scenario_error(msg.str());
+	    }
+	    return codeIt->second;
+	}
+	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
+	// doesn't ensure code is unique in the map either
+	string toString (const SurveyCodes code) {
+	    for (map<string,SurveyCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
+		if (codeIt->second == code)
+		    return codeIt->first;
+	    }
+	    throw runtime_error ("toString called with unknown code");	// this is a code error
+	}
+};
 
-  _assimilatorMode =InputData. get_assim_mode();
+
+void Survey::init () {
+    SurveyAgeGroup::init ();
+    
+    // by default, none are active
+    active.reset ();
+    SurveyCodeMap codeMap;
+    
+    scnXml::OptionSet::OptionSequence sOSeq = InputData.getMonitoring().getSurveyOptions().getOption();
+    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
+	active[codeMap[it->getName()]] = it->getValue();
+    }
+    
+    _assimilatorMode = InputData.getScenario().getAssimMode();
 }
 void SurveyAgeGroup::init () {
     const scnXml::Monitoring& mon = InputData.getMonitoring();
-  const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
-  /* note that the last age group includes individuals who are        *
-  * either younger than Lowerbound or older than the last Upperbound */
-  size_t numAgeGroups = groups.size() + 1;
-  _upperbound.resize (numAgeGroups);
-  _lowerbound = mon.getAgeGroup().getLowerbound();
+    const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
+    /* note that the last age group includes individuals who are        *
+    * either younger than Lowerbound or older than the last Upperbound */
+    size_t numAgeGroups = groups.size() + 1;
+    _upperbound.resize (numAgeGroups);
+    _lowerbound = mon.getAgeGroup().getLowerbound();
 
-  for (size_t i = 0;i < numAgeGroups - 1; i++) {
-    _upperbound[i] = groups[i].getUpperbound();
-  }
-  _upperbound[numAgeGroups-1] = DBL_MAX;
+    for (size_t i = 0;i < numAgeGroups - 1; i++) {
+	_upperbound[i] = groups[i].getUpperbound();
+    }
+    _upperbound[numAgeGroups-1] = DBL_MAX;
 }
 
 SurveyAgeGroup::SurveyAgeGroup (double ageYears) {

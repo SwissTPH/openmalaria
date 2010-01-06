@@ -7,30 +7,15 @@
     </xs:annotation>
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="ModelOptions">
+        <xs:element name="ModelOptions" type="OptionSet">
           <xs:annotation>
             <xs:documentation>
-              List of true/false options. Each option has a default value (may
-              be true or false) which is used if the option is not listed here.
+              All model options (bug fixes, choices between models, etc.).
               
               The list of recognised options can be found in the code at:
               include/util/ModelOptions.hpp and should also be in the wiki.
             </xs:documentation>
           </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
-                <xs:complexType>
-                  <xs:attribute name="name" type="xs:string" use="required">
-                    <xs:annotation>
-                      <xs:documentation>Option name</xs:documentation>
-		    </xs:annotation>
-		  </xs:attribute>
-		  <xs:attribute name="value" type="xs:boolean" use="required"/>
-		</xs:complexType>
-	      </xs:element>
-	    </xs:sequence>
-	  </xs:complexType>
         </xs:element>
         <xs:element name="demography" type="demography">
           <xs:annotation>
@@ -217,6 +202,30 @@
         <xs:appinfo>units:Number;min:0;max:1;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="OptionSet">
+    <xs:sequence>
+      <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+	<xs:complexType>
+	  <xs:attribute name="name" type="xs:string" use="required">
+	    <xs:annotation>
+	      <xs:documentation>
+		Option name. Must be one of a strictly defined set.
+		Options are not required to be listed if their default value is desired.
+	      </xs:documentation>
+	    </xs:annotation>
+	  </xs:attribute>
+	  <xs:attribute name="value" type="xs:boolean" use="required">
+	    <xs:annotation>
+	      <xs:documentation>
+		Option value (true/false). Each option has a default value (may
+		be true or false) which is used if the option is not listed.
+	      </xs:documentation>
+	    </xs:annotation>
+	  </xs:attribute>
+	</xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="parameters">
     <xs:annotation>
@@ -430,6 +439,14 @@
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
+      <xs:element name="SurveyOptions" type="OptionSet">
+	<xs:annotation>
+	  <xs:documentation>
+	    List of all active survey options. See include/Survey.h for a list of
+	    supported outputs. Should also be on the wiki.
+	  </xs:documentation>
+	</xs:annotation>
+      </xs:element>
       <xs:element name="surveys">
         <xs:annotation>
           <xs:documentation>
@@ -460,14 +477,6 @@
               <xs:appinfo>
                 units:parasites/micolitre;min:0;max:1000;
               </xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="summaryOption" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Requested output variables
-              </xs:documentation>
-              <xs:appinfo>units:Code;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

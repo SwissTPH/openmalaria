@@ -6,7 +6,7 @@ openmalaria.kdev4
 util/SchemaTranslator/scenarios
 util/SchemaTranslator/translatedScenarios
 util/.metadata
-util/SchemaTranslator/SchemaTranslator.class
+util/SchemaTranslator/*.class
 util/CaseManagementTree/*.class
 util/CaseManagementTree/CaseManagementTree
 .sconsign.dblite

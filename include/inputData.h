@@ -163,11 +163,6 @@ namespace Interventions {
 	double get_detectionlimit(); 
 	int get_analysis_no(); 
 
-	// For summary:
-	int get_summary_option();
-	int get_assim_mode(); 
-	double get_lowerbound(); 
-
 	// For global / simulation:
 	double get_maximum_ageyrs();
 	int get_latentp(); 

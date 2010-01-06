@@ -558,6 +558,58 @@ public class SchemaTranslator {
 	
 	scenarioElement.insertBefore(modelOptions, scenarioElement.getFirstChild());
 	scenarioElement.removeAttribute ("modelVersion");
+	
+	final int NUM_SURVEYS = 31;
+	String[] surveyCode2String = new String[NUM_SURVEYS];
+	surveyCode2String[0] = "nHost";
+	surveyCode2String[1] = "nInfect";
+	surveyCode2String[2] = "nExpectd";
+	surveyCode2String[3] = "nPatent";
+	surveyCode2String[4] = "sumLogPyrogenThres";
+	surveyCode2String[5] = "sumlogDens";
+	surveyCode2String[6] = "totalInfs";
+	surveyCode2String[7] = "nTransmit";
+	surveyCode2String[8] = "totalPatentInf";
+	surveyCode2String[9] = "contrib";
+	surveyCode2String[10] = "sumPyrogenThresh";
+	surveyCode2String[11] = "nTreatments1";
+	surveyCode2String[12] = "nTreatments2";
+	surveyCode2String[13] = "nTreatments3";
+	surveyCode2String[14] = "nUncomp";
+	surveyCode2String[15] = "nSevere";
+	surveyCode2String[16] = "nSeq";
+	surveyCode2String[17] = "nHospitalDeaths";
+	surveyCode2String[18] = "nIndDeaths";
+	surveyCode2String[19] = "nDirDeaths";
+	surveyCode2String[20] = "nEPIVaccinations";
+	surveyCode2String[21] = "imr_summary";
+	surveyCode2String[22] = "nMassVaccinations";
+	surveyCode2String[23] = "nHospitalRecovs";
+	surveyCode2String[24] = "nHospitalSeqs";
+	surveyCode2String[25] = "nIPTDoses";
+	surveyCode2String[26] = "annAvgK";
+	surveyCode2String[27] = "nNMFever";
+	surveyCode2String[28] = "innoculationsPerDayOfYear";
+	surveyCode2String[29] = "kappaPerDayOfYear";
+	surveyCode2String[30] = "innoculationsPerAgeGroup";
+	
+	Element surveyOptions = scenarioDocument.createElement ("SurveyOptions");
+	Element monitoring = (Element) scenarioElement.getElementsByTagName("monitoring").item(0);
+	Element surveys = (Element) monitoring.getElementsByTagName("surveys").item(0);
+	int surveyFlags = Integer.parseInt (surveys.getAttribute ("summaryOption"));
+	
+	for (int i = 0; i < NUM_SURVEYS; ++i) {
+	    if ((surveyFlags & (1 << i)) != 0) {
+		Element opt = scenarioDocument.createElement ("option");
+		opt.setAttribute ("name", surveyCode2String[i]);
+		opt.setAttribute ("value", "true");
+		surveyOptions.appendChild (opt);
+	    }
+	}
+	
+	monitoring.insertBefore(surveyOptions, surveys);
+	surveys.removeAttribute ("summaryOption");
+	
 	return true;
     }
     

@@ -25,7 +25,7 @@
   </demography>
 
   <monitoring name="Test Moni">
-    <surveys detectionLimit="2.5" summaryOption="1879062589">
+    <SurveyOptions><option name="nHost" value="true"/><option name="nExpectd" value="true"/><option name="nPatent" value="true"/><option name="sumLogPyrogenThres" value="true"/><option name="sumlogDens" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="innoculationsPerDayOfYear" value="true"/><option name="kappaPerDayOfYear" value="true"/><option name="innoculationsPerAgeGroup" value="true"/></SurveyOptions><surveys detectionLimit="2.5">
       <surveyTime>1</surveyTime>
       <surveyTime>293</surveyTime>
       <surveyTime>366</surveyTime>

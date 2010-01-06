@@ -231,19 +231,9 @@ double InputDataType::get_detectionlimit()
     return  monitoring->getSurveys().getDetectionLimit();
 }
 
-int InputDataType::get_summary_option()
-{
-    return monitoring->getSurveys().getSummaryOption();
-}
-
 int InputDataType::get_mode()
 {
     return scenario->getMode();
-}
-
-int InputDataType::get_assim_mode()
-{
-    return scenario->getAssimMode();
 }
 
 int InputDataType::get_wu_id()
@@ -254,11 +244,6 @@ int InputDataType::get_wu_id()
 double InputDataType::get_maximum_ageyrs()
 {
     return scenario->getMaximumAgeYrs();
-}
-
-double InputDataType::get_lowerbound()
-{
-    return monitoring->getAgeGroup().getLowerbound();
 }
 
 const scnXml::Intervention* InputDataType::getInterventionByTime (int time)

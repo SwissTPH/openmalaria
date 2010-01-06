@@ -23,7 +23,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <surveys detectionLimit="2.5" summaryOption="268435455">
+    <SurveyOptions><option name="nHost" value="true"/><option name="nInfect" value="true"/><option name="nExpectd" value="true"/><option name="nPatent" value="true"/><option name="sumLogPyrogenThres" value="true"/><option name="sumlogDens" value="true"/><option name="totalInfs" value="true"/><option name="nTransmit" value="true"/><option name="totalPatentInf" value="true"/><option name="contrib" value="true"/><option name="sumPyrogenThresh" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="nUncomp" value="true"/><option name="nSevere" value="true"/><option name="nSeq" value="true"/><option name="nHospitalDeaths" value="true"/><option name="nIndDeaths" value="true"/><option name="nDirDeaths" value="true"/><option name="nEPIVaccinations" value="true"/><option name="imr_summary" value="true"/><option name="nMassVaccinations" value="true"/><option name="nHospitalRecovs" value="true"/><option name="nHospitalSeqs" value="true"/><option name="nIPTDoses" value="true"/><option name="annAvgK" value="true"/><option name="nNMFever" value="true"/></SurveyOptions><surveys detectionLimit="2.5">
       <surveyTime>1</surveyTime>
       <surveyTime>4</surveyTime>
       <surveyTime>73</surveyTime>

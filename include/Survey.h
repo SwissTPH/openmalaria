@@ -28,81 +28,78 @@ namespace OM {
 /** Enumeration of reporting options
  *
  * Most are reported per age-group. */
-enum Measure {
-  /// Total number of humans
-  nHost = 0,
-  /// number of infected hosts 
-  nInfect = 1,
-  /// expected number of infected hosts
-  nExpectd= 2,
-  /// number of patent hosts
-  nPatent= 3,
-  /// Sum of the log of the pyrogen threshold
-  sumLogPyrogenThres = 4,
-  /// Sum of the logarithm of the parasite density
-  sumlogDens= 5,
-  /// Total infections
-  totalInfs= 6,
-  /** Infectiousness of human population to mosquitoes
-   *
-   * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
-   * mosquitoes that get infected). We don't want this by age. */
-  nTransmit= 7,
-  /// Total patent infections
-  totalPatentInf= 8,
-  /// Contribution to immunity functions
-  ///NOTE: not used
-  contrib= 9,
-  /// Sum of the pyrogenic threshold
-  sumPyrogenThresh = 10,
-  /// number of treatments (1st line)
-  nTreatments1= 11,
-  /// number of treatments (2nd line)
-  nTreatments2= 12,
-  /// number of treatments (inpatient)
-  nTreatments3= 13,
-  /// number of episodes (uncomplicated)
-  nUncomp= 14,
-  /// number of episodes (severe)
-  nSevere= 15,
-  /// cases with sequelae
-  nSeq= 16,
-  /// deaths in hospital
-  nHospitalDeaths= 17,
-  /// number of deaths (indirect)
-  nIndDeaths= 18,
-  /// number of deaths (direct)
-  nDirDeaths= 19,
-  /// number of EPI vaccine doses given
-  nEPIVaccinations= 20,
-  //all cause infant mortality rate
-  imr_summary= 21,
-  /// number of Mass / Campaign vaccine doses given
-  nMassVaccinations= 22,
-  /// recoveries in hospital
-  nHospitalRecovs= 23,
-  /// sequelae in hospital
-  nHospitalSeqs= 24,
-  /// number of IPT Doses
-  nIPTDoses= 25,
-  /** Annual Average Kappa
-   *
-   * Calculated once a year as sum of human infectiousness divided by initial
-   * EIR summed over a year. */
-  annAvgK= 26,
-  /// Number of episodes (non-malaria fever)
-  nNMFever= 27,
-  /// Innoculations per human (all ages) per day of year, over the last year.
-  innoculationsPerDayOfYear = 28,
-  /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
-  kappaPerDayOfYear = 29,
-  /** The total number of innoculations per age group, summed over the
-   * reporting period. */
-  innoculationsPerAgeGroup = 30,
-  // TODO: Replace encoding within XML with something more extensible.
-  // Can't use 31 without being very careful, because we're using a *signed* 32-bit int.
-  // Note: can't use values greater than 31 without forcing a 64-bit type
-  NUM_SUMMARY_OPTIONS	// must be hightest value above plus one
+enum SurveyCodes {
+    /// Total number of humans
+    nHost,
+    /// number of infected hosts 
+    nInfect,
+    /// expected number of infected hosts
+    nExpectd,
+    /// number of patent hosts
+    nPatent,
+    /// Sum of the log of the pyrogen threshold
+    sumLogPyrogenThres,
+    /// Sum of the logarithm of the parasite density
+    sumlogDens,
+    /// Total infections
+    totalInfs,
+    /** Infectiousness of human population to mosquitoes
+    *
+    * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
+    * mosquitoes that get infected). We don't want this by age. */
+    nTransmit,
+    /// Total patent infections
+    totalPatentInf,
+    /// Contribution to immunity functions
+    ///NOTE: not used
+    contrib,
+    /// Sum of the pyrogenic threshold
+    sumPyrogenThresh,
+    /// number of treatments (1st line)
+    nTreatments1,
+    /// number of treatments (2nd line)
+    nTreatments2,
+    /// number of treatments (inpatient)
+    nTreatments3,
+    /// number of episodes (uncomplicated)
+    nUncomp,
+    /// number of episodes (severe)
+    nSevere,
+    /// cases with sequelae
+    nSeq,
+    /// deaths in hospital
+    nHospitalDeaths,
+    /// number of deaths (indirect)
+    nIndDeaths,
+    /// number of deaths (direct)
+    nDirDeaths,
+    /// number of EPI vaccine doses given
+    nEPIVaccinations,
+    //all cause infant mortality rate
+    imr_summary,
+    /// number of Mass / Campaign vaccine doses given
+    nMassVaccinations,
+    /// recoveries in hospital
+    nHospitalRecovs,
+    /// sequelae in hospital
+    nHospitalSeqs,
+    /// number of IPT Doses
+    nIPTDoses,
+    /** Annual Average Kappa
+    *
+    * Calculated once a year as sum of human infectiousness divided by initial
+    * EIR summed over a year. */
+    annAvgK,
+    /// Number of episodes (non-malaria fever)
+    nNMFever,
+    /// Innoculations per human (all ages) per day of year, over the last year.
+    innoculationsPerDayOfYear,
+    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+    kappaPerDayOfYear,
+    /** The total number of innoculations per age group, summed over the
+    * reporting period. */
+    innoculationsPerAgeGroup,
+    NUM_SURVEY_OPTIONS	// must be hightest value above plus one
 };
 
 /** Included for type-saftey: don't allow implicit double->int conversions.
@@ -162,7 +159,7 @@ class Survey {
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
-    static bitset<NUM_SUMMARY_OPTIONS> active;
+    static bitset<NUM_SURVEY_OPTIONS> active;
     
     /** Assimilator mode
      *

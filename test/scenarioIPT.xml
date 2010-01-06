@@ -23,7 +23,7 @@
 		</ageGroup>
 	</demography>
 	<monitoring name="Yearly Surveys">
-	<surveys detectionLimit="40" summaryOption="132118697">
+	<SurveyOptions><option name="nHost" value="true"/><option name="nPatent" value="true"/><option name="sumlogDens" value="true"/><option name="nTransmit" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="nUncomp" value="true"/><option name="nSevere" value="true"/><option name="nSeq" value="true"/><option name="nHospitalDeaths" value="true"/><option name="nIndDeaths" value="true"/><option name="nDirDeaths" value="true"/><option name="nEPIVaccinations" value="true"/><option name="nMassVaccinations" value="true"/><option name="nHospitalRecovs" value="true"/><option name="nHospitalSeqs" value="true"/><option name="nIPTDoses" value="true"/><option name="annAvgK" value="true"/></SurveyOptions><surveys detectionLimit="40">
 			<surveyTime>1</surveyTime>
 			<surveyTime>19</surveyTime>
 			<surveyTime>37</surveyTime>

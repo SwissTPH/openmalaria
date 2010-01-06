@@ -23,7 +23,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Idete">
-    <surveys detectionLimit="40" summaryOption="16385">
+    <SurveyOptions><option name="nHost" value="true"/><option name="nUncomp" value="true"/></SurveyOptions><surveys detectionLimit="40">
       <surveyTime>73</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
