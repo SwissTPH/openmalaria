@@ -33,7 +33,7 @@ namespace OM { namespace WithinHost {
 /*! Old Within Host Model class.
  *
  * Note: this implementation has a few bugs with (hopefully) small effect
- * conditionally fixed (see MAX_DENS_RESET, MAX_DENS_CORRECTION and
+ * conditionally fixed (see MAX_DENS_CORRECTION and
  * INNATE_MAX_DENS). Thus results can be preserved. */
 class DescriptiveWithinHostModel : public WithinHostModel {
 public:

@@ -31,7 +31,7 @@ namespace OM { namespace util {
     public:
 	/// Boolean command-line options
 	enum Options {
-	    PRINT_MODEL_VERSION = 0,	// outputs modelVersion in a human-readable form
+	    PRINT_MODEL_OPTIONS = 0,	// outputs model-options in a human-readable form
 	    TEST_CHECKPOINTING,	// forces a checkpoint in the middle of initialisation, followed by exiting
 	    COMPRESS_CHECKPOINTS,	// compress checkpoint files with gzip before writing
 	    NUM_OPTIONS

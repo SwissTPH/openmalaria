@@ -80,7 +80,7 @@ namespace OM { namespace util {
 	// @{
 	MAX_DENS_CORRECTION,
 	INNATE_MAX_DENS,
-	MAX_DENS_RESET,
+// 	MAX_DENS_RESET,
 	//@}
 	
 	/** @brief Parasite densities are predicted from an autoregressive process
