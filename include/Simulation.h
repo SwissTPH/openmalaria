@@ -80,7 +80,11 @@ private:
     int phase;
     
     Population* _population;
-
+    
+    /** Some identifier is needed to prevent checkpoint cheats. Ideally a unique identifier per
+     * workunit, but a random integer number should do the job. */
+    int workUnitIdentifier;
+    
     friend class VectorAnophelesSuite;
 };
 

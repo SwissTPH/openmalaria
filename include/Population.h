@@ -120,12 +120,6 @@ private:
     /// Iterator type of population
     typedef std::list<Host::Human>::iterator HumanIter;
 
-    /*!
-      this is needed to prevent checkpoint cheats. Ideally a unique identifier per workunit, but a
-      random integer number should do the job
-    */
-    static int workUnitIdentifier;
-
     friend class VectorAnophelesSuite;
 
 

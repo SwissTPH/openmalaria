@@ -43,8 +43,6 @@ namespace OM
 
 // -----  Population: static data / methods  -----
 
-int Population::workUnitIdentifier;
-
 #ifdef OMP_CSV_REPORTING
 ofstream csvReporting;
 #endif
@@ -60,8 +58,6 @@ void Population::init()
 #endif
     
     AgeStructure::init ();
-    
-    workUnitIdentifier = InputData.get_wu_id();
 }
 
 void Population::clear()
@@ -78,20 +74,12 @@ void Population::staticCheckpoint (istream& stream)
     Host::NeonatalMortality::staticCheckpoint (stream);
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
-    
-    workUnitIdentifier & stream;
-    
-    // Check scenario.xml and checkpoint files correspond:
-    if (workUnitIdentifier != InputData.get_wu_id())
-	throw util::checkpoint_error ("invalid work-unit identifier");
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
-    
-    workUnitIdentifier & stream;
 }
 
 

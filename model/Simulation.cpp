@@ -54,6 +54,8 @@ Simulation::Simulation()
     Surveys.init();
     Population::init();
     _population = new Population();
+    
+    workUnitIdentifier = InputData.get_wu_id();
 }
 
 Simulation::~Simulation(){
@@ -239,6 +241,11 @@ void Simulation::checkpoint (istream& stream) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
+    workUnitIdentifier & stream;
+    
+    // Check scenario.xml and checkpoint files correspond:
+    if (workUnitIdentifier != InputData.get_wu_id())
+	throw util::checkpoint_error ("invalid work-unit identifier");
     
     stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
     if (stream.gcount () != 0) {
@@ -265,6 +272,7 @@ void Simulation::checkpoint (ostream& stream) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
+    workUnitIdentifier & stream;
     
     timer::stopCheckpoint ();
     if (stream.fail())
