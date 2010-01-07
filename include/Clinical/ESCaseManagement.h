@@ -81,6 +81,14 @@ struct CaseTreatment {
     vector<MedicateData> medications;
 };
 
+/// Pair of cmid and CaseTreatment&
+// (would have used std::pair, but it can't store a reference
+struct CaseTreatmentPair {
+    CaseTreatmentPair (cmid id, CaseTreatment& ct);
+    cmid first;
+    CaseTreatment& second;
+};
+
 /** Tracks clinical status (sickness), does case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
  */
@@ -91,11 +99,11 @@ class ESCaseManagement {
 	static cmid execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
 	
     private:
-	static pair<cmid,CaseTreatment&> traverse (cmid id);
+	static CaseTreatmentPair traverse (cmid id);
 	
 	class CMNode {
 	    public:
-		virtual pair<cmid,CaseTreatment&> traverse (cmid id) =0;
+		virtual CaseTreatmentPair traverse (cmid id) =0;
 	};
 	class CMPBranchSet : public CMNode {
 	    struct PBranch {
@@ -107,14 +115,14 @@ class ESCaseManagement {
 	    public:
 		CMPBranchSet (const scnXml::CM_pBranchSet::CM_pBranchSequence& branchSeq);
 		
-		virtual pair<cmid,CaseTreatment&> traverse (cmid id);
+		virtual CaseTreatmentPair traverse (cmid id);
 	};
 	class CMLeaf : public CMNode {
 	    CaseTreatment ct;
 	    public:
 		CMLeaf (CaseTreatment t) : ct(t) {}
 		
-		virtual pair<cmid,CaseTreatment&> traverse (cmid id);
+		virtual CaseTreatmentPair traverse (cmid id);
 	};
 	
 	//FIXME: use hash-map instead

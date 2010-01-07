@@ -81,12 +81,12 @@ cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
             endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
     }*/
     
-    pair<cmid,CaseTreatment&> leaf = traverse (decisionID);
+    CaseTreatmentPair leaf = traverse (decisionID);
     leaf.second.apply (medicateQueue, leaf.first);
     return leaf.first;
 }
 
-pair<cmid,CaseTreatment&> ESCaseManagement::traverse (cmid id) {
+CaseTreatmentPair ESCaseManagement::traverse (cmid id) {
     // Parasite test:
     //NOTE: currently only one test, but only used in UC trees
     // (can make test depend on severe/UC state)
@@ -127,7 +127,7 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
     branches[branchSeq.size()-1].cumP = 1.0;
 }
 
-pair<cmid,CaseTreatment&> ESCaseManagement::CMPBranchSet::traverse (cmid id) {
+CaseTreatmentPair ESCaseManagement::CMPBranchSet::traverse (cmid id) {
     double randCum = gsl::rngUniform();
     size_t i = 0;
     while (branches[i].cumP < randCum) {
@@ -139,8 +139,8 @@ pair<cmid,CaseTreatment&> ESCaseManagement::CMPBranchSet::traverse (cmid id) {
     return ESCaseManagement::traverse (id);
 }
 
-pair<cmid,CaseTreatment&> ESCaseManagement::CMLeaf::traverse (cmid id) {
-    return pair<cmid,CaseTreatment&> (id, ct);
+CaseTreatmentPair ESCaseManagement::CMLeaf::traverse (cmid id) {
+    return CaseTreatmentPair (id, ct);
 }
 
 } }
