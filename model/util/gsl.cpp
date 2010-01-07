@@ -115,7 +115,7 @@ void gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double 
     minex_func.params = (void *) NULL;
     minex_func.n = 2;
     
-    const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex2;
+    const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
     gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc (T, 2);
     gsl_multimin_fminimizer_set (minimizer, &minex_func, initialValues, stepSize);
     
