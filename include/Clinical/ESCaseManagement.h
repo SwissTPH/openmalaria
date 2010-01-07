@@ -84,7 +84,9 @@ struct CaseTreatment {
 /// Pair of cmid and CaseTreatment&
 // (would have used std::pair, but it can't store a reference
 struct CaseTreatmentPair {
-    CaseTreatmentPair (cmid id, CaseTreatment& ct);
+    CaseTreatmentPair (cmid id, CaseTreatment& ct) :
+	first(id), second(ct)
+    {}
     cmid first;
     CaseTreatment& second;
 };
