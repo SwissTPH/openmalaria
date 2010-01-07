@@ -26,7 +26,9 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4290)	// disable some warnings on MSVC
+#ifndef _CRT_SECURE_NO_DEPRECATE
 #define _CRT_SECURE_NO_DEPRECATE
+#endif
 #define finite(x) _finite(x)
 #endif
 
