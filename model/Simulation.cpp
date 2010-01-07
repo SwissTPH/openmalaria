@@ -40,8 +40,8 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulation::Simulation()
-: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL)
+Simulation::Simulation(util::Checksum ck)
+: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL), workUnitIdentifier(0), cksum(ck)
 {
     Global::simulationTime = 0;
     Global::timeStep = numeric_limits<int>::min();
@@ -55,7 +55,7 @@ Simulation::Simulation()
     Population::init();
     _population = new Population();
     
-    workUnitIdentifier = InputData.get_wu_id();
+    workUnitIdentifier = InputData.getScenario().getWuID();
 }
 
 Simulation::~Simulation(){
@@ -241,11 +241,14 @@ void Simulation::checkpoint (istream& stream) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
-    workUnitIdentifier & stream;
     
     // Check scenario.xml and checkpoint files correspond:
-    if (workUnitIdentifier != InputData.get_wu_id())
-	throw util::checkpoint_error ("invalid work-unit identifier");
+    int oldWUID(workUnitIdentifier);
+    util::Checksum oldCksum(cksum);
+    workUnitIdentifier & stream;
+    cksum & stream;
+    if (workUnitIdentifier != oldWUID || cksum != oldCksum)
+	throw util::checkpoint_error ("mismatched checkpoint");
     
     stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
     if (stream.gcount () != 0) {
@@ -273,6 +276,7 @@ void Simulation::checkpoint (ostream& stream) {
     phase & stream;
     (*_population) & stream;
     workUnitIdentifier & stream;
+    cksum & stream;
     
     timer::stopCheckpoint ();
     if (stream.fail())

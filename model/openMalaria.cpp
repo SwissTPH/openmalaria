@@ -37,12 +37,12 @@ int main(int argc, char* argv[]){
     scenario_name = OM::util::CommandLine::lookupResource (scenario_name.c_str());
     
     //Change it and read it with boinc
-    OM::InputData.createDocument(scenario_name);
+    OM::util::Checksum cksum = OM::InputData.createDocument(scenario_name);
     
     OM::Global::init ();
     
     {
-      OM::Simulation simulation;	// constructor runs
+      OM::Simulation simulation (cksum);	// constructor runs
       simulation.start();
     }	// simulation's destructor runs
   } catch (const OM::util::cmd_exit& e) {	// this is not an error, but exiting due to command line

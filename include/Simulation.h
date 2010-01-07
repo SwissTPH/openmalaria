@@ -32,7 +32,7 @@ namespace OM {
 class Simulation{
 public: 
     //!  Inititalise all step specific constants and variables.
-    Simulation();
+    Simulation(util::Checksum);
     ~Simulation();
     
     //! Entry point to simulation.
@@ -84,6 +84,9 @@ private:
     /** Some identifier is needed to prevent checkpoint cheats. Ideally a unique identifier per
      * workunit, but a random integer number should do the job. */
     int workUnitIdentifier;
+    
+    /// Checksum of scenario; also used for work-unit validation on checkpoint loading.
+    util::Checksum cksum;
     
     friend class VectorAnophelesSuite;
 };

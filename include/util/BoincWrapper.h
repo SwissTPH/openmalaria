@@ -48,14 +48,6 @@ namespace BoincWrapper {
   int timeToCheckpoint();
   /// Call when a checkpoint's completed
   void checkpointCompleted();
-  
-  /** Checks the current stream position (assumed to be end of file), resets
-   * the stream, generates an MD5 sum from the stream (to EOF), and checks the
-   * stream position is back where it started.
-   * 
-   * The idea of this is to generate a checksum of the file in a slightly
-   * secure way by not closing and reopening the file. */
-  void generateChecksum (istream& in);
 }
 
 /// Memory shared with graphics app:
@@ -67,6 +59,48 @@ namespace SharedGraphics {
   /// Function to set kappa in shared memory:
   void copyKappa(double *kappa);
 }
+
+/** Class for storing and generating checksums.
+*
+* These are nearly md5 sums but not quite.
+**********************************************************/
+class Checksum {
+public:
+    /** Checks the current stream position (assumed to be end of file), resets
+    * the stream, generates a checksum from the stream (to EOF), and checks the
+    * stream position is back where it started.
+    * 
+    * The idea of this is to generate a checksum of the file in a slightly
+    * secure way by not closing and reopening the file. */
+    static Checksum generate (std::istream& fileStream);
+    
+    /// Copy ctor to make sure it copies data, not pointers
+    Checksum (const Checksum& that) {
+	for (int i = 0; i < 16; ++i)
+	    data[i] = that.data[i];
+    }
+    
+    /** Write the checksum data to a file in base 16. */
+    void writeToFile (std::string filename);
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	for (int i = 0; i < 16; ++i)
+	    data[i] & stream;
+    }
+    
+    bool operator!= (Checksum& that) {
+	for (int i = 0; i < 16; ++i)
+	    if (data[i] != that.data[i])
+		return true;
+	return false;
+    }
+    
+private:
+    Checksum () {}		// use static functions to create
+    unsigned char data[16];	// checksum
+};
 
 } }
 #endif

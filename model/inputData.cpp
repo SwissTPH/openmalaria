@@ -22,6 +22,7 @@
 #include "scenario.hxx"
 #include "util/BoincWrapper.h"
 #include "util/errors.hpp"
+#include "util/Checksum.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -35,6 +36,7 @@ const int SCHEMA_VERSION = 13;
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
 const int OLDEST_COMPATIBLE = 13;
+
 
 // Initialization functions:
 
@@ -101,7 +103,7 @@ void InputDataType::initTimedInterventions()
 }
 
 
-void InputDataType::createDocument (std::string lXmlFile)
+util::Checksum InputDataType::createDocument (std::string lXmlFile)
 {
     xmlFileName = lXmlFile;
     //Parses the document
@@ -113,11 +115,19 @@ void InputDataType::createDocument (std::string lXmlFile)
     // but we won't necessarily have the right schema version associated with
     // the XML file in that case.
     scenario = (scnXml::parseScenario (lXmlFile.c_str())).release();
+    //NOTE: Non-boinc Checksum::generate() doesn't work anyway, so don't need a real stream.
+    ifstream fileStream;
+    util::Checksum cksum = util::Checksum::generate (fileStream);
 # else
     ifstream fileStream (lXmlFile.c_str());
     scenario = (scnXml::parseScenario (fileStream)).release();
-    BoincWrapper::generateChecksum (fileStream);
+    util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
+    string outFileName = util::BoincWrapper::resolveFile ("scenario.sum");
+    ifstream test (outFileName.c_str());
+    if (test.is_open())
+	throw runtime_error ("File scenario.sum exists!");
+    cksum.writeToFile (outFileName);
 #endif
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
         ostringstream msg;
@@ -142,6 +152,7 @@ void InputDataType::createDocument (std::string lXmlFile)
 
     initParameterValues();
     initTimedInterventions();
+    return cksum;
 }
 
 void InputDataType::cleanDocument()
@@ -234,11 +245,6 @@ double InputDataType::get_detectionlimit()
 int InputDataType::get_mode()
 {
     return scenario->getMode();
-}
-
-int InputDataType::get_wu_id()
-{
-    return scenario->getWuID();
 }
 
 double InputDataType::get_maximum_ageyrs()

@@ -23,10 +23,13 @@
 #include "util/BoincWrapper.h"
 #include <iostream>
 #include <string>
+#include <fstream>
+
+namespace OM { namespace util {
 
 #ifdef WITHOUT_BOINC
 #include <stdlib.h>	// exit()
-namespace OM { namespace util { namespace BoincWrapper {
+namespace BoincWrapper {
   void init () {
     cout << "BoincWrapper: not using BOINC" << endl;
   }
@@ -43,9 +46,15 @@ namespace OM { namespace util { namespace BoincWrapper {
     return 0;
   }
   void checkpointCompleted() {}
-  
-  void generateChecksum (istream& in) {}
-} } }
+}
+Checksum Checksum::generate (istream& fileStream) {
+    // Return a dummy checksum; making sure it is always the same.
+    // Note: checkpoints from BOINC and non-BOINC versions are then incompatible.
+    Checksum ret;
+    for (int i = 0; i < 16; ++i)
+	ret.data[i] = 0;
+    return ret;
+}
 
 #else	// With BOINC
 #include "boinc_api.h"
@@ -55,7 +64,7 @@ namespace OM { namespace util { namespace BoincWrapper {
 #include <sstream>
 #include <stdexcept>	// runtime_error
 
-namespace OM { namespace util { namespace BoincWrapper {
+namespace BoincWrapper {
   void init () {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
     int err = boinc_init();
@@ -92,8 +101,8 @@ namespace OM { namespace util { namespace BoincWrapper {
   void checkpointCompleted() {
     boinc_checkpoint_completed();
   }
-  
-  void generateChecksum (istream& fileStream) {
+}
+Checksum Checksum::generate (istream& fileStream) {
     streampos firstLen = fileStream.tellg ();
     fileStream.seekg (0);
     fileStream.clear ();	// now reset to beginning; we can read it again without reopening it
@@ -102,42 +111,35 @@ namespace OM { namespace util { namespace BoincWrapper {
     // and modified to work with an input stream (so we only open the input file once).
     
     char buf[4096];
-    unsigned char binout[16];
+    Checksum output;
     md5_state_t state;
     int read = 0;
     
     md5_init(&state);
     while (1) {
-      fileStream.read (buf, 4096);
-      buf[264] ^= 5;
-      int n = fileStream.gcount ();
-      if (n<=0) break;
-      read += n;
-      md5_append(&state, (unsigned char*) buf, n);
-      if (!fileStream.good ()) break;
+	fileStream.read (buf, 4096);
+	buf[264] ^= 5;
+	int n = fileStream.gcount ();
+	if (n<=0) break;
+	read += n;
+	md5_append(&state, (unsigned char*) buf, n);
+	if (!fileStream.good ()) break;
     }
-    md5_finish(&state, binout);
+    md5_finish(&state, output.data);
     
     if (firstLen != read) {	// fileStream.tellg () returns -1 now, not what I'd expect
-      //cerr << "first: "<<firstLen<<"\nsecond:"<<fileStream.tellg()<<"\nread:  "<<read<<endl;
-      throw runtime_error ("Initialisation read error");
+	//cerr << "first: "<<firstLen<<"\nsecond:"<<fileStream.tellg()<<"\nread:  "<<read<<endl;
+	throw runtime_error ("Initialisation read error");
     }
     
-    string outFileName = resolveFile ("scenario.sum");
-    ifstream test (outFileName.c_str());
-    if (test.is_open())
-      throw runtime_error ("File scenario.sum exists!");
-    ofstream os (outFileName.c_str(), ios_base::binary | ios_base::out);
-    os.write ((char*)binout, 16);
-    os.close();
-  }
-} } }
+    return output;
+}
 #endif	// Without/with BOINC
 
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
 #include "ShmStruct.h"
 #include "graphics2.h"
-namespace OM { namespace util { namespace SharedGraphics {
+namespace SharedGraphics {
   UC_SHMEM* shmem = NULL;
   void update_shmem() {
     shmem->fraction_done = boinc_get_fraction_done();
@@ -165,10 +167,17 @@ namespace OM { namespace util { namespace SharedGraphics {
     memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
   }
 
-} } }
+}
 #else
-namespace OM { namespace util { namespace SharedGraphics {
+namespace SharedGraphics {
   void init() {}
   void copyKappa(double *kappa){}
-} } }
+}
 #endif
+
+void Checksum::writeToFile (string filename) {
+    ofstream os (filename.c_str(), ios_base::binary | ios_base::out);
+    os.write ((char*)data, 16);
+    os.close();
+}
+} }

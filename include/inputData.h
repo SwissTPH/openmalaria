@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #define INPUTDATABOINC_H
 
 #include "Global.h"
+#include "util/BoincWrapper.h"
 #include <scenario.hxx>
 #include <string>
 #include <bitset>
@@ -100,6 +101,7 @@ namespace Interventions {
     };
 }
     
+    
     class InputDataType {
     public:
 	InputDataType () : scenario(NULL) {}
@@ -107,7 +109,7 @@ namespace Interventions {
 	/** @brief Reads the document in the xmlFile
 	* 
 	* Throws on failure. */
-	void createDocument(std::string);
+	util::Checksum createDocument(std::string);
 
 	/**
 	* Some elements in memory have been created. This function deletes the object in memory
@@ -169,7 +171,6 @@ namespace Interventions {
 	int get_interval(); 
 
 	// For population:
-	int get_wu_id();
 	int get_populationsize(); 
 
 	// For transmission:
