@@ -123,11 +123,6 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     scenario = (scnXml::parseScenario (fileStream)).release();
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
-    string outFileName = util::BoincWrapper::resolveFile ("scenario.sum");
-    ifstream test (outFileName.c_str());
-    if (test.is_open())
-	throw runtime_error ("File scenario.sum exists!");
-    cksum.writeToFile (outFileName);
 #endif
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
         ostringstream msg;

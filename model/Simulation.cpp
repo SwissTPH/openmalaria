@@ -88,7 +88,7 @@ int Simulation::start(){
 	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
 		writeCheckpoint();
 		util::BoincWrapper::checkpointCompleted();
-		if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+		if (Global::simulationTime == testCheckpointStep)
 		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    }
 	    
@@ -137,6 +137,9 @@ int Simulation::start(){
     
     delete _population;	// must destroy all Human instances to make sure they reported past events
     Surveys.writeSummaryArrays();
+    
+    // Write scenario checksum, only if simulation completed.
+    cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
     
     return 0;
 }

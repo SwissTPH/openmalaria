@@ -24,11 +24,25 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <stdexcept>	// runtime_error
+
+#ifdef WITHOUT_BOINC
+#include <stdlib.h>	// exit()
+#else	// With BOINC
+#include "boinc_api.h"
+#include "diagnostics.h"
+#include "md5.h"
+#include <sstream>
+#endif
+
+#if (defined(_GRAPHICS_6)&&defined(_BOINC))
+#include "ShmStruct.h"
+#include "graphics2.h"
+#endif
 
 namespace OM { namespace util {
 
 #ifdef WITHOUT_BOINC
-#include <stdlib.h>	// exit()
 namespace BoincWrapper {
   void init () {
     cout << "BoincWrapper: not using BOINC" << endl;
@@ -57,12 +71,6 @@ Checksum Checksum::generate (istream& fileStream) {
 }
 
 #else	// With BOINC
-#include "boinc_api.h"
-#include "diagnostics.h"
-#include "md5.h"
-#include <fstream>
-#include <sstream>
-#include <stdexcept>	// runtime_error
 
 namespace BoincWrapper {
   void init () {
@@ -137,8 +145,6 @@ Checksum Checksum::generate (istream& fileStream) {
 #endif	// Without/with BOINC
 
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
-#include "ShmStruct.h"
-#include "graphics2.h"
 namespace SharedGraphics {
   UC_SHMEM* shmem = NULL;
   void update_shmem() {
@@ -176,6 +182,10 @@ namespace SharedGraphics {
 #endif
 
 void Checksum::writeToFile (string filename) {
+    ifstream test (filename.c_str());
+    if (test.is_open())
+	throw runtime_error ("File scenario.sum exists!");
+    
     ofstream os (filename.c_str(), ios_base::binary | ios_base::out);
     os.write ((char*)data, 16);
     os.close();
