@@ -185,6 +185,7 @@ namespace OM { namespace util {
 	    codeMap["COMORB_TREAT_HET"] = COMORB_TREAT_HET;
 	    codeMap["TRIPLE_HET"] = TRIPLE_HET;
 	    codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
+	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
 	}
 	
 	OptionCodes operator[] (const string s) {

@@ -147,6 +147,13 @@ namespace OM { namespace util {
 	EMPIRICAL_WITHIN_HOST_MODEL,
 	// @}
 	
+	/** Use the Garki density bias instead of the default one in the detection limit.
+	 *
+	 * The default bias corresponds to counting parasites and white blood cells
+	 * (assuming a white blood cell density of 8000 per µl), the Garki bias to
+	 * estimations from a probability function. */
+	GARKI_DENSITY_BIAS,
+	
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

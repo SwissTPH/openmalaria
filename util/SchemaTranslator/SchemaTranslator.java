@@ -504,6 +504,8 @@ public class SchemaTranslator {
     }
     
     // Version 13 replaced the modelVersion list with a ModelOptions section.
+    // Similarly, the summaryOption attribute was replaced with a SurveyOptions element.
+    // Also, the GARKI_DENSITY_BIAS model option was introduced.
     // As such, old scenarios are definitely incompatible with the new code.
     public Boolean translate12To13() throws Exception {
 	final int NUM_VERSIONS = 23;
@@ -609,6 +611,15 @@ public class SchemaTranslator {
 	
 	monitoring.insertBefore(surveyOptions, surveys);
 	surveys.removeAttribute ("summaryOption");
+	
+	int analysisNum = Integer.parseInt (scenarioElement.getAttribute ("analysisNo"));
+	// These analysis numbers _were_ reserved for Garki scenarios.
+	if ((analysisNum >= 22) && (analysisNum <= 30)) {
+	    Element opt = scenarioDocument.createElement ("option");
+	    opt.setAttribute ("name", "GARKI_DENSITY_BIAS");
+	    opt.setAttribute ("value", "true");
+	    modelOptions.appendChild (opt);
+	}
 	
 	return true;
     }

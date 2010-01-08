@@ -55,16 +55,13 @@ void WithinHostModel::init() {
   asexImmRemain=exp(-InputData.getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
   
   double densitybias;
-  /*
-  TODO: This densitiybias function should be part of the scenario description XML, not the parameter element.
-  or maybe it should be a parameter, as we want to fit it... but the garki analysis numbers are a bit dangerous
-  add an attribute to scenario.xml densityQuantification="malariaTherapy|garki|other"
-  */
-  if (( InputData.get_analysis_no() <  22) || (InputData.get_analysis_no() >  30)) {
+  if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
+      densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
+  } else {
+    if ((InputData.get_analysis_no() >= 22) && (InputData.get_analysis_no() <= 30)) {
+	cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+    }
     densitybias=InputData.getParameter(Params::DENSITY_BIAS_NON_GARKI);
-  }
-  else {
-    densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
   }
   detectionLimit=InputData.get_detectionlimit()*densitybias;
   
