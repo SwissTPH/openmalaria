@@ -140,9 +140,10 @@ Checksum Checksum::generate (istream& fileStream) {
     }
     md5_finish(&state, output.data);
     
-    if (firstLen != bytes_read) {	// fileStream.tellg () returns -1 now, not what I'd expect
-	//cerr << "first: "<<firstLen<<"\nsecond:"<<fileStream.tellg()<<"\nread:  "<<read<<endl;
-	throw runtime_error ("Initialisation read error");
+    if (firstLen != fileStream.tellg ()) {	// fileStream.tellg () returns -1 now, not what I'd expect
+	ostringstream msg;
+	msg << "Initialisation read error:\tfirst: "<<firstLen<<"\tsecond:"<<fileStream.tellg()<<"\tread:  "<<bytes_read;
+	throw runtime_error (msg.str());
     }
     
     return output;
