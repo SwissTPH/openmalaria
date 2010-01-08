@@ -139,7 +139,7 @@ public:
   void summarize(Survey& survey);
   
   /// Calculate chance of a biting mosquito becoming infected
-  //TODO: per genotype?
+  //TODO: per genotype? (for Tiago's resistance modelling)
   inline double probTransmissionToMosquito() const {
     return _probTransmissionToMosquito;
   }

@@ -139,12 +139,6 @@ namespace Interventions {
 	* You should set "documentChanged = true;" if you want your changes saved. */
 	scnXml::Scenario& getMutableScenario();
 
-	/** Change the element returned by getHealthSystem() to newHS.
-	*
-	* This doesn't change the scenario document, but just a local pointer, so it's
-	* safe to use when editing and saving the document. */
-	void changeHealthSystem (const scnXml::HealthSystem* newHS);
-
 	/// Get the intervention from interventions->timed with time time.
 	/// @returns NULL if not available
 	const scnXml::Intervention* getInterventionByTime(int time);
@@ -156,7 +150,10 @@ namespace Interventions {
 	/// Get a parameter from the parameter list. i should be less than Params::MAX.
 	double getParameter (size_t i);
 
-	/// Set true if the xml document has been changed and should be saved.
+	/** Set true if the xml document has been changed and should be saved.
+	 *
+	 * Currently this is unused. If it is used again, we should be careful about checkpointing since
+	 * none of the scenario element is currently checkpointed. */
 	bool documentChanged;
 
 	// -----  Other parameter-getters (old functions)  -----
@@ -202,7 +199,7 @@ namespace Interventions {
 	std::map<int, const scnXml::Intervention*> timedInterventions;
 	bitset<Interventions::SIZE> activeInterventions;
     };
-    /// InputData entry point. Most set up done before sim start, but changeHealthSystem() and documentChanged members allow changes which aren't checkpointed. TODO
+    /// InputData entry point.
     extern InputDataType InputData;
 }
 #endif

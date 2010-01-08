@@ -218,11 +218,6 @@ scnXml::Scenario& InputDataType::getMutableScenario()
     return *scenario;
 }
 
-void InputDataType::changeHealthSystem (const scnXml::HealthSystem* hs)
-{
-    healthSystem = hs;
-}
-
 double InputDataType::getParameter (size_t i)
 {
     return parameterValues[i];

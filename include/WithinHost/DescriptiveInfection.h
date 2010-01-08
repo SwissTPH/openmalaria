@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 namespace OM { namespace WithinHost {
-//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations?
+//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations? (model incompatible anyway though)
 const int maxDur=84;
 
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.

@@ -196,12 +196,15 @@ private:
    * Read from XML by initialise; no need to checkpoint. */
   //@{
   /** Death rate of mosquitoes while host-seeking (μ_vA).
+   *
+   * TODO: the model could be extended to allow this and mosqSeekingDuration to vary over the year.
+   * 
    * Unit: animals/day. */
-  double mosqSeekingDeathRate;	// TODO: varies over time
+  double mosqSeekingDeathRate;
   
   /** Duration of host-seeking per day; the maximum fraction of a day that a
    * mosquito would spend seeking (θ_d). */
-  double mosqSeekingDuration;	// TODO: varies over time
+  double mosqSeekingDuration;
   
   /** Duration of resting period for mosquito (τ).
    * Units: days. */

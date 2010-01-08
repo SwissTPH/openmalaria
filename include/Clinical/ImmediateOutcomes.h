@@ -49,7 +49,6 @@ protected:
   virtual void checkpoint (ostream& stream);
   
 private:
-  //TODO move implementation into class?
   /// The CaseManagementModel decides how to treat ill individuals
   OldCaseManagement * caseManagement;
 };

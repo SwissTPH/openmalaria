@@ -108,7 +108,7 @@ private:
     next.  latestTreatment: time of the most recent treatment for the
     individual regimen: drug to be used for the new treatment.
   */
-  static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated, int regimen);
+  static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated);
 
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   static void setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem);

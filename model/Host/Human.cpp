@@ -200,12 +200,7 @@ void Human::updateInterventionStatus() {
       _TBVEfficacy *= Vaccine::TBV.decay;
       _BSVEfficacy *= Vaccine::BSV.decay;
     }
-    /*
-      Determine eligibility for vaccination
-      check for number of vaccine doses in the vaccinate subroutine
-      TODO: The tstep conditional is appropriate if we assume there is no intervention during warmup
-      It won't work if we introduce interventions into a scenario with a pre-existing intervention.
-    */
+    
     //_ctsIntervs.deploy(ageTimeSteps);
     if (Global::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){

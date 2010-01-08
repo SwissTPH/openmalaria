@@ -80,7 +80,9 @@ void NonVectorTransmission::initMainSimulation (){
 
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
+    // Note: requires Global::timeStep >= 0, but this can only be called in intervention period anyway.
   simulationMode = transientEIRknown;
+  
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
@@ -120,7 +122,6 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array
-      // TODO: check usage of timestep is safe (check transient EIR cannot be enterred before intervention sim)
       eir = interventionEIR[Global::timeStep];
       break;
     case dynamicEIR:

@@ -88,7 +88,7 @@ private:
   //@{
   /** The number of discrete species of anopheles mosquitos to be modelled.
    *
-   * Must be the same as species.size(). */
+   * Must be the same as species.size() and at least 1. */
   size_t numSpecies;
   
   /** Per anopheles species data.

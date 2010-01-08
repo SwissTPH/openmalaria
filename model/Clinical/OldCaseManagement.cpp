@@ -158,7 +158,7 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
   SurveyAgeGroup ageGroup(ageYears);
   Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA
                                    : Pathogenesis::SICK;
-  int nextRegimen = getNextRegimen (Global::simulationTime, entrypoint, _tLastTreatment, _latestRegimen);
+  int nextRegimen = getNextRegimen (Global::simulationTime, entrypoint, _tLastTreatment);
   bool successfulTreatment = false;
   
   if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (gsl::rngUniform())) {
@@ -187,12 +187,8 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
   if (ageYears >= 5.0) {
     isAdultIndex = 0;
   }
-  /*
-  TODO: is there a reason we cannot first decide if the patient is treated, then increase latestRegimen
-  and latestTreatment, instead of resetting it if not treated? (Can't think of one, but
-  do we want to change this section of code rather than just introducing the new alternative (TS))
-  */
-  int nextRegimen = getNextRegimen (Global::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment, _latestRegimen);
+  
+  int nextRegimen = getNextRegimen (Global::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment);
 
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
@@ -304,7 +300,7 @@ double OldCaseManagement::getCommunityCaseFatalityRate (double caseFatalityRatio
   return x / (1 - caseFatalityRatio + x);
 }
 
-int OldCaseManagement::getNextRegimen (int simulationTime, int diagnosis, int tLastTreated, int regimen)
+int OldCaseManagement::getNextRegimen (int simulationTime, int diagnosis, int tLastTreated)
 {
   if (diagnosis == Pathogenesis::STATE_SEVERE)
     return 3;
