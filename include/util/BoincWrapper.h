@@ -28,7 +28,6 @@
 #define Hmod_boincWrapper
 
 #include <string>
-using namespace std;
 
 namespace OM { namespace util {
 /// Wrapper around BOINC functions
@@ -39,7 +38,7 @@ namespace BoincWrapper {
   void finish (int err);
   
   /// Calls boinc_resolve_filename_s with inName, returning the result.
-  string resolveFile (const string& inName);
+  std::string resolveFile (const std::string& inName);
   
   /// Report the proportion of work done
   void reportProgress (double progress);

@@ -29,6 +29,9 @@
 #ifdef WITHOUT_BOINC
 #include <stdlib.h>	// exit()
 #else	// With BOINC
+#ifdef _WIN32
+#include "boinc_win.h"
+#endif
 #include "boinc_api.h"
 #include "diagnostics.h"
 #include "md5.h"
@@ -39,6 +42,8 @@
 #include "ShmStruct.h"
 #include "graphics2.h"
 #endif
+
+using namespace std;
 
 namespace OM { namespace util {
 
@@ -77,10 +82,10 @@ namespace BoincWrapper {
     boinc_init_diagnostics(BOINC_DIAG_DUMPCALLSTACKENABLED|BOINC_DIAG_REDIRECTSTDERR);
     int err = boinc_init();
     if (err) {
-      cerr << "APP. boinc_init() failed with code: "<<err<<endl;
+      std::cerr << "APP. boinc_init() failed with code: "<<err<<std::endl;
       exit (err);
     }
-    cout << "BoincWrapper: BOINC initialized" << endl;
+    std::cout << "BoincWrapper: BOINC initialized" << std::endl;
     
     SharedGraphics::init();
   }
@@ -88,8 +93,8 @@ namespace BoincWrapper {
     boinc_finish(err);	// doesn't return
   }
   
-  string resolveFile (const string& inName) {
-    string ret;
+  std::string resolveFile (const std::string& inName) {
+    std::string ret;
     int err = boinc_resolve_filename_s(inName.c_str(),ret);
     if (err) {
       stringstream t;
@@ -121,7 +126,7 @@ Checksum Checksum::generate (istream& fileStream) {
     char buf[4096];
     Checksum output;
     md5_state_t state;
-    int read = 0;
+    streampos bytes_read = 0;
     
     md5_init(&state);
     while (1) {
@@ -129,13 +134,13 @@ Checksum Checksum::generate (istream& fileStream) {
 	buf[264] ^= 5;
 	int n = fileStream.gcount ();
 	if (n<=0) break;
-	read += n;
+	bytes_read += n;
 	md5_append(&state, (unsigned char*) buf, n);
 	if (!fileStream.good ()) break;
     }
     md5_finish(&state, output.data);
     
-    if (firstLen != read) {	// fileStream.tellg () returns -1 now, not what I'd expect
+    if (firstLen != bytes_read) {	// fileStream.tellg () returns -1 now, not what I'd expect
 	//cerr << "first: "<<firstLen<<"\nsecond:"<<fileStream.tellg()<<"\nread:  "<<read<<endl;
 	throw runtime_error ("Initialisation read error");
     }

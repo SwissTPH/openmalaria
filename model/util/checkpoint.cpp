@@ -30,7 +30,7 @@ namespace OM { namespace util { namespace checkpoint {
     // Header test constants
     const unsigned int h_BOM = 0x50434D4F;	// "OMCP" in little-endian: OpenMalaria CheckPoint
     const bool h_b = true;
-    const char h_c = 0xA5;	// binary: 10100101; don't care if char is signed as long as first bit is read and written correctly
+    const unsigned char h_c = 0xA5;	// binary: 10100101; don't care if char is signed as long as first bit is read and written correctly
     const double h_n0 = -0.0;
     const double h_nan = numeric_limits<double>::quiet_NaN();
     
@@ -82,7 +82,7 @@ namespace OM { namespace util { namespace checkpoint {
 	staticChecks ();
 	unsigned int BOM;
 	bool b;
-	char c;
+	unsigned char c;
 	double n0;
 	double nan;
 	
