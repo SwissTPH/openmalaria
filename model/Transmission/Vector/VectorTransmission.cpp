@@ -39,8 +39,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   if (numSpecies < 1)
     throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
 #ifdef OMV_CSV_REPORTING
+  csvReporting << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
   species.resize (numSpecies, VectorAnopheles(this,csvReporting));
-  csvReporting << "simulation time,";
+  csvReporting << "simulation time\t";
 #else
   species.resize (numSpecies, VectorAnopheles(this));
 #endif
@@ -51,12 +52,12 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
     speciesIndex[name] = i;
     
 #ifdef OMV_CSV_REPORTING
-    csvReporting << "N_v0("<<i<<"),N_v("<<i<<"),O_v("<<i<<"),S_v("<<i<<"),";
+    csvReporting << "N_v0("<<i<<")\tN_v("<<i<<")\tO_v("<<i<<")\tS_v("<<i<<")\t";
 #endif
   }
   
 #ifdef OMV_CSV_REPORTING
-  csvReporting << "input EIR,resultant EIR,human infectiousness,human availability" << endl;
+  csvReporting << "input EIR\tresultant EIR\thuman infectiousness\thuman availability" << endl;
 #endif
   
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {
@@ -127,7 +128,7 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 // Every Global::interval days:
 void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {
 #ifdef OMV_CSV_REPORTING
-  csvReporting << simulationTime << ',';
+  csvReporting << simulationTime << '\t';
 #endif
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);

@@ -54,7 +54,7 @@ TransmissionModel::TransmissionModel() :
     _sumAnnualKappa(0.0), annualEIR(0.0),
     timeStepNumEntoInnocs (0)
 #ifdef OMV_CSV_REPORTING
-  , csvReporting ("vector.csv", ios::app)
+  , csvReporting ("vector.txt", ios::app)
 #endif
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
@@ -145,10 +145,10 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   
 #ifdef OMV_CSV_REPORTING
   csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear]
-	       << ',' << innoculationsPerDayOfYear[tmod]
-	       << ',' << kappa[tmod]
-	       << ',' << ageCorrectionFactor
-	       << ','<< endl;
+	       << '\t' << innoculationsPerDayOfYear[tmod]
+	       << '\t' << kappa[tmod]
+	       << '\t' << ageCorrectionFactor
+	       << '\t'<< endl;
 #endif
 }
 

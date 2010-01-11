@@ -388,7 +388,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   }
   
 #ifdef OMV_CSV_REPORTING
-  (*csvReporting) << outN_v0/Global::interval << ',' << outN_v/Global::interval << ',' << outO_v/Global::interval << ',' << outS_v/Global::interval << ',';
+  (*csvReporting) << outN_v0/Global::interval << '\t' << outN_v/Global::interval << '\t' << outO_v/Global::interval << '\t' << outS_v/Global::interval << '\t';
 #endif
 }
 

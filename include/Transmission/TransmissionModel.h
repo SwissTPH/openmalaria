@@ -245,7 +245,8 @@ protected:
   //@}
   
 #ifdef OMV_CSV_REPORTING
-  /// This is used to output infectiousness, etc. as a csv file, when included
+  /// This is used to output infectiousness, etc. as a tab-deliminated-value file, when included.
+  /// (It used to be csv, but German Excel can't open csv directly.)
   ofstream csvReporting;
 #endif
 };
