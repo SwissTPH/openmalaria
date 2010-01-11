@@ -28,11 +28,7 @@ namespace OM { namespace Transmission {
     using namespace OM::util;
 
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
-{
-  if (!util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION)
-      && !util::ModelOptions::option(util::LOGNORMAL_MASS_ACTION))
-    throw util::xml_scenario_error ("VectorTransmission is incompatible with the original InfectionIncidenceModel");
-  
+{  
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
   
