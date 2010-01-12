@@ -203,8 +203,7 @@ namespace OM { namespace util { namespace checkpoint {
     }
     //@}
     
-    // Note: this won't handle many characters a string might contain.
-    // I use a quick hack to confirm things are expected, doing most of the work on loading.
+    // string
     void operator& (string x, ostream& stream) {
 	x.length() & stream;
 	stream.write (x.c_str(), x.length());
@@ -216,6 +215,29 @@ namespace OM { namespace util { namespace checkpoint {
 	stream.read (&x[0], x.length());
 	if (!stream || stream.gcount() != streamsize(len))
 	    throw checkpoint_error ("stream read error string");
+    }
+    
+    // map<S,T> — template doesn't work on gcc
+    void operator& (map<string,double> x, ostream& stream) {
+	x.size() & stream;
+	for (map<string,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+	    pos->first & stream;
+	    pos->second & stream;
+	}
+    }
+    void operator& (map<string,double>& x, istream& stream) {
+	size_t l;
+	l & stream;
+	validateListSize (l);
+	x.clear ();
+	map<string,double>::iterator pos = x.begin ();
+	for (size_t i = 0; i < l; ++i) {
+	    string s;
+	    double t;
+	    s & stream;
+	    t & stream;
+	    pos = x.insert (pos, make_pair (s,t));
+	}
     }
     
 } } }

@@ -55,6 +55,7 @@ public:
 	partialEIR(0.0),
 	larvicidingEndStep (std::numeric_limits<int>::max()),
 	larvicidingIneffectiveness (1.0),
+	timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0),
 	csvReporting(&csvR)
     {}
 #else
@@ -62,7 +63,8 @@ public:
 	transmissionModel(tm),
 	partialEIR(0.0),
 	larvicidingEndStep (std::numeric_limits<int>::max()),
-	larvicidingIneffectiveness (1.0)
+	larvicidingIneffectiveness (1.0),
+	timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0)
     {}
 #endif
   
@@ -142,6 +144,9 @@ public:
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
+  /// Write some per-species summary information.
+  void summarize (const string speciesName, Survey& survey);
+  
   /// Checkpointing
   //Note: below comments about what does and doesn't need checkpointing are ignored here.
   template<class S>
@@ -174,6 +179,10 @@ public:
     partialEIR & stream;
     larvicidingEndStep & stream;
     larvicidingIneffectiveness & stream;
+    timestep_N_v0 & stream;
+    timestep_N_v & stream;
+    timestep_O_v & stream;
+    timestep_S_v & stream;
   }
   
 private:
@@ -351,6 +360,10 @@ private:
   double larvicidingIneffectiveness;
   //@}
   
+  /** Variables tracking data to be reported. */
+  double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
+
+
   /* Functions */
   
   /** This subroutine converts ShortArray to a vector<double> of length

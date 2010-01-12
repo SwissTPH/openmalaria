@@ -294,7 +294,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   partialEIR = 0.0;
   
 #ifdef OMV_CSV_REPORTING
-  double outN_v0 = 0.0, outN_v = 0.0, outO_v = 0.0, outS_v = 0.0;
+  timestep_N_v0 = 0.0, timestep_N_v = 0.0, timestep_O_v = 0.0, timestep_S_v = 0.0;
 #endif
   
   // The code within the for loop needs to run per-day, wheras the main
@@ -380,15 +380,15 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     partialEIR += S_v[t] * P_Ai_base;
     
 #ifdef OMV_CSV_REPORTING
-    outN_v += N_v[t];
-    outN_v0 += mosqEmergeRate[dYear];
-    outO_v += O_v[t];
-    outS_v += S_v[t];
+    timestep_N_v += N_v[t];
+    timestep_N_v0 += mosqEmergeRate[dYear];
+    timestep_O_v += O_v[t];
+    timestep_S_v += S_v[t];
 #endif
   }
   
 #ifdef OMV_CSV_REPORTING
-  (*csvReporting) << outN_v0/Global::interval << '\t' << outN_v/Global::interval << '\t' << outO_v/Global::interval << '\t' << outS_v/Global::interval << '\t';
+  (*csvReporting) << timestep_N_v0/Global::interval << '\t' << timestep_N_v/Global::interval << '\t' << timestep_O_v/Global::interval << '\t' << timestep_S_v/Global::interval << '\t';
 #endif
 }
 
@@ -397,6 +397,14 @@ void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt
   cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
   larvicidingEndStep = Global::simulationTime + (elt.getDuration() / Global::interval);
+}
+
+void VectorAnopheles::summarize (const string speciesName, Survey& survey) {
+    //FIXME: check is this called at the end of the timestep?
+    survey.set_Vector_Nv0 (speciesName, timestep_N_v0/Global::interval);
+    survey.set_Vector_Nv (speciesName, timestep_N_v/Global::interval);
+    survey.set_Vector_Ov (speciesName, timestep_O_v/Global::interval);
+    survey.set_Vector_Sv (speciesName, timestep_S_v/Global::interval);
 }
 
 

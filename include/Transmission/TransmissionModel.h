@@ -94,8 +94,10 @@ public:
   }
   //@}
   
-  /// Set a couple of summary items
-  void summarize (Survey& survey);
+  /** Set some summary items.
+   *
+   * Overriding functions should call this base version too. */
+  virtual void summarize (Survey& survey);
   
   
   /** How many intervals are needed for vector initialisation before

@@ -140,6 +140,13 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
     species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
 }
 
+void VectorTransmission::summarize (Survey& survey) {
+    TransmissionModel::summarize (survey);
+    
+    for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
+	species[it->second].summarize (it->first, survey);
+}
+
 
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);

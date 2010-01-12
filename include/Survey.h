@@ -22,84 +22,118 @@
 
 #include "Global.h"
 #include <bitset>
+#include <map>
 
 namespace OM {
     
 /** Enumeration of reporting options
  *
- * Most are reported per age-group. */
-enum SurveyCodes {
+ * Many are reported per age-group, but to check which actually are you'll have
+ * to look through the code.
+ * 
+ * Don't ever change these names or numbers. The names are used in scenario
+ * files, and the numbers in results output/databases. */
+enum SurveyMeasure {
     /// Total number of humans
-    nHost,
+    nHost = 0,
     /// number of infected hosts 
-    nInfect,
+    nInfect = 1,
     /// expected number of infected hosts
-    nExpectd,
+    nExpectd= 2,
     /// number of patent hosts
-    nPatent,
+    nPatent= 3,
     /// Sum of the log of the pyrogen threshold
-    sumLogPyrogenThres,
+    sumLogPyrogenThres = 4,
     /// Sum of the logarithm of the parasite density
-    sumlogDens,
+    sumlogDens= 5,
     /// Total infections
-    totalInfs,
+    totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
-    *
-    * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
-    * mosquitoes that get infected). We don't want this by age. */
-    nTransmit,
+     *
+     * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
+     * mosquitoes that get infected). Single value, not per age-group. */
+    nTransmit= 7,
     /// Total patent infections
-    totalPatentInf,
+    totalPatentInf= 8,
     /// Contribution to immunity functions
     ///NOTE: not used
-    contrib,
+    contrib= 9,
     /// Sum of the pyrogenic threshold
-    sumPyrogenThresh,
+    sumPyrogenThresh = 10,
     /// number of treatments (1st line)
-    nTreatments1,
+    nTreatments1= 11,
     /// number of treatments (2nd line)
-    nTreatments2,
+    nTreatments2= 12,
     /// number of treatments (inpatient)
-    nTreatments3,
+    nTreatments3= 13,
     /// number of episodes (uncomplicated)
-    nUncomp,
+    nUncomp= 14,
     /// number of episodes (severe)
-    nSevere,
+    nSevere= 15,
     /// cases with sequelae
-    nSeq,
+    nSeq= 16,
     /// deaths in hospital
-    nHospitalDeaths,
+    nHospitalDeaths= 17,
     /// number of deaths (indirect)
-    nIndDeaths,
+    nIndDeaths= 18,
     /// number of deaths (direct)
-    nDirDeaths,
+    nDirDeaths= 19,
     /// number of EPI vaccine doses given
-    nEPIVaccinations,
+    nEPIVaccinations= 20,
     //all cause infant mortality rate
-    imr_summary,
+    imr_summary= 21,
     /// number of Mass / Campaign vaccine doses given
-    nMassVaccinations,
+    nMassVaccinations= 22,
     /// recoveries in hospital
-    nHospitalRecovs,
+    nHospitalRecovs= 23,
     /// sequelae in hospital
-    nHospitalSeqs,
+    nHospitalSeqs= 24,
     /// number of IPT Doses
-    nIPTDoses,
+    nIPTDoses= 25,
     /** Annual Average Kappa
-    *
-    * Calculated once a year as sum of human infectiousness divided by initial
-    * EIR summed over a year. */
-    annAvgK,
+     *
+     * Calculated once a year as sum of human infectiousness divided by initial
+     * EIR summed over a year. Single value, not per age-group. */
+    annAvgK= 26,
     /// Number of episodes (non-malaria fever)
-    nNMFever,
-    /// Innoculations per human (all ages) per day of year, over the last year.
-    innoculationsPerDayOfYear,
-    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
-    kappaPerDayOfYear,
+    nNMFever= 27,
     /** The total number of innoculations per age group, summed over the
-    * reporting period. */
-    innoculationsPerAgeGroup,
-    NUM_SURVEY_OPTIONS	// must be hightest value above plus one
+     * reporting period. */
+    innoculationsPerAgeGroup = 30,
+    
+    /** @brief Per day-of-year data
+     *
+     * These were added as an initial way of reporting vector data. I don't
+     * recommend using them, though currently the only other way to get this
+     * data is via the non-BOINC vector.txt output. */
+    //@{
+    /// Innoculations per human (all ages) per day of year, over the last year.
+    innoculationsPerDayOfYear = 28,
+    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+    kappaPerDayOfYear = 29,
+    //@}
+    
+    /** @brief Vector model parameters.
+     *
+     * All are point-time outputs, not averages. The Nv0, Nv, Ov and Sv outputs
+     * are per-species; the EIR outputs are single values. */
+    //@{
+    /** Mosquito emergence rate. */
+    Vector_Nv0 = 31,
+    /// Mosquito population size
+    Vector_Nv = 32,
+    /// Number of infected mosquitoes
+    Vector_Ov = 33,
+    /// Number of infectious mosquitoes
+    Vector_Sv = 34,
+    /// Input EIR (Expected EIR entered into scenario file)
+    Vector_EIR_Input = 35,
+    /// Simulated EIR (EIR output by the vector model)
+    Vector_EIR_Simulated = 36,
+    //@}
+    
+    // must be hightest value above plus one
+    NUM_SURVEY_OPTIONS	
 };
 
 /** Included for type-saftey: don't allow implicit double->int conversions.
@@ -294,6 +328,24 @@ public:
   void reportHospitalizationDays (int days) {
       //FIXME: report
   }
+  void set_Vector_Nv0 (string key, double v) {
+    data_Vector_Nv0[key] = v;
+  }
+  void set_Vector_Nv (string key, double v) {
+    data_Vector_Nv[key] = v;
+  }
+  void set_Vector_Ov (string key, double v) {
+    data_Vector_Ov[key] = v;
+  }
+  void set_Vector_Sv (string key, double v) {
+    data_Vector_Sv[key] = v;
+  }
+  void set_Vector_EIR_Input (double v) {
+    data_Vector_EIR_Input = v;
+  }
+  void set_Vector_EIR_Simulated (double v) {
+    data_Vector_EIR_Simulated = v;
+  }
   
   /// Checkpointing
   template<class S>
@@ -327,6 +379,12 @@ public:
     _innoculationsPerDayOfYear & stream;
     _kappaPerDayOfYear & stream;
     _innoculationsPerAgeGroup & stream;
+    data_Vector_Nv0 & stream;
+    data_Vector_Nv & stream;
+    data_Vector_Ov & stream;
+    data_Vector_Sv & stream;
+    data_Vector_EIR_Input & stream;
+    data_Vector_EIR_Simulated & stream;
   }
   
 private:
@@ -338,6 +396,11 @@ private:
    * @param survey Survey number (starting from 1) */
   void writeSummaryArrays (ostream& outputFile, int survey);
   
+  // atomic data:
+  double _numTransmittingHosts;
+  double _annualAverageKappa;
+  
+  // data, per SurveyAgeGroup:
   vector<int> _numHosts;
   vector<int> _numInfectedHosts;
   vector<double> _numExpectedInfected;
@@ -345,7 +408,6 @@ private:
   vector<double> _sumLogPyrogenicThreshold;
   vector<double> _sumLogDensity;
   vector<int> _sumInfections;
-  double _numTransmittingHosts;
   vector<int> _sumPatentInfections;
   vector<double> _sumPyrogenicThreshold;
   vector<int> _numTreatments1;
@@ -362,23 +424,26 @@ private:
   vector<int> _numHospitalRecoveries;
   vector<int> _numHospitalSequelae;
   vector<int> _numIPTDoses;
-  double _annualAverageKappa;
   vector<int> _numNonMalariaFevers; 
+  vector<double> _innoculationsPerAgeGroup;
+  
+  // data, per day-of-year:
   vector<double> _innoculationsPerDayOfYear;
   vector<double> _kappaPerDayOfYear;
-  vector<double> _innoculationsPerAgeGroup;
+  
+    // data, per vector species:
+    map<string,double> data_Vector_Nv0;
+    map<string,double> data_Vector_Nv;
+    map<string,double> data_Vector_Ov;
+    map<string,double> data_Vector_Sv;
+    double data_Vector_EIR_Input;
+    double data_Vector_EIR_Simulated;
   
   friend class SurveysType;
 };
 
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';
-
-template <class T>
-void writeArray(ostream& file, int measure, bool assimilationMode, int survey, vector<T>& array);
-
-template <class T>
-void writeArray(ostream& file, int measure, bool assimilationMode, int survey, T& value);
 
 }
 #endif

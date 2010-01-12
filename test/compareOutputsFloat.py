@@ -75,20 +75,20 @@ class TestApproxEqual (unittest.TestCase):
 class ValIdentifier:
     def __init__(self,s,g,m):
         self.survey = s
-        self.ageGroup = g
+        self.group = g
         self.measure = m
     def __eq__(self,other):
-        return (self.survey == other.survey) and (self.ageGroup == other.ageGroup) and (self.measure == other.measure)
+        return (self.survey == other.survey) and (self.group == other.group) and (self.measure == other.measure)
     def __hash__(self):
-        return self.survey.__hash__() ^ self.ageGroup.__hash__() ^ self.measure.__hash__()
+        return self.survey.__hash__() ^ self.group.__hash__() ^ self.measure.__hash__()
 
 class TestValIdentifier (unittest.TestCase):
     def setUp(self):
         self.a1 = ValIdentifier(2,4,0);
         self.a2 = ValIdentifier(2,4,0);
         self.a3 = ValIdentifier(2,2,0);
-        self.b1 = ValIdentifier(0,16,5);
-        self.b2 = ValIdentifier(0,16,5);
+        self.b1 = ValIdentifier(0,"abc",5);
+        self.b2 = ValIdentifier(0,"abc",5);
     def testEq (self):
         self.assert_ (self.a1.survey == self.a2.survey)
         self.assert_ (self.a1 == self.a2)
@@ -96,6 +96,7 @@ class TestValIdentifier (unittest.TestCase):
         self.assert_ (self.a1 != self.a3)
     def testHash (self):
         self.assert_ (self.a1.__hash__ == self.a2.__hash__)
+        self.assert_ (self.a1.__hash__ != self.a3.__hash__) # actually, could sometimes be
         self.assert_ (self.b1.__hash__ == self.b2.__hash__)
 
 
@@ -117,7 +118,11 @@ def ReadEntries (fname):
     fileObj = open(fname, 'r')
     for line in fileObj:
         items=string.split(line)
-        key=ValIdentifier(int(items[0]),int(items[1]),int(items[2]))
+        if (len(items) != 4):
+            print "expected 4 items on line; found:"
+            print line
+            
+        key=ValIdentifier(int(items[0]),items[1],int(items[2]))
         values[key]=float(items[3])
     return values
 
@@ -176,7 +181,7 @@ ident is 1 if files are binary-equal."""
         numPrinted += 1
         perMeasureNumDiff[k.measure] = perMeasureNumDiff.get(k.measure,0) + 1;
         if (numPrinted <= maxDiffsToPrint):
-            print "survey {1:>3}, age group {2:>3}, measure {3:>3}:{4:>12.5} ->{5:>12.5}".format(0,k.survey,k.ageGroup,k.measure,v1,v2)
+            print "survey {1:>3}, group {2:>3}, measure {3:>3}:{4:>12.5} ->{5:>12.5}".format(0,k.survey,k.group,k.measure,v1,v2)
             if (numPrinted == maxDiffsToPrint):
                 print "[won't print any more line-by-line diffs]"
     

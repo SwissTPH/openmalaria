@@ -84,7 +84,7 @@ void SurveysType::writeSummaryArrays ()
   if (Survey::active[imr_summary]) {
     if (!Survey::_assimilatorMode)
       outputFile << 1 << "\t" << 1 << "\t" << imr_summary;
-    outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() <<  lineEnd;
+    outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() << lineEnd;
   }
 
   outputFile.close();

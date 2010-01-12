@@ -24,11 +24,14 @@
 #include <boost/foreach.hpp>
 #include <vector>
 #include <list>
+#include <map>
 using namespace std;
 
 /** @brief Checkpointing utility functions
  *
- * These functions are intended to facilitate checkpointing.
+ * These functions are intended to facilitate checkpointing. They were inspired
+ * by the boost::serialization library (which proved to be easier not to use,
+ * due to the additional library dependency).
  * 
  * My current rule-of-thumb is to checkpoint all non-static data but not static data in general.
  * 
@@ -194,6 +197,35 @@ namespace OM { namespace util { namespace checkpoint {
 	    y & stream;
 	}
     }
+    
+    /* The following templates don't work on gcc, so you'll need to provide them as non-templates.
+    template<class S, class T>
+    void operator& (map<S,T> x, ostream& stream) {
+	x.size() & stream;
+	BOOST_FOREACH (T& y, x) {
+	    y->first & stream;
+	    y->second & stream;
+	}
+    }
+    template<class S, class T>
+    void operator& (map<S,T> x, istream& stream) {
+	size_t l;
+	l & stream;
+	validateListSize (l);
+	x.clear ();
+	map<S,T>::iterator pos = x.begin ();
+	for (size_t i = 0; i < l; ++i) {
+	    S s;
+	    T t;
+	    s & stream;
+	    t & stream;
+	    pos = x.insert (pos, make_pair (s,t));
+	}
+    }
+    */
+    
+    void operator& (map<string,double> x, ostream& stream);
+    void operator& (std::map< string, double >& x, istream& stream);
     //@}
     
 } } }	// end of namespaces

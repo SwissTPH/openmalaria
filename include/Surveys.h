@@ -26,7 +26,17 @@
 
 namespace OM {
     
-/** Class to collect surveys and write them out. */
+/** Class to collect surveys and write them out.
+ *
+ * Surveys are written to the file output.txt. There is a one-to-one mapping of
+ * lines to data entries (except the file ends with a new line). Data columns are
+ * separated by tabs on each.
+ * 
+ * The first column lists the survey number as an integer, counting from one,
+ * the second column a "group" parameter as a string (precise meaning depends
+ * on the measure), the third column the measure as an integer ID (the values
+ * in the SurveyCodes enum), and the forth a value (integer or floating-point,
+ * but when exported to the database always considered a double). */
 class SurveysType
 {
   public:

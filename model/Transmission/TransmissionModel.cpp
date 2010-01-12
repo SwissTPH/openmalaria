@@ -174,6 +174,9 @@ void TransmissionModel::summarize (Survey& survey) {
   
   survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
   innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
+  
+  survey.set_Vector_EIR_Input (initialisationEIR[Global::simulationTime % Global::intervalsPerYear]);
+  survey.set_Vector_EIR_Simulated (innoculationsPerDayOfYear[(Global::simulationTime-1) % Global::intervalsPerYear]);
 }
 
 void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {

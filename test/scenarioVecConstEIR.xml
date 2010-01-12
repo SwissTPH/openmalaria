@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="13" wuID="0" xsi:noNamespaceSchemaLocation="scenario_13.xsd"><ModelOptions><option name="LOGNORMAL_MASS_ACTION" value="true"/><option name="NO_PRE_ERYTHROCYTIC" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="13" wuID="0" xsi:noNamespaceSchemaLocation="scenario_13.xsd">
+  <ModelOptions>
+    <option name="LOGNORMAL_MASS_ACTION" value="true"/>
+    <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+    <option name="MAX_DENS_CORRECTION" value="false"/>
+  </ModelOptions>
 
   <demography name="test">
     <ageGroup lowerbound="0">
@@ -25,7 +30,26 @@
   </demography>
 
   <monitoring name="Test Moni">
-    <SurveyOptions><option name="nHost" value="true"/><option name="nExpectd" value="true"/><option name="nPatent" value="true"/><option name="sumLogPyrogenThres" value="true"/><option name="sumlogDens" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="innoculationsPerDayOfYear" value="true"/><option name="kappaPerDayOfYear" value="true"/><option name="innoculationsPerAgeGroup" value="true"/></SurveyOptions><surveys detectionLimit="2.5">
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nExpectd" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="sumLogPyrogenThres" value="true"/>
+      <option name="sumlogDens" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="innoculationsPerDayOfYear" value="true"/>
+      <option name="kappaPerDayOfYear" value="true"/>
+      <option name="innoculationsPerAgeGroup" value="true"/>
+      <option name="Vector_Nv0" value="true"/>
+      <option name="Vector_Nv" value="true"/>
+      <option name="Vector_Ov" value="true"/>
+      <option name="Vector_Sv" value="true"/>
+      <option name="Vector_EIR_Input" value="true"/>
+      <option name="Vector_EIR_Simulated" value="true"/>
+    </SurveyOptions>
+    <surveys detectionLimit="2.5">
       <surveyTime>1</surveyTime>
       <surveyTime>293</surveyTime>
       <surveyTime>366</surveyTime>
