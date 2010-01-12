@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="1000" schemaVersion="13" wuID="0" xsi:noNamespaceSchemaLocation="scenario_13.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="100" schemaVersion="13" wuID="0" xsi:noNamespaceSchemaLocation="scenario_13.xsd">
   <ModelOptions>
     <option name="LOGNORMAL_MASS_ACTION" value="true"/>
     <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
@@ -194,6 +194,34 @@
       <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
     </iptiDescription>
     <anopheles mosquito="gambiae_ss">
+      <ITNDescription name="LLIN test">
+        <deterrency halflife="3" initial="0.44"/>
+        <preprandialKillingEffect halflife="3" initial="0.27"/>
+        <postprandialKillingEffect halflife="3" initial="0.27"/>
+      </ITNDescription>
+      <IRSDescription name="DDT test">
+        <deterrency halflife="0.5" initial="0.56"/>
+        <killingEffect halflife="0.5" initial="0.24"/>
+      </IRSDescription>
+      <VADescription name="hypothetical deterrency">
+	<deterrency halflife="4" initial="0.2"/>
+      </VADescription>
+    </anopheles>
+    <anopheles mosquito="funestus">
+      <ITNDescription name="LLIN test">
+        <deterrency halflife="3" initial="0.44"/>
+        <preprandialKillingEffect halflife="3" initial="0.27"/>
+        <postprandialKillingEffect halflife="3" initial="0.27"/>
+      </ITNDescription>
+      <IRSDescription name="DDT test">
+        <deterrency halflife="0.5" initial="0.56"/>
+        <killingEffect halflife="0.5" initial="0.24"/>
+      </IRSDescription>
+      <VADescription name="hypothetical deterrency">
+	<deterrency halflife="4" initial="0.2"/>
+      </VADescription>
+    </anopheles>
+    <anopheles mosquito="arabiensis">
       <ITNDescription name="LLIN test">
         <deterrency halflife="3" initial="0.44"/>
         <preprandialKillingEffect halflife="3" initial="0.27"/>
