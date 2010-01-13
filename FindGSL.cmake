@@ -38,14 +38,15 @@ if (GSL_INCLUDE_DIR2)
 endif (GSL_INCLUDE_DIR2)
 set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} CACHE PATH "GSL include dirs")
 
-find_library (GSL_LIB gsl gsl_mt
-  PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib ${CMAKE_SOURCE_DIR}/../gsl/gsl/lib
+# gsl puts libraries in various places, with various suffixes. Copy the ones you want to use to ../gsl/lib and remove suffixes.
+find_library (GSL_LIB gsl
+  PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
 )
-find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas cblas_mt
-  PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib ${CMAKE_SOURCE_DIR}/../gsl/gsl/lib
+find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas
+  PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
