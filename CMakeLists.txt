@@ -47,6 +47,7 @@ if (MSVC)
 	endif(${flag_var} MATCHES "/MDd")
     endforeach(flag_var)
   endif (OM_USE_LIBCMT)
+  set (OM_COMPILE_FLAGS "${OM_COMPILE_FLAGS} /D_CRT_SECURE_NO_DEPRECATE")
 endif (MSVC)
 
 
@@ -62,8 +63,12 @@ find_package (XSD)
 find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
-# help for windows installer
-set (BOOST_ROOT "C:\\Program Files\\boost\\boost_1_40")
+
+# suggested on windows: install boost such that paths are:
+# C:\Program Files\boost\boost_VER\boost\config.hpp
+# Add versions greater than 1.38 here:
+set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0")
+#set (Boost_DEBUG)
 find_package( Boost 1.36.0 )
 if(Boost_FOUND)
   include_directories(${Boost_INCLUDE_DIRS})
