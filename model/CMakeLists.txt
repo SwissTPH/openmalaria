@@ -67,7 +67,6 @@ set (Model_CPP
   util/errors.cpp
   util/checkpoint.cpp
     util/Options.cpp
-    util/Checksum.cpp
 )
 
 # Headers - only included so they show up in IDEs:
