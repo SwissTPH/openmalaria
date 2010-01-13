@@ -118,7 +118,7 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     ifstream fileStream;
     util::Checksum cksum = util::Checksum::generate (fileStream);
 # else
-    ifstream fileStream (lXmlFile.c_str());
+    ifstream fileStream (lXmlFile.c_str(), ios::binary);
     scenario = (scnXml::parseScenario (fileStream)).release();
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
