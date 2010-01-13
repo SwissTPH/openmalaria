@@ -169,9 +169,6 @@ void TransmissionModel::summarize (Survey& survey) {
   survey.setNumTransmittingHosts(kappa[(Global::simulationTime-1) % Global::intervalsPerYear]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
   
-  survey.setInnoculationsPerDayOfYear (innoculationsPerDayOfYear);
-  survey.setKappaPerDayOfYear (kappa);
-  
   survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
   innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
   

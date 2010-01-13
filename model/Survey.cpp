@@ -289,12 +289,6 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
     writePerAgeGroup (outputFile, nNMFever, _assimilatorMode, survey, _numNonMalariaFevers);
   }
 
-  if (active[innoculationsPerDayOfYear]) {
-    writePerAgeGroup (outputFile, innoculationsPerDayOfYear, _assimilatorMode, survey, _innoculationsPerDayOfYear);
-  }
-  if (active[kappaPerDayOfYear]) {
-    writePerAgeGroup (outputFile, kappaPerDayOfYear, _assimilatorMode, survey, _kappaPerDayOfYear);
-  }
   if (active[innoculationsPerAgeGroup]) {
     writePerAgeGroup (outputFile, innoculationsPerAgeGroup, _assimilatorMode, survey, _innoculationsPerAgeGroup);
   }

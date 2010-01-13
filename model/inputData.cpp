@@ -22,7 +22,6 @@
 #include "scenario.hxx"
 #include "util/BoincWrapper.h"
 #include "util/errors.hpp"
-#include "util/Checksum.hpp"
 
 #include <iostream>
 #include <sstream>

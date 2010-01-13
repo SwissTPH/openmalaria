@@ -101,17 +101,12 @@ enum SurveyMeasure {
      * reporting period. */
     innoculationsPerAgeGroup = 30,
     
-    /** @brief Per day-of-year data
-     *
-     * These were added as an initial way of reporting vector data. I don't
-     * recommend using them, though currently the only other way to get this
-     * data is via the non-BOINC vector.txt output. */
-    //@{
+    //BEGIN Per day-of-year data (removed)
     /// Innoculations per human (all ages) per day of year, over the last year.
     innoculationsPerDayOfYear = 28,
     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
     kappaPerDayOfYear = 29,
-    //@}
+    //END
     
     /** @brief Vector model parameters.
      *
@@ -316,12 +311,6 @@ public:
     _numTransmittingHosts = value;
   }
   
-  void setInnoculationsPerDayOfYear (vector<double>& v) {
-    _innoculationsPerDayOfYear = v;
-  }
-  void setKappaPerDayOfYear (vector<double>& v) {
-    _kappaPerDayOfYear = v;
-  }
   void setInnoculationsPerAgeGroup (vector<double>& v) {
     _innoculationsPerAgeGroup = v;	// copies v, not just its reference
   }
@@ -376,8 +365,6 @@ public:
     _numIPTDoses & stream;
     _annualAverageKappa & stream;
     _numNonMalariaFevers & stream; 
-    _innoculationsPerDayOfYear & stream;
-    _kappaPerDayOfYear & stream;
     _innoculationsPerAgeGroup & stream;
     data_Vector_Nv0 & stream;
     data_Vector_Nv & stream;
@@ -426,10 +413,6 @@ private:
   vector<int> _numIPTDoses;
   vector<int> _numNonMalariaFevers; 
   vector<double> _innoculationsPerAgeGroup;
-  
-  // data, per day-of-year:
-  vector<double> _innoculationsPerDayOfYear;
-  vector<double> _kappaPerDayOfYear;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;
