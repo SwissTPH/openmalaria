@@ -293,9 +293,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   // Summed per day:
   partialEIR = 0.0;
   
-#ifdef OMV_CSV_REPORTING
   timestep_N_v0 = 0.0, timestep_N_v = 0.0, timestep_O_v = 0.0, timestep_S_v = 0.0;
-#endif
   
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses Global::interval day (currently 5 day) time steps.
@@ -379,12 +377,10 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     
     partialEIR += S_v[t] * P_Ai_base;
     
-#ifdef OMV_CSV_REPORTING
     timestep_N_v += N_v[t];
     timestep_N_v0 += mosqEmergeRate[dYear];
     timestep_O_v += O_v[t];
     timestep_S_v += S_v[t];
-#endif
   }
   
 #ifdef OMV_CSV_REPORTING
@@ -400,7 +396,6 @@ void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt
 }
 
 void VectorAnopheles::summarize (const string speciesName, Survey& survey) {
-    //FIXME: check is this called at the end of the timestep?
     survey.set_Vector_Nv0 (speciesName, timestep_N_v0/Global::interval);
     survey.set_Vector_Nv (speciesName, timestep_N_v/Global::interval);
     survey.set_Vector_Ov (speciesName, timestep_O_v/Global::interval);

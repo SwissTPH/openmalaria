@@ -68,7 +68,7 @@ namespace BoincWrapper {
 }
 Checksum Checksum::generate (istream& fileStream) {
     // Return a dummy checksum; making sure it is always the same.
-    // Note: checkpoints from BOINC and non-BOINC versions are then incompatible.
+    // Note: checkpoints from BOINC and non-BOINC versions are thus incompatible.
     Checksum ret;
     for (int i = 0; i < 16; ++i)
 	ret.data[i] = 0;
