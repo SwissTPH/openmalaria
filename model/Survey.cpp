@@ -79,8 +79,6 @@ class SurveyMeasureMap {
 	    codeMap["nIPTDoses"] = nIPTDoses;
 	    codeMap["annAvgK"] = annAvgK;
 	    codeMap["nNMFever"] = nNMFever;
-	    codeMap["innoculationsPerDayOfYear"] = innoculationsPerDayOfYear;
-	    codeMap["kappaPerDayOfYear"] = kappaPerDayOfYear;
 	    codeMap["innoculationsPerAgeGroup"] = innoculationsPerAgeGroup;
 	    codeMap["Vector_Nv0"] = Vector_Nv0;
 	    codeMap["Vector_Nv"] = Vector_Nv;

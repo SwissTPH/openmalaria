@@ -39,8 +39,6 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
-      <option name="innoculationsPerDayOfYear" value="true"/>
-      <option name="kappaPerDayOfYear" value="true"/>
       <option name="innoculationsPerAgeGroup" value="true"/>
       <option name="Vector_Nv0" value="true"/>
       <option name="Vector_Nv" value="true"/>
