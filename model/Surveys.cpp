@@ -22,6 +22,7 @@
 #include "util/BoincWrapper.h"
 #include "Clinical/ClinicalModel.h"
 
+#include "gzstream.h"
 #include <fstream>
 #include <stdexcept>
 
@@ -62,13 +63,20 @@ void SurveysType::incrementSurveyPeriod()
 
 void SurveysType::writeSummaryArrays ()
 {
-  string output_filename = util::BoincWrapper::resolveFile ("output.txt");
+#ifdef WITHOUT_BOINC
+  ofstream outputFile;		// without boinc, use plain text (for easy reading)
+  const char* fname = "output.txt";
+#else
+  ogzstream outputFile;		// with, use gzip
+  const char* fname = "output.txt.gz";
+#endif
+
+  string output_filename = util::BoincWrapper::resolveFile (fname);
   ifstream test (output_filename.c_str());
   if (test.is_open())
     throw runtime_error ("File output.txt exists!");
 
-  ofstream outputFile;
-  outputFile.open (output_filename.c_str());
+  outputFile.open (output_filename.c_str(), ios::out | ios::binary);
 
   outputFile.width (0);
   // For additional control:
