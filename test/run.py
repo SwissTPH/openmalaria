@@ -15,6 +15,7 @@ import time
 import subprocess
 import shutil
 from optparse import OptionParser
+import gzip
 
 sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
 import compareOutputsFloat as compareOuts
@@ -71,6 +72,7 @@ def runScenario(options,omOptions,name):
     # Run from a temporary directory, so checkpoint files won't conflict
     simDir = tempfile.mkdtemp(prefix=name+'-', dir=testBuildDir)
     outFile=os.path.join(simDir,"output.txt")
+    outFileGz=os.path.join(simDir,"output.txt.gz")
     checkFile=os.path.join(simDir,"checkpoint")
     
     # Link or copy required files.
@@ -90,6 +92,16 @@ def runScenario(options,omOptions,name):
         if ret != 0:
             print "Non-zero exit status: {0}".format(ret)
             break
+        
+        # check for output.txt.gz in place of output.txt and uncompress:
+        if (os.path.isfile(outFileGz)) and (not os.path.isfile(outFile)):
+            f_in = gzip.open(outFileGz, 'rb')
+            f_out = open(outFile, 'wb')
+            f_out.writelines(f_in)
+            f_out.close()
+            f_in.close()
+            if options.cleanup:
+                os.remove(outFileGz)
         
         # if the checkpoint file hasn't been updated, stop
         if not os.path.isfile(checkFile):
