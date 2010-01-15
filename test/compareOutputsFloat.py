@@ -143,7 +143,8 @@ ident is 1 if files are binary-equal."""
         
         values1=ReadEntries(fn1)
         values2=ReadEntries(fn2)
-    except IOError as e:
+    # python 3000 syntax is "except IOError as e", backported to 2.6 but not always supported. Old syntax:
+    except IOError, e:
         print str(e)
         return 1,False
     values=dict()
