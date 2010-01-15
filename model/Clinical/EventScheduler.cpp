@@ -78,6 +78,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
     //TODO: changes to this condition (pending discussion)
+    //new logic: if severe, nothing happens for "hospitalization days"
+    // if uc/uc2/nmf, the only event that can happen within 3 days is severe
+    
     /* Literally, if differences between (the combination of pgState and newState)
      * and pgState include SICK, MALARIA or COMPLICATED
      * or a second case of MALARIA and at least 3 days since last change */
@@ -98,6 +101,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	}
 	
         lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	
+	// FIXME: set EVENT_IN_HOSPITAL from lastCmDecision
+	// FIXME: report hospital entry
+	//TODO report recoveries/death, and seq?
+	
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    //TODO: report sequelae?
 	    // pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
