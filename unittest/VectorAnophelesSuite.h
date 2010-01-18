@@ -143,13 +143,13 @@ public:
     population = &simulation->_population->_population;
     
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
-      cout << "\nXSD Exception: " << e.what() << '\n' << e << endl;
+      cerr << "\nXSD Exception: " << e.what() << '\n' << e << endl;
       throw;
     } catch (const exception& e) {
-      cout << "\nException: " << e.what() << endl;
+      cerr << "\nException: " << e.what() << endl;
       throw;
     } catch (...) {
-      cout << "\nUnknown exception" << endl;
+      cerr << "\nUnknown exception" << endl;
       throw;
     }
   }
@@ -260,16 +260,16 @@ public:
     _ETS_ASSERT_VECTOR_APPROX (f,l, species->S_v, yaml2Std<double> (node["S_v"]));
     
     if (CxxTest::tracker().testFailed()) {
-      cout << "Unittest failed; new output:\n";
+      cerr << "Unittest failed; new output:\n";
       // Print values so they can easily be copied into expected output:
-      cout << setprecision(10);
-      cout << "averageEIR: " << resultEIR / vtm->timeStepNumEntoInnocs;
-      cout << "\nP_A:\t" << species->P_A;
-      cout << "\nP_df:\t" << species->P_df;
-      cout << "\nP_dif:\t" << species->P_dif;
-      cout << "\nN_v:\t" << species->N_v;
-      cout << "\nO_v:\t" << species->O_v;
-      cout << "\nS_v:\t" << species->S_v << endl;;
+      cerr << setprecision(10);
+      cerr << "averageEIR: " << resultEIR / vtm->timeStepNumEntoInnocs;
+      cerr << "\nP_A:\t" << species->P_A;
+      cerr << "\nP_df:\t" << species->P_df;
+      cerr << "\nP_dif:\t" << species->P_dif;
+      cerr << "\nN_v:\t" << species->N_v;
+      cerr << "\nO_v:\t" << species->O_v;
+      cerr << "\nS_v:\t" << species->S_v << endl;;
     }
   }
   
