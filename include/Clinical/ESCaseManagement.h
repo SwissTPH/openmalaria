@@ -46,12 +46,11 @@ struct MedicateData {
     }
     
     string abbrev;	/// Drug abbreviation
-    double qty;		/// Quantity of drug prescribed
+    double qty;		/// Quantity of drug prescribed (mg?)
     int time;		/// Time to medicate at (minutes from start of timestep, may be >= 60*24 (not this timestep))
 };
 
 /// Data type stored in decisions
-/// TODO: treatment seeking delay(?), hospital/community care, RDTs or not.
 struct CaseTreatment {
     CaseTreatment (const scnXml::CM_leaf::MedicateSequence mSeq) {
 	medications.resize (mSeq.size ());
@@ -124,7 +123,6 @@ class ESCaseManagement {
 		virtual CaseTreatmentPair traverse (cmid id);
 	};
 	
-	//FIXME: use hash-map instead
 	//BEGIN Static parameters — set by init()
 	typedef boost::unordered_map<cmid,CMNode*> TreeType;
 	/// Tree probability-branches and leaf nodes.

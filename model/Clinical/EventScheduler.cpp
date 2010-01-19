@@ -118,7 +118,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	cmid lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
 	if ( lastCmDecision & Decision::TEST_RDT ) {
-	    Surveys.current->reportRDT (1);
+	    Surveys.current->report_Clinical_RDTs (1);
 	}
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
@@ -150,8 +150,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    // Check: is patient in hospital? Reporting only.
 	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
 		pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
-		Surveys.current->reportHospitalEntries (1);
-		Surveys.current->reportHospitalizationDays (medicationDuration);
+		Surveys.current->report_Clinical_HospitalEntries (1);
+		Surveys.current->report_Clinical_HospitalizationDays (medicationDuration);
 	    }
 	    
 	    // Report: recovery/seq./death, in/out of hospital
@@ -172,9 +172,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
         ++next;
         if ( it->time < 60*24 ) { // Medicate today's medications
             withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
+	    Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->qty);
             medicateQueue.erase (it);
-            //TODO sort out reporting
-            // Note: there's "Surveys.current->reportTreatments1" etc., but I don't think we want these.
 	} else {   // and decrement treatment seeking delay for the rest
             it->time -= 60*24;
         }

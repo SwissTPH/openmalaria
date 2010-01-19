@@ -186,6 +186,13 @@ void Survey::allocate ()
 //   _innoculationsPerDayOfYear;
 //   _kappaPerDayOfYear;
 //   _innoculationsPerAgeGroup;
+    
+    data_Vector_EIR_Input =numeric_limits<double>::signaling_NaN() ;
+    data_Vector_EIR_Simulated = numeric_limits<double>::signaling_NaN();
+    
+    data_Clinical_HospitalEntries = 0;
+    data_Clinical_HospitalizationDays = 0;
+    data_Clinical_RDTs = 0;
 }
 
 
@@ -291,6 +298,18 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[Vector_EIR_Simulated]) {
     writeValue (outputFile, Vector_EIR_Simulated, _assimilatorMode, survey, data_Vector_EIR_Simulated);
+  }
+  if (active[Clinical_HospitalEntries]) {
+      writeValue (outputFile, Clinical_HospitalEntries, _assimilatorMode, survey, data_Clinical_HospitalEntries);
+  }
+  if (active[Clinical_HospitalizationDays]) {
+      writeValue (outputFile, Clinical_HospitalizationDays, _assimilatorMode, survey, data_Clinical_HospitalizationDays);
+  }
+  if (active[Clinical_RDTs]) {
+      writeValue (outputFile, Clinical_RDTs, _assimilatorMode, survey, data_Clinical_RDTs);
+  }
+  if (active[Clinical_DrugUsage]) {
+      writeMap (outputFile, Clinical_DrugUsage, _assimilatorMode, survey, data_Clinical_DrugUsage);
   }
 }
 
