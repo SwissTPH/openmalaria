@@ -69,6 +69,8 @@ public:
     * the stream, generates a checksum from the stream (to EOF), and checks the
     * stream position is back where it started.
     * 
+    * Checksum generated is a (potentially perturbed) MD5 sum.
+    * 
     * The idea of this is to generate a checksum of the file in a slightly
     * secure way by not closing and reopening the file. */
     static Checksum generate (std::istream& fileStream);

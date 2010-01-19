@@ -131,7 +131,10 @@ Checksum Checksum::generate (istream& fileStream) {
     md5_init(&state);
     while (1) {
 	fileStream.read (buf, 4096);
-	buf[264] ^= 5;
+	
+	// potential perturbation:
+	// buf[264] ^= 5;
+	
 	int n = fileStream.gcount ();
 	if (n<=0) break;
 	bytes_read += n;
