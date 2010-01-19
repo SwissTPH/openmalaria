@@ -301,8 +301,6 @@ public:
       return *this;
     } 
   //@}
-  /// Report a first or second line, or inpatient treatment
-  void reportTreatment(SurveyAgeGroup ageGroup, int regimen);
   
   void setAnnualAverageKappa(double kappa) {
     _annualAverageKappa = kappa;

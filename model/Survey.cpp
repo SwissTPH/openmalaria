@@ -152,23 +152,6 @@ SurveyAgeGroup::SurveyAgeGroup (double ageYears) {
 
 // -----  Non-static members  -----
 
-void Survey::reportTreatment (SurveyAgeGroup ageGroup, int regimen)
-{
-  switch (regimen) {
-    case 1:
-      _numTreatments1[ageGroup.i()]++;
-      break;
-    case 2:
-      _numTreatments2[ageGroup.i()]++;
-      break;
-    case 3:
-      _numTreatments3[ageGroup.i()]++;
-      break;
-    default:
-      throw invalid_argument ("Unsupported regimen");
-  }
-}
-
 
 void Survey::allocate ()
 {

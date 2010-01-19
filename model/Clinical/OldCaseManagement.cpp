@@ -102,7 +102,7 @@ void OldCaseManagement::setHealthSystem (int source) {
 // -----  non-static construction/desctruction  -----
 
 OldCaseManagement::OldCaseManagement (double tSF) :
-    _latestRegimen (0), _tLastTreatment (Global::TIMESTEP_NEVER), _treatmentSeekingFactor (tSF)
+    _tLastTreatment (Global::TIMESTEP_NEVER), _treatmentSeekingFactor (tSF)
 {
 }
 OldCaseManagement::~OldCaseManagement()
@@ -155,29 +155,32 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
 
 bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears)
 {
-  SurveyAgeGroup ageGroup(ageYears);
-  Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA
-                                   : Pathogenesis::SICK;
-  int nextRegimen = getNextRegimen (Global::simulationTime, entrypoint, _tLastTreatment);
-  bool successfulTreatment = false;
-  
-  if (probGetsTreatment[nextRegimen-1]*_treatmentSeekingFactor > (gsl::rngUniform())) {
-    _latestRegimen = nextRegimen;
-    _tLastTreatment = Global::simulationTime;
-      Surveys.current->reportTreatment(ageGroup, _latestRegimen);
-
-    if (probParasitesCleared[nextRegimen-1] > gsl::rngUniform()) {
-      successfulTreatment = true;	// Parasites are cleared
-      // We don't report out-of-hospital recoveries, so this wouldn't do anything extra:
-      //entrypoint = Pathogenesis::State (entrypoint | Pathogenesis::RECOVERY);
+    SurveyAgeGroup ageGroup(ageYears);
+    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime) ? Regimen::UC2 : Regimen::UC;
+    bool successfulTreatment = false;
+    
+    if (probGetsTreatment[regimen]*_treatmentSeekingFactor > (gsl::rngUniform())) {
+	_tLastTreatment = Global::simulationTime;
+	if ( regimen == Regimen::UC )
+	    Surveys.current->reportTreatments1( ageGroup, 1 );
+	if ( regimen == Regimen::UC2 )
+	    Surveys.current->reportTreatments2( ageGroup, 1 );
+	
+	if (probParasitesCleared[regimen] > gsl::rngUniform()) {
+	successfulTreatment = true;	// Parasites are cleared
+	// We don't report out-of-hospital recoveries, so this wouldn't do anything extra:
+	//entrypoint = Pathogenesis::State (entrypoint | Pathogenesis::RECOVERY);
+	} else {
+	// No change in parasitological status: treated outside of hospital
+	}
     } else {
-      // No change in parasitological status: treated outside of hospital
+	// No change in parasitological status: non-treated
     }
-  } else {
-    // No change in parasitological status: non-treated
-  }
-  latestReport.update (Global::simulationTime, ageGroup, entrypoint);
-  return successfulTreatment;
+    
+    Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA : Pathogenesis::SICK;
+    latestReport.update (Global::simulationTime, ageGroup, entrypoint);
+    
+    return successfulTreatment;
 }
 
 bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, int& doomed)
@@ -188,13 +191,13 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
     isAdultIndex = 0;
   }
   
-  int nextRegimen = getNextRegimen (Global::simulationTime, Pathogenesis::STATE_SEVERE, _tLastTreatment);
+  Regimen::Type regimen = Regimen::SEVERE;
 
   double p2, p3, p4, p5, p6, p7;
   // Probability of getting treatment (only part which is case managment):
-  p2 = probGetsTreatment[nextRegimen-1] * _treatmentSeekingFactor;
+  p2 = probGetsTreatment[regimen] * _treatmentSeekingFactor;
   // Probability of getting cured after getting treatment:
-  p3 = cureRate[nextRegimen-1];
+  p3 = cureRate[regimen];
   // p4 is the hospital case-fatality rate from Tanzania
   p4 = caseFatality (ageYears);
   // p5 here is the community threshold case-fatality rate
@@ -230,8 +233,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
 
   if (q[2] <= prandom) { // Patient gets in-hospital treatment
     _tLastTreatment = Global::simulationTime;
-    _latestRegimen = nextRegimen;
-    Surveys.current->reportTreatment(ageGroup,_latestRegimen);
+    Surveys.current->reportTreatments3( ageGroup, 1 );
 
     Pathogenesis::State sevTreated = Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::EVENT_IN_HOSPITAL);
     if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
@@ -298,17 +300,6 @@ double OldCaseManagement::getCommunityCaseFatalityRate (double caseFatalityRatio
 {
   double x = caseFatalityRatio * _oddsRatioThreshold;
   return x / (1 - caseFatalityRatio + x);
-}
-
-int OldCaseManagement::getNextRegimen (int simulationTime, int diagnosis, int tLastTreated)
-{
-  if (diagnosis == Pathogenesis::STATE_SEVERE)
-    return 3;
-
-  if (tLastTreated + Episode::healthSystemMemory > simulationTime)
-    return 2;
-
-  return 1;
 }
 
 double OldCaseManagement::caseFatality (double ageYears)

@@ -27,7 +27,19 @@ namespace scnXml {
 }
 
 namespace OM { namespace Clinical {
-    
+
+namespace Regimen {
+    /** Regimen: UC / UC2 / SEVERE.
+     *
+     * Note: values used in array lookups, so are important. */
+    enum Type {
+	UC = 0,		// first line
+	UC2 = 1,		// second line
+	SEVERE = 2,	// third line
+	NUM = 3,
+    };
+}
+
 //! Models of treatment seeking and referral
 class OldCaseManagement {
 public:
@@ -67,7 +79,6 @@ public:
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
-      _latestRegimen & stream;
       _tLastTreatment & stream;
       _treatmentSeekingFactor & stream;
   }
@@ -85,9 +96,6 @@ private:
     * Note: sets doomed = 4 if patient dies. */
   bool severeMalaria(Episode& latestReport, double ageYears, int& doomed);
   
-  //!indicates the latest treatment regimen(1st, 2nd or 3rd line)
-  int _latestRegimen;
-  
   /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
   int _tLastTreatment;
   
@@ -102,14 +110,7 @@ private:
   /*! Calculate the case fatality rate in the community as a function of the
     hospital case fatality rate.*/
   static double getCommunityCaseFatalityRate(double caseFatalityRatio);
-
-  /*!
-    Look up any recent treatments and determine which drug regimen to use
-    next.  latestTreatment: time of the most recent treatment for the
-    individual regimen: drug to be used for the new treatment.
-  */
-  static int getNextRegimen(int simulationTime, int diagnosis, int tLastTreated);
-
+  
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   static void setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem);
   
@@ -142,15 +143,15 @@ private:
   
   /** pSequelaeTreated is the probability that the patient has sequelae
    * conditional on hospital treatment for severe disease. */
-  static double probSequelaeTreated[2];
+  static double probSequelaeTreated[NUM_SEQUELAE_AGE_GROUPS];
   /** pSequelaeUntreated is the probability that the patient has sequelae
    * conditional if they don't receive hospital treatment for severe disease.
    */
-  static double probSequelaeUntreated[2];
+  static double probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
-  static double probGetsTreatment[3];
-  static double probParasitesCleared[3];
-  static double cureRate[3];
+  static double probGetsTreatment[Regimen::NUM];
+  static double probParasitesCleared[Regimen::NUM];
+  static double cureRate[Regimen::NUM];
   
   /// shortcut: if there is only one CFR group, and the CFR is 0, set this to true.
   static bool _noMortality;
