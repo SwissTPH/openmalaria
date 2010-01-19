@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/ESCaseManagement.h"
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <list>
 
 namespace OM { namespace Clinical {
@@ -51,13 +51,14 @@ protected:
 private:
   /// Current state of sickness
   Pathogenesis::State pgState;
-  /// Time of last state-change; only meaningful if pgState & Pathogenesis::SICK.
-  int pgChangeTimestep;
+  /** If Global::simulationTime >= timestepHealthyOrDead, the individual has recovered or died.
+   *
+   * This event occurs when time-steps are equal. Which event occurs is determined by whether
+   * pgState includes Pathogenesis::DIRECT_DEATH. */
+  int timeHealthyOrDead;
   
   /// All pending medications
   list<MedicateData> medicateQueue;
-  /// Decision ID of last case management run
-  cmid lastCmDecision;
   
   ///@brief Static data, set up by init
   //@{
@@ -72,8 +73,7 @@ private:
 	int hospitalizationDaysRecover;
     };
     
-    //FIXME: use a hash-map instead
-    typedef map<cmid,OutcomeData> OutcomeType;
+    typedef boost::unordered_map<cmid,OutcomeData> OutcomeType;
     /** Table of outcome data.
      *
      * Currently only used for severe outcomes. If wanted for UC outcomes, a second mask could be

@@ -52,6 +52,7 @@ void ClinicalEventScheduler::init ()
 	od.pDeath = it->getPDeath();
 	od.hospitalizationDaysDeath = it->getHospitalizationDaysDeath ();
 	od.hospitalizationDaysRecover = it->getHospitalizationDaysRecover ();
+	//FIXME: assert hospitalizationDaysRecover equals length of medication course in days
 	outcomes[it->getID()] = od;
     }
     outcomeMask = ev.getClinicalOutcomes().getSevereMask();
@@ -62,7 +63,7 @@ void ClinicalEventScheduler::init ()
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         ClinicalModel (cF),
-        pgState (Pathogenesis::NONE), pgChangeTimestep (Global::TIMESTEP_NEVER)
+        pgState (Pathogenesis::NONE), timeHealthyOrDead (Global::TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -77,22 +78,35 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     // this is unimportant.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
-    //TODO: changes to this condition (pending discussion)
-    //new logic: if severe, nothing happens for "hospitalization days"
-    // if uc/uc2/nmf, the only event that can happen within 3 days is severe
+    if ( Global::simulationTime == timeHealthyOrDead ) {
+	if ( pgState & Pathogenesis::DIRECT_DEATH ) {
+	    // Note: killed now, no further clinical events but still a source of infection to mosquitoes until next timestep
+	    _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
+	    return;
+	}
+	
+	pgState = Pathogenesis::NONE;	// recovery
+    }
     
-    /* Literally, if differences between (the combination of pgState and newState)
-     * and pgState include SICK, MALARIA or COMPLICATED
-     * or a second case of MALARIA and at least 3 days since last change */
-    if ( ( ( (newState | pgState) ^ pgState) & (Pathogenesis::SICK | Pathogenesis::MALARIA | Pathogenesis::COMPLICATED)) ||
-            (pgState & newState & Pathogenesis::MALARIA && Global::simulationTime >= pgChangeTimestep + 3))
+    bool cmEvent = false;	// set true when we need to do case management
+    if ( pgState & Pathogenesis::COMPLICATED ) {	// previous state: complicated
+	// if severe, no events happen for course of medication
+    } else if ( pgState & Pathogenesis::SICK ) {	// previous state: uncomplicated (UC/UC2/NMF)
+	// if uc/uc2/nmf, the only event that can happen within 3 days is progression to severe/coinfection
+	if ( newState & Pathogenesis::COMPLICATED )
+	    cmEvent = true;
+    } else {	// previous state: healthy
+	if ( newState & Pathogenesis::SICK )	// any (malarial/non-malarial) sickness
+	    cmEvent = true;
+    }
+    
+    if ( cmEvent )
     {
         if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
         SurveyAgeGroup ageGroup = ageYears;
         latestReport.update (Global::simulationTime, ageGroup, pgState);
-        pgChangeTimestep = Global::simulationTime;
 	
 	if (pgState & Pathogenesis::MALARIA) {
 	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
@@ -100,32 +114,51 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	}
 	
-        lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	// Decision ID of last case management run
+	cmid lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
-	// FIXME: set EVENT_IN_HOSPITAL from lastCmDecision
-	// FIXME: report hospital entry
-	//TODO report recoveries/death, and seq?
+	if ( lastCmDecision & Decision::TEST_RDT ) {
+	    Surveys.current->reportRDT (1);
+	}
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
-	    //TODO: report sequelae?
-	    // pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	    
+	    // Find outcome probabilities/durations associated with CM-tree path
 	    cmid id = lastCmDecision & outcomeMask;
 	    OutcomeType::const_iterator oi = outcomes.find (id);
-	    if (oi != outcomes.end ()) {
-		if (gsl::rngUniform() < oi->second.pDeath) {
-		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysDeath);
-		    
-		    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-		    latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
-		    //FIXME: kill after hospitalizationDaysDeath
-		    _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
-		} else {
-		    Surveys.current->reportHospitalizationDays (oi->second.hospitalizationDaysRecover);
-		}
+	    if (oi == outcomes.end ()) {
+		ostringstream msg;
+		msg << "No 'Outcome' data for cmid " << id;
+		throw util::xml_scenario_error(msg.str());
 	    }
-	    // FIXME: pgState still affects other things! Reset at some point?
-	    //  pgState = Pathogenesis::NONE;
+	    
+	    int medicationDuration;
+	    if (gsl::rngUniform() < oi->second.pDeath) {
+		medicationDuration = oi->second.hospitalizationDaysDeath;
+		
+		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+	    } else {
+		medicationDuration = oi->second.hospitalizationDaysRecover;
+		
+		// Note: setting SEQUELAE / RECOVERY here only affects reporting, not model
+		//TODO: report sequelae?
+		// if ( Sequelae )
+		//     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+		// else
+		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	    }
+	    
+	    // Check: is patient in hospital? Reporting only.
+	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
+		pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+		Surveys.current->reportHospitalEntries (1);
+		Surveys.current->reportHospitalizationDays (medicationDuration);
+	    }
+	    
+	    // Report: recovery/seq./death, in/out of hospital
+	    latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
+	    timeHealthyOrDead = Global::simulationTime + medicationDuration;
+	} else {
+	    timeHealthyOrDead = Global::simulationTime + 3;
 	}
     }
 
@@ -133,30 +166,17 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
         _doomed = -Global::interval; // start indirect mortality countdown
     
-    //FIXME: do we need to force time-outs now?
-    if (pgState & Pathogenesis::SICK && latestReport.episodeEnd (Global::simulationTime)) {
-        // Episode timeout: force recovery.
-        // NOTE: An uncomplicated case occuring before this reset could be counted
-        // UC2 but with treatment only occuring after this reset (when the case
-        // should be counted UC) due to a treatment-seeking-delay. This can't be
-        // corrected because the delay depends on the UC/UC2/etc. state leading to
-        // a catch-22 situation, so DH, MP and VC decided to leave it like this.
-        //TODO: also report EVENT_IN_HOSPITAL where relevant (patient _can_ be in a severe state)
-        pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-        latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
-        pgState = Pathogenesis::NONE;
-    }
-    
     // Apply pending medications
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
         list<MedicateData>::iterator next = it;
         ++next;
-        if (it->seekingDelay == 0) { // Medicate today's medications
+        if ( it->time < 60*24 ) { // Medicate today's medications
             withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
             medicateQueue.erase (it);
             //TODO sort out reporting
-        } else {   // and decrement treatment seeking delay for the rest
-            it->seekingDelay--;
+            // Note: there's "Surveys.current->reportTreatments1" etc., but I don't think we want these.
+	} else {   // and decrement treatment seeking delay for the rest
+            it->time -= 60*24;
         }
         it = next;
     }
@@ -168,16 +188,14 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     int s;
     s & stream;
     pgState = Pathogenesis::State(s);
-    pgChangeTimestep & stream;
+    timeHealthyOrDead & stream;
     medicateQueue & stream;
-    lastCmDecision & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
     pgState & stream;
-    pgChangeTimestep & stream;
+    timeHealthyOrDead & stream;
     medicateQueue & stream;
-    lastCmDecision & stream;
 }
 
 } }

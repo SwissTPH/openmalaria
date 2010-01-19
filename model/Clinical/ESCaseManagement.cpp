@@ -60,26 +60,6 @@ cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     cmid decisionID = pgState & Pathogenesis::MORBIDITY_MASK;;
     if (ageYears > 5.0)
 	decisionID |= Decision::AGE_OVER5;
-
-    /*FIXME: report treatment
-    const CaseTypeEndPoints* endPoints;
-    if (pgState & Pathogenesis::MALARIA) { // NOTE: report treatment shouldn't be done like this so it's handled correctly when treatment is cancelled
-        if (pgState & Pathogenesis::COMPLICATED) {
-            endPoints = &caseManagementEndPoints[ageIndex].caseSev;
-            Surveys.current->reportTreatments3 (ageGroup, 1);
-        } else if (pgState & Pathogenesis::SECOND_CASE) {
-            endPoints = &caseManagementEndPoints[ageIndex].caseUC2;
-            Surveys.current->reportTreatments2 (ageGroup, 1);
-        } else {
-            endPoints = &caseManagementEndPoints[ageIndex].caseUC1;
-            Surveys.current->reportTreatments1 (ageGroup, 1);
-        }
-    } else / *if (pgState & Pathogenesis::SICK) [true by above check]* / { // sick but not from malaria
-        if (withinHostModel.parasiteDensityDetectible())
-            endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithParasites;
-        else
-            endPoints = &caseManagementEndPoints[ageIndex].caseNMFWithoutParasites;
-    }*/
     
     CaseTreatmentPair leaf = traverse (decisionID);
     leaf.second.apply (medicateQueue, leaf.first);

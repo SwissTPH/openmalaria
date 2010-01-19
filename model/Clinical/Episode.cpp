@@ -62,7 +62,6 @@ void Episode::report () {
       .reportNonMalariaFevers (_ageGroup, 1);
   }	// also possibility of nothing, but not reported in this case
   
-  // ImmediateOutcomes only:
   if (_state & Pathogenesis::EVENT_IN_HOSPITAL) {
     if (_state & Pathogenesis::DIRECT_DEATH) {
       Surveys.at(_surveyPeriod)

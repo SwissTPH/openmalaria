@@ -30,7 +30,7 @@
 
 #include <cassert>
 #include <list>
-#include <map>
+#include <boost/unordered_map.hpp>
 
 
 namespace OM { namespace Clinical {
@@ -43,14 +43,11 @@ struct MedicateData {
 	abbrev & stream;
 	qty & stream;
 	time & stream;
-	seekingDelay & stream;
     }
     
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed
-    int time;		/// Time of day to medicate at (minutes from start)
-    //FIXME: this should be total days delay; time should always be <24*60
-    int seekingDelay;	/// Delay before treatment seeking in days
+    int time;		/// Time to medicate at (minutes from start of timestep, may be >= 60*24 (not this timestep))
 };
 
 /// Data type stored in decisions
@@ -73,7 +70,7 @@ struct CaseTreatment {
 	
 	for (vector<MedicateData>::iterator it = medications.begin(); it != medications.end(); ++it) {
 	    medicateQueue.push_back (*it);
-	    medicateQueue.back().seekingDelay = delay;
+	    medicateQueue.back().time += delay * 60*24;
 	}
     }
     
@@ -129,7 +126,7 @@ class ESCaseManagement {
 	
 	//FIXME: use hash-map instead
 	//BEGIN Static parameters — set by init()
-	typedef map<cmid,CMNode*> TreeType;
+	typedef boost::unordered_map<cmid,CMNode*> TreeType;
 	/// Tree probability-branches and leaf nodes.
 	static TreeType cmTree;
 	

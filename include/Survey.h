@@ -317,6 +317,12 @@ public:
   void reportHospitalizationDays (int days) {
       //FIXME: report
   }
+  void reportHospitalEntries (int num) {
+      //FIXME: report
+  }
+  void reportRDT (int num) {
+      //FIXME: report
+  }
   void set_Vector_Nv0 (string key, double v) {
     data_Vector_Nv0[key] = v;
   }
