@@ -209,7 +209,7 @@ bool VectorAnopheles::vectorInitIterate () {
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
-    sumAnnualForcedS_v = vectors::sum (forcedS_v) * Global::interval;
+    sumAnnualForcedS_v = vectors::sum (forcedS_v);
     
     return (rAngle > LIMIT * 2*M_PI / Global::intervalsPerYear);	// iterate again if result wasn't close
   }
