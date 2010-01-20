@@ -92,7 +92,7 @@ class SurveyMeasureMap {
 	    map<string,SurveyMeasure>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-		msg << "Unrecognised option: ";
+		msg << "Unrecognised survey option: ";
 		msg << s;
 		throw util::xml_scenario_error(msg.str());
 	    }

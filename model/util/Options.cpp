@@ -83,7 +83,7 @@ namespace OM { namespace util {
 		} else if (clo == "help") {
 		    cloHelp = true;
 		} else {
-		    cerr << "Unrecognised option: --" << clo << endl << endl;
+		    cerr << "Unrecognised command-line option: --" << clo << endl << endl;
 		    cloHelp = true;
 		}
 	    } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
@@ -192,7 +192,7 @@ namespace OM { namespace util {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-		msg << "Unrecognised option: ";
+		msg << "Unrecognised model option: ";
 		msg << s;
 		throw xml_scenario_error(msg.str());
 	    }
