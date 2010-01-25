@@ -36,6 +36,14 @@ using namespace std;
 
 namespace OM { namespace PkPd {
     
+    /** Per drug, per age, etc. drug parameters. */
+    struct LSTMDrugParameters {
+	/// Maximal drug killing rate per day
+	double max_killing_rate;
+	
+	double K, n, k;
+    };
+    
 /** Information about each (type of) drug (rather than each use of a drug).
  *
  * Static data contains a list of all available drug types.
@@ -58,10 +66,8 @@ public:
    *
    * @param name	Name of the drug
    * @param abbreviation	Abbreviated name (e.g. CQ)
-   * @param absorptionFactor	
-   * @param halfLife	Half life of decay, in minutes
    */
-  LSTMDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
+  LSTMDrugType (string name, string abbreviation);
   ~LSTMDrugType ();
   
   //! Adds a PD Rule.
@@ -79,27 +85,7 @@ public:
   //@}
   
 private:
-  // The list of available drugs. Not checkpointed; should be set up by init().
-  //static map<string,LSTMDrugType> available;
-  
-  //! Absorption factor.
-  /*! Absorption = dose * factor / weight
-   */
-  double absorptionFactor;
-  //! Half-life (in minutes)
-  double halfLife;
-  //! Pharma dynamic list of parameters.
-  /*! A ordered list of required mutations.
-   * The parameter value can be found on pdParameters.
-   * The order is important, the first one takes precedence
-   *   (a map cannot impement this).
-   */
-  vector< vector<Mutation*> > requiredMutations;
-  //! PD parameters (check requiredMutations)
-  vector<double> pdParameters;
-  //! Fast data structure to know the PD param per proteome
-  map<int,double> proteomePDParameters;
-  //END
+    LSTMDrugParameters parameters;
   
   // Allow the Drug class to access private members
   friend class Drug;

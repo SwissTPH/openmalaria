@@ -43,33 +43,4 @@ void Drug::init () {
   minutesPerTimeStep = Global::interval * 24*60;
 }
 
-Drug::Drug(const DrugType* type) :
-  typeData (type),
-  _concentration (0),
-  _nextConcentration (0)
-{}
-
-void Drug::checkpoint (istream& stream) {
-    _concentration & stream;
-    _nextConcentration & stream;
-}
-void Drug::checkpoint (ostream& stream) {
-  _concentration & stream;
-  _nextConcentration & stream;
-}
-
-
-void Drug::addDose (double concentration, int delay) {
-    assert (delay == 0);
-    _concentration += concentration;
-    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-}
-
-bool Drug::decay() {
-  _concentration = _nextConcentration;
-  _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
-  //TODO: if concentration is negligible, return true to clean up this object
-  return false;
-}
-
 } }

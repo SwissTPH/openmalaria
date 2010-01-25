@@ -41,24 +41,33 @@ public:
   /** Create a new instance. */
   LSTMDrug (const LSTMDrugType*);
   
+  string getAbbreviation() const { return typeData->abbreviation;}
+  //double getAbsorptionFactor() const { return typeData->absorptionFactor;}
+  //double getHalfLife() const { return typeData->halfLife;}
+  
   /** Add amount to the concentration of drug, at time delay past the start of
    * the current timestep. */
-  void addDose (double amount, int delay);
+  void storeDose (double amount, int delay);
   
-  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-  double getAbsorptionFactor() const {
-      return ((LSTMDrugType*)typeData)->absorptionFactor;
+  double calculateDrugFactor(const ProteomeInstance* infProteome, double ageYears, double weight_kg);
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      concentration & stream;
+      doses & stream;
   }
   
 protected:
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
-
   /** Calculate multiplier to decay a concentration by a duration of time
     *
     * @param time Duration in minutes to decay over */
-  virtual double decayFactor (double time);
+  double decayFactor (double time);
 
+  /// Always links a drug instance to its drug-type data
+  const LSTMDrugType* typeData;
+  
+  double concentration;
   
   /// Per-dose information. Still to be properly defined.
   list<Dose> doses;

@@ -32,32 +32,36 @@ using namespace std;
 
 namespace OM { namespace PkPd {
     
-LSTMDrug::LSTMDrug(const LSTMDrugType* type) : Drug(type) {
-}
+LSTMDrug::LSTMDrug(const LSTMDrugType* type) : Drug(),
+    typeData (type),
+    concentration (0.0)
+{}
 
-void LSTMDrug::checkpoint (istream& stream) {
-    Drug::checkpoint (stream);
-    doses & stream;
-}
-void LSTMDrug::checkpoint (ostream& stream) {
-    Drug::checkpoint (stream);
-    doses & stream;
+
+void LSTMDrug::storeDose (double concentration, int delay) {
+    doses.push_back (Dose (concentration, delay));
 }
 
 
-void LSTMDrug::addDose (double concentration, int delay) {
-    //NOTE: old code; I'm sure it's not correct for the new model
+double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome, double ageYears, double weight_kg) {
+    typeData->parameters.max_killing_rate;
     
-    // Only adding doses for this timestep is supported
-    assert (delay>0 && delay<minutesPerTimeStep);
-    double nextConcentration = concentration*decayFactor (minutesPerTimeStep-delay);
-    doses.push_back (Dose (nextConcentration, 0 /*FIXME*/));
-}
-
-
-double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
-    //TBD
-    return 0.0;	// TODO (best always return _something_, even if nonsense)
+    double totalFactor = 1.0;
+    double startTime = 0.0;
+    for (list<Dose>::iterator i = doses.begin(); i!=doses.end(); ++i) {
+	//TODO::
+	/* calculate t (from time startTime to this drug time)
+	 calculate kill factor over this t
+	 */
+	totalFactor *= 1.0 /*FACTOR*/;
+	
+	startTime = i->time;
+	concentration += i->mg;
+    }
+    //TODO: and here (from startTime to end time)
+    doses.clear ();
+    
+    return totalFactor;
 }
 
 double LSTMDrug::decayFactor (double time) {

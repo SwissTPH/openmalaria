@@ -72,7 +72,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double a
 }
 
 struct DecayPredicate {
-  bool operator() (Drug& drug) {
+  bool operator() (HoshenDrug& drug) {
     return drug.decay ();
   }
 };

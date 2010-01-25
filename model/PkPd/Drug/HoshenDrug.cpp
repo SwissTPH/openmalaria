@@ -23,12 +23,29 @@
 #include "PkPd/Drug/HoshenDrug.h"
 
 #include <cmath>
+#include <assert.h>
 
 namespace OM { namespace PkPd {
     
-HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(type) {
+HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(),
+    typeData (type),
+    _concentration (0),
+    _nextConcentration (0)
+{}
+
+
+void HoshenDrug::addDose (double concentration, int delay) {
+    assert (delay == 0);
+    _concentration += concentration;
+    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
 }
 
+bool HoshenDrug::decay() {
+    _concentration = _nextConcentration;
+    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+    //TODO: if concentration is negligible, return true to clean up this object
+    return false;
+}
 
 double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
   //Returning an average of 2 points

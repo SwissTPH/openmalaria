@@ -28,29 +28,28 @@ using namespace std;
 
 namespace OM { namespace PkPd {
 
-/** A simple class to hold dose info.
- *
- * TODO: This was created as a place-holder. Replace x,y with whatever data is
- * needed, and remove what isn't. */
+/** A simple class to hold dose info. */
 class Dose {
 public:
   /** Create a new dose. */
-  Dose () : x(0.0), y(0.0) {}
+  Dose () : time(0.0), mg(0.0) {}
   /// ditto
-  Dose (double x, double y) {
-    this->x = x;
-    this->y = y;
+  Dose (double time, double mg) {
+    this->time = time;
+    this->mg = mg;
   }
     
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	x & stream;
-	y & stream;
+	time & stream;
+	mg & stream;
     }
   
-  /// Some type of data is wanted... (concentration at start of next timestep, and integral of concentration for this timestep?)
-  double x,y;
+  /// time (minutes)
+  double time;
+  /// dose in mg
+  double mg;
 };
 } }
 #endif

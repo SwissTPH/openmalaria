@@ -68,12 +68,12 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, int time, double age
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
+  drug->storeDose (qty, time);
 }
 
 struct DecayPredicate {
   bool operator() (Drug& drug) {
-    return drug.decay ();
+    return false;	//TODO (DH)
   }
 };
 void LSTMPkPdModel::decayDrugs () {
@@ -85,11 +85,9 @@ double LSTMPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect
-  for (list<LSTMDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-    double drugFactor = it->calculateDrugFactor(infProteome);
-    if (drugFactor < factor) {
-      factor = drugFactor;
-    }
+  for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+    double drugFactor = it->calculateDrugFactor(infProteome,0,0/*FIXME: pass age and weight */);
+    factor *= drugFactor;
   }
   return factor;
 }

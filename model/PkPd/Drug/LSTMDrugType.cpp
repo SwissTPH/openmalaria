@@ -42,7 +42,7 @@ void LSTMDrugType::init () {
   LSTMDrugType* s;
   //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
   //DrugType::addDrug(s);
-  s = new LSTMDrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  s = new LSTMDrugType("Chloroquine", "CQ");	//FIXME: set some values
   vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
@@ -53,24 +53,22 @@ void LSTMDrugType::init () {
 
 // -----  Non-static DrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (string _name, string _abbreviation,
-    double _absorptionFactor, double _halfLife)
+LSTMDrugType::LSTMDrugType (string _name, string _abbreviation)
 : DrugType(_name, _abbreviation)
 {
-  //name = _name;
-  //abbreviation = _abbreviation;
-  absorptionFactor = _absorptionFactor;
-  halfLife = _halfLife;
+    //TODO: various initializations
 }
 LSTMDrugType::~LSTMDrugType () {}
 
 
 void LSTMDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
+    /*FIXME (possibly totally unwanted)
   requiredMutations.push_back(ruleRequiredMutations);
-  pdParameters.push_back(pdFactor);
+  pdParameters.push_back(pdFactor);*/
 }
 
 void LSTMDrugType::parseProteomeInstances() {
+    /*FIXME (possibly totally unwanted)
   vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
   int numRules = requiredMutations.size();
   for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {
@@ -83,6 +81,7 @@ void LSTMDrugType::parseProteomeInstances() {
       }
     }
   }
+  */
 }
 
 } }

@@ -45,15 +45,42 @@ public:
   /** Create a new instance. */
   HoshenDrug (const HoshenDrugType*);
   
+  /** Called per timestep to reduce concentrations.
+   *
+   * If remaining concentration is negligible, return true, and this class
+   * object will be deleted. */
+  bool decay();
+  
+  void addDose (double concentration, int delay);
+  
+  string getAbbreviation() const { return typeData->abbreviation;}
+  //double getAbsorptionFactor() const { return typeData->absorptionFactor;}
+  //double getHalfLife() const { return typeData->halfLife;}
+  
   double getAbsorptionFactor() const { return ((HoshenDrugType*)typeData)->absorptionFactor;}
 
-  virtual double calculateDrugFactor(const ProteomeInstance* infProteome) const;
-
+  double calculateDrugFactor(const ProteomeInstance* infProteome) const;
+  
+  /// Checkpointing
+  template<class S>
+  void operator& (S& stream) {
+      _concentration & stream;
+      _nextConcentration & stream;
+  }
+  
 protected:
   /** Calculate multiplier to decay a concentration by a duration of time
     *
     * @param time Duration in minutes to decay over */
-  virtual double decayFactor (double time);
+  double decayFactor (double time);
+  
+  /// Always links a drug instance to its drug-type data
+  const HoshenDrugType* typeData;
+  
+  //! Drug concentration (ng/mL ?).
+  double _concentration;
+  //! Drug concentration on the next cycle (always should be whatever calcNextConcentration sets).
+  double _nextConcentration;
 };
 
 } }
