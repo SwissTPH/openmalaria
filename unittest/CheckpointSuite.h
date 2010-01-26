@@ -56,6 +56,7 @@ public:
     
     struct TestObject {
 	TestObject () : x(-23263) {}
+	virtual ~TestObject () {}
 	
 	virtual void clear () {
 	    x = 0;

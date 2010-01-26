@@ -101,6 +101,7 @@ class ESCaseManagement {
 	
 	class CMNode {
 	    public:
+		virtual ~CMNode () {}
 		virtual CaseTreatmentPair traverse (cmid id) =0;
 	};
 	class CMPBranchSet : public CMNode {

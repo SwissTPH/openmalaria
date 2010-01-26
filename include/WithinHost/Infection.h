@@ -36,6 +36,7 @@ public:
     _density(0.0),
     _cumulativeExposureJ(0.0)
     {}
+  virtual ~Infection () {}
   
   //! Get proteome
   inline const PkPd::ProteomeInstance* getProteome() const {
