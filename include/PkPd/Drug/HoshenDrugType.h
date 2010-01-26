@@ -75,7 +75,7 @@ public:
   /*! Creates an association between ProteomeInstance and PD factor.
    *  This is solely for performance purposes.
    */
-  virtual void parseProteomeInstances();
+  void parseProteomeInstances();
   //@}
   
 private:

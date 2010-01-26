@@ -69,12 +69,6 @@ public:
    */
   DrugType (string name, string abbreviation);
   ~DrugType ();
-  
-  //! Parses the proteme instances.
-  /*! Creates an association between ProteomeInstance and PD factor.
-   *  This is solely for performance purposes.
-   */
-  virtual void parseProteomeInstances() {};
   //@}
   
 protected:

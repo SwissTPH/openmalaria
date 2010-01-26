@@ -36,12 +36,15 @@ using namespace std;
 
 namespace OM { namespace PkPd {
     
-    /** Per drug, per age, etc. drug parameters. */
+    /** Per drug, per age, etc. drug parameters. */						// Add in my parameters and their documentation here
     struct LSTMDrugParameters {
-	/// Maximal drug killing rate per day
-	double max_killing_rate;
-	
-	double K, n, k;
+	 /*PD parameters required*/
+	double max_killing_rate;			/// Maximal drug killing rate per day
+	double IC50;						/// Concentration with 50% of the maximal parasite killing
+	double slope;						/// Slope of the dose response curve
+	/*PK parameters required*/
+	double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life
+	double vol_dist;					/// Volume of distribution (l/kg)
     };
     
 /** Information about each (type of) drug (rather than each use of a drug).
@@ -81,7 +84,7 @@ public:
   /*! Creates an association between ProteomeInstance and PD factor.
    *  This is solely for performance purposes.
    */
-  virtual void parseProteomeInstances();
+ void parseProteomeInstances();
   //@}
   
 private:
