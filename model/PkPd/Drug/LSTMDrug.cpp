@@ -61,14 +61,22 @@ double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome, double
 	//KW - start concentration is equal to the end concentration of the previous time step
 	double conc_after_decay = concentration * exp(elimination_rate_constant *  duration);			//KW - need to find time.
 	double drug_effect = pow( (pow(IC50,slope) + pow(conc_after_decay,slope)) / (pow(IC50,slope) + pow(concentration,slope)), max_killing_rate / (elimination_rate_constant * slope));
-	totalFactor *= drug_effect /*FACTOR*/;	
+	totalFactor *= drug_effect;	
 	startTime = dose->time;		// KW - Increment the time 
 
 	concentration = conc_after_decay + dose->mg / (vol_dist*weight_kg);
 								// KW - The concentration value here is moved to the top of this loop and used in the conc_feter_decay and drug_effect equations
     }
    
-	 //TODO: and here (from startTime to end time)
+	double duration = 24*60 - startTime;
+	 
+	//KW - start concentration is equal to the end concentration of the previous time step
+	double conc_after_decay = concentration * exp(elimination_rate_constant *  duration);			//KW - need to find time.
+	double drug_effect = pow( (pow(IC50,slope) + pow(conc_after_decay,slope)) / (pow(IC50,slope) + pow(concentration,slope)), max_killing_rate / (elimination_rate_constant * slope));
+	totalFactor *= drug_effect;	
+
+	concentration = conc_after_decay;
+	
 	doses.clear ();				// KW - Clear doses to ensure they don't interfer with those given on the next day.
     
     return totalFactor;			/* KW -	Returning drug effect per day, per drug
