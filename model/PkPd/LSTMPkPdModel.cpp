@@ -30,7 +30,9 @@ void LSTMPkPdModel::init() {
 
 // -----  non-static set up / tear down functions  -----
 
-LSTMPkPdModel::LSTMPkPdModel () {}
+LSTMPkPdModel::LSTMPkPdModel () {
+    metabolismMultiplier = 3;	// TODO (LSTM): can add initialization, heterogeneity, etc., here
+}
 LSTMPkPdModel::~LSTMPkPdModel () {}
 
 void LSTMPkPdModel::checkpoint (istream& stream) {
