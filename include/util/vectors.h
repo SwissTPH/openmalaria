@@ -37,11 +37,14 @@ namespace OM { namespace util { namespace vectors {
   
   ///@brief Comparissons on std::vector
   //@{
-  /// Return true if, approximately, a == b
-  bool approxEqual (const double a, const double b);
+  /** Return true if, approximately, a == b
+   *
+   * In detail: true when (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact). */
+  bool approxEqual (const double a, const double b, const double lim_fact = 1e-6);
   
-  /// Returns true if vec1 and vec2 have equal length and all elements are approximately equal.
-  bool approxEqual (const vector<double>& vec1, const vector<double>& vec2);
+  /// Returns true if vec1 and vec2 have equal length and all elements are
+  /// approximately equal (see approxEqual for double parameters).
+  bool approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact = 1e-6);
   //@}
   
   

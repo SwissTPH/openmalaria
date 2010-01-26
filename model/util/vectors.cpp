@@ -37,16 +37,15 @@ double vectors::sum (vector<double>& vec) {
 }
 
 
-bool vectors::approxEqual (const double a, const double b) {
-  const double LIM = 1e-6;
-  return (fabs(a-b) <= max(fabs(a),fabs(b)) * LIM);
+bool vectors::approxEqual (const double a, const double b, const double lim_fact) {
+  return (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);
 }
 
-bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2) {
+bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact) {
   if (vec1.size() != vec2.size())
     return false;
   for (size_t i = 0; i < vec1.size(); ++i) {
-    if (!approxEqual (vec1[i], vec2[i]))
+    if (!approxEqual (vec1[i], vec2[i], lim_fact))
       return false;
   }
   return true;

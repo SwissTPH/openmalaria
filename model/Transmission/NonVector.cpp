@@ -127,6 +127,9 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     case dynamicEIR:
       eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
       if (Global::timeStep >= 0) {
+	  // we modulate the initialization based on the human infectiousness nspore timesteps ago in the
+	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
+	  // nspore gives the sporozoite development delay.
 	eir *=
             kappa[(simulationTime-nspore-1) % Global::intervalsPerYear] /
             initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear];
