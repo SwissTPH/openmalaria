@@ -38,17 +38,12 @@ namespace OM { namespace PkPd {
 
 void LSTMDrugType::init () {
   DrugType::init();
-  Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
+  //TODO: add drugs from scenario file
   LSTMDrugType* s;
-  //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
-  //DrugType::addDrug(s);
-  s = new LSTMDrugType("Chloroquine", "CQ");	//FIXME: set some values
-  vector<Mutation*> crt76L;
-  crt76L.push_back(crt76);
-  s->addPDRule(crt76L, 204.0);
-  s->addPDRule(vector<Mutation*>(), 68.0);
-  s->parseProteomeInstances();
+  s = new LSTMDrugType("Mefloquine", "MF");
   DrugType::addDrug(s);
+  //s = new LSTMDrugType("Chloroquine", "CQ"); - This will be moved to XML later
+  //DrugType::addDrug(s);
 }
 
 // -----  Non-static DrugType functions  -----
@@ -56,7 +51,14 @@ void LSTMDrugType::init () {
 LSTMDrugType::LSTMDrugType (string _name, string _abbreviation)
 : DrugType(_name, _abbreviation)
 {
-    //TODO: various initializations
+	//TODO: temporarily hard-coding values; need to get from XML
+	if(_abbreviation == "MF") {
+		parameters.max_killing_rate = 3.45;
+		parameters.IC50 = 0.6654;
+		parameters.slope = 2.5;
+		parameters.elimination_rate_constant = 0.036;
+		parameters.vol_dist = 20.8;
+	} //else if(_abbreviation == "CQ"){...} - This will be moved to XML later
 }
 LSTMDrugType::~LSTMDrugType () {}
 

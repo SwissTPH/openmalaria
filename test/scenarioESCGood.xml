@@ -58,7 +58,8 @@
         <CM_pBranch outcome="" p="1">
       </CM_pBranchSet> -->
       <CM_leaf ID="0">
-        <medicate name="CQ" qty="1250000" time="0"/>
+        <medicate name="MF" qty="3000" time="0"/>
+        <medicate name="MF" qty="3000" time="720"/>
       </CM_leaf>
     </CaseManagementTree>
     <ClinicalOutcome mask="0">
