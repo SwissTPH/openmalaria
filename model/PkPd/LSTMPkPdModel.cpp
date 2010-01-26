@@ -56,7 +56,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void LSTMPkPdModel::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+void LSTMPkPdModel::medicate(string drugAbbrev, double qty, int time, double age) {
   list<LSTMDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -81,15 +81,15 @@ void LSTMPkPdModel::decayDrugs () {
   _drugs.remove_if (DecayPredicate());
 }
 
-double LSTMPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
-  // We will choose for now the smallest (ie, most impact)
-  
-  double factor = 1.0; //no effect
-  for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-    double drugFactor = it->calculateDrugFactor(infProteome,0,0/*FIXME: pass age and weight */);
-    factor *= drugFactor;
-  }
-  return factor;
+double LSTMPkPdModel::getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
+    double weight = ageToWeight(ageYears);
+    double factor = 1.0; //no effect
+    
+    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+	double drugFactor = it->calculateDrugFactor(infProteome, ageYears, weight);
+	factor *= drugFactor;
+    }
+    return factor;
 }
 
 } }

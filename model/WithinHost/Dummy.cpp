@@ -57,7 +57,7 @@ void DummyWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void DummyWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  pkpdModel->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
+  pkpdModel->medicate(drugName, qty, time, age);
 }
 
 
@@ -78,7 +78,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     }
     
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
+    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome(), ageInYears);
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     i->multiplyDensity(survivalFactor);
     i->determineWithinHostDensity();

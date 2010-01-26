@@ -56,7 +56,7 @@ void HoshenPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double age, double weight) {
+void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double ageYears) {
   list<HoshenDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -68,6 +68,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double a
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
+  double weight = ageToWeight(ageYears);
   drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
 }
 
@@ -81,7 +82,7 @@ void HoshenPkPdModel::decayDrugs () {
   _drugs.remove_if (DecayPredicate());
 }
 
-double HoshenPkPdModel::getDrugFactor (const ProteomeInstance* infProteome) {
+double HoshenPkPdModel::getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
   // We will choose for now the smallest (ie, most impact)
   
   double factor = 1.0; //no effect

@@ -21,6 +21,7 @@
 #ifndef Hmod_PkPdModel
 #define Hmod_PkPdModel
 
+#include "WithinHost/WithinHostModel.h"	// weight model (TODO: cleanup or replace)
 #include "PkPd/Proteome.h"
 #include <fstream>
 using namespace std;
@@ -77,7 +78,6 @@ public:
    * \param qty        - the quantity (mg?).
    * \param time       - Time in minutes since start of this time step to medicate at
    * \param age        - Age of human in years
-   * \param weight     - Weight (mass) of human in kg
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
    * update (calling medicate) and within-host model update (calling
@@ -86,7 +86,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, int time, double age, double weight)  {};
+  virtual void medicate(string drugAbbrev, double qty, int time, double age)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?
@@ -97,13 +97,29 @@ public:
    * Each timestep, on each infection, the parasite density is multiplied by
    * the return value of this infection. The WithinHostModels are responsible
    * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (const ProteomeInstance* infProteome) {
+  virtual double getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
     return 1.0;
   }
   
 protected:
   virtual void checkpoint (istream& stream) {}
   virtual void checkpoint (ostream& stream) {}
+  
+  /** Weight model. Currently looks up a weight dependant on age from a table
+   * in an entirely deterministic way.
+   *
+   * @param ageYears Age in years
+   * @returns Mass in kg */
+  static double ageToWeight (double ageYears);
+  
+private:
+  //! Relative weights by age group
+  /** Relative weights, based on data in InputTables\wt_bites.csv 
+  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
+  thesis). The original source was anthropometric studies by Inez Azevedo Reads
+  in weights by age group. The weights are expressed as proportions of 0.5*those
+  in the reference age group. */
+  static const double wtprop[WithinHost::WithinHostModel::nages];
 };
 
 } }

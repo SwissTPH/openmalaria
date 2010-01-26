@@ -193,13 +193,6 @@ public:
 protected:
   //! Maximum of each age category
   static const double agemax[nages];
-  //! Relative weights by age group
-  /** Relative weights, based on data in InputTables\wt_bites.csv 
-  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
-  thesis). The original source was anthropometric studies by Inez Azevedo Reads
-  in weights by age group. The weights are expressed as proportions of 0.5*those
-  in the reference age group. */
-  static const double wtprop[nages];
   //@}
   //@}
 };

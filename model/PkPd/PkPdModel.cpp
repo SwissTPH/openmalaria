@@ -33,6 +33,9 @@ namespace OM { namespace PkPd {
 // Temporary switch to use the LSTM model − this may eventually be determined by XML data or XML model version.
 const bool Use_LSTM = false;
 
+// weight proportions, used by drug code
+const double PkPdModel::wtprop[WithinHost::WithinHostModel::nages] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
+
 // -----  static functions  -----
 
 void PkPdModel::init () {
@@ -75,6 +78,11 @@ PkPdModel* PkPdModel::createPkPdModel () {
       return new HoshenPkPdModel ();
   }
   return new PkPdModel();
+}
+
+
+double PkPdModel::ageToWeight (double ageYears) {
+    return 120.0 * wtprop[WithinHost::WithinHostModel::getAgeGroup(ageYears)];
 }
 
 } }

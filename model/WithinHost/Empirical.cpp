@@ -56,7 +56,7 @@ void EmpiricalWithinHostModel::clearAllInfections(){
 // -----  medicate drugs -----
 
 void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, double age) {
-  pkpdModel->medicate(drugName, qty, time, age, 120.0 * wtprop[getAgeGroup(age)]);
+  pkpdModel->medicate(drugName, qty, time, age);
 }
 
 
@@ -68,7 +68,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome());
+    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome(), ageInYears);
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
