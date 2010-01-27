@@ -45,7 +45,7 @@ void LSTMDrug::storeDose (double concentration, int delay) {
 
 inline double drugEffect (const LSTMDrugParameters& params, double& concentration, double duration, double weight_kg, double dose_mg) {
 	//KW - start concentration is equal to the end concentration of the previous time step
-	double conc_after_decay = concentration * exp(params.elimination_rate_constant *  duration);			//KW - need to find time.
+	double conc_after_decay = concentration * exp(params.elimination_rate_constant *  duration);			
 	double drug_effect = pow( (pow(params.IC50,params.slope) + pow(conc_after_decay,params.slope)) /
 		(pow(params.IC50,params.slope) + pow(concentration,params.slope)),
 		 params.max_killing_rate / (params.elimination_rate_constant * params.slope));

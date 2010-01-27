@@ -52,7 +52,7 @@ public:
   
 private:
   list<LSTMDrug> _drugs;
-  double metabolismMultiplier;
+  double metabolismMultiplier; /// add in variables relating to individual variation here
 };
 
 } }
