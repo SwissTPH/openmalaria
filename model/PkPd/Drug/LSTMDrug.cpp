@@ -44,34 +44,37 @@ void LSTMDrug::storeDose (double concentration, int delay) {
 
 
 inline double drugEffect (const LSTMDrugParameters& params, double& concentration, double duration, double weight_kg, double dose_mg) {
-	//KW - start concentration is equal to the end concentration of the previous time step
-	double conc_after_decay = concentration * exp(params.elimination_rate_constant *  duration);			
-	double drug_effect = pow( (pow(params.IC50,params.slope) + pow(conc_after_decay,params.slope)) /
-		(pow(params.IC50,params.slope) + pow(concentration,params.slope)),
-		 params.max_killing_rate / (params.elimination_rate_constant * params.slope));
-
-	concentration = conc_after_decay + dose_mg / (params.vol_dist*weight_kg);
-	return drug_effect;
+    //KW - start concentration is equal to the end concentration of the previous time step
+    double conc_after_decay = concentration * exp(params.elimination_rate_constant *  duration);
+    
+    double numerator = pow(params.IC50,params.slope) + pow(conc_after_decay,params.slope);
+    double denominator = pow(params.IC50,params.slope) + pow(concentration,params.slope);
+    double power = params.max_killing_rate / (params.elimination_rate_constant * params.slope);
+    double drug_effect = pow( numerator / denominator, power );
+    
+    concentration = conc_after_decay + dose_mg / (params.vol_dist*weight_kg);
+    
+    return drug_effect;
 }
 
 double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome, double ageYears, double weight_kg) {
-	double totalFactor = 1.0;   /* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug affect is seen
-										this vaule is updated in the for loop, value decreases with increasing drug effect. */
+    double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug affect is seen
+									this vaule is updated in the for loop, value decreases with increasing drug effect. */
     double startTime = 0.0;		/* KW-	Use the information from medicate to determine the time elapsed from 0 to first dose.
-										Use the information on dose timings from medicate to update this value at the end of the for loop.
-										Run drugEffect function after for loop to find drug effect from last dose to end of day. */
+									Use the information on dose timings from medicate to update this value at the end of the for loop.
+									Run drugEffect function after for loop to find drug effect from last dose to end of day. */
     for (list<Dose>::iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
-		double duration = dose->time - startTime;
-		
-		totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, dose->mg);	
-		startTime = dose->time;		// KW - Increment the time 
+	double duration = dose->time - startTime;
+	
+	totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, dose->mg);	
+	startTime = dose->time;		// KW - Increment the time 
     }
    
-	double duration = 24*60 - startTime;
-	
-	totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, 0.0);	
-	
-	doses.clear ();				// KW - Clear doses to ensure they don't interfer with those given on the next day.
+    double duration = 24*60 - startTime;
+    
+    totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, 0.0);	
+    
+    doses.clear ();				// KW - Clear doses to ensure they don't interfer with those given on the next day.
     
     return totalFactor;			/* KW -	Returning drug effect per day, per drug */
 }
