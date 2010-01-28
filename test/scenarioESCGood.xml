@@ -1,4 +1,9 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" modelVersion="12800" name="test D94" popSize="100" schemaVersion="11" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_12.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="10000" schemaVersion="13" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_14.xsd">
+  <ModelOptions>
+    <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
+    <option name="INCLUDES_PK_PD" value="true"/>
+    <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
+  </ModelOptions>
   <demography name="test">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,7 +28,22 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <surveys detectionLimit="2.5" summaryOption="915517">
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nExpectd" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="sumLogPyrogenThres" value="true"/>
+      <option name="sumlogDens" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="nUncomp" value="true"/>
+      <option name="nSevere" value="true"/>
+      <option name="nSeq" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+    </SurveyOptions>
+    <surveys detectionLimit="2.5">
       <surveyTime>730</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
@@ -62,9 +82,9 @@
         <medicate name="MF" qty="3000" time="720"/>
       </CM_leaf>
     </CaseManagementTree>
-    <ClinicalOutcome mask="0">
-      <path ID="0" pDeath="0.01" hospitalizationDuration="3"/>
-    </ClinicalOutcome>
+    <ClinicalOutcomes severeMask="0">
+      <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
+    </ClinicalOutcomes>
   </EventScheduler>
   <entoData name="Test">
     <nonVector eipDuration="10">
@@ -923,6 +943,22 @@
       <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entoData>
+  <drugDescription>
+    <drug abbrev="MF">
+      <PD>
+        <allele name="sensitive (rename)">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.6654</IC50>
+          <slope>2.5</slope>
+        </allele>
+      </PD>
+      <PK>
+        <elimination_rate_constant>0.036</elimination_rate_constant>
+        <vol_dist>20.8</vol_dist>
+      </PK>
+    </drug>
+  </drugDescription>
   <parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>

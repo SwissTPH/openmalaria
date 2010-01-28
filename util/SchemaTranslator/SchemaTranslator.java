@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 13;
+    static final int CURRENT_VERSION = 14;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -621,6 +621,16 @@ public class SchemaTranslator {
 	    modelOptions.appendChild (opt);
 	}
 	
+	return true;
+    }
+    
+    // Version 14 changed the drugDescription element. This was as-yet unused and there's no direct
+    // translation from the old version.
+    public Boolean translate13To14() throws Exception {
+	Element cms = (Element) scenarioElement.getElementsByTagName("drugDescription").item(0);
+	if (cms != null) {
+	    System.err.println ("Warning: drugDescription element has changed; please rewrite manually.");
+	}
 	return true;
     }
     
