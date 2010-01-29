@@ -100,10 +100,15 @@ namespace OM { namespace util {
 	* Default: Non-malaria fevers are not simulated. */
 	NON_MALARIA_FEVERS,
 	
-	/** @brief Pharmacokinetic and pharmacodynamics of drugs are simulated
-	* 
-	* Default: Drugs have all or nothing effects (except in certain IPTi
-	* models). */
+	/** @brief Use a PK & PD model for drug effects
+	 *
+	 * This causes simulation of the pharmacokinetics and pharmacodynamics of drugs,
+	 * as opposed to the original (and default) models, in which drugs have all or
+	 * nothing effects (except in certain IPTi models).
+	 * 
+	 * Currently this means to use either the Hoshen or the LSTM PKPD model
+	 * (LSTM when drugDescription XML element is present in scenario description.)
+	 */
 	INCLUDES_PK_PD,
 	
 	/** @brief Use revised clinical and case management model, ClinicalEventScheduler

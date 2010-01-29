@@ -23,15 +23,17 @@
 #include "Global.h"
 #include "PkPd/Proteome.h"
 #include "util/ModelOptions.hpp"
+#include "inputData.h"
 
 // submodels:
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 
+#include <assert.h>
+
 namespace OM { namespace PkPd {
     
-// Temporary switch to use the LSTM model − this may eventually be determined by XML data or XML model version.
-const bool Use_LSTM = false;
+PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
 
 // weight proportions, used by drug code
 const double PkPdModel::wtprop[WithinHost::WithinHostModel::nages] = { 0.116547265, 0.152531009, 0.181214575, 0.202146126, 0.217216287, 0.237405732, 0.257016899, 0.279053187, 0.293361286, 0.309949502, 0.334474135, 0.350044993, 0.371144279, 0.389814144, 0.412366341, 0.453, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
@@ -39,45 +41,36 @@ const double PkPdModel::wtprop[WithinHost::WithinHostModel::nages] = { 0.1165472
 // -----  static functions  -----
 
 void PkPdModel::init () {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-    ProteomeManager::init ();
-    if (Use_LSTM) {
-      LSTMDrugType::init();
-      LSTMDrug::init ();
-      LSTMPkPdModel::init();
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
+	ProteomeManager::init ();
+	if (InputData.getScenario().getDrugDescription().present()) {
+	    activeModel = LSTM_PKPD;
+	    LSTMDrugType::init();
+	    LSTMDrug::init ();
+	    LSTMPkPdModel::init();
+	} else {
+	    activeModel = HOSHEN_PKPD;
+	    HoshenDrugType::init();
+	    HoshenDrug::init ();
+	    HoshenPkPdModel::init();
+	}
     }
-    else {
-      HoshenDrugType::init();
-      HoshenDrug::init ();
-      HoshenPkPdModel::init();
-    }
-  }
 }
 void PkPdModel::cleanup () {
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
+    if (activeModel != NON_PKPD) {
 	ProteomeManager::cleanup ();
     }
 }
 
-void PkPdModel::staticCheckpoint (istream& stream) {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-//     ProteomeManager::read (in);
-  }
-}
-void PkPdModel::staticCheckpoint (ostream& stream) {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-//     ProteomeManager::write (out);
-  }
-}
-
 PkPdModel* PkPdModel::createPkPdModel () {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-    if (Use_LSTM)
-      return new LSTMPkPdModel ();
-    else
-      return new HoshenPkPdModel ();
-  }
-  return new PkPdModel();
+    if (activeModel == NON_PKPD) {
+	return new PkPdModel();
+    } else if (activeModel == LSTM_PKPD) {
+	return new LSTMPkPdModel ();
+    } else if (activeModel == HOSHEN_PKPD) {
+	return new HoshenPkPdModel ();
+    }
+    assert(false);	// execution shouldn't reach this point
 }
 
 

@@ -47,8 +47,9 @@ public:
   static void init ();
   static void cleanup ();
   
-  static void staticCheckpoint (istream& stream);
-  static void staticCheckpoint (ostream& stream);
+  // checkpointing of static data: not required since all data is set up by init
+  static void staticCheckpoint (istream& stream) {}
+  static void staticCheckpoint (ostream& stream) {}
   
   /** Factory function to create a drug interface, type dependant on run-time
    * options.
@@ -113,6 +114,14 @@ protected:
   static double ageToWeight (double ageYears);
   
 private:
+    enum ActiveModel {
+	NON_PKPD = 0,
+	HOSHEN_PKPD,
+	LSTM_PKPD
+    };
+    /// Which model is in use (set by init())
+    static ActiveModel activeModel;
+    
   //! Relative weights by age group
   /** Relative weights, based on data in InputTables\wt_bites.csv 
   The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
