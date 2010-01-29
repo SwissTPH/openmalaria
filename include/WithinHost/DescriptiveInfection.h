@@ -60,7 +60,7 @@ public:
   ///@name CTOR & DTOR
   //@{
   //! Constructor
-  DescriptiveInfection();
+  DescriptiveInfection ();
   
   /** Destructor */
   virtual ~DescriptiveInfection();

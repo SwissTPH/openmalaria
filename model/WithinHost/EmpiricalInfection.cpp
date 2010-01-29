@@ -121,7 +121,9 @@ void EmpiricalInfection::initParameters(){
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
-EmpiricalInfection::EmpiricalInfection(double growthRateMultiplier) {
+EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
+    Infection(protID)
+{
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time
   _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
@@ -130,9 +132,6 @@ EmpiricalInfection::EmpiricalInfection(double growthRateMultiplier) {
   //only the immediately preceding value is modified by the growth rate multiplier
   _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
-  
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 EmpiricalInfection::~EmpiricalInfection() {
 }

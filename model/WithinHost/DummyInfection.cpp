@@ -33,12 +33,11 @@ namespace OM { namespace WithinHost {
 void DummyInfection::init (){
 }
 
-DummyInfection::DummyInfection() {
+DummyInfection::DummyInfection (uint32_t protID) :
+    Infection(protID)
+{
     _density=16;	// increased by DH to avoid zeros in initialKappa
     _duration=100;	// arbitrary max duration
-    
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 
 int DummyInfection::getEndDate(){

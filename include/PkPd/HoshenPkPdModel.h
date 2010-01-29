@@ -51,6 +51,10 @@ public:
   void decayDrugs ();
   double getDrugFactor (const ProteomeInstance* infProteome, double ageYears);
   
+  virtual uint32_t new_proteome_ID () {
+      return ProteomeInstance::newInfection()->getProteomeID();
+  }
+  
 private:
   list<HoshenDrug> _drugs;
 };

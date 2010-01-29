@@ -29,26 +29,20 @@ namespace scnXml {
 
 namespace OM { namespace WithinHost {
     
-struct genotype {
-  //!In order to save memory, we just define the ID of the genotype. Attributes of the
-  //!genotype can be accessed via arrays in mod_intervention.
-  //!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
-  //!attributes are:
-  //!freq: Probability of being infected by this specific genotype
-  //!ACR: Probability of being cured (due to SP)
-  //!proph: Prophylactic effect of SP (measured in time steps)
-  //!tolperiod: time window of tolerance period
-  //!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
-  int ID;
-  
-  /// Checkpointing
-  template<class S>
-  void operator& (S& stream) {
-      ID & stream;
-  }
-};
 
-/// IPT extension of DescriptiveInfection
+/** IPT extension of DescriptiveInfection
+ *
+ * Note: proteome_ID parameter from base Infection is used here to store the genotype.
+ */
+//!In order to save memory, we just define the ID of the genotype. Attributes of the
+//!genotype can be accessed via arrays in mod_intervention.
+//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
+//!attributes are:
+//!freq: Probability of being infected by this specific genotype
+//!ACR: Probability of being cured (due to SP)
+//!proph: Prophylactic effect of SP (measured in time steps)
+//!tolperiod: time window of tolerance period
+//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
 class DescriptiveIPTInfection : public DescriptiveInfection {
 public:
   ///@name Static init/cleanup
@@ -69,8 +63,8 @@ public:
   
   /** The event that the last SP dose clears parasites. */
   bool eventSPClears (int _lastSPDose) {
-    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[_gType.ID]) &&
-    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[_gType.ID]);
+    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[proteome_ID]) &&
+    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[proteome_ID]);
   }
   
   /// Return: _SPattenuate == 1. Name by DH.
@@ -78,7 +72,7 @@ public:
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   double getAsexualAttenuationEndDate () {
-    return _startdate + _duration * genotypeAtten[_gType.ID];
+    return _startdate + _duration * genotypeAtten[proteome_ID];
   }
   
 protected:
@@ -86,8 +80,6 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-  //! Genotype responsible for infection
-  genotype _gType;
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;
   

@@ -64,19 +64,13 @@ void Infection::checkpoint (istream& stream) {
     _startdate & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-	int proteomeID;
-	proteomeID & stream;
-	_proteome = PkPd::ProteomeInstance::getProteome(proteomeID);
-    } else
-	_proteome = NULL;
+    proteome_ID & stream;
 }
 void Infection::checkpoint (ostream& stream) {
     _startdate & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-	_proteome->getProteomeID() & stream;
+    proteome_ID & stream;
 }
 
 } }

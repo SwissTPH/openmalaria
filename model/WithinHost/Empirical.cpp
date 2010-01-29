@@ -42,7 +42,7 @@ EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
 
 void EmpiricalWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
-    infections.push_back(EmpiricalInfection(1));
+    infections.push_back(EmpiricalInfection(pkpdModel->new_proteome_ID (), 1));
     _MOI++;
   }
 }
@@ -68,7 +68,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
   std::list<EmpiricalInfection>::iterator i;
   for(i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome(), ageInYears);
+    survivalFactor *= pkpdModel->getDrugFactor(i->get_proteome_ID(), ageInYears);
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.

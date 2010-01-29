@@ -23,10 +23,11 @@
 #ifndef Hmod_Proteome
 #define Hmod_Proteome
 
+#include "Global.h"
+
 #include <string>
 #include <vector>
 #include <list>
-#include "Global.h"
 
 using namespace std;
 
@@ -121,7 +122,7 @@ class ProteomeInstance {
   static vector<ProteomeInstance> instances;
   
   
-  int proteomeID;
+  uint32_t proteomeID;
   //TODO: Fitness
   // List of mutations. DON'T try using a custom comparator with C++ set/map,
   // when we store pointers, because the comparator can't specify when two
@@ -156,7 +157,7 @@ public:
   ProteomeInstance();
   ~ProteomeInstance();
   
-  inline int getProteomeID() const {
+  inline uint32_t getProteomeID() const {
     return proteomeID;
   }
   /** True if this ProteomeInstance has all mutations in _mutations. */

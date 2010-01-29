@@ -23,14 +23,15 @@
 #ifndef Hmod_HoshenDrugType
 #define Hmod_HoshenDrugType
 
-#include <string>
-#include <deque>
-#include <map>
-#include <vector>
 #include "Dose.h"
 #include "Global.h"
 #include "PkPd/Proteome.h"
 #include "DrugType.h"
+
+#include <string>
+#include <deque>
+#include <map>
+#include <vector>
 
 using namespace std;
 
@@ -98,7 +99,7 @@ private:
   //! PD parameters (check requiredMutations)
   vector<double> pdParameters;
   //! Fast data structure to know the PD param per proteome
-  map<int,double> proteomePDParameters;
+  map<uint32_t,double> proteomePDParameters;
   //END
   
   // Allow the Drug class to access private members

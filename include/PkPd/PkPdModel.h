@@ -26,6 +26,8 @@
 #include <fstream>
 using namespace std;
 
+class HoshenPkPdSuite;
+
 namespace OM { namespace PkPd {
 
 /** Encapsulates both the static operations for PKPD models and the per-human
@@ -98,8 +100,12 @@ public:
    * Each timestep, on each infection, the parasite density is multiplied by
    * the return value of this infection. The WithinHostModels are responsible
    * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
+  virtual double getDrugFactor (const uint32_t proteome_ID, double ageYears) {
     return 1.0;
+  }
+  
+  virtual uint32_t new_proteome_ID () {
+      return 0xFFFFFFFF;
   }
   
 protected:
@@ -129,6 +135,8 @@ private:
   in weights by age group. The weights are expressed as proportions of 0.5*those
   in the reference age group. */
   static const double wtprop[WithinHost::WithinHostModel::nages];
+
+  friend class ::HoshenPkPdSuite;
 };
 
 } }

@@ -29,6 +29,8 @@
 #define finite(x) _finite(x)
 #endif
 
+#include <stdint.h>
+
 #include "util/checkpoint.hpp"
 using namespace OM::util::checkpoint;
 

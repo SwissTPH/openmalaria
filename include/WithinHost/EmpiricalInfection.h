@@ -36,9 +36,9 @@ public:
   /// @brief Construction and destruction
   //@{
   /// For checkpointing (don't use for anything else)
-  EmpiricalInfection() {}
+  EmpiricalInfection() : Infection(0xFFFFFFFF) {}
   /// Per instance initialisation; create new inf.
-  EmpiricalInfection(double growthRateMultiplier);
+  EmpiricalInfection(uint32_t protID, double growthRateMultiplier);
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to

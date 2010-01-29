@@ -38,7 +38,13 @@ public:
   HoshenPkPdSuite () {
     Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
     util::ModelOptions::optSet.set (util::INCLUDES_PK_PD);
-    PkPdModel::init ();
+    
+    //Note: we fudge this call since it's not so easy to falsely initialize scenario element.
+    //PkPdModel::init ();
+    PkPdModel::activeModel = PkPdModel::HOSHEN_PKPD;
+    HoshenDrugType::init();
+    HoshenDrug::init ();
+    HoshenPkPdModel::init();
   }
   
   void setUp () {

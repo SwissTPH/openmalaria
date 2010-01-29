@@ -107,11 +107,10 @@ void DescriptiveInfection::clearParameters () {}
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection() {
+DescriptiveInfection::DescriptiveInfection () :
+    Infection(0xFFFFFFFF)
+{
     _duration=infectionDuration();
-    
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-      _proteome = PkPd::ProteomeInstance::newInfection();
 }
 
 DescriptiveInfection::~DescriptiveInfection() {

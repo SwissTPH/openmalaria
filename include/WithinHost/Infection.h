@@ -30,8 +30,8 @@ class Infection {
 public:
   static void init();
   
-  Infection () :
-    _proteome(NULL),
+  Infection (uint32_t protID) :
+    proteome_ID(protID),
     _startdate(Global::simulationTime),
     _density(0.0),
     _cumulativeExposureJ(0.0)
@@ -39,8 +39,8 @@ public:
   virtual ~Infection () {}
   
   //! Get proteome
-  inline const PkPd::ProteomeInstance* getProteome() const {
-    return _proteome;
+  inline const uint32_t get_proteome_ID() const {
+    return proteome_ID;
   }
   
   
@@ -64,7 +64,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
   //! Proteome (used in a different situation than genotype) 
-  const PkPd::ProteomeInstance* _proteome; 
+  uint32_t proteome_ID;
   
   //! Start date of the infection
   int _startdate; 

@@ -33,8 +33,10 @@ namespace OM { namespace WithinHost {
 */
 class DummyInfection : public Infection {
 public:
-  //! Constructor
-  DummyInfection();
+    /// For checkpointing (don't use for anything else)
+    DummyInfection() : Infection(0xFFFFFFFF) {}
+    //! Constructor
+    DummyInfection (uint32_t protID);
   
   static void init ();
   

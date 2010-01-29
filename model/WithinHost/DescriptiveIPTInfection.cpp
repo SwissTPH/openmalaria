@@ -71,16 +71,17 @@ void DescriptiveIPTInfection::clearParameters () {
 DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
   DescriptiveInfection(), _SPattenuate(false)
 {
-  _gType.ID=-1;
+    // proteome_ID is initialized to 0xFFFFFFFF
   
   double uniformRandomVariable=(gsl::rngUniform());
     double lowerIntervalBound=0.0;
     double upperIntervalBound=genotypeFreq[0];
     //This Loop assigns the infection a genotype according to its frequency
     for (int genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
+	//FIXME: use >= and < (make sure all potential values of uniformRandomVariable are covered)
       if (uniformRandomVariable > lowerIntervalBound &&
 	uniformRandomVariable < upperIntervalBound){
-	_gType.ID=genotypeCounter - 1;
+	proteome_ID=genotypeCounter - 1;
       }
       lowerIntervalBound=upperIntervalBound;
       /*
@@ -88,28 +89,31 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
       For safety reason we do it nevertheless
       */
       if ( genotypeCounter !=  numberOfGenoTypes) {
+	  //FIXME: array access is out of bounds when genotypeCounter == numberOfGenoTypes
 	upperIntervalBound = upperIntervalBound + genotypeFreq[genotypeCounter];
       }
       else {
 	upperIntervalBound=1.0;
-	//write(0,*) 'should not be here'
+	//FIXME: this check wasn't here before. I've just found it fails. DH
+	//assert (false);	// 'should not be here'
       }
     }
+    assert (proteome_ID < 0xFFFFFFFF);
     /*
     The attenuation effect of SP is only effective during a certain time-window for certain IPTi models
     If t(=now) lies within this time window, SPattenuate is true, false otherwise.
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (Global::simulationTime-lastSPdose > genotypeProph[_gType.ID] &&
-	Global::simulationTime-lastSPdose <= genotypeProph[_gType.ID] + genotypeTolPeriod[_gType.ID]){
+    if (Global::simulationTime-lastSPdose > genotypeProph[proteome_ID] &&
+	Global::simulationTime-lastSPdose <= genotypeProph[proteome_ID] + genotypeTolPeriod[proteome_ID]){
       _SPattenuate=true;
     }
 }
 
 
 double DescriptiveIPTInfection::asexualAttenuation () {
-  double attFact = 1.0 / genotypeAtten[_gType.ID];
+  double attFact = 1.0 / genotypeAtten[proteome_ID];
   _density *= attFact;
   return attFact;
 }
@@ -117,12 +121,10 @@ double DescriptiveIPTInfection::asexualAttenuation () {
 
 void DescriptiveIPTInfection::checkpoint (istream& stream) {
   DescriptiveInfection::checkpoint (stream);
-  _gType & stream; 
   _SPattenuate & stream; 
 }
 void DescriptiveIPTInfection::checkpoint (ostream& stream) {
     DescriptiveInfection::checkpoint (stream);
-    _gType & stream; 
     _SPattenuate & stream; 
 }
 

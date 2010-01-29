@@ -42,10 +42,10 @@ DummyWithinHostModel::~DummyWithinHostModel() {
 // -----  Simple infection adders/removers  -----
 
 void DummyWithinHostModel::newInfection(){
-  if (_MOI < MAX_INFECTIONS) {
-        infections.push_back(DummyInfection());
-    _MOI++;
-  }
+    if (_MOI < MAX_INFECTIONS) {
+	infections.push_back(DummyInfection (pkpdModel->new_proteome_ID()));
+	_MOI++;
+    }
 }
 
 void DummyWithinHostModel::clearAllInfections(){
@@ -78,7 +78,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     }
     
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-    survivalFactor *= pkpdModel->getDrugFactor(i->getProteome(), ageInYears);
+    survivalFactor *= pkpdModel->getDrugFactor(i->get_proteome_ID(), ageInYears);
     survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
     i->multiplyDensity(survivalFactor);
     i->determineWithinHostDensity();
