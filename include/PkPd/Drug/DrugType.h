@@ -63,11 +63,11 @@ public:
   ///@brief Non static (per instance) functions
   //@{
   /** Create a new DrugType.
-   *
-   * @param name	Name of the drug
+   * The name isn't required; we only use the abbreviation.
+   * 
    * @param abbreviation	Abbreviated name (e.g. CQ)
    */
-  DrugType (string name, string abbreviation);
+  DrugType (string abbreviation);
   ~DrugType ();
   //@}
   
@@ -75,16 +75,12 @@ protected:
   // The list of available drugs. Not checkpointed; should be set up by init().
   static map<string,DrugType*> available;
   
-  //BEGIN Drug-type fields (same for all drugs of same type)
   //! The drug abbreviated name, used for registry lookups.
   string abbreviation;
-  //! The drug name.
-  string name; 
   
   // Allow the Drug class to access private members
   friend class Drug;
   friend class HoshenDrug;
-  friend class IhKwDrug;
 };
 
 } }

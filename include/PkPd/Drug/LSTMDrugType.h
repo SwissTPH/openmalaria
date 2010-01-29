@@ -31,21 +31,17 @@
 #include "Global.h"
 #include "PkPd/Proteome.h"
 #include "DrugType.h"
+#include "inputData.h"
 
 using namespace std;
 
 namespace OM { namespace PkPd {
     
-    /** Per drug, per age, etc. drug parameters. */						// Add in my parameters and their documentation here
-    struct LSTMDrugParameters {
-		/*PD parameters required - varies with infection genotype*/
-		double max_killing_rate;			/// Maximal drug killing rate per day
-		double IC50;						/// Concentration with 50% of the maximal parasite killing
-		double slope;						/// Slope of the dose response curve
-		/*PK parameters required - varies with humans age and severity of disease*/
-		//TODO: make elimination_rate_constant a function of half-life
-		double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life
-		double vol_dist;					/// Volume of distribution (l/kg)
+    /** Per drug, per genotype, PD parameters of drug. */
+    struct LSTMDrugPDParameters {
+	double max_killing_rate;			/// Maximal drug killing rate per day
+	double IC50;						/// Concentration with 50% of the maximal parasite killing
+	double slope;						/// Slope of the dose response curve
     };
     
 /** Information about each (type of) drug (rather than each use of a drug).
@@ -55,12 +51,11 @@ namespace OM { namespace PkPd {
  * No DrugType data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
-class LSTMDrugType : public DrugType {
+class LSTMDrugType : public DrugType {	//TODO: check what else is inherited, and possibly remove DrugType base class
 public:
   ///@brief Static functions
   //@{
   /** Initialise the drug model. Called at start of simulation. */
-  //TODO: data from XML.
   static void init ();
   
   
@@ -71,29 +66,22 @@ public:
    * @param name	Name of the drug
    * @param abbreviation	Abbreviated name (e.g. CQ)
    */
-  LSTMDrugType (string name, string abbreviation);
+  LSTMDrugType (const scnXml::Drug& drugData);
   ~LSTMDrugType ();
-  
-  //! Adds a PD Rule.
-  /*! The order of rule adding is important! The first add should be the
-   *  one with most mutations (typically the most resistant), the last
-   *  one should be the sensitive (ie vector<mutation> = 0).
-   */
-  void addPDRule(vector<Mutation*> requiredMutations, double pdFactor);
-
-  //! Parses the proteme instances.
-  /*! Creates an association between ProteomeInstance and PD factor.
-   *  This is solely for performance purposes.
-   */
- void parseProteomeInstances();
   //@}
   
 private:
-    LSTMDrugParameters parameters;
-  
-  // Allow the Drug class to access private members
-  friend class Drug;
+    /*PD parameters required - varies with infection genotype*/
+    vector<LSTMDrugPDParameters> PD_params;
+    
+    /*PK parameters required - varies with humans age and severity of disease*/
+    //TODO: make elimination_rate_constant a function of half-life
+    double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life
+    double vol_dist;					/// Volume of distribution (l/kg)
+    
+  // Allow LSTMDrug to access private members
   friend class LSTMDrug;
+  friend inline double drugEffect (const LSTMDrugType& drugType, double& concentration, double duration, double weight_kg, double dose_mg);
 };
 
 } }

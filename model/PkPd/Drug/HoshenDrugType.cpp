@@ -57,7 +57,7 @@ void HoshenDrugType::init () {
 
 HoshenDrugType::HoshenDrugType (string _name, string _abbreviation,
     double _absorptionFactor, double _halfLife)
-: DrugType(_name, _abbreviation)
+: DrugType(_abbreviation)
 {
   //name = _name;
   //abbreviation = _abbreviation;

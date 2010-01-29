@@ -43,16 +43,18 @@ void LSTMDrug::storeDose (double concentration, int delay) {
 }
 
 
-inline double drugEffect (const LSTMDrugParameters& params, double& concentration, double duration, double weight_kg, double dose_mg) {
+inline double drugEffect (const LSTMDrugType& drugType, double& concentration, double duration, double weight_kg, double dose_mg) {
     //KW - start concentration is equal to the end concentration of the previous time step
-    double conc_after_decay = concentration * exp(params.elimination_rate_constant *  duration);
+    double conc_after_decay = concentration * exp(drugType.elimination_rate_constant *  duration);
+    size_t allele = 0;	//FIXME: fudge using first allele until we get allele info.
+    const LSTMDrugPDParameters& PD_params = drugType.PD_params[allele];
     
-    double numerator = pow(params.IC50,params.slope) + pow(conc_after_decay,params.slope);
-    double denominator = pow(params.IC50,params.slope) + pow(concentration,params.slope);
-    double power = params.max_killing_rate / (params.elimination_rate_constant * params.slope);
+    double numerator = pow(PD_params.IC50,PD_params.slope) + pow(conc_after_decay,PD_params.slope);
+    double denominator = pow(PD_params.IC50,PD_params.slope) + pow(concentration,PD_params.slope);
+    double power = PD_params.max_killing_rate / (drugType.elimination_rate_constant * PD_params.slope);
     double drug_effect = pow( numerator / denominator, power );
     
-    concentration = conc_after_decay + dose_mg / (params.vol_dist*weight_kg);
+    concentration = conc_after_decay + dose_mg / (drugType.vol_dist*weight_kg);
     
     return drug_effect;
 }
@@ -66,13 +68,13 @@ double LSTMDrug::calculateDrugFactor(const ProteomeInstance* infProteome, double
     for (list<Dose>::iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
 	double duration = dose->time - startTime;
 	
-	totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, dose->mg);	
+	totalFactor *= drugEffect (*typeData, concentration, duration, weight_kg, dose->mg);	
 	startTime = dose->time;		// KW - Increment the time 
     }
    
     double duration = 24*60 - startTime;
     
-    totalFactor *= drugEffect (typeData->parameters, concentration, duration, weight_kg, 0.0);	
+    totalFactor *= drugEffect (*typeData, concentration, duration, weight_kg, 0.0);	
     
     doses.clear ();				// KW - Clear doses to ensure they don't interfer with those given on the next day.
     

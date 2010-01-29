@@ -21,6 +21,8 @@
 */
 
 #include "PkPd/Drug/LSTMDrugType.h"
+#include "inputData.h"
+#include "util/errors.hpp"
 
 #include <assert.h>
 #include <cmath>
@@ -37,53 +39,32 @@ namespace OM { namespace PkPd {
  */
 
 void LSTMDrugType::init () {
-  DrugType::init();
-  //TODO: add drugs from scenario file
-  LSTMDrugType* s;
-  s = new LSTMDrugType("Mefloquine", "MF");
-  DrugType::addDrug(s);
-  //s = new LSTMDrugType("Chloroquine", "CQ"); - This will be moved to XML later
-  //DrugType::addDrug(s);
+    DrugType::init();
+    
+    const scnXml::DrugDescription& data = InputData.getScenario().getDrugDescription().get ();
+    for (scnXml::DrugDescription::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
+	DrugType::addDrug (new LSTMDrugType (*drug));
+    }
 }
 
 // -----  Non-static DrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (string _name, string _abbreviation)
-: DrugType(_name, _abbreviation)
+LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData)
+: DrugType(drugData.getAbbrev())
 {
-	//TODO: temporarily hard-coding values; need to get from XML
-	if(_abbreviation == "MF") {
-		parameters.max_killing_rate = 3.45;
-		parameters.IC50 = 0.6654;
-		parameters.slope = 2.5;
-		parameters.elimination_rate_constant = 0.036;
-		parameters.vol_dist = 20.8;
-	} //else if(_abbreviation == "CQ"){...} - This will be moved to XML later
+    const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
+    if (alleles.size() < 1)
+	throw util::xml_scenario_error ("Expected at least one allele for each drug.");
+    PD_params.resize (alleles.size());
+    for (size_t i = 0; i < alleles.size(); ++i) {
+	PD_params[i].max_killing_rate = alleles[i].getMax_killing_rate ();
+	PD_params[i].IC50 = alleles[i].getIC50 ();
+	PD_params[i].slope = alleles[i].getSlope ();
+    }
+    
+    elimination_rate_constant = drugData.getPK().getElimination_rate_constant();
+    vol_dist = drugData.getPK().getVol_dist();
 }
 LSTMDrugType::~LSTMDrugType () {}
-
-
-void LSTMDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double pdFactor) {
-    /*FIXME (possibly totally unwanted)
-  requiredMutations.push_back(ruleRequiredMutations);
-  pdParameters.push_back(pdFactor);*/
-}
-
-void LSTMDrugType::parseProteomeInstances() {
-    /*FIXME (possibly totally unwanted)
-  vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
-  int numRules = requiredMutations.size();
-  for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {
-    //cerr << " Here goes instance";
-    for(int rule=0; rule<numRules; rule++) {
-      if (it->hasMutations(requiredMutations[rule])) {
-	proteomePDParameters[it->getProteomeID()] = pdParameters[rule];
-	//cerr << " rule: " << rule << "\n";
-	break;
-      }
-    }
-  }
-  */
-}
 
 } }

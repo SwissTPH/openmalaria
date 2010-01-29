@@ -65,8 +65,7 @@ const DrugType* DrugType::getDrug(string _abbreviation) {
 
 // -----  Non-static DrugType functions  -----
 
-DrugType::DrugType (string _name, string _abbreviation) {
-  name = _name;
+DrugType::DrugType (string _abbreviation) {
   abbreviation = _abbreviation;
 }
 DrugType::~DrugType () {}

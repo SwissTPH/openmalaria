@@ -1422,7 +1422,7 @@
               <xs:element name="PD">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="allele" maxOccurs="unbounded">
+                    <xs:element name="allele" minOccurs="1" maxOccurs="unbounded">
 		      <xs:annotation>
 			<xs:documentation>
 			  PD parameters per allele, plus initial frequency of each allele.
