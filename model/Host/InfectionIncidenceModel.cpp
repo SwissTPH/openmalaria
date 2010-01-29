@@ -161,7 +161,7 @@ double InfectionIncidenceModel::susceptibility () {
 
 int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans) {
   double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
-  //NOTE: error check (should be OK if kappa is checked, for nonVector model)
+  // error check (should be OK if kappa is checked, for nonVector model):
   if (!finite(effectiveEIR)) {
     ostringstream out;
     out << "effectiveEIR is not finite: " << effectiveEIR << endl;

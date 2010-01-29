@@ -25,6 +25,7 @@
 
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 using namespace std;
 
@@ -51,7 +52,7 @@ Mutation* Protein::getMutation(int _position, char _allele) throw(int) {
       return (*it)->getMutation(_allele);
     }
   }
-  throw(2); // Position not known
+  throw runtime_error ("Position not known");
 }
 
 
@@ -89,7 +90,7 @@ Mutation* ProteinPosition::getMutation(char _allele) throw(int) {
       return *it;
     }
   }
-  throw(3); // Allele not known
+  throw runtime_error("Allele not known");
 }
 
 Mutation::Mutation(ProteinPosition* _position, char _allele) {
@@ -191,7 +192,7 @@ Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char 
       return (*itProt)->getMutation(_position, _allele);
     }
   }
-  throw(1); // Name not known
+  throw runtime_error ("Name not known");
 }
 
 } }

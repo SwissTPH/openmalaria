@@ -145,7 +145,6 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
   }
 
   if (effectiveTreatment) {
-    if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
       withinHostModel.clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
   }
 }

@@ -57,7 +57,7 @@ double EmpiricalInfection::_overallMultiplier;
 
 void EmpiricalInfection::initParameters(){
   if (Global::interval != 1)
-    throw domain_error ("EmpiricalInfection only supports using an interval of 1");
+    throw util::xml_scenario_error ("EmpiricalInfection only supports using an interval of 1");
   
   // alpha1 corresponds to 1 day before first patent, alpha2 2 days before first patent etc.
   _alpha1=0.2647;

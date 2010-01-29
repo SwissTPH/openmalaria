@@ -25,6 +25,7 @@
 #include "util/gsl.h"
 #include "util/CommandLine.hpp"
 #include "util/ModelOptions.hpp"
+#include "util/errors.hpp"
 #include <algorithm>
 #include <sstream>
 #include <string.h>
@@ -43,7 +44,9 @@ double DescriptiveInfection::xNuStar;
 
 void DescriptiveInfection::initParameters (){
   if (Global::interval != 5)
-    throw domain_error ("DescriptiveInfection only supports using an interval of 5");
+    throw util::xml_scenario_error ("DescriptiveInfection only supports using an interval of 5");
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+      throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
   
   latentp=InputData.get_latentp();
   sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);

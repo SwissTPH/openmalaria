@@ -68,8 +68,6 @@ void WithinHostModel::init() {
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::initParameters();	// 1-day timestep check
   } else {
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-	throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }

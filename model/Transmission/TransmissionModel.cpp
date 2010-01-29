@@ -108,7 +108,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   
 #ifndef NDEBUG
   if (sumWeight < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
-    throw range_error ("sumWeight is invalid");
+    throw runtime_error ("sumWeight is invalid");
 #endif
   
   size_t tmod = (simulationTime-1) % Global::intervalsPerYear;

@@ -51,7 +51,11 @@ void DescriptiveIPTWithinHost::initParameters () {
   }
   
   if (Global::interval != 5)
-    throw domain_error ("IPT code only supports using an interval of 5");
+    throw util::xml_scenario_error ("IPT code only supports using an interval of 5");
+  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
+      throw util::xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
+      // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
+  }
   
   // --- IptiDescription begin ---
   const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
@@ -88,10 +92,6 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
     _SPattenuationt(Global::TIMESTEP_NEVER), _lastSPDose (Global::TIMESTEP_NEVER), _lastIptiOrPlacebo (Global::TIMESTEP_NEVER),
     _cumulativeInfections(0)
 {
-  if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-    throw util::xml_scenario_error ("DescriptiveIPTWithinHost not intended to work with DrugAction");
-    // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
-  }
 }
 
 
