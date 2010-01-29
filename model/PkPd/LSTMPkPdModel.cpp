@@ -31,7 +31,8 @@ void LSTMPkPdModel::init() {
 // -----  non-static set up / tear down functions  -----
 
 LSTMPkPdModel::LSTMPkPdModel () {
-    metabolismMultiplier = 3;	// TODO (LSTM): can add initialization, heterogeneity, etc., here
+    // TODO (LSTM): can add initialization, heterogeneity, etc., here
+    //metabolismMultiplier = 3;
 }
 LSTMPkPdModel::~LSTMPkPdModel () {}
 

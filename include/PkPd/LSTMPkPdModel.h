@@ -51,8 +51,9 @@ public:
   double getDrugFactor (const ProteomeInstance* infProteome, double ageYears);
   
 private:
+    // Per-individual variables:
   list<LSTMDrug> _drugs;
-  double metabolismMultiplier; /// add in variables relating to individual variation here
+  //double metabolismMultiplier;
 };
 
 } }
