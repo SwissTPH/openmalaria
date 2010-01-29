@@ -75,7 +75,6 @@ private:
     vector<LSTMDrugPDParameters> PD_params;
     
     /*PK parameters required - varies with humans age and severity of disease*/
-    //TODO: make elimination_rate_constant a function of half-life
     double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life
     double vol_dist;					/// Volume of distribution (l/kg)
     

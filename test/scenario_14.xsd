@@ -1447,7 +1447,7 @@
 	      <xs:element name="PK">
 		<xs:complexType>
 		  <xs:sequence>
-		    <xs:element name="elimination_rate_constant" type="xs:double"/>
+		    <xs:element name="half_life" type="xs:double"/>
 		    <xs:element name="vol_dist" type="xs:double"/>
 		  </xs:sequence>
 		</xs:complexType>

@@ -62,7 +62,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData)
 	PD_params[i].slope = alleles[i].getSlope ();
     }
     
-    elimination_rate_constant = drugData.getPK().getElimination_rate_constant();
+    elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
 }
 LSTMDrugType::~LSTMDrugType () {}
