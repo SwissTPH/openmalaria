@@ -45,7 +45,7 @@ void Protein::addPosition(ProteinPosition* _position) {
   positions.push_back(_position);
 }
 
-Mutation* Protein::getMutation(int _position, char _allele) throw(int) {
+Mutation* Protein::getMutation(int _position, char _allele) {
   vector<ProteinPosition*>::const_iterator it;
   for (it=positions.begin(); it != positions.end(); it++) {
     if ((*it)->getPosition() == _position) {
@@ -83,7 +83,7 @@ void ProteinPosition::addMutation(Mutation* _mutation) {
  * Mutation
  */
 
-Mutation* ProteinPosition::getMutation(char _allele) throw(int) {
+Mutation* ProteinPosition::getMutation(char _allele) {
   vector<Mutation*>::const_iterator it;
   for (it=mutations.begin(); it != mutations.end(); it++) {
     if ((*it)->getAllele() == _allele) {
@@ -186,7 +186,7 @@ void ProteomeManager::addProtein(Protein* _protein) {
   proteins.push_back(_protein);
 }
 
-Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char _allele) throw(int) {
+Mutation* ProteomeManager::getMutation(string _proteinName, int _position, char _allele) {
   for (vector<Protein*>::const_iterator itProt = proteins.begin(); itProt != proteins.end(); itProt++) {
     if ((*itProt)->isNamed(_proteinName)) {
       return (*itProt)->getMutation(_position, _allele);

@@ -61,7 +61,7 @@ public:
   ~Protein ();
   
   void addPosition(ProteinPosition* _position);
-  Mutation* getMutation(int _position, char _allele) throw(int);
+  Mutation* getMutation(int _position, char _allele);
   inline bool isNamed (const string _name) const {
       return name == _name;
   }
@@ -85,7 +85,7 @@ public:
   inline Protein* getProtein() {
     return protein;
   }
-  Mutation* getMutation(char _allele) throw(int);
+  Mutation* getMutation(char _allele);
   inline int getPosition() const {
     return position;
   }
@@ -176,7 +176,7 @@ public:
     static void cleanup ();
     
     static void addProtein(Protein* _protein);
-    static Mutation* getMutation(string _proteinName, int _position, char _allele) throw(int);
+    static Mutation* getMutation(string _proteinName, int _position, char _allele);
 };
 
 } }
