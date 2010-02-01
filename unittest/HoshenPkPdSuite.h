@@ -40,6 +40,7 @@ public:
     util::ModelOptions::optSet.set (util::INCLUDES_PK_PD);
     
     //Note: we fudge this call since it's not so easy to falsely initialize scenario element.
+    ProteomeManager::init ();
     //PkPdModel::init ();
     PkPdModel::activeModel = PkPdModel::HOSHEN_PKPD;
     HoshenDrugType::init();
