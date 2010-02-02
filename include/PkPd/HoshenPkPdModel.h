@@ -47,12 +47,12 @@ public:
   virtual void checkpoint (ostream& stream);
   
   //TODO: do we need to pass age?
-  void medicate(string drugAbbrev, double qty, int time, double age);
-  void decayDrugs ();
-  double getDrugFactor (const ProteomeInstance* infProteome, double ageYears);
+  virtual void medicate(string drugAbbrev, double qty, int time, double age);
+  virtual void decayDrugs ();
+  virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
   
   virtual uint32_t new_proteome_ID () {
-      return ProteomeInstance::newInfection()->getProteomeID();
+      return ProteomeInstance::newInfection();
   }
   
 private:

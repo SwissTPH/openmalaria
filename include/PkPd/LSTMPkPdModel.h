@@ -46,9 +46,9 @@ public:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
-  void medicate(string drugAbbrev, double qty, int time, double age);
-  void decayDrugs ();
-  double getDrugFactor (const ProteomeInstance* infProteome, double ageYears);
+  virtual void medicate(string drugAbbrev, double qty, int time, double age);
+  virtual void decayDrugs ();
+  virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
   
 private:
     // Per-individual variables:

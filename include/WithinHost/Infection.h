@@ -39,7 +39,7 @@ public:
   virtual ~Infection () {}
   
   //! Get proteome
-  inline const uint32_t get_proteome_ID() const {
+  inline uint32_t get_proteome_ID() const {
     return proteome_ID;
   }
   

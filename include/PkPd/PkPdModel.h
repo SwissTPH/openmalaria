@@ -100,7 +100,7 @@ public:
    * Each timestep, on each infection, the parasite density is multiplied by
    * the return value of this infection. The WithinHostModels are responsible
    * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (const uint32_t proteome_ID, double ageYears) {
+  virtual double getDrugFactor (uint32_t proteome_ID, double ageYears) {
     return 1.0;
   }
   

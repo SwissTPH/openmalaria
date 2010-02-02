@@ -59,7 +59,7 @@ public:
   
   double getAbsorptionFactor() const { return ((HoshenDrugType*)typeData)->absorptionFactor;}
 
-  double calculateDrugFactor(const ProteomeInstance* infProteome) const;
+  double calculateDrugFactor(uint32_t proteome_ID) const;
   
   /// Checkpointing
   template<class S>

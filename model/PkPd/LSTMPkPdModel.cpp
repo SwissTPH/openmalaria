@@ -84,12 +84,12 @@ void LSTMPkPdModel::decayDrugs () {
   _drugs.remove_if (DecayPredicate());
 }
 
-double LSTMPkPdModel::getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
+double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
     double weight = ageToWeight(ageYears);
     double factor = 1.0; //no effect
     
     for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-	double drugFactor = it->calculateDrugFactor(infProteome, ageYears, weight);
+	double drugFactor = it->calculateDrugFactor(proteome_ID, ageYears, weight);
 	factor *= drugFactor;
     }
     return factor;

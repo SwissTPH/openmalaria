@@ -39,8 +39,10 @@ namespace OM { namespace PkPd {
     
     /** Per drug, per genotype, PD parameters of drug. */
     struct LSTMDrugPDParameters {
+	double initial_frequency;			/// Frequency at which this allele occurs — at initialisation.
+									/// Independant of frequencies of alleles at other loci (for other drugs).
 	double max_killing_rate;			/// Maximal drug killing rate per day
-	double IC50;						/// Concentration with 50% of the maximal parasite killing
+	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope
 	double slope;						/// Slope of the dose response curve
     };
     
@@ -63,14 +65,22 @@ public:
   //@{
   /** Create a new DrugType.
    *
-   * @param name	Name of the drug
-   * @param abbreviation	Abbreviated name (e.g. CQ)
+   * @param drugData Scenario data for this drug (PK params, PD params per allele)
+   * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
    */
-  LSTMDrugType (const scnXml::Drug& drugData);
+  LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start);
   ~LSTMDrugType ();
   //@}
   
 private:
+    /** Allele information is stored as a uint32_t in infection. Denote this p_id,
+     * then we use ((p_id >> allele_rshift) & allele_mask) as an index in
+     * PD_params for the allele.
+     * 
+     * This does restrict the number of alleles, for all drugs, that can be
+     * represented, so might have to be changed or extended. */
+    uint32_t allele_rshift, allele_mask;
+    
     /*PD parameters required - varies with infection genotype*/
     vector<LSTMDrugPDParameters> PD_params;
     

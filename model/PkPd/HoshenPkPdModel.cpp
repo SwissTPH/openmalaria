@@ -82,12 +82,12 @@ void HoshenPkPdModel::decayDrugs () {
   _drugs.remove_if (DecayPredicate());
 }
 
-double HoshenPkPdModel::getDrugFactor (const ProteomeInstance* infProteome, double ageYears) {
-  // We will choose for now the smallest (ie, most impact)
-  
+double HoshenPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
+  // We will choose for now the smallest factor (ie, most impact)
   double factor = 1.0; //no effect
+  
   for (list<HoshenDrug>::const_iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-    double drugFactor = it->calculateDrugFactor(infProteome);
+    double drugFactor = it->calculateDrugFactor(proteome_ID);
     if (drugFactor < factor) {
       factor = drugFactor;
     }

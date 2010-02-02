@@ -47,9 +47,9 @@ bool HoshenDrug::decay() {
     return false;
 }
 
-double HoshenDrug::calculateDrugFactor(const ProteomeInstance* infProteome) const {
+double HoshenDrug::calculateDrugFactor(uint32_t proteome_ID) const {
   //Returning an average of 2 points
-  double param = ((HoshenDrugType*)typeData)->proteomePDParameters.find(infProteome->getProteomeID())->second;
+  double param = ((HoshenDrugType*)typeData)->proteomePDParameters.find(proteome_ID)->second;
   double startFactor = 3.8/(1+param/_concentration);
   double endFactor = 3.8/(1+param/_nextConcentration);
   return std::exp(-(startFactor + endFactor)/2);

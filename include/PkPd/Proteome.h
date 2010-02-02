@@ -143,11 +143,8 @@ public:
     return instances;
   }
   
-  /** For a new infection, randomly chooses a proteome and returns a reference
-   * to it.
-   * 
-   * Ownership is not passed; i.e. do not try to delete this pointer! */
-  static const ProteomeInstance* newInfection();
+  /** For a new infection, randomly chooses a proteome and returns its ID. */
+  static uint32_t newInfection();
   /// When loading a checkpoint, use the proteome ID to find the original proteome.
   static inline ProteomeInstance* getProteome(int proteome) {
     return &instances[proteome];

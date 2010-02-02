@@ -40,25 +40,40 @@ namespace OM { namespace PkPd {
 
 void LSTMDrugType::init () {
     DrugType::init();
+    uint32_t start_bit = 0;
     
     const scnXml::DrugDescription& data = InputData.getScenario().getDrugDescription().get ();
     for (scnXml::DrugDescription::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
-	DrugType::addDrug (new LSTMDrugType (*drug));
+	DrugType::addDrug (new LSTMDrugType (*drug, start_bit));
     }
 }
 
 // -----  Non-static DrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData)
-: DrugType(drugData.getAbbrev())
+LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
+    DrugType(drugData.getAbbrev()),
+    allele_rshift (bit_start)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)
 	throw util::xml_scenario_error ("Expected at least one allele for each drug.");
+    
+    // got length l; want minimal n such that: 2^n >= l
+    // that is, n >= log_2 (l)
+    // so n = ceil (log_2 (l))
+    uint32_t n_bits = std::ceil (log (alleles.size()) / log(2.0));
+    assert (std::pow (2, n_bits) >= alleles.size());
+    allele_mask = uint32_t (std::pow (2, n_bits)) - 1;
+    // update bit_start to next available bit:
+    bit_start += n_bits;
+    if (bit_start > 32)
+	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
+    
     PD_params.resize (alleles.size());
     for (size_t i = 0; i < alleles.size(); ++i) {
+	PD_params[i].initial_frequency = alleles[i].getInitial_frequency ();
 	PD_params[i].max_killing_rate = alleles[i].getMax_killing_rate ();
-	PD_params[i].IC50 = alleles[i].getIC50 ();
+	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), alleles[i].getSlope ());
 	PD_params[i].slope = alleles[i].getSlope ();
     }
     
