@@ -1475,6 +1475,15 @@
 	      <xs:element name="PK">
 		<xs:complexType>
 		  <xs:sequence>
+		    <xs:element name="negligible_concentration" type="xs:double">
+		      <xs:annotation>
+			<xs:documentation>
+			  Concentration below which drug's effects are deemed negligible and can
+			  be removed from simulation.
+			</xs:documentation>
+			<xs:appinfo>units:mg/l;min:0;</xs:appinfo>
+		      </xs:annotation>
+		    </xs:element>
 		    <xs:element name="half_life" type="xs:double">
 		      <xs:annotation>
 			<xs:documentation>

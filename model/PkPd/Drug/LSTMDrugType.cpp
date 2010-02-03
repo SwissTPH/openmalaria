@@ -93,6 +93,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     if (bit_start > 32)
 	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
     
+    negligible_concentration = drugData.getPK().getNegligible_concentration();
     elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
     

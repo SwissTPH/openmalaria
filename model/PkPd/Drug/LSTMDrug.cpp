@@ -105,8 +105,9 @@ bool LSTMDrug::updateConcentration (double weight_kg) {
     double duration = 24*60 - startTime;
     concentration *= exp(typeData->elimination_rate_constant *  duration);
     
-    doses.clear ();				// KW - Clear doses to ensure they don't interfer with those given on the next day.
-    return concentration < 0;	//FIXME: use negligible concentration limit here
+    doses.clear ();				// Clear today's dose list — they've been added to concentration now.
+    // return true when concentration is no longer significant:
+    return concentration < typeData->negligible_concentration;
 }
 
 } }
