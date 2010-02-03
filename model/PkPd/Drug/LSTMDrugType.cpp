@@ -58,7 +58,7 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 	    // we randomly pick an allele according to its initial frequency
 	    if (sample <= dt.PD_params[i].cum_initial_frequency) {
 		// add identifier for this allele into the proteome identifier
-		assert ((~dt.allele_mask) & (i << dt.allele_rshift) == 0);	// sanity check (identifier within specified bits)
+		assert (((~dt.allele_mask) & (i << dt.allele_rshift)) == 0);	// sanity check (identifier within specified bits)
 		id |= (i << dt.allele_rshift);
 		goto gotAllele;	// and return
 	    }
@@ -80,6 +80,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)
 	throw util::xml_scenario_error ("Expected at least one allele for each drug.");
+    //TODO: check units (which time unit?)
     
     // got length l; want minimal n such that: 2^n >= l
     // that is, n >= log_2 (l)
@@ -92,23 +93,23 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     if (bit_start > 32)
 	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
     
+    elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
+    vol_dist = drugData.getPK().getVol_dist();
+    
     PD_params.resize (alleles.size());
     double cum_IF = 0.0;
     for (size_t i = 0; i < PD_params.size(); ++i) {
 	cum_IF += alleles[i].getInitial_frequency ();
 	PD_params[i].cum_initial_frequency = cum_IF;
-	PD_params[i].max_killing_rate = alleles[i].getMax_killing_rate ();
-	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), alleles[i].getSlope ());
 	PD_params[i].slope = alleles[i].getSlope ();
+	PD_params[i].power = alleles[i].getMax_killing_rate () / (elimination_rate_constant * PD_params[i].slope);
+	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), PD_params[i].slope);
     }
     for (size_t i = 0; i < PD_params.size(); ++i) {
 	PD_params[i].cum_initial_frequency /= cum_IF;	// scale: initial freq. of each is out of sum of all initial freq.s
     }
     // Be absolutely certain this is 1 so we can't get a random double greater than this value:
     PD_params[PD_params.size()-1].cum_initial_frequency = 1.0;
-    
-    elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
-    vol_dist = drugData.getPK().getVol_dist();
 }
 LSTMDrugType::~LSTMDrugType () {}
 

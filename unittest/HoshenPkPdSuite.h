@@ -68,13 +68,13 @@ public:
   
   void testCqDecayed () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs ();
+    proxy->decayDrugs (21);
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12608995630400068);
   }
   
   void testCq2Doses () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs ();
+    proxy->decayDrugs (21);
     proxy->medicate ("CQ", 250000, 0, 21);
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.06809903879225410);
   }

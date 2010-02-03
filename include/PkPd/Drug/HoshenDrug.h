@@ -27,7 +27,6 @@
 #include <deque>
 #include <map>
 #include <vector>
-#include "Drug.h"
 #include "Dose.h"
 #include "HoshenDrugType.h"
 #include "Global.h"
@@ -40,8 +39,11 @@ namespace OM { namespace PkPd {
 /** A class holding hoshen pkpd drug use info.
  *
  * Each human has an instance for each type of drug present in their blood. */
-class HoshenDrug : public Drug {
+class HoshenDrug {
 public:
+  /** Initialise the drug model. Called at start of simulation. */
+  static void init ();
+  
   /** Create a new instance. */
   HoshenDrug (const HoshenDrugType*);
   
@@ -69,7 +71,9 @@ public:
   }
   
 protected:
-  /** Calculate multiplier to decay a concentration by a duration of time
+  static double minutesPerTimeStep;
+  
+   /** Calculate multiplier to decay a concentration by a duration of time
     *
     * @param time Duration in minutes to decay over */
   double decayFactor (double time);

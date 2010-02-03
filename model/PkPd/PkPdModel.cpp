@@ -46,7 +46,6 @@ void PkPdModel::init () {
 	if (InputData.getScenario().getDrugDescription().present()) {
 	    activeModel = LSTM_PKPD;
 	    LSTMDrugType::init();
-	    LSTMDrug::init ();
 	    LSTMPkPdModel::init();
 	} else {
 	    activeModel = HOSHEN_PKPD;

@@ -97,7 +97,7 @@ void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEffic
     ++i;
   }
   
-  pkpdModel->decayDrugs();
+  pkpdModel->decayDrugs(ageInYears);
 }
 
 

@@ -77,7 +77,7 @@ struct DecayPredicate {
     return drug.decay ();
   }
 };
-void HoshenPkPdModel::decayDrugs () {
+void HoshenPkPdModel::decayDrugs (double) {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
 }

@@ -83,7 +83,7 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
     timeStepMaxDensity = max(timeStepMaxDensity, dens);
     ++i;
   }
-  pkpdModel->decayDrugs();
+  pkpdModel->decayDrugs (ageInYears);
 }
 
 

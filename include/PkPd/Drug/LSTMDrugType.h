@@ -41,9 +41,9 @@ namespace OM { namespace PkPd {
     struct LSTMDrugPDParameters {
 	double cum_initial_frequency;		/// Frequency at which this allele occurs (at initialisation); cumulative
 									/// Independant of frequencies of alleles at other loci (for other drugs).
-	double max_killing_rate;			/// Maximal drug killing rate per day
-	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope
 	double slope;						/// Slope of the dose response curve
+	double power;						/// Maximal drug killing rate per day / (elimination_rate_constant * slope)
+	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope
     };
     
 /** Information about each (type of) drug (rather than each use of a drug).

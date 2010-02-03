@@ -74,14 +74,18 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, int time, double age
   drug->storeDose (qty, time);
 }
 
-struct DecayPredicate {
-  bool operator() (Drug& drug) {
-    return false;	//TODO (DH)
-  }
+// This may look complicated but its just some machinery to call updateConcentration() and return its result
+class DecayPredicate {
+    double ageYears;
+public:
+    DecayPredicate(double aY) : ageYears(aY) {}
+    bool operator() (LSTMDrug& drug) {
+	return drug.updateConcentration(ageYears);
+    }
 };
-void LSTMPkPdModel::decayDrugs () {
+void LSTMPkPdModel::decayDrugs (double ageYears) {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-  _drugs.remove_if (DecayPredicate());
+  _drugs.remove_if (DecayPredicate(ageYears));
 }
 
 double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {

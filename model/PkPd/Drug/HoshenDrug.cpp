@@ -27,7 +27,18 @@
 
 namespace OM { namespace PkPd {
     
-HoshenDrug::HoshenDrug(const HoshenDrugType* type) : Drug(),
+// -----  Static variables and functions  -----
+
+double HoshenDrug::minutesPerTimeStep;
+
+void HoshenDrug::init () {
+  minutesPerTimeStep = Global::interval * 24*60;
+}
+
+
+// -----  Non-static variables and functions  -----
+
+HoshenDrug::HoshenDrug(const HoshenDrugType* type) :
     typeData (type),
     _concentration (0),
     _nextConcentration (0)

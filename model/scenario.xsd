@@ -1433,10 +1433,38 @@
 		      </xs:annotation>
                       <xs:complexType>
                         <xs:sequence>
-                          <xs:element name="initial_frequency" type="xs:double"/>
-                          <xs:element name="max_killing_rate" type="xs:double"/>
-                          <xs:element name="IC50" type="xs:double"/>
-                          <xs:element name="slope" type="xs:double"/>
+                          <xs:element name="initial_frequency" type="xs:double">
+			    <xs:annotation>
+			      <xs:documentation>
+				Frequency, relative to the total frequency of all alleles for this drug/locus.
+			      </xs:documentation>
+			      <xs:appinfo>units:relative frequency;min:0;</xs:appinfo>
+			    </xs:annotation>
+			  </xs:element>
+                          <xs:element name="max_killing_rate" type="xs:double">
+			    <xs:annotation>
+			      <xs:documentation>
+				k1 — Maximal parasite killing rate.
+			      </xs:documentation>
+			      <xs:appinfo>units:1/days;min:0;</xs:appinfo>
+			    </xs:annotation>
+			  </xs:element>
+                          <xs:element name="IC50" type="xs:double">
+			    <xs:annotation>
+			      <xs:documentation>
+				Half maximal effect concentration.
+			      </xs:documentation>
+			      <xs:appinfo>units:mg/l;min:0;</xs:appinfo>
+			    </xs:annotation>
+			  </xs:element>
+                          <xs:element name="slope" type="xs:double">
+			    <xs:annotation>
+			      <xs:documentation>
+				n — Slope of the concentration effect curve
+			      </xs:documentation>
+			      <xs:appinfo>units:no units;</xs:appinfo>
+			    </xs:annotation>
+			  </xs:element>
 			</xs:sequence>
 			<xs:attribute name="name" use="required" type="xs:string"/>
 		      </xs:complexType>
@@ -1447,8 +1475,22 @@
 	      <xs:element name="PK">
 		<xs:complexType>
 		  <xs:sequence>
-		    <xs:element name="half_life" type="xs:double"/>
-		    <xs:element name="vol_dist" type="xs:double"/>
+		    <xs:element name="half_life" type="xs:double">
+		      <xs:annotation>
+			<xs:documentation>
+			  Used to calculate elimintation rate (which is: ln(2) / half_life).
+			</xs:documentation>
+			<xs:appinfo>units:minutes;min:0;</xs:appinfo>
+		      </xs:annotation>
+		    </xs:element>
+		    <xs:element name="vol_dist" type="xs:double">
+		      <xs:annotation>
+			<xs:documentation>
+			  Volume of Distribution
+			</xs:documentation>
+			<xs:appinfo>units:l/kg;min:0;</xs:appinfo>
+		      </xs:annotation>
+		    </xs:element>
 		  </xs:sequence>
 		</xs:complexType>
 	      </xs:element>

@@ -93,7 +93,7 @@ public:
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?
-  virtual void decayDrugs () {};
+  virtual void decayDrugs (double ageYears) {};
   
   /** This is how drugs act on infections.
    *

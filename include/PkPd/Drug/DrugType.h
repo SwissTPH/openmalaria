@@ -75,7 +75,6 @@ protected:
   string abbreviation;
   
   // Allow the Drug class to access private members
-  friend class Drug;
   friend class HoshenDrug;
 };
 

@@ -48,7 +48,7 @@ public:
   
   //TODO: do we need to pass age?
   virtual void medicate(string drugAbbrev, double qty, int time, double age);
-  virtual void decayDrugs ();
+  virtual void decayDrugs (double ageYears);
   virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
   
   virtual uint32_t new_proteome_ID () {

@@ -34,7 +34,6 @@ set (Model_CPP
   PkPd/PkPdModel.cpp
   PkPd/HoshenPkPdModel.cpp
   PkPd/LSTMPkPdModel.cpp
-  PkPd/Drug/Drug.cpp
   PkPd/Drug/DrugType.cpp
   PkPd/Drug/HoshenDrug.cpp
   PkPd/Drug/HoshenDrugType.cpp
