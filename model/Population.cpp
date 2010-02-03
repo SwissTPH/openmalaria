@@ -128,23 +128,13 @@ void Population::preMainSimInit ()
 void Population::createInitialHumans ()
 {
     int cumulativePop = 0;
-    //TODO: cleanup & check (this code duplicates old behaviour)
-    for (int iage = AgeStructure::getMaxTimestepsPerLife() - 2; iage >= 0; iage--) {
-	int targetPop = AgeStructure::targetCumPop (2+iage, populationSize);
+    for (int iage = AgeStructure::getMaxTimestepsPerLife() - 1; iage >= 0; iage--) {
+	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
 	    newHuman (-iage);
 	    ++cumulativePop;
 	}
     }
-    /*    for (int j = 1;j < maxTimestepsPerLife; j++) {
-    int iage = maxTimestepsPerLife - j - 1;
-    int targetPop = (int) floor (cumAgeProp[j] * populationSize + 0.5);
-    while (cumulativePop < targetPop) {
-   if (InitPopOpt && iage > 0) {} // only those with age 0 should be created here
-       else newHuman (-iage);
-       ++cumulativePop;
-       }
-       }*/
     
     // Vector setup dependant on human population
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
@@ -191,10 +181,7 @@ void Population::update1()
         int age = (Global::simulationTime - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age) ...
-        //FIXME: The +2 here is to replicate old results. I think it's wrong though. Also, it looks
-	// like this code assumes the maximum age of indivs is maxTimestepsPerLife not
-	// Global::maxAgeIntervals.
-        if (cumPop > AgeStructure::targetCumPop (age + 2, targetPop)) {
+        if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);
@@ -271,6 +258,7 @@ void Population::implementIntervention (int time)
         system description. The default clearance rate for MDA should be 100%
         since this simulates what was meant to happen in Garki.  We can change
         this by introducing an optional clearance rate that can be < 100%. */
+	//TODO: MDA with the old treatment system should do this; with the drug model it needs some drugs to medicate.
         massIntervention (interv->getMDA().get(), &Host::Human::clearInfections);
     }
     if (interv->getIpti().present()) {

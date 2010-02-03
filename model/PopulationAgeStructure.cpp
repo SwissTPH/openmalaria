@@ -59,7 +59,7 @@ void AgeStructure::init () {
 
 int AgeStructure::targetCumPop (int ageTSteps, int targetPop)
 {
-    return (int) floor (cumAgeProp[maxTimestepsPerLife+1-ageTSteps] * targetPop + 0.5);
+    return (int) floor (cumAgeProp[maxTimestepsPerLife-1-ageTSteps] * targetPop + 0.5);
 }
 
 
