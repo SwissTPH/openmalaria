@@ -46,10 +46,6 @@ class DrugType {
 public:
   ///@brief Static functions
   //@{
-  /** Initialise the drug model. Called at start of simulation. */
-  //TODO: data from XML.
-  static void init ();
-  
   //! Adds a new drug type to the list
   static void addDrug(DrugType* drug);
 

@@ -40,11 +40,6 @@ namespace OM { namespace PkPd {
 map<string,DrugType*> DrugType::available; 
 
 
-
-void DrugType::init () {
-}
-
-
 void DrugType::addDrug(DrugType* drug) {
   string abbrev = drug->abbreviation;
   // Check drug doesn't already exist

@@ -50,6 +50,8 @@ public:
   virtual void decayDrugs ();
   virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
   
+  virtual uint32_t new_proteome_ID ();
+  
 private:
     // Per-individual variables:
   list<LSTMDrug> _drugs;

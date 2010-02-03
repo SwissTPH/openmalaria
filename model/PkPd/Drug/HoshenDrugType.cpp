@@ -39,7 +39,6 @@ namespace OM { namespace PkPd {
 //map<string,HoshenDrugType*> HoshenDrugType::available; 
 
 void HoshenDrugType::init () {
-  DrugType::init();
   Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
   HoshenDrugType* s;
   //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values

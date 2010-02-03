@@ -39,7 +39,7 @@ namespace OM { namespace PkPd {
     
     /** Per drug, per genotype, PD parameters of drug. */
     struct LSTMDrugPDParameters {
-	double initial_frequency;			/// Frequency at which this allele occurs — at initialisation.
+	double cum_initial_frequency;		/// Frequency at which this allele occurs (at initialisation); cumulative
 									/// Independant of frequencies of alleles at other loci (for other drugs).
 	double max_killing_rate;			/// Maximal drug killing rate per day
 	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope
@@ -55,22 +55,26 @@ namespace OM { namespace PkPd {
  * checkpointed.) */
 class LSTMDrugType : public DrugType {	//TODO: check what else is inherited, and possibly remove DrugType base class
 public:
-  ///@brief Static functions
-  //@{
-  /** Initialise the drug model. Called at start of simulation. */
-  static void init ();
-  
-  
-  ///@brief Non static (per instance) functions
-  //@{
-  /** Create a new DrugType.
-   *
-   * @param drugData Scenario data for this drug (PK params, PD params per allele)
-   * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
-   */
-  LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start);
-  ~LSTMDrugType ();
-  //@}
+    ///@brief Static functions
+    //@{
+    /** Initialise the drug model. Called at start of simulation. */
+    static void init ();
+    
+    /// Return a new proteome ID
+    static uint32_t new_proteome_ID ();
+    //@}
+    
+    
+    ///@brief Non static (per instance) functions
+    //@{
+    /** Create a new DrugType.
+     *
+     * @param drugData Scenario data for this drug (PK params, PD params per allele)
+     * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
+     */
+    LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start);
+    ~LSTMDrugType ();
+    //@}
   
 private:
     /** Allele information is stored as a uint32_t in infection. Denote this p_id,

@@ -23,6 +23,7 @@
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "inputData.h"
 #include "util/errors.hpp"
+#include "util/gsl.h"
 
 #include <assert.h>
 #include <cmath>
@@ -39,7 +40,6 @@ namespace OM { namespace PkPd {
  */
 
 void LSTMDrugType::init () {
-    DrugType::init();
     uint32_t start_bit = 0;
     
     const scnXml::DrugDescription& data = InputData.getScenario().getDrugDescription().get ();
@@ -47,6 +47,29 @@ void LSTMDrugType::init () {
 	DrugType::addDrug (new LSTMDrugType (*drug, start_bit));
     }
 }
+
+uint32_t LSTMDrugType::new_proteome_ID () {
+    uint32_t id = 0;	// proteome / genotype identifier
+    // for each drug / locus,
+    for (map<string,DrugType*>::const_iterator it = available.begin(); it != available.end(); ++it) {
+	const LSTMDrugType& dt = *(LSTMDrugType*)(it->second);
+	double sample = gsl::rngUniform();
+	for (size_t i = 0; i < dt.PD_params.size(); ++i) {
+	    // we randomly pick an allele according to its initial frequency
+	    if (sample <= dt.PD_params[i].cum_initial_frequency) {
+		// add identifier for this allele into the proteome identifier
+		assert ((~dt.allele_mask) & (i << dt.allele_rshift) == 0);	// sanity check (identifier within specified bits)
+		id |= (i << dt.allele_rshift);
+		goto gotAllele;	// and return
+	    }
+	}
+	assert(false);	// sanity check that we did get an allele (only in debug mode)
+	gotAllele:;
+    }
+    return id;	// done (includes components specifying each allele)
+}
+
+
 
 // -----  Non-static DrugType functions  -----
 
@@ -70,12 +93,19 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
 	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
     
     PD_params.resize (alleles.size());
-    for (size_t i = 0; i < alleles.size(); ++i) {
-	PD_params[i].initial_frequency = alleles[i].getInitial_frequency ();
+    double cum_IF = 0.0;
+    for (size_t i = 0; i < PD_params.size(); ++i) {
+	cum_IF += alleles[i].getInitial_frequency ();
+	PD_params[i].cum_initial_frequency = cum_IF;
 	PD_params[i].max_killing_rate = alleles[i].getMax_killing_rate ();
 	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), alleles[i].getSlope ());
 	PD_params[i].slope = alleles[i].getSlope ();
     }
+    for (size_t i = 0; i < PD_params.size(); ++i) {
+	PD_params[i].cum_initial_frequency /= cum_IF;	// scale: initial freq. of each is out of sum of all initial freq.s
+    }
+    // Be absolutely certain this is 1 so we can't get a random double greater than this value:
+    PD_params[PD_params.size()-1].cum_initial_frequency = 1.0;
     
     elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();

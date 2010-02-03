@@ -95,4 +95,8 @@ double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
     return factor;
 }
 
+uint32_t LSTMPkPdModel::new_proteome_ID () {
+    return LSTMDrugType::new_proteome_ID ();
+}
+
 } }
