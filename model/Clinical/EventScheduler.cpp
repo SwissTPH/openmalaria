@@ -85,7 +85,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    return;
 	}
 	
-	pgState = Pathogenesis::NONE;	// recovery
+	pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
     }
     
     bool cmEvent = false;	// set true when we need to do case management

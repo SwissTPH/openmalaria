@@ -1299,13 +1299,13 @@
 						<xs:appinfo>units:mg;</xs:appinfo>
 					    </xs:annotation>
 					    </xs:attribute>
-					    <xs:attribute name="time" type="xs:int" use="required">
+					    <xs:attribute name="time" type="xs:double" use="required">
 					    <xs:annotation>
 						<xs:documentation>
-						    Number of minutes past start of timestep the drug is medicated at (usually 0).
+						    Number of hours past start of timestep the drug is medicated at (usually 0).
 						</xs:documentation>
 						<xs:appinfo>
-						units:Minutes;min:0;
+						units:hours;min:0;
 						</xs:appinfo>
 					    </xs:annotation>
 					    </xs:attribute>

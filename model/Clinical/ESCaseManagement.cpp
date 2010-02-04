@@ -61,12 +61,16 @@ cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     if (ageYears > 5.0)
 	decisionID |= Decision::AGE_OVER5;
     
-    CaseTreatmentPair leaf = traverse (decisionID);
+    CaseTreatmentPair leaf = traverse (decisionID);	// Traverse the tree.
     leaf.second.apply (medicateQueue, leaf.first);
     return leaf.first;
 }
 
 CaseTreatmentPair ESCaseManagement::traverse (cmid id) {
+    /* This has branches for severe or uncomplicated cases.
+    FIXME: In UCs it needs to branch into UC1 or UC2 depending on
+    result of last parasite test, if within health-system-memory. */
+    
     // Parasite test:
     //NOTE: currently only one test, but only used in UC trees
     // (can make test depend on severe/UC state)

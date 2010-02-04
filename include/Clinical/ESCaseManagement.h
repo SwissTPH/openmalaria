@@ -57,7 +57,7 @@ struct CaseTreatment {
 	for (size_t j = 0; j < mSeq.size(); ++j) {
 	    medications[j].abbrev = mSeq[j].getName();
 	    medications[j].qty = mSeq[j].getQty();
-	    medications[j].time = (double(mSeq[j].getTime())) / (24*60);	// convert from minutes to days
+	    medications[j].time = mSeq[j].getTime() / 24.0;	// convert from hours to days
 	}
     }
     
