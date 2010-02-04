@@ -41,9 +41,9 @@ namespace OM { namespace PkPd {
     struct LSTMDrugPDParameters {
 	double cum_initial_frequency;		/// Frequency at which this allele occurs (at initialisation); cumulative
 									/// Independant of frequencies of alleles at other loci (for other drugs).
-	double slope;						/// Slope of the dose response curve
-	double power;						/// Maximal drug killing rate per day / (elimination_rate_constant * slope)
-	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope
+	double slope;						/// Slope of the dose response curve (no unit)
+	double power;						/// Maximal drug killing rate per day / (elimination_rate_constant * slope) (no unit)
+	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     };
     
 /** Information about each (type of) drug (rather than each use of a drug).
@@ -89,8 +89,8 @@ private:
     vector<LSTMDrugPDParameters> PD_params;
     
     /*PK parameters required - varies with humans age and severity of disease*/
-    double negligible_concentration;		/// Concentration, below which drug is deemed not to have an effect and is removed for performance reasons.
-    double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life
+    double negligible_concentration;		/// Concentration, below which drug is deemed not to have an effect and is removed for performance reasons. (mg/l)
+    double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life. (1 / days)
     double vol_dist;					/// Volume of distribution (l/kg)
     
   // Allow LSTMDrug to access private members

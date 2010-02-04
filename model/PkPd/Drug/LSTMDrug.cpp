@@ -38,11 +38,14 @@ LSTMDrug::LSTMDrug(const LSTMDrugType* type) :
 {}
 
 
-void LSTMDrug::storeDose (double concentration, int delay) {
-    doses.push_back (Dose (concentration, delay));
+void LSTMDrug::storeDose (double time, double qty) {
+    doses.push_back (Dose (time, qty));
 }
 
 
+/* Function to avoid repeating some operations in calculateDrugFactor().
+ * @param duration Time-span acted over with units days.
+ * @returns a survival factor (no units). */
 inline double drugEffect (const LSTMDrugPDParameters& PD_params, double elimination_rate_constant, double& concentration, double duration) {
     //KW - start concentration is equal to the end concentration of the previous time step
     double conc_after_decay = concentration * exp(elimination_rate_constant *  duration);
@@ -79,10 +82,10 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
 	totalFactor *= drugEffect (PD_params, typeData->elimination_rate_constant, concentration_today, duration);	
 	concentration_today += dose->mg * dist_weight_inv;
 	
-	startTime = dose->time;		// KW - Increment the time 
+	startTime = dose->time;		// KW - Increment the time (assuming doses are in order of time)
     }
    
-    double duration = 24*60 - startTime;
+    double duration = 1.0 - startTime;
     totalFactor *= drugEffect (PD_params, typeData->elimination_rate_constant, concentration_today, duration);	
     
     return totalFactor;			/* KW -	Returning drug effect per day, per drug */
@@ -99,10 +102,10 @@ bool LSTMDrug::updateConcentration (double weight_kg) {
 	concentration *= exp(typeData->elimination_rate_constant *  duration);
 	concentration += dose->mg * dist_weight_inv;
 	
-	startTime = dose->time;		// KW - Increment the time 
+	startTime = dose->time;	
     }
    
-    double duration = 24*60 - startTime;
+    double duration = 1.0 - startTime;
     concentration *= exp(typeData->elimination_rate_constant *  duration);
     
     doses.clear ();				// Clear today's dose list — they've been added to concentration now.

@@ -53,7 +53,11 @@ public:
    * object will be deleted. */
   bool decay();
   
-  void addDose (double concentration, int delay);
+  /** Add a dose.
+   *
+   * @param concentration
+   * @param time Days */
+  void addDose (double concentration, double time);
   
   string getAbbreviation() const { return typeData->abbreviation;}
   //double getAbsorptionFactor() const { return typeData->absorptionFactor;}

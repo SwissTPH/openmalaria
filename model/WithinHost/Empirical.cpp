@@ -55,7 +55,7 @@ void EmpiricalWithinHostModel::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void EmpiricalWithinHostModel::medicate(string drugName, double qty, int time, double age) {
+void EmpiricalWithinHostModel::medicate(string drugName, double qty, double time, double age) {
   pkpdModel->medicate(drugName, qty, time, age);
 }
 

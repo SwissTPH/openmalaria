@@ -47,7 +47,7 @@ struct MedicateData {
     
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed (mg?)
-    int time;		/// Time to medicate at (minutes from start of timestep, may be >= 60*24 (not this timestep))
+    double time;	/// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
 };
 
 /// Data type stored in decisions
@@ -57,7 +57,7 @@ struct CaseTreatment {
 	for (size_t j = 0; j < mSeq.size(); ++j) {
 	    medications[j].abbrev = mSeq[j].getName();
 	    medications[j].qty = mSeq[j].getQty();
-	    medications[j].time = mSeq[j].getTime();
+	    medications[j].time = (double(mSeq[j].getTime())) / (24*60);	// convert from minutes to days
 	}
     }
     
@@ -69,7 +69,7 @@ struct CaseTreatment {
 	
 	for (vector<MedicateData>::iterator it = medications.begin(); it != medications.end(); ++it) {
 	    medicateQueue.push_back (*it);
-	    medicateQueue.back().time += delay * 60*24;
+	    medicateQueue.back().time += double(delay);
 	}
     }
     

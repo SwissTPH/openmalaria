@@ -46,7 +46,7 @@ public:
 	mg & stream;
     }
   
-  /// time (minutes)
+  /// time (days)
   double time;
   /// dose in mg
   double mg;

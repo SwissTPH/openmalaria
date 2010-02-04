@@ -79,7 +79,7 @@ public:
    *
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity (mg?).
-   * \param time       - Time in minutes since start of this time step to medicate at
+   * \param time       - Time in days since start of this time step to medicate at
    * \param age        - Age of human in years
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
@@ -89,7 +89,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, int time, double age)  {};
+  virtual void medicate(string drugAbbrev, double qty, double time, double age)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
   //NOTE: does calling after applying drug effects make the most sense for all models?

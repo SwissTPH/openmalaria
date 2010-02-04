@@ -75,8 +75,12 @@ public:
   
   /** Medicate drugs (wraps drug's medicate).
    *
-   * \param age	= Age in years of human. */
-  virtual void medicate(string drugName, double qty, int time, double age) {}
+   * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
+   * @param qty		Quantity of drug to administer in mg
+   * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
+   * @param age		Age of human in years
+   */
+  virtual void medicate(string drugAbbrev, double qty, double time, double age) {}
 
   /** Update the parasite densities of infections.
    *

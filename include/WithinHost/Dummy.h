@@ -46,7 +46,7 @@ public:
   virtual void newInfection();
   virtual void clearAllInfections();
   
-  virtual void medicate(string drugName, double qty, int time, double age);
+  virtual void medicate(string drugName, double qty, double time, double age);
   
   virtual void calculateDensities(double ageInYears, double BSVEfficacy);
   

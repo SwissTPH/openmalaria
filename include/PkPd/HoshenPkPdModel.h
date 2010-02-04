@@ -47,7 +47,7 @@ public:
   virtual void checkpoint (ostream& stream);
   
   //TODO: do we need to pass age?
-  virtual void medicate(string drugAbbrev, double qty, int time, double age);
+  virtual void medicate(string drugAbbrev, double qty, double time, double age);
   virtual void decayDrugs (double ageYears);
   virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
   

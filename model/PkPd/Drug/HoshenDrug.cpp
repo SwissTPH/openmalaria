@@ -45,8 +45,8 @@ HoshenDrug::HoshenDrug(const HoshenDrugType* type) :
 {}
 
 
-void HoshenDrug::addDose (double concentration, int delay) {
-    assert (delay == 0);
+void HoshenDrug::addDose (double concentration, double time) {
+    assert (time == 0.0);
     _concentration += concentration;
     _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
 }

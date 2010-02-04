@@ -44,7 +44,7 @@ public:
   
   /** Add amount to the concentration of drug, at time delay past the start of
    * the current timestep. */
-  void storeDose (double amount, int delay);
+  void storeDose (double time, double qty);
   
   /** Returns the total drug factor for one drug over one day.
    *

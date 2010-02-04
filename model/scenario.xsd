@@ -1489,7 +1489,7 @@
 			<xs:documentation>
 			  Used to calculate elimintation rate (which is: ln(2) / half_life).
 			</xs:documentation>
-			<xs:appinfo>units:minutes;min:0;</xs:appinfo>
+			<xs:appinfo>units:days;min:0;</xs:appinfo>
 		      </xs:annotation>
 		    </xs:element>
 		    <xs:element name="vol_dist" type="xs:double">

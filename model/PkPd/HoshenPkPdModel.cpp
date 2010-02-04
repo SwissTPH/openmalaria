@@ -56,7 +56,7 @@ void HoshenPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void HoshenPkPdModel::medicate(string drugAbbrev, double qty, int time, double ageYears) {
+void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, double ageYears) {
   list<HoshenDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
