@@ -44,7 +44,6 @@ public:
     //PkPdModel::init ();
     PkPdModel::activeModel = PkPdModel::HOSHEN_PKPD;
     HoshenDrugType::init();
-    HoshenDrug::init ();
     HoshenPkPdModel::init();
   }
   

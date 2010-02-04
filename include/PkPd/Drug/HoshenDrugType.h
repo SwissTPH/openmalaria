@@ -60,7 +60,7 @@ public:
    * @param name	Name of the drug
    * @param abbreviation	Abbreviated name (e.g. CQ)
    * @param absorptionFactor	
-   * @param halfLife	Half life of decay, in minutes
+   * @param halfLife	Half life of decay, in days
    */
   HoshenDrugType (string name, string abbreviation, double absorptionFactor, double halfLife);
   ~HoshenDrugType ();
@@ -87,7 +87,7 @@ private:
   /*! Absorption = dose * factor / weight
    */
   double absorptionFactor;
-  //! Half-life (in minutes)
+  //! Half-life (in days)
   double halfLife;
   //! Pharma dynamic list of parameters.
   /*! A ordered list of required mutations.

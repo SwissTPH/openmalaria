@@ -41,9 +41,6 @@ namespace OM { namespace PkPd {
  * Each human has an instance for each type of drug present in their blood. */
 class HoshenDrug {
 public:
-  /** Initialise the drug model. Called at start of simulation. */
-  static void init ();
-  
   /** Create a new instance. */
   HoshenDrug (const HoshenDrugType*);
   
@@ -75,11 +72,9 @@ public:
   }
   
 protected:
-  static double minutesPerTimeStep;
-  
    /** Calculate multiplier to decay a concentration by a duration of time
     *
-    * @param time Duration in minutes to decay over */
+    * @param time Duration in days to decay over */
   double decayFactor (double time);
   
   /// Always links a drug instance to its drug-type data

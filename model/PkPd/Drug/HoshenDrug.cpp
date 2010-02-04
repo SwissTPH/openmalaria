@@ -27,16 +27,6 @@
 
 namespace OM { namespace PkPd {
     
-// -----  Static variables and functions  -----
-
-double HoshenDrug::minutesPerTimeStep;
-
-void HoshenDrug::init () {
-  minutesPerTimeStep = Global::interval * 24*60;
-}
-
-
-// -----  Non-static variables and functions  -----
 
 HoshenDrug::HoshenDrug(const HoshenDrugType* type) :
     typeData (type),
@@ -48,12 +38,12 @@ HoshenDrug::HoshenDrug(const HoshenDrugType* type) :
 void HoshenDrug::addDose (double concentration, double time) {
     assert (time == 0.0);
     _concentration += concentration;
-    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+    _nextConcentration = _concentration * decayFactor (Global::interval);
 }
 
 bool HoshenDrug::decay() {
     _concentration = _nextConcentration;
-    _nextConcentration = _concentration * decayFactor (minutesPerTimeStep);
+    _nextConcentration = _concentration * decayFactor (Global::interval);
     //TODO: if concentration is negligible, return true to clean up this object
     return false;
 }
@@ -68,7 +58,7 @@ double HoshenDrug::calculateDrugFactor(uint32_t proteome_ID) const {
 
 double HoshenDrug::decayFactor (double time) {
   //k = log(2)/halfLife
-  return std::exp(-time*log(2.0)/((HoshenDrugType*)typeData)->halfLife);
+  return std::exp( -time * log(2.0) / ((HoshenDrugType*)typeData)->halfLife);
 }
 
 } }

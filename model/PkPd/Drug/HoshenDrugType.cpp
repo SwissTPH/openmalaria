@@ -41,9 +41,9 @@ namespace OM { namespace PkPd {
 void HoshenDrugType::init () {
   Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
   HoshenDrugType* s;
-  //s = new DrugType("Sulfadoxine", "S", 0.1, 10*24*60); //Invented values
+  //s = new DrugType("Sulfadoxine", "S", 0.1, 10); //Invented values
   //DrugType::addDrug(s);
-  s = new HoshenDrugType("Chloroquine", "CQ", 0.02, 45*24*60); //Based on Hoshen
+  s = new HoshenDrugType("Chloroquine", "CQ", 0.02, 45); //Based on Hoshen
   vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
