@@ -137,7 +137,7 @@ private:
   
   /// Age bounds of probSequelae* parameters
   //@{
-  static const int NUM_SEQUELAE_AGE_GROUPS = 2;
+  static const size_t NUM_SEQUELAE_AGE_GROUPS = 2;
   static const int SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS];
   //@}
   

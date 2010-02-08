@@ -1090,7 +1090,11 @@
         <xs:annotation>
           <xs:documentation>
             List of age specific probabilities of sequelae
-            in inpatients
+            in inpatients.
+            
+            Note: previously these ranges were silently remapped. To prevent
+            unexpected differences, there *must* be two groups, with maxAgeYrs
+            bounds 5 and 99 respectively.
           </xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>

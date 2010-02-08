@@ -33,7 +33,7 @@
 namespace OM { namespace Clinical {
 
 int OldCaseManagement::healthSystemSource;
-const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 1, 10 };
+const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 5, 99 };
 double OldCaseManagement::_oddsRatioThreshold;
 bool OldCaseManagement::_noMortality;
 std::vector<double> OldCaseManagement::_inputAge;
@@ -41,8 +41,8 @@ std::vector<double> OldCaseManagement::_caseFatalityRate;
 double OldCaseManagement::probGetsTreatment[3];
 double OldCaseManagement::probParasitesCleared[3];
 double OldCaseManagement::cureRate[3];
-double OldCaseManagement::probSequelaeTreated[2];
-double OldCaseManagement::probSequelaeUntreated[2];
+double OldCaseManagement::probSequelaeTreated[NUM_SEQUELAE_AGE_GROUPS];
+double OldCaseManagement::probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
 
 // -----  utility  -----
@@ -82,17 +82,18 @@ void OldCaseManagement::setHealthSystem (int source) {
     
     setParasiteCaseParameters (healthSystem);
     
-    const scnXml::ByAgeItems::ItemSequence& items = healthSystem.getPSequelaeInpatient().getItem();
-    for (int agegrp = 0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
-	for (size_t i = 0; i < items.size(); i++) {
-	    if (items[i].getMaxAgeYrs() > SEQUELAE_AGE_BOUND[agegrp]) {
-		probSequelaeTreated[agegrp] =
-		probSequelaeUntreated[agegrp] = items[i].getValue();
-		goto gotItem;
-	    }
-	}
-	throw util::xml_scenario_error ("In scenario.xml: healthSystem: pSequelaeInpatient: expected item with maxAgeYrs > 10");
-	gotItem:; // alternative to for ... break ... else
+    const scnXml::ByAgeItems::ItemSequence& pSeqGroups = healthSystem.getPSequelaeInpatient().getItem();
+    /* Note: Previously age groups specified in the XML were remapped; this was misleading
+    (age groups could be ignored or have different bounds). To avoid letting non-corresponding
+    entries now have a different effect, we check the bounds correspond _exactly_ to what we expect
+    (and appears to have always been the case). */
+    if (pSeqGroups.size() != NUM_SEQUELAE_AGE_GROUPS)
+	throw util::xml_scenario_error ("Expected: 2 pSequelaeInpatient age groups with maxAgeYrs 5 and 99");
+    for (size_t agegrp = 0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
+	if (pSeqGroups[agegrp].getMaxAgeYrs() != SEQUELAE_AGE_BOUND[agegrp])
+	    throw util::xml_scenario_error ("Expected: 2 pSequelaeInpatient age groups with maxAgeYrs 5 and 99");
+	
+	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
     }
     
     readCaseFatalityRatio (healthSystem);
@@ -185,9 +186,10 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
 bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, int& doomed)
 {
   SurveyAgeGroup ageGroup(ageYears);
-  int isAdultIndex = 1;
-  if (ageYears >= 5.0) {
-    isAdultIndex = 0;
+  BOOST_STATIC_ASSERT (NUM_SEQUELAE_AGE_GROUPS == 2);	// code setting sequelaeIndex assumes this
+  size_t sequelaeIndex = 0;
+  if (ageYears >= SEQUELAE_AGE_BOUND[0]) {
+    sequelaeIndex = 1;
   }
   
   Regimen::Type regimen = Regimen::SEVERE;
@@ -201,8 +203,8 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
   p4 = caseFatality (ageYears);
   // p5 here is the community threshold case-fatality rate
   p5 = getCommunityCaseFatalityRate (p4);
-  p6 = probSequelaeTreated[isAdultIndex];
-  p7 = probSequelaeUntreated[isAdultIndex];
+  p6 = probSequelaeTreated[sequelaeIndex];
+  p7 = probSequelaeUntreated[sequelaeIndex];
 
   double q[9];
   // Community deaths

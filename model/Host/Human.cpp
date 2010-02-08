@@ -152,21 +152,8 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
   if (clinicalModel->isDead(ageTimeSteps))
     return true;
   
-  // Comments here refer to which WHM functions get called, and which parameters
-  // read/set, by the next call. Temporary for some WHM refactoring (TODO).
-  
-  //withinHostModel->IPTSetLastSPDose	in(iptiEffect) out(_lastIptiOrPlacebo,_lastSPDose,reportIPTDose)
   updateInterventionStatus();
-  //withinHostModel->newInfection	inout(_MOI,_cumulativeInfections,infections)
-  //withinHostModel->getTotalDensity	in (totalDensity)
-  //withinHostModel->calculateDensities	inout(infections,_MOI)...
   updateInfection(transmissionModel);
-  //withinHostModel.getTimeStepMaxDensity	in(timeStepMaxDensity)
-  //withinHostModel.getTotalDensity	in (totalDensity)
-  //old?withinHostModel.immunityPenalisation	inout(_cumulativeY) in(_cumulativeYlag)
-  //old?withinHostModel.clearInfections	in(_lastIptiOrPlacebo,iptiEffect) inout(_lastSPDose,infections) out(_MOI)
-  //new?withinHostModel.parasiteDensityDetectible	in(totalDensity)
-  //new?withinHostModel.medicate	inout(drugProxy)
   clinicalModel->update (*withinHostModel, getAgeInYears(), Global::simulationTime-_dateOfBirth);
   clinicalModel->updateInfantDeaths (ageTimeSteps);
   _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
