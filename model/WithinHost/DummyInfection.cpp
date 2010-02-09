@@ -20,6 +20,7 @@
 */
 
 #include "WithinHost/DummyInfection.h"
+#include "WithinHost/Common.h"
 #include "inputData.h"
 #include "util/gsl.h"
 #include "util/ModelOptions.hpp"
@@ -30,16 +31,25 @@
 
 namespace OM { namespace WithinHost {
     
-void DummyInfection::init (){
+CommonInfection* createDummyInfection (uint32_t protID) {
+    return new DummyInfection (protID);
+}
+CommonInfection* checkpointedDummyInfection (istream& stream) {
+    return new DummyInfection (stream);
+}
+
+void DummyInfection::init () {
+    CommonWithinHost::createInfection = &createDummyInfection;
+    CommonWithinHost::checkpointedInfection = &checkpointedDummyInfection;
 }
 
 DummyInfection::DummyInfection (uint32_t protID) :
-    Infection(protID)
+    CommonInfection(protID)
 {
     _density=16;	// increased by DH to avoid zeros in initialKappa
 }
 
-bool DummyInfection::updateDensity(double survivalFactor) {
+bool DummyInfection::updateDensity(int simulationTime, double survivalFactor) {
     const double GROWTH_RATE = 8.0;
     const double PARASITE_THRESHOLD = 1;
     
@@ -54,11 +64,8 @@ bool DummyInfection::updateDensity(double survivalFactor) {
 }
 
 
-void DummyInfection::checkpoint (istream& stream) {
-    Infection::checkpoint (stream);
-}
-void DummyInfection::checkpoint (ostream& stream) {
-    Infection::checkpoint (stream);
-}
+DummyInfection::DummyInfection (istream& stream) :
+    CommonInfection (stream)
+{}
 
 } }

@@ -21,9 +21,8 @@
 
 #ifndef Hmod_DummyInfection
 #define Hmod_DummyInfection
-#include "WithinHost/Infection.h"
-#include <fstream>
-#include <fcntl.h>
+
+#include "WithinHost/CommonInfection.h"
 
 namespace OM { namespace WithinHost {
 
@@ -31,10 +30,10 @@ namespace OM { namespace WithinHost {
 /*!
   Models related to the within-host dynamics of infections.
 */
-class DummyInfection : public Infection {
+class DummyInfection : public CommonInfection {
 public:
     /// For checkpointing (don't use for anything else)
-    DummyInfection() : Infection(0xFFFFFFFF) {}
+    DummyInfection (istream& stream);
     //! Constructor
     DummyInfection (uint32_t protID);
   
@@ -46,22 +45,8 @@ public:
   */
   int getEndDate();
 
-  //! Get the density of the infection
-  double getDensity() { return _density; };
   
-  
-  /** Update: calculate new density.
-   *
-   * Currently sets _laggedLogDensities[0] to a large negative number when the
-   * infection goes extinct.
-   * 
-   * @param survivalFactor Density multiplier to introduce drug & vaccine effects
-   * @returns True when the infection goes extinct. */
-  bool updateDensity (double survivalFactor);
-  
-protected:
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
+  virtual bool updateDensity (int simulationTime, double survivalFactor);
 };
 
 } }

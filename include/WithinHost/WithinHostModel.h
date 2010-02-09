@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_whost
-#define Hmod_whost
+#ifndef Hmod_WithinHost_Model
+#define Hmod_WithinHost_Model
 
 #include "Global.h"
 #include "WithinHost/Infection.h"

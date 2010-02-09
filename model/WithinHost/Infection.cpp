@@ -60,7 +60,7 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
 }
 
 
-void Infection::checkpoint (istream& stream) {
+Infection::Infection (istream& stream) {
     _density & stream;
     _cumulativeExposureJ & stream; 
     proteome_ID & stream;

@@ -61,6 +61,8 @@ public:
   //@{
   //! Constructor
   DescriptiveInfection ();
+  /// Checkpoint loading constructor
+  DescriptiveInfection (istream& stream);
   
   /** Destructor */
   virtual ~DescriptiveInfection();
@@ -118,7 +120,6 @@ public:
   static int latentp;
   
 protected:
-    virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
   //! Start date of the infection

@@ -23,8 +23,9 @@
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/Descriptive.h"
 #include "WithinHost/DescriptiveIPT.h"
-#include "WithinHost/Dummy.h"
-#include "WithinHost/Empirical.h"
+#include "WithinHost/Common.h"
+#include "WithinHost/DummyInfection.h"
+#include "WithinHost/EmpiricalInfection.h"
 #include "inputData.h"
 #include "util/gsl.h"
 #include "util/ModelOptions.hpp"
@@ -87,10 +88,8 @@ void WithinHostModel::clear() {
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
-  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
-    return new DummyWithinHostModel();
-  } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
-    return new EmpiricalWithinHostModel();
+  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
+    return new CommonWithinHost();
   } else {
     if (DescriptiveIPTWithinHost::iptActive)
       return new DescriptiveIPTWithinHost();

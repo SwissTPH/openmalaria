@@ -56,6 +56,7 @@ public:
   //! Constructor
   /*! \param lastSPdose Time interval of last SP Dose. */
   DescriptiveIPTInfection(int lastSPdose);
+  DescriptiveIPTInfection (istream& stream);
   
   /** Destructor */
   virtual ~DescriptiveIPTInfection() {}
@@ -76,7 +77,6 @@ public:
   }
   
 protected:
-    virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
 private:

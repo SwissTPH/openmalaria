@@ -35,6 +35,7 @@ public:
     _density(0.0),
     _cumulativeExposureJ(0.0)
     {}
+  Infection (istream& stream);
   virtual ~Infection () {}
   
   //! Get proteome
@@ -59,7 +60,6 @@ public:
   }
   
 protected:
-    virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
   //! Proteome (used in a different situation than genotype) 

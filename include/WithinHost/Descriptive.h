@@ -20,8 +20,8 @@
 
 */
 
-#ifndef Hmod_oldwhost
-#define Hmod_oldwhost
+#ifndef Hmod_WithinHost_Descriptive
+#define Hmod_WithinHost_Descriptive
 
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DescriptiveInfection.h"
@@ -42,6 +42,8 @@ public:
   virtual ~DescriptiveWithinHostModel();
   
   virtual void newInfection();
+  /// load an infection from a checkpoint
+  virtual void loadInfection(istream& stream);
   virtual void clearAllInfections();
   
   virtual void calculateDensities(double ageInYears, double BSVEfficacy);

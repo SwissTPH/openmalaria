@@ -18,11 +18,14 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHost/Infection.h"
+#ifndef Hmod_EmpiricalInfection
+#define Hmod_EmpiricalInfection
+
+#include "WithinHost/CommonInfection.h"
 
 namespace OM { namespace WithinHost {
     
-class EmpiricalInfection : public Infection {
+class EmpiricalInfection : public CommonInfection {
 public:
   ///@brief Static methods
   //@{
@@ -36,10 +39,7 @@ public:
   /// @brief Construction and destruction
   //@{
   /// For checkpointing (don't use for anything else)
-  EmpiricalInfection() :
-    Infection(0xFFFFFFFF),
-    _startdate(Global::simulationTime)
-  {}
+  EmpiricalInfection(istream& stream);
   /// Per instance initialisation; create new inf.
   EmpiricalInfection(uint32_t protID, double growthRateMultiplier);
   /** Destructor
@@ -56,18 +56,9 @@ public:
   /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);
   
-  /** Update: calculate new density.
-   *
-   * Currently sets _laggedLogDensities[0] to a large negative number when the
-   * infection goes extinct.
-   * 
-   * @param simulationTime Simulation timestep (expected to be a 1-day timestep)
-   * @param survivalFactor Density multiplier to introduce drug & vaccine effects
-   * @returns True when the infection goes extinct. */
-  bool updateDensity (int simulationTime, double survivalFactor);
+  virtual bool updateDensity (int simulationTime, double survivalFactor);
   
 protected:
-    virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
 private:
@@ -110,3 +101,4 @@ private:
 };
 
 } }
+#endif

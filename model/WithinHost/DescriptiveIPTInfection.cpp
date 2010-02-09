@@ -119,8 +119,9 @@ double DescriptiveIPTInfection::asexualAttenuation () {
 }
 
 
-void DescriptiveIPTInfection::checkpoint (istream& stream) {
-  DescriptiveInfection::checkpoint (stream);
+DescriptiveIPTInfection::DescriptiveIPTInfection (istream& stream) :
+    DescriptiveInfection(stream)
+{
   _SPattenuate & stream; 
 }
 void DescriptiveIPTInfection::checkpoint (ostream& stream) {

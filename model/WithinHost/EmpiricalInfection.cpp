@@ -18,7 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHost/Empirical.h"
+#include "WithinHost/EmpiricalInfection.h"
+#include "WithinHost/Common.h"
 #include "util/gsl.h"
 #include "util/errors.hpp"
 #include "util/CommandLine.hpp"
@@ -55,10 +56,21 @@ double EmpiricalInfection::_extinctionLevel;
 double EmpiricalInfection::_overallMultiplier;
 
 
+CommonInfection* createEmpiricalInfection (uint32_t protID) {
+    return new EmpiricalInfection (protID, 1);
+}
+CommonInfection* checkpointedEmpiricalInfection (istream& stream) {
+    return new EmpiricalInfection (stream);
+}
+
+
 void EmpiricalInfection::initParameters(){
-  if (Global::interval != 1)
-    throw util::xml_scenario_error ("EmpiricalInfection only supports using an interval of 1");
-  
+    if (Global::interval != 1)
+	throw util::xml_scenario_error ("EmpiricalInfection only supports using an interval of 1");
+    
+    CommonWithinHost::createInfection = &createEmpiricalInfection;
+    CommonWithinHost::checkpointedInfection = &checkpointedEmpiricalInfection;
+    
   // alpha1 corresponds to 1 day before first patent, alpha2 2 days before first patent etc.
   _alpha1=0.2647;
   _alpha2=2.976;
@@ -122,7 +134,7 @@ void EmpiricalInfection::initParameters(){
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
 EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
-    Infection(protID)
+    CommonInfection(protID)
 {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time
@@ -249,8 +261,9 @@ void EmpiricalInfection::overrideInflationFactors(double inflationMean, double i
 
 // -----  checkpointing  -----
 
-void EmpiricalInfection::checkpoint (istream& stream) {
-    Infection::checkpoint (stream);
+EmpiricalInfection::EmpiricalInfection (istream& stream) :
+    CommonInfection(stream)
+{
     _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;
@@ -258,7 +271,7 @@ void EmpiricalInfection::checkpoint (istream& stream) {
     _patentGrowthRateMultiplier & stream;
 }
 void EmpiricalInfection::checkpoint (ostream& stream) {
-    Infection::checkpoint (stream);
+    CommonInfection::checkpoint (stream);
     _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;

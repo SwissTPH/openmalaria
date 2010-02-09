@@ -49,14 +49,13 @@ set (Model_CPP
   Transmission/Vector/HostCategoryAnopheles.cpp
   
   WithinHost/WithinHostModel.cpp
+  WithinHost/Common.cpp
   WithinHost/Infection.cpp
   WithinHost/Descriptive.cpp
   WithinHost/DescriptiveInfection.cpp
   WithinHost/DescriptiveIPT.cpp
   WithinHost/DescriptiveIPTInfection.cpp
-  WithinHost/Dummy.cpp
   WithinHost/DummyInfection.cpp
-  WithinHost/Empirical.cpp
   WithinHost/EmpiricalInfection.cpp
   
   util/BoincWrapper.cpp

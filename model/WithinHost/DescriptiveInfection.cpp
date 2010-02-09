@@ -215,8 +215,9 @@ void DescriptiveInfection::determineDensityFinal () {
 }
 
 
-void DescriptiveInfection::checkpoint (istream& stream) {
-    Infection::checkpoint (stream);
+DescriptiveInfection::DescriptiveInfection (istream& stream) :
+    Infection(stream)
+{
     _startdate & stream;
     _duration & stream;
 }

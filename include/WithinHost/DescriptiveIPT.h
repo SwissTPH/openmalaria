@@ -41,6 +41,7 @@ public:
   
   //! Create a new infection requires that the human is allocated and current
   virtual void newInfection();
+  virtual void loadInfection(istream& stream);
   
   /// Conditionally clear all infections
   virtual void clearInfections (bool isSevere);

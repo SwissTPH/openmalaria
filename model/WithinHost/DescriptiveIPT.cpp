@@ -104,6 +104,9 @@ void DescriptiveIPTWithinHost::newInfection(){
     _MOI++;
   }
 }
+void DescriptiveIPTWithinHost::loadInfection(istream& stream){
+    infections.push_back(new DescriptiveIPTInfection(stream));
+}
 
 // -----    -----
 
