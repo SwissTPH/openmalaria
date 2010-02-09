@@ -121,6 +121,8 @@ protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
+  //! Start date of the infection
+  int _startdate;
   //! Arbitrary maximum duration of the infection, in timesteps
   int _duration; 
   

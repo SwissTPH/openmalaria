@@ -37,38 +37,28 @@ DummyInfection::DummyInfection (uint32_t protID) :
     Infection(protID)
 {
     _density=16;	// increased by DH to avoid zeros in initialKappa
-    _duration=100;	// arbitrary max duration
 }
 
-int DummyInfection::getEndDate(){
-  return _startdate+_duration/Global::interval;
-}
-
-void DummyInfection::determineWithinHostDensity(){
-  const double GROWTH_RATE = 8.0;
-  const double PARASITE_THRESHOLD = 1;
-  
-  /*
-    if the density gets to be < 1 parasite per host then clear infections
-    is called by making the duration negative. 
-    */
-  if (_density < PARASITE_THRESHOLD) {
-    _duration=-99;
-    _density = 0.0;
-  } else {
-    _density = (int(_density*GROWTH_RATE) % 20000);
-  }
-  _cumulativeExposureJ += Global::interval * _density;
+bool DummyInfection::updateDensity(double survivalFactor) {
+    const double GROWTH_RATE = 8.0;
+    const double PARASITE_THRESHOLD = 1;
+    
+    _density = (int(_density*GROWTH_RATE) % 20000) * survivalFactor;
+    _cumulativeExposureJ += Global::interval * _density;
+    
+    if (_density < PARASITE_THRESHOLD) {
+	return true;
+    } else {
+	return false;
+    }
 }
 
 
 void DummyInfection::checkpoint (istream& stream) {
     Infection::checkpoint (stream);
-    _duration & stream;
 }
 void DummyInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
-    _duration & stream;
 }
 
 } }

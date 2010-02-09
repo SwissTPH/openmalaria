@@ -36,31 +36,25 @@ public:
   /// @brief Construction and destruction
   //@{
   /// For checkpointing (don't use for anything else)
-  EmpiricalInfection() : Infection(0xFFFFFFFF) {}
+  EmpiricalInfection() :
+    Infection(0xFFFFFFFF),
+    _startdate(Global::simulationTime)
+  {}
   /// Per instance initialisation; create new inf.
   EmpiricalInfection(uint32_t protID, double growthRateMultiplier);
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to
-   * the population list. destroy() does the real freeing and must be
-   * called explicitly. */
-  ~EmpiricalInfection();
+   * the population list. */
+  ~EmpiricalInfection() {}
   //@}
   
-  //BEGIN FIXME: do we want these?
-  //FIXME: we're using _density here, but it's never set by calculations!
-  /// Multiplies the density by x.
-  void multiplyDensity(double x) { _density *= x; };
   //! Get the density of the infection
-  inline double getDensity() { return _density * _overallMultiplier; };
-
-  //! Start date of the infection
-  int getStartDate() { return _startdate; };
-
-
-  //! Set patent growth rate multiplier
+  inline double getDensity() { return _density; };
+  
+  /// Set patent growth rate multiplier.
+  /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);
-  //END
   
   /** Update: calculate new density.
    *
@@ -81,6 +75,9 @@ private:
   double sigma_noise(int ageOfInfection);
   double samplePatentValue(double mu, double sigma, double lowerBound);
   double sampleSubPatentValue(double mu, double sigma, double upperBound);
+  
+  //! Start date of the infection
+  int _startdate;
   
   double _laggedLogDensities[3];
   double _patentGrowthRateMultiplier;

@@ -30,8 +30,7 @@ namespace OM { namespace WithinHost {
     // -----  Initialization  -----
 
 DummyWithinHostModel::DummyWithinHostModel() :
-    WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ()),
-    patentInfections(0)
+    WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {}
 
 DummyWithinHostModel::~DummyWithinHostModel() {
@@ -45,6 +44,7 @@ void DummyWithinHostModel::newInfection(){
     if (_MOI < MAX_INFECTIONS) {
 	infections.push_back(DummyInfection (pkpdModel->new_proteome_ID()));
 	_MOI++;
+	_cumulativeh++;
     }
 }
 
@@ -66,38 +66,30 @@ void DummyWithinHostModel::medicate(string drugName, double qty, double time, do
 void DummyWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   updateImmuneStatus ();	// inout(_cumulativeh,_cumulativeY)
   
-  patentInfections = 0;
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
+  double timestepCumY = _cumulativeY;
   
   for(std::list<DummyInfection>::iterator i=infections.begin(); i!=infections.end();) {
-    if (Global::simulationTime >= i->getEndDate()) {
-      i=infections.erase(i);
-      _MOI--;
-      continue;
-    }
-    
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
     survivalFactor *= pkpdModel->getDrugFactor(i->get_proteome_ID(), ageInYears);
-    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
-    i->multiplyDensity(survivalFactor);
-    i->determineWithinHostDensity();
-    timeStepMaxDensity=std::max(i->getDensity(), timeStepMaxDensity);
+    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, timestepCumY);
+    
+    // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
+    if (i->updateDensity(survivalFactor)) {
+      i = infections.erase(i);	// i points to next infection now so don't increment with ++i
+      --_MOI;
+      continue;	// infection no longer exists so skip the rest
+    }
     
     totalDensity += i->getDensity();
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    if (i->getDensity() > detectionLimit) {
-	patentInfections++;
-    }
-    if (i->getStartDate() == (Global::simulationTime-1)) {
-	_cumulativeh++;
-    }
+    timeStepMaxDensity = max(timeStepMaxDensity, i->getDensity());
     _cumulativeY += Global::interval*i->getDensity();
     
     ++i;
   }
   
-  pkpdModel->decayDrugs(ageInYears);
+  pkpdModel->decayDrugs (ageInYears);
 }
 
 
@@ -118,7 +110,6 @@ int DummyWithinHostModel::countInfections (int& patentInfections) {
 void DummyWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
     (*pkpdModel) & stream;
-    patentInfections & stream;
     infections & stream;
     if (int(infections.size()) != _MOI)
 	throw util::checkpoint_error ("_MOI mismatch");
@@ -126,7 +117,6 @@ void DummyWithinHostModel::checkpoint (istream& stream) {
 void DummyWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
     (*pkpdModel) & stream;
-    patentInfections & stream;
     infections & stream;
 }
 

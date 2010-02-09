@@ -61,8 +61,6 @@ inline double drugEffect (const LSTMDrugPDParameters& PD_params, double eliminat
 }
 
 double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, double weight_kg) const {
-    //FIXME: check units of time
-    
     double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug affect is seen
 									this vaule is updated in the for loop, value decreases with increasing drug effect. */
     double startTime = 0.0;		/* KW-	Use the information from medicate to determine the time elapsed from 0 to first dose.
@@ -92,8 +90,6 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
 }
 
 bool LSTMDrug::updateConcentration (double weight_kg) {
-    //FIXME: check units of time
-    
     double startTime = 0.0;		// as in calculateDrugFactor()
     double dist_weight_inv = 1.0 / (typeData->vol_dist * weight_kg);
     

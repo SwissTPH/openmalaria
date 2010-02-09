@@ -228,7 +228,7 @@ void Human::IPTiTreatment () {
 
 
 void Human::clearInfections () {
-  //NOTE: if Population::massTreatment is incompatible with IPT, we can just pass false:
+  // Note: when Population::massTreatment is used with DescriptiveIPT, we need this to get the is-severe state.
   withinHostModel->clearInfections(clinicalModel->latestDiagnosisIsSevereMalaria());
 }
 

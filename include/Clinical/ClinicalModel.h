@@ -90,7 +90,7 @@ public:
   void updateInfantDeaths (int ageTimeSteps);
   
   /** Was the last diagnosis severe malaria?
-   * FIXME: update or remove */
+   * Used when mass treament is used with the DescriptiveIPT code. */
   inline bool latestDiagnosisIsSevereMalaria () {
     return latestReport.getState() == Pathogenesis::STATE_SEVERE;
   }

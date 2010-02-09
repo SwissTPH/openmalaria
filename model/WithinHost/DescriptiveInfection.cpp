@@ -108,7 +108,8 @@ void DescriptiveInfection::clearParameters () {}
 // -----  non-static init/destruction  -----
 
 DescriptiveInfection::DescriptiveInfection () :
-    Infection(0xFFFFFFFF)
+    Infection(0xFFFFFFFF),
+    _startdate(Global::simulationTime)
 {
     _duration=infectionDuration();
 }
@@ -216,10 +217,12 @@ void DescriptiveInfection::determineDensityFinal () {
 
 void DescriptiveInfection::checkpoint (istream& stream) {
     Infection::checkpoint (stream);
+    _startdate & stream;
     _duration & stream;
 }
 void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
+    _startdate & stream;
     _duration & stream;
 }
 

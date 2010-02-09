@@ -60,7 +60,7 @@ void DescriptiveWithinHostModel::clearAllInfections(){
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
-  updateImmuneStatus ();	// inout(_cumulativeh,_cumulativeY)
+  updateImmuneStatus ();
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
     if ((*iter)->expired()) {

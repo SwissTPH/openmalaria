@@ -133,8 +133,6 @@ EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultipl
   _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
 }
-EmpiricalInfection::~EmpiricalInfection() {
-}
 
 
 // -----  non-static class members (other functions)  -----
@@ -157,6 +155,7 @@ bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor
   // constraints to ensure the density is defined and not exploding
   double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
   double amplificationPerCycle;
+  double localDensity;	// density before scaling by _overallMultiplier
   for (int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for (int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
@@ -178,29 +177,30 @@ bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor
     if (!(logDensity <= upperLimitoflogDensity))	// in case all the above attempts fail, cap logDensity
       logDensity=upperLimitoflogDensity;
     
-    _density= getInflatedDensity(logDensity); 
+    localDensity= getInflatedDensity(logDensity);
     
-    _density *= survivalFactor;	// Apply drug and vaccine effects
+    localDensity *= survivalFactor;	// Apply drug and vaccine effects
     
     // Infections that get killed before they become patent:
-    if ((ageOfInfection==0) && (_density < _subPatentLimit))
-      _density=0.0;
+    if ((ageOfInfection==0) && (localDensity < _subPatentLimit))
+      localDensity=0.0;
     
-    amplificationPerCycle=_density/exp(L[1]);
-    if (_density >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle)
+    amplificationPerCycle=localDensity/exp(L[1]);
+    if (localDensity >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle)
       break;	// We're done. Hopefully usually with the first try.
   }
-  if (!(_density >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle))	// in case the above tries fail
-    _density = _maximumPermittedAmplificationPerCycle*exp(L[1]);
+  if (!(localDensity >= 0.0 && amplificationPerCycle <= _maximumPermittedAmplificationPerCycle))	// in case the above tries fail
+    localDensity = _maximumPermittedAmplificationPerCycle*exp(L[1]);
   
   _laggedLogDensities[2]=_laggedLogDensities[1];
   _laggedLogDensities[1]=_laggedLogDensities[0];
-  _laggedLogDensities[0]=log(_density);
+  _laggedLogDensities[0]=log(localDensity);
   
+  _density = localDensity;
   _cumulativeExposureJ += Global::interval * _density;
   
   // Note: here use a positive test for survival, since if _density became an NaN tests against it will return false:
-  if (_density*_overallMultiplier > _extinctionLevel)
+  if (_density > _extinctionLevel)
     return false;	// Still parasites; infection didn't go extinct
   else
     return true;	// parasites are extinct; infection will be removed from model
@@ -251,6 +251,7 @@ void EmpiricalInfection::overrideInflationFactors(double inflationMean, double i
 
 void EmpiricalInfection::checkpoint (istream& stream) {
     Infection::checkpoint (stream);
+    _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;
     _laggedLogDensities[2] & stream;
@@ -258,6 +259,7 @@ void EmpiricalInfection::checkpoint (istream& stream) {
 }
 void EmpiricalInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
+    _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;
     _laggedLogDensities[2] & stream;

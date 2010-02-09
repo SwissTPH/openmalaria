@@ -32,7 +32,6 @@ public:
   
   Infection (uint32_t protID) :
     proteome_ID(protID),
-    _startdate(Global::simulationTime),
     _density(0.0),
     _cumulativeExposureJ(0.0)
     {}
@@ -66,8 +65,6 @@ protected:
   //! Proteome (used in a different situation than genotype) 
   uint32_t proteome_ID;
   
-  //! Start date of the infection
-  int _startdate; 
   //! Current density of the infection
   double _density;
   

@@ -61,9 +61,6 @@ private:
   /// Encapsulates drug code for each human
   PkPd::PkPdModel* pkpdModel;
   
-  //!Number of infections with densities above the limit of detection
-  int patentInfections;
-  
   /** The list of all infections this human has.
    * 
    * Since infection models and within host models are very much intertwined,

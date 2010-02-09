@@ -131,7 +131,11 @@ protected:
   //!innate ability to control parasite densities
   double _innateImmSurvFact;
   
-  //!Number of infections received since birth
+  /** Number of infections received since birth.
+   *
+   * In the Empirical and Dummy WH models this is updated instantly; in the
+   * Descriptive model the update doesn't take effect until 2 timesteps after
+   * infection (avoids changing results). TODO: confirm intended behaviour. */
   double _cumulativeh;
   //!Cumulative parasite density since birth
   double _cumulativeY;

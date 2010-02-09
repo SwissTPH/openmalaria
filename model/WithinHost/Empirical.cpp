@@ -33,7 +33,6 @@ EmpiricalWithinHostModel::EmpiricalWithinHostModel() :
     WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {}
 EmpiricalWithinHostModel::~EmpiricalWithinHostModel() {
-  clearAllInfections();
   delete pkpdModel;
 }
 
@@ -44,6 +43,7 @@ void EmpiricalWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
     infections.push_back(EmpiricalInfection(pkpdModel->new_proteome_ID (), 1));
     _MOI++;
+    _cumulativeh++;
   }
 }
 
@@ -63,13 +63,16 @@ void EmpiricalWithinHostModel::medicate(string drugName, double qty, double time
 // -----  Density calculations  -----
 
 void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
-  totalDensity = 0.0;
+    updateImmuneStatus ();
+    
+    totalDensity = 0.0;
   timeStepMaxDensity = 0.0;
-  std::list<EmpiricalInfection>::iterator i;
-  for(i=infections.begin(); i!=infections.end();){
+  double timestepCumY = _cumulativeY;
+  
+  for(std::list<EmpiricalInfection>::iterator i=infections.begin(); i!=infections.end();){
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
     survivalFactor *= pkpdModel->getDrugFactor(i->get_proteome_ID(), ageInYears);
-    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, _cumulativeY);
+    survivalFactor *= i->immunitySurvivalFactor(ageInYears, _cumulativeh, timestepCumY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if (i->updateDensity(Global::simulationTime, survivalFactor)) {
@@ -78,11 +81,13 @@ void EmpiricalWithinHostModel::calculateDensities(double ageInYears, double BSVE
       continue;	// infection no longer exists so skip the rest
     }
     
-    double dens = i->getDensity();
-    totalDensity += dens;
-    timeStepMaxDensity = max(timeStepMaxDensity, dens);
+    totalDensity += i->getDensity();
+    timeStepMaxDensity = max(timeStepMaxDensity, i->getDensity());
+    _cumulativeY += Global::interval*i->getDensity();
+    
     ++i;
   }
+  
   pkpdModel->decayDrugs (ageInYears);
 }
 

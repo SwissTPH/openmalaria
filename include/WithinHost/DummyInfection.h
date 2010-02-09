@@ -46,26 +46,22 @@ public:
   */
   int getEndDate();
 
-  /// Multiplies the density by x.
-  void multiplyDensity(double x) { _density *= x; };
   //! Get the density of the infection
   double getDensity() { return _density; };
-
-  //! Start date of the infection
-  int getStartDate() { return _startdate; };
   
-  /*
-  //! Dummy function. Should override \sa determineDensities.
-  */ 
-  void determineWithinHostDensity();
+  
+  /** Update: calculate new density.
+   *
+   * Currently sets _laggedLogDensities[0] to a large negative number when the
+   * infection goes extinct.
+   * 
+   * @param survivalFactor Density multiplier to introduce drug & vaccine effects
+   * @returns True when the infection goes extinct. */
+  bool updateDensity (double survivalFactor);
   
 protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
-    
-private:
-  //! Arbitrary maximum duration of the infection
-  int _duration; 
 };
 
 } }
