@@ -78,8 +78,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
     double upperIntervalBound=genotypeFreq[0];
     //This Loop assigns the infection a genotype according to its frequency
     for (int genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
-	//FIXME: use >= and < (make sure all potential values of uniformRandomVariable are covered)
-      if (uniformRandomVariable > lowerIntervalBound &&
+      if (uniformRandomVariable >= lowerIntervalBound &&
 	uniformRandomVariable < upperIntervalBound){
 	proteome_ID=genotypeCounter - 1;
       }
@@ -89,13 +88,10 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
       For safety reason we do it nevertheless
       */
       if ( genotypeCounter !=  numberOfGenoTypes) {
-	  //FIXME: array access is out of bounds when genotypeCounter == numberOfGenoTypes
 	upperIntervalBound = upperIntervalBound + genotypeFreq[genotypeCounter];
       }
       else {
 	upperIntervalBound=1.0;
-	//FIXME: this check wasn't here before. I've just found it fails. DH
-	//assert (false);	// 'should not be here'
       }
     }
     assert (proteome_ID < 0xFFFFFFFF);
