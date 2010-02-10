@@ -30,6 +30,8 @@ namespace OM { namespace Clinical {
 ESCaseManagement::TreeType ESCaseManagement::cmTree;
 cmid ESCaseManagement::cmMask;
 
+CaseTreatment* ESCaseManagement::mdaDoses;
+
 // -----  Static  -----
 
 void ESCaseManagement::init () {
@@ -42,10 +44,23 @@ void ESCaseManagement::init () {
     }
     
     cmMask = xmlCM.getMask();
+    
+    // MDA Intervention data
+    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData.getInterventions().getMDADescription();
+    if (mdaDesc.present()) {
+	mdaDoses = new CaseTreatment (mdaDesc.get().getMedicate());
+    } else
+	mdaDoses = NULL;
 }
 
 
-// -----  Non-static  -----
+void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {
+    if (mdaDoses == NULL)
+	throw util::xml_scenario_error ("MDA intervention without description");
+    else
+	mdaDoses->apply(medicateQueue, 0);
+}
+
 
 cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
 #ifndef NDEBUG

@@ -89,12 +89,6 @@ public:
    * infantDeaths arrays. */
   void updateInfantDeaths (int ageTimeSteps);
   
-  /** Was the last diagnosis severe malaria?
-   * Used when mass treament is used with the DescriptiveIPT code. */
-  inline bool latestDiagnosisIsSevereMalaria () {
-    return latestReport.getState() == Pathogenesis::STATE_SEVERE;
-  }
-  
   /** Used with IPT within host model to potentially skip summarizing.
    *
    * NOTE: Only used for IPT, which can only be used with OldCaseManagement.
@@ -102,6 +96,8 @@ public:
   virtual bool recentTreatment() {
     return false;
   }
+  
+  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears) =0;
   
   /// Summarize PathogenesisModel details
   void summarize (Survey& survey, SurveyAgeGroup ageGroup);

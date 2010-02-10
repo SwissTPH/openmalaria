@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="1000" schemaVersion="13" wuID="0" xsi:noNamespaceSchemaLocation="scenario_13.xsd"><ModelOptions><option name="LOGNORMAL_MASS_ACTION" value="true"/><option name="NO_PRE_ERYTHROCYTIC" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="1000" schemaVersion="15" wuID="0" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="LOGNORMAL_MASS_ACTION" value="true"/><option name="NO_PRE_ERYTHROCYTIC" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
 
   <demography name="test">
     <ageGroup lowerbound="0">

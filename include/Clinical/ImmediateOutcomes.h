@@ -38,13 +38,15 @@ public:
   ClinicalImmediateOutcomes (double cF, double tSF);
   ~ClinicalImmediateOutcomes ();
   
-  void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears);
-  
   inline bool recentTreatment() {
     return caseManagement->recentTreatment();
   }
   
+  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears);
+  
 protected:
+  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears);
+  
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   

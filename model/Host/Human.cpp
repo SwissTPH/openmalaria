@@ -227,9 +227,8 @@ void Human::IPTiTreatment () {
 }
 
 
-void Human::clearInfections () {
-  // Note: when Population::massTreatment is used with DescriptiveIPT, we need this to get the is-severe state.
-  withinHostModel->clearInfections(clinicalModel->latestDiagnosisIsSevereMalaria());
+void Human::massDrugAdministration () {
+    clinicalModel->massDrugAdministration (*withinHostModel, getAgeInYears());
 }
 
 SurveyAgeGroup Human::ageGroup() const{

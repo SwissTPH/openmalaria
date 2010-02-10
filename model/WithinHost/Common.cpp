@@ -95,7 +95,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     ++inf;
   }
   
-  pkpdModel->decayDrugs (ageInYears);
+  pkpdModel->decayDrugs (ageInYears);	// FIXME: shouldn't be necessary to pass age
 }
 
 

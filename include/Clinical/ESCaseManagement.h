@@ -94,6 +94,8 @@ class ESCaseManagement {
     public:
 	static void init ();
 	
+	static void massDrugAdministration(list< OM::Clinical::MedicateData >& medicateQueue);
+	
 	static cmid execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
 	
     private:
@@ -131,6 +133,9 @@ class ESCaseManagement {
 	
 	/// Mask applied to id before lookup in cmTree.
 	static cmid cmMask;
+	
+	/// MDA dosage info; null pointer if not provided
+	static CaseTreatment* mdaDoses;
 	//END
 };
 

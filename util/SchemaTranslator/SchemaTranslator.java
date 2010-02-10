@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 14;
+    static final int CURRENT_VERSION = 15;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -631,6 +631,12 @@ public class SchemaTranslator {
 	if (cms != null) {
 	    System.err.println ("Warning: drugDescription element has changed; please rewrite manually.");
 	}
+	return true;
+    }
+    
+    // Version 15 allowed MDA interventions to include drug information (no
+    // changes to existing scenarios)
+    public Boolean translate14To15() throws Exception {
 	return true;
     }
     

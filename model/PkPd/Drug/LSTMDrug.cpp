@@ -39,6 +39,7 @@ LSTMDrug::LSTMDrug(const LSTMDrugType* type) :
 
 
 void LSTMDrug::storeDose (double time, double qty) {
+    //FIXME: we should make sure doses are sorted by time (may not be if administered through both MDA and as treatment)
     doses.push_back (Dose (time, qty));
 }
 

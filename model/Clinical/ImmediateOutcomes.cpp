@@ -43,6 +43,11 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
+void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHostModel& withinHostModel, double ageYears) {
+    // We need to pass the is-severe state for the IPT code.
+    withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
+}
+
 void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears) {
   caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,

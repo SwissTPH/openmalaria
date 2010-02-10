@@ -70,6 +70,14 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 // -----  other methods  -----
 
+void ClinicalEventScheduler::massDrugAdministration(OM::WithinHost::WithinHostModel& withinHostModel, double ageYears) {
+    // Note: we use the same medication method as with drugs as treatments, hence the actual
+    // medication doesn't occur until the next timestep.
+    // Note: we augment any existing medications, however future medications will replace any yet-
+    // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
+    ESCaseManagement::massDrugAdministration (medicateQueue);
+}
+
 void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears)
 {
     // Run pathogenesisModel
@@ -166,18 +174,17 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
         _doomed = -Global::interval; // start indirect mortality countdown
     
-    // Apply pending medications
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
-        list<MedicateData>::iterator next = it;
-        ++next;
-        if ( it->time < 1.0 ) { // Medicate today's medications
-            withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
+	list<MedicateData>::iterator next = it;
+	++next;
+	if ( it->time < 1.0 ) { // Medicate today's medications
+	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
 	    Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->qty);
-            medicateQueue.erase (it);
+	    medicateQueue.erase (it);
 	} else {   // and decrement treatment seeking delay for the rest
-            it->time -= 1.0;
-        }
-        it = next;
+	    it->time -= 1.0;
+	}
+	it = next;
     }
 }
 

@@ -117,8 +117,8 @@ public:
   
   /// @brief Small functions
   //@{
-  /// For direct interactions with within host model
-  void clearInfections();
+  /// Asks the clinical model to deal with this
+  void massDrugAdministration ();
   
   //! Determines the age group of a human
   SurveyAgeGroup ageGroup() const;
