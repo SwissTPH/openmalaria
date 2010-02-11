@@ -23,7 +23,6 @@
 #ifndef Hmod_LSTMDrug
 #define Hmod_LSTMDrug
 
-#include "Dose.h"
 #include "Global.h"
 #include "PkPd/Proteome.h"
 #include "LSTMDrugType.h"
@@ -73,9 +72,12 @@ protected:
   
   double concentration;
   
-  /** List of each dose given today. Used in calculateDrugFactor temporarily,
+  /** List of each dose given today, ordered by time.
+   * First parameter (key) is time in days, second (value) is dose in mg.
+   * 
+   * Used in calculateDrugFactor temporarily,
    * and in updateConcentration() to update concentration. */
-  list<Dose> doses;
+  multimap<double,double> doses;
 };
 
 } }

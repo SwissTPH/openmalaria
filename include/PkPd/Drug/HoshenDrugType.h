@@ -23,7 +23,6 @@
 #ifndef Hmod_HoshenDrugType
 #define Hmod_HoshenDrugType
 
-#include "Dose.h"
 #include "Global.h"
 #include "PkPd/Proteome.h"
 #include "DrugType.h"

@@ -27,7 +27,6 @@
 #include <deque>
 #include <map>
 #include <vector>
-#include "Dose.h"
 #include "HoshenDrugType.h"
 #include "Global.h"
 #include "PkPd/Proteome.h"

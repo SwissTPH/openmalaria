@@ -65,6 +65,12 @@ public:
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
   }
   
+  void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
+      proxy->medicate ("CQ", 125000, 0, 21);
+      proxy->medicate ("CQ", 125000, 0, 21);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
+  }
+  
   void testCqDecayed () {
     proxy->medicate ("CQ", 250000, 0, 21);
     proxy->decayDrugs (21);

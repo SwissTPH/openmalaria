@@ -39,8 +39,8 @@ LSTMDrug::LSTMDrug(const LSTMDrugType* type) :
 
 
 void LSTMDrug::storeDose (double time, double qty) {
-    //FIXME: we should make sure doses are sorted by time (may not be if administered through both MDA and as treatment)
-    doses.push_back (Dose (time, qty));
+    // multimap insertion: is ordered
+    doses.insert (doses.end(), make_pair (time, qty));
 }
 
 
@@ -76,12 +76,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
     size_t allele = (proteome_ID >> typeData->allele_rshift) & typeData->allele_mask;
     const LSTMDrugPDParameters& PD_params = typeData->PD_params[allele];
     
-    for (list<Dose>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
-	double duration = dose->time - startTime;
+    for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
+	double duration = dose->first - startTime;
 	totalFactor *= drugEffect (PD_params, typeData->elimination_rate_constant, concentration_today, duration);	
-	concentration_today += dose->mg * dist_weight_inv;
+	concentration_today += dose->second * dist_weight_inv;
 	
-	startTime = dose->time;		// KW - Increment the time (assuming doses are in order of time)
+	startTime = dose->first;		// KW - Increment the time (assuming doses are in order of time)
     }
    
     double duration = 1.0 - startTime;
@@ -94,12 +94,12 @@ bool LSTMDrug::updateConcentration (double weight_kg) {
     double startTime = 0.0;		// as in calculateDrugFactor()
     double dist_weight_inv = 1.0 / (typeData->vol_dist * weight_kg);
     
-    for (list<Dose>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
-	double duration = dose->time - startTime;
+    for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
+	double duration = dose->first - startTime;
 	concentration *= exp(typeData->elimination_rate_constant *  duration);
-	concentration += dose->mg * dist_weight_inv;
+	concentration += dose->second * dist_weight_inv;
 	
-	startTime = dose->time;	
+	startTime = dose->first;	
     }
    
     double duration = 1.0 - startTime;
