@@ -24,12 +24,7 @@
 
 namespace OM { namespace WithinHost {
     // static IPT variables
-int DescriptiveIPTInfection::numberOfGenoTypes;
-double *DescriptiveIPTInfection::genotypeFreq;
-int *DescriptiveIPTInfection::genotypeProph;
-int *DescriptiveIPTInfection::genotypeTolPeriod;
-double *DescriptiveIPTInfection::genotypeACR;
-double *DescriptiveIPTInfection::genotypeAtten;
+vector<DescriptiveIPTInfection::GenotypeData> DescriptiveIPTInfection::genotypes;
 
 
 // -----  static init/clear -----
@@ -38,31 +33,21 @@ double *DescriptiveIPTInfection::genotypeAtten;
 void DescriptiveIPTInfection::initParameters (const scnXml::Interventions& xmlInterventions){
   const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
   
-  const scnXml::IptDescription::InfGenotypeSequence& genotypes = xmlIPTI.getInfGenotype();
-  numberOfGenoTypes = genotypes.size();
-  genotypeFreq	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeACR	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
-  genotypeProph	= (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeTolPeriod = (int*)malloc(((numberOfGenoTypes))*sizeof(int));
-  genotypeAtten	= (double*)malloc(((numberOfGenoTypes))*sizeof(double));
+  const scnXml::IptDescription::InfGenotypeSequence& genotypesData = xmlIPTI.getInfGenotype();
+  genotypes.resize (genotypesData.size());
   
+  double genotypeCumFreq = 0.0;
   size_t i = 0;
-  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypes.begin();
-       it != genotypes.end(); ++it, ++i) {
-    genotypeFreq[i]	= it->getFreq();
-    genotypeACR[i]	= it->getACR();
-    genotypeProph[i]	= it->getProph();
-    genotypeTolPeriod[i]= it->getTolPeriod();
-    genotypeAtten[i]	= it->getAtten();
+  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it, ++i) {
+    genotypeCumFreq += it->getFreq();
+    genotypes[i].cumFreq = genotypeCumFreq;
+    genotypes[i].ACR = it->getACR();
+    genotypes[i].proph = it->getProph();
+    genotypes[i].tolPeriod = it->getTolPeriod();
+    genotypes[i].atten = it->getAtten();
   }
-}
-
-void DescriptiveIPTInfection::clearParameters () {
-  free(genotypeFreq);
-  free(genotypeACR);
-  free(genotypeProph);
-  free(genotypeTolPeriod);
-  free(genotypeAtten);
+  genotypes[genotypes.size()-1].cumFreq = 1.0;	// make sure.. for random draws
+  // (otherwise we rely on specification with XML and floating-point arithmatic)
 }
 
 
@@ -72,44 +57,33 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
   DescriptiveInfection(), _SPattenuate(false)
 {
     // proteome_ID is initialized to 0xFFFFFFFF
-  
-  double uniformRandomVariable=(gsl::rngUniform());
-    double lowerIntervalBound=0.0;
-    double upperIntervalBound=genotypeFreq[0];
+    
+    double rndSample=(gsl::rngUniform());
+    double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
-    for (int genotypeCounter=1; genotypeCounter<=numberOfGenoTypes; genotypeCounter++){
-      if (uniformRandomVariable >= lowerIntervalBound &&
-	uniformRandomVariable < upperIntervalBound){
-	proteome_ID=genotypeCounter - 1;
+    for (size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
+      if (rndSample >= lowerBound && rndSample < genotypes[genotypeCounter].cumFreq){
+	proteome_ID=genotypeCounter;
+	break;
       }
-      lowerIntervalBound=upperIntervalBound;
-      /*
-      The loop should never come into this else-part (exits before), so the if statement is not necessary.
-      For safety reason we do it nevertheless
-      */
-      if ( genotypeCounter !=  numberOfGenoTypes) {
-	upperIntervalBound = upperIntervalBound + genotypeFreq[genotypeCounter];
-      }
-      else {
-	upperIntervalBound=1.0;
-      }
+      lowerBound = genotypes[genotypeCounter].cumFreq;
     }
-    assert (proteome_ID < 0xFFFFFFFF);
+    assert (proteome_ID < genotypes.size());
     /*
     The attenuation effect of SP is only effective during a certain time-window for certain IPTi models
     If t(=now) lies within this time window, SPattenuate is true, false otherwise.
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (Global::simulationTime-lastSPdose > genotypeProph[proteome_ID] &&
-	Global::simulationTime-lastSPdose <= genotypeProph[proteome_ID] + genotypeTolPeriod[proteome_ID]){
+    if (Global::simulationTime-lastSPdose > genotypes[proteome_ID].proph &&
+	Global::simulationTime-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
       _SPattenuate=true;
     }
 }
 
 
 double DescriptiveIPTInfection::asexualAttenuation () {
-  double attFact = 1.0 / genotypeAtten[proteome_ID];
+  double attFact = 1.0 / genotypes[proteome_ID].atten;
   _density *= attFact;
   return attFact;
 }

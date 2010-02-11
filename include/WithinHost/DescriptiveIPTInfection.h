@@ -48,7 +48,6 @@ public:
   ///@name Static init/cleanup
   //@{
   static void initParameters(const scnXml::Interventions& xmlInterventions);
-  static void clearParameters();
   //@}
   
   ///@name CTOR & DTOR
@@ -64,8 +63,8 @@ public:
   
   /** The event that the last SP dose clears parasites. */
   bool eventSPClears (int _lastSPDose) {
-    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypeACR[proteome_ID]) &&
-    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypeProph[proteome_ID]);
+    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
+    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
   }
   
   /// Return: _SPattenuate == 1. Name by DH.
@@ -73,7 +72,7 @@ public:
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   double getAsexualAttenuationEndDate () {
-    return _startdate + _duration * genotypeAtten[proteome_ID];
+    return _startdate + _duration * genotypes[proteome_ID].atten;
   }
   
 protected:
@@ -83,16 +82,15 @@ private:
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;
   
-  /// @brief genotypes, set by initParameters
-  //@{
-  static int numberOfGenoTypes;
-  static double *genotypeFreq;
-  static int *genotypeTolPeriod;
-public:
-  static int *genotypeProph;
-  static double *genotypeACR;
-  static double *genotypeAtten;
-  //@}
+  struct GenotypeData {
+    double cumFreq;
+    int tolPeriod;
+    int proph;
+    double ACR;
+    double atten;
+  };
+  /// Per genotype data, set by initParameters
+  static vector<GenotypeData> genotypes;
 };
 
 } }
