@@ -64,7 +64,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, doubl
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (HoshenDrug((HoshenDrugType*)DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (HoshenDrug(dynamic_cast<const HoshenDrugType*>(DrugType::getDrug(drugAbbrev))));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

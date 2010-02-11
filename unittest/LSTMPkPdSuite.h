@@ -1,7 +1,7 @@
 /*
  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -17,13 +17,13 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-// Unittest for the Hoshen drug model
+// Unittest for the LSTM drug model
 
-#ifndef Hmod_HoshenPkPdSuite
-#define Hmod_HoshenPkPdSuite
+#ifndef Hmod_LSTMPkPdSuite
+#define Hmod_LSTMPkPdSuite
 
 #include <cxxtest/TestSuite.h>
-#include "PkPd/HoshenPkPdModel.h"
+#include "PkPd/LSTMPkPdModel.h"
 #include "UnittestUtil.hpp"
 #include "ExtraAsserts.h"
 #include <limits>
@@ -31,16 +31,16 @@
 using namespace OM;
 using namespace OM::PkPd;
 
-class HoshenPkPdSuite : public CxxTest::TestSuite
+class LSTMPkPdSuite : public CxxTest::TestSuite
 {
 public:
-  HoshenPkPdSuite () {
-    UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
-  }
+    LSTMPkPdSuite () {
+	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
+    }
   
   void setUp () {
-    proxy = new HoshenPkPdModel ();
-    proteome_ID = ProteomeInstance::getInstances()[0].getProteomeID();	// force a particular proteome rather than let it be randomly allocated
+    proxy = new LSTMPkPdModel ();
+    proteome_ID = 0;		// 0 should work; we definitely don't want random allocation
   }
   void tearDown () {
     delete proxy;
@@ -52,30 +52,32 @@ public:
   }
   
   void testCq () {
-    proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
+      //FIXME: if "CQ" is used, it finds the Hoshen drug info!!
+    proxy->medicate ("MF", 3000, 0, 21);
+    //FIXME: these results do not make sense
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 27.71397757582060640);
   }
   
   void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
-      proxy->medicate ("CQ", 125000, 0, 21);
-      proxy->medicate ("CQ", 125000, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
+      proxy->medicate ("MF", 1500, 0, 21);
+      proxy->medicate ("MF", 1500, 0, 21);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 27.71397757582060640);
   }
   
   void testCqDecayed () {
-    proxy->medicate ("CQ", 250000, 0, 21);
+    proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs (21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12608995630400068);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 31.22481269377238624);
   }
   
   void testCq2Doses () {
-    proxy->medicate ("CQ", 250000, 0, 21);
+    proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs (21);
-    proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.06809903879225410);
+    proxy->medicate ("MF", 3000, 0, 21);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 31.36674260417435028);
   }
   
-  HoshenPkPdModel *proxy;
+  LSTMPkPdModel *proxy;
   uint32_t proteome_ID;
 };
 

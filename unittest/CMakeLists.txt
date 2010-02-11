@@ -66,6 +66,7 @@ set (OM_CXXTEST_HEADERS
   #VectorAnophelesSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
   HoshenPkPdSuite.h
+  LSTMPkPdSuite.h
   CheckpointSuite.h
 )
 

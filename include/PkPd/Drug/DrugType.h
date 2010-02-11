@@ -63,7 +63,7 @@ public:
    * @param abbreviation	Abbreviated name (e.g. CQ)
    */
   DrugType (string abbreviation);
-  ~DrugType ();
+  virtual ~DrugType ();	//FIXME: making this virtual is just a crude hack to make the class polymorphic
   //@}
   
 protected:

@@ -57,7 +57,7 @@ public:
     ///@brief Static functions
     //@{
     /** Initialise the drug model. Called at start of simulation. */
-    static void init ();
+    static void init (const scnXml::DrugDescription& data);
     
     /// Return a new proteome ID
     static uint32_t new_proteome_ID ();

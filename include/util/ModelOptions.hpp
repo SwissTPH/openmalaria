@@ -23,7 +23,7 @@
 
 #include <bitset>
 
-class HoshenPkPdSuite;
+class UnittestUtil;
 
 namespace OM { namespace util {
     
@@ -188,7 +188,7 @@ namespace OM { namespace util {
 	 * Default value set by init(). */
 	static std::bitset<NUM_OPTIONS> optSet;
 	
-	friend class ::HoshenPkPdSuite;	// Note: class is in base namespace
+	friend class ::UnittestUtil;	// Note: class is in base namespace
     };
 } }
 #endif

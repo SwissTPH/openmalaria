@@ -39,10 +39,9 @@ namespace OM { namespace PkPd {
  * Static variables and functions
  */
 
-void LSTMDrugType::init () {
+void LSTMDrugType::init (const scnXml::DrugDescription& data) {
     uint32_t start_bit = 0;
     
-    const scnXml::DrugDescription& data = InputData.getScenario().getDrugDescription().get ();
     for (scnXml::DrugDescription::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
 	DrugType::addDrug (new LSTMDrugType (*drug, start_bit));
     }

@@ -67,7 +67,7 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double 
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (LSTMDrug((LSTMDrugType*)DrugType::getDrug(drugAbbrev)));
+  _drugs.push_front (LSTMDrug(dynamic_cast<const LSTMDrugType*>(DrugType::getDrug(drugAbbrev))));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

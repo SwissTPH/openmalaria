@@ -42,13 +42,13 @@ const double PkPdModel::wtprop[WithinHost::WithinHostModel::nages] = { 0.1165472
 
 void PkPdModel::init () {
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-	ProteomeManager::init ();
 	if (InputData.getScenario().getDrugDescription().present()) {
 	    activeModel = LSTM_PKPD;
-	    LSTMDrugType::init();
+	    LSTMDrugType::init(InputData.getScenario().getDrugDescription().get ());
 	    LSTMPkPdModel::init();
 	} else {
 	    activeModel = HOSHEN_PKPD;
+	    ProteomeManager::init ();
 	    HoshenDrugType::init();
 	    HoshenPkPdModel::init();
 	}

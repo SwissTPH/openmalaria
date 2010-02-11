@@ -26,7 +26,7 @@
 #include <fstream>
 using namespace std;
 
-class HoshenPkPdSuite;
+class UnittestUtil;
 
 namespace OM { namespace PkPd {
 
@@ -108,6 +108,12 @@ public:
       return 0xFFFFFFFF;
   }
   
+  enum ActiveModel {
+      NON_PKPD = 0,
+      HOSHEN_PKPD,
+      LSTM_PKPD
+  };
+  
 protected:
   virtual void checkpoint (istream& stream) {}
   virtual void checkpoint (ostream& stream) {}
@@ -120,11 +126,6 @@ protected:
   static double ageToWeight (double ageYears);
   
 private:
-    enum ActiveModel {
-	NON_PKPD = 0,
-	HOSHEN_PKPD,
-	LSTM_PKPD
-    };
     /// Which model is in use (set by init())
     static ActiveModel activeModel;
     
@@ -136,7 +137,7 @@ private:
   in the reference age group. */
   static const double wtprop[WithinHost::WithinHostModel::nages];
 
-  friend class ::HoshenPkPdSuite;
+  friend class ::UnittestUtil;
 };
 
 } }
