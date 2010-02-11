@@ -87,7 +87,8 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
     double duration = 1.0 - startTime;
     totalFactor *= drugEffect (PD_params, typeData->elimination_rate_constant, concentration_today, duration);	
     
-    return totalFactor;			/* KW -	Returning drug effect per day, per drug */
+    //TODO: confirm with LSTM that this is the intended way to get a survival multiplication factor
+    return 1.0 / totalFactor;		/* KW -	Returning drug effect per day, per drug */
 }
 
 bool LSTMDrug::updateConcentration (double weight_kg) {
