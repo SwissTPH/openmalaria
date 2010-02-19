@@ -21,6 +21,7 @@
 */
 
 #include "PkPd/Drug/HoshenDrugType.h"
+#include "util/errors.hpp"
 
 #include <assert.h>
 #include <cmath>
@@ -31,38 +32,54 @@
 using namespace std;
 
 namespace OM { namespace PkPd {
-    
+
 /*
  * Static variables and functions
  */
 
-//map<string,HoshenDrugType*> HoshenDrugType::available; 
+map<string,HoshenDrugType*> HoshenDrugType::available; 
 
 void HoshenDrugType::init () {
   Mutation* crt76 = ProteomeManager::getMutation(string("CRT"), 76, 'T');
   HoshenDrugType* s;
-  //s = new DrugType("Sulfadoxine", "S", 0.1, 10); //Invented values
-  //DrugType::addDrug(s);
+  //s = new HoshenDrugType("Sulfadoxine", "S", 0.1, 10); //Invented values
+  //HoshenDrugType::addDrug(s);
   s = new HoshenDrugType("Chloroquine", "CQ", 0.02, 45); //Based on Hoshen
   vector<Mutation*> crt76L;
   crt76L.push_back(crt76);
   s->addPDRule(crt76L, 204.0);
   s->addPDRule(vector<Mutation*>(), 68.0);
   s->parseProteomeInstances();
-  DrugType::addDrug(s);
+  HoshenDrugType::addDrug(s);
 }
 
-// -----  Non-static DrugType functions  -----
 
-HoshenDrugType::HoshenDrugType (string _name, string _abbreviation,
-    double _absorptionFactor, double _halfLife)
-: DrugType(_abbreviation)
-{
-  //name = _name;
-  //abbreviation = _abbreviation;
-  absorptionFactor = _absorptionFactor;
-  halfLife = _halfLife;
+void HoshenDrugType::addDrug(HoshenDrugType* drug) {
+  string abbrev = drug->abbreviation;
+  // Check drug doesn't already exist
+    if (available.find (abbrev) != available.end())
+    throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
+  
+  available.insert (pair<string,HoshenDrugType*>(abbrev, drug));
 }
+
+const HoshenDrugType* HoshenDrugType::getDrug(string _abbreviation) {
+  map<string,HoshenDrugType*>::const_iterator i = available.find (_abbreviation);
+  if (i == available.end())
+    throw util::xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
+  
+  return i->second;
+}
+
+
+// -----  Non-static HoshenDrugType functions  -----
+
+HoshenDrugType::HoshenDrugType (string _name, string _abbreviation, double _absorptionFactor, double _halfLife) :
+    //name (_name),
+    abbreviation (_abbreviation),
+    absorptionFactor (_absorptionFactor),
+    halfLife (_halfLife)
+{}
 HoshenDrugType::~HoshenDrugType () {}
 
 

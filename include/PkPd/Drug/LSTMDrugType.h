@@ -29,7 +29,6 @@
 #include <vector>
 #include "Global.h"
 #include "PkPd/Proteome.h"
-#include "DrugType.h"
 #include "inputData.h"
 
 using namespace std;
@@ -52,12 +51,21 @@ namespace OM { namespace PkPd {
  * No DrugType data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
-class LSTMDrugType : public DrugType {	//TODO: check what else is inherited, and possibly remove DrugType base class
+class LSTMDrugType {
 public:
     ///@brief Static functions
     //@{
     /** Initialise the drug model. Called at start of simulation. */
     static void init (const scnXml::DrugDescription& data);
+    
+    //! Adds a new drug type to the list
+    static void addDrug(const LSTMDrugType drug);
+    
+    /** Find a DrugType by its abbreviation, and create a new Drug from that.
+     *
+     * Throws if the drug isn't found, so you can rely on it returning a valid
+     * drug if it returns (doesn't throw). */
+    static const LSTMDrugType& getDrug(string abbreviation);
     
     /// Return a new proteome ID
     static uint32_t new_proteome_ID ();
@@ -76,6 +84,12 @@ public:
     //@}
   
 private:
+    // The list of available drugs. Not checkpointed; should be set up by init().
+    static map<const string,const LSTMDrugType> available;
+    
+    //! The drug abbreviated name, used for registry lookups.
+    string abbreviation;
+    
     /** Allele information is stored as a uint32_t in infection. Denote this p_id,
      * then we use ((p_id >> allele_rshift) & allele_mask) as an index in
      * PD_params for the allele.

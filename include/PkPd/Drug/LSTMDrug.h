@@ -37,7 +37,7 @@ namespace OM { namespace PkPd {
 class LSTMDrug {
 public:
   /** Create a new instance. */
-  LSTMDrug (const LSTMDrugType*);
+  LSTMDrug (const LSTMDrugType&);
   
   inline string getAbbreviation() const { return typeData->abbreviation;}
   

@@ -32,8 +32,8 @@ using namespace std;
 
 namespace OM { namespace PkPd {
     
-LSTMDrug::LSTMDrug(const LSTMDrugType* type) :
-    typeData (type),
+LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
+    typeData (&type),
     concentration (0.0)
 {}
 

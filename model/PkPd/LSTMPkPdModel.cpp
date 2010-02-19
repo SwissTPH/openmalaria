@@ -43,7 +43,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
     for (size_t i=0; i<numDrugs; i++) {
 	string abbrev;
 	abbrev & stream;
-	_drugs.push_back (LSTMDrug ((LSTMDrugType*)DrugType::getDrug(abbrev)));
+	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(abbrev)));
 	_drugs.back() & stream;
     }
 }
@@ -67,7 +67,7 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double 
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (LSTMDrug(dynamic_cast<const LSTMDrugType*>(DrugType::getDrug(drugAbbrev))));
+  _drugs.push_front (LSTMDrug(LSTMDrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

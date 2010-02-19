@@ -52,7 +52,6 @@ public:
   }
   
   void testCq () {
-      //FIXME: if "CQ" is used, it finds the Hoshen drug info!!
     proxy->medicate ("MF", 3000, 0, 21);
     TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03608287541816233);
   }

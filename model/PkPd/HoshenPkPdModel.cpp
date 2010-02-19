@@ -40,7 +40,7 @@ void HoshenPkPdModel::checkpoint (istream& stream) {
     for (size_t i=0; i<numDrugs; i++) {
 	string abbrev;
 	abbrev & stream;
-	_drugs.push_back (HoshenDrug ((HoshenDrugType*)DrugType::getDrug(abbrev)));
+	_drugs.push_back (HoshenDrug (HoshenDrugType::getDrug(abbrev)));
 	_drugs.back() & stream;
     }
 }
@@ -64,7 +64,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, doubl
     ++drug;
   }
   // No match, so insert one:
-  _drugs.push_front (HoshenDrug(dynamic_cast<const HoshenDrugType*>(DrugType::getDrug(drugAbbrev))));
+  _drugs.push_front (HoshenDrug(HoshenDrugType::getDrug(drugAbbrev)));
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:

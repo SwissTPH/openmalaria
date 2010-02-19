@@ -34,24 +34,44 @@
 using namespace std;
 
 namespace OM { namespace PkPd {
-    
+
 /*
  * Static variables and functions
  */
+
+map<const string,const LSTMDrugType> LSTMDrugType::available; 
+
 
 void LSTMDrugType::init (const scnXml::DrugDescription& data) {
     uint32_t start_bit = 0;
     
     for (scnXml::DrugDescription::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
-	DrugType::addDrug (new LSTMDrugType (*drug, start_bit));
+	LSTMDrugType::addDrug (LSTMDrugType (*drug, start_bit));
     }
+}
+
+void LSTMDrugType::addDrug(const LSTMDrugType drug) {
+  string abbrev = drug.abbreviation;
+  // Check drug doesn't already exist
+    if (available.find (abbrev) != available.end())
+    throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
+  
+  available.insert (pair<string,LSTMDrugType>(abbrev, drug));
+}
+
+const LSTMDrugType& LSTMDrugType::getDrug(string _abbreviation) {
+  map<const string,const LSTMDrugType>::const_iterator i = available.find (_abbreviation);
+  if (i == available.end())
+    throw util::xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
+  
+  return i->second;
 }
 
 uint32_t LSTMDrugType::new_proteome_ID () {
     uint32_t id = 0;	// proteome / genotype identifier
     // for each drug / locus,
-    for (map<string,DrugType*>::const_iterator it = available.begin(); it != available.end(); ++it) {
-	const LSTMDrugType& dt = *(LSTMDrugType*)(it->second);
+    for (map<const string,const LSTMDrugType>::const_iterator it = available.begin(); it != available.end(); ++it) {
+	const LSTMDrugType& dt = it->second;
 	double sample = gsl::rngUniform();
 	for (size_t i = 0; i < dt.PD_params.size(); ++i) {
 	    // we randomly pick an allele according to its initial frequency
@@ -70,10 +90,10 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 
 
-// -----  Non-static DrugType functions  -----
+// -----  Non-static LSTMDrugType functions  -----
 
 LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
-    DrugType(drugData.getAbbrev()),
+    abbreviation (drugData.getAbbrev()),
     allele_rshift (bit_start)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();

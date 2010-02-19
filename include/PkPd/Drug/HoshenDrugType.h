@@ -25,7 +25,6 @@
 
 #include "Global.h"
 #include "PkPd/Proteome.h"
-#include "DrugType.h"
 
 #include <string>
 #include <deque>
@@ -43,7 +42,7 @@ namespace OM { namespace PkPd {
  * No DrugType data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
-class HoshenDrugType : public DrugType {
+class HoshenDrugType {
 public:
   ///@brief Static functions
   //@{
@@ -51,6 +50,15 @@ public:
   //TODO: data from XML.
   static void init ();
   
+  //! Adds a new drug type to the list
+  static void addDrug(HoshenDrugType* drug);
+
+  /** Find a DrugType by its abbreviation, and create a new Drug from that.
+   *
+   * Throws if the drug isn't found, so you can rely on it returning a valid
+   * drug if it returns (doesn't throw). */
+  static const HoshenDrugType* getDrug(string abbreviation);
+  //@}
   
   ///@brief Non static (per instance) functions
   //@{
@@ -80,10 +88,14 @@ public:
   
 private:
   // The list of available drugs. Not checkpointed; should be set up by init().
-  //static map<string,HoshenDrugType> available;
+  static map<string,HoshenDrugType*> available;
   
-  //! Absorption factor.
-  /*! Absorption = dose * factor / weight
+  //! The drug abbreviated name, used for registry lookups.
+  string abbreviation;
+  
+  /** Absorption factor
+   *
+   * Absorption = dose * factor / weight
    */
   double absorptionFactor;
   //! Half-life (in days)
@@ -99,7 +111,6 @@ private:
   vector<double> pdParameters;
   //! Fast data structure to know the PD param per proteome
   map<uint32_t,double> proteomePDParameters;
-  //END
   
   // Allow the Drug class to access private members
   friend class Drug;
