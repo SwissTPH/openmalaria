@@ -64,7 +64,7 @@
 #define DEF_REL_PRECISION 1e-7
 #define DEF_ABS_PRECISION 1e-7
 
-#   define ___ETS_ASSERT_APPROX(f,l,x,y,r,a) ___ETS_ASSERT_DELTA(f,l,x,y,ExtraAsserts::tolerance(x,y,r,a),0)
+#   define ___ETS_ASSERT_APPROX(f,l,x,y,r,a) ExtraAsserts::assert_approx( (f), (l), (x), (y), (r), (a) )
 #   define ___TS_ASSERT_APPROX(f,l,x,y,r,a) { _TS_TRY { ___ETS_ASSERT_APPROX(f,l,x,y,r,a); } __TS_CATCH(f,l) }
 
 // Explicit tolerance:
@@ -78,7 +78,7 @@
 
 // TS_ASSERT_VECTOR_APPROX
 // Actually supports std::vector<T>, gsl_vector and gsl_matrix
-#   define ___ETS_ASSERT_VECTOR_APPROX(f,l,x,y,r,a) ExtraAsserts::doAssertVector( (f), (l), #x, (x), #y, (y), (r), (a))
+#   define ___ETS_ASSERT_VECTOR_APPROX(f,l,x,y,r,a) ExtraAsserts::doAssertVector( (f), (l), #x, (x), #y, (y), (r), (a) )
 #   define ___TS_ASSERT_VECTOR_APPROX(f,l,x,y,r,a) { _TS_TRY { ___ETS_ASSERT_VECTOR_APPROX(f,l,x,y,r,a); } __TS_CATCH(f,l) }
 
 // Explicit tolerance:
@@ -107,6 +107,11 @@ namespace ExtraAsserts {
     if (tol < absPrecision)
       return absPrecision;
     return tol;
+  }
+  
+  /** Wrapper function. Used because implementation as a macro involves re-evaluation of x and y. */
+  void assert_approx (const char *file, unsigned line, double x, double y, double r, double a) {
+      ___ETS_ASSERT_DELTA(file,line,x,y,ExtraAsserts::tolerance(x,y,r,a),0);
   }
   
   /** Basic approximate equality test for doubles, using relative precision.

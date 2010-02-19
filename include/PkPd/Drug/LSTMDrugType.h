@@ -103,7 +103,7 @@ private:
     
     /*PK parameters required - varies with humans age and severity of disease*/
     double negligible_concentration;		/// Concentration, below which drug is deemed not to have an effect and is removed for performance reasons. (mg/l)
-    double elimination_rate_constant;	/// Terminal elimination rate constant. Found using ln(2)/half_life. (1 / days)
+    double neg_elimination_rate_constant;	/// Terminal elimination rate constant (negated). Found using ln(2)/half_life. (1 / days)
     double vol_dist;					/// Volume of distribution (l/kg)
     
   // Allow LSTMDrug to access private members

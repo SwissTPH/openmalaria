@@ -53,33 +53,32 @@ public:
   
   void testCq () {
     proxy->medicate ("MF", 3000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03608287541816233);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03650284726560851);
   }
   
   void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
       proxy->medicate ("MF", 1500, 0, 21);
       proxy->medicate ("MF", 1500, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03608287541816233);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03650284726560851);
   }
   
   void testCqSplit () {
       proxy->medicate ("MF", 3000, 0, 21);
       proxy->medicate ("MF", 0, 0.5, 21);	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03608287541816233);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03650284726560851);
   }
   
   void testCqDecayed () {
     proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs (21);
-    //FIXME: this survival factor should be greater than above, not smaller
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03202581260270484);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03696456856994084);
   }
   
   void testCq2Doses () {
     proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs (21);
     proxy->medicate ("MF", 3000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03188090049660012);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.03260437173442231);
   }
   
   LSTMPkPdModel *proxy;

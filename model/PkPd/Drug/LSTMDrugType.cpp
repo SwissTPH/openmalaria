@@ -99,7 +99,6 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)
 	throw util::xml_scenario_error ("Expected at least one allele for each drug.");
-    //TODO: check units (which time unit?)
     
     // got length l; want minimal n such that: 2^n >= l
     // that is, n >= log_2 (l)
@@ -113,7 +112,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
 	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
     
     negligible_concentration = drugData.getPK().getNegligible_concentration();
-    elimination_rate_constant = log(2) / drugData.getPK().getHalf_life();
+    neg_elimination_rate_constant = -log(2) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
     
     PD_params.resize (alleles.size());
@@ -122,7 +121,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
 	cum_IF += alleles[i].getInitial_frequency ();
 	PD_params[i].cum_initial_frequency = cum_IF;
 	PD_params[i].slope = alleles[i].getSlope ();
-	PD_params[i].power = alleles[i].getMax_killing_rate () / (elimination_rate_constant * PD_params[i].slope);
+	PD_params[i].power = alleles[i].getMax_killing_rate () / (-neg_elimination_rate_constant * PD_params[i].slope);
 	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), PD_params[i].slope);
     }
     for (size_t i = 0; i < PD_params.size(); ++i) {

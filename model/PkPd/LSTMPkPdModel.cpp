@@ -76,16 +76,16 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double 
 
 // This may look complicated but its just some machinery to call updateConcentration() and return its result
 class DecayPredicate {
-    double ageYears;
+    double weight;
 public:
-    DecayPredicate(double aY) : ageYears(aY) {}
+    DecayPredicate(double w) : weight(w) {}
     bool operator() (LSTMDrug& drug) {
-	return drug.updateConcentration(ageYears);
+	return drug.updateConcentration(weight);
     }
 };
 void LSTMPkPdModel::decayDrugs (double ageYears) {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-  _drugs.remove_if (DecayPredicate(ageYears));
+  _drugs.remove_if (DecayPredicate(ageToWeight(ageYears)));
 }
 
 double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
