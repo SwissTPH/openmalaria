@@ -38,9 +38,10 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 {}
 
 
-void LSTMDrug::storeDose (double time, double qty) {
+void LSTMDrug::medicate (double time, double qty, double weight) {
+    double conc = qty / (typeData->vol_dist * weight);
     // multimap insertion: is ordered
-    doses.insert (doses.end(), make_pair (time, qty));
+    doses.insert (doses.end(), make_pair (time, conc));
 }
 
 
@@ -61,14 +62,13 @@ inline double drugEffect (const LSTMDrugPDParameters& PD_params, double neg_elim
     return drug_effect;
 }
 
-double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, double weight_kg) const {
+double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
     double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug affect is seen
 									this vaule is updated in the for loop, value decreases with increasing drug effect. */
     double startTime = 0.0;		/* KW-	Use the information from medicate to determine the time elapsed from 0 to first dose.
 									Use the information on dose timings from medicate to update this value at the end of the for loop.
 									Run drugEffect function after for loop to find drug effect from last dose to end of day. */
     
-    double dist_weight_inv = 1.0 / (typeData->vol_dist * weight_kg);
     // Make a copy of concetration and use that over today. Don't adjust concentration because this
     // function may be called multiple times (or not at all) in a day.
     double concentration_today = concentration;
@@ -79,7 +79,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
     for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
 	double duration = dose->first - startTime;
 	totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);	
-	concentration_today += dose->second * dist_weight_inv;
+	concentration_today += dose->second;
 	
 	startTime = dose->first;		// KW - Increment the time (assuming doses are in order of time)
     }
@@ -87,18 +87,16 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID, double ageYears, doub
     double duration = 1.0 - startTime;
     totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);	
     
-    //TODO: confirm with LSTM that this is the intended way to get a survival multiplication factor
-    return totalFactor;		/* KW -	Returning drug effect per day, per drug */
+    return totalFactor;			/* KW -	Returning drug effect per day, per drug */
 }
 
-bool LSTMDrug::updateConcentration (double weight_kg) {
+bool LSTMDrug::updateConcentration () {
     double startTime = 0.0;		// as in calculateDrugFactor()
-    double dist_weight_inv = 1.0 / (typeData->vol_dist * weight_kg);
     
     for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
 	double duration = dose->first - startTime;
 	concentration *= exp(typeData->neg_elimination_rate_constant *  duration);
-	concentration += dose->second * dist_weight_inv;
+	concentration += dose->second;
 	
 	startTime = dose->first;	
     }

@@ -41,9 +41,11 @@ public:
   
   inline string getAbbreviation() const { return typeData->abbreviation;}
   
-  /** Add amount to the concentration of drug, at time delay past the start of
-   * the current timestep. */
-  void storeDose (double time, double qty);
+  /** Indicate a new medication this timestep.
+   *
+   * Converts qty in mg to concentration, and stores along with time (delay past
+   * the start of the current timestep) in the doses container. */
+  void medicate (double time, double qty, double weight);
   
   /** Returns the total drug factor for one drug over one day.
    *
@@ -52,12 +54,12 @@ public:
    * 
    * This doesn't adjust concentration because this function may be called
    * several times (for each infection) per timestep, or not at all. */
-  double calculateDrugFactor(uint32_t proteome_ID, double ageYears, double weight_kg) const;
+  double calculateDrugFactor(uint32_t proteome_ID) const;
   
   /** Updates concentration variable and clears day's doses.
    *
    * @returns true if concentration is negligible (this class instance can be removed). */
-  bool updateConcentration (double weight_kg);
+  bool updateConcentration ();
   
   /// Checkpointing
   template<class S>
@@ -73,7 +75,8 @@ protected:
   double concentration;
   
   /** List of each dose given today, ordered by time.
-   * First parameter (key) is time in days, second (value) is dose in mg.
+   * First parameter (key) is time in days, second (value) is dose in same units
+   * as concentration.
    * 
    * Used in calculateDrugFactor temporarily,
    * and in updateConcentration() to update concentration. */

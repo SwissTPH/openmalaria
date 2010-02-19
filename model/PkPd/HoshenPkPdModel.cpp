@@ -77,12 +77,12 @@ struct DecayPredicate {
     return drug.decay ();
   }
 };
-void HoshenPkPdModel::decayDrugs (double) {
+void HoshenPkPdModel::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
 }
 
-double HoshenPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
+double HoshenPkPdModel::getDrugFactor (uint32_t proteome_ID) {
   // We will choose for now the smallest factor (ie, most impact)
   double factor = 1.0; //no effect
   

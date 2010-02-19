@@ -59,7 +59,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double age) {
+void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double ageYears) {
   list<LSTMDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -71,29 +71,26 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double 
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  drug->storeDose (time, qty);
+  drug->medicate (time, qty, ageToWeight (ageYears));
 }
 
 // This may look complicated but its just some machinery to call updateConcentration() and return its result
 class DecayPredicate {
-    double weight;
 public:
-    DecayPredicate(double w) : weight(w) {}
     bool operator() (LSTMDrug& drug) {
-	return drug.updateConcentration(weight);
+	return drug.updateConcentration();
     }
 };
-void LSTMPkPdModel::decayDrugs (double ageYears) {
+void LSTMPkPdModel::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-  _drugs.remove_if (DecayPredicate(ageToWeight(ageYears)));
+  _drugs.remove_if (DecayPredicate());
 }
 
-double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID, double ageYears) {
-    double weight = ageToWeight(ageYears);
+double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
     double factor = 1.0; //no effect
     
     for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
-	double drugFactor = it->calculateDrugFactor(proteome_ID, ageYears, weight);
+	double drugFactor = it->calculateDrugFactor(proteome_ID);
 	factor *= drugFactor;
     }
     return factor;

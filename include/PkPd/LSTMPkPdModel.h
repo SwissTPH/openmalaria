@@ -46,9 +46,9 @@ public:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
-  virtual void medicate(string drugAbbrev, double qty, double time, double age);
-  virtual void decayDrugs (double ageYears);
-  virtual double getDrugFactor (uint32_t proteome_ID, double ageYears);
+  virtual void medicate(string drugAbbrev, double qty, double time, double ageYears);
+  virtual void decayDrugs ();
+  virtual double getDrugFactor (uint32_t proteome_ID);
   
   virtual uint32_t new_proteome_ID ();
   

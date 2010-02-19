@@ -47,32 +47,31 @@ public:
   }
   
   void testNone () {
-      // Note: second parameter is age but shouldn't be used; to check this pass an NaN
-    TS_ASSERT_EQUALS (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 1.0);
+    TS_ASSERT_EQUALS (proxy->getDrugFactor (proteome_ID), 1.0);
   }
   
   void testCq () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12427429993973554);
   }
   
   void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
       proxy->medicate ("CQ", 125000, 0, 21);
       proxy->medicate ("CQ", 125000, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12427429993973554);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12427429993973554);
   }
   
   void testCqDecayed () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs (21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.12608995630400068);
+    proxy->decayDrugs ();
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12608995630400068);
   }
   
   void testCq2Doses () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs (21);
+    proxy->decayDrugs ();
     proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID, std::numeric_limits< double >::quiet_NaN()), 0.06809903879225410);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.06809903879225410);
   }
   
   HoshenPkPdModel *proxy;

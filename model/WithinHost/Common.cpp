@@ -77,7 +77,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
   
   for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();){
     double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-    survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID(), ageInYears);
+    survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
     survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, _cumulativeh, timestepCumY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
@@ -95,7 +95,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     ++inf;
   }
   
-  pkpdModel->decayDrugs (ageInYears);	// FIXME: shouldn't be necessary to pass age
+  pkpdModel->decayDrugs ();
 }
 
 

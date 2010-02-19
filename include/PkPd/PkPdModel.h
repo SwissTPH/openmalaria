@@ -92,15 +92,14 @@ public:
   virtual void medicate(string drugAbbrev, double qty, double time, double age)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
-  //NOTE: does calling after applying drug effects make the most sense for all models?
-  virtual void decayDrugs (double ageYears) {};
+  virtual void decayDrugs () {};
   
   /** This is how drugs act on infections.
    *
    * Each timestep, on each infection, the parasite density is multiplied by
    * the return value of this infection. The WithinHostModels are responsible
    * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (uint32_t proteome_ID, double ageYears) {
+  virtual double getDrugFactor (uint32_t proteome_ID) {
     return 1.0;
   }
   
