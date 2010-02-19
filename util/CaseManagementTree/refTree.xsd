@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="agedependentDecisionTrees">
+	<xs:complexType>
+	    <xs:choice>
+		<xs:element name="inputBranches" type="inputBranches"/>
+		<xs:element name="randomBranches" type="randomBranches"/>
+	    </xs:choice>
+	</xs:complexType>
+    </xs:element>
+    
+    <xs:complexType name="branches">
+	<xs:attribute name="depends" type="xs:string" use="optional"/>
+	<xs:attribute name="id" type="xs:string" use="optional"/>
+	<xs:attribute name="ref" type="xs:string" use="optional"/>
+    </xs:complexType>
+    <xs:complexType name="inputBranches">
+	<xs:complexContent>
+	    <xs:extension base="branches">
+		<xs:sequence>
+		    <xs:element name="choice" type="inputChoice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	    </xs:extension>
+	</xs:complexContent>
+    </xs:complexType>
+    <xs:complexType name="randomBranches">
+	<xs:complexContent>
+	    <xs:extension base="branches">
+		<xs:sequence>
+		    <xs:element name="choice" type="randomChoice" minOccurs="0" maxOccurs="unbounded"/>
+		</xs:sequence>
+	    </xs:extension>
+	</xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="inputChoice">
+	<xs:sequence>
+	    <xs:element name="inputBranches" type="inputBranches" minOccurs="0"/>
+	    <xs:element name="randomBranches" type="randomBranches" minOccurs="0"/>
+	</xs:sequence>
+	<xs:attribute name="value" type="xs:string" use="required"/>
+    </xs:complexType>
+    <xs:complexType name="randomChoice">
+	<xs:complexContent>
+	    <xs:extension base="inputChoice">
+		<xs:attribute name="p" type="xs:double" use="required"/>
+	    </xs:extension>
+	</xs:complexContent>
+    </xs:complexType>
+</xs:schema>

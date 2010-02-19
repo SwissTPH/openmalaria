@@ -53,6 +53,30 @@
  * 
  * TSDELAY is slightly different; (x & TSDELAY_MASK) >> TSDELAY_SHIFT yields
  * an integer in the range [0,15] which is the delay in days. */
+/* TODO:
+One or two new branch-points in trees.
+What of this information do we need to fix though?
+
+Tree path information
+-------------------
+
+Needs to be known by code:
+UC1/UC2/severe input
+age-over-5 input
+test type output
+result input/output
+treatment seeking delay output
+in/out of hospital output
+
+Used for medicate-lookup:
+Drug type
+adherance
+quality
+treatment delay
+
+Other info, not needed outside tree:
+Some of treatment seeking stuff?
+*/
 enum DecisionEnums {
     /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
      * Many are designed to be "flags", so the value corresponds to a single bit:

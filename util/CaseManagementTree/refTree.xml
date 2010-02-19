@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<agedependentDecisionTrees xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="refTree.xsd">
+  <inputBranches depends="maxAge">
+    <choice value="5">
+      <inputBranches id="caseRef0" depends="case">
+        <choice value="uc1">
+          <randomBranches id="testedRef0" depends="tested">
+            <choice value="microscopy" p="0.02">
+              <randomBranches id="resultRef0" depends="result">
+                <choice value="true positive" p="0.7">
+                  <randomBranches id="drugRef0" depends="drug">
+                    <choice value="SP" p="0.37">
+                      <randomBranches id="qualityRef0" depends="quality">
+                        <choice value="good" p="0.9">
+                          <randomBranches id="adherenceRef0" depends="adherence">
+                            <choice value="good" p="1.0">
+                              <randomBranches id="timeRef0" depends="time">
+                                <choice value="0" p="0.5"/>
+                                <choice value="1" p="0.3"/>
+                                <choice value="2" p="0.2"/>
+                              </randomBranches>
+                            </choice>
+                            <choice value="bad" p="0.0">
+                              <randomBranches ref="timeRef0"/>
+                            </choice>
+                          </randomBranches>
+                        </choice>
+                        <choice value="bad" p="0.1">
+                          <randomBranches ref="adherenceRef0"/>
+                        </choice>
+                      </randomBranches>
+                    </choice>
+                    <choice value="AL" p="0.6">
+                      <randomBranches id="qualityRef1" depends="quality">
+                        <choice value="good" p="0.95">
+                          <randomBranches id="adherenceRef1" depends="adherence">
+                            <choice value="good" p="0.85">
+                              <randomBranches ref="timeRef0"/>
+                            </choice>
+                            <choice value="bad" p="0.15">
+                              <randomBranches ref="timeRef0"/>
+                            </choice>
+                          </randomBranches>
+                        </choice>
+                        <choice value="bad" p="0.05">
+                          <randomBranches id="adherenceRef2" depends="adherence">
+                            <choice value="good" p="0.8">
+                              <randomBranches ref="timeRef0"/>
+                            </choice>
+                            <choice value="bad" p="0.2">
+                              <randomBranches ref="timeRef0"/>
+                            </choice>
+                          </randomBranches>
+                        </choice>
+                      </randomBranches>
+                    </choice>
+                    <choice value="no antimalarial" p="0.03"/>
+                  </randomBranches>
+                </choice>
+                <choice value="false negative" p="0.3">
+                  <randomBranches id="drugRef1" depends="drug">
+                    <choice value="SP" p="0.3">
+                      <randomBranches ref="qualityRef0"/>
+                    </choice>
+                    <choice value="AL" p="0.15">
+                      <randomBranches ref="qualityRef1"/>
+                    </choice>
+                    <choice value="no antimalarial" p="0.55"/>
+                  </randomBranches>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="RDT" p="0.08">
+              <randomBranches id="resultRef1" depends="result">
+                <choice value="true positive" p="0.9">
+                  <randomBranches ref="drugRef0"/>
+                </choice>
+                <choice value="false negative" p="0.1">
+                  <randomBranches ref="drugRef1"/>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="no" p="0.9">
+              <randomBranches id="drugRef2" depends="drug">
+                <choice value="SP" p="0.4">
+                  <randomBranches id="qualityRef2" depends="quality">
+                    <choice value="good" p="0.75">
+                      <randomBranches ref="adherenceRef0"/>
+                    </choice>
+                    <choice value="bad" p="0.25">
+                      <randomBranches id="adherenceRef3" depends="adherence">
+                        <choice value="good" p="0.9">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                        <choice value="bad" p="0.1">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                      </randomBranches>
+                    </choice>
+                  </randomBranches>
+                </choice>
+                <choice value="AL" p="0.3">
+                  <randomBranches id="qualityRef3" depends="quality">
+                    <choice value="good" p="0.8">
+                      <randomBranches id="adherenceRef4" depends="adherence">
+                        <choice value="good" p="0.5">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                        <choice value="bad" p="0.5">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                      </randomBranches>
+                    </choice>
+                    <choice value="bad" p="0.2">
+                      <randomBranches id="adherenceRef5" depends="adherence">
+                        <choice value="good" p="0.4">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                        <choice value="bad" p="0.6">
+                          <randomBranches ref="timeRef0"/>
+                        </choice>
+                      </randomBranches>
+                    </choice>
+                  </randomBranches>
+                </choice>
+                <choice value="no antimalarial" p="0.3"/>
+              </randomBranches>
+            </choice>
+          </randomBranches>
+        </choice>
+        <choice value="uc2">
+          <randomBranches id="testedRef1" depends="tested">
+            <choice value="microscopy" p="0.04">
+              <randomBranches ref="resultRef0"/>
+            </choice>
+            <choice value="RDT" p="0.14">
+              <randomBranches ref="resultRef1"/>
+            </choice>
+            <choice value="no" p="0.82">
+              <randomBranches id="drugRef3" depends="drug">
+                <choice value="SP" p="0.45">
+                  <randomBranches ref="qualityRef2"/>
+                </choice>
+                <choice value="AL" p="0.35">
+                  <randomBranches ref="qualityRef3"/>
+                </choice>
+                <choice value="no antimalarial" p="0.2"/>
+              </randomBranches>
+            </choice>
+          </randomBranches>
+        </choice>
+        <choice value="sev">
+          <randomBranches id="testedRef2" depends="tested">
+            <choice value="microscopy" p="0.2">
+              <randomBranches id="resultRef2" depends="result">
+                <choice value="true positive" p="0.95">
+                  <randomBranches id="treatmentRef0" depends="treatment">
+                    <choice value="parenteral" p="0.53">
+                      <randomBranches id="managementRef0" depends="management">
+                        <choice value="good" p="0.8"/>
+                        <choice value="bad" p="0.2"/>
+                      </randomBranches>
+                    </choice>
+                    <choice value="pre-referral and immediate referral" p="0.08">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="pre-referral and delayed referral" p="0.01">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="pre-referral only" p="0.01"/>
+                    <choice value="delayed referral" p="0.12">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="no antimalarial" p="0.25"/>
+                  </randomBranches>
+                </choice>
+                <choice value="false negative" p="0.05">
+                  <randomBranches id="treatmentRef1" depends="treatment">
+                    <choice value="parenteral" p="0.45">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="pre-referral and immediate referral" p="0.05">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="pre-referral and delayed referral" p="0.01">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="pre-referral only" p="0.01"/>
+                    <choice value="delayed referral" p="0.23">
+                      <randomBranches ref="managementRef0"/>
+                    </choice>
+                    <choice value="no antimalarial" p="0.25"/>
+                  </randomBranches>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="RDT" p="0.4">
+              <randomBranches ref="resultRef2"/>
+            </choice>
+            <choice value="no" p="0.4">
+              <randomBranches id="treatmentRef2" depends="treatment">
+                <choice value="parenteral" p="0.1">
+                  <randomBranches ref="managementRef0"/>
+                </choice>
+                <choice value="pre-referral and immediate referral" p="0.075">
+                  <randomBranches ref="managementRef0"/>
+                </choice>
+                <choice value="pre-referral and delayed referral" p="0.075">
+                  <randomBranches ref="managementRef0"/>
+                </choice>
+                <choice value="pre-referral only" p="0.05"/>
+                <choice value="delayed referral" p="0.3">
+                  <randomBranches ref="managementRef0"/>
+                </choice>
+                <choice value="no antimalarial" p="0.4"/>
+              </randomBranches>
+            </choice>
+          </randomBranches>
+        </choice>
+        <choice value="nmfP">
+          <randomBranches id="testedRef3" depends="tested">
+            <choice value="microscopy" p="0.02">
+              <randomBranches id="resultRef4" depends="result">
+                <choice value="positive" p="0.6">
+                  <randomBranches ref="drugRef0"/>
+                </choice>
+                <choice value="negative" p="0.4">
+                  <randomBranches ref="drugRef1"/>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="RDT" p="0.08">
+              <randomBranches id="resultRef5" depends="result">
+                <choice value="positive" p="0.8">
+                  <randomBranches ref="drugRef0"/>
+                </choice>
+                <choice value="negative" p="0.2">
+                  <randomBranches ref="drugRef1"/>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="no" p="0.9">
+              <randomBranches ref="drugRef2"/>
+            </choice>
+          </randomBranches>
+        </choice>
+        <choice value="nmfNP">
+          <randomBranches id="testedRef4" depends="tested">
+            <choice value="microscopy" p="0.02">
+              <randomBranches id="resultRef3" depends="result">
+                <choice value="true negative" p="0.7">
+                  <randomBranches ref="drugRef1"/>
+                </choice>
+                <choice value="false positive" p="0.3">
+                  <randomBranches ref="drugRef0"/>
+                </choice>
+              </randomBranches>
+            </choice>
+            <choice value="RDT" p="0.08">
+              <randomBranches ref="resultRef3"/>
+            </choice>
+            <choice value="no" p="0.9">
+              <randomBranches ref="drugRef2"/>
+            </choice>
+          </randomBranches>
+        </choice>
+      </inputBranches>
+    </choice>
+    <choice value="99">
+      <inputBranches ref="caseRef0"/>
+    </choice>
+  </inputBranches>
+</agedependentDecisionTrees>

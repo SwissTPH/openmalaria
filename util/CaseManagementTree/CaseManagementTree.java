@@ -43,16 +43,15 @@ import org.w3c.dom.NodeList;
 public class CM {
 
     DocumentBuilder _builder;
+    
+    String inFileName;
+    String outFileName;
 
-    static String _outfileName = "cm_out.xml";
-
-    public CM() {
-        try {
-            _builder = DocumentBuilderFactory.newInstance()
+    public CM(String inN, String outN) throws ParserConfigurationException {
+	inFileName = inN;
+	outFileName = outN;
+	_builder = DocumentBuilderFactory.newInstance()
                     .newDocumentBuilder();
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        }
     }
 
     public void processNodes(Element parent, Map<String, Double> outcomes,
@@ -101,7 +100,8 @@ public class CM {
         return p;
     }
 
-    public void checkUnitProbability(File outfile) throws Exception {
+    public void checkUnitProbability() throws Exception {
+	File outfile = new File (outFileName);
         Element caseManagements = _builder.parse(outfile).getDocumentElement();
         NodeList cmList = caseManagements
                 .getElementsByTagName("caseManagement");
@@ -128,12 +128,17 @@ public class CM {
         }
     }
 
-    public void translate(File file) throws Exception {
+    public void translate() throws Exception {
+	// source root:
+	File file = new File (inFileName);
         Element ageDepDecisionTrees = _builder.parse(file).getDocumentElement();
+	
+	// target root:
         Document hsDoc = _builder.newDocument();
         Element newRoot = hsDoc.createElement("caseManagements");
         hsDoc.appendChild(newRoot);
         newRoot.setAttribute("name", "test");
+	
         NodeList dtList = ageDepDecisionTrees
                 .getElementsByTagName("decisionTrees");
         String minAY = "0.0";
@@ -175,7 +180,7 @@ public class CM {
         }
         Source source = new DOMSource(hsDoc);
         // Prepare the output file
-        File outFile = new File(_outfileName);
+        File outFile = new File(outFileName);
         OutputStream os = new FileOutputStream(outFile);
         Result result = new StreamResult(os);
         // Write the DOM document to the file
@@ -183,22 +188,21 @@ public class CM {
         xformer.transform(source, result);
     }
 
-    public static void main(String[] args) {
-        CM cm = new CM();
+    public static int main(String[] args) {
+	if (args.length != 2) {
+	    System.err.println("Usage: "+args[0]+" IN.xml OUT.xml");
+	    return 1;
+	}
         try {
-            cm.translate(new File("cm.xml"));
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
+	    CM cm = new CM(args[0], args[1]);
+	    cm.translate();
+	    cm.checkUnitProbability();
+	} catch (Exception e) {
             e.printStackTrace();
+	    return -1;
         }
-
-        try {
-            cm.checkUnitProbability(new File(_outfileName));
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
+	
         System.out.println("\nDone");
+	return 0;
     }
 }

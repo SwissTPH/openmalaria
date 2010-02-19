@@ -21,8 +21,6 @@
 #ifndef MO_PATHOGENISIS_STATE
 #define MO_PATHOGENISIS_STATE
 
-#include <iostream>
-
 namespace OM { namespace Pathogenesis {
   /** Types of sickness; used by case management.
    *

@@ -1,0 +1,2795 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<agedependentDecisionTrees>
+  <decisionTrees maxAgeYrs="5.0">
+    <tree entryPoint="uc1">
+      <branch decision="tested: microscopy" p="0.02">
+	 <branch decision="result: true positive" p="0.7">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.3">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.08">
+	 <branch decision="result: true positive" p="0.9">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.1">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>
+
+  <tree entryPoint="uc2">
+     <branch decision="tested: microscopy" p="0.04">
+	 <branch decision="result: true positive" p="0.7">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.3">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.14">
+	 <branch decision="result: true positive" p="0.9">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.1">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="not tested" p="0.82">
+            <branch decision="drug: SP" p="0.8">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.25">
+	            <branch decision=" adherence: good" p="0.9">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                     <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="no antimalarial treatment" p="0.2">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>         
+             
+
+  <tree entryPoint="sev">
+      <branch decision="tested: microscopy" p="0.2">
+         <branch decision="result: true positive" p="0.95">
+            <branch decision="treatment: parenteral" p="0.53">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.08">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.12">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+        <branch decision="false negative" p="0.05">
+            <branch decision="treatment: parenteral" p="0.45">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.05">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.23">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </branch>
+      <branch decision="tested: RDT" p="0.4">
+        <branch decision="true positive" p="0.95">
+            <branch decision="treatment: parenteral" p="0.53">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.08">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.12">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+        <branch decision="false negative" p="0.05">
+            <branch decision="treatment: parenteral" p="0.45">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.05">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.23">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </branch>
+      <branch decision="test: no" p="0.4">
+            <branch decision="treatment: parenteral" p="0.1">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.075">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.075">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.05">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.3">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.4">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </tree>
+              
+
+ <tree entryPoint="nmfwithparasites">
+    <branch decision="tested: microscopy" p="0.02">
+	 <branch decision="result: positive" p="0.6">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: negative" p="0.4">
+           <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.08">
+	 <branch decision="result: positive" p="0.8">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: negative" p="0.2">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>
+
+<tree entryPoint="nmfwithoutparasites">
+    <branch decision="tested by microscopy" p="0.02">
+	 <branch decision="true negative" p="0.7">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="false positive" p="0.3">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested by RDT" p="0.08">
+	 <branch decision="true negative" p="0.7">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="false positive" p="0.3">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>                     
+    </tree>
+
+
+  <decisions>
+    <decision id="1">
+      <medicate name="cq" qty="0" time="0"/>
+    </decision>
+    <decision id="00110">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00100">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+    <decision id="00010">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00000">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+   <decision id="00111">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00101">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00011">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00001">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+   <decision id="00112">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00102">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00012">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00002">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+
+   <decision id="02110">
+      <medicate name="qu" qty="good" time="0"/>
+    </decision>
+    <decision id="02010">
+      <medicate name="qu" qty="poor" time="0"/>
+    </decision>
+   <decision id="02111">
+      <medicate name="qu" qty="good" time="0"/>
+    </decision>
+   <decision id="02011">
+      <medicate name="qu" qty="poor" time="0"/>
+    </decision>
+   </decisions>
+    </decisionTrees>
+
+
+<decisionTrees maxAgeYrs="100.0">
+    <tree entryPoint="uc1">
+      <branch decision="tested: microscopy" p="0.02">
+	 <branch decision="result: true positive" p="0.7">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.3">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.08">
+	 <branch decision="result: true positive" p="0.9">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.1">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>
+
+  <tree entryPoint="uc2">
+     <branch decision="tested: microscopy" p="0.04">
+	 <branch decision="result: true positive" p="0.7">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.3">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.14">
+	 <branch decision="result: true positive" p="0.9">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: false negative" p="0.1">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="not tested" p="0.82">
+            <branch decision="drug: SP" p="0.8">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.25">
+	            <branch decision=" adherence: good" p="0.9">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                     <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="no antimalarial treatment" p="0.2">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>         
+             
+
+  <tree entryPoint="sev">
+      <branch decision="tested: microscopy" p="0.2">
+         <branch decision="result: true positive" p="0.95">
+            <branch decision="treatment: parenteral" p="0.53">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.08">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.12">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+        <branch decision="false negative" p="0.05">
+            <branch decision="treatment: parenteral" p="0.45">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.05">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.23">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </branch>
+      <branch decision="tested: RDT" p="0.4">
+        <branch decision="true positive" p="0.95">
+            <branch decision="treatment: parenteral" p="0.53">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.08">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.12">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+        <branch decision="false negative" p="0.05">
+            <branch decision="treatment: parenteral" p="0.45">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.05">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.01">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.01">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.23">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.25">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </branch>
+      <branch decision="test: no" p="0.4">
+            <branch decision="treatment: parenteral" p="0.1">
+                <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	          <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral and immediate referral" p="0.075">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02110</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02010</decision>
+                    </branch>
+ 	           </branch>
+		  <branch decision="treatment: pre-referral and delayed referral" p="0.075">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: pre-referral only" p="0.05">
+	             <decision>1</decision>
+                    </branch>
+            <branch decision="treatment: delayed referral" p="0.3">
+		    <branch decision="management: good" p="0.8">
+	             <decision>02111</decision>
+                    </branch>
+ 	            <branch decision="management: bad" p="0.2">
+	             <decision>02011</decision>
+                    </branch>
+ 	           </branch>
+            <branch decision="treatment: no antimalarial" p="0.4">
+	             <decision>1</decision>
+                    </branch>
+                  </branch>
+                </tree>
+              
+
+ <tree entryPoint="nmfwithparasites">
+    <branch decision="tested: microscopy" p="0.02">
+	 <branch decision="result: positive" p="0.6">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: negative" p="0.4">
+           <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: RDT" p="0.08">
+	 <branch decision="result: positive" p="0.8">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="result: negative" p="0.2">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>         
+             </tree>
+
+<tree entryPoint="nmfwithoutparasites">
+    <branch decision="tested by microscopy" p="0.02">
+	 <branch decision="true negative" p="0.7">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="false positive" p="0.3">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested by RDT" p="0.08">
+	 <branch decision="true negative" p="0.7">
+            <branch decision="drug: SP" p="0.45">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.55">
+                <decision>1</decision>
+              </branch>
+             </branch>
+         <branch decision="false positive" p="0.3">
+            <branch decision="drug: SP" p="0.97">
+              <branch decision="quality: good" p="0.9">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+                  <branch decision="quality: bad" p="0.1">
+	            <branch decision="adherence: good" p="1.0">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.03">
+                <decision>1</decision>
+              </branch>
+             </branch>
+            </branch>
+   <branch decision="tested: no" p="0.9">
+            <branch decision="drug: SP" p="0.7">
+              <branch decision="quality: good" p="0.75">
+	            <branch decision="adherence: good" p="1.0">	 
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00110</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00111</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00112</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.0">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00100</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00101</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00102</decision>
+                    </branch>
+                   </branch>
+                  </branch>
+              <branch decision="quality: bad" p="0.25">
+	            <branch decision="adherence: good" p="0.9">
+                       <branch decision="time:0" p="0.5">	 	 
+                      <decision>00010</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00011</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00012</decision>
+                    </branch>
+                   </branch>
+ 	            <branch decision="adherence: bad" p="0.1">	
+                      <branch decision="time:0" p="0.5">	 	 
+                      <decision>00000</decision>
+                    </branch>
+                       <branch decision="time:1" p="0.3">	 	 
+                      <decision>00001</decision>
+                    </branch>
+                       <branch decision="time:2" p="0.2">	 	 
+                      <decision>00002</decision>
+                    </branch>
+                   </branch>
+                </branch>
+               </branch>  
+            <branch decision="drug: no antimalarial" p="0.3">
+                <decision>1</decision>
+              </branch>
+             </branch>                     
+    </tree>
+
+
+  <decisions>
+    <decision id="1">
+      <medicate name="cq" qty="0" time="0"/>
+    </decision>
+    <decision id="00110">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00100">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+    <decision id="00010">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00000">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+   <decision id="00111">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00101">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00011">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00001">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+   <decision id="00112">
+      <medicate name="sp" qty="good" time="0"/>
+    </decision>
+    <decision id="00102">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00012">
+      <medicate name="sp" qty="sufficient" time="0"/>
+    </decision>
+   <decision id="00002">
+      <medicate name="sp" qty="poor" time="0"/>
+    </decision>
+
+   <decision id="02110">
+      <medicate name="qu" qty="good" time="0"/>
+    </decision>
+    <decision id="02010">
+      <medicate name="qu" qty="poor" time="0"/>
+    </decision>
+   <decision id="02111">
+      <medicate name="qu" qty="good" time="0"/>
+    </decision>
+   <decision id="02011">
+      <medicate name="qu" qty="poor" time="0"/>
+    </decision>
+   </decisions>
+    </decisionTrees>
+
+ </agedependentDecisionTrees>
+  

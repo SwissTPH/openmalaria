@@ -91,7 +91,7 @@ void SurveysType::writeSummaryArrays ()
   // reporting, but I believe required for parameterisation.
   if (Survey::active[imr_summary]) {
     if (!Survey::_assimilatorMode)
-      outputFile << 1 << "\t" << 1 << "\t" << imr_summary;
+      outputFile << 0 << "\t" << 0 << "\t" << imr_summary;
     outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() << lineEnd;
   }
 
