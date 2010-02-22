@@ -24,6 +24,8 @@
 #include "Global.h"
 #include "PkPd/Proteome.h"
 
+class EmpiricalInfectionSuite;
+
 namespace OM { namespace WithinHost {
     
 class Infection {
@@ -86,6 +88,8 @@ private:
   */
   static double decayM;
   //@}
+  
+  friend class ::EmpiricalInfectionSuite;
 };
 
 } }

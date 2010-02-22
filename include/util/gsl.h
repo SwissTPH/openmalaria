@@ -65,7 +65,9 @@ namespace gsl {
   
   ///@brief Setup & cleanup
   //@{
-  void setUp();
+  /// Set up the random-number-generator with seed (usually InputData.getISeed()).
+  void setUp(unsigned long int seed);
+  /// Free memory
   void tearDown();
   
   void rngSaveState(int seedFileNumber);

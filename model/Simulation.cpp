@@ -49,7 +49,7 @@ Simulation::Simulation(util::Checksum ck)
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
-    gsl::setUp();
+    gsl::setUp (InputData.getISeed());
     util::ModelOptions::init ();
     Surveys.init();
     Population::init();

@@ -95,6 +95,9 @@ void EmpiricalInfection::initParameters(){
   //read header of file (unused)
   string csvLine;
   getline(f_autoRegressionParameters,csvLine);
+  if (csvLine != "day,mub1,sigb1,mub2,sigb2,mub3,sigb3")
+      // this check is here to catch unexpected alterations
+      throw runtime_error ("autoRegressionParameters.csv does not have expected header line");
 
   // read every line from the stream
   while(getline(f_autoRegressionParameters, csvLine)){
@@ -134,7 +137,8 @@ void EmpiricalInfection::initParameters(){
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
 EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
-    CommonInfection(protID)
+    CommonInfection(protID),
+    _startdate(Global::simulationTime)
 {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time

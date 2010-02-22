@@ -49,9 +49,6 @@ public:
   ~EmpiricalInfection() {}
   //@}
   
-  //! Get the density of the infection
-  inline double getDensity() { return _density; };
-  
   /// Set patent growth rate multiplier.
   /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);

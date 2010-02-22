@@ -68,6 +68,7 @@ set (OM_CXXTEST_HEADERS
   HoshenPkPdSuite.h
   LSTMPkPdSuite.h
   CheckpointSuite.h
+  EmpiricalInfectionSuite.h
 )
 
 if (OM_CXXTEST_INTERPRETER)
@@ -88,6 +89,7 @@ endif (OM_CXXTEST_INTERPRETER)
 #  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
 #endforeach (DATA_FILE)
 #configure_file (${CMAKE_SOURCE_DIR}/test/${OM_LATEST_SCHEMA} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (run tests.cpp)
 target_link_libraries (run

@@ -139,10 +139,10 @@ void gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double 
 
 // -----  Setup & cleanup  -----
 
-void gsl::setUp (){
+void gsl::setUp (unsigned long int seed){
   //use the mersenne twister generator
   generator = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set (generator, InputData.getISeed());
+  gsl_rng_set (generator, seed);
 }
 
 void gsl::tearDown (){

@@ -33,7 +33,6 @@ class TransmissionModel;
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
  * Currently many members are public and directly accessed. */
-// TODO: optimise for memory
 class PerHostTransmission
 {
 public:
