@@ -29,8 +29,10 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
+#include "WithinHost/Infection.h"
 
 using namespace OM;
+using WithinHost::Infection;
 
 struct UnittestUtil {
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
@@ -63,6 +65,14 @@ struct UnittestUtil {
 	} else {
 	    assert (false);
 	}
+    }
+    
+    // For when infection parameters shouldn't be used; enforce by setting to NaNs.
+    static void Infection_init_NaN () {
+	Infection::cumulativeYstar = numeric_limits<double>::quiet_NaN();
+	Infection::cumulativeHstar = numeric_limits<double>::quiet_NaN();
+	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
+	Infection::decayM = numeric_limits<double>::quiet_NaN();
     }
 };
 

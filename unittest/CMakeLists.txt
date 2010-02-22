@@ -68,6 +68,7 @@ set (OM_CXXTEST_HEADERS
   HoshenPkPdSuite.h
   LSTMPkPdSuite.h
   CheckpointSuite.h
+  DummyInfectionSuite.h
   EmpiricalInfectionSuite.h
 )
 

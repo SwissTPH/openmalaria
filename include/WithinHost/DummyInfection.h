@@ -37,7 +37,7 @@ public:
     //! Constructor
     DummyInfection (uint32_t protID);
   
-  static void init ();
+  static void initParameters ();
   
   //! Get the last timestep before the infection is cleared.
   /*!

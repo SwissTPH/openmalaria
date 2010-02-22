@@ -65,7 +65,7 @@ void WithinHostModel::init() {
   detectionLimit=InputData.get_detectionlimit()*densitybias;
   
   if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
-    DummyInfection::init ();
+    DummyInfection::initParameters ();
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::initParameters();	// 1-day timestep check
   } else {
