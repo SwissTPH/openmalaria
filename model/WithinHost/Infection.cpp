@@ -32,10 +32,10 @@ double Infection::alpha_m;
 double Infection::decayM;
 
 void Infection::init () {
-  cumulativeYstar=(float)InputData.getParameter(Params::CUMULATIVE_Y_STAR);
-  cumulativeHstar=(float)InputData.getParameter(Params::CUMULATIVE_H_STAR);
-  alpha_m=1-exp(-InputData.getParameter(Params::NEG_LOG_ONE_MINUS_ALPHA_M));
-  decayM=InputData.getParameter(Params::DECAY_M);
+  cumulativeYstar = (float) InputData.getParameter (Params::CUMULATIVE_Y_STAR);
+  cumulativeHstar = (float) InputData.getParameter (Params::CUMULATIVE_H_STAR);
+  alpha_m = 1.0 - exp(-InputData.getParameter (Params::NEG_LOG_ONE_MINUS_ALPHA_M));
+  decayM = InputData.getParameter (Params::DECAY_M);
 }
 
 

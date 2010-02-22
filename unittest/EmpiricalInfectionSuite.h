@@ -92,6 +92,7 @@ public:
 	TS_ASSERT_APPROX (infection->getDensity(), 1.97582432565095644);
     }
     
+private:
     CommonInfection* infection;
 };
 

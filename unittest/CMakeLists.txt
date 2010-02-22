@@ -70,6 +70,8 @@ set (OM_CXXTEST_HEADERS
   CheckpointSuite.h
   DummyInfectionSuite.h
   EmpiricalInfectionSuite.h
+  InfectionImmunitySuite.h
+  #DescriptiveInfectionSuite.h
 )
 
 if (OM_CXXTEST_INTERPRETER)

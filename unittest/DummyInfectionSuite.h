@@ -24,7 +24,6 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.hpp"
 #include "WithinHost/DummyInfection.h"
-#include "util/gsl.h"
 #include <limits>
 
 using namespace OM::WithinHost;
@@ -38,6 +37,7 @@ public:
     }
     
     void setUp () {
+	Global::interval = 1;
 	Global::simulationTime = 1;	// value isn't really important
 	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
     }
@@ -72,6 +72,7 @@ public:
 	TS_ASSERT_APPROX (infection->getDensity(), 102.00000008286288040);
     }
     
+private:
     CommonInfection* infection;
 };
 
