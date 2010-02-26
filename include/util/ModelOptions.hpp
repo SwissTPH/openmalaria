@@ -21,8 +21,6 @@
 #ifndef Hmod_util_ModelOptions
 #define Hmod_util_ModelOptions
 
-#include <bitset>
-
 class UnittestUtil;
 
 namespace OM { namespace util {
@@ -169,14 +167,19 @@ namespace OM { namespace util {
     public:
 	/** Return true if given option (from OptionCodes) is active. */
 	static inline bool option(OptionCodes code) {
-	    return optSet[code];
+	    /* Performance:
+	    using bitset<>::operator[] constructs and returns some kind of
+	    reference. It's slow! bitset<>::test() isn't much better, hence
+	    reverted to integer binary ops (1/8th time). (Also note: this was
+	    the only use of bitset<> with significant performance impact.)
+	    */
+	    return optSet & code;
 	}
 	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
 	 * TRIPLE_HET are active. */
 	static inline bool anyTransHet () {
-	    std::bitset<NUM_OPTIONS> anyHet;
-	    anyHet.set (TRANS_HET).set (COMORB_TRANS_HET).set (TRANS_TREAT_HET).set (TRIPLE_HET);
-	    return (optSet & anyHet).any();
+	    int anyHet = TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET;
+	    return optSet & anyHet;
 	}
 	
 	/// Set options from XML file
@@ -186,7 +189,7 @@ namespace OM { namespace util {
 	/** Model options.
 	 *
 	 * Default value set by init(). */
-	static std::bitset<NUM_OPTIONS> optSet;
+	static int optSet;
 	
 	friend class ::UnittestUtil;	// Note: class is in base namespace
     };
