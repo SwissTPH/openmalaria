@@ -19,11 +19,20 @@
 
 /* This module contains the random-number generator and distributions wrapper.
  *
- * Currently the implementation uses GSL, though I did look into migrating it to
- * boost. The current boost code is only an addition to the GSL code, however.
+ * Currently both the GSL and boost generators are implemented. The
+ * distributions all come from the GSL library so far.
+ * 
+ * Using the boost generator appears (in rough tests) to be slightly
+ * slower, which is understandable since the GSL distributions must then use a
+ * wrapper around the boost generator.
+ * 
+ * Note: using boost distributions elsewhere could ideally be implemented a
+ * little differently, since the distribution objects could in many cases last
+ * the length of the program rather than be created on each use.
  */
 
-#define OM_RANDOM_USE_BOOST
+// Define to use boost as the underlying generator:
+//#define OM_RANDOM_USE_BOOST
 
 #include "util/random.h"
 #include "util/errors.hpp"
@@ -32,6 +41,7 @@
 #ifdef OM_RANDOM_USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/random/lognormal_distribution.hpp>
 #include <boost/static_assert.hpp>
 #endif
 
@@ -153,9 +163,12 @@ void random::checkpoint (ostream& stream, int seedFileNumber) {
 // -----  random number generation  -----
 
 double random::uniform_01 () {
-    //TODO: check both GSL and boost produce the same result here
+    // GSL and boost versions both do the same (when using boost as the underlying generator):
+# ifdef OM_RANDOM_USE_BOOST
+    return rng_uniform01 ();
+# else
     return gsl_rng_uniform (rng.gsl_generator);
-    //return rng.rng_uniform01 ();
+# endif
 }
 
 double random::gauss (double mean, double std){
@@ -167,7 +180,14 @@ double random::gamma (double a, double b){
 }
 
 double random::log_normal (double mean, double std){
+/*# ifdef OM_RANDOM_USE_BOOST
+    // This doesn't work... boost version takes actual mean and sigma and computes
+    // parameters; gsl version takes computed parameters.
+    boost::lognormal_distribution<> dist (mean, std);
+    return dist (boost_generator);
+# else*/
     return gsl_ran_lognormal (rng.gsl_generator, mean, std);
+//# endif
 }
 
 double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
