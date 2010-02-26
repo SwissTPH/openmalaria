@@ -69,6 +69,7 @@ public:
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
+      surveyAgeGroup & stream;
       _ylag & stream;
       _dateOfBirth & stream;
       _lastVaccineDose & stream;
@@ -86,7 +87,8 @@ public:
    * individual for the time-step. */
   bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
   
-  void updateInfection(Transmission::TransmissionModel*);
+  //FIXME: should be private?
+  void updateInfection(Transmission::TransmissionModel*, double ageYears);
   
   /*! Apply interventions to this human if eligible. Calculate the remaining
       efficacy of the latest vaccination if vaccinated before */
@@ -120,8 +122,10 @@ public:
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
-  //! Determines the age group of a human
-  SurveyAgeGroup ageGroup() const;
+  /// Get the survey age-group. Constant-time; returns result of last update.
+  inline SurveyAgeGroup ageGroup() const {
+      return surveyAgeGroup;
+  }
   
   //! Get the age in years, based on current simulationTime.
   double getAgeInYears() const;
@@ -182,6 +186,9 @@ private:
    * and clinical outcomes (morbidity, reporting). */
   Clinical::ClinicalModel *clinicalModel;
   //@}
+  
+  /// Made persistant to save a lookup each timestep (has a significant impact)
+  SurveyAgeGroup surveyAgeGroup;
   
   ///@brief Private variables
   //@{

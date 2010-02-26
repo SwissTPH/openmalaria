@@ -79,7 +79,7 @@ void ClinicalEventScheduler::massDrugAdministration(OM::WithinHost::WithinHostMo
     ESCaseManagement::massDrugAdministration (medicateQueue);
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears)
+void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup)
 {
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE, though considering
@@ -114,7 +114,6 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
         if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
-        SurveyAgeGroup ageGroup = ageYears;
         latestReport.update (Global::simulationTime, ageGroup, pgState);
 	
 	if (pgState & Pathogenesis::MALARIA) {
@@ -164,7 +163,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	    
 	    // Report: recovery/seq./death, in/out of hospital
-	    latestReport.update (Global::simulationTime, SurveyAgeGroup (ageYears), pgState);
+	    latestReport.update (Global::simulationTime, ageGroup, pgState);
 	    timeHealthyOrDead = Global::simulationTime + medicationDuration;
 	} else {
 	    timeHealthyOrDead = Global::simulationTime + 3;

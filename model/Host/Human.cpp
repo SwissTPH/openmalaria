@@ -150,20 +150,22 @@ void Human::destroy() {
 // -----  Non-static functions: per-timestep update  -----
 
 bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
-  int ageTimeSteps = simulationTime-_dateOfBirth;
-  if (clinicalModel->isDead(ageTimeSteps))
-    return true;
-  
-  updateInterventionStatus();
-  updateInfection(transmissionModel);
-  clinicalModel->update (*withinHostModel, getAgeInYears(), Global::simulationTime-_dateOfBirth);
-  clinicalModel->updateInfantDeaths (ageTimeSteps);
-  _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
-  return false;
+    int ageTimeSteps = simulationTime-_dateOfBirth;
+    double ageYears = ageTimeSteps * Global::yearsPerInterval;
+    surveyAgeGroup.update (ageYears);
+    if (clinicalModel->isDead(ageTimeSteps))
+	return true;
+    
+    updateInterventionStatus();
+    updateInfection(transmissionModel, ageYears);
+    clinicalModel->update (*withinHostModel, ageYears, surveyAgeGroup, ageTimeSteps);
+    clinicalModel->updateInfantDeaths (ageTimeSteps);
+    _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
+    return false;
 }
 
-void Human::updateInfection(Transmission::TransmissionModel* transmissionModel){
-  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, getAgeInYears()),
+void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
+  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageYears, surveyAgeGroup),
 					      _PEVEfficacy, perHostTransmission);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
@@ -172,7 +174,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel){
   // Cache total density for infectiousness calculations
   _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
   
-  withinHostModel->calculateDensities(getAgeInYears(), _BSVEfficacy);
+  withinHostModel->calculateDensities(ageYears, _BSVEfficacy);
 }
 
 void Human::updateInterventionStatus() {
@@ -233,12 +235,8 @@ void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*withinHostModel, getAgeInYears());
 }
 
-SurveyAgeGroup Human::ageGroup() const{
-  return SurveyAgeGroup(getAgeInYears());
-}
-
 double Human::getAgeInYears() const{
-  return double((Global::simulationTime-_dateOfBirth)*Global::interval) / Global::DAYS_IN_YEAR;
+    return (Global::simulationTime - _dateOfBirth) * Global::yearsPerInterval;
 }
 
 

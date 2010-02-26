@@ -132,6 +132,8 @@ void SurveyAgeGroup::init () {
     size_t numAgeGroups = groups.size() + 1;
     _upperbound.resize (numAgeGroups);
     _lowerbound = mon.getAgeGroup().getLowerbound();
+    if (!(_lowerbound <= 0.0))
+	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
 
     for (size_t i = 0;i < numAgeGroups - 1; i++) {
 	_upperbound[i] = groups[i].getUpperbound();
@@ -139,15 +141,9 @@ void SurveyAgeGroup::init () {
     _upperbound[numAgeGroups-1] = DBL_MAX;
 }
 
-SurveyAgeGroup::SurveyAgeGroup (double ageYears) {
-    //TODO: use faster search algorithm and compare performance
-    if (ageYears < _lowerbound)
-	_i = _upperbound.size() - 1;
-    else {
-	_i = 0;
-	while (ageYears > _upperbound[_i])
+void SurveyAgeGroup::update (double ageYears) {
+    while (ageYears > _upperbound[_i])
 	_i++;
-    }
 }
 
 

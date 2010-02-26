@@ -153,8 +153,12 @@ enum SurveyMeasure {
  * Don't use _this_ class for other index/age-group types. */
 class SurveyAgeGroup {
   public:
-    /** Find the age group for the given age ageYears. */
-    SurveyAgeGroup (double ageYears);
+    SurveyAgeGroup () : _i(0) {}
+    
+    /** Update age-group. Assumes age only increases (per instance).
+     *
+     * If called regularly, should be O(1); worst case is O(_upperbound.size()). */
+    void update (double ageYears);
     
     /// Checkpointing
     template<class S>

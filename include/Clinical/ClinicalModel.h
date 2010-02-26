@@ -80,10 +80,14 @@ public:
   /** Run main part of the model: determine the sickness status and any
    * treatment for the human.
    * 
-   * @param withinHostModel = Used to get the parasite density and to medicate
+   * Yes, the age _is_ passed 3 times...
+   * 
+   * @param withinHostModel Used to get the parasite density and to medicate
    *	drugs/clear infections.
-   * @param ageYears = Age of human. */
-  void update (WithinHost::WithinHostModel& withinHostModel, double ageYears, int ageTimeSteps);
+   * @param ageYears Age of human.
+   * @param ageGroup Survey age group of human.
+   * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
+  void update (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup, int ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -127,9 +131,10 @@ protected:
   
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
-   * @param withinHostModel = WithinHostModel of human.
-   * @param ageYears = Age of human. */
-  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears) =0;
+   * @param withinHostModel WithinHostModel of human.
+   * @param ageYears Age of human.
+   * @param ageGroup Survey age group of human. */
+  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

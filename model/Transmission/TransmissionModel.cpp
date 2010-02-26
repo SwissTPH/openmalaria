@@ -152,14 +152,13 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
 #endif
 }
 
-double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears) {
+double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, double ageInYears, SurveyAgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
   double EIR = calculateEIR (simulationTime, host, ageInYears);
   
-  SurveyAgeGroup ageGroup (ageInYears);
   timeStepEntoInnocs[ageGroup.i()] += EIR;
   timeStepNumEntoInnocs ++;
   return EIR;

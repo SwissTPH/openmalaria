@@ -122,18 +122,18 @@ void OldCaseManagement::staticCheckpoint (istream& stream) {
 
 // -----  other public  -----
 
-void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, int& doomed)
+void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed)
 {
   bool effectiveTreatment = false;
 
   if (pgState & Pathogenesis::MALARIA) {
     if (pgState & Pathogenesis::COMPLICATED)
-      effectiveTreatment = severeMalaria (latestReport, ageYears, doomed);
+      effectiveTreatment = severeMalaria (latestReport, ageYears, ageGroup, doomed);
     else if (pgState == Pathogenesis::STATE_MALARIA) {
       // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
       // included. Validity is debatable, but there's no point changing now.
       // (This does affect tests.)
-      effectiveTreatment = uncomplicatedEvent (latestReport, true, ageYears);
+      effectiveTreatment = uncomplicatedEvent (latestReport, true, ageYears, ageGroup);
     }
 
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
@@ -143,7 +143,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
       withinHostModel.immunityPenalisation();
     }
   } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
-    effectiveTreatment = uncomplicatedEvent (latestReport, false, ageYears);
+    effectiveTreatment = uncomplicatedEvent (latestReport, false, ageYears, ageGroup);
   }
 
   if (effectiveTreatment) {
@@ -154,9 +154,8 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
 
 // -----  private  -----
 
-bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears)
+bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears, SurveyAgeGroup ageGroup)
 {
-    SurveyAgeGroup ageGroup(ageYears);
     Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime) ? Regimen::UC2 : Regimen::UC;
     bool successfulTreatment = false;
     
@@ -184,9 +183,8 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
     return successfulTreatment;
 }
 
-bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, int& doomed)
+bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed)
 {
-  SurveyAgeGroup ageGroup(ageYears);
   BOOST_STATIC_ASSERT (NUM_SEQUELAE_AGE_GROUPS == 2);	// code setting sequelaeIndex assumes this
   size_t sequelaeIndex = 0;
   if (ageYears >= SEQUELAE_AGE_BOUND[0]) {

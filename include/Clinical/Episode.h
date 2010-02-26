@@ -37,7 +37,7 @@ namespace OM { namespace Clinical {
  * bouts of sickness and recovery (the most severe is reported). */
 class Episode{
 public:
-  Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup(0) {};
+  Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup() {};
   ~Episode();
   
   /** Report an episode, its severity, and any outcomes it entails.

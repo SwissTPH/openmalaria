@@ -153,7 +153,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears);
+  double getEIR (int simulationTime, PerHostTransmission& host, double ageInYears, SurveyAgeGroup ageGroup);
   
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);
