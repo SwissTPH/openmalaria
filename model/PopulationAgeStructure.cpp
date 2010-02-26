@@ -26,6 +26,7 @@
 #include <cmath>
 
 namespace OM {
+    using namespace OM::util;
 
 #ifdef OM_HAVE_GSL
 double AgeStructure::ageGroupBounds[ngroups+1];

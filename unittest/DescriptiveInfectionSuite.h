@@ -23,7 +23,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "WithinHost/DescriptiveInfection.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include <limits>
 
 using namespace OM::WithinHost;

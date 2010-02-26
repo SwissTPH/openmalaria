@@ -24,7 +24,7 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.hpp"
 #include "WithinHost/EmpiricalInfection.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include <limits>
 
 using namespace OM::WithinHost;
@@ -38,13 +38,12 @@ public:
     }
     
     void setUp () {
-	gsl::setUp (83);	// seed is unimportant, but must be fixed
+	util::random::seed (83);	// seed is unimportant, but must be fixed
 	Global::simulationTime = 1;	// value isn't really important
 	infection = new EmpiricalInfection (0xFFFFFFFF, 1);	// pkpdID (1st value) isn't important since we're not using drug model here
     }
     void tearDown () {
 	delete infection;
-	gsl::tearDown ();
     }
     
     void testNewInf () {

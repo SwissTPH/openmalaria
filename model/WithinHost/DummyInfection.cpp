@@ -22,7 +22,7 @@
 #include "WithinHost/DummyInfection.h"
 #include "WithinHost/Common.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/ModelOptions.hpp"
 
 #include <algorithm>

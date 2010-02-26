@@ -20,7 +20,7 @@
 
 #include "Clinical/EventScheduler.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Surveys.h"
 #include "util/ModelOptions.hpp"
@@ -141,7 +141,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	    
 	    int medicationDuration;
-	    if (random::uniform01() < oi->second.pDeath) {
+	    if (random::uniform_01() < oi->second.pDeath) {
 		medicationDuration = oi->second.hospitalizationDaysDeath;
 		
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);

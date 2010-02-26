@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "Pathogenesis/Mueller.h"
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/ModelOptions.hpp"
 
 #include <cmath>
@@ -87,15 +87,15 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
   double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
   pCoinfection*=_comorbidityFactor;
   
-  if ((random::uniform01()) < prEpisode) {
+  if ((random::uniform_01()) < prEpisode) {
     //Fixed severe threshold
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
     Pathogenesis::State ret;
-    if (random::uniform01() < prSevereEpisode)
+    if (random::uniform_01() < prSevereEpisode)
       ret = Pathogenesis::STATE_SEVERE;
-    else if (random::uniform01() < pCoinfection)
+    else if (random::uniform_01() < pCoinfection)
       ret = Pathogenesis::STATE_COINFECTION;
     else
       ret = Pathogenesis::STATE_MALARIA;
@@ -106,7 +106,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     */
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
-    if (random::uniform01() < indirectRisk)
+    if (random::uniform_01() < indirectRisk)
       ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
@@ -114,7 +114,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     //TODO: should this be stored in the XML file?
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
-    if (random::uniform01() < prNonMalariaFever)
+    if (random::uniform_01() < prNonMalariaFever)
       return Pathogenesis::SICK;
   }
   return Pathogenesis::NONE;

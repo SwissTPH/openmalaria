@@ -20,7 +20,7 @@
 
 #include "WithinHost/DescriptiveIPT.h"
 #include "WithinHost/DescriptiveIPTInfection.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/errors.hpp"
 #include "util/ModelOptions.hpp"
 #include "inputData.h"
@@ -157,7 +157,7 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ag
   
   for (int i=0;i<numberOfIPTiDoses; i++) {
     if (iptiTargetagetstep[i] == agetstep) {
-      if (random::uniform01() <  iptiCoverage[i]) {
+      if (random::uniform_01() <  iptiCoverage[i]) {
         _lastIptiOrPlacebo=Global::simulationTime;
         /*
         iptiEffect denotes treatment or placebo group

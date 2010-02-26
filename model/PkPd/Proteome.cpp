@@ -21,7 +21,7 @@
 */
 
 #include "PkPd/Proteome.h"
-#include "util/gsl.h"
+#include "util/random.h"
 
 #include <string>
 #include <vector>
@@ -125,7 +125,7 @@ void ProteomeInstance::cleanup () {
 
 uint32_t ProteomeInstance::newInfection() {
   const double percRes = 0.0;		// proportion of resistant infections
-  if (random::uniform01() < percRes) {
+  if (random::uniform_01() < percRes) {
     return instances[1].getProteomeID();
   } else {
     return instances[0].getProteomeID();

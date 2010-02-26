@@ -21,7 +21,7 @@
 #define Hmod_PerHostTransmission
 
 #include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
-#include "util/gsl.h"
+#include "util/random.h"
 #include "inputData.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 

@@ -17,118 +17,175 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/* This module contains the random-number generator and distributions wrapper.
+ *
+ * Currently the implementation uses GSL, though I did look into migrating it to
+ * boost. The current boost code is only an addition to the GSL code, however.
+ */
+
+//TODO: enable
+//#define OM_RANDOM_USE_BOOST
+
 #include "util/random.h"
-#include <boost/random/variate_generator.hpp>
+#include "util/errors.hpp"
+#include "Global.h"
+
+#ifdef OM_RANDOM_USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
+#include <boost/random/uniform_01.hpp>
+#endif
+
+#include <gsl/gsl_cdf.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+
+#include <cmath>
 #include <sstream>
 
 using namespace boost;
 
 namespace OM { namespace util {
 
-namespace random {
-    mt19937 generator;
-    uniform_real<> dist_uniform01 (0,1);
-    variate_generator<mt19937&, uniform_real<> > rng_uniform01 (generator, dist_uniform01);
+// This should be created and deleted automatically, taking care of
+// allocating and freeing the generator.
+struct generator_factory {
+# ifdef OM_RANDOM_USE_BOOST
+    mt19937 boost_generator;
+    uniform_01<mt19937&> rng_uniform01 (boost_generator);
     
-    
-    // -----  set-up, tear-down and checkpointing  -----
-    
-    void seed (uint32_t seed) {
-	generator.seed (seed);
+    uint32_t boost_rng_get (void*) {
+	return boost_generator ();
     }
-    
-    void checkpoint (istream& stream) {
-	string str;
-	str & stream;
-	istringstream ss (str);
-	ss >> generator;
-    }
-    void checkpoint (ostream& stream) {
-	ostringstream ss;
-	ss << generator;
-	ss.str() & stream;
-    }
-    
-    // -----  random number generation  -----
-    
-    double uniform01 () {
+    double boost_rng_get_double_01 (void*) {
 	return rng_uniform01 ();
     }
+    
+    static const gsl_rng_type boost_mt_type = {
+	"boost_mt19937",		// name
+	boost_generator.max(),	// max value
+	boost_generator.min(),	// min value
+	0,					// size of state; not used here
+	NULL,				// re-seed function; don't use
+	&boost_rng_get,
+	&boost_rng_get_double_01
+    };
+# endif
+    gsl_rng * gsl_generator;
+    
+    generator_factory () {
+#	ifdef OM_RANDOM_USE_BOOST
+	// In this case, I construct a wrapper around boost's generator. The reason for this is
+	// that it allows use of distributions from both boost and GSL.
+	gsl_generator = new gsl_rng;
+	gsl_generator->type = &boost_mt_type;
+	gsl_generator->state = NULL;
+#	else
+	//use the mersenne twister generator
+	gsl_generator = gsl_rng_alloc(gsl_rng_mt19937);
+#	endif
+    }
+    ~generator_factory () {
+#	ifdef OM_RANDOM_USE_BOOST
+	delete gsl_generator->type;
+	delete gsl_generator;
+#	else
+	gsl_rng_free (gsl_generator);
+#	endif
+    }
+} rng;
+
+// -----  set-up, tear-down and checkpointing  -----
+
+void random::seed (uint32_t seed) {
+# ifdef OM_RANDOM_USE_BOOST
+    boost_generator.seed (seed);
+# else
+    gsl_rng_set (rng.gsl_generator, seed);
+# endif
+}
+
+void random::checkpoint (istream& stream, int seedFileNumber) {
+# ifdef OM_RANDOM_USE_BOOST
+    string str;
+    str & stream;
+    istringstream ss (str);
+    ss >> boost_generator;
+# else
+    
+    ostringstream seedN;
+    seedN << string("seed") << seedFileNumber;
+    FILE * f = fopen(seedN.str().c_str(), "rb");
+    if (f == NULL)
+	throw checkpoint_error (string("load_rng_state: file not found: ").append(seedN.str()));
+    if (gsl_rng_fread(f, rng.gsl_generator) != 0)
+	throw checkpoint_error ("gsl_rng_fread failed");
+    fclose (f);
+# endif
+}
+
+void random::checkpoint (ostream& stream, int seedFileNumber) {
+# ifdef OM_RANDOM_USE_BOOST
+    ostringstream ss;
+    ss << boost_generator;
+    ss.str() & stream;
+# else
+    
+    ostringstream seedN;
+    seedN << string("seed") << seedFileNumber;
+    FILE * f = fopen(seedN.str().c_str(), "wb");
+    if (gsl_rng_fwrite(f, rng.gsl_generator) != 0)
+	throw checkpoint_error ("gsl_rng_fwrite failed");
+    fclose (f);
+# endif
+}
+
+
+// -----  random number generation  -----
+
+double random::uniform_01 () {
+    //TODO: check both GSL and boost produce the same result here
+    return gsl_rng_uniform (rng.gsl_generator);
+    //return rng_uniform01 ();
+}
+
+double random::gauss (double mean, double std){
+    return gsl_ran_gaussian(rng.gsl_generator,std)+mean;
+}
+
+double random::gamma (double a, double b){
+    return gsl_ran_gamma(rng.gsl_generator, a, b);
+}
+
+double random::log_normal (double mean, double std){
+    return gsl_ran_lognormal (rng.gsl_generator, mean, std);
+}
+
+double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
+    // Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
+    
+    double zval = gsl_cdf_ugaussian_Pinv (normp);
     /*
-    double Random::rngGauss (double mean, double std){
-	return gsl_ran_gaussian(generator,std)+mean;
-    }
-    
-    double Random::rngGamma (double a, double b){
-	return gsl_ran_gamma(generator, a, b);
-    }
-    
-    double Random::rngLogNormal (double mean, double std){
-	return gsl_ran_lognormal (generator, mean, std);
-    }
-    
-    double Random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
-	// Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
-	
-	double zval = Random::cdfUGaussianPInv (normp);
-	/*
-	Why not zval=W_UGAUSS?
-	where normp is distributed uniformly over [0,1],
-	zval is distributed like a standard normal distribution
-	where normp has been transformed by raising to the power of 1/(T-1) 
-	zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
-	distr. function of a uniform gauss
-	* /
-	return exp(meanlog+stdlog*((float)zval));
-    }
-    
-    double Random::rngBeta (double a, double b){
-	return gsl_ran_beta (generator,a,b);
-    }
-    
-    int Random::rngPoisson(double lambda){
-	if (!finite(lambda)) {
-	    //This would lead to an inifinite loop in gsl_ran_poisson
-	    cerr << "lambda isInf" << endl;
-	    exit(-1);
-	}
-	return gsl_ran_poisson (generator, lambda);
-    }
-    
-    
-    // -----  ?  -----
-    
-    double Random::cdfUGaussianP (double x){
-	return gsl_cdf_ugaussian_P(x);
-    }
-    
-    double Random::cdfUGaussianPInv (double p){
-	return gsl_cdf_ugaussian_Pinv(p);
-    }
+    Why not zval=W_UGAUSS?
+    where normp is distributed uniformly over [0,1],
+    zval is distributed like a standard normal distribution
+    where normp has been transformed by raising to the power of 1/(T-1) 
+    zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
+    distr. function of a uniform gauss
     */
-    
-    // -----  Setup & cleanup  -----
-    /*
-    void Random::rngLoadState (int seedFileNumber){
-	ostringstream seedN;
-	seedN << string("seed") << seedFileNumber;
-	FILE * f = fopen(seedN.str().c_str(), "rb");
-	if (f!=NULL){
-	    gsl_rng_fread(f, generator);
-	    fclose (f);
-	}else{
-	    throw runtime_error (string("load_rng_state: file not found: ").append(seedN.str()));
-	}
+    return exp(meanlog+stdlog*((float)zval));
+}
+
+double random::beta (double a, double b){
+    return gsl_ran_beta (rng.gsl_generator,a,b);
+}
+
+int random::poisson(double lambda){
+    if (!finite(lambda)) {
+	//This would lead to an inifinite loop in gsl_ran_poisson
+	cerr << "lambda isInf" << endl;
+	exit(-1);
     }
-    
-    void Random::rngSaveState (int seedFileNumber){
-	ostringstream seedN;
-	seedN << string("seed") << seedFileNumber;
-	FILE * f = fopen(seedN.str().c_str(), "wb");
-	gsl_rng_fwrite(f, generator);
-	fclose (f);
-    }*/
-};
+    return gsl_ran_poisson (rng.gsl_generator, lambda);
+}
+
 } }

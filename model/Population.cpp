@@ -33,6 +33,7 @@
 #include "PkPd/PkPdModel.h"
 
 #include "util/errors.hpp"
+#include "util/random.h"
 #include "util/ModelOptions.hpp"
 
 namespace OM
@@ -291,7 +292,7 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::
 
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         double ageYears = iter->getAgeInYears();
-        if ( (ageYears > minAge) && (ageYears < maxAge) && random::uniform01() < coverage)
+        if ( (ageYears > minAge) && (ageYears < maxAge) && random::uniform_01() < coverage)
             // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
             ( (*iter).*intervention) ();
     }

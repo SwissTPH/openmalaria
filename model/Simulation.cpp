@@ -23,7 +23,6 @@
 
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
-#include "util/gsl.h"
 #include "Surveys.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
@@ -50,7 +49,6 @@ Simulation::Simulation(util::Checksum ck)
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
-    gsl::setUp (InputData.getISeed());
     util::random::seed (InputData.getISeed());
     util::ModelOptions::init ();
     Surveys.init();
@@ -63,8 +61,6 @@ Simulation::Simulation(util::Checksum ck)
 Simulation::~Simulation(){
   //free memory
   Population::clear();
-  
-  gsl::tearDown();
 }
 
 
@@ -178,8 +174,6 @@ void Simulation::writeCheckpoint(){
 	checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
     }
   
-  gsl::rngSaveState (checkpointNum);
-  
   // Open the next checkpoint file for writing:
   ostringstream name;
   name << CHECKPOINT << checkpointNum;
@@ -187,10 +181,12 @@ void Simulation::writeCheckpoint(){
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
     checkpoint (out);
+    util::random::checkpoint (out, checkpointNum);
     out.close();
   } else {
     ofstream out(name.str().c_str(), ios::out | ios::binary);
     checkpoint (out);
+    util::random::checkpoint (out, checkpointNum);
     out.close();
   }
   
@@ -213,6 +209,7 @@ void Simulation::readCheckpoint() {
   ifstream in(name.str().c_str(), ios::in | ios::binary);
   if (in.good()) {
     checkpoint (in);
+    util::random::checkpoint (in, checkpointNum);
     in.close();
   } else {
     name << ".gz";				// then compressed
@@ -220,10 +217,10 @@ void Simulation::readCheckpoint() {
     if (!in.good())
       throw util::checkpoint_error ("Unable to read file");
     checkpoint (in);
+    util::random::checkpoint (in, checkpointNum);
     in.close();
   }
   
-  gsl::rngLoadState (checkpointNum);
   cerr << "Loaded checkpoint from: " << name.str() << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
@@ -237,7 +234,6 @@ void Simulation::readCheckpoint() {
 void Simulation::checkpoint (istream& stream) {
     util::checkpoint::header (stream);
     util::CommandLine::staticCheckpoint (stream);
-    util::random::checkpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
     
@@ -272,7 +268,6 @@ void Simulation::checkpoint (ostream& stream) {
     util::timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
-    util::random::checkpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
     

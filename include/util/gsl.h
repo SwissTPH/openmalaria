@@ -21,33 +21,9 @@
 #ifndef GSL_WRAPPER_H
 #define GSL_WRAPPER_H
 
-// rather than change all includes immediately to include random.h, it comes for free with this header for now:
-#include "util/random.h"
-
-// Note: should be in namespace util too but can't see much point here.
-namespace OM {
+namespace OM { namespace util {
 ///@brief A wrapper about some GSL functionality, and some additional functionality based on GSL routines.
 namespace gsl {
-  ///@brief Random number generators
-  //@{
-  /** This function returns a Gaussian random variate, with mean mean and standard deviation std. */
-  double rngGauss (double mean, double std);
-  
-  /** This function returns a random variate from the gamma distribution. */
-  double rngGamma (double a, double b);
-  
-  /** This function returns a random variate from the lognormal distribution. */
-  double rngLogNormal (double mean, double std);
-  
-  /** Used for performance reasons. Calling rngLogNormal 5 times is 50% slower. */
-  double sampleFromLogNormal (double normp, double meanlog, double stdlog);
-  
-  /** This function returns a random variate from the beta distribution. */
-  double rngBeta(double a, double b);
-  
-  /** This function returns a random integer from the Poisson distribution with mean lambda. */
-  int rngPoisson(double lambda);
-  //@}
   
   /** These functions compute the cumulative distribution function P(x) and it's inverse for the unit Gaussian distribution. */
   double cdfUGaussianP (double x);
@@ -61,18 +37,6 @@ namespace gsl {
    * @param param2 Initial guess of second
    */
   void minimizeCalc_rss(double (*func) (double,double), double param1, double param2);
-  
-  
-  ///@brief Setup & cleanup
-  //@{
-  /// Set up the random-number-generator with seed (usually InputData.getISeed()).
-  void setUp(unsigned long int seed);
-  /// Free memory
-  void tearDown();
-  
-  void rngSaveState(int seedFileNumber);
-  void rngLoadState(int seedFileNumber);
-  //@}
 }
-}
+} }
 #endif

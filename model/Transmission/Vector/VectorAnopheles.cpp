@@ -24,7 +24,6 @@
 
 #include "inputData.h"
 #include "Simulation.h"
-#include "util/random.h"
 #include "util/vectors.h"
 
 #include <gsl/gsl_blas.h>

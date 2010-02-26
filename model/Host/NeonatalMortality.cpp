@@ -20,7 +20,7 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Host/Human.h"
-#include "util/gsl.h"
+#include "util/random.h"
 
 namespace OM { namespace Host {
     using namespace OM::util;
@@ -44,7 +44,7 @@ void NeonatalMortality::staticCheckpoint (ostream& stream) {
 }
 
 bool NeonatalMortality::eventNeonatalMortality() {
-  return random::uniform01() <= _riskFromMaternalInfection;
+  return random::uniform_01() <= _riskFromMaternalInfection;
 }
 
 void NeonatalMortality::update (const list<Host::Human>& population) {

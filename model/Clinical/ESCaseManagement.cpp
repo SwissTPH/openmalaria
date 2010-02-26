@@ -20,7 +20,7 @@
 
 #include "Clinical/ESCaseManagement.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/errors.hpp"
 
 #include <boost/static_assert.hpp>
@@ -128,7 +128,7 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
 }
 
 CaseTreatmentPair ESCaseManagement::CMPBranchSet::traverse (cmid id) {
-    double randCum = random::uniform01();
+    double randCum = random::uniform_01();
     size_t i = 0;
     while (branches[i].cumP < randCum) {
 	++i;

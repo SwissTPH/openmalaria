@@ -20,10 +20,10 @@
 
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/intervention.h"
-#include "util/gsl.h"
 #include "inputData.h"
 #include "Transmission/PerHostTransmission.h"
 #include "util/ModelOptions.hpp"
+#include "util/random.h"
 
 #include <stdexcept>
 
@@ -109,11 +109,15 @@ double InfectionIncidenceModel::getAvailabilityFactor(double baseAvailability) {
   return baseAvailability;
 }
 double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
-  return gsl::rngGamma(BaselineAvailabilityShapeParam,
+    // Gamma sample with k=BaselineAvailabilityShapeParam; mean is baseAvailability
+  return random::gamma(BaselineAvailabilityShapeParam,
 		 baseAvailability/BaselineAvailabilityShapeParam);
 }
 double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
-  return gsl::rngLogNormal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
+    // given BaselineAvailabilityShapeParam = sqrt (log (1 + variance/mean²))
+    // and baseAvailability = mean, this is a draw from the log-normal distribution.
+    // FIXME: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
+  return random::log_normal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 		     BaselineAvailabilityShapeParam);
 }
 
@@ -134,11 +138,11 @@ double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEI
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
-  return gsl::rngGamma(InfectionrateShapeParam,
+  return random::gamma(InfectionrateShapeParam,
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
-  return gsl::sampleFromLogNormal(random::uniform01(),
+  return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
 }
@@ -184,7 +188,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
     _pinfected = 1.0;
   
   if (expectedNumInfections > 0.0000001)
-    return gsl::rngPoisson(expectedNumInfections);
+    return random::poisson(expectedNumInfections);
   else
     return 0;
 }

@@ -27,12 +27,13 @@
 #include "WithinHost/DummyInfection.h"
 #include "WithinHost/EmpiricalInfection.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 
 #include <cmath>
 using namespace std;
+using namespace OM::util;
 
 namespace OM { namespace WithinHost {
 // NOTE: I'd rather use these than x.99 values, but it changes things!
@@ -105,7 +106,7 @@ WithinHostModel::WithinHostModel () :
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
     _MOI(0), totalDensity(0.0), timeStepMaxDensity(0.0)
 {
-    _innateImmSurvFact = exp(-gsl::rngGauss(0, sigma_i));
+    _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
 }
 
 

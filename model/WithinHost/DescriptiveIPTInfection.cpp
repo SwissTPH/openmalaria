@@ -20,7 +20,7 @@
 
 #include "WithinHost/DescriptiveIPTInfection.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 
 namespace OM { namespace WithinHost {
      using namespace OM::util;
@@ -59,7 +59,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
-    double rndSample=(random::uniform01());
+    double rndSample=(random::uniform_01());
     double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
     for (size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
@@ -83,7 +83,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 }
 
 bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
-    return (random::uniform01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
+    return (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
     (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
 }
 

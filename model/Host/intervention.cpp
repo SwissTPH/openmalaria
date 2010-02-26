@@ -22,11 +22,12 @@
 
 #include "Host/intervention.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "util/errors.hpp"
 
 namespace OM { namespace Host {
-    
+    using namespace OM::util;
+
 enum VaccineType {
     preerythrocytic_reduces_h = 1,
     erythrocytic_reduces_y = 2,
@@ -50,7 +51,7 @@ double Vaccine::getEfficacy (int numPrevDoses)
         numPrevDoses = initialMeanEfficacy.size() - 1;
     if (initialMeanEfficacy[numPrevDoses] <  1) {
         double a = efficacyB * initialMeanEfficacy[numPrevDoses] / (1.0 - initialMeanEfficacy[numPrevDoses]);
-        return gsl::rngBeta (a, efficacyB);
+        return random::beta (a, efficacyB);
     } else
         return 1.0;
 }

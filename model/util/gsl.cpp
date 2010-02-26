@@ -17,73 +17,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include <string>
-using namespace std;
-#include <gsl/gsl_cdf.h>
-#include <gsl/gsl_multimin.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include "util/gsl.h"
 #include "inputData.h"
 #include "Global.h"
 #include "util/errors.hpp"
 
-namespace OM { 
+#include <gsl/gsl_cdf.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
+#include <string>
+using namespace std;
 
-gsl_rng * generator;
-
-
-// -----  random number generation  -----
-
-double gsl::rngGauss (double mean, double std){
-  return gsl_ran_gaussian(generator,std)+mean;
-}
-
-double gsl::rngGamma (double a, double b){
-  return gsl_ran_gamma(generator, a, b);
-}
-
-double gsl::rngLogNormal (double mean, double std){
-  return gsl_ran_lognormal (generator, mean, std);
-}
-
-double gsl::sampleFromLogNormal(double normp, double meanlog, double stdlog){
-  // Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
-  
-  double zval = gsl::cdfUGaussianPInv (normp);
-    /*
-  Why not zval=W_UGAUSS?
-  where normp is distributed uniformly over [0,1],
-  zval is distributed like a standard normal distribution
-  where normp has been transformed by raising to the power of 1/(T-1) 
-  zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
-  distr. function of a uniform gauss
-    */
-  return exp(meanlog+stdlog*((float)zval));
-}
-
-double gsl::rngBeta (double a, double b){
-  return gsl_ran_beta (generator,a,b);
-}
-
-int gsl::rngPoisson(double lambda){
-  if (!finite(lambda)) {
-    //This would lead to an inifinite loop in gsl_ran_poisson
-    cerr << "lambda isInf" << endl;
-    exit(-1);
-  }
-  return gsl_ran_poisson (generator, lambda);
-}
+namespace OM { namespace util {
 
 
 // -----  ?  -----
 
 double gsl::cdfUGaussianP (double x){
-  return gsl_cdf_ugaussian_P(x);
+    return gsl_cdf_ugaussian_P(x);
 }
 
 double gsl::cdfUGaussianPInv (double p){
-  return gsl_cdf_ugaussian_Pinv(p);
+    return gsl_cdf_ugaussian_Pinv(p);
 }
 
 // function pointer for wCalcRSS's func
@@ -132,37 +88,4 @@ void gsl::minimizeCalc_rss(double (*func) (double,double), double param1,double 
     gsl_multimin_fminimizer_free (minimizer);
 }
 
-
-// -----  Setup & cleanup  -----
-
-void gsl::setUp (unsigned long int seed){
-  //use the mersenne twister generator
-  generator = gsl_rng_alloc(gsl_rng_mt19937);
-  gsl_rng_set (generator, seed);
-}
-
-void gsl::tearDown (){
-  gsl_rng_free (generator);
-}
-
-void gsl::rngLoadState (int seedFileNumber){
-  ostringstream seedN;
-  seedN << string("seed") << seedFileNumber;
-  FILE * f = fopen(seedN.str().c_str(), "rb");
-  if (f!=NULL){
-    gsl_rng_fread(f, generator);
-    fclose (f);
-  }else{
-    throw runtime_error (string("load_rng_state: file not found: ").append(seedN.str()));
-  }
-}
-
-void gsl::rngSaveState (int seedFileNumber){
-  ostringstream seedN;
-  seedN << string("seed") << seedFileNumber;
-  FILE * f = fopen(seedN.str().c_str(), "wb");
-  gsl_rng_fwrite(f, generator);
-  fclose (f);
-}
-
-}
+} }

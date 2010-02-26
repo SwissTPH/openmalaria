@@ -20,7 +20,7 @@
 #include "Transmission/NonVector.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
-#include "util/gsl.h"
+#include "util/random.h"
 #include "Surveys.h"	// sim-end timestep
 #include <cfloat>
 
