@@ -166,7 +166,7 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 	sample the maximum density over the T-1 remaining days in the
 	time interval, (where T is the duration of the time interval)
 	*/
-	double normp = pow(gsl::rngUniform(), 1.0 / (Global::interval-1));
+	double normp = pow(rng::uniform01(), 1.0 / (Global::interval-1));
 	/*
 	To mimic sampling T-1 repeated values, we transform the sampling
 	distribution and use only one sampled value, which has the sampling
@@ -179,7 +179,7 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 	timeStepMaxDensity = gsl::sampleFromLogNormal(normp, meanlog, stdlog);
       }
       //calculate the expected density on the day of sampling
-      _density = gsl::sampleFromLogNormal(gsl::rngUniform(), meanlog, stdlog);
+      _density = gsl::sampleFromLogNormal(rng::uniform01(), meanlog, stdlog);
       timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
     }
     if (_density > maxDens || timeStepMaxDensity > maxDens) {

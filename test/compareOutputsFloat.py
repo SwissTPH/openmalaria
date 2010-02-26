@@ -162,6 +162,8 @@ ident is 1 if files are binary-equal."""
     numDiffs=0
     numMissing1=0
     numMissing2=0
+    perMeasureNum = dict()
+    perMeasureTotal = dict()
     perMeasureNumDiff = dict()
     perMeasureDiffSum = dict()
     perMeasureDiffAbsSum = dict()
@@ -170,14 +172,18 @@ ident is 1 if files are binary-equal."""
             numMissing1 += 1
         elif v2==None:
             numMissing2 += 1
-        # Compare with relative precision
-        elif not approx_equal_6 (v1, v2):
+        else:
+            perMeasureNum[k.measure] = perMeasureNum.get(k.measure, 0) + 1
+            perMeasureTotal[k.measure] = perMeasureTotal.get(k.measure, 0.0) + v1
+            
+            # Compare with relative precision
+            if approx_equal_6 (v1, v2):
+                continue
+            
             numDiffs += 1
             # Sum up total difference per measure
             perMeasureDiffSum[k.measure]    = perMeasureDiffSum.get(k.measure,0.0)    + v2 - v1
             perMeasureDiffAbsSum[k.measure] = perMeasureDiffAbsSum.get(k.measure,0.0) + math.fabs(v2-v1)
-        else:
-            continue
         
         numPrinted += 1
         perMeasureNumDiff[k.measure] = perMeasureNumDiff.get(k.measure,0) + 1;
@@ -190,10 +196,11 @@ ident is 1 if files are binary-equal."""
         print "{0} entries missing from first file, {1} from second".format(numMissing1,numMissing2)
         ret = 3
     
-    for (k.measure,val) in perMeasureDiffAbsSum.iteritems():
-        if val > 1e-6:
+    for (k.measure,absDiff) in perMeasureDiffAbsSum.iteritems():
+        if absDiff > 1e-6:
             diff=perMeasureDiffSum[k.measure]
-            print "Diff sum for measure {0: >3}:{1: >12.5f}\tabs: {2: >12.5f}\t(ratio: {3: >9.5f}; from {4:>3} diffs)".format(k.measure,diff,val,diff/val,perMeasureNumDiff.get(k.measure,0))
+            sum1=perMeasureTotal[k.measure]
+            print "for measure {0: >3}: sum(1st file):{1: >12.5f}  diff/sum: {2: >12.5}  (abs diff)/sum: {3: >12.5}  diff/(abs diff): {4: >9.5f}  num diffs/total: {5:>3}/{6:>3}".format(k.measure,sum1,diff/sum1,absDiff/sum1,diff/absDiff,perMeasureNumDiff.get(k.measure,0),perMeasureNum.get(k.measure,0))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:

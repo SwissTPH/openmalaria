@@ -21,15 +21,15 @@
 #ifndef GSL_WRAPPER_H
 #define GSL_WRAPPER_H
 
+// rather than change all includes immediately to include random.h, it comes for free with this header for now:
+#include "util/random.h"
+
 // Note: should be in namespace util too but can't see much point here.
 namespace OM {
 ///@brief A wrapper about some GSL functionality, and some additional functionality based on GSL routines.
 namespace gsl {
   ///@brief Random number generators
   //@{
-  /** Generate a random number in the range [0,1). */
-  double rngUniform();
-  
   /** This function returns a Gaussian random variate, with mean mean and standard deviation std. */
   double rngGauss (double mean, double std);
   

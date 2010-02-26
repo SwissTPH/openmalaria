@@ -50,6 +50,7 @@ Simulation::Simulation(util::Checksum ck)
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
     gsl::setUp (InputData.getISeed());
+    rng::seed (InputData.getISeed());
     util::ModelOptions::init ();
     Surveys.init();
     Population::init();
@@ -266,7 +267,7 @@ void Simulation::checkpoint (ostream& stream) {
     util::checkpoint::header (stream);
     if (stream == NULL || !stream.good())
 	throw util::checkpoint_error ("Unable to write to file");
-    timer::startCheckpoint ();
+    util::timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
@@ -281,7 +282,7 @@ void Simulation::checkpoint (ostream& stream) {
     workUnitIdentifier & stream;
     cksum & stream;
     
-    timer::stopCheckpoint ();
+    util::timer::stopCheckpoint ();
     if (stream.fail())
 	throw util::checkpoint_error ("stream write error");
 }

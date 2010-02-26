@@ -155,7 +155,7 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ag
   
   for (int i=0;i<numberOfIPTiDoses; i++) {
     if (iptiTargetagetstep[i] == agetstep) {
-      if (gsl::rngUniform() <  iptiCoverage[i]) {
+      if (rng::uniform01() <  iptiCoverage[i]) {
         _lastIptiOrPlacebo=Global::simulationTime;
         /*
         iptiEffect denotes treatment or placebo group

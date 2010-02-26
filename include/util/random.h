@@ -17,12 +17,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_timer
-#define Hmod_timer
+#include "Global.h"
 
-namespace OM { namespace util { namespace timer {
-  void startCheckpoint ();
-  void stopCheckpoint ();
-} } }
+namespace OM { namespace util {
 
-#endif
+/** Random number generator.
+ *
+ * This interface should be independant of implementation. */
+namespace rng {
+    ///@brief Setup & cleanup; checkpointing
+    //@{
+    /// Reseed the random-number-generator with seed (usually InputData.getISeed()).
+    void seed (uint32_t seed);
+    
+    //TODO: checkpoint
+    //@}
+    
+    ///@brief Random number distributions
+    //@{
+    /** Generate a random number in the range [0,1). */
+    double uniform01 ();
+    //@}
+};
+}
+// convenience: make rng available in the ::OM namespace
+namespace rng = util::rng;
+}

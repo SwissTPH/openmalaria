@@ -3,7 +3,7 @@
   <inputBranches depends="maxAge">
     <choice value="5">
       <inputBranches id="caseRef0" depends="case">
-        <choice value="uc1">
+        <choice value="UC1">
           <randomBranches id="testedRef0" depends="tested">
             <choice value="microscopy" p="0.02">
               <randomBranches id="resultRef0" depends="result">
@@ -80,7 +80,7 @@
                 </choice>
               </randomBranches>
             </choice>
-            <choice value="no" p="0.9">
+            <choice value="none" p="0.9">
               <randomBranches id="drugRef2" depends="drug">
                 <choice value="SP" p="0.4">
                   <randomBranches id="qualityRef2" depends="quality">
@@ -128,7 +128,7 @@
             </choice>
           </randomBranches>
         </choice>
-        <choice value="uc2">
+        <choice value="UC2">
           <randomBranches id="testedRef1" depends="tested">
             <choice value="microscopy" p="0.04">
               <randomBranches ref="resultRef0"/>
@@ -136,7 +136,7 @@
             <choice value="RDT" p="0.14">
               <randomBranches ref="resultRef1"/>
             </choice>
-            <choice value="no" p="0.82">
+            <choice value="none" p="0.82">
               <randomBranches id="drugRef3" depends="drug">
                 <choice value="SP" p="0.45">
                   <randomBranches ref="qualityRef2"/>
@@ -149,7 +149,7 @@
             </choice>
           </randomBranches>
         </choice>
-        <choice value="sev">
+        <choice value="severe">
           <randomBranches id="testedRef2" depends="tested">
             <choice value="microscopy" p="0.2">
               <randomBranches id="resultRef2" depends="result">
@@ -197,7 +197,7 @@
             <choice value="RDT" p="0.4">
               <randomBranches ref="resultRef2"/>
             </choice>
-            <choice value="no" p="0.4">
+            <choice value="none" p="0.4">
               <randomBranches id="treatmentRef2" depends="treatment">
                 <choice value="parenteral" p="0.1">
                   <randomBranches ref="managementRef0"/>
@@ -239,7 +239,7 @@
                 </choice>
               </randomBranches>
             </choice>
-            <choice value="no" p="0.9">
+            <choice value="none" p="0.9">
               <randomBranches ref="drugRef2"/>
             </choice>
           </randomBranches>
@@ -259,7 +259,7 @@
             <choice value="RDT" p="0.08">
               <randomBranches ref="resultRef3"/>
             </choice>
-            <choice value="no" p="0.9">
+            <choice value="none" p="0.9">
               <randomBranches ref="drugRef2"/>
             </choice>
           </randomBranches>

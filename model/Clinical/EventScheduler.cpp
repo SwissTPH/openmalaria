@@ -140,7 +140,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	    
 	    int medicationDuration;
-	    if (gsl::rngUniform() < oi->second.pDeath) {
+	    if (rng::uniform01() < oi->second.pDeath) {
 		medicationDuration = oi->second.hospitalizationDaysDeath;
 		
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);

@@ -124,7 +124,7 @@ void ProteomeInstance::cleanup () {
 
 uint32_t ProteomeInstance::newInfection() {
   const double percRes = 0.0;		// proportion of resistant infections
-  if (gsl::rngUniform() < percRes) {
+  if (rng::uniform01() < percRes) {
     return instances[1].getProteomeID();
   } else {
     return instances[0].getProteomeID();

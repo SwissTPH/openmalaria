@@ -21,7 +21,6 @@
 #ifndef Hmod_DescriptiveIPTInfection
 #define Hmod_DescriptiveIPTInfection
 #include "DescriptiveInfection.h"
-#include "util/gsl.h"
 
 namespace scnXml {
     class Interventions;	// XML data passed to initParameters
@@ -62,10 +61,7 @@ public:
   //@}
   
   /** The event that the last SP dose clears parasites. */
-  bool eventSPClears (int _lastSPDose) {
-    return (gsl::rngUniform() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
-    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
-  }
+  bool eventSPClears (int _lastSPDose);
   
   /// Return: _SPattenuate == 1. Name by DH.
   bool doSPAttenuation () { return _SPattenuate == 1; }

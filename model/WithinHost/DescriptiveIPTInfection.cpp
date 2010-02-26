@@ -58,7 +58,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
-    double rndSample=(gsl::rngUniform());
+    double rndSample=(rng::uniform01());
     double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
     for (size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
@@ -81,6 +81,10 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
     }
 }
 
+bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
+    return (rng::uniform01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
+    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
+}
 
 double DescriptiveIPTInfection::asexualAttenuation () {
   double attFact = 1.0 / genotypes[proteome_ID].atten;

@@ -127,7 +127,7 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
 }
 
 CaseTreatmentPair ESCaseManagement::CMPBranchSet::traverse (cmid id) {
-    double randCum = gsl::rngUniform();
+    double randCum = rng::uniform01();
     size_t i = 0;
     while (branches[i].cumP < randCum) {
 	++i;

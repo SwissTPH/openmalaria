@@ -35,10 +35,6 @@ gsl_rng * generator;
 
 // -----  random number generation  -----
 
-double gsl::rngUniform (){
-  return gsl_rng_uniform (generator);
-}
-
 double gsl::rngGauss (double mean, double std){
   return gsl_ran_gaussian(generator,std)+mean;
 }

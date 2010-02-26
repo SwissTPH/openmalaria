@@ -89,38 +89,38 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
   
   if (util::ModelOptions::option (util::TRANS_HET)) {
     availabilityFactor=0.2;
-    if (gsl::rngUniform() < 0.5) {
+    if (rng::uniform01() < 0.5) {
       availabilityFactor=1.8;
     }
   }
   if (util::ModelOptions::option (util::COMORB_HET)) {
     _comorbidityFactor=0.2;
-    if (gsl::rngUniform() < 0.5) {
+    if (rng::uniform01() < 0.5) {
       _comorbidityFactor=1.8;
     }	
   }
   if (util::ModelOptions::option (util::TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
-    if (gsl::rngUniform() < 0.5) {            
+    if (rng::uniform01() < 0.5) {            
       _treatmentSeekingFactor=1.8;
     }	
   }
   if (util::ModelOptions::option (util::TRANS_TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
     availabilityFactor=1.8;
-    if (gsl::rngUniform()<0.5) {
+    if (rng::uniform01()<0.5) {
       _treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
   } else if (util::ModelOptions::option (util::COMORB_TRANS_HET)) {
-    if (gsl::rngUniform()<0.5) {
+    if (rng::uniform01()<0.5) {
       _treatmentSeekingFactor=0.2;
     } else {
       _treatmentSeekingFactor=1.8;
     }
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
-    if (gsl::rngUniform()<0.5) {
+    if (rng::uniform01()<0.5) {
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
     }
@@ -128,7 +128,7 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
-    if (gsl::rngUniform()<0.5) {
+    if (rng::uniform01()<0.5) {
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
@@ -192,7 +192,7 @@ void Human::updateInterventionStatus() {
     if (Global::timeStep >= 0) {
       if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
 	  if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps &&
-	      gsl::rngUniform() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
+	      rng::uniform01() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
           vaccinate();
           Surveys.current->reportEPIVaccinations (ageGroup(), 1);
         }

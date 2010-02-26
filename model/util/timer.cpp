@@ -32,6 +32,8 @@
 
 using namespace std;
 
+namespace OM { namespace util {
+
 bool finishedCP=false;
 
 //NOTE: is calling exit from another thread even valid?
@@ -109,4 +111,6 @@ void timer::stopCheckpoint (){
     exit(EXIT_FAILURE);
   }
 }
+
+} }
 #endif

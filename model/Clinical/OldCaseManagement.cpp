@@ -159,14 +159,14 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
     Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime) ? Regimen::UC2 : Regimen::UC;
     bool successfulTreatment = false;
     
-    if (probGetsTreatment[regimen]*_treatmentSeekingFactor > (gsl::rngUniform())) {
+    if (probGetsTreatment[regimen]*_treatmentSeekingFactor > (rng::uniform01())) {
 	_tLastTreatment = Global::simulationTime;
 	if ( regimen == Regimen::UC )
 	    Surveys.current->reportTreatments1( ageGroup, 1 );
 	if ( regimen == Regimen::UC2 )
 	    Surveys.current->reportTreatments2( ageGroup, 1 );
 	
-	if (probParasitesCleared[regimen] > gsl::rngUniform()) {
+	if (probParasitesCleared[regimen] > rng::uniform01()) {
 	successfulTreatment = true;	// Parasites are cleared
 	// We don't report out-of-hospital recoveries, so this wouldn't do anything extra:
 	//entrypoint = Pathogenesis::State (entrypoint | Pathogenesis::RECOVERY);
@@ -230,7 +230,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, i
   NOT TREATED
   */
 
-  double prandom = (gsl::rngUniform());
+  double prandom = rng::uniform01();
 
   if (q[2] <= prandom) { // Patient gets in-hospital treatment
     _tLastTreatment = Global::simulationTime;

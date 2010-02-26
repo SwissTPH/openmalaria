@@ -41,9 +41,11 @@ using Glib::ustring;
 #include <limits>
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <boost/format.hpp>
+#include <assert.h>
 
 using namespace std;
-using boost::lexical_cast;
+using namespace boost;
 
 typedef Decision::DecisionEnums d_id_t;
 
@@ -61,19 +63,24 @@ const map<ustring,map<ustring,d_id_t> > createDecisionsMap () {
     
     //TODO: severe & second case?
     currentMap = &decisionsMap["case"];
-    (*currentMap)["uc1"] = d_id_t (Pathogenesis::SICK);
-    (*currentMap)["uc2"] = d_id_t (Pathogenesis::SICK | Pathogenesis::SECOND_CASE);
+    (*currentMap)["UC1"] = d_id_t (Pathogenesis::SICK);
+    (*currentMap)["UC2"] = d_id_t (Pathogenesis::SICK | Pathogenesis::SECOND_CASE);
     (*currentMap)["severe"] = d_id_t (Pathogenesis::SICK | Pathogenesis::SEVERE);
     
     currentMap = &decisionsMap["source"];
     (*currentMap)["hospital"] = Decision::TREATMENT_HOSPITAL;
     
     currentMap = &decisionsMap["tested"];
+    (*currentMap)["none"] = Decision::TEST_NONE;
     (*currentMap)["microscopy"] = Decision::TEST_MICROSCOPY;
+    (*currentMap)["RDT"] = Decision::TEST_RDT;
     
     currentMap = &decisionsMap["result"];
     (*currentMap)["positive"] = Decision::RESULT_POSITIVE;
     (*currentMap)["negative"] = Decision::RESULT_NEGATIVE;
+    // All we're interested in right here is the test outcome — right?
+    (*currentMap)["true positive"] = Decision::RESULT_POSITIVE;
+    (*currentMap)["false negative"] = Decision::RESULT_NEGATIVE;
     
     currentMap = &decisionsMap["drug"];
     (*currentMap)["no antimalarial"] = Decision::DRUG_NO_AM;
@@ -85,6 +92,8 @@ const map<ustring,map<ustring,d_id_t> > createDecisionsMap () {
     (*currentMap)["missed first dose"] = Decision::ADHERENCE_MISSED_FIRST;
     //TODO: not the same as ADHERENCE_MISSED_LAST?
 //     (*currentMap)["missed last day"] = Decision::ADHERENCE_MISSED_LAST_DAY;
+    //TODO: remove (added for compatibility with old tree)
+    (*currentMap)["bad"] = Decision::ADHERENCE_SELECTIVE;
     
     currentMap = &decisionsMap["quality"];
     (*currentMap)["good"] = Decision::QUALITY_GOOD;
@@ -114,67 +123,105 @@ const map<ustring,d_id_t>& decisionsMapGet (const ustring& k) {
     return it->second;
 }
 
+
 //TODO: build tree
 //TODO: we could probably often bubble input-decisions up over random decisions and maybe sometimes
 //the other way. If this reduces the number of random trees required it is an advantage.
 
+
+/// First-stage parsing: produce an in-memory tree. This is only required to
+/// deal with id/ref of branches.
 class CMRefTreeParser : public xmlpp::SaxParser
 {
 public:
-    CMRefTreeParser() : line_num(0) {}
+    struct TreeNode {
+	virtual ~TreeNode() {}
+    };
+    struct TreeBranches;
+    struct TreeChoice : public TreeNode {
+	TreeChoice () : child(NULL), id(Decision::NONE), prob(numeric_limits<double>::signaling_NaN()) {}
+	TreeChoice (const TreeBranches& parent, const Glib::ustring& value) : child(NULL), id((d_id_t)0xFFFFFFFF), prob(numeric_limits<double>::signaling_NaN()) {
+	    map<ustring,d_id_t>::const_iterator local_id = parent.id_value_map.find (value);
+	    if (local_id == parent.id_value_map.end()) {
+		ostringstream msg;
+		msg << "unexpected choice value: " << value;
+		throw xmlpp::exception (msg.str());
+	    }
+	    id = local_id->second;
+	};
+	
+	TreeBranches* child;
+	d_id_t id;
+	double prob;
+    };
+    struct TreeBranches : public TreeNode {
+	TreeBranches (const TreeChoice& parent, const Glib::ustring& depends) :
+	id_value_map(decisionsMapGet(depends)),
+	local_cum_prob (0.0)
+	{}
+	
+	list<TreeChoice> choices;	// all choices possible for this branch-point
+	const map<ustring,d_id_t>& id_value_map;	// map to resolve an id from a value, for this decision
+	double local_cum_prob;	// initialized to zero and incermented for each choice; should come to 1.0
+    };
+    
+    TreeChoice root;
+    
+    
+    CMRefTreeParser() : line_num(1) {}
 //     virtual ~CMRefTreeParser();
     
 protected:
     //overrides:
-    virtual void on_start_document() {
-	line_num = 0;
-    }
+//     virtual void on_start_document() {}
 //     virtual void on_end_document();
     virtual void on_start_element(const Glib::ustring& name, const AttributeList& attributes) {
 	try {
 	    if (name == "agedependentDecisionTrees") {
-		if (!elt_stack.empty ())
-		    throw xmlpp::exception ("agedependentDecisionTrees should only be first (root) element");
+		confirm (elt_stack.empty (), "agedependentDecisionTrees should only be first (root) element");
 		
-		elt_stack.push_back (new StackChoice (name));
-		// choice_id left at initialization value
+		// root.id left at initialization value
+		root.prob = 1.0;
+		elt_stack.push_back (make_pair(name,&root));
 	    } else {
-		if (elt_stack.empty ())
-		    throw xmlpp::exception ("expected <agedependentDecisionTrees> as first (root) element");
+		confirm (!elt_stack.empty (), "expected <agedependentDecisionTrees> as first (root) element");
 		
 		if (name == "randomBranches" || name == "inputBranches") {
-		    //TODO: deal with references
-		    
-		    StackChoice* parent = dynamic_cast<StackChoice*> (elt_stack.back());
-		    if (parent == NULL)
-			throw xmlpp::exception ("*Branches should only be a child of a choice (or agedependentDecisionTrees) element");
-		    
-		    StackBranches* branches = new StackBranches (name, *parent, get_attribute (attributes, "depends", name));
-		    elt_stack.push_back (branches);
-		} else if (name == "choice") {
-		    StackBranches* parent = dynamic_cast<StackBranches*> (elt_stack.back());
-		    if (parent == NULL)
-			throw xmlpp::exception ("choice should only be a child of a *Branches element");
-		    
-		    StackChoice* choice = new StackChoice (name);
-		    
-		    ustring value = get_attribute (attributes, "value", name);
-		    map<ustring,d_id_t>::const_iterator local_id = parent->id_value_map.find (value);
-		    if (local_id == parent->id_value_map.end()) {
+		    ustring attrKey = "ref";
+		    AttributeList::const_iterator attribute = std::find_if(attributes.begin(), attributes.end(), AttributeHasName(attrKey));
+		    if (attribute != attributes.end()) {	// is a "ref" to another *Branches
 			ostringstream msg;
-			msg << "unexpected choice value: " << value;
-			throw xmlpp::exception (msg.str());
+			msg << name << " reference not found: " << attribute->value;
+			confirm (refMap.count(attribute->value), msg.str());
+			elt_stack.push_back (make_pair(name, refMap[attribute->value]));
+		    } else {
+			TreeChoice* parent = dynamic_cast<TreeChoice*> (elt_stack.back().second);
+			confirm (parent != NULL, "*Branches should only be a child of a choice (or agedependentDecisionTrees) element");
+			
+			TreeBranches* branches = new TreeBranches (*parent, get_attribute (attributes, "depends", name));
+			parent->child = branches;
+			elt_stack.push_back (make_pair (name, branches));
+			
+			attrKey = "id";
+			AttributeList::const_iterator attribute = std::find_if(attributes.begin(), attributes.end(), AttributeHasName(attrKey));
+			if (attribute != attributes.end()) {
+			    refMap[attribute->value] = branches;
+			}
 		    }
-		    choice->choice_id = d_id_t (parent->parent_id & local_id->second);
+		} else if (name == "choice") {
+		    TreeBranches* parent = dynamic_cast<TreeBranches*> (elt_stack.back().second);
+		    confirm (parent != NULL, "choice should only be a child of a *Branches element");
 		    
-		    if (parent->name == "randomBranches") {
+		    parent->choices.push_back (TreeChoice (*parent, get_attribute (attributes, "value", name)));
+		    TreeChoice* choice = &parent->choices.back();
+		    
+		    if (elt_stack.back().first == "randomBranches") {
 			double p = lexical_cast<double> (get_attribute (attributes, "p", "choice element when inside a randomBranches"));
 			parent->local_cum_prob += p;
-			choice->prob = p * parent->parent_prob;
+			choice->prob = p;
 		    }
 		    
-		    elt_stack.push_back (choice);
-		    // TODO: store choice in table? Only when no children?
+		    elt_stack.push_back (make_pair(name, choice));
 		}
 	    }
 	} catch (xmlpp::exception& e) {
@@ -184,24 +231,30 @@ protected:
     }
     virtual void on_end_element(const Glib::ustring& name) {
 	try {
-	    if (elt_stack.empty() || name != elt_stack.back()->name) {
+	    if (elt_stack.empty() || name != elt_stack.back().first) {
 		ostringstream msg;
 		msg << "mismatched tags: ";
 		if (elt_stack.empty()) {
 		    msg << "(none)";
 		} else {
-		    msg << '<' << elt_stack.back()->name << '>';
+		    msg << '<' << elt_stack.back().first << '>';
 		}
 		msg << " and </" << name << '>';
 		throw xmlpp::exception (msg.str());
 	    }
-	    StackBranches* parent = dynamic_cast<StackBranches*> (elt_stack.back());
-	    if (parent != NULL && parent->name == "randomBranches") {
+	    if (elt_stack.back().first == "randomBranches") {
+		TreeBranches* parent = dynamic_cast<TreeBranches*> (elt_stack.back().second);
+		confirm (parent != NULL, "element should be a TreeBranches");
 		if (!(0.999 < parent->local_cum_prob && parent->local_cum_prob < 1.001)) {
 		    ostringstream msg;
 		    msg << "probabilities of randomBranches's children should add up to 1.0, not " << parent->local_cum_prob;
 		    throw xmlpp::exception (msg.str());
 		}
+	    } else if (elt_stack.back().first == "choice") {
+		TreeChoice* choice = dynamic_cast<TreeChoice*> (elt_stack.back().second);
+		confirm (choice != NULL, "element should be a TreeChoice");
+		if (choice->child == NULL)
+		    cout << format("choice: %1$_#0.9x\tp: %2%") % choice->id % choice->prob <<endl;
 	    }
 	    elt_stack.pop_back();
 	} catch (xmlpp::exception& e) {
@@ -241,6 +294,10 @@ protected:
     }
     
 private:
+    inline void confirm (bool condition, const Glib::ustring message) {
+	if (!condition)
+	    throw xmlpp::exception (message);
+    }
     const Glib::ustring& get_attribute (const AttributeList& attributes, const Glib::ustring name, const Glib::ustring element) {
 	AttributeList::const_iterator attribute = std::find_if(attributes.begin(), attributes.end(), AttributeHasName(name));
 	if (attribute == attributes.end()) {
@@ -251,35 +308,8 @@ private:
 	return attribute->value;
     }
     
-    class StackElement {
-    public:
-	StackElement (const Glib::ustring& name_) :
-	    name (name_)
-	{}
-	virtual ~StackElement (){}	// actually just to make this type polymorphic
-	const Glib::ustring name;	// Element name (i.e. type)
-    };
-    class StackChoice : public StackElement {
-    public:
-	StackChoice (const Glib::ustring& name) :
-	    StackElement (name), choice_id(Decision::NONE), prob(numeric_limits<double>::signaling_NaN())
-	{}
-	d_id_t choice_id;		// full id of this choice (including parent choices' ids)
-	double prob;			// total probability of reaching this choice (multiplied by parent choices' probabilities)
-    };
-    class StackBranches : public StackElement {
-    public:
-	StackBranches (const Glib::ustring& name, StackChoice& parent, const Glib::ustring& depends) :
-	    StackElement (name), id_value_map(decisionsMapGet(depends)),
-	    parent_id(parent.choice_id), parent_prob(parent_prob), local_cum_prob (0.0)
-	{}
-	const map<ustring,d_id_t>& id_value_map;	// map to resolve an id from a value, for this decision
-	d_id_t parent_id;		// copied from parent choice
-	double parent_prob;	// ditto
-	double local_cum_prob;	// initialized to zero and incermented for each choice; should come to 1.0
-    };
-    
-    list<StackElement*> elt_stack;
+    list<pair<string,TreeNode*> > elt_stack;
+    map<string,TreeBranches*> refMap;	// for id / ref resolution of branches elements; contains pointers to all branches with an "id"
     size_t line_num;
 };
 

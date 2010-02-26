@@ -101,7 +101,7 @@ double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, 
 void PerHostTransmission::continousItnDistribution (int ageTSteps) {
   if (Global::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
     && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
-    if (gsl::rngUniform() < cntItnCoverage[nextItnDistribution])
+    if (rng::uniform01() < cntItnCoverage[nextItnDistribution])
       setupITN ();
     ++nextItnDistribution;
   }

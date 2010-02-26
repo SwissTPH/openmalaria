@@ -86,15 +86,15 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
   double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
   pCoinfection*=_comorbidityFactor;
   
-  if ((gsl::rngUniform()) < prEpisode) {
+  if ((rng::uniform01()) < prEpisode) {
     //Fixed severe threshold
     double severeMalThreshold=sevMal_21+1;
     double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
     
     Pathogenesis::State ret;
-    if (gsl::rngUniform() < prSevereEpisode)
+    if (rng::uniform01() < prSevereEpisode)
       ret = Pathogenesis::STATE_SEVERE;
-    else if (gsl::rngUniform() < pCoinfection)
+    else if (rng::uniform01() < pCoinfection)
       ret = Pathogenesis::STATE_COINFECTION;
     else
       ret = Pathogenesis::STATE_MALARIA;
@@ -105,7 +105,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     */
     double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
     indirectRisk*=_comorbidityFactor;
-    if (gsl::rngUniform() < indirectRisk)
+    if (rng::uniform01() < indirectRisk)
       ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     
     return ret;
@@ -113,7 +113,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
     //TODO: should this be stored in the XML file?
     const double RelativeRiskNonMalariaFever= 1.0;
     double prNonMalariaFever=pCoinfection*RelativeRiskNonMalariaFever;
-    if ((gsl::rngUniform()) < prNonMalariaFever)
+    if (rng::uniform01() < prNonMalariaFever)
       return Pathogenesis::SICK;
   }
   return Pathogenesis::NONE;
