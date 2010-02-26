@@ -180,13 +180,11 @@ void Simulation::writeCheckpoint(){
   if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
-    checkpoint (out);
-    util::random::checkpoint (out, checkpointNum);
+    checkpoint (out, checkpointNum);
     out.close();
   } else {
     ofstream out(name.str().c_str(), ios::out | ios::binary);
-    checkpoint (out);
-    util::random::checkpoint (out, checkpointNum);
+    checkpoint (out, checkpointNum);
     out.close();
   }
   
@@ -208,16 +206,14 @@ void Simulation::readCheckpoint() {
   name << CHECKPOINT << checkpointNum;	// try uncompressed
   ifstream in(name.str().c_str(), ios::in | ios::binary);
   if (in.good()) {
-    checkpoint (in);
-    util::random::checkpoint (in, checkpointNum);
+    checkpoint (in, checkpointNum);
     in.close();
   } else {
     name << ".gz";				// then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     if (!in.good())
       throw util::checkpoint_error ("Unable to read file");
-    checkpoint (in);
-    util::random::checkpoint (in, checkpointNum);
+    checkpoint (in, checkpointNum);
     in.close();
   }
   
@@ -231,7 +227,7 @@ void Simulation::readCheckpoint() {
 
 //   -----  checkpointing: Simulation data  -----
 
-void Simulation::checkpoint (istream& stream) {
+void Simulation::checkpoint (istream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
@@ -243,6 +239,9 @@ void Simulation::checkpoint (istream& stream) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
+    
+    // read last, because other loads may use random numbers:
+    util::random::checkpoint (stream, checkpointNum);
     
     // Check scenario.xml and checkpoint files correspond:
     int oldWUID(workUnitIdentifier);
@@ -261,7 +260,7 @@ void Simulation::checkpoint (istream& stream) {
 	throw util::checkpoint_error ("stream read error");
 }
 
-void Simulation::checkpoint (ostream& stream) {
+void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
     if (stream == NULL || !stream.good())
 	throw util::checkpoint_error ("Unable to write to file");
@@ -277,6 +276,8 @@ void Simulation::checkpoint (ostream& stream) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
+    
+    util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
     cksum & stream;
     

@@ -211,6 +211,7 @@ namespace OM { namespace util { namespace checkpoint {
     void operator& (string& x, istream& stream) {
 	size_t len;
 	len & stream;
+	validateListSize (len);
 	x.resize (len);
 	stream.read (&x[0], x.length());
 	if (!stream || stream.gcount() != streamsize(len))

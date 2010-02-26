@@ -52,8 +52,8 @@ private:
     void writeCheckpoint();
     void readCheckpoint();
     
-    void checkpoint (istream& stream);
-    void checkpoint (ostream& stream);
+    void checkpoint (istream& stream, int checkpointNum);
+    void checkpoint (ostream& stream, int checkpointNum);
     //@}
     
     

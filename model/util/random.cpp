@@ -23,8 +23,7 @@
  * boost. The current boost code is only an addition to the GSL code, however.
  */
 
-//TODO: enable
-//#define OM_RANDOM_USE_BOOST
+#define OM_RANDOM_USE_BOOST
 
 #include "util/random.h"
 #include "util/errors.hpp"
@@ -33,6 +32,7 @@
 #ifdef OM_RANDOM_USE_BOOST
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#include <boost/static_assert.hpp>
 #endif
 
 #include <gsl/gsl_cdf.h>
@@ -42,19 +42,19 @@
 #include <cmath>
 #include <sstream>
 
-using namespace boost;
+// Note: since we're using both gsl and boost files, we should be careful to
+// avoid name conflicts. So probably don't use "using namespace boost;".
+
 
 namespace OM { namespace util {
 
-// This should be created and deleted automatically, taking care of
-// allocating and freeing the generator.
-struct generator_factory {
 # ifdef OM_RANDOM_USE_BOOST
-    mt19937 boost_generator;
-    uniform_01<mt19937&> rng_uniform01 (boost_generator);
+    static boost::mt19937 boost_generator;
+    static boost::uniform_01<boost::mt19937&> rng_uniform01 (boost_generator);
     
-    uint32_t boost_rng_get (void*) {
-	return boost_generator ();
+    long unsigned int boost_rng_get (void*) {
+	BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
+	return static_cast<long unsigned int> (boost_generator ());
     }
     double boost_rng_get_double_01 (void*) {
 	return rng_uniform01 ();
@@ -70,6 +70,10 @@ struct generator_factory {
 	&boost_rng_get_double_01
     };
 # endif
+
+// This should be created and deleted automatically, taking care of
+// allocating and freeing the generator.
+struct generator_factory {
     gsl_rng * gsl_generator;
     
     generator_factory () {
@@ -86,7 +90,6 @@ struct generator_factory {
     }
     ~generator_factory () {
 #	ifdef OM_RANDOM_USE_BOOST
-	delete gsl_generator->type;
 	delete gsl_generator;
 #	else
 	gsl_rng_free (gsl_generator);
@@ -98,6 +101,7 @@ struct generator_factory {
 
 void random::seed (uint32_t seed) {
 # ifdef OM_RANDOM_USE_BOOST
+    if (seed == 0) seed = 4357;	// gsl compatibility − ugh
     boost_generator.seed (seed);
 # else
     gsl_rng_set (rng.gsl_generator, seed);
@@ -106,8 +110,14 @@ void random::seed (uint32_t seed) {
 
 void random::checkpoint (istream& stream, int seedFileNumber) {
 # ifdef OM_RANDOM_USE_BOOST
+    // Don't use OM::util::checkpoint function for loading a stream; checkpoint::validateListSize uses too small a number.
     string str;
-    str & stream;
+    size_t len;
+    len & stream;
+    str.resize (len);
+    stream.read (&str[0], str.length());
+    if (!stream || stream.gcount() != streamsize(len))
+	throw checkpoint_error ("stream read error string");
     istringstream ss (str);
     ss >> boost_generator;
 # else
@@ -145,7 +155,7 @@ void random::checkpoint (ostream& stream, int seedFileNumber) {
 double random::uniform_01 () {
     //TODO: check both GSL and boost produce the same result here
     return gsl_rng_uniform (rng.gsl_generator);
-    //return rng_uniform01 ();
+    //return rng.rng_uniform01 ();
 }
 
 double random::gauss (double mean, double std){
