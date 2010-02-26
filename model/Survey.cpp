@@ -140,13 +140,14 @@ void SurveyAgeGroup::init () {
 }
 
 SurveyAgeGroup::SurveyAgeGroup (double ageYears) {
-  if (ageYears < _lowerbound)
-    _i = _upperbound.size() - 1;
-  else {
-    _i = 0;
-    while (ageYears > _upperbound[_i])
-      _i++;
-  }
+    //TODO: use faster search algorithm and compare performance
+    if (ageYears < _lowerbound)
+	_i = _upperbound.size() - 1;
+    else {
+	_i = 0;
+	while (ageYears > _upperbound[_i])
+	_i++;
+    }
 }
 
 

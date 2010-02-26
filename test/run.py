@@ -182,10 +182,13 @@ You can pass options to openMalaria by first specifying -- (to end options passe
 		    help="Run openMalaria through gdb.")
     parser.add_option("--valgrind", action="callback", callback=setWrapArgs,
 		    callback_args=(["valgrind","--gen-suppressions=yes","--leak-check=full"],),
-		    help="Run openMalaria through valgrind.")
+		    help="Run openMalaria through valgrind (using memcheck tool).")
     parser.add_option("--valgrind-track-origins", action="callback", callback=setWrapArgs,
 		    callback_args=(["valgrind","--gen-suppressions=yes","--leak-check=full","--track-origins=yes"],),
 		    help="As --valgrind, but pass --track-origins=yes option (1/2 performance).")
+    parser.add_option("--callgrind", action="callback", callback=setWrapArgs,
+            callback_args=(["valgrind","--tool=callgrind"],),
+            help="Run openMalaria through valgrind using callgrind tool.")
     (options, others) = parser.parse_args(args=args)
     
     options.ensure_value("wrapArgs", [])

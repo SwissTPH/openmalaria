@@ -76,6 +76,7 @@ void WithinHostModel::init() {
 }
 
 size_t WithinHostModel::getAgeGroup (double age) {
+    //TODO: use faster search algorithm and compare performance
     for (size_t i = 0; i < nages; ++i) {
 	if (agemax[i] > age)
 	    return i;

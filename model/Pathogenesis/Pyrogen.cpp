@@ -58,12 +58,14 @@ void PyrogenPathogenesis::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
 }
 
 void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
+    // Note: this calculation is slow (something like 5% of runtime)
+    
   //Number of categories in the numerical approx. below
   const int n= 11;
   const double delt= 1.0/n;
   //Numerical approximation to equation 2, AJTMH p.57
   for (int i=1;i<=n; i++) {
-    _pyrogenThres += totalDensity*alpha14*Global::interval*delt/((Ystar1_26+totalDensity)*(Ystar2_13+_pyrogenThres))-smuY*_pyrogenThres*delt;
+    _pyrogenThres += totalDensity * alpha14 * Global::interval * delt / ((Ystar1_26 + totalDensity) * (Ystar2_13 + _pyrogenThres)) - smuY * _pyrogenThres * delt;
   }
 }
 
