@@ -30,7 +30,8 @@
 using namespace std;
 
 namespace OM { namespace PkPd {
-    
+        using namespace OM::util;
+
 /*
  * Protein
  */
@@ -124,7 +125,7 @@ void ProteomeInstance::cleanup () {
 
 uint32_t ProteomeInstance::newInfection() {
   const double percRes = 0.0;		// proportion of resistant infections
-  if (rng::uniform01() < percRes) {
+  if (random::uniform01() < percRes) {
     return instances[1].getProteomeID();
   } else {
     return instances[0].getProteomeID();

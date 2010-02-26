@@ -34,6 +34,7 @@
 using namespace std;
 
 namespace OM { namespace PkPd {
+    using namespace OM::util;
 
 /*
  * Static variables and functions
@@ -72,7 +73,7 @@ uint32_t LSTMDrugType::new_proteome_ID () {
     // for each drug / locus,
     for (map<const string,const LSTMDrugType>::const_iterator it = available.begin(); it != available.end(); ++it) {
 	const LSTMDrugType& dt = it->second;
-	double sample = rng::uniform01();
+	double sample = random::uniform01();
 	for (size_t i = 0; i < dt.PD_params.size(); ++i) {
 	    // we randomly pick an allele according to its initial frequency
 	    if (sample <= dt.PD_params[i].cum_initial_frequency) {

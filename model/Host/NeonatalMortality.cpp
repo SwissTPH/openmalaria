@@ -23,6 +23,7 @@
 #include "util/gsl.h"
 
 namespace OM { namespace Host {
+    using namespace OM::util;
 
 double NeonatalMortality::_riskFromMaternalInfection = 0.0;
 std::vector<double> NeonatalMortality::_prevalenceByGestationalAge;
@@ -43,7 +44,7 @@ void NeonatalMortality::staticCheckpoint (ostream& stream) {
 }
 
 bool NeonatalMortality::eventNeonatalMortality() {
-  return rng::uniform01() <= _riskFromMaternalInfection;
+  return random::uniform01() <= _riskFromMaternalInfection;
 }
 
 void NeonatalMortality::update (const list<Host::Human>& population) {

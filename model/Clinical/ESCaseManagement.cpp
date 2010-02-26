@@ -26,6 +26,7 @@
 #include <boost/static_assert.hpp>
 
 namespace OM { namespace Clinical {
+    using namespace OM::util;
 
 ESCaseManagement::TreeType ESCaseManagement::cmTree;
 cmid ESCaseManagement::cmMask;
@@ -127,7 +128,7 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
 }
 
 CaseTreatmentPair ESCaseManagement::CMPBranchSet::traverse (cmid id) {
-    double randCum = rng::uniform01();
+    double randCum = random::uniform01();
     size_t i = 0;
     while (branches[i].cumP < randCum) {
 	++i;

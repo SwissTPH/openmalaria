@@ -17,15 +17,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "util/random.h"
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <sstream>
 
 using namespace boost;
 
 namespace OM { namespace util {
 
-namespace rng {
+namespace random {
     mt19937 generator;
     uniform_real<> dist_uniform01 (0,1);
     variate_generator<mt19937&, uniform_real<> > rng_uniform01 (generator, dist_uniform01);
@@ -37,6 +39,17 @@ namespace rng {
 	generator.seed (seed);
     }
     
+    void checkpoint (istream& stream) {
+	string str;
+	str & stream;
+	istringstream ss (str);
+	ss >> generator;
+    }
+    void checkpoint (ostream& stream) {
+	ostringstream ss;
+	ss << generator;
+	ss.str() & stream;
+    }
     
     // -----  random number generation  -----
     

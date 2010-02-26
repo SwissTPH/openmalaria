@@ -23,7 +23,8 @@
 #include "util/gsl.h"
 
 namespace OM { namespace WithinHost {
-    // static IPT variables
+     using namespace OM::util;
+   // static IPT variables
 vector<DescriptiveIPTInfection::GenotypeData> DescriptiveIPTInfection::genotypes;
 
 
@@ -58,7 +59,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
-    double rndSample=(rng::uniform01());
+    double rndSample=(random::uniform01());
     double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
     for (size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
@@ -82,7 +83,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 }
 
 bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
-    return (rng::uniform01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
+    return (random::uniform01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
     (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
 }
 

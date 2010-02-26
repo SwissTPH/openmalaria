@@ -31,6 +31,7 @@
 #include "util/CommandLine.hpp"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
+#include "util/random.h"
 
 #include <fstream>
 #include "gzstream.h"
@@ -50,7 +51,7 @@ Simulation::Simulation(util::Checksum ck)
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
     gsl::setUp (InputData.getISeed());
-    rng::seed (InputData.getISeed());
+    util::random::seed (InputData.getISeed());
     util::ModelOptions::init ();
     Surveys.init();
     Population::init();
@@ -236,6 +237,7 @@ void Simulation::readCheckpoint() {
 void Simulation::checkpoint (istream& stream) {
     util::checkpoint::header (stream);
     util::CommandLine::staticCheckpoint (stream);
+    util::random::checkpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
     
@@ -270,6 +272,7 @@ void Simulation::checkpoint (ostream& stream) {
     util::timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
+    util::random::checkpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
     

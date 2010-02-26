@@ -27,6 +27,7 @@
 #include "util/errors.hpp"
 
 namespace OM { namespace Clinical {
+    using namespace OM::util;
 
 ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
 cmid ClinicalEventScheduler::outcomeMask;
@@ -140,7 +141,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	    
 	    int medicationDuration;
-	    if (rng::uniform01() < oi->second.pDeath) {
+	    if (random::uniform01() < oi->second.pDeath) {
 		medicationDuration = oi->second.hospitalizationDaysDeath;
 		
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);

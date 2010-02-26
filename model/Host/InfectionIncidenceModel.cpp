@@ -28,6 +28,7 @@
 #include <stdexcept>
 
 namespace OM { namespace Host {
+    using namespace OM::util;
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 double InfectionIncidenceModel::InfectionrateShapeParam;
@@ -137,7 +138,7 @@ double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, Transmissi
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
-  return gsl::sampleFromLogNormal(rng::uniform01(),
+  return gsl::sampleFromLogNormal(random::uniform01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
 }

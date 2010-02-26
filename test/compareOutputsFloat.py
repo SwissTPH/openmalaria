@@ -198,9 +198,16 @@ ident is 1 if files are binary-equal."""
     
     for (k.measure,absDiff) in perMeasureDiffAbsSum.iteritems():
         if absDiff > 1e-6:
+            # standard division throws on divide-by-zero, which I don't want
+            def div(x,y):
+                try:
+                    return x/y
+                except ZeroDivisionError:
+                    return 1e400 * 0 # nan
+            
             diff=perMeasureDiffSum[k.measure]
             sum1=perMeasureTotal[k.measure]
-            print "for measure {0: >3}: sum(1st file):{1: >12.5f}  diff/sum: {2: >12.5}  (abs diff)/sum: {3: >12.5}  diff/(abs diff): {4: >9.5f}  num diffs/total: {5:>3}/{6:>3}".format(k.measure,sum1,diff/sum1,absDiff/sum1,diff/absDiff,perMeasureNumDiff.get(k.measure,0),perMeasureNum.get(k.measure,0))
+            print "for measure {0: >3}: sum(1st file):{1: >12.5f}  diff/sum: {2: >12.5}  (abs diff)/sum: {3: >12.5}  diff/(abs diff): {4: >9.5f}  num diffs/total: {5:>3}/{6:>3}".format(k.measure,sum1,div(diff,sum1),div(absDiff,sum1),div(diff,absDiff),perMeasureNumDiff.get(k.measure,0),perMeasureNum.get(k.measure,0))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:

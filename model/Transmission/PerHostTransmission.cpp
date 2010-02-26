@@ -22,7 +22,8 @@
 #include "inputData.h"
 
 namespace OM { namespace Transmission {
-    
+        using namespace OM::util;
+
 // -----  PerHostTransmission static  -----
 
 const double PerHostTransmission::bsa_prop[WithinHost::WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
@@ -101,7 +102,7 @@ double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, 
 void PerHostTransmission::continousItnDistribution (int ageTSteps) {
   if (Global::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
     && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
-    if (rng::uniform01() < cntItnCoverage[nextItnDistribution])
+    if (random::uniform01() < cntItnCoverage[nextItnDistribution])
       setupITN ();
     ++nextItnDistribution;
   }

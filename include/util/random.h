@@ -24,13 +24,14 @@ namespace OM { namespace util {
 /** Random number generator.
  *
  * This interface should be independant of implementation. */
-namespace rng {
+namespace random {
     ///@brief Setup & cleanup; checkpointing
     //@{
     /// Reseed the random-number-generator with seed (usually InputData.getISeed()).
     void seed (uint32_t seed);
     
-    //TODO: checkpoint
+    void checkpoint (istream& stream);
+    void checkpoint (ostream& stream);
     //@}
     
     ///@brief Random number distributions
@@ -38,8 +39,5 @@ namespace rng {
     /** Generate a random number in the range [0,1). */
     double uniform01 ();
     //@}
-};
 }
-// convenience: make rng available in the ::OM namespace
-namespace rng = util::rng;
-}
+} }
