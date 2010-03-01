@@ -173,7 +173,7 @@ namespace OM { namespace util {
 	    reverted to integer binary ops (1/8th time). (Also note: this was
 	    the only use of bitset<> with significant performance impact.)
 	    */
-	    return optSet & code;
+	    return optSet & (1<<code);
 	}
 	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
 	 * TRIPLE_HET are active. */

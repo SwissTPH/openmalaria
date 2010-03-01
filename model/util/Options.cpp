@@ -225,12 +225,14 @@ namespace OM { namespace util {
 		optSet |= (1<<codeMap[it->getName()]);
 	}
 	
+	cout << boolalpha;
+	
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
 	    for (int i = 0; i < NUM_OPTIONS; ++i) {
-		if ((optSet & (1<<i)) != defaultOptSet[i])
-		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << (optSet & 1<<i);
+		if (bool(optSet & (1<<i)) != defaultOptSet[i])
+		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i);
 	    }
 	    cout << endl;
 	}
@@ -267,12 +269,12 @@ namespace OM { namespace util {
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if ((optSet & 1<<i) && (bitset<NUM_OPTIONS>(optSet) & incompatibilities[i]).any()) {
 		ostringstream msg;
-		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << (optSet & 1<<i)
+		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i)
 			<< " is incompatible with flags:";
 		bitset<NUM_OPTIONS> incompat = (bitset<NUM_OPTIONS>(optSet) & incompatibilities[i]);
 		for (int j = 0; j < NUM_OPTIONS; ++j) {
 		    if (incompat[j])
-			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << (optSet & 1<<i);
+			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i);
 		}
 		throw xml_scenario_error (msg.str());
 	    }
