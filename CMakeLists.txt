@@ -54,7 +54,7 @@ endif (MSVC)
 
 option (OM_VECTOR_OUTPUT "Write per-timestep vector statistics to vector.csv" OFF)
 if (OM_VECTOR_OUTPUT)
-    add_definitions (-DOM_CSV_REPORTING)
+    add_definitions (-DOMV_CSV_REPORTING)
 endif (OM_VECTOR_OUTPUT)
 
 
