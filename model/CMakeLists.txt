@@ -11,6 +11,7 @@ set (Model_CPP
   inputData.cpp
   Surveys.cpp
   Survey.cpp
+  AgeGroupData.cpp
   gzstream.C
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
   

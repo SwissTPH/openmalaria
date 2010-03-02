@@ -36,9 +36,6 @@ using namespace std;
 using namespace OM::util;
 
 namespace OM { namespace WithinHost {
-// NOTE: I'd rather use these than x.99 values, but it changes things!
-//const double WithinHostModel::agemin[nages] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 20, 25, 30, 40, 50, 60 };
-const double WithinHostModel::agemax[nages] = { 0.99, 1.99, 2.99, 3.99, 4.99, 5.99, 6.99, 7.99, 8.99, 9.99, 10.99, 11.99, 12.99, 13.99, 14.99, 19.99, 24.99, 29.99, 39.99, 49.99, 59.99, 60.99 };
 double WithinHostModel::sigma_i;
 double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
@@ -73,15 +70,6 @@ void WithinHostModel::init() {
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }
-}
-
-size_t WithinHostModel::getAgeGroup (double age) {
-    //TODO: use faster search algorithm and compare performance
-    for (size_t i = 0; i < nages; ++i) {
-	if (agemax[i] > age)
-	    return i;
-    }
-    return nages-1;	// final category
 }
 
 void WithinHostModel::clear() {

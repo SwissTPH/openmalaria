@@ -95,10 +95,6 @@ public:
   inline double getTotalDensity() const {return totalDensity;}
   inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
   
-  /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
-  /// and wtprop for this age (in years). Also used by PerHostTransmission.
-  static size_t getAgeGroup (double age);
-  
   ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
@@ -163,7 +159,7 @@ protected:
    * of 5 daily samples. */
   double timeStepMaxDensity;
   
-  ///@brief Static parameters, either const or set by init()
+  ///@brief Static parameters, set by init()
   //@{
 //Standard dev innate immunity for densities
   static double sigma_i;
@@ -192,16 +188,6 @@ protected:
    * for this limit is to prevent incase bad input from causing the number of
    * infections to baloon stupidly. */
   static const int MAX_INFECTIONS = 21;
-  
-  ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
-  //@{
-public:
-  //! Number of age groups to use
-  static const size_t nages= 22;
-protected:
-  //! Maximum of each age category
-  static const double agemax[nages];
-  //@}
   //@}
 };
 

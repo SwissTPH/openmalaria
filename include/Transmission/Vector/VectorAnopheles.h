@@ -21,6 +21,7 @@
 #define Hmod_VectorAnopheles
 
 #include "Global.h"
+#include "Survey.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "Transmission/PerHostTransmission.h"
 #include <list>

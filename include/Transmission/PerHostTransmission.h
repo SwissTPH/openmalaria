@@ -20,10 +20,10 @@
 #ifndef Hmod_PerHostTransmission
 #define Hmod_PerHostTransmission
 
-#include "WithinHost/WithinHostModel.h"	// for getAgeGroup()
 #include "util/random.h"
 #include "inputData.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
+#include "AgeGroupData.h"
 
 namespace OM { namespace Transmission {
     
@@ -53,8 +53,8 @@ public:
    * Age factor of availiability; to be multiplied by partial availability.
    * 
    * Mean output should be 1.0/ageCorrectionFactor. */
-  static double relativeAvailabilityAge (double ageyrs) {
-    return ageSpecificRelativeAvailability[WithinHost::WithinHostModel::getAgeGroup(ageyrs)];
+  static inline double relativeAvailabilityAge (double ageyrs) {
+    return AgeGroupData::getAgeSpecificRelativeAvailability (ageyrs);
   }
   //@}
   
@@ -155,24 +155,6 @@ private:
   
   size_t nextItnDistribution;
   
-  
-  ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
-  // set by initParameters
-  //@{
-  /** Average number of bites for each age as a proportion of the maximum.
-   *
-   * Set by constructor from constants (bsa_prop). */
-  static double ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
-
-  //! Proportionate body surface area
- /* 
-  The body surface area is expressed as proportions of 0.5*those in 
-  the reference age group.In some models we have used calculations of weight and in others surface area, based on 
-  Mosteller RD: Simplified Calculation of Body Surface Area. N Engl J Med 1987 Oct 22;317(17):1098 (letter) 
-  These values are retained here should they be required for future comparisons 
- */ 
-  static const double bsa_prop[WithinHost::WithinHostModel::nages];
-  //@}
   
   /// Target ages at which individuals may receive ITNs
   static vector<double> cntItnTargetAgeTStep;

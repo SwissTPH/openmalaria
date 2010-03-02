@@ -21,8 +21,9 @@
 #ifndef Hmod_PkPdModel
 #define Hmod_PkPdModel
 
-#include "WithinHost/WithinHostModel.h"	// weight model (TODO: cleanup or replace)
 #include "PkPd/Proteome.h"
+#include "AgeGroupData.h"
+
 #include <fstream>
 using namespace std;
 
@@ -122,21 +123,15 @@ protected:
    *
    * @param ageYears Age in years
    * @returns Mass in kg */
-  static double ageToWeight (double ageYears);
+  static inline double ageToWeight (double ageYears) {
+      return AgeGroupData::ageToWeight (ageYears);
+  }
   
 private:
     /// Which model is in use (set by init())
     static ActiveModel activeModel;
     
-  //! Relative weights by age group
-  /** Relative weights, based on data in InputTables\wt_bites.csv 
-  The data are for Kilombero, Tanzania, taken from the Keiser et al (diploma
-  thesis). The original source was anthropometric studies by Inez Azevedo Reads
-  in weights by age group. The weights are expressed as proportions of 0.5*those
-  in the reference age group. */
-  static const double wtprop[WithinHost::WithinHostModel::nages];
-
-  friend class ::UnittestUtil;
+    friend class ::UnittestUtil;
 };
 
 } }

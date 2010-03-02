@@ -26,17 +26,12 @@ namespace OM { namespace Transmission {
 
 // -----  PerHostTransmission static  -----
 
-const double PerHostTransmission::bsa_prop[WithinHost::WithinHostModel::nages] = { 0.1843, 0.2225, 0.252, 0.2706, 0.2873, 0.3068, 0.3215, 0.3389, 0.3527, 0.3677, 0.3866, 0.3987, 0.4126, 0.4235, 0.441, 0.4564, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5 };
-double PerHostTransmission::ageSpecificRelativeAvailability[WithinHost::WithinHostModel::nages];
 vector<double> PerHostTransmission::cntItnTargetAgeTStep;
 vector<double> PerHostTransmission::cntItnCoverage;
 
 
 void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
-  for (size_t i=0; i<WithinHost::WithinHostModel::nages; i++) {
-    ageSpecificRelativeAvailability[i] = bsa_prop[i] / (1-bsa_prop[i]);
-  }
-  
+    AgeGroupData::initParameters ();
   if (interv.getContinuous().present()) {
     const scnXml::Continuous::ITNSequence& seqItn = interv.getContinuous().get().getITN();
     int n = seqItn.size();
