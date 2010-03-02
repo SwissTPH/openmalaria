@@ -33,7 +33,7 @@ namespace OM { namespace util {
     
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
-    int ModelOptions::optSet;
+    uint32_t ModelOptions::optSet;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -217,22 +217,19 @@ namespace OM { namespace util {
 	defaultOptSet.set (MAX_DENS_CORRECTION);
 	
 	// Set optSet to defaults, then override any given in the XML file:
-	optSet = defaultOptSet.to_ulong();
+	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
 	
 	const scnXml::OptionSet::OptionSequence& optSeq = InputData.getScenario().getModelOptions().getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
-	    if (it->getValue())
-		optSet |= (1<<codeMap[it->getName()]);
+	    optSet_bs[codeMap[it->getName()]] = it->getValue();
 	}
-	
-	cout << boolalpha;
 	
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
 	    for (int i = 0; i < NUM_OPTIONS; ++i) {
-		if (bool(optSet & (1<<i)) != defaultOptSet[i])
-		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i);
+		if (optSet_bs[i] != defaultOptSet[i])
+		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
 	    }
 	    cout << endl;
 	}
@@ -267,14 +264,14 @@ namespace OM { namespace util {
 	incompatibilities[COMORB_TREAT_HET]	.set(TRIPLE_HET);
 	
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-	    if ((optSet & 1<<i) && (bitset<NUM_OPTIONS>(optSet) & incompatibilities[i]).any()) {
+	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {
 		ostringstream msg;
-		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i)
+		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i]
 			<< " is incompatible with flags:";
-		bitset<NUM_OPTIONS> incompat = (bitset<NUM_OPTIONS>(optSet) & incompatibilities[i]);
+		bitset<NUM_OPTIONS> incompat = (optSet_bs & incompatibilities[i]);
 		for (int j = 0; j < NUM_OPTIONS; ++j) {
 		    if (incompat[j])
-			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << bool(optSet & 1<<i);
+			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
 		}
 		throw xml_scenario_error (msg.str());
 	    }
@@ -282,12 +279,21 @@ namespace OM { namespace util {
 	
 	// Required options (above table can't check these):
 	// NOTE: in principle, this restriction isn't required
-	if ((optSet & EMPIRICAL_WITHIN_HOST_MODEL) && !(optSet & INCLUDES_PK_PD))
+	if (optSet_bs[EMPIRICAL_WITHIN_HOST_MODEL] && !optSet_bs[INCLUDES_PK_PD])
 	    throw xml_scenario_error ("EMPIRICAL_WITHIN_HOST_MODEL requires INCLUDES_PK_PD");
 	
 	// Stop OM now if "--print-model" was on command-line
 	if (CommandLine::option (util::CommandLine::PRINT_MODEL_OPTIONS))
 	    throw cmd_exit ("Printed model version");
+	
+	// Convert from bitset to more performant integer with binary operations
+	// Note: use bitset up to now to restrict use of binary operators to
+	// where it has significant performance benefits.
+	optSet = 0;
+	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+	    if (optSet_bs[i])
+		optSet |= (1<<i);
+	}
     }
     
 } }

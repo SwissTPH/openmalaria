@@ -21,6 +21,8 @@
 #ifndef Hmod_util_ModelOptions
 #define Hmod_util_ModelOptions
 
+#include "Global.h"
+
 class UnittestUtil;
 
 namespace OM { namespace util {
@@ -178,7 +180,7 @@ namespace OM { namespace util {
 	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
 	 * TRIPLE_HET are active. */
 	static inline bool anyTransHet () {
-	    int anyHet = TRANS_HET | COMORB_TRANS_HET | TRANS_TREAT_HET | TRIPLE_HET;
+	    static const uint32_t anyHet = 1<<TRANS_HET | 1<<COMORB_TRANS_HET | 1<<TRANS_TREAT_HET | 1<<TRIPLE_HET;
 	    return optSet & anyHet;
 	}
 	
@@ -189,7 +191,7 @@ namespace OM { namespace util {
 	/** Model options.
 	 *
 	 * Default value set by init(). */
-	static int optSet;
+	static uint32_t optSet;
 	
 	friend class ::UnittestUtil;	// Note: class is in base namespace
     };
