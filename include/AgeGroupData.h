@@ -22,6 +22,9 @@
 #define Hmod_AgeGroupData
 
 #include <cstddef>	// for size_t
+#include <map>
+
+using namespace std;
 
 /** Encapsulation for data according to some old age-groups. */
 class AgeGroupData
@@ -37,13 +40,16 @@ private:
     /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
     /// and wtprop for this age (in years). Also used by PerHostTransmission.
     static size_t getAgeGroup (double age);
-    
+    static const map<double,size_t> fillAgeGroups();
+
     ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
     //@{
     //! Number of age groups to use
     static const size_t nages= 22;
     //! Maximum of each age category
     static const double agemax[nages];
+
+    static const map<double,size_t> ageMap;
   
     /** Average number of bites for each age as a proportion of the maximum.
     *
