@@ -74,5 +74,27 @@ double AgeGroupData::getAgeSpecificRelativeAvailability (double ageYears) {
 }
 
 double AgeGroupData::ageToWeight (double ageYears) {
-    return 120.0 * wtprop[getAgeGroup (ageYears)];
+
+	size_t age_group = getAgeGroup(ageYears);
+	size_t lower_group;
+
+	if(age_group>0&&ageYears<60.99)
+		lower_group = age_group-1;
+	else
+		lower_group = age_group;
+
+	double diff_wtprop = wtprop[age_group]-wtprop[lower_group];
+	double diff_age_max = agemax[age_group]-agemax[lower_group];
+	double diff_age = ageYears - agemax[lower_group];
+
+	double return_value;
+
+	if(diff_age_max>0)
+		return_value = 120.0 * (wtprop[lower_group] + ((diff_wtprop/diff_age_max)*diff_age));
+	else
+		return_value = 120.0 * wtprop[lower_group];
+
+	//double return_value_old = 120 * wtprop[getAgeGroup(ageYears)];
+
+    return return_value;
 }

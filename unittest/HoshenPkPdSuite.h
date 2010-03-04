@@ -52,26 +52,26 @@ public:
   
   void testCq () {
     proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12427429993973554);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
   }
   
   void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
       proxy->medicate ("CQ", 125000, 0, 21);
       proxy->medicate ("CQ", 125000, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12427429993973554);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
   }
   
   void testCqDecayed () {
     proxy->medicate ("CQ", 250000, 0, 21);
     proxy->decayDrugs ();
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.12608995630400068);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11719189335668142);
   }
   
   void testCq2Doses () {
     proxy->medicate ("CQ", 250000, 0, 21);
     proxy->decayDrugs ();
     proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.06809903879225410);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.06410970330787730);
   }
   
   HoshenPkPdModel *proxy;

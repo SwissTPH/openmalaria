@@ -52,32 +52,32 @@ public:
   
   void testCq () {
     proxy->medicate ("MF", 3000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03650284726560851);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
   }
   
   void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
       proxy->medicate ("MF", 1500, 0, 21);
       proxy->medicate ("MF", 1500, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03650284726560851);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
   }
   
   void testCqSplit () {
       proxy->medicate ("MF", 3000, 0, 21);
       proxy->medicate ("MF", 0, 0.5, 21);	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03650284726560851);
+      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
   }
   
   void testCqDecayed () {
     proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs ();
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03696456856994084);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03601694155274731);
   }
   
   void testCq2Doses () {
     proxy->medicate ("MF", 3000, 0, 21);
     proxy->decayDrugs ();
     proxy->medicate ("MF", 3000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03260437173442231);
+    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03245158219000328);
   }
   
   LSTMPkPdModel *proxy;
