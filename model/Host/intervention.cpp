@@ -59,7 +59,7 @@ double Vaccine::getEfficacy (int numPrevDoses)
 void Vaccine::initParameters()
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-    const scnXml::Interventions& interventions = InputData.getInterventions();
+    const scnXml::Interventions& interventions = InputData().getInterventions();
     const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
     if (vaccDesc.size() == 0) {
 	if (InputData.getActiveInterventions()[Interventions::VACCINE])

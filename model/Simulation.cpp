@@ -49,13 +49,13 @@ Simulation::Simulation(util::Checksum ck)
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
-    util::random::seed (InputData.getISeed());
+    util::random::seed (InputData().getModel().getParameters().getIseed());
     util::ModelOptions::init ();
     Surveys.init();
     Population::init();
     _population = new Population();
     
-    workUnitIdentifier = InputData.getScenario().getWuID();
+    workUnitIdentifier = InputData().getWuID();
 }
 
 Simulation::~Simulation(){

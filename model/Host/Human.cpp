@@ -48,7 +48,7 @@ namespace OM { namespace Host {
 
 void Human::initHumanParameters () {	// static
   // Init models used by humans:
-  Transmission::PerHostTransmission::initParameters(InputData.getInterventions());
+  Transmission::PerHostTransmission::initParameters(InputData().getInterventions());
   InfectionIncidenceModel::init();
   WithinHost::WithinHostModel::init();
   Clinical::ClinicalModel::init();

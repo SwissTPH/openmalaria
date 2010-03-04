@@ -20,10 +20,16 @@
 
 #include "Clinical/Episode.h"
 #include "Surveys.h"
+#include "inputData.h"
 
 
 namespace OM { namespace Clinical {
 int Episode::healthSystemMemory;
+
+
+void Episode::init() {
+    healthSystemMemory = InputData().getModel().getClinical().getHealthSystemMemory();
+}
 
 
 Episode::~Episode ()

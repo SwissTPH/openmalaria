@@ -37,7 +37,7 @@ namespace OM {
     int Global::timeStep;
     
     void Global::init () {
-	interval=InputData.get_interval();
+	interval = InputData().getModel().getParameters().getInterval();
 	if (Global::DAYS_IN_YEAR % interval !=  0) {
 	    cerr << "Global::DAYS_IN_YEAR not a multiple of interval" << endl;
 	    exit(-12);
@@ -45,6 +45,6 @@ namespace OM {
 	intervalsPer5Days = 5/interval;
 	intervalsPerYear = Global::DAYS_IN_YEAR/interval;
 	yearsPerInterval = double(interval) / double(Global::DAYS_IN_YEAR);
-	maxAgeIntervals=(int)InputData.get_maximum_ageyrs()*intervalsPerYear;
+	maxAgeIntervals = (int) (InputData().getMaximumAgeYrs()*intervalsPerYear);
     }
 }

@@ -48,14 +48,14 @@ double OldCaseManagement::probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
 // -----  utility  -----
 
-const scnXml::HealthSystem& getHealthSystem (int healthSystemSource) {
+const scnXml::HSImmediateOutcomes& getHealthSystem (int healthSystemSource) {
     if (healthSystemSource == -1) {
-	return InputData.getHealthSystem();
+	return InputData().getHealthSystem().getImmediateOutcomes().get();
     } else {
 	const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
 	if (interv == NULL || !interv->getChangeHS().present())
 	    throw runtime_error ("healthSystemSource invalid");
-	return interv->getChangeHS().get();
+	return interv->getChangeHS().get().getImmediateOutcomes().get();
     }
     assert(false);	// unreachable
 }
@@ -74,12 +74,7 @@ void OldCaseManagement::init ()
 
 void OldCaseManagement::setHealthSystem (int source) {
     healthSystemSource = source;
-    const scnXml::HealthSystem& healthSystem = getHealthSystem(healthSystemSource);
-    
-    if (source == -1)
-	Episode::healthSystemMemory = healthSystem.getHealthSystemMemory();
-    else if (Episode::healthSystemMemory != healthSystem.getHealthSystemMemory())
-	throw util::xml_scenario_error ("Change of health system had a different healthSystemMemory");
+    const scnXml::HSImmediateOutcomes& healthSystem = getHealthSystem(healthSystemSource);
     
     setParasiteCaseParameters (healthSystem);
     
@@ -97,7 +92,7 @@ void OldCaseManagement::setHealthSystem (int source) {
 	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
     }
     
-    readCaseFatalityRatio (healthSystem);
+    readCaseFatalityRatio ();
 }
 
 
@@ -272,9 +267,9 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, S
   }
 }
 
-void OldCaseManagement::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
+void OldCaseManagement::readCaseFatalityRatio ()
 {
-    const scnXml::AgeGroups::GroupSequence& xmlGroupSeq = healthSystem.getCFR().getGroup();
+    const scnXml::CFRAgeGroups::GroupSequence& xmlGroupSeq = InputData().getModel().getClinical().getCFR().getGroup();
 
   int numOfGroups = xmlGroupSeq.size();
   _inputAge.resize (numOfGroups + 1);
@@ -340,7 +335,7 @@ double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firs
   }
 }
 
-void OldCaseManagement::setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem)
+void OldCaseManagement::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem)
 {
   // --- calculate cureRate ---
 

@@ -67,7 +67,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   
   
   // -----  Initialise interventions  -----
-  const scnXml::Interventions::AnophelesSequence& intervSeq = InputData.getInterventions().getAnopheles();
+  const scnXml::Interventions::AnophelesSequence& intervSeq = InputData().getInterventions().getAnopheles();
   for (scnXml::Interventions::AnophelesSequence::const_iterator it = intervSeq.begin(); it != intervSeq.end(); ++it) {
     species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it);
   }
@@ -107,7 +107,7 @@ void VectorTransmission::initMainSimulation() {
     cerr << initialisationEIR << '\n' << innoculationsPerDayOfYear << endl;
   }
   
-  simulationMode = InputData.get_mode();	// allow forcing equilibrium mode like with non-vector model
+  simulationMode = InputData().getMode();	// allow forcing equilibrium mode like with non-vector model
   if (simulationMode != 2 && simulationMode != 4)
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }

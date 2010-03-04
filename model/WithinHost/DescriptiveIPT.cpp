@@ -44,7 +44,7 @@ int DescriptiveIPTWithinHost::iptiEffect;
 // -----  init  -----
 
 void DescriptiveIPTWithinHost::initParameters () {
-    const scnXml::Interventions& xmlInterventions = InputData.getInterventions();
+    const scnXml::Interventions& xmlInterventions = InputData().getInterventions();
   iptActive = xmlInterventions.getIptiDescription().present();
   if (!iptActive) {
       if (InputData.getActiveInterventions()[Interventions::IPTI])

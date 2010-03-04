@@ -117,15 +117,15 @@ void Survey::init () {
     active.reset ();
     SurveyMeasureMap codeMap;
     
-    scnXml::OptionSet::OptionSequence sOSeq = InputData.getMonitoring().getSurveyOptions().getOption();
+    scnXml::OptionSet::OptionSequence sOSeq = InputData().getMonitoring().getSurveyOptions().getOption();
     for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 	active[codeMap[it->getName()]] = it->getValue();
     }
     
-    _assimilatorMode = InputData.getScenario().getAssimMode();
+    _assimilatorMode = InputData().getAssimMode();
 }
 void SurveyAgeGroup::init () {
-    const scnXml::Monitoring& mon = InputData.getMonitoring();
+    const scnXml::Monitoring& mon = InputData().getMonitoring();
     const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
     /* note that the last age group includes individuals who are        *
     * either younger than Lowerbound or older than the last Upperbound */

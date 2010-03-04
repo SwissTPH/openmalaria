@@ -55,12 +55,12 @@ void WithinHostModel::init() {
   if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
       densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
   } else {
-    if ((InputData.get_analysis_no() >= 22) && (InputData.get_analysis_no() <= 30)) {
+    if ((InputData().getAnalysisNo() >= 22) && (InputData().getAnalysisNo() <= 30)) {
 	cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
     }
     densitybias=InputData.getParameter(Params::DENSITY_BIAS_NON_GARKI);
   }
-  detectionLimit=InputData.get_detectionlimit()*densitybias;
+  detectionLimit=InputData().getMonitoring().getSurveys().getDetectionLimit()*densitybias;
   
   if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
     DummyInfection::initParameters ();

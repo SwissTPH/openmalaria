@@ -37,11 +37,11 @@ namespace OM { namespace Transmission {
 TransmissionModel* TransmissionModel::createTransmissionModel () {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData::VectorOptional& vectorData = InputData.getEntoData().getVector();
+  const scnXml::EntoData::VectorOptional& vectorData = InputData().getEntoData().getVector();
   if (vectorData.present())
     return new VectorTransmission(vectorData.get());
   else {
-      const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData.getEntoData().getNonVector();
+      const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData().getEntoData().getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     return new NonVectorTransmission(nonVectorData.get());

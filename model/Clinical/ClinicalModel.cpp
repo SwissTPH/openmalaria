@@ -43,6 +43,7 @@ void ClinicalModel::init () {
   _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
   
   Pathogenesis::PathogenesisModel::init();
+  Episode::init();
   if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
     ClinicalEventScheduler::init();
   else

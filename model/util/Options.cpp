@@ -219,7 +219,7 @@ namespace OM { namespace util {
 	// Set optSet to defaults, then override any given in the XML file:
 	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
 	
-	const scnXml::OptionSet::OptionSequence& optSeq = InputData.getScenario().getModelOptions().getOption();
+	const scnXml::OptionSet::OptionSequence& optSeq = InputData().getModel().getModelOptions().getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
 	    optSet_bs[codeMap[it->getName()]] = it->getValue();
 	}

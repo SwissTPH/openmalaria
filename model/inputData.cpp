@@ -45,7 +45,7 @@ void InputDataType::initParameterValues()
     for (size_t i = 0; i < Params::MAX; ++i)
         parameterValues[i] = 0;
     // set parameters
-    const scnXml::Parameters::ParameterSequence& paramSeq = parameters->getParameter();
+    const scnXml::Parameters::ParameterSequence& paramSeq = scenario->getModel().getParameters().getParameter();
     for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
         int i = it->getNumber();
         if (i < 0 || i >= Params::MAX)
@@ -57,8 +57,8 @@ void InputDataType::initParameterValues()
 
 void InputDataType::initTimedInterventions()
 {
-    if (interventions->getContinuous().present()) {
-        const scnXml::Continuous& contI = interventions->getContinuous().get();
+    if (scenario->getInterventions().getContinuous().present()) {
+        const scnXml::Continuous& contI = scenario->getInterventions().getContinuous().get();
         if (contI.getVaccine().size())
             activeInterventions.set (Interventions::VACCINE, true);
 	if (contI.getITN().size())
@@ -67,9 +67,9 @@ void InputDataType::initTimedInterventions()
 	    activeInterventions.set (Interventions::IPTI, true);
     }
 
-    if (interventions->getTimed().present()) {
+    if (scenario->getInterventions().getTimed().present()) {
         const scnXml::Timed::InterventionSequence& interventionSeq =
-            interventions->getTimed().get().getIntervention();
+            scenario->getInterventions().getTimed().get().getIntervention();
         for (scnXml::Timed::InterventionConstIterator it (interventionSeq.begin()); it != interventionSeq.end(); ++it) {
             int time = it->getTime();
             if (timedInterventions.count (time)) {
@@ -131,19 +131,6 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     if (scenario->getSchemaVersion() > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
 
-    monitoring = &scenario->getMonitoring();
-    interventions = &scenario->getInterventions();
-    entoData = &scenario->getEntoData();
-    demography = &scenario->getDemography();
-    if (scenario->getHealthSystem().present())
-        healthSystem = &scenario->getHealthSystem().get();
-    else
-        healthSystem = NULL;
-    eventScheduler = scenario->getEventScheduler().present() ?
-                      &scenario->getEventScheduler().get() : NULL;
-    parameters = &scenario->getParameters();
-    //proteome = &scenario->getProteome();
-
     initParameterValues();
     initTimedInterventions();
     return cksum;
@@ -179,68 +166,10 @@ void InputDataType::cleanDocument()
 }
 
 
-const scnXml::Scenario& InputDataType::getScenario() {
-    return *scenario;
-}
-
-const scnXml::Monitoring& InputDataType::getMonitoring()
-{
-    return *monitoring;
-}
-const scnXml::Interventions& InputDataType::getInterventions()
-{
-    return *interventions;
-}
-const scnXml::EntoData& InputDataType::getEntoData()
-{
-    return *entoData;
-}
-const scnXml::Demography& InputDataType::getDemography()
-{
-    return *demography;
-}
-const scnXml::EventScheduler& InputDataType::getEventScheduler ()
-{
-    if (eventScheduler == NULL)
-	throw util::xml_scenario_error ("EventScheduler requested but not in XML");
-    return *eventScheduler;
-}
-const scnXml::HealthSystem& InputDataType::getHealthSystem()
-{
-    if (healthSystem == NULL)
-        throw util::xml_scenario_error ("heathSystem element requested but not present");
-    return *healthSystem;
-}
-
-scnXml::Scenario& InputDataType::getMutableScenario()
-{
-    return *scenario;
-}
-
 double InputDataType::getParameter (size_t i)
 {
     return parameterValues[i];
 }
-
-
-// ----- Member access functions (bridges) -----
-// This is largely unmodified from the old xerces version.
-
-double InputDataType::get_detectionlimit()
-{
-    return  monitoring->getSurveys().getDetectionLimit();
-}
-
-int InputDataType::get_mode()
-{
-    return scenario->getMode();
-}
-
-double InputDataType::get_maximum_ageyrs()
-{
-    return scenario->getMaximumAgeYrs();
-}
-
 const scnXml::Intervention* InputDataType::getInterventionByTime (int time)
 {
     std::map<int, const scnXml::Intervention*>::iterator i = timedInterventions.find (time);
@@ -254,39 +183,7 @@ const bitset<Interventions::SIZE> InputDataType::getActiveInterventions ()
     return activeInterventions;
 }
 
-int InputDataType::get_analysis_no()
-{
-    return scenario->getAnalysisNo();
-}
 
-int InputDataType::get_populationsize()
-{
-    return scenario->getPopSize();
-}
-
-
-double InputDataType::get_growthrate()
-{
-    if (demography->getGrowthRate().present())
-        return demography->getGrowthRate().get();
-    else
-        return 0.;
-}
-
-int InputDataType::get_latentp()
-{
-    return parameters->getLatentp();
-}
-
-int InputDataType::get_interval()
-{
-    return parameters->getInterval();
-}
-
-int InputDataType::getISeed()
-{
-    return parameters->getIseed();
-}
 
 InputDataType InputData;
 }

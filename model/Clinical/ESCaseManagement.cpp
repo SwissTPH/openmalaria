@@ -36,7 +36,8 @@ CaseTreatment* ESCaseManagement::mdaDoses;
 // -----  Static  -----
 
 void ESCaseManagement::init () {
-    const scnXml::CaseManagementTree& xmlCM = InputData.getEventScheduler().getCaseManagementTree();
+    // Assume EventScheduler data was checked present:
+    const scnXml::CaseManagementTree& xmlCM = InputData().getHealthSystem().getEventScheduler().get().getCaseManagementTree();
     for (scnXml::CaseManagementTree::CM_pBranchSetConstIterator it = xmlCM.getCM_pBranchSet().begin(); it != xmlCM.getCM_pBranchSet().end(); ++it) {
 	cmTree[it->getID ()] = new CMPBranchSet (it->getCM_pBranch());
     }
@@ -47,7 +48,7 @@ void ESCaseManagement::init () {
     cmMask = xmlCM.getMask();
     
     // MDA Intervention data
-    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData.getInterventions().getMDADescription();
+    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
     if (mdaDesc.present()) {
 	mdaDoses = new CaseTreatment (mdaDesc.get().getMedicate());
     } else

@@ -42,8 +42,8 @@ void ClinicalEventScheduler::init ()
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
-    const scnXml::EventScheduler& ev = InputData.getEventScheduler();
-    Episode::healthSystemMemory = ev.getHealthSystemMemory();
+    // We assume EventScheduler data was already confirmed present:
+    const scnXml::HSEventScheduler& ev = InputData().getHealthSystem().getEventScheduler().get();
     
     ESCaseManagement::init ();
     

@@ -73,7 +73,7 @@ void AgeStructure::estimateRemovalRates ()
     
     //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
     double sumperc = 0.0;
-    const scnXml::AgeGroupPerC::GroupSequence& group = InputData.getDemography().getAgeGroup().getGroup();
+    const scnXml::AgeGroupPerC::GroupSequence& group = InputData().getDemography().getAgeGroup().getGroup();
     if (group.size() < ngroups - 1) {
 	ostringstream msg;
 	msg << "expected " << ngroups - 1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)";
@@ -111,7 +111,10 @@ void AgeStructure::estimateRemovalRates ()
 // Static method used by estimateRemovalRates
 double AgeStructure::setDemoParameters (double param1, double param2)
 {
-    rho = InputData.get_growthrate() * (0.01 * Global::yearsPerInterval);
+    rho = 0.0;
+    if (InputData().getDemography().getGrowthRate().present())
+	rho = InputData().getDemography().getGrowthRate().get();
+    rho = rho * (0.01 * Global::yearsPerInterval);
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,
 	// however, some code currently uses this as the total population size.

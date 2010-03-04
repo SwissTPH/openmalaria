@@ -39,9 +39,9 @@ PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
 
 void PkPdModel::init () {
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-	if (InputData.getScenario().getDrugDescription().present()) {
+	if (InputData().getDrugDescription().present()) {
 	    activeModel = LSTM_PKPD;
-	    LSTMDrugType::init(InputData.getScenario().getDrugDescription().get ());
+	    LSTMDrugType::init(InputData().getDrugDescription().get ());
 	    LSTMPkPdModel::init();
 	} else {
 	    activeModel = HOSHEN_PKPD;

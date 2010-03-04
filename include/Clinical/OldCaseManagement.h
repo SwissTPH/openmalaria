@@ -23,7 +23,7 @@
 #include "Clinical/Episode.h"
 
 namespace scnXml {
-    class HealthSystem;
+    class HSImmediateOutcomes;
 }
 
 namespace OM { namespace Clinical {
@@ -113,14 +113,14 @@ private:
   static double getCommunityCaseFatalityRate(double caseFatalityRatio);
   
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
-  static void setParasiteCaseParameters (const scnXml::HealthSystem& healthSystem);
+  static void setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem);
   
   //! Reads in the Case Fatality percentages from the XML.
   /*! This replaces the reading from CaseFatalityByAge.csv.Note that we could
     calculate and cache the CFR as a function of age in years for better
     performance. This would require a specification of the resolution.
   */
-  static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
+  static void readCaseFatalityRatio();
   
   //log odds ratio of case-fatality in community compared to hospital
   //set only by init()

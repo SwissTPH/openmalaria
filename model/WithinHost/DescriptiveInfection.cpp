@@ -49,7 +49,7 @@ void DescriptiveInfection::initParameters (){
   if (util::ModelOptions::option (util::INCLUDES_PK_PD))
       throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
   
-  latentp=InputData.get_latentp();
+  latentp=InputData().getModel().getParameters().getLatentp();
   sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);
   xNuStar=InputData.getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.

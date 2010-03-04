@@ -116,28 +116,22 @@ namespace Interventions {
 	*/
 	void cleanDocument();
 	
-	/// Get the base scenario element
-	const scnXml::Scenario& getScenario();
-	
-	/// Get the Monitoring xml object
-	const scnXml::Monitoring& getMonitoring();
-	/// Get the Interventions xml object
-	const scnXml::Interventions& getInterventions();
-	/// Get the EntoData xml object
-	const scnXml::EntoData& getEntoData();
-	/// Get the Demography xml object
-	const scnXml::Demography& getDemography();
-	/// Get the EventScheduler xml object
-	const scnXml::EventScheduler& getEventScheduler();
-	/// Get the HealthSystem xml object
-	const scnXml::HealthSystem& getHealthSystem();
+	/** Get the base scenario element.
+	 *
+	 * Is an operator for brevity: InputData().getModel()...
+	 */
+	inline const scnXml::Scenario& operator()() {
+	    return *scenario;
+	}
 
 	/** Get a mutable version of scenario element.
 	*
 	* This is the only entry point for changing the scenario document.
 	* 
 	* You should set "documentChanged = true;" if you want your changes saved. */
-	scnXml::Scenario& getMutableScenario();
+	inline scnXml::Scenario& getMutableScenario() {
+	    return *scenario;
+	}
 
 	/// Get the intervention from interventions->timed with time time.
 	/// @returns NULL if not available
@@ -156,26 +150,6 @@ namespace Interventions {
 	 * none of the scenario element is currently checkpointed. */
 	bool documentChanged;
 
-	// -----  Other parameter-getters (old functions)  -----
-
-	// For WHM:
-	double get_detectionlimit(); 
-	int get_analysis_no(); 
-
-	// For global / simulation:
-	double get_maximum_ageyrs();
-	int get_latentp(); 
-	int get_interval(); 
-
-	// For population:
-	int get_populationsize(); 
-
-	// For transmission:
-	int get_mode(); 
-	double get_growthrate(); 
-
-	// For GSL:
-	int getISeed(); 
 	
     private:
 	void initParameterValues ();
@@ -186,13 +160,6 @@ namespace Interventions {
 	
 	/** @brief The xml data structure. */
 	scnXml::Scenario* scenario;
-	const scnXml::Monitoring * monitoring;
-	const scnXml::Interventions * interventions;
-	const scnXml::EntoData * entoData; // May be replaced by a changeEIR intervention
-	const scnXml::Demography * demography;
-	const scnXml::HealthSystem * healthSystem; // May be replaced by a changeHS intervention or not present
-	const scnXml::EventScheduler * eventScheduler; // Optional (may be NULL)
-	const scnXml::Parameters * parameters;
 	
 	// Initialized (derived) values:
 	double parameterValues[Params::MAX];

@@ -34,7 +34,7 @@ void SurveysType::init ()
 {
   _surveyPeriod = 0;
 
-  const scnXml::Surveys::SurveyTimeSequence& survs = InputData.getMonitoring().getSurveys().getSurveyTime();
+  const scnXml::Surveys::SurveyTimeSequence& survs = InputData().getMonitoring().getSurveys().getSurveyTime();
 
   _surveysTimeIntervals.resize (survs.size() + 1);
   for (size_t i = 0; i < survs.size(); i++) {

@@ -73,7 +73,7 @@ void NonVectorTransmission::initMainSimulation (){
 	  throw runtime_error ("initialKappa is invalid");
   }
   
-  simulationMode = InputData.get_mode();
+  simulationMode = InputData().getMode();
   if (simulationMode < 2 || simulationMode > 4)
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
 }

@@ -37,6 +37,9 @@ namespace OM { namespace Clinical {
  * bouts of sickness and recovery (the most severe is reported). */
 class Episode{
 public:
+    /** Set healthSystemMemory. */
+    static void init();
+    
   Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup() {};
   ~Episode();
   
