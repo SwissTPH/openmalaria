@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 15;
+    static final int CURRENT_VERSION = 16;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -75,10 +75,13 @@ public class SchemaTranslator {
         scenarioElement.setAttribute("assimMode", "0");
         // This is set by the work generator
         scenarioElement.setAttribute("wuID", "123");
+        
+        Element model = (Element)scenarioElement.getElementsByTagName("model").item(0);
+        Element t_parameters = (Element)model.getElementsByTagName("parameters").item(0);
 
-        if (scenarioElement.getLastChild().getNodeValue().contains(
+        if (t_parameters.getNodeValue() != null && t_parameters.getNodeValue().contains(
                 "@parameters@")) {
-            scenarioElement.getLastChild().setNodeValue("");
+            t_parameters.getLastChild().setNodeValue("");
             // Add a dummy parameter
             Element parameters = forValidation.createElement("parameters");
 
@@ -639,6 +642,73 @@ public class SchemaTranslator {
     public Boolean translate14To15() throws Exception {
 	return true;
     }
+    
+    public Boolean translate15To16() throws Exception {
+    	
+    	Element model = scenarioDocument.createElement("model");
+    	Element clinical = scenarioDocument.createElement("clinical");
+    	Element modelOptions = (Element)scenarioElement.getElementsByTagName("ModelOptions").item(0);
+    	Element parameters = (Element)scenarioElement.getElementsByTagName("parameters").item(0);
+    	
+    	model.appendChild(modelOptions);
+    	model.appendChild(clinical);
+    	model.appendChild(parameters);
+    	
+    	scenarioElement.appendChild(model);
+    	
+    	Element healthSystemOld = (Element)scenarioElement.getElementsByTagName("healthSystem").item(0);
+    	Element eventScheduler = (Element)scenarioElement.getElementsByTagName("EventScheduler").item(0);
+    	Attr healthSystemMemory;
+    	
+    	Element healthSystemNew = scenarioDocument.createElement("healthSystem");
+    	
+    	if(healthSystemOld== null)
+    	{
+    		healthSystemMemory = (Attr)eventScheduler.getAttributeNode("healthSystemMemory");
+    		eventScheduler.removeAttribute("healthSystemMemory");
+    		//scenarioDocument.renameNode(eventScheduler, null, "HSEventScheduler");
+    		Element CFR = scenarioDocument.createElement("CFR");
+    		Element group = scenarioDocument.createElement("group");
+    		Attr cfr = scenarioDocument.createAttribute("cfr");
+    		Attr lowerbound = scenarioDocument.createAttribute("lowerbound");
+    		
+    		cfr.setNodeValue("0");
+    		lowerbound.setNodeValue("0");
+    		
+    		group.setAttributeNode(cfr);
+    		group.setAttributeNode(lowerbound);
+    		
+    		CFR.appendChild(group);
+    		clinical.appendChild(CFR);
+    		
+    		healthSystemNew.appendChild(eventScheduler);
+    	}
+    	else
+    	{
+    		healthSystemMemory = (Attr)healthSystemOld.getAttributeNode("healthSystemMemory");
+    		healthSystemOld.removeAttribute("healthSystemMemory");
+    		//healthSystemOld.removeAttribute("name");
+    		scenarioDocument.renameNode(healthSystemOld, null, "ImmediateOutcomes");
+    		Element CFR  = (Element)healthSystemOld.getElementsByTagName("CFR").item(0);
+    		clinical.appendChild(CFR);
+    		healthSystemNew.appendChild(healthSystemOld);
+    	}
+    	
+    	Element Intervention = (Element)scenarioElement.getElementsByTagName("intervention").item(0);
+    	if(Intervention!=null)
+    	{
+    		Element changeHS = (Element)Intervention.getElementsByTagName("changeHS").item(0);
+        	
+        	if(changeHS != null)
+        		Intervention.removeChild(changeHS);
+    	}
+    	
+    	scenarioElement.insertBefore(healthSystemNew, (Element)scenarioElement.getElementsByTagName("entoData").item(0));
+    	clinical.setAttributeNode(healthSystemMemory);
+    	
+    	return true;
+    }
+    
     
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {

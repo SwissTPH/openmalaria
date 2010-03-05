@@ -1,8 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="1000" schemaVersion="15" wuID="0" xsi:noNamespaceSchemaLocation="scenario_15.xsd">
-  <ModelOptions>
-    <option name="LOGNORMAL_MASS_ACTION" value="true"/>
-    <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-  </ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="1000" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
+  
 
   <demography name="Ifakara">
     <ageGroup lowerbound="0">
@@ -246,7 +243,9 @@
     </timed>
   </interventions>
 
-  <healthSystem healthSystemMemory="6" name="Tanzania ACT">
+  
+
+  <healthSystem><ImmediateOutcomes name="Tanzania ACT">
     <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
     <initialACR>
       <ACT value="0.85"/>
@@ -269,21 +268,8 @@
       <item maxAgeYrs="5" value="0.0132"/>
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-
-  <entoData name="Namawala">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-5.835" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
@@ -303,7 +289,23 @@
     </vector>
   </entoData>
 
-  <parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
+  
+
+<model><ModelOptions>
+    <option name="LOGNORMAL_MASS_ACTION" value="true"/>
+    <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+  </ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR></clinical><parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -334,6 +336,4 @@
     <parameter include="false" name="Ystar0" number="28" value="296.302437899999973"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters>
-
-</scenario>
+  </parameters></model></scenario>

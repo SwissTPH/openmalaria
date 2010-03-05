@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" maximumAgeYrs="90" mode="4" name="triple correlated heterogeneity" popSize="200" schemaVersion="15" wuID="0" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="TRIPLE_HET" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" maximumAgeYrs="90" mode="4" name="triple correlated heterogeneity" popSize="200" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -33,7 +33,10 @@
   </monitoring>
   <interventions name="No Intervention">
   </interventions>
-  <healthSystem healthSystemMemory="6" name="treatment20">
+  
+  <!-- entoData did have attribute firstDay="18" which is obsolete.
+       But has this been accounted for in EIRDaily data? -->
+  <healthSystem><ImmediateOutcomes name="treatment20">
     <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
     <initialACR>
       <CQ value="0"/>
@@ -68,13 +71,8 @@
       <item maxAgeYrs="99" value="0.005"/>
       <!-- <sources> Brewster et al., 1990</sources> -->
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0" lowerbound="0"/>
-    </CFR>
-  </healthSystem>
-  <!-- entoData did have attribute firstDay="18" which is obsolete.
-       But has this been accounted for in EIRDaily data? -->
-  <entoData name="Sugungum Preintervention">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Sugungum Preintervention">
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.3669507722007722</EIRDaily>
       <EIRDaily origin="interpolate">0.35685255791505793</EIRDaily>
@@ -587,7 +585,10 @@
     </nonVector>
   </entoData>
   <!-- parameters 31052007 -->
-  <parameters delta="0.000547945205479452" interval="5" iseed="10" latentp="3">
+  
+<model><ModelOptions><option name="TRIPLE_HET" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="10" latentp="3">
     <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="0" name="Estar" number="2" value="0.03247"/>
     <parameter include="1" name="Simm" number="3" value="0.1447"/>
@@ -618,5 +619,4 @@
     <parameter include="1" name="Ystar0" number="28" value="328.056605"/>
     <parameter include="1" name="Idete multiplier" number="29" value="2.78614"/>
     <parameter include="1" name="critical age for comorbidity" number="30" value="0.115906"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>

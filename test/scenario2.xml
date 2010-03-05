@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" maximumAgeYrs="4" mode="2" name="Navrongo IPTi treated" popSize="500" schemaVersion="15" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" maximumAgeYrs="4" mode="2" name="Navrongo IPTi treated" popSize="500" schemaVersion="16" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
   <demography name="Navrongo">
     <ageGroup lowerbound="0.0">
       <group poppercent="2.941827" upperbound="1"/>
@@ -49,7 +49,9 @@
       <ipti coverage="0.919" targetAgeYrs="1.25"/>
     </continuous>
   </interventions>
-  <healthSystem healthSystemMemory="4" name="Navrongo Ipti ">
+  
+  <!--data are scaled to give annual total of 418 inf bites (corresponds to Appawu et al,)-->
+  <healthSystem><ImmediateOutcomes name="Navrongo Ipti ">
     <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
     <initialACR>
       <CQ value="0"/>
@@ -83,21 +85,8 @@
       <item maxAgeYrs="5" value="0"/>
       <item maxAgeYrs="99" value="0"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-  <!--data are scaled to give annual total of 418 inf bites (corresponds to Appawu et al,)-->
-  <entoData name="Navrongo">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Navrongo">
     <nonVector eipDuration="10">
       <EIRDaily origin="data">0.6731</EIRDaily>
       <EIRDaily origin="interpolate">0.630555</EIRDaily>
@@ -467,7 +456,19 @@
     </nonVector>
   </entoData>
   <!-- parameters 31052007 -->
-  <parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
+  
+<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="4"><CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
     <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="0" name="Estar" number="2" value="0.03247"/>
     <parameter include="1" name="Simm" number="3" value="0.1447"/>
@@ -498,5 +499,4 @@
     <parameter include="1" name="Ystar0" number="28" value="328.056605"/>
     <parameter include="1" name="Idete multiplier" number="29" value="2.78614"/>
     <parameter include="1" name="critical age for comorbidity" number="30" value="0.115906"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="500" schemaVersion="15" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="500" schemaVersion="16" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
   <demography name="test">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -58,54 +58,12 @@
   <interventions name="Change to monitoring HS">
     <timed>
       <intervention time="0">
-        <changeHS healthSystemMemory="6" name="Test HS">
-          <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
-          <initialACR>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </initialACR>
-          <compliance>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </compliance>
-          <nonCompliersEffective>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </nonCompliersEffective>
-          <pSeekOfficialCareUncomplicated1 value="1"/>
-          <pSelfTreatUncomplicated value="0"/>
-          <pSeekOfficialCareUncomplicated2 value="1"/>
-          <pSeekOfficialCareSevere value="1"/>
-          <pSequelaeInpatient>
-            <item maxAgeYrs="5" value="0.0132"/>
-            <item maxAgeYrs="99" value="0.005"/>
-          </pSequelaeInpatient>
-          <CFR>
-            <group cfr="0.09189" lowerbound="0"/>
-            <group cfr="0.0810811" lowerbound="0.25"/>
-            <group cfr="0.0648649" lowerbound="0.75"/>
-            <group cfr="0.0689189" lowerbound="1.5"/>
-            <group cfr="0.0675676" lowerbound="2.5"/>
-            <group cfr="0.0297297" lowerbound="3.5"/>
-            <group cfr="0.0459459" lowerbound="4.5"/>
-            <group cfr="0.0945946" lowerbound="7.5"/>
-            <group cfr="0.1243243" lowerbound="12.5"/>
-            <group cfr="0.1378378" lowerbound="15"/>
-          </CFR>
-        </changeHS>
+        
       </intervention>
     </timed>
   </interventions>
-  <healthSystem healthSystemMemory="6" name="no Treatment no Mortality">
+  
+  <healthSystem><ImmediateOutcomes name="no Treatment no Mortality">
     <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
     <initialACR>
       <CQ value="0"/>
@@ -139,11 +97,8 @@
       <item maxAgeYrs="5" value="0.0132"/>
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0" lowerbound="0"/>
-    </CFR>
-  </healthSystem>
-  <entoData name="Test">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Test">
     <nonVector eipDuration="10">
       <EIRDaily origin="monthly">0.0738</EIRDaily>
       <EIRDaily origin="monthly">0.0738</EIRDaily>
@@ -1000,7 +955,10 @@
       <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entoData>
-  <parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
+  
+<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -1031,5 +989,4 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>

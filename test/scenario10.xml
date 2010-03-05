@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" name="Idete Incidence" popSize="300" schemaVersion="15" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="INCLUDES_PK_PD" value="true"/><option name="MUELLER_PRESENTATION_MODEL" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" assimMode="0" maximumAgeYrs="6.0" mode="4" name="Idete Incidence" popSize="300" schemaVersion="16" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -34,7 +34,8 @@
     </ageGroup>
   </monitoring>
   <interventions name="No Intervention"/>
-  <healthSystem healthSystemMemory="6" name="Ironmal">
+  
+  <healthSystem><ImmediateOutcomes name="Ironmal">
     <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
     <initialACR>
       <CQ value="0.6"/>
@@ -68,20 +69,8 @@
       <item maxAgeYrs="5" value="0.0132"/>
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-  <entoData name="Idete">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Idete">
     <!--first day is 17-03-92-->
     <nonVector eipDuration="10">
       <EIRDaily>31.5389</EIRDaily>
@@ -954,7 +943,19 @@
       <EIRDaily>1.8254</EIRDaily>
     </nonVector>
   </entoData>
-  <parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
+  
+<model><ModelOptions><option name="INCLUDES_PK_PD" value="true"/><option name="MUELLER_PRESENTATION_MODEL" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
     <parameter include="false" name="         '-ln(1-Sinf)'    " number="1" value="0.050736"/>
     <parameter include="false" name="         Estar    " number="2" value="0.03247"/>
     <parameter include="false" name="         Simm     " number="3" value="0.157325"/>
@@ -987,5 +988,4 @@
     <parameter include="false" name="         critical age for comorbidity     " number="30" value="0.105099"/>
     <parameter include="false" name="Mueller dummy 1" number="31" value="2.797523626"/>
     <parameter include="false" name="Mueller dummy 2" number="32" value="0.117383"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" maximumAgeYrs="90" mode="2" name="Namawala1_16" popSize="500" schemaVersion="15" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" maximumAgeYrs="90" mode="2" name="Namawala1_16" popSize="500" schemaVersion="16" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -42,7 +42,9 @@
       <ipti coverage="0.95" targetAgeYrs="0.79453"/>
     </continuous>
   </interventions>
-  <healthSystem healthSystemMemory="6" name="TanzaniaSP 04">
+  
+  <!-- Namawala 1_16 -->
+  <healthSystem><ImmediateOutcomes name="TanzaniaSP 04">
     <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
     <initialACR>
       <CQ value="0"/>
@@ -76,21 +78,8 @@
       <item maxAgeYrs="5" value="0"/>
       <item maxAgeYrs="99" value="0"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-  <!-- Namawala 1_16 -->
-  <entoData name="Namawala">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Namawala">
     <nonVector eipDuration="10">
       <EIRDaily origin="Namawala Pre">0.01164644875</EIRDaily>
       <EIRDaily origin="Namawala Pre">0.0121764839375</EIRDaily>
@@ -460,7 +449,19 @@
     </nonVector>
   </entoData>
   <!-- parameters 31052007 -->
-  <parameters delta="0.000547945205479452" interval="5" iseed="5" latentp="3">
+  
+<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="5" latentp="3">
     <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="0" name="Estar" number="2" value="0.03247"/>
     <parameter include="1" name="Simm" number="3" value="0.1447"/>
@@ -491,5 +492,4 @@
     <parameter include="1" name="Ystar0" number="28" value="328.056605"/>
     <parameter include="1" name="Idete multiplier" number="29" value="2.78614"/>
     <parameter include="1" name="critical age for comorbidity" number="30" value="0.115906"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="1000" schemaVersion="15" wuID="0" xsi:noNamespaceSchemaLocation="scenario_15.xsd"><ModelOptions><option name="LOGNORMAL_MASS_ACTION" value="true"/><option name="NO_PRE_ERYTHROCYTIC" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="1000" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
 
   <demography name="test">
     <ageGroup lowerbound="0">
@@ -58,7 +58,9 @@
 
   <interventions name="No interventions"/>
 
-  <healthSystem healthSystemMemory="6" name="TanzaniaSP 04">
+  
+
+  <healthSystem><ImmediateOutcomes name="TanzaniaSP 04">
     <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
     <initialACR>
       <CQ value="0"/>
@@ -92,7 +94,20 @@
       <item maxAgeYrs="5" value="0"/>
       <item maxAgeYrs="99" value="0"/>
     </pSequelaeInpatient>
-    <CFR>
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Namawala, single vector">
+    <vector>
+      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+        <eir EIRRotateAngle="0" a0="-3.251" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+        
+        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
+      </anopheles>
+    </vector>
+  </entoData>
+
+  
+
+<model><ModelOptions><option name="LOGNORMAL_MASS_ACTION" value="true"/><option name="NO_PRE_ERYTHROCYTIC" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
       <group cfr="0.09189" lowerbound="0"/>
       <group cfr="0.0810811" lowerbound="0.25"/>
       <group cfr="0.0648649" lowerbound="0.75"/>
@@ -103,20 +118,7 @@
       <group cfr="0.0945946" lowerbound="7.5"/>
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-
-  <entoData name="Namawala, single vector">
-    <vector>
-      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <eir EIRRotateAngle="0" a0="-3.251" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-      </anopheles>
-    </vector>
-  </entoData>
-
-  <parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
+    </CFR></clinical><parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -147,6 +149,4 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters>
-
-</scenario>
+  </parameters></model></scenario>

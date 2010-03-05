@@ -1,9 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" assimMode="0" maximumAgeYrs="80.389041096" mode="3" name="Matsari Intervention" popSize="500" schemaVersion="15" wuID="12345" xsi:noNamespaceSchemaLocation="scenario_15.xsd">
-  <ModelOptions>
-    <option name="COMORB_HET" value="true"/>
-    <option name="GARKI_DENSITY_BIAS" value="true"/>
-    <option name="MAX_DENS_CORRECTION" value="false"/>
-  </ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" assimMode="0" maximumAgeYrs="80.389041096" mode="3" name="Matsari Intervention" popSize="500" schemaVersion="16" wuID="12345" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
+  
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -662,7 +658,8 @@
         <MDA coverage="1" maxAge="999" minAge="0"/>
       </intervention>
     </timed>
-  </interventions><healthSystem healthSystemMemory="6" name="no Treatment no Mortality">
+  </interventions>
+  <healthSystem><ImmediateOutcomes name="no Treatment no Mortality">
     <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
     <initialACR>
       <CQ value="0"/>
@@ -696,11 +693,8 @@
       <item maxAgeYrs="5" value="0.0132"/>
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
-    <CFR>
-      <group cfr="0" lowerbound="0"/>
-    </CFR>
-  </healthSystem>
-  <entoData name="Matsari Preintervention">
+    
+  </ImmediateOutcomes></healthSystem><entoData name="Matsari Preintervention">
     <!--day1 in Garki is 26-10-70-->
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.15927</EIRDaily>
@@ -1211,7 +1205,14 @@
       <EIRDaily origin="interpolate">0.00227</EIRDaily>
     </nonVector>
   </entoData> 
-  <parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
+  
+<model><ModelOptions>
+    <option name="COMORB_HET" value="true"/>
+    <option name="GARKI_DENSITY_BIAS" value="true"/>
+    <option name="MAX_DENS_CORRECTION" value="false"/>
+  </ModelOptions><clinical healthSystemMemory="6"><CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -1242,5 +1243,4 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters>
-</scenario>
+  </parameters></model></scenario>
