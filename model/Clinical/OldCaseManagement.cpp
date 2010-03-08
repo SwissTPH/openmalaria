@@ -48,14 +48,14 @@ double OldCaseManagement::probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
 // -----  utility  -----
 
-const scnXml::HSImmediateOutcomes& getHealthSystem (int healthSystemSource) {
+const scnXml::HealthSystem& getHealthSystem (int healthSystemSource) {
     if (healthSystemSource == -1) {
-	return InputData().getHealthSystem().getImmediateOutcomes().get();
+	return InputData().getHealthSystem();
     } else {
 	const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
 	if (interv == NULL || !interv->getChangeHS().present())
 	    throw runtime_error ("healthSystemSource invalid");
-	return interv->getChangeHS().get().getImmediateOutcomes().get();
+	return interv->getChangeHS().get();
     }
     assert(false);	// unreachable
 }
@@ -74,11 +74,12 @@ void OldCaseManagement::init ()
 
 void OldCaseManagement::setHealthSystem (int source) {
     healthSystemSource = source;
-    const scnXml::HSImmediateOutcomes& healthSystem = getHealthSystem(healthSystemSource);
+    const scnXml::HealthSystem& healthSystem = getHealthSystem(healthSystemSource);
+    const scnXml::HSImmediateOutcomes& immediateOutcomes = healthSystem.getImmediateOutcomes().get();
     
-    setParasiteCaseParameters (healthSystem);
+    setParasiteCaseParameters (immediateOutcomes);
     
-    const scnXml::ByAgeItems::ItemSequence& pSeqGroups = healthSystem.getPSequelaeInpatient().getItem();
+    const scnXml::ByAgeItems::ItemSequence& pSeqGroups = immediateOutcomes.getPSequelaeInpatient().getItem();
     /* Note: Previously age groups specified in the XML were remapped; this was misleading
     (age groups could be ignored or have different bounds). To avoid letting non-corresponding
     entries now have a different effect, we check the bounds correspond _exactly_ to what we expect
@@ -92,7 +93,7 @@ void OldCaseManagement::setHealthSystem (int source) {
 	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
     }
     
-    readCaseFatalityRatio (InputData().getHealthSystem());
+    readCaseFatalityRatio (healthSystem);
 }
 
 

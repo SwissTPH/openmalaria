@@ -49,6 +49,7 @@ private:
     static const size_t nages= 22;
     //! Maximum of each age category
     static const double agemax[nages];
+    static const double agemin[nages];
 
     static const map<double,size_t> ageMap;
   
@@ -73,6 +74,7 @@ private:
     in weights by age group. The weights are expressed as proportions of 0.5*those
     in the reference age group. */
     static const double wtprop[nages];
+    static const double wtpropmin[nages];
     //@}
 };
 
