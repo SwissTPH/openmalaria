@@ -92,7 +92,7 @@ void OldCaseManagement::setHealthSystem (int source) {
 	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
     }
     
-    readCaseFatalityRatio ();
+    readCaseFatalityRatio (InputData().getHealthSystem());
 }
 
 
@@ -267,9 +267,9 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, S
   }
 }
 
-void OldCaseManagement::readCaseFatalityRatio ()
+void OldCaseManagement::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
 {
-    const scnXml::CFRAgeGroups::GroupSequence& xmlGroupSeq = InputData().getModel().getClinical().getCFR().getGroup();
+    const scnXml::CFRAgeGroups::GroupSequence& xmlGroupSeq = healthSystem.getCFR().getGroup();
 
   int numOfGroups = xmlGroupSeq.size();
   _inputAge.resize (numOfGroups + 1);

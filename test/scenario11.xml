@@ -72,7 +72,9 @@
       <!-- <sources> Brewster et al., 1990</sources> -->
     </pSequelaeInpatient>
     
-  </ImmediateOutcomes></healthSystem><entoData name="Sugungum Preintervention">
+  </ImmediateOutcomes><CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR></healthSystem><entoData name="Sugungum Preintervention">
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.3669507722007722</EIRDaily>
       <EIRDaily origin="interpolate">0.35685255791505793</EIRDaily>
@@ -586,9 +588,7 @@
   </entoData>
   <!-- parameters 31052007 -->
   
-<model><ModelOptions><option name="TRIPLE_HET" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
-      <group cfr="0" lowerbound="0"/>
-    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="10" latentp="3">
+<model><ModelOptions><option name="TRIPLE_HET" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479452" interval="5" iseed="10" latentp="3">
     <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="0" name="Estar" number="2" value="0.03247"/>
     <parameter include="1" name="Simm" number="3" value="0.1447"/>

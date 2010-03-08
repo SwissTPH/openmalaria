@@ -694,7 +694,9 @@
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
     
-  </ImmediateOutcomes></healthSystem><entoData name="Matsari Preintervention">
+  </ImmediateOutcomes><CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR></healthSystem><entoData name="Matsari Preintervention">
     <!--day1 in Garki is 26-10-70-->
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.15927</EIRDaily>
@@ -1210,9 +1212,7 @@
     <option name="COMORB_HET" value="true"/>
     <option name="GARKI_DENSITY_BIAS" value="true"/>
     <option name="MAX_DENS_CORRECTION" value="false"/>
-  </ModelOptions><clinical healthSystemMemory="6"><CFR>
-      <group cfr="0" lowerbound="0"/>
-    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
+  </ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

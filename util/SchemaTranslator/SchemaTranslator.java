@@ -679,9 +679,9 @@ public class SchemaTranslator {
     		group.setAttributeNode(lowerbound);
     		
     		CFR.appendChild(group);
-    		clinical.appendChild(CFR);
     		
     		healthSystemNew.appendChild(eventScheduler);
+    		healthSystemNew.appendChild(CFR);
     	}
     	else
     	{
@@ -690,25 +690,30 @@ public class SchemaTranslator {
     		//healthSystemOld.removeAttribute("name");
     		scenarioDocument.renameNode(healthSystemOld, null, "ImmediateOutcomes");
     		Element CFR  = (Element)healthSystemOld.getElementsByTagName("CFR").item(0);
-    		clinical.appendChild(CFR);
+    		
     		healthSystemNew.appendChild(healthSystemOld);
+    		healthSystemNew.appendChild(CFR);
     	}
     	
     	Element Intervention = (Element)scenarioElement.getElementsByTagName("intervention").item(0);
     	if(Intervention!=null)
     	{
     		Element changeHS = (Element)Intervention.getElementsByTagName("changeHS").item(0);
-    		changeHS.removeAttribute("healthSystemMemory");
+    		
+    		if(changeHS!=null)
+    		{
+    			changeHS.removeAttribute("healthSystemMemory");
+    			
+        		scenarioDocument.renameNode(changeHS, null, "ImmediateOutcomes");
+        		
+        		Element changeHSNew = scenarioDocument.createElement("changeHS");
+        		Intervention.appendChild(changeHSNew);
+        		changeHSNew.appendChild(changeHS);
+        		
+    			Element HSCFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
+    			changeHSNew.appendChild(HSCFR);
+    		}
 			
-    		scenarioDocument.renameNode(changeHS, null, "ImmediateOutcomes");
-    		
-    		Element changeHSNew = scenarioDocument.createElement("changeHS");
-    		Intervention.appendChild(changeHSNew);
-    		changeHSNew.appendChild(changeHS);
-    		
-			Element HSCFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
-			if(HSCFR!=null)
-				changeHS.removeChild(HSCFR);
     	}
     	
     	scenarioElement.insertBefore(healthSystemNew, (Element)scenarioElement.getElementsByTagName("entoData").item(0));

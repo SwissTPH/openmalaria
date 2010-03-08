@@ -24,6 +24,7 @@
 
 namespace scnXml {
     class HSImmediateOutcomes;
+    class HealthSystem;
 }
 
 namespace OM { namespace Clinical {
@@ -120,7 +121,7 @@ private:
     calculate and cache the CFR as a function of age in years for better
     performance. This would require a specification of the resolution.
   */
-  static void readCaseFatalityRatio();
+  static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
   
   //log odds ratio of case-fatality in community compared to hospital
   //set only by init()

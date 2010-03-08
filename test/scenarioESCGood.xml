@@ -82,7 +82,7 @@
     <ClinicalOutcomes severeMask="0">
       <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
     </ClinicalOutcomes>
-  </EventScheduler></healthSystem><entoData name="Test">
+  </EventScheduler><CFR><group cfr="0" lowerbound="0"/></CFR></healthSystem><entoData name="Test">
     <nonVector eipDuration="10">
       <EIRDaily origin="monthly">0.0738</EIRDaily>
       <EIRDaily origin="monthly">0.0738</EIRDaily>
@@ -961,7 +961,7 @@
     <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
     <option name="INCLUDES_PK_PD" value="true"/>
     <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-  </ModelOptions><clinical healthSystemMemory="28"><CFR><group cfr="0" lowerbound="0"/></CFR></clinical><parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
+  </ModelOptions><clinical healthSystemMemory="28"/><parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

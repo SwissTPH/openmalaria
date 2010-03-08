@@ -70,7 +70,18 @@
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
     
-  </ImmediateOutcomes></healthSystem><entoData name="Idete">
+  </ImmediateOutcomes><CFR>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR></healthSystem><entoData name="Idete">
     <!--first day is 17-03-92-->
     <nonVector eipDuration="10">
       <EIRDaily>31.5389</EIRDaily>
@@ -944,18 +955,7 @@
     </nonVector>
   </entoData>
   
-<model><ModelOptions><option name="INCLUDES_PK_PD" value="true"/><option name="MUELLER_PRESENTATION_MODEL" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"><CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
-    </CFR></clinical><parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
+<model><ModelOptions><option name="INCLUDES_PK_PD" value="true"/><option name="MUELLER_PRESENTATION_MODEL" value="true"/><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">
     <parameter include="false" name="         '-ln(1-Sinf)'    " number="1" value="0.050736"/>
     <parameter include="false" name="         Estar    " number="2" value="0.03247"/>
     <parameter include="false" name="         Simm     " number="3" value="0.157325"/>
