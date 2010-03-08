@@ -988,9 +988,6 @@
       </xs:documentation>
       <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
-      <xs:element name="CFR" type="CFRAgeGroups" />
-    </xs:sequence>
     <xs:attribute name="healthSystemMemory" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -1018,6 +1015,7 @@
         <xs:element name="EventScheduler" type="HSEventScheduler"/>
         <xs:element name="ImmediateOutcomes" type="HSImmediateOutcomes"/>
       </xs:choice>
+      <xs:element name="CFR" type="CFRAgeGroups" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSImmediateOutcomes">
