@@ -59,7 +59,39 @@
     <timed>
       <intervention time="0">
         
-      </intervention>
+      <changeHS><ImmediateOutcomes name="Test HS">
+          <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
+          <initialACR>
+            <CQ value="1"/>
+            <AQ value="1"/>
+            <ACT value="1"/>
+            <QN value="1"/>
+            <selfTreatment value="1"/>
+          </initialACR>
+          <compliance>
+            <CQ value="1"/>
+            <AQ value="1"/>
+            <ACT value="1"/>
+            <QN value="1"/>
+            <selfTreatment value="1"/>
+          </compliance>
+          <nonCompliersEffective>
+            <CQ value="1"/>
+            <AQ value="1"/>
+            <ACT value="1"/>
+            <QN value="1"/>
+            <selfTreatment value="1"/>
+          </nonCompliersEffective>
+          <pSeekOfficialCareUncomplicated1 value="1"/>
+          <pSelfTreatUncomplicated value="0"/>
+          <pSeekOfficialCareUncomplicated2 value="1"/>
+          <pSeekOfficialCareSevere value="1"/>
+          <pSequelaeInpatient>
+            <item maxAgeYrs="5" value="0.0132"/>
+            <item maxAgeYrs="99" value="0.005"/>
+          </pSequelaeInpatient>
+          
+        </ImmediateOutcomes></changeHS></intervention>
     </timed>
   </interventions>
   
