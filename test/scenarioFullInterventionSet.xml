@@ -203,6 +203,35 @@
 	<deterrency halflife="4" initial="0.2"/>
       </VADescription>
     </anopheles>
+    <!-- HACK : added following 2 descriptions for non-gambiae mosquitoes -->
+    <anopheles mosquito="funestus">
+      <ITNDescription name="LLIN test">
+        <deterrency halflife="3" initial="0.44"/>
+        <preprandialKillingEffect halflife="3" initial="0.27"/>
+        <postprandialKillingEffect halflife="3" initial="0.27"/>
+      </ITNDescription>
+      <IRSDescription name="DDT test">
+        <deterrency halflife="0.5" initial="0.56"/>
+        <killingEffect halflife="0.5" initial="0.24"/>
+      </IRSDescription>
+      <VADescription name="hypothetical deterrency">
+        <deterrency halflife="4" initial="0.2"/>
+      </VADescription>
+    </anopheles>
+    <anopheles mosquito="arabiensis">
+      <ITNDescription name="LLIN test">
+        <deterrency halflife="3" initial="0.44"/>
+        <preprandialKillingEffect halflife="3" initial="0.27"/>
+        <postprandialKillingEffect halflife="3" initial="0.27"/>
+      </ITNDescription>
+      <IRSDescription name="DDT test">
+        <deterrency halflife="0.5" initial="0.56"/>
+        <killingEffect halflife="0.5" initial="0.24"/>
+      </IRSDescription>
+      <VADescription name="hypothetical deterrency">
+        <deterrency halflife="4" initial="0.2"/>
+      </VADescription>
+    </anopheles>
     <continuous>
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>
