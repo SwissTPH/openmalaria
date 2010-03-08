@@ -53,8 +53,8 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   }
   
   // Calculate total annual EIR
+  // divide by number of records assigned to each interval (usually one per day)
   for (size_t j=0;j<Global::intervalsPerYear; j++) {
-    // NOTE: this should be unnecessary, if daily.size() == daysInYear
     initialisationEIR[j] *= Global::interval / (double)nDays[j];
     annualEIR += initialisationEIR[j];
   }
@@ -83,6 +83,9 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
     // Note: requires Global::timeStep >= 0, but this can only be called in intervention period anyway.
   simulationMode = transientEIRknown;
   
+  if (nspore != nonVectorData.getEipDuration() / Global::interval)
+      throw util::xml_scenario_error ("change-of-EIR intervention cannot change EIP duration");
+  
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
@@ -101,7 +104,7 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
     nDays[istep]++;
     interventionEIR[istep] += EIRdaily;
   }
-  // NOTE: this should be unnecessary, if daily.size() == daysInYear
+  // divide by number of records assigned to each interval (usually one per day)
   for (size_t i = 0; i < interventionEIR.size(); ++i)
     interventionEIR[i] *= Global::interval / nDays[i];
   annualEIR=0.0;
