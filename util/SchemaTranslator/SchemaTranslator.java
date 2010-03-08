@@ -698,9 +698,17 @@ public class SchemaTranslator {
     	if(Intervention!=null)
     	{
     		Element changeHS = (Element)Intervention.getElementsByTagName("changeHS").item(0);
-        	
-        	if(changeHS != null)
-        		Intervention.removeChild(changeHS);
+    		changeHS.removeAttribute("healthSystemMemory");
+			
+    		scenarioDocument.renameNode(changeHS, null, "ImmediateOutcomes");
+    		
+    		Element changeHSNew = scenarioDocument.createElement("changeHS");
+    		Intervention.appendChild(changeHSNew);
+    		changeHSNew.appendChild(changeHS);
+    		
+			Element HSCFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
+			if(HSCFR!=null)
+				changeHS.removeChild(HSCFR);
     	}
     	
     	scenarioElement.insertBefore(healthSystemNew, (Element)scenarioElement.getElementsByTagName("entoData").item(0));
