@@ -399,6 +399,15 @@
           <xs:complexType>
             <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
+              <xs:element maxOccurs="unbounded" minOccurs="1" name="nonHumanHosts">
+                <xs:attribute name="name" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>Name of this species of non human hosts (must match up with those described per anopheles section).</xs:documentation>
+                    <xs:appinfo>units:List of elements;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="number" type="xs:double" use="required"/>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
