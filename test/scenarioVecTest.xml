@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="17" wuID="0" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
   
 
   <demography name="test">
@@ -129,7 +129,7 @@
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
         
-        <mosq extrinsicIncubationPeriod="10" mosqEntoAvailability="0.007" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.93" mosqProbResting="0.94" mosqRestDuration="3" mosqSeekingDeathRate="1.6" mosqSeekingDuration="0.33"/>
+        <mosq extrinsicIncubationPeriod="10" mosqHumanBloodIndex="1.0" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
       </anopheles>
     </vector>
   </entoData>

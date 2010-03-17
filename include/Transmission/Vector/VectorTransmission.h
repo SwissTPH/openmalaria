@@ -33,7 +33,7 @@ namespace OM { namespace Transmission {
 //! Transmission models, Chitnis et al
 class VectorTransmission : public TransmissionModel {
 public:
-  VectorTransmission(const scnXml::Vector vectorData);
+  VectorTransmission(const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorTransmission();
   
   /** Extra initialisation when not loading from a checkpoint, requiring

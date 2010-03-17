@@ -87,7 +87,7 @@ void Population::staticCheckpoint (ostream& stream)
 Population::Population()
     : populationSize (InputData().getPopSize())
 {
-    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel();
+    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
 
 Population::~Population()

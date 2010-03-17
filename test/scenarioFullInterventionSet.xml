@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="1000" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="1000" schemaVersion="17" wuID="0" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
   
 
   <demography name="Ifakara">
@@ -284,20 +284,20 @@
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-5.835" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00085" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.055" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.939" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-4.852" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.0022" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.65" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.045" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.98" mosqLaidEggsSameDayProportion="0.616" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.611"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-3.638" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.012" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.871" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
-    </vector>
+    <nonHumanHosts name="unprotectedAnimals" number="1.0"/></vector>
   </entoData>
 
   

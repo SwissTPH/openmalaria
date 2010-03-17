@@ -25,6 +25,7 @@
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "Transmission/PerHostTransmission.h"
 #include <list>
+#include <vector>
 
 namespace OM {
     namespace Host {
@@ -47,6 +48,9 @@ namespace Transmission {
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
  * a heterogeneous host population" (3rd Oct. 2007). */
+
+using namespace std;
+
 class VectorAnopheles
 {
 public:
@@ -77,8 +81,10 @@ public:
    * @param sIndex Index in VectorTransmission.species of this class.
    * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: innoculations.
    */
-  string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR);
+  string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR, map<string, double>& nonHumanHostsPopulations, int populationSize);
   
+
+
   /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
    * on the human population structure (when not loading from a checkpoint).
    * 
@@ -169,7 +175,7 @@ public:
     initNv0FromSv & stream;
     initNvFromSv & stream;
     N_v_length & stream;
-    P_A & stream;
+    //P_A & stream;
     P_df & stream;
     P_dif & stream;
     N_v & stream;
@@ -201,6 +207,19 @@ private:
   HostCategoryAnopheles humanBase;
   //@}
   
+  double initP_A;
+  double P_A1;
+  double P_An;
+
+  void setPAS();
+  void setMosqSeekingDeathRate();
+  double getHumanEntoAvailability(int populationSize);
+  double getNonHumanEntoAvailability(int populationSize, double relativeEntoAvailability);
+
+  double mosqLaidEggsSameDayProp;
+
+  double probMosqSurvivalFeedingCycle;
+
   /** @brief Parameters which may vary per mosquito species
    *
    * Read from XML by initialise; no need to checkpoint. */
@@ -363,6 +382,8 @@ private:
   
   /** Variables tracking data to be reported. */
   double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
+
+  map<string, double> nonHumansHostsPopulations;
 
 
   /* Functions */

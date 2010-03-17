@@ -352,6 +352,7 @@
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
           <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required" />
+          <xs:attribute name="mosqHumanBloodIndex" type="xs:double" use="required" />
         </xs:complexType>
       </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
@@ -361,11 +362,10 @@
         </xs:annotation>
         <xs:complexType>
 	  <xs:attribute name="name" type="xs:string" use="required" />
-          <xs:attribute name="mosqHumanBloodIndex" type="xs:double" use="required" />
+          <xs:attribute name="mosqRelativeEntoAvailability" type="xs:double" use="required" />
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
           <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
-          <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required" />
         </xs:complexType>
       </xs:element>
     </xs:sequence>

@@ -34,12 +34,12 @@
 
 namespace OM { namespace Transmission {
     
-TransmissionModel* TransmissionModel::createTransmissionModel () {
+TransmissionModel* TransmissionModel::createTransmissionModel (int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
   const scnXml::EntoData::VectorOptional& vectorData = InputData().getEntoData().getVector();
   if (vectorData.present())
-    return new VectorTransmission(vectorData.get());
+    return new VectorTransmission(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData().getEntoData().getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...

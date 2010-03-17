@@ -23,11 +23,12 @@
 #include "util/ModelOptions.hpp"
 
 #include <fstream>
+#include <map>
 
 namespace OM { namespace Transmission {
     using namespace OM::util;
 
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
+VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
 {  
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
@@ -35,6 +36,13 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   // Each item in the AnophelesSequence represents an anopheles species.
   // TransmissionModel::createTransmissionModel checks length of list >= 1.
   const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
+  const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
+
+  map<string, double> nonHumanHostsPopulations;
+
+  for(size_t i = 0; i<nonHumansList.size(); i++)
+	  nonHumanHostsPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+
   numSpecies = anophelesList.size();
   if (numSpecies < 1)
     throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
@@ -48,7 +56,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData)
   
   for (size_t i = 0; i < numSpecies; ++i) {
     string name = species[i].initialise (anophelesList[i], i,
-					 initialisationEIR);
+					 initialisationEIR, nonHumanHostsPopulations, populationSize);
     speciesIndex[name] = i;
     
 #ifdef OMV_CSV_REPORTING
@@ -86,6 +94,7 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
 }
 
 int VectorTransmission::vectorInitIterate () {
+  cout<<"start vector init iterate "<<endl;
   bool iterate = false;
   for (size_t i = 0; i < numSpecies; ++i)
     iterate |= species[i].vectorInitIterate ();

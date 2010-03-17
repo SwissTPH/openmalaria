@@ -25,18 +25,26 @@ namespace OM { namespace Transmission {
 
 // NOTE: should Mosq be an extension of NonHumanHosts type or NonHumanHosts a sub-object of Mosq? This is duplicate functionality.
 void HostCategoryAnopheles::operator= (const scnXml::Mosq& mosq) {
-  entoAvailability = mosq.getMosqEntoAvailability();
   probMosqBiting = mosq.getMosqProbBiting();
   probMosqFindRestSite = mosq.getMosqProbFindRestSite();
   probMosqSurvivalResting = mosq.getMosqProbResting();
+  probMosqOvipositing = mosq.getMosqProbOvipositing();
+  humanBloodIndex = mosq.getMosqHumanBloodIndex();
 }
 
 void HostCategoryAnopheles::operator= (const scnXml::NonHumanHosts& nnh) {
-  entoAvailability = nnh.getMosqEntoAvailability();
   probMosqBiting = nnh.getMosqProbBiting();
   probMosqFindRestSite = nnh.getMosqProbFindRestSite();
   probMosqSurvivalResting = nnh.getMosqProbResting();
+  relativeEntoAvailability = nnh.getMosqRelativeEntoAvailability();
+  nonHumanHostName = nnh.getName();
 }
+
+void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
+{
+	this->entoAvailability = entoAvailability;
+}
+
 
 void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
   if (intervDesc.getITNDescription().present()) {

@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 16;
+    static final int CURRENT_VERSION = 17;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -54,6 +54,27 @@ public class SchemaTranslator {
 	none, correct, dontCorrect;
     }
     private static BugCorrectionBehaviour maxDensBug = BugCorrectionBehaviour.none; 
+    
+    public static double HumanBloodIndex_NONNHS = 1;
+    
+    public static int INDEX_GAMBIAE_SS = 0;
+    public static int INDEX_FUNESTUS = 1;
+    public static int INDEX_ARABIENSIS = 2;
+    
+    public static String Name_GAMBIAE_SS = "gambiae_ss";
+    public static String Name_FUNESTUS = "funestus";
+    public static String Name_ARABIENSIS = "arabiensis";
+    
+    public static double[] HumanBloodIndexes = {0.939, 0.98, 0.871};
+    public static double[] ProporitionsLaidEggsSameDay = {0.313, 0.616, 0.313};
+    public static double[] PsSurvivalFeedingCycle = {0.623, 0.611, 0.623};
+    public static double[] PAs = {0.687, 0.384, 0.687};
+    public static double[] PA2s = {0.0151, 0.00957, 0.320};
+    
+    public static double td = 0.33;
+    
+    public static double Standard_RELATIVE_ENTO_AV = 1.0;
+    public static double Standard_NHH_NUMBER = 1.0;
 
     public SchemaTranslator() {
         try {
@@ -721,6 +742,97 @@ public class SchemaTranslator {
     	
     	return true;
     }
+    
+    public boolean translate16To17() throws Exception {
+    	
+    	Element vector = (Element)scenarioElement.getElementsByTagName("vector").item(0);
+    	
+    	if(vector!=null)
+    	{
+    		NodeList anopheles = vector.getElementsByTagName("anopheles");
+    		
+    		if(((Element)anopheles.item(0)).getElementsByTagName("nonHumanHosts").getLength()>0)
+    		{
+    			Element nhh = (Element)((Element)anopheles.item(0)).getElementsByTagName("nonHumanHosts").item(0);
+    			
+    			Attr nonHumanHostsnumber = scenarioDocument.createAttribute("number");
+    			nonHumanHostsnumber.setNodeValue(Double.toString(SchemaTranslator.Standard_NHH_NUMBER));
+    			Attr name = scenarioDocument.createAttribute("name");
+    			name.setNodeValue(nhh.getAttribute("name"));
+    			
+    			Element nonHumanHostsnumbers = scenarioDocument.createElement("nonHumanHosts");
+    			nonHumanHostsnumbers.setAttributeNode(name);
+    			nonHumanHostsnumbers.setAttributeNode(nonHumanHostsnumber);
+    			
+    			vector.appendChild(nonHumanHostsnumbers);
+    		}
+    		
+    		for(int i=0;i<anopheles.getLength(); i++)
+    		{
+    			Element anophelesType = (Element)anopheles.item(i);
+    			String typeName = anophelesType.getAttribute("mosquito");
+    			NodeList nonHumanHosts = anophelesType.getElementsByTagName("nonHumanHosts");
+    			Element mosq = (Element)anophelesType.getElementsByTagName("mosq").item(0);
+    			
+    			if(typeName.equals(SchemaTranslator.Name_GAMBIAE_SS))
+    				setMosqsNewAttributes(SchemaTranslator.INDEX_GAMBIAE_SS, mosq, nonHumanHosts);
+    			
+    			else if(typeName.equals(SchemaTranslator.Name_FUNESTUS))
+    				setMosqsNewAttributes(SchemaTranslator.INDEX_FUNESTUS, mosq, nonHumanHosts);
+    			
+    			else if(typeName.equals(SchemaTranslator.Name_ARABIENSIS))
+    				setMosqsNewAttributes(SchemaTranslator.INDEX_ARABIENSIS, mosq, nonHumanHosts);
+    			
+    			else
+    			{
+    				System.err.println("There are no standards values for this kind of mosquito. Please edit those values per hand. ");
+    				System.err.println("This scenario will not be updated.");
+    				return false;
+    			}
+    		}	
+    	}
+    	return true;
+    }
+    
+    private void setMosqsNewAttributes(int mosqType, Element mosq, NodeList nonHumanHosts)
+    {
+    	
+    	Attr humanBloodIndex = scenarioDocument.createAttribute("mosqHumanBloodIndex");
+		Attr proportionLaidEggsSameDay = scenarioDocument.createAttribute("mosqLaidEggsSameDayProportion");
+		Attr PSurvivalFeedingCycle = scenarioDocument.createAttribute("mosqSurvivalFeedingCycleProbability");
+		
+		proportionLaidEggsSameDay.setNodeValue(Double.toString(SchemaTranslator.ProporitionsLaidEggsSameDay[mosqType]));
+		PSurvivalFeedingCycle.setNodeValue(Double.toString(SchemaTranslator.PsSurvivalFeedingCycle[mosqType]));
+    	
+    	if(nonHumanHosts == null || nonHumanHosts.getLength()==0)
+    		humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndex_NONNHS));
+			
+    	else if(nonHumanHosts.getLength() == 1)
+    	{
+			humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
+			
+			Element nhh = (Element) nonHumanHosts.item(0);
+			
+			Attr relativeEntoAvailability = scenarioDocument.createAttribute("mosqRelativeEntoAvailability");
+			relativeEntoAvailability.setNodeValue(Double.toString(SchemaTranslator.Standard_RELATIVE_ENTO_AV));
+			
+			nhh.setAttributeNode(relativeEntoAvailability);
+			nhh.removeAttribute("mosqEntoAvailability");
+    	}
+    	else
+    	{
+			
+			humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
+    		System.err.println("There are more than 1 non human hosts types in these scenario. Please edit the relative Ento availabilities for each type of non human host by hand.");
+    	}
+    	
+    	mosq.setAttributeNode(humanBloodIndex);
+		mosq.setAttributeNode(proportionLaidEggsSameDay);
+		mosq.setAttributeNode(PSurvivalFeedingCycle);
+		
+		mosq.removeAttribute("mosqEntoAvailability");
+		mosq.removeAttribute("mosqSeekingDeathRate");
+	}
     
     
     private void visitAllFiles(File file, File outDir) throws Exception {

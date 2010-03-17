@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" maximumAgeYrs="90" mode="4" name="triple correlated heterogeneity" popSize="200" schemaVersion="16" wuID="0" xsi:noNamespaceSchemaLocation="scenario_16.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" maximumAgeYrs="90" mode="4" name="triple correlated heterogeneity" popSize="200" schemaVersion="17" wuID="0" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
   <demography name="Ifakara">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>

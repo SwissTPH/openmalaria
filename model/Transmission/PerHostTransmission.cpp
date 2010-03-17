@@ -76,6 +76,7 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophel
     alpha_i *= (1.0 - base.IRSDeterrency (Global::simulationTime - timestepIRS));
   if (timestepVA >= 0)
     alpha_i *= (1.0 - base.VADeterrency  (Global::simulationTime - timestepVA));
+
   return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
@@ -109,7 +110,7 @@ void PerHostTransmission::continousItnDistribution (int ageTSteps) {
 void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double availabilityFactor)
 {
   //TODO: vary to simulate heterogeneity
-  
+
   entoAvailability = base.entoAvailability * availabilityFactor;
   probMosqBiting = base.probMosqBiting;
   probMosqFindRestSite = base.probMosqFindRestSite;

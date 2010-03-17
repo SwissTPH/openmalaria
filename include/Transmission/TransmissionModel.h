@@ -76,7 +76,7 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel ();
+  static TransmissionModel* createTransmissionModel (int populationSize);
   
   //! Reads all entomological parameters from the input datafile. 
   TransmissionModel();
