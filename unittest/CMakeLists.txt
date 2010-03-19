@@ -45,11 +45,12 @@ if (OM_CXXTEST_GUI)
 endif (OM_CXXTEST_GUI)
 
 
-# For yaml-cpp. Temporarily here while I'm trialing the use of yaml with unittest data.
-find_library (YAML_CPP_LIB NAMES yaml-cpp)
-if (NOT YAML_CPP_LIB)
-  message (FATAL_ERROR "Unable to find yaml-cpp library. (You can avoid this dependency by disabling OM_CXXTEST_ENABLE)")
-endif (NOT YAML_CPP_LIB)
+# For yaml-cpp: I did use this to read in data for the VectorAnopheles unittest.
+# It's another not-the-easiest dependency to install, so maybe don't use it?
+#find_library (YAML_CPP_LIB NAMES yaml-cpp)
+#if (NOT YAML_CPP_LIB)
+#  message (FATAL_ERROR "Unable to find yaml-cpp library. (You can avoid this dependency by disabling OM_CXXTEST_ENABLE)")
+#endif (NOT YAML_CPP_LIB)
 
 set (CMAKE_CONFIGURED 1)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_DIR}/configured/TestPaths.h @ONLY)
@@ -88,11 +89,7 @@ else (OM_CXXTEST_INTERPRETER)
   message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp which is required to run the unittests.")
 endif (OM_CXXTEST_INTERPRETER)
 
-# These files are needed. "run" won't search for them, so they must be in the current directory.
-#foreach (DATA_FILE VectorEmergenceSuite.txt VectorSpeciesSuite.yaml)
-#  configure_file (${CMAKE_CURRENT_SOURCE_DIR}/${DATA_FILE} ${CMAKE_CURRENT_BINARY_DIR}/${DATA_FILE} COPYONLY)
-#endforeach (DATA_FILE)
-#configure_file (${CMAKE_SOURCE_DIR}/test/${OM_LATEST_SCHEMA} ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# This file is needed to run the EmpiricalInfection unittest:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (run tests.cpp)
@@ -104,7 +101,7 @@ target_link_libraries (run
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
-  ${YAML_CPP_LIB}
+  #${YAML_CPP_LIB}
 )
 
 if (MSVC)
