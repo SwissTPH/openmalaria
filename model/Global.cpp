@@ -45,6 +45,9 @@ namespace OM {
 	intervalsPer5Days = 5/interval;
 	intervalsPerYear = Global::DAYS_IN_YEAR/interval;
 	yearsPerInterval = double(interval) / double(Global::DAYS_IN_YEAR);
-	maxAgeIntervals = (int) (InputData().getMaximumAgeYrs()*intervalsPerYear);
+	// Changed in r756 (2010-03-04): Did cast max-age-years to int before multiplying (minor effect on output).
+	maxAgeIntervals = static_cast<int> (InputData().getMaximumAgeYrs() * intervalsPerYear);
+	// old behaviour (temporary for restore-old-behaviour commit):
+	maxAgeIntervals = static_cast<int> (InputData().getMaximumAgeYrs()) * intervalsPerYear;
     }
 }
