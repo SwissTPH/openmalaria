@@ -22,6 +22,7 @@
 #define Hmod_ESCaseManagement
 
 #include "Global.h"
+#include "Clinical/ESDecisionTree.h"	// needed for ESDecisionMap
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Survey.h"
@@ -81,84 +82,6 @@ struct CaseTreatment {
 };
 
 
-struct ESDecisionName {
-    ESDecisionName () : id(0) {}
-    ESDecisionName (const char* name) {
-        (*this) = name;
-    }
-    void operator= (const char* name);
-    inline bool operator== (const ESDecisionName that) const {
-        return id == that.id;
-    }
-private:
-    uint32_t id;
-    static map<string,uint32_t> id_map;
-    static uint32_t next_free;
-};
-/** A compressed representation of all decision outcomes.
- * Pass by value (it is 64-bits in size). */
-struct ESDecisionValue {
-    ESDecisionValue () : id(0) {}
-    ESDecisionValue (const char* decision, const char* value) {
-	this->assign (decision, value);
-    }
-    /** Set up a new set of decision values, returing the mask covering them all. */
-    static ESDecisionValue add_decision_values (const string& decision, const std::vector< string > values);
-    /** Assign from decision and value. add_decision_values must have been
-     * called first. */
-    void assign (const string& decision, const string& value);
-    inline bool operator== (const ESDecisionValue that) const {
-	return id == that.id;
-    }
-    inline ESDecisionValue operator& (const ESDecisionValue that) const {
-	return ESDecisionValue(id & that.id);
-    }
-    inline void operator|= (const ESDecisionValue that) {
-	id |= that.id;
-    }
-    private:
-	// private constructor, only for use by internal operations
-	ESDecisionValue (uint64_t new_id) : id(new_id) {}
-	uint64_t id;
-	//TODO: static members should really be per tree (uncomplicated/complicated):
-	static map<string,uint64_t> id_map;
-	static uint64_t next_bit;
-	friend std::size_t hash_value(ESDecisionValue const& b);
-};
-std::size_t hash_value(ESDecisionValue const& b);
-
-struct ESHostData {
-    ESHostData (double aY, WithinHostModel& wH, Pathogenesis::State pS) :
-        ageYears(aY), withinHost(wH), pgState(pS) {}
-    double ageYears;
-    WithinHostModel& withinHost;
-    Pathogenesis::State pgState;
-};
-
-/** Representation of one decision, random or deterministic (deterministic
- * decisions are hard-coded).
- *
- * Implementations (extending this base) are in the cpp file since they needn't
- * be shared.
- *****************************************************************************/
-class ESDecisionTree {
-    public:
-        /// Run decision tree, with input filtered by mask.
-        virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const =0;
-        
-	// Note: for some cases we could use ESDecisionName instead of string
-	// (for speed), but error messages would be bad. Only slows set-up.
-	string decision;	// name of decision
-        vector<string> depends;      // other decisions this depends upon
-        ESDecisionValue mask;      // mask covering all outputs
-        vector<ESDecisionValue> values;    // ids associated with each possible output
-        
-    protected:
-	// Sets mask and values, given the decision's name and a set of values
-	void setValues (const std::vector< string >& valueList);
-};
-
-
 /** Decision trees representation, mapping inputs to a CaseTreatment pointer.
  *
  * Used to represent a UC/UC2 or severe decision tree.
@@ -182,6 +105,7 @@ class ESDecisionMap {
         // Currently we walk through all decisions, required or not
         vector<ESDecisionTree*> decisions;
         unordered_map<ESDecisionValue,CaseTreatment*> treatments;
+	ESDecisionValueMap dvMap;
 };
 
 
