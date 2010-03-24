@@ -1,7 +1,15 @@
 # Root CMake configuration for OpenMalaria
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
+
 cmake_minimum_required (VERSION 2.4)
+# We still (try to) support cmake 2.4, but cmake 2.8 policies also work:
+if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.6)
+    cmake_policy(VERSION 2.8)
+elseif("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
+    cmake_policy(VERSION 2.6)
+endif("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.6)
+
 project (OpenMalaria CXX)
 
 # The FindXXX.cmake files included are not quite the same as standard ones.
@@ -68,13 +76,39 @@ find_package (Z)
 # suggested on windows: install boost such that paths are:
 # C:\Program Files\boost\boost_VER\boost\config.hpp
 # Add versions greater than 1.38 here:
-set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0")
+set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0")
 #set (Boost_DEBUG)
-find_package( Boost 1.36.0 )
+find_package( Boost 1.37.0 )
 if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIRS})
+    find_file (SPIRIT_VERSION_HPP boost/spirit/include/version.hpp
+	PATHS ${CMAKE_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS}
+    )
+    if (NOT SPIRIT_VERSION_HPP)
+	message (FATAL_ERROR "Not found: boost/spirit/include/version.hpp
+Required: Spirit 2.1 or later. (You can either upgrade boost to version
+1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/include .
+See: http://boost-spirit.com/home/articles/spirit2-1-release/using-spirit-v2-1-with-older-versions-of-boost-pre-v1-41/ )"
+	)
+    endif (NOT SPIRIT_VERSION_HPP)
+    
+    # Extract SPIRIT_VERSION macro (code taken from FindBoost.cmake)
+    # Read the whole file:
+    SET(SPIRIT_VERSION 0)
+    FILE(READ "${SPIRIT_VERSION_HPP}" _spirit_VERSION_HPP_CONTENTS)
+    
+    STRING(REGEX REPLACE ".*#define SPIRIT_VERSION 0x([0-9]+).*" "\\1" SPIRIT_VERSION "${_boost_VERSION_HPP_CONTENTS}")
+    SET(SPIRIT_VERSION ${SPIRIT_VERSION} CACHE INTERNAL "The version number for boost/spirit (base 16)")
+    
+    # Warning: this is a hex number. The LESS test will probably fail if any digits are A-F.
+    if (SPIRIT_VERSION LESS 2010)
+        message (FATAL_ERROR "Spirit version 0x${SPIRIT_VERSION} found.
+Required: Spirit 2.1 or later. (You can either upgrade boost to version
+1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/spirit .
+See: http://boost-spirit.com/home/articles/spirit2-1-release/using-spirit-v2-1-with-older-versions-of-boost-pre-v1-41/ )"
+        )
+    endif (SPIRIT_VERSION LESS 2010)
 else(Boost_FOUND)
-  message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org")
+    message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
 endif(Boost_FOUND)
 
 option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
@@ -127,6 +161,7 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model
