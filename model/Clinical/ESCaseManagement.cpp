@@ -23,38 +23,64 @@
 #include "util/random.h"
 #include "util/errors.hpp"
 
+#include <boost/format.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/unordered_map.hpp>
+#include <boost/tokenizer.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
 // -----  Types  -----
 
+void ESDecisionTree::setValues (const char* decision, vector<const char*> valueList) {
+    mask = ESDecisionValue::add_decision_values (decision, valueList);
+    values.resize (valueList.size());
+    size_t i = 0;
+    BOOST_FOREACH ( const char* value, valueList ) {
+	values[i].assign (decision, value);
+    }
+}
 /*class ESDecisionDeterministic : public ESDecisionTree {
 public:
     
-    virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
-   unordered_map<ESDecisionID,ESDecisionID>::const_iterator it = set.find (input);
+    virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+   unordered_map<ESDecisionValue,ESDecisionValue>::const_iterator it = set.find (input);
    if (it == set.end())
    return 0;
    return it->second;
 }
 
     private:
-	unordered_map<ESDecisionID,ESDecisionID> set;
+	unordered_map<ESDecisionValue,ESDecisionValue> set;
 };*/
 class ESDecisionRandom : public ESDecisionTree {
     public:
 	ESDecisionRandom (const ::scnXml::Decision& xmlDc) {
-	    //TODO: set depends, values
+	    // Set depends, values:
+	    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+	    boost::char_separator<char> separator (",");
+	    
+	    tokenizer depends_tokens (xmlDc.getDepends(), separator);
+	    BOOST_FOREACH ( const string& str, depends_tokens ) {
+		//FIXME: check names confirm to expected format
+		depends.push_back (str.c_str());	// cast to ESDecisionName
+	    }
+	    
+	    vector<const char*> valueList;
+	    tokenizer values_tokens (xmlDc.getValues(), separator);
+	    BOOST_FOREACH ( const string& str, values_tokens ) {
+		valueList.push_back (str.c_str());
+	    }
+	    setValues (xmlDc.getName().c_str(), valueList);
+	    
 	    //TODO: parse tree
 	}
 	
-	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
-	    unordered_map<ESDecisionID,vector<double> >::const_iterator it = set_cum_p.find (input);
+	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+	    unordered_map<ESDecisionValue,vector<double> >::const_iterator it = set_cum_p.find (input);
 	    if (it == set_cum_p.end())
-		return 0;
+		return ESDecisionValue();	// no decision
 	    double sample = random::uniform_01 ();
 	    size_t i = 0;
 	    while (it->second[i] < sample)
@@ -66,42 +92,46 @@ class ESDecisionRandom : public ESDecisionTree {
 	// a map of depended decision values to
 	// cumulative probabilities associated with values
 	//NOTE: be interesting to compare performance with std::map
-	unordered_map<ESDecisionID,vector<double> > set_cum_p;
-	vector<ESDecisionTree*> decisions;
+	unordered_map<ESDecisionValue,vector<double> > set_cum_p;
 };
 class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test () {
-	    mask = Decision::AGE_OVER5 | Decision::AGE_UNDER5;
-	    values.resize (2, Decision::AGE_OVER5);
-	    values[1] = Decision::AGE_UNDER5;
+	    vector<const char*> valueList (2, "under5");
+	    valueList[1] = "over5";
+	    setValues ("age5Test", valueList);
 	}
-	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
+	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
 	    if (hostData.ageYears >= 5.0)
-		return Decision::AGE_OVER5;
+		return values[1];
 	    else
-		return Decision::AGE_UNDER5;
+		return values[0];
 	}
 };
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest () {
-	    depends.resize (1, "tested");
-	    mask = Decision::RESULT_MASK;
-	    values.resize (2, Decision::RESULT_POSITIVE);
-	    values[1] = Decision::RESULT_NEGATIVE;
+	    depends.resize (1, "test");
+	    //TODO: assert "test" has outputs as below
+	    
+	    vector<const char*> valueList (2, "negative");
+	    valueList[1] = "positive";
+	    setValues ("result", valueList);
 	}
 	
-	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
-	    if (input == Decision::TEST_MICROSCOPY) {
+	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+	static const ESDecisionValue TEST_MICROSCOPY("test", "microscopy"),
+		TEST_RDT("test","RDT"),
+		TEST_NONE("test","none");
+	    if (input == TEST_MICROSCOPY) {
 		// if (hostData.withinHost.getDensity () > ...)
-		//FIXME: or RESULT_NEGATIVE
-		return Decision::RESULT_POSITIVE;
-	    } else if (input == Decision::TEST_RDT) {
-		//FIXME: or RESULT_NEGATIVE
-		return Decision::RESULT_POSITIVE;
+		//FIXME: or values[0]
+		return values[1];
+	    } else if (input == TEST_RDT) {
+		//FIXME: or values[0]
+		return values[0];
 	    } else
-		return 0;
+		return ESDecisionValue();	// 0, no decision
 	}
 };
 
@@ -171,9 +201,52 @@ void ESDecisionName::operator= (const char* name) {
 map<string,uint32_t> ESDecisionName::id_map;
 uint32_t ESDecisionName::next_free = 1;
 
-CaseTreatment* ESDecisionMap::determine (Pathogenesis::State pgState, ESHostData& hostData) {
-    BOOST_STATIC_ASSERT ( int(Pathogenesis::MORBIDITY_MASK) == int(Decision::MORBIDITY_MASK) );
-    ESDecisionID id = pgState & Decision::MORBIDITY_MASK;
+ESDecisionValue ESDecisionValue::add_decision_values (const char* decision, vector<const char*> values) {
+    // got length l = values.size() + 1 (default, "no outcome"); want minimal n such that: 2^n >= l
+    // that is, n >= log_2 (l)
+    // so n = ceil (log_2 (l))
+    uint32_t n_bits = std::ceil (log (values.size() + 1) / log(2.0));
+    if (n_bits+next_bit>=(sizeof(next_bit)*8))
+	throw runtime_error ("ESDecisionValue design: insufficient bits");
+    uint64_t next=(1<<next_bit), step;
+    step=next;
+    BOOST_FOREACH ( const char* value, values ) {
+	string name = (boost::format("%1%(%2%)") %decision %value).str();
+	bool inserted = id_map.insert (pair<string,uint64_t>(name, next)).second;
+	if (!inserted)
+	    throw runtime_error ("ESDecisionValue: value doesn't have a unique name");
+	next += step;
+    }
+    assert (next <= (1<<(n_bits+next_bit)));
+    
+    ESDecisionValue mask;
+    for (size_t i = 0; i < n_bits; ++i) {
+	mask.id |= (1<<next_bit);
+	++next_bit;
+    }
+    assert ((next-step) & mask.id == 0);
+    assert (next & mask.id != 0);
+    return mask;
+}
+void ESDecisionValue::assign (const char* decision, const char* value) {
+    string name = (boost::format("%1%(%2%)") %decision %value).str();
+    map<string,uint64_t>::const_iterator it = id_map.find (name);
+    if (it == id_map.end()) {
+	throw runtime_error ("ESDecisionValue: name used before an entry was created for it");
+    } else {
+	id = it->second;
+    }
+}
+std::size_t hash_value(ESDecisionValue const& b) {
+    boost::hash<int> hasher;
+    return hasher(b.id);
+}
+map<string,uint64_t> ESDecisionValue::id_map;
+uint64_t ESDecisionValue::next_bit = 0;
+
+CaseTreatment* ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) {
+    ESDecisionValue id;
+    //TODO: add pgState decision
     //TODO
 }
 
@@ -186,9 +259,9 @@ void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     else
         map = &UC;
     
-    ESHostData hostData (ageYears, withinHostModel);
+    ESHostData hostData (ageYears, withinHostModel, pgState);
     
-    CaseTreatment* treatment = map->determine (pgState, hostData);
+    CaseTreatment* treatment = map->determine (hostData);
     
     // We always remove any queued medications.
     medicateQueue.clear();

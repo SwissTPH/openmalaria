@@ -81,45 +81,13 @@ struct CaseTreatment {
 };
 
 
-/// Type used as identifier in decision trees.
-typedef uint64_t ESDecisionID;
-namespace Decision { enum DecisionEnums {
-    /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
-    * Many are designed to be "flags", so the value corresponds to a single bit:
-    * http://en.wikipedia.org/wiki/Flag_byte
-    * (note & | ^ are C++'s binary AND, OR and XOR operators).
-    * Maximum value I'd recommend using as a flag: 0x4000_0000 */
-    NONE                                = 0x0,
-    
-    /** MUST correspond to Pathogenesis::MORBIDITY_MASK.
-    *
-    * Pathogenesis constants from Constant.h within this mask may be used. */
-    MORBIDITY_MASK              = 0x3F,
-    
-    AGE_UNDER5                  = 0x40,
-    AGE_OVER5                   = 0x80,
-    
-    TEST_NONE                   = 0x0,
-    TEST_MICROSCOPY     = 0x100,
-    TEST_RDT                    = 0x200,
-    TEST_MASK                   = 0x300,
-    
-    RESULT_POSITIVE     = 0x400,
-    RESULT_NEGATIVE     = 0x800,
-    RESULT_MASK         = 0xC00,
-    
-    TSDELAY_NUM_MAX     = 3,
-    TSDELAY_SHIFT       = 24,
-    TSDELAY_MASK        = 0x3000000,
-}; }
-
 struct ESDecisionName {
     ESDecisionName () : id(0) {}
     ESDecisionName (const char* name) {
         (*this) = name;
     }
     void operator= (const char* name);
-    inline bool operator== (ESDecisionName& that) {
+    inline bool operator== (const ESDecisionName that) const {
         return id == that.id;
     }
 private:
@@ -127,12 +95,33 @@ private:
     static map<string,uint32_t> id_map;
     static uint32_t next_free;
 };
+struct ESDecisionValue {
+    ESDecisionValue () : id(0) {}
+    ESDecisionValue (const char* decision, const char* value) {
+	this->assign (decision, value);
+    }
+    /** Set up a new set of decision values, returing the mask covering them all. */
+    static ESDecisionValue add_decision_values (const char* decision, vector<const char*> values);
+    /** Assign from decision and value. add_decision_values must have been
+     * called first. */
+    void assign (const char* decision, const char* value);
+    inline bool operator== (const ESDecisionValue that) const {
+	return id == that.id;
+    }
+    private:
+	uint64_t id;
+	static map<string,uint64_t> id_map;
+	static uint64_t next_bit;
+	friend std::size_t hash_value(ESDecisionValue const& b);
+};
+std::size_t hash_value(ESDecisionValue const& b);
 
 struct ESHostData {
-    ESHostData (double aY, WithinHostModel& wH) :
-        ageYears(aY), withinHost(wH) {}
+    ESHostData (double aY, WithinHostModel& wH, Pathogenesis::State pS) :
+        ageYears(aY), withinHost(wH), pgState(pS) {}
     double ageYears;
     WithinHostModel& withinHost;
+    Pathogenesis::State pgState;
 };
 
 /** Representation of one decision, random or deterministic (deterministic
@@ -144,11 +133,15 @@ struct ESHostData {
 class ESDecisionTree {
     public:
         /// Run decision tree, with input filtered by mask.
-        virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) =0;
+        virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) =0;
         
         vector<ESDecisionName> depends;      // other decisions this depends upon
-        ESDecisionID mask;      // mask covering all outputs
-        vector<ESDecisionID> values;    // ids associated with each possible output
+        ESDecisionValue mask;      // mask covering all outputs
+        vector<ESDecisionValue> values;    // ids associated with each possible output
+        
+    protected:
+	// Sets mask and values, given the decision's name and a set of values
+	void setValues (const char* decision, vector<const char*> valueList);
 };
 
 
@@ -168,12 +161,12 @@ class ESDecisionMap {
 	void initialize (const ::scnXml::HSESCMDecisions& decisions, bool complicated);
         
         /// Run decision tree. TODO: consider non-treatment outputs.
-        CaseTreatment* determine (Pathogenesis::State pgState, ESHostData& hostData);
+        CaseTreatment* determine (ESHostData& hostData);
         
     private:
         // Currently we walk through all decisions, required or not
         vector<ESDecisionTree*> decisions;
-        unordered_map<ESDecisionID,CaseTreatment*> treatments;
+        unordered_map<ESDecisionValue,CaseTreatment*> treatments;
 };
 
 
