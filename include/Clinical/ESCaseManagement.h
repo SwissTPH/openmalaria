@@ -169,6 +169,7 @@ class ESDecisionMap {
         ~ESDecisionMap();
 	/** Initialization.
 	 *
+	 * @param decisions XML element describing probabilistic decisions
 	 * @param complicated Determines whether hard-coded decisions for the
 	 * uncomplicated or complicated case are added. */
 	void initialize (const ::scnXml::HSESCMDecisions& decisions, bool complicated);

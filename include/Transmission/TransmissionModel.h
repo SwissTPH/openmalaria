@@ -162,7 +162,8 @@ protected:
   /** Calculates the EIR (in adults), during the main simulation phase.
    * 
    * \param simulationTime Time since start of simulation.
-   * \param host The human to calculate EIR for (not used by all models). */
+   * \param host The human to calculate EIR for (not used by all models).
+   * \param ageInYears Age of the human in years. */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears) = 0; 
   
   virtual void checkpoint (istream& stream);

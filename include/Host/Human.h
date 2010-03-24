@@ -44,7 +44,6 @@ public:
   /** Initialise all variables of a human datatype.
    * 
    * \param tm Transmission model reference (to initialize TM code)
-   * \param ID unique identifier
    * \param dateOfBirth date of birth in time steps (equal to simulationTime,
    *	except for initial population set up)
    * \param simulationTime Simulation timestep */

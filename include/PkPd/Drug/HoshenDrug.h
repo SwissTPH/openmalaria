@@ -51,7 +51,7 @@ public:
   
   /** Add a dose.
    *
-   * @param qty Quantity in mg
+   * @param concentration Concentration (mg per kg?)
    * @param time Days */
   void addDose (double concentration, double time);
   

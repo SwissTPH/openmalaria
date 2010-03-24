@@ -54,7 +54,9 @@ public:
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
    * 
-   * \param simulationTime Time since start of simulation . */
+   * @param simulationTime Time since start of simulation.
+   * @param perHost Transmission-related data for this host.
+   * @param ageInYears Age of this host in years. */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears); 
  
 private:

@@ -23,6 +23,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #else
+#include <cstdio>	// perror
 #include <pthread.h>
 #endif
 
@@ -75,7 +76,6 @@ void timer::stopCheckpoint (){
 }
 
 #else
-#include <stdio.h>	// perror
 
 //Pthread version
 int res;

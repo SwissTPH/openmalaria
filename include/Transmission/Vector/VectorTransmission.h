@@ -60,7 +60,9 @@ public:
   
   /** Calculates EIR (in adults).
    * 
-   * \param simulationTime Time since start of simulation . */
+   * @param simulationTime Time since start of simulation.
+   * @param host Transmission-related data for this host.
+   * @param ageInYears Age of this host in years. */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageInYears); 
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
