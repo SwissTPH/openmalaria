@@ -80,33 +80,38 @@ set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "
 #set (Boost_DEBUG)
 find_package( Boost 1.37.0 )
 if(Boost_FOUND)
-    find_file (SPIRIT_VERSION_HPP boost/spirit/include/version.hpp
-	PATHS ${CMAKE_SOURCE_DIR}/include ${Boost_INCLUDE_DIRS}
+    find_path (SPIRIT_INCLUDE_DIRS boost/spirit/include/version.hpp
+	PATHS ${CMAKE_SOURCE_DIR}/../spirit ${Boost_INCLUDE_DIRS}
     )
-    if (NOT SPIRIT_VERSION_HPP)
+    if (NOT SPIRIT_INCLUDE_DIRS)
 	message (FATAL_ERROR "Not found: boost/spirit/include/version.hpp
 Required: Spirit 2.1 or later. (You can either upgrade boost to version
-1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/include .
+1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/../spirit (containing boost/spirit/include/version.hpp).
 See: http://boost-spirit.com/home/articles/spirit2-1-release/using-spirit-v2-1-with-older-versions-of-boost-pre-v1-41/ )"
 	)
-    endif (NOT SPIRIT_VERSION_HPP)
+    endif (NOT SPIRIT_INCLUDE_DIRS)
     
     # Extract SPIRIT_VERSION macro (code taken from FindBoost.cmake)
     # Read the whole file:
     SET(SPIRIT_VERSION 0)
-    FILE(READ "${SPIRIT_VERSION_HPP}" _spirit_VERSION_HPP_CONTENTS)
+    FILE(READ "${SPIRIT_INCLUDE_DIRS}/boost/spirit/include/version.hpp" _spirit_VERSION_HPP_CONTENTS)
     
-    STRING(REGEX REPLACE ".*#define SPIRIT_VERSION 0x([0-9]+).*" "\\1" SPIRIT_VERSION "${_boost_VERSION_HPP_CONTENTS}")
+    STRING(REGEX REPLACE ".*#define SPIRIT_VERSION 0x([0-9A-Fa-f]+).*" "\\1" SPIRIT_VERSION "${_spirit_VERSION_HPP_CONTENTS}")
     SET(SPIRIT_VERSION ${SPIRIT_VERSION} CACHE INTERNAL "The version number for boost/spirit (base 16)")
     
-    # Warning: this is a hex number. The LESS test will probably fail if any digits are A-F.
-    if (SPIRIT_VERSION LESS 2010)
+    # Warning: this is a hex number. The test will probably fail if any digits are A-F.
+    # The logic I want is !(SPIRIT_VERSION >= 2010) which is _not_ the same as
+    # (SPIRIT_VERSION LESS 2010) (because this is false when SPIRIT_VERSION is not a number).
+    if (SPIRIT_VERSION GREATER 2010)
+    elseif (SPIRIT_VERSION EQUAL 2010)
+    else (SPIRIT_VERSION GREATER 2010)
         message (FATAL_ERROR "Spirit version 0x${SPIRIT_VERSION} found.
 Required: Spirit 2.1 or later. (You can either upgrade boost to version
-1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/spirit .
+1.41 or later or you can extract spirit headers to ${CMAKE_SOURCE_DIR}/../spirit (containing boost/spirit/include/version.hpp).
 See: http://boost-spirit.com/home/articles/spirit2-1-release/using-spirit-v2-1-with-older-versions-of-boost-pre-v1-41/ )"
         )
-    endif (SPIRIT_VERSION LESS 2010)
+    endif (SPIRIT_VERSION GREATER 2010)
+    message (STATUS "Spirit version: ${SPIRIT_VERSION} (from: ${SPIRIT_INCLUDE_DIRS})")
 else(Boost_FOUND)
     message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
 endif(Boost_FOUND)
@@ -162,6 +167,7 @@ include_directories (SYSTEM
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
+  ${SPIRIT_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model

@@ -92,9 +92,11 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${SPIRIT_INCLUDE_DIRS}
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model
 )
 
 add_library (model
