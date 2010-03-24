@@ -24,35 +24,130 @@
 #include "util/errors.hpp"
 
 #include <boost/static_assert.hpp>
+#include <boost/unordered_map.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-ESCaseManagement::TreeType ESCaseManagement::cmTree;
-cmid ESCaseManagement::cmMask;
+// -----  Types  -----
 
+/*class ESDecisionDeterministic : public ESDecisionTree {
+public:
+    
+    virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
+   unordered_map<ESDecisionID,ESDecisionID>::const_iterator it = set.find (input);
+   if (it == set.end())
+   return 0;
+   return it->second;
+}
+
+    private:
+	unordered_map<ESDecisionID,ESDecisionID> set;
+};*/
+class ESDecisionRandom : public ESDecisionTree {
+    public:
+	ESDecisionRandom (const ::scnXml::Decision& xmlDc) {
+	    //TODO: set depends, values
+	    //TODO: parse tree
+	}
+	
+	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
+	    unordered_map<ESDecisionID,vector<double> >::const_iterator it = set_cum_p.find (input);
+	    if (it == set_cum_p.end())
+		return 0;
+	    double sample = random::uniform_01 ();
+	    size_t i = 0;
+	    while (it->second[i] < sample)
+		++i;
+	    return values[i];
+	}
+	
+    private:
+	// a map of depended decision values to
+	// cumulative probabilities associated with values
+	//NOTE: be interesting to compare performance with std::map
+	unordered_map<ESDecisionID,vector<double> > set_cum_p;
+	vector<ESDecisionTree*> decisions;
+};
+class ESDecisionAge5Test : public ESDecisionTree {
+    public:
+	ESDecisionAge5Test () {
+	    mask = Decision::AGE_OVER5 | Decision::AGE_UNDER5;
+	    values.resize (2, Decision::AGE_OVER5);
+	    values[1] = Decision::AGE_UNDER5;
+	}
+	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
+	    if (hostData.ageYears >= 5.0)
+		return Decision::AGE_OVER5;
+	    else
+		return Decision::AGE_UNDER5;
+	}
+};
+class ESDecisionParasiteTest : public ESDecisionTree {
+    public:
+	ESDecisionParasiteTest () {
+	    depends.resize (1, "tested");
+	    mask = Decision::RESULT_MASK;
+	    values.resize (2, Decision::RESULT_POSITIVE);
+	    values[1] = Decision::RESULT_NEGATIVE;
+	}
+	
+	virtual ESDecisionID determine (ESDecisionID input, ESHostData& hostData) {
+	    if (input == Decision::TEST_MICROSCOPY) {
+		// if (hostData.withinHost.getDensity () > ...)
+		//FIXME: or RESULT_NEGATIVE
+		return Decision::RESULT_POSITIVE;
+	    } else if (input == Decision::TEST_RDT) {
+		//FIXME: or RESULT_NEGATIVE
+		return Decision::RESULT_POSITIVE;
+	    } else
+		return 0;
+	}
+};
+
+
+// ESCaseManagement::TreeType ESCaseManagement::cmTree;
+// cmid ESCaseManagement::cmMask;
+
+ESDecisionMap ESCaseManagement::UC, ESCaseManagement::severe;
 CaseTreatment* ESCaseManagement::mdaDoses;
 
 // -----  Static  -----
 
 void ESCaseManagement::init () {
     // Assume EventScheduler data was checked present:
-    const scnXml::CaseManagementTree& xmlCM = InputData().getHealthSystem().getEventScheduler().get().getCaseManagementTree();
-    for (scnXml::CaseManagementTree::CM_pBranchSetConstIterator it = xmlCM.getCM_pBranchSet().begin(); it != xmlCM.getCM_pBranchSet().end(); ++it) {
-	cmTree[it->getID ()] = new CMPBranchSet (it->getCM_pBranch());
-    }
-    for (scnXml::CaseManagementTree::CM_leafConstIterator it = xmlCM.getCM_leaf().begin(); it != xmlCM.getCM_leaf().end(); ++it) {
-	cmTree[it->getID ()] = new CMLeaf (CaseTreatment (it->getMedicate()));
-    }
-    
-    cmMask = xmlCM.getMask();
+    const scnXml::HSEventScheduler& xmlESCM = InputData().getHealthSystem().getEventScheduler().get();
+    UC.initialize (xmlESCM.getUC (), false);
+    severe.initialize (xmlESCM.getSevere (), true);
     
     // MDA Intervention data
     const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
     if (mdaDesc.present()) {
-	mdaDoses = new CaseTreatment (mdaDesc.get().getMedicate());
+	mdaDoses = new CaseTreatment (/*FIXME mdaDesc.get().getMedicate()*/);
     } else
 	mdaDoses = NULL;
+}
+
+void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool complicated) {
+    uint32_t decision_num = xmlDcs.getDecision().size() + 1;
+    if (!complicated)
+	decision_num += 1;
+    decisions.resize (decision_num);
+    
+    decision_num = 0;
+    decisions[decision_num++] = new ESDecisionAge5Test;
+    if (!complicated) {
+	decisions[decision_num++] = new ESDecisionParasiteTest;
+    }
+    
+    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlDcs.getDecision() ) {
+	decisions[decision_num++] = new ESDecisionRandom (xmlDc);
+    }
+}
+ESDecisionMap::~ESDecisionMap () {
+    BOOST_FOREACH ( ESDecisionTree* d, decisions ) {
+	delete d;
+    }
 }
 
 
@@ -60,58 +155,48 @@ void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue)
     if (mdaDoses == NULL)
 	throw util::xml_scenario_error ("MDA intervention without description");
     else
-	mdaDoses->apply(medicateQueue, 0);
+	mdaDoses->apply(medicateQueue);
+}
+
+void ESDecisionName::operator= (const char* name) {
+    map<string,uint32_t>::const_iterator it = id_map.find (name);
+    if (it == id_map.end()) {
+        id = next_free;
+        next_free++;
+        id_map[name] = id;
+    } else {
+        id = it->second;
+    }
+}
+map<string,uint32_t> ESDecisionName::id_map;
+uint32_t ESDecisionName::next_free = 1;
+
+CaseTreatment* ESDecisionMap::determine (Pathogenesis::State pgState, ESHostData& hostData) {
+    BOOST_STATIC_ASSERT ( int(Pathogenesis::MORBIDITY_MASK) == int(Decision::MORBIDITY_MASK) );
+    ESDecisionID id = pgState & Decision::MORBIDITY_MASK;
+    //TODO
 }
 
 
-cmid ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
-#ifndef NDEBUG
-    if (! (pgState & Pathogenesis::SICK))
-        throw domain_error ("doCaseManagement shouldn't be called if not sick");
-#endif
-
+void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
+    ESDecisionMap* map;
+    assert (pgState & Pathogenesis::SICK);
+    if (pgState & Pathogenesis::COMPLICATED)
+        map = &severe;
+    else
+        map = &UC;
+    
+    ESHostData hostData (ageYears, withinHostModel);
+    
+    CaseTreatment* treatment = map->determine (pgState, hostData);
+    
     // We always remove any queued medications.
     medicateQueue.clear();
-    
-    BOOST_STATIC_ASSERT ( cmid(Pathogenesis::MORBIDITY_MASK) == cmid(Decision::MORBIDITY_MASK) );
-    cmid decisionID = pgState & Pathogenesis::MORBIDITY_MASK;;
-    if (ageYears > 5.0)
-	decisionID |= Decision::AGE_OVER5;
-    
-    CaseTreatmentPair leaf = traverse (decisionID);	// Traverse the tree.
-    leaf.second.apply (medicateQueue, leaf.first);
-    return leaf.first;
+    treatment->apply (medicateQueue);
 }
-
-CaseTreatmentPair ESCaseManagement::traverse (cmid id) {
-    /* This has branches for severe or uncomplicated cases.
-    FIXME: In UCs it needs to branch into UC1 or UC2 depending on
-    result of last parasite test, if within health-system-memory. */
-    
-    // Parasite test:
-    //NOTE: currently only one test, but only used in UC trees
-    // (can make test depend on severe/UC state)
-    if ((id & Decision::RESULT_MASK) == Decision::RESULT_DETERMINE) {
-	id = id & (~Decision::RESULT_MASK);	// remove result flags
-	
-	//FIXME: or RESULT_NEGATIVE
-	id |= Decision::RESULT_POSITIVE;
-	
-	return traverse(id);
-    }
-    
-    TreeType::const_iterator it = cmTree.find (id & cmMask);
-    if (it == cmTree.end()) {
-	ostringstream msg;
-	msg << "No node for id "<<(id&cmMask)<<" (unmasked: "<<id<<")";
-	throw util::xml_scenario_error (msg.str());
-    }
-    return it->second->traverse (id);
-}
-
 
 // -----  CMNode derivatives  -----
-
+/*
 ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pBranchSequence& branchSeq) {
     double pAccumulation = 0.0;
     branches.resize (branchSeq.size());
@@ -126,22 +211,6 @@ ESCaseManagement::CMPBranchSet::CMPBranchSet (const scnXml::CM_pBranchSet::CM_pB
     // In any case, force it exactly 1.0 (because it could be slightly less,
     // meaning a random number x could have cumP<x<1.0, causing index errors.
     branches[branchSeq.size()-1].cumP = 1.0;
-}
-
-CaseTreatmentPair ESCaseManagement::CMPBranchSet::traverse (cmid id) {
-    double randCum = random::uniform_01();
-    size_t i = 0;
-    while (branches[i].cumP < randCum) {
-	++i;
-	assert (i < branches.size());
-    }
-    id |= branches[i].outcome;
-    
-    return ESCaseManagement::traverse (id);
-}
-
-CaseTreatmentPair ESCaseManagement::CMLeaf::traverse (cmid id) {
-    return CaseTreatmentPair (id, ct);
-}
+}*/
 
 } }

@@ -29,8 +29,8 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
-cmid ClinicalEventScheduler::outcomeMask;
+// ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
+// cmid ClinicalEventScheduler::outcomeMask;
 
 
 // -----  static init  -----
@@ -46,7 +46,7 @@ void ClinicalEventScheduler::init ()
     const scnXml::HSEventScheduler& ev = InputData().getHealthSystem().getEventScheduler().get();
     
     ESCaseManagement::init ();
-    
+    /*
     const scnXml::ClinicalOutcomes::OutcomesSequence& ocSeq = ev.getClinicalOutcomes().getOutcomes();
     for (scnXml::ClinicalOutcomes::OutcomesConstIterator it = ocSeq.begin(); it != ocSeq.end(); ++it) {
 	OutcomeData od;
@@ -56,7 +56,7 @@ void ClinicalEventScheduler::init ()
 	//FIXME: assert hospitalizationDaysRecover equals length of medication course in days
 	outcomes[it->getID()] = od;
     }
-    outcomeMask = ev.getClinicalOutcomes().getSevereMask();
+    outcomeMask = ev.getClinicalOutcomes().getSevereMask();*/
 }
 
 
@@ -123,29 +123,31 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	}
 	
 	// Decision ID of last case management run
-	cmid lastCmDecision = ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
+	//TODO: costing reporting
+	/*
 	if ( lastCmDecision & Decision::TEST_RDT ) {
 	    Surveys.current->report_Clinical_RDTs (1);
-	}
+	}*/
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    // Find outcome probabilities/durations associated with CM-tree path
-	    cmid id = lastCmDecision & outcomeMask;
-	    OutcomeType::const_iterator oi = outcomes.find (id);
-	    if (oi == outcomes.end ()) {
-		ostringstream msg;
-		msg << "No 'Outcome' data for cmid " << id;
-		throw util::xml_scenario_error(msg.str());
-	    }
-	    
-	    int medicationDuration;
-	    if (random::uniform_01() < oi->second.pDeath) {
-		medicationDuration = oi->second.hospitalizationDaysDeath;
-		
-		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-	    } else {
-		medicationDuration = oi->second.hospitalizationDaysRecover;
+// 	    cmid id = lastCmDecision & outcomeMask;
+// 	    OutcomeType::const_iterator oi = outcomes.find (id);
+// 	    if (oi == outcomes.end ()) {
+// 		ostringstream msg;
+// 		msg << "No 'Outcome' data for cmid " << id;
+// 		throw util::xml_scenario_error(msg.str());
+// 	    }
+// 	    
+	    int medicationDuration = 5;	//FIXME: this is a substitute value
+// 	    if (random::uniform_01() < oi->second.pDeath) {
+// 		medicationDuration = oi->second.hospitalizationDaysDeath;
+// 		
+// 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+// 	    } else {
+// 		medicationDuration = oi->second.hospitalizationDaysRecover;
 		
 		// Note: setting SEQUELAE / RECOVERY here only affects reporting, not model
 		//TODO: report sequelae?
@@ -153,14 +155,14 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 		//     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
 		// else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	    }
+// 	    }
 	    
 	    // Check: is patient in hospital? Reporting only.
-	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
-		pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
-		Surveys.current->report_Clinical_HospitalEntries (1);
-		Surveys.current->report_Clinical_HospitalizationDays (medicationDuration);
-	    }
+// 	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
+// 		pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+// 		Surveys.current->report_Clinical_HospitalEntries (1);
+// 		Surveys.current->report_Clinical_HospitalizationDays (medicationDuration);
+// 	    }
 	    
 	    // Report: recovery/seq./death, in/out of hospital
 	    latestReport.update (Global::simulationTime, ageGroup, pgState);

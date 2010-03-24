@@ -1273,94 +1273,10 @@
     </xs:sequence>
   </xs:complexType>
     <xs:complexType name="HSEventScheduler">
-	<xs:sequence>
-	    <xs:element name="CaseManagementTree">
-		<xs:annotation>
-		    <xs:documentation>
-			Partial description of the case management tree. The tree consists of:
-			Probability branches: map an ID to another ID (the outcome) stochastically.
-			Test branches: map an ID with a special flag to another ID; these are hard-coded.
-			Leaf nodes: these map an ID to a list of drug medications.
-			
-			Test branches are used if a flag requests a test (currently only RESULT_DETERMINE for parasite
-			tests). Otherwise a probability or leaf branch is used by masking the current ID with mask
-			(attribute for this element).
-		    </xs:documentation>
-		    <xs:appinfo>units:List of elements;</xs:appinfo>
-		</xs:annotation>
-		<xs:complexType>
-		    <xs:sequence>
-			<xs:element name="CM_pBranchSet" maxOccurs="unbounded" minOccurs="0">
-			    <xs:annotation>
-				<xs:documentation>
-				    A probability branch node: contains a list of outcome nodes along with
-				    probabilities, which link to another probability/test branch or leaf node.
-				</xs:documentation>
-			    </xs:annotation>
-			    <xs:complexType>
-				<xs:sequence>
-				    <xs:element name="CM_pBranch" maxOccurs="unbounded" minOccurs="1">
-					<xs:complexType>
-					    <xs:attribute name="outcome" type="xs:int" use="required">
-						<xs:annotation>
-						    <xs:documentation>
-							ID of next probability/test branch or leaf node.
-						    </xs:documentation>
-						</xs:annotation>
-					    </xs:attribute>
-					    <xs:attribute name="p" type="xs:double" use="required">
-						<xs:annotation>
-						    <xs:documentation>
-							Probability of this outcome
-						    </xs:documentation>
-						<xs:appinfo>
-						    units:Proportion;min:0;max:1;constraints:
-						    sum(p)=1
-						</xs:appinfo>
-						</xs:annotation>
-					    </xs:attribute>
-					</xs:complexType>
-				    </xs:element>
-				</xs:sequence>
-				<xs:attribute name="ID" type="xs:int" use="required">
-				    <xs:annotation>
-					<xs:documentation>Decision identifier.</xs:documentation>
-					<xs:appinfo>units:ID</xs:appinfo>
-				    </xs:annotation>
-				</xs:attribute>
-			    </xs:complexType>
-			</xs:element>
-			<xs:element name="CM_leaf" minOccurs="1" maxOccurs="unbounded">
-			    <xs:annotation>
-				<xs:documentation>
-				    End points of the case management tree, listing treatments.
-				</xs:documentation>
-			    </xs:annotation>
-			    <xs:complexType>
-				<xs:sequence>
-				    <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded"/>
-				</xs:sequence>
-				<xs:attribute name="ID" type="xs:int" use="required">
-				    <xs:annotation>
-					<xs:documentation>Decision identifier.</xs:documentation>
-					<xs:appinfo>units:ID</xs:appinfo>
-				    </xs:annotation>
-				</xs:attribute>
-			    </xs:complexType>
-			</xs:element>
-		    </xs:sequence>
-		    <xs:attribute name="mask" type="xs:int" use="required">
-			<xs:annotation>
-			<xs:documentation>
-			    Value used to mask decision ids before selecting a branch/leaf.
-			</xs:documentation>
-			<xs:appinfo>
-			    units:None;min:0;max:0xFFFFFFFF;
-			</xs:appinfo>
-			</xs:annotation>
-		    </xs:attribute>
-		</xs:complexType>
-	    </xs:element>
+      <xs:sequence>
+        <xs:element name="UC" type="HSESCMDecisions"/>
+        <xs:element name="Severe" type="HSESCMDecisions"/>
+            <!-- TODO: replace outcome data -->
 	    <xs:element name="ClinicalOutcomes">
 		<xs:annotation>
 		    <xs:documentation>
@@ -1427,6 +1343,92 @@
 	    </xs:element>
 	</xs:sequence>
     </xs:complexType>
+  <xs:complexType name="HSESCMDecisions">
+    <xs:annotation>
+      <xs:documentation>
+        Description of decisions for a case management tree. A generic view
+        of this tree would be that each decision is deterimistic, or based on probabilities which
+        may depend on other decisions. Probabilistic decisions are described here.
+        
+        In general, each decision has a name, a defined set of outcome values, and a set of
+        depenency decisions mentioned by name. The following decisions, with their associated
+        outcomes, are provided by the code (and may not be included here):
+        * "Age5Test": "under5", "over5"
+        * (UC only): "case": "UC1", "UC2"
+        * (UC only): "result": "positive", "negative"; this depends on decision "tested"
+        
+        The following decisions must be described here:
+        * (UC only): "tested": "none", "microscopy", "RDT"
+        * "drug": values aren't restricted but must match up with a drug (combination) described
+          in the corresponding "treatmentData" section, or be "none" (no treatment).
+      </xs:documentation>
+      <xs:appinfo>units:List of elements;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="decision" maxOccurs="unbounded" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            A decision describes how to choose between a set of values.
+            
+            Lexically, it can contain symbols matching "[_\.a-zA-Z0-9]+", round brackets: (),
+            braces: {} and colons. Whitespace is ignored except to separate symbols.
+            
+            Syntactically, it must match one TREE, where SYMBOL is a symbol described above.
+            (Here, "x|y" means x or y, "x+" means x occurs once or more, brackets show grouping.)
+            TREE := BRANCH_SET | OUTCOME
+            BRANCH_SET := BRANCH+
+            BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
+            OUTCOME, DECISION, VALUE := SYMBOL
+            
+            Semantically, each OUTCOME must be one of the values associated with this decision
+            or "void". For each BRANCH_SET each BRANCH must have the same DECISION, which
+            must be either:
+            * One of the dependencies mentioned in "depends". The VALUE immediately following in
+              brackets must correspond to one of its output values. The BRANCH_SET immediately
+              containing this BRANCH must represent each output value of the same decision
+              exactly once, and no parent BRANCH_SET may be for the same DECISION.
+            * Or: "p". This indicates a probalistic decision. In this case the value is a
+              probability, the sum of all values for the BRANCH_SET must be 1 and the decision
+              must be associated directly with OUTCOMEs (not sub-TREEs).
+          </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="name" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    The name of this decision. The name must match the regular expression
+                    "[_a-zA-Z0-9]+"; that is it can only contain letters, digits and _ characters
+                    (no spaces, punctuation, etc.).
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="depends" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    A comma-separated list of decisions that must have already been evaluated before
+                    this decision can be evaluated. Can be empty. Each must be hard-coded or
+                    described here.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="values" type="xs:string" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    A comma-separated list of outcome values this decision may have.
+                    The name of each value must be of the same form as decision names (i.e.
+                    only contain letters, digits and _ characters).
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <!-- TODO: add treatment -->
+    </xs:sequence>
+  </xs:complexType>
     
     <xs:complexType name="medicate">
 	<xs:attribute name="name" type="xs:string" use="required">

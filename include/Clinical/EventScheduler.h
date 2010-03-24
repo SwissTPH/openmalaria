@@ -75,14 +75,14 @@ private:
 	int hospitalizationDaysRecover;
     };
     
-    typedef boost::unordered_map<cmid,OutcomeData> OutcomeType;
+//     typedef boost::unordered_map<cmid,OutcomeData> OutcomeType;
     /** Table of outcome data.
      *
      * Currently only used for severe outcomes. If wanted for UC outcomes, a second mask could be
      * used (defaulting to 0), which, if non-zero, is used to mask the tree id in UC cases. */
-    static OutcomeType outcomes;
+//     static OutcomeType outcomes;
     /// Mask applied to tree id before lookup in outcomes.
-    static cmid outcomeMask;
+//     static cmid outcomeMask;
   //@}
 };
 
