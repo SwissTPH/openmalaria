@@ -113,7 +113,8 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 {
     rho = 0.0;
     if (InputData().getDemography().getGrowthRate().present())
-	rho = InputData().getDemography().getGrowthRate().get();
+    	rho = InputData().getDemography().getGrowthRate().get();
+
     rho = rho * (0.01 * Global::yearsPerInterval);
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,

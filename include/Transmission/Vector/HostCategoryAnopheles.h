@@ -28,9 +28,8 @@ namespace OM { namespace Transmission {
 /** Stores vector model data applicable between a category of host and a
  * mosquito species.
  * 
- * This is either base parameters for a mosquito species to humans, or (final)
- * parameters for a mosquito species to a non-human host type (since non-human
- * hosts are not modelled as agents).
+ * This is a superclass of HostCategoryAnophelesHumans and HostCategoryAnophelesNonHumans
+ * which contains parameters found in Human hosts and non human hosts
    *
    * Read from XML by VectorTransmission constructor. No need to checkpoint. */
 class HostCategoryAnopheles
@@ -39,14 +38,13 @@ public:
   /** Initialise entoAvailability and probMosq... to 0. */
   HostCategoryAnopheles () :
     entoAvailability(0.0), probMosqBiting(0.0),
-    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0),
-    relativeEntoAvailability(0.0), humanBloodIndex(0.0),
-    probMosqOvipositing(0.0)
+    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0)
   {}
   
-  void operator= (const scnXml::Mosq&);
-  void operator= (const scnXml::NonHumanHosts&);
-  
+  /** set the (human or non human) ento Availability.
+   *  This is only a helper method, since the ento availability
+   *  is calculated in VectorAnopheles.
+   */
   void setEntoAvailability(double entoAvailability);
 
   /** Set up any vector-model intervention parameters. */
@@ -62,12 +60,9 @@ public:
   template<class S>
   void operator& (S& stream) {
       entoAvailability & stream;
-      relativeEntoAvailability & stream;
       probMosqBiting & stream;
       probMosqFindRestSite & stream;
       probMosqSurvivalResting & stream;
-      probMosqOvipositing & stream;
-      humanBloodIndex & stream;
       ITNDeterrency & stream;
       ITNPreprandialKillingEffect & stream;
       ITNPostprandialKillingEffect & stream;
@@ -92,16 +87,6 @@ public:
    * (P_D_i). */
   double probMosqSurvivalResting;
   //@}
-  
-  double relativeEntoAvailability;
-
-  double humanBloodIndex;
-
-  double probMosqOvipositing;
-
-  string nonHumanHostName;
-
-  double getEntoAvailability(bool human);
 
   /** @brief Intervention description parameters */
   //@{
@@ -124,7 +109,7 @@ public:
   util::WeibullDecayedValue VADeterrency;
   //@}
 };
-typedef vector<HostCategoryAnopheles> NonHumanHostsType;
+
 
 } }
 #endif

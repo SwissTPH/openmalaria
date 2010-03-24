@@ -400,7 +400,7 @@
           <xs:complexType>
             <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
-              <xs:element maxOccurs="unbounded" minOccurs="1" name="nonHumanHosts">
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="nonHumanHosts">
               	<xs:complexType>
 	                <xs:attribute name="name" type="xs:string" use="required">
 	                  <xs:annotation>

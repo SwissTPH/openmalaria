@@ -81,7 +81,5 @@ double AgeGroupData::ageToWeight (double ageYears) {
 	double diff_age_max = agemax[age_group]-agemin[age_group];
 	double diff_age = ageYears - agemin[age_group];
 
-	double return_value;
-
     return 120.0 * (wtpropmin[age_group] + ((diff_wtprop/diff_age_max)*diff_age));;
 }

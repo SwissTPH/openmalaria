@@ -47,7 +47,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   
   probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
   probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability();
-  
+
   humanBase = mosq;
 
 
@@ -70,6 +70,20 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 
   double humanEntoAvailability = getHumanEntoAvailability(populationSize);
   humanBase.setEntoAvailability(humanEntoAvailability);
+
+  for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
+  {
+	    double relativeEntoAvailability = nnh->relativeEntoAvailability;
+		map<string, double>::const_iterator nonHumanPopulationIter = this->nonHumansHostsPopulations.find(nnh->nonHumanHostName);
+		double nonHumanPopulationSize = 0.0;
+
+		if(nonHumanPopulationIter == this->nonHumansHostsPopulations.end())
+			throw xml_scenario_error ("There is no population size defined for at least one non human host type, please check the scenario file. ");
+
+		nonHumanPopulationSize = (*nonHumanPopulationIter).second;
+		double entoAvailability = getNonHumanEntoAvailability(nonHumanPopulationSize,relativeEntoAvailability);
+		nnh->setEntoAvailability(entoAvailability);
+  }
 
   // -----  EIR  -----
   const scnXml::Eir& eirData = anoph.getEir();
@@ -126,35 +140,32 @@ void VectorAnopheles::setPAS()
 {
 	initP_A  = 1 - mosqLaidEggsSameDayProp;
 
-	double sum_relEntoAvailability1 = 0.0;
-	double sum_relEntoAvailability2 = 0.0;
-	double mult_HBloodIndexPd1Pe1 = humanBase.humanBloodIndex*mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
+	double sum_ZiPbiPci = 0.0;
+	double sum_den = 0.0;
+	double mult_HBloodIndexPd1Pe1 = humanBase.humanBloodIndex * humanBase.probMosqSurvivalResting * humanBase.probMosqOvipositing;
 	double inv_HBlood = 1-humanBase.humanBloodIndex;
 
 	if(!nonHumanHosts.empty())
 	{
+
 		for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
-			{
-				double ZiPbiPci;
-				ZiPbiPci = nnh->relativeEntoAvailability * nnh->probMosqBiting * nnh->probMosqFindRestSite;
+		{
+			double ZiPbiPci = nnh->relativeEntoAvailability * nnh->probMosqBiting * nnh->probMosqFindRestSite;
+			sum_ZiPbiPci += ZiPbiPci;
+			double mult_INVHBloodIndexPdiPei = inv_HBlood * nnh->probMosqSurvivalResting * humanBase.probMosqOvipositing;
+			sum_den += ZiPbiPci * (mult_HBloodIndexPd1Pe1 + mult_INVHBloodIndexPdiPei);
+		}
 
-				sum_relEntoAvailability1 += ZiPbiPci;
-				sum_relEntoAvailability2 += ZiPbiPci * (mult_HBloodIndexPd1Pe1 + inv_HBlood * nnh->probMosqSurvivalResting * humanBase.probMosqOvipositing);
-			}
-
-			double mult_A0Pf = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
-
-			P_A1 = (mult_A0Pf * humanBase.humanBloodIndex * sum_relEntoAvailability1)/
-					(humanBase.probMosqBiting * humanBase.probMosqFindRestSite * sum_relEntoAvailability2);
-
-			P_An = (mult_A0Pf * inv_HBlood)/(sum_relEntoAvailability2);
+		double mult_A0Pf = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
+		P_A1 = (mult_A0Pf * humanBase.humanBloodIndex * sum_ZiPbiPci)/
+				(humanBase.probMosqBiting * humanBase.probMosqFindRestSite * sum_den);
+		P_An = (mult_A0Pf * inv_HBlood)/(sum_den);
 	}
 	else
 	{
 		P_A1 = (mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle)/(humanBase.probMosqBiting*humanBase.probMosqFindRestSite*humanBase.probMosqSurvivalResting*humanBase.probMosqOvipositing);
 		P_An = 0.0;
 	}
-
 
 	cout<< "initP_A : "<< initP_A;
 	cout<< " P_A1 : "<< P_A1;
@@ -198,25 +209,15 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   }
   
   for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
-	  double relativeEntoAvailability = nnh->relativeEntoAvailability;
-	  map<string, double>::const_iterator nonHumanPopulationIter = nonHumansHostsPopulations.find(nnh->nonHumanHostName);
-	  double nonHumanPopulationSize = 1.0;
-
-	  if(nonHumanPopulationIter != nonHumansHostsPopulations.end())
-		  nonHumanPopulationSize = (*nonHumanPopulationIter).second;
-
-	  double entoAvailability = getNonHumanEntoAvailability(nonHumanPopulationSize,relativeEntoAvailability);
-
-	  nnh->setEntoAvailability(entoAvailability);
 	  leaveSeekingStateRate += nnh->entoAvailability;
-    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
+	  intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
     // Note: in model, we do the same for intP_dif, except in this case it's
     // multiplied by infectiousness of host to mosquito which is zero.
   }
   
   // Probability of a mosquito not finding a host this day:
-  //double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-  double P_Ai_base = (1.0 - initP_A) / leaveSeekingStateRate;
+  double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
   sumPFindBite *= P_Ai_base;
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   //END P_A, P_Ai, P_df, P_dif
@@ -230,12 +231,12 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   
   // Crude estimate of mosqEmergeRate; in practice, varies on other values
   mosqEmergeRate = forcedS_v;
-  initNv0FromSv = initNvFromSv * (1.0 - initP_A - intP_df);
+  initNv0FromSv = initNvFromSv * (1.0 - intP_A - intP_df);
   vectors::scale (mosqEmergeRate, initNv0FromSv);
   
   // Initialize per-day variables; S_v, N_v and O_v are only estimated
   for (int t = 0; t < N_v_length; ++t) {
-    P_A[t] = initP_A;
+    P_A[t] = intP_A;
     P_df[t] = intP_df;
     P_dif[t] = 0.0;	// humans start off with no infectiousness.. so just wait
     //t in: sTime*Global::interval..((sTime+1)*Global::interval-1)
@@ -364,8 +365,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   }
 
   // Probability of a mosquito not finding a host this day:
-
-  double P_Ai_base = (1.0 - initP_A) / leaveSeekingStateRate;
+  double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+  double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
 
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
@@ -393,7 +394,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     
     // These only need to be calculated once per timestep, but should be
     // present in each of the previous N_v_length - 1 positions of arrays.
-    P_A[t] = initP_A;
+    P_A[t] = intP_A;
     P_df[t] = intP_df;
     P_dif[t] = intP_dif;
     
@@ -462,8 +463,6 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     timestep_N_v0 += mosqEmergeRate[dYear];
     timestep_O_v += O_v[t];
     timestep_S_v += S_v[t];
-
-
   }
 
 #ifdef OMV_CSV_REPORTING

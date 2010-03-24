@@ -48,6 +48,8 @@ set (Model_CPP
   Transmission/Vector/VectorTransmission.cpp
   Transmission/Vector/VectorAnopheles.cpp
   Transmission/Vector/HostCategoryAnopheles.cpp
+  Transmission/Vector/HostCategoryAnophelesHumans.cpp
+  Transmission/Vector/HostCategoryAnophelesNonHumans.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/Common.cpp

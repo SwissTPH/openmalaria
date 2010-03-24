@@ -23,6 +23,8 @@
 #include "Global.h"
 #include "Survey.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
+#include "Transmission/Vector/HostCategoryAnophelesNonHumans.h"
+#include "Transmission/Vector/HostCategoryAnophelesHumans.h"
 #include "Transmission/PerHostTransmission.h"
 #include <list>
 #include <vector>
@@ -175,7 +177,7 @@ public:
     initNv0FromSv & stream;
     initNvFromSv & stream;
     N_v_length & stream;
-    //P_A & stream;
+    P_A & stream;
     P_df & stream;
     P_dif & stream;
     N_v & stream;
@@ -190,6 +192,11 @@ public:
     timestep_N_v & stream;
     timestep_O_v & stream;
     timestep_S_v & stream;
+    initP_A & stream;
+    P_A1 & stream;
+    P_An & stream;
+    mosqLaidEggsSameDayProp & stream;
+    probMosqSurvivalFeedingCycle & stream;
   }
   
 private:
@@ -204,20 +211,52 @@ private:
    * 
    * Read from XML by initialise; no need to checkpoint. */
   //@{
-  HostCategoryAnopheles humanBase;
+  HostCategoryAnophelesHumans humanBase;
   //@}
   
   double initP_A;
   double P_A1;
   double P_An;
 
+  /** sets the PAS (See Document "Parameter Values for Transmission model" (Chitnis, Smith and Schapira, 4.3.2010))
+   *  initPA : Probability that a mosquito does not find a host and does not die in one night of searching
+   *  P_A1 : Probability that a mosquito encounters a human on a given night.
+   *  P_An : Probability that a mosquito encounters a non human host on a given night.
+   *
+   */
   void setPAS();
-  void setMosqSeekingDeathRate();
+
+  /** returns the human ento availability, calculated from PA, PA1, mosqSeekingDuration and population size.
+   *
+   *  In previous versions the ento availability was to be explicitly given in the scenario. Because of the
+   *  dependence of the ento availability value with the population size, we had to change the ento availability
+   *  whenever we changed the population size.
+   *
+   * @param human population size;
+   * @return human ento availability;
+   *
+   */
   double getHumanEntoAvailability(int populationSize);
+
+    /** returns the non human ento availability for a given type of non human host,
+     *  calculated from init_PA, P_An, mosqSeekingDuration, population size and relativeEntoAvailability.
+     *
+     *  In previous versions the ento availability was to be explicitly given in the scenario. Because of the
+     *  dependence of the ento availability value with the population size, we had to change the ento availability
+     *  whenever we changed the population size.
+     *
+     *  If only one type of non human host is given in the scenario, then relativeEntoAvailability = 1.
+     *
+     * @param non human host population size;
+     * @return non human host ento availability;
+     *
+     */
   double getNonHumanEntoAvailability(int populationSize, double relativeEntoAvailability);
 
+  /** Proportion of host-seeking parous mosquitoes that have laid eggs same day*/
   double mosqLaidEggsSameDayProp;
 
+  /** Probability that a mosquito survives a feeding cycle */
   double probMosqSurvivalFeedingCycle;
 
   /** @brief Parameters which may vary per mosquito species
@@ -383,6 +422,7 @@ private:
   /** Variables tracking data to be reported. */
   double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
 
+  /** map that has populations size as value and non human host type name as key */
   map<string, double> nonHumansHostsPopulations;
 
 

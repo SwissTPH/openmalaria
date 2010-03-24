@@ -664,6 +664,13 @@ public class SchemaTranslator {
 	return true;
     }
     
+    /**
+     * Version 16 : 
+     * The modelOptions, parameters and a new element, clinical, are now children  of a new element called model.
+     * The old "health system" is now known as Immediate Outcomes and is child of the element health System.
+     * This is the same for the EventScheduler. 
+     * 
+     */
     public Boolean translate15To16() throws Exception {
     	
     	Element model = scenarioDocument.createElement("model");
@@ -743,6 +750,23 @@ public class SchemaTranslator {
     	return true;
     }
     
+    /**
+     * Version 17:
+     * we don't need the ento availabilities (human and non human) and the seeking death rate anymore.
+     * Since the ento availabilities are directly dependent of the population size, please use this 
+     * translation carefuly and check first if the ento availability given in the older scenario version
+     * is adequate with the population size.
+     * 
+     * New Values are now needed:
+     * - The probability that a mosquito survives a feeding cycle
+     * - The proportion of host-seeking parous mosquitoes that have laid eggs that day
+     * - The human blood index
+     * - The relative Ento Availability (for non human hosts)
+     * 
+     * Since we can't directly determine the relative Ento availability, this translation won't work for
+     * more than 1 non human hosts type.
+     *    
+     */
     public boolean translate16To17() throws Exception {
     	
     	Element vector = (Element)scenarioElement.getElementsByTagName("vector").item(0);
