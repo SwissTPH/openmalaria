@@ -80,7 +80,11 @@ class ESDecisionRandom : public ESDecisionTree {
 	    qi::rule<string::iterator, ascii::space_type> branch = symbol >> '(' > symbol > ')' > ( ':' > symbol | '{' > tree > '}' );
 	    tree = +branch | symbol;
 	    
-	    s = "";	//TODO: pass actual content (not directly available...)
+	    const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
+	    if (content_p == NULL)
+		throw runtime_error ("ESDecision: bad upcast?!");
+	    s = *content_p;
+	    cout << "Got content: "<<s<<endl;
 	    first = s.begin();
 	    // For now, we ignore output and just test it wil pass the tree
 	    qi::phrase_parse(first, s.end(),
@@ -194,8 +198,9 @@ void ESCaseManagement::init () {
 
 inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
     BOOST_FOREACH ( const string& n, decision->depends ) {
-	if (!dependencies.count(n))
+	if (dependencies.count(n) == 0) {
 	    return false;
+	}
     }
     return true;
 }
@@ -214,29 +219,33 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool co
     decisions.resize (toAdd.size());
     size_t i = 0;
     set<string> added;	// names of decisions added; used since it's faster to lookup decision names here than linearly in "decisions"
-    for (list<ESDecisionTree*>::iterator it = toAdd.begin(); ; ++it) {
+    for (list<ESDecisionTree*>::iterator it = toAdd.begin(); ;) {
 	if (it == toAdd.end ()) {
 	    if (toAdd.empty ())	// good, we're done
 		break;
 	    // else: some elements had unresolved dependencies
-	    ostringstream msg;
-	    msg << "ESCaseManagement: some decisions have unmeetable dependencies (for "<<(complicated?"":"un")<<"complicated tree):";
+	    cerr << "ESCaseManagement: some decisions have unmeetable dependencies (for "<<(complicated?"":"un")<<"complicated tree):";
 	    BOOST_FOREACH ( ESDecisionTree* decision, toAdd ) {
-		msg << "decision: "<<decision->decision;
-		msg << "\thas unmet dependency decisions:";
+		cerr << "\ndecision: "<<decision->decision;
+		cerr << "\thas unmet dependency decisions:";
 		BOOST_FOREACH ( string& dep, decision->depends ) {
-		    if (!added.count(dep))
-			msg << " " << dep;
+		    if (added.count(dep))
+			cerr << " (" << dep << ')';
+		    else
+			cerr << " " << dep;
 		}
 	    }
-	    throw xml_scenario_error(msg.str());
+	    cerr << endl;
+	    throw xml_scenario_error("ESCaseManagement: some decisions have unmeetable dependencies (see above)");
 	}
+	//cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
 	if (hasAllDependencies (*it, added)) {
 	    decisions[i++] = *it;
 	    added.insert ((*it)->decision);
 	    toAdd.erase (it);
 	    it = toAdd.begin ();	// restart from beginning; affects order and means we know if we reach the end there shouldn't be any elements left
-	}
+	} else
+	    ++it;
     }
 }
 ESDecisionMap::~ESDecisionMap () {
@@ -273,8 +282,11 @@ ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, co
 	expected.insert ("microscopy");
 	expected.insert ("RDT");
 	BOOST_FOREACH ( const string& value, values ) {
-	    if (!expected.count (value))
+	    set<string>::iterator it = expected.find (value);
+	    if (it == expected.end())
 		throw xml_scenario_error ((boost::format("CaseManagement: \"test\" has unexpected outcome: %1%") % value).str());
+	    else
+		expected.erase (it);
 	}
 	if (!expected.empty ()) {
 	    ostringstream msg;
@@ -289,26 +301,32 @@ ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, co
     // that is, n >= log_2 (l)
     // so n = ceil (log_2 (l))
     uint32_t n_bits = std::ceil (log (values.size() + 1) / log(2.0));
-    if (n_bits+next_bit>=(sizeof(next_bit)*8))
+    if (n_bits+next_bit>=(sizeof(next_bit)*8))	// (only valid on 8-bit-per-byte architectures)
 	throw runtime_error ("ESDecisionValue design: insufficient bits");
+    // Now we've got enough bits to represent all outcomes, starting at next_bit
+    // Zero always means "missing value", so text starts at our first non-zero value:
     uint64_t next=(1<<next_bit), step;
     step=next;
     BOOST_FOREACH ( const string& value, values ) {
 	string name = (boost::format("%1%(%2%)") %decision %value).str();
-	bool inserted = id_map.insert (pair<string,uint64_t>(name, next)).second;
-	if (!inserted)
-	    throw runtime_error ("ESDecisionValue: value doesn't have a unique name");
+	bool success = id_map.insert (pair<string,uint64_t>(name, next)).second;
+	if (!success) {
+	    ostringstream msg;
+	    msg <<"ESDecisionValue: value \""<<name<<"\" doesn't have a unique name";
+	    throw runtime_error (msg.str());
+	}
 	next += step;
     }
     assert (next <= (1<<(n_bits+next_bit)));
     
+    // Set mask so bits which are used by values are 1:
     ESDecisionValue mask;
     for (size_t i = 0; i < n_bits; ++i) {
 	mask.id |= (1<<next_bit);
 	++next_bit;
     }
-    assert ((next-step) & mask.id == 0);
-    assert (next & mask.id != 0);
+    assert ((next-step & ~mask.id) == 0);		// last used value should be completely masked
+    assert ((1<<next_bit & mask.id) == 0);		// this bit should be off the end of the mask
     return mask;
 }
 void ESDecisionValue::assign (const string& decision, const string& value) {

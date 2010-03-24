@@ -72,7 +72,7 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated >
-        <decision name="dummy" depends="" values="one,zero">
+        <decision name="test" depends="" values="none,microscopy,RDT">
           p(.8): one
           p(.2): zero
         </decision>

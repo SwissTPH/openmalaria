@@ -120,6 +120,7 @@ struct ESDecisionValue {
 	// private constructor, only for use by internal operations
 	ESDecisionValue (uint64_t new_id) : id(new_id) {}
 	uint64_t id;
+	//TODO: static members should really be per tree (uncomplicated/complicated):
 	static map<string,uint64_t> id_map;
 	static uint64_t next_bit;
 	friend std::size_t hash_value(ESDecisionValue const& b);
