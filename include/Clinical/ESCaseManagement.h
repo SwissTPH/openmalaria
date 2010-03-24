@@ -103,10 +103,10 @@ struct ESDecisionValue {
 	this->assign (decision, value);
     }
     /** Set up a new set of decision values, returing the mask covering them all. */
-    static ESDecisionValue add_decision_values (const string& decision, std::vector< const char* > values);
+    static ESDecisionValue add_decision_values (const string& decision, const std::vector< string > values);
     /** Assign from decision and value. add_decision_values must have been
      * called first. */
-    void assign (const string& decision, const char* value);
+    void assign (const string& decision, const string& value);
     inline bool operator== (const ESDecisionValue that) const {
 	return id == that.id;
     }
@@ -154,7 +154,7 @@ class ESDecisionTree {
         
     protected:
 	// Sets mask and values, given the decision's name and a set of values
-	void setValues (vector<const char*> valueList);
+	void setValues (const std::vector< string >& valueList);
 };
 
 

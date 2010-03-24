@@ -27,18 +27,20 @@
 #include <boost/format.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/tokenizer.hpp>
+#include <boost/spirit/include/qi.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
+    namespace qi = boost::spirit::qi;
+    namespace ascii = boost::spirit::ascii;
 
 // -----  Types  -----
 
-void ESDecisionTree::setValues (vector<const char*> valueList) {
+void ESDecisionTree::setValues (const vector< string >& valueList) {
     mask = ESDecisionValue::add_decision_values (decision, valueList);
     values.resize (valueList.size());
     size_t i = 0;
-    BOOST_FOREACH ( const char* value, valueList ) {
+    BOOST_FOREACH ( const string& value, valueList ) {
 	values[i].assign (decision, value);
     }
 }
@@ -48,20 +50,23 @@ class ESDecisionRandom : public ESDecisionTree {
 	    decision = xmlDc.getName();
 	    
 	    // Set depends, values:
-	    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-	    boost::char_separator<char> separator (",");
+	    string s = xmlDc.getDepends();
+	    string::iterator first = s.begin(); // we need a copy of the iterator, not a temporary
+	    // Parse s into depends; note that the "attribute type" of the
+	    // expression must match the type of depends (a vector<string>):
+	    qi::phrase_parse(first, s.end(),
+			     (qi::lexeme[+(qi::alnum | '.' | '_')] % ','),
+			     ascii::space,
+			     depends);
 	    
-	    tokenizer depends_tokens (xmlDc.getDepends(), separator);
-	    BOOST_FOREACH ( const string& str, depends_tokens ) {
-		//FIXME: check names confirm to expected format
-		depends.push_back (str);
-	    }
+	    vector<string> valueList;
+	    s = xmlDc.getValues();
+	    first = s.begin();
+	    qi::phrase_parse(first, s.end(),
+			     (qi::lexeme[+(qi::alnum | '.' | '_')] % ','),
+			     ascii::space,
+			     valueList);
 	    
-	    vector<const char*> valueList;
-	    tokenizer values_tokens (xmlDc.getValues(), separator);
-	    BOOST_FOREACH ( const string& str, values_tokens ) {
-		valueList.push_back (str.c_str());
-	    }
 	    setValues (valueList);
 	    
 	    //TODO: parse tree
@@ -79,6 +84,7 @@ class ESDecisionRandom : public ESDecisionTree {
 	}
 	
     private:
+	
 	// a map of depended decision values to
 	// cumulative probabilities associated with values
 	//NOTE: be interesting to compare performance with std::map
@@ -88,7 +94,7 @@ class ESDecisionUC2Test : public ESDecisionTree {
     public:
 	ESDecisionUC2Test () {
 	    decision = "pathogenesisState";
-	    vector<const char*> valueList (2, "UC1");
+	    vector< string > valueList (2, "UC1");
 	    valueList[1] = "UC2";
 	    setValues (valueList);
 	}
@@ -104,7 +110,7 @@ class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test () {
 	    decision = "age5Test";
-	    vector<const char*> valueList (2, "under5");
+	    vector< string > valueList (2, "under5");
 	    valueList[1] = "over5";
 	    setValues (valueList);
 	}
@@ -121,7 +127,7 @@ class ESDecisionParasiteTest : public ESDecisionTree {
 	    decision = "result";
 	    depends.resize (1, "test");	// Note: we check in add_decision_values() that this test has the outcomes we expect
 	    
-	    vector<const char*> valueList (2, "negative");
+	    vector< string > valueList (2, "negative");
 	    valueList[1] = "positive";
 	    setValues (valueList);
 	}
@@ -239,13 +245,13 @@ void ESDecisionName::operator= (const char* name) {
 map<string,uint32_t> ESDecisionName::id_map;
 uint32_t ESDecisionName::next_free = 1;
 
-ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, std::vector< const char* > values) {
+ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, const std::vector< string > values) {
     if (decision == "test") {	// Simple way to check "test" decision has expected values
 	set<string> expected;
 	expected.insert ("none");
 	expected.insert ("microscopy");
 	expected.insert ("RDT");
-	BOOST_FOREACH ( const char* value, values ) {
+	BOOST_FOREACH ( const string& value, values ) {
 	    if (!expected.count (value))
 		throw xml_scenario_error ((boost::format("CaseManagement: \"test\" has unexpected outcome: %1%") % value).str());
 	}
@@ -266,7 +272,7 @@ ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, st
 	throw runtime_error ("ESDecisionValue design: insufficient bits");
     uint64_t next=(1<<next_bit), step;
     step=next;
-    BOOST_FOREACH ( const char* value, values ) {
+    BOOST_FOREACH ( const string& value, values ) {
 	string name = (boost::format("%1%(%2%)") %decision %value).str();
 	bool inserted = id_map.insert (pair<string,uint64_t>(name, next)).second;
 	if (!inserted)
@@ -284,7 +290,7 @@ ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, st
     assert (next & mask.id != 0);
     return mask;
 }
-void ESDecisionValue::assign (const string& decision, const char* value) {
+void ESDecisionValue::assign (const string& decision, const string& value) {
     string name = (boost::format("%1%(%2%)") %decision %value).str();
     map<string,uint64_t>::const_iterator it = id_map.find (name);
     if (it == id_map.end()) {
