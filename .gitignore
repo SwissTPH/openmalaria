@@ -1,5 +1,7 @@
 # I (DH) have been using the repository via git-svn, hence this .gitignore file.
 html
+doc
+profiling
 .kdev4
 openmalaria.kdev4
 # These two folders are tracked in svn anyway (git won't track folders).
