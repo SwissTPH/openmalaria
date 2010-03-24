@@ -49,27 +49,48 @@ class ESDecisionRandom : public ESDecisionTree {
 	ESDecisionRandom (const ::scnXml::Decision& xmlDc) {
 	    decision = xmlDc.getName();
 	    
-	    // Set depends, values:
+	    // Set depends, values. Start by defining a rule matching a symbol:
+	    qi::rule<string::iterator, string(), ascii::space_type> symbol = qi::lexeme[+(qi::alnum | '.' | '_')];
+	    
 	    string s = xmlDc.getDepends();
 	    string::iterator first = s.begin(); // we need a copy of the iterator, not a temporary
 	    // Parse s into depends; note that the "attribute type" of the
 	    // expression must match the type of depends (a vector<string>):
 	    qi::phrase_parse(first, s.end(),
-			     (qi::lexeme[+(qi::alnum | '.' | '_')] % ','),
+			     (symbol % ','),
 			     ascii::space,
 			     depends);
 	    
 	    vector<string> valueList;
 	    s = xmlDc.getValues();
 	    first = s.begin();
+	    // Same as above, for valueList:
 	    qi::phrase_parse(first, s.end(),
-			     (qi::lexeme[+(qi::alnum | '.' | '_')] % ','),
+			     (symbol % ','),
 			     ascii::space,
 			     valueList);
 	    
 	    setValues (valueList);
 	    
 	    //TODO: parse tree
+	    //BRANCH_SET := BRANCH+
+	    //BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
+	    //OUTCOME, DECISION, VALUE := SYMBOL
+	    qi::rule<string::iterator, ascii::space_type> tree;
+	    qi::rule<string::iterator, ascii::space_type> branch = symbol >> '(' > symbol > ')' > ( ':' > symbol | '{' > tree > '}' );
+	    tree = +branch | symbol;
+	    
+	    s = "";	//TODO: pass actual content (not directly available...)
+	    first = s.begin();
+	    // For now, we ignore output and just test it wil pass the tree
+	    qi::phrase_parse(first, s.end(),
+			     tree,
+			     ascii::space);
+	    if (first != s.end ()) {
+		ostringstream msg;
+		msg << "ESDecision: failed to parse tree; remainder: " << string(first,s.end());
+		throw xml_scenario_error (msg.str());
+	    }
 	}
 	
 	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const {
@@ -152,7 +173,7 @@ class ESDecisionParasiteTest : public ESDecisionTree {
 // ESCaseManagement::TreeType ESCaseManagement::cmTree;
 // cmid ESCaseManagement::cmMask;
 
-ESDecisionMap ESCaseManagement::UC, ESCaseManagement::severe;
+ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 CaseTreatment* ESCaseManagement::mdaDoses;
 
 // -----  Static  -----
@@ -160,8 +181,8 @@ CaseTreatment* ESCaseManagement::mdaDoses;
 void ESCaseManagement::init () {
     // Assume EventScheduler data was checked present:
     const scnXml::HSEventScheduler& xmlESCM = InputData().getHealthSystem().getEventScheduler().get();
-    UC.initialize (xmlESCM.getUC (), false);
-    severe.initialize (xmlESCM.getSevere (), true);
+    uncomplicated.initialize (xmlESCM.getUncomplicated (), false);
+    complicated.initialize (xmlESCM.getComplicated (), true);
     
     // MDA Intervention data
     const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
@@ -330,9 +351,9 @@ void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     ESDecisionMap* map;
     assert (pgState & Pathogenesis::SICK);
     if (pgState & Pathogenesis::COMPLICATED)
-        map = &severe;
+        map = &complicated;
     else
-        map = &UC;
+        map = &uncomplicated;
     
     ESHostData hostData (ageYears, withinHostModel, pgState);
     

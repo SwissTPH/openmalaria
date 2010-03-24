@@ -345,14 +345,13 @@
         <xs:complexType>
           <xs:attribute name="mosqRestDuration" type="xs:int" use="required" />
           <xs:attribute name="extrinsicIncubationPeriod" type="xs:int" use="required" />
-          <xs:attribute name="mosqLaidEggsSameDayProportion" type="xs:double" use="required" />
+          <xs:attribute name="mosqSeekingDeathRate" type="xs:double" use="required" />
           <xs:attribute name="mosqSeekingDuration" type="xs:double" use="required" />
-          <xs:attribute name="mosqSurvivalFeedingCycleProbability" type="xs:double" use="required" />
+          <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
           <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required" />
-          <xs:attribute name="mosqHumanBloodIndex" type="xs:double" use="required" />
         </xs:complexType>
       </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
@@ -362,7 +361,7 @@
         </xs:annotation>
         <xs:complexType>
 	  <xs:attribute name="name" type="xs:string" use="required" />
-          <xs:attribute name="mosqRelativeEntoAvailability" type="xs:double" use="required" />
+          <xs:attribute name="mosqEntoAvailability" type="xs:double" use="required" />
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required" />
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required" />
           <xs:attribute name="mosqProbResting" type="xs:double" use="required" />
@@ -400,17 +399,6 @@
           <xs:complexType>
             <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
-              <xs:element maxOccurs="unbounded" minOccurs="1" name="nonHumanHosts">
-              	<xs:complexType>
-	                <xs:attribute name="name" type="xs:string" use="required">
-	                  <xs:annotation>
-	                    <xs:documentation>Name of this species of non human hosts (must match up with those described per anopheles section) </xs:documentation>
-	                    <xs:appinfo>units:List of elements;</xs:appinfo>
-	                  </xs:annotation>
-	                </xs:attribute>
-	                <xs:attribute name="number" type="xs:double" use="required"/>
-	      	</xs:complexType>
-              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>

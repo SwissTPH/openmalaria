@@ -201,7 +201,7 @@ class ESCaseManagement {
 	
 	//BEGIN Static parameters — set by init()
         //FIXME: initialize
-	static ESDecisionMap UC, severe;
+	static ESDecisionMap uncomplicated, complicated;
 	
 	/// MDA dosage info; null pointer if not provided
 	static CaseTreatment* mdaDoses;

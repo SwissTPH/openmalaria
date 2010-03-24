@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="17" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="18" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
   
   <demography name="test">
     <ageGroup lowerbound="0.0">
@@ -69,20 +69,35 @@
   </monitoring>
   <interventions name="No intervention"/>
   
-  <healthSystem><EventScheduler>
-    <CaseManagementTree mask="0">
-      <!-- <CM_pBranchSet ID="">
-        <CM_pBranch outcome="" p="1">
-      </CM_pBranchSet> -->
-      <CM_leaf ID="0">
-        <medicate name="MF" qty="3000" time="0"/>
-        <medicate name="MF" qty="3000" time="720"/>
-      </CM_leaf>
-    </CaseManagementTree>
-    <ClinicalOutcomes severeMask="0">
-      <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
-    </ClinicalOutcomes>
-  </EventScheduler><CFR><group cfr="0" lowerbound="0"/></CFR></healthSystem><entoData name="Test">
+  <healthSystem>
+    <EventScheduler>
+      <uncomplicated >
+        <decision name="dummy" depends="" values="one,zero">
+          p(.8): one
+          p(.2): zero
+        </decision>
+      </uncomplicated>
+      <complicated >
+        <decision name="dummy" depends="" values="one,zero">
+          p(.8): one
+          p(.2): zero
+        </decision>
+      </complicated>
+      <!-- Treament is to be added
+        <CM_leaf ID="0">
+          <medicate name="MF" qty="3000" time="0"/>
+          <medicate name="MF" qty="3000" time="720"/>
+        </CM_leaf>
+      -->
+      <ClinicalOutcomes severeMask="0">
+        <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
+      </ClinicalOutcomes>
+    </EventScheduler>
+    <CFR>
+      <group cfr="0" lowerbound="0"/>
+    </CFR>
+  </healthSystem>
+  <entoData name="Test">
     <nonVector eipDuration="10">
       <EIRDaily origin="monthly">0.0738</EIRDaily>
       <EIRDaily origin="monthly">0.0738</EIRDaily>
@@ -957,11 +972,14 @@
     </drug>
   </drugDescription>
   
-<model><ModelOptions>
+<model>
+  <ModelOptions>
     <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
     <option name="INCLUDES_PK_PD" value="true"/>
     <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-  </ModelOptions><clinical healthSystemMemory="28"/><parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
+  </ModelOptions>
+  <clinical healthSystemMemory="28"/>
+  <parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -992,4 +1010,6 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters></model></scenario>
+  </parameters>
+</model>
+</scenario>

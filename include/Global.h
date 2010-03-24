@@ -29,7 +29,7 @@
 #define finite(x) _finite(x)
 #endif
 
-#include <stdint.h>
+#include <boost/cstdint.hpp>
 
 #include "util/checkpoint.hpp"
 using namespace OM::util::checkpoint;
