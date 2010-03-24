@@ -21,7 +21,17 @@
 
 #include <vector>
 
-//TODO: provide save/load functionality allowing use without gsl
+/*  TODO:
+    Provide saving and loading functionality for cumAgeProp, to allow building a
+    version of the program without GSL (useful if random-number generators are
+    also re-written).
+
+1.  Needs to be stored somewhere; probably <demography> in the XML document
+    is a good place (InputData already can save changes to the scenario document).
+2.  If compiled with GSL, calculate cumAgeProp (as currently done) and save/
+    validate. If not, use cumAgeProp from the XML (or complain if not present).
+3.  OM_HAVE_GSL can become a macro added by CMake.
+******************************************************************************/
 #define OM_HAVE_GSL
 
 namespace OM

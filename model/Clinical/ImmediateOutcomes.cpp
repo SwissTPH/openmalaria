@@ -44,6 +44,12 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 // -----  other methods  -----
 
 void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHostModel& withinHostModel, double ageYears) {
+    /* TODO: here we assume a 100% clearance rate for the MDA drug we use.
+       This is not consistent with the way we treat according to the Health
+       system description. The default clearance rate for MDA should be 100%
+       since this simulates what was meant to happen in Garki.  We can change
+       this by introducing an optional clearance rate that can be < 100%.
+    */
     // We need to pass the is-severe state for the IPT code.
     withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
 }

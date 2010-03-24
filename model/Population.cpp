@@ -255,12 +255,6 @@ void Population::implementIntervention (int time)
         massIntervention (interv->getVaccinate().get(), &Host::Human::massVaccinate);
     }
     if (interv->getMDA().present()) {
-	/* TODO: here we assume a 100% clearance rate for the MDA drug we use.
-	This is not consistent with the way we treat according to the Health
-	system description. The default clearance rate for MDA should be 100%
-	since this simulates what was meant to happen in Garki.  We can change
-	this by introducing an optional clearance rate that can be < 100%. */
-	//TODO: MDA with the old treatment system should do this; with the drug model it needs some drugs to medicate.
 	massIntervention (interv->getMDA().get().getCoverage(), &Host::Human::massDrugAdministration);
     }
     if (interv->getIpti().present()) {
