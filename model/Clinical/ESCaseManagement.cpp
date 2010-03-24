@@ -23,6 +23,7 @@
 #include "util/random.h"
 #include "util/errors.hpp"
 
+#include <set>
 #include <boost/format.hpp>
 #include <boost/static_assert.hpp>
 #include <boost/unordered_map.hpp>
@@ -33,7 +34,7 @@ namespace OM { namespace Clinical {
 
 // -----  Types  -----
 
-void ESDecisionTree::setValues (const char* decision, vector<const char*> valueList) {
+void ESDecisionTree::setValues (vector<const char*> valueList) {
     mask = ESDecisionValue::add_decision_values (decision, valueList);
     values.resize (valueList.size());
     size_t i = 0;
@@ -41,22 +42,11 @@ void ESDecisionTree::setValues (const char* decision, vector<const char*> valueL
 	values[i].assign (decision, value);
     }
 }
-/*class ESDecisionDeterministic : public ESDecisionTree {
-public:
-    
-    virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
-   unordered_map<ESDecisionValue,ESDecisionValue>::const_iterator it = set.find (input);
-   if (it == set.end())
-   return 0;
-   return it->second;
-}
-
-    private:
-	unordered_map<ESDecisionValue,ESDecisionValue> set;
-};*/
 class ESDecisionRandom : public ESDecisionTree {
     public:
 	ESDecisionRandom (const ::scnXml::Decision& xmlDc) {
+	    decision = xmlDc.getName();
+	    
 	    // Set depends, values:
 	    typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	    boost::char_separator<char> separator (",");
@@ -64,7 +54,7 @@ class ESDecisionRandom : public ESDecisionTree {
 	    tokenizer depends_tokens (xmlDc.getDepends(), separator);
 	    BOOST_FOREACH ( const string& str, depends_tokens ) {
 		//FIXME: check names confirm to expected format
-		depends.push_back (str.c_str());	// cast to ESDecisionName
+		depends.push_back (str);
 	    }
 	    
 	    vector<const char*> valueList;
@@ -72,12 +62,12 @@ class ESDecisionRandom : public ESDecisionTree {
 	    BOOST_FOREACH ( const string& str, values_tokens ) {
 		valueList.push_back (str.c_str());
 	    }
-	    setValues (xmlDc.getName().c_str(), valueList);
+	    setValues (valueList);
 	    
 	    //TODO: parse tree
 	}
 	
-	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const {
 	    unordered_map<ESDecisionValue,vector<double> >::const_iterator it = set_cum_p.find (input);
 	    if (it == set_cum_p.end())
 		return ESDecisionValue();	// no decision
@@ -94,14 +84,31 @@ class ESDecisionRandom : public ESDecisionTree {
 	//NOTE: be interesting to compare performance with std::map
 	unordered_map<ESDecisionValue,vector<double> > set_cum_p;
 };
+class ESDecisionUC2Test : public ESDecisionTree {
+    public:
+	ESDecisionUC2Test () {
+	    decision = "pathogenesisState";
+	    vector<const char*> valueList (2, "UC1");
+	    valueList[1] = "UC2";
+	    setValues (valueList);
+	}
+	virtual ESDecisionValue determine (const ESDecisionValue, ESHostData& hostData) const {
+	    assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
+	    if (hostData.pgState & Pathogenesis::SECOND_CASE)	//TODO: check this actually gets set
+		return values[1];
+	    else
+		return values[0];
+	}
+};
 class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test () {
+	    decision = "age5Test";
 	    vector<const char*> valueList (2, "under5");
 	    valueList[1] = "over5";
-	    setValues ("age5Test", valueList);
+	    setValues (valueList);
 	}
-	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const {
 	    if (hostData.ageYears >= 5.0)
 		return values[1];
 	    else
@@ -111,15 +118,15 @@ class ESDecisionAge5Test : public ESDecisionTree {
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest () {
-	    depends.resize (1, "test");
-	    //TODO: assert "test" has outputs as below
+	    decision = "result";
+	    depends.resize (1, "test");	// Note: we check in add_decision_values() that this test has the outcomes we expect
 	    
 	    vector<const char*> valueList (2, "negative");
 	    valueList[1] = "positive";
-	    setValues ("result", valueList);
+	    setValues (valueList);
 	}
 	
-	virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) {
+	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const {
 	static const ESDecisionValue TEST_MICROSCOPY("test", "microscopy"),
 		TEST_RDT("test","RDT"),
 		TEST_NONE("test","none");
@@ -158,20 +165,51 @@ void ESCaseManagement::init () {
 	mdaDoses = NULL;
 }
 
+inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
+    BOOST_FOREACH ( const string& n, decision->depends ) {
+	if (!dependencies.count(n))
+	    return false;
+    }
+    return true;
+}
 void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool complicated) {
-    uint32_t decision_num = xmlDcs.getDecision().size() + 1;
-    if (!complicated)
-	decision_num += 1;
-    decisions.resize (decision_num);
-    
-    decision_num = 0;
-    decisions[decision_num++] = new ESDecisionAge5Test;
+    // Assemble a list of all tests we need to add
+    list<ESDecisionTree*> toAdd;
+    toAdd.push_back (new ESDecisionAge5Test);
     if (!complicated) {
-	decisions[decision_num++] = new ESDecisionParasiteTest;
+	toAdd.push_back (new ESDecisionUC2Test);
+	toAdd.push_back (new ESDecisionParasiteTest);
+    }
+    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlDcs.getDecision() ) {
+	toAdd.push_back (new ESDecisionRandom (xmlDc));
     }
     
-    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlDcs.getDecision() ) {
-	decisions[decision_num++] = new ESDecisionRandom (xmlDc);
+    decisions.resize (toAdd.size());
+    size_t i = 0;
+    set<string> added;	// names of decisions added; used since it's faster to lookup decision names here than linearly in "decisions"
+    for (list<ESDecisionTree*>::iterator it = toAdd.begin(); ; ++it) {
+	if (it == toAdd.end ()) {
+	    if (toAdd.empty ())	// good, we're done
+		break;
+	    // else: some elements had unresolved dependencies
+	    ostringstream msg;
+	    msg << "ESCaseManagement: some decisions have unmeetable dependencies (for "<<(complicated?"":"un")<<"complicated tree):";
+	    BOOST_FOREACH ( ESDecisionTree* decision, toAdd ) {
+		msg << "decision: "<<decision->decision;
+		msg << "\thas unmet dependency decisions:";
+		BOOST_FOREACH ( string& dep, decision->depends ) {
+		    if (!added.count(dep))
+			msg << " " << dep;
+		}
+	    }
+	    throw xml_scenario_error(msg.str());
+	}
+	if (hasAllDependencies (*it, added)) {
+	    decisions[i++] = *it;
+	    added.insert ((*it)->decision);
+	    toAdd.erase (it);
+	    it = toAdd.begin ();	// restart from beginning; affects order and means we know if we reach the end there shouldn't be any elements left
+	}
     }
 }
 ESDecisionMap::~ESDecisionMap () {
@@ -201,7 +239,25 @@ void ESDecisionName::operator= (const char* name) {
 map<string,uint32_t> ESDecisionName::id_map;
 uint32_t ESDecisionName::next_free = 1;
 
-ESDecisionValue ESDecisionValue::add_decision_values (const char* decision, vector<const char*> values) {
+ESDecisionValue ESDecisionValue::add_decision_values (const string& decision, std::vector< const char* > values) {
+    if (decision == "test") {	// Simple way to check "test" decision has expected values
+	set<string> expected;
+	expected.insert ("none");
+	expected.insert ("microscopy");
+	expected.insert ("RDT");
+	BOOST_FOREACH ( const char* value, values ) {
+	    if (!expected.count (value))
+		throw xml_scenario_error ((boost::format("CaseManagement: \"test\" has unexpected outcome: %1%") % value).str());
+	}
+	if (!expected.empty ()) {
+	    ostringstream msg;
+	    msg << "CaseManagement: expected \"test\" to have outcomes:";
+	    BOOST_FOREACH ( const string& v, expected )
+		msg << ' ' << v;
+	    throw xml_scenario_error (msg.str());
+	}
+    }
+    
     // got length l = values.size() + 1 (default, "no outcome"); want minimal n such that: 2^n >= l
     // that is, n >= log_2 (l)
     // so n = ceil (log_2 (l))
@@ -228,7 +284,7 @@ ESDecisionValue ESDecisionValue::add_decision_values (const char* decision, vect
     assert (next & mask.id != 0);
     return mask;
 }
-void ESDecisionValue::assign (const char* decision, const char* value) {
+void ESDecisionValue::assign (const string& decision, const char* value) {
     string name = (boost::format("%1%(%2%)") %decision %value).str();
     map<string,uint64_t>::const_iterator it = id_map.find (name);
     if (it == id_map.end()) {
@@ -245,9 +301,22 @@ map<string,uint64_t> ESDecisionValue::id_map;
 uint64_t ESDecisionValue::next_bit = 0;
 
 CaseTreatment* ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) {
-    ESDecisionValue id;
-    //TODO: add pgState decision
-    //TODO
+    ESDecisionValue outcomes;	// initialized to 0
+    // At this point, decisions is ordered such that all dependencies should be
+    // met if evaluated in order, so we just do that.
+    BOOST_FOREACH ( const ESDecisionTree* decision, decisions ) {
+	// Pass determine the outcomes of previous decisions, filtered to the decisions it depends on.
+	// Get back another outcome and add it into the outcomes set.
+	outcomes |= decision->determine (outcomes & decision->mask, hostData);
+    }
+    // Find our outcome. FIXME: do we not want to mask this? It normally only depens on drug chosen, right?
+    //TODO: suppositories as separate drug?
+    unordered_map<ESDecisionValue,CaseTreatment*>::const_iterator treatment = treatments.find (outcomes);
+    if (treatment == treatments.end ()) {
+	//FIXME: what do we do? Complain or ignore?
+    } else {
+	return treatment->second;
+    }
 }
 
 

@@ -95,20 +95,30 @@ private:
     static map<string,uint32_t> id_map;
     static uint32_t next_free;
 };
+/** A compressed representation of all decision outcomes.
+ * Pass by value (it is 64-bits in size). */
 struct ESDecisionValue {
     ESDecisionValue () : id(0) {}
     ESDecisionValue (const char* decision, const char* value) {
 	this->assign (decision, value);
     }
     /** Set up a new set of decision values, returing the mask covering them all. */
-    static ESDecisionValue add_decision_values (const char* decision, vector<const char*> values);
+    static ESDecisionValue add_decision_values (const string& decision, std::vector< const char* > values);
     /** Assign from decision and value. add_decision_values must have been
      * called first. */
-    void assign (const char* decision, const char* value);
+    void assign (const string& decision, const char* value);
     inline bool operator== (const ESDecisionValue that) const {
 	return id == that.id;
     }
+    inline ESDecisionValue operator& (const ESDecisionValue that) const {
+	return ESDecisionValue(id & that.id);
+    }
+    inline void operator|= (const ESDecisionValue that) {
+	id |= that.id;
+    }
     private:
+	// private constructor, only for use by internal operations
+	ESDecisionValue (uint64_t new_id) : id(new_id) {}
 	uint64_t id;
 	static map<string,uint64_t> id_map;
 	static uint64_t next_bit;
@@ -133,15 +143,18 @@ struct ESHostData {
 class ESDecisionTree {
     public:
         /// Run decision tree, with input filtered by mask.
-        virtual ESDecisionValue determine (ESDecisionValue input, ESHostData& hostData) =0;
+        virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const =0;
         
-        vector<ESDecisionName> depends;      // other decisions this depends upon
+	// Note: for some cases we could use ESDecisionName instead of string
+	// (for speed), but error messages would be bad. Only slows set-up.
+	string decision;	// name of decision
+        vector<string> depends;      // other decisions this depends upon
         ESDecisionValue mask;      // mask covering all outputs
         vector<ESDecisionValue> values;    // ids associated with each possible output
         
     protected:
 	// Sets mask and values, given the decision's name and a set of values
-	void setValues (const char* decision, vector<const char*> valueList);
+	void setValues (vector<const char*> valueList);
 };
 
 
