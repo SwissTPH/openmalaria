@@ -71,9 +71,13 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   double humanEntoAvailability = getHumanEntoAvailability(populationSize);
   humanBase.setEntoAvailability(humanEntoAvailability);
 
+  double relativeEntoAvailabilitySum = 0.0;
+
   for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
   {
 	    double relativeEntoAvailability = nnh->relativeEntoAvailability;
+	    relativeEntoAvailabilitySum += relativeEntoAvailability;
+
 		map<string, double>::const_iterator nonHumanPopulationIter = this->nonHumansHostsPopulations.find(nnh->nonHumanHostName);
 		double nonHumanPopulationSize = 0.0;
 
@@ -84,6 +88,10 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 		double entoAvailability = getNonHumanEntoAvailability(nonHumanPopulationSize,relativeEntoAvailability);
 		nnh->setEntoAvailability(entoAvailability);
   }
+
+  if(!nonHumanHosts.empty()&&relativeEntoAvailabilitySum!=1.0)
+	  throw xml_scenario_error ("The sum of all non human hosts types relative ento availabilities must be 1.0, please check the scenario file. ");
+
 
   // -----  EIR  -----
   const scnXml::Eir& eirData = anoph.getEir();
