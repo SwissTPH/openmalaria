@@ -85,7 +85,7 @@ void Population::staticCheckpoint (ostream& stream)
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
 Population::Population()
-    : populationSize (InputData().getPopSize())
+    : populationSize (InputData().getDemography().getPopSize())
 {
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }

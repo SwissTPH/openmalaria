@@ -116,7 +116,7 @@ void VectorTransmission::initMainSimulation() {
     cerr << initialisationEIR << '\n' << innoculationsPerDayOfYear << endl;
   }
   
-  simulationMode = InputData().getMode();	// allow forcing equilibrium mode like with non-vector model
+  simulationMode = InputData().getEntoData().getMode();	// allow forcing equilibrium mode like with non-vector model
   if (simulationMode != 2 && simulationMode != 4)
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }

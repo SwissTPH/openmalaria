@@ -100,28 +100,12 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
-        <xs:annotation>
-          <xs:documentation>
-            Maximum age of simulated humans
-          </xs:documentation>
-          <xs:appinfo>units:Number;min:0;max:100;</xs:appinfo>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="name" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation>
             Name of intervention
           </xs:documentation>
           <xs:appinfo>units:string;</xs:appinfo>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="popSize" type="xs:int" use="required">
-        <xs:annotation>
-          <xs:documentation>Population size</xs:documentation>
-          <xs:appinfo>
-            units:Count;min:1;max:100000;
-          </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="wuID" type="xs:int" use="required">
@@ -149,19 +133,6 @@
           <xs:restriction base="xs:int">
             <xs:enumeration value="0" />
             <xs:enumeration value="1" />
-          </xs:restriction>
-        </xs:simpleType>
-      </xs:attribute>
-      <xs:attribute name="mode" use="required">
-        <xs:annotation>
-          <xs:documentation>Transmission simulation mode</xs:documentation>
-          <xs:appinfo>units:Code;</xs:appinfo>
-        </xs:annotation>
-        <xs:simpleType>
-          <xs:restriction base="xs:int">
-            <xs:enumeration value="2" />
-            <xs:enumeration value="3" />
-            <xs:enumeration value="4" />
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
@@ -294,6 +265,22 @@
         <xs:appinfo>units:string;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="popSize" type="xs:int" use="required">
+        <xs:annotation>
+          <xs:documentation>Population size</xs:documentation>
+          <xs:appinfo>
+            units:Count;min:1;max:100000;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:attribute>
+    <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Maximum age of simulated humans
+          </xs:documentation>
+          <xs:appinfo>units:Number;min:0;max:100;</xs:appinfo>
+        </xs:annotation>
+     </xs:attribute>
     <xs:attribute name="growthRate" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
@@ -400,7 +387,7 @@
           <xs:complexType>
             <xs:sequence>	
               <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anopheles" />
-              <xs:element maxOccurs="unbounded" minOccurs="1" name="nonHumanHosts">
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="nonHumanHosts">
               	<xs:complexType>
 	                <xs:attribute name="name" type="xs:string" use="required">
 	                  <xs:annotation>
@@ -424,6 +411,19 @@
         <xs:appinfo>units:string;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="mode" use="required">
+        <xs:annotation>
+          <xs:documentation>Transmission simulation mode</xs:documentation>
+          <xs:appinfo>units:Code;</xs:appinfo>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:int">
+            <xs:enumeration value="2" />
+            <xs:enumeration value="3" />
+            <xs:enumeration value="4" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
   </xs:complexType>
   <xs:complexType name="nonVector">
     <xs:annotation>

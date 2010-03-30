@@ -46,6 +46,6 @@ namespace OM {
 	intervalsPerYear = Global::DAYS_IN_YEAR/interval;
 	yearsPerInterval = double(interval) / double(Global::DAYS_IN_YEAR);
 	// Changed in r756 (2010-03-04): Did cast max-age-years to int before multiplying (minor effect on output).
-	maxAgeIntervals = static_cast<int> (InputData().getMaximumAgeYrs() * intervalsPerYear);
+	maxAgeIntervals = static_cast<int> (InputData().getDemography().getMaximumAgeYrs() * intervalsPerYear);
     }
 }
