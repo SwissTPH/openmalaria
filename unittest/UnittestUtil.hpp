@@ -90,7 +90,12 @@ struct UnittestUtil {
     
     static void DescriptiveInfection_init () {
 	Global::interval = 5;
-	util::ModelOptions::optSet ^= util::INCLUDES_PK_PD;
+	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
+    }
+    
+    static void EmpiricalWHM_setup () {
+	Global::interval = 1;
+	util::ModelOptions::optSet = util::EMPIRICAL_WITHIN_HOST_MODEL;
     }
 };
 
