@@ -1,10 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" maximumAgeYrs="90" mode="4" name="Full set of interventions" popSize="100" schemaVersion="15" wuID="0" xsi:noNamespaceSchemaLocation="scenario_15.xsd">
-  <ModelOptions>
-    <option name="LOGNORMAL_MASS_ACTION" value="true"/>
-    <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-  </ModelOptions>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="18" wuID="0" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+  
 
-  <demography name="Ifakara">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -274,7 +271,9 @@
     </timed>
   </interventions>
 
-  <healthSystem healthSystemMemory="6" name="Tanzania ACT">
+  
+
+  <healthSystem><ImmediateOutcomes name="Tanzania ACT">
     <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
     <initialACR>
       <ACT value="0.85"/>
@@ -297,7 +296,8 @@
       <item maxAgeYrs="5" value="0.0132"/>
       <item maxAgeYrs="99" value="0.005"/>
     </pSequelaeInpatient>
-    <CFR>
+    
+  </ImmediateOutcomes><CFR>
       <group cfr="0.09189" lowerbound="0"/>
       <group cfr="0.0810811" lowerbound="0.25"/>
       <group cfr="0.0648649" lowerbound="0.75"/>
@@ -308,30 +308,32 @@
       <group cfr="0.0945946" lowerbound="7.5"/>
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
-    </CFR>
-  </healthSystem>
-
-  <entoData name="Namawala">
+    </CFR></healthSystem><entoData mode="4" name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-5.835" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00085" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.055" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.939" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-4.852" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.0022" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.65" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.045" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.98" mosqLaidEggsSameDayProportion="0.616" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.611"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-3.638" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" mosqEntoAvailability="0.00079" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDeathRate="0.24" mosqSeekingDuration="0.33"/>
-        <nonHumanHosts mosqEntoAvailability="0.012" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" name="unprotectedAnimals"/>
+        <mosq extrinsicIncubationPeriod="11" mosqHumanBloodIndex="0.871" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
       </anopheles>
-    </vector>
+    <nonHumanHosts name="unprotectedAnimals" number="1.0"/></vector>
   </entoData>
 
-  <parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
+  
+
+<model><ModelOptions>
+    <option name="LOGNORMAL_MASS_ACTION" value="true"/>
+    <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+  </ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
@@ -362,6 +364,4 @@
     <parameter include="false" name="Ystar0" number="28" value="296.302437899999973"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters>
-
-</scenario>
+  </parameters></model></scenario>

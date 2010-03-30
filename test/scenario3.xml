@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" maximumAgeYrs="90" mode="2" name="Namawala1_16" popSize="500" schemaVersion="17" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
-  <demography name="Ifakara">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" name="Namawala1_16" schemaVersion="18" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -90,7 +90,7 @@
       <group cfr="0.0945946" lowerbound="7.5"/>
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
-    </CFR></healthSystem><entoData name="Namawala">
+    </CFR></healthSystem><entoData mode="2" name="Namawala">
     <nonVector eipDuration="10">
       <EIRDaily origin="Namawala Pre">0.01164644875</EIRDaily>
       <EIRDaily origin="Namawala Pre">0.0121764839375</EIRDaily>

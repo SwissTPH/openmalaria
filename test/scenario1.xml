@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="80" mode="4" name="test D94" popSize="100" schemaVersion="17" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
-	<demography name="test">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+	<demography maximumAgeYrs="80" name="test" popSize="100">
 		<ageGroup lowerbound="0.0">
 			<group poppercent="3.474714994" upperbound="1"/>
 			<group poppercent="12.76004028" upperbound="5"/>
@@ -142,7 +142,7 @@
 		
 	</ImmediateOutcomes><CFR>
 			<group cfr="0" lowerbound="0"/>
-		</CFR></healthSystem><entoData name="Test">
+		</CFR></healthSystem><entoData mode="4" name="Test">
 	  <nonVector eipDuration="10">
 	    <EIRDaily origin="monthly">0.738</EIRDaily>
       <EIRDaily origin="monthly">0.738</EIRDaily>

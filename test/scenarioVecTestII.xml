@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" maximumAgeYrs="90" mode="4" name="test D94" popSize="100" schemaVersion="17" wuID="0" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="0" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
   
 
-  <demography name="test">
+  <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -124,7 +124,7 @@
       <group cfr="0.0945946" lowerbound="7.5"/>
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
-    </CFR></healthSystem><entoData name="Vector Test">
+    </CFR></healthSystem><entoData mode="4" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>

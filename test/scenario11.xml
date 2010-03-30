@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" maximumAgeYrs="90" mode="4" name="triple correlated heterogeneity" popSize="200" schemaVersion="17" wuID="0" xsi:noNamespaceSchemaLocation="scenario_17.xsd">
-  <demography name="Ifakara">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" name="triple correlated heterogeneity" schemaVersion="18" wuID="0" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="200">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -74,7 +74,7 @@
     
   </ImmediateOutcomes><CFR>
       <group cfr="0" lowerbound="0"/>
-    </CFR></healthSystem><entoData name="Sugungum Preintervention">
+    </CFR></healthSystem><entoData mode="4" name="Sugungum Preintervention">
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.3669507722007722</EIRDaily>
       <EIRDaily origin="interpolate">0.35685255791505793</EIRDaily>
