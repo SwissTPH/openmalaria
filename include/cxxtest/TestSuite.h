@@ -457,6 +457,7 @@ namespace CxxTest
 #   define ___TS_ASSERT_THROWS_NOTHING(f,l,e,m) { \
             _TS_TRY { e; } \
             _TS_CATCH_ABORT( { throw; } ) \
+            _TS_CATCH_TYPE( (std::exception& exc), { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (exc.what()) ); } ) \
             _TS_LAST_CATCH( { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (m) ); } ) }
 
 #   define _TS_ASSERT_THROWS_NOTHING(f,l,e) ___TS_ASSERT_THROWS_NOTHING(f,l,e,0)

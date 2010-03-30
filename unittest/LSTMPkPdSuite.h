@@ -34,16 +34,14 @@ using namespace OM::PkPd;
 class LSTMPkPdSuite : public CxxTest::TestSuite
 {
 public:
-    LSTMPkPdSuite () {
-	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
-    }
-  
   void setUp () {
+    UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
     proxy = new LSTMPkPdModel ();
     proteome_ID = 0;		// 0 should work; we definitely don't want random allocation
   }
   void tearDown () {
     delete proxy;
+    UnittestUtil::PkPdSuiteTearDown();
   }
   
   void testNone () {

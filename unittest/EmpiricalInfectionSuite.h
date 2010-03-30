@@ -32,12 +32,9 @@ using namespace OM::WithinHost;
 class EmpiricalInfectionSuite : public CxxTest::TestSuite
 {
 public:
-    EmpiricalInfectionSuite () {
+    void setUp () {
 	UnittestUtil::Infection_init_NaN ();
 	EmpiricalInfection::initParameters();
-    }
-    
-    void setUp () {
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	Global::simulationTime = 1;	// value isn't really important
 	infection = new EmpiricalInfection (0xFFFFFFFF, 1);	// pkpdID (1st value) isn't important since we're not using drug model here

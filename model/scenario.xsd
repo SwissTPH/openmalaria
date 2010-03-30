@@ -1274,9 +1274,8 @@
   </xs:complexType>
     <xs:complexType name="HSEventScheduler">
       <xs:sequence>
-        <xs:element name="uncomplicated" type="HSESCMDecisions"/>
-        <xs:element name="complicated" type="HSESCMDecisions"/>
-            <!-- TODO: replace outcome data -->
+        <xs:element name="uncomplicated" type="HSESCaseManagement"/>
+        <xs:element name="complicated" type="HSESCaseManagement"/>
 	    <xs:element name="ClinicalOutcomes">
 		<xs:annotation>
 		    <xs:documentation>
@@ -1343,7 +1342,7 @@
 	    </xs:element>
 	</xs:sequence>
     </xs:complexType>
-  <xs:complexType name="HSESCMDecisions">
+  <xs:complexType name="HSESCaseManagement">
     <xs:annotation>
       <xs:documentation>
         Description of decisions for a case management tree. A generic view
@@ -1353,7 +1352,7 @@
         In general, each decision has a name, a defined set of outcome values, and a set of
         depenency decisions mentioned by name. The following decisions, with their associated
         outcomes, are provided by the code (and may not be included here):
-        * "Age5Test": "under5", "over5"
+        * "age5Test": "under5", "over5"
         * (UC only): "case": "UC1", "UC2"
         * (UC only): "result": "positive", "negative"; this depends on decision "tested"
         
@@ -1426,39 +1425,72 @@
           </xs:simpleContent>
         </xs:complexType>
       </xs:element>
-      <!-- TODO: add treatment -->
+      <xs:element name="treatments" type="HSESTreatments"/>
     </xs:sequence>
   </xs:complexType>
-    
-    <xs:complexType name="medicate">
-	<xs:attribute name="name" type="xs:string" use="required">
-	<xs:annotation>
-	    <xs:documentation>
-	    Abbreviated name of drug compound
-	    </xs:documentation>
-	    <xs:appinfo>
-	    units:string;
-	    </xs:appinfo>
-	</xs:annotation>
-	</xs:attribute>
-	<xs:attribute name="qty" type="xs:double" use="required">
-	<xs:annotation>
-	    <xs:documentation>Quantity of drug compound</xs:documentation>
-	    <xs:appinfo>units:mg;</xs:appinfo>
-	</xs:annotation>
-	</xs:attribute>
-	<xs:attribute name="time" type="xs:double" use="required">
-	<xs:annotation>
-	    <xs:documentation>
-		Number of hours past start of timestep the drug is medicated at (usually 0).
-	    </xs:documentation>
-	    <xs:appinfo>
-	    units:hours;min:0;
-	    </xs:appinfo>
-	</xs:annotation>
-	</xs:attribute>
-    </xs:complexType>  
-    
+  
+  <xs:complexType name="HSESTreatments">
+    <xs:annotation>
+      <xs:documentation>
+      A list of drug treatment tables. Each should have a name corresponding to
+      one of the "drug" decision's values.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="treatment" type="HSESTreatment" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESTreatment">
+    <xs:annotation>
+      <xs:documentation>
+      A drug treatment table.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="drug" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Name corresponding to one of the drug decision's output values.
+        </xs:documentation>
+        <xs:appinfo>
+        units:string;
+        </xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:complexType name="medicate">
+    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:annotation>
+      <xs:documentation>
+      Abbreviated name of drug compound
+      </xs:documentation>
+      <xs:appinfo>
+      units:string;
+      </xs:appinfo>
+    </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="qty" type="xs:double" use="required">
+    <xs:annotation>
+      <xs:documentation>Quantity of drug compound</xs:documentation>
+      <xs:appinfo>units:mg;</xs:appinfo>
+    </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="time" type="xs:double" use="required">
+    <xs:annotation>
+      <xs:documentation>
+        Number of hours past start of timestep the drug is medicated at (usually 0).
+      </xs:documentation>
+      <xs:appinfo>
+      units:hours;min:0;
+      </xs:appinfo>
+    </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>  
+  
     <xs:complexType name="drugDescription">
       <xs:sequence>
         <xs:element name="drug" maxOccurs="unbounded">

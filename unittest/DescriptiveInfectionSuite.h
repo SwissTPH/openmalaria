@@ -31,13 +31,10 @@ using namespace OM::WithinHost;
 class DescriptiveInfectionSuite : public CxxTest::TestSuite
 {
 public:
-    DescriptiveInfectionSuite () {
+    void setUp () {
 	UnittestUtil::Infection_init ();
 	UnittestUtil::DescriptiveInfection_init ();
 	DescriptiveInfection::initParameters();	//FIXME: this gets data from InputData
-    }
-    
-    void setUp () {
 	gsl::setUp (83);	// seed is unimportant, but must be fixed
 	Global::interval = 5;
 	Global::simulationTime = 1;	// value isn't really important

@@ -54,14 +54,13 @@ struct MedicateData {
 
 /// Data type stored in decisions
 struct CaseTreatment {
-    CaseTreatment (/*const scnXml::CM_leaf::MedicateSequence mSeq*/) {
-	//FIXME: get data
-// 	medications.resize (mSeq.size ());
-// 	for (size_t j = 0; j < mSeq.size(); ++j) {
-// 	    medications[j].abbrev = mSeq[j].getName();
-// 	    medications[j].qty = mSeq[j].getQty();
-// 	    medications[j].time = mSeq[j].getTime() / 24.0;	// convert from hours to days
-// 	}
+    CaseTreatment (const ::scnXml::HSESTreatment::MedicateSequence& mSeq) {
+	medications.resize (mSeq.size ());
+	for (size_t j = 0; j < mSeq.size(); ++j) {
+	    medications[j].abbrev = mSeq[j].getName();
+	    medications[j].qty = mSeq[j].getQty();
+	    medications[j].time = mSeq[j].getTime() / 24.0;	// convert from hours to days
+	}
     }
     
     /// Add medications into medicate queue
@@ -81,7 +80,6 @@ struct CaseTreatment {
     vector<MedicateData> medications;
 };
 
-
 /** Decision trees representation, mapping inputs to a CaseTreatment pointer.
  *
  * Used to represent a UC/UC2 or severe decision tree.
@@ -91,21 +89,33 @@ class ESDecisionMap {
         /// Constructor. Element is created statically, so initialize later
         ESDecisionMap () {}
         ~ESDecisionMap();
-	/** Initialization.
+	/** Read decision trees from an XML element.
 	 *
 	 * @param decisions XML element describing probabilistic decisions
 	 * @param complicated Determines whether hard-coded decisions for the
 	 * uncomplicated or complicated case are added. */
-	void initialize (const ::scnXml::HSESCMDecisions& decisions, bool complicated);
+	void initialize (const ::scnXml::HSESCaseManagement& decisions, bool complicated);
         
-        /// Run decision tree. TODO: consider non-treatment outputs.
-        CaseTreatment* determine (ESHostData& hostData);
+        /** Run decision tree to arrive at an outcome.
+	 *
+	 * @returns An outcome as a binary-or'd list of decision values. */
+        ESDecisionValue determine (ESHostData& hostData) const;
+	
+	/** Given a decision-tree outcome, return a corresponding case-treatment
+	 * object. Return-value should always point to an existing CaseTreatment
+	 * object (which shouldn't be deleted by the caller). */
+	CaseTreatment* getTreatment (ESDecisionValue outcome) const;
         
     private:
+	ESDecisionValueMap dvMap;
+	
         // Currently we walk through all decisions, required or not
         vector<ESDecisionTree*> decisions;
-        unordered_map<ESDecisionValue,CaseTreatment*> treatments;
-	ESDecisionValueMap dvMap;
+	
+	typedef unordered_map<ESDecisionValue,CaseTreatment*> treatments_t;
+	treatments_t treatments;
+	// Used to mask ESDecisionValues before lookup in treatments:
+	ESDecisionValue treatmentMask;
 };
 
 
@@ -125,8 +135,7 @@ class ESCaseManagement {
     private:
 	
 	//BEGIN Static parameters — set by init()
-        //FIXME: initialize
-	static ESDecisionMap uncomplicated, complicated;
+        static ESDecisionMap uncomplicated, complicated;
 	
 	/// MDA dosage info; null pointer if not provided
 	static CaseTreatment* mdaDoses;

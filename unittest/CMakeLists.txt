@@ -74,6 +74,8 @@ set (OM_CXXTEST_HEADERS
   InfectionImmunitySuite.h
   AgeGroupDataSuite.h
   #DescriptiveInfectionSuite.h
+  ESCaseManagementSuite.h
+  ESDecisionTreeSuite.h
 )
 
 if (OM_CXXTEST_INTERPRETER)

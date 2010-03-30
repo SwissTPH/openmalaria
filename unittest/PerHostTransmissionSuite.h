@@ -31,7 +31,7 @@ using namespace OM::Transmission;
 class PerHostSuite : public CxxTest::TestSuite
 {
 public:
-  PerHostSuite () {
+  void setUp () {
     scnXml::Interventions intervs(xml_schema::String("dummy"));
     PerHostTransmission::initParameters(intervs);
   }

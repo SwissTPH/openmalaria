@@ -49,6 +49,8 @@ public:
   /** Initialise the drug model. Called at start of simulation. */
   //TODO: data from XML.
   static void init ();
+  /** Delete set data. Must be called before init can be called again. */
+  static void cleanup ();
   
   //! Adds a new drug type to the list
   static void addDrug(HoshenDrugType* drug);

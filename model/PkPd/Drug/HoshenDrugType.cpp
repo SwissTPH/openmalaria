@@ -52,12 +52,17 @@ void HoshenDrugType::init () {
   s->parseProteomeInstances();
   HoshenDrugType::addDrug(s);
 }
+void HoshenDrugType::cleanup () {
+    for( map<string,HoshenDrugType*>::iterator it = available.begin(); it != available.end(); ++it )
+	delete it->second;
+    available.clear();
+}
 
 
 void HoshenDrugType::addDrug(HoshenDrugType* drug) {
   string abbrev = drug->abbreviation;
   // Check drug doesn't already exist
-    if (available.find (abbrev) != available.end())
+  if (available.find (abbrev) != available.end())
     throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
   
   available.insert (pair<string,HoshenDrugType*>(abbrev, drug));

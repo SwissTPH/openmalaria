@@ -31,12 +31,9 @@ using namespace OM::WithinHost;
 class DummyInfectionSuite : public CxxTest::TestSuite
 {
 public:
-    DummyInfectionSuite () {
+    void setUp () {
 	UnittestUtil::Infection_init_NaN ();
 	DummyInfection::initParameters();
-    }
-    
-    void setUp () {
 	Global::interval = 1;
 	Global::simulationTime = 1;	// value isn't really important
 	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here

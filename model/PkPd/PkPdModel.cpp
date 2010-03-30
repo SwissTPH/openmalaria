@@ -42,17 +42,18 @@ void PkPdModel::init () {
 	if (InputData().getDrugDescription().present()) {
 	    activeModel = LSTM_PKPD;
 	    LSTMDrugType::init(InputData().getDrugDescription().get ());
-	    LSTMPkPdModel::init();
 	} else {
 	    activeModel = HOSHEN_PKPD;
 	    ProteomeManager::init ();
 	    HoshenDrugType::init();
-	    HoshenPkPdModel::init();
 	}
     }
 }
 void PkPdModel::cleanup () {
-    if (activeModel != NON_PKPD) {
+    if (activeModel == LSTM_PKPD) {
+	LSTMDrugType::cleanup();
+    } else if (activeModel == HOSHEN_PKPD) {
+	HoshenDrugType::cleanup();
 	ProteomeManager::cleanup ();
     }
 }

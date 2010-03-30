@@ -21,12 +21,6 @@
 #include "PkPd/LSTMPkPdModel.h"
 
 namespace OM { namespace PkPd {
-    
-// -----  static functions  -----
-
-void LSTMPkPdModel::init() {
-}
-
 
 // -----  non-static set up / tear down functions  -----
 

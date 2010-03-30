@@ -37,7 +37,7 @@ using WithinHost::Infection;
 struct UnittestUtil {
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
-	util::ModelOptions::optSet |= util::INCLUDES_PK_PD;
+	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
 	//PkPdModel::init ();
@@ -57,13 +57,19 @@ struct UnittestUtil {
 	    dd.getDrug().push_back (drug);
 	    
 	    PkPd::LSTMDrugType::init (dd);
-	    PkPd::LSTMPkPdModel::init();
 	} else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
 	    PkPd::ProteomeManager::init ();
 	    PkPd::HoshenDrugType::init();
-	    PkPd::HoshenPkPdModel::init();
 	} else {
 	    assert (false);
+	}
+    }
+    static void PkPdSuiteTearDown () {
+	if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::LSTM_PKPD) {
+	    PkPd::LSTMDrugType::cleanup();
+	} else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
+	    PkPd::HoshenDrugType::cleanup();
+	    PkPd::ProteomeManager::cleanup();
 	}
     }
     

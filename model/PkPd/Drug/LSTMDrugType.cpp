@@ -50,11 +50,14 @@ void LSTMDrugType::init (const scnXml::DrugDescription& data) {
 	LSTMDrugType::addDrug (LSTMDrugType (*drug, start_bit));
     }
 }
+void LSTMDrugType::cleanup () {
+    available.clear ();
+}
 
 void LSTMDrugType::addDrug(const LSTMDrugType drug) {
   string abbrev = drug.abbreviation;
   // Check drug doesn't already exist
-    if (available.find (abbrev) != available.end())
+  if (available.find (abbrev) != available.end())
     throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
   
   available.insert (pair<string,LSTMDrugType>(abbrev, drug));

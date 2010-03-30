@@ -73,22 +73,31 @@
     <EventScheduler>
       <uncomplicated >
         <decision name="test" depends="" values="none,microscopy,RDT">
-          p(.8): one
-          p(.2): zero
+          p(.1): none
+          p(.4): microscopy
+          p(.5): RDT
         </decision>
+        <decision name="drug" depends="" values="MF">
+          MF
+        </decision>
+        <treatments>
+          <treatment drug="MF">
+            <medicate name="MF" qty="3000" time="0"/>
+            <medicate name="MF" qty="3000" time="720"/>
+          </treatment>
+        </treatments>
       </uncomplicated>
       <complicated >
-        <decision name="dummy" depends="" values="one,zero">
-          p(.8): one
-          p(.2): zero
+        <decision name="drug" depends="" values="MF_sev">
+          MF_sev
         </decision>
+        <treatments>
+          <treatment drug="MF_sev">
+            <!-- made-up, BIG dose -->
+            <medicate name="MF" qty="300000" time="0"/>
+          </treatment>
+        </treatments>
       </complicated>
-      <!-- Treament is to be added
-        <CM_leaf ID="0">
-          <medicate name="MF" qty="3000" time="0"/>
-          <medicate name="MF" qty="3000" time="720"/>
-        </CM_leaf>
-      -->
       <ClinicalOutcomes severeMask="0">
         <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
       </ClinicalOutcomes>

@@ -24,30 +24,14 @@
 #include "util/errors.hpp"
 
 #include <set>
+#include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
+    using boost::format;
 
-// -----  Types  -----
 
-ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
-CaseTreatment* ESCaseManagement::mdaDoses;
-
-// -----  Static  -----
-
-void ESCaseManagement::init () {
-    // Assume EventScheduler data was checked present:
-    const scnXml::HSEventScheduler& xmlESCM = InputData().getHealthSystem().getEventScheduler().get();
-    uncomplicated.initialize (xmlESCM.getUncomplicated (), false);
-    complicated.initialize (xmlESCM.getComplicated (), true);
-    
-    // MDA Intervention data
-    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
-    if (mdaDesc.present()) {
-	mdaDoses = new CaseTreatment (/*FIXME mdaDesc.get().getMedicate()*/);
-    } else
-	mdaDoses = NULL;
-}
+// -----  ESDecisionMap  -----
 
 inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
     BOOST_FOREACH ( const string& n, decision->depends ) {
@@ -57,7 +41,14 @@ inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string
     }
     return true;
 }
-void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool complicated) {
+inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t& vmap, const string& value) {
+    ESDecisionValueMap::value_map_t::const_iterator it = vmap.find (value);
+    if (it == vmap.end())
+	// value is "void" or something unknown; neither is acceptable
+	throw xml_scenario_error((format("Treatment for drug %1% which isn't an output of \"drug\" decision") %value).str());
+    return it->second;
+}
+void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
     // Assemble a list of all tests we need to add
     list<ESDecisionTree*> toAdd;
     toAdd.push_back (new ESDecisionAge5Test (dvMap));
@@ -65,7 +56,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool co
 	toAdd.push_back (new ESDecisionUC2Test (dvMap));
 	toAdd.push_back (new ESDecisionParasiteTest (dvMap));
     }
-    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlDcs.getDecision() ) {
+    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlCM.getDecision() ) {
 	toAdd.push_back (new ESDecisionRandom (dvMap, xmlDc));
     }
     
@@ -100,22 +91,32 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCMDecisions& xmlDcs, bool co
 	} else
 	    ++it;
     }
+    
+    
+    // Read treatments:
+    pair< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("drug");
+    const ESDecisionValueMap::value_map_t& drugCodes = mask_vmap_pair.second;
+    treatments_t unmodified_treatments;
+    BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
+	unmodified_treatments.insert( make_pair( treatmentGetValue( drugCodes, treatment.getDrug() ), new CaseTreatment( treatment.getMedicate() ) ) );
+    }
+    //TODO: introduce and apply modifiers
+    // for now, just copy
+    treatments = unmodified_treatments;
+    // Include "void" input with an empty CaseTreatment:
+    treatments[ESDecisionValue()] = new CaseTreatment (::scnXml::HSESTreatment::MedicateSequence());
+    
+    treatmentMask = mask_vmap_pair.first;
 }
 ESDecisionMap::~ESDecisionMap () {
     BOOST_FOREACH ( ESDecisionTree* d, decisions ) {
 	delete d;
     }
+    for( treatments_t::iterator it = treatments.begin(); it != treatments.end(); ++it )
+	delete it->second;
 }
 
-
-void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {
-    if (mdaDoses == NULL)
-	throw util::xml_scenario_error ("MDA intervention without description");
-    else
-	mdaDoses->apply(medicateQueue);
-}
-
-CaseTreatment* ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) {
+ESDecisionValue ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) const {
     ESDecisionValue outcomes;	// initialized to 0
     // At this point, decisions is ordered such that all dependencies should be
     // met if evaluated in order, so we just do that.
@@ -124,16 +125,48 @@ CaseTreatment* ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) {
 	// Get back another outcome and add it into the outcomes set.
 	outcomes |= decision->determine (outcomes & decision->mask, hostData);
     }
-    // Find our outcome. FIXME: do we not want to mask this? It normally only depens on drug chosen, right?
+    return outcomes;
+}
+CaseTreatment* ESDecisionMap::getTreatment (ESDecisionValue outcome) const {
+    // Find our outcome.
     //TODO: suppositories as separate drug?
-    unordered_map<ESDecisionValue,CaseTreatment*>::const_iterator treatment = treatments.find (outcomes);
+    ESDecisionValue masked = outcome & treatmentMask;
+    unordered_map<ESDecisionValue,CaseTreatment*>::const_iterator treatment = treatments.find (masked);
     if (treatment == treatments.end ()) {
-	//FIXME: what do we do? Complain or ignore?
+	ostringstream msg;
+	msg<<"decision outcome "<<dvMap.format( masked )<<" not found in list of treatments";
+	throw xml_scenario_error (msg.str());
     } else {
 	return treatment->second;
     }
 }
 
+
+// -----  ESCaseManagement  -----
+
+ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
+CaseTreatment* ESCaseManagement::mdaDoses;
+
+void ESCaseManagement::init () {
+    // Assume EventScheduler data was checked present:
+    const scnXml::HSEventScheduler& xmlESCM = InputData().getHealthSystem().getEventScheduler().get();
+    uncomplicated.initialize (xmlESCM.getUncomplicated (), false);
+    complicated.initialize (xmlESCM.getComplicated (), true);
+    
+    // MDA Intervention data
+    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
+    if (mdaDesc.present()) {
+	mdaDoses = new CaseTreatment ( mdaDesc.get().getMedicate() );
+    } else
+	mdaDoses = NULL;
+}
+
+void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {
+    if (mdaDoses == NULL)
+	throw util::xml_scenario_error ("MDA intervention without description");
+    else
+	mdaDoses->apply(medicateQueue);
+}
 
 void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
     ESDecisionMap* map;
@@ -145,7 +178,9 @@ void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     
     ESHostData hostData (ageYears, withinHostModel, pgState);
     
-    CaseTreatment* treatment = map->determine (hostData);
+    ESDecisionValue outcome = map->determine (hostData);
+    
+    CaseTreatment* treatment = map->getTreatment(outcome);
     
     // We always remove any queued medications.
     medicateQueue.clear();

@@ -34,16 +34,14 @@ using namespace OM::PkPd;
 class HoshenPkPdSuite : public CxxTest::TestSuite
 {
 public:
-  HoshenPkPdSuite () {
-    UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
-  }
-  
   void setUp () {
+    UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
     proxy = new HoshenPkPdModel ();
     proteome_ID = ProteomeInstance::getInstances()[0].getProteomeID();	// force a particular proteome rather than let it be randomly allocated
   }
   void tearDown () {
     delete proxy;
+    UnittestUtil::PkPdSuiteTearDown();
   }
   
   void testNone () {

@@ -33,9 +33,6 @@ using namespace OM;
 class AgeGroupDataSuite : public CxxTest::TestSuite
 {
 public:
-  AgeGroupDataSuite () {
-  }
-
   void setUp () {
     proxy = new AgeGroupData;
   }

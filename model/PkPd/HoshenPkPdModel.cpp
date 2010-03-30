@@ -22,11 +22,6 @@
 
 namespace OM { namespace PkPd {
     
-// -----  static functions  -----
-
-void HoshenPkPdModel::init() {
-}
-
 
 // -----  non-static set up / tear down functions  -----
 

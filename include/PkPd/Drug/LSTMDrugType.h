@@ -57,6 +57,8 @@ public:
     //@{
     /** Initialise the drug model. Called at start of simulation. */
     static void init (const scnXml::DrugDescription& data);
+    /// Remove set-up drugs. (Must be called before init can be re-called.)
+    static void cleanup ();
     
     //! Adds a new drug type to the list
     static void addDrug(const LSTMDrugType drug);

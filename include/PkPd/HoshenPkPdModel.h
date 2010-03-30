@@ -35,11 +35,6 @@ namespace OM { namespace PkPd {
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
 class HoshenPkPdModel : public PkPdModel {
 public:
-  ///@brief Static functions
-  //@{
-  static void init ();
-  //@}
-  
   HoshenPkPdModel ();
   virtual ~HoshenPkPdModel ();
   

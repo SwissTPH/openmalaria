@@ -9,8 +9,6 @@ util/SchemaTranslator/scenarios
 util/SchemaTranslator/translatedScenarios
 util/.metadata
 util/SchemaTranslator/*.class
-util/CaseManagementTree/*.class
-util/CaseManagementTree/CaseManagementTree
 .sconsign.dblite
 build
 rel-build

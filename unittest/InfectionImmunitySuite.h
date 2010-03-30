@@ -30,11 +30,8 @@ using namespace OM::WithinHost;
 class InfectionImmunitySuite : public CxxTest::TestSuite
 {
 public:
-    InfectionImmunitySuite () {
-	UnittestUtil::Infection_init ();
-    }
-    
     void setUp () {
+	UnittestUtil::Infection_init ();
 	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
     }
     void tearDown () {
