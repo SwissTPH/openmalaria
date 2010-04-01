@@ -31,6 +31,8 @@
 
 using namespace std;
 
+class UnittestUtil;
+
 namespace OM { namespace WithinHost {
     
 /*! Within Host Model abstract class.
@@ -189,6 +191,8 @@ protected:
    * infections to baloon stupidly. */
   static const int MAX_INFECTIONS = 21;
   //@}
+  
+  friend class ::UnittestUtil;
 };
 
 } }

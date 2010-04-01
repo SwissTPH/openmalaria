@@ -127,9 +127,8 @@ namespace OM { namespace Clinical {
 		    
 		    double p = boost::lexical_cast<double>( branch.dec_value );
 		    cum_p += p;
-		    dependP *= p;
 		    
-		    processOutcome( branch.outcome, dependValues, dependP );
+		    processOutcome( branch.outcome, dependValues, dependP*p );
 		}
 		// Test cum_p is approx. 1.0 in case the input tree is wrong. In any case, we force probabilities to add to 1.0.
 		if (cum_p < 0.999 || cum_p > 1.001)	//TODO: improve error message!
@@ -149,7 +148,7 @@ namespace OM { namespace Clinical {
 		    
 		    valMap.erase( valIt );
 		}
-		if( !branches.empty() ){	// error: not all options were included
+		if( !valMap.empty() ){	// error: not all options were included
 		    //TODO: improve error message!
 		    ostringstream msg;
 		    msg << "Expected:";
@@ -177,10 +176,19 @@ namespace OM { namespace Clinical {
 		
 		// find/make an entry for dependent decisions:
 		vector<double>& outcomes_cum_p = dR.map_cum_p[ dependValues ];
+		/* print cum-prob-array (part 1):
+		if( outcomes_cum_p.empty() ) cout << "new ";
+		cout << "outcome cumulative probabilities for "<<dvMap.format( val )<<" (index "<<i<<"): ";
+		*/
 		// make sure it's size is correct (will need resizing if just inserted):
 		outcomes_cum_p.resize( dR.values.size(), 0.0 );	// any new entries have p(0.0)
 		for (size_t j = i; j < outcomes_cum_p.size(); ++j)
 		    outcomes_cum_p[j] += dependP;
+		/* print cum-prob-array (part 2):
+		for (size_t j = 0; j < outcomes_cum_p.size(); ++j)
+		    cout <<" "<<outcomes_cum_p[j];
+		cout<<endl;
+		*/
 	    } else if ( const parser::Branches* brs_p = boost::get<parser::Branches>( &outcome ) ) {
 		processBranches( *brs_p, dependValues, dependP );
 	    } else {

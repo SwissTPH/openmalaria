@@ -27,10 +27,12 @@
 #include "WithinHost/WithinHostModel.h"
 #include "UnittestUtil.hpp"
 #include <limits>
+#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
 using namespace OM::Pathogenesis;
 using namespace OM::WithinHost;
+using namespace boost::assign; // bring 'operator+=()' into scope
 
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
@@ -46,8 +48,110 @@ public:
 	UnittestUtil::PkPdSuiteTearDown ();
     }
     
-    //TODO: test ESDecisionValue operations
-    //TODO: test ESDecisionRandom
+    void testESDecisionValue () {
+	ESDecisionValueMap dvMap;	// use a separate map for this test
+	
+	vector<string> vals;
+	vals += "1","2";
+	dvMap.add_decision_values( "a", vals );
+	
+	// Assert getting unknown values/decisions fails:
+	TS_ASSERT_THROWS_EQUALS( dvMap.get( "b", "1" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no decision b" );
+	TS_ASSERT_THROWS_EQUALS( dvMap.get( "a", "4" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no value a(4)" );
+	
+	// check we can re-add the same decision:
+	TS_ASSERT_THROWS_NOTHING( dvMap.add_decision_values( "a", vals ) );
+	// but not if it's different:
+	vals[1] = "5";
+	TS_ASSERT_THROWS_EQUALS( dvMap.add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; expected value: 2" );
+	vals.resize(4,"2");
+	vals[3]="6";	// now "1","5","2","6"
+	TS_ASSERT_THROWS_EQUALS( dvMap.add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; unexpected values: 5 6" );
+	
+	// check we can't use void:
+	vals.resize(1);
+	vals[0] = "void";
+	TS_ASSERT_THROWS_EQUALS( dvMap.add_decision_values( "v", vals ), const std::runtime_error &e, string(e.what()), "void can not be a declared output of a decision" );
+	
+	vals.resize(2,"9");
+	vals[0] = "9";	// "9","9"
+	TS_ASSERT_THROWS_EQUALS( dvMap.add_decision_values( "c", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision c's value 9 in value list twice!" );
+	
+	vals.resize(1);
+	dvMap.add_decision_values( "c", vals );
+	
+	// check what outcomes we get:
+	typedef ESDecisionValue::id_type id_type;
+	TS_ASSERT_EQUALS( dvMap.get( "a", "1" ).id, static_cast<id_type>(1) );
+	TS_ASSERT_EQUALS( dvMap.get( "a", "2" ).id, static_cast<id_type>(2) );
+	TS_ASSERT_EQUALS( dvMap.get( "c", "9" ).id, static_cast<id_type>(4) );
+	
+	ostringstream val_string;
+	val_string << dvMap.format( dvMap.get( "a", "1" ) | dvMap.get( "c", "9" ) );
+	TS_ASSERT_EQUALS( val_string.str(), "a(1), c(9)" );
+    }
+    
+    /* Runs d.determine( input, hd ) N times
+     * returns the proportion of these runs where the output equalled expectedOutput
+     */
+    double determineNTimes (int N, const ESDecisionTree& d, const ESDecisionValue input, const ESHostData& hd, const ESDecisionValue expectedOutput) {
+	int nExpected = 0;
+	for (int i = 0; i < N; ++i) {
+	    if( d.determine( input, hd ) == expectedOutput )
+		++nExpected;
+	}
+	return double(nExpected) / double(N);
+    }
+    
+    void testRandom () {
+	ESHostData hd(
+		numeric_limits< double >::quiet_NaN(),
+		*whm,
+		NONE
+	);
+	
+	// random decision
+	scnXml::Decision ut_r_xml ("\
+		p(.5) {\
+		    p(.9): a\
+		    p(.1): b\
+		}\
+		p(.5) {\
+		    p(.7): a\
+		    p(.3): b\
+		}",
+	    "myR",	// decision
+	    "",	// depends
+	    "a,b"	// values
+	);
+	ESDecisionRandom ut_r( dvMap, ut_r_xml );
+	
+	const int N = 10000;
+	const double LIM = .02;
+	double propPos;	// proportion positive
+	
+	// test that ut_r.decide produces a 80% of the time and b 20%:
+	propPos = determineNTimes( N, ut_r, ESDecisionValue(), hd, dvMap.get( "myR", "a" ) );
+	TS_ASSERT_DELTA( propPos, .8, LIM );
+	
+	// deterministic decision
+	vector<string> vals;
+	vals += "1","2";
+	dvMap.add_decision_values( "i", vals );
+	
+	scnXml::Decision ut_d_xml ("\
+		i(1): a\
+		i(2): b",
+	    "d",	// decision
+	    "i",	// depends
+	    "a,b"	// values
+	);
+	ESDecisionRandom ut_d( dvMap, ut_d_xml );
+	
+	TS_ASSERT_EQUALS( ut_d.determine( dvMap.get( "i", "1" ), hd ), dvMap.get( "d", "a" ) );
+	TS_ASSERT_EQUALS( ut_d.determine( ESDecisionValue(), hd ), ESDecisionValue() );	// void input and output
+	TS_ASSERT_EQUALS( ut_d.determine( dvMap.get( "i", "2" ), hd ), dvMap.get( "d", "b" ) );
+    }
     
     void testUC2Test () {
 	ESDecisionUC2Test d( dvMap );
@@ -80,9 +184,21 @@ public:
 		*whm,
 		STATE_MALARIA
 	);
-	//NOTE: the test isn't implemented yet, hence always returns negative
-	TS_ASSERT_EQUALS( d.determine( dvMap.get( "test", "microscopy" ), hd ), dvMap.get( "result", "positive" ) );
-	TS_ASSERT_EQUALS( d.determine( dvMap.get( "test", "RDT" ), hd ), dvMap.get( "result", "positive" ) );
+	const int N = 10000;
+	const double LIM = .02;
+	double propPos;	// proportion positive
+	UnittestUtil::setTotalParasiteDensity( *whm, 0. );	// no parasites (so we test specificity)
+	propPos = determineNTimes( N, d, dvMap.get( "test", "microscopy" ), hd, dvMap.get( "result", "negative" ) );
+	TS_ASSERT_DELTA ( propPos, .75, LIM );
+	propPos = determineNTimes( N, d, dvMap.get( "test", "RDT" ), hd, dvMap.get( "result", "negative" ) );
+	TS_ASSERT_DELTA ( propPos, .942, LIM );
+	TS_ASSERT_EQUALS( d.determine( dvMap.get( "test", "none" ), hd ), ESDecisionValue() );
+	
+	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites (so we test sensitivity with 0-100 parasites)
+	propPos = determineNTimes( N, d, dvMap.get( "test", "microscopy" ), hd, dvMap.get( "result", "positive" ) );
+	TS_ASSERT_DELTA ( propPos, .75, LIM );
+	propPos = determineNTimes( N, d, dvMap.get( "test", "RDT" ), hd, dvMap.get( "result", "positive" ) );
+	TS_ASSERT_DELTA ( propPos, .539, LIM );
 	TS_ASSERT_EQUALS( d.determine( dvMap.get( "test", "none" ), hd ), ESDecisionValue() );
     }
     

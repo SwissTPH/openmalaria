@@ -37,7 +37,7 @@ namespace OM { namespace Clinical {
 	}
     }
     
-    ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, ESHostData& hostData) const {
+    ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
 	if (it == map_cum_p.end())	// should only happen when "void" was specified as an output
 	    return ESDecisionValue();	// no decision
@@ -54,12 +54,12 @@ namespace OM { namespace Clinical {
 	valueList[1] = "UC2";
 	setValues (dvMap, valueList);
     }
-    ESDecisionValue ESDecisionUC2Test::determine (const ESDecisionValue, ESHostData& hostData) const {
+    ESDecisionValue ESDecisionUC2Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
 	assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
 	if (hostData.pgState & Pathogenesis::SECOND_CASE)	//TODO: check this actually gets set
-	    return values[2];
+	    return values[2];	// UC2
 	else
-	    return values[1];
+	    return values[1];	// UC1
     }
     
     ESDecisionAge5Test::ESDecisionAge5Test (ESDecisionValueMap& dvMap) {
@@ -68,11 +68,11 @@ namespace OM { namespace Clinical {
 	valueList[1] = "over5";
 	setValues (dvMap, valueList);
     }
-    ESDecisionValue ESDecisionAge5Test::determine (const ESDecisionValue input, ESHostData& hostData) const {
+    ESDecisionValue ESDecisionAge5Test::determine (const ESDecisionValue input, const ESHostData& hostData) const {
 	if (hostData.ageYears >= 5.0)
-	    return values[2];
+	    return values[2];	// over5
 	else
-	    return values[1];
+	    return values[1];	// under5
     }
     
     ESDecisionParasiteTest::ESDecisionParasiteTest (ESDecisionValueMap& dvMap) {
@@ -92,16 +92,48 @@ namespace OM { namespace Clinical {
 	setValues (dvMap, valueList);
     }
     
-    ESDecisionValue ESDecisionParasiteTest::determine (const ESDecisionValue input, ESHostData& hostData) const {
-	if (input == test_microscopy) {
-	    // if (hostData.withinHost.getDensity () > ...)
-	    //FIXME: or values[1]
-	    return values[2];
-	} else if (input == test_RDT) {
-	    //FIXME: or values[1]
-	    return values[2];
-	} else	// if output was void
+    ESDecisionValue ESDecisionParasiteTest::determine (const ESDecisionValue input, const ESHostData& hostData) const {
+	if (input == test_none)
 	    return ESDecisionValue();	// 0, no decision
+	else {
+	    double dens = hostData.withinHost.getTotalDensity ();
+	    double pPositive = 0.0;	// chance of a positive result
+	    if (input == test_microscopy) {
+		// Microscopy sensitivity/specificity data in Africa;
+		// Source: expert opinion — Allan Schapira
+		if (dens > 100.)
+		    pPositive = .9;
+		else if (dens > 0.)
+		    pPositive = .75;
+		else
+		    pPositive = 1.0 - .75;	// specificity
+	    } else {
+		assert (input == test_RDT);
+		// RDT sensitivity/specificity for Plasmodium falciparum in Africa
+		// Source: Murray et al (Clinical Microbiological Reviews, Jan. 2008)
+		if (dens > 500.) {
+		    if (dens > 5000.)
+			pPositive = .997;
+		    else if (dens > 1000.)
+			pPositive = .992;
+		    else	// dens > 500.
+			pPositive = .926;
+		} else {
+		    if (dens > 100.)
+			pPositive = .892;
+		    else if (dens > 0.)
+			pPositive = .539;
+		    else	// !(dens > 0.)
+			pPositive = 1.0 - .942;	// specificity
+		}
+	    }
+	    
+	    if (random::uniform_01() < pPositive)
+		return values[2];	// positive
+	    else
+		return values[1];	// negative
+	}
+	assert(false);	// should return before here
     }
     
 
@@ -110,6 +142,11 @@ std::size_t hash_value(ESDecisionValue const& b) {
     return hasher(b.id);
 }
 ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision, const std::vector< string > values) {
+    set<string> valueSet;
+    BOOST_FOREACH( const string& v, values )
+	if( !valueSet.insert( v ).second )
+	    throw xml_scenario_error( (boost::format( "CaseManagement: decision %1%'s value %2% in value list twice!" ) %decision %v).str() );
+    
     pair<id_map_type::iterator,bool> dec_pair = id_map.insert( make_pair (decision, make_pair ( ESDecisionValue(), value_map_t() ) ) );
     value_map_t& valMap = dec_pair.first->second.second;	// alias new map
     if (dec_pair.second) {	// new entry; fill it
@@ -148,13 +185,13 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
 	for (value_map_t::const_iterator cur_val = valMap.begin(); cur_val != valMap.end(); ++cur_val) {
 	    set<string>::iterator it = new_values.find (cur_val->first);
 	    if (it == new_values.end())
-		throw xml_scenario_error ((boost::format("CaseManagement: %1% values don't match (expected): %2%") % decision % cur_val->first).str());
+		throw xml_scenario_error ((boost::format("CaseManagement: decision %1%'s values don't match; expected value: %2%") % decision % cur_val->first).str());
 	    else
 		new_values.erase (it);
 	}
 	if (!new_values.empty ()) {
 	    ostringstream msg;
-	    msg << "CaseManagement: "<<decision<<" values don't match (unexpected):";
+	    msg << "CaseManagement: decision "<<decision<<"'s values don't match; unexpected values:";
 	    BOOST_FOREACH ( const string& v, new_values )
 		msg << ' ' << v;
 	    throw xml_scenario_error (msg.str());

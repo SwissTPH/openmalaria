@@ -30,9 +30,10 @@
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "WithinHost/Infection.h"
+#include "WithinHost/WithinHostModel.h"
 
 using namespace OM;
-using WithinHost::Infection;
+using namespace WithinHost;
 
 struct UnittestUtil {
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
@@ -96,6 +97,11 @@ struct UnittestUtil {
     static void EmpiricalWHM_setup () {
 	Global::interval = 1;
 	util::ModelOptions::optSet = util::EMPIRICAL_WITHIN_HOST_MODEL;
+    }
+    
+    // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
+    static void setTotalParasiteDensity (WithinHostModel& whm, double density) {
+	whm.totalDensity = density;
     }
 };
 

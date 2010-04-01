@@ -29,6 +29,7 @@
 #include <map>
 #include <boost/unordered_map.hpp>
 
+class ESDecisionTreeSuite;
 
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
@@ -62,6 +63,7 @@ struct ESDecisionValue {
 	friend std::size_t hash_value(ESDecisionValue const& b);
 	friend ostream& operator<< (ostream& stream, const ESDecisionValue v);
 	friend class ESDecisionValueMap;
+	friend class ::ESDecisionTreeSuite;
 };
 std::size_t hash_value(ESDecisionValue const& b);
 inline ostream& operator<< (ostream& stream, const ESDecisionValue v){
@@ -149,7 +151,7 @@ struct ESHostData {
 class ESDecisionTree {
     public:
         /// Run decision tree, with input filtered by mask.
-        virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const =0;
+        virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const =0;
         
 	// Note: for some cases we could use ESDecisionName instead of string
 	// (for speed), but error messages would be bad. Only slows set-up.
@@ -166,7 +168,7 @@ class ESDecisionTree {
 class ESDecisionRandom : public ESDecisionTree {
     public:
 	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::Decision& xmlDc);
-	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const;
+	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
 	
     private:
 	// A map from depended decision values (represented as an or-d list of one
@@ -181,18 +183,18 @@ class ESDecisionRandom : public ESDecisionTree {
 class ESDecisionUC2Test : public ESDecisionTree {
     public:
 	ESDecisionUC2Test (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue, ESHostData& hostData) const;
+	virtual ESDecisionValue determine (const ESDecisionValue, const ESHostData& hostData) const;
 };
 
 class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const;
+	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
 };
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue input, ESHostData& hostData) const;
+	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
     private:
 	// These shouldn't be static: they correspond to the passed-in dvMap and can
 	// only be initialized after values are created there.
