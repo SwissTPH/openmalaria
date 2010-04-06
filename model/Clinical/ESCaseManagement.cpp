@@ -56,7 +56,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	toAdd.push_back (new ESDecisionUC2Test (dvMap));
 	toAdd.push_back (new ESDecisionParasiteTest (dvMap));
     }
-    BOOST_FOREACH ( const ::scnXml::Decision& xmlDc, xmlCM.getDecision() ) {
+    BOOST_FOREACH ( const ::scnXml::HSESDecision& xmlDc, xmlCM.getDecisions().getDecision() ) {
 	toAdd.push_back (new ESDecisionRandom (dvMap, xmlDc));
     }
     
@@ -94,17 +94,17 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     
     
     // Read treatments:
-    pair< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("drug");
-    const ESDecisionValueMap::value_map_t& drugCodes = mask_vmap_pair.second;
+    pair< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
+    const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.second;
     treatments_t unmodified_treatments;
     BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
-	unmodified_treatments.insert( make_pair( treatmentGetValue( drugCodes, treatment.getDrug() ), new CaseTreatment( treatment.getMedicate() ) ) );
+	unmodified_treatments.insert( make_pair( treatmentGetValue( treatmentCodes, treatment.getName() ), new CaseTreatment( treatment.getSchedule().getMedicate() ) ) );
     }
     //TODO: introduce and apply modifiers
     // for now, just copy
     treatments = unmodified_treatments;
     // Include "void" input with an empty CaseTreatment:
-    treatments[ESDecisionValue()] = new CaseTreatment (::scnXml::HSESTreatment::MedicateSequence());
+    treatments[ESDecisionValue()] = new CaseTreatment (::scnXml::HSESTreatmentSchedule::MedicateSequence());
     
     treatmentMask = mask_vmap_pair.first;
 }

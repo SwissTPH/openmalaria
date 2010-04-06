@@ -54,12 +54,12 @@ struct MedicateData {
 
 /// Data type stored in decisions
 struct CaseTreatment {
-    CaseTreatment (const ::scnXml::HSESTreatment::MedicateSequence& mSeq) {
+    CaseTreatment (const ::scnXml::HSESTreatmentSchedule::MedicateSequence& mSeq) {
 	medications.resize (mSeq.size ());
 	for (size_t j = 0; j < mSeq.size(); ++j) {
-	    medications[j].abbrev = mSeq[j].getName();
-	    medications[j].qty = mSeq[j].getQty();
-	    medications[j].time = mSeq[j].getTime() / 24.0;	// convert from hours to days
+	    medications[j].abbrev = mSeq[j].getDrug();
+	    medications[j].qty = mSeq[j].getMg();
+	    medications[j].time = mSeq[j].getHour() / 24.0;	// convert from hours to days
 	}
     }
     

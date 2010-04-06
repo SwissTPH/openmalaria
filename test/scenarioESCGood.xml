@@ -72,29 +72,52 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <decision depends="" name="test" values="none,microscopy,RDT">
-          p(.1): none
-          p(.4): microscopy
-          p(.5): RDT
-        </decision>
-        <decision depends="" name="drug" values="MF">
-          MF
-        </decision>
+        <decisions>
+          <decision name="test" depends="" values="none,microscopy,RDT">
+            p(.1): none
+            p(.4): microscopy
+            p(.5): RDT
+          </decision>
+          <decision name="treatment" depends="" values="MF_dose">
+            MF_dose
+          </decision>
+          <decision name="delay" depends="" values="0,1,2">
+            p(.6): 0
+            p(.3): 1
+            p(.1): 2
+          </decision>
+        </decisions>
         <treatments>
-          <treatment drug="MF">
-            <medicate name="MF" qty="3000" time="0"/>
-            <medicate name="MF" qty="3000" time="720"/>
+          <treatment name="MF_dose">
+            <schedule>
+              <medicate drug="MF" mg="3000" hour="0"/>
+              <medicate drug="MF" mg="3000" hour="12"/>
+            </schedule>
+            <modifier decision="test">
+              <multiplyQty value="none" drugs="MF">0.5</multiplyQty>
+              <multiplyQty value="microscopy" drugs="MF">1.0</multiplyQty>
+              <multiplyQty value="RDT" drugs="MF">1.0</multiplyQty>
+            </modifier>
+            <modifier decision="delay">
+              <delay value="0" drugs="MF">0</delay>
+              <delay value="1" drugs="MF">24</delay>
+              <delay value="2" drugs="MF">48</delay>
+            </modifier>
           </treatment>
         </treatments>
       </uncomplicated>
       <complicated>
-        <decision depends="" name="drug" values="MF_sev">
-          MF_sev
-        </decision>
+        <decisions>
+          <decision name="treatment" depends="" values="MF_sev">
+            MF_sev
+          </decision>
+        </decisions>
         <treatments>
-          <treatment drug="MF_sev">
-            <!-- made-up, BIG dose -->
-            <medicate name="MF" qty="300000" time="0"/>
+          <treatment name="MF_sev">
+            <schedule>
+              <!-- made-up, BIG dose (we're not modelling overdoses yet) -->
+              <medicate drug="MF" mg="300000" hour="0"/>
+            </schedule>
           </treatment>
         </treatments>
       </complicated>

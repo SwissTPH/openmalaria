@@ -212,7 +212,7 @@ namespace OM { namespace Clinical {
 	ESDecisionRandom& dR;
     };
     
-    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::Decision& xmlDc) {
+    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc) {
 	decision = xmlDc.getName();
 	
 	typedef string::iterator iter_t;

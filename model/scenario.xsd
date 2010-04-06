@@ -1345,6 +1345,20 @@
   <xs:complexType name="HSESCaseManagement">
     <xs:annotation>
       <xs:documentation>
+        A set of decisions and a set of treatments.
+      </xs:documentation>
+      <xs:appinfo>units:List of elements;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="decisions" type="HSESDecisions">
+      </xs:element>
+      <xs:element name="treatments" type="HSESTreatments"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESDecisions">
+    <xs:annotation>
+      <xs:documentation>
         Description of decisions for a case management tree. A generic view
         of this tree would be that each decision is deterimistic, or based on probabilities which
         may depend on other decisions. Probabilistic decisions are described here.
@@ -1358,82 +1372,81 @@
         
         The following decisions must be described here:
         * (UC only): "tested": "none", "microscopy", "RDT"
-        * "drug": values aren't restricted but must match up with a drug (combination) described
-          in the corresponding "treatmentData" section, or be "none" (no treatment).
+        * "treatment": values aren't restricted but must match up with a treatment described
+          in the corresponding "treatments" section, or be "void" (no treatment).
       </xs:documentation>
-      <xs:appinfo>units:List of elements;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="decision" maxOccurs="unbounded" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            A decision describes how to choose between a set of values.
-            
-            Lexically, it can contain symbols matching "[_\.a-zA-Z0-9]+", round brackets: (),
-            braces: {} and colons. Whitespace is ignored except to separate symbols.
-            
-            Syntactically, it must match one TREE, where SYMBOL is a symbol described above.
-            (Here, "x|y" means x or y, "x+" means x occurs once or more, brackets show grouping.)
-            TREE := BRANCH_SET | OUTCOME
-            BRANCH_SET := BRANCH+
-            BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
-            OUTCOME, DECISION, VALUE := SYMBOL
-            
-            Semantically, each OUTCOME must be one of the values associated with this decision
-            or "void". For each BRANCH_SET each BRANCH must have the same DECISION, which
-            must be either:
-            * One of the dependencies mentioned in "depends". The VALUE immediately following in
-              brackets must correspond to one of its output values. The BRANCH_SET immediately
-              containing this BRANCH must represent each output value of the same decision
-              exactly once, and no parent BRANCH_SET may be for the same DECISION.
-            * Or: "p". This indicates a probalistic decision. In this case the value is a
-              probability, the sum of all values for the BRANCH_SET must be 1 and the decision
-              must be associated directly with OUTCOMEs (not sub-TREEs).
-          </xs:documentation>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:simpleContent>
-            <xs:extension base="xs:string">
-              <xs:attribute name="name" type="xs:string" use="required">
-                <xs:annotation>
-                  <xs:documentation>
-                    The name of this decision. The name must match the regular expression
-                    "[_a-zA-Z0-9]+"; that is it can only contain letters, digits and _ characters
-                    (no spaces, punctuation, etc.).
-                  </xs:documentation>
-                </xs:annotation>
-              </xs:attribute>
-              <xs:attribute name="depends" type="xs:string" use="required">
-                <xs:annotation>
-                  <xs:documentation>
-                    A comma-separated list of decisions that must have already been evaluated before
-                    this decision can be evaluated. Can be empty. Each must be hard-coded or
-                    described here.
-                  </xs:documentation>
-                </xs:annotation>
-              </xs:attribute>
-              <xs:attribute name="values" type="xs:string" use="required">
-                <xs:annotation>
-                  <xs:documentation>
-                    A comma-separated list of outcome values this decision may have.
-                    The name of each value must be of the same form as decision names (i.e.
-                    only contain letters, digits and _ characters).
-                  </xs:documentation>
-                </xs:annotation>
-              </xs:attribute>
-            </xs:extension>
-          </xs:simpleContent>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="treatments" type="HSESTreatments"/>
+      <xs:element name="decision" type="HSESDecision" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESDecision">
+    <xs:annotation>
+      <xs:documentation>
+        A decision describes how to choose between a set of values.
+        
+        Lexically, it can contain symbols matching "[_\.a-zA-Z0-9]+", round brackets: (),
+        braces: {} and colons. Whitespace is ignored except to separate symbols.
+        
+        Syntactically, it must match one TREE, where SYMBOL is a symbol described above.
+        (Here, "x|y" means x or y, "x+" means x occurs once or more, brackets show grouping.)
+        TREE := BRANCH_SET | OUTCOME
+        BRANCH_SET := BRANCH+
+        BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
+        OUTCOME, DECISION, VALUE := SYMBOL
+        
+        Semantically, each OUTCOME must be one of the values associated with this decision
+        or "void" (indicating not relevent/no decision, and forcing all decisions dependent on this
+        to also output void).
+        For each BRANCH_SET each BRANCH must have the same DECISION, which must be one of:
+        * One of the dependencies mentioned in "depends": the VALUE immediately following in
+          brackets must correspond to one of its output values. The BRANCH_SET immediately
+          containing this BRANCH must represent each output value of the same decision
+          exactly once, and no parent BRANCH_SET may be for the same DECISION.
+        * "p": this indicates a probalistic decision. In this case the value is a
+          probability, the sum of all values for the BRANCH_SET must be 1 and the decision
+          must be associated directly with OUTCOMEs (not sub-TREEs).
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              The name of this decision. The name must match the regular expression
+              "[_a-zA-Z0-9]+"; that is it can only contain letters, digits and _ characters
+              (no spaces, punctuation, etc.).
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="depends" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              A comma-separated list of decisions that must have already been evaluated before
+              this decision can be evaluated. Can be empty. Each must be hard-coded or
+              described here.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="values" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              A comma-separated list of outcome values this decision may have.
+              The name of each value must be of the same form as decision names (i.e.
+              only contain letters, digits and _ characters).
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
   
   <xs:complexType name="HSESTreatments">
     <xs:annotation>
       <xs:documentation>
-      A list of drug treatment tables. Each should have a name corresponding to
-      one of the "drug" decision's values.
+        A list of drug treatment tables. Each should have a name corresponding to
+        one of the "drug" decision's values.
       </xs:documentation>
     </xs:annotation>
     <xs:sequence>
@@ -1444,26 +1457,37 @@
   <xs:complexType name="HSESTreatment">
     <xs:annotation>
       <xs:documentation>
-      A drug treatment table.
+        A description of a base treatment schedule along with modifiers to handle
+        delays, quality variations, etc.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="schedule" type="HSESTreatmentSchedule"/>
+      <xs:element name="modifier" type="HSESTreatmentModifier" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name corresponding to one of the drug decision's output values.
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESTreatmentSchedule">
+    <xs:annotation>
+      <xs:documentation>
+        The base (unmodified) schedule of drugs administered for this treatment.
       </xs:documentation>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="drug" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-        Name corresponding to one of the drug decision's output values.
-        </xs:documentation>
-        <xs:appinfo>
-        units:string;
-        </xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   
   <xs:complexType name="medicate">
-    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:attribute name="drug" type="xs:string" use="required">
     <xs:annotation>
       <xs:documentation>
       Abbreviated name of drug compound
@@ -1473,23 +1497,154 @@
       </xs:appinfo>
     </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="qty" type="xs:double" use="required">
+    <xs:attribute name="mg" type="xs:double" use="required">
     <xs:annotation>
       <xs:documentation>Quantity of drug compound</xs:documentation>
       <xs:appinfo>units:mg;</xs:appinfo>
     </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="time" type="xs:double" use="required">
+    <xs:attribute name="hour" type="xs:double" use="required">
     <xs:annotation>
       <xs:documentation>
-        Number of hours past start of timestep the drug is medicated at (usually 0).
+        Number of hours past start of timestep this drug dose is administered
+        at (first dose should be at hour 0).
       </xs:documentation>
-      <xs:appinfo>
-      units:hours;min:0;
-      </xs:appinfo>
+      <xs:appinfo>units:hours;min:0;</xs:appinfo>
     </xs:annotation>
     </xs:attribute>
   </xs:complexType>  
+  
+  <xs:complexType name="HSESTreatmentModifier">
+    <xs:annotation>
+      <xs:documentation>
+        A modifier for this treatment, according to the outputs of a decision.
+        
+        The "decision" attribute must be the name of a known decision. Then, there must be a set of
+        multipyQty, delay or selectTimeRange sub-elements, each of which corresponds to one value
+        output of the decision.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="multiplyQty" type="HSESTMMultiplyQty" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="delay" type="HSESTMDelay" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="selectTimeRange" type="HSESTMSelectTimeRange" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:choice>
+    <xs:attribute name="decision" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specifies the decision that this modifier acts on.
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESTMMultiplyQty">
+    <xs:annotation>
+      <xs:documentation>
+        Multiplies the quantity of active ingredients of drugs administered.
+        
+        The "drugs" attribute is a comma-separated list of all active ingredients administered in
+        the base schedule (each must be listed once) and the content of this element is a comma-
+        separated list of multipliers for each active ingredient, listed in the same order as in
+        the "drugs" attribute. E.g. with drugs="A,B" and content "0.5,1" the quantity of drug A is
+        halved while that of B is unchanged.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="value" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies a value of the decision to act on.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="drugs" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Comma-separated list of all drugs this affects (to specify order).
+              See element documentation.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESTMDelay">
+    <xs:annotation>
+      <xs:documentation>
+        Delays administration of drugs listed in the base schedule by so many hours.
+        
+        The "drugs" attribute is a comma-separated list of all active ingredients administered in
+        the base schedule (each must be listed once) and the content of this element is a comma-
+        separated list of delays (in hours) for each active ingredient, listed in the same order as in
+        the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
+        in the base schedule while drug B is administered 6 hours later than specified.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="value" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies a value of the decision to act on.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="drugs" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Comma-separated list of all drugs this affects (to specify order).
+              See element documentation.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
+  <xs:complexType name="HSESTMSelectTimeRange">
+    <xs:annotation>
+      <xs:documentation>
+        Selects which drug doses to administer according to time of administration (before times
+        are modified by delays).
+        
+        The "drugs" attribute is a comma-separated list of all active ingredients administered in
+        the base schedule (each must be listed once) and the content of this element is a comma-
+        separated list of time-ranges (in hours) for each active ingredient, listed in the same
+        order as in the "drugs" attribute. The time-ranges should be of the form x-y and are
+        interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
+        administered if <![CDATA[x <= t < y]]>.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="value" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Specifies a value of the decision to act on.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="drugs" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Comma-separated list of all drugs this affects (to specify order).
+              See element documentation.
+            </xs:documentation>
+            <xs:appinfo>units:string;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
   
     <xs:complexType name="drugDescription">
       <xs:sequence>

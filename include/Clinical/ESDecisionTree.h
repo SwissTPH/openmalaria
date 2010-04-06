@@ -167,7 +167,7 @@ class ESDecisionTree {
 
 class ESDecisionRandom : public ESDecisionTree {
     public:
-	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::Decision& xmlDc);
+	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc);
 	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
 	
     private:

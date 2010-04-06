@@ -36,11 +36,12 @@ public:
     
     //TODO: test trees handle "void" output correctly
     
-    //TODO: test all decisions of ESDecisionTree.h
-    
-    //TODO: test treatments get matched from inputs
-    
-    //TODO: test treatment modifiers get applied and matched correctly: delay, qty multiplier, adherence
+    void testTreatments () {
+	//TODO: create a set of treatments from a base schedule and several different modifiers
+	
+	//TODO: test treatments get matched from inputs and yield expected schedules
+	//TODO: test treatment modifiers get applied and matched correctly: delay, qty multiplier, adherence
+    }
 };
 
 #endif
