@@ -86,6 +86,10 @@ public:
    * individual for the time-step. */
   bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
   
+  void addInfections(int numInf);
+
+  void addInfection();
+
   //FIXME: should be private?
   void updateInfection(Transmission::TransmissionModel*, double ageYears);
   

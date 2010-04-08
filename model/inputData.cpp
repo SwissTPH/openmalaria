@@ -97,6 +97,9 @@ void InputDataType::initTimedInterventions()
                 activeInterventions.set (Interventions::VEC_AVAIL, true);
             if (it->getLarviciding().present())
                 activeInterventions.set (Interventions::LARVICIDING, true);
+            if (it->getImportedInfectionsPerThousandHosts().present())
+            	activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
+
         }
     }
 }

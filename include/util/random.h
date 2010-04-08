@@ -18,6 +18,7 @@
  */
 
 #include "Global.h"
+#include <set>
 
 namespace OM { namespace util {
 
@@ -57,5 +58,15 @@ namespace random {
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda);
     //@}
+
+    /** This function returns (picksNbr) random picks for a given population
+     *
+     */
+    multiset<unsigned long int> randomPicks(int populationSize, long picksNbr);
+
+    /** This function returns 1 or 0 (Bernoulli distribution).
+     *
+     */
+    int bernoulli(double prob);
 }
 } }

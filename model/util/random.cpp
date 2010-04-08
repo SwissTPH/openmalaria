@@ -218,4 +218,28 @@ int random::poisson(double lambda){
     return gsl_ran_poisson (rng.gsl_generator, lambda);
 }
 
+multiset<unsigned long int> random::randomPicks(int populationSize, long picksNbr){
+
+	multiset<unsigned long int> chosenHumans;
+	long i = 0;
+
+	while(i<picksNbr)
+	{
+		unsigned long int  randomPick = gsl_rng_uniform_int (rng.gsl_generator, (unsigned long int) populationSize);
+		multiset<unsigned long int>::iterator iterator = chosenHumans.find(randomPick);
+
+		if(iterator==chosenHumans.end())
+		{
+			chosenHumans.insert(randomPick);
+			i++;
+		}
+	}
+	return chosenHumans;
+}
+
+int random::bernoulli(double prob)
+{
+	return gsl_ran_bernoulli(rng.gsl_generator,prob);
+}
+
 } }

@@ -274,6 +274,26 @@ void Population::implementIntervention (int time)
     if (interv->getLarviciding().present()) {
         _transmissionModel->intervLarviciding (interv->getLarviciding().get());
     }
+
+    if(interv->getImportedInfectionsPerThousandHosts().present()){
+    	importedInfections(interv->getImportedInfectionsPerThousandHosts().get());
+    }
+}
+
+void Population::importedInfections(double importedInfectionsPerThousandHosts)
+{
+	double prop = (double)populationSize/1000.0;
+	double importedInfectionsNbr = importedInfectionsPerThousandHosts * prop;
+	double importedInfectionsProb = importedInfectionsNbr/(double) populationSize;
+	int totalImportedInfections = 0;
+
+	if(importedInfectionsNbr>0)
+		for(HumanIter humanIterator = population.begin(); humanIterator!=population.end(); humanIterator++)
+			if(random::bernoulli(importedInfectionsProb)==1)
+			{
+				humanIterator->addInfection();
+				totalImportedInfections++;
+			}
 }
 
 void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ())

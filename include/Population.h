@@ -100,6 +100,17 @@ private:
      * within human which activates the intervention. */
     void massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ());
 
+
+    /** This function sets the imported infections in a population.
+     *  The probability of an host to import an infection is calculated
+     *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
+     *  is then used to predict if an human has imported the infection in the
+     *  population or not. An human can only import one infection between two
+     *  intervention times.
+     *
+     */
+    void importedInfections(double importedInfectionsPerThousandHosts);
+
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
 

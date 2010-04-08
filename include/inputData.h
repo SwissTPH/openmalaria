@@ -90,6 +90,7 @@ namespace Interventions {
     enum Flags {
 	CHANGE_HS,
 	CHANGE_EIR,
+	IMPORTED_INFECTIONS,
 	VACCINE,	// any vaccine
 	MDA,
 	IPTI,

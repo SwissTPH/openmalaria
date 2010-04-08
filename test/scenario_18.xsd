@@ -849,6 +849,7 @@
           <xs:appinfo>name:Change in EIR;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="importedInfectionsPerThousandHosts" type="xs:double">
       <xs:element minOccurs="0" name="MDA" type="mass">
         <xs:annotation>
           <xs:documentation>
