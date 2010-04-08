@@ -31,13 +31,14 @@
             <xs:appinfo>units:List of elements;name:Preventive interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="groupBounds" />
+        <xs:element name="healthSystem" type="healthSystem">
         <xs:annotation>
           <xs:documentation>
               Description of case management system
             </xs:documentation>
           <xs:appinfo>units:List of elements;name:Case Management system;</xs:appinfo>
         </xs:annotation>
+        </xs:element>
         <xs:element name="entoData" type="entoData">
           <xs:annotation>
             <xs:documentation>
@@ -194,8 +195,8 @@
 		Option value (true/false). Each option has a default value (may
 		be true or false) which is used if the option is not listed.
 	      </xs:documentation>
-            </xs:annotation>
             <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+           </xs:annotation>
           </xs:attribute>
         </xs:complexType>
       </xs:element>
@@ -484,12 +485,15 @@
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
-        <xs:element name="nonVector" type="nonVector" />
-        <xs:documentation>
-             Description of transmission setting for models without vector control interventions
-             (included for backward compatibility)
-           </xs:documentation>
-        <xs:appinfo>units:List of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
+        <xs:element name="nonVector" type="nonVector">
+          <xs:annotation>
+	    <xs:documentation>
+	             Description of transmission setting for models without vector control interventions
+	             (included for backward compatibility)
+	    </xs:documentation>
+	    <xs:appinfo>units:List of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
+	  </xs:annotation>
+	</xs:element>
         <xs:element name="vector">
           <xs:annotation>
             <xs:documentation>Parameters of the transmission model.</xs:documentation>
@@ -850,6 +854,11 @@
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="importedInfectionsPerThousandHosts" type="xs:double">
+      <xs:annotation>
+          <xs:documentation />
+          <xs:appinfo />
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="0" name="MDA" type="mass">
         <xs:annotation>
           <xs:documentation>
