@@ -1,0 +1,80 @@
+/* Stylesheet for demonstration of using Make and Markdown together */
+
+body {
+	margin: 0;
+	padding: 0;
+
+	font-family: "Bitstream Vera Serif", "Georgia", serif;
+	font-size: 100%;
+}
+
+code {
+	font-family: "Bitstream Vera Sans", "Trebuchet MS", sans-serif;
+	font-size: 1em;
+        background-color: #EEEEEE;
+}
+
+div#footer {
+	margin: 1.6em 0 0 0;
+
+	font-size: 0.5em;
+
+	background-color: #CC9;
+}
+
+div#header {
+	margin: 0.0em 0 0 0;
+	
+	font-size: 0.75em;
+
+        background-color: #E5E5CF;
+/*	border-bottom: 1px solid #69C; */
+}
+
+h1 {
+	margin: 0.6em 0.5em 1em 0.5em;
+
+	font-family: "Bitstream Vera Sans", "Trebuchet MS", sans-serif;
+	font-size: 2em;
+	font-weight: normal;
+	color: #F90;
+}
+
+h2 {
+	clear: both;
+	/*float: left;*/
+	margin: 0 0 0 1em;
+	/*width: 11em;*/
+	
+	font-family: "Bitstream Vera Sans", "Trebuchet MS", sans-serif;
+	font-size: 1em;
+	font-weight: bold;
+	color: #C63;
+}
+
+li {
+	margin: 0 1em 0.3em 2em;
+	max-width: 45em;
+}
+
+p {
+	margin: 0 1em 1.2em 1em;
+	max-width: 50em;
+}
+
+p#trail {
+	margin: 0 1.333em;
+
+	font-family: "Bitstream Vera Sans", "Trebuchet MS", sans-serif;
+}
+
+pre {
+	margin: 1.2em 1em 1.2em 2em;
+	max-width: 48em;
+        background-color: #EEEEEE;
+}
+
+ul {
+	margin: 0;
+	padding: 0;
+}
