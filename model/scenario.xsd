@@ -700,12 +700,15 @@
         <xs:annotation>
           <xs:documentation>
             Description of drug dose(s) used in a mass-drug-administration intervention.
+            
+            When using the new (Event Scheduler) case management model, a
+            treatment schedule must be present.
           </xs:documentation>
           <xs:appinfo>units:List of medicate elements;name:Drug dose(s) used in MDA;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="schedule" type="HSESTreatmentSchedule" minOccurs="0" />
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -1692,122 +1695,76 @@
       </xs:documentation>
     </xs:annotation>
     <xs:choice>
-      <xs:element name="multiplyQty" type="HSESTMMultiplyQty" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="delay" type="HSESTMDelay" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="selectTimeRange" type="HSESTMSelectTimeRange" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="multiplyQty" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Multiplies the quantity of active ingredients of drugs administered.
+            
+            The "drugs" attribute is a comma-separated list of all active ingredients administered in
+            the base schedule (each must be listed once) and the content of this element is a comma-
+            separated list of multipliers for each active ingredient, listed in the same order as in
+            the "drugs" attribute. E.g. with drugs="A,B" and content "0.5,1" the quantity of drug A is
+            halved while that of B is unchanged.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="delay" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Delays administration of drugs listed in the base schedule by so many hours.
+            
+            The "drugs" attribute is a comma-separated list of all active ingredients administered in
+            the base schedule (each must be listed once) and the content of this element is a comma-
+            separated list of delays (in hours) for each active ingredient, listed in the same order as in
+            the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
+            in the base schedule while drug B is administered 6 hours later than specified.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="selectTimeRange" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Selects which drug doses to administer according to time of administration (before times
+            are modified by delays).
+            
+            The "drugs" attribute is a comma-separated list of all active ingredients administered in
+            the base schedule (each must be listed once) and the content of this element is a comma-
+            separated list of time-ranges (in hours) for each active ingredient, listed in the same
+            order as in the "drugs" attribute. The time-ranges should be of the form x-y and are
+            interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
+            administered if <![CDATA[x <= t < y]]>.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:choice>
     <xs:attribute name="decision" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           Specifies the decision that this modifier acts on.
         </xs:documentation>
-        <xs:appinfo>units:string;name:Decision;</xs:appinfo>
+        <xs:appinfo>units:string;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="HSESTMMultiplyQty">
-    <xs:annotation>
-      <xs:documentation>
-        Multiplies the quantity of active ingredients of drugs administered.
-        
-        The "drugs" attribute is a comma-separated list of all active ingredients administered in
-        the base schedule (each must be listed once) and the content of this element is a comma-
-        separated list of multipliers for each active ingredient, listed in the same order as in
-        the "drugs" attribute. E.g. with drugs="A,B" and content "0.5,1" the quantity of drug A is
-        halved while that of B is unchanged.
-      </xs:documentation>
-    </xs:annotation>
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="value" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Specifies a value of the decision to act on.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="drugs" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Comma-separated list of all drugs this affects (to specify order).
-              See element documentation.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="HSESTMDelay">
-    <xs:annotation>
-      <xs:documentation>
-        Delays administration of drugs listed in the base schedule by so many hours.
-        
-        The "drugs" attribute is a comma-separated list of all active ingredients administered in
-        the base schedule (each must be listed once) and the content of this element is a comma-
-        separated list of delays (in hours) for each active ingredient, listed in the same order as in
-        the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
-        in the base schedule while drug B is administered 6 hours later than specified.
-      </xs:documentation>
-    </xs:annotation>
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="value" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Specifies a value of the decision to act on.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="drugs" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Comma-separated list of all drugs this affects (to specify order).
-              See element documentation.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="HSESTMSelectTimeRange">
-    <xs:annotation>
-      <xs:documentation>
-        Selects which drug doses to administer according to time of administration (before times
-        are modified by delays).
-        
-        The "drugs" attribute is a comma-separated list of all active ingredients administered in
-        the base schedule (each must be listed once) and the content of this element is a comma-
-        separated list of time-ranges (in hours) for each active ingredient, listed in the same
-        order as in the "drugs" attribute. The time-ranges should be of the form x-y and are
-        interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
-        administered if <![CDATA[x <= t < y]]>.
-      </xs:documentation>
-    </xs:annotation>
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="value" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Specifies a value of the decision to act on.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="drugs" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              Comma-separated list of all drugs this affects (to specify order).
-              See element documentation.
-            </xs:documentation>
-            <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:simpleContent>
+  
+  <xs:complexType name="HSESTreatmentModifierEffect">
+    <xs:attribute name="value" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specifies a value of the decision to act on.
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="effect" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Comma-separated list of effect for each drug, in the form
+          DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
+        </xs:documentation>
+        <xs:appinfo>units:string;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="drugDescription">
     <xs:sequence>

@@ -34,6 +34,7 @@ namespace OM { namespace Clinical {
 	values[0] = ESDecisionValue();	// "void" option
 	for( size_t i = 0; i < valueList.size(); ++i ) {
 	    values[i+1] = dvMap.get (decision, valueList[i]);
+	    //cout<<"added: "<<dvMap.format(values[i+1])<<endl;
 	}
     }
     
@@ -56,7 +57,7 @@ namespace OM { namespace Clinical {
     }
     ESDecisionValue ESDecisionUC2Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
 	assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
-	if (hostData.pgState & Pathogenesis::SECOND_CASE)	//TODO: check this actually gets set
+	if (hostData.pgState & Pathogenesis::SECOND_CASE)
 	    return values[2];	// UC2
 	else
 	    return values[1];	// UC1
@@ -216,7 +217,7 @@ ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& v
     //cout << "ESDecisionValueMap::get ("<<decision<<", "<<value<<"): "<<it2->second.id<<endl;
     return it2->second;
 }
-const pair< ESDecisionValue, ESDecisionValueMap::value_map_t > ESDecisionValueMap::getDecision (const string& decision) const {
+pair< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueMap::getDecision (const string& decision) const {
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end ())
 	throw invalid_argument ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
@@ -224,6 +225,10 @@ const pair< ESDecisionValue, ESDecisionValueMap::value_map_t > ESDecisionValueMa
 }
 
 void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) const {
+    if( v == ESDecisionValue() ) {
+	stream<<"(0)";
+	return;
+    }
     bool second = false;	// prepend second, third, etc., with ", "
     for( id_map_type::const_iterator dec_it = id_map.begin(); dec_it != id_map.end(); ++dec_it ) {
 	ESDecisionValue masked = v & dec_it->second.first;

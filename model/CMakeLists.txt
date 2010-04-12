@@ -28,6 +28,7 @@ set (Model_CPP
   Clinical/ImmediateOutcomes.cpp
   Clinical/OldCaseManagement.cpp
   Clinical/Episode.cpp
+  Clinical/parser.cpp
   
   Pathogenesis/PathogenesisModel.cpp
   Pathogenesis/Mueller.cpp

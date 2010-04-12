@@ -201,7 +201,7 @@ namespace CxxTest
 #           define ___TSM_CATCH(f,l,m) _TSM_LAST_CATCH(f,l,m)
 #       endif // _CXXTEST_HAVE_STD
 #       define __TSM_CATCH(f,l,m) \
-                _TS_CATCH_ABORT( { throw; } ) \
+                _TS_CATCH_ABORT( { /*don't rethrow, we don't abort*/ } ) \
                 ___TSM_CATCH(f,l,m)
 #       define __TS_CATCH(f,l) __TSM_CATCH(f,l,"Unhandled exception")
 #       define _TS_CATCH __TS_CATCH(__FILE__,__LINE__)
@@ -383,7 +383,7 @@ namespace CxxTest
             bool _ts_threw_expected = false, _ts_threw_else = false; \
             _TS_TRY { e; } \
             _TS_CATCH_TYPE( (t), { _ts_threw_expected = true; } ) \
-            _TS_CATCH_ABORT( { throw; } ) \
+            _TS_CATCH_ABORT( { /*don't rethrow, we don't abort*/ } ) \
             _TS_LAST_CATCH( { _ts_threw_else = true; } ) \
             if ( !_ts_threw_expected ) { CxxTest::doFailAssertThrows( (f), (l), #e, #t, _ts_threw_else, (m) ); } }
 
@@ -398,7 +398,7 @@ namespace CxxTest
             bool _ts_threw_expected = false, _ts_threw_else = false; \
             _TS_TRY { e; } \
             _TS_CATCH_TYPE( (t), { a; _ts_threw_expected = true; } ) \
-            _TS_CATCH_ABORT( { throw; } ) \
+            _TS_CATCH_ABORT( { /*don't rethrow, we don't abort*/ } ) \
             _TS_LAST_CATCH( { _ts_threw_else = true; } ) \
             if ( !_ts_threw_expected ) { CxxTest::doFailAssertThrows( (f), (l), #e, #t, _ts_threw_else, (m) ); } }
 
@@ -456,7 +456,7 @@ namespace CxxTest
     // TS_ASSERT_THROWS_NOTHING
 #   define ___TS_ASSERT_THROWS_NOTHING(f,l,e,m) { \
             _TS_TRY { e; } \
-            _TS_CATCH_ABORT( { throw; } ) \
+            _TS_CATCH_ABORT( { /*don't rethrow, we don't abort*/ } ) \
             _TS_CATCH_TYPE( (std::exception& exc), { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (exc.what()) ); } ) \
             _TS_LAST_CATCH( { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (m) ); } ) }
 

@@ -21,87 +21,17 @@
 // This is a small file to separate out ESDecisionRandom's parsers.
 
 #include "Clinical/ESDecisionTree.h"
+#include "Clinical/parser.h"
 #include "util/errors.hpp"
 
 #include <string>
 #include <sstream>
-#include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/qi.hpp>
-#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 
 using namespace OM::util;
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
 
 namespace OM { namespace Clinical {
-    /** We use boost::spirit (2.1) for parsing here. A warning: debugging this
-     * code when it won't compile is nearly impossible, so be very careful when
-     * making changes!
-     *************************************************************************/
-    namespace parser {
-	typedef std::vector<string> SymbolList;
-	
-	template <typename Iterator>
-	struct list_grammar : qi::grammar<Iterator, SymbolList(), ascii::space_type> {
-	    list_grammar() : list_grammar::base_type(list) {
-		using qi::alnum;
-		using qi::lexeme;
-		
-		symbol %= lexeme[ +( alnum | '.' | '_' ) ];
-		list %= symbol % ',';
-	    }
-	    
-	    qi::rule<Iterator, string(), ascii::space_type> symbol;
-	    qi::rule<Iterator, SymbolList(), ascii::space_type> list;
-	};
-	
-	class Branch;
-	typedef std::vector<Branch> Branches;
-	typedef boost::variant< boost::recursive_wrapper< Branches >, string > Outcome;
-	struct Branch {
-	    string decision;
-	    string dec_value;
-	    Outcome outcome;
-	};
-    }
-} }
-
-// We need to tell fusion about our Branch struct to make it a first-class
-// fusion citizen. This has to be in global scope.
-BOOST_FUSION_ADAPT_STRUCT(
-    OM::Clinical::parser::Branch,
-    (std::string, decision)
-    (std::string, dec_value)
-    (OM::Clinical::parser::Outcome, outcome)
-)
-
-namespace OM { namespace Clinical {
-    namespace parser {
-	template <typename Iterator>
-	struct DR_grammar : qi::grammar<Iterator, Outcome(), ascii::space_type>
-	{
-	    DR_grammar() : DR_grammar::base_type(tree)
-	    {
-		using qi::alnum;
-		using qi::lexeme;
-		
-		symbol %= lexeme[ +( alnum | '.' | '_' ) ] ;
-		tree %= branches | symbol ;
-		outcome %= ('{' > branches > '}') | (':' > symbol) ;
-		branch %= symbol >> '(' > symbol > ')' > outcome ;
-		branches %= +branch ;
-	    }
-	    
-	    qi::rule<Iterator, string(), ascii::space_type> symbol;
-	    qi::rule<Iterator, Outcome(), ascii::space_type> tree;
-	    qi::rule<Iterator, Outcome(), ascii::space_type> outcome;
-	    qi::rule<Iterator, Branch(), ascii::space_type> branch;
-	    qi::rule<Iterator, Branches(), ascii::space_type> branches;
-	};
-    }
-    
     struct DR_processor {
 	DR_processor (const string& n, ESDecisionValueMap& dvm, ESDecisionRandom& d) : name(n), dvMap(dvm), dR(d) {}
 	void process (const parser::Outcome& outcome) {
@@ -175,6 +105,7 @@ namespace OM { namespace Clinical {
 		}
 		
 		// find/make an entry for dependent decisions:
+		//NOTE: valgrind complains about a memory leak _here_.. why?
 		vector<double>& outcomes_cum_p = dR.map_cum_p[ dependValues ];
 		/* print cum-prob-array (part 1):
 		if( outcomes_cum_p.empty() ) cout << "new ";
@@ -214,74 +145,23 @@ namespace OM { namespace Clinical {
     
     ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc) {
 	decision = xmlDc.getName();
+	string decErrStr = "decision "+decision;
 	
-	typedef string::iterator iter_t;
-	typedef parser::list_grammar<iter_t> list_grammar;
-	list_grammar list_rule;
+	depends = parser::parseSymbolList( xmlDc.getDepends(), decision+" depends attribute" );
 	
-	
-	// Read depends:
-	string s = xmlDc.getDepends();
-	iter_t first = s.begin(); // we need a copy of the iterator, not a temporary
-	
-	// Parse s into depends; note that the "attribute type" of the
-	// expression must match the type of depends (a vector<string>):
-	qi::phrase_parse(first, s.end(),
-			    list_rule,
-			    ascii::space,
-			    depends);
-	if (first != s.end ()) {
-	    ostringstream msg;
-	    msg << "ESDecision: failed to parse dependencies; remainder: " << string(first,s.end());
-	    throw xml_scenario_error (msg.str());
-	}
-	
-	
-	// Read values:
-	vector<string> valueList;
-	s = xmlDc.getValues();
-	first = s.begin();
-	
-	// Same as above, for valueList:
-	qi::phrase_parse(first, s.end(),
-			    list_rule,
-			    ascii::space,
-			    valueList);
-	if (first != s.end ()) {
-	    ostringstream msg;
-	    msg << "ESDecision: failed to parse values; remainder: " << string(first,s.end());
-	    throw xml_scenario_error (msg.str());
-	}
-	
+	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
 	// Calling a base-class function in the constructor, but it's not virtual so isn't an issue:
 	setValues (dvMap, valueList);
 	
-	
-	// Read tree:
-	typedef parser::DR_grammar<iter_t> DR_grammar;
-	DR_grammar tree_rule;
-	parser::Outcome tree;
-	
+	// Get content of this element:
 	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
 	if (content_p == NULL)
 	    throw runtime_error ("ESDecision: bad upcast?!");
-	s = *content_p;
-	//cout << "Got content: "<<s<<endl;
-	first = s.begin();
-	
-	// For now, we ignore output and just test it wil pass the tree
-	qi::phrase_parse(first, s.end(),
-			    tree_rule,
-			    ascii::space,
-			    tree);
-	if (first != s.end ()) {
-	    ostringstream msg;
-	    msg << "ESDecision: failed to parse tree; remainder: " << string(first,s.end());
-	    throw xml_scenario_error (msg.str());
-	}
 	
 	DR_processor processor (decision, dvMap, *this);
-	processor.process (tree);
+	// 2-stage parse: first produces a parser::Outcome object, second the
+	// processor object does the work of converting into map_cum_p:
+	processor.process( parser::parseTree( *content_p, decision ) );
     }
     
 } }

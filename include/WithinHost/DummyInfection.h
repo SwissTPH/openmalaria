@@ -36,6 +36,8 @@ public:
     DummyInfection (istream& stream);
     //! Constructor
     DummyInfection (uint32_t protID);
+    
+    virtual ~DummyInfection () {}
   
   static void initParameters ();
   

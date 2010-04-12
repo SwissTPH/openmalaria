@@ -72,14 +72,19 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
+        <!-- An example to show decisions, and how they select and modify a treatment schedule. -->
         <decisions>
           <decision name="test" depends="" values="none,microscopy,RDT">
             p(.1): none
             p(.4): microscopy
             p(.5): RDT
           </decision>
-          <decision name="treatment" depends="" values="MF_dose">
-            MF_dose
+          <decision name="treatment" depends="" values="MF_treat">
+            MF_treat
+          </decision>
+          <decision name="adherence" depends="" values="full,missFirstDose">
+            p(.7): full
+            p(.3): missFirstDose
           </decision>
           <decision name="delay" depends="" values="0,1,2">
             p(.6): 0
@@ -88,20 +93,24 @@
           </decision>
         </decisions>
         <treatments>
-          <treatment name="MF_dose">
+          <treatment name="MF_treat">
             <schedule>
               <medicate drug="MF" mg="3000" hour="0"/>
               <medicate drug="MF" mg="3000" hour="12"/>
             </schedule>
             <modifier decision="test">
-              <multiplyQty value="none" drugs="MF">0.5</multiplyQty>
-              <multiplyQty value="microscopy" drugs="MF">1.0</multiplyQty>
-              <multiplyQty value="RDT" drugs="MF">1.0</multiplyQty>
+              <multiplyQty value="none" effect="MF(0.5)" />
+              <multiplyQty value="microscopy" effect="MF(1.0)" />
+              <multiplyQty value="RDT" effect="MF(1.0)"/>
+            </modifier>
+            <modifier decision="adherence">
+              <selectTimeRange value="full" effect="MF(0-13)"/>
+              <selectTimeRange value="missFirstDose" effect="MF(1-13)"/>
             </modifier>
             <modifier decision="delay">
-              <delay value="0" drugs="MF">0</delay>
-              <delay value="1" drugs="MF">24</delay>
-              <delay value="2" drugs="MF">48</delay>
+              <delay value="0" effect="MF(0)"/>
+              <delay value="1" effect="MF(24)"/>
+              <delay value="2" effect="MF(48)"/>
             </modifier>
           </treatment>
         </treatments>

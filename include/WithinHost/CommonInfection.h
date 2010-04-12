@@ -37,6 +37,7 @@ public:
     CommonInfection(uint32_t protID) :
 	Infection(protID)
     {}
+    virtual ~CommonInfection() {}
     //@}
     
     //! Get the density of the infection

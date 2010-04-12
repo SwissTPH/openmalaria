@@ -46,7 +46,7 @@ public:
    * 
    * Note: this destructor does nothing in order to allow shallow copying to
    * the population list. */
-  ~EmpiricalInfection() {}
+  virtual ~EmpiricalInfection() {}
   //@}
   
   /// Set patent growth rate multiplier.

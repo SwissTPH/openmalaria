@@ -30,13 +30,14 @@ else (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
 endif (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
 
 option (OM_CXXTEST_GUI "Draw a graphical progress bar" OFF)
-set (OM_CXXTEST_GUI_ARG "")
+# We want abort-on-fail for safety checks (like bad memory accesses) to work
+set (OM_CXXTEST_OPTIONS "--have-std --have-eh --abort-on-fail")
 if (OM_CXXTEST_GUI)
   # also supports QT, but that has more dependencies.
   if (WIN32)
-    set (OM_CXXTEST_GUI_ARG "--gui=Win32Gui")
+    set (OM_CXXTEST_OPTIONS "${OM_CXXTEST_OPTIONS} --gui=Win32Gui")
   elseif (UNIX)
-    set (OM_CXXTEST_GUI_ARG "--gui=X11Gui")
+    set (OM_CXXTEST_OPTIONS "${OM_CXXTEST_OPTIONS} --gui=X11Gui")
     find_library (OM_CXXTEST_GUI_LIB X11)
     if (NOT OM_CXXTEST_GUI_LIB)
       message (SEND_ERROR "Requested use of a gui, but can't find X11 library${OM_CXXTEST_GUI_LIB}!")
@@ -80,7 +81,7 @@ set (OM_CXXTEST_HEADERS
 
 if (OM_CXXTEST_INTERPRETER)
   add_custom_command (OUTPUT tests.cpp
-    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_GUI_ARG} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
+    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp
       ${OM_CXXTEST_HEADERS}
     DEPENDS ${OM_CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
@@ -118,6 +119,6 @@ set_tests_properties (unittest
   PROPERTIES PASS_REGULAR_EXPRESSION "^Running [0-9]+ tests.*OK![ \r\n]*$")
 
 mark_as_advanced (
-  OM_CXXTEST_GUI_ARG
+  OM_CXXTEST_OPTIONS
   OM_CXXTEST_GUI_LIB
 )

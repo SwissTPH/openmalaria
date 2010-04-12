@@ -46,11 +46,15 @@ struct ESDecisionValue {
     inline ESDecisionValue operator& (const ESDecisionValue that) const {
 	return ESDecisionValue(id & that.id);
     }
-    inline ESDecisionValue operator| (const ESDecisionValue that) {
+    inline ESDecisionValue operator| (const ESDecisionValue that) const {
 	return ESDecisionValue( id | that.id );
     }
     inline void operator|= (const ESDecisionValue that) {
 	id |= that.id;
+    }
+    // all use in a map:
+    inline bool operator< (const ESDecisionValue that) const {
+	return id < that.id;
     }
     private:
 	typedef uint64_t id_type;
@@ -93,7 +97,7 @@ struct ESDecisionValueMap {
      * second: a map of value names to ESDecisionValue objects
      *
      * @throws invalid_argument when decision is not found */
-    const pair< ESDecisionValue, value_map_t > getDecision (const string& decision) const;
+    pair< ESDecisionValue, const value_map_t& > getDecision (const string& decision) const;
     
     class ValueFormatter {
 	const ESDecisionValueMap& parent;
@@ -174,7 +178,7 @@ class ESDecisionRandom : public ESDecisionTree {
 	// A map from depended decision values (represented as an or-d list of one
 	// value (or 0) from each dependency) to a list of cumulative probabilities.
 	// Indecies in this list map to the same index in values; last entry must be 1.0.
-	//NOTE: be interesting to compare performance with std::map
+	//NOTE: be interesting to compare performance between boost::unordered_map and std::map
 	typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
 	map_cum_p_t map_cum_p;
 	friend struct DR_processor;
