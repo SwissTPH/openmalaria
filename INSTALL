@@ -1,9 +1,0 @@
-For build instructions, further documentation, etc:
-http://code.google.com/p/openmalaria/w/list
-
-In short:
-mkdir build && cd build
-ccmake ..
-Press 'c', look over options, press 'c' again and 'g'
-make
-make test
