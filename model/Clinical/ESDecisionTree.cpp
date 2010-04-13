@@ -29,7 +29,7 @@ namespace OM { namespace Clinical {
     using namespace OM::util;
     
     void ESDecisionTree::setValues (ESDecisionValueMap& dvMap, const vector< string >& valueList) {
-	mask = dvMap.add_decision_values (decision, valueList);
+	dvMap.add_decision_values (decision, valueList);
 	values.resize (valueList.size()+1);
 	values[0] = ESDecisionValue();	// "void" option
 	for( size_t i = 0; i < valueList.size(); ++i ) {
@@ -40,8 +40,16 @@ namespace OM { namespace Clinical {
     
     ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
-	if (it == map_cum_p.end())	// should only happen when "void" was specified as an output
+	if (it == map_cum_p.end()){	// should only happen when "void" was specified as an output
+	    if( input != ESDecisionValue() ){
+		cerr<<"ESDecisionRandom::determine: input="<<dvMap.format( input )<<"; known values:\n";
+		for( it = map_cum_p.begin(); it != map_cum_p.end(); ++it )
+		    cerr<<" — "<<dvMap.format( it->first );
+		cerr<<endl;
+	    }
+	    assert( input == ESDecisionValue() );
 	    return ESDecisionValue();	// no decision
+	}
 	double sample = random::uniform_01 ();
 	size_t i = 0;
 	while (it->second[i] < sample)
@@ -80,12 +88,14 @@ namespace OM { namespace Clinical {
 	decision = "result";
 	
 	string vs[] = { "none", "microscopy", "RDT" };
-	// Add values, which (1) lets us create test_none, etc., and (2) introduces a
-	// check when the "test" decision is added later.
-	dvMap.add_decision_values ("test", vector<string>(vs, vs+3));
+	// Add values, which (1) lets us create test_none, etc., (2) introduces a
+	// check when the "test" decision is added later on output values, and
+	// (3) allows us to set mask.
+	mask = dvMap.add_decision_values ("test", vector<string>(vs, vs+3));
 	test_none = dvMap.get("test","none");
 	test_microscopy = dvMap.get("test", "microscopy");
 	test_RDT = dvMap.get("test","RDT");
+	
 	depends.resize (1, "test");	// Note: we check in add_decision_values() that this test has the outcomes we expect
 	
 	vector< string > valueList (2, "negative");
@@ -244,6 +254,22 @@ void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) cons
 	    }
 	    assert( false );	// v matched mask but no value: this shouldn't happen!
 	    foundValue:;
+	}
+    }
+}
+
+ESDecisionValueSet::ESDecisionValueSet (const ESDecisionValueMap::value_map_t valMap) {
+    for( ESDecisionValueMap::value_map_t::const_iterator it = valMap.begin(); it != valMap.end(); ++it )
+	values.push_back( it->second );
+}
+
+void ESDecisionValueSet::operator|= (const ESDecisionValueSet& that) {
+    list<ESDecisionValue> old;
+    old.swap( values );
+    
+    BOOST_FOREACH( ESDecisionValue v1, old ){
+	BOOST_FOREACH( ESDecisionValue v2, that.values ){
+	    values.push_back( v1 | v2 );
 	}
     }
 }

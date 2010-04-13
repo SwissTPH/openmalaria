@@ -222,6 +222,8 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
 }
 void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
     // Assemble a list of all tests we need to add
+    // TODO: could remove tests we don't need (check dependencies of other
+    // decisions and of treatment modifiers) (optimization).
     list<ESDecisionTree*> toAdd;
     toAdd.push_back (new ESDecisionAge5Test (dvMap));
     if (!complicated) {
@@ -314,8 +316,14 @@ ESTreatmentSchedule* ESDecisionMap::getSchedule (ESDecisionValue outcome) const 
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )
 	    return ret;
-	else
-	    throw logic_error("ESDecisionMap: null treatment (code error)!");
+	else {
+	    ostringstream msg;
+	    msg
+		<<"a required modifier decision has void output; existing decisions: "
+		<<dvMap.format( masked | outcome )	// masked contains treatment, outcome contains modifier decisions
+	    ;
+	    throw logic_error( msg.str() );
+	}
 	masked = masked & outcome;
     }
     

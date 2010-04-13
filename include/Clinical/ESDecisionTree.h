@@ -43,6 +43,9 @@ struct ESDecisionValue {
     inline bool operator== (const ESDecisionValue that) const {
 	return id == that.id;
     }
+    inline bool operator!= (const ESDecisionValue that) const {
+	return id != that.id;
+    }
     inline ESDecisionValue operator& (const ESDecisionValue that) const {
 	return ESDecisionValue(id & that.id);
     }
@@ -137,6 +140,24 @@ inline ostream& operator<<( ostream& stream, const ESDecisionValueMap::ValueForm
     return stream;
 }
 
+/** Encapsulates a set of ESDecisionValues, allowing piecewise operators on the
+ * set. */
+struct ESDecisionValueSet {
+    /// Construct with just one value: [ val ]
+    inline ESDecisionValueSet (ESDecisionValue val) {
+	values.push_back( val );
+    }
+    
+    /// Construct from all values of a value_map_t map
+    ESDecisionValueSet (const ESDecisionValueMap::value_map_t valMap);
+    
+    /// This set becomes the set of all elements x | y such that x is in this
+    /// and y is in that.
+    void operator|= (const ESDecisionValueSet& that);
+    
+    list<ESDecisionValue> values;
+};
+
 struct ESHostData {
     ESHostData (double aY, WithinHostModel& wH, Pathogenesis::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
@@ -154,18 +175,19 @@ struct ESHostData {
  *****************************************************************************/
 class ESDecisionTree {
     public:
-        /// Run decision tree, with input filtered by mask.
+        /** Run decision tree. Input must be filtered by mask (i.e. call as
+	 * d.determine( input & d.mask, hostData ); ). */
         virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const =0;
         
 	// Note: for some cases we could use ESDecisionName instead of string
 	// (for speed), but error messages would be bad. Only slows set-up.
 	string decision;	// name of decision
         vector<string> depends;      // other decisions this depends upon
-        ESDecisionValue mask;      // mask covering all outputs
+        ESDecisionValue mask;      // mask covering all dependencies' values
         vector<ESDecisionValue> values;    // ids associated with each possible output
         
     protected:
-	// Sets mask and values, given the decision's name and a set of values
+	// Sets values, given the decision's name and a set of values
 	void setValues (ESDecisionValueMap& dvMap, const std::vector< string >& valueList);
 };
 
@@ -181,6 +203,10 @@ class ESDecisionRandom : public ESDecisionTree {
 	//NOTE: be interesting to compare performance between boost::unordered_map and std::map
 	typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
 	map_cum_p_t map_cum_p;
+	
+	// For bug-tracking:
+	const ESDecisionValueMap& dvMap;
+	
 	friend struct DR_processor;
 };
 

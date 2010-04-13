@@ -33,6 +33,7 @@
 #include <boost/unordered_map.hpp>
 
 class ESCaseManagementSuite;
+class ESDecisionTreeSuite;
 
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
@@ -145,7 +146,8 @@ class ESDecisionMap {
 	// Used to mask ESDecisionValues before lookup in treatments:
 	ESDecisionValue treatmentsMask;
 	
-	friend class ::ESCaseManagementSuite;	// unittest
+	friend class ::ESCaseManagementSuite;	// unittests
+	friend class ::ESDecisionTreeSuite;
 };
 
 
