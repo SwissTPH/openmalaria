@@ -20,25 +20,21 @@
             <xs:documentation>
               Description of surveys
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Variables to be reported;</xs:appinfo>
+            <xs:appinfo>units:List of elements;name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="interventions" type="interventions">
           <xs:annotation>
             <xs:documentation>
-              List of interventions
+              List of interventions. Generally these are either point-time
+              distributions of something to some subset of the population, or
+              continuous-time distribution targetting individuals when they
+              reach a certain age.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Preventive interventions;</xs:appinfo>
+            <xs:appinfo>units:List of elements;name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="healthSystem">
-        <xs:annotation>
-          <xs:documentation>
-              Description of case management system
-            </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Case Management system;</xs:appinfo>
-        </xs:annotation>
-        </xs:element>
+        <xs:element name="healthSystem" type="healthSystem"/>
         <xs:element name="entoData" type="entoData">
           <xs:annotation>
             <xs:documentation>
@@ -203,10 +199,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="parameters">
-    <xs:annotation>
-      <xs:documentation>Parameter vector</xs:documentation>
-      <xs:appinfo>units:List of elements;name:List of model parameters;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="parameter" type="parameter" />
     </xs:sequence>
@@ -242,19 +234,13 @@
   <xs:complexType name="inputValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>
-        <xs:documentation>TODO</xs:documentation>
+        <xs:documentation>A double-precision floating-point value.</xs:documentation>
         <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <!---HumanPopulationStructure-->
   <xs:complexType name="demography">
-    <xs:annotation>
-      <xs:documentation>
-        Description of demography
-      </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Age distribution of population;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element name="ageGroup" type="ageGroupPerC">
         <xs:annotation>
@@ -477,19 +463,13 @@
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="entoData">
-    <xs:annotation>
-      <xs:documentation>
-        Data for entomological model
-      </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Models of action of vector control;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:choice>
         <xs:element name="nonVector" type="nonVector">
           <xs:annotation>
 	    <xs:documentation>
-	             Description of transmission setting for models without vector control interventions
-	             (included for backward compatibility)
+              Description of transmission setting for models without vector control interventions
+              (included for backward compatibility)
 	    </xs:documentation>
 	    <xs:appinfo>units:List of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
 	  </xs:annotation>
@@ -541,10 +521,6 @@
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="nonVector">
-    <xs:annotation>
-      <xs:documentation>Parameters for the non-vector transmission model.</xs:documentation>
-      <xs:appinfo>units:Code;name:Parameters of the transmission model;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily" />
     </xs:sequence>
@@ -557,10 +533,6 @@
   </xs:complexType>
   <!--Monitoring-->
   <xs:complexType name="monitoring">
-    <xs:annotation>
-      <xs:documentation>Description of surveys</xs:documentation>
-      <xs:appinfo>units:List of elements;name:Measures to be monitored;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element name="SurveyOptions" type="OptionSet">
         <xs:annotation>
@@ -691,10 +663,6 @@
   </xs:complexType>
   <!--Interventions-->
   <xs:complexType name="interventions">
-    <xs:annotation>
-      <xs:documentation>List of interventions</xs:documentation>
-      <xs:appinfo>units:List of elements;name:List of interventions;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="1" minOccurs="0" name="MDADescription">
         <xs:annotation>
@@ -844,17 +812,15 @@
   </xs:complexType>
   <xs:complexType name="intervention">
     <xs:sequence>
-      <xs:element minOccurs="0" name="changeHS" type="healthSystem">
-        <xs:annotation>
-          <xs:documentation />
-          <xs:appinfo>name:Change in case management regimen;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="0" name="changeHS" type="healthSystem"/>
       <xs:element minOccurs="0" name="changeEIR" type="nonVector">
-        <xs:annotation>
-          <xs:documentation />
-          <xs:appinfo>name:Change in EIR;</xs:appinfo>
-        </xs:annotation>
+          <xs:annotation>
+            <xs:documentation>
+              New description of transmission setting for models without vector control interventions
+              (included for backward compatibility)
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Replacement transmission setting (vector control not enabled);</xs:appinfo>
+          </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="importedInfectionsPerThousandHosts" type="xs:double">
       <xs:annotation>
@@ -1188,8 +1154,9 @@
   <xs:complexType name="healthSystem">
     <xs:annotation>
       <xs:documentation>
-        Generic description of health system, used to specify the default or a
-        replacement-as-intervention.
+        Description of case management system, used to specify the initial model
+        or a replacement (an intervention). Encompasses case management
+        data and some other data required to derive case outcomes.
         
         Contains a sub-element describing the particular health-system in use.
         Health system data is here defined as data used to decide on a treatment
@@ -1323,8 +1290,8 @@
       <xs:element name="pSequelaeInpatient" type="byAgeItems">
         <xs:annotation>
           <xs:documentation>
-            List of age specific probabilities of sequelae
-            in inpatients.
+            List of age specific probabilities of sequelae in inpatients.
+            
             Note: previously these ranges were silently remapped. To prevent
             unexpected differences, there *must* be two groups, with maxAgeYrs
             bounds 5 and 99 respectively.
@@ -1446,72 +1413,7 @@
     <xs:sequence>
       <xs:element name="uncomplicated" type="HSESCaseManagement" />
       <xs:element name="complicated" type="HSESCaseManagement" />
-      <xs:element name="ClinicalOutcomes">
-        <xs:annotation>
-          <xs:documentation>
-			Tables describing the probability of death and the expected length of hospital stay.
-			The ID looked up in each table is the final outcome ID of the case-management tree binary or-ed
-			with the mask given here.
-		    </xs:documentation>
-          <xs:appinfo>name:Clinical Outcomes;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="outcomes" minOccurs="1" maxOccurs="unbounded">
-              <xs:annotation>
-                <xs:documentation>
-				    Parameters for a path through the case-management tree (i.e. table row).
-				</xs:documentation>
-                <xs:appinfo>name:Path;</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <xs:attribute name="ID" type="xs:int" use="required" />
-                <xs:attribute name="pDeath" type="xs:double" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-					    The probability of death.
-					    This probability is applied once-only for each case, irrespective of the branch (thus
-					    entries with p=0 for UC cases are probably needed).
-					</xs:documentation>
-                    <xs:appinfo>units:None;min:0;max:1;name:Probability of dying;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="hospitalizationDaysDeath" type="xs:int" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-					    The median length of stay in hospital, given the patient dies directly from this event.
-					    (Use median rather than a distribution because data should be more reliable and the effect
-					    of heterogeneity should be small.)
-					</xs:documentation>
-                    <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in fatal cases;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="hospitalizationDaysRecover" type="xs:int" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-					    The median length of stay in hospital, given the patient recovers from this event.
-					    (Use median rather than a distribution because data should be more reliable and the effect
-					    of heterogeneity should be small.)
-					</xs:documentation>
-                    <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in survivors;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="severeMask" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-			    Value used to mask the final ID from the case-management tree before looking up values here.
-			</xs:documentation>
-              <xs:appinfo>
-			    units:None;min:0;max:0xFFFFFFFF;
-			</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
+      <xs:element name="ClinicalOutcomes" type="ClinicalOutcomes" />
   </xs:complexType>
   <xs:complexType name="HSESCaseManagement">
     <xs:annotation>
@@ -1521,9 +1423,8 @@
       <xs:appinfo>units:List of elements;name:Set of decisions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="decisions" type="HSESDecisions">
-      </xs:element>
-      <xs:element name="treatments" type="HSESTreatments" />
+      <xs:element name="decisions" type="HSESDecisions"/>
+      <xs:element name="treatments" type="HSESTreatments"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESDecisions">
@@ -1536,14 +1437,21 @@
         In general, each decision has a name, a defined set of outcome values, and a set of
         dependent decisions mentioned by name. The following decisions, with their associated
         outcomes, are provided by the code (and may not be included here):
-        * "age5Test": "under5", "over5"
-        * (UC only): "case": "UC1", "UC2"
-        * (UC only): "result": "positive", "negative"; this depends on decision "tested"
+        
+        * age5Test: tests the patient's age and returns "under5" or "over5".
+        * case (uncomplicated only): Returns "UC1" if there is no recent history
+          of a malarial case, or "UC2" if there is.
+        * result (uncomplicated only): Dependent on decision "test", this
+          performs a parasite density test. Output is one of "none" (no test
+          performed), "positive", "negative".
         
         The following decisions must be described here:
-        * (UC only): "tested": "none", "microscopy", "RDT"
-        * "treatment": values aren't restricted but must match up with a treatment described
-          in the corresponding "treatments" section, or be "void" (no treatment).
+        
+        * test (uncomplicated only): Outputs must be "none", "microscopy" or
+          "RDT" to describe which test the "result" decision uses.
+        * treatment: Describes which treatment to use. Values aren't restricted
+          but must match up with a treatment described in the corresponding
+          "treatments" section.
       </xs:documentation>
       <xs:appinfo>name:Description of decisions;</xs:appinfo>
     </xs:annotation>
@@ -1753,7 +1661,7 @@
         <xs:documentation>
           Specifies a value of the decision to act on.
         </xs:documentation>
-        <xs:appinfo>units:string;</xs:appinfo>
+            <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="effect" type="xs:string" use="required">
@@ -1762,10 +1670,75 @@
           Comma-separated list of effect for each drug, in the form
           DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
         </xs:documentation>
-        <xs:appinfo>units:string;</xs:appinfo>
+            <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  
+  <xs:complexType name="ClinicalOutcomes">
+    <xs:annotation>
+      <xs:documentation>
+                    Tables describing the probability of death and the expected length of hospital stay.
+                    The ID looked up in each table is the final outcome ID of the case-management tree binary or-ed
+                    with the mask given here.
+                </xs:documentation>
+      <xs:appinfo>name:Clinical Outcomes;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="outcomes" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+                              Parameters for a path through the case-management tree (i.e. table row).
+                          </xs:documentation>
+          <xs:appinfo>name:Path;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="ID" type="xs:int" use="required" />
+          <xs:attribute name="pDeath" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                                      The probability of death.
+                                      This probability is applied once-only for each case, irrespective of the branch (thus
+                                      entries with p=0 for UC cases are probably needed).
+                                  </xs:documentation>
+              <xs:appinfo>units:None;min:0;max:1;name:Probability of dying;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="hospitalizationDaysDeath" type="xs:int" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                                      The median length of stay in hospital, given the patient dies directly from this event.
+                                      (Use median rather than a distribution because data should be more reliable and the effect
+                                      of heterogeneity should be small.)
+                                  </xs:documentation>
+              <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in fatal cases;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="hospitalizationDaysRecover" type="xs:int" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                                      The median length of stay in hospital, given the patient recovers from this event.
+                                      (Use median rather than a distribution because data should be more reliable and the effect
+                                      of heterogeneity should be small.)
+                                  </xs:documentation>
+              <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in survivors;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="severeMask" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+                      Value used to mask the final ID from the case-management tree before looking up values here.
+                  </xs:documentation>
+        <xs:appinfo>
+                      units:None;min:0;max:0xFFFFFFFF;
+                  </xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
   <xs:complexType name="drugDescription">
     <xs:sequence>
       <xs:element name="drug" maxOccurs="unbounded">
