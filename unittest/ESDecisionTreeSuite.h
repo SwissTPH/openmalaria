@@ -58,39 +58,40 @@ public:
     
     void testESDecisionValue () {
 	vector<string> vals;
-	vals += "1","2";
+	vals += "1", "2", "3";
 	dvMap->add_decision_values( "a", vals );
 	
 	// Assert getting unknown values/decisions fails:
 	TS_ASSERT_THROWS_EQUALS( dvMap->get( "b", "1" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no decision b" );
 	TS_ASSERT_THROWS_EQUALS( dvMap->get( "a", "4" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no value a(4)" );
 	
-	// check we can re-add the same decision:
+	// check we can re-add the same decision, even when values are reordered:
+	vals[0] = "3";
+	vals[2] = "1";
 	TS_ASSERT_THROWS_NOTHING( dvMap->add_decision_values( "a", vals ) );
 	// but not if it's different:
 	vals[1] = "5";
 	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; expected value: 2" );
-	vals.resize(4,"2");
-	vals[3]="6";	// now "1","5","2","6"
+	vals += "2", "6";	// now "3", "5", "1", "2", "6"
 	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; unexpected values: 5 6" );
 	
-	// check we can't use void:
-	vals.resize(1);
-	vals[0] = "void";
-	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "v", vals ), const std::runtime_error &e, string(e.what()), "void can not be a declared output of a decision" );
-	
-	vals.resize(2,"9");
-	vals[0] = "9";	// "9","9"
+	// Check a value can't occur twice:
+	vals.clear();
+	vals.resize(2,"9");	// "9","9"
 	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "c", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision c's value 9 in value list twice!" );
 	
-	vals.resize(1);
+	vals[1] = "A";	// "9", "A"
 	dvMap->add_decision_values( "c", vals );
 	
 	// check what outcomes we get:
 	typedef ESDecisionValue::id_type id_type;
-	TS_ASSERT_EQUALS( dvMap->get( "a", "1" ).id, static_cast<id_type>(1) );
-	TS_ASSERT_EQUALS( dvMap->get( "a", "2" ).id, static_cast<id_type>(2) );
-	TS_ASSERT_EQUALS( dvMap->get( "c", "9" ).id, static_cast<id_type>(4) );
+	// a should have values 0, 1, 2
+	TS_ASSERT_EQUALS( dvMap->get( "a", "1" ).id, static_cast<id_type>(0) );
+	TS_ASSERT_EQUALS( dvMap->get( "a", "2" ).id, static_cast<id_type>(1) );
+	TS_ASSERT_EQUALS( dvMap->get( "a", "3" ).id, static_cast<id_type>(2) );
+	// c should have values 0, 4
+	TS_ASSERT_EQUALS( dvMap->get( "c", "9" ).id, static_cast<id_type>(0) );
+	TS_ASSERT_EQUALS( dvMap->get( "c", "A" ).id, static_cast<id_type>(4) );
 	
 	ostringstream val_string;
 	val_string << dvMap->format( dvMap->get( "a", "1" ) | dvMap->get( "c", "9" ) );
@@ -153,12 +154,11 @@ public:
 		i(2): b",
 	    "ut_d",	// decision
 	    "i",	// depends
-	    "a,b"	// values
+	    "b,a"	// values
 	);
 	ESDecisionRandom ut_d( *dvMap, ut_d_xml );
 	
 	TS_ASSERT_EQUALS( ut_d.determine( dvMap->get( "i", "1" ) & ut_d.mask, hd ), dvMap->get( "ut_d", "a" ) );
-	TS_ASSERT_EQUALS( ut_d.determine( ESDecisionValue() & ut_d.mask, hd ), ESDecisionValue() );	// void input and output
 	TS_ASSERT_EQUALS( ut_d.determine( dvMap->get( "i", "2" ) & ut_d.mask, hd ), dvMap->get( "ut_d", "b" ) );
     }
     
@@ -168,19 +168,47 @@ public:
 	dvMap->add_decision_values( "i", vals );
 	dvMap->add_decision_values( "j", vals );
 	
-	scnXml::HSESDecision ut_void_xml ("\
+	scnXml::HSESDecision ut_bad_decis_xml ("\
 		i(1): a\
-		i(2): b\
-		i(void): b",		// depending on a void input is illegal
-	    "ut_e",	// decision
+		j(2): b",	// decision changes here (illegal & non-sensical)
+	    "bad_decis",	// decision
 	    "i",	// depends
 	    "a,b"	// values
 	);
 	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionRandom ut_e( *dvMap, ut_void_xml ),
+	    ESDecisionRandom ut_e( *dvMap, ut_bad_decis_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
-	    "decision tree ut_e: i(void) encountered: void is not an outcome of i"
+	    "decision tree bad_decis: a set of tree branches don\'t share the same decision"
+	);
+	
+	scnXml::HSESDecision ut_unknown_input_value_xml ("\
+		i(1): a\
+		i(2): b\
+		i(3): b",		// depending on an unknown input value is illegal
+	    "unknown_input_value",	// decision
+	    "i",	// depends
+	    "a,b"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	ESDecisionRandom ut_e( *dvMap, ut_unknown_input_value_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "decision tree unknown_input_value: i(3) encountered: 3 is not an outcome of i"
+	);
+	
+	scnXml::HSESDecision ut_undeclared_output_xml ("\
+		i(1): a\
+		i(2): b",		// output not declared (illegal)
+	    "undeclared_output",	// decision
+	    "i",	// depends
+	    "a"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	ESDecisionRandom ut_e( *dvMap, ut_undeclared_output_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "ESDecisionValueMap::get(): no value undeclared_output(b)"
 	);
 	
 	scnXml::HSESDecision ut_nondepends_xml ("\
@@ -193,7 +221,7 @@ public:
 		    j(2): a\
 		}\
 	    ",
-	    "ut_f",	// decision
+	    "nondepends",	// decision
 	    "i",	// error: dependency j not listed
 	    "a,b"	// values
 	);
@@ -201,7 +229,7 @@ public:
 	    ESDecisionRandom ut_f( *dvMap, ut_nondepends_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
-	    "decision tree ut_f: j not listed as a dependency"
+	    "decision tree nondepends: j not listed as a dependency"
 	);
     }
     
@@ -233,14 +261,14 @@ public:
 	TS_ASSERT_DELTA ( propPos, .75, LIM );
 	propPos = determineNTimes( N, d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "negative" ) );
 	TS_ASSERT_DELTA ( propPos, .942, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), ESDecisionValue() );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), dvMap->get( "result", "none" ) );
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites (so we test sensitivity with 0-100 parasites)
 	propPos = determineNTimes( N, d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .75, LIM );
 	propPos = determineNTimes( N, d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .539, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), ESDecisionValue() );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), dvMap->get( "result", "none" ) );
     }
     
     void testESDecisionMap () {
@@ -266,15 +294,17 @@ public:
 		test(microscopy){\
 		    result(positive){ case(UC2):second case(UC1):normal }\
 		    result(negative): minor\
+		    result(none): error\
 		}\
 		test(RDT){\
 		    result(positive){ case(UC2):second case(UC1):normal }\
 		    result(negative): minor\
+		    result(none): error\
 		}\
 		",	// tree
 		"treatment",	// decision
 		"test,result,case",	// depends
-		"minor,normal,second"	// values
+		"minor,normal,second,error"	// values
 	    )
 	);
 	scnXml::HSESDecisions decisions;
@@ -293,10 +323,11 @@ public:
 	hd.pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
 	UnittestUtil::setTotalParasiteDensity( *whm, 4000. );	// lots of parasites
 	
-	const int N = 100000;
-	const double LIM = .0002;
-	int nMinor = 0, nNormal = 0, nSecond = 0;
+	const int N = 100000;	// number of times to sample
+	const double LIM = .002;	// answer expected to be accurate to this limit
+	// Note: LIM=.002 is on the verge of what worked; it may need to be increased.
 	
+	int nMinor = 0, nNormal = 0, nSecond = 0;
 	ESDecisionValue mask = dMap.dvMap.getDecision( "treatment" ).first;
 	ESDecisionValue minor = dMap.dvMap.get( "treatment", "minor" );
 	ESDecisionValue normal = dMap.dvMap.get( "treatment", "normal" );
@@ -307,7 +338,7 @@ public:
 	    if( outcome == minor ) nMinor++;
 	    else if( outcome == normal ) nNormal++;
 	    else if( outcome == second ) nSecond++;
-	    else TS_FAIL( "unexpected treatment output (void?)" );
+	    else TS_FAIL( "unexpected treatment output (error?)" );
 	}
 	
 	// route: tested & (RDT | microscopy) & positive

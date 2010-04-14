@@ -24,31 +24,17 @@
 
 #include <set>
 #include <boost/format.hpp>
+#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
-    
-    void ESDecisionTree::setValues (ESDecisionValueMap& dvMap, const vector< string >& valueList) {
-	dvMap.add_decision_values (decision, valueList);
-	values.resize (valueList.size()+1);
-	values[0] = ESDecisionValue();	// "void" option
-	for( size_t i = 0; i < valueList.size(); ++i ) {
-	    values[i+1] = dvMap.get (decision, valueList[i]);
-	    //cout<<"added: "<<dvMap.format(values[i+1])<<endl;
-	}
-    }
+    using namespace boost::assign;
     
     ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
-	if (it == map_cum_p.end()){	// should only happen when "void" was specified as an output
-	    if( input != ESDecisionValue() ){
-		cerr<<"ESDecisionRandom::determine: input="<<dvMap.format( input )<<"; known values:\n";
-		for( it = map_cum_p.begin(); it != map_cum_p.end(); ++it )
-		    cerr<<" — "<<dvMap.format( it->first );
-		cerr<<endl;
-	    }
-	    assert( input == ESDecisionValue() );
-	    return ESDecisionValue();	// no decision
+	if (it == map_cum_p.end()){
+	    // All possible input combinations should be in map_cum_p
+	    throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
 	}
 	double sample = random::uniform_01 ();
 	size_t i = 0;
@@ -59,53 +45,61 @@ namespace OM { namespace Clinical {
     
     ESDecisionUC2Test::ESDecisionUC2Test (ESDecisionValueMap& dvMap) {
 	decision = "case";
-	vector< string > valueList (2, "UC1");
-	valueList[1] = "UC2";
-	setValues (dvMap, valueList);
+	vector< string > valueList;
+	valueList += "UC1", "UC2";
+	dvMap.add_decision_values( decision, valueList );
+	UC1 = dvMap.get( decision, "UC1" );
+	UC2 = dvMap.get( decision, "UC2" );
     }
     ESDecisionValue ESDecisionUC2Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
 	assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
 	if (hostData.pgState & Pathogenesis::SECOND_CASE)
-	    return values[2];	// UC2
+	    return UC2;
 	else
-	    return values[1];	// UC1
+	    return UC1;
     }
     
     ESDecisionAge5Test::ESDecisionAge5Test (ESDecisionValueMap& dvMap) {
 	decision = "age5Test";
-	vector< string > valueList (2, "under5");
-	valueList[1] = "over5";
-	setValues (dvMap, valueList);
+	vector< string > valueList;
+	valueList += "under5", "over5";
+	dvMap.add_decision_values( decision, valueList );
+	under5 = dvMap.get( decision, "under5" );
+	over5 = dvMap.get( decision, "over5" );
     }
     ESDecisionValue ESDecisionAge5Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
 	if (hostData.ageYears >= 5.0)
-	    return values[2];	// over5
+	    return over5;
 	else
-	    return values[1];	// under5
+	    return under5;
     }
     
     ESDecisionParasiteTest::ESDecisionParasiteTest (ESDecisionValueMap& dvMap) {
 	decision = "result";
 	
-	string vs[] = { "none", "microscopy", "RDT" };
+	vector<string> testValues;
+	testValues += "none", "microscopy", "RDT";
 	// Add values, which (1) lets us create test_none, etc., (2) introduces a
 	// check when the "test" decision is added later on output values, and
 	// (3) allows us to set mask.
-	mask = dvMap.add_decision_values ("test", vector<string>(vs, vs+3));
+	mask = dvMap.add_decision_values ("test", testValues);
 	test_none = dvMap.get("test","none");
 	test_microscopy = dvMap.get("test", "microscopy");
 	test_RDT = dvMap.get("test","RDT");
 	
 	depends.resize (1, "test");	// Note: we check in add_decision_values() that this test has the outcomes we expect
 	
-	vector< string > valueList (2, "negative");
-	valueList[1] = "positive";
-	setValues (dvMap, valueList);
+	vector< string > valueList;
+	valueList += "none", "negative", "positive";
+	dvMap.add_decision_values( decision, valueList );
+	none = dvMap.get( decision, "none" );
+	negative = dvMap.get( decision, "negative" );
+	positive = dvMap.get( decision, "positive" );
     }
     
     ESDecisionValue ESDecisionParasiteTest::determine (const ESDecisionValue input, const ESHostData& hostData) const {
-	if (input == test_none || input == ESDecisionValue())	// no test or void (no decision)
-	    return ESDecisionValue();	// void, no decision
+	if (input == test_none)	// no test
+	    return none;
 	else {
 	    double dens = hostData.withinHost.getTotalDensity ();
 	    double pPositive = 0.0;	// chance of a positive result
@@ -140,9 +134,9 @@ namespace OM { namespace Clinical {
 	    }
 	    
 	    if (random::uniform_01() < pPositive)
-		return values[2];	// positive
+		return positive;
 	    else
-		return values[1];	// negative
+		return negative;
 	}
 	assert(false);	// should return before here
     }
@@ -162,20 +156,17 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
     value_map_t& valMap = dec_pair.first->second.second;	// alias new map
     if (dec_pair.second) {	// new entry; fill it
 	
-	// got length l = values.size() + 1 (default, "no outcome"); want minimal n such that: 2^n >= l
+	// got length l = values.size(); want minimal n such that: 2^n >= l
 	// that is, n >= log_2 (l)
 	// so n = ceil (log_2 (l))
-	uint32_t n_bits = std::ceil (log (values.size() + 1) / log(2.0));
-	if (n_bits+next_bit>=(sizeof(next_bit)*8))	// (only valid on 8-bit-per-byte architectures)
+	uint32_t n_bits = std::ceil( log( values.size() ) / log( 2.0 ) );
+	if( n_bits + next_bit >= sizeof(next_bit) * 8 )	// (only valid on 8-bit-per-byte architectures)
 	    throw runtime_error ("ESDecisionValue design: insufficient bits");
 	
 	// Now we've got enough bits to represent all outcomes, starting at next_bit
 	// Zero always means "missing value", so text starts at our first non-zero value:
-	id_type next=(1<<next_bit), step;
-	step=next;
+	id_type next=0, step=(1<<next_bit);
 	BOOST_FOREACH ( const string& value, values ) {
-	    if( value == "void" )
-		throw xml_scenario_error( "void can not be a declared output of a decision" );
 // 	    cout<<"ESDecisionValue: "<<decision<<'('<<value<<"): "<<next<<endl;
 	    valMap[value] = ESDecisionValue(next);
 	    next += step;
@@ -213,9 +204,6 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
     return dec_pair.first->second.first;
 }
 ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& value) const {
-    if( value == "void" )
-	return ESDecisionValue();	// void always maps to 0
-    
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end())
 	throw runtime_error ((boost::format("ESDecisionValueMap::get(): no decision %1%") %decision).str());
@@ -235,26 +223,20 @@ pair< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueM
 }
 
 void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) const {
-    if( v == ESDecisionValue() ) {
-	stream<<"(0)";
-	return;
-    }
     bool second = false;	// prepend second, third, etc., with ", "
     for( id_map_type::const_iterator dec_it = id_map.begin(); dec_it != id_map.end(); ++dec_it ) {
 	ESDecisionValue masked = v & dec_it->second.first;
-	if( !(masked == ESDecisionValue()) ) {	// if not 0
-	    for( value_map_t::const_iterator it = dec_it->second.second.begin(); it != dec_it->second.second.end(); ++it ) {
-		if( masked == it->second ){
-		    if( second )
-			stream << ", ";
-		    stream << dec_it->first<<'('<<it->first<<')';
-		    second = true;
-		    goto foundValue;
-		}
+	for( value_map_t::const_iterator it = dec_it->second.second.begin(); it != dec_it->second.second.end(); ++it ) {
+	    if( masked == it->second ){
+		if( second )
+		    stream << ", ";
+		stream << dec_it->first<<'('<<it->first<<')';
+		second = true;
+		goto foundValue;
 	    }
-	    assert( false );	// v matched mask but no value: this shouldn't happen!
-	    foundValue:;
 	}
+	assert( false );	// v matched mask but no value: this shouldn't happen!
+	foundValue:;
     }
 }
 

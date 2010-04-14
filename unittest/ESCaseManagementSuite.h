@@ -52,7 +52,7 @@ public:
 	xsd::cxx::tree::sequence<scnXml::HSESDecision, false> decisionSeq;
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"void",	// tree
+		"treatment1",	// tree
 		"treatment",	// decision
 		"",	// depends
 		"treatment1"	// values
@@ -115,35 +115,6 @@ public:
     }
     
     // Note: use ETS_..., not TS_..., when assertion should throw if false (prevent dangerous operations)
-    
-    void testGetNullTreatment() {
-	// When treatment is null, we should get an empty list of medications
-	ESDecisionValue treatmentNull
-	    = dMap.dvMap.get( "modD1", "0" );	// this decision set, but not the "treatment" decision
-	
-	const ESTreatmentSchedule *sched
-	    = dMap.getSchedule( treatmentNull );
-	ETS_ASSERT( sched != NULL );		// check we're given an object
-	
-	list<MedicateData> medQueue;
-	sched->apply( medQueue );
-	TS_ASSERT_EQUALS( medQueue.size(), 0u );	// check it has 0 medications
-    }
-    
-    void testGetVoidDecision() {
-	// If we specify the treatment but not all decisions, we should have an error:
-	ESDecisionValue treatment1 = dMap.dvMap.get( "treatment", "treatment1" );
-	treatment1 |= dMap.dvMap.get( "modQty", "extra" );
-	treatment1 |= dMap.dvMap.get( "modD1", "0" );
-	//treatment1 |= dMap.dvMap.get( "modD2", "B2" );	don't specify this decision
-	treatment1 |= dMap.dvMap.get( "modSTR", "all" );
-	
-	TS_ASSERT_THROWS_EQUALS(
-	    dMap.getSchedule( treatment1 ),
-	    const std::logic_error &e, string(e.what()),
-	    "a required modifier decision has void output; existing decisions: modD1(0), modQty(extra), modSTR(all), treatment(treatment1)"
-	);
-    }
     
     void testTreatments() {
 	// When we give all decisions, we should get the expected medications:

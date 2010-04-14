@@ -127,10 +127,8 @@ class ESDecisionMap {
 	 * schedule. Return-value should always point to an existing
 	 * ESTreatmentSchedule object (shouldn't be deleted by the caller).
 	 * 
-	 * If the treatment decision (outcome & treatmentMask) is "void", an
-	 * empty schedule is returned. If, however, this is non-void but not
-	 * found, or found but a treatment schedule is not, an error is thrown.
-	 */
+	 * If the treatment decision is but not found, or found but a treatment
+	 * schedule is not, an error is thrown. */
 	ESTreatmentSchedule* getSchedule (ESDecisionValue outcome) const;
         
     private:

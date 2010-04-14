@@ -184,11 +184,6 @@ class ESDecisionTree {
 	string decision;	// name of decision
         vector<string> depends;      // other decisions this depends upon
         ESDecisionValue mask;      // mask covering all dependencies' values
-        vector<ESDecisionValue> values;    // ids associated with each possible output
-        
-    protected:
-	// Sets values, given the decision's name and a set of values
-	void setValues (ESDecisionValueMap& dvMap, const std::vector< string >& valueList);
 };
 
 class ESDecisionRandom : public ESDecisionTree {
@@ -201,11 +196,12 @@ class ESDecisionRandom : public ESDecisionTree {
 	// value (or 0) from each dependency) to a list of cumulative probabilities.
 	// Indecies in this list map to the same index in values; last entry must be 1.0.
 	//NOTE: be interesting to compare performance between boost::unordered_map and std::map
+	vector<ESDecisionValue> values;    // ids associated with each possible output
 	typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
 	map_cum_p_t map_cum_p;
 	
-	// For bug-tracking:
-	const ESDecisionValueMap& dvMap;
+	// For better messages when bug-tracking:
+	//const ESDecisionValueMap& dvMap;
 	
 	friend struct DR_processor;
 };
@@ -214,18 +210,23 @@ class ESDecisionUC2Test : public ESDecisionTree {
     public:
 	ESDecisionUC2Test (ESDecisionValueMap& dvMap);
 	virtual ESDecisionValue determine (const ESDecisionValue, const ESHostData& hostData) const;
+    private:
+	ESDecisionValue UC1, UC2;
 };
 
 class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test (ESDecisionValueMap& dvMap);
 	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
+    private:
+	ESDecisionValue under5, over5;
 };
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest (ESDecisionValueMap& dvMap);
 	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
     private:
+	ESDecisionValue none, positive, negative;
 	// These shouldn't be static: they correspond to the passed-in dvMap and can
 	// only be initialized after values are created there.
 	// There should only be one ESDecisionParasiteTest object anyway.

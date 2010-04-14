@@ -25,6 +25,7 @@
 #include "util/errors.hpp"
 
 #include <set>
+#include <sstream>
 #include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
@@ -215,8 +216,7 @@ inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string
 }
 inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t& vmap, const string& value) {
     ESDecisionValueMap::value_map_t::const_iterator it = vmap.find (value);
-    if (it == vmap.end())
-	// value is "void" or something unknown; neither is acceptable
+    if (it == vmap.end())	// value is unknown
 	throw xml_scenario_error((format("Treatment description given for treatment %1% which isn't an output of \"treatment\" decision") %value).str());
     return it->second;
 }
@@ -273,20 +273,12 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
 	treatments[treatmentGetValue( treatmentCodes, treatment.getName() )] = new ESTreatment( dvMap, treatment );
     }
-    // Associate "void" input with an ESTreatment which has just one, empty, ESTreatmentSchedule:
-    treatments[ESDecisionValue()] = new ESTreatment(
-	dvMap,
-	scnXml::HSESTreatment(
-	    scnXml::HSESTreatmentSchedule(),	// empty base schedule
-	    "void"		// name of treatment
-	)
-    );
     
     treatmentsMask = mask_vmap_pair.first;
     
     
     // TODO: could check at this point that all possible combinations of
-    // decision outputs (including void) resolve a treatment (so we don't get
+    // decision outputs resolve a treatment (so we don't get
     // exceptions when running big workunits on BOINC).
 }
 
@@ -316,15 +308,9 @@ ESTreatmentSchedule* ESDecisionMap::getSchedule (ESDecisionValue outcome) const 
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )
 	    return ret;
-	else {
-	    ostringstream msg;
-	    msg
-		<<"a required modifier decision has void output; existing decisions: "
-		<<dvMap.format( masked | outcome )	// masked contains treatment, outcome contains modifier decisions
-	    ;
-	    throw logic_error( msg.str() );
-	}
-	masked = masked & outcome;
+	else
+	    throw logic_error( "a required modifier decision's output is unexpected (code error)" );
+	masked = masked & outcome;	// change error message below
     }
     
     ostringstream msg;

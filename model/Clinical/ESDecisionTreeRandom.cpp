@@ -25,6 +25,7 @@
 #include "util/errors.hpp"
 
 #include <string>
+#include <set>
 #include <sstream>
 #include <algorithm>	// find
 #include <boost/format.hpp>
@@ -41,12 +42,13 @@ namespace OM { namespace Clinical {
 		dR.mask |= decMap.first;	// add this decision's inputs into the mask
 		
 		// decMap.second is converted to an ESDecisionValueSet:
-		dependencyMaps.push_back( make_pair( decMap.first, decMap.second ) );
+		inputDependencies.push_back( make_pair( dependency, decMap.second ) );
 	    }
 	}
 	
 	void process (const parser::Outcome& outcome) {
 	    processOutcome(outcome,
+			   set<string>(),	/* empty set: no decisions yet processed */
 			   ESDecisionValue(),	/* 0: start with no outcomes */
 			   1.0				/* probability of reaching here, given all required values */
 	    );
@@ -55,7 +57,8 @@ namespace OM { namespace Clinical {
 	
     private:
 	void processBranches (const parser::Branches& branches,
-			     ESDecisionValue dependValues,
+			      set<string> usedInputs,	// needs to take a copy
+			      ESDecisionValue dependValues,
 			     double dependP
 	){
 	    assert (branches.size ());	// spirit parser shouldn't allow this to happen
@@ -64,12 +67,13 @@ namespace OM { namespace Clinical {
 		
 		double cum_p = 0.0;
 		BOOST_FOREACH( const parser::Branch& branch, branches ) {
-		    assert (branch.decision == decision);	//TODO: catch in parser
+		    if( branch.decision != decision )	//TODO: catch in parser
+			throw xml_scenario_error( (boost::format("decision tree %1%: a set of tree branches don't share the same decision") %dR.decision ).str());
 		    
 		    double p = boost::lexical_cast<double>( branch.dec_value );
 		    cum_p += p;
 		    
-		    processOutcome( branch.outcome, dependValues, dependP*p );
+		    processOutcome( branch.outcome, usedInputs, dependValues, dependP*p );
 		}
 		// Test cum_p is approx. 1.0 in case the input tree is wrong. In any case, we force probabilities to add to 1.0.
 		if (cum_p < 0.999 || cum_p > 1.001)
@@ -89,10 +93,12 @@ namespace OM { namespace Clinical {
 			%dR.decision
 			%decision
 		    ).str() );
+		usedInputs.insert( decision );
 		
 		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( decision ).second;	// copy
 		BOOST_FOREACH( const parser::Branch& branch, branches ) {
-		    assert (branch.decision == decision);	//TODO: catch in parser
+		    if( branch.decision != decision )	//TODO: catch in parser
+			throw xml_scenario_error( (boost::format("decision tree %1%: a set of tree branches don't share the same decision") %dR.decision ).str());
 		    
 		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( branch.dec_value );
 		    if( valIt == valMap.end() )
@@ -103,7 +109,7 @@ namespace OM { namespace Clinical {
 			    %dR.decision
 			).str());
 		    
-		    processOutcome( branch.outcome, dependValues | valIt->second, dependP );
+		    processOutcome( branch.outcome, usedInputs, dependValues | valIt->second, dependP );
 		    
 		    valMap.erase( valIt );
 		}
@@ -118,6 +124,7 @@ namespace OM { namespace Clinical {
 	    }
 	}
 	void processOutcome (const parser::Outcome& outcome,
+			     const set<string>& usedInputs,	// doesn't edit
 			     ESDecisionValue dependValues,
 			     double dependP
 	){
@@ -138,9 +145,9 @@ namespace OM { namespace Clinical {
 		
 		// all input values which match the decisions we have made
 		ESDecisionValueSet inputValues = dependValues;
-		for( list< pair< ESDecisionValue, ESDecisionValueSet > >::const_iterator it = dependencyMaps.begin(); it != dependencyMaps.end(); ++it ){
-		    if( (dependValues & it->first) == ESDecisionValue() )
-			// This decion was not decided
+		for( list< pair< string, ESDecisionValueSet > >::const_iterator it = inputDependencies.begin(); it != inputDependencies.end(); ++it ){
+		    if( usedInputs.count( it->first ) == 0 )
+			// This decion was not decided; look at all permutations by it
 			inputValues |= it->second;
 		}
 		
@@ -163,7 +170,7 @@ namespace OM { namespace Clinical {
 		    */
 		}
 	    } else if ( const parser::Branches* brs_p = boost::get<parser::Branches>( &outcome ) ) {
-		processBranches( *brs_p, dependValues, dependP );
+		processBranches( *brs_p, usedInputs, dependValues, dependP );
 	    } else {
 		assert (false);
 	    }
@@ -182,25 +189,30 @@ namespace OM { namespace Clinical {
 	
 	const ESDecisionValueMap& dvMap;
 	ESDecisionRandom& dR;
-	list< pair< ESDecisionValue, ESDecisionValueSet > > dependencyMaps;
+	list< pair< string, ESDecisionValueSet > > inputDependencies;
     };
     
-    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) : dvMap(dvm) {
+    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) /*: dvMap(dvm)*/ {
 	decision = xmlDc.getName();
 	string decErrStr = "decision "+decision;
 	
 	depends = parser::parseSymbolList( xmlDc.getDepends(), decision+" depends attribute" );
 	
 	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
-	// Calling a base-class function in the constructor, but it's not virtual so isn't an issue:
-	setValues (dvm, valueList);
+	
+	dvm.add_decision_values (decision, valueList);
+	values.resize (valueList.size());
+	for( size_t i = 0; i < valueList.size(); ++i ) {
+	    values[i] = dvm.get (decision, valueList[i]);
+	    //cout<<"added: "<<dvm.format(values[i])<<endl;
+	}
 	
 	// Get content of this element:
 	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
 	if (content_p == NULL)
 	    throw runtime_error ("ESDecision: bad upcast?!");
 	
-	DR_processor processor (dvMap, *this);
+	DR_processor processor (dvm, *this);
 	// 2-stage parse: first produces a parser::Outcome object, second the
 	// processor object does the work of converting into map_cum_p:
 	processor.process( parser::parseTree( *content_p, decision ) );
