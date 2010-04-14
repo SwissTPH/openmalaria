@@ -76,7 +76,11 @@
         <decisions>
           <decision name="provider" depends="" values="hospital, lower_level_public, private, community_health_worker, informal, none">
             p(.1): hospital
-            p(.3): lower_level_public
+            p(.1): lower_level_public
+            p(.1): private
+            p(.1): community_health_worker
+            p(.1): informal
+            p(.5): none
           </decision>
           <decision name="test" depends="provider" values="none,microscopy,RDT">
             provider(hospital){
@@ -89,32 +93,414 @@
               p(.4): microscopy
               p(.5): RDT
             }
-          </decision>
-          <decision name="test_and_result" depends="test,result" values="none,positive,negative">
-            test(none): none
-            test(microscopy){
-              result(positive): positive
-              result(negative): negative
+            provider(private){
+              p(.1): none
+              p(.4): microscopy
+              p(.5): RDT
             }
-            test(RDT){
-              result(positive): positive
-              result(negative): negative
+            provider(community_health_worker){
+              p(.5): none
+              p(.5): RDT
+            }
+            provider(informal){
+              p(.5): none
+              p(.5): RDT
+            }
+            provider(none){
+              p(1.0):none
             }
           </decision>
-           <decision name="treatment" depends="" values="MF_treat, AL_treat">
-              p(.1): MF_treat
-              p(.9): AL_treat
+          <decision name="result" depends="" values="none,positive,negative">
           </decision>
-          <decision name="adherence" depends="treatment,provider,test_and_result" values="full,missFirstDose">
+           <decision name="treatment" depends="provider,result" values="MF_treat,AL_treat,ASAQ_treat,SP_treat">
+              provider(hospital){
+                result: none{
+                  p(.1): MF_treat
+                  p(.9): AL_treat
+            }
+                result: positive{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+                result: negative{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+            provider(lower_level_public){
+                result: none{
+                  p(.1): MF_treat
+                  p(.9): AL_treat
+            }
+                result: positive{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+                result: negative{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+            provider(private){
+                result: none{
+                  p(.1): MF_treat
+                  p(.9): AL_treat
+            }
+                result: positive{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+                result: negative{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+            provider(community_health_worker){
+                result: none{
+                  p(.1): MF_treat
+                  p(.9): AL_treat
+            }
+                result: positive{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+                result: negative{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+            provider(informal){
+                result: none{
+                  p(.1): MF_treat
+                  p(.9): AL_treat
+            }
+                result: positive{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+                result: negative{
+                  p(.2): MF_treat
+                  p(.8): AL_treat
+            }
+          </decision>
+          <decision name="adherence" depends="treatment,provider,test,result" values="full,missFirstDose,missLastDay,selective">
             treatment(MF_treat){
+                provider(hospital){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(hospital){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(hospital){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(hospital){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(hospital){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(lower_level_public){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(lower_level_public){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(lower_level_public){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(lower_level_public){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(lower_level_public){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(private){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(private){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(private){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(private){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(private){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(community_health_worker){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(community_health_worker){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(community_health_worker){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(informal){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(informal){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(MF_treat){
+                provider(informal){
+                  test:RDT{
+                    result:negative{
               p(.7): full
               p(.3): missFirstDose
             }
             treatment(AL_treat){
+                provider(hospital){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(hospital){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(hospital){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(hospital){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(hospital){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(lower_level_public){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(lower_level_public){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(lower_level_public){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(lower_level_public){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(lower_level_public){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(private){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(private){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(private){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(private){
+                  test:microscopy{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(private){
+                  test:microscopy{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(community_health_worker){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(community_health_worker){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(community_health_worker){
+                  test:RDT{
+                    result:negative{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(informal){
+                  test:none{
+                    result:none{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(informal){
+                  test:RDT{
+                    result:positive{
+              p(.7): full
+              p(.3): missFirstDose
+            }
+            treatment(AL_treat){
+                provider(informal){
+                  test:RDT{
+                    result:negative{
               p(.7): full
               p(.3): missFirstDose
             }
           </decision>
+          <decision name="quality" depends= "provider" values="good, medium, poor">
+            provider(hospital){
+              p(.8): good
+              p(.1): medium
+              p(.1): poor
+            }
+            provider(lower_level_public){
+              p(.8): good
+              p(.1): medium
+              p(.1): poor
+            }
+            provider(private){
+              p(.8): good
+              p(.1): medium
+              p(.1): poor
+            }
+            provider(community_health_worker){
+              p(.8): good
+              p(.1): medium
+              p(.1): poor
+            }
+            provider(informal){
+              p(.8): good
+              p(.1): medium
+              p(.1): poor
+            }
           <decision name="delay" depends="" values="0,1,2">
             p(.6): 0
             p(.3): 1
@@ -127,26 +513,31 @@
               <medicate drug="MF" mg="3000" hour="0"/>
               <medicate drug="MF" mg="3000" hour="12"/>
             </schedule>
-            <modifier decision="test">
-              <multiplyQty value="none" effect="MF(0.5)" />
-              <multiplyQty value="microscopy" effect="MF(1.0)" />
-              <multiplyQty value="RDT" effect="MF(1.0)"/>
+            <modifier decision="quality">
+              <multiplyQty value="high" effect="MF(1.0)" />
+              <multiplyQty value="medium" effect="MF(0.6)" />
+              <multiplyQty value="low" effect="MF(0.3)"/>
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="MF(0-13)"/>
               <selectTimeRange value="missFirstDose" effect="MF(1-13)"/>
             </modifier>
+            <modifier decision="delay">
+              <delay value="0" effect="MF(0)"/>
+              <delay value="1" effect="MF(24)"/>
+              <delay value="2" effect="MF(48)"/>
+            </modifier>
           </treatment>
           <treatment name="AL_treat">
             <schedule>
-              <medicate drug="MF" mg="3000" hour="0"/>
-              <medicate drug="MF" mg="3000" hour="12"/>
+              <medicate drug="AR" mg="3000" hour="0"/>
+              <medicate drug="LU" mg="3000" hour="0"/>
               <medicate drug="Y" mg="3000" hour="0"/>
             </schedule>
-            <modifier decision="test">
-              <multiplyQty value="none" effect="MF(0.5),Y(0.5)" />
-              <multiplyQty value="microscopy" effect="MF(1.0)" />
-              <multiplyQty value="RDT" effect="MF(1.0)"/>
+            <modifier decision="quality">
+              <multiplyQty value="high" effect="AR(1.0),LU(1.0)" />
+              <multiplyQty value="medium" effect="AR(0.6), LU(0.6)" />
+              <multiplyQty value="low" effect="AR(0.3), LU(0.3)"/>
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="MF(0-13)"/>
