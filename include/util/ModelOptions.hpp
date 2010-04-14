@@ -152,6 +152,8 @@ namespace OM { namespace util {
 	EMPIRICAL_WITHIN_HOST_MODEL,
 	// @}
 	
+	MOLINEAUX_WITHIN_HOST_MODEL,
+
 	/** Use the Garki density bias instead of the default one in the detection limit.
 	 *
 	 * The default bias corresponds to counting parasites and white blood cells

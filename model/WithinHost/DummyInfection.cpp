@@ -56,6 +56,8 @@ bool DummyInfection::updateDensity(int simulationTime, double survivalFactor) {
     _density = (int(_density*GROWTH_RATE) % 20000) * survivalFactor;
     _cumulativeExposureJ += Global::interval * _density;
     
+    cout<<"Parasite densities at time "<<simulationTime<<" : "<<_density<<endl;
+
     if (_density < PARASITE_THRESHOLD) {
 	return true;
     } else {

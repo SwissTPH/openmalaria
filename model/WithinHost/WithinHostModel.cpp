@@ -26,6 +26,7 @@
 #include "WithinHost/Common.h"
 #include "WithinHost/DummyInfection.h"
 #include "WithinHost/EmpiricalInfection.h"
+#include "WithinHost/MolineauxInfection.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.hpp"
@@ -66,6 +67,8 @@ void WithinHostModel::init() {
     DummyInfection::initParameters ();
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::initParameters();	// 1-day timestep check
+  } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
+	MolineauxInfection::initParameters();
   } else {
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
@@ -78,7 +81,7 @@ void WithinHostModel::clear() {
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
-  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
+  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
     return new CommonWithinHost();
   } else {
     if (DescriptiveIPTWithinHost::iptActive)

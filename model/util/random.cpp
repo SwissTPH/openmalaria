@@ -175,6 +175,7 @@ double random::gauss (double mean, double std){
     return gsl_ran_gaussian(rng.gsl_generator,std)+mean;
 }
 
+
 double random::gamma (double a, double b){
     return gsl_ran_gamma(rng.gsl_generator, a, b);
 }
