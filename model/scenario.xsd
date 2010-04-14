@@ -1414,6 +1414,7 @@
       <xs:element name="uncomplicated" type="HSESCaseManagement" />
       <xs:element name="complicated" type="HSESCaseManagement" />
       <xs:element name="ClinicalOutcomes" type="ClinicalOutcomes" />
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESCaseManagement">
     <xs:annotation>
