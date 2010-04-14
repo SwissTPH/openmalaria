@@ -110,364 +110,226 @@
               p(1.0):none
             }
           </decision>
-           <decision name="treatment" depends="provider,result" values="MF_treat,AL_treat,ASAQ_treat,SP_treat">
+           <decision name="treatment" depends="provider,result" values="MF_treat,AL_treat,ASAQ_treat,SP_treat,none">
               provider(hospital){
-                result: none{
+                result(none){
                   p(.1): MF_treat
                   p(.9): AL_treat
             }
-                result: positive{
+                result(positive){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
-                result: negative{
+                result (negative){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
             }
             provider(lower_level_public){
-                result: none{
+                result(none){
                   p(.1): MF_treat
                   p(.9): AL_treat
             }
-                result: positive{
+                result(positive){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
-                result: negative{
+                result(negative){
                   p(.2): MF_treat
                   p(.8): AL_treat
+            }
             }
             provider(private){
-                result: none{
+                result(none){
                   p(.1): MF_treat
                   p(.9): AL_treat
             }
-                result: positive{
+                result(positive){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
-                result: negative{
+                result(negative){
                   p(.2): MF_treat
                   p(.8): AL_treat
+            }
             }
             provider(community_health_worker){
-                result: none{
+                result(none){
                   p(.1): MF_treat
                   p(.9): AL_treat
             }
-                result: positive{
+                result(positive){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
-                result: negative{
+                result(negative){
                   p(.2): MF_treat
                   p(.8): AL_treat
+            }
             }
             provider(informal){
-                result: none{
+                result(none){
                   p(.1): MF_treat
                   p(.9): AL_treat
             }
-                result: positive{
+                result(positive){
                   p(.2): MF_treat
                   p(.8): AL_treat
             }
-                result: negative{
+                result(negative){
                   p(.2): MF_treat
                   p(.8): AL_treat
+            }
+            }
+            provider(none){
+                  p(1.0):none
             }
           </decision>
-          <decision name="adherence" depends="treatment,provider,test,result" values="full,missFirstDose,missLastDay,selective">
+          <decision name="adherence" depends="treatment,provider,result" values="full,missFirstDose,missLastDay,selective">
             treatment(MF_treat){
                 provider(hospital){
-                  test(none){
+                  result(none){
                     p(.7): full
                     p(.3): missFirstDose
-                  }
-                  test(microscopy){
-                    result(none){
-                      full
                     }
-                    result(negative){
-                      p(.7): full
-                      p(.3): missFirstDose
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
                     }
-                    result(positive){
-                      p(.7): full
-                      p(.3): missFirstDose
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
                     }
                   }
-                  test(RDT){
-                    result(none): full
-                    result(negative){
-                      p(.7): full
-                      p(.3): missFirstDose
+                provider(lower_level_public){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
                     }
-                    result(positive){
-                      p(.7): full
-                      p(.3): missFirstDose
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                    }
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
                     }
                   }
-                }
-                provider(lower_level_public){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(lower_level_public){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(lower_level_public){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(lower_level_public){
-                  test:microscopy{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(lower_level_public){
-                  test:microscopy{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
                 provider(private){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(private){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(private){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(private){
-                  test:microscopy{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(private){
-                  test:microscopy{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                    }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                    }
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
+                    }
+                  }
                 provider(community_health_worker){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(community_health_worker){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(community_health_worker){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                     }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                     }
+                  result:negative{
+                    p(.7): full
+                    p(.3): missFirstDose
+                     }
+                  }
                 provider(informal){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(informal){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(MF_treat){
-                provider(informal){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
+                  result:none{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result:positive{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result:negative{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
+                  }
             treatment(AL_treat){
                 provider(hospital){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(hospital){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(hospital){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(hospital){
-                  test:microscopy{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(hospital){
-                  test:microscopy{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
                 provider(lower_level_public){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(lower_level_public){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(lower_level_public){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(lower_level_public){
-                  test:microscopy{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(lower_level_public){
-                  test:microscopy{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
                 provider(private){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(private){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(private){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(private){
-                  test:microscopy{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(private){
-                  test:microscopy{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(negative){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
                 provider(community_health_worker){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(community_health_worker){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(community_health_worker){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
+                  result(none){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result(positive){
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result:negative{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
                 provider(informal){
-                  test:none{
-                    result:none{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(informal){
-                  test:RDT{
-                    result:positive{
-              p(.7): full
-              p(.3): missFirstDose
-            }
-            treatment(AL_treat){
-                provider(informal){
-                  test:RDT{
-                    result:negative{
-              p(.7): full
-              p(.3): missFirstDose
-            }
+                  result:none{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result:positive{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                  result:negative{
+                    p(.7): full
+                    p(.3): missFirstDose
+                      }
+                    }
+                  }
           </decision>
           <decision name="quality" depends= "provider" values="good, medium, poor">
             provider(hospital){
