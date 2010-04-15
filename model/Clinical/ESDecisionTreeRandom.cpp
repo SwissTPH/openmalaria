@@ -56,20 +56,15 @@ namespace OM { namespace Clinical {
 	}
 	
     private:
-	void processBranches (const parser::Branches& branches,
+	void processBranches (const parser::BranchSet& branchSet,
 			      set<string> usedInputs,	// needs to take a copy
 			      ESDecisionValue dependValues,
 			     double dependP
 	){
-	    assert (branches.size ());	// spirit parser shouldn't allow this to happen
-	    string decision = branches[0].decision;
-	    if (decision == "p") {
+	    if (branchSet.decision == "p") {
 		
 		double cum_p = 0.0;
-		BOOST_FOREACH( const parser::Branch& branch, branches ) {
-		    if( branch.decision != decision )	//TODO: catch in parser
-			throw xml_scenario_error( (boost::format("decision tree %1%: a set of tree branches don't share the same decision") %dR.decision ).str());
-		    
+		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
 		    double p = boost::lexical_cast<double>( branch.dec_value );
 		    cum_p += p;
 		    
@@ -87,24 +82,21 @@ namespace OM { namespace Clinical {
 		// This check is to make sure dependencies are listed (other
 		// code depends on this). TODO: check decisions aren't listed
 		// unnecessarily.
-		if( find( dR.depends.begin(), dR.depends.end(), decision ) == dR.depends.end() )
+		if( find( dR.depends.begin(), dR.depends.end(), branchSet.decision ) == dR.depends.end() )
 		    throw xml_scenario_error( (
 			boost::format( "decision tree %1%: %2% not listed as a dependency" )
 			%dR.decision
-			%decision
+			%branchSet.decision
 		    ).str() );
-		usedInputs.insert( decision );
+		usedInputs.insert( branchSet.decision );
 		
-		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( decision ).second;	// copy
-		BOOST_FOREACH( const parser::Branch& branch, branches ) {
-		    if( branch.decision != decision )	//TODO: catch in parser
-			throw xml_scenario_error( (boost::format("decision tree %1%: a set of tree branches don't share the same decision") %dR.decision ).str());
-		    
+		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( branchSet.decision ).second;	// copy
+		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
 		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( branch.dec_value );
 		    if( valIt == valMap.end() )
 			throw xml_scenario_error( (
 			    boost::format("decision tree %3%: %1%(%2%) encountered: %2% is not an outcome of %1%")
-			    %decision
+			    %branchSet.decision
 			    %branch.dec_value
 			    %dR.decision
 			).str());
@@ -117,7 +109,7 @@ namespace OM { namespace Clinical {
 		    ostringstream msg;
 		    msg << "decision tree "<<dR.decision<<": expected branches:";
 		    for (ESDecisionValueMap::value_map_t::iterator it = valMap.begin(); it != valMap.end(); ++it)
-			msg <<' '<<decision<<'('<<it->first<<')';
+			msg <<' '<<branchSet.decision<<'('<<it->first<<')';
 		    throw xml_scenario_error( msg.str() );
 		}
 		
@@ -169,8 +161,8 @@ namespace OM { namespace Clinical {
 		    cout<<endl;
 		    */
 		}
-	    } else if ( const parser::Branches* brs_p = boost::get<parser::Branches>( &outcome ) ) {
-		processBranches( *brs_p, usedInputs, dependValues, dependP );
+	    } else if ( const parser::BranchSet* bs_p = boost::get<parser::BranchSet>( &outcome ) ) {
+		processBranches( *bs_p, usedInputs, dependValues, dependP );
 	    } else {
 		assert (false);
 	    }

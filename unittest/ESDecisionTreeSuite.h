@@ -150,8 +150,8 @@ public:
 	dvMap->add_decision_values( "i", vals );
 	
 	scnXml::HSESDecision ut_d_xml ("\
-		i(1): a\
-		i(2): b",
+		i(1)	:a\
+		i ( 2 )	{ b }",
 	    "ut_d",	// decision
 	    "i",	// depends
 	    "b,a"	// values
@@ -179,7 +179,7 @@ public:
 	    ESDecisionRandom ut_e( *dvMap, ut_bad_decis_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
-	    "decision tree bad_decis: a set of tree branches don\'t share the same decision"
+	    "failed to parse tree for bad_decis; expecting: \"i\" here: \"j(2): b\""
 	);
 	
 	scnXml::HSESDecision ut_unknown_input_value_xml ("\

@@ -36,13 +36,21 @@ namespace OM { namespace Clinical {
     namespace parser {
 	typedef std::vector<string> SymbolList;
 	
-	class Branch;
-	typedef std::vector<Branch> Branches;
-	typedef boost::variant< boost::recursive_wrapper< Branches >, string > Outcome;
+	struct BranchSet;
+	/** An Outcome is either a set of sub-branches (BranchSet) or a final
+	 * outcome (string). */
+	typedef boost::variant< boost::recursive_wrapper< BranchSet >, string > Outcome;
+	/** A Branch is an input decision-value (string) and an Outcome. The
+	 * decision is stored by the parent BranchSet. */
 	struct Branch {
-	    string decision;
 	    string dec_value;
 	    Outcome outcome;
+	};
+	/** A BranchSet describes a set of branches (vector<Branch>) dependent
+	 * on a decision (string). */
+	struct BranchSet {
+	    string decision;
+	    std::vector<Branch> branches;
 	};
 	
 	typedef std::map<string,double> SymbolValueMap;
