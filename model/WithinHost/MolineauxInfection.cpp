@@ -164,7 +164,7 @@ bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor
 	if(timeDiff%2==1)
 		updateGrowthRateMultiplier();
 
-	if(_density>1.0e5)
+	if(_density>1.0e-5)
 		return false;
 	else
 		return true;
