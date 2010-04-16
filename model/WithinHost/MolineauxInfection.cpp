@@ -77,7 +77,8 @@ void MolineauxInfection::initParameters(){
 }
 
 MolineauxInfection::MolineauxInfection(uint32_t protID):
-		CommonInfection(protID)
+		CommonInfection(protID),
+		_startdate(Global::simulationTime)
 {
 	m[v] = 0.0;
 	Pc = 0.0;
@@ -98,7 +99,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 	for(int tau=0; tau<taus;tau++)
 		laggedPc[tau] = 0.0;
 
-	_density = P[0] = 0.1;
+	P[0] = 0.1;
 	variantTranscendingSummation = 0.0;
 }
 
@@ -135,38 +136,36 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		else
 			p_i = pow(q, (double)i+1)*S[i]/sigma_Qi_Si;
 
-		newP[i] = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
-		growthRateMultiplier[i] = (newP[i] - P[i])/2;
-
-		//cout<<"Growth rate multiplier for variant : "<<i<<" : "<<growthRateMultiplier[i]<<endl;
+		double newPi;
+		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
+		growthRate[i] = (newPi - P[i])/2;
 	}
 }
 
 bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor){
 
 	double newDensity = 0.0;
+	int timeDiff = simulationTime - _startdate;
 
-	if(simulationTime != 1)
+	if(timeDiff == 1)
+		_density = P[0];
+	else
 	{
 		for(int i=0;i<v;i++)
 		{
-
-			P[i] += growthRateMultiplier[i];
+			P[i] += growthRate[i];
+			P[i]*=survivalFactor;
 
 			if(P[i]<1.0e-5)
 				P[i] = 0.0;
 
-			P[i]*=survivalFactor;
-
 			newDensity += P[i];
 		}
-			_density = newDensity;
+		_density = newDensity;
 	}
 
-	if(simulationTime%2==1)
+	if(timeDiff%2==1)
 		updateGrowthRateMultiplier();
-
-	cout<<simulationTime<<" : "<<_density<<endl;
 
 	if(_density>1.0e5)
 		return false;
@@ -210,7 +209,7 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
 {
     Pc & stream;
     for(int i=0;i<v;i++)
-    	growthRateMultiplier[i] & stream;
+    	growthRate[i] & stream;
 }
 
 void MolineauxInfection::checkpoint (ostream& stream) {
@@ -218,7 +217,7 @@ void MolineauxInfection::checkpoint (ostream& stream) {
 
     Pc & stream;
     for(int i=0;i<v;i++)
-    	growthRateMultiplier[i] & stream;
+    	growthRate[i] & stream;
 }
 
 }

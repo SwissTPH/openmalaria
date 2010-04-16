@@ -54,11 +54,11 @@ private:
 	static const int v = 50;
 	static const int taus = 4;
 
-	int _startDate;
+	int _startdate;
 
 	static int delta;
 	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v;
-	double m[v], Pc, variantTranscendingSummation, growthRateMultiplier[v],newP[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus];
+	double m[v], Pc, variantTranscendingSummation, growthRate[v],newP[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus];
 };
 
 }}
