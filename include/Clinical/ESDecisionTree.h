@@ -28,12 +28,14 @@
 
 #include <map>
 #include <boost/unordered_map.hpp>
+#include <boost/tuple/tuple.hpp>
 
 class ESDecisionTreeSuite;
 
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
     using boost::unordered_map;
+    using boost::tuple;
 
 /** A compressed representation of all decision outcomes.
  * Pass by value (it is 64-bits in size). */
@@ -60,7 +62,7 @@ struct ESDecisionValue {
 	return id < that.id;
     }
     private:
-	typedef uint64_t id_type;
+      typedef boost::uint64_t id_type;
 	
 	// private constructor, only for use by internal operations
 	ESDecisionValue (id_type new_id) : id(new_id) {}
@@ -69,7 +71,7 @@ struct ESDecisionValue {
 	
 	friend std::size_t hash_value(ESDecisionValue const& b);
 	friend ostream& operator<< (ostream& stream, const ESDecisionValue v);
-	friend class ESDecisionValueMap;
+	friend struct ESDecisionValueMap;
 	friend class ::ESDecisionTreeSuite;
 };
 std::size_t hash_value(ESDecisionValue const& b);
@@ -100,7 +102,7 @@ struct ESDecisionValueMap {
      * second: a map of value names to ESDecisionValue objects
      *
      * @throws invalid_argument when decision is not found */
-    pair< ESDecisionValue, const value_map_t& > getDecision (const string& decision) const;
+    tuple< ESDecisionValue, const value_map_t& > getDecision (const string& decision) const;
     
     class ValueFormatter {
 	const ESDecisionValueMap& parent;
@@ -131,7 +133,7 @@ struct ESDecisionValueMap {
 	typedef ESDecisionValue::id_type id_type;
 	
 	// Map of decision to ( pair ( mask, map of value to id ) )
-	typedef map< string, pair< ESDecisionValue, value_map_t > > id_map_type;
+  typedef map< string, pair< ESDecisionValue, value_map_t > > id_map_type;
 	id_map_type id_map;
 	id_type next_bit;
 };

@@ -30,6 +30,7 @@
 #endif
 
 #include <boost/cstdint.hpp>
+using boost::uint32_t;
 
 #include "util/checkpoint.hpp"
 using namespace OM::util::checkpoint;

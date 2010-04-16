@@ -177,13 +177,13 @@ namespace OM { namespace util {
 	    reverted to integer binary ops (1/8th time). (Also note: this was
 	    the only use of bitset<> with significant performance impact.)
 	    */
-	    return optSet & (1<<code);
+	    return (optSet & (1<<code)) != 0u;
 	}
 	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
 	 * TRIPLE_HET are active. */
 	static inline bool anyTransHet () {
 	    static const uint32_t anyHet = 1<<TRANS_HET | 1<<COMORB_TRANS_HET | 1<<TRANS_TREAT_HET | 1<<TRIPLE_HET;
-	    return optSet & anyHet;
+	    return (optSet & anyHet) != 0u;
 	}
 	
 	/// Set options from XML file

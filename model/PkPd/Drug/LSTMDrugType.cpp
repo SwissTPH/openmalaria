@@ -107,16 +107,16 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     // got length l; want minimal n such that: 2^n >= l
     // that is, n >= log_2 (l)
     // so n = ceil (log_2 (l))
-    uint32_t n_bits = std::ceil (log (alleles.size()) / log(2.0));
+    uint32_t n_bits = (uint32_t)std::ceil (log (double(alleles.size())) / log(2.0));
     assert (std::pow (2, n_bits) >= alleles.size());
-    allele_mask = uint32_t (std::pow (2, n_bits)) - 1;
+    allele_mask = static_cast<uint32_t>((std::pow (2.0, (double)n_bits)) - 1);
     // update bit_start to next available bit:
     bit_start += n_bits;
     if (bit_start > 32)
 	throw std::logic_error ("Implementation can't cope with this many alleles & drugs.");
     
     negligible_concentration = drugData.getPK().getNegligible_concentration();
-    neg_elimination_rate_constant = -log(2) / drugData.getPK().getHalf_life();
+    neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
     
     PD_params.resize (alleles.size());

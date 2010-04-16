@@ -143,7 +143,7 @@ namespace OM { namespace Clinical {
     
 
 std::size_t hash_value(ESDecisionValue const& b) {
-    boost::hash<int> hasher;
+  boost::hash<ESDecisionValue::id_type> hasher;
     return hasher(b.id);
 }
 ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision, const std::vector< string > values) {
@@ -159,7 +159,7 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
 	// got length l = values.size(); want minimal n such that: 2^n >= l
 	// that is, n >= log_2 (l)
 	// so n = ceil (log_2 (l))
-	uint32_t n_bits = std::ceil( log( values.size() ) / log( 2.0 ) );
+	uint32_t n_bits = (uint32_t)std::ceil( log( double(values.size()) ) / log( 2.0 ) );
 	if( n_bits + next_bit >= sizeof(next_bit) * 8 )	// (only valid on 8-bit-per-byte architectures)
 	    throw runtime_error ("ESDecisionValue design: insufficient bits");
 	
@@ -215,11 +215,14 @@ ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& v
     //cout << "ESDecisionValueMap::get ("<<decision<<", "<<value<<"): "<<it2->second.id<<endl;
     return it2->second;
 }
-pair< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueMap::getDecision (const string& decision) const {
+tuple< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueMap::getDecision (const string& decision) const {
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end ())
 	throw invalid_argument ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
-    return it->second;
+    return tuple<
+      ESDecisionValue,
+      const ESDecisionValueMap::value_map_t&
+    >(it->second.first, it->second.second);
 }
 
 void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) const {

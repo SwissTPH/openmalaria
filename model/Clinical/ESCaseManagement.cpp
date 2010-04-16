@@ -117,10 +117,10 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	}
 	schedules.clear();
 	
-	pair<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier->getDecision() );
-	schedulesMask |= decPair.first;
-	value_map_t decVals = decPair.second;	// copy
-	schedules.rehash( decVals.size() / schedules.max_load_factor() + 1 );
+	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier->getDecision() );
+	schedulesMask |= decPair.get<0>();
+	value_map_t decVals = decPair.get<1>();	// copy
+  schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
 	
 	if( modifier->getMultiplyQty().size() ) {
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getMultiplyQty() ){
@@ -268,13 +268,13 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     
     
     // Read treatments:
-    pair< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
-    const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.second;
+    tuple< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
+    const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.get<1>();
     BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
 	treatments[treatmentGetValue( treatmentCodes, treatment.getName() )] = new ESTreatment( dvMap, treatment );
     }
     
-    treatmentsMask = mask_vmap_pair.first;
+    treatmentsMask = mask_vmap_pair.get<0>();
     
     
     // TODO: could check at this point that all possible combinations of

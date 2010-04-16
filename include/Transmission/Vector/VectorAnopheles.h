@@ -251,7 +251,7 @@ private:
      * @return non human host ento availability;
      *
      */
-  double getNonHumanEntoAvailability(int populationSize, double relativeEntoAvailability);
+  double getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability);
 
   /** Proportion of host-seeking parous mosquitoes that have laid eggs same day*/
   double mosqLaidEggsSameDayProp;

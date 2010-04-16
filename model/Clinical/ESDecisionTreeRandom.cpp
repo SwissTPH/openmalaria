@@ -38,11 +38,11 @@ namespace OM { namespace Clinical {
     struct DR_processor {
 	DR_processor (const ESDecisionValueMap& dvm, ESDecisionRandom& d) : dvMap(dvm), dR(d) {
 	    BOOST_FOREACH( const string& dependency, dR.depends ){
-		pair<ESDecisionValue,const ESDecisionValueMap::value_map_t&> decMap = dvMap.getDecision( dependency );
-		dR.mask |= decMap.first;	// add this decision's inputs into the mask
+		tuple<ESDecisionValue,const ESDecisionValueMap::value_map_t&> decMap = dvMap.getDecision( dependency );
+		dR.mask |= decMap.get<0>();	// add this decision's inputs into the mask
 		
 		// decMap.second is converted to an ESDecisionValueSet:
-		inputDependencies.push_back( make_pair( dependency, decMap.second ) );
+		inputDependencies.push_back( make_pair( dependency, decMap.get<1>() ) );
 	    }
 	}
 	
@@ -90,7 +90,7 @@ namespace OM { namespace Clinical {
 		    ).str() );
 		usedInputs.insert( branchSet.decision );
 		
-		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( branchSet.decision ).second;	// copy
+		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( branchSet.decision ).get<1>();	// copy
 		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
 		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( branch.dec_value );
 		    if( valIt == valMap.end() )

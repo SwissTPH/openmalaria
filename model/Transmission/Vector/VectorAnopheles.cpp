@@ -186,9 +186,9 @@ double VectorAnopheles::getHumanEntoAvailability(int populationSize)
 		return (1/((double)populationSize))*(P_A1/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
 }
 
-double VectorAnopheles::getNonHumanEntoAvailability(int populationSize, double relativeEntoAvailability)
+double VectorAnopheles::getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability)
 {
-		return (1/((double)populationSize))*((P_An*relativeEntoAvailability)/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
+		return (1/(populationSize))*((P_An*relativeEntoAvailability)/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
 }
 
 

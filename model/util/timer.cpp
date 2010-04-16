@@ -112,5 +112,5 @@ void timer::stopCheckpoint (){
   }
 }
 
-} }
 #endif
+} }

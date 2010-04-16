@@ -34,9 +34,6 @@ using namespace OM::util;
 namespace OM {
 namespace WithinHost {
 
-const int MolineauxInfection::v;
-const int MolineauxInfection::taus;
-
 int MolineauxInfection::delta;
 
 double MolineauxInfection::C;
