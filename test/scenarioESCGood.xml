@@ -92,6 +92,11 @@
             p(.3): 1
             p(.1): 2
           </decision>
+          <decision name="ageGroup" depends="age" values="0_1,1_8,8_inf">
+            age(0-1): 0_1
+            age(1-8): 1_8
+            age(8-inf): 8_inf
+          </decision>
         </decisions>
         <treatments>
           <treatment name="MF_treat">
@@ -99,10 +104,10 @@
               <medicate drug="MF" mg="3000" hour="0"/>
               <medicate drug="MF" mg="3000" hour="12"/>
             </schedule>
-            <modifier decision="test">
-              <multiplyQty value="none" effect="MF(0.5)" />
-              <multiplyQty value="microscopy" effect="MF(1.0)" />
-              <multiplyQty value="RDT" effect="MF(1.0)"/>
+            <modifier decision="ageGroup">
+              <multiplyQty value="0_1" effect="MF(0.25)" />
+              <multiplyQty value="1_8" effect="MF(0.5)" />
+              <multiplyQty value="8_inf" effect="MF(1)"/>
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="MF(0-13)"/>

@@ -1,7 +1,7 @@
 /*
  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -19,29 +19,173 @@
 */
 
 #include "Clinical/ESDecisionTree.h"
+#include "Clinical/parser.h"
 #include "util/random.h"
 #include "util/errors.hpp"
 
-#include <set>
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <boost/lexical_cast.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
     using namespace boost::assign;
     
-    ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
-	map_cum_p_t::const_iterator it = map_cum_p.find (input);
-	if (it == map_cum_p.end()){
-	    // All possible input combinations should be in map_cum_p
-	    throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
+    
+    // -----  Input processor to set up user-defined decisions  -----
+    // (You may want to skip this when reading the file.)
+    
+    struct DR_processor {
+	DR_processor (const ESDecisionValueMap& dvm, ESDecisionRandom& d) : dvMap(dvm), dR(d) {
+	    BOOST_FOREACH( const string& dependency, dR.depends ){
+		tuple<ESDecisionValue,const ESDecisionValueMap::value_map_t&> decMap = dvMap.getDecision( dependency );
+		dR.mask |= decMap.get<0>();	// add this decision's inputs into the mask
+		
+		// decMap.second is converted to an ESDecisionValueSet:
+		inputDependencies.push_back( make_pair( dependency, decMap.get<1>() ) );
+	    }
 	}
-	double sample = random::uniform_01 ();
-	size_t i = 0;
-	while (it->second[i] < sample)
-	    ++i;
-	return values[i];
-    }
+	
+	void process (const parser::Outcome& outcome) {
+	    processOutcome(outcome,
+			   set<string>(),	/* empty set: no decisions yet processed */
+			   ESDecisionValue(),	/* 0: start with no outcomes */
+			   1.0				/* probability of reaching here, given all required values */
+	    );
+	    checkProbabilities ();
+	}
+	
+    private:
+	void processBranches (const parser::BranchSet& branchSet,
+			      set<string> usedInputs,	// needs to take a copy
+			      ESDecisionValue dependValues,
+			     double dependP
+	){
+	    if (branchSet.decision == "p") {
+		
+		double cum_p = 0.0;
+		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
+		    double p = boost::lexical_cast<double>( branch.dec_value );
+		    cum_p += p;
+		    
+		    processOutcome( branch.outcome, usedInputs, dependValues, dependP*p );
+		}
+		// Test cum_p is approx. 1.0 in case the input tree is wrong. In any case, we force probabilities to add to 1.0.
+		if (cum_p < 0.999 || cum_p > 1.001)
+		    throw util::xml_scenario_error ( (
+			boost::format("decision tree %1%: expected probability sum to be 1.0 but found %2%")
+			%dR.decision
+			%cum_p
+		    ).str() );
+		
+	    } else {
+		// This check is to make sure dependencies are listed (other
+		// code depends on this). TODO: check decisions aren't listed
+		// unnecessarily.
+		if( find( dR.depends.begin(), dR.depends.end(), branchSet.decision ) == dR.depends.end() )
+		    throw xml_scenario_error( (
+			boost::format( "decision tree %1%: %2% not listed as a dependency" )
+			%dR.decision
+			%branchSet.decision
+		    ).str() );
+		usedInputs.insert( branchSet.decision );
+		
+		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( branchSet.decision ).get<1>();	// copy
+		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
+		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( branch.dec_value );
+		    if( valIt == valMap.end() )
+			throw xml_scenario_error( (
+			    boost::format("decision tree %3%: %1%(%2%) encountered: %2% is not an outcome of %1%")
+			    %branchSet.decision
+			    %branch.dec_value
+			    %dR.decision
+			).str());
+		    
+		    processOutcome( branch.outcome, usedInputs, dependValues | valIt->second, dependP );
+		    
+		    valMap.erase( valIt );
+		}
+		if( !valMap.empty() ){	// error: not all options were included
+		    ostringstream msg;
+		    msg << "decision tree "<<dR.decision<<": expected branches:";
+		    for (ESDecisionValueMap::value_map_t::iterator it = valMap.begin(); it != valMap.end(); ++it)
+			msg <<' '<<branchSet.decision<<'('<<it->first<<')';
+		    throw xml_scenario_error( msg.str() );
+		}
+		
+	    }
+	}
+	void processOutcome (const parser::Outcome& outcome,
+			     const set<string>& usedInputs,	// doesn't edit
+			     ESDecisionValue dependValues,
+			     double dependP
+	){
+	    if ( const string* val_p = boost::get<string>( &outcome ) ) {
+		ESDecisionValue val = dvMap.get( dR.decision, *val_p );
+		size_t i = 0;	// get index i in dR.values of this outcome
+		while (true) {
+		    if (i >= dR.values.size())
+			throw logic_error( (
+			    boost::format("decision tree %1%: unable to find index for value %2% (code error)")
+			    %dR.decision
+			    %*val_p
+			).str() );
+		    if( dR.values[i] == val )
+			break;
+		    ++i;
+		}
+		
+		// all input values which match the decisions we have made
+		ESDecisionValueSet inputValues = dependValues;
+		for( list< pair< string, ESDecisionValueSet > >::const_iterator it = inputDependencies.begin(); it != inputDependencies.end(); ++it ){
+		    if( usedInputs.count( it->first ) == 0 )
+			// This decion was not decided; look at all permutations by it
+			inputValues |= it->second;
+		}
+		
+		BOOST_FOREACH( ESDecisionValue inputValue, inputValues.values ){
+		    // find/make an entry for dependent decisions:
+		    //NOTE: valgrind complains about a memory leak _here_.. why?
+		    vector<double>& outcomes_cum_p = dR.map_cum_p[ inputValue ];
+		    /* print cum-prob-array (part 1):
+		    if( outcomes_cum_p.empty() ) cout << "new ";
+		    cout << "outcome cumulative probabilities for "<<dvMap.format( val )<<" (index "<<i<<"): ";
+		    */
+		    // make sure it's size is correct (will need resizing if just inserted):
+		    outcomes_cum_p.resize( dR.values.size(), 0.0 );	// any new entries have p(0.0)
+		    for (size_t j = i; j < outcomes_cum_p.size(); ++j)
+			outcomes_cum_p[j] += dependP;
+		    /* print cum-prob-array (part 2):
+		    for (size_t j = 0; j < outcomes_cum_p.size(); ++j)
+			cout <<" "<<outcomes_cum_p[j];
+		    cout<<endl;
+		    */
+		}
+	    } else if ( const parser::BranchSet* bs_p = boost::get<parser::BranchSet>( &outcome ) ) {
+		processBranches( *bs_p, usedInputs, dependValues, dependP );
+	    } else {
+		assert (false);
+	    }
+	}
+	
+	void checkProbabilities () {
+	    size_t l = dR.values.size();
+	    size_t l1 = l - 1;
+	    for( ESDecisionRandom::map_cum_p_t::iterator val_cum_p = dR.map_cum_p.begin(); val_cum_p != dR.map_cum_p.end(); ++val_cum_p ) {
+		assert( val_cum_p->second.size() == l );
+		// We force the last value to 1.0. It should be roughly that anyway due to
+		// previous checks; it doesn't really matter if this gives allows a small error.
+		val_cum_p->second[l1] = 1.0;
+	    }
+	}
+	
+	const ESDecisionValueMap& dvMap;
+	ESDecisionRandom& dR;
+	list< pair< string, ESDecisionValueSet > > inputDependencies;
+    };
+    
+    
+    // -----  Decision constructors and determine() functions  -----
     
     ESDecisionUC2Test::ESDecisionUC2Test (ESDecisionValueMap& dvMap) {
 	decision = "case";
@@ -141,122 +285,42 @@ namespace OM { namespace Clinical {
 	assert(false);	// should return before here
     }
     
-
-std::size_t hash_value(ESDecisionValue const& b) {
-  boost::hash<ESDecisionValue::id_type> hasher;
-    return hasher(b.id);
-}
-ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision, const std::vector< string > values) {
-    set<string> valueSet;
-    BOOST_FOREACH( const string& v, values )
-	if( !valueSet.insert( v ).second )
-	    throw xml_scenario_error( (boost::format( "CaseManagement: decision %1%'s value %2% in value list twice!" ) %decision %v).str() );
-    
-    pair<id_map_type::iterator,bool> dec_pair = id_map.insert( make_pair (decision, make_pair ( ESDecisionValue(), value_map_t() ) ) );
-    value_map_t& valMap = dec_pair.first->second.second;	// alias new map
-    if (dec_pair.second) {	// new entry; fill it
+    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) /*: dvMap(dvm)*/ {
+	decision = xmlDc.getName();
+	string decErrStr = "decision "+decision;
 	
-	// got length l = values.size(); want minimal n such that: 2^n >= l
-	// that is, n >= log_2 (l)
-	// so n = ceil (log_2 (l))
-	uint32_t n_bits = (uint32_t)std::ceil( log( double(values.size()) ) / log( 2.0 ) );
-	if( n_bits + next_bit >= sizeof(next_bit) * 8 )	// (only valid on 8-bit-per-byte architectures)
-	    throw runtime_error ("ESDecisionValue design: insufficient bits");
+	depends = parser::parseSymbolList( xmlDc.getDepends(), decision+" depends attribute" );
 	
-	// Now we've got enough bits to represent all outcomes, starting at next_bit
-	// Zero always means "missing value", so text starts at our first non-zero value:
-	id_type next=0, step=(1<<next_bit);
-	BOOST_FOREACH ( const string& value, values ) {
-// 	    cout<<"ESDecisionValue: "<<decision<<'('<<value<<"): "<<next<<endl;
-	    valMap[value] = ESDecisionValue(next);
-	    next += step;
-	}
-	next_bit += n_bits;
-	assert (next <= (1u<<next_bit));
+	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
 	
-	// Set mask so bits which are used by values are 1:
-	ESDecisionValue mask;
-	for (value_map_t::const_iterator cur_val = valMap.begin(); cur_val != valMap.end(); ++cur_val)
-	mask |= cur_val->second;
-// 	cout<<"Mask for "<<decision<<": "<<mask<<endl;
-	dec_pair.first->second.first = mask;
-	
-    } else {	// decision already exists; confirm values match
-	
-	set<string> new_values (values.begin(), values.end());
-	for (value_map_t::const_iterator cur_val = valMap.begin(); cur_val != valMap.end(); ++cur_val) {
-	    set<string>::iterator it = new_values.find (cur_val->first);
-	    if (it == new_values.end())
-		throw xml_scenario_error ((boost::format("CaseManagement: decision %1%'s values don't match; expected value: %2%") % decision % cur_val->first).str());
-	    else
-		new_values.erase (it);
-	}
-	if (!new_values.empty ()) {
-	    ostringstream msg;
-	    msg << "CaseManagement: decision "<<decision<<"'s values don't match; unexpected values:";
-	    BOOST_FOREACH ( const string& v, new_values )
-		msg << ' ' << v;
-	    throw xml_scenario_error (msg.str());
+	dvm.add_decision_values (decision, valueList);
+	values.resize (valueList.size());
+	for( size_t i = 0; i < valueList.size(); ++i ) {
+	    values[i] = dvm.get (decision, valueList[i]);
+	    //cout<<"added: "<<dvm.format(values[i])<<endl;
 	}
 	
+	// Get content of this element:
+	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
+	if (content_p == NULL)
+	    throw runtime_error ("ESDecision: bad upcast?!");
+	
+	DR_processor processor (dvm, *this);
+	// 2-stage parse: first produces a parser::Outcome object, second the
+	// processor object does the work of converting into map_cum_p:
+	processor.process( parser::parseTree( *content_p, decision ) );
+    }
+    ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
+	map_cum_p_t::const_iterator it = map_cum_p.find (input);
+	if (it == map_cum_p.end()){
+	    // All possible input combinations should be in map_cum_p
+	    throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
+	}
+	double sample = random::uniform_01 ();
+	size_t i = 0;
+	while (it->second[i] < sample)
+	    ++i;
+	return values[i];
     }
     
-    return dec_pair.first->second.first;
-}
-ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& value) const {
-    id_map_type::const_iterator it = id_map.find (decision);
-    if (it == id_map.end())
-	throw runtime_error ((boost::format("ESDecisionValueMap::get(): no decision %1%") %decision).str());
-    
-    value_map_t::const_iterator it2 = it->second.second.find (value);
-    if (it2 == it->second.second.end())
-	throw runtime_error ((boost::format("ESDecisionValueMap::get(): no value %1%(%2%)") %decision %value).str());
-    
-    //cout << "ESDecisionValueMap::get ("<<decision<<", "<<value<<"): "<<it2->second.id<<endl;
-    return it2->second;
-}
-tuple< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueMap::getDecision (const string& decision) const {
-    id_map_type::const_iterator it = id_map.find (decision);
-    if (it == id_map.end ())
-	throw invalid_argument ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
-    return tuple<
-      ESDecisionValue,
-      const ESDecisionValueMap::value_map_t&
-    >(it->second.first, it->second.second);
-}
-
-void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) const {
-    bool second = false;	// prepend second, third, etc., with ", "
-    for( id_map_type::const_iterator dec_it = id_map.begin(); dec_it != id_map.end(); ++dec_it ) {
-	ESDecisionValue masked = v & dec_it->second.first;
-	for( value_map_t::const_iterator it = dec_it->second.second.begin(); it != dec_it->second.second.end(); ++it ) {
-	    if( masked == it->second ){
-		if( second )
-		    stream << ", ";
-		stream << dec_it->first<<'('<<it->first<<')';
-		second = true;
-		goto foundValue;
-	    }
-	}
-	assert( false );	// v matched mask but no value: this shouldn't happen!
-	foundValue:;
-    }
-}
-
-ESDecisionValueSet::ESDecisionValueSet (const ESDecisionValueMap::value_map_t valMap) {
-    for( ESDecisionValueMap::value_map_t::const_iterator it = valMap.begin(); it != valMap.end(); ++it )
-	values.push_back( it->second );
-}
-
-void ESDecisionValueSet::operator|= (const ESDecisionValueSet& that) {
-    list<ESDecisionValue> old;
-    old.swap( values );
-    
-    BOOST_FOREACH( ESDecisionValue v1, old ){
-	BOOST_FOREACH( ESDecisionValue v2, that.values ){
-	    values.push_back( v1 | v2 );
-	}
-    }
-}
-
 } }
