@@ -33,6 +33,10 @@ namespace OM { namespace Clinical {
  * medicates treatment, determines patient recovery, death and sequelae.
  * 
  * TODO: Reporting of parasitological status (not model specific).
+ * 
+ * Note: there are several variables that only need to be used during an
+ * episode. It's possible that memory usage could be reduced by storing them
+ * externally in a temporary object during episodes (but unlikely worth doing).
  */
 class ClinicalEventScheduler : public ClinicalModel
 {
@@ -51,13 +55,30 @@ protected:
   virtual void checkpoint (ostream& stream);
  
 private:
+    /// Length of an uncomplicated case
+    static int uncomplicatedCaseDuration;
+    /// Length of a complicated case
+    static int complicatedCaseDuration;
+    
+    /// Probability of death on first day of a complicated case (1 - S(0)).
+    static double pDeathInitial;
+    /// A measure of effectiveness of parasite reduction on the chance-of-death
+    /// probability in severe cases; α in model.
+    static double parasiteReductionEffectiveness;
+  
   /// Current state of sickness
   Pathogenesis::State pgState;
-  /** If Global::simulationTime >= timestepHealthyOrDead, the individual has recovered or died.
-   *
-   * This event occurs when time-steps are equal. Which event occurs is determined by whether
-   * pgState includes Pathogenesis::DIRECT_DEATH. */
-  int timeHealthyOrDead;
+  
+  //NOTE: not all these variables should be needed eventually
+  /// Timestep latest event started at
+  int lastEventTime;
+  
+  /** The individual recovers when Global::simulationTime >= timeOfRecovery,
+   * assuming they didn't die. */
+  int timeOfRecovery;
+  
+  /// Total parasite density at previous timestep (used during an event).
+  double previousDensity;
   
   /// All pending medications
   list<MedicateData> medicateQueue;

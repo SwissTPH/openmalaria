@@ -29,8 +29,15 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-// ClinicalEventScheduler::OutcomeType ClinicalEventScheduler::outcomes;
-// cmid ClinicalEventScheduler::outcomeMask;
+int ClinicalEventScheduler::uncomplicatedCaseDuration;
+int ClinicalEventScheduler::complicatedCaseDuration;
+double ClinicalEventScheduler::pDeathInitial;
+double ClinicalEventScheduler::parasiteReductionEffectiveness;
+
+//FIXME: age correction factor
+double pDeathAgeFactor (double ageYears) {
+    return 1.0;
+}
 
 
 // -----  static init  -----
@@ -57,6 +64,11 @@ void ClinicalEventScheduler::init ()
 	outcomes[it->getID()] = od;
     }
     outcomeMask = ev.getClinicalOutcomes().getSevereMask();*/
+    
+    //FIXME: initialize properly
+    uncomplicatedCaseDuration = 3;
+    complicatedCaseDuration = 6;
+    pDeathInitial = 0.2;
 }
 
 
@@ -64,7 +76,8 @@ void ClinicalEventScheduler::init ()
 
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         ClinicalModel (cF),
-        pgState (Pathogenesis::NONE), timeHealthyOrDead (Global::TIMESTEP_NEVER)
+        pgState (Pathogenesis::NONE),
+        timeOfRecovery (Global::TIMESTEP_NEVER)
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -87,13 +100,17 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     // this is unimportant.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
-    if ( Global::simulationTime == timeHealthyOrDead ) {
-	if ( pgState & Pathogenesis::DIRECT_DEATH ) {
-	    // Note: killed now, no further clinical events but still a source of infection to mosquitoes until next timestep
-	    _doomed = DOOMED_COMPLICATED; // kill human (removed from simulation next timestep)
-	    return;
-	}
+    if ( Global::simulationTime == timeOfRecovery ) {
+	/*{//FIXME: report recovery/sequelae
+	    // Note: setting SEQUELAE / RECOVERY here only affects reporting, not model
+	    //TODO: report sequelae?
+	    // if ( Sequelae )
+	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	    // else
+	    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	}*/
 	
+	// Individual recovers (and is immediately susceptible to new cases)
 	pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
     }
     
@@ -114,6 +131,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
         if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
+	lastEventTime = Global::simulationTime;
         latestReport.update (Global::simulationTime, ageGroup, pgState);
 	
 	if (pgState & Pathogenesis::MALARIA) {
@@ -122,40 +140,26 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	}
 	
-	// Decision ID of last case management run
+	//TODO: get quality of case management and work into p(death)
 	ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
-	//TODO: costing reporting
-	/*
-	if ( lastCmDecision & Decision::TEST_RDT ) {
+	if (false /*FIXME: RDT used*/) {
 	    Surveys.current->report_Clinical_RDTs (1);
-	}*/
+	}
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
-	    // Find outcome probabilities/durations associated with CM-tree path
-// 	    cmid id = lastCmDecision & outcomeMask;
-// 	    OutcomeType::const_iterator oi = outcomes.find (id);
-// 	    if (oi == outcomes.end ()) {
-// 		ostringstream msg;
-// 		msg << "No 'Outcome' data for cmid " << id;
-// 		throw util::xml_scenario_error(msg.str());
-// 	    }
-// 	    
-	    int medicationDuration = 5;	//FIXME: this is a substitute value
-// 	    if (random::uniform_01() < oi->second.pDeath) {
-// 		medicationDuration = oi->second.hospitalizationDaysDeath;
-// 		
-// 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-// 	    } else {
-// 		medicationDuration = oi->second.hospitalizationDaysRecover;
+	    //TODO: zero infectiousness when in hospital
+	    
+	    //TODO: document (first day of case fatality model)
+	    if (random::uniform_01() < pDeathInitial) {
+		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		latestReport.update (Global::simulationTime, ageGroup, pgState);
 		
-		// Note: setting SEQUELAE / RECOVERY here only affects reporting, not model
-		//TODO: report sequelae?
-		// if ( Sequelae )
-		//     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-		// else
-		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-// 	    }
+		// Human dies this timestep; we still allow medication of
+		// today's treatments for costing.
+		_doomed = DOOMED_COMPLICATED;
+	    }
+	    previousDensity = withinHostModel.getTotalDensity();
 	    
 	    // Check: is patient in hospital? Reporting only.
 // 	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
@@ -164,18 +168,42 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 // 		Surveys.current->report_Clinical_HospitalizationDays (medicationDuration);
 // 	    }
 	    
-	    // Report: recovery/seq./death, in/out of hospital
-	    latestReport.update (Global::simulationTime, ageGroup, pgState);
-	    timeHealthyOrDead = Global::simulationTime + medicationDuration;
+	    // complicatedCaseDuration should to some respects be associated
+	    // with medication duration, however ongoing medications after
+	    // exiting hospital are OK and medications terminating before the
+	    // end of hospitalization shouldn't matter too much if the person
+	    // can't recieve new infections due to zero transmission in hospital.
+	    timeOfRecovery = Global::simulationTime + complicatedCaseDuration;
 	} else {
-	    timeHealthyOrDead = Global::simulationTime + 3;
+	    timeOfRecovery = Global::simulationTime + uncomplicatedCaseDuration;
+	}
+    } else {
+	// No new event (haven't changed state this timestep).
+	
+	//TODO: document (subsequent days of case fatality model)
+	if (pgState & Pathogenesis::COMPLICATED) {
+	    double parasiteReductionEffect = pow(
+		previousDensity / (previousDensity - withinHostModel.getTotalDensity()),
+		parasiteReductionEffectiveness
+	    );
+	    double pDeath = 1.0 - exp(-pDeathAgeFactor(ageYears) * parasiteReductionEffect);
+	    if (random::uniform_01() < pDeath) {
+		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		latestReport.update (Global::simulationTime, ageGroup, pgState);
+		
+		// Human dies this timestep; we still allow medication of
+		// today's treatments for costing.
+		_doomed = DOOMED_COMPLICATED;
+	    }
+	    previousDensity = withinHostModel.getTotalDensity();
 	}
     }
-
-
+    
+    
     if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
         _doomed = -Global::interval; // start indirect mortality countdown
     
+    // Process pending medications (in interal queue) and apply/update:
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
 	list<MedicateData>::iterator next = it;
 	++next;
@@ -193,16 +221,28 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 
 void ClinicalEventScheduler::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
+    uncomplicatedCaseDuration & stream;
+    complicatedCaseDuration & stream;
+    pDeathInitial & stream;
+    parasiteReductionEffectiveness & stream;
     int s;
     s & stream;
     pgState = Pathogenesis::State(s);
-    timeHealthyOrDead & stream;
+    lastEventTime & stream;
+    timeOfRecovery & stream;
+    previousDensity & stream;
     medicateQueue & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
+    uncomplicatedCaseDuration & stream;
+    complicatedCaseDuration & stream;
+    pDeathInitial & stream;
+    parasiteReductionEffectiveness & stream;
     pgState & stream;
-    timeHealthyOrDead & stream;
+    lastEventTime & stream;
+    timeOfRecovery & stream;
+    previousDensity & stream;
     medicateQueue & stream;
 }
 
