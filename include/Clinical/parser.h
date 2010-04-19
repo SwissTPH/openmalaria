@@ -35,15 +35,25 @@ using std::pair;
 namespace OM { namespace Clinical {
     namespace parser {
 	typedef std::vector<string> SymbolList;
+	typedef std::map<string,double> SymbolValueMap;
+	struct DoubleRange {
+	    double first, second;
+	};
+	typedef std::map<string,DoubleRange> SymbolRangeMap;
 	
 	struct BranchSet;
+	/// Either a decision's input value, a probability, or an age-range.
+	typedef boost::variant< string, double, DoubleRange > DecisionValue;
 	/** An Outcome is either a set of sub-branches (BranchSet) or a final
 	 * outcome (string). */
-	typedef boost::variant< boost::recursive_wrapper< BranchSet >, string > Outcome;
+	typedef boost::variant<
+	    boost::recursive_wrapper< BranchSet >,
+	    string
+	> Outcome;
 	/** A Branch is an input decision-value (string) and an Outcome. The
 	 * decision is stored by the parent BranchSet. */
 	struct Branch {
-	    string dec_value;
+	    DecisionValue dec_value;
 	    Outcome outcome;
 	};
 	/** A BranchSet describes a set of branches (vector<Branch>) dependent
@@ -52,11 +62,6 @@ namespace OM { namespace Clinical {
 	    string decision;
 	    std::vector<Branch> branches;
 	};
-	
-	typedef std::map<string,double> SymbolValueMap;
-	
-	typedef std::pair<double,double> DoubleRange;
-	typedef std::map<string,DoubleRange> SymbolRangeMap;
 	
 	
 	/** @brief Parser functions.

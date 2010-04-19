@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Clinical/ESDecisionTree.h"	// needed for ESDecisionMap
+#include "Clinical/parser.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Survey.h"
@@ -59,11 +60,11 @@ struct ESTreatmentSchedule {
     ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& sched);
     
     /// Multiply the quantity of each medication based on the value of this map.
-    void multiplyQty (const map<string,double>&, const string& errObj);
+    void multiplyQty (const parser::SymbolValueMap&, const string& errObj);
     /// Delay the time of each medication based on the value of this map, in hours.
-    void delay (const map<string,double>&, const string& errObj);
+    void delay (const parser::SymbolValueMap&, const string& errObj);
     /// Remove medications not in time range (in hours) described by this map.
-    void selectTimeRange (const map< string, pair<double,double> >&, const string& errObj);
+    void selectTimeRange (const parser::SymbolRangeMap&, const string& errObj);
     
     /// Add medications into medicate queue
     inline void apply (list<MedicateData>& medicateQueue) const {

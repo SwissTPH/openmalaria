@@ -31,7 +31,8 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
     using boost::format;
-
+    using parser::SymbolValueMap;
+    using parser::SymbolRangeMap;
 
 // -----  ESTreatmentSchedule  -----
 
@@ -45,25 +46,25 @@ ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& s
     }
 }
 
-void ESTreatmentSchedule::multiplyQty (const map<string,double>& m, const string& errObj) {
+void ESTreatmentSchedule::multiplyQty (const SymbolValueMap& m, const string& errObj) {
     for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ++med ){
-	map<string,double>::const_iterator it = m.find( med->abbrev );
+	SymbolValueMap::const_iterator it = m.find( med->abbrev );
 	if( it == m.end() )
 	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
 	med->qty *= it->second;
     }
 }
-void ESTreatmentSchedule::delay (const map<string,double>& m, const string& errObj) {
+void ESTreatmentSchedule::delay (const SymbolValueMap& m, const string& errObj) {
     for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ++med ){
-	map<string,double>::const_iterator it = m.find( med->abbrev );
+	SymbolValueMap::const_iterator it = m.find( med->abbrev );
 	if( it == m.end() )
 	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
 	med->time += it->second / 24.0;	// convert to days
     }
 }
-void ESTreatmentSchedule::selectTimeRange (const map< string, pair<double,double> >& m, const string& errObj) {
+void ESTreatmentSchedule::selectTimeRange (const SymbolRangeMap& m, const string& errObj) {
     for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ){
-	map< string, pair<double,double> >::const_iterator it = m.find( med->abbrev );
+	SymbolRangeMap::const_iterator it = m.find( med->abbrev );
 	if( it == m.end() )
 	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
 	double timeH = med->time * 24.0;	// convert back to hours for comparisons
@@ -126,7 +127,7 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getMultiplyQty() ){
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const parser::SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
+		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
 		
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
@@ -138,7 +139,7 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getDelay() ){
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const parser::SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
+		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
 		
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
@@ -150,7 +151,7 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getSelectTimeRange() ){
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const parser::SymbolRangeMap& m = parser::parseSymbolRangeMap( mod.getEffect(), errObj );
+		const SymbolRangeMap& m = parser::parseSymbolRangeMap( mod.getEffect(), errObj );
 		
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
@@ -231,7 +232,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	toAdd.push_back (new ESDecisionParasiteTest (dvMap));
     }
     BOOST_FOREACH ( const ::scnXml::HSESDecision& xmlDc, xmlCM.getDecisions().getDecision() ) {
-	toAdd.push_back (new ESDecisionRandom (dvMap, xmlDc));
+	toAdd.push_back (ESDecisionTree::create (dvMap, xmlDc));
     }
     
     decisions.resize (toAdd.size());
@@ -297,7 +298,7 @@ ESDecisionValue ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) co
     BOOST_FOREACH ( const ESDecisionTree* decision, decisions ) {
 	// Pass determine the outcomes of previous decisions, filtered to the decisions it depends on.
 	// Get back another outcome and add it into the outcomes set.
-	outcomes |= decision->determine (outcomes & decision->mask, hostData);
+	outcomes |= decision->determine (outcomes, hostData);
     }
     return outcomes;
 }

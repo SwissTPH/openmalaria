@@ -54,7 +54,7 @@ typedef std::vector<SymbolRangePair> SymbolRangeList;
 // fusion citizens. This has to be in global scope.
 BOOST_FUSION_ADAPT_STRUCT(
     OM::Clinical::parser::Branch,
-    (std::string, dec_value)
+    (OM::Clinical::parser::DecisionValue, dec_value)
     (OM::Clinical::parser::Outcome, outcome)
 )
 BOOST_FUSION_ADAPT_STRUCT(
@@ -103,47 +103,75 @@ namespace OM { namespace Clinical {
 		using qi::alnum;
 		using qi::lexeme;
 		using qi::lit;
+		using qi::double_;
 		using phoenix::at_c;
 		using phoenix::push_back;
 		using phoenix::val;
+		using phoenix::construct;
 		using namespace qi::labels;
 		
 		symbol %= lexeme[ +( alnum | '.' | '_' ) ] ;	// symbol token
+		value_symbol = symbol[ _val = _1 ];
+		value_double = double_[ _val = _1 ];
+		value_range = range[ _val = _1 ];
+		range %= double_ > '-' > double_ ;
 		tree %=
-		    (branch_set | symbol)	// either a set of branches or a symbol
+		    (branch_set | symbol )	// either a set of branches or a symbol
 		;
 		outcome %=			// as tree, but with braces or a colon
 		    ('{' > tree > '}')
 		    | (':' > symbol)
 		;
-		branch = '(' > symbol > ')' > outcome ;
+		branch_p %= '(' > value_double > ')' > outcome ;
+		branch_age %= '(' > value_range > ')' > outcome ;
+		branch_decision %= '(' > value_symbol > ')' > outcome ;
 		branch_set =
 		    ( symbol >> &lit('(') )[	// match if we start with this
 			at_c<0>(_val) = _1		// and set decision
 		    ]
-		    > branch[	// then we expect a branch
+		    > (	// then we expect a branch
+			( eps(at_c<0>(_val) == "p") > branch_p ) |
+			( eps(at_c<0>(_val) == "age") > branch_age ) |
+			branch_decision
+		    )[
 			push_back( at_c<1>(_val), _1 )
 		    ]
 		    > *(	// then, any number of times
 			&symbol	// if we have a symbol
 			> lit( at_c<0>(_val) )	// it must be decision
-			> branch[	// followed by a branch
+			> (	// followed by a branch
+			    ( eps(at_c<0>(_val) == "p") > branch_p ) |
+			    ( eps(at_c<0>(_val) == "age") > branch_age ) |
+			    branch_decision
+			)[
 			    push_back( at_c<1>(_val), _1 )
 			]
 		    )
 		;
 		
 		symbol.name( "symbol" );
+		value_symbol.name( "value" );
+		value_double.name( "value" );
+		value_range.name( "value" );
+		range.name( "range" );
 		tree.name( "tree" );
 		outcome.name( "outcome" );
-		branch.name( "branch" );
+		branch_p.name( "branch (p)" );
+		branch_age.name( "branch (age)" );
+		branch_decision.name( "branch (decision)" );
 		branch_set.name( "branch_set" );
 	    }
 	    
 	    qi::rule<Iterator, string(), ascii::space_type> symbol;
+	    qi::rule<Iterator, DecisionValue(), ascii::space_type> value_symbol;
+	    qi::rule<Iterator, DecisionValue(), ascii::space_type> value_double;
+	    qi::rule<Iterator, DecisionValue(), ascii::space_type> value_range;
+	    qi::rule<Iterator, DoubleRange(), ascii::space_type> range;
 	    qi::rule<Iterator, Outcome(), ascii::space_type> tree;
 	    qi::rule<Iterator, Outcome(), ascii::space_type> outcome;
-	    qi::rule<Iterator, Branch(), ascii::space_type> branch;
+	    qi::rule<Iterator, Branch(), ascii::space_type> branch_p;
+	    qi::rule<Iterator, Branch(), ascii::space_type> branch_age;
+	    qi::rule<Iterator, Branch(), ascii::space_type> branch_decision;
 	    qi::rule<Iterator, BranchSet(), ascii::space_type> branch_set;
 	};
 	

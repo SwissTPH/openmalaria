@@ -25,7 +25,6 @@
 
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
-#include <boost/lexical_cast.hpp>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
@@ -65,7 +64,8 @@ namespace OM { namespace Clinical {
 		
 		double cum_p = 0.0;
 		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
-		    double p = boost::lexical_cast<double>( branch.dec_value );
+		    assert ( boost::get<double>( &branch.dec_value ) != NULL );	// parser should guarantee we have the right value
+		    double p = *boost::get<double>( &branch.dec_value );
 		    cum_p += p;
 		    
 		    processOutcome( branch.outcome, usedInputs, dependValues, dependP*p );
@@ -92,12 +92,14 @@ namespace OM { namespace Clinical {
 		
 		ESDecisionValueMap::value_map_t valMap = dvMap.getDecision( branchSet.decision ).get<1>();	// copy
 		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
-		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( branch.dec_value );
+		    assert ( boost::get<string>( &branch.dec_value ) != NULL );	// parser should guarantee we have the right value
+		    string dec_value = *boost::get<string>( &branch.dec_value );
+		    ESDecisionValueMap::value_map_t::iterator valIt = valMap.find( dec_value );
 		    if( valIt == valMap.end() )
 			throw xml_scenario_error( (
 			    boost::format("decision tree %3%: %1%(%2%) encountered: %2% is not an outcome of %1%")
 			    %branchSet.decision
-			    %branch.dec_value
+			    %dec_value
 			    %dR.decision
 			).str());
 		    
@@ -185,7 +187,7 @@ namespace OM { namespace Clinical {
     };
     
     
-    // -----  Decision constructors and determine() functions  -----
+    // -----  Decision constructors and determineImpl() functions  -----
     
     ESDecisionUC2Test::ESDecisionUC2Test (ESDecisionValueMap& dvMap) {
 	decision = "case";
@@ -195,7 +197,7 @@ namespace OM { namespace Clinical {
 	UC1 = dvMap.get( decision, "UC1" );
 	UC2 = dvMap.get( decision, "UC2" );
     }
-    ESDecisionValue ESDecisionUC2Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
+    ESDecisionValue ESDecisionUC2Test::determineImpl (const ESDecisionValue, const ESHostData& hostData) const {
 	assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
 	if (hostData.pgState & Pathogenesis::SECOND_CASE)
 	    return UC2;
@@ -211,7 +213,7 @@ namespace OM { namespace Clinical {
 	under5 = dvMap.get( decision, "under5" );
 	over5 = dvMap.get( decision, "over5" );
     }
-    ESDecisionValue ESDecisionAge5Test::determine (const ESDecisionValue, const ESHostData& hostData) const {
+    ESDecisionValue ESDecisionAge5Test::determineImpl (const ESDecisionValue, const ESHostData& hostData) const {
 	if (hostData.ageYears >= 5.0)
 	    return over5;
 	else
@@ -241,7 +243,7 @@ namespace OM { namespace Clinical {
 	positive = dvMap.get( decision, "positive" );
     }
     
-    ESDecisionValue ESDecisionParasiteTest::determine (const ESDecisionValue input, const ESHostData& hostData) const {
+    ESDecisionValue ESDecisionParasiteTest::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
 	if (input == test_none)	// no test
 	    return none;
 	else {
@@ -285,11 +287,19 @@ namespace OM { namespace Clinical {
 	assert(false);	// should return before here
     }
     
-    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) /*: dvMap(dvm)*/ {
+    ESDecisionAge::ESDecisionAge (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) {
+    }
+    ESDecisionValue ESDecisionAge::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
+	map<double, ESDecisionValue>::const_iterator it = age_upper_bounds.upper_bound( hostData.ageYears );
+	assert( it != age_upper_bounds.end() );	// should be confirmed by set-up
+	return it->second;
+    }
+    
+    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput) /*: dvMap(dvm)*/ {
 	decision = xmlDc.getName();
 	string decErrStr = "decision "+decision;
 	
-	depends = parser::parseSymbolList( xmlDc.getDepends(), decision+" depends attribute" );
+	depends = dependsInput;
 	
 	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
 	
@@ -310,7 +320,7 @@ namespace OM { namespace Clinical {
 	// processor object does the work of converting into map_cum_p:
 	processor.process( parser::parseTree( *content_p, decision ) );
     }
-    ESDecisionValue ESDecisionRandom::determine (const ESDecisionValue input, const ESHostData& hostData) const {
+    ESDecisionValue ESDecisionRandom::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
 	if (it == map_cum_p.end()){
 	    // All possible input combinations should be in map_cum_p
@@ -323,4 +333,34 @@ namespace OM { namespace Clinical {
 	return values[i];
     }
     
+    ESDecisionTree* ESDecisionTree::create (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) {
+	const string& name = xmlDc.getName();
+	if( name == "age" || name == "p" || name == "case" || name == "result" )
+	    throw xml_scenario_error( (boost::format("error: %1% is a reserved decision name") %name).str() );
+	
+	vector<string> depends = parser::parseSymbolList( xmlDc.getDepends(), xmlDc.getName()+" depends attribute" );
+	vector<string>::iterator it;
+	
+	it = find( depends.begin(), depends.end(), "age" );
+	if( it != depends.end() ){
+	    if( depends.size() != 1u )
+		throw xml_scenario_error( (boost::format(
+		    "decision tree %1%: a decision depending on \"age\" may not depend on anything else"
+		) %name).str() );
+	    return new ESDecisionAge( dvm, xmlDc );
+	}
+	
+	it = find( depends.begin(), depends.end(), "p" );
+	if( it != depends.end() ){
+	    depends.erase( it );
+	    if( find( depends.begin(), depends.end(), "p" ) != depends.end() )
+		throw xml_scenario_error( (boost::format(
+		"decision tree %1%: dependency \"p\" occurred twice"
+		) %name).str() );
+	    return new ESDecisionRandom( dvm, xmlDc, depends );
+	}
+	
+	//FIXME: mustn't allow any probability decisions in this case!
+	return new ESDecisionRandom( dvm, xmlDc, depends );
+    }
 } }

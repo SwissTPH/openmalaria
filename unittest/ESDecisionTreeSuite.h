@@ -101,10 +101,10 @@ public:
     /* Runs d.determine( input, hd ) N times
      * returns the proportion of these runs where the output equalled expectedOutput
      */
-    double determineNTimes (int N, const ESDecisionTree& d, const ESDecisionValue input, const ESHostData& hd, const ESDecisionValue expectedOutput) {
+    double determineNTimes (int N, const ESDecisionTree* d, const ESDecisionValue input, const ESHostData& hd, const ESDecisionValue expectedOutput) {
 	int nExpected = 0;
 	for (int i = 0; i < N; ++i) {
-	    if( d.determine( input & d.mask, hd ) == expectedOutput )
+	    if( d->determine( input, hd ) == expectedOutput )
 		++nExpected;
 	}
 	return double(nExpected) / double(N);
@@ -131,7 +131,7 @@ public:
 	    "",	// depends
 	    "a,b"	// values
 	);
-	ESDecisionRandom ut_r( *dvMap, ut_r_xml );
+	ESDecisionTree* ut_r = ESDecisionTree::create( *dvMap, ut_r_xml );
 	
 	const int N = 10000;
 	const double LIM = .02;
@@ -140,7 +140,7 @@ public:
 	// test that ut_r.decide produces a 80% of the time and b 20%:
 	propPos = determineNTimes( N, ut_r, ESDecisionValue(), hd, dvMap->get( "myR", "a" ) );
 	TS_ASSERT_DELTA( propPos, .8, LIM );
-	
+	delete ut_r;
     }
     
     void testRandomDeterministic () {
@@ -156,10 +156,11 @@ public:
 	    "i",	// depends
 	    "b,a"	// values
 	);
-	ESDecisionRandom ut_d( *dvMap, ut_d_xml );
+	ESDecisionTree* ut_d = ESDecisionTree::create( *dvMap, ut_d_xml );
 	
-	TS_ASSERT_EQUALS( ut_d.determine( dvMap->get( "i", "1" ) & ut_d.mask, hd ), dvMap->get( "ut_d", "a" ) );
-	TS_ASSERT_EQUALS( ut_d.determine( dvMap->get( "i", "2" ) & ut_d.mask, hd ), dvMap->get( "ut_d", "b" ) );
+	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "1" ), hd ), dvMap->get( "ut_d", "a" ) );
+	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "2" ), hd ), dvMap->get( "ut_d", "b" ) );
+	delete ut_d;
     }
     
     void testRandomErrors () {
@@ -176,7 +177,7 @@ public:
 	    "a,b"	// values
 	);
 	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionRandom ut_e( *dvMap, ut_bad_decis_xml ),
+	    ESDecisionTree::create( *dvMap, ut_bad_decis_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
 	    "failed to parse tree for bad_decis; expecting: \"i\" here: \"j(2): b\""
@@ -191,7 +192,7 @@ public:
 	    "a,b"	// values
 	);
 	TS_ASSERT_THROWS_EQUALS(
-	ESDecisionRandom ut_e( *dvMap, ut_unknown_input_value_xml ),
+	    ESDecisionTree::create( *dvMap, ut_unknown_input_value_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
 	    "decision tree unknown_input_value: i(3) encountered: 3 is not an outcome of i"
@@ -205,7 +206,7 @@ public:
 	    "a"	// values
 	);
 	TS_ASSERT_THROWS_EQUALS(
-	ESDecisionRandom ut_e( *dvMap, ut_undeclared_output_xml ),
+	    ESDecisionTree::create( *dvMap, ut_undeclared_output_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
 	    "ESDecisionValueMap::get(): no value undeclared_output(b)"
@@ -226,7 +227,7 @@ public:
 	    "a,b"	// values
 	);
 	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionRandom ut_f( *dvMap, ut_nondepends_xml ),
+	    ESDecisionTree::create( *dvMap, ut_nondepends_xml ),
 	    const std::runtime_error &e,
 	    string(e.what()),
 	    "decision tree nondepends: j not listed as a dependency"
@@ -236,17 +237,17 @@ public:
     void testUC2Test () {
 	ESDecisionUC2Test d( *dvMap );
 	hd.pgState = STATE_MALARIA;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue() & d.mask, hd ), dvMap->get( "case", "UC1" ) );
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "case", "UC1" ) );
 	hd.pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue() & d.mask, hd ), dvMap->get( "case", "UC2" ) );
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "case", "UC2" ) );
     }
     
     void testAge5Test () {
 	ESDecisionAge5Test d( *dvMap );
 	hd.ageYears = 4.99;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue() & d.mask, hd ), dvMap->get( "age5Test", "under5" ) );
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "age5Test", "under5" ) );
 	hd.ageYears = 5.0;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue() & d.mask, hd ), dvMap->get( "age5Test", "over5" ) );
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "age5Test", "over5" ) );
     }
     
     void testParasiteTest () {
@@ -257,18 +258,18 @@ public:
 	double propPos;	// proportion positive
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 0. );	// no parasites (so we test specificity)
-	propPos = determineNTimes( N, d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "negative" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "negative" ) );
 	TS_ASSERT_DELTA ( propPos, .75, LIM );
-	propPos = determineNTimes( N, d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "negative" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "negative" ) );
 	TS_ASSERT_DELTA ( propPos, .942, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites (so we test sensitivity with 0-100 parasites)
-	propPos = determineNTimes( N, d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .75, LIM );
-	propPos = determineNTimes( N, d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .539, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ) & d.mask, hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
     }
     
     void testESDecisionMap () {

@@ -51,30 +51,56 @@ struct ESHostData {
  *****************************************************************************/
 class ESDecisionTree {
     public:
-        /** Run decision tree. Input must be filtered by mask (i.e. call as
-	 * d.determine( input & d.mask, hostData ); ). */
-        virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const =0;
-        
+	/// Create a user-configured decision from xmlDc.
+	static ESDecisionTree* create (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc);
+	
+        /** Run decision tree. */
+	inline ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const{
+	    return determineImpl( input & mask, hostData );
+	}
+	
 	// Note: for some cases we could use ESDecisionName instead of string
 	// (for speed), but error messages would be bad. Only slows set-up.
 	string decision;	// name of decision
-        vector<string> depends;      // other decisions this depends upon
+	vector<string> depends;      // other decisions this depends upon
+	
+    protected:
+        virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const =0;
         ESDecisionValue mask;      // mask covering all dependencies' values
+};
+
+class ESDecisionAge : public ESDecisionTree {
+    public:
+	ESDecisionAge (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc);
+	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
+	
+    private:
+	// A map from age-group upper-bounds to output values. The first lower-
+	// bound we assume to be less than or equal to any input value, and we
+	// assume no input can be greater than the last upper-bound (which
+	// should be inf).
+	map<double, ESDecisionValue> age_upper_bounds;
+	
+	// For better messages when bug-tracking:
+	//const ESDecisionValueMap& dvMap;
+	
+	friend struct DR_processor;
 };
 
 class ESDecisionRandom : public ESDecisionTree {
     public:
-	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc);
-	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
+	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput);
+	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
 	
     private:
 	// A map from depended decision values (represented as an or-d list of one
 	// value (or 0) from each dependency) to a list of cumulative probabilities.
 	// Indecies in this list map to the same index in values; last entry must be 1.0.
 	//NOTE: be interesting to compare performance between boost::unordered_map and std::map
-	vector<ESDecisionValue> values;    // ids associated with each possible output
 	typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
 	map_cum_p_t map_cum_p;
+	
+	vector<ESDecisionValue> values;    // ids associated with each possible output
 	
 	// For better messages when bug-tracking:
 	//const ESDecisionValueMap& dvMap;
@@ -85,7 +111,7 @@ class ESDecisionRandom : public ESDecisionTree {
 class ESDecisionUC2Test : public ESDecisionTree {
     public:
 	ESDecisionUC2Test (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue, const ESHostData& hostData) const;
+	virtual ESDecisionValue determineImpl (const ESDecisionValue, const ESHostData& hostData) const;
     private:
 	ESDecisionValue UC1, UC2;
 };
@@ -93,14 +119,14 @@ class ESDecisionUC2Test : public ESDecisionTree {
 class ESDecisionAge5Test : public ESDecisionTree {
     public:
 	ESDecisionAge5Test (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
+	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
     private:
 	ESDecisionValue under5, over5;
 };
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determine (const ESDecisionValue input, const ESHostData& hostData) const;
+	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
     private:
 	ESDecisionValue none, positive, negative;
 	// These shouldn't be static: they correspond to the passed-in dvMap and can

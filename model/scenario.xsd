@@ -1475,17 +1475,24 @@
         BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
         OUTCOME, DECISION, VALUE := SYMBOL
         
-        Semantically, each OUTCOME must be one of the values associated with this decision
-        or "void" (indicating not relevent/no decision, and forcing all decisions dependent on this
-        to also output void).
-        For each BRANCH_SET each BRANCH must have the same DECISION, which must be one of:
-        * One of the dependencies mentioned in "depends": the VALUE immediately following in
+        For each BRANCH_SET each BRANCH must have the same DECISION. This
+        DECISION must be one of the dependencies mentioned in "depends". This
+        may be:
+        * another decision, in which case the VALUE immediately following in
           brackets must correspond to one of its output values. The BRANCH_SET immediately
           containing this BRANCH must represent each output value of the same decision
           exactly once, and no parent BRANCH_SET may be for the same DECISION.
         * "p": this indicates a probabilistic decision. In this case the value is a
           probability, the sum of all values for the BRANCH_SET must be 1 and the decision
           must be associated directly with OUTCOMEs (not sub-TREEs).
+        * "age": this indicates an age-test. The VALUE must have the form "a-b",
+          indicating that this branch will be taken for individuals aged such
+          that <![CDATA[a <= age < b]]>, where a,b are non-negative real numbers
+          or the special value "inf", and <![CDATA[a <= b]]>. All VALUEs in the
+          BRANCH_SET must cover all possible (non-negative real) ages, with no
+          overlap (hence, smallest a must be 0 and greatest b must be inf).
+        
+        Semantically, each OUTCOME must be one of the values associated with this decision.
       </xs:documentation>
       <xs:appinfo>name:Help-seeking decision;</xs:appinfo>
     </xs:annotation>
@@ -1506,7 +1513,8 @@
             <xs:documentation>
               A comma-separated list of decisions that must have already been evaluated before
               this decision can be evaluated. Can be empty. Each must be hard-coded or
-              described here.
+              described here. Can include the special decisions "p" and "age",
+              though "age" cannot be combined with any other dependency.
             </xs:documentation>
             <xs:appinfo>name:Preceding decisions;</xs:appinfo>
           </xs:annotation>
