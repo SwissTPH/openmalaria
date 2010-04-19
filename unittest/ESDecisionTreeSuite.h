@@ -328,7 +328,7 @@ public:
 	// Note: LIM=.002 is on the verge of what worked; it may need to be increased.
 	
 	int nMinor = 0, nNormal = 0, nSecond = 0;
-	ESDecisionValue mask = dMap.dvMap.getDecision( "treatment" ).first;
+	ESDecisionValue mask = dMap.dvMap.getDecision( "treatment" ).get<0>();
 	ESDecisionValue minor = dMap.dvMap.get( "treatment", "minor" );
 	ESDecisionValue normal = dMap.dvMap.get( "treatment", "normal" );
 	ESDecisionValue second = dMap.dvMap.get( "treatment", "second" );

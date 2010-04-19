@@ -83,11 +83,12 @@ foreach(arg ${OM_CXXTEST_HEADERS_LIST})
   set(OM_CXXTEST_HEADERS "${OM_CXXTEST_HEADERS} ${arg}")
 endforeach(arg ${OM_CXXTEST_HEADERS_LIST})
 
-message(STATUS "${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}")
+#Appears to be problems with this on windows...
+#message(STATUS "${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}")
 if (OM_CXXTEST_INTERPRETER)
   add_custom_command (OUTPUT tests.cpp
     COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}
-    DEPENDS ${OM_CXXTEST_HEADERS}
+    DEPENDS ${OM_CXXTEST_HEADERS_LIST}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating unittest code with cxxtestgen"
     VERBATIM
