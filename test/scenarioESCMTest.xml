@@ -88,18 +88,22 @@
               p(.5): RDT
             }
           </decision>
-          <decision name="treatment" depends="age5Test" values="MF_treat">
-            age5Test(under5): MF_treat
-            age5Test(over5): MF_treat
+          <decision name="age5" depends="age" values="under5,over5">
+            age(0-5): under5
+            age(5-inf): over5
+         </decision>
+          <decision name="treatment" depends="age5" values="MF_treat">
+            age5(under5): MF_treat
+            age5(over5): MF_treat
           </decision>
-          <decision name="doseSize" depends="treatment,age5Test,result" values="0,1,10,100">
+          <decision name="doseSize" depends="treatment,age5,result" values="0,1,10,100">
             treatment(MF_treat){
-              age5Test(under5){
+              age5(under5){
                 result(none): 100
                 result(negative): 0
                 result(positive): 10
               }
-              age5Test(over5){
+              age5(over5){
                 result(none): 1
                 result(negative): 0
                 result(positive): 100

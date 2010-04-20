@@ -320,21 +320,6 @@ namespace OM { namespace Clinical {
 	    return UC1;
     }
     
-    ESDecisionAge5Test::ESDecisionAge5Test (ESDecisionValueMap& dvMap) {
-	decision = "age5Test";
-	vector< string > valueList;
-	valueList += "under5", "over5";
-	dvMap.add_decision_values( decision, valueList );
-	under5 = dvMap.get( decision, "under5" );
-	over5 = dvMap.get( decision, "over5" );
-    }
-    ESDecisionValue ESDecisionAge5Test::determineImpl (const ESDecisionValue, const ESHostData& hostData) const {
-	if (hostData.ageYears >= 5.0)
-	    return over5;
-	else
-	    return under5;
-    }
-    
     ESDecisionParasiteTest::ESDecisionParasiteTest (ESDecisionValueMap& dvMap) {
 	decision = "result";
 	

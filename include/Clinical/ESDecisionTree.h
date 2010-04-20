@@ -116,13 +116,6 @@ class ESDecisionUC2Test : public ESDecisionTree {
 	ESDecisionValue UC1, UC2;
 };
 
-class ESDecisionAge5Test : public ESDecisionTree {
-    public:
-	ESDecisionAge5Test (ESDecisionValueMap& dvMap);
-	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
-    private:
-	ESDecisionValue under5, over5;
-};
 class ESDecisionParasiteTest : public ESDecisionTree {
     public:
 	ESDecisionParasiteTest (ESDecisionValueMap& dvMap);

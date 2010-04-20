@@ -226,7 +226,6 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     // TODO: could remove tests we don't need (check dependencies of other
     // decisions and of treatment modifiers) (optimization).
     list<ESDecisionTree*> toAdd;
-    toAdd.push_back (new ESDecisionAge5Test (dvMap));
     if (!complicated) {
 	toAdd.push_back (new ESDecisionUC2Test (dvMap));
 	toAdd.push_back (new ESDecisionParasiteTest (dvMap));

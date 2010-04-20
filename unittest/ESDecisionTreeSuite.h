@@ -332,14 +332,6 @@ public:
 	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "case", "UC2" ) );
     }
     
-    void testAge5Test () {
-	ESDecisionAge5Test d( *dvMap );
-	hd.ageYears = 4.99;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "age5Test", "under5" ) );
-	hd.ageYears = 5.0;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "age5Test", "over5" ) );
-    }
-    
     void testParasiteTest () {
 	ESDecisionParasiteTest d( *dvMap );
 	hd.pgState = STATE_MALARIA;
@@ -369,13 +361,22 @@ public:
 	xsd::cxx::tree::sequence<scnXml::HSESDecision, false> decisionSeq;
 	decisionSeq.push_back(
 	    scnXml::HSESDecision( "\
+		age(0-5): under5\
+		age(5-inf): over5",	// tree
+		"age5",	// decision
+		"age",	// depends
+		"under5,over5"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision( "\
 		p(.1): none\
 		p(.9){\
-		    age5Test(under5){p(.8):RDT p(.2):microscopy}\
-		    age5Test(over5){p(.5):RDT p(.5):microscopy}\
+		    age5(under5){p(.8):RDT p(.2):microscopy}\
+		    age5(over5){p(.5):RDT p(.5):microscopy}\
 		}",	// tree
 		"test",	// decision
-		"age5Test,p",	// depends
+		"age5,p",	// depends
 		"none,RDT,microscopy"	// values
 	    )
 	);
