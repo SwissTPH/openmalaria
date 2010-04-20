@@ -35,7 +35,14 @@ namespace OM { namespace Clinical {
     // (You may want to skip this when reading the file.)
     
     struct DR_processor {
-	DR_processor (const ESDecisionValueMap& dvm, ESDecisionRandom& d) : dvMap(dvm), dR(d) {
+	/** Parses input for an ESDecisionRandom tree.
+	 *
+	 * @param dvm Decision-value map
+	 * @param d The target object.
+	 * @param allowP "p" decisions are only allowed when this is true, in
+	 * order to enforce the specification.
+	 */
+	DR_processor (const ESDecisionValueMap& dvm, ESDecisionRandom& d, bool allowP) : dvMap(dvm), dR(d), allowPDecisions(allowP) {
 	    BOOST_FOREACH( const string& dependency, dR.depends ){
 		tuple<ESDecisionValue,const ESDecisionValueMap::value_map_t&> decMap = dvMap.getDecision( dependency );
 		dR.mask |= decMap.get<0>();	// add this decision's inputs into the mask
@@ -60,7 +67,7 @@ namespace OM { namespace Clinical {
 			      ESDecisionValue dependValues,
 			     double dependP
 	){
-	    if (branchSet.decision == "p") {
+	    if (allowPDecisions && branchSet.decision == "p") {
 		
 		double cum_p = 0.0;
 		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ) {
@@ -183,6 +190,7 @@ namespace OM { namespace Clinical {
 	
 	const ESDecisionValueMap& dvMap;
 	ESDecisionRandom& dR;
+	bool allowPDecisions;
 	list< pair< string, ESDecisionValueSet > > inputDependencies;
     };
     
@@ -299,7 +307,22 @@ namespace OM { namespace Clinical {
 	decision = xmlDc.getName();
 	string decErrStr = "decision "+decision;
 	
+	// Prerequisites for deciding this decision.
+	// According to spec, "p" must be listed as a dependency in order to
+	// allow probability-based decisions. We could more efficiently decide
+	// non-random decisions with a separate class, but this is only a
+	// corner-case.
 	depends = dependsInput;
+	bool allowPDecisions = false;
+	vector<string>::iterator it = find( depends.begin(), depends.end(), "p" );
+	if( it != depends.end() ){
+	    depends.erase( it );
+	    if( find( depends.begin(), depends.end(), "p" ) != depends.end() )
+		throw xml_scenario_error( (boost::format(
+		    "decision tree %1%: dependency \"p\" occurred twice"
+		) %decision).str() );
+	    allowPDecisions = true;
+	}
 	
 	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
 	
@@ -315,7 +338,7 @@ namespace OM { namespace Clinical {
 	if (content_p == NULL)
 	    throw runtime_error ("ESDecision: bad upcast?!");
 	
-	DR_processor processor (dvm, *this);
+	DR_processor processor (dvm, *this, allowPDecisions);
 	// 2-stage parse: first produces a parser::Outcome object, second the
 	// processor object does the work of converting into map_cum_p:
 	processor.process( parser::parseTree( *content_p, decision ) );
@@ -334,33 +357,21 @@ namespace OM { namespace Clinical {
     }
     
     ESDecisionTree* ESDecisionTree::create (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) {
-	const string& name = xmlDc.getName();
-	if( name == "age" || name == "p" || name == "case" || name == "result" )
-	    throw xml_scenario_error( (boost::format("error: %1% is a reserved decision name") %name).str() );
+	const string& decision = xmlDc.getName();
+	if( decision == "age" || decision == "p" || decision == "case" || decision == "result" )
+	    throw xml_scenario_error( (boost::format("error: %1% is a reserved decision name") %decision).str() );
 	
-	vector<string> depends = parser::parseSymbolList( xmlDc.getDepends(), xmlDc.getName()+" depends attribute" );
-	vector<string>::iterator it;
+	vector<string> depends = parser::parseSymbolList( xmlDc.getDepends(), decision+" depends attribute" );
 	
-	it = find( depends.begin(), depends.end(), "age" );
+	vector<string>::iterator it = find( depends.begin(), depends.end(), "age" );
 	if( it != depends.end() ){
 	    if( depends.size() != 1u )
 		throw xml_scenario_error( (boost::format(
 		    "decision tree %1%: a decision depending on \"age\" may not depend on anything else"
-		) %name).str() );
+		) %decision).str() );
 	    return new ESDecisionAge( dvm, xmlDc );
 	}
 	
-	it = find( depends.begin(), depends.end(), "p" );
-	if( it != depends.end() ){
-	    depends.erase( it );
-	    if( find( depends.begin(), depends.end(), "p" ) != depends.end() )
-		throw xml_scenario_error( (boost::format(
-		"decision tree %1%: dependency \"p\" occurred twice"
-		) %name).str() );
-	    return new ESDecisionRandom( dvm, xmlDc, depends );
-	}
-	
-	//FIXME: mustn't allow any probability decisions in this case!
 	return new ESDecisionRandom( dvm, xmlDc, depends );
     }
 } }

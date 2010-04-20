@@ -81,14 +81,17 @@ class ESDecisionAge : public ESDecisionTree {
 	// should be inf).
 	map<double, ESDecisionValue> age_upper_bounds;
 	
-	// For better messages when bug-tracking:
-	//const ESDecisionValueMap& dvMap;
-	
 	friend struct DR_processor;
 };
 
 class ESDecisionRandom : public ESDecisionTree {
     public:
+	/** Set up.
+	 *
+	 * @param dvMap Decision-value map to add decision-outcomes into.
+	 * @param xmlDc XML element describing tree
+	 * @param dependsInput Prerequisites of this decision. (Also described
+	 * within xmlDc; passed to avoid re-parsing.) */
 	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput);
 	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
 	
@@ -101,9 +104,6 @@ class ESDecisionRandom : public ESDecisionTree {
 	map_cum_p_t map_cum_p;
 	
 	vector<ESDecisionValue> values;    // ids associated with each possible output
-	
-	// For better messages when bug-tracking:
-	//const ESDecisionValueMap& dvMap;
 	
 	friend struct DR_processor;
 };

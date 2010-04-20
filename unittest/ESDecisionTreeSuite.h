@@ -128,7 +128,7 @@ public:
 		    p(.3): b\
 		}",
 	    "myR",	// decision
-	    "",	// depends
+	    "p",	// depends
 	    "a,b"	// values
 	);
 	ESDecisionTree* ut_r = ESDecisionTree::create( *dvMap, ut_r_xml );
@@ -168,6 +168,20 @@ public:
 	vals += "1","2";
 	dvMap->add_decision_values( "i", vals );
 	dvMap->add_decision_values( "j", vals );
+	
+	scnXml::HSESDecision ut_no_p_xml ("\
+		p(.9): a\
+		p(.1): b",
+	    "no_p",	// decision
+	    "",	// depends
+	    "a,b"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	    ESDecisionTree::create( *dvMap, ut_no_p_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "decision tree no_p: p not listed as a dependency"
+	);
 	
 	scnXml::HSESDecision ut_bad_decis_xml ("\
 		i(1): a\
@@ -285,7 +299,7 @@ public:
 		    age5Test(over5){p(.5):RDT p(.5):microscopy}\
 		}",	// tree
 		"test",	// decision
-		"age5Test",	// depends
+		"age5Test,p",	// depends
 		"none,RDT,microscopy"	// values
 	    )
 	);

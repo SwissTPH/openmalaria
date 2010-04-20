@@ -76,7 +76,7 @@
           This is not intended to be at all realistic, but just to test what the model can do.
           It might eliminate malaria, but might kill patients with drug-overdoses too! -->
         <decisions>
-          <decision name="test" depends="case" values="none,microscopy,RDT">
+          <decision name="test" depends="case,p" values="none,microscopy,RDT">
             case(UC1){
               p(.3): none
               p(.4): microscopy
@@ -111,11 +111,11 @@
             test(microscopy): full
             test(RDT): full
           </decision>
-          <decision name="adherence" depends="" values="full,missFirstDose">
+          <decision name="adherence" depends="p" values="full,missFirstDose">
             p(.7): full
             p(.3): missFirstDose
           </decision>
-          <decision name="delay" depends="" values="0,1,2">
+          <decision name="delay" depends="p" values="0,1,2">
             p(.6): 0
             p(.3): 1
             p(.1): 2
