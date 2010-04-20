@@ -81,7 +81,7 @@ class ESDecisionAge : public ESDecisionTree {
 	// should be inf).
 	map<double, ESDecisionValue> age_upper_bounds;
 	
-	friend struct DR_processor;
+	friend struct DA_processor;
 };
 
 class ESDecisionRandom : public ESDecisionTree {

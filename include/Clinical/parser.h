@@ -26,17 +26,24 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <limits>
 #include <boost/config/warning_disable.hpp>
 #include <boost/variant.hpp>
 
 using std::string;
 using std::pair;
+using std::numeric_limits;
 
 namespace OM { namespace Clinical {
     namespace parser {
 	typedef std::vector<string> SymbolList;
 	typedef std::map<string,double> SymbolValueMap;
 	struct DoubleRange {
+	    DoubleRange() :
+		first(numeric_limits<double>::signaling_NaN()),
+		second(numeric_limits<double>::signaling_NaN())
+	    {}
+	    DoubleRange(double f, double s) : first(f), second(s) {}
 	    double first, second;
 	};
 	typedef std::map<string,DoubleRange> SymbolRangeMap;

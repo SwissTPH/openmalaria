@@ -248,6 +248,82 @@ public:
 	);
     }
     
+    void testAgeDecision () {
+	scnXml::HSESDecision ut_age5_xml ("\
+		age(0-5): under5\
+		age(5-inf): over5\
+	    ",
+	    "age5",	// decision
+	    "age",	// depends
+	    "under5,over5"	// values
+	);
+	ESDecisionTree* d = ESDecisionTree::create( *dvMap, ut_age5_xml );
+	
+	hd.ageYears = 4.99;	// under
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "under5" ) );
+	hd.ageYears = 5.0;		// boundary
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "over5" ) );
+	hd.ageYears = numeric_limits<double>::max();
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "over5" ) );
+	
+	scnXml::HSESDecision ut_age_deep_xml ("\
+		age(0-10){\
+		    age(0-5): a\
+		    age(5-12): b\
+		}\
+		age(10-inf): c\
+	    ",
+	    "age_deep",	// decision
+	    "age",	// depends
+	    "a,b,c"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	    ESDecisionTree::create( *dvMap, ut_age_deep_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "decision tree age_deep: age-branches within age-branches not supported"
+	);
+	
+	
+	scnXml::HSESDecision ut_age_no_depends_xml ("\
+		age(0-5): a\
+		age(5-inf): b\
+	    ",
+	    "age_no_depends",	// decision
+	    "",	// error: age not listed
+	    "a,b"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	    ESDecisionTree::create( *dvMap, ut_age_no_depends_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "decision tree age_no_depends: age not listed as a dependency"
+	);
+	
+	vector<string> vals;
+	vals += "1","2";
+	dvMap->add_decision_values( "i", vals );
+	
+	scnXml::HSESDecision ut_age_combined_xml ("\
+		i(1) {\
+		    age(0-inf): a\
+		}\
+		i(2) {\
+		    age(0-inf): b\
+		}\
+	    ",
+	    "age_combined",	// decision
+	    "i,age",	// error: age may not be combined with other dependencies
+	    "a,b"	// values
+	);
+	TS_ASSERT_THROWS_EQUALS(
+	    ESDecisionTree::create( *dvMap, ut_age_combined_xml ),
+	    const std::runtime_error &e,
+	    string(e.what()),
+	    "decision tree age_combined: a decision depending on \"age\" may not depend on anything else"
+	);
+    }
+    
     void testUC2Test () {
 	ESDecisionUC2Test d( *dvMap );
 	hd.pgState = STATE_MALARIA;

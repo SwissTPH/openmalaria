@@ -23,6 +23,8 @@
 #include "util/random.h"
 #include "util/errors.hpp"
 
+#include <limits>
+#include <list>
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
@@ -194,6 +196,111 @@ namespace OM { namespace Clinical {
 	list< pair< string, ESDecisionValueSet > > inputDependencies;
     };
     
+    struct DA_processor {
+	typedef parser::DoubleRange DoubleRange;
+	
+	/** Parses input for an ESDecisionAge tree.
+	 *
+	 * @param dvm Decision-value map
+	 * @param d The target object.
+	 */
+	DA_processor (const ESDecisionValueMap& dvm, ESDecisionAge& d) : dvMap(dvm), dA(d) {
+	    assert( dA.depends.empty() );
+	}
+	
+	void process (const parser::Outcome& outcome) {
+	    processOutcome( outcome, DoubleRange(0.0, numeric_limits<double>::infinity()), false );
+	    checkAndApplyRanges ();
+	}
+	
+    private:
+	static DoubleRange intersection( const DoubleRange& lhs, const DoubleRange& rhs ){
+	    DoubleRange ret(
+		std::max( lhs.first, rhs.first ),
+		std::min( lhs.second, rhs.second )
+	    );
+	    if( ret.first > ret.second )
+		ret.second = ret.first;	// empty range
+	    return ret;
+	}
+	
+	void processBranches (const parser::BranchSet& branchSet, const DoubleRange& range){
+	    if (branchSet.decision == "age") {
+		BOOST_FOREACH( const parser::Branch& branch, branchSet.branches ){
+		    assert ( boost::get<parser::DoubleRange>( &branch.dec_value ) != NULL );	// parser should guarantee we have the right value
+		    processOutcome(
+			branch.outcome,
+			intersection( range, *boost::get<parser::DoubleRange>( &branch.dec_value ) ),
+			true	// to say, don't allow sub-branches
+		    );
+		}
+	    } else {
+		throw xml_scenario_error( (
+		    boost::format( "decision tree %1%: cannot depend on anything other than age (tried to use %2%)" )
+		    %dA.decision
+		    %branchSet.decision
+		).str() );
+	    }
+	}
+	void processOutcome (const parser::Outcome& outcome, DoubleRange range, bool deep){
+	    if ( const string* val_p = boost::get<string>( &outcome ) ) {
+		ESDecisionValue val = dvMap.get( dA.decision, *val_p );
+		
+		ranges.push_back( make_pair( range, val ) );
+	    } else if ( const parser::BranchSet* bs_p = boost::get<parser::BranchSet>( &outcome ) ) {
+		// Don't allow deeper age-branches. Only reason for this
+		// restriction is that we don't check sub-ranges conform to
+		// parent range, which would allow some funny-looking input.
+		if( deep ) {
+		    throw xml_scenario_error( (
+			boost::format( "decision tree %1%: age-branches within age-branches not supported" )
+			%dA.decision
+		    ).str() );
+		}
+		processBranches( *bs_p, range );
+	    } else {
+		assert (false);
+	    }
+	}
+	
+	typedef pair<DoubleRange,ESDecisionValue> RangeValue;
+	struct SortRangeValue {
+	    bool operator() (const RangeValue& lhs, const RangeValue& rhs) const{
+		return lhs.first.first < rhs.first.second;	// sort according to lower-bound of range
+	    }
+	};
+	void checkAndApplyRanges () {
+	    SortRangeValue sortRangeValue;
+	    ranges.sort( sortRangeValue );
+	    
+	    double lastUBound = 0.0;	// required lower bound
+	    BOOST_FOREACH( const RangeValue& range, ranges ){
+		if( lastUBound != range.first.first ) {	// yes, using == on doubles, but should be ok
+		    throw xml_scenario_error( (
+			boost::format( "decision tree %1%: age range bounds don't match up; found [a,%2%), [%3%,%4%)" )
+			%dA.decision
+			%lastUBound
+			%range.first.first
+			%range.first.second
+		    ).str() );
+		}
+		lastUBound = range.first.second;
+		dA.age_upper_bounds[range.first.second] = range.second;
+	    }
+	    if( lastUBound != numeric_limits<double>::infinity() ){
+		throw xml_scenario_error( (
+		    boost::format( "decision tree %1%: age range final upper bound should be inf, found: %2%" )
+		    %dA.decision
+		    %lastUBound
+		).str() );
+	    }
+	}
+	
+	const ESDecisionValueMap& dvMap;
+	ESDecisionAge& dA;
+	list<RangeValue> ranges;
+    };
+    
     
     // -----  Decision constructors and determineImpl() functions  -----
     
@@ -296,6 +403,21 @@ namespace OM { namespace Clinical {
     }
     
     ESDecisionAge::ESDecisionAge (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc) {
+	decision = xmlDc.getName();
+	string decErrStr = "decision "+decision;
+	
+	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
+	dvm.add_decision_values (decision, valueList);
+	
+	// Get content of this element:
+	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
+	if (content_p == NULL)
+	    throw runtime_error ("ESDecision: bad upcast?!");
+	
+	DA_processor processor (dvm, *this);
+	// 2-stage parse: first produces a parser::Outcome object, second the
+	// processor object does the work of converting into age_upper_bounds:
+	processor.process( parser::parseTree( *content_p, decision ) );
     }
     ESDecisionValue ESDecisionAge::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
 	map<double, ESDecisionValue>::const_iterator it = age_upper_bounds.upper_bound( hostData.ageYears );
@@ -325,12 +447,10 @@ namespace OM { namespace Clinical {
 	}
 	
 	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
-	
 	dvm.add_decision_values (decision, valueList);
 	values.resize (valueList.size());
 	for( size_t i = 0; i < valueList.size(); ++i ) {
 	    values[i] = dvm.get (decision, valueList[i]);
-	    //cout<<"added: "<<dvm.format(values[i])<<endl;
 	}
 	
 	// Get content of this element:
