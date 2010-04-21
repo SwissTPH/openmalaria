@@ -44,6 +44,8 @@ public:
   //@{
   /// Initialise whichever model is in use.
   static void init ();
+  /// Cleanup on exit
+  static void cleanup ();
   
   /// Static checkpointing
   static void staticCheckpoint (istream& stream);

@@ -158,6 +158,12 @@ class ESCaseManagement : public CaseManagementCommon {
     public:
 	static void init ();
 	
+	/** Load health system data from initial data or an intervention's data (both from XML).
+	* (Re)loads all data affected by this healthSystem element. */
+	static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
+	
+	static void cleanup ();
+	
 	static void massDrugAdministration(list< OM::Clinical::MedicateData >& medicateQueue);
 	
         /** Runs through case management decisions, selects treatments and

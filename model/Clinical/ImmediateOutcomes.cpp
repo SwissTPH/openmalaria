@@ -34,10 +34,9 @@ void ClinicalImmediateOutcomes::initParameters () {
 
 ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
     ClinicalModel (cF),
-    caseManagement(new OldCaseManagement (tSF))
+    caseManagement(tSF)
 {}
 ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
-  delete caseManagement; 
 }
 
 
@@ -55,7 +54,7 @@ void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHos
 }
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
-  caseManagement->doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
+  caseManagement.doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,
 				    latestReport,
 				    ageYears,
@@ -66,11 +65,11 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& w
 
 void ClinicalImmediateOutcomes::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
-    (*caseManagement) & stream;
+    caseManagement & stream;
 }
 void ClinicalImmediateOutcomes::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
-    (*caseManagement) & stream;
+    caseManagement & stream;
 }
 
 } }

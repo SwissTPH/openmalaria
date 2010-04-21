@@ -24,6 +24,7 @@
 #include "Clinical/Episode.h"
 
 namespace scnXml {
+    class HealthSystem;
     class HSImmediateOutcomes;
 }
 
@@ -48,10 +49,8 @@ public:
   static void init();
   
   /** Load health system data from initial data or an intervention's data (both from XML).
-   * (Re)loads all data affected by this healthSystem element.
-   *
-   * @param source Values have same meaning as healthSystemSource variable. */
-  static void setHealthSystem (int source);
+   * (Re)loads all data affected by this healthSystem element. */
+  static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
   
   
   //!Read caseManagement parameters from input file and allocate data structures.

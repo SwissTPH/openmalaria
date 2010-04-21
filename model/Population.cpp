@@ -28,7 +28,8 @@
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
-#include "Clinical/ImmediateOutcomes.h"
+#include "Clinical/ClinicalModel.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "PkPd/PkPdModel.h"
 
@@ -242,9 +243,7 @@ void Population::implementIntervention (int time)
     // have data if used according to getActiveInterventions().
 
     if (interv->getChangeHS().present()) {
-        if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-            throw util::xml_scenario_error ("Only ClinicalImmediateOutcomes is compatible with change of health-system intervention.");
-        Clinical::OldCaseManagement::setHealthSystem(time);
+        Clinical::CaseManagementCommon::changeHealthSystem(time);
     }
 
     if (interv->getChangeEIR().present()) {

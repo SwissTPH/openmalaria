@@ -58,6 +58,7 @@ void Human::initHumanParameters () {	// static
 
 void Human::clear() {	// static clear
   WithinHost::WithinHostModel::clear();
+  Clinical::ClinicalModel::cleanup();
   Vaccine::clearParameters();
 }
 

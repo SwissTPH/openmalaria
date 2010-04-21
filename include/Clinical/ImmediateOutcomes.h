@@ -39,7 +39,7 @@ public:
   ~ClinicalImmediateOutcomes ();
   
   inline bool recentTreatment() {
-    return caseManagement->recentTreatment();
+    return caseManagement.recentTreatment();
   }
   
   virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears);
@@ -52,7 +52,7 @@ protected:
   
 private:
   /// The CaseManagementModel decides how to treat ill individuals
-  OldCaseManagement * caseManagement;
+  OldCaseManagement caseManagement;
 };
 
 } }

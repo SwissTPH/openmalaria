@@ -20,6 +20,7 @@
 
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/OldCaseManagement.h"
+#include "Clinical/ESCaseManagement.h"
 #include "inputData.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
@@ -32,8 +33,19 @@ namespace OM { namespace Clinical {
     
     // -----  functions  -----
     
-    const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem (int source) {
+    void CaseManagementCommon::changeHealthSystem (int source) {
 	healthSystemSource = source;
+	const scnXml::HealthSystem& healthSystem = getHealthSystem ();
+	
+	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+	    ESCaseManagement::setHealthSystem(healthSystem);
+	else
+	    OldCaseManagement::setHealthSystem(healthSystem);
+	
+	readCaseFatalityRatio (healthSystem);
+    }
+    
+    const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem () {
 	if (healthSystemSource == -1) {
 	    return InputData().getHealthSystem();
 	} else {
@@ -82,10 +94,7 @@ namespace OM { namespace Clinical {
     }
     void CaseManagementCommon::staticCheckpoint (istream& stream) {
 	healthSystemSource & stream;
-	if (healthSystemSource != -1) {
-	    //TODO: equivalent for event scheduler model:
-	    if (!util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-		OldCaseManagement::setHealthSystem(healthSystemSource);
-	}
+	if (healthSystemSource != -1)
+	    changeHealthSystem( healthSystemSource );
     }
 } }

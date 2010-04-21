@@ -51,11 +51,12 @@ void OldCaseManagement::init ()
 
     _oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
     
-    setHealthSystem(-1);
+    changeHealthSystem(-1);
 }
 
-void OldCaseManagement::setHealthSystem (int source) {
-    const scnXml::HealthSystem& healthSystem = getHealthSystem(source);
+void OldCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
+    if( !healthSystem.getImmediateOutcomes().present() )
+	throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
     const scnXml::HSImmediateOutcomes& immediateOutcomes = healthSystem.getImmediateOutcomes().get();
     
     setParasiteCaseParameters (immediateOutcomes);
@@ -73,8 +74,6 @@ void OldCaseManagement::setHealthSystem (int source) {
 	
 	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
     }
-    
-    readCaseFatalityRatio (healthSystem);
 }
 
 
@@ -268,57 +267,57 @@ double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firs
   }
 }
 
-void OldCaseManagement::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem)
+void OldCaseManagement::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& hsioData)
 {
   // --- calculate cureRate ---
 
   //We get the ACR depending on the name of firstLineDrug.
-  cureRate[0] = getHealthSystemACRByName (healthSystem.getInitialACR(),
-                                          healthSystem.getDrugRegimen().getFirstLine());
+  cureRate[0] = getHealthSystemACRByName (hsioData.getInitialACR(),
+                                          hsioData.getDrugRegimen().getFirstLine());
 
   //Calculate curerate 0
-  double pSeekOfficialCareUncomplicated1 = healthSystem.getPSeekOfficialCareUncomplicated1().getValue();
-  double pSelfTreatment = healthSystem.getPSelfTreatUncomplicated().getValue();
+  double pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
+  double pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
   if (pSeekOfficialCareUncomplicated1 + pSelfTreatment > 0) {
-    double cureRateSelfTreatment = healthSystem.getInitialACR().getSelfTreatment().getValue();
+    double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
 
     cureRate[0] = (cureRate[0] * pSeekOfficialCareUncomplicated1
                    + cureRateSelfTreatment * pSelfTreatment)
                   / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
   }
 
-  cureRate[1] = getHealthSystemACRByName (healthSystem.getInitialACR(),
-                                          healthSystem.getDrugRegimen().getSecondLine());
+  cureRate[1] = getHealthSystemACRByName (hsioData.getInitialACR(),
+                                          hsioData.getDrugRegimen().getSecondLine());
 
-  cureRate[2] = getHealthSystemACRByName (healthSystem.getInitialACR(),
-                                          healthSystem.getDrugRegimen().getInpatient());
+  cureRate[2] = getHealthSystemACRByName (hsioData.getInitialACR(),
+                                          hsioData.getDrugRegimen().getInpatient());
 
 
   // --- calculate probGetsTreatment ---
 
-  probGetsTreatment[0] = healthSystem.getPSeekOfficialCareUncomplicated1().getValue() + healthSystem.getPSelfTreatUncomplicated().getValue();
-  probGetsTreatment[1] = healthSystem.getPSeekOfficialCareUncomplicated2().getValue();
-  probGetsTreatment[2] = healthSystem.getPSeekOfficialCareSevere().getValue();
+  probGetsTreatment[0] = hsioData.getPSeekOfficialCareUncomplicated1().getValue() + hsioData.getPSelfTreatUncomplicated().getValue();
+  probGetsTreatment[1] = hsioData.getPSeekOfficialCareUncomplicated2().getValue();
+  probGetsTreatment[2] = hsioData.getPSeekOfficialCareSevere().getValue();
 
 
   // --- calculate probParasitesCleared ---
 
-  string firstLineDrug = healthSystem.getDrugRegimen().getFirstLine();
-  string secondLineDrug = healthSystem.getDrugRegimen().getSecondLine();
-  pSeekOfficialCareUncomplicated1 = healthSystem.getPSeekOfficialCareUncomplicated1().getValue();
+  string firstLineDrug = hsioData.getDrugRegimen().getFirstLine();
+  string secondLineDrug = hsioData.getDrugRegimen().getSecondLine();
+  pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
 
-  double complianceFirstLine = getHealthSystemACRByName (healthSystem.getCompliance(), firstLineDrug);
-  double complianceSecondLine = getHealthSystemACRByName (healthSystem.getCompliance(), secondLineDrug);
+  double complianceFirstLine = getHealthSystemACRByName (hsioData.getCompliance(), firstLineDrug);
+  double complianceSecondLine = getHealthSystemACRByName (hsioData.getCompliance(), secondLineDrug);
 
-  double cureRateFirstLine = getHealthSystemACRByName (healthSystem.getInitialACR(), firstLineDrug);
-  double cureRateSecondLine = getHealthSystemACRByName (healthSystem.getInitialACR(), secondLineDrug);
+  double cureRateFirstLine = getHealthSystemACRByName (hsioData.getInitialACR(), firstLineDrug);
+  double cureRateSecondLine = getHealthSystemACRByName (hsioData.getInitialACR(), secondLineDrug);
 
-  double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (healthSystem.getNonCompliersEffective(), firstLineDrug);
-  double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (healthSystem.getNonCompliersEffective(), secondLineDrug);
+  double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), firstLineDrug);
+  double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), secondLineDrug);
 
-  pSelfTreatment = healthSystem.getPSelfTreatUncomplicated().getValue();
-  double complianceSelfTreatment = healthSystem.getCompliance().getSelfTreatment().getValue();
-  double cureRateSelfTreatment = healthSystem.getInitialACR().getSelfTreatment().getValue();
+  pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
+  double complianceSelfTreatment = hsioData.getCompliance().getSelfTreatment().getValue();
+  double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
 
   //calculate probParasitesCleared 0
   if ( (pSeekOfficialCareUncomplicated1 + pSelfTreatment) > 0) {

@@ -50,6 +50,10 @@ void ClinicalModel::init () {
   else
     ClinicalImmediateOutcomes::initParameters();
 }
+void ClinicalModel::cleanup () {
+    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+	ClinicalEventScheduler::cleanup();
+}
 
 void ClinicalModel::staticCheckpoint (istream& stream) {
     infantDeaths & stream;

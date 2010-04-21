@@ -29,33 +29,55 @@ namespace scnXml {
 }
 
 namespace OM { namespace Clinical {
+    /** Code shared between case management systems, to:
+     *
+     * 1. deal with change-of-health-system interventions
+     * 2. handle case-fatality-rate data
+     * 
+     * For convenience with handling change-of-health-system interventions,
+     * the case management model holds CFR data, not the clinical model.
+     *************************************************************************/
     class CaseManagementCommon {
     public:
+	/** Checkpointing: load state.
+	 *
+	 * If healthSystemSource != -1, this calls changeHealthSystem to re-load
+	 * a parameters from an intervention. */
 	static void staticCheckpoint (istream& stream);
+	/// Checkpointing: save state
 	static void staticCheckpoint (ostream& stream);
 	
-    protected:
-	/** Gets the primary description of the health system when
-	 * source == -1, or the replacement description given by
-	 * timed intervention at timestep source.
+	/** Serves both to set initial health-system data and to change
+	 * following an intervention.
 	 * 
-	 * Also sets healthSystemSource to this value. */
-	static const scnXml::HealthSystem& getHealthSystem (int source);
+	 * Gets the primary description of the health system when
+	 * source == -1, or the replacement description given by
+	 * timed intervention at timestep source, then calls
+	 * setHealthSystem from a derived class.
+	 * 
+	 * Also calls readCaseFatalityRatio with the new data. */
+	static void changeHealthSystem (int source);
 	
-	/// Reads in the Case Fatality percentages from the XML.
-	static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
-	
+    protected:
 	/** Stepwise linear interpolation to get age-specific hospital case
 	 * fatality rate from input data.
 	 * 
 	 * @param ageYears Age of person in years */
 	static double caseFatality(double ageYears);
 	
+    private:
+	/** Gets the primary description of the health system when
+	 * source == -1, or the replacement description given by
+	 * timed intervention at timestep source. */
+	static const scnXml::HealthSystem& getHealthSystem ();
+	
+	/// Reads in the Case Fatality percentages from the XML.
+	static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
+	
 	/** Describes which health-system descriptor should be used, in order
 	 * to load the correct one from a checkpoint (see getHealthSystem). */
 	static int healthSystemSource;
 	
-    private:
 	// A map from age-group upper-bounds to CFR values. The first lower-
 	// bound we assume to be less than or equal to any input value, and we
 	// assume no input can be greater than the last upper-bound (which

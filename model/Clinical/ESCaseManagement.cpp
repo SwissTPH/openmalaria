@@ -20,6 +20,7 @@
 
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ESDecisionTree.h"
+#include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
 #include "inputData.h"
 #include "util/errors.hpp"
@@ -265,6 +266,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	} else
 	    ++it;
     }
+    assert( i == decisions.size() );	// all allocated decision slots should be full
     
     
     // Read treatments:
@@ -325,11 +327,6 @@ ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESTreatmentSchedule* ESCaseManagement::mdaDoses;
 
 void ESCaseManagement::init () {
-    // Assume EventScheduler data was checked present:
-    const scnXml::HSEventScheduler& xmlESCM = InputData().getHealthSystem().getEventScheduler().get();
-    uncomplicated.initialize (xmlESCM.getUncomplicated (), false);
-    complicated.initialize (xmlESCM.getComplicated (), true);
-    
     // MDA Intervention data
     const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
     if (mdaDesc.present()) {
@@ -338,6 +335,24 @@ void ESCaseManagement::init () {
 	mdaDoses = new ESTreatmentSchedule ( mdaDesc.get().getSchedule().get() );
     } else
 	mdaDoses = NULL;
+    
+    changeHealthSystem( -1 );
+}
+//TODO: test-case with a change-of-health-system
+void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
+    if( !healthSystem.getEventScheduler().present() )
+	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");
+    const scnXml::HSEventScheduler& esData = healthSystem.getEventScheduler().get();
+    uncomplicated.initialize (esData.getUncomplicated (), false);
+    complicated.initialize (esData.getComplicated (), true);
+    
+    // Calling our parent class like this is messy. Changing this would require
+    // moving change-of-health-system handling into ClinicalModel.
+    ClinicalEventScheduler::setParameters( esData );
+}
+void ESCaseManagement::cleanup () {
+    if( mdaDoses != NULL )
+	delete mdaDoses;
 }
 
 void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {

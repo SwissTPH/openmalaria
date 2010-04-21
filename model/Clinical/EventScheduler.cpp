@@ -49,10 +49,10 @@ void ClinicalEventScheduler::init ()
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
-    // We assume EventScheduler data was already confirmed present:
-    const scnXml::HSEventScheduler& ev = InputData().getHealthSystem().getEventScheduler().get();
-    
     ESCaseManagement::init ();
+}
+
+void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
     /*
     const scnXml::ClinicalOutcomes::OutcomesSequence& ocSeq = ev.getClinicalOutcomes().getOutcomes();
     for (scnXml::ClinicalOutcomes::OutcomesConstIterator it = ocSeq.begin(); it != ocSeq.end(); ++it) {
@@ -69,6 +69,10 @@ void ClinicalEventScheduler::init ()
     uncomplicatedCaseDuration = 3;
     complicatedCaseDuration = 6;
     pDeathInitial = 0.2;
+}
+
+void ClinicalEventScheduler::cleanup () {
+    ESCaseManagement::cleanup ();
 }
 
 

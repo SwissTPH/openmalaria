@@ -27,6 +27,10 @@
 #include <boost/unordered_map.hpp>
 #include <list>
 
+namespace scnXml {
+    class HSEventScheduler;
+}
+
 namespace OM { namespace Clinical {
 
 /** Tracks clinical status (sickness), triggers case management for new events,
@@ -42,6 +46,8 @@ class ClinicalEventScheduler : public ClinicalModel
 {
 public:
   static void init ();
+  static void setParameters (const scnXml::HSEventScheduler& esData);
+  static void cleanup ();
   
   ClinicalEventScheduler (double cF, double tSF);
   ~ClinicalEventScheduler ();
