@@ -20,6 +20,7 @@
 
 #include "Clinical/ClinicalModel.h"
 
+#include "Clinical/CaseManagementCommon.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
@@ -53,14 +54,12 @@ void ClinicalModel::init () {
 void ClinicalModel::staticCheckpoint (istream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
-    if (!util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-	OldCaseManagement::staticCheckpoint(stream);
+    CaseManagementCommon::staticCheckpoint(stream);
 }
 void ClinicalModel::staticCheckpoint (ostream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
-    if (!util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-	OldCaseManagement::staticCheckpoint(stream);
+    CaseManagementCommon::staticCheckpoint(stream);
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {

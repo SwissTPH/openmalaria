@@ -22,6 +22,7 @@
 #define Hmod_ESCaseManagement
 
 #include "Global.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ESDecisionTree.h"	// needed for ESDecisionMap
 #include "Clinical/parser.h"
 #include "Pathogenesis/State.h"
@@ -153,7 +154,7 @@ class ESDecisionMap {
 /** Tracks clinical status (sickness), does case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
  *****************************************************************************/
-class ESCaseManagement {
+class ESCaseManagement : public CaseManagementCommon {
     public:
 	static void init ();
 	

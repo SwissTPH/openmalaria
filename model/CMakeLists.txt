@@ -21,6 +21,7 @@ set (Model_CPP
   Host/intervention.cpp
   
   Clinical/ClinicalModel.cpp
+  Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
   Clinical/ESDecisionTree.cpp

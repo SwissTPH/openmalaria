@@ -405,6 +405,7 @@ namespace OM { namespace Clinical {
 	processor.process( parser::parseTree( *content_p, decision ) );
     }
     ESDecisionValue ESDecisionAge::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
+	assert (hostData.ageYears >= 0.0 && hostData.ageYears < numeric_limits<double>::infinity());
 	map<double, ESDecisionValue>::const_iterator it = age_upper_bounds.upper_bound( hostData.ageYears );
 	assert( it != age_upper_bounds.end() );	// should be confirmed by set-up
 	return it->second;

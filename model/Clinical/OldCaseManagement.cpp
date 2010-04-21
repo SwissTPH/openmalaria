@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
+
 #include "Clinical/OldCaseManagement.h"
 #include "Clinical/ClinicalModel.h"
 
@@ -27,38 +28,19 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 
-#include <limits>
 #include <cmath>
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-int OldCaseManagement::healthSystemSource;
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 5, 99 };
 double OldCaseManagement::_oddsRatioThreshold;
-bool OldCaseManagement::_noMortality;
-std::vector<double> OldCaseManagement::_inputAge;
-std::vector<double> OldCaseManagement::_caseFatalityRate;
 double OldCaseManagement::probGetsTreatment[3];
 double OldCaseManagement::probParasitesCleared[3];
 double OldCaseManagement::cureRate[3];
 double OldCaseManagement::probSequelaeTreated[NUM_SEQUELAE_AGE_GROUPS];
 double OldCaseManagement::probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
-
-// -----  utility  -----
-
-const scnXml::HealthSystem& getHealthSystem (int healthSystemSource) {
-    if (healthSystemSource == -1) {
-	return InputData().getHealthSystem();
-    } else {
-	const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
-	if (interv == NULL || !interv->getChangeHS().present())
-	    throw runtime_error ("healthSystemSource invalid");
-	return interv->getChangeHS().get();
-    }
-    assert(false);	// unreachable
-}
 
 // -----  static init  -----
 
@@ -73,8 +55,7 @@ void OldCaseManagement::init ()
 }
 
 void OldCaseManagement::setHealthSystem (int source) {
-    healthSystemSource = source;
-    const scnXml::HealthSystem& healthSystem = getHealthSystem(healthSystemSource);
+    const scnXml::HealthSystem& healthSystem = getHealthSystem(source);
     const scnXml::HSImmediateOutcomes& immediateOutcomes = healthSystem.getImmediateOutcomes().get();
     
     setParasiteCaseParameters (immediateOutcomes);
@@ -105,15 +86,6 @@ OldCaseManagement::OldCaseManagement (double tSF) :
 }
 OldCaseManagement::~OldCaseManagement()
 {
-}
-
-void OldCaseManagement::staticCheckpoint (ostream& stream) {
-    healthSystemSource & stream;
-}
-void OldCaseManagement::staticCheckpoint (istream& stream) {
-    healthSystemSource & stream;
-    if (healthSystemSource != -1)
-	setHealthSystem(healthSystemSource);
 }
 
 // -----  other public  -----
@@ -268,50 +240,10 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, S
   }
 }
 
-void OldCaseManagement::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
-{
-    const scnXml::CFRAgeGroups::GroupSequence& xmlGroupSeq = healthSystem.getCFR().getGroup();
-
-  int numOfGroups = xmlGroupSeq.size();
-  _inputAge.resize (numOfGroups + 1);
-  _caseFatalityRate.resize (numOfGroups + 1);
-
-  for (int i = 0;i < numOfGroups; i++) {
-    const scnXml::Group& xmlGroup = xmlGroupSeq[i];
-    _inputAge[i] = xmlGroup.getLowerbound();
-    _caseFatalityRate[i] = xmlGroup.getCfr();
-  }
-
-  //NOTE: need to make sure _inputAge[0] == 0 (or less)
-  _inputAge[0] = 0;
-
-  //Use a high number for the upper bound.
-  _inputAge[numOfGroups] = numeric_limits<double>::infinity();
-  //CFR is constant for everyone above the highest upperbound
-  _caseFatalityRate[numOfGroups] = _caseFatalityRate[numOfGroups-1];
-  _noMortality = (numOfGroups == 1) && (_caseFatalityRate[0] == 0);
-}
-
 double OldCaseManagement::getCommunityCaseFatalityRate (double caseFatalityRatio)
 {
   double x = caseFatalityRatio * _oddsRatioThreshold;
   return x / (1 - caseFatalityRatio + x);
-}
-
-double OldCaseManagement::caseFatality (double ageYears)
-{
-  // NOTE: assume ageYears >= 0 and _inputAge[0] <= 0
-  if (_noMortality)
-    return 0.0;
-
-  size_t i = 0;
-  while (_inputAge[i] <= ageYears)
-    ++i;
-
-  // _inputAge[i-1] <= ageYears < _inputAge[i]
-  double a0 = _inputAge[i-1];
-  double f0 = _caseFatalityRate[i-1];
-  return (ageYears - a0) / (_inputAge[i] - a0) * (_caseFatalityRate[i] - f0) + f0;
 }
 
 
