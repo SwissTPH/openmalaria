@@ -79,8 +79,9 @@ namespace OM { namespace Clinical {
     
     double CaseManagementCommon::caseFatality (double ageYears)
     {
-	assert (ageYears >= 0.0 && ageYears < numeric_limits<double>::infinity());
+	assert ( ageYears >= 0.0 );
 	map<double,double>::const_iterator it = caseFatalityRates.upper_bound( ageYears );
+	assert( it != caseFatalityRates.end() );
 	double a1 = it->first;
 	double f1 = it->second;
 	--it;

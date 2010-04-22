@@ -31,8 +31,8 @@ namespace OM { namespace Clinical {
 
 int ClinicalEventScheduler::uncomplicatedCaseDuration;
 int ClinicalEventScheduler::complicatedCaseDuration;
-double ClinicalEventScheduler::pDeathInitial;
-double ClinicalEventScheduler::parasiteReductionEffectiveness;
+map<double,double> ClinicalEventScheduler::pDeathInitial;
+double ClinicalEventScheduler::neg_v;
 
 //FIXME: age correction factor
 double pDeathAgeFactor (double ageYears) {
@@ -68,7 +68,14 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     //FIXME: initialize properly
     uncomplicatedCaseDuration = 3;
     complicatedCaseDuration = 6;
-    pDeathInitial = 0.2;
+    double alpha = .4;	// proportion of deaths on day of entry to health system in complicated malaria cases
+    
+    const map<double,double>& cfr = CaseManagementCommon::getCaseFatalityRates();
+    pDeathInitial.clear();	// in case we're re-loading from intervention data
+    for( map<double,double>::const_iterator it = cfr.begin(); it != cfr.end(); ++it ){
+	pDeathInitial[it->first] = alpha * it->second;
+    }
+    neg_v = - InputData.getParameter( Params::CFR_PAR_REDUCTION_SCALAR );
 }
 
 void ClinicalEventScheduler::cleanup () {
@@ -94,6 +101,18 @@ void ClinicalEventScheduler::massDrugAdministration(OM::WithinHost::WithinHostMo
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration (medicateQueue);
+}
+
+double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
+    assert ( ageYears >= 0.0 );
+    map<double,double>::const_iterator it = pDeathInitial.upper_bound( ageYears );
+    assert( it != pDeathInitial.end() );
+    double a1 = it->first;
+    double f1 = it->second;
+    --it;
+    double a0 = it->first;	// a0 <=ageYears < a1
+    double f0 = it->second;
+    return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
 }
 
 void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup)
@@ -154,8 +173,10 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    //TODO: zero infectiousness when in hospital
 	    
-	    //TODO: document (first day of case fatality model)
-	    if (random::uniform_01() < pDeathInitial) {
+	    // The probability of death on the first day is some fixed input
+	    // scaled by age-specific CFR.
+	    double pDeath = getPDeathInitial( ageYears );
+	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
 		latestReport.update (Global::simulationTime, ageGroup, pgState);
 		
@@ -184,13 +205,12 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     } else {
 	// No new event (haven't changed state this timestep).
 	
-	//TODO: document (subsequent days of case fatality model)
 	if (pgState & Pathogenesis::COMPLICATED) {
-	    double parasiteReductionEffect = pow(
-		previousDensity / (previousDensity - withinHostModel.getTotalDensity()),
-		parasiteReductionEffectiveness
-	    );
-	    double pDeath = 1.0 - exp(-pDeathAgeFactor(ageYears) * parasiteReductionEffect);
+	    // In complicated episodes, S(t), the probability of survival on
+	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
+	    // for parasite density Y(t). v_neg below is -v.
+	    double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
+	    double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
 		latestReport.update (Global::simulationTime, ageGroup, pgState);
@@ -225,10 +245,6 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 
 void ClinicalEventScheduler::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
-    uncomplicatedCaseDuration & stream;
-    complicatedCaseDuration & stream;
-    pDeathInitial & stream;
-    parasiteReductionEffectiveness & stream;
     int s;
     s & stream;
     pgState = Pathogenesis::State(s);
@@ -239,10 +255,6 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
-    uncomplicatedCaseDuration & stream;
-    complicatedCaseDuration & stream;
-    pDeathInitial & stream;
-    parasiteReductionEffectiveness & stream;
     pgState & stream;
     lastEventTime & stream;
     timeOfRecovery & stream;

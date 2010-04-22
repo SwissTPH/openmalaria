@@ -58,6 +58,11 @@ namespace OM { namespace Clinical {
 	 * Also calls readCaseFatalityRatio with the new data. */
 	static void changeHealthSystem (int source);
 	
+	/// Return the case-fatality-rate map (needed by EventScheduler)
+	static inline const map<double,double>& getCaseFatalityRates (){
+	    return caseFatalityRates;
+	}
+	
     protected:
 	/** Stepwise linear interpolation to get age-specific hospital case
 	 * fatality rate from input data.

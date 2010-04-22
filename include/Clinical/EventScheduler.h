@@ -61,17 +61,21 @@ protected:
   virtual void checkpoint (ostream& stream);
  
 private:
+    /// Utility find to take a value from pDeathInitial.
+    double getPDeathInitial (double ageYears);
+    
     /// Length of an uncomplicated case
     static int uncomplicatedCaseDuration;
     /// Length of a complicated case
     static int complicatedCaseDuration;
     
     /// Probability of death on first day of a complicated case (1 - S(0)).
-    static double pDeathInitial;
-    /// A measure of effectiveness of parasite reduction on the chance-of-death
-    /// probability in severe cases; α in model.
-    static double parasiteReductionEffectiveness;
-  
+    /// Depends on age-group.
+    static map<double,double> pDeathInitial;
+    
+    /// Parameter of S(t) for t > 0
+    static double neg_v;
+    
   /// Current state of sickness
   Pathogenesis::State pgState;
   
