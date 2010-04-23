@@ -124,14 +124,13 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
     if ( Global::simulationTime == timeOfRecovery ) {
-	/*{//FIXME: report recovery/sequelae
-	    // Note: setting SEQUELAE / RECOVERY here only affects reporting, not model
-	    //TODO: report sequelae?
-	    // if ( Sequelae )
-	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	    // else
+	//TODO: report sequelae?
+	// if ( Sequelae )
+	//     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	// else
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	}*/
+	// report event, at conclusion:
+	latestReport.update (Global::simulationTime, ageGroup, pgState);
 	
 	// Individual recovers (and is immediately susceptible to new cases)
 	pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
@@ -155,7 +154,6 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
 	lastEventTime = Global::simulationTime;
-        latestReport.update (Global::simulationTime, ageGroup, pgState);
 	
 	if (pgState & Pathogenesis::MALARIA) {
 	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
@@ -163,10 +161,14 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	}
 	
-	//TODO: get quality of case management and work into p(death)
-	ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	CMAuxOutput auxOut =
+	    ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
-	if (false /*FIXME: RDT used*/) {
+	// Check: is patient in hospital? Reporting only.
+	if ( auxOut.hospitalised ) {	// in hospital
+	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+	}
+	if ( auxOut.RDT_used ) {
 	    Surveys.current->report_Clinical_RDTs (1);
 	}
 	
@@ -185,13 +187,6 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 		_doomed = DOOMED_COMPLICATED;
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
-	    
-	    // Check: is patient in hospital? Reporting only.
-// 	    if ( lastCmDecision & (Decision::TREATMENT_HOSPITAL | Decision::TREATMENT_DEL_HOSPITAL) ) {	// in hospital
-// 		pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
-// 		Surveys.current->report_Clinical_HospitalEntries (1);
-// 		Surveys.current->report_Clinical_HospitalizationDays (medicationDuration);
-// 	    }
 	    
 	    // complicatedCaseDuration should to some respects be associated
 	    // with medication duration, however ongoing medications after

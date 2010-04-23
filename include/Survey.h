@@ -127,17 +127,11 @@ enum SurveyMeasure {
     Vector_EIR_Simulated = 36,
     //@}
     
-    /** @brief EventScheduler reporting (additional to above)
-     *
-     * These are single values, except for drug use, which is per drug abbreviation. */
+    /// @brief EventScheduler reporting (additional to above)
     //@{
-    /// Number of admittances of patients to hospital
-    Clinical_HospitalEntries = 37,
-    /// Number of patient-days in hospital
-    Clinical_HospitalizationDays = 38,
     /// Number of Rapid Diagnostic Tests used
     Clinical_RDTs = 39,
-    /// Quantities of drugs used, by abbreviation
+    /// Quantities of drugs used, per active ingredient abbreviation
     Clinical_DrugUsage = 40,
     //@}
     
@@ -330,12 +324,6 @@ public:
   void setInnoculationsPerAgeGroup (vector<double>& v) {
     _innoculationsPerAgeGroup = v;	// copies v, not just its reference
   }
-  void report_Clinical_HospitalEntries (int num) {
-      data_Clinical_HospitalEntries += num;
-  }
-  void report_Clinical_HospitalizationDays (int days) {
-      data_Clinical_HospitalizationDays += days;
-  }
   void report_Clinical_RDTs (int num) {
       data_Clinical_RDTs += num;
   }
@@ -398,8 +386,6 @@ public:
     data_Vector_Sv & stream;
     data_Vector_EIR_Input & stream;
     data_Vector_EIR_Simulated & stream;
-    data_Clinical_HospitalEntries & stream;
-    data_Clinical_HospitalizationDays & stream;
     data_Clinical_RDTs & stream;
     data_Clinical_DrugUsage & stream;
   }
@@ -452,8 +438,6 @@ private:
     double data_Vector_EIR_Input;
     double data_Vector_EIR_Simulated;
     
-    int data_Clinical_HospitalEntries;
-    int data_Clinical_HospitalizationDays;
     int data_Clinical_RDTs;
     map<string,double> data_Clinical_DrugUsage;
     

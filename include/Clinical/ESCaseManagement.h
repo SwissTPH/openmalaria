@@ -41,6 +41,12 @@ namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
     using boost::unordered_map;
 
+/// Auxilliary output from running case management
+struct CMAuxOutput {
+    bool hospitalised;	// was case hospitalised?
+    bool RDT_used;	// was an RDT test used?
+};
+
 /// Data used for a withinHostModel->medicate() call
 struct MedicateData {
     /// Checkpointing
@@ -133,6 +139,16 @@ class ESDecisionMap {
 	 * schedule is not, an error is thrown. */
 	ESTreatmentSchedule* getSchedule (ESDecisionValue outcome) const;
         
+	/// Return true if the input outcome indicates case was hospitalised
+	inline bool hospitalised (ESDecisionValue outcome) const{
+	    return (outcome & hospitalised_true) == hospitalised_true;
+	}
+	
+	/// Return true if the input outcome indicates an RDT was used
+	inline bool RDT_used (ESDecisionValue outcome) const{
+	    return (outcome & RDT_used_true) == RDT_used_true;
+	}
+	
     private:
 	// All data here should be set by ESCaseManagement::init(); don't checkpoint.
 	
@@ -145,6 +161,9 @@ class ESDecisionMap {
 	Treatments treatments;
 	// Used to mask ESDecisionValues before lookup in treatments:
 	ESDecisionValue treatmentsMask;
+	// Bit set true when hospitalised / an RDT is used:
+	ESDecisionValue hospitalised_true;
+	ESDecisionValue RDT_used_true;
 	
 	friend class ::ESCaseManagementSuite;	// unittests
 	friend class ::ESDecisionTreeSuite;
@@ -167,8 +186,10 @@ class ESCaseManagement : public CaseManagementCommon {
 	static void massDrugAdministration(list< OM::Clinical::MedicateData >& medicateQueue);
 	
         /** Runs through case management decisions, selects treatments and
-         * applies them to the passed medicateQueue. */
-	static void execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
+         * applies them to the passed medicateQueue.
+         * 
+         * Returns: true when the person was hospitalised, false when not. */
+	static CMAuxOutput execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
 	
     private:
 	

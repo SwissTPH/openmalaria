@@ -28,9 +28,11 @@
 #include <set>
 #include <sstream>
 #include <boost/format.hpp>
+#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
+    using namespace boost::assign;
     using boost::format;
     using parser::SymbolValueMap;
     using parser::SymbolRangeMap;
@@ -223,6 +225,16 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
     return it->second;
 }
 void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
+    // Register required "hospitalised", "true"/"false" output, before decisions are created:
+    vector<string> tfValues;
+    // can optimise such that mask and value "true" are equal:
+    tfValues += "false","true";	// true second so has non-zero value
+    hospitalised_true = dvMap.add_decision_values( "hospitalised", tfValues );
+    assert( hospitalised_true == dvMap.get( "hospitalised", "true" ) );
+    // Ditto for RDT usage:
+    RDT_used_true = dvMap.add_decision_values( "RDT_used", tfValues );
+    assert( RDT_used_true == dvMap.get( "RDT_used", "true" ) );
+    
     // Assemble a list of all tests we need to add
     // TODO: could remove tests we don't need (check dependencies of other
     // decisions and of treatment modifiers) (optimization).
@@ -267,6 +279,11 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	    ++it;
     }
     assert( i == decisions.size() );	// all allocated decision slots should be full
+    
+    if( !added.count( "hospitalised" ) )
+	throw xml_scenario_error("ESCaseManagement: decision \"hospitalised\" required");
+    if( !added.count( "RDT_used" ) )
+	throw xml_scenario_error("ESCaseManagement: decision \"RDT_used\" required");
     
     
     // Read treatments:
@@ -362,7 +379,7 @@ void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue)
 	mdaDoses->apply(medicateQueue);
 }
 
-void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
+CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
     ESDecisionMap* map;
     assert (pgState & Pathogenesis::SICK);
     if (pgState & Pathogenesis::COMPLICATED)
@@ -379,6 +396,11 @@ void ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis:
     // We always remove any queued medications.
     medicateQueue.clear();
     schedule->apply (medicateQueue);
+    
+    CMAuxOutput auxOut;
+    auxOut.hospitalised = map->hospitalised(outcome);
+    auxOut.RDT_used = map->RDT_used(outcome);
+    return auxOut;
 }
 
 } }

@@ -124,6 +124,14 @@
             p(.3): 1
             p(.1): 2
           </decision>
+          <decision name="hospitalised" depends="" values="true,false">
+            false
+          </decision>
+          <decision name="RDT_used" depends="test" values="true,false">
+            test(none): false
+            test(microscopy): false
+            test(RDT): true
+          </decision>
         </decisions>
         <treatments>
           <treatment name="MF_treat">
@@ -157,6 +165,13 @@
         <decisions>
           <decision name="treatment" depends="" values="MF_sev">
             MF_sev
+          </decision>
+          <decision name="hospitalised" depends="" values="true,false">
+            true
+          </decision>
+          <decision name="RDT_used" depends="p" values="true,false">
+            p(.2): false
+            p(.8): true
           </decision>
         </decisions>
         <treatments>
