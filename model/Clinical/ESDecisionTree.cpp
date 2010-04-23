@@ -347,38 +347,24 @@ namespace OM { namespace Clinical {
 	if (input == test_none)	// no test
 	    return none;
 	else {
-	    double dens = hostData.withinHost.getTotalDensity ();
-	    double pPositive = 0.0;	// chance of a positive result
+	    //TODO: reference paper
+	    //TODO: move parameters to XML
+	    double dens_50;	// parasite density giving 50% chance of positive outcome
+	    double specificity;	// chance of a negative outcome given no parasites
 	    if (input == test_microscopy) {
 		// Microscopy sensitivity/specificity data in Africa;
 		// Source: expert opinion — Allan Schapira
-		if (dens > 100.)
-		    pPositive = .9;
-		else if (dens > 0.)
-		    pPositive = .75;
-		else
-		    pPositive = 1.0 - .75;	// specificity
+		dens_50 = 20.0;
+		specificity = .75;
 	    } else {
 		assert (input == test_RDT);
 		// RDT sensitivity/specificity for Plasmodium falciparum in Africa
 		// Source: Murray et al (Clinical Microbiological Reviews, Jan. 2008)
-		if (dens > 500.) {
-		    if (dens > 5000.)
-			pPositive = .997;
-		    else if (dens > 1000.)
-			pPositive = .992;
-		    else	// dens > 500.
-			pPositive = .926;
-		} else {
-		    if (dens > 100.)
-			pPositive = .892;
-		    else if (dens > 0.)
-			pPositive = .539;
-		    else	// !(dens > 0.)
-			pPositive = 1.0 - .942;	// specificity
-		}
+		dens_50 = 50.0;
+		specificity = .942;
 	    }
-	    
+	    double dens = hostData.withinHost.getTotalDensity ();
+	    double pPositive = 1.0 - specificity + specificity * dens / (dens + dens_50);
 	    if (random::uniform_01() < pPositive)
 		return positive;
 	    else

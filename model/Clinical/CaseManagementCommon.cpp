@@ -37,12 +37,12 @@ namespace OM { namespace Clinical {
 	healthSystemSource = source;
 	const scnXml::HealthSystem& healthSystem = getHealthSystem ();
 	
+	readCaseFatalityRatio (healthSystem);
+	
 	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
 	    ESCaseManagement::setHealthSystem(healthSystem);
 	else
 	    OldCaseManagement::setHealthSystem(healthSystem);
-	
-	readCaseFatalityRatio (healthSystem);
     }
     
     const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem () {

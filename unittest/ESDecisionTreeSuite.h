@@ -346,11 +346,18 @@ public:
 	TS_ASSERT_DELTA ( propPos, .942, LIM );
 	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
 	
-	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites (so we test sensitivity with 0-100 parasites)
+	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites
 	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .75, LIM );
+	TS_ASSERT_DELTA ( propPos, .85, LIM );
 	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .539, LIM );
+	TS_ASSERT_DELTA ( propPos, .63769, LIM );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
+	
+	UnittestUtil::setTotalParasiteDensity( *whm, 2000. );	// lots of parasites
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
+	TS_ASSERT_DELTA ( propPos, .99257, LIM );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
+	TS_ASSERT_DELTA ( propPos, .99702, LIM );
 	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
     }
     
@@ -434,11 +441,11 @@ public:
 	}
 	
 	// route: tested & (RDT | microscopy) & positive
-	TS_ASSERT_DELTA( nMinor / double(N), 0.9 * (0.8*0.008 + 0.2*0.1), LIM );
+	TS_ASSERT_DELTA( nMinor / double(N), 0.9 * (0.8*0.012 + 0.2*0.004), LIM );
 	// impossible
 	TS_ASSERT_EQUALS( nNormal, 0 );
 	// route: not tested | (tested & (RDT | microscopy) & positive)
-	TS_ASSERT_DELTA( nSecond / double(N), 0.1 + 0.9 * (0.8*0.992 + 0.2*0.9), LIM );
+	TS_ASSERT_DELTA( nSecond / double(N), 0.1 + 0.9 * (0.8*0.988 + 0.2*0.996), LIM );
     }
     
 private:
