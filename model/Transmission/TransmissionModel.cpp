@@ -80,7 +80,7 @@ void TransmissionModel::updateAgeCorrectionFactor (const std::list<Host::Human>&
     // etc., will have a mean of 1.0.
     double meanRelativeAvailability = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h)
-	meanRelativeAvailability += Transmission::PerHostTransmission::relativeAvailabilityAge (h->getAgeInYears());
+	meanRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
     ageCorrectionFactor = populationSize / meanRelativeAvailability;
 }
 

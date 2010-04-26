@@ -159,7 +159,7 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
     
     updateInterventionStatus();
     updateInfection(transmissionModel, ageYears);
-    clinicalModel->update (*withinHostModel, ageYears, surveyAgeGroup, ageTimeSteps);
+    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, surveyAgeGroup, ageTimeSteps);
     clinicalModel->updateInfantDeaths (ageTimeSteps);
     _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     return false;

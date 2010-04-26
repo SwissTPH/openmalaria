@@ -130,7 +130,7 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].calculateEIR (i, host);
   }
-  return EIR * PerHostTransmission::relativeAvailabilityAge (ageInYears) * ageCorrectionFactor;
+  return EIR * host.relativeAvailabilityAge (ageInYears) * ageCorrectionFactor;
 }
 
 

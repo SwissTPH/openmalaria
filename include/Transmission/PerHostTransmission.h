@@ -52,9 +52,14 @@ public:
    *
    * Age factor of availiability; to be multiplied by partial availability.
    * 
-   * Mean output should be 1.0/ageCorrectionFactor. */
-  static inline double relativeAvailabilityAge (double ageyrs) {
-    return AgeGroupData::getAgeSpecificRelativeAvailability (ageyrs);
+   * Mean output should be 1.0/ageCorrectionFactor.
+   * 
+   * Also has a switch to put individuals entirely outside transmission. */
+  inline double relativeAvailabilityAge (double ageyrs) const {
+      // TODO: test if using an if condition like this or multiplying by a
+      // double (0.0 / 1.0) is faster (for usual case: in transmission).
+    return outsideTransmission ? 0.0 :
+	AgeGroupData::getAgeSpecificRelativeAvailability (ageyrs);
   }
   //@}
   
@@ -110,6 +115,12 @@ public:
     return _relativeAvailabilityHet;
   }
   
+  /** Set true to remove human from transmission. Must set true again to restore
+   * transmission. */
+  inline void removeFromTransmission (bool s){
+      outsideTransmission = s;
+  }
+  
   /// Give individual a new ITN as of time timeStep.
   inline void setupITN () {
     timestepITN = Global::simulationTime;
@@ -145,6 +156,9 @@ private:
   // Heterogeneity factor in availability; this is already multiplied into the
   // entoAvailability param stored in HostMosquitoInteraction.
   double _relativeAvailabilityHet;
+  
+  // Determines whether human is outside transmission
+  bool outsideTransmission;
   
   // (simulationTime - timestepXXX) is the age of the intervention.
   // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.

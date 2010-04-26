@@ -53,7 +53,7 @@ void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHos
     withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
 }
 
-void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
+void ClinicalImmediateOutcomes::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup) {
   caseManagement.doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
 				    withinHostModel,
 				    latestReport,

@@ -24,7 +24,12 @@
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 
-namespace OM { namespace Clinical {
+namespace OM {
+    namespace Transmission {
+	class PerHostTransmission;
+    }
+    using Transmission::PerHostTransmission;
+namespace Clinical {
 
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
@@ -86,10 +91,11 @@ public:
    * 
    * @param withinHostModel Used to get the parasite density and to medicate
    *	drugs/clear infections.
+   * @param hostTransmission Used to switch off/on transmission for human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human.
    * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup, int ageTimeSteps);
+  void update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup, int ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -134,9 +140,10 @@ protected:
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
    * @param withinHostModel WithinHostModel of human.
+   * @param hostTransmission PerHostTransmission of human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human. */
-  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) =0;
+  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

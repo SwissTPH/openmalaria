@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
+#include "Transmission/PerHostTransmission.h"
 #include "Surveys.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
@@ -115,7 +116,7 @@ double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
     return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup)
+void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup)
 {
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE, though considering
@@ -134,6 +135,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	
 	// Individual recovers (and is immediately susceptible to new cases)
 	pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
+	
+	// And returns to transmission (if was removed)
+	hostTransmission.removeFromTransmission( false );
     }
     
     bool cmEvent = false;	// set true when we need to do case management
@@ -164,17 +168,18 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	CMAuxOutput auxOut =
 	    ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
-	// Check: is patient in hospital? Reporting only.
 	if ( auxOut.hospitalised ) {	// in hospital
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+	    
+	    // Patients in hospital are removed from the transmission cycle.
+	    // This should have an effect from the start of the next timestep.
+	    hostTransmission.removeFromTransmission( false );
 	}
 	if ( auxOut.RDT_used ) {
 	    Surveys.current->report_Clinical_RDTs (1);
 	}
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
-	    //TODO: zero infectiousness when in hospital
-	    
 	    // The probability of death on the first day is some fixed input
 	    // scaled by age-specific CFR.
 	    double pDeath = getPDeathInitial( ageYears );

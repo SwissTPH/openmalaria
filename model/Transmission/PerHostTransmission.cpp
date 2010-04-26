@@ -49,6 +49,7 @@ void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
 // -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () :
+    outsideTransmission(false),
     timestepITN(Global::TIMESTEP_NEVER), timestepIRS(Global::TIMESTEP_NEVER), timestepVA(Global::TIMESTEP_NEVER),
     nextItnDistribution(0)
 {}
