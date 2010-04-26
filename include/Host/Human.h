@@ -85,21 +85,13 @@ public:
   /** If the individual is too old, returns true. Otherwise, updates the
    * individual for the time-step. */
   bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
-  
-  void addInfections(int numInf);
-
-  void addInfection();
-
-  //FIXME: should be private?
-  void updateInfection(Transmission::TransmissionModel*, double ageYears);
-  
-  /*! Apply interventions to this human if eligible. Calculate the remaining
-      efficacy of the latest vaccination if vaccinated before */
-  void updateInterventionStatus();
   //@}
   
-  ///@brief Deploy intervention functions
+  ///@brief Deploy "intervention" functions
   //@{
+  /// Asks the clinical model to deal with this
+  void massDrugAdministration ();
+  
   /** A wrapper around vaccinate to also report.
    * Can't move reporting to vaccinate as it would change existing reporting. */
   void massVaccinate ();
@@ -118,13 +110,13 @@ public:
   inline void setupVA () {
     perHostTransmission.setupVA ();
   }
+  
+  /// Infect the human (with an imported infection).
+  void addInfection();
   //@}
   
   /// @brief Small functions
   //@{
-  /// Asks the clinical model to deal with this
-  void massDrugAdministration ();
-  
   /// Get the survey age-group. Constant-time; returns result of last update.
   inline SurveyAgeGroup ageGroup() const {
       return surveyAgeGroup;
@@ -160,15 +152,21 @@ public:
   //@}
   
 private:
-  /*! Update the number of doses and the date of the most recent vaccination in
-   * this human */
-  void vaccinate();
-  
-  double calcProbTransmissionToMosquito() const;
-  
-  void clearInfection(WithinHost::Infection *iCurrent);
-  
-  
+    void updateInfection(Transmission::TransmissionModel*, double ageYears);
+    
+    /*! Apply interventions to this human if eligible. Calculate the remaining
+    efficacy of the latest vaccination if vaccinated before */
+    void updateInterventionStatus();
+    
+    /*! Update the number of doses and the date of the most recent vaccination in
+     * this human */
+    void vaccinate();
+    
+    double calcProbTransmissionToMosquito() const;
+    
+    void clearInfection(WithinHost::Infection *iCurrent);
+    
+    
 public:
   /** @brief Models
    *

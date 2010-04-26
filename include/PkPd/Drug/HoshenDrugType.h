@@ -47,7 +47,6 @@ public:
   ///@brief Static functions
   //@{
   /** Initialise the drug model. Called at start of simulation. */
-  //TODO: data from XML.
   static void init ();
   /** Delete set data. Must be called before init can be called again. */
   static void cleanup ();

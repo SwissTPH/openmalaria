@@ -166,7 +166,7 @@ bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor
   # define L _laggedLogDensities
   
   int ageOfInfection = simulationTime - _startdate;	// age in days
-  if (ageOfInfection > _maximumDurationInDays || !(L[0] > -999999.9))	// NOTE: second test is extremely unlikely to fail
+  if (ageOfInfection > _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
   // constraints to ensure the density is defined and not exploding

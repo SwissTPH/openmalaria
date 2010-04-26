@@ -35,11 +35,6 @@ int ClinicalEventScheduler::complicatedCaseDuration;
 map<double,double> ClinicalEventScheduler::pDeathInitial;
 double ClinicalEventScheduler::neg_v;
 
-//FIXME: age correction factor
-double pDeathAgeFactor (double ageYears) {
-    return 1.0;
-}
-
 
 // -----  static init  -----
 

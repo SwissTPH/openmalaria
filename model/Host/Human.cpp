@@ -165,11 +165,6 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
     return false;
 }
 
-void Human::addInfections(int numInf){
-	for(int i=0;i<numInf;i++)
-		withinHostModel->newInfection();
-}
-
 void Human::addInfection(){
 	withinHostModel->newInfection();
 }

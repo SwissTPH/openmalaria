@@ -120,8 +120,9 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   } else if(Global::simulationTime-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
-    TODO: if this code is to survive, then the iptiEffect values should be 
+    if this code is to survive, then the iptiEffect values should be 
     symbolic constants
+    however: code is dead (only used for repeat experiments) anyway
           */
   } else if( iptiEffect ==  2 ||  iptiEffect ==  12) {
     _lastSPDose=Global::simulationTime+1;
@@ -189,9 +190,8 @@ void DescriptiveIPTWithinHost::IPTiTreatment (SurveyAgeGroup ageGroup) {
 // -----  density calculation  -----
 
 void DescriptiveIPTWithinHost::SPAction(){
-  /*TODO if we want to look at presumptive SP treatment with the PkPD model we
-  need to add some code here that will be conditionally implemented depending on the
-  model version.*/
+  /* Uses a simplistic drug model as opposed to PKPD model. PKPD effects with
+   * PKPD model happen anyway. */
 
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()) {
@@ -212,7 +212,7 @@ void DescriptiveIPTWithinHost::SPAction(){
 }
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
-  //NOTE: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
+  //Note: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
   if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeInfections > 0) {
     if (_SPattenuationt > Global::simulationTime && totalDensity < 10) {
       totalDensity = 10;

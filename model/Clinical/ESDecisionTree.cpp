@@ -89,8 +89,7 @@ namespace OM { namespace Clinical {
 		
 	    } else {
 		// This check is to make sure dependencies are listed (other
-		// code depends on this). TODO: check decisions aren't listed
-		// unnecessarily.
+		// code depends on this).
 		if( find( dR.depends.begin(), dR.depends.end(), branchSet.decision ) == dR.depends.end() )
 		    throw xml_scenario_error( (
 			boost::format( "decision tree %1%: %2% not listed as a dependency" )
