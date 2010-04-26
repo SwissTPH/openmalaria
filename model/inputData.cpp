@@ -27,9 +27,12 @@
 #include <sstream>
 #include <fstream>
 #include <map>
+#include <boost/format.hpp>
 
 namespace OM {
-    /// Current schema version.
+    using boost::format;
+    
+/// Current schema version.
 const int SCHEMA_VERSION = 18;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
@@ -41,17 +44,14 @@ const int OLDEST_COMPATIBLE = 13;
 
 void InputDataType::initParameterValues()
 {
-    // initialize all to zero
-    for (size_t i = 0; i < Params::MAX; ++i)
-        parameterValues[i] = 0;
     // set parameters
     const scnXml::Parameters::ParameterSequence& paramSeq = scenario->getModel().getParameters().getParameter();
     for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
         int i = it->getNumber();
         if (i < 0 || i >= Params::MAX)
-            std::cerr << "Warning: parameter with invalid index; ignoring." << std::endl;
-        else
-            parameterValues[i] = it->getValue();
+	    throw util::xml_scenario_error( (format("parameter with invalid index %1%") %i).str() );
+	if( !parameterValues.insert( make_pair( i, it->getValue() ) ).second )
+	    throw util::xml_scenario_error( (format("parameter with index %1% described twice") %i).str() );
     }
 }
 
@@ -171,7 +171,10 @@ void InputDataType::cleanDocument()
 
 double InputDataType::getParameter (size_t i)
 {
-    return parameterValues[i];
+    std::map<int, double>::const_iterator it = parameterValues.find( i );
+    if( it == parameterValues.end() )
+	throw util::xml_scenario_error( (format("parameter %1% required but not described") %i).str() );
+    return it->second;
 }
 const scnXml::Intervention* InputDataType::getInterventionByTime (int time)
 {

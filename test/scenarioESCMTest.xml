@@ -127,11 +127,6 @@
           <decision name="hospitalised" depends="" values="true,false">
             false
           </decision>
-          <decision name="RDT_used" depends="test" values="true,false">
-            test(none): false
-            test(microscopy): false
-            test(RDT): true
-          </decision>
         </decisions>
         <treatments>
           <treatment name="MF_treat">
@@ -1113,6 +1108,7 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="1"/>
   </parameters>
 </model>
 </scenario>

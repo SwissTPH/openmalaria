@@ -170,7 +170,7 @@ namespace Interventions {
 	scnXml::Scenario* scenario;
 	
 	// Initialized (derived) values:
-	double parameterValues[Params::MAX];
+	std::map<int, double> parameterValues;
 	std::map<int, const scnXml::Intervention*> timedInterventions;
 	bitset<Interventions::SIZE> activeInterventions;
     };

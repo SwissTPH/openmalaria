@@ -283,8 +283,9 @@ public:
 		// 1. empty slots in the decisions list
 		// 2. That required decisions are mistakenly optimised out.
 		if( it->first != "result" ) {	// this is a built-in test which may not be used
-		    cerr << "Warning: ESCaseManagement: decision " << it->first << " is unused (for "<<(complicated?"":"un")<<"complicated tree)";
+		    cerr << "Warning: ESCaseManagement: decision " << it->first << " is unused (for "<<(complicated?"":"un")<<"complicated tree)"<<endl;
 		}
+		delete it->second;
 		pending.erase(it);
 		it = pending.begin();	// after erase, we must restart from beginning
 	    } else if (hasAllDependencies (it->second, added)) {
