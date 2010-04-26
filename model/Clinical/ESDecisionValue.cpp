@@ -111,6 +111,12 @@ tuple< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValue
       const ESDecisionValueMap::value_map_t&
     >(it->second.first, it->second.second);
 }
+ESDecisionValue ESDecisionValueMap::getDecisionMask (const string& decision) const {
+    id_map_type::const_iterator it = id_map.find (decision);
+    if (it == id_map.end ())
+	throw invalid_argument ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
+    return it->second.first;
+}
 
 void ESDecisionValueMap::format( const ESDecisionValue v, ostream& stream ) const {
     bool second = false;	// prepend second, third, etc., with ", "

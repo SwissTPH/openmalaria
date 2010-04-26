@@ -389,6 +389,14 @@ public:
 	);
 	decisionSeq.push_back(
 	    scnXml::HSESDecision( "\
+		false",	// tree
+		"hospitalised",	// decision
+		"",	// depends
+		"false,true"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision( "\
 		test(none){ case(UC2):second case(UC1):normal }\
 		test(microscopy){\
 		    result(positive){ case(UC2):second case(UC1):normal }\
@@ -427,7 +435,7 @@ public:
 	// Note: LIM=.002 is on the verge of what worked; it may need to be increased.
 	
 	int nMinor = 0, nNormal = 0, nSecond = 0;
-	ESDecisionValue mask = dMap.dvMap.getDecision( "treatment" ).get<0>();
+	ESDecisionValue mask = dMap.dvMap.getDecisionMask( "treatment" );
 	ESDecisionValue minor = dMap.dvMap.get( "treatment", "minor" );
 	ESDecisionValue normal = dMap.dvMap.get( "treatment", "normal" );
 	ESDecisionValue second = dMap.dvMap.get( "treatment", "second" );

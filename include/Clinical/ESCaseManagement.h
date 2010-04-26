@@ -95,7 +95,7 @@ class ESTreatment {
 	/** Construct from a base schedule and modifiers.
 	 * 
 	 * Also neede the decision value map. */
-	ESTreatment (const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt);
+	ESTreatment (const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt, list<string>& required);
 	~ESTreatment();
 	
 	/** Given an input ESDecisionValue, find a variant of the base treatment
@@ -141,12 +141,12 @@ class ESDecisionMap {
         
 	/// Return true if the input outcome indicates case was hospitalised
 	inline bool hospitalised (ESDecisionValue outcome) const{
-	    return (outcome & hospitalised_true) == hospitalised_true;
+	    return (outcome & hospitalised_mask) == hospitalised_true;
 	}
 	
 	/// Return true if the input outcome indicates an RDT was used
 	inline bool RDT_used (ESDecisionValue outcome) const{
-	    return (outcome & RDT_used_true) == RDT_used_true;
+	    return (outcome & test_mask) == test_RDT;
 	}
 	
     private:
@@ -161,9 +161,8 @@ class ESDecisionMap {
 	Treatments treatments;
 	// Used to mask ESDecisionValues before lookup in treatments:
 	ESDecisionValue treatmentsMask;
-	// Bit set true when hospitalised / an RDT is used:
-	ESDecisionValue hospitalised_true;
-	ESDecisionValue RDT_used_true;
+	ESDecisionValue hospitalised_mask, hospitalised_true;
+	ESDecisionValue test_mask, test_RDT;
 	
 	friend class ::ESCaseManagementSuite;	// unittests
 	friend class ::ESDecisionTreeSuite;

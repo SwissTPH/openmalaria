@@ -100,6 +100,9 @@ struct ESDecisionValueMap {
      * @throws invalid_argument when decision is not found */
     tuple< ESDecisionValue, const value_map_t& > getDecision (const string& decision) const;
     
+    /** Similar to getDecision, but just get the mask directly. */
+    ESDecisionValue getDecisionMask (const string& decision) const;
+    
     class ValueFormatter {
 	const ESDecisionValueMap& parent;
 	const ESDecisionValue value;

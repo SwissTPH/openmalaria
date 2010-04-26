@@ -100,7 +100,7 @@ ESDecisionValue modGetESDecVal( value_map_t& decVals, const scnXml::HSESTreatmen
     return val;
 }
 
-ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt) {
+ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt, list<string>& required) {
     // We need to apply all select-time-range modifiers before any delay
     // modifiers. The easiest solution is to reorder the list:
     list<const scnXml::HSESTreatmentModifier*> modifierList;
@@ -121,6 +121,7 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	}
 	schedules.clear();
 	
+	required.push_back( modifier->getDecision() );	// make sure this decision isn't optimised out
 	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier->getDecision() );
 	schedulesMask |= decPair.get<0>();
 	value_map_t decVals = decPair.get<1>();	// copy
@@ -210,14 +211,91 @@ ESTreatmentSchedule* ESTreatment::getSchedule (ESDecisionValue& outcome) const {
 
 // -----  ESDecisionMap  -----
 
-inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
-    BOOST_FOREACH ( const string& n, decision->depends ) {
-	if (dependencies.count(n) == 0) {
-	    return false;
+class ESDecisionMapProcessor {
+    bool complicated;
+    ESDecisionValueMap& dvMap;
+    
+    typedef map<string,ESDecisionTree*> DecisionList;
+    DecisionList pending;
+    
+    set<ESDecisionTree*> required;	// all required tests; any others are removed (optimisation)
+    
+    // Add by key "decision", and return true if added
+    bool addToPending( ESDecisionTree* d ){
+	return pending.insert( make_pair(d->decision, d) ).second;
+    }
+    void addRequires (const string& x){
+	DecisionList::const_iterator it = pending.find( x );
+	if( it == pending.end() ) {
+	    ostringstream msg;
+	    msg << "ESCaseManagement: decision " << x << " required (for "<<(complicated?"":"un")<<"complicated tree)";
+	    throw xml_scenario_error(msg.str());
+	}
+	if( required.insert( it->second ).second ){	// if newly inserted...
+	    BOOST_FOREACH( const string& dep, it->second->depends )
+		addRequires( dep );
+	}	// else it was already considered
+    }
+    
+    inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
+	BOOST_FOREACH ( const string& n, decision->depends ) {
+	    if (dependencies.count(n) == 0) {
+		return false;
+	    }
+	}
+	return true;
+    }
+    
+public:
+    /* Read from XML into a temporary list. */
+    ESDecisionMapProcessor (ESDecisionValueMap& dvm, const ::scnXml::HSESCaseManagement& xmlCM, bool c) : complicated(c), dvMap(dvm) {
+	// Assemble a list of all tests we might need to add
+	if (!complicated) {
+	    addToPending (new ESDecisionUC2Test (dvMap));	// this test only makes sense for UC case
+	}
+	addToPending (new ESDecisionParasiteTest (dvMap));	// optimised away if not used
+	BOOST_FOREACH ( const ::scnXml::HSESDecision& xmlDc, xmlCM.getDecisions().getDecision() ) {
+	    if( !addToPending (ESDecisionTree::create (dvMap, xmlDc)) )
+		throw xml_scenario_error((format("Case management: decision %1% described twice") %xmlDc.getName()).str());
 	}
     }
-    return true;
-}
+    
+    /* Filter and output. */
+    void process (vector<ESDecisionTree*>& decisions, list<string>& requiredOutputs) {
+	BOOST_FOREACH( const string& req, requiredOutputs ){
+	    addRequires( req );
+	}
+	
+	decisions.resize (pending.size());
+	size_t i = 0;
+	set<string> added;	// names of decisions added; used since it's faster to lookup decision names here than linearly in "decisions"
+	for (DecisionList::iterator it = pending.begin(); ;) {
+	    if (it == pending.end ()) {
+		if (pending.empty ())	// good, we're done
+		    break;
+		// else: some elements had unresolved dependencies; this should already have been caught by addRequires though
+		throw logic_error("ESCaseManagement: didn't catch all dependencies (code error)");
+	    }
+	    //cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
+	    /*if (required.count( it->second ) == 0) {
+		//TODO: optimising out unwanted decisions like this has two
+		// possible sources of error, which should be checked:
+		// 1. empty slots in the decisions list
+		// 2. That required decisions are mistakenly optimised out.
+		pending.erase(it);
+		it = pending.begin();	// after erase, we must restart from beginning
+	    } else*/ if (hasAllDependencies (it->second, added)) {
+		decisions[i++] = it->second;
+		added.insert (it->second->decision);
+		pending.erase (it);
+		it = pending.begin ();	// restart from beginning as above; also means we know if we reach the end there shouldn't be any elements left
+	    } else
+		++it;
+	}
+	assert( i <= decisions.size() );	// some decisions may have been optimised out
+	decisions.resize( i );	// don't leave invalid indexes at the end!
+    }
+};
 inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t& vmap, const string& value) {
     ESDecisionValueMap::value_map_t::const_iterator it = vmap.find (value);
     if (it == vmap.end())	// value is unknown
@@ -225,76 +303,35 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
     return it->second;
 }
 void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
-    // Register required "hospitalised", "true"/"false" output, before decisions are created:
+    // Construct processor & read from XML (must be done before evaluating treatments):
+    ESDecisionMapProcessor processor( dvMap, xmlCM, complicated );
+    
+    list<string> required;	// list required decisions, to avoid optimising out
+    // Register required "hospitalised", "true"/"false" output, before
+    // decisions are created (by ESDecisionMapProcessor):
     vector<string> tfValues;
     // can optimise such that mask and value "true" are equal:
     tfValues += "false","true";	// true second so has non-zero value
-    hospitalised_true = dvMap.add_decision_values( "hospitalised", tfValues );
-    assert( hospitalised_true == dvMap.get( "hospitalised", "true" ) );
-    // Ditto for RDT usage:
-    RDT_used_true = dvMap.add_decision_values( "RDT_used", tfValues );
-    assert( RDT_used_true == dvMap.get( "RDT_used", "true" ) );
+    required.push_back( "hospitalised" );
+    hospitalised_mask = dvMap.add_decision_values( "hospitalised", tfValues );
+    hospitalised_true == dvMap.get( "hospitalised", "true" );
     
-    // Assemble a list of all tests we need to add
-    // TODO: could remove tests we don't need (check dependencies of other
-    // decisions and of treatment modifiers) (optimization).
-    list<ESDecisionTree*> toAdd;
-    if (!complicated) {
-	toAdd.push_back (new ESDecisionUC2Test (dvMap));
-	toAdd.push_back (new ESDecisionParasiteTest (dvMap));
-    }
-    BOOST_FOREACH ( const ::scnXml::HSESDecision& xmlDc, xmlCM.getDecisions().getDecision() ) {
-	toAdd.push_back (ESDecisionTree::create (dvMap, xmlDc));
-    }
+    required.push_back( "test" );
+    test_mask = dvMap.getDecisionMask( "test" );
+    test_RDT = dvMap.get( "test", "RDT" );
     
-    decisions.resize (toAdd.size());
-    size_t i = 0;
-    set<string> added;	// names of decisions added; used since it's faster to lookup decision names here than linearly in "decisions"
-    for (list<ESDecisionTree*>::iterator it = toAdd.begin(); ;) {
-	if (it == toAdd.end ()) {
-	    if (toAdd.empty ())	// good, we're done
-		break;
-	    // else: some elements had unresolved dependencies
-	    cerr << "ESCaseManagement: some decisions have unmeetable dependencies (for "<<(complicated?"":"un")<<"complicated tree):";
-	    BOOST_FOREACH ( ESDecisionTree* decision, toAdd ) {
-		cerr << "\ndecision: "<<decision->decision;
-		cerr << "\thas unmet dependency decisions:";
-		BOOST_FOREACH ( string& dep, decision->depends ) {
-		    if (added.count(dep))
-			cerr << " (" << dep << ')';
-		    else
-			cerr << " " << dep;
-		}
-	    }
-	    cerr << endl;
-	    throw xml_scenario_error("ESCaseManagement: some decisions have unmeetable dependencies (see above)");
-	}
-	//cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
-	if (hasAllDependencies (*it, added)) {
-	    decisions[i++] = *it;
-	    added.insert ((*it)->decision);
-	    toAdd.erase (it);
-	    it = toAdd.begin ();	// restart from beginning; affects order and means we know if we reach the end there shouldn't be any elements left
-	} else
-	    ++it;
-    }
-    assert( i == decisions.size() );	// all allocated decision slots should be full
-    
-    if( !added.count( "hospitalised" ) )
-	throw xml_scenario_error("ESCaseManagement: decision \"hospitalised\" required");
-    if( !added.count( "RDT_used" ) )
-	throw xml_scenario_error("ESCaseManagement: decision \"RDT_used\" required");
-    
-    
-    // Read treatments:
+    // Read treatments
+    required.push_back( "treatment" );
     tuple< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
-    const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.get<1>();
-    BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
-	treatments[treatmentGetValue( treatmentCodes, treatment.getName() )] = new ESTreatment( dvMap, treatment );
-    }
-    
     treatmentsMask = mask_vmap_pair.get<0>();
     
+    const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.get<1>();
+    BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
+	treatments[treatmentGetValue( treatmentCodes, treatment.getName() )] = new ESTreatment( dvMap, treatment, required );
+    }
+    
+    // Filter and add decisions (must be done after reading treatments):
+    processor.process( decisions, required );
     
     // TODO: could check at this point that all possible combinations of
     // decision outputs resolve a treatment (so we don't get

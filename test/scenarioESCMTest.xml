@@ -169,9 +169,9 @@
           <decision name="hospitalised" depends="" values="true,false">
             true
           </decision>
-          <decision name="RDT_used" depends="p" values="true,false">
-            p(.2): false
-            p(.8): true
+          <decision name="test" depends="p" values="none,microscopy,RDT">
+            p(.2): none
+            p(.8): RDT
           </decision>
         </decisions>
         <treatments>

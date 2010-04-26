@@ -59,8 +59,6 @@ class ESDecisionTree {
 	    return determineImpl( input & mask, hostData );
 	}
 	
-	// Note: for some cases we could use ESDecisionName instead of string
-	// (for speed), but error messages would be bad. Only slows set-up.
 	string decision;	// name of decision
 	vector<string> depends;      // other decisions this depends upon
 	

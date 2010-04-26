@@ -48,7 +48,7 @@ public:
 	vals += "all", "selective";
 	dMap.dvMap.add_decision_values( "modSTR", vals );
 	
-	// We need to add a "treatment" decision to make the thing work, though we won't be using it:
+	// We need to add treatment, hospitalised and test decisions to make the thing work, though we won't be using them:
 	xsd::cxx::tree::sequence<scnXml::HSESDecision, false> decisionSeq;
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
@@ -56,6 +56,55 @@ public:
 		"treatment",	// decision
 		"",	// depends
 		"treatment1"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"true",	// tree
+		"hospitalised",	// decision
+		"",	// depends
+		"true,false"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"none",	// tree
+		"test",	// decision
+		"",	// depends
+		"none,microscopy,RDT"	// values
+	    )
+	);
+	// dummy-decisions, required to determine modifiers (though not used)
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"poor",	// tree
+		"modQty",	// decision
+		"",	// depends
+		"poor,extra"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"0",	// tree
+		"modD1",	// decision
+		"",	// depends
+		"0,5"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"B2",	// tree
+		"modD2",	// decision
+		"",	// depends
+		"B2"	// values
+	    )
+	);
+	decisionSeq.push_back(
+	    scnXml::HSESDecision(
+		"all",	// tree
+		"modSTR",	// decision
+		"",	// depends
+		"all,selective"	// values
 	    )
 	);
 	scnXml::HSESDecisions decisions;
