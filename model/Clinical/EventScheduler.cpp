@@ -32,6 +32,7 @@ namespace OM { namespace Clinical {
 
 int ClinicalEventScheduler::uncomplicatedCaseDuration;
 int ClinicalEventScheduler::complicatedCaseDuration;
+int ClinicalEventScheduler::extraDaysAtRisk;
 map<double,double> ClinicalEventScheduler::pDeathInitial;
 double ClinicalEventScheduler::neg_v;
 
@@ -49,22 +50,19 @@ void ClinicalEventScheduler::init ()
 }
 
 void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
-    /*
-    const scnXml::ClinicalOutcomes::OutcomesSequence& ocSeq = ev.getClinicalOutcomes().getOutcomes();
-    for (scnXml::ClinicalOutcomes::OutcomesConstIterator it = ocSeq.begin(); it != ocSeq.end(); ++it) {
-	OutcomeData od;
-	od.pDeath = it->getPDeath();
-	od.hospitalizationDaysDeath = it->getHospitalizationDaysDeath ();
-	od.hospitalizationDaysRecover = it->getHospitalizationDaysRecover ();
-	//FIXME: assert hospitalizationDaysRecover equals length of medication course in days
-	outcomes[it->getID()] = od;
-    }
-    outcomeMask = ev.getClinicalOutcomes().getSevereMask();*/
+    const scnXml::ClinicalOutcomes& coData = esData.getClinicalOutcomes();
     
-    //FIXME: initialize properly
-    uncomplicatedCaseDuration = 3;
-    complicatedCaseDuration = 6;
-    double alpha = .4;	// proportion of deaths on day of entry to health system in complicated malaria cases
+    uncomplicatedCaseDuration = coData.getUncomplicatedCaseDuration();
+    complicatedCaseDuration = coData.getComplicatedCaseDuration();
+    extraDaysAtRisk = coData.getComplicatedRiskDuration() - complicatedCaseDuration;
+    if( uncomplicatedCaseDuration<1 ||
+	complicatedCaseDuration<1 ||
+	extraDaysAtRisk+complicatedCaseDuration<1 ||
+	extraDaysAtRisk>0 )
+	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk duration not met (see documentation)");
+    double alpha = coData.getPropDeathsFirstDay();
+    if( alpha<0.0 || 1.0<alpha )
+	throw util::xml_scenario_error("Clinical outcomes: Proportion of direct deaths on first day should be within range [0,1]");
     
     const map<double,double>& cfr = CaseManagementCommon::getCaseFatalityRates();
     pDeathInitial.clear();	// in case we're re-loading from intervention data
@@ -200,7 +198,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     } else {
 	// No new event (haven't changed state this timestep).
 	
-	if (pgState & Pathogenesis::COMPLICATED) {
+	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
+	if( (pgState & Pathogenesis::COMPLICATED) && (Global::simulationTime < timeOfRecovery + extraDaysAtRisk) ) {
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
 	    // for parasite density Y(t). v_neg below is -v.

@@ -1687,65 +1687,50 @@
   <xs:complexType name="ClinicalOutcomes">
     <xs:annotation>
       <xs:documentation>
-                    Tables describing the probability of death and the expected length of hospital stay.
-                    The ID looked up in each table is the final outcome ID of the case-management tree binary or-ed
-                    with the mask given here.
-                </xs:documentation>
+        Description of base parameters of the clinical model.
+      </xs:documentation>
       <xs:appinfo>name:Clinical Outcomes;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="outcomes" minOccurs="1" maxOccurs="unbounded">
+      <xs:element name="uncomplicatedCaseDuration" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-                              Parameters for a path through the case-management tree (i.e. table row).
-                          </xs:documentation>
-          <xs:appinfo>name:Path;</xs:appinfo>
+            Fixed length of an uncomplicated case of malarial/non-malarial
+            sickness (from treatment seeking until return to life-as-usual).
+            Usually 3.
+          </xs:documentation>
+          <xs:appinfo>name:Uncomplicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="ID" type="xs:int" use="required" />
-          <xs:attribute name="pDeath" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                                      The probability of death.
-                                      This probability is applied once-only for each case, irrespective of the branch (thus
-                                      entries with p=0 for UC cases are probably needed).
-                                  </xs:documentation>
-              <xs:appinfo>units:None;min:0;max:1;name:Probability of dying;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="hospitalizationDaysDeath" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                                      The median length of stay in hospital, given the patient dies directly from this event.
-                                      (Use median rather than a distribution because data should be more reliable and the effect
-                                      of heterogeneity should be small.)
-                                  </xs:documentation>
-              <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in fatal cases;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="hospitalizationDaysRecover" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                                      The median length of stay in hospital, given the patient recovers from this event.
-                                      (Use median rather than a distribution because data should be more reliable and the effect
-                                      of heterogeneity should be small.)
-                                  </xs:documentation>
-              <xs:appinfo>units:Days;min:0;name:Duration of hospitalisation in survivors;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
+      </xs:element>
+      <xs:element name="complicatedCaseDuration" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Fixed length of a complicated/severe case of malaria
+            (from treatment seeking until return to life-as-usual).
+          </xs:documentation>
+          <xs:appinfo>name:Complicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="complicatedRiskDuration" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Number of days for which humans are at risk of death during a severe
+            or complicated case of malaria. Cannot be greater than the duration
+            of a complicated case or less than 1 day.
+          </xs:documentation>
+          <xs:appinfo>name:Complicated risk duration;units:days;min:1;max:unbounded</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="propDeathsFirstDay" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Proportion of direct deaths from severe malaria or a complication
+            which happen on the day of entry to the health system.
+          </xs:documentation>
+          <xs:appinfo>name:Proportion of direct deaths on first day;units:none;min:0;max:1</xs:appinfo>
+        </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="severeMask" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-                      Value used to mask the final ID from the case-management tree before looking up values here.
-                  </xs:documentation>
-        <xs:appinfo>
-                      units:None;min:0;max:0xFFFFFFFF;
-                  </xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 
   <xs:complexType name="drugDescription">

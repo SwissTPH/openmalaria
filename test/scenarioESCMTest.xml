@@ -178,8 +178,11 @@
           </treatment>
         </treatments>
       </complicated>
-      <ClinicalOutcomes severeMask="0">
-        <outcomes ID="0" hospitalizationDaysDeath="2" hospitalizationDaysRecover="3" pDeath="0.01"/>
+      <ClinicalOutcomes>
+        <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
+        <complicatedCaseDuration>6</complicatedCaseDuration>
+        <complicatedRiskDuration>6</complicatedRiskDuration>
+        <propDeathsFirstDay>0.4</propDeathsFirstDay>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>

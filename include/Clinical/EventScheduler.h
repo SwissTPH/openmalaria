@@ -68,6 +68,9 @@ private:
     static int uncomplicatedCaseDuration;
     /// Length of a complicated case
     static int complicatedCaseDuration;
+    /// Time-span for which individual is at risk of death in complicated case
+    /// minus length of complicated case (must be <= 0)
+    static int extraDaysAtRisk;
     
     /// Probability of death on first day of a complicated case (1 - S(0)).
     /// Depends on age-group.
@@ -92,29 +95,6 @@ private:
   
   /// All pending medications
   list<MedicateData> medicateQueue;
-  
-  ///@brief Static data, set up by init
-  //@{
-    /** For a given path through the case-management tree, this holds:
-     * probability of death
-     * hospitalization length (if dies)
-     * hospitalization length (if recovers)
-     */
-    struct OutcomeData {
-	double pDeath;
-	int hospitalizationDaysDeath;
-	int hospitalizationDaysRecover;
-    };
-    
-//     typedef boost::unordered_map<cmid,OutcomeData> OutcomeType;
-    /** Table of outcome data.
-     *
-     * Currently only used for severe outcomes. If wanted for UC outcomes, a second mask could be
-     * used (defaulting to 0), which, if non-zero, is used to mask the tree id in UC cases. */
-//     static OutcomeType outcomes;
-    /// Mask applied to tree id before lookup in outcomes.
-//     static cmid outcomeMask;
-  //@}
 };
 
 } }
