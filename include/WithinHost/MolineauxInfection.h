@@ -45,7 +45,7 @@ private:
 
     /**This function adapt the growth rate.
      * We can't use the Molineaux as it, since
-     * this model is a one day timestep model.
+     * this model is a two day timestep model.
      * the density p(t+1) is then extrapolated.
      *
      */
@@ -57,7 +57,7 @@ private:
 	int _startdate;
 
 	static int delta;
-	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v;
+	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v, meanLocalMaxDensity, sdLocalMaxDensity, meanDiffPosDays, sdDiffPosDays;
 	double m[v], Pc, variantTranscendingSummation, growthRate[v],newP[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus];
 };
 

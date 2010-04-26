@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "WithinHost/MolineauxInfection.h"
 #include "WithinHost/Common.h"
+#include "inputData.h"
 #include "util/random.h"
 #include "util/errors.hpp"
 #include "util/CommandLine.hpp"
@@ -31,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <cmath>
 
 using namespace OM::util;
+
 namespace OM {
 namespace WithinHost {
 
@@ -50,6 +52,10 @@ double MolineauxInfection::Pstar_v;
 double MolineauxInfection::kappa_c;
 double MolineauxInfection::kappa_v;
 double MolineauxInfection::kappa_m;
+double MolineauxInfection::meanLocalMaxDensity;
+double MolineauxInfection::sdLocalMaxDensity;
+double MolineauxInfection::meanDiffPosDays;
+double MolineauxInfection::sdDiffPosDays;
 
 CommonInfection* createMolineauxInfection (uint32_t protID) {
     return new MolineauxInfection (protID);
@@ -67,6 +73,11 @@ void MolineauxInfection::initParameters(){
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
 
+	meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
+	sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+	meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
+	sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+
 	C=1.0, sigma=0.02,rho=0.0, beta=0.01, sProb=0.02, q=0.3, mu_m=16.0, sigma_m=10.4,
 	k_c=0.2, k_m=0.04, Pstar_v=30.0, kappa_c=3.0, kappa_v=3.0, kappa_m=1.0;
 
@@ -82,7 +93,8 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
 	for(int i=0;i<v; i++)
 	{
-		P[i] = m[i] = 0.0;
+		P[i] = 0.0;
+		m[i] = 0.0;
 
 		while(m[i]<1.0)
 			m[i]=random::gauss(mu_m, sigma_m);
@@ -92,7 +104,6 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
 		variantSpecificSummation[i]=0.0;
 	}
-
 	for(int tau=0; tau<taus;tau++)
 		laggedPc[tau] = 0.0;
 
@@ -102,10 +113,8 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
 void MolineauxInfection::updateGrowthRateMultiplier(){
 
-	double Pc_new = 0.0;
-
-	double Pstar_c = k_c*pow(random::gauss(4.79, 0.57), 10.0);
-	double Pstar_m = k_m*pow(random::gauss(2.33, 0.26), 10.0);
+	double Pstar_c = k_c*pow(random::gauss(meanLocalMaxDensity, sdLocalMaxDensity), 10.0);
+	double Pstar_m = k_m*pow(random::gauss(meanDiffPosDays, sdDiffPosDays), 10.0);
 
 	double Sc = 1/(1 + pow(_density/Pstar_c, kappa_c));
 	double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta;
@@ -121,7 +130,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	for(int i=0; i<v; i++)
 	{
 		S[i] = 1/(1+pow(getVariantSpecificSummation(i,P[i])/Pstar_v, kappa_v));
-		sigma_Qi_Si+= pow(q, (double)i+1)*S[i];
+		sigma_Qi_Si+= pow(q, (double)i)*S[i];
 		sigma_S+=S[i];
 	}
 
@@ -131,7 +140,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		if(S[i]<0.1)
 			p_i = 0.0;
 		else
-			p_i = pow(q, (double)i+1)*S[i]/sigma_Qi_Si;
+			p_i = pow(q, (double)i)*S[i]/sigma_Qi_Si;
 
 		double newPi;
 		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
