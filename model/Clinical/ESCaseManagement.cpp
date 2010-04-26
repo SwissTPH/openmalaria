@@ -277,14 +277,14 @@ public:
 		throw logic_error("ESCaseManagement: didn't catch all dependencies (code error)");
 	    }
 	    //cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
-	    /*if (required.count( it->second ) == 0) {
-		//TODO: optimising out unwanted decisions like this has two
+	    if (required.count( it->second ) == 0) {
+		//Note: optimising out unwanted decisions like this has two
 		// possible sources of error, which should be checked:
 		// 1. empty slots in the decisions list
 		// 2. That required decisions are mistakenly optimised out.
 		pending.erase(it);
 		it = pending.begin();	// after erase, we must restart from beginning
-	    } else*/ if (hasAllDependencies (it->second, added)) {
+	    } else if (hasAllDependencies (it->second, added)) {
 		decisions[i++] = it->second;
 		added.insert (it->second->decision);
 		pending.erase (it);

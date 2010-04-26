@@ -60,15 +60,15 @@ public:
 	);
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"true",	// tree
+		"age(0-5): true age(5-inf): false",	// tree
 		"hospitalised",	// decision
-		"",	// depends
+		"age",	// depends
 		"true,false"	// values
 	    )
 	);
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"none",	// tree
+		"RDT",	// tree
 		"test",	// decision
 		"",	// depends
 		"none,microscopy,RDT"	// values
@@ -77,7 +77,7 @@ public:
 	// dummy-decisions, required to determine modifiers (though not used)
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"poor",	// tree
+		"extra",	// tree
 		"modQty",	// decision
 		"",	// depends
 		"poor,extra"	// values
@@ -190,6 +190,50 @@ public:
 	TS_ASSERT_EQUALS( md2.abbrev, "B" );
 	TS_ASSERT_EQUALS( md2.qty, 600.0 );
 	TS_ASSERT_DELTA( md2.time, 19.0/24.0, 1.0e-10 );
+    }
+    
+    void testExecution() {
+	// Again, test output treatment, but this time evaluating decision trees.
+	// Aim: check wanted decisions are _not_ optimised out and the unwanted
+	// "result" decision is optimised out.
+	
+	WithinHostModel* whm = WithinHostModel::createWithinHostModel();
+	UnittestUtil::setTotalParasiteDensity( *whm, numeric_limits< double >::infinity() );	// infinite, which means P(true outcome) should be 1.0 with an RDT test
+	ESHostData hd( 16., *whm, OM::Pathogenesis::NONE );
+	ESDecisionValue outcome = dMap.determine( hd );
+	delete whm;
+	
+	// If result test was executed, result should be true (or false). But it
+	// should have been optimised out (since unused), leaving result none.
+	ESDecisionValue result_mask = dMap.dvMap.getDecisionMask( "result" );
+	ESDecisionValue result_none = dMap.dvMap.get( "result", "none" );
+	TS_ASSERT_EQUALS( outcome & result_mask, result_none );
+	
+	const ESTreatmentSchedule *sched
+	    = dMap.getSchedule( outcome );
+	ETS_ASSERT( sched != NULL );
+	
+	list<MedicateData> medQueue;
+	sched->apply( medQueue );
+	ETS_ASSERT_EQUALS( medQueue.size(), 3u );
+	
+	const MedicateData& md1 = medQueue.front();
+	TS_ASSERT_EQUALS( md1.abbrev, "A" );
+	TS_ASSERT_EQUALS( md1.qty, 2000.0 );
+	TS_ASSERT_DELTA( md1.time, 0.0/24.0, 1.0e-10 );
+	medQueue.pop_front();
+	const MedicateData& md2 = medQueue.front();
+	TS_ASSERT_EQUALS( md2.abbrev, "B" );
+	TS_ASSERT_EQUALS( md2.qty, 3900.0 );
+	TS_ASSERT_DELTA( md2.time, 2.0/24.0, 1.0e-10 );
+	medQueue.pop_front();
+	const MedicateData& md3 = medQueue.front();
+	TS_ASSERT_EQUALS( md3.abbrev, "B" );
+	TS_ASSERT_EQUALS( md3.qty, 3900.0 );
+	TS_ASSERT_DELTA( md3.time, 14.0/24.0, 1.0e-10 );
+	
+	TS_ASSERT_EQUALS( dMap.hospitalised( outcome ), false );
+	TS_ASSERT_EQUALS( dMap.RDT_used( outcome ), true );
     }
     
 private:
