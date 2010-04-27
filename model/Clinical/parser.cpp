@@ -104,6 +104,7 @@ namespace OM { namespace Clinical {
 		using qi::lexeme;
 		using qi::lit;
 		using qi::double_;
+		using qi::eps;
 		using phoenix::at_c;
 		using phoenix::push_back;
 		using phoenix::val;
@@ -115,7 +116,7 @@ namespace OM { namespace Clinical {
 		value_double = double_[ _val = _1 ];
 		value_range = range[ _val = _1 ];
 		range %= double_ > '-' > double_ ;
-		tree %=
+		tree %= eps >	// force a match: means empty input is an error, not no match
 		    (branch_set | symbol )	// either a set of branches or a symbol
 		;
 		outcome %=			// as tree, but with braces or a colon

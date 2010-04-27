@@ -34,6 +34,9 @@ std::size_t hash_value(ESDecisionValue const& b) {
     return hasher(b.id);
 }
 ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision, const std::vector< string > values) {
+    if( !(values.size() >= 1) )
+	throw xml_scenario_error( (boost::format( "CaseManagement: decision %1%: minimum number of output values is 1" ) %decision).str() );
+    
     set<string> valueSet;
     BOOST_FOREACH( const string& v, values )
 	if( !valueSet.insert( v ).second )
