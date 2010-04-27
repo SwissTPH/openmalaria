@@ -173,6 +173,8 @@ bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor
 	if(timeDiff%2==1)
 		updateGrowthRateMultiplier();
 
+	_cumulativeExposureJ += Global::interval * _density;
+
 	if(_density>1.0e-5)
 		return false;
 	else
