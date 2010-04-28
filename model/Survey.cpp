@@ -86,6 +86,10 @@ class SurveyMeasureMap {
 	    codeMap["Vector_Sv"] = Vector_Sv;
 	    codeMap["Vector_EIR_Input"] = Vector_EIR_Input;
 	    codeMap["Vector_EIR_Simulated"] = Vector_EIR_Simulated;
+	    codeMap["Clinical_RDTs"] = Clinical_RDTs;
+	    codeMap["Clinical_DrugUsage"] = Clinical_DrugUsage;
+	    codeMap["Clinical_FirstDayDeaths"] = Clinical_FirstDayDeaths;
+	    codeMap["Clinical_HospitalFirstDayDeaths"] = Clinical_HospitalFirstDayDeaths;
 	}
 	
 	SurveyMeasure operator[] (const string s) {
@@ -188,6 +192,8 @@ void Survey::allocate ()
     data_Vector_EIR_Simulated = numeric_limits<double>::signaling_NaN();
     
     data_Clinical_RDTs = 0;
+    data_Clinical_FirstDayDeaths.resize (numAgeGroups);
+    data_Clinical_HospitalFirstDayDeaths.resize (numAgeGroups);
 }
 
 
@@ -299,6 +305,12 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[Clinical_DrugUsage]) {
       writeMap (outputFile, Clinical_DrugUsage, _assimilatorMode, survey, data_Clinical_DrugUsage);
+  }
+  if (active[Clinical_FirstDayDeaths]) {
+      writePerAgeGroup (outputFile, Clinical_FirstDayDeaths, _assimilatorMode, survey, data_Clinical_FirstDayDeaths);
+  }
+  if (active[Clinical_HospitalFirstDayDeaths]) {
+      writePerAgeGroup (outputFile, Clinical_HospitalFirstDayDeaths, _assimilatorMode, survey, data_Clinical_HospitalFirstDayDeaths);
   }
 }
 

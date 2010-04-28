@@ -85,6 +85,11 @@ struct ESDecisionValueMap {
      * set (if decision was already entered, and values don't match those
      * associated with the existing decision, a xml_scenario_error is thrown).
      * 
+     * To allow setting up bit-masks, values are assigned integer values in the
+     * order added (as 0, s, 2s, etc., where s is some step size). This only
+     * applies when decision wasn't already added; its recommended to test
+     * values with assert.
+     * 
      * @returns The mask covering them all. */
     ESDecisionValue add_decision_values (const string& decision, const std::vector< string > values);
     

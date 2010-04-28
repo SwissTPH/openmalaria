@@ -73,6 +73,10 @@ void Episode::report () {
       Surveys.at(_surveyPeriod)
 	.reportDirectDeaths (_ageGroup, 1)
 	.reportHospitalDeaths (_ageGroup, 1);
+	if (_state & Pathogenesis::EVENT_FIRST_DAY)
+	    Surveys.at(_surveyPeriod)
+		.report_Clinical_FirstDayDeaths (_ageGroup, 1)
+		.report_Clinical_HospitalFirstDayDeaths (_ageGroup, 1);
     }
     else if (_state & Pathogenesis::SEQUELAE) {
       Surveys.at(_surveyPeriod)
@@ -83,9 +87,13 @@ void Episode::report () {
       Surveys.at(_surveyPeriod)
 	.reportHospitalRecoveries (_ageGroup, 1);
   } else {
-    if (_state & Pathogenesis::DIRECT_DEATH)
+    if (_state & Pathogenesis::DIRECT_DEATH) {
       Surveys.at(_surveyPeriod)
 	.reportDirectDeaths (_ageGroup, 1);
+	if (_state & Pathogenesis::EVENT_FIRST_DAY)
+	    Surveys.at(_surveyPeriod)
+	    .report_Clinical_FirstDayDeaths (_ageGroup, 1);
+    }
     else if (_state & Pathogenesis::SEQUELAE)
       Surveys.at(_surveyPeriod)
 	.reportSequelae (_ageGroup, 1);

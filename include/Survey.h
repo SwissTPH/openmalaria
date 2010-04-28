@@ -133,6 +133,10 @@ enum SurveyMeasure {
     Clinical_RDTs = 39,
     /// Quantities of drugs used, per active ingredient abbreviation
     Clinical_DrugUsage = 40,
+    /// Direct death on first day of CM (before treatment takes effect)
+    Clinical_FirstDayDeaths = 41,
+    /// Direct death on first day of CM (before treatment takes effect); hospital only
+    Clinical_HospitalFirstDayDeaths = 42,
     //@}
     
     // must be hightest value above plus one
@@ -331,6 +335,14 @@ public:
       // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
       (*((data_Clinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
   }
+  Survey& report_Clinical_FirstDayDeaths (SurveyAgeGroup ageGroup, int val) {
+      data_Clinical_FirstDayDeaths[ageGroup.i()] += val;
+      return *this;
+  } 
+  Survey& report_Clinical_HospitalFirstDayDeaths (SurveyAgeGroup ageGroup, int val) {
+      data_Clinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
+      return *this;
+  } 
   void set_Vector_Nv0 (string key, double v) {
     data_Vector_Nv0[key] = v;
   }
@@ -429,6 +441,8 @@ private:
   vector<int> _numIPTDoses;
   vector<int> _numNonMalariaFevers; 
   vector<double> _innoculationsPerAgeGroup;
+  vector<int> data_Clinical_FirstDayDeaths;
+  vector<int> data_Clinical_HospitalFirstDayDeaths;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;

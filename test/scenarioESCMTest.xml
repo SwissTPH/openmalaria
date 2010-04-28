@@ -30,17 +30,21 @@
       <option name="nPatent" value="true"/>
       <option name="sumLogPyrogenThres" value="true"/>
       <option name="sumlogDens" value="true"/>
-      <option name="nTreatments1" value="true"/>
-      <option name="nTreatments2" value="true"/>
-      <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
       <option name="nSeq" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nHospitalRecovs" value="true"/>
+      <option name="nHospitalSeqs" value="true"/>
+      <option name="Clinical_RDTs" value="true"/>
+      <option name="Clinical_DrugUsage" value="true"/>
+      <option name="Clinical_FirstDayDeaths" value="true"/>
+      <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>730</surveyTime>
+      <surveyTime>3650</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
@@ -124,9 +128,6 @@
             p(.3): 1
             p(.1): 2
           </decision>
-          <decision name="hospitalised" depends="" values="true,false">
-            false
-          </decision>
         </decisions>
         <treatments>
           <treatment name="MF_treat">
@@ -161,8 +162,8 @@
           <decision name="treatment" depends="" values="MF_sev">
             MF_sev
           </decision>
-          <decision name="hospitalised" depends="" values="true,false">
-            true
+          <decision name="hospitalisation" depends="" values="none,delayed,immediate">
+            immediate
           </decision>
           <decision name="test" depends="p" values="none,microscopy,RDT">
             p(.2): none
@@ -1111,7 +1112,7 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="1"/>
+    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
   </parameters>
 </model>
 </scenario>

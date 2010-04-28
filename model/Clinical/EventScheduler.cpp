@@ -112,9 +112,7 @@ double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
 void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup)
 {
     // Run pathogenesisModel
-    // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE, though considering
-    // the model's not designed to handle "coninfections" as presented by the Pathogenesis model
-    // this is unimportant.
+    // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
     if ( Global::simulationTime == timeOfRecovery ) {
@@ -161,8 +159,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	CMAuxOutput auxOut =
 	    ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
 	
-	if ( auxOut.hospitalised ) {	// in hospital
+	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+	    
+	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
+		timeOfRecovery += 1;	//FIXME: deal with delay correctly
 	    
 	    // Patients in hospital are removed from the transmission cycle.
 	    // This should have an effect from the start of the next timestep.
@@ -177,7 +178,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    // scaled by age-specific CFR.
 	    double pDeath = getPDeathInitial( ageYears );
 	    if (random::uniform_01() < pDeath) {
-		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
 		latestReport.update (Global::simulationTime, ageGroup, pgState);
 		
 		// Human dies this timestep; we still allow medication of

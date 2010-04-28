@@ -53,6 +53,7 @@ namespace OM { namespace Pathogenesis {
     DIRECT_DEATH	= 0x1000,	///< Used for reporting death (from COMPLICATED sickness)
     SEQUELAE		= 0x2000,	///< Reporting recovered with sequelae (from COMPLICATED sickness)
     RECOVERY		= 0x4000,	///< Report that individual fully recovered
+    EVENT_FIRST_DAY	= 0x8000,	///< Used in combination with DIRECT_DEATH to report death happens on first day (before treatment has effect)
     
     STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
     STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE

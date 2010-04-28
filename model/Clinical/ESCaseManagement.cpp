@@ -309,17 +309,21 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
 void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
     // Construct processor & read from XML (must be done before evaluating treatments):
     ESDecisionMapProcessor processor( dvMap, xmlCM, complicated );
-    
     list<string> required;	// list required decisions, to avoid optimising out
-    // Register required "hospitalised", "true"/"false" output, before
-    // decisions are created (by ESDecisionMapProcessor):
-    vector<string> tfValues;
-    // can optimise such that mask and value "true" are equal:
-    tfValues += "false","true";	// true second so has non-zero value
-    required.push_back( "hospitalised" );
-    hospitalised_mask = dvMap.add_decision_values( "hospitalised", tfValues );
-    hospitalised_true == dvMap.get( "hospitalised", "true" );
     
+    if( complicated ){
+	// Register required "hospitalisation" output, before decisions are created
+	// (by ESDecisionMapProcessor). Effects: no transmission in hospital, delay
+	// simply adds one day to time before returning to treatment seeking.
+	vector<string> tfValues;
+	tfValues += "none","immediate","delayed";
+	required.push_back( "hospitalisation" );
+	hospitalisation_mask = dvMap.add_decision_values( "hospitalisation", tfValues );
+	hospitalisation_immediate = dvMap.get( "hospitalisation", "immediate" );
+	hospitalisation_delayed = dvMap.get( "hospitalisation", "delayed" );
+    }
+    
+    // Register "test" decision, which determines diagnostic usage.
     required.push_back( "test" );
     test_mask = dvMap.getDecisionMask( "test" );
     test_RDT = dvMap.get( "test", "RDT" );
@@ -435,7 +439,10 @@ CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathog
     schedule->apply (medicateQueue);
     
     CMAuxOutput auxOut;
-    auxOut.hospitalised = map->hospitalised(outcome);
+    if( pgState & Pathogenesis::COMPLICATED )
+	auxOut.hospitalisation = map->hospitalisation(outcome);
+    else
+	auxOut.hospitalisation = CMAuxOutput::NONE;
     auxOut.RDT_used = map->RDT_used(outcome);
     return auxOut;
 }

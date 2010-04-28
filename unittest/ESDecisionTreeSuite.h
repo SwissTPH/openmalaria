@@ -389,14 +389,6 @@ public:
 	);
 	decisionSeq.push_back(
 	    scnXml::HSESDecision( "\
-		false",	// tree
-		"hospitalised",	// decision
-		"",	// depends
-		"false,true"	// values
-	    )
-	);
-	decisionSeq.push_back(
-	    scnXml::HSESDecision( "\
 		test(none){ case(UC2):second case(UC1):normal }\
 		test(microscopy){\
 		    result(positive){ case(UC2):second case(UC1):normal }\

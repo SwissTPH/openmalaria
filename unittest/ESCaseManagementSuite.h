@@ -60,10 +60,10 @@ public:
 	);
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"age(0-5): true age(5-inf): false",	// tree
-		"hospitalised",	// decision
+		"age(0-5): immediate age(5-inf): none",	// tree
+		"hospitalisation",	// decision
 		"age",	// depends
-		"true,false"	// values
+		"immediate,delayed,none"	// values
 	    )
 	);
 	decisionSeq.push_back(
@@ -232,7 +232,7 @@ public:
 	TS_ASSERT_EQUALS( md3.qty, 3900.0 );
 	TS_ASSERT_DELTA( md3.time, 14.0/24.0, 1.0e-10 );
 	
-	TS_ASSERT_EQUALS( dMap.hospitalised( outcome ), false );
+	TS_ASSERT_EQUALS( dMap.hospitalisation( outcome ), CMAuxOutput::NONE );
 	TS_ASSERT_EQUALS( dMap.RDT_used( outcome ), true );
     }
     
