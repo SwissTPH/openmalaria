@@ -61,8 +61,8 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     if( uncomplicatedCaseDuration<1
 	|| complicatedCaseDuration<1
 	|| maxUCSeekingMemory<0
-	|| extraDaysAtRisk+complicatedCaseDuration<1
-	|| extraDaysAtRisk>0
+	|| extraDaysAtRisk+complicatedCaseDuration<1	// at risk at least 1 day
+	|| extraDaysAtRisk>0	// at risk longer than case duration
     )
 	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk duration not met (see documentation)");
     pImmediateUC = coData.getPImmediateUC();
@@ -124,19 +124,26 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     
     if ( Global::simulationTime == timeOfRecovery ) {
-	//TODO: report sequelae?
-	// if ( Sequelae )
-	//     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	// else
-	    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	// report event, at conclusion:
-	latestReport.update (Global::simulationTime, ageGroup, pgState);
-	
-	// Individual recovers (and is immediately susceptible to new cases)
-	pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
-	
-	// And returns to transmission (if was removed)
-	hostTransmission.removeFromTransmission( false );
+	if( pgState & Pathogenesis::DIRECT_DEATH ){
+	    // Human dies this timestep (last day of risk of death)
+	    _doomed = DOOMED_COMPLICATED;
+	    
+	    latestReport.update (Global::simulationTime, ageGroup, pgState);
+	} else {
+	    //TODO: report sequelae?
+	    // if ( Sequelae )
+	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+	    // else
+		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	    // report event, at conclusion:
+	    latestReport.update (Global::simulationTime, ageGroup, pgState);
+	    
+	    // Individual recovers (and is immediately susceptible to new cases)
+	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
+	    
+	    // And returns to transmission (if was removed)
+	    hostTransmission.removeFromTransmission( false );
+	}
     }
     
     bool cmEvent = false;	// set true when we need to do case management
@@ -191,16 +198,15 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	
 	// Case fatality rate (first day of illness)
 	// P(death) is some fixed input scaled by age-specific CFR.
-	if (pgState & Pathogenesis::COMPLICATED) {
+	if( (pgState & Pathogenesis::COMPLICATED)
+	    && !(pgState & Pathogenesis::DIRECT_DEATH)
+	) {
 	    double pDeath = getPDeathInitial( ageYears );
 	    //TODO: community when not in hospital / delayed hospital
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
-		latestReport.update (Global::simulationTime, ageGroup, pgState);
-		
-		// Human dies this timestep; we still allow medication of
-		// today's treatments for costing.
-		_doomed = DOOMED_COMPLICATED;
+		// Human is killed at end of time at risk
+		timeOfRecovery += extraDaysAtRisk;
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
@@ -209,7 +215,10 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	
 	// Case fatality rate (subsequent days)
 	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
-	if( (pgState & Pathogenesis::COMPLICATED) && (Global::simulationTime < timeOfRecovery + extraDaysAtRisk) ) {
+	if( (pgState & Pathogenesis::COMPLICATED)
+	    && !(pgState & Pathogenesis::DIRECT_DEATH)
+	    && (Global::simulationTime < timeOfRecovery + extraDaysAtRisk)
+	) {
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
 	    // for parasite density Y(t). v_neg below is -v.
@@ -218,11 +227,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    //TODO: community when not in hospital / delayed hospital
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-		latestReport.update (Global::simulationTime, ageGroup, pgState);
-		
-		// Human dies this timestep; we still allow medication of
-		// today's treatments for costing.
-		_doomed = DOOMED_COMPLICATED;
+		// Human is killed at end of time at risk
+		timeOfRecovery += extraDaysAtRisk;
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
@@ -234,7 +240,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	// Patients in hospital are removed from the transmission cycle.
 	// This should have an effect from the start of the next timestep.
 	if (pgState & Pathogenesis::EVENT_IN_HOSPITAL)
-	    hostTransmission.removeFromTransmission( false );
+	    hostTransmission.removeFromTransmission( true );
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    // complicatedCaseDuration should to some respects be associated
