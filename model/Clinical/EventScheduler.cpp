@@ -27,6 +27,8 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 
+#include <limits>
+
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
@@ -94,7 +96,10 @@ void ClinicalEventScheduler::cleanup () {
 ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         ClinicalModel (cF),
         pgState (Pathogenesis::NONE),
-        timeOfRecovery (Global::TIMESTEP_NEVER)
+        caseStartTime (Global::TIMESTEP_NEVER),
+        timeOfRecovery (Global::TIMESTEP_NEVER),
+        timeLastTreatment (Global::TIMESTEP_NEVER),
+        previousDensity (numeric_limits<double>::quiet_NaN())
 {}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -174,8 +179,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
     
     if ( cmEvent )	// note: new event can override pending delayed event
     {
-	//FIXME: this says if last case was recently, use second line; this isn't quite what we want
-	if (caseStartTime + Episode::healthSystemMemory > Global::simulationTime)
+	// If last treatment prescribed was in recent memory, consider second line.
+	if (timeLastTreatment + Episode::healthSystemMemory > Global::simulationTime)
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
 	
 	caseStartTime = Global::simulationTime;
@@ -189,6 +194,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	CMAuxOutput auxOut = ESCaseManagement::execute(
 	    medicateQueue, pgState, withinHostModel, ageYears, ageGroup
 	);
+	
+	if( medicateQueue.size() )	// I.E. some treatment was given (list is cleared either way)
+	    timeLastTreatment = Global::simulationTime;
 	
 	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
@@ -291,6 +299,7 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     pgState = Pathogenesis::State(s);
     caseStartTime & stream;
     timeOfRecovery & stream;
+    timeLastTreatment & stream;
     previousDensity & stream;
     medicateQueue & stream;
 }
@@ -299,6 +308,7 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     pgState & stream;
     caseStartTime & stream;
     timeOfRecovery & stream;
+    timeLastTreatment & stream;
     previousDensity & stream;
     medicateQueue & stream;
 }

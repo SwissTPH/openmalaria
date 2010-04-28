@@ -95,7 +95,6 @@ private:
   /// Current state of sickness
   Pathogenesis::State pgState;
   
-  //NOTE: not all these variables should be needed eventually
   /** Set to when an event should start. If simulationTime equals this, an event
    * is started (UC & C behaviour different).
    * 
@@ -105,6 +104,9 @@ private:
   /** The individual recovers when Global::simulationTime >= timeOfRecovery,
    * assuming they didn't die. */
   int timeOfRecovery;
+  
+  /// Time at which last treatment was recieved (for second-case considerations).
+  int timeLastTreatment;
   
   /// Total parasite density at previous timestep (used during an event).
   double previousDensity;
