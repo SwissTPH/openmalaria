@@ -37,6 +37,7 @@ int ClinicalEventScheduler::extraDaysAtRisk;
 double ClinicalEventScheduler::pImmediateUC;
 map<double,double> ClinicalEventScheduler::pDeathInitial;
 double ClinicalEventScheduler::neg_v;
+double ClinicalEventScheduler::communityOddsMultiplier;
 
 
 // -----  static init  -----
@@ -64,13 +65,16 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 	|| extraDaysAtRisk+complicatedCaseDuration<1	// at risk at least 1 day
 	|| extraDaysAtRisk>0	// at risk longer than case duration
     )
-	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk duration not met (see documentation)");
+	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
     pImmediateUC = coData.getPImmediateUC();
     double alpha = coData.getPropDeathsFirstDay();
-    if( (alpha<0.0 || 1.0<alpha)
-	|| (pImmediateUC<0.0 || 1.0<pImmediateUC)
+    communityOddsMultiplier = coData.getCommunityOddsMultiplier();
+    if( !(0.0<=alpha && alpha<=1.0)
+	|| !(0.0<=pImmediateUC && pImmediateUC<=1.0)
     )
 	throw util::xml_scenario_error("Clinical outcomes: pImmediateUC and propDeathsFirstDay should be within range [0,1]");
+    if( !(communityOddsMultiplier >= 0) )
+	throw util::xml_scenario_error("Clinical outcomes: communityOddsMultiplier must be >= 0");
     
     const map<double,double>& cfr = CaseManagementCommon::getCaseFatalityRates();
     pDeathInitial.clear();	// in case we're re-loading from intervention data
@@ -202,7 +206,10 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    && !(pgState & Pathogenesis::DIRECT_DEATH)
 	) {
 	    double pDeath = getPDeathInitial( ageYears );
-	    //TODO: community when not in hospital / delayed hospital
+	    // community fatality rate when not in hospital or delayed hospital entry
+	    if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
+		pDeath = (communityOddsMultiplier * pDeath) /
+		    (1.0 + pDeath * (communityOddsMultiplier - 1.0) );
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
@@ -224,7 +231,10 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    // for parasite density Y(t). v_neg below is -v.
 	    double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
 	    double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
-	    //TODO: community when not in hospital / delayed hospital
+	    // community fatality rate when not in hospital
+	    if( !(pgState & Pathogenesis::EVENT_IN_HOSPITAL) )
+		pDeath = (communityOddsMultiplier * pDeath) /
+		(1.0 + pDeath * (communityOddsMultiplier - 1.0) );
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
 		// Human is killed at end of time at risk

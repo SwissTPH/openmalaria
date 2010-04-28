@@ -186,6 +186,7 @@
         <complicatedRiskDuration>6</complicatedRiskDuration>
         <pImmediateUC>.8</pImmediateUC>
         <propDeathsFirstDay>0.4</propDeathsFirstDay>
+        <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
