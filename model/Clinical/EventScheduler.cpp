@@ -30,9 +30,11 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
+int ClinicalEventScheduler::maxUCSeekingMemory;
 int ClinicalEventScheduler::uncomplicatedCaseDuration;
 int ClinicalEventScheduler::complicatedCaseDuration;
 int ClinicalEventScheduler::extraDaysAtRisk;
+double ClinicalEventScheduler::pImmediateUC;
 map<double,double> ClinicalEventScheduler::pDeathInitial;
 double ClinicalEventScheduler::neg_v;
 
@@ -52,17 +54,23 @@ void ClinicalEventScheduler::init ()
 void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
     const scnXml::ClinicalOutcomes& coData = esData.getClinicalOutcomes();
     
+    maxUCSeekingMemory = coData.getMaxUCSeekingMemory();
     uncomplicatedCaseDuration = coData.getUncomplicatedCaseDuration();
     complicatedCaseDuration = coData.getComplicatedCaseDuration();
     extraDaysAtRisk = coData.getComplicatedRiskDuration() - complicatedCaseDuration;
-    if( uncomplicatedCaseDuration<1 ||
-	complicatedCaseDuration<1 ||
-	extraDaysAtRisk+complicatedCaseDuration<1 ||
-	extraDaysAtRisk>0 )
+    if( uncomplicatedCaseDuration<1
+	|| complicatedCaseDuration<1
+	|| maxUCSeekingMemory<0
+	|| extraDaysAtRisk+complicatedCaseDuration<1
+	|| extraDaysAtRisk>0
+    )
 	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk duration not met (see documentation)");
+    pImmediateUC = coData.getPImmediateUC();
     double alpha = coData.getPropDeathsFirstDay();
-    if( alpha<0.0 || 1.0<alpha )
-	throw util::xml_scenario_error("Clinical outcomes: Proportion of direct deaths on first day should be within range [0,1]");
+    if( (alpha<0.0 || 1.0<alpha)
+	|| (pImmediateUC<0.0 || 1.0<pImmediateUC)
+    )
+	throw util::xml_scenario_error("Clinical outcomes: pImmediateUC and propDeathsFirstDay should be within range [0,1]");
     
     const map<double,double>& cfr = CaseManagementCommon::getCaseFatalityRates();
     pDeathInitial.clear();	// in case we're re-loading from intervention data
@@ -136,20 +144,30 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	// if severe, no events happen for course of medication
     } else if ( pgState & Pathogenesis::SICK ) {	// previous state: uncomplicated (UC/UC2/NMF)
 	// if uc/uc2/nmf, the only event that can happen within 3 days is progression to severe/coinfection
-	if ( newState & Pathogenesis::COMPLICATED )
+	if ( newState & Pathogenesis::COMPLICATED ) {
+	    pgState = Pathogenesis::State (pgState | newState);
 	    cmEvent = true;
-    } else {	// previous state: healthy
-	if ( newState & Pathogenesis::SICK )	// any (malarial/non-malarial) sickness
-	    cmEvent = true;
+	}
+    } else {	// previous state: healthy or delayed UC
+	if ( newState & Pathogenesis::SICK ) {	// any (malarial/non-malarial) sickness
+	    if( (pgState & Pathogenesis::PENDING_UC) == 0 ) {
+		timeOfRecovery = Global::simulationTime + maxUCSeekingMemory;
+		pgState = Pathogenesis::State (pgState | newState | Pathogenesis::PENDING_UC);
+	    }
+	}
+	if( pgState & Pathogenesis::PENDING_UC ) {
+	    if( random::uniform_01() < pImmediateUC)
+		cmEvent = true;
+	}
     }
     
     if ( cmEvent )	// note: new event can override pending delayed event
     {
-	caseStartTime = Global::simulationTime;
+	//FIXME: this says if last case was recently, use second line; this isn't quite what we want
+	if (caseStartTime + Episode::healthSystemMemory > Global::simulationTime)
+	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
 	
-	if ( (newState & pgState) & Pathogenesis::MALARIA)
-            newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
-        pgState = Pathogenesis::State (pgState | newState);
+	caseStartTime = Global::simulationTime;
 	
 	if (pgState & Pathogenesis::MALARIA) {
 	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
@@ -157,8 +175,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    }
 	}
 	
-	CMAuxOutput auxOut =
-	    ESCaseManagement::execute (medicateQueue, pgState, withinHostModel, ageYears, ageGroup);
+	CMAuxOutput auxOut = ESCaseManagement::execute(
+	    medicateQueue, pgState, withinHostModel, ageYears, ageGroup
+	);
 	
 	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);

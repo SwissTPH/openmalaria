@@ -1692,7 +1692,16 @@
       <xs:appinfo>name:Clinical Outcomes;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="uncomplicatedCaseDuration" type="xs:double">
+      <xs:element name="maxUCSeekingMemory" type="xs:int">
+        <xs:annotation>
+          <xs:documentation>
+            Maximum number of timesteps (including first of case) an individual will
+            remember they are sick before resetting.
+          </xs:documentation>
+          <xs:appinfo>name:Max UC treatment-seeking memory;units:days;min:0;max:unbounded</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="uncomplicatedCaseDuration" type="xs:int">
         <xs:annotation>
           <xs:documentation>
             Fixed length of an uncomplicated case of malarial/non-malarial
@@ -1702,7 +1711,7 @@
           <xs:appinfo>name:Uncomplicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="complicatedCaseDuration" type="xs:double">
+      <xs:element name="complicatedCaseDuration" type="xs:int">
         <xs:annotation>
           <xs:documentation>
             Fixed length of a complicated/severe case of malaria
@@ -1711,7 +1720,7 @@
           <xs:appinfo>name:Complicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="complicatedRiskDuration" type="xs:double">
+      <xs:element name="complicatedRiskDuration" type="xs:int">
         <xs:annotation>
           <xs:documentation>
             Number of days for which humans are at risk of death during a severe
@@ -1721,7 +1730,16 @@
           <xs:appinfo>name:Complicated risk duration;units:days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="propDeathsFirstDay" type="xs:double">
+       <xs:element name="pImmediateUC" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that UC treatment seeking will be done immediately when
+            sick, on second day given that it wasn't done on first, etc.
+          </xs:documentation>
+          <xs:appinfo>name:Probability of immediate UC treatment seeking;units:none;min:0;max:1</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+     <xs:element name="propDeathsFirstDay" type="xs:double">
         <xs:annotation>
           <xs:documentation>
             Proportion of direct deaths from severe malaria or a complication

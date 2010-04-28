@@ -51,12 +51,6 @@ public:
    */
   void update(int simulationTime, SurveyAgeGroup ageGroup, Pathogenesis::State newState);
   
-  /** Return true if on last timestep that would be considered part of current
-   * espisode (or later). */
-  inline bool episodeEnd (int simulationTime) {
-    return simulationTime >= (_time + healthSystemMemory);
-  }
-  
   Pathogenesis::State getState() const {return _state;};
   
   /// Checkpointing
@@ -68,10 +62,7 @@ public:
    * another event to be considered part of the same episode.
    * 
    * Used by both the clinical models in roughly the same way, but will have
-   * different values in each to match Global::interval.
-   * 
-   * Set by either ClinicalEventScheduler::init () or
-   * ClinicalImmediateOutcomes::initParameters (). */
+   * different values in each to match Global::interval. */
   static int healthSystemMemory;
   
 private:

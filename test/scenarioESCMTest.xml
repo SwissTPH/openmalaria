@@ -180,9 +180,11 @@
         </treatments>
       </complicated>
       <ClinicalOutcomes>
+        <maxUCSeekingMemory>3</maxUCSeekingMemory>
         <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
         <complicatedCaseDuration>6</complicatedCaseDuration>
         <complicatedRiskDuration>6</complicatedRiskDuration>
+        <pImmediateUC>.8</pImmediateUC>
         <propDeathsFirstDay>0.4</propDeathsFirstDay>
       </ClinicalOutcomes>
     </EventScheduler>

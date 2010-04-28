@@ -64,6 +64,9 @@ private:
     /// Utility find to take a value from pDeathInitial.
     double getPDeathInitial (double ageYears);
     
+    /// Maximum number of timesteps (including first of case) an individual will
+    /// remember they are sick before resetting.
+    static int maxUCSeekingMemory;
     /// Length of an uncomplicated case
     static int uncomplicatedCaseDuration;
     /// Length of a complicated case
@@ -71,6 +74,9 @@ private:
     /// Time-span for which individual is at risk of death in complicated case
     /// minus length of complicated case (must be <= 0)
     static int extraDaysAtRisk;
+    /// Probability that UC treatment seeking will be done immediately when
+    /// sick, on second day given that it wasn't done on first, etc.
+    static double pImmediateUC;
     
     /// Probability of death on first day of a complicated case (1 - S(0)).
     /// Depends on age-group.

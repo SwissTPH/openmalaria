@@ -47,8 +47,8 @@ struct CMAuxOutput {
 	NONE, IMMEDIATE, DELAYED
     };
     
-    Hospitalisation hospitalisation;	/// was case hospitalised immediately, after a delay, or not at all?
-    bool RDT_used;	/// was an RDT test used?
+    Hospitalisation hospitalisation;	///< was case hospitalised immediately, after a delay, or not at all?
+    bool RDT_used;	///< was an RDT test used?
 };
 
 /// Data used for a withinHostModel->medicate() call

@@ -315,9 +315,9 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	// Register required "hospitalisation" output, before decisions are created
 	// (by ESDecisionMapProcessor). Effects: no transmission in hospital, delay
 	// simply adds one day to time before returning to treatment seeking.
+	required.push_back( "hospitalisation" );
 	vector<string> tfValues;
 	tfValues += "none","immediate","delayed";
-	required.push_back( "hospitalisation" );
 	hospitalisation_mask = dvMap.add_decision_values( "hospitalisation", tfValues );
 	hospitalisation_immediate = dvMap.get( "hospitalisation", "immediate" );
 	hospitalisation_delayed = dvMap.get( "hospitalisation", "delayed" );
