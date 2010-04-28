@@ -143,12 +143,13 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    cmEvent = true;
     }
     
-    if ( cmEvent )
+    if ( cmEvent )	// note: new event can override pending delayed event
     {
-        if ( (newState & pgState) & Pathogenesis::MALARIA)
+	caseStartTime = Global::simulationTime;
+	
+	if ( (newState & pgState) & Pathogenesis::MALARIA)
             newState = Pathogenesis::State (newState | Pathogenesis::SECOND_CASE);
         pgState = Pathogenesis::State (pgState | newState);
-	lastEventTime = Global::simulationTime;
 	
 	if (pgState & Pathogenesis::MALARIA) {
 	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
@@ -163,20 +164,17 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
 	    
 	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
-		timeOfRecovery += 1;	//FIXME: deal with delay correctly
-	    
-	    // Patients in hospital are removed from the transmission cycle.
-	    // This should have an effect from the start of the next timestep.
-	    hostTransmission.removeFromTransmission( false );
+		caseStartTime++;
 	}
 	if ( auxOut.RDT_used ) {
 	    Surveys.current->report_Clinical_RDTs (1);
 	}
 	
+	// Case fatality rate (first day of illness)
+	// P(death) is some fixed input scaled by age-specific CFR.
 	if (pgState & Pathogenesis::COMPLICATED) {
-	    // The probability of death on the first day is some fixed input
-	    // scaled by age-specific CFR.
 	    double pDeath = getPDeathInitial( ageYears );
+	    //TODO: community when not in hospital / delayed hospital
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
 		latestReport.update (Global::simulationTime, ageGroup, pgState);
@@ -186,19 +184,11 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 		_doomed = DOOMED_COMPLICATED;
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
-	    
-	    // complicatedCaseDuration should to some respects be associated
-	    // with medication duration, however ongoing medications after
-	    // exiting hospital are OK and medications terminating before the
-	    // end of hospitalization shouldn't matter too much if the person
-	    // can't recieve new infections due to zero transmission in hospital.
-	    timeOfRecovery = Global::simulationTime + complicatedCaseDuration;
-	} else {
-	    timeOfRecovery = Global::simulationTime + uncomplicatedCaseDuration;
 	}
     } else {
 	// No new event (haven't changed state this timestep).
 	
+	// Case fatality rate (subsequent days)
 	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
 	if( (pgState & Pathogenesis::COMPLICATED) && (Global::simulationTime < timeOfRecovery + extraDaysAtRisk) ) {
 	    // In complicated episodes, S(t), the probability of survival on
@@ -206,6 +196,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    // for parasite density Y(t). v_neg below is -v.
 	    double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
 	    double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
+	    //TODO: community when not in hospital / delayed hospital
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
 		latestReport.update (Global::simulationTime, ageGroup, pgState);
@@ -215,6 +206,26 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 		_doomed = DOOMED_COMPLICATED;
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
+	}
+    }
+    
+    // Start of case. Not necessarily start of sickness due to treatment-seeking
+    // delays and travel time.
+    if( caseStartTime == Global::simulationTime ){
+	// Patients in hospital are removed from the transmission cycle.
+	// This should have an effect from the start of the next timestep.
+	if (pgState & Pathogenesis::EVENT_IN_HOSPITAL)
+	    hostTransmission.removeFromTransmission( false );
+	
+	if (pgState & Pathogenesis::COMPLICATED) {
+	    // complicatedCaseDuration should to some respects be associated
+	    // with medication duration, however ongoing medications after
+	    // exiting hospital are OK and medications terminating before the
+	    // end of hospitalization shouldn't matter too much if the person
+	    // can't recieve new infections due to zero transmission in hospital.
+	    timeOfRecovery = Global::simulationTime + complicatedCaseDuration;
+	} else {
+	    timeOfRecovery = Global::simulationTime + uncomplicatedCaseDuration;
 	}
     }
     
@@ -243,7 +254,7 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     int s;
     s & stream;
     pgState = Pathogenesis::State(s);
-    lastEventTime & stream;
+    caseStartTime & stream;
     timeOfRecovery & stream;
     previousDensity & stream;
     medicateQueue & stream;
@@ -251,7 +262,7 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
     pgState & stream;
-    lastEventTime & stream;
+    caseStartTime & stream;
     timeOfRecovery & stream;
     previousDensity & stream;
     medicateQueue & stream;

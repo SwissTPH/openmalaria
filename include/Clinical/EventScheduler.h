@@ -83,8 +83,11 @@ private:
   Pathogenesis::State pgState;
   
   //NOTE: not all these variables should be needed eventually
-  /// Timestep latest event started at
-  int lastEventTime;
+  /** Set to when an event should start. If simulationTime equals this, an event
+   * is started (UC & C behaviour different).
+   * 
+   * Note: medications are not delayed by this. */
+  int caseStartTime;
   
   /** The individual recovers when Global::simulationTime >= timeOfRecovery,
    * assuming they didn't die. */
