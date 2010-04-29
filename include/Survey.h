@@ -400,6 +400,8 @@ public:
     data_Vector_EIR_Simulated & stream;
     data_Clinical_RDTs & stream;
     data_Clinical_DrugUsage & stream;
+    data_Clinical_FirstDayDeaths & stream;
+    data_Clinical_HospitalFirstDayDeaths & stream;
   }
   
 private:

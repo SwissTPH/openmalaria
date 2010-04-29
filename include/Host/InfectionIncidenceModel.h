@@ -60,13 +60,8 @@ public:
 protected:
   /// Create a new model
   InfectionIncidenceModel ();
-  /// Load from a checkpoint
-  InfectionIncidenceModel (istream& in);
 public:
   virtual ~InfectionIncidenceModel() {}
-  
-  /// Write a checkpoint
-  void write (ostream& out) const;
   
   /** Return an availability multiplier, dependant on the model (NegBinomMAII
    * and LogNormalMAII models use this). Ideally availability adjustments
@@ -141,8 +136,6 @@ protected:
 class HeterogeneityWorkaroundII : public InfectionIncidenceModel {
 public:
   HeterogeneityWorkaroundII () {}
-  HeterogeneityWorkaroundII (istream& in) :
-    InfectionIncidenceModel (in) {}
   virtual ~HeterogeneityWorkaroundII() {}
 protected:
   double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
@@ -150,7 +143,6 @@ protected:
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
   NegBinomMAII () {}
-  NegBinomMAII (istream& in);
   virtual ~NegBinomMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
@@ -159,7 +151,6 @@ protected:
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
   LogNormalMAII () {}
-  LogNormalMAII (istream& in);
   virtual ~LogNormalMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:

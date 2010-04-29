@@ -125,7 +125,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 void CommonWithinHost::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
     (*pkpdModel) & stream;
-    for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
 	(**inf) & stream;
     }
 }
