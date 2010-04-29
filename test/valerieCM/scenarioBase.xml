@@ -1296,21 +1296,86 @@
     </nonVector>
   </entoData>
   <drugDescription>
-    <drug abbrev="MF">
+	<drug abbrev="AR">
+      <PD>
+        <allele name="sensitive (rename)">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>4</max_killing_rate>
+          <IC50>0.0023</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.000023</negligible_concentration>
+        <half_life>0.175</half_life>
+        <vol_dist>17.4</vol_dist>
+      </PK>
+    </drug>
+
+	<drug abbrev="AS">
+      <PD>
+        <allele name="sensitive (rename)">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>4.6</max_killing_rate>
+          <IC50>0.0016</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.000016</negligible_concentration>
+        <half_life>0.042</half_life>
+        <vol_dist>2.75</vol_dist>
+      </PK>
+    </drug>
+
+	<drug abbrev="CQ">
       <PD>
         <allele name="sensitive (rename)">
           <initial_frequency>1</initial_frequency>
           <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.6654</IC50>
-          <slope>2.5</slope>
+          <IC50>0.036</IC50>
+          <slope>1.6</slope>
         </allele>
       </PD>
       <PK>
-        <negligible_concentration>0.006654</negligible_concentration>
-        <half_life>19.254</half_life>
+        <negligible_concentration>0.00036</negligible_concentration>
+        <half_life>30.006</half_life>
+        <vol_dist>300</vol_dist>
+      </PK>
+    </drug>
+
+	<drug abbrev="LR">
+      <PD>
+        <allele name="sensitive (rename)">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.100</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.001</negligible_concentration>
+        <half_life>4.332</half_life>
+        <vol_dist>21</vol_dist>
+      </PK>
+    </drug>
+
+    <drug abbrev="MQ">
+      <PD>
+        <allele name="sensitive (rename)">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.5</IC50>
+          <slope>5</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.005</negligible_concentration>
+        <half_life>13.078</half_life>
         <vol_dist>20.8</vol_dist>
       </PK>
     </drug>
+	
   </drugDescription>
   
 <model>

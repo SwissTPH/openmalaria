@@ -63,9 +63,9 @@ inline double drugEffect (const LSTMDrugPDParameters& PD_params, double neg_elim
 }
 
 double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
-    double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug affect is seen
+    double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug effect is seen
 									this vaule is updated in the for loop, value decreases with increasing drug effect. */
-    double startTime = 0.0;		/* KW-	Use the information from medicate to determine the time elapsed from 0 to first dose.
+    double startTime = 0.0;			/* KW-	Use the information from medicate to determine the time elapsed from 0 to first dose.
 									Use the information on dose timings from medicate to update this value at the end of the for loop.
 									Run drugEffect function after for loop to find drug effect from last dose to end of day. */
     
