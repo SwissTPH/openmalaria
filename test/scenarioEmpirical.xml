@@ -30,17 +30,21 @@
       <option name="nPatent" value="true"/>
       <option name="sumLogPyrogenThres" value="true"/>
       <option name="sumlogDens" value="true"/>
-      <option name="nTreatments1" value="true"/>
-      <option name="nTreatments2" value="true"/>
-      <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
       <option name="nSeq" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nHospitalRecovs" value="true"/>
+      <option name="nHospitalSeqs" value="true"/>
+      <option name="Clinical_RDTs" value="true"/>
+      <option name="Clinical_DrugUsage" value="true"/>
+      <option name="Clinical_FirstDayDeaths" value="true"/>
+      <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>730</surveyTime>
+      <surveyTime>3650</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
@@ -71,387 +75,118 @@
   
   <healthSystem>
     <EventScheduler>
+      <!-- Simple partially-realistic (poorly researched) health system description (DH). -->
       <uncomplicated>
-        <!-- An example to show decisions, and how they select and modify a treatment schedule. -->
         <decisions>
-          <decision name="provider" depends="p" values="hospital, lower_level_public, private, community_health_worker, informal, none">
-            p(.1): hospital
-            p(.1): lower_level_public
-            p(.1): private
-            p(.1): community_health_worker
-            p(.1): informal
-            p(.5): none
-          </decision>
-          <decision name="test" depends="provider,p" values="none,microscopy,RDT">
-            provider(hospital){
-              p(.1): none
-              p(.4): microscopy
-              p(.5): RDT
-            }
-            provider(lower_level_public){
-              p(.1): none
-              p(.4): microscopy
-              p(.5): RDT
-            }
-            provider(private){
-              p(.1): none
-              p(.4): microscopy
-              p(.5): RDT
-            }
-            provider(community_health_worker){
+          <decision name="test" depends="case,p" values="none,microscopy,RDT">
+            case(UC1){
               p(.5): none
-              p(.5): RDT
+              p(.3): microscopy
+              p(.2): RDT
             }
-            provider(informal){
-              p(.5): none
-              p(.5): RDT
-            }
-            provider(none){
-              p(1.0):none
-            }
-          </decision>
-           <decision name="treatment" depends="provider,result,p" values="MF_treat,AL_treat,ASAQ_treat,SP_treat,none">
-              provider(hospital){
-                result(none){
-                  p(.1): MF_treat
-                  p(.9): AL_treat
-            }
-                result(positive){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-                result (negative){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-            }
-            provider(lower_level_public){
-                result(none){
-                  p(.1): MF_treat
-                  p(.9): AL_treat
-            }
-                result(positive){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-                result(negative){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-            }
-            provider(private){
-                result(none){
-                  p(.1): MF_treat
-                  p(.9): AL_treat
-            }
-                result(positive){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-                result(negative){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-            }
-            provider(community_health_worker){
-                result(none){
-                  p(.1): MF_treat
-                  p(.9): AL_treat
-            }
-                result(positive){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-                result(negative){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-            }
-            provider(informal){
-                result(none){
-                  p(.1): MF_treat
-                  p(.9): AL_treat
-            }
-                result(positive){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-                result(negative){
-                  p(.2): MF_treat
-                  p(.8): AL_treat
-            }
-            }
-            provider(none){
-                  p(1.0):none
+            case(UC2){
+              p(.4): none
+              p(.3): microscopy
+              p(.3): RDT
             }
           </decision>
-          <decision name="adherence" depends="treatment,provider,result,p" values="full,missFirstDose,missLastDay,selective">
-            treatment(MF_treat){
-                provider(hospital){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  }
-                provider(lower_level_public){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  }
-                provider(private){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                    }
-                  }
-                provider(community_health_worker){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                     }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                     }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                     }
-                  }
-                provider(informal){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                  provider(none):full
-                  }
-            treatment(AL_treat){
-                provider(hospital){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                provider(lower_level_public){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                provider(private){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                provider(community_health_worker){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                provider(informal){
-                  result(none){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(positive){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                  result(negative){
-                    p(.7): full
-                    p(.3): missFirstDose
-                      }
-                    }
-                provider(none): full
-                  }
-              treatment(ASAQ_treat): full
-              treatment(SP_treat): full
-              treatment(none): full
+          <decision name="treatment" depends="result,p" values="MQ_treat,no_treat">
+            result(positive){
+              p(.9): MQ_treat
+              p(.1): no_treat
+            }
+            result(negative): no_treat
+            result(none) {
+              p(.5): MQ_treat
+              p(.5): no_treat
+            }
           </decision>
-          <decision name="quality" depends= "provider,p" values="good, medium, poor">
-            provider(hospital){
-              p(.8): good
-              p(.1): medium
-              p(.1): poor
-            }
-            provider(lower_level_public){
-              p(.8): good
-              p(.1): medium
-              p(.1): poor
-            }
-            provider(private){
-              p(.8): good
-              p(.1): medium
-              p(.1): poor
-            }
-            provider(community_health_worker){
-              p(.8): good
-              p(.1): medium
-              p(.1): poor
-            }
-            provider(informal){
-              p(.8): good
-              p(.1): medium
-              p(.1): poor
-            }
-            provider(none): good
-          </decision>
-          <decision name="delay" depends="p" values="0,1,2">
-            p(.6): 0
-            p(.3): 1
-            p(.1): 2
-          </decision>
-          <decision name="ageGroup" depends="age" values="0_1,1_5">
-            age(0-1): 0_1
-            age(1-5): 1_5
-            age(5-inf): 1_5
+          <decision name="bodyMass" depends="age" values="5,20,60">
+            age(0-2): 5
+            age(2-6): 20
+            age(6-inf): 60
           </decision>
         </decisions>
         <treatments>
-          <treatment name="MF_treat">
+          <treatment name="MQ_treat">
             <schedule>
-              <medicate drug="MF" mg="3000" hour="0"/>
-              <medicate drug="MF" mg="3000" hour="12"/>
+              <medicate drug="MQ" mg="20" hour="0"/>
             </schedule>
-            <modifier decision="quality">
-              <multiplyQty value="good" effect="MF(1.0)" />
-              <multiplyQty value="medium" effect="MF(0.6)" />
-              <multiplyQty value="poor" effect="MF(0.3)"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange value="full" effect="MF(0-13)"/>
-              <selectTimeRange value="missFirstDose" effect="MF(1-13)"/>
-              <selectTimeRange value="missLastDay" effect="MF(0-0)"/>
-              <selectTimeRange value="selective" effect="MF(0-100)"/><!-- irrelevent, so give full adherence -->
-            </modifier>
-            <modifier decision="delay">
-              <delay value="0" effect="MF(0)"/>
-              <delay value="1" effect="MF(24)"/>
-              <delay value="2" effect="MF(48)"/>
+            <modifier decision="bodyMass">
+              <multiplyQty value="5" effect="MQ(5)" />
+              <multiplyQty value="20" effect="MQ(20)" />
+              <multiplyQty value="60" effect="MQ(60)" />
             </modifier>
           </treatment>
-          <treatment name="AL_treat">
-            <schedule>
-              <medicate drug="AR" mg="3000" hour="0"/>
-              <medicate drug="LU" mg="3000" hour="0"/>
-            </schedule>
-            <modifier decision="quality">
-              <multiplyQty value="high" effect="AR(1.0),LU(1.0)" />
-              <multiplyQty value="medium" effect="AR(0.6), LU(0.6)" />
-              <multiplyQty value="low" effect="AR(0.3), LU(0.3)"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange value="full" effect="MF(0-13)"/>
-              <selectTimeRange value="missFirstDose" effect="MF(1-13)"/>
-            </modifier>
-            <modifier decision="delay">
-              <delay value="0" effect="MF(0)"/>
-              <delay value="1" effect="MF(24)"/>
-              <delay value="2" effect="MF(48)"/>
-            </modifier>
-            <modifier decision="ageGroup">
-              <multiplyQty value="0_1" effect="AR(1.0),LU(1.0)" />
-              <multiplyQty value="1_5" effect="AR(0.6), LU(0.6)" />
-              <multiplyQty value="low" effect="AR(0.3), LU(0.3)"/>
-            </modifier>
+          <treatment name="no_treat">
+            <schedule/>
           </treatment>
         </treatments>
       </uncomplicated>
       <complicated>
         <decisions>
-          <decision name="treatment" depends="" values="MF_sev">
-            MF_sev
+          <decision name="treatment" depends="result,p" values="AS_sev,none">
+            result(positive) {
+              p(.9): AS_sev
+              p(.1): none
+            }
+            result(negative): none
+            result(none): none
+          </decision>
+          <decision name="hospitalisation" depends="" values="none,delayed,immediate">
+            immediate
+          </decision>
+          <decision name="test" depends="p" values="none,microscopy,RDT">
+            p(.3): none
+            p(.5): RDT
+            p(.2): microscopy
+          </decision>
+          <decision name="bodyMass" depends="age" values="5,20,60">
+            age(0-2): 5
+            age(2-6): 20
+            age(6-inf): 60
           </decision>
         </decisions>
         <treatments>
-          <treatment name="MF_sev">
+          <treatment name="AS_sev">
             <schedule>
-              <!-- made-up, BIG dose (we're not modelling overdoses yet) -->
-              <medicate drug="MF" mg="300000" hour="0"/>
+              <medicate drug="AS" mg="2.4" hour="0"/>
+              <medicate drug="AS" mg="2.4" hour="18"/>
+              <medicate drug="AS" mg="2.4" hour="36"/>
+              <medicate drug="AS" mg="2.4" hour="54"/>
             </schedule>
+            <modifier decision="bodyMass">
+              <multiplyQty value="5" effect="AS(5)" />
+              <multiplyQty value="20" effect="AS(20)" />
+              <multiplyQty value="60" effect="AS(60)" />
+            </modifier>
           </treatment>
-        </treatments>
+          <treatment name="none">
+            <schedule/>
+          </treatment>
+       </treatments>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
         <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
-        <complicatedCaseDuration>5</complicatedCaseDuration>
-        <complicatedRiskDuration>5</complicatedRiskDuration>
+        <complicatedCaseDuration>6</complicatedCaseDuration>
+        <complicatedRiskDuration>6</complicatedRiskDuration>
         <pImmediateUC>.8</pImmediateUC>
         <propDeathsFirstDay>0.4</propDeathsFirstDay>
         <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
-      <group cfr="0" lowerbound="0"/>
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
     </CFR>
   </healthSystem>
   <entoData mode="4" name="Test">
@@ -1312,7 +1047,7 @@
     </nonVector>
   </entoData>
   <drugDescription>
-	<drug abbrev="AR">
+        <drug abbrev="AR">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1328,7 +1063,7 @@
       </PK>
     </drug>
 
-	<drug abbrev="AS">
+        <drug abbrev="AS">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1344,7 +1079,7 @@
       </PK>
     </drug>
 
-	<drug abbrev="CQ">
+        <drug abbrev="CQ">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1360,7 +1095,7 @@
       </PK>
     </drug>
 
-	<drug abbrev="LR">
+        <drug abbrev="LR">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1391,12 +1126,12 @@
         <vol_dist>20.8</vol_dist>
       </PK>
     </drug>
-	
+        
   </drugDescription>
   
 <model>
   <ModelOptions>
-    <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
+    <option name="EMPIRICAL_WITHIN_HOST_MODEL" value="true"/>
     <option name="INCLUDES_PK_PD" value="true"/>
     <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
   </ModelOptions>
@@ -1432,6 +1167,7 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
   </parameters>
 </model>
 </scenario>
