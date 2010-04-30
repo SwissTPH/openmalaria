@@ -175,10 +175,9 @@ void VectorAnopheles::setPAS()
 		P_An = 0.0;
 	}
 
-	cout<< "initP_A : "<< initP_A;
-	cout<< " P_A1 : "<< P_A1;
-	cout<< " P_An : "<< P_An << " \n";
-
+// 	cout<< "initP_A : "<< initP_A;
+// 	cout<< " P_A1 : "<< P_A1;
+// 	cout<< " P_An : "<< P_An << " \n";
 }
 
 double VectorAnopheles::getHumanEntoAvailability(int populationSize)
@@ -280,7 +279,7 @@ bool VectorAnopheles::vectorInitIterate () {
   //NOTE: how accurate do we want fits to be? Results seem to be stocastically something like 1-5% different.
   const double LIMIT = 0.05;
   if (fabs(factor - 1.0) > LIMIT) {
-    cout << "Vector iteration: adjusting with factor "<<factor<<endl;
+//     cout << "Vector iteration: adjusting with factor "<<factor<<endl;
     // Adjusting mosqEmergeRate is the important bit. The rest should just bring things to a stable state quicker.
     initNv0FromSv *= factor;
     initNvFromSv *= factor;	//(not currently used)
@@ -293,7 +292,7 @@ bool VectorAnopheles::vectorInitIterate () {
   } else {
     // Once the amplitude is approximately correct, we try to find the offset
     double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, annualS_v);
-    cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
+//     cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
     FSRotateAngle -= rAngle;	// annualS_v was already rotated by old value of FSRotateAngle, so increment
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).

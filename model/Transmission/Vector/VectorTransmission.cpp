@@ -94,7 +94,6 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
 }
 
 int VectorTransmission::vectorInitIterate () {
-  cout<<"start vector init iterate "<<endl;
   bool iterate = false;
   for (size_t i = 0; i < numSpecies; ++i)
     iterate |= species[i].vectorInitIterate ();

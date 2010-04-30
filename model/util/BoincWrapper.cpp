@@ -28,6 +28,8 @@
 
 #ifdef WITHOUT_BOINC
 #include <stdlib.h>	// exit()
+#include <cmath>		// ceil
+#include <boost/format.hpp>
 #else	// With BOINC
 #ifdef _WIN32
 #include "boinc_win.h"
@@ -53,6 +55,7 @@ namespace BoincWrapper {
     cout << "BoincWrapper: not using BOINC" << endl;
   }
   void finish(int err = 0) {
+      cout << '\r' << flush;	// clean last line of progress-output
     exit(err);	// doesn't return
   }
   
@@ -60,7 +63,10 @@ namespace BoincWrapper {
     return inName;
   }
 
-  void reportProgress (double progress) {}
+  void reportProgress (double progress) {
+      // \r cleans line. Then we print progress as a percentage.
+      cout << (boost::format("\r[%|3i|%%]\t") %std::ceil( progress * 100.0 )) << flush;
+  }
   int timeToCheckpoint() {
     return 0;
   }
