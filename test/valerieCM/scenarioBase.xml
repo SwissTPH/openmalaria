@@ -74,6 +74,10 @@
       <uncomplicated>
         <!-- An example to show decisions, and how they select and modify a treatment schedule. -->
         <decisions>
+          <decision name="age5" depends="age" values="under5,over5">
+            age(0-5): under5
+            age(5-inf): over5
+         </decision>
           <decision name="provider" depends="p" values="hospital, lower_level_public, private, community_health_worker, informal, none">
             p(.1): hospital
             p(.1): lower_level_public
@@ -107,7 +111,7 @@
               p(.5): RDT
             }
             provider(none){
-              p(1.0):none
+              none
             }
           </decision>
            <decision name="treatment" depends="provider,result,p" values="MF_treat,AL_treat,ASAQ_treat,SP_treat,none">
@@ -369,11 +373,6 @@
             p(.3): 1
             p(.1): 2
           </decision>
-          <decision name="ageGroup" depends="age" values="0_1,1_5">
-            age(0-1): 0_1
-            age(1-5): 1_5
-            age(5-inf): 1_5
-          </decision>
         </decisions>
         <treatments>
           <treatment name="MF_treat">
@@ -449,6 +448,7 @@
         <propDeathsFirstDay>0.4</propDeathsFirstDay>
         <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
+
     </EventScheduler>
     <CFR>
       <group cfr="0" lowerbound="0"/>

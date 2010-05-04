@@ -143,7 +143,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    _doomed = DOOMED_COMPLICATED;
 	    
 	    latestReport.update (Global::simulationTime, ageGroup, pgState);
-	} else {
+        } else if ( pgState & Pathogenesis::PENDING_UC ){
+            pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
+        } else {
 	    //TODO: report sequelae?
 	    // if ( Sequelae )
 	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
@@ -170,20 +172,26 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    cmEvent = true;
 	}
     } else {	// previous state: healthy or delayed UC
-	if ( newState & Pathogenesis::SICK ) {	// any (malarial/non-malarial) sickness
+        if ( newState & Pathogenesis::COMPLICATED ){
+            cmEvent = true;
+        } else {
+          if ( newState & Pathogenesis::SICK ) {	// any (malarial/non-malarial) sickness
 	    if( (pgState & Pathogenesis::PENDING_UC) == 0 ) {
 		timeOfRecovery = Global::simulationTime + maxUCSeekingMemory;
 		pgState = Pathogenesis::State (pgState | newState | Pathogenesis::PENDING_UC);
 	    }
-	}
-	if( pgState & Pathogenesis::PENDING_UC ) {
+	  }
+	  if( pgState & Pathogenesis::PENDING_UC ) {
 	    if( random::uniform_01() < pImmediateUC)
 		cmEvent = true;
-	}
+	  }
+        }
     }
     
     if ( cmEvent )	// note: new event can override pending delayed event
     {
+        pgState = Pathogenesis::State (pgState & ~Pathogenesis::PENDING_UC);    // remove PENDING_UC bit
+
 	// If last treatment prescribed was in recent memory, consider second line.
 	if (timeLastTreatment + Episode::healthSystemMemory > Global::simulationTime)
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
