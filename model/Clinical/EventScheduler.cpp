@@ -100,7 +100,12 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         timeOfRecovery (Global::TIMESTEP_NEVER),
         timeLastTreatment (Global::TIMESTEP_NEVER),
         previousDensity (numeric_limits<double>::quiet_NaN())
-{}
+{
+    if( tSF != 1.0 )
+	// p(treatment seeking) is part of tree & handled generically, so we
+	// don't have a way of modifying it.
+	throw xml_scenario_error("treatment seeking heterogeneity not supported");
+}
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 
