@@ -173,7 +173,8 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	}
     } else {	// previous state: healthy or delayed UC
         if ( newState & Pathogenesis::COMPLICATED ){
-            cmEvent = true;
+	    pgState = Pathogenesis::State (pgState | newState);
+	    cmEvent = true;
         } else {
           if ( newState & Pathogenesis::SICK ) {	// any (malarial/non-malarial) sickness
 	    if( (pgState & Pathogenesis::PENDING_UC) == 0 ) {
@@ -234,7 +235,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
-		timeOfRecovery += extraDaysAtRisk;
+		//timeOfRecovery += extraDaysAtRisk;	(no point updating; will be set later: ATORWD)
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
@@ -259,7 +260,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    if (random::uniform_01() < pDeath) {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
 		// Human is killed at end of time at risk
-		timeOfRecovery += extraDaysAtRisk;
+		timeOfRecovery += extraDaysAtRisk;	// may be re-set later (see ATORWD)
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
@@ -280,6 +281,9 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	    // end of hospitalization shouldn't matter too much if the person
 	    // can't recieve new infections due to zero transmission in hospital.
 	    timeOfRecovery = Global::simulationTime + complicatedCaseDuration;
+	    // Time should be adjusted to end of at-risk period when patient dies:
+	    if( pgState & Pathogenesis::DIRECT_DEATH )	// death may already have been determined
+		timeOfRecovery += extraDaysAtRisk;	// ATORWD (search keyword)
 	} else {
 	    timeOfRecovery = Global::simulationTime + uncomplicatedCaseDuration;
 	}
