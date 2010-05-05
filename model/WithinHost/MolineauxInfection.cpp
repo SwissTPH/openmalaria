@@ -31,10 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <fstream>
 #include <cmath>
 
-using namespace OM::util;
+
 
 namespace OM {
 namespace WithinHost {
+
+using namespace OM::util;
 
 int MolineauxInfection::delta;
 

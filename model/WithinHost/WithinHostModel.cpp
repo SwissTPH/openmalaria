@@ -31,12 +31,15 @@
 #include "util/random.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
+//using namespace std;
 
 #include <cmath>
-using namespace std;
-using namespace OM::util;
+
 
 namespace OM { namespace WithinHost {
+
+using namespace OM::util;
+
 double WithinHostModel::sigma_i;
 double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;

@@ -108,7 +108,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     // that is, n >= log_2 (l)
     // so n = ceil (log_2 (l))
     uint32_t n_bits = (uint32_t)std::ceil (log (double(alleles.size())) / log(2.0));
-    assert (std::pow (2, n_bits) >= alleles.size());
+    assert (std::pow (2.0, (double)n_bits) >= alleles.size());
     allele_mask = static_cast<uint32_t>((std::pow (2.0, (double)n_bits)) - 1);
     // update bit_start to next available bit:
     bit_start += n_bits;

@@ -30,8 +30,9 @@
 #include <string>
 #include <cmath>
 
-using namespace ::OM::util;
+
 namespace OM { namespace WithinHost {
+using namespace ::OM::util;
     
 // -----  static class members (variables & functions)  -----
 
