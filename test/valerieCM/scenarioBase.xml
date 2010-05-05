@@ -124,162 +124,171 @@
               none
             }
           </decision>
-           <decision name="treatment" depends="case,provider,result,p" values="MF_treat,AL_treat,ASAQ_treat,SP_treat,none">
+           <decision name="treatment" depends="case,provider,result,p" values="AL_treat,ASAQ_treat, SP_treat, CQ_treat, none">
              case(UC1){
                provider(hospital){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.8): AL_treat
                   p(.1): none
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result (negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(lower_level_public){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(private){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(community_health_worker){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(informal){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(none){
-                  p(1.0):none
+                  none
             }
             }
             case(UC2){
                provider(hospital){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.8): AL_treat
                   p(.1): none
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result (negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(lower_level_public){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(private){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(community_health_worker){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(informal){
                 result(none){
-                  p(.1): MF_treat
+                  p(.1): CQ_treat
                   p(.9): AL_treat
             }
                 result(positive){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
                 result(negative){
-                  p(.2): MF_treat
+                  p(.2): CQ_treat
                   p(.8): AL_treat
             }
             }
             provider(none){
-                  p(1.0):none
+                  none
             }
             }
           </decision>
+          <decision name="bodyMass" depends="age" values="10,20, 30, 40, 50, 60">
+            age(0-0): 5
+            age(1-2): 10 
+            age(3-5): 20
+            age(6-8): 30
+            age(9-12): 40
+            age(13-15): 50
+            age(16-inf): 60
+          </decision>
           <decision name="adherence" depends="treatment,provider,result,p" values="full,missFirstDose,missLastDay,selective">
-            treatment(MF_treat){
+            treatment(CQ_treat){
                 provider(hospital){
                   result(none){
                     p(.7): full
@@ -495,7 +504,7 @@
               <delay value="1" effect="AL(24)"/>
               <delay value="2" effect="AL(48)"/>
             </modifier>
-            <modifier decision="ageGroup">  <!-- what is this? -->
+            <modifier decision="ageGroup">  
               <multiplyQty value="0_2" effect="AR(1.0),LU(1.0)" />
               <multiplyQty value="3_8" effect="AR(2.0), LU(2.0)" />
               <multiplyQty value="9_14" effect="AR(3.0), LU(3.0)"/>
@@ -514,16 +523,16 @@
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="SP(0-100)"/>
-              <selectTimeRange value="missFirstDose" effect="none"/> <!-- is this correct -->
-              <selectTimeRange value="missLastDay" effect="none"/>
-              <selectTimeRange value="selective" effect="SP(0-100)"/>
+              <selectTimeRange value="missFirstDose" effect="SP(1-100)"/>  <!-- means person does not take dose given-->
+              <selectTimeRange value="missLastDay" effect="SP(0-0)"/>
+              <selectTimeRange value="selective" effect="SP(0-0)"/>
             </modifier>
             <modifier decision="delay">
               <delay value="0" effect="SP(0)"/>
               <delay value="1" effect="SP(24)"/>
               <delay value="2" effect="SP(48)"/>
             </modifier>
-            <modifier decision="ageGroup">  <!-- what is this? -->
+            <modifier decision="ageGroup">  
               <multiplyQty value="0_1" effect="S(0.5),P(0.5)" />
               <multiplyQty value="1_5" effect="S(1.0), P(1.0)" />
               <multiplyQty value="6_9" effect="S(1.5), P(1.5)"/>
@@ -531,7 +540,7 @@
               <multiplyQty value="15_100" effect="S(3.0), P(3.0)"/>
             </modifier>
           </treatment>
-          <treatment name="MF_treat">
+          <treatment name="MF_treat"> <!-- MF is hardly used in Africa, so this part not updated-->
             <schedule>
               <medicate drug="MF" mg="3000" hour="0"/>
               <medicate drug="MF" mg="3000" hour="12"/>
@@ -556,7 +565,40 @@
               <delay value="2" effect="MF(48)"/>
             </modifier>
           </treatment>
-        </treatments>
+          <treatment name="CQ_treat">
+            <schedule>
+              <medicate drug="CQ" mg="10" hour="0"/> <!-- 1st dose is 10 mg base per kg body mass-->
+              <medicate drug="CQ" mg="5" hour="6"/>
+              <medicate drug="CQ" mg="5" hour="24"/> 
+              <medicate drug="CQ" mg="5" hour="36"/> 
+            </schedule>
+            <modifier decision="bodyMass">
+              <multiplyQty value="5" effect="CQ(5)" /> <!-- is this correct? -->
+              <multiplyQty value="10" effect="CQ(10)" />
+              <multiplyQty value="20" effect="CQ(20)" />
+              <multiplyQty value="30" effect="CQ(30)" />
+              <multiplyQty value="40" effect="CQ(40)" />
+              <multiplyQty value="50" effect="CQ(50)" />
+              <multiplyQty value="60" effect="CQ(60)" />
+            </modifier>
+            <modifier decision="quality">
+              <multiplyQty value="high" effect="CQ(1.0)" />
+              <multiplyQty value="medium" effect="CQ(0.6)" />
+              <multiplyQty value="low" effect="CQ(0.3)"/>
+            </modifier>
+            <modifier decision="adherence">
+              <selectTimeRange value="full" effect="CQ(0-100)"/>
+              <selectTimeRange value="missFirstDose" effect="CQ(1-100)"/> 
+              <selectTimeRange value="missLastDay" effect="CQ(0-35)"/>
+              <selectTimeRange value="selective" effect="CQ(0-100)"/>
+            </modifier>
+            <modifier decision="delay">
+              <delay value="0" effect="CQ(0)"/>
+              <delay value="1" effect="CQ(24)"/>
+              <delay value="2" effect="CQ(48)"/>
+            </modifier>
+            </treatment>
+          </treatments>
       </uncomplicated>
       <complicated>
         <decisions>
@@ -565,9 +607,21 @@
              p(0.3): lower_level
              p(0.5): none
         </decision>
+        <decision name="lower_level_test" depends="initial_provider,p" values="hospital, lower_level, none">
+             initial_provider(hospital){
+              none
+              }
+              initial_provider(lower_level){
+              p(0.5): none
+              p(0.5): RDT
+              }
+              initial_provider(none){
+              none
+              }
+        </decision>
         <decision name="referral" depends="initial_provider, p" values="immediate, delayed, none">
              initial_provider(hospital){
-              p(1.0): none
+              none
               }
               initial_provider(lower_level){
               p(0.5): immediate
@@ -575,7 +629,7 @@
               p(0.2): none
               }
               initial_provider(none){
-              p(1.0): none
+              none
               }
         </decision>
         <decision name="suppository" depends="initial_provider, referral, p" values="true, false">
@@ -604,22 +658,35 @@
         </decision>
         <decision name="treatment" depends="suppository, p" values="MF_sev">
             suppository(true){
-            p(.5): MF_sev
+            p(.5): AS_sev
             p(.5): QU_sev
             }
             suppository(false){
-            p(.7): MF_sev
+            p(.7): AS_sev
             p(.3): QU_sev
             }
         </decision>
         </decisions>
         <treatments>
-          <treatment name="MF_sev">
+          <treatment name="AS_sev">
             <schedule>
-              <!-- made-up, BIG dose (we're not modelling overdoses yet) -->
-              <medicate drug="MF" mg="300000" hour="0"/>
+              <medicate drug="AS_sev" mg="1" hour="0"/>
+              <medicate drug="AS_sev" mg="1" hour="12"/>
+              <medicate drug="AS_sev" mg="1" hour="24"/>
+              <medicate drug="AS_sev" mg="1" hour="48"/>
+              <medicate drug="AS_sev" mg="1" hour="72"/>
             </schedule>
-          </treatment>
+            <modifier decision="ageGroup">
+            <multiplyQty value="0_1" effect="AS_sev(22)"/>
+            <multiplyQty value="1_3" effect="AS_sev(29)"/>
+            <multiplyQty value="4_5" effect="AS_sev(43)"/>
+            <multiplyQty value="6_8" effect="AS_sev(50)"/>
+            <multiplyQty value="9_11" effect="AS_sev(72)"/>
+            <multiplyQty value="12_14" effect="AS_sev(101)"/>
+            <multiplyQty value="15_16" effect="AS_sev(130)"/>
+            <multiplyQty value="17_inf" effect="AS_sev(144)"/>
+            </modifier>
+          </treatment> <!-- not quite sure how to put in CQ -->
         </treatments>
       </complicated>
       <ClinicalOutcomes>
