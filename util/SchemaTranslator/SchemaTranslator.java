@@ -50,29 +50,31 @@ public class SchemaTranslator {
     private static boolean doValidation = true;
     private static boolean doTranslation = true;
     private static boolean doDBUpdate = false;
+
     private enum BugCorrectionBehaviour {
-	none, correct, dontCorrect;
+        none, correct, dontCorrect;
     }
-    private static BugCorrectionBehaviour maxDensBug = BugCorrectionBehaviour.none; 
-    
+
+    private static BugCorrectionBehaviour maxDensBug = BugCorrectionBehaviour.none;
+
     public static double HumanBloodIndex_NONNHS = 1;
-    
+
     public static int INDEX_GAMBIAE_SS = 0;
     public static int INDEX_FUNESTUS = 1;
     public static int INDEX_ARABIENSIS = 2;
-    
+
     public static String Name_GAMBIAE_SS = "gambiae_ss";
     public static String Name_FUNESTUS = "funestus";
     public static String Name_ARABIENSIS = "arabiensis";
-    
-    public static double[] HumanBloodIndexes = {0.939, 0.98, 0.871};
-    public static double[] ProporitionsLaidEggsSameDay = {0.313, 0.616, 0.313};
-    public static double[] PsSurvivalFeedingCycle = {0.623, 0.611, 0.623};
-    public static double[] PAs = {0.687, 0.384, 0.687};
-    public static double[] PA2s = {0.0151, 0.00957, 0.320};
-    
+
+    public static double[] HumanBloodIndexes = { 0.939, 0.98, 0.871 };
+    public static double[] ProporitionsLaidEggsSameDay = { 0.313, 0.616, 0.313 };
+    public static double[] PsSurvivalFeedingCycle = { 0.623, 0.611, 0.623 };
+    public static double[] PAs = { 0.687, 0.384, 0.687 };
+    public static double[] PA2s = { 0.0151, 0.00957, 0.320 };
+
     public static double td = 0.33;
-    
+
     public static double Standard_RELATIVE_ENTO_AV = 1.0;
     public static double Standard_NHH_NUMBER = 1.0;
 
@@ -96,12 +98,14 @@ public class SchemaTranslator {
         scenarioElement.setAttribute("assimMode", "0");
         // This is set by the work generator
         scenarioElement.setAttribute("wuID", "123");
-        
-        Element model = (Element)scenarioElement.getElementsByTagName("model").item(0);
-        Element t_parameters = (Element)model.getElementsByTagName("parameters").item(0);
 
-        if (t_parameters.getNodeValue() != null && t_parameters.getNodeValue().contains(
-                "@parameters@")) {
+        Element model = (Element) scenarioElement.getElementsByTagName("model")
+                .item(0);
+        Element t_parameters = (Element) model.getElementsByTagName(
+                "parameters").item(0);
+
+        if (t_parameters.getNodeValue() != null
+                && t_parameters.getNodeValue().contains("@parameters@")) {
             t_parameters.getLastChild().setNodeValue("");
             // Add a dummy parameter
             Element parameters = forValidation.createElement("parameters");
@@ -139,10 +143,10 @@ public class SchemaTranslator {
     private void translateFile(File documentFile, File outDir) throws Exception {
         scenarioDocument = _builder.parse(documentFile);
         String schemaFileName = translateDocument();
-	if (schemaFileName == null) {
-	    System.err.println ("Update of "+documentFile+" failed.");
-	    return;
-	}
+        if (schemaFileName == null) {
+            System.err.println("Update of " + documentFile + " failed.");
+            return;
+        }
         if (doTranslation) {
             File outFile = new File(outDir, documentFile.getName());
             outFile.createNewFile();
@@ -178,8 +182,7 @@ public class SchemaTranslator {
             Class.forName("com.mysql.jdbc.Driver").newInstance();
 
             con = DriverManager.getConnection(
-                    "jdbc:mysql://127.0.0.1:3306/DBNAME", "USER",
-                    "PASSWD");
+                    "jdbc:mysql://127.0.0.1:3306/DBNAME", "USER", "PASSWD");
 
             if (!con.isClosed())
                 System.out.println("Successfully connected to "
@@ -226,12 +229,13 @@ public class SchemaTranslator {
     private String translateDocument() throws NoSuchMethodException, Exception,
             IllegalAccessException, InvocationTargetException {
         scenarioElement = scenarioDocument.getDocumentElement();
-//         System.out.println("Updating: " + scenarioElement.getAttribute("name"));
+        // System.out.println("Updating: " +
+        // scenarioElement.getAttribute("name"));
         // 0 if no current version (getAttribute returns ""):
         int schemaVersion = Integer.parseInt("0"
                 + scenarioElement.getAttribute("schemaVersion"));
         String schemaFileName = "scenario_" + schemaVersion + ".xsd";
-	Class<? extends SchemaTranslator> cls = this.getClass();
+        Class<? extends SchemaTranslator> cls = this.getClass();
         while (schemaVersion < _required_version) {
             ++schemaVersion;
             schemaFileName = "scenario_" + schemaVersion + ".xsd";
@@ -246,14 +250,14 @@ public class SchemaTranslator {
             if (method == null)
                 throw new Exception("Method " + translateMeth + " not found");
             if (!(Boolean) method.invoke(this, new Object[] {}))
-		return null;
+                return null;
         }
         return schemaFileName;
     }
 
     // / Exactly what version 1 is has been forgotten; it's merged into 2.
     public Boolean translate0To1() {
-	return true;
+        return true;
     }
 
     public Boolean translate1To2() {
@@ -325,7 +329,7 @@ public class SchemaTranslator {
     }
 
     public Boolean translate2To3() {
-	return true;
+        return true;
     }
 
     /*
@@ -412,17 +416,19 @@ public class SchemaTranslator {
         int ver = Integer
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
         if ((ver & 0x68) != 0) {// modelVersion with flags 1<<2, 1<<4 or 1<<5
-	    if ((ver & (1<<5)) == 0) {
-		ver = ver & (1<<2);
-	    } else if ((ver & 0x68) == (1<<5)) {
-		ver = (ver ^ (1<<5))	/* remove 1<<5 flag */
-		    & (1<<4);		/* and add 1<<4 flag */
-		System.err.println("Warning: Scenario uses LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM which has had a bug fixed!");
-	    } else {
-		throw new Exception ("Error: Scenario had a combination of InfectionIncidenceModel flags - this was invalid!");
-	    }
-	}
-	return true;
+            if ((ver & (1 << 5)) == 0) {
+                ver = ver & (1 << 2);
+            } else if ((ver & 0x68) == (1 << 5)) {
+                ver = (ver ^ (1 << 5)) /* remove 1<<5 flag */
+                        & (1 << 4); /* and add 1<<4 flag */
+                System.err
+                        .println("Warning: Scenario uses LOGNORMAL_MASS_ACTION_PLUS_PRE_IMM which has had a bug fixed!");
+            } else {
+                throw new Exception(
+                        "Error: Scenario had a combination of InfectionIncidenceModel flags - this was invalid!");
+            }
+        }
+        return true;
     }
 
     public Boolean translate5To6() throws Exception {
@@ -430,7 +436,7 @@ public class SchemaTranslator {
                 .parseInt(scenarioElement.getAttribute("modelVersion"));
         Element cMs = (Element) scenarioElement.getElementsByTagName(
                 "caseManagements").item(0);
-        //wuID is added by add_work.cpp
+        // wuID is added by add_work.cpp
         scenarioElement.removeAttribute("wuID");
         if ((ver & 8192) != 0) { // ClinicalEventScheduler (new case
             // management)
@@ -444,7 +450,8 @@ public class SchemaTranslator {
                         .println("Warning: caseManagement element present but not used (updating anyway)");
         }
         if (cMs == null)
-            return true; // element may not exist, in which case there's nothing to
+            return true; // element may not exist, in which case there's
+        // nothing to
         // do
         NodeList cMList = cMs.getElementsByTagName("caseManagement");
         for (int i = 0; i < cMList.getLength(); ++i) {
@@ -458,404 +465,454 @@ public class SchemaTranslator {
         }
         return true;
     }
-    
+
     // Version 7 added elements for ITN and IRS intervention descriptions.
     // Nothing old needs to be changed.
     public Boolean translate6To7() throws Exception {
-	return true;
+        return true;
     }
-    
+
     // Version 8 moved emergence rates and some other parameters into the XML
     // file. The relevant test scenarios have already been converted.
     public Boolean translate7To8() throws Exception {
-	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
-	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
-	if (vect != null) {
-	    Element anoph = (Element) vect.getElementsByTagName("anopheles").item(0);
-	    Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
-	    // This was required, so this if should always be true:
-	    if (mosq.getAttribute("emergenceRateFilename") != null) {
-		System.err.println("Warning: emergence rate data is now stored in the scenario document. Update by hand or run with \"openMalaria --enableERC\"");
-		mosq.removeAttribute("emergenceRateFilename");
-	    }
-	}
-	return true;
+        Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
+                .item(0);
+        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+        if (vect != null) {
+            Element anoph = (Element) vect.getElementsByTagName("anopheles")
+                    .item(0);
+            Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
+            // This was required, so this if should always be true:
+            if (mosq.getAttribute("emergenceRateFilename") != null) {
+                System.err
+                        .println("Warning: emergence rate data is now stored in the scenario document. Update by hand or run with \"openMalaria --enableERC\"");
+                mosq.removeAttribute("emergenceRateFilename");
+            }
+        }
+        return true;
     }
-    
+
     // This changed some stuff to do with non-human hosts that wasn't used
     // before and added a VectorAvailability intervention.
     public Boolean translate8To9() throws Exception {
-	return true;
+        return true;
     }
-    
+
     // Version 10 introduced PKPD description parameters. No changes to
     // existing elements.
     public Boolean translate9To10() throws Exception {
-	return true;
+        return true;
     }
-    
+
     // Version 11 removes cached emerge rates from the schema
     public Boolean translate10To11() throws Exception {
-	Element eD = (Element) scenarioElement.getElementsByTagName("entoData").item(0);
-	Element vect = (Element) eD.getElementsByTagName("vector").item(0);
-	if (vect != null) {
-	    NodeList species = vect.getElementsByTagName("anopheles");
-	    for (int i = 0; i < species.getLength(); ++i) {
-		Element anoph = (Element) species.item(i);
-		Node er = anoph.getElementsByTagName("emergence").item(0);
-		if (er != null)
-		    anoph.removeChild (er);
-		// These are from the parameter values based on Anopheles gambiae in 
-		// Namawala, Tanzania, from the paper on comparing interventions.
-		anoph.setAttribute ("propInfected", "0.078");
-		anoph.setAttribute ("propInfectious", "0.021");
-	    }
-	    System.err.println ("New attributes propInfected and propInfectious created with default values - please correct (for each anopheles section)!");
-	}
-	return true;
+        Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
+                .item(0);
+        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+        if (vect != null) {
+            NodeList species = vect.getElementsByTagName("anopheles");
+            for (int i = 0; i < species.getLength(); ++i) {
+                Element anoph = (Element) species.item(i);
+                Node er = anoph.getElementsByTagName("emergence").item(0);
+                if (er != null)
+                    anoph.removeChild(er);
+                // These are from the parameter values based on Anopheles
+                // gambiae in
+                // Namawala, Tanzania, from the paper on comparing
+                // interventions.
+                anoph.setAttribute("propInfected", "0.078");
+                anoph.setAttribute("propInfectious", "0.021");
+            }
+            System.err
+                    .println("New attributes propInfected and propInfectious created with default values - please correct (for each anopheles section)!");
+        }
+        return true;
     }
-    
+
     // Version 12 removed the simulationDuration attribute and changed the
     // event-scheduler data (no real scenarios yet so this is not auto-updated).
     public Boolean translate11To12() throws Exception {
-	Element cms = (Element) scenarioElement.getElementsByTagName("caseManagements").item(0);
-	if (cms != null) {
-	    System.err.println ("Please replace the caseManagements element with an EventScheduler element (auto-update not implemented)");
-	    return false;
-	}
-	scenarioElement.removeAttribute ("simulationDuration");
-	return true;
+        Element cms = (Element) scenarioElement.getElementsByTagName(
+                "caseManagements").item(0);
+        if (cms != null) {
+            System.err
+                    .println("Please replace the caseManagements element with an EventScheduler element (auto-update not implemented)");
+            return false;
+        }
+        scenarioElement.removeAttribute("simulationDuration");
+        return true;
     }
-    
+
     // Version 13 replaced the modelVersion list with a ModelOptions section.
-    // Similarly, the summaryOption attribute was replaced with a SurveyOptions element.
+    // Similarly, the summaryOption attribute was replaced with a SurveyOptions
+    // element.
     // Also, the GARKI_DENSITY_BIAS model option was introduced.
     // As such, old scenarios are definitely incompatible with the new code.
     public Boolean translate12To13() throws Exception {
-	final int NUM_VERSIONS = 23;
-	String[] num2String = new String[NUM_VERSIONS];
-	num2String[1] = "PENALISATION_EPISODES";
-	num2String[2] = "NEGATIVE_BINOMIAL_MASS_ACTION";
-	num2String[3] = "ATTENUATION_ASEXUAL_DENSITY";
-	num2String[4] = "LOGNORMAL_MASS_ACTION";
-	num2String[5] = "NO_PRE_ERYTHROCYTIC";
-	num2String[6] = "MAX_DENS_CORRECTION";
-	num2String[7] = "INNATE_MAX_DENS";
-	num2String[8] = "MAX_DENS_RESET";
-	num2String[9] = "DUMMY_WITHIN_HOST_MODEL";
-	num2String[10] = "PREDETERMINED_EPISODES";
-	num2String[11] = "NON_MALARIA_FEVERS";
-	num2String[12] = "INCLUDES_PK_PD";
-	num2String[13] = "CLINICAL_EVENT_SCHEDULER";
-	num2String[14] = "MUELLER_PRESENTATION_MODEL";
-	num2String[15] = "TRANS_HET";
-	num2String[16] = "COMORB_HET";
-	num2String[17] = "TREAT_HET";
-	num2String[18] = "COMORB_TRANS_HET";
-	num2String[19] = "TRANS_TREAT_HET";
-	num2String[20] = "COMORB_TREAT_HET";
-	num2String[21] = "TRIPLE_HET";
-	num2String[22] = "EMPIRICAL_WITHIN_HOST_MODEL";
-	
-	Element modelOptions = scenarioDocument.createElement ("ModelOptions");
-	int verFlags = Integer.parseInt (scenarioElement.getAttribute ("modelVersion"));
-	
-	for (int i = 1; i < NUM_VERSIONS; ++i) {
-	    if ((verFlags & (1 << i)) != 0) {
-		Element opt = scenarioDocument.createElement ("option");
-		opt.setAttribute ("name", num2String[i]);
-		opt.setAttribute ("value", "true");
-		modelOptions.appendChild (opt);
-	    }
-	}
-	if ((verFlags & (1 << 6)) == 0 && (verFlags & (1<<9)) == 0 && (verFlags & (1<<22)) == 0) {
-	    if (maxDensBug == BugCorrectionBehaviour.correct) {
-		// option is enabled by default so don't need to add it
-	    } else if (maxDensBug == BugCorrectionBehaviour.dontCorrect) {
-		Element opt = scenarioDocument.createElement ("option");
-		opt.setAttribute ("name", num2String[6]);
-		opt.setAttribute ("value", "false");
-		modelOptions.appendChild (opt);
-	    } else {
-		System.err.println ("scenario doesn't include MAX_DENS_CORRECTION: please specify --maxDensCorrection BOOL");
-		return false;
-	    }
-	}
-	
-	scenarioElement.insertBefore(modelOptions, scenarioElement.getFirstChild());
-	scenarioElement.removeAttribute ("modelVersion");
-	
-	final int NUM_SURVEYS = 31;
-	String[] surveyCode2String = new String[NUM_SURVEYS];
-	surveyCode2String[0] = "nHost";
-	surveyCode2String[1] = "nInfect";
-	surveyCode2String[2] = "nExpectd";
-	surveyCode2String[3] = "nPatent";
-	surveyCode2String[4] = "sumLogPyrogenThres";
-	surveyCode2String[5] = "sumlogDens";
-	surveyCode2String[6] = "totalInfs";
-	surveyCode2String[7] = "nTransmit";
-	surveyCode2String[8] = "totalPatentInf";
-	surveyCode2String[9] = "contrib";
-	surveyCode2String[10] = "sumPyrogenThresh";
-	surveyCode2String[11] = "nTreatments1";
-	surveyCode2String[12] = "nTreatments2";
-	surveyCode2String[13] = "nTreatments3";
-	surveyCode2String[14] = "nUncomp";
-	surveyCode2String[15] = "nSevere";
-	surveyCode2String[16] = "nSeq";
-	surveyCode2String[17] = "nHospitalDeaths";
-	surveyCode2String[18] = "nIndDeaths";
-	surveyCode2String[19] = "nDirDeaths";
-	surveyCode2String[20] = "nEPIVaccinations";
-	surveyCode2String[21] = "imr_summary";
-	surveyCode2String[22] = "nMassVaccinations";
-	surveyCode2String[23] = "nHospitalRecovs";
-	surveyCode2String[24] = "nHospitalSeqs";
-	surveyCode2String[25] = "nIPTDoses";
-	surveyCode2String[26] = "annAvgK";
-	surveyCode2String[27] = "nNMFever";
-	surveyCode2String[28] = "innoculationsPerDayOfYear";
-	surveyCode2String[29] = "kappaPerDayOfYear";
-	surveyCode2String[30] = "innoculationsPerAgeGroup";
-	
-	Element surveyOptions = scenarioDocument.createElement ("SurveyOptions");
-	Element monitoring = (Element) scenarioElement.getElementsByTagName("monitoring").item(0);
-	Element surveys = (Element) monitoring.getElementsByTagName("surveys").item(0);
-	int surveyFlags = Integer.parseInt (surveys.getAttribute ("summaryOption"));
-	
-	for (int i = 0; i < NUM_SURVEYS; ++i) {
-	    if ((surveyFlags & (1 << i)) != 0) {
-		Element opt = scenarioDocument.createElement ("option");
-		opt.setAttribute ("name", surveyCode2String[i]);
-		opt.setAttribute ("value", "true");
-		surveyOptions.appendChild (opt);
-	    }
-	}
-	
-	monitoring.insertBefore(surveyOptions, surveys);
-	surveys.removeAttribute ("summaryOption");
-	
-	int analysisNum = Integer.parseInt (scenarioElement.getAttribute ("analysisNo"));
-	// These analysis numbers _were_ reserved for Garki scenarios.
-	if ((analysisNum >= 22) && (analysisNum <= 30)) {
-	    Element opt = scenarioDocument.createElement ("option");
-	    opt.setAttribute ("name", "GARKI_DENSITY_BIAS");
-	    opt.setAttribute ("value", "true");
-	    modelOptions.appendChild (opt);
-	}
-	
-	return true;
+        final int NUM_VERSIONS = 23;
+        String[] num2String = new String[NUM_VERSIONS];
+        num2String[1] = "PENALISATION_EPISODES";
+        num2String[2] = "NEGATIVE_BINOMIAL_MASS_ACTION";
+        num2String[3] = "ATTENUATION_ASEXUAL_DENSITY";
+        num2String[4] = "LOGNORMAL_MASS_ACTION";
+        num2String[5] = "NO_PRE_ERYTHROCYTIC";
+        num2String[6] = "MAX_DENS_CORRECTION";
+        num2String[7] = "INNATE_MAX_DENS";
+        num2String[8] = "MAX_DENS_RESET";
+        num2String[9] = "DUMMY_WITHIN_HOST_MODEL";
+        num2String[10] = "PREDETERMINED_EPISODES";
+        num2String[11] = "NON_MALARIA_FEVERS";
+        num2String[12] = "INCLUDES_PK_PD";
+        num2String[13] = "CLINICAL_EVENT_SCHEDULER";
+        num2String[14] = "MUELLER_PRESENTATION_MODEL";
+        num2String[15] = "TRANS_HET";
+        num2String[16] = "COMORB_HET";
+        num2String[17] = "TREAT_HET";
+        num2String[18] = "COMORB_TRANS_HET";
+        num2String[19] = "TRANS_TREAT_HET";
+        num2String[20] = "COMORB_TREAT_HET";
+        num2String[21] = "TRIPLE_HET";
+        num2String[22] = "EMPIRICAL_WITHIN_HOST_MODEL";
+
+        Element modelOptions = scenarioDocument.createElement("ModelOptions");
+        int verFlags = Integer.parseInt(scenarioElement
+                .getAttribute("modelVersion"));
+
+        for (int i = 1; i < NUM_VERSIONS; ++i) {
+            if ((verFlags & (1 << i)) != 0) {
+                Element opt = scenarioDocument.createElement("option");
+                opt.setAttribute("name", num2String[i]);
+                opt.setAttribute("value", "true");
+                modelOptions.appendChild(opt);
+            }
+        }
+        if ((verFlags & (1 << 6)) == 0 && (verFlags & (1 << 9)) == 0
+                && (verFlags & (1 << 22)) == 0) {
+            if (maxDensBug == BugCorrectionBehaviour.correct) {
+                // option is enabled by default so don't need to add it
+            } else if (maxDensBug == BugCorrectionBehaviour.dontCorrect) {
+                Element opt = scenarioDocument.createElement("option");
+                opt.setAttribute("name", num2String[6]);
+                opt.setAttribute("value", "false");
+                modelOptions.appendChild(opt);
+            } else {
+                System.err
+                        .println("scenario doesn't include MAX_DENS_CORRECTION: please specify --maxDensCorrection BOOL");
+                return false;
+            }
+        }
+
+        scenarioElement.insertBefore(modelOptions, scenarioElement
+                .getFirstChild());
+        scenarioElement.removeAttribute("modelVersion");
+
+        final int NUM_SURVEYS = 31;
+        String[] surveyCode2String = new String[NUM_SURVEYS];
+        surveyCode2String[0] = "nHost";
+        surveyCode2String[1] = "nInfect";
+        surveyCode2String[2] = "nExpectd";
+        surveyCode2String[3] = "nPatent";
+        surveyCode2String[4] = "sumLogPyrogenThres";
+        surveyCode2String[5] = "sumlogDens";
+        surveyCode2String[6] = "totalInfs";
+        surveyCode2String[7] = "nTransmit";
+        surveyCode2String[8] = "totalPatentInf";
+        surveyCode2String[9] = "contrib";
+        surveyCode2String[10] = "sumPyrogenThresh";
+        surveyCode2String[11] = "nTreatments1";
+        surveyCode2String[12] = "nTreatments2";
+        surveyCode2String[13] = "nTreatments3";
+        surveyCode2String[14] = "nUncomp";
+        surveyCode2String[15] = "nSevere";
+        surveyCode2String[16] = "nSeq";
+        surveyCode2String[17] = "nHospitalDeaths";
+        surveyCode2String[18] = "nIndDeaths";
+        surveyCode2String[19] = "nDirDeaths";
+        surveyCode2String[20] = "nEPIVaccinations";
+        surveyCode2String[21] = "imr_summary";
+        surveyCode2String[22] = "nMassVaccinations";
+        surveyCode2String[23] = "nHospitalRecovs";
+        surveyCode2String[24] = "nHospitalSeqs";
+        surveyCode2String[25] = "nIPTDoses";
+        surveyCode2String[26] = "annAvgK";
+        surveyCode2String[27] = "nNMFever";
+        surveyCode2String[28] = "innoculationsPerDayOfYear";
+        surveyCode2String[29] = "kappaPerDayOfYear";
+        surveyCode2String[30] = "innoculationsPerAgeGroup";
+
+        Element surveyOptions = scenarioDocument.createElement("SurveyOptions");
+        Element monitoring = (Element) scenarioElement.getElementsByTagName(
+                "monitoring").item(0);
+        Element surveys = (Element) monitoring.getElementsByTagName("surveys")
+                .item(0);
+        int surveyFlags = Integer.parseInt(surveys
+                .getAttribute("summaryOption"));
+
+        for (int i = 0; i < NUM_SURVEYS; ++i) {
+            if ((surveyFlags & (1 << i)) != 0) {
+                Element opt = scenarioDocument.createElement("option");
+                opt.setAttribute("name", surveyCode2String[i]);
+                opt.setAttribute("value", "true");
+                surveyOptions.appendChild(opt);
+            }
+        }
+
+        monitoring.insertBefore(surveyOptions, surveys);
+        surveys.removeAttribute("summaryOption");
+
+        int analysisNum = Integer.parseInt(scenarioElement
+                .getAttribute("analysisNo"));
+        // These analysis numbers _were_ reserved for Garki scenarios.
+        if ((analysisNum >= 22) && (analysisNum <= 30)) {
+            Element opt = scenarioDocument.createElement("option");
+            opt.setAttribute("name", "GARKI_DENSITY_BIAS");
+            opt.setAttribute("value", "true");
+            modelOptions.appendChild(opt);
+        }
+
+        return true;
     }
-    
-    // Version 14 changed the drugDescription element. This was as-yet unused and there's no direct
+
+    // Version 14 changed the drugDescription element. This was as-yet unused
+    // and there's no direct
     // translation from the old version.
     public Boolean translate13To14() throws Exception {
-	Element cms = (Element) scenarioElement.getElementsByTagName("drugDescription").item(0);
-	if (cms != null) {
-	    System.err.println ("Warning: drugDescription element has changed; please rewrite manually.");
-	}
-	return true;
+        Element cms = (Element) scenarioElement.getElementsByTagName(
+                "drugDescription").item(0);
+        if (cms != null) {
+            System.err
+                    .println("Warning: drugDescription element has changed; please rewrite manually.");
+        }
+        return true;
     }
-    
+
     // Version 15 allowed MDA interventions to include drug information (no
     // changes to existing scenarios)
     public Boolean translate14To15() throws Exception {
-	return true;
+        return true;
     }
-    
+
     public Boolean translate15To16() throws Exception {
-    	
-    	Element model = scenarioDocument.createElement("model");
-    	Element clinical = scenarioDocument.createElement("clinical");
-    	Element modelOptions = (Element)scenarioElement.getElementsByTagName("ModelOptions").item(0);
-    	Element parameters = (Element)scenarioElement.getElementsByTagName("parameters").item(0);
-    	
-    	model.appendChild(modelOptions);
-    	model.appendChild(clinical);
-    	model.appendChild(parameters);
-    	
-    	scenarioElement.appendChild(model);
-    	
-    	Element healthSystemOld = (Element)scenarioElement.getElementsByTagName("healthSystem").item(0);
-    	Element eventScheduler = (Element)scenarioElement.getElementsByTagName("EventScheduler").item(0);
-    	Attr healthSystemMemory;
-    	
-    	Element healthSystemNew = scenarioDocument.createElement("healthSystem");
-    	
-    	if(healthSystemOld== null)
-    	{
-    		healthSystemMemory = (Attr)eventScheduler.getAttributeNode("healthSystemMemory");
-    		eventScheduler.removeAttribute("healthSystemMemory");
-    		//scenarioDocument.renameNode(eventScheduler, null, "HSEventScheduler");
-    		Element CFR = scenarioDocument.createElement("CFR");
-    		Element group = scenarioDocument.createElement("group");
-    		Attr cfr = scenarioDocument.createAttribute("cfr");
-    		Attr lowerbound = scenarioDocument.createAttribute("lowerbound");
-    		
-    		cfr.setNodeValue("0");
-    		lowerbound.setNodeValue("0");
-    		
-    		group.setAttributeNode(cfr);
-    		group.setAttributeNode(lowerbound);
-    		
-    		CFR.appendChild(group);
-    		
-    		healthSystemNew.appendChild(eventScheduler);
-    		healthSystemNew.appendChild(CFR);
-    	}
-    	else
-    	{
-    		healthSystemMemory = (Attr)healthSystemOld.getAttributeNode("healthSystemMemory");
-    		healthSystemOld.removeAttribute("healthSystemMemory");
-    		//healthSystemOld.removeAttribute("name");
-    		scenarioDocument.renameNode(healthSystemOld, null, "ImmediateOutcomes");
-    		Element CFR  = (Element)healthSystemOld.getElementsByTagName("CFR").item(0);
-    		
-    		healthSystemNew.appendChild(healthSystemOld);
-    		healthSystemNew.appendChild(CFR);
-    	}
-    	
-    	Element Intervention = (Element)scenarioElement.getElementsByTagName("intervention").item(0);
-    	if(Intervention!=null)
-    	{
-    		Element changeHS = (Element)Intervention.getElementsByTagName("changeHS").item(0);
-    		
-    		if(changeHS!=null)
-    		{
-    			changeHS.removeAttribute("healthSystemMemory");
-    			
-        		scenarioDocument.renameNode(changeHS, null, "ImmediateOutcomes");
-        		
-        		Element changeHSNew = scenarioDocument.createElement("changeHS");
-        		Intervention.appendChild(changeHSNew);
-        		changeHSNew.appendChild(changeHS);
-        		
-    			Element HSCFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
-    			changeHSNew.appendChild(HSCFR);
-    		}
-			
-    	}
-    	
-    	scenarioElement.insertBefore(healthSystemNew, (Element)scenarioElement.getElementsByTagName("entoData").item(0));
-    	clinical.setAttributeNode(healthSystemMemory);
-    	
-    	return true;
+
+        Element model = scenarioDocument.createElement("model");
+        Element clinical = scenarioDocument.createElement("clinical");
+        Element modelOptions = (Element) scenarioElement.getElementsByTagName(
+                "ModelOptions").item(0);
+        Element parameters = (Element) scenarioElement.getElementsByTagName(
+                "parameters").item(0);
+
+        model.appendChild(modelOptions);
+        model.appendChild(clinical);
+        model.appendChild(parameters);
+
+        scenarioElement.appendChild(model);
+
+        Element healthSystemOld = (Element) scenarioElement
+                .getElementsByTagName("healthSystem").item(0);
+        Element eventScheduler = (Element) scenarioElement
+                .getElementsByTagName("EventScheduler").item(0);
+        Attr healthSystemMemory;
+
+        Element healthSystemNew = scenarioDocument
+                .createElement("healthSystem");
+
+        if (healthSystemOld == null) {
+            healthSystemMemory = eventScheduler
+                    .getAttributeNode("healthSystemMemory");
+            eventScheduler.removeAttribute("healthSystemMemory");
+            // scenarioDocument.renameNode(eventScheduler, null,
+            // "HSEventScheduler");
+            Element CFR = scenarioDocument.createElement("CFR");
+            Element group = scenarioDocument.createElement("group");
+            Attr cfr = scenarioDocument.createAttribute("cfr");
+            Attr lowerbound = scenarioDocument.createAttribute("lowerbound");
+
+            cfr.setNodeValue("0");
+            lowerbound.setNodeValue("0");
+
+            group.setAttributeNode(cfr);
+            group.setAttributeNode(lowerbound);
+
+            CFR.appendChild(group);
+
+            healthSystemNew.appendChild(eventScheduler);
+            healthSystemNew.appendChild(CFR);
+        } else {
+            healthSystemMemory = healthSystemOld
+                    .getAttributeNode("healthSystemMemory");
+            healthSystemOld.removeAttribute("healthSystemMemory");
+            // healthSystemOld.removeAttribute("name");
+            scenarioDocument.renameNode(healthSystemOld, null,
+                    "ImmediateOutcomes");
+            Element CFR = (Element) healthSystemOld.getElementsByTagName("CFR")
+                    .item(0);
+
+            healthSystemNew.appendChild(healthSystemOld);
+            healthSystemNew.appendChild(CFR);
+        }
+
+        Element Intervention = (Element) scenarioElement.getElementsByTagName(
+                "intervention").item(0);
+        if (Intervention != null) {
+            Element changeHS = (Element) Intervention.getElementsByTagName(
+                    "changeHS").item(0);
+
+            if (changeHS != null) {
+                changeHS.removeAttribute("healthSystemMemory");
+
+                scenarioDocument
+                        .renameNode(changeHS, null, "ImmediateOutcomes");
+
+                Element changeHSNew = scenarioDocument
+                        .createElement("changeHS");
+                Intervention.appendChild(changeHSNew);
+                changeHSNew.appendChild(changeHS);
+
+                Element HSCFR = (Element) changeHS.getElementsByTagName("CFR")
+                        .item(0);
+                changeHSNew.appendChild(HSCFR);
+            }
+
+        }
+
+        scenarioElement.insertBefore(healthSystemNew, scenarioElement
+                .getElementsByTagName("entoData").item(0));
+        clinical.setAttributeNode(healthSystemMemory);
+
+        return true;
     }
-    
+
     public boolean translate16To17() throws Exception {
-    	
-    	Element vector = (Element)scenarioElement.getElementsByTagName("vector").item(0);
-    	
-    	if(vector!=null)
-    	{
-    		NodeList anopheles = vector.getElementsByTagName("anopheles");
-    		
-    		if(((Element)anopheles.item(0)).getElementsByTagName("nonHumanHosts").getLength()>0)
-    		{
-    			Element nhh = (Element)((Element)anopheles.item(0)).getElementsByTagName("nonHumanHosts").item(0);
-    			
-    			Attr nonHumanHostsnumber = scenarioDocument.createAttribute("number");
-    			nonHumanHostsnumber.setNodeValue(Double.toString(SchemaTranslator.Standard_NHH_NUMBER));
-    			Attr name = scenarioDocument.createAttribute("name");
-    			name.setNodeValue(nhh.getAttribute("name"));
-    			
-    			Element nonHumanHostsnumbers = scenarioDocument.createElement("nonHumanHosts");
-    			nonHumanHostsnumbers.setAttributeNode(name);
-    			nonHumanHostsnumbers.setAttributeNode(nonHumanHostsnumber);
-    			
-    			vector.appendChild(nonHumanHostsnumbers);
-    		}
-    		
-    		for(int i=0;i<anopheles.getLength(); i++)
-    		{
-    			Element anophelesType = (Element)anopheles.item(i);
-    			String typeName = anophelesType.getAttribute("mosquito");
-    			NodeList nonHumanHosts = anophelesType.getElementsByTagName("nonHumanHosts");
-    			Element mosq = (Element)anophelesType.getElementsByTagName("mosq").item(0);
-    			
-    			if(typeName.equals(SchemaTranslator.Name_GAMBIAE_SS))
-    				setMosqsNewAttributes(SchemaTranslator.INDEX_GAMBIAE_SS, mosq, nonHumanHosts);
-    			
-    			else if(typeName.equals(SchemaTranslator.Name_FUNESTUS))
-    				setMosqsNewAttributes(SchemaTranslator.INDEX_FUNESTUS, mosq, nonHumanHosts);
-    			
-    			else if(typeName.equals(SchemaTranslator.Name_ARABIENSIS))
-    				setMosqsNewAttributes(SchemaTranslator.INDEX_ARABIENSIS, mosq, nonHumanHosts);
-    			
-    			else
-    			{
-    				System.err.println("There are no standards values for this kind of mosquito. Please edit those values per hand. ");
-    				System.err.println("This scenario will not be updated.");
-    				return false;
-    			}
-    		}	
-    	}
-    	return true;
+
+        Element vector = (Element) scenarioElement.getElementsByTagName(
+                "vector").item(0);
+
+        if (vector != null) {
+            NodeList anopheles = vector.getElementsByTagName("anopheles");
+
+            if (((Element) anopheles.item(0)).getElementsByTagName(
+                    "nonHumanHosts").getLength() > 0) {
+                Element nhh = (Element) ((Element) anopheles.item(0))
+                        .getElementsByTagName("nonHumanHosts").item(0);
+
+                Attr nonHumanHostsnumber = scenarioDocument
+                        .createAttribute("number");
+                nonHumanHostsnumber.setNodeValue(Double
+                        .toString(SchemaTranslator.Standard_NHH_NUMBER));
+                Attr name = scenarioDocument.createAttribute("name");
+                name.setNodeValue(nhh.getAttribute("name"));
+
+                Element nonHumanHostsnumbers = scenarioDocument
+                        .createElement("nonHumanHosts");
+                nonHumanHostsnumbers.setAttributeNode(name);
+                nonHumanHostsnumbers.setAttributeNode(nonHumanHostsnumber);
+
+                vector.appendChild(nonHumanHostsnumbers);
+            }
+
+            for (int i = 0; i < anopheles.getLength(); i++) {
+                Element anophelesType = (Element) anopheles.item(i);
+                String typeName = anophelesType.getAttribute("mosquito");
+                NodeList nonHumanHosts = anophelesType
+                        .getElementsByTagName("nonHumanHosts");
+                Element mosq = (Element) anophelesType.getElementsByTagName(
+                        "mosq").item(0);
+
+                if (typeName.equals(SchemaTranslator.Name_GAMBIAE_SS))
+                    setMosqsNewAttributes(SchemaTranslator.INDEX_GAMBIAE_SS,
+                            mosq, nonHumanHosts);
+
+                else if (typeName.equals(SchemaTranslator.Name_FUNESTUS))
+                    setMosqsNewAttributes(SchemaTranslator.INDEX_FUNESTUS,
+                            mosq, nonHumanHosts);
+
+                else if (typeName.equals(SchemaTranslator.Name_ARABIENSIS))
+                    setMosqsNewAttributes(SchemaTranslator.INDEX_ARABIENSIS,
+                            mosq, nonHumanHosts);
+
+                else {
+                    System.err
+                            .println("There are no standards values for this kind of mosquito. Please edit those values per hand. ");
+                    System.err.println("This scenario will not be updated.");
+                    return false;
+                }
+            }
+        }
+        return true;
     }
-    
+
     public boolean translate17To18() throws Exception {
-    	
-    	Attr popSize = (Attr)scenarioElement.getAttributeNode("popSize");
-    	Attr maxAgeYrs = (Attr)scenarioElement.getAttributeNode("maximumAgeYrs");
-    	Attr mode = (Attr)scenarioElement.getAttributeNode("mode");
-    	
-    	scenarioElement.removeAttribute("popSize");
-    	scenarioElement.removeAttribute("maximumAgeYrs");
-    	scenarioElement.removeAttribute("mode");
-    	
-    	Element demography = (Element)scenarioElement.getElementsByTagName("demography").item(0);
-    	Element entoData = (Element)scenarioElement.getElementsByTagName("entoData").item(0);
-    	
-    	demography.setAttributeNode(popSize);
-    	demography.setAttributeNode(maxAgeYrs);
-    	
-    	entoData.setAttributeNode(mode);
-    	
-    	return true;
+
+        Attr popSize = scenarioElement.getAttributeNode("popSize");
+        Attr maxAgeYrs = scenarioElement.getAttributeNode("maximumAgeYrs");
+        Attr mode = scenarioElement.getAttributeNode("mode");
+
+        scenarioElement.removeAttribute("popSize");
+        scenarioElement.removeAttribute("maximumAgeYrs");
+        scenarioElement.removeAttribute("mode");
+
+        Element demography = (Element) scenarioElement.getElementsByTagName(
+                "demography").item(0);
+        Element entoData = (Element) scenarioElement.getElementsByTagName(
+                "entoData").item(0);
+
+        demography.setAttributeNode(popSize);
+        demography.setAttributeNode(maxAgeYrs);
+
+        entoData.setAttributeNode(mode);
+
+        return true;
     }
-    
-    private void setMosqsNewAttributes(int mosqType, Element mosq, NodeList nonHumanHosts)
-    {
-    	
-    	Attr humanBloodIndex = scenarioDocument.createAttribute("mosqHumanBloodIndex");
-		Attr proportionLaidEggsSameDay = scenarioDocument.createAttribute("mosqLaidEggsSameDayProportion");
-		Attr PSurvivalFeedingCycle = scenarioDocument.createAttribute("mosqSurvivalFeedingCycleProbability");
-		
-		proportionLaidEggsSameDay.setNodeValue(Double.toString(SchemaTranslator.ProporitionsLaidEggsSameDay[mosqType]));
-		PSurvivalFeedingCycle.setNodeValue(Double.toString(SchemaTranslator.PsSurvivalFeedingCycle[mosqType]));
-    	
-    	if(nonHumanHosts == null || nonHumanHosts.getLength()==0)
-    		humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndex_NONNHS));
-			
-    	else if(nonHumanHosts.getLength() == 1)
-    	{
-			humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
-			
-			Element nhh = (Element) nonHumanHosts.item(0);
-			
-			Attr relativeEntoAvailability = scenarioDocument.createAttribute("mosqRelativeEntoAvailability");
-			relativeEntoAvailability.setNodeValue(Double.toString(SchemaTranslator.Standard_RELATIVE_ENTO_AV));
-			
-			nhh.setAttributeNode(relativeEntoAvailability);
-			nhh.removeAttribute("mosqEntoAvailability");
-    	}
-    	else
-    	{
-			
-			humanBloodIndex.setNodeValue(Double.toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
-    		System.err.println("There are more than 1 non human hosts types in these scenario. Please edit the relative Ento availabilities for each type of non human host by hand.");
-    	}
-    	
-    	mosq.setAttributeNode(humanBloodIndex);
-		mosq.setAttributeNode(proportionLaidEggsSameDay);
-		mosq.setAttributeNode(PSurvivalFeedingCycle);
-		
-		mosq.removeAttribute("mosqEntoAvailability");
-		mosq.removeAttribute("mosqSeekingDeathRate");
-	}
-    
-    
+
+    private void setMosqsNewAttributes(int mosqType, Element mosq,
+            NodeList nonHumanHosts) {
+
+        Attr humanBloodIndex = scenarioDocument
+                .createAttribute("mosqHumanBloodIndex");
+        Attr proportionLaidEggsSameDay = scenarioDocument
+                .createAttribute("mosqLaidEggsSameDayProportion");
+        Attr PSurvivalFeedingCycle = scenarioDocument
+                .createAttribute("mosqSurvivalFeedingCycleProbability");
+
+        proportionLaidEggsSameDay
+                .setNodeValue(Double
+                        .toString(SchemaTranslator.ProporitionsLaidEggsSameDay[mosqType]));
+        PSurvivalFeedingCycle.setNodeValue(Double
+                .toString(SchemaTranslator.PsSurvivalFeedingCycle[mosqType]));
+
+        if (nonHumanHosts == null || nonHumanHosts.getLength() == 0)
+            humanBloodIndex.setNodeValue(Double
+                    .toString(SchemaTranslator.HumanBloodIndex_NONNHS));
+
+        else if (nonHumanHosts.getLength() == 1) {
+            humanBloodIndex.setNodeValue(Double
+                    .toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
+
+            Element nhh = (Element) nonHumanHosts.item(0);
+
+            Attr relativeEntoAvailability = scenarioDocument
+                    .createAttribute("mosqRelativeEntoAvailability");
+            relativeEntoAvailability.setNodeValue(Double
+                    .toString(SchemaTranslator.Standard_RELATIVE_ENTO_AV));
+
+            nhh.setAttributeNode(relativeEntoAvailability);
+            nhh.removeAttribute("mosqEntoAvailability");
+        } else {
+
+            humanBloodIndex.setNodeValue(Double
+                    .toString(SchemaTranslator.HumanBloodIndexes[mosqType]));
+            System.err
+                    .println("There are more than 1 non human hosts types in these scenario. Please edit the relative Ento availabilities for each type of non human host by hand.");
+        }
+
+        mosq.setAttributeNode(humanBloodIndex);
+        mosq.setAttributeNode(proportionLaidEggsSameDay);
+        mosq.setAttributeNode(PSurvivalFeedingCycle);
+
+        mosq.removeAttribute("mosqEntoAvailability");
+        mosq.removeAttribute("mosqSeekingDeathRate");
+    }
+
     private void visitAllFiles(File file, File outDir) throws Exception {
         if (file.isDirectory()) {
             String[] children = file.list();
@@ -886,16 +943,17 @@ public class SchemaTranslator {
                 doTranslation = false;
             } else if (args[i].equals("--update-db")) {
                 doDBUpdate = true;
-	    } else if (args[i].equals("--maxDensCorrection")) {
-		String arg = args[++i];
-		if (arg.equalsIgnoreCase("true")) {
-		    maxDensBug = BugCorrectionBehaviour.correct;
-		} else if (arg.equalsIgnoreCase("false")) {
-		    maxDensBug = BugCorrectionBehaviour.dontCorrect;
-		} else {
-		    System.err.println ("--maxDensCorrection: expected true or false");
-		    System.exit (2);
-		}
+            } else if (args[i].equals("--maxDensCorrection")) {
+                String arg = args[++i];
+                if (arg.equalsIgnoreCase("true")) {
+                    maxDensBug = BugCorrectionBehaviour.correct;
+                } else if (arg.equalsIgnoreCase("false")) {
+                    maxDensBug = BugCorrectionBehaviour.dontCorrect;
+                } else {
+                    System.err
+                            .println("--maxDensCorrection: expected true or false");
+                    System.exit(2);
+                }
             } else {
                 printUsage();
             }
@@ -915,6 +973,8 @@ public class SchemaTranslator {
                 File scenarios = new File("scenarios");
                 if (!scenarios.isDirectory())
                     scenarios.mkdir();
+                System.out
+                        .println("Put XMLs to be translated into the \"scenarios\" directory");
                 File outDir = new File("translatedScenarios");
                 if (!outDir.isDirectory())
                     outDir.mkdir();
