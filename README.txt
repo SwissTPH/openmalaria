@@ -12,7 +12,7 @@ make
 make test
 
 For further documentation, see the wiki:
-http://code.google.com/p/openmalaria/w/list
+http://code.google.com/p/openmalaria/wiki/Start
 
 
 Code subdirs:
@@ -23,6 +23,8 @@ model		Source code for the malaria model.
 xsdcxx		Xml reader code plus latest scenario.xsd schema.
 test		High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
 unittest	Low-level testing: unittests for the model using cxxunit.
+util		Extra scripts associated with OpenMalaria.
+
 
 Scenario schema files:
 model/scenario.xsd	The latest schema file. Code is generated from this file.
