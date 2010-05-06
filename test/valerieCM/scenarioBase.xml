@@ -468,6 +468,9 @@
           </decision>
         </decisions>
         <treatments>
+          <treatment name="none">
+            <schedule/>
+          </treatment>
           <treatment name="AL_treat">
             <schedule>
               <medicate drug="AR" mg="20" hour="0"/>
@@ -546,7 +549,7 @@
              p(0.3): lower_level
              p(0.5): none
         </decision>
-        <decision name="lower_level_test" depends="initial_provider,p" values="hospital, lower_level, none">
+        <decision name="test" depends="initial_provider,p" values="none,RDT,microscopy">
              initial_provider(hospital){
               none
               }
@@ -571,12 +574,27 @@
               none
               }
         </decision>
+        <decision name="hospitalisation" depends="initial_provider, referral" values="none, delayed, immediate">
+             initial_provider(hospital){
+              immediate
+              }
+              initial_provider(lower_level){
+                referral(none): none
+                referral(immediate): immediate
+                referral(delayed): delayed
+              }
+              initial_provider(none){
+              none
+              }
+        </decision>
         <decision name="suppository" depends="initial_provider, referral, p" values="true, false">
              initial_provider(hospital){
               referral(none){
               p(0.0): true
               p(1.0): false
               }
+              referral(immediate): false
+              referral(delayed): false
               }
               initial_provider(lower_level){
               referral(immediate){
@@ -587,15 +605,13 @@
               p(0.7): true
               p(0.3): false
               }
+              referral(none): false
               }
               initial_provider(none){
-              referral(none){
-              p(0.0): true
-              p(1.0): false
-              }
+                false
               }
         </decision>
-        <decision name="treatment" depends="suppository, p" values="MF_sev">
+        <decision name="treatment" depends="suppository, p" values="AS_sev,QU_sev">
             suppository(true){
             p(.5): AS_sev
             p(.5): QU_sev
@@ -1611,6 +1627,7 @@
     <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
   </parameters>
 </model>
 </scenario>
