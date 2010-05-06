@@ -189,6 +189,9 @@ You can pass options to openMalaria by first specifying -- (to end options passe
     parser.add_option("--callgrind", action="callback", callback=setWrapArgs,
             callback_args=(["valgrind","--tool=callgrind"],),
             help="Run openMalaria through valgrind using callgrind tool.")
+    parser.add_option("--cachegrind", action="callback", callback=setWrapArgs,
+            callback_args=(["valgrind","--tool=cachegrind"],),
+            help="Run openMalaria through valgrind using cachegrind tool.")
     (options, others) = parser.parse_args(args=args)
     
     options.ensure_value("wrapArgs", [])
