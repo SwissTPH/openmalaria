@@ -465,7 +465,7 @@
           <treatment name="AL_treat">
             <schedule>
               <medicate drug="AR" mg="20" hour="0"/>
-              <medicate drug="LU" mg="120" hour="0"/>  <!-- should change to read LR to match PK/PD below? -->
+              <medicate drug="LU" mg="120" hour="0"/>  
               <medicate drug="AR" mg="20" hour="8"/>
               <medicate drug="LU" mg="120" hour="8"/> 
               <medicate drug="AR" mg="20" hour="24"/>
@@ -522,7 +522,7 @@
               <medicate drug="CQ" mg="150" hour="24"/>
               <medicate drug="CQ" mg="75" hour="48"/> 
             </schedule>
-            <<modifier decision="ageGroup">
+            <modifier decision="ageGroup">
               <multiplyQty value="0_1" effect="CQ(0.5)" />
               <multiplyQty value="1_5" effect="CQ(1.0)" />
               <multiplyQty value="5_9" effect="CQ(2.0)"/>
@@ -1555,7 +1555,7 @@
       </PK>
     </drug>
 
-	<drug abbrev="LR">
+	<drug abbrev="LU">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
