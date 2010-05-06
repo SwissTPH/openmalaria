@@ -487,6 +487,12 @@
               <selectTimeRange value="missFirstDose" effect="AR(1-61),LU(1-61)"/>
               <selectTimeRange value="missLastDay" effect="AR(0-47),LU(0-47)"/>
             </modifier>
+            <modifier decision="ageGroup">
+              <multiplyQty value="0_3" effect="AR(1.0),LU(1.0)" />
+              <multiplyQty value="3_9" effect="AR(2.0), LU(2.0)" />
+              <multiplyQty value="9_14" effect="AR(3.0), LU(3.0)"/>
+              <multiplyQty value="14_100" effect="AR(4.0), LU(4.0)"/>
+            </modifier>
           </treatment>
           <treatment name="SP_treat">
             <schedule>
@@ -503,22 +509,25 @@
               <selectTimeRange value="missFirstDose" effect="S(1-100),P(1-100)"/>  <!-- means person does not take dose given-->
               <selectTimeRange value="missLastDay" effect="S(0-0),P(0-0)"/>
             </modifier>
+            <modifier decision="ageGroup">
+              <multiplyQty value="0_1" effect="S(0.5),P(0.5)" />
+              <multiplyQty value="1_7" effect="S(1.0), P(1.0)" />
+              <multiplyQty value="7_13" effect="S(2.0), P(2.0)"/>
+              <multiplyQty value="13_100" effect="S(3.0), P(3.0)"/>
+            </modifier>
           </treatment>
           <treatment name="CQ_treat">
             <schedule>
-              <medicate drug="CQ" mg="10" hour="0"/> 
-              <medicate drug="CQ" mg="5" hour="6"/>
-              <medicate drug="CQ" mg="5" hour="24"/> 
-              <medicate drug="CQ" mg="5" hour="36"/> 
+              <medicate drug="CQ" mg="150" hour="0"/> 
+              <medicate drug="CQ" mg="150" hour="24"/>
+              <medicate drug="CQ" mg="75" hour="48"/> 
             </schedule>
-            <modifier decision="bodyMass">
-              <multiplyQty value="5" effect="CQ(5)" />
-              <multiplyQty value="10" effect="CQ(10)" />
-              <multiplyQty value="20" effect="CQ(20)" />
-              <multiplyQty value="30" effect="CQ(30)" />
-              <multiplyQty value="40" effect="CQ(40)" />
-              <multiplyQty value="50" effect="CQ(50)" />
-              <multiplyQty value="60" effect="CQ(60)" />
+            <<modifier decision="ageGroup">
+              <multiplyQty value="0_1" effect="CQ(0.5)" />
+              <multiplyQty value="1_5" effect="CQ(1.0)" />
+              <multiplyQty value="5_9" effect="CQ(2.0)"/>
+              <multiplyQty value="9_15" effect="CQ(3.0)"/>
+              <multiplyQty value="15_100" effect="CQ(4.0)"/>
             </modifier>
             <modifier decision="quality">
               <multiplyQty value="good" effect="CQ(1.0)" />
