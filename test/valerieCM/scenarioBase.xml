@@ -278,15 +278,6 @@
             }
             }
           </decision>
-          <decision name="bodyMass" depends="age" values="5,10,20, 30, 40, 50, 60">
-            age(0-1): 5
-            age(1-3): 10 
-            age(3-6): 20
-            age(6-9): 30
-            age(9-13): 40
-            age(13-16): 50
-            age(16-inf): 60
-          </decision>
           <decision name="adherence" depends="treatment,provider,result,p" values="full,missFirstDose,missLastDay">
             treatment(CQ_treat){
                 provider(hospital){
@@ -515,7 +506,7 @@
           </treatment>
           <treatment name="CQ_treat">
             <schedule>
-              <medicate drug="CQ" mg="10" hour="0"/> <!-- 1st dose is 10 mg base per kg body mass-->
+              <medicate drug="CQ" mg="10" hour="0"/> 
               <medicate drug="CQ" mg="5" hour="6"/>
               <medicate drug="CQ" mg="5" hour="24"/> 
               <medicate drug="CQ" mg="5" hour="36"/> 
