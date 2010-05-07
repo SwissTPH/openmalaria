@@ -45,16 +45,19 @@ ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& s
     for (size_t j = 0; j < mSeq.size(); ++j) {
 	medications[j].abbrev = mSeq[j].getDrug();
 	medications[j].qty = mSeq[j].getMg();
+	medications[j].cost_qty = medications[j].qty;	// effective quantity w.r.t. cost starts off equal to quantity
 	medications[j].time = mSeq[j].getHour() / 24.0;	// convert from hours to days
     }
 }
 
-void ESTreatmentSchedule::multiplyQty (const SymbolValueMap& m, const string& errObj) {
+void ESTreatmentSchedule::multiplyQty (const SymbolValueMap& m, bool affectsCost, const string& errObj) {
     for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ++med ){
 	SymbolValueMap::const_iterator it = m.find( med->abbrev );
 	if( it == m.end() )
 	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
 	med->qty *= it->second;
+	if( affectsCost )
+	    med->cost_qty *= it->second;
     }
 }
 void ESTreatmentSchedule::delay (const SymbolValueMap& m, const string& errObj) {
@@ -65,7 +68,7 @@ void ESTreatmentSchedule::delay (const SymbolValueMap& m, const string& errObj) 
 	med->time += it->second / 24.0;	// convert to days
     }
 }
-void ESTreatmentSchedule::selectTimeRange (const SymbolRangeMap& m, const string& errObj) {
+void ESTreatmentSchedule::selectTimeRange (const SymbolRangeMap& m, bool affectsCost, const string& errObj) {
     for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ){
 	SymbolRangeMap::const_iterator it = m.find( med->abbrev );
 	if( it == m.end() )
@@ -73,8 +76,14 @@ void ESTreatmentSchedule::selectTimeRange (const SymbolRangeMap& m, const string
 	double timeH = med->time * 24.0;	// convert back to hours for comparisons
 	if( it->second.first <= timeH && timeH < it->second.second )
 	    ++med;
-	else
-	    med = medications.erase( med );	// NOTE: inefficient on a vector... not very important here though
+	else {
+	    if( affectsCost )
+		med = medications.erase( med );	// NOTE: inefficient on a vector... not very important here though
+	    else {
+		med->qty = 0.0;	// zero effect treatment, but still has cost (cost_qty)
+		++med;
+	    }
+	}
     }
 }
 
@@ -128,18 +137,22 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
   schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
 	
 	if( modifier->getMultiplyQty().size() ) {
+	    assert( modifier->getDelay().size() == 0 );
+	    assert( modifier->getSelectTimeRange().size() == 0 );
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getMultiplyQty() ){
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
 		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
+		bool affectsCost = mod.getAffectsCost().present() ? mod.getAffectsCost().get() : true;
 		
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
-		    ts->multiplyQty( m, errObj );
+		    ts->multiplyQty( m, affectsCost, errObj );
 		    schedules[ s->first | val ] = ts;
 		}
 	    }
 	} else if( modifier->getDelay().size() ) {
+	    assert( modifier->getSelectTimeRange().size() == 0 );
 	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getDelay() ){
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
@@ -156,10 +169,11 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
 		const SymbolRangeMap& m = parser::parseSymbolRangeMap( mod.getEffect(), errObj );
+		bool affectsCost = mod.getAffectsCost().present() ? mod.getAffectsCost().get() : true;
 		
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
-		    ts->selectTimeRange( m, errObj );
+		    ts->selectTimeRange( m, affectsCost, errObj );
 		    schedules[ s->first | val ] = ts;
 		}
 	    }

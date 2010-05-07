@@ -63,6 +63,7 @@ struct MedicateData {
     
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed (mg?)
+    double cost_qty;	/// Effective quantity prescribed, with respect to costs
     double time;	/// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
 };
 
@@ -71,11 +72,11 @@ struct ESTreatmentSchedule {
     ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& sched);
     
     /// Multiply the quantity of each medication based on the value of this map.
-    void multiplyQty (const parser::SymbolValueMap&, const string& errObj);
+    void multiplyQty (const parser::SymbolValueMap&, bool affectsCost, const string& errObj);
     /// Delay the time of each medication based on the value of this map, in hours.
     void delay (const parser::SymbolValueMap&, const string& errObj);
     /// Remove medications not in time range (in hours) described by this map.
-    void selectTimeRange (const parser::SymbolRangeMap&, const string& errObj);
+    void selectTimeRange (const parser::SymbolRangeMap&, bool affectsCost, const string& errObj);
     
     /// Add medications into medicate queue
     inline void apply (list<MedicateData>& medicateQueue) const {

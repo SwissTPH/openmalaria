@@ -131,7 +131,11 @@ enum SurveyMeasure {
     //@{
     /// Number of Rapid Diagnostic Tests used
     Clinical_RDTs = 39,
-    /// Quantities of drugs used, per active ingredient abbreviation
+    /** Effective total quanty of each drug used, in mg. (Per active ingredient
+     * abbreviation.)
+     * 
+     * The quantity is efffective with respect to the cost (see treatment
+     * schedule definition). */
     Clinical_DrugUsage = 40,
     /// Direct death on first day of CM (before treatment takes effect)
     Clinical_FirstDayDeaths = 41,

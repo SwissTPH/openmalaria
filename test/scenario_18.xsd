@@ -1676,10 +1676,22 @@
     <xs:attribute name="effect" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Comma-separated list of effect for each drug, in the form
-          DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
+          Comma-separated list of the effect the modifier has on each drug, in
+          the form DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
         </xs:documentation>
             <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="affectsCost" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Does this affect the cost? If false, the effective drug usage (w.r.t.
+          cost) is unaffected by this modifier; if true it is. Defaults to true
+          (if omitted).
+          
+          Is meaningless for delays.
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Affects cost?;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

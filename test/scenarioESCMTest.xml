@@ -146,8 +146,8 @@
               <multiplyQty value="100" effect="MF(100)" />
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="MF(0-13)"/>
-              <selectTimeRange value="missFirstDose" effect="MF(1-13)"/>
+              <selectTimeRange value="full" effect="MF(0-13)" affectsCost="false"/>
+              <selectTimeRange value="missFirstDose" effect="MF(1-13)" affectsCost="false"/>
             </modifier>
             <modifier decision="delay">
               <delay value="0" effect="MF(0)"/>

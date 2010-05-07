@@ -478,14 +478,14 @@
               <medicate drug="LU" mg="120" hour="60"/> 
             </schedule>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="AR(1.0),LU(1.0)" />
-              <multiplyQty value="medium" effect="AR(0.6), LU(0.6)" />
-              <multiplyQty value="poor" effect="AR(0.3), LU(0.3)"/>
+              <multiplyQty value="good" effect="AR(1.0),LU(1.0)" affectsCost="false" />
+              <multiplyQty value="medium" effect="AR(0.6), LU(0.6)" affectsCost="false" />
+              <multiplyQty value="poor" effect="AR(0.3), LU(0.3)" affectsCost="false"/>
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="AR(0-61),LU(0-61)"/>
-              <selectTimeRange value="missFirstDose" effect="AR(1-61),LU(1-61)"/>
-              <selectTimeRange value="missLastDay" effect="AR(0-47),LU(0-47)"/>
+              <selectTimeRange value="full" effect="AR(0-61),LU(0-61)" affectsCost="true"/>
+              <selectTimeRange value="missFirstDose" effect="AR(1-61),LU(1-61)" affectsCost="false"/>
+              <selectTimeRange value="missLastDay" effect="AR(0-47),LU(0-47)" affectsCost="true"/>
             </modifier>
             <modifier decision="ageGroup">
               <multiplyQty value="0_3" effect="AR(1.0),LU(1.0)" />
@@ -500,13 +500,13 @@
               <medicate drug="P" mg="25" hour="0"/> 
             </schedule>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="S(1.0),P(1.0)" />
-              <multiplyQty value="medium" effect="S(0.6), P(0.6)" />
-              <multiplyQty value="poor" effect="S(0.3), P(0.3)"/>
+              <multiplyQty value="good" effect="S(1.0),P(1.0)" affectsCost="false" />
+              <multiplyQty value="medium" effect="S(0.6), P(0.6)" affectsCost="false" />
+              <multiplyQty value="poor" effect="S(0.3), P(0.3)" affectsCost="false"/>
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="S(0-100),P(0-100)"/>
-              <selectTimeRange value="missFirstDose" effect="S(1-100),P(1-100)"/>  <!-- means person does not take dose given-->
+              <selectTimeRange value="missFirstDose" effect="S(1-100),P(1-100)" affectsCost="false"/>  <!-- means person does not take dose given-->
               <selectTimeRange value="missLastDay" effect="S(0-0),P(0-0)"/>
             </modifier>
             <modifier decision="ageGroup">
@@ -530,13 +530,13 @@
               <multiplyQty value="15_100" effect="CQ(4.0)"/>
             </modifier>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="CQ(1.0)" />
-              <multiplyQty value="medium" effect="CQ(0.6)" />
-              <multiplyQty value="poor" effect="CQ(0.3)"/>
+              <multiplyQty value="good" effect="CQ(1.0)" affectsCost="false" />
+              <multiplyQty value="medium" effect="CQ(0.6)" affectsCost="false" />
+              <multiplyQty value="poor" effect="CQ(0.3)" affectsCost="false"/>
             </modifier>
             <modifier decision="adherence">
               <selectTimeRange value="full" effect="CQ(0-100)"/>
-              <selectTimeRange value="missFirstDose" effect="CQ(1-100)"/> 
+              <selectTimeRange value="missFirstDose" effect="CQ(1-100)" affectsCost="false"/> 
               <selectTimeRange value="missLastDay" effect="CQ(0-35)"/>
             </modifier>
             </treatment>
