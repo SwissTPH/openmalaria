@@ -226,16 +226,17 @@ bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor
 }
 
 double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){
-  double beta=alpha*(1-mu)/mu;
-  double nonInflatedValue=upperBound+log(random::beta(alpha, beta));
-  double inflatedValue;
-  int tries=0;
-  do {
-    inflatedValue=getInflatedDensity(nonInflatedValue);
-    tries++;
-  } while ((inflatedValue>upperBound) && tries<10);
-  if (inflatedValue>upperBound) inflatedValue=upperBound;
-  return inflatedValue;
+    double beta = alpha * (1.0-mu) / mu;
+    double nonInflatedValue = upperBound + log(random::beta(alpha, beta));
+    double inflatedValue;
+    int tries=0;
+    do {
+	inflatedValue=getInflatedDensity(nonInflatedValue);
+	tries++;
+    } while ((inflatedValue>upperBound) && tries<10);
+    if (inflatedValue>upperBound)
+	inflatedValue=upperBound;
+    return inflatedValue;
 }
 
 double EmpiricalInfection::samplePatentValue(double mu, double sigma, double lowerBound){
@@ -252,7 +253,7 @@ double EmpiricalInfection::sigma_noise(int ageOfInfection) {
 }
 
 double EmpiricalInfection::getInflatedDensity(double nonInflatedDensity){
-  double inflatedLogDensity=log(_inflationMean)+random::gauss(nonInflatedDensity,sqrt(_inflationVariance));
+  double inflatedLogDensity = log(_inflationMean) + random::gauss(nonInflatedDensity, sqrt(_inflationVariance));
   return exp(inflatedLogDensity);
 }
 

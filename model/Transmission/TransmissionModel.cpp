@@ -75,12 +75,14 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-void TransmissionModel::updateAgeCorrectionFactor (const std::list<Host::Human>& population, int populationSize) {
+void TransmissionModel::updateAgeCorrectionFactor (std::list<Host::Human>& population, int populationSize) {
     // Calculate relative availability correction, so calls from vectorUpdate,
     // etc., will have a mean of 1.0.
     double meanRelativeAvailability = 0.0;
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h)
+    for (std::list<Host::Human>::iterator h = population.begin(); h != population.end(); ++h){
+	h->updateAgeGroupData();
 	meanRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeGroupData());
+    }
     ageCorrectionFactor = populationSize / meanRelativeAvailability;
 }
 

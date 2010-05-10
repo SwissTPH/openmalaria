@@ -140,6 +140,7 @@ void Population::createInitialHumans ()
     }
     
     // Vector setup dependant on human population
+    // This also updates humans' ageGroupData, which _must_ happen here.
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
     _transmissionModel->setupNv0 (population, populationSize);
 }
@@ -154,9 +155,7 @@ void Population::newHuman (int dob)
 
 void Population::update1()
 {
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter)
-	iter->updateAgeGroupData();
-    
+    // This also updates humans' ageGroupData, which _must_ happen at beginning of timestep.
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
 
     Host::NeonatalMortality::update (population);

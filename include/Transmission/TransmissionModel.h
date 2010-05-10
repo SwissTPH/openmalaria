@@ -125,7 +125,7 @@ public:
    * 
    * Calculates the ageCorrectionFactor which is used in much of the
    * transmission code, including getEIR (used in Human update). */
-  void updateAgeCorrectionFactor (const std::list<Host::Human>& population, int populationSize);
+  void updateAgeCorrectionFactor (std::list<Host::Human>& population, int populationSize);
   
   /** Needs to be called each step of the simulation
    *
