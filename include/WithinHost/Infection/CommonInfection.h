@@ -21,7 +21,7 @@
 #ifndef Hmod_CommonInfection
 #define Hmod_CommonInfection
 
-#include "WithinHost/Infection.h"
+#include "WithinHost/Infection/Infection.h"
 
 namespace OM { namespace WithinHost {
     

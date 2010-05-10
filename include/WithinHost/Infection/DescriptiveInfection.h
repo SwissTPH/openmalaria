@@ -21,7 +21,7 @@
 
 #ifndef Hmod_DescriptiveInfection
 #define Hmod_DescriptiveInfection
-#include "WithinHost/Infection.h"
+#include "WithinHost/Infection/Infection.h"
 #include <fstream>
 #include <fcntl.h>
 

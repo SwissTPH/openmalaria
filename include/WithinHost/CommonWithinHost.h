@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WithinHostModel.h"
-#include "WithinHost/CommonInfection.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
 
 using namespace std;

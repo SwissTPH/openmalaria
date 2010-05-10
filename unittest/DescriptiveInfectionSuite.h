@@ -22,7 +22,7 @@
 #define Hmod_DescriptiveInfectionSuite
 
 #include <cxxtest/TestSuite.h>
-#include "WithinHost/DescriptiveInfection.h"
+#include "WithinHost/Infection/DescriptiveInfection.h"
 #include "util/random.h"
 #include <limits>
 

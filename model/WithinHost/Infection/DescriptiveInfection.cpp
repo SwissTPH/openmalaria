@@ -19,7 +19,7 @@
 
 */
 
-#include "WithinHost/DescriptiveInfection.h"
+#include "WithinHost/Infection/DescriptiveInfection.h"
 #include "Host/intervention.h"
 #include "inputData.h"
 #include "util/random.h"

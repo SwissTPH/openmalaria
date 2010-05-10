@@ -23,7 +23,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.hpp"
-#include "WithinHost/DummyInfection.h"
+#include "WithinHost/Infection/DummyInfection.h"
 #include <limits>
 
 using namespace OM::WithinHost;

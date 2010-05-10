@@ -22,7 +22,7 @@
 #ifndef Hmod_DummyInfection
 #define Hmod_DummyInfection
 
-#include "WithinHost/CommonInfection.h"
+#include "WithinHost/Infection/CommonInfection.h"
 
 namespace OM { namespace WithinHost {
 

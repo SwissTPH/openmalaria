@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #ifndef Hmod_MOLINEAUXINFECTION_H
 #define Hmod_MOLINEAUXINFECTION_H
 
-#include "WithinHost/CommonInfection.h"
+#include "WithinHost/Infection/CommonInfection.h"
 
 namespace OM { namespace WithinHost {
 

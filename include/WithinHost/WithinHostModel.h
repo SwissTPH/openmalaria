@@ -24,7 +24,7 @@
 #define Hmod_WithinHost_Model
 
 #include "Global.h"
-#include "WithinHost/Infection.h"
+#include "WithinHost/Infection/Infection.h"
 #include "AgeGroupData.h"
 #include "Survey.h"
 

@@ -24,7 +24,7 @@
 #define Hmod_WithinHost_Descriptive
 
 #include "WithinHost/WithinHostModel.h"
-#include "WithinHost/DescriptiveInfection.h"
+#include "WithinHost/Infection/DescriptiveInfection.h"
 
 using namespace std;
 

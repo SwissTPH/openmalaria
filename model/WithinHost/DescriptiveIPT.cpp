@@ -19,7 +19,7 @@
 */
 
 #include "WithinHost/DescriptiveIPT.h"
-#include "WithinHost/DescriptiveIPTInfection.h"
+#include "WithinHost/Infection/DescriptiveIPTInfection.h"
 #include "util/random.h"
 #include "util/errors.hpp"
 #include "util/ModelOptions.hpp"

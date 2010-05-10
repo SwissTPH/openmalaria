@@ -23,7 +23,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.hpp"
-#include "WithinHost/EmpiricalInfection.h"
+#include "WithinHost/Infection/EmpiricalInfection.h"
 #include "util/random.h"
 #include <limits>
 

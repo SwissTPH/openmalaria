@@ -21,7 +21,7 @@
 #ifndef Hmod_EmpiricalInfection
 #define Hmod_EmpiricalInfection
 
-#include "WithinHost/CommonInfection.h"
+#include "WithinHost/Infection/CommonInfection.h"
 
 namespace OM { namespace WithinHost {
     

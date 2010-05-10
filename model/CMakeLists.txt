@@ -56,14 +56,14 @@ set (Model_CPP
   
   WithinHost/WithinHostModel.cpp
   WithinHost/Common.cpp
-  WithinHost/Infection.cpp
   WithinHost/Descriptive.cpp
-  WithinHost/DescriptiveInfection.cpp
   WithinHost/DescriptiveIPT.cpp
-  WithinHost/DescriptiveIPTInfection.cpp
-  WithinHost/DummyInfection.cpp
-  WithinHost/EmpiricalInfection.cpp
-  WithinHost/MolineauxInfection.cpp
+  WithinHost/Infection/Infection.cpp
+  WithinHost/Infection/DescriptiveInfection.cpp
+  WithinHost/Infection/DescriptiveIPTInfection.cpp
+  WithinHost/Infection/DummyInfection.cpp
+  WithinHost/Infection/EmpiricalInfection.cpp
+  WithinHost/Infection/MolineauxInfection.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp
@@ -72,8 +72,8 @@ set (Model_CPP
   util/WeibullDecayedValue.cpp
   util/errors.cpp
   util/checkpoint.cpp
-    util/Options.cpp
-    util/random.cpp
+  util/Options.cpp
+  util/random.cpp
 )
 
 # Headers - only included so they show up in IDEs:

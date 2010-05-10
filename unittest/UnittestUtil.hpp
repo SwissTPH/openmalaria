@@ -29,7 +29,7 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
-#include "WithinHost/Infection.h"
+#include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WithinHostModel.h"
 
 using namespace OM;

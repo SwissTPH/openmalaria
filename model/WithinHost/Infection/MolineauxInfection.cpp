@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHost/MolineauxInfection.h"
+#include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Common.h"
 #include "inputData.h"
 #include "util/random.h"

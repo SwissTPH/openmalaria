@@ -22,7 +22,7 @@
 #define Hmod_InfectionImmunitySuite
 
 #include <cxxtest/TestSuite.h>
-#include "WithinHost/DummyInfection.h"
+#include "WithinHost/Infection/DummyInfection.h"
 #include <limits>
 
 using namespace OM::WithinHost;

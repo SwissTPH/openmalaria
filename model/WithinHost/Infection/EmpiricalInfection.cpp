@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHost/EmpiricalInfection.h"
+#include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Common.h"
 #include "util/random.h"
 #include "util/errors.hpp"

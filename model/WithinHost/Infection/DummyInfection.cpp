@@ -19,7 +19,7 @@
 
 */
 
-#include "WithinHost/DummyInfection.h"
+#include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Common.h"
 #include "inputData.h"
 #include "util/random.h"
