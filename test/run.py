@@ -66,7 +66,7 @@ def runScenario(options,omOptions,name):
     cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
     
     if not options.run:
-        print "\033[1;32m",cmd,"\033[0;00m"
+        print "\033[1;32m"+(" ".join(cmd))+"\033[0;00m"
         return 0
     
     # Run from a temporary directory, so checkpoint files won't conflict
@@ -87,7 +87,7 @@ def runScenario(options,omOptions,name):
     # While no output and cmd exits successfully:
     while (not os.path.isfile(outFile)):
         if options.logging:
-            print "\033[1;32m",cmd,"\033[0;00m"
+            print "\033[1;32m"+(" ".join(cmd))+"\033[0;00m"
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
         if ret != 0:
             print "Non-zero exit status: {0}".format(ret)

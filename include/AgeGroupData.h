@@ -34,15 +34,17 @@ public:
     /// Initialization
     static void initParameters ();
     
-    static double getAgeSpecificRelativeAvailability (double ageYears);
-    static double ageToWeight (double ageYears);
+    AgeGroupData() : _i(0) {}
+    
+    /// Update age group. Must be called before other member functions each timestep.
+    void update (double ageYears);
+    
+    inline double getAgeSpecificRelativeAvailability () const {
+	return ageSpecificRelativeAvailability[_i];
+    }
+    double ageToWeight (double ageYears) const;
     
 private:
-    /// Get the appropriate index within agemax, ageSpecificRelativeAvailability
-    /// and wtprop for this age (in years). Also used by PerHostTransmission.
-    static size_t getAgeGroup (double age);
-    static const map<double,size_t> fillAgeGroups();
-
     ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
     //@{
     //! Number of age groups to use
@@ -50,9 +52,7 @@ private:
     //! Maximum of each age category
     static const double agemax[nages];
     static const double agemin[nages];
-
-    static const map<double,size_t> ageMap;
-  
+    
     /** Average number of bites for each age as a proportion of the maximum.
     *
     * Set by constructor from constants (bsa_prop). */
@@ -76,6 +76,9 @@ private:
     static const double wtprop[nages];
     static const double wtpropmin[nages];
     //@}
+    
+    /// Current age group
+    size_t _i;
 };
 
 #endif

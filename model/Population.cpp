@@ -154,6 +154,9 @@ void Population::newHuman (int dob)
 
 void Population::update1()
 {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter)
+	iter->updateAgeGroupData();
+    
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
 
     Host::NeonatalMortality::update (population);

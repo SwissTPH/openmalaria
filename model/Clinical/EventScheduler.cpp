@@ -131,7 +131,7 @@ double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
     return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup)
+void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup)
 {
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
@@ -298,7 +298,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	list<MedicateData>::iterator next = it;
 	++next;
 	if ( it->time < 1.0 ) { // Medicate today's medications
-	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
+	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageGroupData, ageYears);
 	    Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	} else {   // and decrement treatment seeking delay for the rest

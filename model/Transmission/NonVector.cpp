@@ -115,7 +115,7 @@ void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) 
 }
 
 
-double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageInYears){
+double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, const AgeGroupData ageGroupData){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
@@ -150,7 +150,7 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
     throw overflow_error(msg.str());
   }
 #endif
-  return eir * perHost.relativeAvailabilityHetAge (ageInYears);
+  return eir * perHost.relativeAvailabilityHetAge (ageGroupData);
 }
 
 

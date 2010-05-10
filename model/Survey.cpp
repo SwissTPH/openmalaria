@@ -21,7 +21,6 @@
 #include "inputData.h"
 #include "util/errors.hpp"
 
-#include <cfloat>
 #include <stdexcept>
 
 namespace OM {
@@ -142,7 +141,7 @@ void SurveyAgeGroup::init () {
     for (size_t i = 0;i < numAgeGroups - 1; i++) {
 	_upperbound[i] = groups[i].getUpperbound();
     }
-    _upperbound[numAgeGroups-1] = DBL_MAX;
+    _upperbound[numAgeGroups-1] = numeric_limits<double>::infinity();
 }
 
 void SurveyAgeGroup::update (double ageYears) {

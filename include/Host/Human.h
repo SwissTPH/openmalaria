@@ -82,6 +82,11 @@ public:
   /** @brief Per timestep update functions
    * Functions called by Population, Simulation or Summary */
   //@{
+  /// Update ageGroupData. Should happen before anything using this on  the timestep.
+  inline void updateAgeGroupData() {
+      ageGroupData.update( getAgeInYears() );
+  }
+      
   /** If the individual is too old, returns true. Otherwise, updates the
    * individual for the time-step. */
   bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
@@ -117,8 +122,13 @@ public:
   
   /// @brief Small functions
   //@{
+  /// Return ageGroupData
+  inline const AgeGroupData getAgeGroupData() const{
+      return ageGroupData;
+  }
+      
   /// Get the survey age-group. Constant-time; returns result of last update.
-  inline SurveyAgeGroup ageGroup() const {
+  inline const SurveyAgeGroup ageGroup() const {
       return surveyAgeGroup;
   }
   
@@ -190,6 +200,9 @@ private:
   
   /// Made persistant to save a lookup each timestep (has a significant impact)
   SurveyAgeGroup surveyAgeGroup;
+  
+  /// Age group for compiled-in data (made persistant as for surveyAgeGroup).
+  AgeGroupData ageGroupData;
   
   ///@brief Private variables
   //@{

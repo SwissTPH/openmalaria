@@ -115,7 +115,7 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
   return false;
 }
 
-void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup, int ageTimeSteps) {
+void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
     _doomed -= Global::interval;
   
@@ -134,7 +134,7 @@ void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHos
     }
   }
   
-  doClinicalUpdate (withinHostModel, hostTransmission, ageYears, ageGroup);
+  doClinicalUpdate (withinHostModel, hostTransmission, ageYears, ageGroupData, ageGroup);
 }
 
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {

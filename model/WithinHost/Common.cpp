@@ -64,8 +64,8 @@ void CommonWithinHost::clearAllInfections(){
 
 // -----  medicate drugs -----
 
-void CommonWithinHost::medicate(string drugName, double qty, double time, double age) {
-  pkpdModel->medicate(drugName, qty, time, age);
+void CommonWithinHost::medicate(string drugName, double qty, double time, const AgeGroupData ageGroupData, double age) {
+    pkpdModel->medicate(drugName, qty, time, ageGroupData, age);
 }
 
 

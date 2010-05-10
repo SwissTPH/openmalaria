@@ -81,6 +81,7 @@ public:
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity (mg?).
    * \param time       - Time in days since start of this time step to medicate at
+   * \param ageGroupData Age group of human for age data (passed for performance reasons)
    * \param age        - Age of human in years
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
@@ -90,7 +91,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, double age)  {};
+  virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () {};
@@ -121,10 +122,11 @@ protected:
   /** Weight model. Currently looks up a weight dependant on age from a table
    * in an entirely deterministic way.
    *
+   * @param ageGroupData Age group for weight data
    * @param ageYears Age in years
    * @returns Mass in kg */
-  static inline double ageToWeight (double ageYears) {
-      return AgeGroupData::ageToWeight (ageYears);
+  static inline double ageToWeight (const AgeGroupData ageGroupData, double ageYears) {
+      return ageGroupData.ageToWeight( ageYears );
   }
   
 private:

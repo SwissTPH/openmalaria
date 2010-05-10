@@ -33,37 +33,44 @@ using namespace OM;
 class AgeGroupDataSuite : public CxxTest::TestSuite
 {
 public:
-  void setUp () {
-    proxy = new AgeGroupData;
-  }
-  void tearDown () {
-    delete proxy;
-  }
-
-  void testLowerbound() {
-	  TS_ASSERT_APPROX (proxy-> ageToWeight(0.0), 13.9856718);
-  }
-
-  void testUpperbound() {
-	  TS_ASSERT_APPROX (proxy-> ageToWeight(100.0), 60.0);
-
-  }
-
-  void testStandardCaseLowerbound(){
-	  TS_ASSERT_APPROX (proxy->ageToWeight(14.99), 49.48396092);
-  }
-
-  void testStandardCase() {
-	  TS_ASSERT_APPROX (proxy->ageToWeight(17.0), 51.44412863);
-
-  }
-
-  void testStandardCaseUpperbound(){
-	  TS_ASSERT_APPROX (proxy->ageToWeight(19.99), 54.36);
-
-  }
-
-  AgeGroupData *proxy;
+    void setUp () {
+	agd = new AgeGroupData;
+    }
+    void tearDown () {
+	delete agd;
+    }
+    
+    void testLowerbound() {
+	double age = 0.0;
+	agd->update( age );
+	TS_ASSERT_APPROX (agd->ageToWeight(age), 13.9856718);
+    }
+    
+    void testUpperbound() {
+	double age = 100.0;
+	agd->update( age );
+	TS_ASSERT_APPROX (agd->ageToWeight(age), 60.0);
+    }
+    
+    void testStandardCaseLowerbound(){
+	double age = 14.99;
+	agd->update( age );
+	TS_ASSERT_APPROX (agd->ageToWeight(age), 49.48396092);
+    }
+    
+    void testStandardCase() {
+	double age = 17.0;
+	agd->update( age );
+	TS_ASSERT_APPROX (agd->ageToWeight(age), 51.44412863);
+    }
+    
+    void testStandardCaseUpperbound(){
+	double age = 19.99;
+	agd->update( age );
+	TS_ASSERT_APPROX (agd->ageToWeight(age), 54.36);
+    }
+    
+    AgeGroupData *agd;
 };
 
 #endif

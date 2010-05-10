@@ -25,6 +25,7 @@
 
 #include "Global.h"
 #include "WithinHost/Infection.h"
+#include "AgeGroupData.h"
 #include "Survey.h"
 
 #include <list>
@@ -82,7 +83,7 @@ public:
    * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
    * @param age		Age of human in years
    */
-  virtual void medicate(string drugAbbrev, double qty, double time, double age) {}
+  virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age) {}
 
   /** Update the parasite densities of infections.
    *

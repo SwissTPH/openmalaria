@@ -55,11 +55,11 @@ public:
    * Mean output should be 1.0/ageCorrectionFactor.
    * 
    * Also has a switch to put individuals entirely outside transmission. */
-  inline double relativeAvailabilityAge (double ageyrs) const {
+  inline double relativeAvailabilityAge (AgeGroupData ageGroupData) const {
       // TODO: test if using an if condition like this or multiplying by a
       // double (0.0 / 1.0) is faster (for usual case: in transmission).
     return outsideTransmission ? 0.0 :
-	AgeGroupData::getAgeSpecificRelativeAvailability (ageyrs);
+	ageGroupData.getAgeSpecificRelativeAvailability ();
   }
   //@}
   
@@ -76,9 +76,15 @@ public:
   /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
    *
    * Mean should be same as entoAvailabilityHetVecItv(). */
-  inline double entoAvailabilityFull (const HostCategoryAnopheles& base, size_t speciesIndex, double ageYears, double ageCorrectionFactor) const {
-    return entoAvailabilityHetVecItv (base, speciesIndex)
-         * relativeAvailabilityAge (ageYears) * ageCorrectionFactor;
+    inline double entoAvailabilityFull (
+	const HostCategoryAnopheles& base,
+	size_t speciesIndex,
+	AgeGroupData ageGroupData,
+	double ageCorrectionFactor
+    ) const {
+	return entoAvailabilityHetVecItv (base, speciesIndex)
+	    * relativeAvailabilityAge (ageGroupData)
+	    * ageCorrectionFactor;
   }
   /** @brief Availability of host to mosquitoes (α_i) excluding age factor.
    *
@@ -103,9 +109,9 @@ public:
    * 
    * Mean output is less than 1.0 (roughly 1.0/ageCorrectionFactor);
    * this is to avoid changing all NonVector model results. */
-  inline double relativeAvailabilityHetAge (double ageYears) const {
+  inline double relativeAvailabilityHetAge (AgeGroupData ageGroupData) const {
     return _relativeAvailabilityHet
-        * relativeAvailabilityAge (ageYears);
+        * relativeAvailabilityAge (ageGroupData);
   }
   /** Relative availability of host to mosquitoes excluding age factor.
    *

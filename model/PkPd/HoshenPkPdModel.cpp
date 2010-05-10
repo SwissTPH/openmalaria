@@ -51,7 +51,7 @@ void HoshenPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, double ageYears) {
+void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double ageYears) {
   list<HoshenDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -63,7 +63,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, doubl
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  double weight = ageToWeight(ageYears);
+  double weight = ageToWeight(ageGroupData, ageYears);
   drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
 }
 

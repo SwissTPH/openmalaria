@@ -153,13 +153,13 @@ void Human::destroy() {
 bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
     int ageTimeSteps = simulationTime-_dateOfBirth;
     double ageYears = ageTimeSteps * Global::yearsPerInterval;
-    surveyAgeGroup.update (ageYears);
+    surveyAgeGroup.update( ageYears );
     if (clinicalModel->isDead(ageTimeSteps))
 	return true;
     
     updateInterventionStatus();
     updateInfection(transmissionModel, ageYears);
-    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, surveyAgeGroup, ageTimeSteps);
+    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, surveyAgeGroup, ageTimeSteps);
     clinicalModel->updateInfantDeaths (ageTimeSteps);
     _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     return false;
@@ -170,7 +170,7 @@ void Human::addInfection(){
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageYears, surveyAgeGroup),
+  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageGroupData, surveyAgeGroup),
 					      _PEVEfficacy, perHostTransmission);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();

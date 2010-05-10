@@ -53,7 +53,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double ageYears) {
+void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double ageYears) {
   list<LSTMDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -65,7 +65,7 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double 
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  drug->medicate (time, qty, ageToWeight (ageYears));
+  drug->medicate (time, qty, ageToWeight (ageGroupData, ageYears));
 }
 
 // This may look complicated but its just some machinery to call updateConcentration() and return its result

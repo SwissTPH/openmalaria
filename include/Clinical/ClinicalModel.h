@@ -23,6 +23,7 @@
 
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
+#include "AgeGroupData.h"
 
 namespace OM {
     namespace Transmission {
@@ -93,9 +94,10 @@ public:
    *	drugs/clear infections.
    * @param hostTransmission Used to switch off/on transmission for human.
    * @param ageYears Age of human.
+   * @param ageGroupData Age group of availability data.
    * @param ageGroup Survey age group of human.
    * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup, int ageTimeSteps);
+  void update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup, int ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -143,7 +145,7 @@ protected:
    * @param hostTransmission PerHostTransmission of human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human. */
-  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, SurveyAgeGroup ageGroup) =0;
+  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

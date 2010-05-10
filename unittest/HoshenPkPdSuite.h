@@ -34,46 +34,48 @@ using namespace OM::PkPd;
 class HoshenPkPdSuite : public CxxTest::TestSuite
 {
 public:
-  void setUp () {
-    UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
-    proxy = new HoshenPkPdModel ();
-    proteome_ID = ProteomeInstance::getInstances()[0].getProteomeID();	// force a particular proteome rather than let it be randomly allocated
-  }
-  void tearDown () {
-    delete proxy;
-    UnittestUtil::PkPdSuiteTearDown();
-  }
-  
-  void testNone () {
-    TS_ASSERT_EQUALS (proxy->getDrugFactor (proteome_ID), 1.0);
-  }
-  
-  void testCq () {
-    proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
-  }
-  
-  void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
-      proxy->medicate ("CQ", 125000, 0, 21);
-      proxy->medicate ("CQ", 125000, 0, 21);
-      TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
-  }
-  
-  void testCqDecayed () {
-    proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs ();
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11719189335668142);
-  }
-  
-  void testCq2Doses () {
-    proxy->medicate ("CQ", 250000, 0, 21);
-    proxy->decayDrugs ();
-    proxy->medicate ("CQ", 250000, 0, 21);
-    TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.06410970330787730);
-  }
-  
-  HoshenPkPdModel *proxy;
-  uint32_t proteome_ID;
+    void setUp () {
+	agd.update( 21.0 );
+	UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
+	proxy = new HoshenPkPdModel ();
+	proteome_ID = ProteomeInstance::getInstances()[0].getProteomeID();	// force a particular proteome rather than let it be randomly allocated
+    }
+    void tearDown () {
+	delete proxy;
+	UnittestUtil::PkPdSuiteTearDown();
+    }
+    
+    void testNone () {
+	TS_ASSERT_EQUALS (proxy->getDrugFactor (proteome_ID), 1.0);
+    }
+    
+    void testCq () {
+	proxy->medicate ("CQ", 250000, 0, agd, 21);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
+    }
+    
+    void testCqHalves () {	// the point being: check it can handle two doses at the same time-point correctly
+	proxy->medicate ("CQ", 125000, 0, agd, 21);
+	proxy->medicate ("CQ", 125000, 0, agd, 21);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11551905833244182);
+    }
+    
+    void testCqDecayed () {
+	proxy->medicate ("CQ", 250000, 0, agd, 21);
+	proxy->decayDrugs ();
+	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.11719189335668142);
+    }
+    
+    void testCq2Doses () {
+	proxy->medicate ("CQ", 250000, 0, agd, 21);
+	proxy->decayDrugs ();
+	proxy->medicate ("CQ", 250000, 0, agd, 21);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.06410970330787730);
+    }
+    
+    AgeGroupData agd;
+    HoshenPkPdModel *proxy;
+    uint32_t proteome_ID;
 };
 
 #endif
