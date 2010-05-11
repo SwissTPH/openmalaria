@@ -119,13 +119,10 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   //Calculate time-weighted average of kappa
   _sumAnnualKappa += kappa[tmod] * initialisationEIR[tmod];
   if (tmod == Global::intervalsPerYear - 1) {
-    if (annualEIR == 0.0) {
-      _annualAverageKappa=0;
-      cerr << "aE.eq.0" << endl;
-    } else {
+      // if annualEIR == 0.0 (or an NaN), we just get some nonsense output like inf or nan.
+      // This is a better solution than printing a warning no-one will see and outputting 0.
       _annualAverageKappa = _sumAnnualKappa / annualEIR;
-    }
-    _sumAnnualKappa = 0.0;
+      _sumAnnualKappa = 0.0;
   }
   
   double timeStepTotal = 0.0;

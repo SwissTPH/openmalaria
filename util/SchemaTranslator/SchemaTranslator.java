@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 18;
+    static final int CURRENT_VERSION = 19;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
@@ -863,7 +863,45 @@ public class SchemaTranslator {
 
         return true;
     }
-
+    
+    // Version 19: entoData's "mode" can no longer have value 3.
+    public boolean translate18To19() throws Exception {
+	Element entoData = (Element) scenarioElement.getElementsByTagName(
+	    "entoData").item(0);
+	Attr mode = entoData.getAttributeNode("mode");
+	
+	if (Integer.parseInt(mode.getValue()) == 3){
+	    // unless an intervention at time 0 specifies EIR values, the scenario was buggy
+	    boolean hasTransientEIRAt0 = false;
+	    
+	    Element elt = (Element) scenarioElement.getElementsByTagName("interventions").item(0);
+	    if (elt != null) {
+		Element timed = (Element) elt.getElementsByTagName("timed").item(0);
+		if (timed != null) {
+		    NodeList intervs = timed.getElementsByTagName("intervention");
+		    for (int i = 0; i < intervs.getLength(); i++) {
+			Element interv = (Element) intervs.item(i);
+			if (Integer.parseInt(interv.getAttribute("time")) != 0)
+			    continue;	// only interested in interv. at time 0
+			
+			Element cEIR = (Element) interv.getElementsByTagName("changeEIR").item(0);
+			if (cEIR != null)	// yes, have applicable transient EIR data
+			    hasTransientEIRAt0 = true;
+		    }
+		}
+	    }
+	    if (!hasTransientEIRAt0) {
+		System.err.println("Error: entoData has mode=\"3\", but no changeEIR intervention found at time 0.");
+		return false;
+	    }
+	    
+	    // Assuming correct changeEIR intervention was found, we can just switch mode to 4.
+	    mode.setValue ("4");
+	}
+	
+	return true;
+    }
+    
     private void setMosqsNewAttributes(int mosqType, Element mosq,
             NodeList nonHumanHosts) {
 

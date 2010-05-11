@@ -696,7 +696,7 @@
     
   </ImmediateOutcomes><CFR>
       <group cfr="0" lowerbound="0"/>
-    </CFR></healthSystem><entoData mode="3" name="Matsari Preintervention">
+    </CFR></healthSystem><entoData mode="4" name="Matsari Preintervention">
     <!--day1 in Garki is 26-10-70-->
     <nonVector eipDuration="10">
       <EIRDaily origin="regression">0.15927</EIRDaily>

@@ -22,7 +22,7 @@
 #include "inputData.h"
 #include "util/random.h"
 #include "Surveys.h"	// sim-end timestep
-#include <cfloat>
+#include <limits>
 
 namespace OM { namespace Transmission {
     
@@ -41,6 +41,8 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
+  if( daily.size() < static_cast<size_t>(Global::DAYS_IN_YEAR) )
+      throw util::xml_scenario_error( "insufficient EIRDaily data for a year" );
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
     double EIRdaily = std::max((double)daily[mpcday], minEIR);
     
@@ -74,8 +76,10 @@ void NonVectorTransmission::initMainSimulation (){
   }
   
   simulationMode = InputData().getEntoData().getMode();
-  if (simulationMode < 2 || simulationMode > 4)
-    throw util::xml_scenario_error("mode attribute has invalid value (expected: 2, 3 or 4)");
+  if (simulationMode != 2 && simulationMode != 4)
+      // Note: previously 3 was allowed -- but mode is set to 3 anyway when
+      // "intervention" EIR data is loaded, so 2 or 4 should be used here.
+      throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
 
@@ -107,7 +111,10 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   // divide by number of records assigned to each interval (usually one per day)
   for (size_t i = 0; i < interventionEIR.size(); ++i)
     interventionEIR[i] *= Global::interval / nDays[i];
-  annualEIR=0.0;
+  
+  // I've no idea what this should be, so until someone asks it can be NaN.
+  // It was -9.99 and later 0.0. It could of course be recalculated from interventionEIR.
+  annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
 void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) {

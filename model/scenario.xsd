@@ -508,13 +508,17 @@
     </xs:attribute>
     <xs:attribute name="mode" use="required">
       <xs:annotation>
-        <xs:documentation>Transmission simulation mode</xs:documentation>
+        <xs:documentation>
+        Transmission simulation mode -- enter dynamic mode (4) or forced mode
+        (2) at start of intervention period. Mode 3 (transient EIR from data
+        provided as intervention) is set when intervention data is applied, and
+        is no longer a valid value to specify here.
+        </xs:documentation>
         <xs:appinfo>units:Code;name:Transmission simulation mode;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:int">
           <xs:enumeration value="2" />
-          <xs:enumeration value="3" />
           <xs:enumeration value="4" />
         </xs:restriction>
       </xs:simpleType>
