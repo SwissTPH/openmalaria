@@ -6,6 +6,7 @@
 # usage ./reformat_xmls.py -p folder_path | file_path 
 
 from xml.dom.minidom import parse, parseString
+# xml.dom.ext comes from PyXML which is no longer maintained an not always available :-(
 from xml.dom.ext import PrettyPrint
 from os.path import exists
 from os.path import isdir

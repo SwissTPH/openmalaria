@@ -139,7 +139,27 @@ public class SchemaTranslator {
         Source source = new DOMSource(forValidation);
         validator.validate(source);
     }
-
+    
+    // Helper function to strip old white-space.
+    // Source: http://forums.sun.com/thread.jspa?threadID=5201482
+    public static void visit(Node node, short nodeType, String name) {
+	NodeList list = node.getChildNodes();
+	for (int i = 0; i < list.getLength(); i++) {
+	    // Get child node
+	    Node childNode = list.item(i);
+	    if (childNode.getNodeType() == nodeType && 
+		(name == null || childNode.getNodeName().trim().equals(name) && childNode.getNodeValue().trim().equals(""))
+	    ) {
+		childNode.getParentNode().removeChild(childNode);
+		// child was removed so list invalid; easiest is to start again:
+		visit(node, nodeType, name);
+		break;
+	    }
+	    else {
+		visit(childNode, nodeType, name);
+	    }
+	}
+    }
     private void translateFile(File documentFile, File outDir) throws Exception {
         scenarioDocument = _builder.parse(documentFile);
         String schemaFileName = translateDocument();
@@ -157,20 +177,16 @@ public class SchemaTranslator {
                     .newTransformer();
             xformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
             xformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            // This adds more indentation/new-lines where there's already
-            // spacing :-(
-            // xformer.setOutputProperty(OutputKeys.INDENT, "yes");
+	    
+	    // Reformat. First, remove all whitespace nodes, then insert new whitespace.
+	    visit(scenarioElement, org.w3c.dom.Node.TEXT_NODE, "#text");
+	    scenarioDocument.normalize();
+	    // Then add new indentation/new-lines:
+            xformer.setOutputProperty(OutputKeys.INDENT, "yes");
             xformer.setOutputProperty(
                     "{http://xml.apache.org/xslt}indent-amount", "2");
+	    
             xformer.transform(new DOMSource(scenarioDocument), result);
-            /*
-             * Think this was something picked up from the web which never
-             * worked, to try reformatting the file... OutputFormat format = new
-             * OutputFormat(doc); format.setLineWidth(80);
-             * format.setIndenting(true); format.setIndent(2); XMLSerializer
-             * serializer = new XMLSerializer(out, format);
-             * serializer.serialize(doc);
-             */
         }
         if (doValidation)
             validate(scenarioDocument, schemaFileName, "../../test/");
