@@ -184,7 +184,7 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
       timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
     }
     if (_density > maxDens || timeStepMaxDensity > maxDens) {
-      cerr << "MD lim" << endl;
+      cerr << "MD lim: " << _density << timeStepMaxDensity << endl;
       _density = maxDens;
       timeStepMaxDensity = _density;
     }

@@ -178,6 +178,8 @@ void Simulation::writeCheckpoint(){
   // Open the next checkpoint file for writing:
   ostringstream name;
   name << CHECKPOINT << checkpointNum;
+  //Writing checkpoint:
+  cerr << Global::simulationTime << " WC: " << name.str();
   if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -197,6 +199,7 @@ void Simulation::writeCheckpoint(){
     if (!checkpointFile)
 	throw util::checkpoint_error ("error writing to file \"checkpoint\"");
   }
+    cerr << " OK" << endl;
 }
 
 void Simulation::readCheckpoint() {

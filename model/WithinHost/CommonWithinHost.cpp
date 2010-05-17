@@ -35,33 +35,36 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 CommonWithinHost::CommonWithinHost() :
     WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {}
-CommonWithinHost::~CommonWithinHost() {
-    delete pkpdModel;
-    for(std::list<CommonInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
-	delete *it;
-    }
-}
 
+CommonWithinHost::~CommonWithinHost() {
+  delete pkpdModel;
+  for(std::list<CommonInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
+    delete *it;
+  }
+}
 
 // -----  Simple infection adders/removers  -----
 
 void CommonWithinHost::newInfection(){
-    if (_MOI < MAX_INFECTIONS) {
-	infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
-	_MOI++;
-	_cumulativeh++;
-    }
-    assert( _MOI == infections.size() );
+  if (_MOI < MAX_INFECTIONS) {
+    infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
+    _MOI++;
+    _cumulativeh++;
+  }
+  else{
+    //Maximum infections exceeded.
+    cerr << "MIE" << '\n';
+  }
+  assert( _MOI == infections.size() );
 }
 
 void CommonWithinHost::clearAllInfections(){
-    for(std::list<CommonInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
-	delete *it;
-    }
-    infections.clear();
-    _MOI=0;
+  for(std::list<CommonInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
+    delete *it;
+  }
+  infections.clear();
+  _MOI=0;
 }
-
 
 // -----  medicate drugs -----
 
@@ -117,19 +120,19 @@ int CommonWithinHost::countInfections (int& patentInfections) {
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
-    (*pkpdModel) & stream;
-    for (int i = 0; i < _MOI; ++i) {
-	infections.push_back (checkpointedInfection (stream));
-    }
-    assert( _MOI == infections.size() );
+  WithinHostModel::checkpoint (stream);
+  (*pkpdModel) & stream;
+  for (int i = 0; i < _MOI; ++i) {
+    infections.push_back (checkpointedInfection (stream));
+  }
+  assert( _MOI == infections.size() );
 }
+
 void CommonWithinHost::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);
     (*pkpdModel) & stream;
     for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-	(**inf) & stream;
+      (**inf) & stream;
     }
 }
-
 } }
