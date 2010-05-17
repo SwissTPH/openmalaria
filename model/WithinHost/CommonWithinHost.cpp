@@ -53,7 +53,7 @@ void CommonWithinHost::newInfection(){
   }
   else{
     //Maximum infections exceeded.
-    cerr << "MIE" << '\n';
+    cerr << "MIE" << endl;
   }
   assert( _MOI == infections.size() );
 }

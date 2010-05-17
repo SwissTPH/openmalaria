@@ -104,7 +104,11 @@ void DescriptiveIPTWithinHost::newInfection(){
     _cumulativeInfections++;
     infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     _MOI++;
+  } else{
+      //Maximum infections exceeded.
+      cerr << "MIE" << endl;
   }
+  
 }
 void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));

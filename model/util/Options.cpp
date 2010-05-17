@@ -33,6 +33,7 @@ namespace OM { namespace util {
     
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
+    set<int> CommandLine::checkpoint_times;
     uint32_t ModelOptions::optSet;
     
     string parseNextArg (int argc, char* argv[], int& i) {
@@ -69,17 +70,28 @@ namespace OM { namespace util {
 		    options.set (PRINT_MODEL_OPTIONS);
 		} else if (clo == "checkpoint") {
 		    options.set (TEST_CHECKPOINTING);
+		} else if (clo.compare (0,11,"checkpoint=") == 0) {
+		    stringstream t;
+		    t << clo.substr (11);
+		    int time;
+		    t >> time;
+		    if (t.fail() || time <= 0) {
+			cerr << "Expected: --checkpoint=t  where t is a positive integer" << endl;
+			cloHelp = true;
+			break;
+		    }
+		    checkpoint_times.insert( time );
 		} else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
 		    stringstream t;
 		    t << clo.substr (21);
 		    bool b;
 		    t >> b;
-		    options[COMPRESS_CHECKPOINTS] = b;
 		    if (t.fail()) {
 			cerr << "Expected: --compress-checkpoints=x  where x is 1 or 0" << endl;
 			cloHelp = true;
 			break;
 		    }
+		    options[COMPRESS_CHECKPOINTS] = b;
 		} else if (clo == "help") {
 		    cloHelp = true;
 		} else {
@@ -116,8 +128,10 @@ namespace OM { namespace util {
 	    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
-	    << " -c --checkpoint	Forces checkpointing once during simulation (during initialisation"<<endl
-	    << "			period), exiting after completing each"<<endl
+	    << "	--checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
+	    << "			more than once. Overrides --checkpoint option."<<endl
+	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
+	    << "			period, exiting after completing each"<<endl
 	    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
 	    << "			Set checkpoint compression on or off. Default is on." <<endl

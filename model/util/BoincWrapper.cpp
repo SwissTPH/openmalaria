@@ -62,10 +62,15 @@ namespace BoincWrapper {
   string resolveFile (const string& inName) {
     return inName;
   }
-
+  
+  int lastPercent = -1;	// last _integer_ percentage value
   void reportProgress (double progress) {
-      // \r cleans line. Then we print progress as a percentage.
-      cout << (boost::format("\r[%|3i|%%]\t") %std::ceil( progress * 100.0 )) << flush;
+      int percent = static_cast<int>(std::ceil( progress * 100.0 ));
+      if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
+	  lastPercent = percent;
+	// \r cleans line. Then we print progress as a percentage.
+	cout << (boost::format("\r[%|3i|%%]\t") %std::ceil( progress * 100.0 )) << flush;
+      }
   }
   int timeToCheckpoint() {
     return 0;

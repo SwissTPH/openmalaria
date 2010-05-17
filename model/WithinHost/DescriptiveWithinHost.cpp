@@ -45,7 +45,11 @@ void DescriptiveWithinHostModel::newInfection(){
   if (_MOI < MAX_INFECTIONS) {
     infections.push_back(new DescriptiveInfection());
     _MOI++;
+  } else{
+      //Maximum infections exceeded.
+      cerr << "MIE" << endl;
   }
+  
   assert( _MOI == infections.size() );
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream){

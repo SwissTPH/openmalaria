@@ -69,13 +69,15 @@ Simulation::~Simulation(){
 int Simulation::start(){
     // +1 to let final survey run
     totalSimDuration = _population->_transmissionModel->vectorInitDuration() + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
-    int testCheckpointStep = -1;	// declare here so goto doesn't cross initialization
     
     if (isCheckpoint()) {
 	readCheckpoint();
     } else {
 	_population->createInitialHumans();
     }
+    // Set to either a checkpointing timestep or <0. We only need to set once,
+    // since we exit after a checkpoint triggered this way.
+    int testCheckpointStep = util::CommandLine::getNextCheckpointTime( Global::simulationTime );
     
     
     // phase loop
@@ -86,7 +88,7 @@ int Simulation::start(){
 	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
 		writeCheckpoint();
 		util::BoincWrapper::checkpointCompleted();
-		if (Global::simulationTime == testCheckpointStep)
+		if (Global::simulationTime == testCheckpointStep)	// caused by a test checkpoint
 		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    }
 	    
@@ -129,9 +131,13 @@ int Simulation::start(){
 	    cerr << "sim end" << endl;
 	    break;
 	}
-	testCheckpointStep = -1;
-	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
-	    testCheckpointStep = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
+	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
+	    // First of middle of next phase, or current value (from command line) triggers a checkpoint.
+	    int phase_mid = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
+	    // don't checkpoint 0-length phases or do mid-phase checkpointing when timed checkpoints were specified:
+	    if( testCheckpointStep == -1 && phase_mid > Global::simulationTime )
+		testCheckpointStep = phase_mid;
+	}
     }
     
     delete _population;	// must destroy all Human instances to make sure they reported past events

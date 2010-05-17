@@ -22,6 +22,7 @@
 #define Hmod_util_CommandLine
 
 #include <string>
+#include <set>
 #include <bitset>
 using namespace std;
 
@@ -41,6 +42,21 @@ namespace OM { namespace util {
 	static inline bool option(size_t code) {
 	    return options.test(code);
 	}
+	
+	/** Return first checkpointing timestep _greater than_ timestep passed,
+	 * or -2 if no greater checkpoint times (but were some times), or -1 if
+	 * no checkpointing times. */
+	static int getNextCheckpointTime( int now ) {
+	    set<int>::iterator it = checkpoint_times.upper_bound( now );
+	    if( it == checkpoint_times.end() ){
+		if( checkpoint_times.size() )
+		    return -2;
+		else
+		    return -1;
+	    } else
+		return *it;
+	}
+	
 	/** Prepend if path is relative, prepend it with clResourcePath.
 	* Then passes the resulting (or original) path through
 	* BoincWrapper::resolveFile() and returns the result. */
@@ -68,6 +84,10 @@ namespace OM { namespace util {
 	// Static parameters: set by parse _and_ checked on checkpoint load
 	static bitset<NUM_OPTIONS> options;	// boolean options
 	static string resourcePath;
+	
+	/** Set of simulation times at which a checkpoint should be written and
+	* program should exit (to allow resume). */
+	static set<int> checkpoint_times;
     };
 } }
 #endif
