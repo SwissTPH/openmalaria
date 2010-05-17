@@ -51,6 +51,7 @@ void CommonWithinHost::newInfection(){
 	_MOI++;
 	_cumulativeh++;
     }
+    assert( _MOI == infections.size() );
 }
 
 void CommonWithinHost::clearAllInfections(){
@@ -121,6 +122,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
     for (int i = 0; i < _MOI; ++i) {
 	infections.push_back (checkpointedInfection (stream));
     }
+    assert( _MOI == infections.size() );
 }
 void CommonWithinHost::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);

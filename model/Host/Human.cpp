@@ -24,7 +24,7 @@
 #include "Host/intervention.h"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
-#include "WithinHost/DescriptiveIPT.h"	// only for summarizing
+#include "WithinHost/DescriptiveIPTWithinHost.h"	// only for summarizing
 
 #include "inputData.h"
 #include "Transmission/TransmissionModel.h"

@@ -21,7 +21,7 @@
 #ifndef Hmod_DescriptiveIPT
 #define Hmod_DescriptiveIPT
 
-#include "WithinHost/Descriptive.h"
+#include "WithinHost/DescriptiveWithinHost.h"
 
 namespace OM { namespace WithinHost {
     
@@ -74,6 +74,7 @@ private:
   int _lastIptiOrPlacebo;
   
   //!Cumulative number of infections since birth
+  //NOTE: we also have _cumulativeh; why both?
   int _cumulativeInfections;
   
   /// @brief Static data set by initParameters

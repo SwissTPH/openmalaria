@@ -189,7 +189,9 @@ protected:
   
   /** The maximum number of infections a human can have. The only real reason
    * for this limit is to prevent incase bad input from causing the number of
-   * infections to baloon stupidly. */
+   * infections to baloon stupidly.
+   * 
+   * Exact constraint is: _MOI <= MAX_INFECTIONS. */
   static const int MAX_INFECTIONS = 21;
   //@}
   

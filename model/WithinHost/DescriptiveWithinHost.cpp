@@ -45,6 +45,7 @@ void DescriptiveWithinHostModel::newInfection(){
     infections.push_back(new DescriptiveInfection());
     _MOI++;
   }
+  assert( _MOI == infections.size() );
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream){
     infections.push_back(new DescriptiveInfection(stream));
@@ -75,6 +76,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
       iter++;
     }
   }//TODO cleanup
+  assert( _MOI == infections.size() );
   
   totalDensity = 0.0;
   timeStepMaxDensity = 0.0;

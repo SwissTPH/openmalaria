@@ -55,9 +55,9 @@ set (Model_CPP
   Transmission/Vector/HostCategoryAnophelesNonHumans.cpp
   
   WithinHost/WithinHostModel.cpp
-  WithinHost/Common.cpp
-  WithinHost/Descriptive.cpp
-  WithinHost/DescriptiveIPT.cpp
+  WithinHost/CommonWithinHost.cpp
+  WithinHost/DescriptiveWithinHost.cpp
+  WithinHost/DescriptiveIPTWithinHost.cpp
   WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
   WithinHost/Infection/DescriptiveIPTInfection.cpp
