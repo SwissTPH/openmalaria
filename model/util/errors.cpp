@@ -27,7 +27,7 @@ xml_scenario_error::xml_scenario_error(const string&  __arg)
   : runtime_error(__arg) { }
 
 checkpoint_error::checkpoint_error(const string&  __arg)
-  : runtime_error(string("Error reading checkpoint: ").append(__arg)) { }
+  : runtime_error(__arg) { }
 
 cmd_exit::cmd_exit(const string& __arg)
   : runtime_error(__arg) { }

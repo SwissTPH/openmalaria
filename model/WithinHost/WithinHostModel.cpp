@@ -34,6 +34,7 @@
 //using namespace std;
 
 #include <cmath>
+#include <boost/format.hpp>
 
 
 namespace OM { namespace WithinHost {
@@ -167,7 +168,7 @@ void WithinHostModel::checkpoint (istream& stream) {
     timeStepMaxDensity & stream;
     
     if (_MOI < 0 || _MOI > MAX_INFECTIONS)
-	throw util::checkpoint_error ("_MOI");
+	throw util::checkpoint_error( (boost::format("_MOI: %1%") %_MOI).str() );
 }
 void WithinHostModel::checkpoint (ostream& stream) {
     _innateImmSurvFact & stream;

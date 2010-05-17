@@ -126,6 +126,7 @@ int Simulation::start(){
 	    phase = MAIN_PHASE;
 	} else if (phase == MAIN_PHASE) {
 	    phase = END_SIM;
+	    cerr << "sim end" << endl;
 	    break;
 	}
 	testCheckpointStep = -1;
@@ -217,7 +218,7 @@ void Simulation::readCheckpoint() {
     in.close();
   }
   
-  cerr << "Loaded checkpoint from: " << name.str() << endl;
+  cerr << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
@@ -228,28 +229,37 @@ void Simulation::readCheckpoint() {
 //   -----  checkpointing: Simulation data  -----
 
 void Simulation::checkpoint (istream& stream, int checkpointNum) {
-    util::checkpoint::header (stream);
-    util::CommandLine::staticCheckpoint (stream);
-    Population::staticCheckpoint (stream);
-    Surveys & stream;
+    try {
+	util::checkpoint::header (stream);
+	util::CommandLine::staticCheckpoint (stream);
+	Population::staticCheckpoint (stream);
+	Surveys & stream;
+	
+	Global::simulationTime & stream;
+	Global::timeStep & stream;
+	simPeriodEnd & stream;
+	totalSimDuration & stream;
+	phase & stream;
+	(*_population) & stream;
+	
+	// read last, because other loads may use random numbers:
+	util::random::checkpoint (stream, checkpointNum);
+	
+	// Check scenario.xml and checkpoint files correspond:
+	int oldWUID(workUnitIdentifier);
+	util::Checksum oldCksum(cksum);
+	workUnitIdentifier & stream;
+	cksum & stream;
+	if (workUnitIdentifier != oldWUID || cksum != oldCksum)
+	    throw util::checkpoint_error ("mismatched checkpoint");
+    } catch (const util::checkpoint_error& e) {	// append " (pos X of Y bytes)"
+	ostringstream pos;
+	pos<<" (pos "<<stream.tellg()<<" of ";
+	stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
+	pos<<stream.tellg()<<" bytes)";
+	throw util::checkpoint_error( e.what() + pos.str() );
+    }
     
-    Global::simulationTime & stream;
-    Global::timeStep & stream;
-    simPeriodEnd & stream;
-    totalSimDuration & stream;
-    phase & stream;
-    (*_population) & stream;
-    
-    // read last, because other loads may use random numbers:
-    util::random::checkpoint (stream, checkpointNum);
-    
-    // Check scenario.xml and checkpoint files correspond:
-    int oldWUID(workUnitIdentifier);
-    util::Checksum oldCksum(cksum);
-    workUnitIdentifier & stream;
-    cksum & stream;
-    if (workUnitIdentifier != oldWUID || cksum != oldCksum)
-	throw util::checkpoint_error ("mismatched checkpoint");
     
     stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
     if (stream.gcount () != 0) {

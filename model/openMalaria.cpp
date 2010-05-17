@@ -50,6 +50,9 @@ int main(int argc, char* argv[]){
   } catch (const ::xsd::cxx::tree::exception<char>& e) {
     cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
     exitStatus = -1;
+  } catch (const OM::util::checkpoint_error& e) {
+    cerr << "Checkpoint exception: " << e.what() << endl;
+    exitStatus = -1;
   } catch (const exception& e) {
     cerr << "Exception: " << e.what() << endl;
     exitStatus = -1;

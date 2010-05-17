@@ -37,6 +37,8 @@
 #include "util/random.h"
 #include "util/ModelOptions.hpp"
 
+#include <boost/format.hpp>
+
 namespace OM
 {
     using namespace OM::util;
@@ -104,7 +106,7 @@ void Population::checkpoint (istream& stream)
     size_t popSize; // must be type of population.size()
     popSize & stream;
     if (popSize != size_t (populationSize))
-        throw util::checkpoint_error ("population size exceeds that given in scenario.xml");
+        throw util::checkpoint_error( (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
     while (popSize > 0 && !stream.eof()) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
@@ -113,7 +115,7 @@ void Population::checkpoint (istream& stream)
         --popSize;
     }
     if (int (population.size()) != populationSize)
-        throw util::checkpoint_error ("can't read whole population (out of data)");
+        throw util::checkpoint_error( (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
 }
 void Population::checkpoint (ostream& stream)
 {
