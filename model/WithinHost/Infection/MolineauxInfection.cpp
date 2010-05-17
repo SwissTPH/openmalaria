@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
 #include "WithinHost/Infection/MolineauxInfection.h"
-#include "WithinHost/Common.h"
+#include "WithinHost/CommonWithinHost.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/errors.hpp"

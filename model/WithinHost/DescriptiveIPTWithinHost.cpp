@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "WithinHost/DescriptiveIPT.h"
+#include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/Infection/DescriptiveIPTInfection.h"
 #include "util/random.h"
 #include "util/errors.hpp"

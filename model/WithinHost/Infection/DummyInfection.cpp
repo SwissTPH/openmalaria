@@ -20,7 +20,7 @@
 */
 
 #include "WithinHost/Infection/DummyInfection.h"
-#include "WithinHost/Common.h"
+#include "WithinHost/CommonWithinHost.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.hpp"

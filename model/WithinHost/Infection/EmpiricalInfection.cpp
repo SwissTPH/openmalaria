@@ -19,7 +19,7 @@
 */
 
 #include "WithinHost/Infection/EmpiricalInfection.h"
-#include "WithinHost/Common.h"
+#include "WithinHost/CommonWithinHost.h"
 #include "util/random.h"
 #include "util/errors.hpp"
 #include "util/CommandLine.hpp"

@@ -20,7 +20,8 @@
 
 */
 
-#include "WithinHost/Descriptive.h"
+#include <cassert>
+#include "WithinHost/DescriptiveWithinHost.h"
 #include "util/ModelOptions.hpp"
 
 using namespace std;
