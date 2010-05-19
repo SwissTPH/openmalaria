@@ -46,8 +46,8 @@ double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
-size_t WithinHostModel::totalInfections;
-size_t WithinHostModel::allowedInfections;
+int WithinHostModel::totalInfections;
+int WithinHostModel::allowedInfections;
 
 // -----  static functions  -----
 
