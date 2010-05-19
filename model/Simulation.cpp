@@ -31,6 +31,7 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 #include "util/random.h"
+#include "WithinHost/WithinHostModel.h"
 
 #include <fstream>
 #include "gzstream.h"
@@ -128,7 +129,7 @@ int Simulation::start(){
 	    phase = MAIN_PHASE;
 	} else if (phase == MAIN_PHASE) {
 	    phase = END_SIM;
-	    cerr << "sim end" << endl;
+	    cout << "sim end" << endl;
 	    break;
 	}
 	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
@@ -139,6 +140,8 @@ int Simulation::start(){
 		testCheckpointStep = phase_mid;
 	}
     }
+    
+    WithinHost::WithinHostModel::printTotInfs();
     
     delete _population;	// must destroy all Human instances to make sure they reported past events
     Surveys.writeSummaryArrays();
@@ -185,7 +188,7 @@ void Simulation::writeCheckpoint(){
   ostringstream name;
   name << CHECKPOINT << checkpointNum;
   //Writing checkpoint:
-  cerr << Global::simulationTime << " WC: " << name.str();
+  cout << Global::simulationTime << " WC: " << name.str();
   if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -205,7 +208,7 @@ void Simulation::writeCheckpoint(){
     if (!checkpointFile)
 	throw util::checkpoint_error ("error writing to file \"checkpoint\"");
   }
-    cerr << " OK" << endl;
+    cout << " OK" << endl;
 }
 
 void Simulation::readCheckpoint() {
@@ -227,7 +230,7 @@ void Simulation::readCheckpoint() {
     in.close();
   }
   
-  cerr << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
+  cout << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
@@ -250,6 +253,8 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
 	totalSimDuration & stream;
 	phase & stream;
 	(*_population) & stream;
+	WithinHost::WithinHostModel::totalInfections & stream;
+	WithinHost::WithinHostModel::allowedInfections & stream;
 	
 	// read last, because other loads may use random numbers:
 	util::random::checkpoint (stream, checkpointNum);
@@ -295,6 +300,8 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
+    WithinHost::WithinHostModel::totalInfections & stream;
+    WithinHost::WithinHostModel::allowedInfections & stream;
     
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;

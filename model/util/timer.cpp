@@ -54,7 +54,7 @@ DWORD WINAPI write_cp_timer(PVOID arg) {
     counter++;
   }
   //Checkpoint write timed out
-  cerr<<"cpw_to\n";
+  cerr<<"cpw_to"<<endl;
   exit(-6);
   //return 0;
 }
@@ -92,7 +92,7 @@ void *write_cp_timer(void *arg) {
     counter++;
   }
   //Checkpoint write timed out
-  cerr<<"cpw_to\n";
+  cerr<<"cpw_to"<<endl;
   exit(-6);
   //return 0;
 }

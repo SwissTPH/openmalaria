@@ -111,6 +111,10 @@ public:
   /// Called to effect some penalty on immunity − but what? Please document.
   void immunityPenalisation();
   
+  inline static void printTotInfs() {
+      cerr << "Total infections: "<<totalInfections<<"\tallowed: "<<allowedInfections<<"\t: prevented: "<<double(allowedInfections-totalInfections)*100.0/totalInfections<<"%"<<endl;
+  }
+  
 protected:
   /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
    * have already been incremented.
@@ -193,6 +197,10 @@ protected:
    * 
    * Exact constraint is: _MOI <= MAX_INFECTIONS. */
   static const int MAX_INFECTIONS = 21;
+  
+public:	// Public to allow checkpointing from Simulation; TODO remove/tidy up
+  static int totalInfections;
+  static int allowedInfections;
   //@}
   
   friend class ::UnittestUtil;

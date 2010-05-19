@@ -100,15 +100,14 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveIPTWithinHost::newInfection(){
+    ++totalInfections;
   if (_MOI <= MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     _MOI++;
-  } else{
-      //Maximum infections exceeded.
-      cerr << "MIE" << endl;
+    ++allowedInfections;
   }
-  
+  assert( _MOI == infections.size() );
 }
 void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));

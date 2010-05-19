@@ -121,7 +121,7 @@ namespace OM { namespace util {
 	}
 	
 	if (cloHelp) {
-	    cout << "Usage: " << argv[0] << " [options]" << endl << endl
+	    cerr << "Usage: " << argv[0] << " [options]" << endl << endl
 	    << "Options:"<<endl
 	    << " -p --resource-path	Path to look up input resources with relative URLs (defaults to"<<endl
 	    << "			working directory). Not used for output files."<<endl

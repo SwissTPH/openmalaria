@@ -42,14 +42,12 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveWithinHostModel::newInfection(){
+    ++totalInfections;
   if (_MOI < MAX_INFECTIONS) {
     infections.push_back(new DescriptiveInfection());
     _MOI++;
-  } else{
-      //Maximum infections exceeded.
-      cerr << "MIE" << endl;
+    ++allowedInfections;
   }
-  
   assert( _MOI == infections.size() );
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream){

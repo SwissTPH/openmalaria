@@ -46,14 +46,12 @@ CommonWithinHost::~CommonWithinHost() {
 // -----  Simple infection adders/removers  -----
 
 void CommonWithinHost::newInfection(){
+    ++totalInfections;
   if (_MOI < MAX_INFECTIONS) {
     infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
     _MOI++;
     _cumulativeh++;
-  }
-  else{
-    //Maximum infections exceeded.
-    cerr << "MIE" << endl;
+    ++allowedInfections;
   }
   assert( _MOI == infections.size() );
 }

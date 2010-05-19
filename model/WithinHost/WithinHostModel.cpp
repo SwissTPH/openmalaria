@@ -46,6 +46,8 @@ double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
+size_t WithinHostModel::totalInfections;
+size_t WithinHostModel::allowedInfections;
 
 // -----  static functions  -----
 
@@ -77,6 +79,9 @@ void WithinHostModel::init() {
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }
+  
+  totalInfections = 0;
+  allowedInfections = 0;
 }
 
 void WithinHostModel::clear() {
