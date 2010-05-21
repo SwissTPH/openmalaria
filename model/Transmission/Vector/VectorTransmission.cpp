@@ -19,6 +19,7 @@
 
 #include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
+#include "Output/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.hpp"
 
@@ -28,8 +29,32 @@
 namespace OM { namespace Transmission {
     using namespace OM::util;
 
+void VectorTransmission::ctsCbN_v0 (ostream& stream){
+    for (size_t i = 0; i < numSpecies; ++i)
+	stream << '\t' << species[i].getLastN_v0()/Global::interval;
+}
+void VectorTransmission::ctsCbN_v (ostream& stream){
+    for (size_t i = 0; i < numSpecies; ++i)
+	stream << '\t' << species[i].getLastN_v()/Global::interval;
+}
+void VectorTransmission::ctsCbO_v (ostream& stream){
+    for (size_t i = 0; i < numSpecies; ++i)
+	stream << '\t' << species[i].getLastO_v()/Global::interval;
+}
+void VectorTransmission::ctsCbS_v (ostream& stream){
+    for (size_t i = 0; i < numSpecies; ++i)
+	stream << '\t' << species[i].getLastS_v()/Global::interval;
+}
+const string& reverseLookup (const map<string,size_t>& m, size_t i){
+    for( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ){
+	if( it->second == i )
+	    return it->first;
+    }
+    throw logic_error( "reverseLookup: key not found" );	// shouldn't ever happen
+}
+
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
-{  
+{
   for (size_t j=0;j<Global::intervalsPerYear; j++)
     initialisationEIR[j]=0.0;
   
@@ -46,27 +71,13 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
   numSpecies = anophelesList.size();
   if (numSpecies < 1)
     throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-#ifdef OMV_CSV_REPORTING
-  csvReporting << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
-  species.resize (numSpecies, VectorAnopheles(this,csvReporting));
-  csvReporting << "simulation time\t";
-#else
   species.resize (numSpecies, VectorAnopheles(this));
-#endif
   
   for (size_t i = 0; i < numSpecies; ++i) {
     string name = species[i].initialise (anophelesList[i], i,
 					 initialisationEIR, nonHumanHostsPopulations, populationSize);
     speciesIndex[name] = i;
-    
-#ifdef OMV_CSV_REPORTING
-    csvReporting << "N_v0("<<i<<")\tN_v("<<i<<")\tO_v("<<i<<")\tS_v("<<i<<")\t";
-#endif
   }
-  
-#ifdef OMV_CSV_REPORTING
-  csvReporting << "input EIR\tresultant EIR\thuman infectiousness\thuman availability" << endl;
-#endif
   
   for (size_t i = 0; i < initialisationEIR.size(); ++i) {
     // Calculate total annual EIR
@@ -91,6 +102,23 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
   for (size_t i = 0; i < numSpecies; ++i) {
     species[i].setupNv0 (i, population, populationSize);
   }
+  
+  ostringstream ctsNv0, ctsNv, ctsOv, ctsSv;
+  // Output in order of species so that (1) we can just iterate through this
+  // list when outputting and (2) output is in order specified in XML.
+  for (size_t i = 0; i < numSpecies; ++i){
+    // Unfortunately, we need to reverse-lookup the name.
+    const string& name = reverseLookup( speciesIndex, i );
+    ctsNv0<<"\tN_v0("<<name<<")";
+    ctsNv<<"\tN_v("<<name<<")";
+    ctsOv<<"\tO_v("<<name<<")";
+    ctsSv<<"\tS_v("<<name<<")";
+  }
+  using Output::Continuous;
+  Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
+  Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
+  Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
+  Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
 }
 
 int VectorTransmission::vectorInitIterate () {
@@ -135,9 +163,6 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 // Every Global::interval days:
 void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {
-#ifdef OMV_CSV_REPORTING
-  csvReporting << simulationTime << '\t';
-#endif
   for (size_t i = 0; i < numSpecies; ++i)
     species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);
 }
@@ -158,11 +183,7 @@ void VectorTransmission::summarize (Survey& survey) {
 
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
-#ifdef OMV_CSV_REPORTING
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this, csvReporting));
-#else
     util::checkpoint::checkpoint (species, stream, VectorAnopheles (this));
-#endif
 }
 void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

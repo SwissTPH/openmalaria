@@ -86,6 +86,12 @@ private:
     return sIndex->second;
   }
   
+  void ctsCbN_v0 (ostream& stream);
+  void ctsCbN_v (ostream& stream);
+  void ctsCbO_v (ostream& stream);
+  void ctsCbS_v (ostream& stream);
+  
+  
   /** @brief Access to per (anopheles) species data.
    *
    * Set by constructor so don't checkpoint. */

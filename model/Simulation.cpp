@@ -23,6 +23,7 @@
 
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
+#include "Output/Continuous.h"
 #include "Surveys.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
@@ -38,6 +39,7 @@
 
 
 namespace OM {
+    using Output::Continuous;
 
 // -----  Set-up & tear-down  -----
 
@@ -73,8 +75,10 @@ int Simulation::start(){
     
     if (isCheckpoint()) {
 	readCheckpoint();
+	Continuous::init( true );
     } else {
 	_population->createInitialHumans();
+	Continuous::init( false );
     }
     // Set to either a checkpointing timestep or <0. We only need to set once,
     // since we exit after a checkpoint triggered this way.
@@ -93,7 +97,8 @@ int Simulation::start(){
 		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    }
 	    
-	    // interventions
+	    // Reporting (happens before timestep updates)
+	    Continuous::update();
 	    if (Global::timeStep == Surveys.currentTimestep) {
 		_population->newSurvey();
 		Surveys.incrementSurveyPeriod();
@@ -103,6 +108,7 @@ int Simulation::start(){
 	    // update
 	    ++Global::simulationTime;
 	    _population->update1();
+	    
 	    ++Global::timeStep;
 	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
 	}
@@ -129,7 +135,7 @@ int Simulation::start(){
 	    phase = MAIN_PHASE;
 	} else if (phase == MAIN_PHASE) {
 	    phase = END_SIM;
-	    cout << "sim end" << endl;
+	    cerr << "sim end" << endl;
 	    break;
 	}
 	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
@@ -188,7 +194,7 @@ void Simulation::writeCheckpoint(){
   ostringstream name;
   name << CHECKPOINT << checkpointNum;
   //Writing checkpoint:
-  cout << Global::simulationTime << " WC: " << name.str();
+  cerr << Global::simulationTime << " WC: " << name.str();
   if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
     name << ".gz";
     ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -208,7 +214,7 @@ void Simulation::writeCheckpoint(){
     if (!checkpointFile)
 	throw util::checkpoint_error ("error writing to file \"checkpoint\"");
   }
-    cout << " OK" << endl;
+    cerr << " OK" << endl;
 }
 
 void Simulation::readCheckpoint() {
@@ -230,7 +236,7 @@ void Simulation::readCheckpoint() {
     in.close();
   }
   
-  cout << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
+  cerr << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))

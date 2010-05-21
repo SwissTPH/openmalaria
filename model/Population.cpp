@@ -45,6 +45,8 @@ namespace OM
 
 // -----  Population: static data / methods  -----
 
+// Optional immediate reporting of population demographics
+// Compile with -DOMP_CSV_REPORTING for gcc or /DOMP_CSV_REPORTING for MSVC.
 #ifdef OMP_CSV_REPORTING
 ofstream csvReporting;
 #endif

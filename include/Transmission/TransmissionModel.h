@@ -169,6 +169,11 @@ protected:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
+private:
+    void ctsCbInputEIR (ostream& stream);
+    void ctsCbSimulatedEIR (ostream& stream);
+    void ctsCbKappa (ostream& stream);
+    void ctsCbHumanAvail (ostream& stream);
   
 public:
   /** Correction factor for PerHostTransmission::getRelativeAvailability.
@@ -246,12 +251,6 @@ protected:
   vector<double> kappaByAge;
   vector<int> nByAge;
   //@}
-  
-#ifdef OMV_CSV_REPORTING
-  /// This is used to output infectiousness, etc. as a tab-deliminated-value file, when included.
-  /// (It used to be csv, but German Excel can't open csv directly.)
-  ofstream csvReporting;
-#endif
 };
 
 } }

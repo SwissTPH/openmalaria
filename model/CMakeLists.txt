@@ -74,6 +74,8 @@ set (Model_CPP
   util/checkpoint.cpp
   util/Options.cpp
   util/random.cpp
+  
+  Output/Continuous.cpp
 )
 
 # Headers - only included so they show up in IDEs:

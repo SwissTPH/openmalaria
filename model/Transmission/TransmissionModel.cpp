@@ -26,6 +26,7 @@
 
 #include "inputData.h"
 #include "Simulation.h"
+#include "Output/Continuous.h"
 #include "util/BoincWrapper.h"
 
 #include <cmath> 
@@ -48,14 +49,26 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
   }
 }
 
+
+// The times here should be for the last updated index of arrays:
+void TransmissionModel::ctsCbInputEIR (ostream& stream){
+    stream<<'\t'<<initialisationEIR[Global::simulationTime%Global::intervalsPerYear];
+}
+void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
+    stream<<'\t'<<innoculationsPerDayOfYear[(Global::simulationTime-1) % Global::intervalsPerYear];
+}
+void TransmissionModel::ctsCbKappa (ostream& stream){
+    stream<<'\t'<<kappa[(Global::simulationTime-1) % Global::intervalsPerYear];
+}
+void TransmissionModel::ctsCbHumanAvail (ostream& stream){
+    stream<<'\t'<<1.0/ageCorrectionFactor;
+}
+
 TransmissionModel::TransmissionModel() :
     ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
     _sumAnnualKappa(0.0), annualEIR(0.0),
     timeStepNumEntoInnocs (0)
-#ifdef OMV_CSV_REPORTING
-  , csvReporting ("vector.txt", ios::app)
-#endif
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
@@ -66,24 +79,27 @@ TransmissionModel::TransmissionModel() :
   // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
   // memory corruption or extra tests when setting/copying values
   noOfAgeGroupsSharedMem = std::max(SurveyAgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
+  
+  using Output::Continuous;
+  Continuous::registerCallback( "input EIR", "input EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
+  Continuous::registerCallback( "simulated EIR", "simulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
+  Continuous::registerCallback( "human infectiousness", "human infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
+  Continuous::registerCallback( "human availability", "mean human availability", MakeDelegate( this, &TransmissionModel::ctsCbHumanAvail ) );
 }
 
 TransmissionModel::~TransmissionModel () {
-#ifdef OMV_CSV_REPORTING
-  csvReporting.close();
-#endif
 }
 
 
 void TransmissionModel::updateAgeCorrectionFactor (std::list<Host::Human>& population, int populationSize) {
     // Calculate relative availability correction, so calls from vectorUpdate,
     // etc., will have a mean of 1.0.
-    double meanRelativeAvailability = 0.0;
+    double sumRelativeAvailability = 0.0;
     for (std::list<Host::Human>::iterator h = population.begin(); h != population.end(); ++h){
 	h->updateAgeGroupData();
-	meanRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeGroupData());
+	sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeGroupData());
     }
-    ageCorrectionFactor = populationSize / meanRelativeAvailability;
+    ageCorrectionFactor = populationSize / sumRelativeAvailability;	// 1 / mean-rel-avail
 }
 
 void TransmissionModel::updateKappa (const std::list<Host::Human>& population, int simulationTime) {
@@ -141,14 +157,6 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
       kappaByAge[i] /= nByAge[i];
     util::SharedGraphics::copyKappa(&kappaByAge[0]);
   }
-  
-#ifdef OMV_CSV_REPORTING
-  csvReporting << initialisationEIR[simulationTime%Global::intervalsPerYear]
-	       << '\t' << innoculationsPerDayOfYear[tmod]
-	       << '\t' << kappa[tmod]
-	       << '\t' << ageCorrectionFactor
-	       << '\t'<< endl;
-#endif
 }
 
 double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup) {

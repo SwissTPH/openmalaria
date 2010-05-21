@@ -39,4 +39,6 @@ CxxTest 3.10.1:
   include/cxxtest
   unittest/cxxtestgen.pl
   unittest/cxxtestgen.py
-Both are licenced under the LGPL 2.1 (see COPYING.LIB).
+FastDelegate (http://www.codeproject.com/KB/cpp/FastDelegate.aspx):
+  include/FastDelegate.h
+CxxTest and gzstream are licenced under the LGPL 2.1 (see COPYING.LIB). FastDelegate is public domain.

@@ -530,6 +530,24 @@
   <!--Monitoring-->
   <xs:complexType name="monitoring">
     <xs:sequence>
+      <xs:element name="continuous" minOccurs="0">
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="OptionSet">
+              <xs:attribute name="period" type="xs:int" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Number of days between reports.
+                  </xs:documentation>
+                  <xs:appinfo>
+                    units:Days;min:1;max:unbounded;name:Days between reports;
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="SurveyOptions" type="OptionSet">
         <xs:annotation>
           <xs:documentation>

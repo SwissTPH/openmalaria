@@ -56,16 +56,6 @@ using namespace std;
 class VectorAnopheles
 {
 public:
-#ifdef OMV_CSV_REPORTING
-    VectorAnopheles (const TransmissionModel* const tm,ofstream& csvR) :
-	transmissionModel(tm),
-	partialEIR(0.0),
-	larvicidingEndStep (std::numeric_limits<int>::max()),
-	larvicidingIneffectiveness (1.0),
-	timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0),
-	csvReporting(&csvR)
-    {}
-#else
     VectorAnopheles (const TransmissionModel* const tm) :
 	transmissionModel(tm),
 	partialEIR(0.0),
@@ -73,7 +63,6 @@ public:
 	larvicidingIneffectiveness (1.0),
 	timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0)
     {}
-#endif
   
   ///@brief Initialisation and destruction
   //@{
@@ -152,6 +141,19 @@ public:
   }
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
+  
+  inline double getLastN_v0 (){
+      return timestep_N_v0;
+  }
+  inline double getLastN_v (){
+      return timestep_N_v;
+  }
+  inline double getLastO_v (){
+      return timestep_O_v;
+  }
+  inline double getLastS_v (){
+      return timestep_S_v;
+  }
   
   /// Write some per-species summary information.
   void summarize (const string speciesName, Survey& survey);
@@ -448,13 +450,6 @@ private:
   
   friend class VectorEmergenceSuite;
   friend class VectorAnophelesSuite;
-  
-#ifdef OMV_CSV_REPORTING
-  /// This is used to output infectiousness, etc. as a csv file, when included
-  //TODO: replace this reporting system
-  //NOTE: this is not checkpointed
-  ofstream* csvReporting;
-#endif
 };
 
 } }

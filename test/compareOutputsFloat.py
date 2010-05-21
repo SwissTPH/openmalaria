@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-#FIXME: won't compare one file equal to itself now.
 import sys
 import string
 import math

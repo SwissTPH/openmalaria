@@ -212,6 +212,7 @@ void DescriptiveIPTWithinHost::SPAction(){
       iter++;
     }
   }
+  assert( _MOI == infections.size() );
 }
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
