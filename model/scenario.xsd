@@ -214,14 +214,6 @@
         <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="delta" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          this no longer seems to be used
-        </xs:documentation>
-        <xs:appinfo>units:? Redundant;exposed:false;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute name="latentp" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>

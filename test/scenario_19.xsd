@@ -214,14 +214,6 @@
         <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="delta" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          this no longer seems to be used
-        </xs:documentation>
-        <xs:appinfo>units:? Redundant;exposed:false;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute name="latentp" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -508,7 +500,12 @@
     </xs:attribute>
     <xs:attribute name="mode" use="required">
       <xs:annotation>
-        <xs:documentation>Transmission simulation mode</xs:documentation>
+        <xs:documentation>
+        Transmission simulation mode -- enter dynamic mode (4) or forced mode
+        (2) at start of intervention period. Mode 3 (transient EIR from data
+        provided as intervention) is set when intervention data is applied, and
+        is no longer a valid value to specify here.
+        </xs:documentation>
         <xs:appinfo>units:Code;name:Transmission simulation mode;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>

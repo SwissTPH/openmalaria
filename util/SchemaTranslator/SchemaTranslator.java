@@ -881,6 +881,7 @@ public class SchemaTranslator {
     }
     
     // Version 19: entoData's "mode" can no longer have value 3.
+    // Removed unused "delta" from parameters.
     public boolean translate18To19() throws Exception {
 	Element entoData = (Element) scenarioElement.getElementsByTagName(
 	    "entoData").item(0);
@@ -914,6 +915,12 @@ public class SchemaTranslator {
 	    // Assuming correct changeEIR intervention was found, we can just switch mode to 4.
 	    mode.setValue ("4");
 	}
+	
+        Element model = (Element) scenarioElement.getElementsByTagName("model")
+                .item(0);
+        Element t_parameters = (Element) model.getElementsByTagName(
+                "parameters").item(0);
+	t_parameters.removeAttribute("delta");
 	
 	return true;
     }
