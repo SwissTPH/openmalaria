@@ -101,7 +101,7 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 
 void DescriptiveIPTWithinHost::newInfection(){
     ++totalInfections;
-  if (_MOI <= MAX_INFECTIONS) {
+  if (_MOI < MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     _MOI++;
