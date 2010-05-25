@@ -17,17 +17,17 @@ import shutil
 from optparse import OptionParser
 import gzip
 
-sys.path[0]="/home/gouigoui/devel/trunk/test"
+sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
 import compareOutputsFloat as compareOuts
 
 # replaced by CMake; run the version it puts in the build/test/ dir.
-testSrcDir="/home/gouigoui/devel/trunk/test"
-testBuildDir="/home/gouigoui/devel/trunk/build/test"
+testSrcDir="@CMAKE_CURRENT_SOURCE_DIR@"
+testBuildDir="@CMAKE_CURRENT_BINARY_DIR@"
 if not os.path.isdir(testSrcDir) or not os.path.isdir(testBuildDir):
     print "Don't run this script directly; configure CMake then use the version in the CMake build dir."
     sys.exit(-1)
-if not os.path.isfile (os.path.join(testSrcDir,"scenario_18.xsd")):
-    print "File not found (wrong CMake var?): ",os.path.join(testSrcDir,"scenario_18.xsd")
+if not os.path.isfile (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@")):
+    print "File not found (wrong CMake var?): ",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@")
     sys.exit(-1)
 
 # executable
@@ -61,7 +61,7 @@ def runScenario(options,omOptions,name):
     scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
     if options.xmlValidate:
         # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]
-        return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"scenario_18.xsd"),scenarioSrc],cwd=testBuildDir)
+        return subprocess.call (["xmllint","--noout","--schema",os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"),scenarioSrc],cwd=testBuildDir)
     
     cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
     
@@ -76,9 +76,9 @@ def runScenario(options,omOptions,name):
     checkFile=os.path.join(simDir,"checkpoint")
     
     # Link or copy required files.
-    # Apparently the schema file doesn't need to be copied now. Not really sure how, but scenario_18.xsd isn't guaranteed to be the required version anyway.
-    scenario_xsd=os.path.join(simDir,"scenario_18.xsd")
-    linkOrCopy (os.path.join(testSrcDir,"scenario_18.xsd"), scenario_xsd)
+    # Apparently the schema file doesn't need to be copied now. Not really sure how, but @OM_BOXTEST_SCHEMA_NAME@ isn't guaranteed to be the required version anyway.
+    scenario_xsd=os.path.join(simDir,"@OM_BOXTEST_SCHEMA_NAME@")
+    linkOrCopy (os.path.join(testSrcDir,"@OM_BOXTEST_SCHEMA_NAME@"), scenario_xsd)
     
     if options.logging:
         print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
@@ -171,7 +171,7 @@ You can pass options to openMalaria by first specifying -- (to end options passe
     parser.add_option("-n","--dry-run", action="store_false", dest="run", default=True,
 		    help="Don't actually run openMalaria, just output the commandline.")
     parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
-		    help="Don't clean up expected files from the temparary dir (checkpoint files and scenario_18.xsd)")
+		    help="Don't clean up expected files from the temparary dir (checkpoint files and @OM_BOXTEST_SCHEMA_NAME@)")
     parser.add_option("-d","--diff", action="store_true", dest="diff", default=False,
             help="Launch a diff program (kdiff3) on the output if validation fails")
     parser.add_option("--valid","--validate",
