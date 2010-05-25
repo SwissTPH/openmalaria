@@ -187,12 +187,12 @@ ident is 1 if files are binary-equal."""
         numPrinted += 1
         perMeasureNumDiff[k.measure] = perMeasureNumDiff.get(k.measure,0) + 1;
         if (numPrinted <= maxDiffsToPrint):
-            print "survey {1:>3}, group {2:>3}, measure {3:>3}:{4:>12.5} ->{5:>12.5}".format(0,k.survey,k.group,k.measure,v1,v2)
+            print "survey "+str(k.survey)+", group "+str(k.group)+", measure "+str(k.measure)+": "+str(v1)+" -> "+str(v2)
             if (numPrinted == maxDiffsToPrint):
                 print "[won't print any more line-by-line diffs]"
     
     if (numMissing1 > 0) or (numMissing2 > 0):
-        print "{0} entries missing from first file, {1} from second".format(numMissing1,numMissing2)
+        print str(numMissing1) + " entries missing from first file, " + str(numMissing2) +" from second"
         ret = 3
     
     for (k.measure,absDiff) in perMeasureDiffAbsSum.iteritems():
@@ -206,14 +206,14 @@ ident is 1 if files are binary-equal."""
             
             diff=perMeasureDiffSum[k.measure]
             sum1=perMeasureTotal[k.measure]
-            print "for measure {0: >3}: sum(1st file):{1: >12.5f}  diff/sum: {2: >12.5}  (abs diff)/sum: {3: >12.5}  diff/(abs diff): {4: >9.5f}  num diffs/total: {5:>3}/{6:>3}".format(k.measure,sum1,div(diff,sum1),div(absDiff,sum1),div(diff,absDiff),perMeasureNumDiff.get(k.measure,0),perMeasureNum.get(k.measure,0))
+            print "for measure "+str(k.measure)+": sum(1st file):"+str(sum1)+" diff/sum: "+str(div(diff,sum1))+" (abs diff)/sum: "+str(div(absDiff,sum1))+" diff/(abs diff): "+str(div(diff,absDiff))+"  num diffs/total: "+str(perMeasureNumDiff.get(k.measure,0)/perMeasureNum.get(k.measure,0))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
-        print "No significant differences (total relative diff: {0}), ok...".format(totalRelDiff/1.e6)
+        print "No significant differences (total relative diff: "+str(totalRelDiff/1.e6)+"), ok..."
         return ret,False
     else:
-        print "{0} significant differences (total relative diff: {1})!".format(numDiffs,totalRelDiff/1.e6)
+        print str(numDiffs)+" significant differences (total relative diff: "+str(totalRelDiff/1.e6)+ ")!"
         return 1,False
 
 if __name__ == '__main__':
