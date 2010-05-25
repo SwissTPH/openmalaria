@@ -188,8 +188,8 @@
           <xs:attribute name="value" type="xs:boolean" use="required">
             <xs:annotation>
               <xs:documentation>
-		Option value (true/false). Each option has a default value (may
-		be true or false) which is used if the option is not listed.
+		Option value (true/false). Each option has a default value used
+		if the option is not listed (usually false but sometimes true).
 	      </xs:documentation>
             <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
            </xs:annotation>

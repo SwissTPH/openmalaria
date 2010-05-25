@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="18" wuID="0" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="19" wuID="0" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   
 
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
@@ -26,6 +26,12 @@
   </demography>
 
   <monitoring name="Quarterly Surveys">
+    <continuous period='5'>
+      <option name="input EIR" value="true"/>
+      <option name="simulated EIR" value="true"/>
+      <option name="human infectiousness" value="true"/>
+      <option name="N_v0" value="true"/>
+    </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
@@ -333,7 +339,7 @@
 <model><ModelOptions>
     <option name="LOGNORMAL_MASS_ACTION" value="true"/>
     <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-  </ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479" interval="5" iseed="1" latentp="3">
+  </ModelOptions><clinical healthSystemMemory="6"/><parameters interval="5" iseed="1" latentp="3">
     <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
     <parameter include="false" name="Estar" number="2" value="0.03247"/>
     <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

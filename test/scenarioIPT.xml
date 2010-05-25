@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" assimMode="0" name="IPTi_seas_niak21_d4mo" schemaVersion="18" wuID="0" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" assimMode="0" name="IPTi_seas_niak21_d4mo" schemaVersion="19" wuID="0" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
 	<demography maximumAgeYrs="90" name="Ifakara" popSize="100">
 		<ageGroup lowerbound="0.0">
 			<group poppercent="3.474714994" upperbound="1"/>
@@ -23,6 +23,11 @@
 		</ageGroup>
 	</demography>
 	<monitoring name="Yearly Surveys">
+          <continuous period='5'>
+            <option name="input EIR" value="true"/>
+            <option name="simulated EIR" value="true"/>
+            <option name="human infectiousness" value="true"/>
+          </continuous>
 	<SurveyOptions><option name="nHost" value="true"/><option name="nPatent" value="true"/><option name="sumlogDens" value="true"/><option name="nTransmit" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="nUncomp" value="true"/><option name="nSevere" value="true"/><option name="nSeq" value="true"/><option name="nHospitalDeaths" value="true"/><option name="nIndDeaths" value="true"/><option name="nDirDeaths" value="true"/><option name="nEPIVaccinations" value="true"/><option name="nMassVaccinations" value="true"/><option name="nHospitalRecovs" value="true"/><option name="nHospitalSeqs" value="true"/><option name="nIPTDoses" value="true"/><option name="annAvgK" value="true"/></SurveyOptions><surveys detectionLimit="40">
 			<surveyTime>1</surveyTime>
 			<surveyTime>19</surveyTime>
@@ -559,7 +564,7 @@
   </entoData>
   <!-- parameters 31052007 -->
   
-<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479452" interval="5" iseed="0" latentp="3">	
+<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"/><parameters interval="5" iseed="0" latentp="3">	
     <parameter include="0" name=" '-ln(1-Sinf)' " number="1" value="0.050736"/>
     <parameter include="0" name=" Estar " number="2" value="0.03247"/>
     <parameter include="1" name=" Simm " number="3" value="0.1447"/>

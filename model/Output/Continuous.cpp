@@ -18,6 +18,7 @@
 */
 
 #include "Output/Continuous.h"
+#include "Survey.h"	// lineEnd
 #include "util/errors.hpp"
 #include "inputData.h"
 
@@ -54,9 +55,11 @@ namespace OM { namespace Output {
 	    ctsPeriod = 0;
 	    return;
 	}
-	ctsPeriod = ctsOpt.get().getPeriod();
+	ctsPeriod = ctsOpt.get().getPeriod() / Global::interval;
 	if( ctsPeriod < 1 )
-	    throw xml_scenario_error("monitoring.continuous.period: must be > 1");
+	    throw xml_scenario_error("monitoring.continuous.period: must be > 1 timestep");
+	else if( ctsOpt.get().getPeriod() % Global::interval != 0 )
+	    cerr << "Warning: monitoring.continuous.period not a whole number of timesteps" << endl;
 	
 	if( isCheckpoint )
 	    // When loading a check-point, we resume reporting to this file.
@@ -82,6 +85,7 @@ namespace OM { namespace Output {
 		    toReport.push_back( reg_it->second.cb );
 		}
 	    }
+	    ctsOStream << lineEnd;
 	}
     }
     
@@ -100,5 +104,6 @@ namespace OM { namespace Output {
 	ctsOStream << Global::timeStep;
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    (toReport[i])( ctsOStream );
+	ctsOStream << lineEnd;
     }
 } }

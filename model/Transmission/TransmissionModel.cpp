@@ -81,10 +81,10 @@ TransmissionModel::TransmissionModel() :
   noOfAgeGroupsSharedMem = std::max(SurveyAgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
   
   using Output::Continuous;
-  Continuous::registerCallback( "input EIR", "input EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
-  Continuous::registerCallback( "simulated EIR", "simulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
-  Continuous::registerCallback( "human infectiousness", "human infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
-  Continuous::registerCallback( "human availability", "mean human availability", MakeDelegate( this, &TransmissionModel::ctsCbHumanAvail ) );
+  Continuous::registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
+  Continuous::registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
+  Continuous::registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
+  Continuous::registerCallback( "human availability", "\tmean human availability", MakeDelegate( this, &TransmissionModel::ctsCbHumanAvail ) );
 }
 
 TransmissionModel::~TransmissionModel () {
