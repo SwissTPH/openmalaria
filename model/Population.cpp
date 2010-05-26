@@ -23,6 +23,7 @@
 #include "Population.h"
 #include "inputData.h"
 #include "Monitoring/Surveys.h"
+#include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
 
@@ -92,6 +93,9 @@ void Population::staticCheckpoint (ostream& stream)
 Population::Population()
     : populationSize (InputData().getDemography().getPopSize())
 {
+    using Monitoring::Continuous;
+    Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
+    
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
 
@@ -130,6 +134,7 @@ void Population::preMainSimInit ()
 {
     _transmissionModel->initMainSimulation();
     Clinical::ClinicalModel::initMainSimulation();
+    recentBirths = 0;
 }
 
 void Population::createInitialHumans ()
@@ -155,6 +160,11 @@ void Population::createInitialHumans ()
 void Population::newHuman (int dob)
 {
     population.push_back (Host::Human (*_transmissionModel, dob, Global::simulationTime));
+    ++recentBirths;
+}
+void Population::ctsRecentBirths (ostream& stream){
+    stream << '\t' << recentBirths;
+    recentBirths = 0;
 }
 
 void Population::update1()

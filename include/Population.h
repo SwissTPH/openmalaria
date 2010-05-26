@@ -91,6 +91,9 @@ private:
     */
     void newHuman (int dob);
     
+    /// Delegate to print the number of births since last count
+    void ctsRecentBirths (ostream& stream);
+    
     /** Generic function to activate some intervention on all humans within the
      * age range and passing the compliance test given by mass.
      *
@@ -117,7 +120,9 @@ private:
 
     //! Size of the human population
     int populationSize;
-
+    
+    /// Births since last continuous output
+    int recentBirths;
 public:
     //! TransmissionModel model
     Transmission::TransmissionModel* _transmissionModel;

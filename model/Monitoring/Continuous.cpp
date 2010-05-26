@@ -49,6 +49,8 @@ namespace OM { namespace Monitoring {
     vector< FastDelegate1<ostream&> > toReport;
     int ctsPeriod = 0;
     
+    /* Initialise: enable outputs registered and requested in XML.
+     * Search for Continuous::registerCallback to see outputs available. */
     void Continuous::init (bool isCheckpoint) {
 	const scnXml::Monitoring::ContinuousOptional& ctsOpt =
 	    InputData().getMonitoring().getContinuous();
