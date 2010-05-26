@@ -25,6 +25,7 @@
 #include "gzstream.h"
 #include <fstream>
 #include <stdexcept>
+#include <boost/math/nonfinite_num_facets.hpp>
 
 namespace OM {
     
@@ -70,6 +71,11 @@ void SurveysType::writeSummaryArrays ()
   ogzstream outputFile;		// with, use gzip
   const char* fname = "output.txt.gz";
 #endif
+    
+    // This locale ensures uniform formatting of nans and infs on all platforms.
+    locale old_locale;
+    locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
+    outputFile.imbue( nfn_put_locale );
 
   string output_filename = util::BoincWrapper::resolveFile (fname);
   ifstream test (output_filename.c_str());

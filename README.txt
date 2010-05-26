@@ -41,4 +41,7 @@ CxxTest 3.10.1:
   unittest/cxxtestgen.py
 FastDelegate (http://www.codeproject.com/KB/cpp/FastDelegate.aspx):
   include/FastDelegate.h
+Floating Point Utilities (http://www.boostpro.com/vault/index.php?&directory=Math%20-%20Numerics):
+  include/boost
 CxxTest and gzstream are licenced under the LGPL 2.1 (see COPYING.LIB). FastDelegate is public domain.
+Floating Point Utilities comes under the boost licence (see http://www.boost.org/LICENSE_1_0.txt).

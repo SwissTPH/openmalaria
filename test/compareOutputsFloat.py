@@ -118,8 +118,9 @@ def ReadEntries (fname):
     for line in fileObj:
         items=string.split(line)
         if (len(items) != 4):
-            print "expected 4 items on line; found:"
+            print "expected 4 items on line; found (following line):"
             print line
+            continue
             
         key=ValIdentifier(int(items[0]),items[1],int(items[2]))
         values[key]=float(items[3])
@@ -196,7 +197,7 @@ ident is 1 if files are binary-equal."""
         ret = 3
     
     for (k.measure,absDiff) in perMeasureDiffAbsSum.iteritems():
-        if absDiff > 1e-6:
+        if not (absDiff <= 1e-6):   # handle NANs
             # standard division throws on divide-by-zero, which I don't want
             def div(x,y):
                 try:

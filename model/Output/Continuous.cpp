@@ -26,13 +26,14 @@
 #include <map>
 #include <fstream>
 #include <boost/format.hpp>
+#include <boost/math/nonfinite_num_facets.hpp>
 
 namespace OM { namespace Output {
     using namespace fastdelegate;
     using util::xml_scenario_error;
     
     /// Output file name
-#  define CTS_FILENAME "vector.txt"
+#  define CTS_FILENAME "ctsout.txt"
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
     ofstream ctsOStream;
@@ -60,6 +61,11 @@ namespace OM { namespace Output {
 	    throw xml_scenario_error("monitoring.continuous.period: must be > 1 timestep");
 	else if( ctsOpt.get().getPeriod() % Global::interval != 0 )
 	    cerr << "Warning: monitoring.continuous.period not a whole number of timesteps" << endl;
+	
+	// This locale ensures uniform formatting of nans and infs on all platforms.
+	locale old_locale;
+	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
+	ctsOStream.imbue( nfn_put_locale );
 	
 	if( isCheckpoint )
 	    // When loading a check-point, we resume reporting to this file.
