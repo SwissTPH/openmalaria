@@ -16,11 +16,10 @@ http://code.google.com/p/openmalaria/wiki/Start
 
 
 Code subdirs:
+contrib	Third-party libraries, distributed under the same repo for convenience.
 graphics	Separate graphics app. Currently out-of-date (untested with latest simulator code).
 include		Header files associated with model & xsdcxx code.
-include/cxxtest	Headers for cxxtest
 model		Source code for the malaria model.
-xsdcxx		Xml reader code plus latest scenario.xsd schema.
 test		High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
 unittest	Low-level testing: unittests for the model using cxxunit.
 util		Extra scripts associated with OpenMalaria.
@@ -29,19 +28,3 @@ util		Extra scripts associated with OpenMalaria.
 Scenario schema files:
 model/scenario.xsd	The latest schema file. Code is generated from this file.
 test/scenario_*.xsd	Copies of all schema versions. The latest version here should _always_ be a copy of model/scenario.xsd. Scenario XML files refer to one of these schemas, used for validation (usually the latest schema version, but not required to be).
-
-
-Included code (from other sources):
-gzstream, an STL iostream wrapper around zlib:
-  include/gzstream.h
-  model/gzstream.C
-CxxTest 3.10.1:
-  include/cxxtest
-  unittest/cxxtestgen.pl
-  unittest/cxxtestgen.py
-FastDelegate (http://www.codeproject.com/KB/cpp/FastDelegate.aspx):
-  include/FastDelegate.h
-Floating Point Utilities (http://www.boostpro.com/vault/index.php?&directory=Math%20-%20Numerics):
-  include/boost
-CxxTest and gzstream are licenced under the LGPL 2.1 (see COPYING.LIB). FastDelegate is public domain.
-Floating Point Utilities comes under the boost licence (see http://www.boost.org/LICENSE_1_0.txt).

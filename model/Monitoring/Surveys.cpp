@@ -22,7 +22,7 @@
 #include "util/BoincWrapper.h"
 #include "Clinical/ClinicalModel.h"
 
-#include "gzstream.h"
+#include <gzstream.h>
 #include <fstream>
 #include <stdexcept>
 #include <boost/math/nonfinite_num_facets.hpp>

@@ -142,6 +142,7 @@ endif (OM_BOINC_INTEGRATION)
 
 # -----  Compile code  -----
 
+add_subdirectory (contrib)
 add_subdirectory (model)
 
 
@@ -172,6 +173,7 @@ add_executable (openMalaria model/openMalaria.cpp)
 
 target_link_libraries (openMalaria
   model
+  contrib
   ${GSL_LIBRARIES}
   ${XERCESC_LIBRARIES}
   ${Z_LIBRARIES}

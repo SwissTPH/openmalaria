@@ -35,7 +35,7 @@
 #include "WithinHost/WithinHostModel.h"
 
 #include <fstream>
-#include "gzstream.h"
+#include <gzstream.h>
 
 
 namespace OM {

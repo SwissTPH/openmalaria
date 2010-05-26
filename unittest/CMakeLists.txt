@@ -10,19 +10,19 @@ if (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
   option (OM_CXXTEST_USE_PYTHON "Use python instead of perl to generate unittest code." OFF)
   if (OM_CXXTEST_USE_PYTHON)
     set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
-    set (OM_CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.py)
+    set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.py)
   else (OM_CXXTEST_USE_PYTHON)
     set (OM_CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
-    set (OM_CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.pl)
+    set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.pl)
   endif (OM_CXXTEST_USE_PYTHON)
 else (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
   if (PERL_EXECUTABLE)
    set (OM_CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
-   set (OM_CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.pl)
+   set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.pl)
   else (PERL_EXECUTABLE)
     if (PYTHON_EXECUTABLE)
       set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
-      set (OM_CXXTEST_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/cxxtestgen.py)
+      set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.py)
     else (PYTHON_EXECUTABLE)
       set (OM_CXXTEST_INTERPRETER "NOTFOUND")
     endif (PYTHON_EXECUTABLE)
@@ -56,11 +56,13 @@ endif (OM_CXXTEST_GUI)
 set (CMAKE_CONFIGURED 1)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_DIR}/configured/TestPaths.h @ONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/scenario.xml ${CMAKE_CURRENT_BINARY_DIR}/configured/scenario.xml @ONLY)
+include_directories( SYSTEM
+    ${CMAKE_SOURCE_DIR}/contrib/cxxtest
+)
 include_directories (
   ${CMAKE_SOURCE_DIR}/include
   ${CMAKE_SOURCE_DIR}/unittest
   ${CMAKE_BINARY_DIR}/unittest
-  ${CMAKE_BINARY_DIR}/xsdcxx
 )
 
 set (OM_CXXTEST_HEADERS_LIST

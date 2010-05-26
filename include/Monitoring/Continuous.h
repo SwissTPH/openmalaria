@@ -21,7 +21,7 @@
 #define Hmod_Output_Continuous
 
 #include "Global.h"
-#include "FastDelegate.h"
+#include <FastDelegate.h>
 #include <string>
 
 using fastdelegate::MakeDelegate;
