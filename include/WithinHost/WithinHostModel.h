@@ -26,7 +26,7 @@
 #include "Global.h"
 #include "WithinHost/Infection/Infection.h"
 #include "AgeGroupData.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 
 #include <list>
 
@@ -65,7 +65,7 @@ public:
   }
   //@}
   
-  void summarize(Survey& survey, SurveyAgeGroup ageGroup);
+  void summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /// Create a new infection within this human
   virtual void newInfection() =0;
@@ -101,9 +101,9 @@ public:
   ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
-  virtual void IPTSetLastSPDose (int agetstep, SurveyAgeGroup ageGroup) {}
+  virtual void IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup) {}
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
-  virtual void IPTiTreatment (SurveyAgeGroup ageGroup);
+  virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup);
   //@}
   
   ///@brief Immunity model

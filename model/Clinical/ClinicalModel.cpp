@@ -26,7 +26,7 @@
 #include "Host/NeonatalMortality.h"
 
 #include "inputData.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "util/ModelOptions.hpp"
 
 namespace OM { namespace Clinical {
@@ -115,20 +115,20 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
   return false;
 }
 
-void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup, int ageTimeSteps) {
+void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
     _doomed -= Global::interval;
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical episode 6 intervals before
-    Surveys.current->reportIndirectDeaths (ageGroup, 1);
+    Monitoring::Surveys.current->reportIndirectDeaths (ageGroup, 1);
     _doomed = DOOMED_INDIRECT;
     return;
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
-      Surveys.current->reportIndirectDeaths (ageGroup, 1);
+      Monitoring::Surveys.current->reportIndirectDeaths (ageGroup, 1);
       _doomed = DOOMED_NEONATAL;
       return;
     }
@@ -149,7 +149,7 @@ void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
   }
 }
 
-void ClinicalModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
+void ClinicalModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   pathogenesisModel->summarize (survey, ageGroup);
 }
 

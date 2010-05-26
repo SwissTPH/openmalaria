@@ -23,7 +23,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "Global.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "util/random.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
@@ -89,7 +89,7 @@ OldCaseManagement::~OldCaseManagement()
 
 // -----  other public  -----
 
-void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed)
+void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed)
 {
   bool effectiveTreatment = false;
 
@@ -121,7 +121,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
 
 // -----  private  -----
 
-bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears, SurveyAgeGroup ageGroup)
+bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears, Monitoring::AgeGroup ageGroup)
 {
     Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime) ? Regimen::UC2 : Regimen::UC;
     bool successfulTreatment = false;
@@ -129,9 +129,9 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
     if (probGetsTreatment[regimen]*_treatmentSeekingFactor > (random::uniform_01())) {
 	_tLastTreatment = Global::simulationTime;
 	if ( regimen == Regimen::UC )
-	    Surveys.current->reportTreatments1( ageGroup, 1 );
+	    Monitoring::Surveys.current->reportTreatments1( ageGroup, 1 );
 	if ( regimen == Regimen::UC2 )
-	    Surveys.current->reportTreatments2( ageGroup, 1 );
+	    Monitoring::Surveys.current->reportTreatments2( ageGroup, 1 );
 	
 	if (probParasitesCleared[regimen] > random::uniform_01()) {
 	successfulTreatment = true;	// Parasites are cleared
@@ -150,7 +150,7 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
     return successfulTreatment;
 }
 
-bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed)
+bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed)
 {
   BOOST_STATIC_ASSERT (NUM_SEQUELAE_AGE_GROUPS == 2);	// code setting sequelaeIndex assumes this
   size_t sequelaeIndex = 0;
@@ -200,7 +200,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, S
 
   if (q[2] <= prandom) { // Patient gets in-hospital treatment
     _tLastTreatment = Global::simulationTime;
-    Surveys.current->reportTreatments3( ageGroup, 1 );
+    Monitoring::Surveys.current->reportTreatments3( ageGroup, 1 );
 
     Pathogenesis::State sevTreated = Pathogenesis::State (Pathogenesis::STATE_SEVERE | Pathogenesis::EVENT_IN_HOSPITAL);
     if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)

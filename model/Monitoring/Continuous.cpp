@@ -17,8 +17,8 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "Output/Continuous.h"
-#include "Survey.h"	// lineEnd
+#include "Monitoring/Continuous.h"
+#include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.hpp"
 #include "inputData.h"
 
@@ -28,7 +28,7 @@
 #include <boost/format.hpp>
 #include <boost/math/nonfinite_num_facets.hpp>
 
-namespace OM { namespace Output {
+namespace OM { namespace Monitoring {
     using namespace fastdelegate;
     using util::xml_scenario_error;
     

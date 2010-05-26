@@ -28,7 +28,7 @@
 
 #include "inputData.h"
 #include "Transmission/TransmissionModel.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "util/gsl.h"
 #include "util/ModelOptions.hpp"
 #include "util/random.h"
@@ -153,13 +153,13 @@ void Human::destroy() {
 bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
     int ageTimeSteps = simulationTime-_dateOfBirth;
     double ageYears = ageTimeSteps * Global::yearsPerInterval;
-    surveyAgeGroup.update( ageYears );
+    monitoringAgeGroup.update( ageYears );
     if (clinicalModel->isDead(ageTimeSteps))
 	return true;
     
     updateInterventionStatus();
     updateInfection(transmissionModel, ageYears);
-    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, surveyAgeGroup, ageTimeSteps);
+    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, monitoringAgeGroup, ageTimeSteps);
     clinicalModel->updateInfantDeaths (ageTimeSteps);
     _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     return false;
@@ -170,7 +170,7 @@ void Human::addInfection(){
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageGroupData, surveyAgeGroup),
+  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageGroupData, monitoringAgeGroup),
 					      _PEVEfficacy, perHostTransmission);
   for (int i=1;i<=numInf; i++) {
     withinHostModel->newInfection();
@@ -203,7 +203,7 @@ void Human::updateInterventionStatus() {
 	  if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps &&
 	      random::uniform_01() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
           vaccinate();
-          Surveys.current->reportEPIVaccinations (ageGroup(), 1);
+          Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
         }
       }
     }
@@ -215,7 +215,7 @@ void Human::updateInterventionStatus() {
 
 void Human::massVaccinate () {
   vaccinate();
-  Surveys.current->reportMassVaccinations (ageGroup(), 1);
+  Monitoring::Surveys.current->reportMassVaccinations (ageGroup(), 1);
 }
 void Human::vaccinate(){
   //Index to look up initial efficacy relevant for this dose.
@@ -245,11 +245,11 @@ double Human::getAgeInYears() const{
 }
 
 
-void Human::summarize(Survey& survey) {
+void Human::summarize(Monitoring::Survey& survey) {
   if (WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment())
     return;	//NOTE: this modifies the denominator to treat the 4*5 day intervals after an episode as 'not at risk' to match the IPTi trials
   
-  SurveyAgeGroup ageGrp = ageGroup();
+  Monitoring::AgeGroup ageGrp = ageGroup();
   survey.reportHosts (ageGrp, 1);
   withinHostModel->summarize (survey, ageGrp);
   infIncidence->summarize (survey, ageGrp);

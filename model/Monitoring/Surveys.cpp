@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "inputData.h"
 #include "util/BoincWrapper.h"
 #include "Clinical/ClinicalModel.h"
@@ -27,7 +27,7 @@
 #include <stdexcept>
 #include <boost/math/nonfinite_num_facets.hpp>
 
-namespace OM {
+namespace OM { namespace Monitoring {
     
 SurveysType Surveys;
 
@@ -118,4 +118,4 @@ void SurveysType::checkpoint (ostream& stream) {
     current = &_survey[_surveyPeriod];
 }
 
-}
+} }

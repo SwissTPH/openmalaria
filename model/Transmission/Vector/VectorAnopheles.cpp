@@ -480,7 +480,7 @@ void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt
   larvicidingEndStep = Global::simulationTime + (elt.getDuration() / Global::interval);
 }
 
-void VectorAnopheles::summarize (const string speciesName, Survey& survey) {
+void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) {
     survey.set_Vector_Nv0 (speciesName, timestep_N_v0/Global::interval);
     survey.set_Vector_Nv (speciesName, timestep_N_v/Global::interval);
     survey.set_Vector_Ov (speciesName, timestep_O_v/Global::interval);

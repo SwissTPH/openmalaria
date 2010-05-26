@@ -24,7 +24,7 @@
 #define Hmod_PathogenesisModel
 
 #include "Global.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "Pathogenesis/State.h"
 
 namespace OM {
@@ -62,7 +62,7 @@ public:
    *
    * Only PyrogenPathogenesis implements this; other models don't have anything
    * to add to the summary. */
-  virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup) {}
+  virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {}
   
   /// Checkpointing
   template<class S>

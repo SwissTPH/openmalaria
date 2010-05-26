@@ -17,13 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "inputData.h"
 #include "util/errors.hpp"
 
 #include <stdexcept>
 
-namespace OM {
+namespace OM { namespace Monitoring {
  
 // -----  Utility forward declarations  -----
 
@@ -38,8 +38,8 @@ void writePerAgeGroup(ostream& file, int measure, bool assimilationMode, int sur
 
 // -----  Static members  -----
 
-double SurveyAgeGroup::_lowerbound;
-vector<double> SurveyAgeGroup::_upperbound;
+double AgeGroup::_lowerbound;
+vector<double> AgeGroup::_upperbound;
 bitset<NUM_SURVEY_OPTIONS> Survey::active;
 bool Survey::_assimilatorMode;
 
@@ -114,7 +114,7 @@ class SurveyMeasureMap {
 
 
 void Survey::init () {
-    SurveyAgeGroup::init ();
+    AgeGroup::init ();
     
     // by default, none are active
     active.reset ();
@@ -127,7 +127,7 @@ void Survey::init () {
     
     _assimilatorMode = InputData().getAssimMode();
 }
-void SurveyAgeGroup::init () {
+void AgeGroup::init () {
     const scnXml::Monitoring& mon = InputData().getMonitoring();
     const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
     /* note that the last age group includes individuals who are        *
@@ -144,7 +144,7 @@ void SurveyAgeGroup::init () {
     _upperbound[numAgeGroups-1] = numeric_limits<double>::infinity();
 }
 
-void SurveyAgeGroup::update (double ageYears) {
+void AgeGroup::update (double ageYears) {
     while (ageYears > _upperbound[_i])
 	_i++;
 }
@@ -155,7 +155,7 @@ void SurveyAgeGroup::update (double ageYears) {
 
 void Survey::allocate ()
 {
-  size_t numAgeGroups = SurveyAgeGroup::getNumGroups();
+  size_t numAgeGroups = AgeGroup::getNumGroups();
   _numHosts.resize (numAgeGroups);
   _numInfectedHosts.resize (numAgeGroups);
   _numExpectedInfected.resize (numAgeGroups);
@@ -341,4 +341,4 @@ void writePerAgeGroup (ostream& file, int measure, bool assimilatorMode, int sur
   }
 }
 
-}
+} }

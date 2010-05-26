@@ -26,7 +26,7 @@
 
 #include "inputData.h"
 #include "Simulation.h"
-#include "Output/Continuous.h"
+#include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 
 #include <cmath> 
@@ -72,15 +72,15 @@ TransmissionModel::TransmissionModel() :
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
-  innoculationsPerAgeGroup.resize (SurveyAgeGroup::getNumGroups(), 0.0);
+  innoculationsPerAgeGroup.resize (Monitoring::AgeGroup::getNumGroups(), 0.0);
   innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
-  timeStepEntoInnocs.resize (SurveyAgeGroup::getNumGroups(), 0.0);
+  timeStepEntoInnocs.resize (Monitoring::AgeGroup::getNumGroups(), 0.0);
   
   // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
   // memory corruption or extra tests when setting/copying values
-  noOfAgeGroupsSharedMem = std::max(SurveyAgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
+  noOfAgeGroupsSharedMem = std::max(Monitoring::AgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
   
-  using Output::Continuous;
+  using Monitoring::Continuous;
   Continuous::registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous::registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
   Continuous::registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
@@ -119,7 +119,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
     sumWt_kappa += t;
     
     // kappaByAge and nByAge are used in the screensaver only
-    SurveyAgeGroup ag = h->ageGroup();
+    Monitoring::AgeGroup ag = h->ageGroup();
     kappaByAge[ag.i()] += t;
     ++nByAge[ag.i()];
   }
@@ -159,7 +159,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   }
 }
 
-double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup) {
+double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
@@ -171,7 +171,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
   return EIR;
 }
 
-void TransmissionModel::summarize (Survey& survey) {
+void TransmissionModel::summarize (Monitoring::Survey& survey) {
   survey.setNumTransmittingHosts(kappa[(Global::simulationTime-1) % Global::intervalsPerYear]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
   

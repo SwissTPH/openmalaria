@@ -115,7 +115,7 @@ void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 
-void WithinHostModel::IPTiTreatment (SurveyAgeGroup ageGroup) {
+void WithinHostModel::IPTiTreatment (Monitoring::AgeGroup ageGroup) {
   throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
@@ -146,7 +146,7 @@ void WithinHostModel::immunityPenalisation() {
 
 // -----  Summarize  -----
 
-void WithinHostModel::summarize (Survey& survey, SurveyAgeGroup ageGroup) {
+void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   int patentInfections;
   int numInfections = countInfections (patentInfections);
   if (numInfections) {

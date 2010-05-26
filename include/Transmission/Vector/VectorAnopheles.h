@@ -21,7 +21,7 @@
 #define Hmod_VectorAnopheles
 
 #include "Global.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "Transmission/Vector/HostCategoryAnophelesNonHumans.h"
 #include "Transmission/Vector/HostCategoryAnophelesHumans.h"
@@ -156,7 +156,7 @@ public:
   }
   
   /// Write some per-species summary information.
-  void summarize (const string speciesName, Survey& survey);
+  void summarize (const string speciesName, Monitoring::Survey& survey);
   
   /// Checkpointing
   //Note: below comments about what does and doesn't need checkpointing are ignored here.

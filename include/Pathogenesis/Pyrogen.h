@@ -42,7 +42,7 @@ protected:
 public:
   PyrogenPathogenesis(double cF);
   virtual ~PyrogenPathogenesis() {}
-  virtual void summarize (Survey& survey, SurveyAgeGroup ageGroup);
+  virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   
   // Static:

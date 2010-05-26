@@ -19,12 +19,14 @@
 */
 
 #include "Clinical/Episode.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "inputData.h"
 
 
 namespace OM { namespace Clinical {
-int Episode::healthSystemMemory;
+    using Monitoring::Surveys;
+    
+    int Episode::healthSystemMemory;
 
 
 void Episode::init() {
@@ -38,7 +40,7 @@ Episode::~Episode ()
 }
 
 
-void Episode::update (int simulationTime, SurveyAgeGroup ageGroup, Pathogenesis::State newState)
+void Episode::update (int simulationTime, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
 {
   if (simulationTime > (_time + healthSystemMemory)) {
     report ();

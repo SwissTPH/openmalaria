@@ -19,7 +19,7 @@
 
 #include "Transmission/Vector/VectorTransmission.h"
 #include "inputData.h"
-#include "Output/Continuous.h"
+#include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.hpp"
 
@@ -114,7 +114,7 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
     ctsOv<<"\tO_v("<<name<<")";
     ctsSv<<"\tS_v("<<name<<")";
   }
-  using Output::Continuous;
+  using Monitoring::Continuous;
   Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
   Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
   Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
@@ -173,7 +173,7 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
     species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
 }
 
-void VectorTransmission::summarize (Survey& survey) {
+void VectorTransmission::summarize (Monitoring::Survey& survey) {
     TransmissionModel::summarize (survey);
     
     for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)

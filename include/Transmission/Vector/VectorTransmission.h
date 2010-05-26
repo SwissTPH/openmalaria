@@ -67,7 +67,7 @@ public:
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
   
-  virtual void summarize (Survey& survey);
+  virtual void summarize (Monitoring::Survey& survey);
   
 protected:
     virtual void checkpoint (istream& stream);

@@ -24,7 +24,7 @@
 #include <bitset>
 #include <map>
 
-namespace OM {
+namespace OM { namespace Monitoring {
     
 /** Enumeration of reporting options
  *
@@ -153,9 +153,9 @@ enum SurveyMeasure {
  * conversion doing the right thing.
  * 
  * Don't use _this_ class for other index/age-group types. */
-class SurveyAgeGroup {
+class AgeGroup {
   public:
-    SurveyAgeGroup () : _i(0) {}
+    AgeGroup () : _i(0) {}
     
     /** Update age-group. Assumes age only increases (per instance).
      *
@@ -220,103 +220,103 @@ public:
   /// @brief reportXXX functions to report val more of measure XXX within age-group ageGroup. Returns this allowing chain calling.
   //Note: generate this list from variable definitions by regexp search-replacing using the following:
   //Search: vector<(\w+)> _num(\w+)\;
-  //Replace: Survey& report\2 (SurveyAgeGroup ageGroup, \1 val) {\n    _num\2[ageGroup.i()] += val;\n    return *this;\n  }
+  //Replace: Survey& report\2 (AgeGroup ageGroup, \1 val) {\n    _num\2[ageGroup.i()] += val;\n    return *this;\n  }
   //Search: vector<(\w+)> _sum(\w+)\;
-  //Replace: Survey& addTo\2 (SurveyAgeGroup ageGroup, \1 val) {\n    _sum\2[ageGroup.i()] += val;\n    return *this;\n  }
+  //Replace: Survey& addTo\2 (AgeGroup ageGroup, \1 val) {\n    _sum\2[ageGroup.i()] += val;\n    return *this;\n  }
   //@{
-    Survey& reportHosts (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportHosts (AgeGroup ageGroup, int val) {
       _numHosts[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportInfectedHosts (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportInfectedHosts (AgeGroup ageGroup, int val) {
       _numInfectedHosts[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportExpectedInfected (SurveyAgeGroup ageGroup, double val) {
+    Survey& reportExpectedInfected (AgeGroup ageGroup, double val) {
       _numExpectedInfected[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportPatentHosts (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportPatentHosts (AgeGroup ageGroup, int val) {
       _numPatentHosts[ageGroup.i()] += val;
       return *this;
     }
-    Survey& addToLogPyrogenicThreshold (SurveyAgeGroup ageGroup, double val) {
+    Survey& addToLogPyrogenicThreshold (AgeGroup ageGroup, double val) {
       _sumLogPyrogenicThreshold[ageGroup.i()] += val;
       return *this;
     }
-    Survey& addToLogDensity (SurveyAgeGroup ageGroup, double val) {
+    Survey& addToLogDensity (AgeGroup ageGroup, double val) {
       _sumLogDensity[ageGroup.i()] += val;
       return *this;
     }
-    Survey& addToInfections (SurveyAgeGroup ageGroup, int val) {
+    Survey& addToInfections (AgeGroup ageGroup, int val) {
       _sumInfections[ageGroup.i()] += val;
       return *this;
     }
-    Survey& addToPatentInfections (SurveyAgeGroup ageGroup, int val) {
+    Survey& addToPatentInfections (AgeGroup ageGroup, int val) {
       _sumPatentInfections[ageGroup.i()] += val;
       return *this;
     }
-    Survey& addToPyrogenicThreshold (SurveyAgeGroup ageGroup, double val) {
+    Survey& addToPyrogenicThreshold (AgeGroup ageGroup, double val) {
       _sumPyrogenicThreshold[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportTreatments1 (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportTreatments1 (AgeGroup ageGroup, int val) {
       _numTreatments1[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportTreatments2 (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportTreatments2 (AgeGroup ageGroup, int val) {
       _numTreatments2[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportTreatments3 (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportTreatments3 (AgeGroup ageGroup, int val) {
       _numTreatments3[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportUncomplicatedEpisodes (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportUncomplicatedEpisodes (AgeGroup ageGroup, int val) {
       _numUncomplicatedEpisodes[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportSevereEpisodes (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportSevereEpisodes (AgeGroup ageGroup, int val) {
       _numSevereEpisodes[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportSequelae (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportSequelae (AgeGroup ageGroup, int val) {
       _numSequelae[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportHospitalDeaths (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportHospitalDeaths (AgeGroup ageGroup, int val) {
       _numHospitalDeaths[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportIndirectDeaths (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportIndirectDeaths (AgeGroup ageGroup, int val) {
       _numIndirectDeaths[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportDirectDeaths (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportDirectDeaths (AgeGroup ageGroup, int val) {
       _numDirectDeaths[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportEPIVaccinations (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportEPIVaccinations (AgeGroup ageGroup, int val) {
       _numEPIVaccinations[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportMassVaccinations (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportMassVaccinations (AgeGroup ageGroup, int val) {
       _numMassVaccinations[ageGroup.i()] += val;
       return *this;
     } 
-    Survey& reportHospitalRecoveries (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportHospitalRecoveries (AgeGroup ageGroup, int val) {
       _numHospitalRecoveries[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportHospitalSequelae (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportHospitalSequelae (AgeGroup ageGroup, int val) {
       _numHospitalSequelae[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportIPTDoses (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportIPTDoses (AgeGroup ageGroup, int val) {
       _numIPTDoses[ageGroup.i()] += val;
       return *this;
     }
-    Survey& reportNonMalariaFevers (SurveyAgeGroup ageGroup, int val) {
+    Survey& reportNonMalariaFevers (AgeGroup ageGroup, int val) {
       _numNonMalariaFevers[ageGroup.i()] += val;
       return *this;
     } 
@@ -339,11 +339,11 @@ public:
       // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
       (*((data_Clinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
   }
-  Survey& report_Clinical_FirstDayDeaths (SurveyAgeGroup ageGroup, int val) {
+  Survey& report_Clinical_FirstDayDeaths (AgeGroup ageGroup, int val) {
       data_Clinical_FirstDayDeaths[ageGroup.i()] += val;
       return *this;
   } 
-  Survey& report_Clinical_HospitalFirstDayDeaths (SurveyAgeGroup ageGroup, int val) {
+  Survey& report_Clinical_HospitalFirstDayDeaths (AgeGroup ageGroup, int val) {
       data_Clinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
       return *this;
   } 
@@ -421,7 +421,7 @@ private:
   double _numTransmittingHosts;
   double _annualAverageKappa;
   
-  // data, per SurveyAgeGroup:
+  // data, per AgeGroup:
   vector<int> _numHosts;
   vector<int> _numInfectedHosts;
   vector<double> _numExpectedInfected;
@@ -467,5 +467,5 @@ private:
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';
 
-}
+} }
 #endif

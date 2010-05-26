@@ -45,7 +45,7 @@ public:
   virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears);
   
 protected:
-    virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData, SurveyAgeGroup ageGroup);
+    virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData, Monitoring::AgeGroup ageGroup);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

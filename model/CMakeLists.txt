@@ -9,8 +9,6 @@ set (Model_CPP
   Population.cpp
   PopulationAgeStructure.cpp
   inputData.cpp
-  Surveys.cpp
-  Survey.cpp
   AgeGroupData.cpp
   gzstream.C
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
@@ -75,7 +73,9 @@ set (Model_CPP
   util/Options.cpp
   util/random.cpp
   
-  Output/Continuous.cpp
+  Monitoring/Continuous.cpp
+  Monitoring/Surveys.cpp
+  Monitoring/Survey.cpp
 )
 
 # Headers - only included so they show up in IDEs:

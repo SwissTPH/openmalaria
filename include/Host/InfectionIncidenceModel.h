@@ -22,7 +22,7 @@
 #define Hmod_InfectionIncidence
 
 #include "Global.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 
@@ -73,7 +73,7 @@ public:
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
   
   /// Output _pinfected to the summary
-  void summarize (Survey& survey, SurveyAgeGroup ageGroup);
+  void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /** Calculate the number of new infections to introduce.
    * 

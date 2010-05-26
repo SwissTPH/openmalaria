@@ -67,7 +67,7 @@ public:
    * @param ageGroup Survey age group of human.
    * @param doomed _doomed variable of Human; used to kill the human.
    *	Passing like this isn't ideal. */
-  void doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed);
+  void doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed);
   
   inline bool recentTreatment() {
     return (Global::simulationTime-_tLastTreatment >= 1 &&
@@ -85,14 +85,14 @@ private:
    /** Called when a non-severe/complicated malaria sickness occurs.
     *
     * @returns True in case of effective or partially effective treatment, false otherwise. */
-   bool uncomplicatedEvent(Episode& latestReport, bool isMalaria, double ageYears, SurveyAgeGroup ageGroup);
+   bool uncomplicatedEvent(Episode& latestReport, bool isMalaria, double ageYears, Monitoring::AgeGroup ageGroup);
 
    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
     *
     * @returns True in case of effective or partially effective treatment, false otherwise.
     * 
     * Note: sets doomed = 4 if patient dies. */
-  bool severeMalaria(Episode& latestReport, double ageYears, SurveyAgeGroup ageGroup, int& doomed);
+  bool severeMalaria(Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed);
   
   /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
   int _tLastTreatment;

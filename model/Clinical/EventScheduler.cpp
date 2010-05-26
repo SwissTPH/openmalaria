@@ -23,7 +23,7 @@
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Transmission/PerHostTransmission.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 
@@ -131,7 +131,7 @@ double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
     return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup)
+void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup)
 {
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
@@ -219,7 +219,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 		caseStartTime++;
 	}
 	if ( auxOut.RDT_used ) {
-	    Surveys.current->report_Clinical_RDTs (1);
+	    Monitoring::Surveys.current->report_Clinical_RDTs (1);
 	}
 	
 	// Case fatality rate (first day of illness)
@@ -299,7 +299,7 @@ void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& with
 	++next;
 	if ( it->time < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageGroupData, ageYears);
-	    Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+	    Monitoring::Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	} else {   // and decrement treatment seeking delay for the rest
 	    it->time -= 1.0;

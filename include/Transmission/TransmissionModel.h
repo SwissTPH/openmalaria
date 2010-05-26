@@ -97,7 +97,7 @@ public:
   /** Set some summary items.
    *
    * Overriding functions should call this base version too. */
-  virtual void summarize (Survey& survey);
+  virtual void summarize (Monitoring::Survey& survey);
   
   
   /** How many intervals are needed for vector initialisation before
@@ -153,7 +153,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, SurveyAgeGroup ageGroup);
+  double getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup);
   
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);

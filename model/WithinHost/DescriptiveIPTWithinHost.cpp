@@ -24,7 +24,7 @@
 #include "util/errors.hpp"
 #include "util/ModelOptions.hpp"
 #include "inputData.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 
 #include <cmath>
 
@@ -138,7 +138,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   clearAllInfections();
 }
 
-void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ageGroup) {
+void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup) {
   if (Global::timeStep < 0) return;
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
@@ -169,14 +169,14 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, SurveyAgeGroup ag
         */
         if (iptiEffect >=  10) {
           _lastSPDose=Global::simulationTime;
-          Surveys.current->reportIPTDoses (ageGroup, 1);
+          Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
         }
       }
     }
   }
 }
 
-void DescriptiveIPTWithinHost::IPTiTreatment (SurveyAgeGroup ageGroup) {
+void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup) {
   //Set the last SP Dose given for the eligible humans - is this all we need to do?
   
   _lastIptiOrPlacebo = Global::simulationTime;
@@ -185,7 +185,7 @@ void DescriptiveIPTWithinHost::IPTiTreatment (SurveyAgeGroup ageGroup) {
   // and also the treatment given when sick (trial-dependent)
   if (iptiEffect >= 10){
     _lastSPDose = Global::simulationTime;
-    Surveys.current->reportIPTDoses (ageGroup, 1);
+    Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
   }
 }
 

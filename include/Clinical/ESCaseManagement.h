@@ -27,7 +27,7 @@
 #include "Clinical/parser.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "inputData.h"
 
 #include <cassert>
@@ -199,7 +199,7 @@ class ESCaseManagement : public CaseManagementCommon {
          * applies them to the passed medicateQueue.
          * 
          * Returns: some extra info (see CMAuxOutput definition). */
-	static CMAuxOutput execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup);
+	static CMAuxOutput execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, Monitoring::AgeGroup ageGroup);
 	
     private:
 	

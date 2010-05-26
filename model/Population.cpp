@@ -22,7 +22,7 @@
 #include "Simulation.h"
 #include "Population.h"
 #include "inputData.h"
-#include "Surveys.h"
+#include "Monitoring/Surveys.h"
 
 #include "Transmission/TransmissionModel.h"
 
@@ -231,7 +231,7 @@ void Population::update1()
 
 void Population::newSurvey ()
 {
-    Survey& current = *Surveys.current;
+    Monitoring::Survey& current = *Monitoring::Surveys.current;
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
         iter->summarize (current);
     }

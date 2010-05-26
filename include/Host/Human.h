@@ -22,7 +22,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 
 namespace OM {
     namespace Transmission {
@@ -68,7 +68,7 @@ public:
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
-      surveyAgeGroup & stream;
+      monitoringAgeGroup & stream;
       _ylag & stream;
       _dateOfBirth & stream;
       _lastVaccineDose & stream;
@@ -128,8 +128,8 @@ public:
   }
       
   /// Get the survey age-group. Constant-time; returns result of last update.
-  inline const SurveyAgeGroup ageGroup() const {
-      return surveyAgeGroup;
+  inline const Monitoring::AgeGroup ageGroup() const {
+      return monitoringAgeGroup;
   }
   
   //! Get the age in years, based on current simulationTime.
@@ -145,7 +145,7 @@ public:
   //@}
   
   //! Summarize the state of a human individual.
-  void summarize(Survey& survey);
+  void summarize(Monitoring::Survey& survey);
   
   /// Calculate chance of a biting mosquito becoming infected
   //TODO: per genotype? (for Tiago's resistance modelling)
@@ -199,9 +199,9 @@ private:
   //@}
   
   /// Made persistant to save a lookup each timestep (has a significant impact)
-  SurveyAgeGroup surveyAgeGroup;
+  Monitoring::AgeGroup monitoringAgeGroup;
   
-  /// Age group for compiled-in data (made persistant as for surveyAgeGroup).
+  /// Age group for compiled-in data (made persistant as for monitoringAgeGroup).
   AgeGroupData ageGroupData;
   
   ///@brief Private variables

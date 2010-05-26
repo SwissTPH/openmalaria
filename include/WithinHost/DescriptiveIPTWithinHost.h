@@ -46,9 +46,9 @@ public:
   /// Conditionally clear all infections
   virtual void clearInfections (bool isSevere);
   /// Conditionally set last SP dose
-  virtual void IPTSetLastSPDose (int agetstep, SurveyAgeGroup ageGroup);
+  virtual void IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
-  virtual void IPTiTreatment (SurveyAgeGroup ageGroup);
+  virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup);
   
   /// Is IPT present?
   /// set by initParameters

@@ -23,8 +23,8 @@
 
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
-#include "Output/Continuous.h"
-#include "Surveys.h"
+#include "Monitoring/Continuous.h"
+#include "Monitoring/Surveys.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "inputData.h"
@@ -39,7 +39,8 @@
 
 
 namespace OM {
-    using Output::Continuous;
+    using Monitoring::Continuous;
+    using Monitoring::Surveys;
 
 // -----  Set-up & tear-down  -----
 

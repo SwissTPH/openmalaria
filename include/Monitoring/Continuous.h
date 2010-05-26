@@ -26,7 +26,7 @@
 
 using fastdelegate::MakeDelegate;
 
-namespace OM { namespace Output {
+namespace OM { namespace Monitoring {
     
     /** Class to deal with continuous output data.
      *

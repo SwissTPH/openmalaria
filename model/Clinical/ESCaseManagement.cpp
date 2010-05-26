@@ -434,7 +434,7 @@ void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue)
 	mdaDoses->apply(medicateQueue);
 }
 
-CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, SurveyAgeGroup ageGroup) {
+CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, Monitoring::AgeGroup ageGroup) {
     assert (pgState & Pathogenesis::SICK);
     ESDecisionMap* map;
     if (pgState & Pathogenesis::COMPLICATED)

@@ -20,11 +20,11 @@
 #ifndef Hmod_Surveys
 #define Hmod_Surveys
 
-#include "Survey.h"
+#include "Monitoring/Survey.h"
 #include "Global.h"
 #include <assert.h>
 
-namespace OM {
+namespace OM { namespace Monitoring {
     
 /** Class to collect surveys and write them out.
  *
@@ -108,5 +108,5 @@ class SurveysType
 };
 /// Data — entry-point for using Surveys. Checkpointed.
 extern SurveysType Surveys;
-}
+} }
 #endif

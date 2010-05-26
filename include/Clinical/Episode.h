@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "Pathogenesis/State.h"
-#include "Survey.h"	//SurveyAgeGroup
+#include "Monitoring/Survey.h"	//Monitoring::AgeGroup
 #include <ostream>
 
 namespace OM { namespace Clinical {
@@ -49,7 +49,7 @@ public:
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(int simulationTime, SurveyAgeGroup ageGroup, Pathogenesis::State newState);
+  void update(int simulationTime, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
   
   Pathogenesis::State getState() const {return _state;};
   
@@ -80,7 +80,7 @@ private:
   //! TODO: we could use the survey array to map time to survey period. slower, but less memory.
   int _surveyPeriod;
   //! agegroup of the individual which experienced the episode
-  SurveyAgeGroup _ageGroup;
+  Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
   Pathogenesis::State _state;
