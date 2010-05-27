@@ -46,8 +46,8 @@ double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
-int WithinHostModel::totalInfections;
-int WithinHostModel::allowedInfections;
+boost::int64_t WithinHostModel::totalInfections;
+boost::int64_t WithinHostModel::allowedInfections;
 
 // -----  static functions  -----
 
@@ -161,6 +161,18 @@ void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
     survey.addToLogDensity(ageGroup, log(totalDensity));
   }
 }
+
+void WithinHostModel::printTotInfs() {
+    long double x = totalInfections-allowedInfections;
+    x *= 100.0 / totalInfections;
+    cerr
+	<< "Total infections: "<<totalInfections
+	<<"\tallowed: "<<allowedInfections
+	<<"\tprevented: "<<x<<"%"
+	<<endl
+    ;
+}
+
 
 
 void WithinHostModel::checkpoint (istream& stream) {
