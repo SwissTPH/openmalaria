@@ -85,6 +85,8 @@ Checksum Checksum::generate (istream& fileStream) {
 	ret.data[i] = 0;
     return ret;
 }
+// In non-BOINC mode we don't need checksums, so don't write one:
+void Checksum::writeToFile (string filename) {}
 
 #else	// With BOINC
 
@@ -163,6 +165,15 @@ Checksum Checksum::generate (istream& fileStream) {
     
     return output;
 }
+void Checksum::writeToFile (string filename) {
+    ifstream test (filename.c_str());
+    if (test.is_open())
+	throw runtime_error ("File scenario.sum exists!");
+    
+    ofstream os (filename.c_str(), ios_base::binary | ios_base::out);
+    os.write ((char*)data, 16);
+    os.close();
+}
 #endif	// Without/with BOINC
 
 #if (defined(_GRAPHICS_6)&&defined(_BOINC))
@@ -201,14 +212,4 @@ namespace SharedGraphics {
   void copyKappa(double *kappa){}
 }
 #endif
-
-void Checksum::writeToFile (string filename) {
-    ifstream test (filename.c_str());
-    if (test.is_open())
-	throw runtime_error ("File scenario.sum exists!");
-    
-    ofstream os (filename.c_str(), ios_base::binary | ios_base::out);
-    os.write ((char*)data, 16);
-    os.close();
-}
 } }
