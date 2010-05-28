@@ -215,6 +215,10 @@ private:
    * Checkpointed. */
   double _sumAnnualKappa;
   
+  double BSSInitialisationEIR;
+  double BSSInnoculationsPerDayOfYear;
+  int BSSTimesteps;
+
 protected:
   /*! Total annual EIR.
    *

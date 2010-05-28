@@ -68,7 +68,7 @@ TransmissionModel::TransmissionModel() :
     ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
     _sumAnnualKappa(0.0), annualEIR(0.0),
-    timeStepNumEntoInnocs (0)
+    timeStepNumEntoInnocs (0), BSSInnoculationsPerDayOfYear(0.0), BSSTimesteps(0), BSSInitialisationEIR(0.0)
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);
@@ -149,6 +149,11 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
     timeStepEntoInnocs[group] = 0.0;
   }
   innoculationsPerDayOfYear[tmod] = timeStepTotal / timeStepNumEntoInnocs;
+
+  BSSInitialisationEIR += initialisationEIR[simulationTime % Global::intervalsPerYear];
+  BSSInnoculationsPerDayOfYear +=innoculationsPerDayOfYear[tmod];
+  BSSTimesteps++;
+
   timeStepNumEntoInnocs = 0;
   
   // Shared graphics: report infectiousness
@@ -177,9 +182,13 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   
   survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
   innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
-  
-  survey.set_Vector_EIR_Input (initialisationEIR[Global::simulationTime % Global::intervalsPerYear]);
-  survey.set_Vector_EIR_Simulated (innoculationsPerDayOfYear[(Global::simulationTime-1) % Global::intervalsPerYear]);
+
+  survey.set_Vector_EIR_Input (BSSInitialisationEIR/(double)BSSTimesteps);
+  survey.set_Vector_EIR_Simulated (BSSInnoculationsPerDayOfYear/(double)BSSTimesteps);
+
+  BSSInitialisationEIR = 0.0;
+  BSSInnoculationsPerDayOfYear = 0.0;
+  BSSTimesteps = 0;
 }
 
 void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
