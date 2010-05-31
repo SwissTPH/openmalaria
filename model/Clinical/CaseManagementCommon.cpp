@@ -30,8 +30,15 @@
 namespace OM { namespace Clinical {
     int CaseManagementCommon::healthSystemSource;
     map<double,double> CaseManagementCommon::caseFatalityRates;
+    double CaseManagementCommon::_oddsRatioThreshold;
     
     // -----  functions  -----
+    
+    void CaseManagementCommon::initCommon (){
+	_oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
+	
+	changeHealthSystem(-1);
+    }
     
     void CaseManagementCommon::changeHealthSystem (int source) {
 	healthSystemSource = source;
@@ -90,6 +97,12 @@ namespace OM { namespace Clinical {
 	return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
     }
     
+    double CaseManagementCommon::getCommunityCaseFatalityRate (double caseFatalityRatio)
+    {
+	double x = caseFatalityRatio * _oddsRatioThreshold;
+	return x / (1 - caseFatalityRatio + x);
+    }
+
     void CaseManagementCommon::staticCheckpoint (ostream& stream) {
 	healthSystemSource & stream;
     }

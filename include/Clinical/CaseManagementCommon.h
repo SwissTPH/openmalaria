@@ -39,6 +39,11 @@ namespace OM { namespace Clinical {
      *************************************************************************/
     class CaseManagementCommon {
     public:
+	/** Initialisation - reads fatality rates, etc.
+	 * Both derived case management systems have their own init function;
+	 * this is named "initCommon" to avoid confusion over which is called. */
+	static void initCommon ();
+	
 	/** Checkpointing: load state.
 	 *
 	 * If healthSystemSource != -1, this calls changeHealthSystem to re-load
@@ -62,6 +67,10 @@ namespace OM { namespace Clinical {
 	static inline const map<double,double>& getCaseFatalityRates (){
 	    return caseFatalityRates;
 	}
+	
+	/** Calculate the case fatality rate in the community as a function of
+	 * the hospital case fatality rate. */
+	static double getCommunityCaseFatalityRate(double caseFatalityRatio);
 	
     protected:
 	/** Stepwise linear interpolation to get age-specific hospital case
@@ -88,6 +97,9 @@ namespace OM { namespace Clinical {
 	// assume no input can be greater than the last upper-bound (which
 	// should be inf).
 	static map<double,double> caseFatalityRates;
-    };
+	
+	//log odds ratio of case-fatality in community compared to hospital
+	static double _oddsRatioThreshold;
+      };
 } }
 #endif

@@ -100,16 +100,8 @@ private:
   //! treatment seeking for heterogeneity
   double _treatmentSeekingFactor;
   
-  /*! Calculate the case fatality rate in the community as a function of the
-    hospital case fatality rate.*/
-  static double getCommunityCaseFatalityRate(double caseFatalityRatio);
-  
   /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
   static void setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem);
-  
-  //log odds ratio of case-fatality in community compared to hospital
-  //set only by init()
-  static double _oddsRatioThreshold;
   
   //BEGIN Static parameters, set by setHealthSystem()
   // These parameters are reset via a setHealthSystem call on checkpoint

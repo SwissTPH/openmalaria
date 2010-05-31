@@ -407,8 +407,6 @@ void ESCaseManagement::init () {
 	mdaDoses = new ESTreatmentSchedule ( mdaDesc.get().getSchedule().get() );
     } else
 	mdaDoses = NULL;
-    
-    changeHealthSystem( -1 );
 }
 //TODO: test-case with a change-of-health-system
 void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {

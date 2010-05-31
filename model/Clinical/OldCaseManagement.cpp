@@ -34,7 +34,6 @@ namespace OM { namespace Clinical {
     using namespace OM::util;
 
 const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 5, 99 };
-double OldCaseManagement::_oddsRatioThreshold;
 double OldCaseManagement::probGetsTreatment[3];
 double OldCaseManagement::probParasitesCleared[3];
 double OldCaseManagement::cureRate[3];
@@ -48,10 +47,6 @@ void OldCaseManagement::init ()
 {
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
 	throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
-
-    _oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
-    
-    changeHealthSystem(-1);
 }
 
 void OldCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
@@ -237,12 +232,6 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, M
     }
     return false;
   }
-}
-
-double OldCaseManagement::getCommunityCaseFatalityRate (double caseFatalityRatio)
-{
-  double x = caseFatalityRatio * _oddsRatioThreshold;
-  return x / (1 - caseFatalityRatio + x);
 }
 
 

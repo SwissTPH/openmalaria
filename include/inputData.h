@@ -83,11 +83,15 @@ namespace Params {
     //@}
     /// v in "Case Fatality Rate proposal" TODO: reference
     CFR_PAR_REDUCTION_SCALAR = 33,
+    
     // Parameters fitting for Molineaux within host model
     MEAN_LOCAL_MAX_DENSITY = 34,
     SD_LOCAL_MAX_DENSITY = 35,
     MEAN_DIFF_POS_DAYS = 36,
     SD_DIFF_POS_DAYS = 37,
+    
+    /// exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day, with event scheduler model
+    CFR_NEG_LOG_ALPHA = 38,
     MAX
   };
 }

@@ -882,6 +882,7 @@ public class SchemaTranslator {
     
     // Version 19: entoData's "mode" can no longer have value 3.
     // Removed unused "delta" from parameters.
+    // Moved two event-scheduler outcome attributes into parameters element -- updated by hand.
     public boolean translate18To19() throws Exception {
 	Element entoData = (Element) scenarioElement.getElementsByTagName(
 	    "entoData").item(0);

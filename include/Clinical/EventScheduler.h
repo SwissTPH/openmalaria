@@ -85,10 +85,6 @@ private:
     /// Parameter of S(t) for t > 0
     static double neg_v;
     
-    /// Multiplies the odds of dying in a community case, where the base
-    /// (hospital) probability of death comes from other inputs.
-    static double communityOddsMultiplier;
-    
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.

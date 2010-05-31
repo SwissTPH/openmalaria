@@ -1765,24 +1765,6 @@
           <xs:appinfo>name:Probability of immediate UC treatment seeking;units:none;min:0;max:1</xs:appinfo>
         </xs:annotation>
       </xs:element>
-     <xs:element name="propDeathsFirstDay" type="xs:double">
-        <xs:annotation>
-          <xs:documentation>
-            Proportion of direct deaths from severe malaria or a complication
-            which happen on the day of entry to the health system.
-          </xs:documentation>
-          <xs:appinfo>name:Proportion of direct deaths on first day;units:none;min:0;max:1</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-     <xs:element name="communityOddsMultiplier" type="xs:double">
-        <xs:annotation>
-          <xs:documentation>
-            Multiplies the odds of dying in a community case, where the base
-            (hospital) probability of death comes from other inputs.
-          </xs:documentation>
-          <xs:appinfo>name:Community odds of death multiplier;units:none;min:0;max:unbounded</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
     </xs:sequence>
   </xs:complexType>
 

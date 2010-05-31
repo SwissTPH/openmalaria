@@ -49,6 +49,7 @@ void ClinicalModel::init () {
     ClinicalEventScheduler::init();
   else
     ClinicalImmediateOutcomes::initParameters();
+  CaseManagementCommon::initCommon();
 }
 void ClinicalModel::cleanup () {
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))

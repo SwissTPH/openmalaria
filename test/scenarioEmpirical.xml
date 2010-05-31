@@ -1168,6 +1168,7 @@
     <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
     <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
     <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
+    <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
   </parameters>
 </model>
 </scenario>
