@@ -100,6 +100,15 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
   }
 }
 
+void WithinHostModel::staticCheckpoint (istream& stream){
+    totalInfections & stream;
+    allowedInfections & stream;
+}
+void WithinHostModel::staticCheckpoint (ostream& stream){
+    totalInfections & stream;
+    allowedInfections & stream;
+}
+
 
 // -----  Non-static  -----
 
@@ -162,7 +171,7 @@ void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
   }
 }
 
-void WithinHostModel::printTotInfs() {
+void WithinHostModel::printDebugStats() {
     long double x = totalInfections-allowedInfections;
     x *= 100.0 / totalInfections;
     cerr

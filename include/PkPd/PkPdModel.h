@@ -79,7 +79,7 @@ public:
    * timesteps, until rendered ineffective by decayDrugs().
    *
    * \param drugAbbrev - The drug abbreviation.
-   * \param qty        - the quantity (mg?).
+   * \param qty        - the quantity in mg.
    * \param time       - Time in days since start of this time step to medicate at
    * \param ageGroupData Age group of human for age data (passed for performance reasons)
    * \param age        - Age of human in years

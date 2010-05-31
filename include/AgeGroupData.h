@@ -42,6 +42,13 @@ public:
     inline double getAgeSpecificRelativeAvailability () const {
 	return ageSpecificRelativeAvailability[_i];
     }
+    
+    /** Calculates mass as a piecewise-linear function of age. Homogeneous with
+     * regards to humans (all humans considered the same at the same age).
+     *
+     * @param ageYears Person's age in years
+     * @returns Mass in kg (range approx 14 to 60 kg).
+     */
     double ageToWeight (double ageYears) const;
     
 private:

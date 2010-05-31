@@ -51,6 +51,10 @@ public:
   
   /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();
+
+    /// Checkpointing for static data members
+    static void staticCheckpoint (istream& stream);
+    static void staticCheckpoint (ostream& stream); ///< ditto
   //@}
   
   /// @brief Constructors, destructors and checkpointing functions
@@ -111,7 +115,8 @@ public:
   /// Called to effect some penalty on immunity − but what? Please document.
   void immunityPenalisation();
   
-  static void printTotInfs();
+  // Print some collected debugging info at end of sim.
+  static void printDebugStats();
   
 protected:
   /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
@@ -195,11 +200,11 @@ protected:
    * 
    * Exact constraint is: _MOI <= MAX_INFECTIONS. */
   static const int MAX_INFECTIONS = 21;
+  //@}
   
-public:	// Public to allow checkpointing from Simulation; TODO remove/tidy up
+  // Static parameters for use with debug output:
   static boost::int64_t totalInfections;
   static boost::int64_t allowedInfections;
-  //@}
   
   friend class ::UnittestUtil;
 };

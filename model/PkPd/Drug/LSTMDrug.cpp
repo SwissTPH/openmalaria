@@ -62,6 +62,8 @@ inline double drugEffect (const LSTMDrugPDParameters& PD_params, double neg_elim
     return drug_effect;
 }
 
+// TODO: in high transmission, is this going to get called more than updateConcentration?
+// When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
     double totalFactor = 1.0;		/* KW-	The drug factor being passed to melissa - this begins with a value of 1, it assumes no drug effect is seen
 									this vaule is updated in the for loop, value decreases with increasing drug effect. */
@@ -78,6 +80,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
     
     for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
 	double duration = dose->first - startTime;
+	// TODO: skip if duration == 0.0?
 	totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);	
 	concentration_today += dose->second;
 	

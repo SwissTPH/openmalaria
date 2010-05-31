@@ -148,7 +148,7 @@ int Simulation::start(){
 	}
     }
     
-    WithinHost::WithinHostModel::printTotInfs();
+    WithinHost::WithinHostModel::printDebugStats();
     
     delete _population;	// must destroy all Human instances to make sure they reported past events
     Surveys.writeSummaryArrays();
@@ -260,8 +260,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
 	totalSimDuration & stream;
 	phase & stream;
 	(*_population) & stream;
-	WithinHost::WithinHostModel::totalInfections & stream;
-	WithinHost::WithinHostModel::allowedInfections & stream;
+	WithinHost::WithinHostModel::staticCheckpoint( stream );
 	
 	// read last, because other loads may use random numbers:
 	util::random::checkpoint (stream, checkpointNum);
@@ -307,8 +306,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
-    WithinHost::WithinHostModel::totalInfections & stream;
-    WithinHost::WithinHostModel::allowedInfections & stream;
+    WithinHost::WithinHostModel::staticCheckpoint( stream );
     
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
