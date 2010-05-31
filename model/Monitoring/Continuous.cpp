@@ -33,10 +33,11 @@ namespace OM { namespace Monitoring {
     using util::xml_scenario_error;
     
     /// Output file name
-#  define CTS_FILENAME "ctsout.txt"
+    const char* CTS_FILENAME = "ctsout.txt";
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
     ofstream ctsOStream;
+    // Can't simply replace with ogzstream for compression: that doesn't support appending.
     
     // List of all registered callbacks (not used after init() runs)
     struct Callback {
@@ -68,10 +69,12 @@ namespace OM { namespace Monitoring {
 	locale old_locale;
 	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
 	ctsOStream.imbue( nfn_put_locale );
+	ctsOStream.width (0);
 	
 	if( isCheckpoint )
 	    // When loading a check-point, we resume reporting to this file.
-	    ctsOStream.open (CTS_FILENAME, ios::app);
+	    // Don't worry about writing to an existing file (like for "output.txt"): we're appending.
+	    ctsOStream.open (CTS_FILENAME, ios::app | ios::binary);
 	else{
 	    ifstream test (CTS_FILENAME);
 	    if (test.is_open())

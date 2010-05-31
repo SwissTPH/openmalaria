@@ -105,6 +105,7 @@ configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CU
 add_executable (run tests.cpp)
 target_link_libraries (run
   model
+  contrib
   ${OM_CXXTEST_GUI_LIB}
   ${GSL_LIBRARIES}
   ${XERCESC_LIBRARIES}
