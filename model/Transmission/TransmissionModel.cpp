@@ -213,6 +213,9 @@ void TransmissionModel::checkpoint (istream& stream) {
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
+    BSSInitialisationEIR & stream;
+    BSSInnoculationsPerDayOfYear & stream;
+    BSSTimesteps & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     ageCorrectionFactor & stream;
@@ -229,6 +232,9 @@ void TransmissionModel::checkpoint (ostream& stream) {
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
+    BSSInitialisationEIR & stream;
+    BSSInnoculationsPerDayOfYear & stream;
+    BSSTimesteps & stream;
 }
 
 } }
