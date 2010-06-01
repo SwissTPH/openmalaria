@@ -285,6 +285,9 @@ void Population::implementIntervention (int time)
     if (interv->getVectorAvailability().present()) {
         massIntervention (interv->getVectorAvailability().get(), &Host::Human::setupVA);
     }
+    if (interv->getImmuneSuppression().present()) {
+	massIntervention (interv->getImmuneSuppression().get(), &Host::Human::immuneSuppression);
+    }
 
     if (interv->getLarviciding().present()) {
         _transmissionModel->intervLarviciding (interv->getLarviciding().get());

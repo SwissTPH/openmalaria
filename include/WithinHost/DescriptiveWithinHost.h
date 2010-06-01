@@ -45,6 +45,7 @@ public:
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
   virtual void clearAllInfections();
+  virtual void immuneSuppression();
   
   virtual void calculateDensities(double ageInYears, double BSVEfficacy);
   

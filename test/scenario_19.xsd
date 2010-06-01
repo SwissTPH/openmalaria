@@ -891,6 +891,18 @@
           <xs:appinfo>units:List of elements;name:IPTi deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="immuneSuppression" type="mass">
+        <xs:annotation>
+          <xs:documentation>
+            Removes all exposure-related immunity gained over time by hosts
+            without removing infections.
+            
+            Hypothetical, but potentially useful to simulate scenarios with
+            unprotected humans.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Immune suppression deployment;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element minOccurs="0" name="larviciding">
         <xs:annotation>
           <xs:documentation>

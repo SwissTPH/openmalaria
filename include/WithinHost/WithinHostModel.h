@@ -55,6 +55,9 @@ public:
     /// Checkpointing for static data members
     static void staticCheckpoint (istream& stream);
     static void staticCheckpoint (ostream& stream); ///< ditto
+  
+  // Print some collected debugging info at end of sim.
+  static void printDebugStats();
   //@}
   
   /// @brief Constructors, destructors and checkpointing functions
@@ -115,8 +118,8 @@ public:
   /// Called to effect some penalty on immunity − but what? Please document.
   void immunityPenalisation();
   
-  // Print some collected debugging info at end of sim.
-  static void printDebugStats();
+  /// Special intervention: clears all immunity
+  virtual void immuneSuppression() =0;
   
 protected:
   /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
@@ -124,15 +127,6 @@ protected:
    * 
    * Applies decay of immunity against asexual blood stages, if present. */
   void updateImmuneStatus();
-  
-  /** For summarizing:
-   * @returns Total number of infections.
-   * @param patentInfections Out param: the number of patent infections
-	    (only set if return-value is non-zero). */
-  virtual int countInfections (int& patentInfections) =0;
-  
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
   
   //!innate ability to control parasite densities
   double _innateImmSurvFact;
@@ -148,6 +142,15 @@ protected:
   //!cumulativeY from previous timestep
   double _cumulativeYlag;
   //@}
+  
+  /** For summarizing:
+   * @returns Total number of infections.
+   * @param patentInfections Out param: the number of patent infections
+	    (only set if return-value is non-zero). */
+  virtual int countInfections (int& patentInfections) =0;
+  
+  virtual void checkpoint (istream& stream);
+  virtual void checkpoint (ostream& stream);
   
   /** Literally just removes all infections in an individual.
    *

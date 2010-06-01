@@ -63,6 +63,15 @@ void DescriptiveWithinHostModel::clearAllInfections(){
   _MOI=0;
 }
 
+// -----  Interventions  -----
+void DescriptiveWithinHostModel::immuneSuppression() {
+    for(std::list<DescriptiveInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
+	(*it)->immuneSuppression();
+    }
+    _cumulativeh = 0.0;
+    _cumulativeYlag = 0.0;
+}
+
 
 // -----  Density calculations  -----
 

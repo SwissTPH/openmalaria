@@ -116,6 +116,11 @@ public:
     perHostTransmission.setupVA ();
   }
   
+  /// Resets immunity
+  inline void immuneSuppression() {
+      withinHostModel->immuneSuppression();
+  }
+  
   /// Infect the human (with an imported infection).
   void addInfection();
   //@}

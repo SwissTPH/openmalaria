@@ -55,6 +55,12 @@ public:
    * timestep). */
   double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
   
+  /// Resets immunity properties specific to the infection (should only be
+  /// called along with immuneSuppression() on within-host model).
+  inline void immuneSuppression(){
+      _cumulativeExposureJ = 0.0;
+  }
+  
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
