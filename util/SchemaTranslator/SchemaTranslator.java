@@ -49,6 +49,7 @@ public class SchemaTranslator {
     private static int _required_version = CURRENT_VERSION;
     private static boolean doValidation = true;
     private static boolean doTranslation = true;
+    private static boolean doODTTranslation = false;
     private static boolean doDBUpdate = false;
 
     private enum BugCorrectionBehaviour {
@@ -167,7 +168,7 @@ public class SchemaTranslator {
             System.err.println("Update of " + documentFile + " failed.");
             return;
         }
-        if (doTranslation) {
+        if (doTranslation||doODTTranslation) {
             File outFile = new File(outDir, documentFile.getName());
             outFile.createNewFile();
             OutputStream os = new FileOutputStream(outFile);
@@ -252,6 +253,7 @@ public class SchemaTranslator {
                 + scenarioElement.getAttribute("schemaVersion"));
         String schemaFileName = "scenario_" + schemaVersion + ".xsd";
         Class<? extends SchemaTranslator> cls = this.getClass();
+        
         while (schemaVersion < _required_version) {
             ++schemaVersion;
             schemaFileName = "scenario_" + schemaVersion + ".xsd";
@@ -268,8 +270,15 @@ public class SchemaTranslator {
             if (!(Boolean) method.invoke(this, new Object[] {}))
                 return null;
         }
+        
+        if(schemaVersion >= 18 && doODTTranslation)
+        	if(!oDTTranslation())
+        		return null;
+        
         return schemaFileName;
     }
+    
+    
 
     // / Exactly what version 1 is has been forgotten; it's merged into 2.
     public Boolean translate0To1() {
@@ -919,11 +928,704 @@ public class SchemaTranslator {
 	
         Element model = (Element) scenarioElement.getElementsByTagName("model")
                 .item(0);
-        Element t_parameters = (Element) model.getElementsByTagName(
+        if(model!=null)
+        {
+            Element t_parameters = (Element) model.getElementsByTagName(
                 "parameters").item(0);
-	t_parameters.removeAttribute("delta");
+            if(t_parameters!=null)
+                t_parameters.removeAttribute("delta");
+        }
+        
 	
 	return true;
+    }
+
+    private Boolean oDTTranslation() {
+
+    	Element surveys = (Element)scenarioElement.getElementsByTagName("surveys").item(0);
+        NodeList surveystimes = surveys.getElementsByTagName("surveyTime");
+
+        for(int i=0;i<surveystimes.getLength();i++)
+        {
+            Element surveytime = (Element)surveystimes.item(i);
+            int surveyTime = Integer.parseInt(surveytime.getTextContent());
+            surveytime.setTextContent(String.valueOf(((surveyTime -1)*5)+1));
+        }
+
+        Element modelElement = (Element)scenarioElement.getElementsByTagName("model").item(0);
+        Element modelOptions = (Element)modelElement.getElementsByTagName("ModelOptions").item(0);
+
+        Element molineauxOption = scenarioDocument.createElement("option");
+        Attr name = scenarioDocument.createAttribute("name");
+        name.setNodeValue("MOLINEAUX_WITHIN_HOST_MODEL");
+        Attr value = scenarioDocument.createAttribute("value");
+        value.setNodeValue("true");
+        molineauxOption.setAttributeNode(name);
+        molineauxOption.setAttributeNode(value);
+        modelOptions.appendChild(molineauxOption);
+
+        Element pkpdOption = scenarioDocument.createElement("option");
+        Attr namePkPd = scenarioDocument.createAttribute("name");
+        namePkPd.setNodeValue("INCLUDES_PK_PD");
+        Attr valuePkPd = scenarioDocument.createAttribute("value");
+        valuePkPd.setNodeValue("true");
+        pkpdOption.setAttributeNode(namePkPd);
+        pkpdOption.setAttributeNode(valuePkPd);
+        modelOptions.appendChild(pkpdOption);
+
+        Element esOption = scenarioDocument.createElement("option");
+        Attr nameES = scenarioDocument.createAttribute("name");
+        nameES.setNodeValue("CLINICAL_EVENT_SCHEDULER");
+        Attr valueES = scenarioDocument.createAttribute("value");
+        valueES.setNodeValue("true");
+        esOption.setAttributeNode(nameES);
+        esOption.setAttributeNode(valueES);
+        modelOptions.appendChild(esOption);
+
+        Element clinical = (Element)scenarioElement.getElementsByTagName("clinical").item(0);
+        Attr healthSystemMemory = clinical.getAttributeNode("healthSystemMemory");
+        healthSystemMemory.setValue(String.valueOf(Integer.parseInt(healthSystemMemory.getValue())*5));
+
+        NodeList interventionList = (NodeList)scenarioElement.getElementsByTagName("intervention");
+
+        for(int i=0;i<interventionList.getLength();i++)
+        {
+            Element intervention = (Element)interventionList.item(0);
+            Attr time = intervention.getAttributeNode("time");
+
+            if(time!=null)
+                time.setNodeValue(String.valueOf(((Integer.parseInt(time.getNodeValue())-1)*5)+1));
+        }
+
+        NodeList changeHSList = (NodeList)scenarioElement.getElementsByTagName("changeHS");
+
+        for(int i=0;i<changeHSList.getLength();i++)
+        {
+            Element changeHS = (Element) changeHSList.item(i);
+            Element immediateOutcomes = (Element)changeHS.getElementsByTagName("ImmediateOutcomes").item(0);
+            String valueString = immediateOutcomes.getAttribute("name");
+
+            if(valueString.equals("Do Monitoring HS")||valueString.equals("Np Monitoring HS"))
+            {
+                Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+                changeHS.removeChild(immediateOutcomes);
+
+                Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
+                Element decisions = (Element)scenarioDocument.createElement("decisions");
+
+                Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+
+                Attr nameTreat = scenarioDocument.createAttribute("name");
+                nameTreat.setNodeValue("treatment");
+                Attr dependsTreat = scenarioDocument.createAttribute("depends");
+                dependsTreat.setNodeValue("");
+                Attr valuesTreat = scenarioDocument.createAttribute("values");
+                valuesTreat.setNodeValue("effective_treat,none");
+
+                decisionTreat.setAttributeNode(nameTreat);
+                decisionTreat.setAttributeNode(dependsTreat);
+                decisionTreat.setAttributeNode(valuesTreat);
+                decisionTreat.setTextContent("effective_treat");
+                decisions.appendChild(decisionTreat);
+
+                Element decisionTest = (Element)scenarioDocument.createElement("decision");
+
+                Attr nameTest = scenarioDocument.createAttribute("name");
+                nameTest.setNodeValue("test");
+                Attr dependsTest = scenarioDocument.createAttribute("depends");
+                dependsTest.setNodeValue("");
+                Attr valuesTest = scenarioDocument.createAttribute("values");
+                valuesTest.setNodeValue("none,microscopy,RDT");
+
+                decisionTest.setAttributeNode(nameTest);
+                decisionTest.setAttributeNode(dependsTest);
+                decisionTest.setAttributeNode(valuesTest);
+                decisionTest.setTextContent("none");
+                decisions.appendChild(decisionTest);
+
+                uncomplicated.appendChild(decisions);
+
+                Element treatments = (Element)scenarioDocument.createElement("treatments");
+                Element treatment = (Element)scenarioDocument.createElement("treatment");
+                Attr nameTreatEl = scenarioDocument.createAttribute("name");
+                nameTreatEl.setNodeValue("effective_treat");
+                treatment.setAttributeNode(nameTreatEl);
+
+                Element schedule = (Element)scenarioDocument.createElement("schedule");
+                Element medicate = (Element)scenarioDocument.createElement("medicate");
+
+                Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+                drug.setNodeValue("effective");
+                Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+                mg.setNodeValue("1");
+                Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+                hour.setNodeValue("0");
+
+                medicate.setAttributeNode(drug);
+                medicate.setAttributeNode(mg);
+                medicate.setAttributeNode(hour);
+
+                schedule.appendChild(medicate);
+                treatment.appendChild(schedule);
+                treatments.appendChild(treatment);
+
+                Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
+                Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+                nameTreatNone.setNodeValue("none");
+                treatmentNone.setAttributeNode(nameTreatNone);
+
+                Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+                treatmentNone.appendChild(scheduleNone);
+                treatments.appendChild(treatmentNone);
+                uncomplicated.appendChild(treatments);
+
+                eventScheduler.appendChild(uncomplicated);
+
+                Element complicated = (Element)scenarioDocument.createElement("complicated");
+                Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+
+                Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+
+                Attr nameCompTreat = scenarioDocument.createAttribute("name");
+                nameCompTreat.setNodeValue("treatment");
+                Attr dependsCompTreat = scenarioDocument.createAttribute("depends");
+                dependsCompTreat.setNodeValue("");
+                Attr valuesCompTreat = scenarioDocument.createAttribute("values");
+                valuesCompTreat.setNodeValue("effective_treat,none");
+
+                decisionCompTreat.setAttributeNode(nameCompTreat);
+                decisionCompTreat.setAttributeNode(dependsCompTreat);
+                decisionCompTreat.setAttributeNode(valuesCompTreat);
+                decisionCompTreat.setTextContent("effective_treat");
+                decisionsComp.appendChild(decisionCompTreat);
+
+                Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+
+                Attr nameCompHosp = scenarioDocument.createAttribute("name");
+                nameCompHosp.setNodeValue("hospitalisation");
+                Attr dependsCompHosp = scenarioDocument.createAttribute("depends");
+                dependsCompHosp.setNodeValue("");
+                Attr valuesCompHosp = scenarioDocument.createAttribute("values");
+                valuesCompHosp.setNodeValue("none,delayed,immediate");
+
+                decisionCompHosp.setAttributeNode(nameCompHosp);
+                decisionCompHosp.setAttributeNode(dependsCompHosp);
+                decisionCompHosp.setAttributeNode(valuesCompHosp);
+                decisionCompHosp.setTextContent("immediate");
+                decisionsComp.appendChild(decisionCompHosp);
+
+                Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+
+                Attr nameCompTest = scenarioDocument.createAttribute("name");
+                nameCompTest.setNodeValue("test");
+                Attr dependsCompTest = scenarioDocument.createAttribute("depends");
+                dependsCompTest.setNodeValue("");
+                Attr valuesCompTest = scenarioDocument.createAttribute("values");
+                valuesCompTest.setNodeValue("none,microscopy,RDT");
+
+                decisionCompTest.setAttributeNode(nameCompTest);
+                decisionCompTest.setAttributeNode(dependsCompTest);
+                decisionCompTest.setAttributeNode(valuesCompTest);
+                decisionCompTest.setTextContent("none");
+                decisionsComp.appendChild(decisionCompTest);
+
+                complicated.appendChild(decisionsComp);
+
+                Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
+                Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+                Attr nameTreatComp = scenarioDocument.createAttribute("name");
+                nameTreatComp.setNodeValue("effective_treat");
+                treatmentComp.setAttributeNode(nameTreatComp);
+
+                Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
+                Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+
+                Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+                drugComp.setNodeValue("effective");
+                Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+                mgComp.setNodeValue("1");
+                Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+                hourComp.setNodeValue("0");
+
+                medicateComp.setAttributeNode(drugComp);
+                medicateComp.setAttributeNode(mgComp);
+                medicateComp.setAttributeNode(hourComp);
+
+                scheduleComp.appendChild(medicateComp);
+                treatmentComp.appendChild(scheduleComp);
+                treatmentsComp.appendChild(treatmentComp);
+
+                Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
+                Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+                nameTreatCompNone.setNodeValue("none");
+                treatmentCompNone.setAttributeNode(nameTreatCompNone);
+
+                Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+                treatmentCompNone.appendChild(scheduleCompNone);
+                treatmentsComp.appendChild(treatmentCompNone);
+                complicated.appendChild(treatmentsComp);
+
+                eventScheduler.appendChild(complicated);
+
+                Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
+                Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+                maxUCSeekingMemory.setTextContent("3");
+                Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+                uncomplicatedCaseDuration.setTextContent("3");
+                Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+                complicatedCaseDuration.setTextContent("5");
+                Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+                complicatedRiskDuration.setTextContent("5");
+                Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+                pImmediateUC.setTextContent("1");
+                Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+                propDeathsFirstDay.setTextContent("0.4");
+
+                clinicalOutcomes.appendChild(maxUCSeekingMemory);
+                clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
+                clinicalOutcomes.appendChild(complicatedCaseDuration);
+                clinicalOutcomes.appendChild(complicatedRiskDuration);
+                clinicalOutcomes.appendChild(pImmediateUC);
+                clinicalOutcomes.appendChild(propDeathsFirstDay);
+
+                eventScheduler.appendChild(clinicalOutcomes);
+
+
+                Element CFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
+                if(CFR!=null)
+                    changeHS.insertBefore(eventScheduler, CFR);
+                else
+                    changeHS.appendChild(eventScheduler);
+            }
+            else return false;
+        }
+
+
+
+        Element healthSystem = (Element)scenarioDocument.getElementsByTagName("healthSystem").item(0);
+
+        Element immediateOutcomes = (Element)healthSystem.getElementsByTagName("ImmediateOutcomes").item(0);
+        String valueString = immediateOutcomes.getAttribute("name");
+
+        System.out.println(valueString);
+
+        if(valueString.equals("no Treatment")||valueString.equals("Mortality Fitting")||valueString.equals("no Treatment no Mortality"))
+        {
+            Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+            healthSystem.removeChild(immediateOutcomes);
+            
+            Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
+            Element decisions = (Element)scenarioDocument.createElement("decisions");
+
+            Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameTreat = scenarioDocument.createAttribute("name");
+            nameTreat.setNodeValue("treatment");
+            Attr dependsTreat = scenarioDocument.createAttribute("depends");
+            dependsTreat.setNodeValue("");
+            Attr valuesTreat = scenarioDocument.createAttribute("values");
+            valuesTreat.setNodeValue("effective_treat,none");
+
+            decisionTreat.setAttributeNode(nameTreat);
+            decisionTreat.setAttributeNode(dependsTreat);
+            decisionTreat.setAttributeNode(valuesTreat);
+            decisionTreat.setTextContent("none");
+            decisions.appendChild(decisionTreat);
+
+            Element decisionTest = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameTest = scenarioDocument.createAttribute("name");
+            nameTest.setNodeValue("test");
+            Attr dependsTest = scenarioDocument.createAttribute("depends");
+            dependsTest.setNodeValue("");
+            Attr valuesTest = scenarioDocument.createAttribute("values");
+            valuesTest.setNodeValue("none,microscopy,RDT");
+
+            decisionTest.setAttributeNode(nameTest);
+            decisionTest.setAttributeNode(dependsTest);
+            decisionTest.setAttributeNode(valuesTest);
+            decisionTest.setTextContent("none");
+            decisions.appendChild(decisionTest);
+
+            uncomplicated.appendChild(decisions);
+
+            Element treatments = (Element)scenarioDocument.createElement("treatments");
+            Element treatment = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatEl = scenarioDocument.createAttribute("name");
+            nameTreatEl.setNodeValue("effective_treat");
+            treatment.setAttributeNode(nameTreatEl);
+
+            Element schedule = (Element)scenarioDocument.createElement("schedule");
+            Element medicate = (Element)scenarioDocument.createElement("medicate");
+
+            Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+            drug.setNodeValue("effective");
+            Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+            mg.setNodeValue("1");
+            Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+            hour.setNodeValue("0");
+
+            medicate.setAttributeNode(drug);
+            medicate.setAttributeNode(mg);
+            medicate.setAttributeNode(hour);
+
+            schedule.appendChild(medicate);
+            treatment.appendChild(schedule);
+            treatments.appendChild(treatment);
+
+            Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+            nameTreatNone.setNodeValue("none");
+            treatmentNone.setAttributeNode(nameTreatNone);
+
+            Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+            treatmentNone.appendChild(scheduleNone);
+            treatments.appendChild(treatmentNone);
+            uncomplicated.appendChild(treatments);
+            
+            eventScheduler.appendChild(uncomplicated);
+
+            Element complicated = (Element)scenarioDocument.createElement("complicated");
+            Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+
+            Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompTreat = scenarioDocument.createAttribute("name");
+            nameCompTreat.setNodeValue("treatment");
+            Attr dependsCompTreat = scenarioDocument.createAttribute("depends");
+            dependsCompTreat.setNodeValue("");
+            Attr valuesCompTreat = scenarioDocument.createAttribute("values");
+            valuesCompTreat.setNodeValue("effective_treat,none");
+
+            decisionCompTreat.setAttributeNode(nameCompTreat);
+            decisionCompTreat.setAttributeNode(dependsCompTreat);
+            decisionCompTreat.setAttributeNode(valuesCompTreat);
+            decisionCompTreat.setTextContent("none");
+            decisionsComp.appendChild(decisionCompTreat);
+
+            Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompHosp = scenarioDocument.createAttribute("name");
+            nameCompHosp.setNodeValue("hospitalisation");
+            Attr dependsCompHosp = scenarioDocument.createAttribute("depends");
+            dependsCompHosp.setNodeValue("");
+            Attr valuesCompHosp = scenarioDocument.createAttribute("values");
+            valuesCompHosp.setNodeValue("none,delayed,immediate");
+
+            decisionCompHosp.setAttributeNode(nameCompHosp);
+            decisionCompHosp.setAttributeNode(dependsCompHosp);
+            decisionCompHosp.setAttributeNode(valuesCompHosp);
+            decisionCompHosp.setTextContent("none");
+            decisionsComp.appendChild(decisionCompHosp);
+
+            Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompTest = scenarioDocument.createAttribute("name");
+            nameCompTest.setNodeValue("test");
+            Attr dependsCompTest = scenarioDocument.createAttribute("depends");
+            dependsCompTest.setNodeValue("");
+            Attr valuesCompTest = scenarioDocument.createAttribute("values");
+            valuesCompTest.setNodeValue("none,microscopy,RDT");
+
+            decisionCompTest.setAttributeNode(nameCompTest);
+            decisionCompTest.setAttributeNode(dependsCompTest);
+            decisionCompTest.setAttributeNode(valuesCompTest);
+            decisionCompTest.setTextContent("none");
+            decisionsComp.appendChild(decisionCompTest);
+
+            complicated.appendChild(decisionsComp);
+
+            Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
+            Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatComp = scenarioDocument.createAttribute("name");
+            nameTreatComp.setNodeValue("effective_treat");
+            treatmentComp.setAttributeNode(nameTreatComp);
+
+            Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
+            Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+
+            Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+            drugComp.setNodeValue("effective");
+            Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+            mgComp.setNodeValue("1");
+            Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+            hourComp.setNodeValue("0");
+
+            medicateComp.setAttributeNode(drugComp);
+            medicateComp.setAttributeNode(mgComp);
+            medicateComp.setAttributeNode(hourComp);
+
+            scheduleComp.appendChild(medicateComp);
+            treatmentComp.appendChild(scheduleComp);
+            treatmentsComp.appendChild(treatmentComp);
+
+            Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+            nameTreatCompNone.setNodeValue("none");
+            treatmentCompNone.setAttributeNode(nameTreatCompNone);
+
+            Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+            treatmentCompNone.appendChild(scheduleCompNone);
+            treatmentsComp.appendChild(treatmentCompNone);
+            complicated.appendChild(treatmentsComp);
+
+            eventScheduler.appendChild(complicated);
+
+            Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
+            Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+            maxUCSeekingMemory.setTextContent("3");
+            Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+            uncomplicatedCaseDuration.setTextContent("3");
+            Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+            complicatedCaseDuration.setTextContent("5");
+            Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+            complicatedRiskDuration.setTextContent("5");
+            Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+            pImmediateUC.setTextContent("1");
+            Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            propDeathsFirstDay.setTextContent("0.4");
+
+            clinicalOutcomes.appendChild(maxUCSeekingMemory);
+            clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
+            clinicalOutcomes.appendChild(complicatedCaseDuration);
+            clinicalOutcomes.appendChild(complicatedRiskDuration);
+            clinicalOutcomes.appendChild(pImmediateUC);
+            clinicalOutcomes.appendChild(propDeathsFirstDay);
+
+            eventScheduler.appendChild(clinicalOutcomes);
+
+
+            Element CFR = (Element)healthSystem.getElementsByTagName("CFR").item(0);
+            if(CFR!=null)
+                healthSystem.insertBefore(eventScheduler, CFR);
+            else
+                healthSystem.appendChild(eventScheduler);
+        }
+        else if(valueString.equals("Ironmal"))
+        {
+            Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+            healthSystem.removeChild(immediateOutcomes);
+
+            Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
+            Element decisions = (Element)scenarioDocument.createElement("decisions");
+
+            Element decisionOC = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameOC = scenarioDocument.createAttribute("name");
+            nameOC.setNodeValue("official_care");
+            Attr dependsOC = scenarioDocument.createAttribute("depends");
+            dependsOC.setNodeValue("p");
+            Attr valuesOC = scenarioDocument.createAttribute("values");
+            valuesOC.setNodeValue("yes,no");
+
+            decisionOC.setAttributeNode(nameOC);
+            decisionOC.setAttributeNode(dependsOC);
+            decisionOC.setAttributeNode(valuesOC);
+            decisionOC.setTextContent("p(.64): yes p(.36): no");
+            decisions.appendChild(decisionOC);
+
+            Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameTreat = scenarioDocument.createAttribute("name");
+            nameTreat.setNodeValue("treatment");
+            Attr dependsTreat = scenarioDocument.createAttribute("depends");
+            dependsTreat.setNodeValue("official_care,p");
+            Attr valuesTreat = scenarioDocument.createAttribute("values");
+            valuesTreat.setNodeValue("effective_treat,none");
+
+            decisionTreat.setAttributeNode(nameTreat);
+            decisionTreat.setAttributeNode(dependsTreat);
+            decisionTreat.setAttributeNode(valuesTreat);
+            decisionTreat.setTextContent("official_care(yes){p(.6): effective_treat p(.4): none} official_care(no): none");
+            decisions.appendChild(decisionTreat);
+
+            Element decisionTest = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameTest = scenarioDocument.createAttribute("name");
+            nameTest.setNodeValue("test");
+            Attr dependsTest = scenarioDocument.createAttribute("depends");
+            dependsTest.setNodeValue("");
+            Attr valuesTest = scenarioDocument.createAttribute("values");
+            valuesTest.setNodeValue("none,microscopy,RDT");
+
+            decisionTest.setAttributeNode(nameTest);
+            decisionTest.setAttributeNode(dependsTest);
+            decisionTest.setAttributeNode(valuesTest);
+            decisionTest.setTextContent("none");
+            decisions.appendChild(decisionTest);
+
+            uncomplicated.appendChild(decisions);
+
+            Element treatments = (Element)scenarioDocument.createElement("treatments");
+            Element treatment = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatEl = scenarioDocument.createAttribute("name");
+            nameTreatEl.setNodeValue("effective_treat");
+            treatment.setAttributeNode(nameTreatEl);
+
+            Element schedule = (Element)scenarioDocument.createElement("schedule");
+            Element medicate = (Element)scenarioDocument.createElement("medicate");
+
+            Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+            drug.setNodeValue("effective");
+            Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+            mg.setNodeValue("1");
+            Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+            hour.setNodeValue("0");
+
+            medicate.setAttributeNode(drug);
+            medicate.setAttributeNode(mg);
+            medicate.setAttributeNode(hour);
+
+            schedule.appendChild(medicate);
+            treatment.appendChild(schedule);
+            treatments.appendChild(treatment);
+
+            Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+            nameTreatNone.setNodeValue("none");
+            treatmentNone.setAttributeNode(nameTreatNone);
+
+            Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+            treatmentNone.appendChild(scheduleNone);
+            treatments.appendChild(treatmentNone);
+            uncomplicated.appendChild(treatments);
+
+            eventScheduler.appendChild(uncomplicated);
+
+            Element complicated = (Element)scenarioDocument.createElement("complicated");
+            Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+
+            Element decisionOCComp = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameOCComp = scenarioDocument.createAttribute("name");
+            nameOCComp.setNodeValue("official_care");
+            Attr dependsOCComp = scenarioDocument.createAttribute("depends");
+            dependsOCComp.setNodeValue("p");
+            Attr valuesOCComp = scenarioDocument.createAttribute("values");
+            valuesOCComp.setNodeValue("yes,no");
+
+            decisionOCComp.setAttributeNode(nameOCComp);
+            decisionOCComp.setAttributeNode(dependsOCComp);
+            decisionOCComp.setAttributeNode(valuesOCComp);
+            decisionOCComp.setTextContent("p(.48): yes p(.52): no");
+            decisionsComp.appendChild(decisionOCComp);
+
+            Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompTreat = scenarioDocument.createAttribute("name");
+            nameCompTreat.setNodeValue("treatment");
+            Attr dependsCompTreat = scenarioDocument.createAttribute("depends");
+            dependsCompTreat.setNodeValue("official_care,p");
+            Attr valuesCompTreat = scenarioDocument.createAttribute("values");
+            valuesCompTreat.setNodeValue("effective_treat,none");
+
+            decisionCompTreat.setAttributeNode(nameCompTreat);
+            decisionCompTreat.setAttributeNode(dependsCompTreat);
+            decisionCompTreat.setAttributeNode(valuesCompTreat);
+            decisionCompTreat.setTextContent("official_care(yes){p(.6): effective_treat p(.4): none} official_care(no): none");
+            decisionsComp.appendChild(decisionCompTreat);
+
+            Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompHosp = scenarioDocument.createAttribute("name");
+            nameCompHosp.setNodeValue("hospitalisation");
+            Attr dependsCompHosp = scenarioDocument.createAttribute("depends");
+            dependsCompHosp.setNodeValue("official_care");
+            Attr valuesCompHosp = scenarioDocument.createAttribute("values");
+            valuesCompHosp.setNodeValue("none,delayed,immediate");
+
+            decisionCompHosp.setAttributeNode(nameCompHosp);
+            decisionCompHosp.setAttributeNode(dependsCompHosp);
+            decisionCompHosp.setAttributeNode(valuesCompHosp);
+            decisionCompHosp.setTextContent("official_care(yes): immediate official_care(no): none");
+            decisionsComp.appendChild(decisionCompHosp);
+
+            Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+
+            Attr nameCompTest = scenarioDocument.createAttribute("name");
+            nameCompTest.setNodeValue("test");
+            Attr dependsCompTest = scenarioDocument.createAttribute("depends");
+            dependsCompTest.setNodeValue("");
+            Attr valuesCompTest = scenarioDocument.createAttribute("values");
+            valuesCompTest.setNodeValue("none,microscopy,RDT");
+
+            decisionCompTest.setAttributeNode(nameCompTest);
+            decisionCompTest.setAttributeNode(dependsCompTest);
+            decisionCompTest.setAttributeNode(valuesCompTest);
+            decisionCompTest.setTextContent("none");
+            decisionsComp.appendChild(decisionCompTest);
+
+            complicated.appendChild(decisionsComp);
+
+            Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
+            Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatComp = scenarioDocument.createAttribute("name");
+            nameTreatComp.setNodeValue("effective_treat");
+            treatmentComp.setAttributeNode(nameTreatComp);
+
+            Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
+            Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+
+            Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+            drugComp.setNodeValue("effective");
+            Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+            mgComp.setNodeValue("1");
+            Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+            hourComp.setNodeValue("0");
+
+            medicateComp.setAttributeNode(drugComp);
+            medicateComp.setAttributeNode(mgComp);
+            medicateComp.setAttributeNode(hourComp);
+
+            scheduleComp.appendChild(medicateComp);
+            treatmentComp.appendChild(scheduleComp);
+            treatmentsComp.appendChild(treatmentComp);
+
+            Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
+            Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+            nameTreatCompNone.setNodeValue("none");
+            treatmentCompNone.setAttributeNode(nameTreatCompNone);
+
+            Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+            treatmentCompNone.appendChild(scheduleCompNone);
+            treatmentsComp.appendChild(treatmentCompNone);
+            complicated.appendChild(treatmentsComp);
+
+            eventScheduler.appendChild(complicated);
+
+            Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
+            Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+            maxUCSeekingMemory.setTextContent("3");
+            Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+            uncomplicatedCaseDuration.setTextContent("3");
+            Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+            complicatedCaseDuration.setTextContent("5");
+            Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+            complicatedRiskDuration.setTextContent("5");
+            Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+            pImmediateUC.setTextContent("1");
+            Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            propDeathsFirstDay.setTextContent("0.4");
+
+            clinicalOutcomes.appendChild(maxUCSeekingMemory);
+            clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
+            clinicalOutcomes.appendChild(complicatedCaseDuration);
+            clinicalOutcomes.appendChild(complicatedRiskDuration);
+            clinicalOutcomes.appendChild(pImmediateUC);
+            clinicalOutcomes.appendChild(propDeathsFirstDay);
+
+            eventScheduler.appendChild(clinicalOutcomes);
+
+
+            Element CFR = (Element)healthSystem.getElementsByTagName("CFR").item(0);
+            if(CFR!=null)
+                healthSystem.insertBefore(eventScheduler, CFR);
+            else
+                healthSystem.appendChild(eventScheduler);
+        }
+        else return false;
+
+    	return true;
     }
     
     private void setMosqsNewAttributes(int mosqType, Element mosq,
@@ -999,6 +1701,9 @@ public class SchemaTranslator {
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--required_version")) {
                 _required_version = Integer.parseInt(args[++i]);
+            } else if (args[i].equals("--oneDayTimesteps")) {
+            	doODTTranslation = true;
+                doValidation = false;
             } else if (args[i].equals("--no-validation")) {
                 doValidation = false;
             } else if (args[i].equals("--no-translation")) {
