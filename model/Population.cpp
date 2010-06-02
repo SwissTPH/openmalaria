@@ -296,6 +296,9 @@ void Population::implementIntervention (int time)
     if(interv->getImportedInfectionsPerThousandHosts().present()){
     	importedInfections(interv->getImportedInfectionsPerThousandHosts().get());
     }
+    if (interv->getUninfectVectors().present()){
+	_transmissionModel->uninfectVectors();
+    }
 }
 
 void Population::importedInfections(double importedInfectionsPerThousandHosts)

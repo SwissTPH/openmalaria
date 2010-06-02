@@ -466,8 +466,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     
     partialEIR += S_v[t] * P_Ai_base;
     
-    timestep_N_v += N_v[t];
     timestep_N_v0 += mosqEmergeRate[dYear];
+    timestep_N_v += N_v[t];
     timestep_O_v += O_v[t];
     timestep_S_v += S_v[t];
   }
@@ -478,6 +478,11 @@ void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt
   cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
   larvicidingEndStep = Global::simulationTime + (elt.getDuration() / Global::interval);
+}
+void VectorAnopheles::uninfectVectors(){
+    O_v.assign( O_v.size(), 0.0 );
+    S_v.assign( S_v.size(), 0.0 );
+    P_dif.assign( P_dif.size(), 0.0 );
 }
 
 void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) {

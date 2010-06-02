@@ -158,6 +158,10 @@ public:
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);
   
+  /** Remove all current infections to mosquitoes, such that without re-
+   * infection, humans will then be exposed to zero EIR. */
+  virtual void uninfectVectors() =0;
+  
 protected:
   /** Calculates the EIR (in adults), during the main simulation phase.
    * 
@@ -200,6 +204,8 @@ protected:
    * It is calculated as the average infectiousness per human.
    * 
    * Checkpointed. */
+  //TODO: kappa should be moved to NonVectorTransmission class. Reporting should
+  // be model specific (isn't currently correct for VectorTransmission).
   vector<double> kappa;
   
 private:

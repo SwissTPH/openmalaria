@@ -82,7 +82,7 @@ namespace Params {
     MUELLER_DENSITY_EXPONENT = 32,
     //@}
     /// v in "Case Fatality Rate proposal" TODO: reference
-    CFR_PAR_REDUCTION_SCALAR = 33,
+    CFR_SCALE_FACTOR = 33,
     
     // Parameters fitting for Molineaux within host model
     MEAN_LOCAL_MAX_DENSITY = 34,

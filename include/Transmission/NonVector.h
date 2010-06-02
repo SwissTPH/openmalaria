@@ -51,6 +51,8 @@ public:
   
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
+  virtual void uninfectVectors();
+  
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
    * 

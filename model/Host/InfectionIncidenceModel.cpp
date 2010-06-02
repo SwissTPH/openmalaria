@@ -189,6 +189,9 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   
   if (expectedNumInfections > 0.0000001)
     return random::poisson(expectedNumInfections);
+  else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
+      // bad Params::BASELINE_AVAILABILITY_SHAPE ?
+      throw runtime_error( "numNewInfections: NaN");
   else
     return 0;
 }

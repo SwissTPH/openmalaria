@@ -79,7 +79,7 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     for( map<double,double>::const_iterator it = cfr.begin(); it != cfr.end(); ++it ){
 	pDeathInitial[it->first] = alpha * it->second;
     }
-    neg_v = - InputData.getParameter( Params::CFR_PAR_REDUCTION_SCALAR );
+    neg_v = - InputData.getParameter( Params::CFR_SCALE_FACTOR );
 }
 
 void ClinicalEventScheduler::cleanup () {

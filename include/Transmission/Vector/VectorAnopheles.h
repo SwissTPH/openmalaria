@@ -142,6 +142,8 @@ public:
   
   void intervLarviciding (const scnXml::LarvicidingAnopheles&);
   
+  void uninfectVectors();
+
   inline double getLastN_v0 (){
       return timestep_N_v0;
   }

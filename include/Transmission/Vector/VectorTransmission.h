@@ -66,6 +66,7 @@ public:
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData); 
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
+  virtual void uninfectVectors();
   
   virtual void summarize (Monitoring::Survey& survey);
   

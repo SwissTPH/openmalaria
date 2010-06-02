@@ -121,6 +121,12 @@ void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) 
     setTransientEIR (ed);
 }
 
+void NonVectorTransmission::uninfectVectors(){
+    if( simulationMode != dynamicEIR )
+	cerr <<"Warning: uninfectVectors is not effectaceous with changeEIR"<<endl;
+    kappa.assign( kappa.size(), 0.0 );	// reset history of human infectivity, which scales dynamic EIR
+}
+
 
 double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, const AgeGroupData ageGroupData){
   // where the full model, with estimates of human mosquito transmission is in use, use this:

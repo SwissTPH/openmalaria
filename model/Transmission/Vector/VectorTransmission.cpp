@@ -172,6 +172,10 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
   for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
     species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
 }
+void VectorTransmission::uninfectVectors(){
+  for (size_t i = 0; i < numSpecies; ++i)
+    species[i].uninfectVectors();
+}
 
 void VectorTransmission::summarize (Monitoring::Survey& survey) {
     TransmissionModel::summarize (survey);

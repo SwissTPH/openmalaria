@@ -903,6 +903,22 @@
           <xs:appinfo>units:List of elements;name:Immune suppression deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="uninfectVectors">
+        <xs:annotation>
+          <xs:documentation>
+            Removes all infections from mosquitoes -- resulting in zero EIR to
+            humans, until such time that mosquitoes are re-infected and become
+            infectious. Only effectious in dynamic EIR mode (when changeEIR was
+            not used).
+            
+            Hypothetical, but potentially useful to simulate a setting starting
+            from no infections, but with enough mosquitoes to reach a set
+            equilibrium of exposure.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Uninfect vectors;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType/>
+      </xs:element>
       <xs:element minOccurs="0" name="larviciding">
         <xs:annotation>
           <xs:documentation>
