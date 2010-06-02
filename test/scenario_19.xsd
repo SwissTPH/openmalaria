@@ -903,6 +903,20 @@
           <xs:appinfo>units:List of elements;name:Immune suppression deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element minOccurs="0" name="insertR_0Case">
+        <xs:annotation>
+          <xs:documentation>
+            Used to simulate R_0. First, infections should be eliminated,
+            immunity removed, and the population given an effective transmission-
+            blocking vaccine (not done by this intervention). Then this
+            intervention may be used to: pick one human, infect him, and remove
+            transmission-blocking vaccine effect on this human. Thus only this
+            one human will be a source of infections in an unprotected population.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Insert R_0 case;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType/>
+      </xs:element>
       <xs:element minOccurs="0" name="uninfectVectors">
         <xs:annotation>
           <xs:documentation>

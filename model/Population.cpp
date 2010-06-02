@@ -292,8 +292,20 @@ void Population::implementIntervention (int time)
     if (interv->getLarviciding().present()) {
         _transmissionModel->intervLarviciding (interv->getLarviciding().get());
     }
-
-    if(interv->getImportedInfectionsPerThousandHosts().present()){
+    
+    if (interv->getInsertR_0Case().present()){
+	int i = std::floor (random::uniform_01() * populationSize);	// pick a human
+	HumanIter it = population.begin();
+	while (i > 0){	// find human (can't use population[i])
+	    ++it;
+	    --i;
+	}
+	assert( i == 0 );
+	assert( it != population.end() );
+	it->removeTBV();
+	it->addInfection();
+    }
+    if (interv->getImportedInfectionsPerThousandHosts().present()){
     	importedInfections(interv->getImportedInfectionsPerThousandHosts().get());
     }
     if (interv->getUninfectVectors().present()){

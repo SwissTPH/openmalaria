@@ -123,6 +123,11 @@ public:
   
   /// Infect the human (with an imported infection).
   void addInfection();
+  
+  /// Remove Transmission Blocking Vaccine from human
+  inline void removeTBV() {
+      _TBVEfficacy = 0.0;
+  }
   //@}
   
   /// @brief Small functions

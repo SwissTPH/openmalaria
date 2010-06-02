@@ -41,8 +41,11 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
+      <option name="totalInfs" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
+      <surveyTime>73</surveyTime>
+      <surveyTime>146</surveyTime>
       <surveyTime>730</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
@@ -77,24 +80,28 @@
         <uninfectVectors/><!-- clear past & current mosquito infections -->
       </intervention>
       <intervention time="74">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <uninfectVectors/>
       </intervention>
       <intervention time="75">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <uninfectVectors/>
       </intervention>
       <intervention time="76">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <uninfectVectors/>
       </intervention>
       <intervention time="77">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <uninfectVectors/>
       </intervention>
       <intervention time="78">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <immuneSuppression coverage="1"/>
+        <uninfectVectors/>
+      </intervention>
+      <intervention time="146">
+        <insertR_0Case/>
       </intervention>
     </timed>
   </interventions>
