@@ -4,8 +4,12 @@ import sys
 import string
 import math
 import unittest
+from optparse import OptionParser
 
 totalRelDiff = 0.0
+
+REL_PRECISION=1e-6
+ABS_PRECISION=1e-6
 
 # Could use math.isinf, but it's not present in python 2.5
 def isinf (a):
@@ -22,9 +26,9 @@ def isinf (a):
 # when it should also allow for large values being rounded to zero.
 # Possibly considering the case where a or b is zero explicitly would help, but
 # might lead to confusing outcomes.
-def approx_equal (a,b, relPrecision, absPrecision):
+def approx_equal (a,b, relPrecision=1e-6, absPrecision=1e-6):
     if isinf(a) or isinf(b):
-        relDiff = 1e1000-1e1000
+        relDiff = 1e1000-1e1000 # NaN
     else:
         tolerance = relPrecision * max(math.fabs(a),math.fabs(b))
         tolerance = max(tolerance, absPrecision)
@@ -132,7 +136,12 @@ the maximum number of differences to print directly (note: order is not intuitiv
 Returns a tuple ret,ident; ret is 0 if test passes (output considered near-enough equal),
 ident is 1 if files are binary-equal."""
     ret=0
-    print "compareOutputsFloat.py "+fn1+" "+fn2+" "+str(maxDiffsToPrint)
+    opt=""
+    if REL_PRECISION!=1e-6:
+        opt+=" --rel-prescision="+str(REL_PRECISION)
+    if ABS_PRECISION!=1e-6:
+        opt+=" --abs-prescision="+str(ABS_PRECISION)
+    print "compareOutputsFloat.py"+opt+" "+fn1+" "+fn2+" "+str(maxDiffsToPrint)
     
     # Read both files and combine into a map of key to pairs (v1, v2)
     try:
@@ -177,7 +186,7 @@ ident is 1 if files are binary-equal."""
             perMeasureTotal[k.measure] = perMeasureTotal.get(k.measure, 0.0) + v1
             
             # Compare with relative precision
-            if approx_equal_6 (v1, v2):
+            if approx_equal (v1, v2, REL_PRECISION, ABS_PRECISION):
                 continue
             
             numDiffs += 1
@@ -217,13 +226,36 @@ ident is 1 if files are binary-equal."""
         print str(numDiffs)+" significant differences (total relative diff: "+str(totalRelDiff/1.e6)+ ")!"
         return 1,False
 
+# Test for options
+def evalOptions (args):
+    parser = OptionParser(usage="Usage: %prog [options] logfile1 logfile2 [max different lines to print]",
+            description="""Scenarios to be run must be of the form scenarioXX.xml; if any are passed on the command line, XX is substituted for each given; if not then all files of the form scenario*.xml are run as test scenarios.
+You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
+    
+    parser.add_option("-R","--rel-precision",
+            action="store", dest="rel_precision", type="float",
+            help="Set relative precision (default: 1.0e-6)")
+    parser.add_option("-A","--abs-precision",
+            action="store", dest="abs_precision", type="float",
+            help="Set absolute precision (default: 1.0e-6)")
+    (options, others) = parser.parse_args(args=args)
+    
+    return options,others
+
 if __name__ == '__main__':
     #uncomment to run unittests:
     #unittest.main()
-    if (len(sys.argv) == 4):
-        ret,ident = main (sys.argv[1],sys.argv[2],int(sys.argv[3]))
-    elif (len(sys.argv) == 3):
-        ret,ident = main (sys.argv[1],sys.argv[2])
+    
+    (options,others) = evalOptions (sys.argv[1:])
+    if options.rel_precision:
+        REL_PRECISION=options.rel_precision
+    if options.abs_precision:
+        ABS_PRECISION=options.abs_precision
+    
+    if (len(others) == 3):
+        ret,ident = main (others[0],others[1],int(others[2]))
+    elif (len(others) == 2):
+        ret,ident = main (others[0],others[1])
     else:
         print "Usage: "+sys.argv[0]+" logfile1 logfile2 [max different lines to print]"
         ret=-1
