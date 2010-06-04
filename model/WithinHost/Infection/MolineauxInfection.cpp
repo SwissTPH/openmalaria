@@ -70,7 +70,7 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
 void MolineauxInfection::initParameters(){
 
 	if (Global::interval != 1)
-		throw util::xml_scenario_error ("MolineauxInfection only supports using an interval of 1");
+		throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
 
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
@@ -209,11 +209,10 @@ double MolineauxInfection::getVariantTranscendingSummation(){
 	for (int tau=1; tau<taus; tau++)
 		laggedPc[4-tau] = laggedPc[3-tau];
 
-	double Pchat;
 	if(_density < C)
-		Pchat = _density;
+		laggedPc[0] = _density;
 	else
-		laggedPc[0] = Pchat;
+		laggedPc[0] =C;
 
 	return variantTranscendingSummation;
 }
