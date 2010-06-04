@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="19" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -72,7 +72,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="No intervention"/>
-  
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
@@ -80,7 +79,7 @@
           This is not intended to be at all realistic, but just to test what the model can do.
           It might eliminate malaria, but might kill patients with drug-overdoses too! -->
         <decisions>
-          <decision name="test" depends="case,p" values="none,microscopy,RDT">
+          <decision depends="case,p" name="test" values="none,microscopy,RDT">
             case(UC1){
               p(.3): none
               p(.4): microscopy
@@ -92,15 +91,15 @@
               p(.5): RDT
             }
           </decision>
-          <decision name="age5" depends="age" values="under5,over5">
+          <decision depends="age" name="age5" values="under5,over5">
             age(0-5): under5
             age(5-inf): over5
          </decision>
-          <decision name="treatment" depends="age5" values="MF_treat">
+          <decision depends="age5" name="treatment" values="MF_treat">
             age5(under5): MF_treat
             age5(over5): MF_treat
           </decision>
-          <decision name="doseSize" depends="treatment,age5,result" values="0,1,10,100">
+          <decision depends="treatment,age5,result" name="doseSize" values="0,1,10,100">
             treatment(MF_treat){
               age5(under5){
                 result(none): 100
@@ -114,16 +113,16 @@
               }
             }
           </decision>
-          <decision name="quality" depends="test" values="full,half">
+          <decision depends="test" name="quality" values="full,half">
             test(none): half
             test(microscopy): full
             test(RDT): full
           </decision>
-          <decision name="adherence" depends="p" values="full,missFirstDose">
+          <decision depends="p" name="adherence" values="full,missFirstDose">
             p(.7): full
             p(.3): missFirstDose
           </decision>
-          <decision name="delay" depends="p" values="0,1,2">
+          <decision depends="p" name="delay" values="0,1,2">
             p(.6): 0
             p(.3): 1
             p(.1): 2
@@ -132,40 +131,40 @@
         <treatments>
           <treatment name="MF_treat">
             <schedule>
-              <medicate drug="MF" mg="3000" hour="0"/>
-              <medicate drug="MF" mg="3000" hour="12"/>
+              <medicate drug="MF" hour="0" mg="3000"/>
+              <medicate drug="MF" hour="12" mg="3000"/>
             </schedule>
             <modifier decision="quality">
-              <multiplyQty value="half" effect="MF(0.5)" />
-              <multiplyQty value="full" effect="MF(1.0)" />
+              <multiplyQty effect="MF(0.5)" value="half"/>
+              <multiplyQty effect="MF(1.0)" value="full"/>
             </modifier>
             <modifier decision="doseSize">
-              <multiplyQty value="0" effect="MF(0)" />
-              <multiplyQty value="1" effect="MF(1.0)" />
-              <multiplyQty value="10" effect="MF(10)" />
-              <multiplyQty value="100" effect="MF(100)" />
+              <multiplyQty effect="MF(0)" value="0"/>
+              <multiplyQty effect="MF(1.0)" value="1"/>
+              <multiplyQty effect="MF(10)" value="10"/>
+              <multiplyQty effect="MF(100)" value="100"/>
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="MF(0-13)" affectsCost="false"/>
-              <selectTimeRange value="missFirstDose" effect="MF(1-13)" affectsCost="false"/>
+              <selectTimeRange affectsCost="false" effect="MF(0-13)" value="full"/>
+              <selectTimeRange affectsCost="false" effect="MF(1-13)" value="missFirstDose"/>
             </modifier>
             <modifier decision="delay">
-              <delay value="0" effect="MF(0)"/>
-              <delay value="1" effect="MF(24)"/>
-              <delay value="2" effect="MF(48)"/>
+              <delay effect="MF(0)" value="0"/>
+              <delay effect="MF(24)" value="1"/>
+              <delay effect="MF(48)" value="2"/>
             </modifier>
           </treatment>
         </treatments>
       </uncomplicated>
       <complicated>
         <decisions>
-          <decision name="treatment" depends="" values="MF_sev">
+          <decision depends="" name="treatment" values="MF_sev">
             MF_sev
           </decision>
-          <decision name="hospitalisation" depends="" values="none,delayed,immediate">
+          <decision depends="" name="hospitalisation" values="none,delayed,immediate">
             immediate
           </decision>
-          <decision name="test" depends="p" values="none,microscopy,RDT">
+          <decision depends="p" name="test" values="none,microscopy,RDT">
             p(.2): none
             p(.8): RDT
           </decision>
@@ -174,7 +173,7 @@
           <treatment name="MF_sev">
             <schedule>
               <!-- made-up, BIG dose (we're not modelling overdoses yet) -->
-              <medicate drug="MF" mg="300000" hour="0"/>
+              <medicate drug="MF" hour="0" mg="300000"/>
             </schedule>
           </treatment>
         </treatments>
@@ -185,8 +184,6 @@
         <complicatedCaseDuration>6</complicatedCaseDuration>
         <complicatedRiskDuration>6</complicatedRiskDuration>
         <pImmediateUC>.8</pImmediateUC>
-        <propDeathsFirstDay>0.4</propDeathsFirstDay>
-        <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
@@ -1076,47 +1073,46 @@
       </PK>
     </drug>
   </drugDescription>
-  
-<model>
-  <ModelOptions>
-    <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
-    <option name="INCLUDES_PK_PD" value="true"/>
-    <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-  </ModelOptions>
-  <clinical healthSystemMemory="28"/>
-  <parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
-    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
-    <parameter include="false" name="Estar" number="2" value="0.03247"/>
-    <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
-    <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
-    <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-    <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-    <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
-    <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
-    <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
-    <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
-    <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
-    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
-    <parameter include="false" name="alpha" number="14" value="142601.91252"/>
-    <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
-    <parameter include="false" name="No Use 1" number="16" value="1"/>
-    <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
-    <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
-    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
-    <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
-    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
-    <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
-    <parameter include="false" name="Immune effector decay" number="23" value="0"/>
-    <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
-    <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
-    <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
-    <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
-    <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
-    <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
-    <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
-    <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
-  </parameters>
-</model>
+  <model>
+    <ModelOptions>
+      <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
+      <option name="INCLUDES_PK_PD" value="true"/>
+      <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="28"/>
+    <parameters interval="1" iseed="1" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
+      <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="No Use 1" number="16" value="1"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+      <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
+      <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
+    </parameters>
+  </model>
 </scenario>

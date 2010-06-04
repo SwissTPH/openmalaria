@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="19" wuID="5630539" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,7 +24,37 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <SurveyOptions><option name="nHost" value="true"/><option name="nInfect" value="true"/><option name="nExpectd" value="true"/><option name="nPatent" value="true"/><option name="sumLogPyrogenThres" value="true"/><option name="sumlogDens" value="true"/><option name="totalInfs" value="true"/><option name="nTransmit" value="true"/><option name="totalPatentInf" value="true"/><option name="contrib" value="true"/><option name="sumPyrogenThresh" value="true"/><option name="nTreatments1" value="true"/><option name="nTreatments2" value="true"/><option name="nTreatments3" value="true"/><option name="nUncomp" value="true"/><option name="nSevere" value="true"/><option name="nSeq" value="true"/><option name="nHospitalDeaths" value="true"/><option name="nIndDeaths" value="true"/><option name="nDirDeaths" value="true"/><option name="nEPIVaccinations" value="true"/><option name="imr_summary" value="true"/><option name="nMassVaccinations" value="true"/><option name="nHospitalRecovs" value="true"/><option name="nHospitalSeqs" value="true"/><option name="nIPTDoses" value="true"/><option name="annAvgK" value="true"/><option name="nNMFever" value="true"/></SurveyOptions><surveys detectionLimit="2.5">
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nInfect" value="true"/>
+      <option name="nExpectd" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="sumLogPyrogenThres" value="true"/>
+      <option name="sumlogDens" value="true"/>
+      <option name="totalInfs" value="true"/>
+      <option name="nTransmit" value="true"/>
+      <option name="totalPatentInf" value="true"/>
+      <option name="contrib" value="true"/>
+      <option name="sumPyrogenThresh" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="nUncomp" value="true"/>
+      <option name="nSevere" value="true"/>
+      <option name="nSeq" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+      <option name="nEPIVaccinations" value="true"/>
+      <option name="imr_summary" value="true"/>
+      <option name="nMassVaccinations" value="true"/>
+      <option name="nHospitalRecovs" value="true"/>
+      <option name="nHospitalSeqs" value="true"/>
+      <option name="nIPTDoses" value="true"/>
+      <option name="annAvgK" value="true"/>
+      <option name="nNMFever" value="true"/>
+    </SurveyOptions>
+    <surveys detectionLimit="2.5">
       <surveyTime>1</surveyTime>
       <surveyTime>4</surveyTime>
       <surveyTime>73</surveyTime>
@@ -58,40 +89,40 @@
   <interventions name="Change to monitoring HS">
     <timed>
       <intervention time="0">
-        
-      <changeHS><ImmediateOutcomes name="Test HS">
-          <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
-          <initialACR>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </initialACR>
-          <compliance>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </compliance>
-          <nonCompliersEffective>
-            <CQ value="1"/>
-            <AQ value="1"/>
-            <ACT value="1"/>
-            <QN value="1"/>
-            <selfTreatment value="1"/>
-          </nonCompliersEffective>
-          <pSeekOfficialCareUncomplicated1 value="1"/>
-          <pSelfTreatUncomplicated value="0"/>
-          <pSeekOfficialCareUncomplicated2 value="1"/>
-          <pSeekOfficialCareSevere value="1"/>
-          <pSequelaeInpatient>
-            <item maxAgeYrs="5" value="0.0132"/>
-            <item maxAgeYrs="99" value="0.005"/>
-          </pSequelaeInpatient>
-          
-        </ImmediateOutcomes><CFR>
+        <changeHS>
+          <ImmediateOutcomes name="Test HS">
+            <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
+            <initialACR>
+              <CQ value="1"/>
+              <AQ value="1"/>
+              <ACT value="1"/>
+              <QN value="1"/>
+              <selfTreatment value="1"/>
+            </initialACR>
+            <compliance>
+              <CQ value="1"/>
+              <AQ value="1"/>
+              <ACT value="1"/>
+              <QN value="1"/>
+              <selfTreatment value="1"/>
+            </compliance>
+            <nonCompliersEffective>
+              <CQ value="1"/>
+              <AQ value="1"/>
+              <ACT value="1"/>
+              <QN value="1"/>
+              <selfTreatment value="1"/>
+            </nonCompliersEffective>
+            <pSeekOfficialCareUncomplicated1 value="1"/>
+            <pSelfTreatUncomplicated value="0"/>
+            <pSeekOfficialCareUncomplicated2 value="1"/>
+            <pSeekOfficialCareSevere value="1"/>
+            <pSequelaeInpatient>
+              <item maxAgeYrs="5" value="0.0132"/>
+              <item maxAgeYrs="99" value="0.005"/>
+            </pSequelaeInpatient>
+          </ImmediateOutcomes>
+          <CFR>
             <group cfr="0.09189" lowerbound="0"/>
             <group cfr="0.0810811" lowerbound="0.25"/>
             <group cfr="0.0648649" lowerbound="0.75"/>
@@ -102,48 +133,52 @@
             <group cfr="0.0945946" lowerbound="7.5"/>
             <group cfr="0.1243243" lowerbound="12.5"/>
             <group cfr="0.1378378" lowerbound="15"/>
-          </CFR></changeHS></intervention>
+          </CFR>
+        </changeHS>
+      </intervention>
     </timed>
   </interventions>
-  
-  <healthSystem><ImmediateOutcomes name="no Treatment no Mortality">
-    <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
-    <initialACR>
-      <CQ value="0"/>
-      <SP value="0"/>
-      <AQ value="0"/>
-      <ACT value="0"/>
-      <QN value="0"/>
-      <selfTreatment value="0"/>
-    </initialACR>
-    <compliance>
-      <CQ value="0"/>
-      <SP value="0"/>
-      <AQ value="0"/>
-      <ACT value="0"/>
-      <QN value="0"/>
-      <selfTreatment value="0"/>
-    </compliance>
-    <nonCompliersEffective>
-      <CQ value="0"/>
-      <SP value="0"/>
-      <AQ value="0"/>
-      <ACT value="0"/>
-      <QN value="0"/>
-      <selfTreatment value="0"/>
-    </nonCompliersEffective>
-    <pSeekOfficialCareUncomplicated1 value="0"/>
-    <pSelfTreatUncomplicated value="0"/>
-    <pSeekOfficialCareUncomplicated2 value="0"/>
-    <pSeekOfficialCareSevere value="0"/>
-    <pSequelaeInpatient>
-      <item maxAgeYrs="5" value="0.0132"/>
-      <item maxAgeYrs="99" value="0.005"/>
-    </pSequelaeInpatient>
-    
-  </ImmediateOutcomes><CFR>
+  <healthSystem>
+    <ImmediateOutcomes name="no Treatment no Mortality">
+      <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
+      <initialACR>
+        <CQ value="0"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
+      </initialACR>
+      <compliance>
+        <CQ value="0"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
+      </compliance>
+      <nonCompliersEffective>
+        <CQ value="0"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
+      </nonCompliersEffective>
+      <pSeekOfficialCareUncomplicated1 value="0"/>
+      <pSelfTreatUncomplicated value="0"/>
+      <pSeekOfficialCareUncomplicated2 value="0"/>
+      <pSeekOfficialCareSevere value="0"/>
+      <pSequelaeInpatient>
+        <item maxAgeYrs="5" value="0.0132"/>
+        <item maxAgeYrs="99" value="0.005"/>
+      </pSequelaeInpatient>
+    </ImmediateOutcomes>
+    <CFR>
       <group cfr="0" lowerbound="0"/>
-    </CFR></healthSystem><entoData mode="4" name="Test">
+    </CFR>
+  </healthSystem>
+  <entoData mode="4" name="Test">
     <nonVector eipDuration="10">
       <EIRDaily origin="monthly">0.0738</EIRDaily>
       <EIRDaily origin="monthly">0.0738</EIRDaily>
@@ -1000,36 +1035,42 @@
       <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entoData>
-  
-<model><ModelOptions><option name="MAX_DENS_CORRECTION" value="false"/></ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000547945205479452" interval="5" iseed="1" latentp="3">
-    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
-    <parameter include="false" name="Estar" number="2" value="0.03247"/>
-    <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
-    <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
-    <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-    <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-    <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
-    <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
-    <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
-    <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
-    <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
-    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
-    <parameter include="false" name="alpha" number="14" value="142601.91252"/>
-    <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
-    <parameter include="false" name="No Use 1" number="16" value="1"/>
-    <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
-    <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
-    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
-    <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
-    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
-    <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
-    <parameter include="false" name="Immune effector decay" number="23" value="0"/>
-    <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
-    <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
-    <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
-    <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
-    <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
-    <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
-    <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-  </parameters></model></scenario>
+  <model>
+    <ModelOptions>
+      <option name="MAX_DENS_CORRECTION" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <parameters interval="5" iseed="1" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
+      <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="No Use 1" number="16" value="1"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    </parameters>
+  </model>
+</scenario>

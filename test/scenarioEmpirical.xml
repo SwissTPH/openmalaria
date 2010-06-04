@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="19" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -72,13 +72,12 @@
     </ageGroup>
   </monitoring>
   <interventions name="No intervention"/>
-  
   <healthSystem>
     <EventScheduler>
       <!-- Simple partially-realistic (poorly researched) health system description (DH). -->
       <uncomplicated>
         <decisions>
-          <decision name="test" depends="case,p" values="none,microscopy,RDT">
+          <decision depends="case,p" name="test" values="none,microscopy,RDT">
             case(UC1){
               p(.5): none
               p(.3): microscopy
@@ -90,7 +89,7 @@
               p(.3): RDT
             }
           </decision>
-          <decision name="treatment" depends="result,p" values="MQ_treat,no_treat">
+          <decision depends="result,p" name="treatment" values="MQ_treat,no_treat">
             result(positive){
               p(.9): MQ_treat
               p(.1): no_treat
@@ -101,7 +100,7 @@
               p(.5): no_treat
             }
           </decision>
-          <decision name="bodyMass" depends="age" values="5,20,60">
+          <decision depends="age" name="bodyMass" values="5,20,60">
             age(0-2): 5
             age(2-6): 20
             age(6-inf): 60
@@ -110,12 +109,12 @@
         <treatments>
           <treatment name="MQ_treat">
             <schedule>
-              <medicate drug="MQ" mg="20" hour="0"/>
+              <medicate drug="MQ" hour="0" mg="20"/>
             </schedule>
             <modifier decision="bodyMass">
-              <multiplyQty value="5" effect="MQ(5)" />
-              <multiplyQty value="20" effect="MQ(20)" />
-              <multiplyQty value="60" effect="MQ(60)" />
+              <multiplyQty effect="MQ(5)" value="5"/>
+              <multiplyQty effect="MQ(20)" value="20"/>
+              <multiplyQty effect="MQ(60)" value="60"/>
             </modifier>
           </treatment>
           <treatment name="no_treat">
@@ -125,7 +124,7 @@
       </uncomplicated>
       <complicated>
         <decisions>
-          <decision name="treatment" depends="result,p" values="AS_sev,none">
+          <decision depends="result,p" name="treatment" values="AS_sev,none">
             result(positive) {
               p(.9): AS_sev
               p(.1): none
@@ -133,15 +132,15 @@
             result(negative): none
             result(none): none
           </decision>
-          <decision name="hospitalisation" depends="" values="none,delayed,immediate">
+          <decision depends="" name="hospitalisation" values="none,delayed,immediate">
             immediate
           </decision>
-          <decision name="test" depends="p" values="none,microscopy,RDT">
+          <decision depends="p" name="test" values="none,microscopy,RDT">
             p(.3): none
             p(.5): RDT
             p(.2): microscopy
           </decision>
-          <decision name="bodyMass" depends="age" values="5,20,60">
+          <decision depends="age" name="bodyMass" values="5,20,60">
             age(0-2): 5
             age(2-6): 20
             age(6-inf): 60
@@ -150,21 +149,21 @@
         <treatments>
           <treatment name="AS_sev">
             <schedule>
-              <medicate drug="AS" mg="2.4" hour="0"/>
-              <medicate drug="AS" mg="2.4" hour="18"/>
-              <medicate drug="AS" mg="2.4" hour="36"/>
-              <medicate drug="AS" mg="2.4" hour="54"/>
+              <medicate drug="AS" hour="0" mg="2.4"/>
+              <medicate drug="AS" hour="18" mg="2.4"/>
+              <medicate drug="AS" hour="36" mg="2.4"/>
+              <medicate drug="AS" hour="54" mg="2.4"/>
             </schedule>
             <modifier decision="bodyMass">
-              <multiplyQty value="5" effect="AS(5)" />
-              <multiplyQty value="20" effect="AS(20)" />
-              <multiplyQty value="60" effect="AS(60)" />
+              <multiplyQty effect="AS(5)" value="5"/>
+              <multiplyQty effect="AS(20)" value="20"/>
+              <multiplyQty effect="AS(60)" value="60"/>
             </modifier>
           </treatment>
           <treatment name="none">
             <schedule/>
           </treatment>
-       </treatments>
+        </treatments>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
@@ -172,8 +171,6 @@
         <complicatedCaseDuration>6</complicatedCaseDuration>
         <complicatedRiskDuration>6</complicatedRiskDuration>
         <pImmediateUC>.8</pImmediateUC>
-        <propDeathsFirstDay>0.4</propDeathsFirstDay>
-        <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
@@ -1047,7 +1044,7 @@
     </nonVector>
   </entoData>
   <drugDescription>
-        <drug abbrev="AR">
+    <drug abbrev="AR">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1062,8 +1059,7 @@
         <vol_dist>17.4</vol_dist>
       </PK>
     </drug>
-
-        <drug abbrev="AS">
+    <drug abbrev="AS">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1078,8 +1074,7 @@
         <vol_dist>2.75</vol_dist>
       </PK>
     </drug>
-
-        <drug abbrev="CQ">
+    <drug abbrev="CQ">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1094,8 +1089,7 @@
         <vol_dist>300</vol_dist>
       </PK>
     </drug>
-
-        <drug abbrev="LR">
+    <drug abbrev="LR">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1110,7 +1104,6 @@
         <vol_dist>21</vol_dist>
       </PK>
     </drug>
-
     <drug abbrev="MQ">
       <PD>
         <allele name="sensitive">
@@ -1126,49 +1119,47 @@
         <vol_dist>20.8</vol_dist>
       </PK>
     </drug>
-        
   </drugDescription>
-  
-<model>
-  <ModelOptions>
-    <option name="EMPIRICAL_WITHIN_HOST_MODEL" value="true"/>
-    <option name="INCLUDES_PK_PD" value="true"/>
-    <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-  </ModelOptions>
-  <clinical healthSystemMemory="28"/>
-  <parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
-    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
-    <parameter include="false" name="Estar" number="2" value="0.03247"/>
-    <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
-    <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
-    <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-    <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-    <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
-    <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
-    <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
-    <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
-    <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
-    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
-    <parameter include="false" name="alpha" number="14" value="142601.91252"/>
-    <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
-    <parameter include="false" name="No Use 1" number="16" value="1"/>
-    <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
-    <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
-    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
-    <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
-    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
-    <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
-    <parameter include="false" name="Immune effector decay" number="23" value="0"/>
-    <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
-    <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
-    <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
-    <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
-    <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
-    <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
-    <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
-    <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
-  </parameters>
-</model>
+  <model>
+    <ModelOptions>
+      <option name="EMPIRICAL_WITHIN_HOST_MODEL" value="true"/>
+      <option name="INCLUDES_PK_PD" value="true"/>
+      <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="28"/>
+    <parameters interval="1" iseed="1" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
+      <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="No Use 1" number="16" value="1"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+      <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
+      <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
+    </parameters>
+  </model>
 </scenario>

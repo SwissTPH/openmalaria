@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="18" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="19" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -68,17 +68,16 @@
     </ageGroup>
   </monitoring>
   <interventions name="No intervention"/>
-  
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
         <!-- An example to show decisions, and how they select and modify a treatment schedule. -->
         <decisions>
-          <decision name="age5" depends="age" values="under5,over5">
+          <decision depends="age" name="age5" values="under5,over5">
             age(0-5): under5
             age(5-inf): over5
          </decision>
-          <decision name="provider" depends="case,p" values="hospital, lower_level_public, private, community_health_worker, informal, none">
+          <decision depends="case,p" name="provider" values="hospital, lower_level_public, private, community_health_worker, informal, none">
             case(UC1){
               p(.1): hospital
               p(.1): lower_level_public
@@ -96,7 +95,7 @@
               p(.1): none
             }
           </decision>
-          <decision name="test" depends="provider,p" values="none,microscopy,RDT">
+          <decision depends="provider,p" name="test" values="none,microscopy,RDT">
             provider(hospital){
               p(.1): none
               p(.4): microscopy
@@ -124,7 +123,7 @@
               none
             }
           </decision>
-           <decision name="treatment" depends="case,provider,result,p" values="AL_treat,ASAQ_treat, SP_treat, CQ_treat, none">
+          <decision depends="case,provider,result,p" name="treatment" values="AL_treat,ASAQ_treat, SP_treat, CQ_treat, none">
              case(UC1){
                provider(hospital){
                 result(none){
@@ -278,7 +277,7 @@
             }
             }
           </decision>
-          <decision name="adherence" depends="treatment,provider,result,p" values="full,missFirstDose,missLastDay">
+          <decision depends="treatment,provider,result,p" name="adherence" values="full,missFirstDose,missLastDay">
             treatment(CQ_treat){
                 provider(hospital){
                   result(none){
@@ -429,7 +428,7 @@
               treatment(SP_treat): full
               treatment(none): full
           </decision>
-          <decision name="quality" depends= "provider,p" values="good, medium, poor">
+          <decision depends="provider,p" name="quality" values="good, medium, poor">
             provider(hospital){
               p(.8): good
               p(.1): medium
@@ -464,92 +463,93 @@
           </treatment>
           <treatment name="AL_treat">
             <schedule>
-              <medicate drug="AR" mg="20" hour="0"/>
-              <medicate drug="LU" mg="120" hour="0"/>  
-              <medicate drug="AR" mg="20" hour="8"/>
-              <medicate drug="LU" mg="120" hour="8"/> 
-              <medicate drug="AR" mg="20" hour="24"/>
-              <medicate drug="LU" mg="120" hour="24"/> 
-              <medicate drug="AR" mg="20" hour="36"/>
-              <medicate drug="LU" mg="120" hour="36"/> 
-              <medicate drug="AR" mg="20" hour="48"/>
-              <medicate drug="LU" mg="120" hour="48"/> 
-              <medicate drug="AR" mg="20" hour="60"/>
-              <medicate drug="LU" mg="120" hour="60"/> 
+              <medicate drug="AR" hour="0" mg="20"/>
+              <medicate drug="LU" hour="0" mg="120"/>
+              <medicate drug="AR" hour="8" mg="20"/>
+              <medicate drug="LU" hour="8" mg="120"/>
+              <medicate drug="AR" hour="24" mg="20"/>
+              <medicate drug="LU" hour="24" mg="120"/>
+              <medicate drug="AR" hour="36" mg="20"/>
+              <medicate drug="LU" hour="36" mg="120"/>
+              <medicate drug="AR" hour="48" mg="20"/>
+              <medicate drug="LU" hour="48" mg="120"/>
+              <medicate drug="AR" hour="60" mg="20"/>
+              <medicate drug="LU" hour="60" mg="120"/>
             </schedule>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="AR(1.0),LU(1.0)" affectsCost="false" />
-              <multiplyQty value="medium" effect="AR(0.6), LU(0.6)" affectsCost="false" />
-              <multiplyQty value="poor" effect="AR(0.3), LU(0.3)" affectsCost="false"/>
+              <multiplyQty affectsCost="false" effect="AR(1.0),LU(1.0)" value="good"/>
+              <multiplyQty affectsCost="false" effect="AR(0.6), LU(0.6)" value="medium"/>
+              <multiplyQty affectsCost="false" effect="AR(0.3), LU(0.3)" value="poor"/>
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="AR(0-61),LU(0-61)" affectsCost="true"/>
-              <selectTimeRange value="missFirstDose" effect="AR(1-61),LU(1-61)" affectsCost="false"/>
-              <selectTimeRange value="missLastDay" effect="AR(0-47),LU(0-47)" affectsCost="true"/>
+              <selectTimeRange affectsCost="true" effect="AR(0-61),LU(0-61)" value="full"/>
+              <selectTimeRange affectsCost="false" effect="AR(1-61),LU(1-61)" value="missFirstDose"/>
+              <selectTimeRange affectsCost="true" effect="AR(0-47),LU(0-47)" value="missLastDay"/>
             </modifier>
             <modifier decision="ageGroup">
-              <multiplyQty value="0_3" effect="AR(1.0),LU(1.0)" />
-              <multiplyQty value="3_9" effect="AR(2.0), LU(2.0)" />
-              <multiplyQty value="9_14" effect="AR(3.0), LU(3.0)"/>
-              <multiplyQty value="14_100" effect="AR(4.0), LU(4.0)"/>
+              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_14"/>
+              <multiplyQty effect="AR(4.0), LU(4.0)" value="14_100"/>
             </modifier>
           </treatment>
           <treatment name="SP_treat">
             <schedule>
-              <medicate drug="S" mg="500" hour="0"/>
-              <medicate drug="P" mg="25" hour="0"/> 
+              <medicate drug="S" hour="0" mg="500"/>
+              <medicate drug="P" hour="0" mg="25"/>
             </schedule>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="S(1.0),P(1.0)" affectsCost="false" />
-              <multiplyQty value="medium" effect="S(0.6), P(0.6)" affectsCost="false" />
-              <multiplyQty value="poor" effect="S(0.3), P(0.3)" affectsCost="false"/>
+              <multiplyQty affectsCost="false" effect="S(1.0),P(1.0)" value="good"/>
+              <multiplyQty affectsCost="false" effect="S(0.6), P(0.6)" value="medium"/>
+              <multiplyQty affectsCost="false" effect="S(0.3), P(0.3)" value="poor"/>
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="S(0-100),P(0-100)"/>
-              <selectTimeRange value="missFirstDose" effect="S(1-100),P(1-100)" affectsCost="false"/>  <!-- means person does not take dose given-->
-              <selectTimeRange value="missLastDay" effect="S(0-0),P(0-0)"/>
+              <selectTimeRange effect="S(0-100),P(0-100)" value="full"/>
+              <selectTimeRange affectsCost="false" effect="S(1-100),P(1-100)" value="missFirstDose"/>
+              <!-- means person does not take dose given-->
+              <selectTimeRange effect="S(0-0),P(0-0)" value="missLastDay"/>
             </modifier>
             <modifier decision="ageGroup">
-              <multiplyQty value="0_1" effect="S(0.5),P(0.5)" />
-              <multiplyQty value="1_7" effect="S(1.0), P(1.0)" />
-              <multiplyQty value="7_13" effect="S(2.0), P(2.0)"/>
-              <multiplyQty value="13_100" effect="S(3.0), P(3.0)"/>
+              <multiplyQty effect="S(0.5),P(0.5)" value="0_1"/>
+              <multiplyQty effect="S(1.0), P(1.0)" value="1_7"/>
+              <multiplyQty effect="S(2.0), P(2.0)" value="7_13"/>
+              <multiplyQty effect="S(3.0), P(3.0)" value="13_100"/>
             </modifier>
           </treatment>
           <treatment name="CQ_treat">
             <schedule>
-              <medicate drug="CQ" mg="150" hour="0"/> 
-              <medicate drug="CQ" mg="150" hour="24"/>
-              <medicate drug="CQ" mg="75" hour="48"/> 
+              <medicate drug="CQ" hour="0" mg="150"/>
+              <medicate drug="CQ" hour="24" mg="150"/>
+              <medicate drug="CQ" hour="48" mg="75"/>
             </schedule>
             <modifier decision="ageGroup">
-              <multiplyQty value="0_1" effect="CQ(0.5)" />
-              <multiplyQty value="1_5" effect="CQ(1.0)" />
-              <multiplyQty value="5_9" effect="CQ(2.0)"/>
-              <multiplyQty value="9_15" effect="CQ(3.0)"/>
-              <multiplyQty value="15_100" effect="CQ(4.0)"/>
+              <multiplyQty effect="CQ(0.5)" value="0_1"/>
+              <multiplyQty effect="CQ(1.0)" value="1_5"/>
+              <multiplyQty effect="CQ(2.0)" value="5_9"/>
+              <multiplyQty effect="CQ(3.0)" value="9_15"/>
+              <multiplyQty effect="CQ(4.0)" value="15_100"/>
             </modifier>
             <modifier decision="quality">
-              <multiplyQty value="good" effect="CQ(1.0)" affectsCost="false" />
-              <multiplyQty value="medium" effect="CQ(0.6)" affectsCost="false" />
-              <multiplyQty value="poor" effect="CQ(0.3)" affectsCost="false"/>
+              <multiplyQty affectsCost="false" effect="CQ(1.0)" value="good"/>
+              <multiplyQty affectsCost="false" effect="CQ(0.6)" value="medium"/>
+              <multiplyQty affectsCost="false" effect="CQ(0.3)" value="poor"/>
             </modifier>
             <modifier decision="adherence">
-              <selectTimeRange value="full" effect="CQ(0-100)"/>
-              <selectTimeRange value="missFirstDose" effect="CQ(1-100)" affectsCost="false"/> 
-              <selectTimeRange value="missLastDay" effect="CQ(0-35)"/>
+              <selectTimeRange effect="CQ(0-100)" value="full"/>
+              <selectTimeRange affectsCost="false" effect="CQ(1-100)" value="missFirstDose"/>
+              <selectTimeRange effect="CQ(0-35)" value="missLastDay"/>
             </modifier>
-            </treatment>
-          </treatments>
+          </treatment>
+        </treatments>
       </uncomplicated>
       <complicated>
         <decisions>
-        <decision name="initial_provider" depends="p" values="hospital, lower_level, none">
+          <decision depends="p" name="initial_provider" values="hospital, lower_level, none">
              p(0.2): hospital
              p(0.3): lower_level
              p(0.5): none
         </decision>
-        <decision name="test" depends="initial_provider,p" values="none,RDT,microscopy">
+          <decision depends="initial_provider,p" name="test" values="none,RDT,microscopy">
              initial_provider(hospital){
               none
               }
@@ -561,7 +561,7 @@
               none
               }
         </decision>
-        <decision name="referral" depends="initial_provider, p" values="immediate, delayed, none">
+          <decision depends="initial_provider, p" name="referral" values="immediate, delayed, none">
              initial_provider(hospital){
               none
               }
@@ -574,7 +574,7 @@
               none
               }
         </decision>
-        <decision name="hospitalisation" depends="initial_provider, referral" values="none, delayed, immediate">
+          <decision depends="initial_provider, referral" name="hospitalisation" values="none, delayed, immediate">
              initial_provider(hospital){
               immediate
               }
@@ -587,7 +587,7 @@
               none
               }
         </decision>
-        <decision name="suppository" depends="initial_provider, referral, p" values="true, false">
+          <decision depends="initial_provider, referral, p" name="suppository" values="true, false">
              initial_provider(hospital){
               referral(none){
               p(0.0): true
@@ -611,7 +611,7 @@
                 false
               }
         </decision>
-        <decision name="treatment" depends="suppository, p" values="AS_sev,QU_sev">
+          <decision depends="suppository, p" name="treatment" values="AS_sev,QU_sev">
             suppository(true){
             p(.5): AS_sev
             p(.5): QU_sev
@@ -625,13 +625,14 @@
         <treatments>
           <treatment name="AS_sev">
             <schedule>
-              <medicate drug="AS_sev" mg="1" hour="0"/>
-              <medicate drug="AS_sev" mg="1" hour="12"/>
-              <medicate drug="AS_sev" mg="1" hour="24"/>
-              <medicate drug="AS_sev" mg="1" hour="48"/>
-              <medicate drug="AS_sev" mg="1" hour="72"/>
+              <medicate drug="AS_sev" hour="0" mg="1"/>
+              <medicate drug="AS_sev" hour="12" mg="1"/>
+              <medicate drug="AS_sev" hour="24" mg="1"/>
+              <medicate drug="AS_sev" hour="48" mg="1"/>
+              <medicate drug="AS_sev" hour="72" mg="1"/>
             </schedule>
-          </treatment> <!-- not quite sure how to put in CQ -->
+          </treatment>
+          <!-- not quite sure how to put in CQ -->
         </treatments>
       </complicated>
       <ClinicalOutcomes>
@@ -640,10 +641,7 @@
         <complicatedCaseDuration>5</complicatedCaseDuration>
         <complicatedRiskDuration>5</complicatedRiskDuration>
         <pImmediateUC>.8</pImmediateUC>
-        <propDeathsFirstDay>0.4</propDeathsFirstDay>
-        <communityOddsMultiplier>1.5</communityOddsMultiplier>
       </ClinicalOutcomes>
-
     </EventScheduler>
     <CFR>
       <group cfr="0" lowerbound="0"/>
@@ -1507,7 +1505,7 @@
     </nonVector>
   </entoData>
   <drugDescription>
-	<drug abbrev="AR">
+    <drug abbrev="AR">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1522,8 +1520,7 @@
         <vol_dist>17.4</vol_dist>
       </PK>
     </drug>
-
-	<drug abbrev="AS">
+    <drug abbrev="AS">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1538,8 +1535,7 @@
         <vol_dist>2.75</vol_dist>
       </PK>
     </drug>
-
-	<drug abbrev="CQ">
+    <drug abbrev="CQ">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1554,8 +1550,7 @@
         <vol_dist>300</vol_dist>
       </PK>
     </drug>
-
-	<drug abbrev="LU">
+    <drug abbrev="LU">
       <PD>
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
@@ -1570,7 +1565,6 @@
         <vol_dist>21</vol_dist>
       </PK>
     </drug>
-
     <drug abbrev="MQ">
       <PD>
         <allele name="sensitive">
@@ -1586,48 +1580,47 @@
         <vol_dist>20.8</vol_dist>
       </PK>
     </drug>
-	
   </drugDescription>
-  
-<model>
-  <ModelOptions>
-    <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
-    <option name="INCLUDES_PK_PD" value="true"/>
-    <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-  </ModelOptions>
-  <clinical healthSystemMemory="28"/>
-  <parameters delta="0.000547945205479452" interval="1" iseed="1" latentp="3">
-    <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
-    <parameter include="false" name="Estar" number="2" value="0.03247"/>
-    <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
-    <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
-    <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-    <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-    <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-    <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
-    <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
-    <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
-    <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
-    <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
-    <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
-    <parameter include="false" name="alpha" number="14" value="142601.91252"/>
-    <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
-    <parameter include="false" name="No Use 1" number="16" value="1"/>
-    <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
-    <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
-    <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
-    <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
-    <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
-    <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
-    <parameter include="false" name="Immune effector decay" number="23" value="0"/>
-    <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
-    <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
-    <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
-    <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
-    <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
-    <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
-    <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-    <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
-  </parameters>
-</model>
+  <model>
+    <ModelOptions>
+      <option name="DUMMY_WITHIN_HOST_MODEL" value="true"/>
+      <option name="INCLUDES_PK_PD" value="true"/>
+      <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="28"/>
+    <parameters interval="1" iseed="1" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001"/>
+      <parameter include="false" name="alpha" number="14" value="142601.91252"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="No Use 1" number="16" value="1"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5390466"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.6"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+      <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
+      <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
+    </parameters>
+  </model>
 </scenario>

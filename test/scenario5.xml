@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="18" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_18.xsd">
-  
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="19" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -202,34 +202,34 @@
       <vaccine coverage="0.99" targetAgeYrs="4.25"/>
     </continuous>
   </interventions>
-  
-  <healthSystem><ImmediateOutcomes name="Tanzania ACT">
-    <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
-    <initialACR>
-      <ACT value="0.85"/>
-      <QN value="0.998"/>
-      <selfTreatment value="0.63"/>
-    </initialACR>
-    <compliance>
-      <ACT value="0.900"/>
-      <QN value="0.175"/>
-      <selfTreatment value="0.85"/>
-    </compliance>
-    <nonCompliersEffective>
-      <ACT value="0"/>
-      <QN value="0.2"/>
-      <selfTreatment value="0"/>
-    </nonCompliersEffective>
-    <pSeekOfficialCareUncomplicated1 value="0.04"/>
-    <pSelfTreatUncomplicated value="0.01"/>
-    <pSeekOfficialCareUncomplicated2 value="0.04"/>
-    <pSeekOfficialCareSevere value="0.48"/>
-    <pSequelaeInpatient>
-      <item maxAgeYrs="5" value="0.0132"/>
-      <item maxAgeYrs="99" value="0.005"/>
-    </pSequelaeInpatient>
-    
-  </ImmediateOutcomes><CFR>
+  <healthSystem>
+    <ImmediateOutcomes name="Tanzania ACT">
+      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+      <initialACR>
+        <ACT value="0.85"/>
+        <QN value="0.998"/>
+        <selfTreatment value="0.63"/>
+      </initialACR>
+      <compliance>
+        <ACT value="0.900"/>
+        <QN value="0.175"/>
+        <selfTreatment value="0.85"/>
+      </compliance>
+      <nonCompliersEffective>
+        <ACT value="0"/>
+        <QN value="0.2"/>
+        <selfTreatment value="0"/>
+      </nonCompliersEffective>
+      <pSeekOfficialCareUncomplicated1 value="0.04"/>
+      <pSelfTreatUncomplicated value="0.01"/>
+      <pSeekOfficialCareUncomplicated2 value="0.04"/>
+      <pSeekOfficialCareSevere value="0.48"/>
+      <pSequelaeInpatient>
+        <item maxAgeYrs="5" value="0.0132"/>
+        <item maxAgeYrs="99" value="0.005"/>
+      </pSequelaeInpatient>
+    </ImmediateOutcomes>
+    <CFR>
       <group cfr="0.09189" lowerbound="0"/>
       <group cfr="0.0810811" lowerbound="0.25"/>
       <group cfr="0.0648649" lowerbound="0.75"/>
@@ -240,7 +240,9 @@
       <group cfr="0.0945946" lowerbound="7.5"/>
       <group cfr="0.1243243" lowerbound="12.5"/>
       <group cfr="0.1378378" lowerbound="15"/>
-    </CFR></healthSystem><entoData mode="4" name="Namawala1_16*1.0">
+    </CFR>
+  </healthSystem>
+  <entoData mode="4" name="Namawala1_16*1.0">
     <nonVector eipDuration="10">
       <EIRDaily origin="Namawala Pre">0.011646449</EIRDaily>
       <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
@@ -609,38 +611,42 @@
       <EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily>
     </nonVector>
   </entoData>
-  
-<model><ModelOptions>
-    <option name="MAX_DENS_CORRECTION" value="false"/>
-  </ModelOptions><clinical healthSystemMemory="6"/><parameters delta="0.000548" interval="5" iseed="0" latentp="3">
-    <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
-    <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
-    <parameter include="false" name="        Simm    " number="3" value="0.1447"/>
-    <parameter include="false" name="        Xstar_p " number="4" value="2801.485664"/>
-    <parameter include="false" name="        gamma_p " number="5" value="2.061137"/>
-    <parameter include="false" name="        sigma2i " number="6" value="9.569774"/>
-    <parameter include="false" name="        CumulativeYstar " number="7" value="137595256.939881"/>
-    <parameter include="false" name="        CumulativeHstar " number="8" value="97.798358"/>
-    <parameter include="false" name="        '-ln(1-alpha_m)'        " number="9" value="2.306627"/>
-    <parameter include="false" name="        decay_m " number="10" value="2.587184"/>
-    <parameter include="false" name="        sigma2_0        " number="11" value="0.656515"/>
-    <parameter include="false" name="        Xstar_v " number="12" value="0.918108"/>
-    <parameter include="false" name="        Ystar2  " number="13" value="9696.340451"/>
-    <parameter include="false" name="        alpha   " number="14" value="157086.100088"/>
-    <parameter include="false" name="        Density bias (non Garki)        " number="15" value="0.172355"/>
-    <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
-    <parameter include="false" name="        log oddsr CF community  " number="17" value="0.729208"/>
-    <parameter include="false" name="        Indirect risk cofactor  " number="18" value="0.017543"/>
-    <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="50.648162"/>
-    <parameter include="false" name="        Density bias (Garki)    " number="20" value="4.784096"/>
-    <parameter include="false" name="        Severe Malaria Threshhold       " number="21" value="346545.408899"/>
-    <parameter include="false" name="        Immunity Penalty        " number="22" value="1"/>
-    <parameter include="false" name="        Immune effector decay     " number="23" value="0"/>
-    <parameter include="false" name="        comorbidity intercept   " number="24" value="0.098975"/>
-    <parameter include="false" name="        Ystar half life " number="25" value="0.278909"/>
-    <parameter include="false" name="        Ystar1  " number="26" value="0.600517"/>
-    <parameter include="false" name="        asex immune decay      " number="27" value="0"/>
-    <parameter include="false" name="        Ystar0  " number="28" value="328.056605"/>
-    <parameter include="false" name="        Idete multiplier        " number="29" value="2.78614"/>
-    <parameter include="false" name="        critical age for comorbidity    " number="30" value="0.115906"/>
-  </parameters></model></scenario>
+  <model>
+    <ModelOptions>
+      <option name="MAX_DENS_CORRECTION" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <parameters interval="5" iseed="0" latentp="3">
+      <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
+      <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
+      <parameter include="false" name="        Simm    " number="3" value="0.1447"/>
+      <parameter include="false" name="        Xstar_p " number="4" value="2801.485664"/>
+      <parameter include="false" name="        gamma_p " number="5" value="2.061137"/>
+      <parameter include="false" name="        sigma2i " number="6" value="9.569774"/>
+      <parameter include="false" name="        CumulativeYstar " number="7" value="137595256.939881"/>
+      <parameter include="false" name="        CumulativeHstar " number="8" value="97.798358"/>
+      <parameter include="false" name="        '-ln(1-alpha_m)'        " number="9" value="2.306627"/>
+      <parameter include="false" name="        decay_m " number="10" value="2.587184"/>
+      <parameter include="false" name="        sigma2_0        " number="11" value="0.656515"/>
+      <parameter include="false" name="        Xstar_v " number="12" value="0.918108"/>
+      <parameter include="false" name="        Ystar2  " number="13" value="9696.340451"/>
+      <parameter include="false" name="        alpha   " number="14" value="157086.100088"/>
+      <parameter include="false" name="        Density bias (non Garki)        " number="15" value="0.172355"/>
+      <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
+      <parameter include="false" name="        log oddsr CF community  " number="17" value="0.729208"/>
+      <parameter include="false" name="        Indirect risk cofactor  " number="18" value="0.017543"/>
+      <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="50.648162"/>
+      <parameter include="false" name="        Density bias (Garki)    " number="20" value="4.784096"/>
+      <parameter include="false" name="        Severe Malaria Threshhold       " number="21" value="346545.408899"/>
+      <parameter include="false" name="        Immunity Penalty        " number="22" value="1"/>
+      <parameter include="false" name="        Immune effector decay     " number="23" value="0"/>
+      <parameter include="false" name="        comorbidity intercept   " number="24" value="0.098975"/>
+      <parameter include="false" name="        Ystar half life " number="25" value="0.278909"/>
+      <parameter include="false" name="        Ystar1  " number="26" value="0.600517"/>
+      <parameter include="false" name="        asex immune decay      " number="27" value="0"/>
+      <parameter include="false" name="        Ystar0  " number="28" value="328.056605"/>
+      <parameter include="false" name="        Idete multiplier        " number="29" value="2.78614"/>
+      <parameter include="false" name="        critical age for comorbidity    " number="30" value="0.115906"/>
+    </parameters>
+  </model>
+</scenario>

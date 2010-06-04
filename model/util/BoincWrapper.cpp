@@ -170,9 +170,14 @@ void Checksum::writeToFile (string filename) {
     if (test.is_open())
 	throw runtime_error ("File scenario.sum exists!");
     
-    ofstream os (filename.c_str(), ios_base::binary | ios_base::out);
-    os.write ((char*)data, 16);
-    os.close();
+    // Use C file commands, since these have clearer behaviour with binary data:
+    FILE *f = fopen( filename.c_str(), "wb" );
+    size_t written=0;
+    if( f != NULL )
+	written=fwrite( data, 1, 16, f );
+    fclose( f );
+    if( written != 16 )
+	throw runtime_error("Error writing scenario.sum");
 }
 #endif	// Without/with BOINC
 

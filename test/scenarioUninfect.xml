@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <continuous period='5'>
+    <continuous period="5">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
@@ -76,8 +76,10 @@
   <interventions name="artificial ellimination">
     <timed>
       <intervention time="73">
-        <MDA coverage="1"/><!-- eliminate current infections -->
-        <uninfectVectors/><!-- clear past & current mosquito infections -->
+        <MDA coverage="1"/>
+        <!-- eliminate current infections -->
+        <uninfectVectors/>
+        <!-- clear past & current mosquito infections -->
       </intervention>
       <intervention time="74">
         <MDA coverage="1"/>
@@ -142,19 +144,19 @@
       </pSequelaeInpatient>
     </ImmediateOutcomes>
     <CFR>
-        <group cfr="0.09189" lowerbound="0"/>
-        <group cfr="0.0810811" lowerbound="0.25"/>
-        <group cfr="0.0648649" lowerbound="0.75"/>
-        <group cfr="0.0689189" lowerbound="1.5"/>
-        <group cfr="0.0675676" lowerbound="2.5"/>
-        <group cfr="0.0297297" lowerbound="3.5"/>
-        <group cfr="0.0459459" lowerbound="4.5"/>
-        <group cfr="0.0945946" lowerbound="7.5"/>
-        <group cfr="0.1243243" lowerbound="12.5"/>
-        <group cfr="0.1378378" lowerbound="15"/>
-      </CFR>
-    </healthSystem>
-    <entoData mode="4" name="Vector Test">
+      <group cfr="0.09189" lowerbound="0"/>
+      <group cfr="0.0810811" lowerbound="0.25"/>
+      <group cfr="0.0648649" lowerbound="0.75"/>
+      <group cfr="0.0689189" lowerbound="1.5"/>
+      <group cfr="0.0675676" lowerbound="2.5"/>
+      <group cfr="0.0297297" lowerbound="3.5"/>
+      <group cfr="0.0459459" lowerbound="4.5"/>
+      <group cfr="0.0945946" lowerbound="7.5"/>
+      <group cfr="0.1243243" lowerbound="12.5"/>
+      <group cfr="0.1378378" lowerbound="15"/>
+    </CFR>
+  </healthSystem>
+  <entoData mode="4" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <eir EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>

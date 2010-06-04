@@ -126,7 +126,7 @@ public class SchemaTranslator {
         // Validate the updated document
         File xsdFile = new File(schemaDirectory + schemaFileName);
         if (xsdFile == null || !xsdFile.isFile()) {
-            System.out.println("Unable to find " + schemaFileName
+            System.out.println("Unable to find " + schemaDirectory + schemaFileName
                     + " file; not validating.");
             return;
         }
