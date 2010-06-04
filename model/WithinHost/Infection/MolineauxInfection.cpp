@@ -91,7 +91,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 		_startdate(Global::simulationTime)
 {
 	m[v] = 0.0;
-	Pc = 0.0;
+	_density = 0.0;
 
 	for(int i=0;i<v; i++)
 	{
@@ -120,7 +120,9 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	double Pstar_m = k_m*pow(random::gauss(meanDiffPosDays, sdDiffPosDays), 10.0);
 
 	double Sc = 1/(1 + pow(_density/Pstar_c, kappa_c));
-	double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta;
+	double varianTranscendingSummation = getVariantTranscendingSummation();
+
+	double Sm = ((1-beta)/(1+pow(varianTranscendingSummation/Pstar_m, kappa_m)))+beta;
 	double S[v];
 
 	double sigma_Qi_Si=0.0;
@@ -208,19 +210,18 @@ double MolineauxInfection::getVariantTranscendingSummation(){
 		laggedPc[4-tau] = laggedPc[3-tau];
 
 	double Pchat;
-	if(Pc < C)
-		Pchat = Pc;
+	if(_density < C)
+		Pchat = _density;
 	else
-		Pchat = C;
+		laggedPc[0] = Pchat;
 
-	laggedPc[0] = Pchat;
 	return variantTranscendingSummation;
 }
 
 MolineauxInfection::MolineauxInfection (istream& stream) :
     CommonInfection(stream)
 {
-    Pc & stream;
+    _density & stream;
     for(int i=0;i<v;i++)
     	growthRate[i] & stream;
 }
@@ -228,7 +229,7 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
 void MolineauxInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
 
-    Pc & stream;
+    _density & stream;
     for(int i=0;i<v;i++)
     	growthRate[i] & stream;
 }
