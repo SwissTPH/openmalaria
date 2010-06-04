@@ -75,10 +75,15 @@ void MolineauxInfection::initParameters(){
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
 
-	meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
-	sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
-	meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
-	sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+	//meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
+	//sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+	//meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
+	//sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+
+	meanLocalMaxDensity = 4.79;
+	sdLocalMaxDensity = 0.57;
+	meanDiffPosDays = 2.33;
+	sdDiffPosDays = 0.26;
 
 	C=1.0, sigma=0.02,rho=0.0, beta=0.01, sProb=0.02, q=0.3, mu_m=16.0, sigma_m=10.4,
 	k_c=0.2, k_m=0.04, Pstar_v=30.0, kappa_c=3.0, kappa_v=3.0, kappa_m=1.0;
@@ -97,6 +102,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 	{
 		P[i] = 0.0;
 		m[i] = 0.0;
+		growthRate[i] = 0.0;
 
 		while(m[i]<1.0)
 			m[i]=random::gauss(mu_m, sigma_m);
@@ -126,6 +132,10 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	double sigma_S=0.0;
 	double sigmaP = 0.0;
 
+	int timeDiff = Global::simulationTime - _startdate;
+	if(timeDiff == 78)
+		cout<<"init update Growth Rate Multiplier: "<<P[4]<<endl;
+
 	for(int j=0;j<v; j++)
 		sigmaP+=P[j];
 
@@ -135,6 +145,9 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		sigma_Qi_Si+= pow(q, (double)i)*S[i];
 		sigma_S+=S[i];
 	}
+
+	if(timeDiff == 78)
+			cout<<"init update Growth Rate Multiplier II: "<<P[4]<<endl;
 
 	for(int i=0;i<v;i++)
 	{
@@ -146,6 +159,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 
 		double newPi;
 		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
+		double oldGrowthRate = growthRate[i];
 		growthRate[i] = (newPi - P[i])/2;
 	}
 }
@@ -155,7 +169,7 @@ bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor
 	double newDensity = 0.0;
 	int timeDiff = simulationTime - _startdate;
 
-	if(timeDiff == 1)
+	if(timeDiff == 0)
 		_density = P[0];
 	else
 	{
@@ -166,19 +180,20 @@ bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor
 
 			if(P[i]<1.0e-5)
 				P[i] = 0.0;
-
-			newDensity += P[i];
+			else
+				newDensity += P[i];
 		}
 		_density = newDensity;
 	}
 
-	if(timeDiff%2==1)
-		updateGrowthRateMultiplier();
-
 	_cumulativeExposureJ += Global::interval * _density;
 
 	if(_density>1.0e-5)
+	{
+		if(timeDiff%2==0)
+				updateGrowthRateMultiplier();
 		return false;
+	}
 	else
 		return true;
 
