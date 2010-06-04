@@ -75,15 +75,10 @@ void MolineauxInfection::initParameters(){
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
 
-	//meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
-	//sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
-	//meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
-	//sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
-
-	meanLocalMaxDensity = 4.79;
-	sdLocalMaxDensity = 0.57;
-	meanDiffPosDays = 2.33;
-	sdDiffPosDays = 0.26;
+	meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
+	sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+	meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
+	sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
 
 	C=1.0, sigma=0.02,rho=0.0, beta=0.01, sProb=0.02, q=0.3, mu_m=16.0, sigma_m=10.4,
 	k_c=0.2, k_m=0.04, Pstar_v=30.0, kappa_c=3.0, kappa_v=3.0, kappa_m=1.0;
@@ -132,10 +127,6 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	double sigma_S=0.0;
 	double sigmaP = 0.0;
 
-	int timeDiff = Global::simulationTime - _startdate;
-	if(timeDiff == 78)
-		cout<<"init update Growth Rate Multiplier: "<<P[4]<<endl;
-
 	for(int j=0;j<v; j++)
 		sigmaP+=P[j];
 
@@ -145,9 +136,6 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		sigma_Qi_Si+= pow(q, (double)i)*S[i];
 		sigma_S+=S[i];
 	}
-
-	if(timeDiff == 78)
-			cout<<"init update Growth Rate Multiplier II: "<<P[4]<<endl;
 
 	for(int i=0;i<v;i++)
 	{
