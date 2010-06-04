@@ -23,7 +23,7 @@ add_library (contrib
 )
 
 if (MSVC)
-  set_target_properties (model PROPERTIES
+  set_target_properties (contrib PROPERTIES
     LINK_FLAGS "${OM_LINK_FLAGS}"
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
