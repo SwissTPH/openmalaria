@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="19" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
-  <demography maximumAgeYrs="80" name="test" popSize="1000">
+  <demography maximumAgeYrs="80" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
