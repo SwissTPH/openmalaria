@@ -984,7 +984,7 @@ public class SchemaTranslator {
 
         Element clinical = (Element)scenarioElement.getElementsByTagName("clinical").item(0);
         Attr healthSystemMemory = clinical.getAttributeNode("healthSystemMemory");
-        healthSystemMemory.setValue(String.valueOf(Integer.parseInt(healthSystemMemory.getValue())*5));
+        healthSystemMemory.setValue(String.valueOf(28));
 
         NodeList interventionList = (NodeList)scenarioElement.getElementsByTagName("intervention");
 
@@ -1178,15 +1178,21 @@ public class SchemaTranslator {
                 complicatedRiskDuration.setTextContent("5");
                 Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
                 pImmediateUC.setTextContent("1");
-                Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
-                propDeathsFirstDay.setTextContent("0.4");
+                //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+                //propDeathsFirstDay.setTextContent("0.4");
+
+                //this communityOddsMultiplier will be removed (for schema >= 19)
+                //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+                //communityOddsMultiplier.setTextContent("1.5");
 
                 clinicalOutcomes.appendChild(maxUCSeekingMemory);
                 clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
                 clinicalOutcomes.appendChild(complicatedCaseDuration);
                 clinicalOutcomes.appendChild(complicatedRiskDuration);
                 clinicalOutcomes.appendChild(pImmediateUC);
-                clinicalOutcomes.appendChild(propDeathsFirstDay);
+                
+
+                //clinicalOutcomes.appendChild(communityOddsMultiplier);
 
                 eventScheduler.appendChild(clinicalOutcomes);
 
@@ -1382,15 +1388,21 @@ public class SchemaTranslator {
             complicatedRiskDuration.setTextContent("5");
             Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
             pImmediateUC.setTextContent("1");
-            Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
-            propDeathsFirstDay.setTextContent("0.4");
+            //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            //propDeathsFirstDay.setTextContent("0.4");
+
+            //this communityOddsMultiplier will be removed (for schema >= 19)
+            //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+            //communityOddsMultiplier.setTextContent("1.5");
 
             clinicalOutcomes.appendChild(maxUCSeekingMemory);
             clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
             clinicalOutcomes.appendChild(complicatedCaseDuration);
             clinicalOutcomes.appendChild(complicatedRiskDuration);
             clinicalOutcomes.appendChild(pImmediateUC);
-            clinicalOutcomes.appendChild(propDeathsFirstDay);
+            
+
+            //clinicalOutcomes.appendChild(communityOddsMultiplier);
 
             eventScheduler.appendChild(clinicalOutcomes);
 
@@ -1604,15 +1616,21 @@ public class SchemaTranslator {
             complicatedRiskDuration.setTextContent("5");
             Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
             pImmediateUC.setTextContent("1");
-            Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
-            propDeathsFirstDay.setTextContent("0.4");
+            //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            //propDeathsFirstDay.setTextContent("0.4");
+            
+            //this communityOddsMultiplier will be removed (for schema >= 19)
+            //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+            //communityOddsMultiplier.setTextContent("1.5");
 
             clinicalOutcomes.appendChild(maxUCSeekingMemory);
             clinicalOutcomes.appendChild(uncomplicatedCaseDuration);
             clinicalOutcomes.appendChild(complicatedCaseDuration);
             clinicalOutcomes.appendChild(complicatedRiskDuration);
             clinicalOutcomes.appendChild(pImmediateUC);
-            clinicalOutcomes.appendChild(propDeathsFirstDay);
+            
+
+            //clinicalOutcomes.appendChild(communityOddsMultiplier);
 
             eventScheduler.appendChild(clinicalOutcomes);
 
