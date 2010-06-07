@@ -116,6 +116,16 @@ def charEqual (fn1,fn2):
         if s1 != s2:
             return False
 
+#http://stackoverflow.com/questions/2974124/reading-floating-point-numbers-with-1-qnan-values-in-python
+def robust_float(s):
+    try:
+        return float(s)
+    except ValueError:
+        if 'nan' in s.lower():
+            return 1e1000-1e1000 # NaN
+        else:
+            raise
+
 def ReadEntries (fname):
     values=dict()
     fileObj = open(fname, 'r')
@@ -127,7 +137,7 @@ def ReadEntries (fname):
             continue
             
         key=ValIdentifier(int(items[0]),items[1],int(items[2]))
-        values[key]=float(items[3])
+        values[key]=robust_float(items[3])
     return values
 
 def main(fn1,fn2,maxDiffsToPrint=6):
