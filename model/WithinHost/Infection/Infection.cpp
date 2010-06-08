@@ -30,8 +30,10 @@ float Infection::cumulativeYstar;
 float Infection::cumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
+int Infection::latentp;
 
 void Infection::init () {
+  latentp=InputData().getModel().getParameters().getLatentp();
   cumulativeYstar = (float) InputData.getParameter (Params::CUMULATIVE_Y_STAR);
   cumulativeHstar = (float) InputData.getParameter (Params::CUMULATIVE_H_STAR);
   alpha_m = 1.0 - exp(-InputData.getParameter (Params::NEG_LOG_ONE_MINUS_ALPHA_M));
@@ -61,14 +63,16 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
 
 
 Infection::Infection (istream& stream) {
+    _startdate & stream;
+    proteome_ID & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    proteome_ID & stream;
 }
 void Infection::checkpoint (ostream& stream) {
+    _startdate & stream;
+    proteome_ID & stream;
     _density & stream;
     _cumulativeExposureJ & stream; 
-    proteome_ID & stream;
 }
 
 } }

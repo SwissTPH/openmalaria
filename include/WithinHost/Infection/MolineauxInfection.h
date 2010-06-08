@@ -34,7 +34,7 @@ public:
 
 	virtual ~MolineauxInfection () {};
 	static void initParameters();
-	virtual bool updateDensity(int simulationTime, double survivalFactor);
+	virtual bool updateDensity(double survivalFactor, int ageOfInfection);
 
 protected:
     virtual void checkpoint (ostream& stream);
@@ -53,8 +53,6 @@ private:
 
 	static const int v = 50;
 	static const int taus = 4;
-
-	int _startdate;
 
 	static int delta;
 	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v, meanLocalMaxDensity, sdLocalMaxDensity, meanDiffPosDays, sdDiffPosDays;

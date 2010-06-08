@@ -26,7 +26,7 @@
 #include <fcntl.h>
 
 namespace OM { namespace WithinHost {
-//Max duration of an infection in intervals. TODO: Consequences for non-5day interval simulations? (model incompatible anyway though)
+//Max duration of an infection in intervals.
 const int maxDur=84;
 
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
@@ -76,12 +76,6 @@ public:
     return Global::simulationTime >= _startdate+_duration;
   }
   
-  //! Get the density of the infection
-  double getDensity() { return _density; }
-
-  //! Start date of the infection
-  int getStartDate() { return _startdate; }
-  
   /** Determines parasite density of an individual infection (5-day timestep update)
    *
    * @param ageInYears Age of human
@@ -114,16 +108,9 @@ public:
   /// Includes the effect of attenuated infections by SP concentrations, when using IPT
   virtual void IPTattenuateAsexualDensity () {}
   
-  /// pre-erythrocytic latent period, in time steps
-  /// set by initParameters
-  //Note: here for convenience; used by DescriptiveInfection and DescriptiveIPT
-  static int latentp;
-  
 protected:
     virtual void checkpoint (ostream& stream);
     
-  //! Start date of the infection
-  int _startdate;
   //! Arbitrary maximum duration of the infection, in timesteps
   int _duration; 
   

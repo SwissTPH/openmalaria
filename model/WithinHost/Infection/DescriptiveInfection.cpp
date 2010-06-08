@@ -35,7 +35,6 @@ namespace OM { namespace WithinHost {
     using namespace util;
     //static (class) variables
 
-int DescriptiveInfection::latentp;
 double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
@@ -49,7 +48,6 @@ void DescriptiveInfection::initParameters (){
   if (util::ModelOptions::option (util::INCLUDES_PK_PD))
       throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
   
-  latentp=InputData().getModel().getParameters().getLatentp();
   sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);
   xNuStar=InputData.getParameter(Params::X_NU_STAR);
   //File name of file with empirical parasite densities.
@@ -109,8 +107,7 @@ void DescriptiveInfection::clearParameters () {}
 // -----  non-static init/destruction  -----
 
 DescriptiveInfection::DescriptiveInfection () :
-    Infection(0xFFFFFFFF),
-    _startdate(Global::simulationTime)
+    Infection(0xFFFFFFFF)
 {
     _duration=infectionDuration();
 }
@@ -131,17 +128,17 @@ int DescriptiveInfection::infectionDuration(){
 
 void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
 {
-  //Age of infection. (Blood stage infection starts latentp intervals later than inoculation ?)
-  int infage=1+Global::simulationTime-_startdate-latentp;
-  if ( infage >  0) {
-    if ( infage <=  maxDur) {
+  //Age of infection. (Blood stage infection starts latentp intervals later than inoculation.)
+  int infage=Global::simulationTime-_startdate-latentp;
+  if ( infage >= 0) {
+    if ( infage < maxDur ) {
       int iduration=_duration;
-      if ( iduration >  maxDur)
+      if ( iduration > maxDur)
 	iduration=maxDur;
       
-      _density=exp(meanLogParasiteCount[infage - 1 + (iduration - 1)*maxDur]);
+      _density=exp(meanLogParasiteCount[infage + (iduration - 1)*maxDur]);
     } else {
-      _density=exp(meanLogParasiteCount[maxDur - 1 + (maxDur - 1)*maxDur]);
+      _density=exp(meanLogParasiteCount[maxDur-1 + (maxDur-1)*maxDur]);
     }
     if (_density < 1.0)
       _density=1.0;
@@ -219,12 +216,10 @@ void DescriptiveInfection::determineDensityFinal () {
 DescriptiveInfection::DescriptiveInfection (istream& stream) :
     Infection(stream)
 {
-    _startdate & stream;
     _duration & stream;
 }
 void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
-    _startdate & stream;
     _duration & stream;
 }
 

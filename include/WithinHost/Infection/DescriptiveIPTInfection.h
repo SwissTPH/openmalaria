@@ -68,7 +68,7 @@ public:
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   double getAsexualAttenuationEndDate () {
-    return _startdate + _duration * genotypes[proteome_ID].atten;
+    return _startdate + _duration * genotypes[proteome_ID].atten;	//FIXME: should probably add latentp
   }
   
 protected:

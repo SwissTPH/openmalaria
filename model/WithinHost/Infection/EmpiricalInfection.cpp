@@ -139,8 +139,7 @@ void EmpiricalInfection::initParameters(){
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
 EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
-    CommonInfection(protID),
-    _startdate(Global::simulationTime)
+    CommonInfection(protID)
 {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time
@@ -162,11 +161,10 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 // TODO: TS needs to improve documentation of this function.
 const int EI_MAX_SAMPLES = 10;
-bool EmpiricalInfection::updateDensity(int simulationTime, double survivalFactor) {
+bool EmpiricalInfection::updateDensity (double survivalFactor, int ageOfInfection) {
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
-  int ageOfInfection = simulationTime - _startdate;	// age in days
   if (ageOfInfection > _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
@@ -271,7 +269,6 @@ void EmpiricalInfection::overrideInflationFactors(double inflationMean, double i
 EmpiricalInfection::EmpiricalInfection (istream& stream) :
     CommonInfection(stream)
 {
-    _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;
     _laggedLogDensities[2] & stream;
@@ -279,7 +276,6 @@ EmpiricalInfection::EmpiricalInfection (istream& stream) :
 }
 void EmpiricalInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
-    _startdate & stream;
     _laggedLogDensities[0] & stream;
     _laggedLogDensities[1] & stream;
     _laggedLogDensities[2] & stream;

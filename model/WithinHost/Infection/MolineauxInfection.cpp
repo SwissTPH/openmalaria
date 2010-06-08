@@ -87,12 +87,8 @@ void MolineauxInfection::initParameters(){
 }
 
 MolineauxInfection::MolineauxInfection(uint32_t protID):
-		CommonInfection(protID),
-		_startdate(Global::simulationTime)
+		CommonInfection(protID)
 {
-	m[v] = 0.0;
-	_density = 0.0;
-
 	for(int i=0;i<v; i++)
 	{
 		P[i] = 0.0;
@@ -154,12 +150,10 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	}
 }
 
-bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor){
-
+bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection){
 	double newDensity = 0.0;
-	int timeDiff = simulationTime - _startdate;
 
-	if(timeDiff == 0)
+	if(ageOfInfection == 0)
 		_density = P[0];
 	else
 	{
@@ -180,7 +174,7 @@ bool MolineauxInfection::updateDensity(int simulationTime, double survivalFactor
 
 	if(_density>1.0e-5)
 	{
-		if(timeDiff%2==0)
+		if(ageOfInfection%2==0)
 				updateGrowthRateMultiplier();
 		return false;
 	}
@@ -220,20 +214,38 @@ double MolineauxInfection::getVariantTranscendingSummation(){
 MolineauxInfection::MolineauxInfection (istream& stream) :
     CommonInfection(stream)
 {
-    _density & stream;
-    for(int i=0;i<v;i++)
+    Pc & stream;
+    variantTranscendingSummation & stream;
+    for(int i=0;i<v;i++){
+	m[i] & stream;
     	growthRate[i] & stream;
+	newP[i] & stream;
+	P[i] & stream;
+	variantSpecificSummation[i] & stream;
+	for(int j=0;j<taus;j++)
+	    laggedP[j][i] & stream;
+    }
+    for(int j=0;j<taus;j++)
+	laggedPc[j] & stream;
 }
 
 void MolineauxInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
 
-    _density & stream;
-    for(int i=0;i<v;i++)
+    Pc & stream;
+    variantTranscendingSummation & stream;
+    for(int i=0;i<v;i++){
+	m[i] & stream;
     	growthRate[i] & stream;
+	newP[i] & stream;
+	P[i] & stream;
+	variantSpecificSummation[i] & stream;
+	for(int j=0;j<taus;j++)
+	    laggedP[j][i] & stream;
+    }
+    for(int j=0;j<taus;j++)
+	laggedPc[j] & stream;
 }
 
 }
 }
-
-

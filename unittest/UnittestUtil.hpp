@@ -76,6 +76,7 @@ struct UnittestUtil {
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
+	Infection::latentp = 0;
 	Infection::cumulativeYstar = numeric_limits<double>::quiet_NaN();
 	Infection::cumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
@@ -83,6 +84,7 @@ struct UnittestUtil {
     }
     static void Infection_init () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
+	Infection::latentp = 3;
 	Infection::cumulativeYstar = (float) 68564384.7102;
 	Infection::cumulativeHstar = (float) 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);

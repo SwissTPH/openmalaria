@@ -47,24 +47,24 @@ public:
     }
     
     void testUpdatedInf () {
-	infection->updateDensity (Global::simulationTime + 1, 1.0);
+	infection->update (Global::simulationTime + 1, 1.0);
 	TS_ASSERT_APPROX (infection->getDensity(), 128.00000008620828820);
     }
     void testUpdated2Inf () {
-	infection->updateDensity (Global::simulationTime + 1, 1.0);
-	infection->updateDensity (Global::simulationTime + 2, 1.0);
+	infection->update (Global::simulationTime + 1, 1.0);
+	infection->update (Global::simulationTime + 2, 1.0);
 	TS_ASSERT_APPROX (infection->getDensity(), 1024.00000082264208600);
     }
     
     void testUpdatedReducedInf () {
-	infection->updateDensity (Global::simulationTime + 1, 1.0);
-	infection->updateDensity (Global::simulationTime + 2, 0.1);
+	infection->update (Global::simulationTime + 1, 1.0);
+	infection->update (Global::simulationTime + 2, 0.1);
 	// This is, as expected, 1/10th of that in testUpdated2Inf
 	TS_ASSERT_APPROX (infection->getDensity(), 102.40000008226420860);
     }
     void testUpdatedReducedInf2 () {
-	infection->updateDensity (Global::simulationTime + 1, 0.1);
-	infection->updateDensity (Global::simulationTime + 2, 1.0);
+	infection->update (Global::simulationTime + 1, 0.1);
+	infection->update (Global::simulationTime + 2, 1.0);
 	// This is nearly the same
 	TS_ASSERT_APPROX (infection->getDensity(), 102.00000008286288040);
     }
