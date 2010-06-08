@@ -214,12 +214,10 @@ double MolineauxInfection::getVariantTranscendingSummation(){
 MolineauxInfection::MolineauxInfection (istream& stream) :
     CommonInfection(stream)
 {
-    Pc & stream;
     variantTranscendingSummation & stream;
     for(int i=0;i<v;i++){
 	m[i] & stream;
     	growthRate[i] & stream;
-	newP[i] & stream;
 	P[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
@@ -232,12 +230,10 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
 void MolineauxInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
 
-    Pc & stream;
     variantTranscendingSummation & stream;
     for(int i=0;i<v;i++){
 	m[i] & stream;
     	growthRate[i] & stream;
-	newP[i] & stream;
 	P[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
