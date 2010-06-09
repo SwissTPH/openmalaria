@@ -222,13 +222,14 @@ private:
   double P_A1;
   double P_An;
 
-  /** sets the PAS (See Document "Parameter Values for Transmission model" (Chitnis, Smith and Schapira, 4.3.2010))
+  /** Sets the P_A parameters (see document "Parameter Values for Transmission model"
+   * (Chitnis, Smith and Schapira, 4.3.2010)).
+   *
    *  initPA : Probability that a mosquito does not find a host and does not die in one night of searching
    *  P_A1 : Probability that a mosquito encounters a human on a given night.
    *  P_An : Probability that a mosquito encounters a non human host on a given night.
-   *
    */
-  void setPAS();
+  void setPAs();
 
   /** returns the human ento availability, calculated from PA, PA1, mosqSeekingDuration and population size.
    *

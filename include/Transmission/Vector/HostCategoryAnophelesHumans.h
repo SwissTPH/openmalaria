@@ -41,6 +41,7 @@ public:
 	HostCategoryAnophelesHumans() :
 		    humanBloodIndex(0.0), probMosqOvipositing(0.0)
 		  {}
+        /** The proportion of resting mosquitoes that have recently fed on human blood. */
 	double humanBloodIndex;
 	double probMosqOvipositing;
 	/**

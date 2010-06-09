@@ -64,7 +64,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
     nonHumanHosts[i] = otherHosts[i];
   }
 
-  setPAS();
+  setPAs();
   
   mosqSeekingDeathRate = ((1-initP_A-P_A1-P_An)/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
 
@@ -144,18 +144,17 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 }
 
 
-void VectorAnopheles::setPAS()
+void VectorAnopheles::setPAs()
 {
-	initP_A  = 1 - mosqLaidEggsSameDayProp;
-
-	double sum_ZiPbiPci = 0.0;
-	double sum_den = 0.0;
-	double mult_HBloodIndexPd1Pe1 = humanBase.humanBloodIndex * humanBase.probMosqSurvivalResting * humanBase.probMosqOvipositing;
-	double inv_HBlood = 1-humanBase.humanBloodIndex;
+	initP_A  = 1.0 - mosqLaidEggsSameDayProp;
 
 	if(!nonHumanHosts.empty())
 	{
-
+                double sum_ZiPbiPci = 0.0;
+                double sum_den = 0.0;
+                double mult_HBloodIndexPd1Pe1 = humanBase.humanBloodIndex * humanBase.probMosqSurvivalResting * humanBase.probMosqOvipositing;
+                double inv_HBlood = 1.0 - humanBase.humanBloodIndex;
+                
 		for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
 		{
 			double ZiPbiPci = nnh->relativeEntoAvailability * nnh->probMosqBiting * nnh->probMosqFindRestSite;
@@ -163,15 +162,22 @@ void VectorAnopheles::setPAS()
 			double mult_INVHBloodIndexPdiPei = inv_HBlood * nnh->probMosqSurvivalResting * humanBase.probMosqOvipositing;
 			sum_den += ZiPbiPci * (mult_HBloodIndexPd1Pe1 + mult_INVHBloodIndexPdiPei);
 		}
-
+		
 		double mult_A0Pf = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
 		P_A1 = (mult_A0Pf * humanBase.humanBloodIndex * sum_ZiPbiPci)/
 				(humanBase.probMosqBiting * humanBase.probMosqFindRestSite * sum_den);
-		P_An = (mult_A0Pf * inv_HBlood)/(sum_den);
+		 P_An = (mult_A0Pf * inv_HBlood)/(sum_den);
 	}
 	else
 	{
-		P_A1 = (mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle)/(humanBase.probMosqBiting*humanBase.probMosqFindRestSite*humanBase.probMosqSurvivalResting*humanBase.probMosqOvipositing);
+		P_A1 =
+                    (mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle) /
+                    (
+                        humanBase.probMosqBiting
+                        * humanBase.probMosqFindRestSite
+                        * humanBase.probMosqSurvivalResting
+                        * humanBase.probMosqOvipositing
+                    );
 		P_An = 0.0;
 	}
 
@@ -182,12 +188,16 @@ void VectorAnopheles::setPAS()
 
 double VectorAnopheles::getHumanEntoAvailability(int populationSize)
 {
-		return (1/((double)populationSize))*(P_A1/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
+    return (1.0 / ((double)populationSize))
+        * (P_A1 / (1.0-initP_A))
+        * (-log(initP_A) / mosqSeekingDuration);
 }
 
 double VectorAnopheles::getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability)
 {
-		return (1/(populationSize))*((P_An*relativeEntoAvailability)/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
+    return (1./(populationSize))
+        * ((P_An*relativeEntoAvailability)/(1.-initP_A))
+        * (-log(initP_A)/mosqSeekingDuration);
 }
 
 

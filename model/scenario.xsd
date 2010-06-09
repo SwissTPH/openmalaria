@@ -307,7 +307,10 @@
       <xs:element name="eir">
         <xs:annotation>
           <xs:documentation>
-	    Description of target entomological inoculation rate, used to calculate the vector emergence rate. An EIR array is generated from the exponent of the inverse discrete fourier transform of these parameters.
+	    Description of target entomological inoculation rate, used to
+	    calculate the vector emergence rate. An EIR array is generated
+	    from the exponent of the inverse discrete fourier transform of
+	    these parameters.
 	  </xs:documentation>
           <xs:appinfo>units:Inoculations per person per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
         </xs:annotation>
@@ -377,22 +380,22 @@
           </xs:attribute>
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability that the mosquito survives biting (TODO- check description);</xs:appinfo>
+              <xs:appinfo>name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability that the mosquito finds a resting place;</xs:appinfo>
+              <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbResting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability that the mosquito survives resting (TODO- check description);</xs:appinfo>
+              <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability that the mosquito survives oviposition (TODO- check description);</xs:appinfo>
+              <xs:appinfo>name:Probability of a mosquito successfully laying eggs given that it has rested;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqHumanBloodIndex" type="xs:double" use="required">
