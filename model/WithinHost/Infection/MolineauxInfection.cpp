@@ -145,7 +145,6 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 
 		double newPi;
 		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
-		double oldGrowthRate = growthRate[i];
 		growthRate[i] = (newPi - P[i])/2;
 	}
 }
