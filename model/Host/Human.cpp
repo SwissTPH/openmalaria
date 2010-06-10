@@ -258,9 +258,10 @@ void Human::summarize(Monitoring::Survey& survey) {
 
 
 double Human::calcProbTransmissionToMosquito() const {
-  /* This model was designed for 5-day timesteps. We use the same model
-  (sampling 10, 15 and 20 days ago) for 1-day timesteps to avoid having to
-  (design and analyse a new model. Description: AJTMH pp.32-33 */
+  /* This model (often referred to as the gametocyte model) was designed for
+  5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
+  for 1-day timesteps to avoid having to design and analyse a new model.
+  Description: AJTMH pp.32-33 */
   int ageTimeSteps=Global::simulationTime-_dateOfBirth;
   if (ageTimeSteps*Global::interval <= 20 || Global::simulationTime*Global::interval <= 20)
     return 0.0;

@@ -400,6 +400,7 @@
           </xs:attribute>
           <xs:attribute name="mosqHumanBloodIndex" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>The proportion of resting mosquitoes which fed on human blood during the last feed.</xs:documentation>
               <xs:appinfo>name:Human blood index;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
@@ -413,27 +414,27 @@
         <xs:complexType>
           <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
-              <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+              <xs:appinfo>name:Identifier for this category of non-human hosts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqRelativeEntoAvailability" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+              <xs:appinfo>name:Relative availability of nonhuman hosts of type i (to other nonhuman hosts) ;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+              <xs:appinfo>name:Probability of mosquito successfully biting host ;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+              <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting ;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbResting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+              <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site ;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -441,7 +442,7 @@
     </xs:sequence>
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>
-        <xs:appinfo>name:(TODO- Nakul to assign description);</xs:appinfo>
+        <xs:appinfo>name:Identifier for this anopheles species;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="propInfected" type="xs:double" use="required">
@@ -544,6 +545,23 @@
                   </xs:documentation>
                   <xs:appinfo>
                     units:Days;min:1;max:unbounded;name:Days between reports;
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="duringInit" type="xs:boolean" use="optional">
+                <xs:annotation>
+                  <xs:documentation>
+                    Also output during initialization. By default this is
+                    disabled (only intervention-period data is output). This
+                    should not be used for predictions, but can be useful for
+                    model validation.
+                    
+                    In this mode, 'simulation time' is output as the first
+                    column (in addition to 'timestep'), since 'timestep' is dis-
+                    continuous across the start of the intervention period.
+                  </xs:documentation>
+                  <xs:appinfo>
+                    units:Days;min:1;max:unbounded;name:During initialization;
                   </xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
@@ -1647,7 +1665,7 @@
     <xs:attribute name="mg" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>Quantity of drug compound</xs:documentation>
-        <xs:appinfo>units:mg;name:drug dose (TODO is this correct?);</xs:appinfo>
+        <xs:appinfo>units:mg;name:drug dose;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="hour" type="xs:double" use="required">

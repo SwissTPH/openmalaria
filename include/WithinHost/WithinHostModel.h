@@ -104,6 +104,8 @@ public:
   
   inline double getTotalDensity() const {return totalDensity;}
   inline double getTimeStepMaxDensity() const {return timeStepMaxDensity;}
+  inline double getCumulativeh() const {return _cumulativeh;}
+  inline double getCumulativeY() const {return _cumulativeY;}
   
   ///@brief Only do anything when IPT is present:
   //@{

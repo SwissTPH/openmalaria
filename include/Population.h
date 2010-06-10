@@ -93,6 +93,10 @@ private:
     
     /// Delegate to print the number of births since last count
     void ctsRecentBirths (ostream& stream);
+    /// Delegate to print immunity's cumulativeh parameter
+    void ctsImmunityh (ostream& stream);
+    /// Delegate to print immunity's cumulativeY parameter
+    void ctsImmunityY (ostream& stream);
     
     /** Generic function to activate some intervention on all humans within the
      * age range and passing the compliance test given by mass.

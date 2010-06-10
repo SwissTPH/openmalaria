@@ -163,6 +163,14 @@ public:
     return _probTransmissionToMosquito;
   }
   
+  ///@brief Access to sub-models
+  //@{
+  /// The WithinHostModel models parasite density and immunity
+  inline const WithinHost::WithinHostModel& getWithinHostModel (){
+      return *withinHostModel;
+  }
+  //@}
+  
   
   ///@name static public
   //@{

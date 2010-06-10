@@ -49,6 +49,7 @@ namespace OM { namespace Monitoring {
     // List that we report.
     vector< FastDelegate1<ostream&> > toReport;
     int ctsPeriod = 0;
+    bool duringInit = false;
     
     /* Initialise: enable outputs registered and requested in XML.
      * Search for Continuous::registerCallback to see outputs available. */
@@ -65,6 +66,9 @@ namespace OM { namespace Monitoring {
 	else if( ctsOpt.get().getPeriod() % Global::interval != 0 )
 	    cerr << "Warning: monitoring.continuous.period not a whole number of timesteps" << endl;
 	
+        if( ctsOpt.get().getDuringInit().present() )
+            duringInit = ctsOpt.get().getDuringInit().get();
+        
 	// This locale ensures uniform formatting of nans and infs on all platforms.
 	locale old_locale;
 	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
@@ -85,6 +89,8 @@ namespace OM { namespace Monitoring {
 	    ctsOStream.open( CTS_FILENAME );
 	    ctsOStream << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
 	    
+	    if( duringInit )
+                ctsOStream << "simulation time\t";
 	    ctsOStream << "timestep";
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
 	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
@@ -109,8 +115,16 @@ namespace OM { namespace Monitoring {
     }
     
     void Continuous::update (){
-	if( Global::timeStep < 0 || ctsPeriod == 0 || Global::timeStep % ctsPeriod != 0 )
-	    return;
+        if( ctsPeriod == 0 )
+            return;
+        if( !duringInit ){
+            if( Global::timeStep < 0 || Global::timeStep % ctsPeriod != 0 )
+                return;
+        } else {
+            if( Global::simulationTime % ctsPeriod != 0 )
+                return;
+            ctsOStream << Global::simulationTime << '\t';
+        }
 	
 	ctsOStream << Global::timeStep;
 	for( size_t i = 0; i < toReport.size(); ++i )

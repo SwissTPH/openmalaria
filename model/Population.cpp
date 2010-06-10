@@ -95,6 +95,8 @@ Population::Population()
 {
     using Monitoring::Continuous;
     Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
+    Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
+    Continuous::registerCallback( "immunity Y", "\timmunity Y", MakeDelegate( this, &Population::ctsImmunityY ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
@@ -161,10 +163,6 @@ void Population::newHuman (int dob)
 {
     population.push_back (Host::Human (*_transmissionModel, dob, Global::simulationTime));
     ++recentBirths;
-}
-void Population::ctsRecentBirths (ostream& stream){
-    stream << '\t' << recentBirths;
-    recentBirths = 0;
 }
 
 void Population::update1()
@@ -237,7 +235,28 @@ void Population::update1()
 }
 
 
-// -----  non-static methods: summarising and interventions  -----
+// -----  non-static methods: reporting  -----
+
+void Population::ctsRecentBirths (ostream& stream){
+    stream << '\t' << recentBirths;
+    recentBirths = 0;
+}
+void Population::ctsImmunityh (ostream& stream){
+    double x = 0.0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        x += iter->getWithinHostModel().getCumulativeh();
+    }
+    x /= populationSize;
+    stream << '\t' << x;
+}
+void Population::ctsImmunityY (ostream& stream){
+    double x = 0.0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        x += iter->getWithinHostModel().getCumulativeY();
+    }
+    x /= populationSize;
+    stream << '\t' << x;
+}
 
 void Population::newSurvey ()
 {
@@ -247,6 +266,9 @@ void Population::newSurvey ()
     }
     _transmissionModel->summarize (current);
 }
+
+
+// -----  non-static methods: interventions  -----
 
 void Population::implementIntervention (int time)
 {

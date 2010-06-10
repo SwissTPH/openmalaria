@@ -33,7 +33,7 @@ namespace OM {
     using boost::format;
     
 /// Current schema version.
-const int SCHEMA_VERSION = 19;
+const int SCHEMA_VERSION = 20;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
