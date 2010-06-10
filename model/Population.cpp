@@ -95,6 +95,7 @@ Population::Population()
 {
     using Monitoring::Continuous;
     Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
+    Continuous::registerCallback( "patent hosts", "\tpatent hosts", MakeDelegate( this, &Population::ctsPatentHosts ) );
     Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
     Continuous::registerCallback( "immunity Y", "\timmunity Y", MakeDelegate( this, &Population::ctsImmunityY ) );
     
@@ -240,6 +241,14 @@ void Population::update1()
 void Population::ctsRecentBirths (ostream& stream){
     stream << '\t' << recentBirths;
     recentBirths = 0;
+}
+void Population::ctsPatentHosts (ostream& stream){
+    int patent = 0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        if( iter->getWithinHostModel().parasiteDensityDetectible() )
+            ++patent;
+    }
+    stream << '\t' << patent;
 }
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;

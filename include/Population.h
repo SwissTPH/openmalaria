@@ -93,6 +93,8 @@ private:
     
     /// Delegate to print the number of births since last count
     void ctsRecentBirths (ostream& stream);
+    /// Delegate to print the number of patent hosts
+    void ctsPatentHosts (ostream& stream);
     /// Delegate to print immunity's cumulativeh parameter
     void ctsImmunityh (ostream& stream);
     /// Delegate to print immunity's cumulativeY parameter
