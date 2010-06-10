@@ -1,0 +1,16 @@
+This directory contains XSD schema files describing scenario files.
+
+Test scenarios (in the ../test dir) should always use scenario.xsd.
+This should always be the latest version (I was going to name it scenario_latest.xsd, but the code has lots of dependencies on the name).
+
+Update policy:
+*   update scenario.xsd and C++ code
+*   update the schema translator (../util/SchemaTranslator) with a function translating the last release version to the next (translateXToY where X is current version, Y=X+1), doing necessary translations and writing a comment explaining the change
+*   update test scenarios when necessary (at least those run by ctest)
+*   within inputData.cpp, update SCHEMA_VERSION to the next version number (otherwise it'll refuse to run updated scenarios)
+
+Release policy (new schema versions):
+*   copy scenario.xsd to scenario_VER.xsd
+*   update the CURRENT_VERSION var in the schema translator
+*   run all scenarios in ../test dir through the schema translator (those already updated by hand should have had their version numbers updated already, so the schema translator doesn't try updating them again)
+

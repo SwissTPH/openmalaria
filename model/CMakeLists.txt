@@ -80,7 +80,7 @@ set (Model_CPP
 # Headers - only included so they show up in IDEs:
 file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
 
-set (XSD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/scenario.xsd)
+set (XSD_FILE ${CMAKE_SOURCE_DIR}/schema/scenario.xsd)
 add_custom_command (
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
   COMMAND ${XSD_EXECUTABLE} cxx-tree

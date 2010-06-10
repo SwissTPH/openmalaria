@@ -939,6 +939,11 @@ public class SchemaTranslator {
 	
 	return true;
     }
+    
+    // Version 20
+    // Added monitoring -> continuous -> duringInit optional attribute (no translation needed)
+    public boolean translate19To20() throws Exception {
+    }
 
     /**
      * This function is used to translate the 5-day timestep fitting

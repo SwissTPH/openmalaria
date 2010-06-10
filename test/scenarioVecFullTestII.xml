@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="19" wuID="0" xsi:noNamespaceSchemaLocation="scenario_19.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="20" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -24,11 +24,13 @@
     </ageGroup>
   </demography>
   <monitoring name="Quarterly Surveys">
-    <continuous period="5">
+    <continuous period="5" duringInit="true">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
       <option name="N_v0" value="true"/>
+      <option name="immunity h" value="true"/>
+      <option name="immunity Y" value="true"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>

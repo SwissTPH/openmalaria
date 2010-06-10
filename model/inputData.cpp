@@ -109,23 +109,19 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
 {
     xmlFileName = lXmlFile;
     //Parses the document
+    
+    // Opening by filename causes a schema lookup in the scenario file's dir,
+    // which no longer works (schemas moved).
+    // Opening with a stream causes it to look in the working directory.
     //NOTE: it'd be nice if this used Global::lookupResource for the schema.
-# ifdef WITHOUT_BOINC
-    // We don't need a checksum when not run with BOINC, so open by filename,
-    // which allows using the filename to help find the schema file.
+    
     // Note that the schema location can be set manually by passing properties,
     // but we won't necessarily have the right schema version associated with
     // the XML file in that case.
-    scenario = (scnXml::parseScenario (lXmlFile.c_str())).release();
-    //NOTE: Non-boinc Checksum::generate() doesn't work anyway, so don't need a real stream.
-    ifstream fileStream;
-    util::Checksum cksum = util::Checksum::generate (fileStream);
-# else
     ifstream fileStream (lXmlFile.c_str(), ios::binary);
     scenario = (scnXml::parseScenario (fileStream)).release();
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
-#endif
     if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
         ostringstream msg;
         msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
