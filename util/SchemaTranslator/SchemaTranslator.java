@@ -1708,6 +1708,31 @@ public class SchemaTranslator {
 
         scenarioElement.insertBefore(drugDescription, modelElement);
 
+        //creating MDADescription element, if there are interventions...
+
+        Element interventions = (Element)scenarioElement.getElementsByTagName("interventions").item(0);
+        if(interventions.getAttribute("name").equals("A2 Intervention"))
+        {
+            Element mdaDescription = scenarioDocument.createElement("MDADescription");
+            Element mdaSchedule = scenarioDocument.createElement("schedule");
+
+            Element mdaMedicate = scenarioDocument.createElement("medicate");
+            Attr mdaDrug = scenarioDocument.createAttribute("drug");
+            mdaDrug.setNodeValue("effective");
+            Attr mdaHour = scenarioDocument.createAttribute("hour");
+            mdaHour.setNodeValue("0");
+            Attr mdaMg = scenarioDocument.createAttribute("mg");
+            mdaMg.setNodeValue("1");
+
+            mdaMedicate.setAttributeNode(mdaDrug);
+            mdaMedicate.setAttributeNode(mdaHour);
+            mdaMedicate.setAttributeNode(mdaMg);
+
+            mdaSchedule.appendChild(mdaMedicate);
+            mdaDescription.appendChild(mdaSchedule);
+            interventions.insertBefore(mdaDescription, interventions.getFirstChild());
+
+        }
     	return true;
     }
     
