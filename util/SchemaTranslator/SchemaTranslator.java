@@ -940,6 +940,15 @@ public class SchemaTranslator {
 	return true;
     }
 
+    /**
+     * This function is used to translate the 5-day timestep fitting
+     * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly
+     * simple case management description (no interventions, no treatment),
+     * then it's not too difficult to translate those scenarii. This translation
+     * is therefore not intended for more complicated 5-day timestep scenarii.
+     * @return true if the translation was a success.
+     *
+     */
     private Boolean oDTTranslation() {
 
     	Element surveys = (Element)scenarioElement.getElementsByTagName("surveys").item(0);
@@ -1643,6 +1652,62 @@ public class SchemaTranslator {
         }
         else return false;
 
+        // creating drugdescription element
+        Element drugDescription = scenarioDocument.createElement("drugDescription");
+
+        Element drug = scenarioDocument.createElement("drug");
+        Attr abbrev = scenarioDocument.createAttribute("abbrev");
+        abbrev.setNodeValue("effective");
+        drug.setAttributeNode(abbrev);
+
+        Element pd = scenarioDocument.createElement("PD");
+
+        Element allele = scenarioDocument.createElement("allele");
+        Attr nameAllele = scenarioDocument.createAttribute("name");
+        nameAllele.setNodeValue("sensitive");
+        allele.setAttributeNode(nameAllele);
+
+        Element initial_frequency = scenarioDocument.createElement("initial_frequency");
+        initial_frequency.setTextContent("1");
+
+        Element max_killing_rate = scenarioDocument.createElement("max_killing_rate");
+        max_killing_rate.setTextContent("1e7");
+
+        Element ic50 = scenarioDocument.createElement("IC50");
+        ic50.setTextContent("1");
+
+        Element slope = scenarioDocument.createElement("slope");
+        slope.setTextContent("1");
+
+        allele.appendChild(initial_frequency);
+        allele.appendChild(max_killing_rate);
+        allele.appendChild(ic50);
+        allele.appendChild(slope);
+
+        pd.appendChild(allele);
+        drug.appendChild(pd);
+
+
+        Element pk = scenarioDocument.createElement("PK");
+
+        Element negligible_concentration = scenarioDocument.createElement("negligible_concentration");
+        negligible_concentration.setTextContent("1e-5");
+
+        Element half_life = scenarioDocument.createElement("half_life");
+        half_life.setTextContent("0.00069");
+
+        Element vol_dist = scenarioDocument.createElement("vol_dist");
+        vol_dist.setTextContent("0.01667");
+
+        pk.appendChild(negligible_concentration);
+        pk.appendChild(half_life);
+        pk.appendChild(vol_dist);
+        drug.appendChild(pk);
+
+        drugDescription.appendChild(drug);
+
+        scenarioElement.insertBefore(drugDescription, modelElement);
+
     	return true;
     }
     
@@ -1722,6 +1787,7 @@ public class SchemaTranslator {
             } else if (args[i].equals("--oneDayTimesteps")) {
             	doODTTranslation = true;
                 doValidation = false;
+                System.out.println("You have chosen the --oneDayTimesteps option, this option is only intended for the fitting scenarii or scenarii using no intervention and/or no ");
             } else if (args[i].equals("--no-validation")) {
                 doValidation = false;
             } else if (args[i].equals("--no-translation")) {
