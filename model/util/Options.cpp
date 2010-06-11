@@ -68,6 +68,8 @@ namespace OM { namespace util {
 		    fileGiven = true;
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
+                } else if (clo == "validate-only") {
+                    options.set (VALIDATE_ONLY);
 		} else if (clo == "checkpoint") {
 		    options.set (TEST_CHECKPOINTING);
 		} else if (clo.compare (0,11,"checkpoint=") == 0) {
@@ -128,6 +130,7 @@ namespace OM { namespace util {
 	    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
+            << "	--validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "	--checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
 	    << "			more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl

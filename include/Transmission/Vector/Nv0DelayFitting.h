@@ -91,8 +91,9 @@ T fit (double fcR, const vector<T>& fc, const vector<T>& samples)
   T min = 0.0;
   T max = 2*M_PI;	// can we provide better bounds?
   T guess = 0.0;
-  int digits = std::numeric_limits<T>::digits / 2;	//TODO: check how many digits we should provide
-  //TODO: see whether halley_iterate or schroeder_iterate is faster
+  //NOTE: fitting can be tweaked. Can alter expected digits, and test whether
+  // halley_iterate or schroeder_iterate converges faster. Current setup works fine in any case.
+  int digits = std::numeric_limits<T>::digits / 2;
   return -boost::math::tools::halley_iterate (eDFunctor<T>(fcR, fc, samples), guess, min, max, digits);
 }
 }

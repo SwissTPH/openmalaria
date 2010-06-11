@@ -240,7 +240,7 @@ protected:
    * 
    * Contains values from today to the previous timestep, one year ago,
    * including the initialisation phase. */
-  vector<double> innoculationsPerDayOfYear;	// NOTE: currently only need current timestep's value, so could make a scalar
+  vector<double> innoculationsPerDayOfYear;
   
   /** The total number of innoculations per age group, summed over the
    * reporting period. */

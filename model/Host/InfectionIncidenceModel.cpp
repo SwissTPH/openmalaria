@@ -63,8 +63,7 @@ void InfectionIncidenceModel::init () {
   r_square_Gamma=(totalInfectionrateVariance**2-gsi*BaselineAvailabilityMean)/(gsi*BaselineAvailabilityMean)**2
   r_square_Gamma must be greater than zero, so r_square_LogNormal is also. 
   */
-  r_square_Gamma=0.649;
-  //such that r_square_LogNormal =0.5
+  r_square_Gamma=0.649; //such that r_square_LogNormal =0.5
   
   if (util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION)) {
     InfectionrateShapeParam = (BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
@@ -116,7 +115,9 @@ double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
 double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
     // given BaselineAvailabilityShapeParam = sqrt (log (1 + variance/mean²))
     // and baseAvailability = mean, this is a draw from the log-normal distribution.
-    // FIXME: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
+    if( baseAvailability != 1.0 )
+        // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
+        throw logic_error("LogNormalMAII::getAvailabilityFactor");
   return random::log_normal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 		     BaselineAvailabilityShapeParam);
 }

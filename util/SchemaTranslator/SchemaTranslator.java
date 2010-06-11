@@ -190,7 +190,7 @@ public class SchemaTranslator {
             xformer.transform(new DOMSource(scenarioDocument), result);
         }
         if (doValidation)
-            validate(scenarioDocument, schemaFileName, "../../test/");
+            validate(scenarioDocument, schemaFileName, "../../schema/");
     }
 
     private void updateDB() {
@@ -943,6 +943,7 @@ public class SchemaTranslator {
     // Version 20
     // Added monitoring -> continuous -> duringInit optional attribute (no translation needed)
     public boolean translate19To20() throws Exception {
+        return true;
     }
 
     /**

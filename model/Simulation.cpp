@@ -47,6 +47,8 @@ namespace OM {
 Simulation::Simulation(util::Checksum ck)
 : simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL), workUnitIdentifier(0), cksum(ck)
 {
+    OM::Global::init ();
+    
     Global::simulationTime = 0;
     Global::timeStep = numeric_limits<int>::min();
     

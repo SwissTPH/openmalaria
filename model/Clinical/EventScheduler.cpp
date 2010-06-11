@@ -127,8 +127,13 @@ double ClinicalEventScheduler::getPDeathInitial (double ageYears) {
     return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup)
-{
+void ClinicalEventScheduler::doClinicalUpdate (
+    WithinHost::WithinHostModel& withinHostModel,
+    PerHostTransmission& hostTransmission,
+    double ageYears,
+    const AgeGroupData ageGroupData,
+    Monitoring::AgeGroup ageGroup
+){
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);

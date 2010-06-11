@@ -124,10 +124,11 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
     ++nByAge[ag.i()];
   }
   
-#ifndef NDEBUG
-  if (sumWeight < DBL_MIN * 4.0)	// if approx. eq. 0 or negative
-    throw runtime_error ("sumWeight is invalid");
-#endif
+  if ( !(sumWeight > DBL_MIN * 10.0) ){	// if approx. eq. 0, negative or an NaN
+      ostringstream msg;
+      msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<ageCorrectionFactor;
+      throw runtime_error(msg.str());
+  }
   
   size_t tmod = (simulationTime-1) % Global::intervalsPerYear;
   kappa[tmod] = sumWt_kappa / sumWeight;
@@ -141,6 +142,14 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
       _sumAnnualKappa = 0.0;
   }
   
+  // Shared graphics: report infectiousness
+  if (Global::simulationTime % 6 ==  0) {
+    for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
+      kappaByAge[i] /= nByAge[i];
+    util::SharedGraphics::copyKappa(&kappaByAge[0]);
+  }
+  
+  // Sum up innoculations this timestep
   double timeStepTotal = 0.0;
   for (size_t group = 0; group < timeStepEntoInnocs.size(); ++group) {
     timeStepTotal += timeStepEntoInnocs[group];
@@ -155,13 +164,6 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   BSSTimesteps++;
 
   timeStepNumEntoInnocs = 0;
-  
-  // Shared graphics: report infectiousness
-  if (Global::simulationTime % 6 ==  0) {
-    for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
-      kappaByAge[i] /= nByAge[i];
-    util::SharedGraphics::copyKappa(&kappaByAge[0]);
-  }
 }
 
 double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup) {
