@@ -1021,13 +1021,13 @@ public class SchemaTranslator {
 
             if(valueString.equals("Do Monitoring HS")||valueString.equals("Np Monitoring HS"))
             {
-                Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+                Element eventScheduler = scenarioDocument.createElement("EventScheduler");
                 changeHS.removeChild(immediateOutcomes);
 
-                Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
-                Element decisions = (Element)scenarioDocument.createElement("decisions");
+                Element uncomplicated = scenarioDocument.createElement("uncomplicated");
+                Element decisions = scenarioDocument.createElement("decisions");
 
-                Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+                Element decisionTreat = scenarioDocument.createElement("decision");
 
                 Attr nameTreat = scenarioDocument.createAttribute("name");
                 nameTreat.setNodeValue("treatment");
@@ -1042,7 +1042,7 @@ public class SchemaTranslator {
                 decisionTreat.setTextContent("effective_treat");
                 decisions.appendChild(decisionTreat);
 
-                Element decisionTest = (Element)scenarioDocument.createElement("decision");
+                Element decisionTest = scenarioDocument.createElement("decision");
 
                 Attr nameTest = scenarioDocument.createAttribute("name");
                 nameTest.setNodeValue("test");
@@ -1059,20 +1059,20 @@ public class SchemaTranslator {
 
                 uncomplicated.appendChild(decisions);
 
-                Element treatments = (Element)scenarioDocument.createElement("treatments");
-                Element treatment = (Element)scenarioDocument.createElement("treatment");
+                Element treatments = scenarioDocument.createElement("treatments");
+                Element treatment = scenarioDocument.createElement("treatment");
                 Attr nameTreatEl = scenarioDocument.createAttribute("name");
                 nameTreatEl.setNodeValue("effective_treat");
                 treatment.setAttributeNode(nameTreatEl);
 
-                Element schedule = (Element)scenarioDocument.createElement("schedule");
-                Element medicate = (Element)scenarioDocument.createElement("medicate");
+                Element schedule = scenarioDocument.createElement("schedule");
+                Element medicate = scenarioDocument.createElement("medicate");
 
-                Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+                Attr drug = scenarioDocument.createAttribute("drug");
                 drug.setNodeValue("effective");
-                Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+                Attr mg = scenarioDocument.createAttribute("mg");
                 mg.setNodeValue("1");
-                Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+                Attr hour = scenarioDocument.createAttribute("hour");
                 hour.setNodeValue("0");
 
                 medicate.setAttributeNode(drug);
@@ -1083,22 +1083,22 @@ public class SchemaTranslator {
                 treatment.appendChild(schedule);
                 treatments.appendChild(treatment);
 
-                Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
-                Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+                Element treatmentNone = scenarioDocument.createElement("treatment");
+                Attr nameTreatNone = scenarioDocument.createAttribute("name");
                 nameTreatNone.setNodeValue("none");
                 treatmentNone.setAttributeNode(nameTreatNone);
 
-                Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+                Element scheduleNone = scenarioDocument.createElement("schedule");
                 treatmentNone.appendChild(scheduleNone);
                 treatments.appendChild(treatmentNone);
                 uncomplicated.appendChild(treatments);
 
                 eventScheduler.appendChild(uncomplicated);
 
-                Element complicated = (Element)scenarioDocument.createElement("complicated");
-                Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+                Element complicated = scenarioDocument.createElement("complicated");
+                Element decisionsComp = scenarioDocument.createElement("decisions");
 
-                Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+                Element decisionCompTreat = scenarioDocument.createElement("decision");
 
                 Attr nameCompTreat = scenarioDocument.createAttribute("name");
                 nameCompTreat.setNodeValue("treatment");
@@ -1113,7 +1113,7 @@ public class SchemaTranslator {
                 decisionCompTreat.setTextContent("effective_treat");
                 decisionsComp.appendChild(decisionCompTreat);
 
-                Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+                Element decisionCompHosp = scenarioDocument.createElement("decision");
 
                 Attr nameCompHosp = scenarioDocument.createAttribute("name");
                 nameCompHosp.setNodeValue("hospitalisation");
@@ -1128,7 +1128,7 @@ public class SchemaTranslator {
                 decisionCompHosp.setTextContent("immediate");
                 decisionsComp.appendChild(decisionCompHosp);
 
-                Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+                Element decisionCompTest = scenarioDocument.createElement("decision");
 
                 Attr nameCompTest = scenarioDocument.createAttribute("name");
                 nameCompTest.setNodeValue("test");
@@ -1145,20 +1145,20 @@ public class SchemaTranslator {
 
                 complicated.appendChild(decisionsComp);
 
-                Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
-                Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+                Element treatmentsComp = scenarioDocument.createElement("treatments");
+                Element treatmentComp = scenarioDocument.createElement("treatment");
                 Attr nameTreatComp = scenarioDocument.createAttribute("name");
                 nameTreatComp.setNodeValue("effective_treat");
                 treatmentComp.setAttributeNode(nameTreatComp);
 
-                Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
-                Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+                Element scheduleComp = scenarioDocument.createElement("schedule");
+                Element medicateComp = scenarioDocument.createElement("medicate");
 
-                Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+                Attr drugComp = scenarioDocument.createAttribute("drug");
                 drugComp.setNodeValue("effective");
-                Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+                Attr mgComp = scenarioDocument.createAttribute("mg");
                 mgComp.setNodeValue("1");
-                Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+                Attr hourComp = scenarioDocument.createAttribute("hour");
                 hourComp.setNodeValue("0");
 
                 medicateComp.setAttributeNode(drugComp);
@@ -1169,34 +1169,34 @@ public class SchemaTranslator {
                 treatmentComp.appendChild(scheduleComp);
                 treatmentsComp.appendChild(treatmentComp);
 
-                Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
-                Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+                Element treatmentCompNone = scenarioDocument.createElement("treatment");
+                Attr nameTreatCompNone = scenarioDocument.createAttribute("name");
                 nameTreatCompNone.setNodeValue("none");
                 treatmentCompNone.setAttributeNode(nameTreatCompNone);
 
-                Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+                Element scheduleCompNone = scenarioDocument.createElement("schedule");
                 treatmentCompNone.appendChild(scheduleCompNone);
                 treatmentsComp.appendChild(treatmentCompNone);
                 complicated.appendChild(treatmentsComp);
 
                 eventScheduler.appendChild(complicated);
 
-                Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
-                Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+                Element clinicalOutcomes = scenarioDocument.createElement("ClinicalOutcomes");
+                Element maxUCSeekingMemory = scenarioDocument.createElement("maxUCSeekingMemory");
                 maxUCSeekingMemory.setTextContent("3");
-                Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+                Element uncomplicatedCaseDuration = scenarioDocument.createElement("uncomplicatedCaseDuration");
                 uncomplicatedCaseDuration.setTextContent("3");
-                Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+                Element complicatedCaseDuration = scenarioDocument.createElement("complicatedCaseDuration");
                 complicatedCaseDuration.setTextContent("5");
-                Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+                Element complicatedRiskDuration = scenarioDocument.createElement("complicatedRiskDuration");
                 complicatedRiskDuration.setTextContent("5");
-                Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+                Element pImmediateUC = scenarioDocument.createElement("pImmediateUC");
                 pImmediateUC.setTextContent("1");
-                //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+                //Element propDeathsFirstDay = scenarioDocument.createElement("propDeathsFirstDay");
                 //propDeathsFirstDay.setTextContent("0.4");
 
                 //this communityOddsMultiplier will be removed (for schema >= 19)
-                //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+                //Element communityOddsMultiplier = scenarioDocument.createElement("communityOddsMultiplier");
                 //communityOddsMultiplier.setTextContent("1.5");
 
                 clinicalOutcomes.appendChild(maxUCSeekingMemory);
@@ -1231,13 +1231,13 @@ public class SchemaTranslator {
 
         if(valueString.equals("no Treatment")||valueString.equals("Mortality Fitting")||valueString.equals("no Treatment no Mortality"))
         {
-            Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+            Element eventScheduler = scenarioDocument.createElement("EventScheduler");
             healthSystem.removeChild(immediateOutcomes);
             
-            Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
-            Element decisions = (Element)scenarioDocument.createElement("decisions");
+            Element uncomplicated = scenarioDocument.createElement("uncomplicated");
+            Element decisions = scenarioDocument.createElement("decisions");
 
-            Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+            Element decisionTreat = scenarioDocument.createElement("decision");
 
             Attr nameTreat = scenarioDocument.createAttribute("name");
             nameTreat.setNodeValue("treatment");
@@ -1252,7 +1252,7 @@ public class SchemaTranslator {
             decisionTreat.setTextContent("none");
             decisions.appendChild(decisionTreat);
 
-            Element decisionTest = (Element)scenarioDocument.createElement("decision");
+            Element decisionTest = scenarioDocument.createElement("decision");
 
             Attr nameTest = scenarioDocument.createAttribute("name");
             nameTest.setNodeValue("test");
@@ -1269,20 +1269,20 @@ public class SchemaTranslator {
 
             uncomplicated.appendChild(decisions);
 
-            Element treatments = (Element)scenarioDocument.createElement("treatments");
-            Element treatment = (Element)scenarioDocument.createElement("treatment");
+            Element treatments = scenarioDocument.createElement("treatments");
+            Element treatment = scenarioDocument.createElement("treatment");
             Attr nameTreatEl = scenarioDocument.createAttribute("name");
             nameTreatEl.setNodeValue("effective_treat");
             treatment.setAttributeNode(nameTreatEl);
 
-            Element schedule = (Element)scenarioDocument.createElement("schedule");
-            Element medicate = (Element)scenarioDocument.createElement("medicate");
+            Element schedule = scenarioDocument.createElement("schedule");
+            Element medicate = scenarioDocument.createElement("medicate");
 
-            Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+            Attr drug = scenarioDocument.createAttribute("drug");
             drug.setNodeValue("effective");
-            Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+            Attr mg = scenarioDocument.createAttribute("mg");
             mg.setNodeValue("1");
-            Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+            Attr hour = scenarioDocument.createAttribute("hour");
             hour.setNodeValue("0");
 
             medicate.setAttributeNode(drug);
@@ -1293,22 +1293,22 @@ public class SchemaTranslator {
             treatment.appendChild(schedule);
             treatments.appendChild(treatment);
 
-            Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
-            Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+            Element treatmentNone = scenarioDocument.createElement("treatment");
+            Attr nameTreatNone = scenarioDocument.createAttribute("name");
             nameTreatNone.setNodeValue("none");
             treatmentNone.setAttributeNode(nameTreatNone);
 
-            Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+            Element scheduleNone = scenarioDocument.createElement("schedule");
             treatmentNone.appendChild(scheduleNone);
             treatments.appendChild(treatmentNone);
             uncomplicated.appendChild(treatments);
             
             eventScheduler.appendChild(uncomplicated);
 
-            Element complicated = (Element)scenarioDocument.createElement("complicated");
-            Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+            Element complicated = scenarioDocument.createElement("complicated");
+            Element decisionsComp = scenarioDocument.createElement("decisions");
 
-            Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompTreat = scenarioDocument.createElement("decision");
 
             Attr nameCompTreat = scenarioDocument.createAttribute("name");
             nameCompTreat.setNodeValue("treatment");
@@ -1323,7 +1323,7 @@ public class SchemaTranslator {
             decisionCompTreat.setTextContent("none");
             decisionsComp.appendChild(decisionCompTreat);
 
-            Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompHosp = scenarioDocument.createElement("decision");
 
             Attr nameCompHosp = scenarioDocument.createAttribute("name");
             nameCompHosp.setNodeValue("hospitalisation");
@@ -1338,7 +1338,7 @@ public class SchemaTranslator {
             decisionCompHosp.setTextContent("none");
             decisionsComp.appendChild(decisionCompHosp);
 
-            Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompTest = scenarioDocument.createElement("decision");
 
             Attr nameCompTest = scenarioDocument.createAttribute("name");
             nameCompTest.setNodeValue("test");
@@ -1355,20 +1355,20 @@ public class SchemaTranslator {
 
             complicated.appendChild(decisionsComp);
 
-            Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
-            Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+            Element treatmentsComp = scenarioDocument.createElement("treatments");
+            Element treatmentComp = scenarioDocument.createElement("treatment");
             Attr nameTreatComp = scenarioDocument.createAttribute("name");
             nameTreatComp.setNodeValue("effective_treat");
             treatmentComp.setAttributeNode(nameTreatComp);
 
-            Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
-            Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+            Element scheduleComp = scenarioDocument.createElement("schedule");
+            Element medicateComp = scenarioDocument.createElement("medicate");
 
-            Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+            Attr drugComp = scenarioDocument.createAttribute("drug");
             drugComp.setNodeValue("effective");
-            Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+            Attr mgComp = scenarioDocument.createAttribute("mg");
             mgComp.setNodeValue("1");
-            Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+            Attr hourComp = scenarioDocument.createAttribute("hour");
             hourComp.setNodeValue("0");
 
             medicateComp.setAttributeNode(drugComp);
@@ -1379,34 +1379,34 @@ public class SchemaTranslator {
             treatmentComp.appendChild(scheduleComp);
             treatmentsComp.appendChild(treatmentComp);
 
-            Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
-            Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+            Element treatmentCompNone = scenarioDocument.createElement("treatment");
+            Attr nameTreatCompNone = scenarioDocument.createAttribute("name");
             nameTreatCompNone.setNodeValue("none");
             treatmentCompNone.setAttributeNode(nameTreatCompNone);
 
-            Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+            Element scheduleCompNone = scenarioDocument.createElement("schedule");
             treatmentCompNone.appendChild(scheduleCompNone);
             treatmentsComp.appendChild(treatmentCompNone);
             complicated.appendChild(treatmentsComp);
 
             eventScheduler.appendChild(complicated);
 
-            Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
-            Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+            Element clinicalOutcomes = scenarioDocument.createElement("ClinicalOutcomes");
+            Element maxUCSeekingMemory = scenarioDocument.createElement("maxUCSeekingMemory");
             maxUCSeekingMemory.setTextContent("3");
-            Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+            Element uncomplicatedCaseDuration = scenarioDocument.createElement("uncomplicatedCaseDuration");
             uncomplicatedCaseDuration.setTextContent("3");
-            Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+            Element complicatedCaseDuration = scenarioDocument.createElement("complicatedCaseDuration");
             complicatedCaseDuration.setTextContent("5");
-            Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+            Element complicatedRiskDuration = scenarioDocument.createElement("complicatedRiskDuration");
             complicatedRiskDuration.setTextContent("5");
-            Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+            Element pImmediateUC = scenarioDocument.createElement("pImmediateUC");
             pImmediateUC.setTextContent("1");
-            //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            //Element propDeathsFirstDay = scenarioDocument.createElement("propDeathsFirstDay");
             //propDeathsFirstDay.setTextContent("0.4");
 
             //this communityOddsMultiplier will be removed (for schema >= 19)
-            //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+            //Element communityOddsMultiplier = scenarioDocument.createElement("communityOddsMultiplier");
             //communityOddsMultiplier.setTextContent("1.5");
 
             clinicalOutcomes.appendChild(maxUCSeekingMemory);
@@ -1429,13 +1429,13 @@ public class SchemaTranslator {
         }
         else if(valueString.equals("Ironmal"))
         {
-            Element eventScheduler = (Element)scenarioDocument.createElement("EventScheduler");
+            Element eventScheduler = scenarioDocument.createElement("EventScheduler");
             healthSystem.removeChild(immediateOutcomes);
 
-            Element uncomplicated = (Element)scenarioDocument.createElement("uncomplicated");
-            Element decisions = (Element)scenarioDocument.createElement("decisions");
+            Element uncomplicated = scenarioDocument.createElement("uncomplicated");
+            Element decisions = scenarioDocument.createElement("decisions");
 
-            Element decisionOC = (Element)scenarioDocument.createElement("decision");
+            Element decisionOC = scenarioDocument.createElement("decision");
 
             Attr nameOC = scenarioDocument.createAttribute("name");
             nameOC.setNodeValue("official_care");
@@ -1450,7 +1450,7 @@ public class SchemaTranslator {
             decisionOC.setTextContent("p(.64): yes p(.36): no");
             decisions.appendChild(decisionOC);
 
-            Element decisionTreat = (Element)scenarioDocument.createElement("decision");
+            Element decisionTreat = scenarioDocument.createElement("decision");
 
             Attr nameTreat = scenarioDocument.createAttribute("name");
             nameTreat.setNodeValue("treatment");
@@ -1465,7 +1465,7 @@ public class SchemaTranslator {
             decisionTreat.setTextContent("official_care(yes){p(.6): effective_treat p(.4): none} official_care(no): none");
             decisions.appendChild(decisionTreat);
 
-            Element decisionTest = (Element)scenarioDocument.createElement("decision");
+            Element decisionTest = scenarioDocument.createElement("decision");
 
             Attr nameTest = scenarioDocument.createAttribute("name");
             nameTest.setNodeValue("test");
@@ -1482,20 +1482,20 @@ public class SchemaTranslator {
 
             uncomplicated.appendChild(decisions);
 
-            Element treatments = (Element)scenarioDocument.createElement("treatments");
-            Element treatment = (Element)scenarioDocument.createElement("treatment");
+            Element treatments = scenarioDocument.createElement("treatments");
+            Element treatment = scenarioDocument.createElement("treatment");
             Attr nameTreatEl = scenarioDocument.createAttribute("name");
             nameTreatEl.setNodeValue("effective_treat");
             treatment.setAttributeNode(nameTreatEl);
 
-            Element schedule = (Element)scenarioDocument.createElement("schedule");
-            Element medicate = (Element)scenarioDocument.createElement("medicate");
+            Element schedule = scenarioDocument.createElement("schedule");
+            Element medicate = scenarioDocument.createElement("medicate");
 
-            Attr drug = (Attr)scenarioDocument.createAttribute("drug");
+            Attr drug = scenarioDocument.createAttribute("drug");
             drug.setNodeValue("effective");
-            Attr mg = (Attr)scenarioDocument.createAttribute("mg");
+            Attr mg = scenarioDocument.createAttribute("mg");
             mg.setNodeValue("1");
-            Attr hour = (Attr)scenarioDocument.createAttribute("hour");
+            Attr hour = scenarioDocument.createAttribute("hour");
             hour.setNodeValue("0");
 
             medicate.setAttributeNode(drug);
@@ -1506,22 +1506,22 @@ public class SchemaTranslator {
             treatment.appendChild(schedule);
             treatments.appendChild(treatment);
 
-            Element treatmentNone = (Element)scenarioDocument.createElement("treatment");
-            Attr nameTreatNone = (Attr)scenarioDocument.createAttribute("name");
+            Element treatmentNone = scenarioDocument.createElement("treatment");
+            Attr nameTreatNone = scenarioDocument.createAttribute("name");
             nameTreatNone.setNodeValue("none");
             treatmentNone.setAttributeNode(nameTreatNone);
 
-            Element scheduleNone = (Element)scenarioDocument.createElement("schedule");
+            Element scheduleNone = scenarioDocument.createElement("schedule");
             treatmentNone.appendChild(scheduleNone);
             treatments.appendChild(treatmentNone);
             uncomplicated.appendChild(treatments);
 
             eventScheduler.appendChild(uncomplicated);
 
-            Element complicated = (Element)scenarioDocument.createElement("complicated");
-            Element decisionsComp = (Element)scenarioDocument.createElement("decisions");
+            Element complicated = scenarioDocument.createElement("complicated");
+            Element decisionsComp = scenarioDocument.createElement("decisions");
 
-            Element decisionOCComp = (Element)scenarioDocument.createElement("decision");
+            Element decisionOCComp = scenarioDocument.createElement("decision");
 
             Attr nameOCComp = scenarioDocument.createAttribute("name");
             nameOCComp.setNodeValue("official_care");
@@ -1536,7 +1536,7 @@ public class SchemaTranslator {
             decisionOCComp.setTextContent("p(.48): yes p(.52): no");
             decisionsComp.appendChild(decisionOCComp);
 
-            Element decisionCompTreat = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompTreat = scenarioDocument.createElement("decision");
 
             Attr nameCompTreat = scenarioDocument.createAttribute("name");
             nameCompTreat.setNodeValue("treatment");
@@ -1551,7 +1551,7 @@ public class SchemaTranslator {
             decisionCompTreat.setTextContent("official_care(yes){p(.6): effective_treat p(.4): none} official_care(no): none");
             decisionsComp.appendChild(decisionCompTreat);
 
-            Element decisionCompHosp = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompHosp = scenarioDocument.createElement("decision");
 
             Attr nameCompHosp = scenarioDocument.createAttribute("name");
             nameCompHosp.setNodeValue("hospitalisation");
@@ -1566,7 +1566,7 @@ public class SchemaTranslator {
             decisionCompHosp.setTextContent("official_care(yes): immediate official_care(no): none");
             decisionsComp.appendChild(decisionCompHosp);
 
-            Element decisionCompTest = (Element)scenarioDocument.createElement("decision");
+            Element decisionCompTest = scenarioDocument.createElement("decision");
 
             Attr nameCompTest = scenarioDocument.createAttribute("name");
             nameCompTest.setNodeValue("test");
@@ -1583,20 +1583,20 @@ public class SchemaTranslator {
 
             complicated.appendChild(decisionsComp);
 
-            Element treatmentsComp = (Element)scenarioDocument.createElement("treatments");
-            Element treatmentComp = (Element)scenarioDocument.createElement("treatment");
+            Element treatmentsComp = scenarioDocument.createElement("treatments");
+            Element treatmentComp = scenarioDocument.createElement("treatment");
             Attr nameTreatComp = scenarioDocument.createAttribute("name");
             nameTreatComp.setNodeValue("effective_treat");
             treatmentComp.setAttributeNode(nameTreatComp);
 
-            Element scheduleComp = (Element)scenarioDocument.createElement("schedule");
-            Element medicateComp = (Element)scenarioDocument.createElement("medicate");
+            Element scheduleComp = scenarioDocument.createElement("schedule");
+            Element medicateComp = scenarioDocument.createElement("medicate");
 
-            Attr drugComp = (Attr)scenarioDocument.createAttribute("drug");
+            Attr drugComp = scenarioDocument.createAttribute("drug");
             drugComp.setNodeValue("effective");
-            Attr mgComp = (Attr)scenarioDocument.createAttribute("mg");
+            Attr mgComp = scenarioDocument.createAttribute("mg");
             mgComp.setNodeValue("1");
-            Attr hourComp = (Attr)scenarioDocument.createAttribute("hour");
+            Attr hourComp = scenarioDocument.createAttribute("hour");
             hourComp.setNodeValue("0");
 
             medicateComp.setAttributeNode(drugComp);
@@ -1607,34 +1607,34 @@ public class SchemaTranslator {
             treatmentComp.appendChild(scheduleComp);
             treatmentsComp.appendChild(treatmentComp);
 
-            Element treatmentCompNone = (Element)scenarioDocument.createElement("treatment");
-            Attr nameTreatCompNone = (Attr)scenarioDocument.createAttribute("name");
+            Element treatmentCompNone = scenarioDocument.createElement("treatment");
+            Attr nameTreatCompNone = scenarioDocument.createAttribute("name");
             nameTreatCompNone.setNodeValue("none");
             treatmentCompNone.setAttributeNode(nameTreatCompNone);
 
-            Element scheduleCompNone = (Element)scenarioDocument.createElement("schedule");
+            Element scheduleCompNone = scenarioDocument.createElement("schedule");
             treatmentCompNone.appendChild(scheduleCompNone);
             treatmentsComp.appendChild(treatmentCompNone);
             complicated.appendChild(treatmentsComp);
 
             eventScheduler.appendChild(complicated);
 
-            Element clinicalOutcomes = (Element)scenarioDocument.createElement("ClinicalOutcomes");
-            Element maxUCSeekingMemory = (Element)scenarioDocument.createElement("maxUCSeekingMemory");
+            Element clinicalOutcomes = scenarioDocument.createElement("ClinicalOutcomes");
+            Element maxUCSeekingMemory = scenarioDocument.createElement("maxUCSeekingMemory");
             maxUCSeekingMemory.setTextContent("3");
-            Element uncomplicatedCaseDuration = (Element)scenarioDocument.createElement("uncomplicatedCaseDuration");
+            Element uncomplicatedCaseDuration = scenarioDocument.createElement("uncomplicatedCaseDuration");
             uncomplicatedCaseDuration.setTextContent("3");
-            Element complicatedCaseDuration = (Element)scenarioDocument.createElement("complicatedCaseDuration");
+            Element complicatedCaseDuration = scenarioDocument.createElement("complicatedCaseDuration");
             complicatedCaseDuration.setTextContent("5");
-            Element complicatedRiskDuration = (Element)scenarioDocument.createElement("complicatedRiskDuration");
+            Element complicatedRiskDuration = scenarioDocument.createElement("complicatedRiskDuration");
             complicatedRiskDuration.setTextContent("5");
-            Element pImmediateUC = (Element)scenarioDocument.createElement("pImmediateUC");
+            Element pImmediateUC = scenarioDocument.createElement("pImmediateUC");
             pImmediateUC.setTextContent("1");
-            //Element propDeathsFirstDay = (Element)scenarioDocument.createElement("propDeathsFirstDay");
+            //Element propDeathsFirstDay = scenarioDocument.createElement("propDeathsFirstDay");
             //propDeathsFirstDay.setTextContent("0.4");
             
             //this communityOddsMultiplier will be removed (for schema >= 19)
-            //Element communityOddsMultiplier = (Element)scenarioDocument.createElement("communityOddsMultiplier");
+            //Element communityOddsMultiplier = scenarioDocument.createElement("communityOddsMultiplier");
             //communityOddsMultiplier.setTextContent("1.5");
 
             clinicalOutcomes.appendChild(maxUCSeekingMemory);
