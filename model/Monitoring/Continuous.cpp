@@ -60,11 +60,9 @@ namespace OM { namespace Monitoring {
 	    ctsPeriod = 0;
 	    return;
 	}
-	ctsPeriod = ctsOpt.get().getPeriod() / Global::interval;
+	ctsPeriod = ctsOpt.get().getPeriod();
 	if( ctsPeriod < 1 )
-	    throw xml_scenario_error("monitoring.continuous.period: must be > 1 timestep");
-	else if( ctsOpt.get().getPeriod() % Global::interval != 0 )
-	    cerr << "Warning: monitoring.continuous.period not a whole number of timesteps" << endl;
+	    throw xml_scenario_error("monitoring.continuous.period: must be >= 1 timestep");
 	
         if( ctsOpt.get().getDuringInit().present() )
             duringInit = ctsOpt.get().getDuringInit().get();

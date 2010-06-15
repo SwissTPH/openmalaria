@@ -541,7 +541,7 @@
               <xs:attribute name="period" type="xs:int" use="required">
                 <xs:annotation>
                   <xs:documentation>
-                    Number of days between reports.
+                    Number of timesteps between reports.
                   </xs:documentation>
                   <xs:appinfo>
                     units:Days;min:1;max:unbounded;name:Days between reports;
