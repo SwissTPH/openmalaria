@@ -6,10 +6,21 @@ find_package (Python)
 
 # Testing via run.sh or run.py script:
 set (OM_BOXTEST_SCHEMA_PATH "${CMAKE_SOURCE_DIR}/schema/scenario.xsd")
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/run.py ${CMAKE_CURRENT_BINARY_DIR}/run.py @ONLY)
+configure_file (
+  ${CMAKE_CURRENT_SOURCE_DIR}/run.py
+  ${CMAKE_CURRENT_BINARY_DIR}/run.py
+  @ONLY
+)
 
 # working tests (with checkpointing):
-set (OM_BOXTEST_NAMES 1 2 3 4 5 6 9 11 12 IPT VecTestII VecFullTestII ESCMTest Empirical Uninfect Molineaux)
+set (OM_BOXTEST_NAMES
+  1 2 3 4 5 6 9 10 11 12
+  EffectiveDrug
+  IPT
+  VecTest VecFullTest NamawalaArabiensis
+  ESCMTest Empirical
+  Uninfect Molineaux
+)
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
 # Disabled due to "in-progress" work: CevCq DummyPKPD

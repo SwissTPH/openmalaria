@@ -119,6 +119,10 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     // but we won't necessarily have the right schema version associated with
     // the XML file in that case.
     ifstream fileStream (lXmlFile.c_str(), ios::binary);
+    if (!fileStream.good()){
+	string msg = "Error: unable to open "+lXmlFile;
+	throw util::xml_scenario_error (msg);
+    }
     scenario = (scnXml::parseScenario (fileStream)).release();
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();

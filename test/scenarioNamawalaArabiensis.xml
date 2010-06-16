@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="20" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
-  <demography maximumAgeYrs="90" name="test" popSize="1000">
+  <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -33,9 +33,9 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
-      <option name="innoculationsPerDayOfYear" value="true"/>
-      <option name="kappaPerDayOfYear" value="true"/>
       <option name="innoculationsPerAgeGroup" value="true"/>
+      <option name="Vector_EIR_Input" value="true"/>
+      <option name="Vector_EIR_Simulated" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>1</surveyTime>

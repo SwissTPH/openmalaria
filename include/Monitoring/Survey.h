@@ -103,8 +103,10 @@ enum SurveyMeasure {
     
     //BEGIN Per day-of-year data (removed)
     /// Innoculations per human (all ages) per day of year, over the last year.
+    /// (Reporting removed.)
     innoculationsPerDayOfYear = 28,
     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+    /// (Reporting removed.)
     kappaPerDayOfYear = 29,
     //END
     

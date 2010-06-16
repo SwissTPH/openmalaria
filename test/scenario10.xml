@@ -963,7 +963,6 @@
   </entoData>
   <model>
     <ModelOptions>
-      <option name="INCLUDES_PK_PD" value="true"/>
       <option name="MUELLER_PRESENTATION_MODEL" value="true"/>
       <option name="MAX_DENS_CORRECTION" value="false"/>
     </ModelOptions>
