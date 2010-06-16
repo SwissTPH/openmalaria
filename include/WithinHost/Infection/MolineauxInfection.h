@@ -55,8 +55,8 @@ private:
 	static const int taus = 4;
 
 	static int delta;
-	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v, meanLocalMaxDensity, sdLocalMaxDensity, meanDiffPosDays, sdDiffPosDays;
-	double m[v],variantTranscendingSummation, growthRate[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus], firstMaxDensity, meanDuration, Pstar_c, Pstar_m;
+	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v;
+	double m[v],variantTranscendingSummation, growthRate[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus], Pstar_c, Pstar_m;
 };
 
 }}

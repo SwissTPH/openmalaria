@@ -54,10 +54,6 @@ double MolineauxInfection::Pstar_v;
 double MolineauxInfection::kappa_c;
 double MolineauxInfection::kappa_v;
 double MolineauxInfection::kappa_m;
-double MolineauxInfection::meanLocalMaxDensity;
-double MolineauxInfection::sdLocalMaxDensity;
-double MolineauxInfection::meanDiffPosDays;
-double MolineauxInfection::sdDiffPosDays;
 
 CommonInfection* createMolineauxInfection (uint32_t protID) {
     return new MolineauxInfection (protID);
@@ -74,16 +70,6 @@ void MolineauxInfection::initParameters(){
 
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
-
-	meanLocalMaxDensity = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
-	sdLocalMaxDensity = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
-	meanDiffPosDays = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
-	sdDiffPosDays = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
-
-	/*meanLocalMaxDensity = 4.79;
-	sdLocalMaxDensity = 0.57;
-	meanDiffPosDays = 2.33;
-	sdDiffPosDays = 0.26;*/
 
 	C=1.0, sigma=0.02,rho=0, beta=0.01, sProb=0.02, q=0.3, mu_m=16.0, sigma_m=10.4,
 	k_c=0.2, k_m=0.04, Pstar_v=30.0, kappa_c=3.0, kappa_v=3.0, kappa_m=1.0;
@@ -113,8 +99,8 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
 	P[0] = 0.1;
 	variantTranscendingSummation = 0.0;
-	Pstar_c = k_c*pow(random::gauss(meanLocalMaxDensity, sdLocalMaxDensity), 10.0);
-	Pstar_m = k_m*pow(random::gauss(meanDiffPosDays, sdDiffPosDays), 10.0);
+	Pstar_c = k_c*pow(random::gauss(InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY), InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY)), 10.0);
+	Pstar_m = k_m*pow(random::gauss(InputData.getParameter(Params::MEAN_DIFF_POS_DAYS), InputData.getParameter(Params::SD_DIFF_POS_DAYS)), 10.0);
 }
 
 void MolineauxInfection::updateGrowthRateMultiplier(){
@@ -230,6 +216,8 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
     }
     for(int j=0;j<taus;j++)
 	laggedPc[j] & stream;
+    Pstar_c & stream;
+    Pstar_m & stream;
 }
 
 void MolineauxInfection::checkpoint (ostream& stream) {
@@ -246,6 +234,8 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     }
     for(int j=0;j<taus;j++)
 	laggedPc[j] & stream;
+    Pstar_c & stream;
+    Pstar_m & stream;
 }
 
 }
