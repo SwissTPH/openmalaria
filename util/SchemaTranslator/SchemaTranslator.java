@@ -47,6 +47,7 @@ public class SchemaTranslator {
     static final int CURRENT_VERSION = 19;
 
     private static int _required_version = CURRENT_VERSION;
+    private static boolean latestSchema = false;
     private static boolean doValidation = true;
     private static boolean doTranslation = true;
     private static boolean doODTTranslation = false;
@@ -55,8 +56,12 @@ public class SchemaTranslator {
     private enum BugCorrectionBehaviour {
         none, correct, dontCorrect;
     }
-
     private static BugCorrectionBehaviour maxDensBug = BugCorrectionBehaviour.none;
+    
+    private enum IptiSpBehaviour {
+	none, assumeIntended, assumeUnintented;
+    }
+    private static IptiSpBehaviour iptiSpOption = IptiSpBehaviour.none;
 
     public static double HumanBloodIndex_NONNHS = 1;
 
@@ -242,6 +247,14 @@ public class SchemaTranslator {
         }
 
     }
+    
+    private static String genSchemaName (int schemaVersion){
+	if (latestSchema){
+	    return "scenario.xsd";
+	}else{
+	    return "scenario_" + schemaVersion + ".xsd";
+	}
+    }
 
     private String translateDocument() throws NoSuchMethodException, Exception,
             IllegalAccessException, InvocationTargetException {
@@ -251,12 +264,12 @@ public class SchemaTranslator {
         // 0 if no current version (getAttribute returns ""):
         int schemaVersion = Integer.parseInt("0"
                 + scenarioElement.getAttribute("schemaVersion"));
-        String schemaFileName = "scenario_" + schemaVersion + ".xsd";
+        String schemaFileName = genSchemaName (schemaVersion);
         Class<? extends SchemaTranslator> cls = this.getClass();
         
         while (schemaVersion < _required_version) {
             ++schemaVersion;
-            schemaFileName = "scenario_" + schemaVersion + ".xsd";
+            schemaFileName = genSchemaName (schemaVersion);
             scenarioElement.setAttribute("schemaVersion", Integer
                     .toString(schemaVersion));
             scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
@@ -942,7 +955,68 @@ public class SchemaTranslator {
     
     // Version 20
     // Added monitoring -> continuous -> duringInit optional attribute (no translation needed)
+    // monitoring -> continuous -> period changed units from days to timesteps
     public boolean translate19To20() throws Exception {
+        Element monitoring = (Element) scenarioElement.getElementsByTagName(
+                "monitoring").item(0);
+	if (monitoring.getElementsByTagName("continuous").getLength() > 0 ){
+	    //We don't update automatically because (a) very few scenarios should
+	    //require this and (b) people may have thought it was originally timesteps anyway.
+	    System.err.println("Warning: monitoring->continuous->period changed unit from timesteps to days. Please update accordingly.");
+	}
+	
+        Element interventions = (Element) scenarioElement.getElementsByTagName(
+                "interventions").item(0);
+	if (interventions != null){
+	    Element iptiDesc = (Element) interventions.getElementsByTagName(
+		"iptiDescription").item(0);
+	    if (iptiDesc != null){
+		int nIPTI = 0;
+		Element continuous = (Element)interventions.getElementsByTagName(
+		    "continuous").item(0);
+		if (continuous != null){
+		    nIPTI += continuous.getElementsByTagName("ipti").getLength();
+		}
+		Element timed = (Element)interventions.getElementsByTagName("timed").item(0);
+		if (timed != null){
+		    NodeList tIntervs = timed.getElementsByTagName("intervention");
+		    for (int i = 0; i < tIntervs.getLength(); ++i){
+			Element tInterv = (Element)tIntervs.item(i);
+			nIPTI += tInterv.getElementsByTagName("ipti").getLength();
+		    }
+		}
+		
+		Element modelElement = (Element)scenarioElement.getElementsByTagName("model").item(0);
+		Element modelOptions = (Element)modelElement.getElementsByTagName("ModelOptions").item(0);
+		Element iptiOption = scenarioDocument.createElement("option");
+		Attr name = scenarioDocument.createAttribute("name");
+		name.setNodeValue("IPTI_SP_MODEL");
+		Attr value = scenarioDocument.createAttribute("value");
+		iptiOption.setAttributeNode(name);
+		iptiOption.setAttributeNode(value);
+	
+		if (nIPTI>0){
+		    // Definitely need IPTI model
+		    value.setNodeValue("true");
+		    modelOptions.appendChild(iptiOption);
+		} else {
+		    // Don't need IPTI model; either it was added on purpose
+		    // (to get results comparable to when using IPTI interventions)
+		    // or it was a mistake. Require user to decide which.
+		    System.err.println("Warning: iptiDescription without IPT interventions");
+		    if (iptiSpOption == IptiSpBehaviour.assumeIntended){
+			value.setNodeValue("true");
+			modelOptions.appendChild(iptiOption);
+		    } else if (iptiSpOption == IptiSpBehaviour.assumeUnintented){
+			value.setNodeValue("false");	// make it clear IPTI code is disabled
+			modelOptions.appendChild(iptiOption);
+		    } else {
+			System.err.println("Error: please specify --iptiSpOptionWithoutInterventions");
+			return false;
+		    }
+		}
+	    }
+	}
         return true;
     }
 
@@ -1001,7 +1075,7 @@ public class SchemaTranslator {
         Attr healthSystemMemory = clinical.getAttributeNode("healthSystemMemory");
         healthSystemMemory.setValue(String.valueOf(28));
 
-        NodeList interventionList = (NodeList)scenarioElement.getElementsByTagName("intervention");
+        NodeList interventionList = scenarioElement.getElementsByTagName("intervention");
 
         for(int i=0;i<interventionList.getLength();i++)
         {
@@ -1012,7 +1086,7 @@ public class SchemaTranslator {
                 time.setNodeValue(String.valueOf(((Integer.parseInt(time.getNodeValue())-1)*5)+1));
         }
 
-        NodeList changeHSList = (NodeList)scenarioElement.getElementsByTagName("changeHS");
+        NodeList changeHSList = scenarioElement.getElementsByTagName("changeHS");
 
         for(int i=0;i<changeHSList.getLength();i++)
         {
@@ -1819,6 +1893,8 @@ public class SchemaTranslator {
             	doODTTranslation = true;
                 doValidation = false;
                 System.out.println("You have chosen the --oneDayTimesteps option, this option is only intended for the fitting scenarii or scenarii using no intervention and/or no ");
+            } else if (args[i].equals("--latest-schema")) {
+                latestSchema = true;
             } else if (args[i].equals("--no-validation")) {
                 doValidation = false;
             } else if (args[i].equals("--no-translation")) {
@@ -1834,6 +1910,17 @@ public class SchemaTranslator {
                 } else {
                     System.err
                             .println("--maxDensCorrection: expected true or false");
+                    System.exit(2);
+                }
+            } else if (args[i].equals("--iptiSpOptionWithoutInterventions")) {
+                String arg = args[++i];
+                if (arg.equalsIgnoreCase("true")) {
+                    iptiSpOption = IptiSpBehaviour.assumeIntended;
+                } else if (arg.equalsIgnoreCase("false")) {
+                    iptiSpOption = IptiSpBehaviour.assumeUnintented;
+                } else {
+                    System.err
+                            .println("--iptiSpOptionWithoutInterventions: expected true or false");
                     System.exit(2);
                 }
             } else {
@@ -1870,13 +1957,15 @@ public class SchemaTranslator {
     }
 
     private static void printUsage() {
-        System.out
-                .println("Usage: schemaTranslator [options]:\n"
-                        + "--required_version VERSION\tThe version number to update the document(s) to. Default: CURRENT_VERSION"
-                        + "--no-validation\t\tDon't validate the result"
-                        + "--no-translation\t\tDon't write out the translated result (but still translate internally for validation)"
-                        + "--update-db\t\tUpdate DB entries instead of files"
-                        + "--maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false to explicitly exclude it.");
+        System.out.println("Usage: schemaTranslator [options]:\n"
+	    + "--required_version VERSION\tThe version number to update the document(s) to. Default: CURRENT_VERSION="+CURRENT_VERSION
+	    + "--latest-schema\t\tUse schema scenario.xsd instead of scenario_VERSION.xsd"
+	    + "--no-validation\t\tDon't validate the result"
+	    + "--no-translation\t\tDon't write out the translated result (but still translate internally for validation)"
+	    + "--update-db\t\tUpdate DB entries instead of files"
+	    + "--maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false to explicitly exclude it."
+	    + "--iptiSpOptionWithoutInterventions\tFor scenarios with iptiDescription but without interventions, assume usage of the IPTI model was (t) intended or (f) a mistake."
+        );
         System.exit(1);
     }
 }

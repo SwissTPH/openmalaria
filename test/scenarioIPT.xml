@@ -590,6 +590,7 @@
   <model>
     <ModelOptions>
       <option name="MAX_DENS_CORRECTION" value="false"/>
+      <option name="IPTI_SP_MODEL" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <parameters interval="5" iseed="0" latentp="3">

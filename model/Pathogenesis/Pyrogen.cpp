@@ -65,7 +65,9 @@ void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
   const double delt= 1.0/n;
   //Numerical approximation to equation 2, AJTMH p.57
   for (int i=1;i<=n; i++) {
-    _pyrogenThres += totalDensity * alpha14 * Global::interval * delt / ((Ystar1_26 + totalDensity) * (Ystar2_13 + _pyrogenThres)) - smuY * _pyrogenThres * delt;
+    _pyrogenThres += totalDensity * alpha14 * Global::interval * delt /
+	( (Ystar1_26 + totalDensity) * (Ystar2_13 + _pyrogenThres) )
+	- smuY * _pyrogenThres * delt;
   }
 }
 

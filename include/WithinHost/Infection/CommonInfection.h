@@ -40,9 +40,6 @@ public:
     virtual ~CommonInfection() {}
     //@}
     
-    //! Get the density of the infection
-    inline double getDensity() { return _density; };
-    
     /** Update: calculate new density.
     *
     * @param simulationTime Simulation timestep (expected to be a 1-day timestep)

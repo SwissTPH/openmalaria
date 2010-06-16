@@ -32,16 +32,10 @@ namespace OM { namespace WithinHost {
 /** IPT extension of DescriptiveInfection
  *
  * Note: proteome_ID parameter from base Infection is used here to store the genotype.
- */
-//!In order to save memory, we just define the ID of the genotype. Attributes of the
-//!genotype can be accessed via arrays in mod_intervention.
-//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
-//!attributes are:
-//!freq: Probability of being infected by this specific genotype
-//!ACR: Probability of being cured (due to SP)
-//!proph: Prophylactic effect of SP (measured in time steps)
-//!tolperiod: time window of tolerance period
-//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
+ *
+ * NOTE: This IPT code (this class and DescriptiveIPTWithinHost) are
+ * unmaintained in order to keep results comparable with previous experiments
+ * run. */
 class DescriptiveIPTInfection : public DescriptiveInfection {
 public:
   ///@name Static init/cleanup
@@ -78,6 +72,15 @@ private:
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;
   
+//!In order to save memory, we just define the ID of the genotype. Attributes of the
+//!genotype can be accessed via arrays in mod_intervention.
+//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
+//!attributes are:
+//!freq: Probability of being infected by this specific genotype
+//!ACR: Probability of being cured (due to SP)
+//!proph: Prophylactic effect of SP (measured in time steps)
+//!tolperiod: time window of tolerance period
+//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
   struct GenotypeData {
     double cumFreq;
     int tolPeriod;

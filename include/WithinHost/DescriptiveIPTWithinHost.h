@@ -26,7 +26,11 @@
 namespace OM { namespace WithinHost {
     
 /** Extension to the DescriptiveWithinHostModel, including IPT (intermittent
- * preventative treatment) plus a simple drug-action model (SPAction). */
+ * preventative treatment) using a simple drug-action model (SPAction).
+ *
+ * NOTE: This IPT code (this class and DescriptiveIPTInfection) are
+ * unmaintained in order to keep results comparable with previous experiments
+ * run. */
 class DescriptiveIPTWithinHost : public DescriptiveWithinHostModel {
 public:
   ///@name Static init/cleanup

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" name="Navrongo IPTi treated" schemaVersion="19" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" assimMode="0" name="Navrongo IPTi treated" schemaVersion="20" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="4" name="Navrongo" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="2.941827" upperbound="1"/>
@@ -501,6 +501,7 @@
   <model>
     <ModelOptions>
       <option name="MAX_DENS_CORRECTION" value="false"/>
+      <option name="IPTI_SP_MODEL" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="4"/>
     <parameters interval="5" iseed="0" latentp="3">

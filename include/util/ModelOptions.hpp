@@ -161,6 +161,15 @@ namespace OM { namespace util {
 	 * estimations from a probability function. */
 	GARKI_DENSITY_BIAS,
 	
+	/** Use the IPT(i) drug model (DescriptiveIPTWithinHost and
+	 * DescriptiveIPTInfection classes) with its simple SP model.
+	 * 
+	 * NOTE: code is unmaintained in order to keep results comparable with
+	 * previous experiments run. On a 1-day timestep, we now have a better
+	 * drug model, but will need to rewrite IPT code to purely be an
+	 * intervention. */
+	IPTI_SP_MODEL,
+	
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

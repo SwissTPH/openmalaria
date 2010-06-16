@@ -44,12 +44,15 @@ int DescriptiveIPTWithinHost::iptiEffect;
 // -----  init  -----
 
 void DescriptiveIPTWithinHost::initParameters () {
-    const scnXml::Interventions& xmlInterventions = InputData().getInterventions();
-  iptActive = xmlInterventions.getIptiDescription().present();
+  iptActive = util::ModelOptions::option( IPTI_SP_MODEL );
   if (!iptActive) {
-      if (InputData.getActiveInterventions()[Interventions::IPTI])
-	  throw util::xml_scenario_error ("IPTI used without description");
-      return;
+    if (InputData.getActiveInterventions()[Interventions::IPTI])
+      throw util::xml_scenario_error ("IPTI interventions require IPT_SP_MODEL option");
+    return;
+  }
+  const scnXml::Interventions& xmlInterventions = InputData().getInterventions();
+  if (!xmlInterventions.getIptiDescription().present()) {
+    throw util::xml_scenario_error ("IPT_SP_MODEL requires iptiDescription");
   }
   
   if (Global::interval != 5)
@@ -123,6 +126,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   } else if(Global::simulationTime-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
+    
     if this code is to survive, then the iptiEffect values should be 
     symbolic constants
     however: code is dead (only used for repeat experiments) anyway

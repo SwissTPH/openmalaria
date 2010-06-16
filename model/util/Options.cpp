@@ -204,6 +204,7 @@ namespace OM { namespace util {
 	    codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
 	    codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
 	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
+	    codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
