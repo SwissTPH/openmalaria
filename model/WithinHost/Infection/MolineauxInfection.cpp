@@ -85,6 +85,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 		P[i] = 0.0;
 		m[i] = 0.0;
 		growthRate[i] = 0.0;
+		initP[i] = 0.0;
 
 		while(m[i]<1.0)
 			m[i]=random::gauss(mu_m, sigma_m);
@@ -99,8 +100,8 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
 	P[0] = 0.1;
 	variantTranscendingSummation = 0.0;
-	Pstar_c = k_c*pow(random::gauss(Params::MEAN_LOCAL_MAX_DENSITY, Params::SD_LOCAL_MAX_DENSITY),10.0);
-	Pstar_m = k_m*pow(random::gauss(Params::MEAN_DIFF_POS_DAYS, Params::SD_DIFF_POS_DAYS), 10.0);
+	Pstar_c = k_c*pow(random::gauss(Params::MEAN_LOCAL_MAX_DENSITY,Params::SD_LOCAL_MAX_DENSITY),10.0);
+	Pstar_m = k_m*pow(random::gauss(Params::MEAN_DIFF_POS_DAYS,Params::SD_DIFF_POS_DAYS), 10.0);
 }
 
 void MolineauxInfection::updateGrowthRateMultiplier(){
@@ -121,6 +122,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		S[i] = 1/(1+pow(getVariantSpecificSummation(i,P[i])/Pstar_v, kappa_v));
 		sigma_Qi_Si+= pow(q, (double)i+1)*S[i];
 		sigma_S+=S[i];
+		initP[i] = 0.0;
 	}
 
 	for(int i=0;i<v;i++)
@@ -133,16 +135,15 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 
 		double newPi;
 		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
+
 		if(newPi<1.0e-5)
 			newPi = 0.0;
 
 		if(P[i]==0)
-		{
-			growthRate[i] = 1;
-			P[i] = newPi;
-		}
+			initP[i] = newPi;
 		else
 			growthRate[i] = sqrt(newPi/P[i]);
+
 	}
 }
 
@@ -155,7 +156,12 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
 	{
 		for(int i=0;i<v;i++)
 		{
-			P[i] *= growthRate[i] * survivalFactor;
+			P[i] *= growthRate[i];
+			P[i] *= survivalFactor;
+			initP[i] *= survivalFactor;
+
+			if(P[i]==0&&ageOfInfection%2==0)
+				P[i] = initP[i];
 
 			if(P[i]<1.0e-5)
 				P[i] = 0.0;
@@ -171,9 +177,7 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
 	if(_density>1.0e-5)
 	{
 		if(ageOfInfection%2==0)
-		{
 			updateGrowthRateMultiplier();
-		}
 		return false;
 	}
 	else

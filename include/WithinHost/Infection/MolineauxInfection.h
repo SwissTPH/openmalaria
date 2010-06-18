@@ -56,7 +56,7 @@ private:
 
 	static int delta;
 	static double C, sigma, rho, beta, sProb, q, mu_m, sigma_m, k_c, k_m, Pstar_v, kappa_c, kappa_m, kappa_v;
-	double m[v],variantTranscendingSummation, growthRate[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus], Pstar_c, Pstar_m;
+	double m[v],variantTranscendingSummation, growthRate[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus], Pstar_c, Pstar_m, initP[v];
 };
 
 }}
