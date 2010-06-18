@@ -49,8 +49,8 @@ public:
   
   /// Conditionally clear all infections
   virtual void clearInfections (bool isSevere);
-  /// Conditionally set last SP dose
-  virtual void IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup);
+  /// Continuous intervention: give an IPTi dose
+  virtual void deployIptDose (Monitoring::AgeGroup ageGroup);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup);
   
@@ -83,12 +83,6 @@ private:
   
   /// @brief Static data set by initParameters
   //@{
-  ///Number of IPTi doses
-  static int numberOfIPTiDoses;
-  ///Target age for IPTi doses, in time steps
-  static int *iptiTargetagetstep;
-  ///Coverage , as a proportion of the poulation in the target age range
-  static double *iptiCoverage;
   /// Values (codes)
   static int iptiEffect;
   //@}

@@ -47,13 +47,17 @@ namespace OM { namespace Host {
 // -----  Static functions  -----
 
 void Human::initHumanParameters () {	// static
-  // Init models used by humans:
-  Transmission::PerHostTransmission::initParameters(InputData().getInterventions());
-  InfectionIncidenceModel::init();
-  WithinHost::WithinHostModel::init();
-  Clinical::ClinicalModel::init();
-  Vaccine::initParameters();
-  _ylagLen = Global::intervalsPer5Days * 4;
+    // Init models used by humans:
+    ContinuousIntervention::init(
+	&Human::setupITN,
+	&Human::deployIptDose
+    );
+    Transmission::PerHostTransmission::initParameters();
+    InfectionIncidenceModel::init();
+    WithinHost::WithinHostModel::init();
+    Clinical::ClinicalModel::init();
+    Vaccine::initParameters();
+    _ylagLen = Global::intervalsPer5Days * 4;
 }
 
 void Human::clear() {	// static clear
@@ -197,19 +201,20 @@ void Human::updateInterventionStatus() {
       _BSVEfficacy *= Vaccine::BSV.decay;
     }
     
-    //_ctsIntervs.deploy(ageTimeSteps);
     if (Global::timeStep >= 0) {
-      if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
-	  if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps &&
-	      random::uniform_01() <  Vaccine::vaccineCoverage[_lastVaccineDose] ) {
-          vaccinate();
-          Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
-        }
-      }
+	if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
+	    if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps){
+		if(random::uniform_01() <  Vaccine::vaccineCoverage[_lastVaccineDose]){
+		    vaccinate();
+		    Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
+		}
+	    }
+	}
     }
   }
-  withinHostModel->IPTSetLastSPDose(ageTimeSteps, ageGroup());
-  perHostTransmission.continousItnDistribution (ageTimeSteps);
+    if (Global::timeStep >= 0) {
+	ctsIntervention.deploy(this, ageTimeSteps);
+    }
 }
 
 
@@ -233,6 +238,9 @@ void Human::vaccinate(){
 
 void Human::IPTiTreatment () {
   withinHostModel->IPTiTreatment (ageGroup());
+}
+void Human::deployIptDose () {
+    withinHostModel->deployIptDose( ageGroup() );
 }
 
 

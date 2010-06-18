@@ -77,6 +77,7 @@ void DescriptiveWithinHostModel::immuneSuppression() {
 
 void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
   updateImmuneStatus ();
+  
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
     if ((*iter)->expired()) {

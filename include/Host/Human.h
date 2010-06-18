@@ -19,6 +19,7 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
+#include "Host/ContinuousIntervention.h"
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
@@ -69,6 +70,8 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
+      ageGroupData & stream;
+      ctsIntervention & stream;
       _ylag & stream;
       _dateOfBirth & stream;
       _lastVaccineDose & stream;
@@ -97,11 +100,12 @@ public:
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
-  /** A wrapper around vaccinate to also report.
-   * Can't move reporting to vaccinate as it would change existing reporting. */
+  /** Wrapper around vaccinate() also reporting; vaccinate() is also used
+   * elsewhere with a different report. */
   void massVaccinate ();
   
   void IPTiTreatment ();
+  void deployIptDose ();
   
   /// Give human a new ITN
   inline void setupITN () {
@@ -221,6 +225,9 @@ private:
   
   /// Age group for compiled-in data (made persistant as for monitoringAgeGroup).
   AgeGroupData ageGroupData;
+  
+  /// Continuous intervention deployment
+  ContinuousIntervention ctsIntervention;
   
   ///@brief Private variables
   //@{

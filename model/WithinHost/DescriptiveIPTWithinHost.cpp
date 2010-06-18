@@ -35,9 +35,6 @@ bool DescriptiveIPTWithinHost::iptActive = false;
 
 // -----  static data  -----
 
-int DescriptiveIPTWithinHost::numberOfIPTiDoses = 0;
-int *DescriptiveIPTWithinHost::iptiTargetagetstep;
-double *DescriptiveIPTWithinHost::iptiCoverage;
 int DescriptiveIPTWithinHost::iptiEffect;
 
 
@@ -68,28 +65,11 @@ void DescriptiveIPTWithinHost::initParameters () {
   iptiEffect = xmlIPTI.getIptiEffect();
   // --- IptiDescription end ---
   
-  if (xmlInterventions.getContinuous().present()) {
-    const scnXml::Continuous::IptiSequence& xmlIpti = xmlInterventions.getContinuous().get().getIpti();
-    numberOfIPTiDoses = xmlIpti.size();
-    
-    iptiTargetagetstep = (int*)malloc(((numberOfIPTiDoses))*sizeof(int));
-    iptiCoverage = (double*)malloc(((numberOfIPTiDoses))*sizeof(double));
-    for (int i=0;i<numberOfIPTiDoses; i++) {
-      iptiTargetagetstep[i] = static_cast<int>(floor(xmlIpti[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval)));
-      iptiCoverage[i] = xmlIpti[i].getCoverage();
-    }
-  } else
-    numberOfIPTiDoses = 0;
-  
   DescriptiveIPTInfection::initParameters(xmlInterventions);
 }
 
 void DescriptiveIPTWithinHost::clearParameters () {
   if (!iptActive) return;
-  if (numberOfIPTiDoses) {
-    free(iptiTargetagetstep);
-    free(iptiCoverage);
-  }
   DescriptiveIPTInfection::clearParameters();
 }
 
@@ -142,8 +122,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   clearAllInfections();
 }
 
-void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup) {
-  if (Global::timeStep < 0) return;
+void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup) {
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
@@ -163,21 +142,15 @@ void DescriptiveIPTWithinHost::IPTSetLastSPDose (int agetstep, Monitoring::AgeGr
     }
   }
   
-  for (int i=0;i<numberOfIPTiDoses; i++) {
-    if (iptiTargetagetstep[i] == agetstep) {
-      if (random::uniform_01() <  iptiCoverage[i]) {
-        _lastIptiOrPlacebo=Global::simulationTime;
-        /*
-        iptiEffect denotes treatment or placebo group
-        and also the treatment given when sick (trial-dependent)
-        */
-        if (iptiEffect >=  10) {
-          _lastSPDose=Global::simulationTime;
-          Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
-        }
-      }
+    _lastIptiOrPlacebo=Global::simulationTime;
+    /*
+    iptiEffect denotes treatment or placebo group
+    and also the treatment given when sick (trial-dependent)
+    */
+    if (iptiEffect >=  10) {
+	_lastSPDose=Global::simulationTime;
+	Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
     }
-  }
 }
 
 void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup) {

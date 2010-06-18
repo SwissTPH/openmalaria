@@ -110,7 +110,7 @@ public:
   ///@brief Only do anything when IPT is present:
   //@{
   /// Conditionally set last SP dose
-  virtual void IPTSetLastSPDose (int agetstep, Monitoring::AgeGroup ageGroup) {}
+  virtual void deployIptDose (Monitoring::AgeGroup ageGroup) {}
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup);
   //@}

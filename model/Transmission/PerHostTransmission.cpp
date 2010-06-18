@@ -26,23 +26,8 @@ namespace OM { namespace Transmission {
 
 // -----  PerHostTransmission static  -----
 
-vector<double> PerHostTransmission::cntItnTargetAgeTStep;
-vector<double> PerHostTransmission::cntItnCoverage;
-
-
-void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
+void PerHostTransmission::initParameters () {
     AgeGroupData::initParameters ();
-  if (interv.getContinuous().present()) {
-    const scnXml::Continuous::ITNSequence& seqItn = interv.getContinuous().get().getITN();
-    int n = seqItn.size();
-    cntItnTargetAgeTStep.resize(n);
-    cntItnCoverage.resize (n);
-    
-    for (int i=0;i<n; i++) {
-      cntItnTargetAgeTStep[i] = static_cast<int>(floor(seqItn[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval)));
-      cntItnCoverage[i] = seqItn[i].getCoverage();
-    }
-  }
 }
 
 
@@ -50,8 +35,9 @@ void PerHostTransmission::initParameters (const scnXml::Interventions& interv) {
 
 PerHostTransmission::PerHostTransmission () :
     outsideTransmission(false),
-    timestepITN(Global::TIMESTEP_NEVER), timestepIRS(Global::TIMESTEP_NEVER), timestepVA(Global::TIMESTEP_NEVER),
-    nextItnDistribution(0)
+    timestepITN(Global::TIMESTEP_NEVER),
+    timestepIRS(Global::TIMESTEP_NEVER),
+    timestepVA(Global::TIMESTEP_NEVER)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
   _relativeAvailabilityHet = availabilityFactor;
@@ -94,15 +80,6 @@ double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, 
   if (timestepIRS >= 0)
     P_D_i *= (1.0 - base.IRSKillingEffect (Global::simulationTime - timestepIRS));
   return P_C_i * P_D_i;
-}
-
-void PerHostTransmission::continousItnDistribution (int ageTSteps) {
-  if (Global::timeStep >= 0 && nextItnDistribution < cntItnTargetAgeTStep.size()
-    && cntItnTargetAgeTStep[nextItnDistribution] == ageTSteps) {
-    if (random::uniform_01() < cntItnCoverage[nextItnDistribution])
-      setupITN ();
-    ++nextItnDistribution;
-  }
 }
 
 

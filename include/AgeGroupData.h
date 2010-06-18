@@ -51,6 +51,12 @@ public:
      */
     double ageToWeight (double ageYears) const;
     
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+	_i & stream;
+    }
+    
 private:
     ///@brief Age-group variables for wtprop and ageSpecificRelativeAvailability
     //@{
@@ -85,7 +91,7 @@ private:
     //@}
     
     /// Current age group
-    size_t _i;
+    unsigned _i;
 };
 
 #endif

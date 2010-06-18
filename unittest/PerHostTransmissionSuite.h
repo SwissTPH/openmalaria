@@ -24,7 +24,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "Transmission/PerHostTransmission.h"
-#include "inputData.h"
 
 using namespace OM::Transmission;
 
@@ -32,8 +31,7 @@ class PerHostSuite : public CxxTest::TestSuite
 {
 public:
   void setUp () {
-    scnXml::Interventions intervs(xml_schema::String("dummy"));
-    PerHostTransmission::initParameters(intervs);
+    PerHostTransmission::initParameters();
   }
   
     void testRelativeAvailability () {

@@ -19,11 +19,11 @@ set (OM_BOXTEST_NAMES
   IPT
   VecTest VecFullTest NamawalaArabiensis
   ESCMTest Empirical
-  Uninfect Molineaux
+  Uninfect
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
-# Disabled due to "in-progress" work: CevCq DummyPKPD
+# Disabled due to "in-progress" work: Molineaux
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})

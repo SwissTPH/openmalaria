@@ -21,7 +21,6 @@
 #define Hmod_PerHostTransmission
 
 #include "util/random.h"
-#include "inputData.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "AgeGroupData.h"
 
@@ -38,10 +37,8 @@ class PerHostTransmission
 public:
   /// @brief Static member functions
   //@{
-  /** Static initialisation
-   *
-   * Pass getInterventions() from inputData. */
-  static void initParameters (const scnXml::Interventions&);
+  /** Static initialisation. */
+  static void initParameters ();
   
   //! Calculates the adjustment for body size in exposure to mosquitoes 
   /*! 
@@ -140,10 +137,6 @@ public:
     timestepVA = Global::simulationTime;
   }
   
-  /** Distribute ITNs to individuals of the correct age (to model ITN
-   * distribution along with measles vaccines, etc.). */
-  void continousItnDistribution (int ageTSteps);
-  
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
@@ -152,7 +145,6 @@ public:
       timestepITN & stream;
       timestepIRS & stream;
       timestepVA & stream;
-      nextItnDistribution & stream;
   }
   
   
@@ -172,14 +164,6 @@ private:
   int timestepITN;
   int timestepIRS;
   int timestepVA;
-  
-  size_t nextItnDistribution;
-  
-  
-  /// Target ages at which individuals may receive ITNs
-  static vector<double> cntItnTargetAgeTStep;
-  /// Coverage levels associated with cntItnTargetAgeTStep
-  static vector<double> cntItnCoverage;
 };
 
 /** Data needed for each human which is per-mosquito species. */
