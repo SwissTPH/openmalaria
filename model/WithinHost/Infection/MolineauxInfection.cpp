@@ -220,6 +220,7 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
 	m[i] & stream;
     	growthRate[i] & stream;
 	P[i] & stream;
+	initP[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
 	    laggedP[j][i] & stream;
@@ -235,9 +236,10 @@ void MolineauxInfection::checkpoint (ostream& stream) {
 
     variantTranscendingSummation & stream;
     for(int i=0;i<v;i++){
-	m[i] & stream;
+    	m[i] & stream;
     	growthRate[i] & stream;
-	P[i] & stream;
+    	P[i] & stream;
+    	initP[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
 	    laggedP[j][i] & stream;
