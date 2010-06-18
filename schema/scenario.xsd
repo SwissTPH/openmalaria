@@ -1516,10 +1516,9 @@
         dependent decisions mentioned by name. The following decisions, with their associated
         outcomes, are provided by the code (and may not be included here):
         
-        * age5Test: tests the patient's age and returns "under5" or "over5".
         * case (uncomplicated only): Returns "UC1" if there is no recent history
           of a malarial case, or "UC2" if there is.
-        * result (uncomplicated only): Dependent on decision "test", this
+        * result: Dependent on decision "test", this
           performs a parasite density test. Output is one of "none" (no test
           performed), "positive", "negative".
         
@@ -1530,6 +1529,7 @@
         * treatment: Describes which treatment to use. Values aren't restricted
           but must match up with a treatment described in the corresponding
           "treatments" section.
+        * hospitalisation (complicated only): none, immediate or delayed.
       </xs:documentation>
       <xs:appinfo>name:Description of decisions;</xs:appinfo>
     </xs:annotation>
@@ -1719,7 +1719,7 @@
         <xs:annotation>
           <xs:documentation>
             Selects which drug doses to administer according to time of administration (before times
-            are modified by delays).
+            are modified by delays). Half-open interval: [x,y)
             
             The "drugs" attribute is a comma-separated list of all active ingredients administered in
             the base schedule (each must be listed once) and the content of this element is a comma-
