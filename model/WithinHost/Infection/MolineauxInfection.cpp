@@ -38,22 +38,10 @@ namespace WithinHost {
 
 using namespace OM::util;
 
-int MolineauxInfection::delta;
-
-double MolineauxInfection::C;
-double MolineauxInfection::sigma;
-double MolineauxInfection::rho;
-double MolineauxInfection::beta;
-double MolineauxInfection::sProb;
-double MolineauxInfection::q;
-double MolineauxInfection::mu_m;
-double MolineauxInfection::sigma_m;
-double MolineauxInfection::k_c;
-double MolineauxInfection::k_m;
-double MolineauxInfection::Pstar_v;
-double MolineauxInfection::kappa_c;
-double MolineauxInfection::kappa_v;
-double MolineauxInfection::kappa_m;
+double MolineauxInfection::mean_first_local_max;
+double MolineauxInfection::sd_first_local_max;
+double MolineauxInfection::mean_diff_pos_days;
+double MolineauxInfection::sd_diff_pos_days;
 
 CommonInfection* createMolineauxInfection (uint32_t protID) {
     return new MolineauxInfection (protID);
@@ -71,10 +59,10 @@ void MolineauxInfection::initParameters(){
 	CommonWithinHost::createInfection = &createMolineauxInfection;
 	CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
 
-	C=1.0, sigma=0.02,rho=0, beta=0.01, sProb=0.02, q=0.3, mu_m=16.0, sigma_m=10.4,
-	k_c=0.2, k_m=0.04, Pstar_v=30.0, kappa_c=3.0, kappa_v=3.0, kappa_m=1.0;
-
-	delta = 8;
+	mean_first_local_max = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
+	sd_first_local_max = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+	mean_diff_pos_days = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
+	sd_diff_pos_days = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
 }
 
 MolineauxInfection::MolineauxInfection(uint32_t protID):
@@ -87,40 +75,54 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 		growthRate[i] = 0.0;
 		initP[i] = 0.0;
 
+		// Molineaux paper, equation 11
 		while(m[i]<1.0)
-			m[i]=random::gauss(mu_m, sigma_m);
+		{
+		    m[i]=random::gauss(mu_m, sigma_m);
+		}
 
 		for(int tau=0; tau<taus; tau++)
-			laggedP[tau][i] =  0.0;
+		{
+		    laggedP[tau][i] =  0.0;
+		}
 
 		variantSpecificSummation[i]=0.0;
 	}
 	for(int tau=0; tau<taus;tau++)
+	{
 		laggedPc[tau] = 0.0;
+	}
 
+	// the initial density is set to 0.1... The first chosen variant is the variant 1
 	P[0] = 0.1;
 	variantTranscendingSummation = 0.0;
-	Pstar_c = k_c*pow(random::gauss(Params::MEAN_LOCAL_MAX_DENSITY,Params::SD_LOCAL_MAX_DENSITY),10.0);
-	Pstar_m = k_m*pow(random::gauss(Params::MEAN_DIFF_POS_DAYS,Params::SD_DIFF_POS_DAYS), 10.0);
+
+	// TODO: use static variables
+	Pstar_c = k_c*pow(random::gauss(mean_first_local_max,sd_first_local_max),10.0);
+	Pstar_m = k_m*pow(random::gauss(mean_diff_pos_days,sd_diff_pos_days),10.0);
 }
 
 void MolineauxInfection::updateGrowthRateMultiplier(){
 
+
+        // The immune responses are represented by the variables
+        // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
+        // Sm (                        "                      acquired and variant-transcending immune response)
+        // S[i] (                      "                      acquired and variant-specific immune response)
 	double Sc = 1/(1 + pow(_density/Pstar_c, kappa_c));
-	double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta;
+
+	//double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta
+	//optimization: Since kappa_m = 1, we don't use pow.
+	double Sm = ((1-beta)/(1+(getVariantTranscendingSummation()/Pstar_m)))+beta;
 	double S[v];
 
 	double sigma_Qi_Si=0.0;
 	double sigma_S=0.0;
-	double sigmaP = 0.0;
-
-	for(int j=0;j<v; j++)
-		sigmaP+=P[j];
 
 	for(int i=0; i<v; i++)
 	{
 		S[i] = 1/(1+pow(getVariantSpecificSummation(i,P[i])/Pstar_v, kappa_v));
-		sigma_Qi_Si+= pow(q, (double)i+1)*S[i];
+		sigma_Qi_Si+= pow(q, (double)(i+1))*S[i];
 		sigma_S+=S[i];
 		initP[i] = 0.0;
 	}
@@ -128,60 +130,108 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 	for(int i=0;i<v;i++)
 	{
 		double p_i;
+		// Molineaux paper equation 4
+		// p_i: variant selection probability
 		if(S[i]<0.1)
-			p_i = 0.0;
+		{
+		    p_i = 0.0;
+		}
 		else
-			p_i = pow(q, (double)i+1)*S[i]/sigma_Qi_Si;
+		{
+		    p_i = pow(q, (double)(i+1))*S[i]/sigma_Qi_Si;
+		}
 
-		double newPi;
-		newPi = ((1-sProb) * P[i]+sProb*p_i*sigmaP)*m[i]*S[i]*Sc*Sm;
+		// Molineaux paper equation 1
+		// newPi: Variant density at t = t + 2
+		// new variant density  = (the amount of this variant's parasites
+		// which will not switch to another variant + the ones from other
+		// variants switching to this variant) * this variant multiplication
+		// factor * the probability that the parasites escape control by immune response.
+		double newPi = ((1-sProb) * P[i]+sProb*p_i*_density)*m[i]*S[i]*Sc*Sm;
 
+		// Molineaux paper equation 2
 		if(newPi<1.0e-5)
-			newPi = 0.0;
+		{
+		    newPi = 0.0;
+		}
 
+		// if P[i] == 0 then that means this variant wasn't expressed yet
+		// or is extinct. If this variant is emerging in (t+2) the new variant
+		// density is stored in the initP array. So we are able to add the survival factor's
+		// effects to the emerging variant density.
 		if(P[i]==0)
-			initP[i] = newPi;
+		{
+		    initP[i] = newPi;
+		    growthRate[i] = 0.0;
+		}
 		else
-			growthRate[i] = sqrt(newPi/P[i]);
+		{
+		    growthRate[i] = sqrt(newPi/P[i]);
+		}
 
 	}
 }
 
 bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection){
-	double newDensity = 0.0;
-
 	if(ageOfInfection == 0)
-		_density = P[0];
+	{
+	    _density = P[0];
+	}
 	else
 	{
-		for(int i=0;i<v;i++)
-		{
-			P[i] *= growthRate[i];
-			P[i] *= survivalFactor;
-			initP[i] *= survivalFactor;
 
-			if(P[i]==0&&ageOfInfection%2==0)
-				P[i] = initP[i];
+	    double newDensity = 0.0;
 
-			if(P[i]<1.0e-5)
-				P[i] = 0.0;
-			else
-				newDensity += P[i];
-		}
+	    for(int i=0;i<v;i++)
+	    {
+		    // growthRate:
+		    // p(t+1) = p(t) * sqrt(p(t+2)/p(t))
+		    // p(t+2) = p(t+1) * sqrt(p(t+2)/p(t))
+		    // p(t+2) = p(t) * sqrt(p(t+2)/p(t))^2...
+		    P[i] *= growthRate[i];
 
-		_density = newDensity;
+		    // survivalFactor: effects of drugs, immunity and vaccines
+		    P[i] *= survivalFactor;
+		    initP[i] *= survivalFactor;
+
+		    // if t+2: The new variant is now expressed. For already extinct
+		    // variants this doesn't matter, since initP[i] = 0 for those variants.
+		    if(P[i]==0 && ageOfInfection%2==0)
+		    {
+			P[i] = initP[i];
+		    }
+
+		    // The variant is extinct when variant's density < 1.0e-5
+		    if(P[i]<1.0e-5)
+		    {
+			P[i] = 0.0;
+		    }
+		    else
+		    {
+			// Molineaux paper equation 3
+			newDensity += P[i];
+		    }
+	    }
+
+	    _density = newDensity;
 	}
 
 	_cumulativeExposureJ += Global::interval * _density;
 
 	if(_density>1.0e-5)
 	{
-		if(ageOfInfection%2==0)
-			updateGrowthRateMultiplier();
-		return false;
+	    // if the infection isn't extinct and t = t+2
+	    // then the growthRateMultiplier is adapted for t+3 and t+4
+	    if(ageOfInfection%2==0)
+	    {
+		updateGrowthRateMultiplier();
+	    }
+	    return false;
 	}
 	else
-		return true;
+	{
+	    return true;
+	}
 }
 
 double MolineauxInfection::getVariantSpecificSummation(int i, double Pcurrent){
@@ -189,27 +239,25 @@ double MolineauxInfection::getVariantSpecificSummation(int i, double Pcurrent){
 //and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
 //the time steps are two days and the dimension of sigma is per day.
 
-	variantSpecificSummation[i] = (variantSpecificSummation[i] * exp(-2.0*sigma))+laggedP[3][i];
-	for(int tau=1; tau<taus; tau++)
-		laggedP[4-tau][i] = laggedP[3-tau][i];
+    //Molineaux paper equation 6
+    size_t index = (Global::simulationTime % 8)/2;	// 8 days ago has same index as today
+    variantSpecificSummation[i] = (variantSpecificSummation[i] * exp(-2.0*sigma))+laggedP[index][i];
+    laggedP[index][i] = Pcurrent;
 
-	laggedP[0][i] = Pcurrent;
-
-	return variantSpecificSummation[i];
+    return variantSpecificSummation[i];
 }
 
 double MolineauxInfection::getVariantTranscendingSummation(){
 
-	variantTranscendingSummation = (variantTranscendingSummation * exp(-2.0*rho))+laggedPc[3];
-	for (int tau=1; tau<taus; tau++)
-		laggedPc[4-tau] = laggedPc[3-tau];
+    //Molineaux paper equation 5
+    size_t index = (Global::simulationTime % 8)/2;	// 8 days ago has same index as today
+    variantTranscendingSummation = (variantTranscendingSummation * exp(-2.0*rho))+laggedPc[index];
 
-	if(_density < C)
-		laggedPc[0] = _density;
-	else
-		laggedPc[0] =C;
+    //Molineaux paper equation 8
+    double localC = C;
+    laggedPc[index] = min(_density, localC);
 
-	return variantTranscendingSummation;
+    return variantTranscendingSummation;
 }
 
 MolineauxInfection::MolineauxInfection (istream& stream) :
@@ -223,10 +271,14 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
 	initP[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
+	{
 	    laggedP[j][i] & stream;
+	}
     }
     for(int j=0;j<taus;j++)
+    {
 	laggedPc[j] & stream;
+    }
     Pstar_c & stream;
     Pstar_m & stream;
 }
@@ -242,10 +294,14 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     	initP[i] & stream;
 	variantSpecificSummation[i] & stream;
 	for(int j=0;j<taus;j++)
+	{
 	    laggedP[j][i] & stream;
+	}
     }
     for(int j=0;j<taus;j++)
+    {
 	laggedPc[j] & stream;
+    }
     Pstar_c & stream;
     Pstar_m & stream;
 }
