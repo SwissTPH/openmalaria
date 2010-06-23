@@ -69,7 +69,7 @@ class SurveysType
       return _survey[n];
     }
 
-    /// Returns current survey index (for later reporting of an event which
+    /// Returns current survey index (for later reporting of a bout which
     /// happened now).
     int getSurveyPeriod() {
       return _surveyPeriod;

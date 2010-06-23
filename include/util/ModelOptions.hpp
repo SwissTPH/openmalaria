@@ -35,11 +35,11 @@ namespace OM { namespace util {
 	* For historical reasons only, there is no 1 (=1<<0). */
 	/** @brief Clinical episodes reduce the level of acquired immunity
 	* 
-	* Effective cumulative exposure to blood stage parasites is reduced during a
-	* clinical episode, so that clinical episodes have a negative effect on
+	* Effective cumulative exposure to blood stage parasites is reduced by a
+	* clinical sickness event, so that clinical bouts have a negative effect on
 	* blood stage immunity.
 	* 
-	* (ImmediateOutcomes model: per event; EventScheduler: once per event.)
+	* (ImmediateOutcomes model: per event; EventScheduler: once per bout.)
 	* 
 	* Default: Clinical events have no effect on immune status except
 	* secondarily via effects of treatment. */

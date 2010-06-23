@@ -38,8 +38,8 @@ namespace OM { namespace Clinical {
  * 
  * TODO: Reporting of parasitological status (not model specific).
  * 
- * Note: there are several variables that only need to be used during an
- * episode. It's possible that memory usage could be reduced by storing them
+ * Note: there are several variables that only need to be used during a
+ * bout. It's possible that memory usage could be reduced by storing them
  * externally in a temporary object during episodes (but unlikely worth doing).
  */
 class ClinicalEventScheduler : public ClinicalModel
@@ -91,8 +91,8 @@ private:
   /// Current state of sickness
   Pathogenesis::State pgState;
   
-  /** Set to when an event should start. If simulationTime equals this, an event
-   * is started (UC & C behaviour different).
+  /** Set to when a bout should start. If simulationTime equals this, a bout
+   * is started (UC & severe behaviour different).
    * 
    * Note: medications are not delayed by this. */
   int caseStartTime;
@@ -104,7 +104,7 @@ private:
   /// Time at which last treatment was recieved (for second-case considerations).
   int timeLastTreatment;
   
-  /// Total parasite density at previous timestep (used during an event).
+  /// Total parasite density at previous timestep (used during a bout).
   double previousDensity;
   
   /// All pending medications

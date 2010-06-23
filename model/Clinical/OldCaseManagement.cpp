@@ -216,7 +216,7 @@ bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, M
         latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::State (sevTreated | Pathogenesis::SEQUELAE));
       } else { /*if (q[5] > prandom)*/
         // No change in parasitological status: in-hospital patients
-        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE); // no event
+        latestReport.update (Global::simulationTime, ageGroup, Pathogenesis::STATE_SEVERE);
       }
       return false;
     }

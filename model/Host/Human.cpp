@@ -255,7 +255,7 @@ double Human::getAgeInYears() const{
 
 void Human::summarize(Monitoring::Survey& survey) {
   if (WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment())
-    return;	//NOTE: this modifies the denominator to treat the 4*5 day intervals after an episode as 'not at risk' to match the IPTi trials
+    return;	//NOTE: this modifies the denominator to treat the 4*5 day intervals after a bout as 'not at risk' to match the IPTi trials
   
   Monitoring::AgeGroup ageGrp = ageGroup();
   survey.reportHosts (ageGrp, 1);

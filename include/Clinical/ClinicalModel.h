@@ -154,8 +154,7 @@ protected:
   /// The PathogenesisModel introduces illness dependant on parasite density
   Pathogenesis::PathogenesisModel *pathogenesisModel;
   
-  /** Next event to report.
-   * Only reported when the Human dies or a separate episode occurs. */
+  /** Last episode; report to survey pending a new episode or human's death. */
   Episode latestReport;
   
   /** @brief Positive values of _doomed variable (codes). */

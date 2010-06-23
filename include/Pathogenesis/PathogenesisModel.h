@@ -82,7 +82,7 @@ private:
   //@{
   //comorbidity prevalence at birth as a risk factor for indirect
   static double indirRiskCoFactor_18;
-  //sevMal: critical density for severe malaria episode (Y*B1)
+  //sevMal: critical density for severe malaria bout (Y*B1)
   static double sevMal_21;
   //Critical age for co-morbidity (for both severe and indirect)
   static double critAgeComorb_30;

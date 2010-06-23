@@ -90,7 +90,7 @@ namespace Params {
     MEAN_DIFF_POS_DAYS = 36,
     SD_DIFF_POS_DAYS = 37,
     
-    /// exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day, with event scheduler model
+    /// exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day, with Event Scheduler model
     CFR_NEG_LOG_ALPHA = 38,
     MAX
   };

@@ -152,7 +152,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
 	    // else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	    // report event, at conclusion:
+	    // report bout, at conclusion of episode:
 	    latestReport.update (Global::simulationTime, ageGroup, pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)

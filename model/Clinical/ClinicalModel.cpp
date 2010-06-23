@@ -121,7 +121,7 @@ void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHos
     _doomed -= Global::interval;
   
   //indirect death: if this human's about to die, don't worry about further episodes:
-  if (_doomed <= -35) {	//clinical episode 6 intervals before
+  if (_doomed <= -35) {	//clinical bout 6 intervals before
     Monitoring::Surveys.current->reportIndirectDeaths (ageGroup, 1);
     _doomed = DOOMED_INDIRECT;
     return;

@@ -32,6 +32,7 @@ namespace OM { namespace Clinical {
  *
  * Terminology:
  * An "event" is an instantaeneous alteration of state.
+ * A "bout" is a single fever or other sickness (falling sick to recovery).
  * An "episode" is a clinical-view of sickness caused by a malaria infection.
  * There's no reason an "episode" can't span multiple infections and multiple
  * bouts of sickness and recovery (the most severe is reported). */
@@ -58,8 +59,8 @@ public:
   void operator& (ostream& stream);	///< ditto
   
   
-  /** The maximum age, in timesteps, of when a sickness event occurred, for
-   * another event to be considered part of the same episode.
+  /** The maximum age, in timesteps, of when a sickness bout occurred, for
+   * another bout to be considered part of the same episode.
    * 
    * Used by both the clinical models in roughly the same way, but will have
    * different values in each to match Global::interval. */
@@ -79,7 +80,7 @@ private:
   //! survey period during which the event occured
   //! TODO: we could use the survey array to map time to survey period. slower, but less memory.
   int _surveyPeriod;
-  //! agegroup of the individual which experienced the episode
+  //! agegroup of the individual which experienced the episode's first bout
   Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
