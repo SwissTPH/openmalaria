@@ -80,7 +80,9 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   
   std::list<DescriptiveInfection*>::iterator iter=infections.begin();
   while(iter != infections.end()){
-    if ((*iter)->expired()) {
+    if( (*iter)->expired() /* infection too old */
+	|| eventSPClears(*iter) /* infection cleared by SP in IPT model */
+    ) {
       delete *iter;
       iter=infections.erase(iter);
       _MOI--;
@@ -98,9 +100,6 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
   // (values are adjusted for each infection)
   double cumulativeh=_cumulativeh;
   double cumulativeY=_cumulativeY;
-  
-  // IPTi SP dose clears infections at the time that blood-stage parasites appear     
-  SPAction();
   
   for(iter=infections.begin(); iter!=infections.end(); iter++){
     // With option MAX_DENS_RESET this would be: infStepMaxDens = 0.0;

@@ -59,10 +59,7 @@ public:
   static bool iptActive;
   
 protected:
-  /*!  SP drug action applies to each infection depending on genotype and when
-  the individual had their last dose of SP */
-  void SPAction();
-  
+  virtual bool eventSPClears (DescriptiveInfection* inf);
   virtual void IPTattenuateAsexualMinTotalDensity ();
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf);
   

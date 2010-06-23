@@ -54,9 +54,7 @@ protected:
   
   ///@brief IPT extensions − empty otherwise
   //@{
-  /*!  SP drug action applies to each infection depending on genotype and when
-  the individual had their last dose of SP */
-  virtual void SPAction() {}
+  virtual bool eventSPClears (DescriptiveInfection* inf) { return false; }
   virtual void IPTattenuateAsexualMinTotalDensity () {}
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}

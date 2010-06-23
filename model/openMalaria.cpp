@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
         OM::util::BoincWrapper::init();
 
-        scenario_name = OM::util::CommandLine::lookupResource (scenario_name.c_str());
+        scenario_name = OM::util::CommandLine::lookupResource (scenario_name);
         OM::util::Checksum cksum = OM::InputData.createDocument(scenario_name);
 
         {

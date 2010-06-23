@@ -96,7 +96,7 @@ void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));
 }
 
-// -----    -----
+// -----  Events setting _lastSPDose  -----
 
 void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   int fortnight = int((14.0/Global::interval)+0.5);	// round to nearest
@@ -167,30 +167,15 @@ void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup) {
 }
 
 
-// -----  density calculation  -----
+// -----  update (from SPAction)  -----
 
-void DescriptiveIPTWithinHost::SPAction(){
-  /* Uses a simplistic drug model as opposed to PKPD model. PKPD effects with
-   * PKPD model happen anyway. */
-
-  std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-  while(iter != infections.end()) {
-    if (1 + Global::simulationTime - (*iter)->getStartDate() > DescriptiveInfection::latentp) {
-      DescriptiveIPTInfection* infec = dynamic_cast<DescriptiveIPTInfection*> (*iter);
-      if (infec == NULL) throw logic_error ("infections should be of type DescriptiveInfection");
-      if (infec->eventSPClears(_lastSPDose)) {
-        delete *iter;
-        iter=infections.erase(iter);
-        _MOI--;
-      } else {
-	iter++;
-      }
-    } else {
-      iter++;
-    }
-  }
-  assert( _MOI == infections.size() );
+bool DescriptiveIPTWithinHost::eventSPClears (DescriptiveInfection* inf){
+  DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
+  assert (iptInf);	// code error if this is anything else
+  return iptInf->eventSPClears(_lastSPDose);
 }
+
+// -----  density calculation  -----
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
   //Note: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
@@ -206,8 +191,7 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection*
   if (!(util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY))) return;
   
   DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
-  if (iptInf == NULL)
-    throw invalid_argument ("inf should be a DescriptiveIPTInfection");
+  assert (iptInf);	// code error if this is anything else
   if (iptInf->doSPAttenuation()) {
     double attFact = iptInf->asexualAttenuation();
     timeStepMaxDensity *= attFact;

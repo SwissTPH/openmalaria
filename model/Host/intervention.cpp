@@ -49,8 +49,9 @@ double Vaccine::getEfficacy (int numPrevDoses)
      * the last efficacy. */
     if (numPrevDoses >= (int) initialMeanEfficacy.size())
         numPrevDoses = initialMeanEfficacy.size() - 1;
-    if (initialMeanEfficacy[numPrevDoses] <  1) {
-        double a = efficacyB * initialMeanEfficacy[numPrevDoses] / (1.0 - initialMeanEfficacy[numPrevDoses]);
+    double ime = initialMeanEfficacy[numPrevDoses];
+    if (ime < 1.0) {
+        double a = efficacyB * ime / ( 1.0 - ime );
         return random::beta (a, efficacyB);
     } else
         return 1.0;

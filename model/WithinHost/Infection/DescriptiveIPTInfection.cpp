@@ -83,6 +83,10 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
 }
 
 bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
+    if(Global::simulationTime - _startdate - latentp < 0)
+	return false;	// don't consider pre-patent infections
+    
+    //TODO: change order to reduce random number calls in some cases
     return (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
     (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
 }
