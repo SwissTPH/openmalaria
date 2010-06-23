@@ -254,8 +254,8 @@ double MolineauxInfection::getVariantTranscendingSummation(){
     variantTranscendingSummation = (variantTranscendingSummation * exp(-2.0*rho))+laggedPc[index];
 
     //Molineaux paper equation 8
-    double localC = C;
-    laggedPc[index] = min(_density, localC);
+    //We could use min here, but it seems that min has problems with static const double C
+    laggedPc[index] = _density < C ? _density:C;
 
     return variantTranscendingSummation;
 }

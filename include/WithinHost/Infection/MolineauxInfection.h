@@ -18,7 +18,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-/*This Molineaux infection refers to the paper:
+/*This model refers to the paper:
  *L. MOLINEAUX, H. H. DIEBNER, M. EICHNER, W. E. COLLINS, G. M. JEFFERY and K. DIETZ (2001). Plasmodium falciparum parasitaemia described by a new mathematical model. Parasitology, 122 , pp 379-391
  *doi:10.1017/S0031182001007533*/
 
