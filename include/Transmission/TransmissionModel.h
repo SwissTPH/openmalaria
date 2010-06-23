@@ -163,11 +163,14 @@ public:
   virtual void uninfectVectors() =0;
   
 protected:
-  /** Calculates the EIR (in adults), during the main simulation phase.
+  /** Calculates the EIR individuals are exposed to.
    * 
-   * \param simulationTime Time since start of simulation.
-   * \param host The human to calculate EIR for (not used by all models).
-   * @param ageGroupData Age group of this host for availablility data. */
+   * @param simulationTime Time since start of simulation.
+   * @param host Transmission data for the human to calculate EIR for.
+   * @param ageGroupData Age group of this host for availablility data.
+   *
+   * @returns  The age- and heterogeneity-specific EIR an individual is exposed
+   * to, in units of innoculations per day. */
   virtual double calculateEIR(int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData) = 0; 
   
   virtual void checkpoint (istream& stream);

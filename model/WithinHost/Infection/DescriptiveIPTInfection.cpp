@@ -1,7 +1,7 @@
 /*
  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -86,9 +86,9 @@ bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
     if(Global::simulationTime - _startdate - latentp < 0)
 	return false;	// don't consider pre-patent infections
     
-    //TODO: change order to reduce random number calls in some cases
-    return (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR) &&
-    (Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph);
+    return
+	(Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
+	&& (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR);
 }
 
 double DescriptiveIPTInfection::asexualAttenuation () {
