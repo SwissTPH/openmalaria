@@ -183,40 +183,51 @@ int readCheckpointNum () {
 }
 
 void Simulation::writeCheckpoint(){
-  // We alternate between two checkpoints, in case program is closed while writing.
-  const int NUM_CHECKPOINTS = 2;
-  
-  int checkpointNum = 0;
+    // We alternate between two checkpoints, in case program is closed while writing.
+    const int NUM_CHECKPOINTS = 2;
+    
+    int oldCheckpointNum = 0, checkpointNum = 0;
     if (isCheckpoint()) {
-	checkpointNum = readCheckpointNum();
+	oldCheckpointNum = readCheckpointNum();
 	// Get next checkpoint number:
-	checkpointNum = (checkpointNum + 1) % NUM_CHECKPOINTS;
+	checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
+	cerr << "oldCheckpointNum: "<<oldCheckpointNum<<"; checkpointNum: "<<checkpointNum<<endl;
     }
-  
-  // Open the next checkpoint file for writing:
-  ostringstream name;
-  name << CHECKPOINT << checkpointNum;
-  //Writing checkpoint:
-  cerr << Global::simulationTime << " WC: " << name.str();
-  if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
-    name << ".gz";
-    ogzstream out(name.str().c_str(), ios::out | ios::binary);
-    checkpoint (out, checkpointNum);
-    out.close();
-  } else {
-    ofstream out(name.str().c_str(), ios::out | ios::binary);
-    checkpoint (out, checkpointNum);
-    out.close();
-  }
-  
-  {	// Indicate which is the latest checkpoint file.
-    ofstream checkpointFile;
-    checkpointFile.open(CHECKPOINT,ios::out);
-    checkpointFile << checkpointNum;
-    checkpointFile.close();
-    if (!checkpointFile)
-	throw util::checkpoint_error ("error writing to file \"checkpoint\"");
-  }
+    
+    {	// Open the next checkpoint file for writing:
+	ostringstream name;
+	name << CHECKPOINT << checkpointNum;
+	//Writing checkpoint:
+	cerr << Global::simulationTime << " WC: " << name.str();
+	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
+	    name << ".gz";
+	    ogzstream out(name.str().c_str(), ios::out | ios::binary);
+	    checkpoint (out, checkpointNum);
+	    out.close();
+	} else {
+	    ofstream out(name.str().c_str(), ios::out | ios::binary);
+	    checkpoint (out, checkpointNum);
+	    out.close();
+	}
+    }
+    
+    {	// Indicate which is the latest checkpoint file.
+	ofstream checkpointFile;
+	checkpointFile.open(CHECKPOINT,ios::out);
+	checkpointFile << checkpointNum;
+	checkpointFile.close();
+	if (!checkpointFile)
+	    throw util::checkpoint_error ("error writing to file \"checkpoint\"");
+    }
+    if( oldCheckpointNum != checkpointNum ){	// Truncate the old checkpoint to save disk space, when it existed
+	ostringstream name;
+	name << CHECKPOINT << oldCheckpointNum;
+	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
+	    name << ".gz";
+	}
+	ofstream out(name.str().c_str(), ios::out | ios::binary);
+	out.close();
+    }
     cerr << " OK" << endl;
 }
 
@@ -233,7 +244,8 @@ void Simulation::readCheckpoint() {
   } else {
     name << ".gz";				// then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
-    if (!in.good())
+    //Note: gzstreams are considered "good" when file not open!
+    if ( !( in.good() && in.rdbuf()->is_open() ) )
       throw util::checkpoint_error ("Unable to read file");
     checkpoint (in, checkpointNum);
     in.close();
