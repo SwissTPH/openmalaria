@@ -43,6 +43,7 @@ double MolineauxInfection::mean_first_local_max;
 double MolineauxInfection::sd_first_local_max;
 double MolineauxInfection::mean_diff_pos_days;
 double MolineauxInfection::sd_diff_pos_days;
+double MolineauxInfection::qPow[v];
 
 CommonInfection* createMolineauxInfection (uint32_t protID) {
     return new MolineauxInfection (protID);
@@ -63,6 +64,11 @@ void MolineauxInfection::initParameters() {
     sd_first_local_max = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
     mean_diff_pos_days = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
     sd_diff_pos_days = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+
+   for(int i=0;i<50;i++)
+   {
+       qPow[i] = pow(q,(double)(i+1));
+   }
 }
 
 MolineauxInfection::MolineauxInfection(uint32_t protID):
@@ -150,7 +156,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
     {
         S[i] = i >= variants.size() ? 1.0 :
                1.0/(1.0 + pow(variants[i].getVariantSpecificSummation() / Pstar_v, kappa_v));
-        sigma_Qi_Si+= pow(q, (double)(i+1))*S[i];
+        sigma_Qi_Si+= qPow[i]*S[i];
     }
 
     for (int i=0;i<v;i++)
@@ -161,7 +167,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
         if ( S[i]<0.1 ) {
             p_i = 0.0;
         } else {
-            p_i = pow(q, (double)(i+1))*S[i]/sigma_Qi_Si;
+            p_i = qPow[i]*S[i]/sigma_Qi_Si;
         }
 	
 	if( i < variants.size() ){

@@ -68,6 +68,13 @@ private:
 	static double mean_diff_pos_days, sd_diff_pos_days;
 	//@}
 	
+	//@brief q^(i+1) array
+	//@{
+	/// all the values of q^1... q^50 are stored in this array.
+	/// this prevent the recalculation of those values on every two timesteps.
+	static double qPow[v];
+	//@}
+
 	/** @brief The static variables (double)
 	 *
 	 * sProb: fraction of parasites switching among variants per two-day cycle
@@ -95,7 +102,6 @@ private:
 	static const double kappa_m=1.0;
 	static const double kappa_v=3.0;
 	static const double C=1.0;
-	//@}
 
 	/*
 	 * The dynamic variables:
