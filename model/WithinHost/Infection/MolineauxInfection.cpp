@@ -78,7 +78,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
             m[i]=random::gauss(mu_m, sigma_m);
         }
     }
-    sort( &m[1], &m[v-1] );
+
     for (int tau=0; tau<taus;tau++)
     {
         laggedPc[tau] = 0.0;
@@ -284,9 +284,7 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
     for (int i=0;i<v;i++) {
         m[i] & stream;
     }
-    for( int i=0; i<variants.size(); ++i){
-	variants[i] & stream;
-    }
+    variants & stream;
     for (int j=0;j<taus;j++)
     {
         laggedPc[j] & stream;
@@ -302,9 +300,7 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     for (int i=0;i<v;i++) {
         m[i] & stream;
     }
-    for( int i=0; i<variants.size(); ++i){
-	variants[i] & stream;
-    }
+    variants & stream;
     for (int j=0;j<taus;j++)
     {
         laggedPc[j] & stream;

@@ -98,12 +98,6 @@ private:
 	//@}
 
 	/*
-	 * The static variables (int):
-	 * delta: delay parameter, in days, of the acquired variant-specific and variant-transcending immune responses
-	 */
-	static const int delta = 8;
-
-	/*
 	 * The dynamic variables:
 	 * m[i]: Multiplication factor, per two-day cycle of variant i
 	 * growthRate[i]: variant's i growthRate
