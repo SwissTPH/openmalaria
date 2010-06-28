@@ -85,7 +85,7 @@ private:
    /** Called when a non-severe/complicated malaria sickness occurs.
     *
     * @returns True in case of effective or partially effective treatment, false otherwise. */
-   bool uncomplicatedEvent(Episode& latestReport, bool isMalaria, double ageYears, Monitoring::AgeGroup ageGroup);
+   bool uncomplicatedEvent(OM::Clinical::Episode& latestReport, OM::Pathogenesis::State pgState, double ageYears, OM::Monitoring::AgeGroup ageGroup);
 
    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
     *

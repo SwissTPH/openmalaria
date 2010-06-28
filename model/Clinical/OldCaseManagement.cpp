@@ -84,8 +84,14 @@ OldCaseManagement::~OldCaseManagement()
 
 // -----  other public  -----
 
-void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed)
-{
+void OldCaseManagement::doCaseManagement (
+    Pathogenesis::State pgState,
+    WithinHost::WithinHostModel& withinHostModel,
+    Episode& latestReport,
+    double ageYears,
+    Monitoring::AgeGroup ageGroup,
+    int& doomed
+){
   bool effectiveTreatment = false;
 
   if (pgState & Pathogenesis::MALARIA) {
@@ -95,7 +101,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
       // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
       // included. Validity is debatable, but there's no point changing now.
       // (This does affect tests.)
-      effectiveTreatment = uncomplicatedEvent (latestReport, true, ageYears, ageGroup);
+      effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, ageGroup);
     }
 
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
@@ -105,7 +111,7 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
       withinHostModel.immunityPenalisation();
     }
   } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
-    effectiveTreatment = uncomplicatedEvent (latestReport, false, ageYears, ageGroup);
+    effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, ageGroup);
   }
 
   if (effectiveTreatment) {
@@ -116,12 +122,21 @@ void OldCaseManagement::doCaseManagement (Pathogenesis::State pgState, WithinHos
 
 // -----  private  -----
 
-bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalaria, double ageYears, Monitoring::AgeGroup ageGroup)
-{
-    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime) ? Regimen::UC2 : Regimen::UC;
-    bool successfulTreatment = false;
+bool OldCaseManagement::uncomplicatedEvent (
+    Episode& latestReport,
+    Pathogenesis::State pgState,
+    double ageYears,
+    Monitoring::AgeGroup ageGroup
+){
+    latestReport.update (Global::simulationTime, ageGroup,
+			 Pathogenesis::State( pgState & Pathogenesis::STATE_MALARIA )	// mask to SICK and MALARIA flags
+    );
     
-    if (probGetsTreatment[regimen]*_treatmentSeekingFactor > (random::uniform_01())) {
+    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > Global::simulationTime)
+	? Regimen::UC2 : Regimen::UC
+    ;
+    
+    if( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
 	_tLastTreatment = Global::simulationTime;
 	if ( regimen == Regimen::UC )
 	    Monitoring::Surveys.current->reportTreatments1( ageGroup, 1 );
@@ -129,24 +144,25 @@ bool OldCaseManagement::uncomplicatedEvent (Episode& latestReport, bool isMalari
 	    Monitoring::Surveys.current->reportTreatments2( ageGroup, 1 );
 	
 	if (probParasitesCleared[regimen] > random::uniform_01()) {
-	successfulTreatment = true;	// Parasites are cleared
-	// We don't report out-of-hospital recoveries, so this wouldn't do anything extra:
-	//entrypoint = Pathogenesis::State (entrypoint | Pathogenesis::RECOVERY);
+	    // Could report Pathogenesis::RECOVERY to latestReport,
+	    // but we don't report out-of-hospital recoveries anyway.
+	    return true;	// successful treatment
 	} else {
-	// No change in parasitological status: treated outside of hospital
+	    // No change in parasitological status: treated outside of hospital
+	    return false;
 	}
     } else {
 	// No change in parasitological status: non-treated
+	return false;
     }
-    
-    Pathogenesis::State entrypoint = isMalaria ? Pathogenesis::STATE_MALARIA : Pathogenesis::SICK;
-    latestReport.update (Global::simulationTime, ageGroup, entrypoint);
-    
-    return successfulTreatment;
 }
 
-bool OldCaseManagement::severeMalaria (Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed)
-{
+bool OldCaseManagement::severeMalaria (
+    Episode& latestReport,
+    double ageYears,
+    Monitoring::AgeGroup ageGroup,
+    int& doomed
+){
   BOOST_STATIC_ASSERT (NUM_SEQUELAE_AGE_GROUPS == 2);	// code setting sequelaeIndex assumes this
   size_t sequelaeIndex = 0;
   if (ageYears >= SEQUELAE_AGE_BOUND[0]) {
