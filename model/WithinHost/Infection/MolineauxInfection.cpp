@@ -30,8 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include <sstream>
 #include <fstream>
 #include <cmath>
-#include <algorithm>
-
+#include <boost/static_assert.hpp>
 
 
 namespace OM {
@@ -143,7 +142,10 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
     // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
     // Sm (                        "                      acquired and variant-transcending immune response)
     // S[i] (                      "                      acquired and variant-specific immune response)
-    double Sc = 1.0/(1.0 + pow(_density/Pstar_c, kappa_c));
+    // We're using multiplication instead of power for speed here. Confirm exponent:
+    BOOST_STATIC_ASSERT( kappa_c == 3 );
+    double base = _density/Pstar_c;
+    double Sc = 1.0 / (1.0 + base*base*base);
 
     //double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta
     //optimization: Since kappa_m = 1, we don't use pow.
@@ -151,11 +153,16 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
     double S[v];
 
     double sigma_Qi_Si=0.0;
-
+    
     for (int i=0; i<v; i++)
     {
-        S[i] = i >= variants.size() ? 1.0 :
-               1.0/(1.0 + pow(variants[i].getVariantSpecificSummation() / Pstar_v, kappa_v));
+        S[i] = 1.0;
+	if( i < variants.size() ){
+	    // As above, confirm exponent:
+	    BOOST_STATIC_ASSERT( kappa_v == 3 );
+	    double base = variants[i].getVariantSpecificSummation() / Pstar_v;
+	    S[i] = 1.0 / (1.0 + base*base*base);
+	}
         sigma_Qi_Si+= qPow[i]*S[i];
     }
 
