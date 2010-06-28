@@ -116,15 +116,8 @@ private:
 	    Variant ();
 	    
 	    /// Checkpointing
-	    template<class S>
-	    void operator& (S& stream) {
-		growthRate & stream;
-		P & stream;
-		variantSpecificSummation & stream;
-		initP & stream;
-		for(int i = 0; i < taus; ++i)
-		    laggedP[i] & stream;
-	    }
+	    void operator& (ostream& stream);
+	    void operator& (istream& stream);
 	    
 	    void updateGrowthRateMultiplier( double pd, double immune_response_escape );
 	    double updateDensity (double survivalFactor, int ageOfInfection);

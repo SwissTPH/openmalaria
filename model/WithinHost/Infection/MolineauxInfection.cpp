@@ -309,5 +309,45 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     Pstar_m & stream;
 }
 
+void MolineauxInfection::Variant::operator& (istream& stream) {
+    bool nonZero;
+    nonZero & stream;
+    if( nonZero ){
+	growthRate & stream;
+	P & stream;
+	variantSpecificSummation & stream;
+	initP & stream;
+	for(int i = 0; i < taus; ++i)
+	    laggedP[i] & stream;
+    }
+    else
+    {
+	growthRate = 0.0;
+	P = 0.0;
+	variantSpecificSummation = 0.0;
+	initP = 0.0;
+	for(int i = 0; i < taus; ++i)
+	    laggedP[i] = 0.0;
+    }
+}
+
+void MolineauxInfection::Variant::operator& (ostream& stream) {
+    bool nonZero =
+	    growthRate != 0.0 ||
+	    P != 0.0 ||
+	    variantSpecificSummation != 0.0 ||
+	    initP != 0.0;
+
+    nonZero & stream;
+    if( nonZero ){
+	growthRate & stream;
+	P & stream;
+	variantSpecificSummation & stream;
+	initP & stream;
+	for(int i = 0; i < taus; ++i)
+	    laggedP[i] & stream;
+    }
+}
+
 }
 }
