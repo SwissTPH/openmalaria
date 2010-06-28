@@ -60,13 +60,16 @@ private:
 	// taus: used for the variantTranscending and variantSpecific array, 4 Molineaux timesteps = 8 days
 	static const int taus = 4;
 
-	// static variables red from parameters
-	// mean_first_local_max, sd_first_local_max: mean and sd of the first local maximum density
-	// mean_diff_pos_days, sd_diff_pos_days: mean and sd of the difference between last positive and first positive days
-	static double mean_first_local_max, sd_first_local_max, mean_diff_pos_days, sd_diff_pos_days;
-
-	/*
-	 * The static variables (double):
+	///@brief static variables red from parameters
+	//@{
+	/// mean and sd of the first local maximum density
+	static double mean_first_local_max, sd_first_local_max;
+	/// mean and sd of the difference between last positive and first positive days
+	static double mean_diff_pos_days, sd_diff_pos_days;
+	//@}
+	
+	/** @brief The static variables (double)
+	 *
 	 * sProb: fraction of parasites switching among variants per two-day cycle
 	 * q: Parameter of the geometric distribution of switching probabilities
 	 * k_c,k_m: constants allowing calculation of Pstar_c and Pstar_m from host-specific data
@@ -76,9 +79,8 @@ private:
 	 * sigma, rho: decay parameters, per day, of the acquired variant-specific and variant-transcending immune responses
 	 * beta: Minimum value of the probability that a parasite escape control by the acquired and variant-transcending immune response
 	 * mu_m, sigma_m: Mean and standard deviation to use for the normal distribution setting the variant specific multiplication factor.
-	 *
 	 */
-
+	//@{
 	static const double sigma=0.02;
 	static const double rho=0.0;
 	static const double beta=0.01;
@@ -93,7 +95,7 @@ private:
 	static const double kappa_m=1.0;
 	static const double kappa_v=3.0;
 	static const double C=1.0;
-
+	//@}
 
 	/*
 	 * The static variables (int):

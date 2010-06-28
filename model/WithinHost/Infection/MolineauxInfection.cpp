@@ -52,7 +52,6 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
 }
 
 void MolineauxInfection::initParameters(){
-
 	if (Global::interval != 1)
 		throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
 
@@ -94,7 +93,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 	}
 
 	// the initial density is set to 0.1... The first chosen variant is the variant 1
-	P[0] = 0.1;
+	/*initP[0] =*/ P[0] = 0.1;
 	variantTranscendingSummation = 0.0;
 
 	// TODO: use static variables
@@ -103,41 +102,34 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 }
 
 void MolineauxInfection::updateGrowthRateMultiplier(){
-
-
         // The immune responses are represented by the variables
         // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
         // Sm (                        "                      acquired and variant-transcending immune response)
         // S[i] (                      "                      acquired and variant-specific immune response)
-	double Sc = 1/(1 + pow(_density/Pstar_c, kappa_c));
+	double Sc = 1.0/(1.0 + pow(_density/Pstar_c, kappa_c));
 
 	//double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta
 	//optimization: Since kappa_m = 1, we don't use pow.
-	double Sm = ((1-beta)/(1+(getVariantTranscendingSummation()/Pstar_m)))+beta;
+	double Sm = ((1.0-beta)/(1.0+(getVariantTranscendingSummation()/Pstar_m)))+beta;
 	double S[v];
 
 	double sigma_Qi_Si=0.0;
-	double sigma_S=0.0;
-
+	
 	for(int i=0; i<v; i++)
 	{
-		S[i] = 1/(1+pow(getVariantSpecificSummation(i,P[i])/Pstar_v, kappa_v));
+		S[i] = 1.0/(1.0 + pow(getVariantSpecificSummation(i,P[i]) / Pstar_v, kappa_v));
 		sigma_Qi_Si+= pow(q, (double)(i+1))*S[i];
-		sigma_S+=S[i];
 		initP[i] = 0.0;
 	}
 
 	for(int i=0;i<v;i++)
 	{
-		double p_i;
 		// Molineaux paper equation 4
 		// p_i: variant selection probability
-		if(S[i]<0.1)
-		{
+		double p_i;
+		if( S[i]<0.1 ){
 		    p_i = 0.0;
-		}
-		else
-		{
+		} else {
 		    p_i = pow(q, (double)(i+1))*S[i]/sigma_Qi_Si;
 		}
 
@@ -147,7 +139,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 		// which will not switch to another variant + the ones from other
 		// variants switching to this variant) * this variant multiplication
 		// factor * the probability that the parasites escape control by immune response.
-		double newPi = ((1-sProb) * P[i]+sProb*p_i*_density)*m[i]*S[i]*Sc*Sm;
+		double newPi = ( (1.0-sProb) * P[i] + sProb*p_i*_density )*m[i]*S[i]*Sc*Sm;
 
 		// Molineaux paper equation 2
 		if(newPi<1.0e-5)
@@ -157,18 +149,16 @@ void MolineauxInfection::updateGrowthRateMultiplier(){
 
 		// if P[i] == 0 then that means this variant wasn't expressed yet
 		// or is extinct. If this variant is emerging in (t+2) the new variant
-		// density is stored in the initP array. So we are able to add the survival factor's
-		// effects to the emerging variant density.
-		if(P[i]==0)
-		{
+		// density is stored in the initP array,  so that we are able to add
+		// the survival factor's effect to the emerging variant's density.
+		if(P[i]==0) {
 		    initP[i] = newPi;
 		    growthRate[i] = 0.0;
 		}
-		else
-		{
+		else {
+		    // important for checkpoints: leave initP[i] non-zero
 		    growthRate[i] = sqrt(newPi/P[i]);
 		}
-
 	}
 }
 
@@ -179,7 +169,6 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
 	}
 	else
 	{
-
 	    double newDensity = 0.0;
 
 	    for(int i=0;i<v;i++)
@@ -235,9 +224,9 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
 }
 
 double MolineauxInfection::getVariantSpecificSummation(int i, double Pcurrent){
-//The effective exposure is computed by adding in the 8-day lagged parasite density (i.e. 4 time steps)
-//and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
-//the time steps are two days and the dimension of sigma is per day.
+    //The effective exposure is computed by adding in the 8-day lagged parasite density (i.e. 4 time steps)
+    //and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
+    //the time steps are two days and the dimension of sigma is per day.
 
     //Molineaux paper equation 6
     size_t index = (Global::simulationTime % 8)/2;	// 8 days ago has same index as today
@@ -266,13 +255,15 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
     variantTranscendingSummation & stream;
     for(int i=0;i<v;i++){
 	m[i] & stream;
-    	growthRate[i] & stream;
-	P[i] & stream;
 	initP[i] & stream;
-	variantSpecificSummation[i] & stream;
-	for(int j=0;j<taus;j++)
-	{
-	    laggedP[j][i] & stream;
+	if( true /*initP[i] != 0.0*/ ){	// otherwise everything below is zero (checkpoint size optimization)
+	    growthRate[i] & stream;
+	    P[i] & stream;
+	    variantSpecificSummation[i] & stream;
+	    for(int j=0;j<taus;j++)
+	    {
+		laggedP[j][i] & stream;
+	    }
 	}
     }
     for(int j=0;j<taus;j++)
@@ -289,13 +280,23 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     variantTranscendingSummation & stream;
     for(int i=0;i<v;i++){
     	m[i] & stream;
-    	growthRate[i] & stream;
-    	P[i] & stream;
     	initP[i] & stream;
-	variantSpecificSummation[i] & stream;
-	for(int j=0;j<taus;j++)
-	{
-	    laggedP[j][i] & stream;
+	if( true /*initP[i] != 0.0*/ ){
+	    growthRate[i] & stream;
+	    P[i] & stream;
+	    variantSpecificSummation[i] & stream;
+	    for(int j=0;j<taus;j++)
+	    {
+		laggedP[j][i] & stream;
+	    }
+	} else {
+	    growthRate[i] = 0.0;
+	    P[i] = 0.0;
+	    variantSpecificSummation[i] = 0.0;
+	    for(int j=0;j<taus;j++)
+	    {
+		laggedP[j][i] = 0.0;
+	    }
 	}
     }
     for(int j=0;j<taus;j++)
