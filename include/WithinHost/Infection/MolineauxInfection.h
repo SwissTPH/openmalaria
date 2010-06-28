@@ -114,7 +114,29 @@ private:
 	 * variantTranscendingSummation: See Molineaux paper, equation 7
 	 * variantSpecificSummation: See Molineaux paper, equation 6
 	 */
-	double m[v],variantTranscendingSummation, growthRate[v], P[v], variantSpecificSummation[v], laggedP[taus][v], laggedPc[taus], Pstar_c, Pstar_m, initP[v];
+	double m[v],variantTranscendingSummation, laggedPc[taus], Pstar_c, Pstar_m;
+	struct Variant {
+	    double growthRate, P, variantSpecificSummation, initP;
+	    double laggedP[taus];
+	    
+	    Variant ();
+	    
+	    /// Checkpointing
+	    template<class S>
+	    void operator& (S& stream) {
+		growthRate & stream;
+		P & stream;
+		variantSpecificSummation & stream;
+		initP & stream;
+		for(int i = 0; i < taus; ++i)
+		    laggedP[i] & stream;
+	    }
+	    
+	    void updateGrowthRateMultiplier( double pd, double immune_response_escape );
+	    double updateDensity (double survivalFactor, int ageOfInfection);
+	    double getVariantSpecificSummation();
+	};
+	vector<Variant> variants;
 };
 
 }}
