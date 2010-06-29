@@ -106,9 +106,9 @@ void SurveysType::writeSummaryArrays ()
   //Infant mortality rate is a single number, therefore treated separately
   // Note: Storing a single value instead of one per reporting period is inconsistent with other
   // reporting, but I believe required for parameterisation.
-  if (Survey::active[imr_summary]) {
+  if (Survey::active[SM::imr_summary]) {
     if (!Survey::_assimilatorMode)
-      outputFile << 1 << "\t" << 1 << "\t" << imr_summary;
+      outputFile << 1 << "\t" << 1 << "\t" << SM::imr_summary;
     outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() << lineEnd;
   }
 

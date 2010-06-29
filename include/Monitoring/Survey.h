@@ -20,134 +20,12 @@
 #ifndef Hmod_Survey
 #define Hmod_Survey
 
+#include "Monitoring/SurveyMeasure.h"
 #include "Global.h"
 #include <bitset>
 #include <map>
 
 namespace OM { namespace Monitoring {
-    
-/** Enumeration of reporting options
- *
- * Many are reported per age-group, but to check which actually are you'll have
- * to look through the code.
- * 
- * Don't ever change these names or numbers. The names are used in scenario
- * files, and the numbers in results output/databases. */
-enum SurveyMeasure {
-    /// Total number of humans
-    nHost = 0,
-    /// number of infected hosts 
-    nInfect = 1,
-    /// expected number of infected hosts
-    nExpectd= 2,
-    /// number of patent hosts
-    nPatent= 3,
-    /// Sum of the log of the pyrogen threshold
-    sumLogPyrogenThres = 4,
-    /// Sum of the logarithm of the parasite density
-    sumlogDens= 5,
-    /// Total infections
-    totalInfs= 6,
-    /** Infectiousness of human population to mosquitoes
-     *
-     * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
-     * mosquitoes that get infected). Single value, not per age-group. */
-    nTransmit= 7,
-    /// Total patent infections
-    totalPatentInf= 8,
-    /// Contribution to immunity functions
-    ///NOTE: not used
-    contrib= 9,
-    /// Sum of the pyrogenic threshold
-    sumPyrogenThresh = 10,
-    /// number of treatments (1st line)
-    nTreatments1= 11,
-    /// number of treatments (2nd line)
-    nTreatments2= 12,
-    /// number of treatments (inpatient)
-    nTreatments3= 13,
-    /// number of episodes (uncomplicated)
-    nUncomp= 14,
-    /// number of episodes (severe)
-    nSevere= 15,
-    /// cases with sequelae
-    nSeq= 16,
-    /// deaths in hospital
-    nHospitalDeaths= 17,
-    /// number of deaths (indirect)
-    nIndDeaths= 18,
-    /// number of deaths (direct)
-    nDirDeaths= 19,
-    /// number of EPI vaccine doses given
-    nEPIVaccinations= 20,
-    //all cause infant mortality rate
-    imr_summary= 21,
-    /// number of Mass / Campaign vaccine doses given
-    nMassVaccinations= 22,
-    /// recoveries in hospital
-    nHospitalRecovs= 23,
-    /// sequelae in hospital
-    nHospitalSeqs= 24,
-    /// number of IPT Doses
-    nIPTDoses= 25,
-    /** Annual Average Kappa
-     *
-     * Calculated once a year as sum of human infectiousness divided by initial
-     * EIR summed over a year. Single value, not per age-group. */
-    annAvgK= 26,
-    /// Number of episodes (non-malaria fever)
-    nNMFever= 27,
-    /** The total number of innoculations per age group, summed over the
-     * reporting period. */
-    innoculationsPerAgeGroup = 30,
-    
-    //BEGIN Per day-of-year data (removed)
-    /// Innoculations per human (all ages) per day of year, over the last year.
-    /// (Reporting removed.)
-    innoculationsPerDayOfYear = 28,
-    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
-    /// (Reporting removed.)
-    kappaPerDayOfYear = 29,
-    //END
-    
-    /** @brief Vector model parameters.
-     *
-     * All are point-time outputs, not averages. The Nv0, Nv, Ov and Sv outputs
-     * are per-species; the EIR outputs are single values. */
-    //@{
-    /** Mosquito emergence rate. */
-    Vector_Nv0 = 31,
-    /// Mosquito population size
-    Vector_Nv = 32,
-    /// Number of infected mosquitoes
-    Vector_Ov = 33,
-    /// Number of infectious mosquitoes
-    Vector_Sv = 34,
-    /// Input EIR (Expected EIR entered into scenario file)
-    Vector_EIR_Input = 35,
-    /// Simulated EIR (EIR output by the vector model)
-    Vector_EIR_Simulated = 36,
-    //@}
-    
-    /// @brief EventScheduler reporting (additional to above)
-    //@{
-    /// Number of Rapid Diagnostic Tests used
-    Clinical_RDTs = 39,
-    /** Effective total quanty of each drug used, in mg. (Per active ingredient
-     * abbreviation.)
-     * 
-     * The quantity is efffective with respect to the cost (see treatment
-     * schedule definition). */
-    Clinical_DrugUsage = 40,
-    /// Direct death on first day of CM (before treatment takes effect)
-    Clinical_FirstDayDeaths = 41,
-    /// Direct death on first day of CM (before treatment takes effect); hospital only
-    Clinical_HospitalFirstDayDeaths = 42,
-    //@}
-    
-    // must be hightest value above plus one
-    NUM_SURVEY_OPTIONS	
-};
 
 /** Included for type-saftey: don't allow implicit double->int conversions.
  *
@@ -210,7 +88,7 @@ class Survey {
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
-    static bitset<NUM_SURVEY_OPTIONS> active;
+    static bitset<SM::NUM_SURVEY_OPTIONS> active;
     
     /** Assimilator mode
      *
