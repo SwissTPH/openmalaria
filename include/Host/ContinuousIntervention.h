@@ -64,7 +64,7 @@ private:
     };
     static vector<AgeIntervention> ctsIntervs;
     
-    uint nextCtsDist;
+    uint32_t nextCtsDist;
 };
 
 } }

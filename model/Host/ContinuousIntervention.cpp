@@ -50,7 +50,7 @@ void ContinuousIntervention::init (
     n = 0;	// use as index in ctsIntervs
     
     for (scnXml::Continuous::ITNConstIterator it = seqItn.begin(); it != seqItn.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint>(
+	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
 	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
 	);
 	ctsIntervs[n].coverage = it->getCoverage();
@@ -58,7 +58,7 @@ void ContinuousIntervention::init (
 	n++;
     }
     for (scnXml::Continuous::IptiConstIterator it = seqIpti.begin(); it != seqIpti.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint>(
+	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
 	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
 	);
 	ctsIntervs[n].coverage = it->getCoverage();

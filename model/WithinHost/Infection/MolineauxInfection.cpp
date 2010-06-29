@@ -44,6 +44,35 @@ double MolineauxInfection::mean_diff_pos_days;
 double MolineauxInfection::sd_diff_pos_days;
 double MolineauxInfection::qPow[v];
 
+/** @brief The static variables (double)
+ *
+ * sProb: fraction of parasites switching among variants per two-day cycle
+ * q: Parameter of the geometric distribution of switching probabilities
+ * k_c,k_m: constants allowing calculation of Pstar_c and Pstar_m from host-specific data
+ * Pstar_v: critical density of a variant, common to all variants
+ * kappa_c, kappa_m, kappa_v: Stiffness parameters for saturation of immune responses
+ * C: Maximum daily antigenic stimulus, per mul, of the acquired variant-transcending immune response
+ * sigma, rho: decay parameters, per day, of the acquired variant-specific and variant-transcending immune responses
+ * beta: Minimum value of the probability that a parasite escape control by the acquired and variant-transcending immune response
+ * mu_m, sigma_m: Mean and standard deviation to use for the normal distribution setting the variant specific multiplication factor.
+ */
+//@{
+const double sigma=0.02;
+const double rho=0.0;
+const double beta=0.01;
+const double sProb=0.02;
+const double q=0.3;
+const double mu_m=16.0;
+const double sigma_m=10.4;
+const double k_c=0.2;
+const double k_m=0.04;
+const double Pstar_v=30.0;
+const int kappa_c=3;
+const int kappa_m=1;
+const int kappa_v=3;
+const double C=1.0;
+//@}
+
 CommonInfection* createMolineauxInfection (uint32_t protID) {
     return new MolineauxInfection (protID);
 }
@@ -154,7 +183,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
 
     double sigma_Qi_Si=0.0;
     
-    for (int i=0; i<v; i++)
+    for (size_t i=0; i<v; i++)
     {
         S[i] = 1.0;
 	if( i < variants.size() ){
@@ -166,7 +195,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
         sigma_Qi_Si+= qPow[i]*S[i];
     }
 
-    for (int i=0;i<v;i++)
+    for (size_t i=0;i<v;i++)
     {
         // Molineaux paper equation 4
         // p_i: variant selection probability
@@ -238,7 +267,7 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
     {
         double newDensity = 0.0;
 
-        for (int i=0;i<variants.size();i++)
+        for (size_t i=0;i<variants.size();i++)
         {
             newDensity += variants[i].updateDensity( survivalFactor, ageOfInfection );
         }

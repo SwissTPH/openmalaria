@@ -74,35 +74,6 @@ private:
 	 * this prevent the recalculation of those values on every two timesteps. */
 	static double qPow[v];
 	
-	/** @brief The static variables (double)
-	 *
-	 * sProb: fraction of parasites switching among variants per two-day cycle
-	 * q: Parameter of the geometric distribution of switching probabilities
-	 * k_c,k_m: constants allowing calculation of Pstar_c and Pstar_m from host-specific data
-	 * Pstar_v: critical density of a variant, common to all variants
-	 * kappa_c, kappa_m, kappa_v: Stiffness parameters for saturation of immune responses
-	 * C: Maximum daily antigenic stimulus, per mul, of the acquired variant-transcending immune response
-	 * sigma, rho: decay parameters, per day, of the acquired variant-specific and variant-transcending immune responses
-	 * beta: Minimum value of the probability that a parasite escape control by the acquired and variant-transcending immune response
-	 * mu_m, sigma_m: Mean and standard deviation to use for the normal distribution setting the variant specific multiplication factor.
-	 */
-	//@{
-	static const double sigma=0.02;
-	static const double rho=0.0;
-	static const double beta=0.01;
-	static const double sProb=0.02;
-	static const double q=0.3;
-	static const double mu_m=16.0;
-	static const double sigma_m=10.4;
-	static const double k_c=0.2;
-	static const double k_m=0.04;
-	static const double Pstar_v=30.0;
-	static const int kappa_c=3;
-	static const int kappa_m=1;
-	static const int kappa_v=3;
-	static const double C=1.0;
-	//@}
-
 	/*
 	 * The dynamic variables:
 	 * m[i]: Multiplication factor, per two-day cycle of variant i
