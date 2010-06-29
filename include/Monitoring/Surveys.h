@@ -51,10 +51,9 @@ class SurveysType
      * previous survey (or the start of the main simulation) until this time. */
     int currentTimestep;
 
-    /// Read in some params from XML and allocate memory. In theory, doesn't
-    /// need to be done before main stage of simulation.
+    /** Read in some params from XML and allocate memory. */
     void init ();
-
+    
     //! It increments the survey period
     void incrementSurveyPeriod();
 

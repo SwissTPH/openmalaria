@@ -31,6 +31,13 @@ namespace OM { namespace Monitoring {
     
 SurveysType Surveys;
 
+#ifdef WITHOUT_BOINC
+  #define OUT_NAME "output.txt"
+#else
+  #define OUT_NAME "output.txt.gz"
+#endif
+const char* fname = OUT_NAME;
+
 void SurveysType::init ()
 {
   _surveyPeriod = 0;
@@ -46,10 +53,16 @@ void SurveysType::init ()
 
   Survey::init ();
 
-  _survey.resize (survs.size() + 1);
+  _survey.resize (_surveysTimeIntervals.size());
   for (size_t i = 0; i < _survey.size(); ++i)
     _survey[i].allocate();
   current = &_survey[0];
+  
+  ifstream readTest( fname );
+  if( readTest.rdbuf()->is_open() ){
+      // We don't want to overwrite the file if it exists; check for this early.
+      throw runtime_error( OUT_NAME " exists at init" );
+  }
 }
 
 void SurveysType::incrementSurveyPeriod()
@@ -66,10 +79,8 @@ void SurveysType::writeSummaryArrays ()
 {
 #ifdef WITHOUT_BOINC
   ofstream outputFile;		// without boinc, use plain text (for easy reading)
-  const char* fname = "output.txt";
 #else
   ogzstream outputFile;		// with, use gzip
-  const char* fname = "output.txt.gz";
 #endif
     
     // This locale ensures uniform formatting of nans and infs on all platforms.
