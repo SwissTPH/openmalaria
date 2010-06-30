@@ -269,9 +269,20 @@ namespace OM { namespace util {
 	
 	//Note: also MAX_DENS_CORRECTION is irrelevant when using DUMMY_WITHIN_HOST_MODEL or EMPIRICAL_WITHIN_HOST_MODEL
 	// but we don't mark it incompatible so we can leave MAX_DENS_CORRECTION on by default.
-	incompatibilities[INNATE_MAX_DENS]	.set(DUMMY_WITHIN_HOST_MODEL)	.set(EMPIRICAL_WITHIN_HOST_MODEL);
+	incompatibilities[INNATE_MAX_DENS]
+	    .set(DUMMY_WITHIN_HOST_MODEL)
+	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
+	    .set(MOLINEAUX_WITHIN_HOST_MODEL);
 	
-	incompatibilities[EMPIRICAL_WITHIN_HOST_MODEL]	.set(DUMMY_WITHIN_HOST_MODEL);
+	incompatibilities[DUMMY_WITHIN_HOST_MODEL]
+	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
+	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
+	    .set(IPTI_SP_MODEL);
+	incompatibilities[EMPIRICAL_WITHIN_HOST_MODEL]
+	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
+	    .set(IPTI_SP_MODEL);
+	incompatibilities[MOLINEAUX_WITHIN_HOST_MODEL]
+	    .set(IPTI_SP_MODEL);
 	
 	incompatibilities[NON_MALARIA_FEVERS]	.set(MUELLER_PRESENTATION_MODEL);
 	
@@ -297,9 +308,8 @@ namespace OM { namespace util {
 	}
 	
 	// Required options (above table can't check these):
-	// NOTE: in principle, this restriction isn't required
-	if (optSet_bs[EMPIRICAL_WITHIN_HOST_MODEL] && !optSet_bs[INCLUDES_PK_PD])
-	    throw xml_scenario_error ("EMPIRICAL_WITHIN_HOST_MODEL requires INCLUDES_PK_PD");
+	if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
+	    throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
 	
 	// Stop OM now if "--print-model" was on command-line
 	if (CommandLine::option (util::CommandLine::PRINT_MODEL_OPTIONS))

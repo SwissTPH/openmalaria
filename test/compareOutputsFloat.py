@@ -226,7 +226,7 @@ ident is 1 if files are binary-equal."""
             
             diff=perMeasureDiffSum[k.measure]
             sum1=perMeasureTotal[k.measure]
-            print "for measure "+str(k.measure)+": sum(1st file):"+str(sum1)+" diff/sum: "+str(div(diff,sum1))+" (abs diff)/sum: "+str(div(absDiff,sum1))+" diff/(abs diff): "+str(div(diff,absDiff))+"  num diffs/total: "+str(perMeasureNumDiff.get(k.measure,0)/perMeasureNum.get(k.measure,0))
+            print "for measure "+str(k.measure)+":\tsum(1st file):"+str(sum1)+"\tsum(1st file):"+str(sum1)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
