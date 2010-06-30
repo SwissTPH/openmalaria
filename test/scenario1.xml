@@ -1022,7 +1022,6 @@
   </entoData>
   <model>
     <ModelOptions>
-      <option name="MAX_DENS_CORRECTION" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <parameters interval="5" iseed="1" latentp="3">

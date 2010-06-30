@@ -603,7 +603,8 @@
   <model>
     <ModelOptions>
       <option name="TRIPLE_HET" value="true"/>
-      <option name="MAX_DENS_CORRECTION" value="false"/>
+      <option name="MAX_DENS_CORRECTION" value="true"/>
+      <option name="INNATE_MAX_DENS" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <parameters interval="5" iseed="10" latentp="3">
