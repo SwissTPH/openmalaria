@@ -71,7 +71,7 @@ class SurveyMeasureMap {
 	    codeMap["nIndDeaths"] = SM::nIndDeaths;
 	    codeMap["nDirDeaths"] = SM::nDirDeaths;
 	    codeMap["nEPIVaccinations"] = SM::nEPIVaccinations;
-	    codeMap["imr_summary"] = SM::imr_summary;
+	    codeMap["allCauseIMR"] = SM::allCauseIMR;
 	    codeMap["nMassVaccinations"] = SM::nMassVaccinations;
 	    codeMap["nHospitalRecovs"] = SM::nHospitalRecovs;
 	    codeMap["nHospitalSeqs"] = SM::nHospitalSeqs;

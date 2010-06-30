@@ -46,7 +46,7 @@
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
       <option name="nEPIVaccinations" value="true"/>
-      <option name="imr_summary" value="true"/>
+      <option name="allCauseIMR" value="true"/>
       <option name="nMassVaccinations" value="true"/>
       <option name="nHospitalRecovs" value="true"/>
       <option name="nHospitalSeqs" value="true"/>

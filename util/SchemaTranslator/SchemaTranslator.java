@@ -956,6 +956,8 @@ public class SchemaTranslator {
     // Version 20
     // Added monitoring -> continuous -> duringInit optional attribute (no translation needed)
     // monitoring -> continuous -> period changed units from days to timesteps
+    // IPTI_SP_MODEL option added
+    // imr_summary changed name to allCauseIMR
     public boolean translate19To20() throws Exception {
         Element monitoring = (Element) scenarioElement.getElementsByTagName(
                 "monitoring").item(0);
@@ -963,6 +965,15 @@ public class SchemaTranslator {
 	    //We don't update automatically because (a) very few scenarios should
 	    //require this and (b) people may have thought it was originally timesteps anyway.
 	    System.err.println("Warning: monitoring->continuous->period changed unit from timesteps to days. Please update accordingly.");
+	}
+	
+	Element SurveyOptions = (Element) monitoring.getElementsByTagName("SurveyOptions").item(0);
+	NodeList options = SurveyOptions.getElementsByTagName("option");
+	for (int i = 0; i < options.getLength(); ++i){
+	    Element option = (Element) options.item(i);
+	    if (option.getAttribute("name") == "imr_summary"){
+		option.setAttribute("name", "allCauseIMR");
+	    }
 	}
 	
         Element interventions = (Element) scenarioElement.getElementsByTagName(
