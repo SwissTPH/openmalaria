@@ -94,8 +94,8 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             _MOI--;
         }
         else {
-            // With option MAX_DENS_RESET this would be: infStepMaxDens = 0.0;
-            // However, when using MAX_DENS_CORRECTION this is irrelevant.
+            // Should be: infStepMaxDens = 0.0, but has some history.
+            // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
             double infStepMaxDens = timeStepMaxDensity;
             (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
 

@@ -194,13 +194,16 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
     }
     else {
         _density = 0.0;
+	// This option used to be MAX_DENS_RESET. Since it makes no sense without
+	// MAX_DENS_CORRECTION and only makes a difference with it if INNATE_MAX_DENS is also
+	// used (where its absense would cause very wierd behaviour), the option has been combined.
+	if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
+	    timeStepMaxDensity = 0.0;
     }
 	/* TODO: the code below should be above, at the end of the if(infage>=0) block.
-	 * This breaks output in two cases, however:
-	 * 1) If MAX_DENS_CORRECTION isn't used
-	 * 2) If INNATE_MAX_DENS is used, since innateImmSurvFact can be (much)
-	 *   greater than 1 and the MAX_DENS_RESET option was removed.
-	 */
+	 * This changes output if MAX_DENS_CORRECTION isn't used, and since the
+	 * absense of this option explicitly implies previous results should be
+	 * generated, this fix is not employed. */
 	//Compute the proportion of parasites remaining after innate blood stage effect
 	_density *= innateImmSurvFact;
 	// INNATE_MAX_DENS is a bug-fix:
