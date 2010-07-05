@@ -162,12 +162,13 @@ void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
     for (int j = 1;j < maxTimestepsPerLife; j++) {
-	double ageYears = (maxTimestepsPerLife - j - 1) * Global::yearsPerInterval;
+	int age = maxTimestepsPerLife - j - 1;
+	double ageYears = age * Global::yearsPerInterval;
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);
 	double Ms = M1s + M2s;
 	double predperc = exp (-rho * ageYears - Ms);
-	if (j < maxTimestepsPerLife - Global::maxAgeIntervals) {
+	if (age >= Global::maxAgeIntervals) {
 	    predperc = 0.0;
 	}
 	cumAgeProp[j] = cumAgeProp[j-1] + predperc;

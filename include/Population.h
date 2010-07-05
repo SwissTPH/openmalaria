@@ -91,6 +91,8 @@ private:
     */
     void newHuman (int dob);
     
+    /// Delegate to print the number of hosts
+    void ctsHosts (ostream& stream);
     /// Delegate to print the number of births since last count
     void ctsRecentBirths (ostream& stream);
     /// Delegate to print the number of patent hosts

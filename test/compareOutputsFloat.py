@@ -182,7 +182,8 @@ ident is 1 if files are binary-equal."""
     numMissing1=0
     numMissing2=0
     perMeasureNum = dict()
-    perMeasureTotal = dict()
+    perMeasureTotal1 = dict()
+    perMeasureTotal2 = dict()
     perMeasureNumDiff = dict()
     perMeasureDiffSum = dict()
     perMeasureDiffAbsSum = dict()
@@ -193,7 +194,8 @@ ident is 1 if files are binary-equal."""
             numMissing2 += 1
         else:
             perMeasureNum[k.measure] = perMeasureNum.get(k.measure, 0) + 1
-            perMeasureTotal[k.measure] = perMeasureTotal.get(k.measure, 0.0) + v1
+            perMeasureTotal1[k.measure] = perMeasureTotal1.get(k.measure, 0.0) + v1
+            perMeasureTotal2[k.measure] = perMeasureTotal2.get(k.measure, 0.0) + v2
             
             # Compare with relative precision
             if approx_equal (v1, v2, REL_PRECISION, ABS_PRECISION):
@@ -225,8 +227,9 @@ ident is 1 if files are binary-equal."""
                     return 1e400 * 0 # nan
             
             diff=perMeasureDiffSum[k.measure]
-            sum1=perMeasureTotal[k.measure]
-            print "for measure "+str(k.measure)+":\tsum(1st file):"+str(sum1)+"\tsum(1st file):"+str(sum1)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
+            sum1=perMeasureTotal1[k.measure]
+            sum2=perMeasureTotal2[k.measure]
+            print "for measure "+str(k.measure)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:

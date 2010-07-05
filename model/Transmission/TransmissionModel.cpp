@@ -100,6 +100,9 @@ void TransmissionModel::updateAgeCorrectionFactor (std::list<Host::Human>& popul
 	sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeGroupData());
     }
     ageCorrectionFactor = populationSize / sumRelativeAvailability;	// 1 / mean-rel-avail
+    if( sumRelativeAvailability == 0.0 )
+	// value should be unimportant when no humans are available, though inf/nan is not acceptable
+	ageCorrectionFactor = 1.0;
 }
 
 void TransmissionModel::updateKappa (const std::list<Host::Human>& population, int simulationTime) {
@@ -112,8 +115,8 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   nByAge.assign (noOfAgeGroupsSharedMem, 0);
   
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-    double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeGroupData())
-	* ageCorrectionFactor;
+      // Note: should multiply by ageCorrectionFactor for relative availability; however factor cancels:
+    double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeGroupData());
     sumWeight += t;
     t *= h->probTransmissionToMosquito();
     sumWt_kappa += t;
@@ -124,14 +127,17 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
     ++nByAge[ag.i()];
   }
   
-  if ( !(sumWeight > DBL_MIN * 10.0) ){	// if approx. eq. 0, negative or an NaN
-      ostringstream msg;
-      msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<ageCorrectionFactor;
-      throw runtime_error(msg.str());
-  }
-  
   size_t tmod = (simulationTime-1) % Global::intervalsPerYear;
-  kappa[tmod] = sumWt_kappa / sumWeight;
+  if( population.empty() ){	// this is valid
+      kappa[tmod] = 0.0;	// no humans: no infectiousness
+  } else {
+    if ( !(sumWeight > DBL_MIN * 10.0) ){	// if approx. eq. 0, negative or an NaN
+	ostringstream msg;
+	msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
+	throw runtime_error(msg.str());
+    }
+    kappa[tmod] = sumWt_kappa / sumWeight;
+  }
   
   //Calculate time-weighted average of kappa
   _sumAnnualKappa += kappa[tmod] * initialisationEIR[tmod];

@@ -70,8 +70,10 @@ namespace OM
 	static void calcCumAgeProp ();
 
         /** This is the maximum age of an individual that the simulation program can
-        * handle. Max age for a scenario is given in the  the xml file. */
+        * handle. Max age for a scenario is given in the xml file. */
+	//TODO: both these constants could instead be read from the XML file, if we use vectors
         static const int maxLifetimeDays = 32855;
+	/// Maximum number of age-groups for demography
         static const int ngroups = 20;
 	
 	//BEGIN static parameters only used by estimateRemovalRates(), setDemoParameters() and calcCumAgeProp()

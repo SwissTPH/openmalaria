@@ -321,6 +321,11 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
     return it->second;
 }
 void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
+    // This function is also used to load a new health-system from intervention data; therefore clear old data:
+    dvMap.clear();
+    decisions.clear();
+    treatments.clear();
+    
     // Construct processor & read from XML (must be done before evaluating treatments):
     ESDecisionMapProcessor processor( dvMap, xmlCM, complicated );
     list<string> required;	// list required decisions, to avoid optimising out

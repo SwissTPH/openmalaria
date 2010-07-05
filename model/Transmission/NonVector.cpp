@@ -82,6 +82,11 @@ void NonVectorTransmission::initMainSimulation (){
       throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
+int NonVectorTransmission::transmissionInitDuration (){
+    // 0 maintains old behaviour; human infectiousness over the last year of
+    // human initialisation is used.
+    return 0;
+}
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
     // Note: requires Global::timeStep >= 0, but this can only be called in intervention period anyway.

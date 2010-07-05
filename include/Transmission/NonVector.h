@@ -37,6 +37,8 @@ public:
   //! initialise the main simulation 
   void initMainSimulation ();
   
+  virtual int transmissionInitDuration ();
+  
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
   

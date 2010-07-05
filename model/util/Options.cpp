@@ -143,6 +143,9 @@ namespace OM { namespace util {
 	    throw cmd_exit ("Printed help");
 	}
 	
+	if (checkpoint_times.size())	// timed checkpointing implies this
+	    options[TEST_CHECKPOINTING] = true;
+	
 	return scenarioFile;
     }
     

@@ -100,17 +100,16 @@ public:
   virtual void summarize (Monitoring::Survey& survey);
   
   
-  /** How many intervals are needed for vector initialisation before
-   * updateOneLifespan() ? */
-  virtual int vectorInitDuration () {
-    return 0;	// Non-vector model doesn't need it
-  }
-  /** Called after end of vectorInitDuration() and after init iterations.
-   *
+  /** How many intervals are needed for vector initialisation after one-
+   * lifespan initialisation? */
+  virtual int transmissionInitDuration () =0;
+  /** Called after end of transmissionInitDuration() to control initialisation
+   * iterations.
+   * 
    * Should determine whether another init iteration is needed, make necessary
    * adjustments, and return number of timesteps to run this initialisation for
-   * (0 if a further iteration is not needed). */
-  virtual int vectorInitIterate () {
+   * (0 if no further iteration is needed). */
+  virtual int transmissionInitIterate () {
     return 0;
   }
   

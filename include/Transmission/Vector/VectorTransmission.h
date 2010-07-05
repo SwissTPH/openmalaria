@@ -40,18 +40,16 @@ public:
    * information from the human population structure. */
   virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
   
-  /** Length with which to force vector calculations, while waiting for human
-   * population to stabilise. */
-  virtual int vectorInitDuration () {
-    // 30 years allows human availability & infectiousness to stabilise somewhat, at least according to one scenario.
-    return Global::intervalsPerYear*30;
-  }
+  /** How long to sample for before first iteration of fitting.
+   *
+   * (EIR is forced until vectorInitIterate finishes fitting). */
+  virtual int transmissionInitDuration ();
   /** Called after end of vectorInitDuration() and after init iterations.
    *
    * Should determine whether another init iteration is needed, make necessary
    * adjustments, and return number of timesteps to run this initialisation for
    * (0 if a further iteration is not needed). */
-  virtual int vectorInitIterate ();
+  virtual int transmissionInitIterate ();
   
   /** Initialise the main simulation. */
   void initMainSimulation ();

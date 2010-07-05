@@ -62,12 +62,12 @@ private:
     int totalSimDuration;
     enum Phase {
 	STARTING_PHASE = 0,
-	/// Initialisation phase for Vector model
-	VECTOR_FITTING,
 	/*! Run the simulation using the equilibrium inoculation rates over one complete
 	    lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
 	    classes. Don't report any events */
 	ONE_LIFE_SPAN,
+	/** Initialisation/fitting phase for transmission models. */
+	TRANSMISSION_INIT,
 	//!  This procedure starts with the current state of the simulation 
 	/*! It continues updating    assuming:
 	    (i)		the default (exponential) demographic model

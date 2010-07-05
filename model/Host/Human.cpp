@@ -156,10 +156,11 @@ void Human::destroy() {
 
 bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
     int ageTimeSteps = simulationTime-_dateOfBirth;
-    double ageYears = ageTimeSteps * Global::yearsPerInterval;
-    monitoringAgeGroup.update( ageYears );
     if (clinicalModel->isDead(ageTimeSteps))
 	return true;
+    
+    double ageYears = ageTimeSteps * Global::yearsPerInterval;
+    monitoringAgeGroup.update( ageYears );
     
     updateInterventionStatus();
     updateInfection(transmissionModel, ageYears);
@@ -170,20 +171,25 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
 }
 
 void Human::addInfection(){
-	withinHostModel->newInfection();
+    withinHostModel->newInfection();
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-  int numInf = infIncidence->numNewInfections(transmissionModel->getEIR(Global::simulationTime, perHostTransmission, ageGroupData, monitoringAgeGroup),
-					      _PEVEfficacy, perHostTransmission);
-  for (int i=1;i<=numInf; i++) {
-    withinHostModel->newInfection();
-  }
-  
-  // Cache total density for infectiousness calculations
-  _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
-  
-  withinHostModel->calculateDensities(ageYears, _BSVEfficacy);
+    int numInf = infIncidence->numNewInfections(
+	transmissionModel->getEIR(
+	    Global::simulationTime, perHostTransmission, ageGroupData, monitoringAgeGroup
+	),
+	_PEVEfficacy,
+	perHostTransmission
+    );
+    for (int i=1;i<=numInf; i++) {
+	withinHostModel->newInfection();
+    }
+    
+    // Cache total density for infectiousness calculations
+    _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
+    
+    withinHostModel->calculateDensities(ageYears, _BSVEfficacy);
 }
 
 void Human::updateInterventionStatus() {

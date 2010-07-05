@@ -57,18 +57,19 @@ struct ESDecisionValue {
     inline bool operator< (const ESDecisionValue that) const {
 	return id < that.id;
     }
-    private:
-      typedef boost::uint64_t id_type;
-	
-	// private constructor, only for use by internal operations
-	ESDecisionValue (id_type new_id) : id(new_id) {}
-	
-	id_type id;
-	
-	friend std::size_t hash_value(ESDecisionValue const& b);
-	friend ostream& operator<< (ostream& stream, const ESDecisionValue v);
-	friend struct ESDecisionValueMap;
-	friend class ::ESDecisionTreeSuite;
+    
+private:
+    typedef boost::uint64_t id_type;
+    
+    // private constructor, only for use by internal operations
+    ESDecisionValue (id_type new_id) : id(new_id) {}
+    
+    id_type id;
+    
+    friend std::size_t hash_value(ESDecisionValue const& b);
+    friend ostream& operator<< (ostream& stream, const ESDecisionValue v);
+    friend struct ESDecisionValueMap;
+    friend class ::ESDecisionTreeSuite;
 };
 std::size_t hash_value(ESDecisionValue const& b);
 inline ostream& operator<< (ostream& stream, const ESDecisionValue v){
@@ -80,6 +81,11 @@ struct ESDecisionValueMap {
     ESDecisionValueMap () :
 	next_bit(0)
     {}
+    /** Reset to zero. */
+    void clear() {
+	id_map.clear();
+	next_bit = 0;
+    }
     
     /** Set up a new set of decision values, or confirm they match an existing
      * set (if decision was already entered, and values don't match those
@@ -132,14 +138,14 @@ struct ESDecisionValueMap {
     /// Implementation of format( ESDecisionValue )
     void format( const ESDecisionValue v, ostream& stream ) const;
     
-    private:
-	ESDecisionValueMap (const ESDecisionValueMap&) {assert(false);}	// disable copying
-	typedef ESDecisionValue::id_type id_type;
-	
-	// Map of decision to ( pair ( mask, map of value to id ) )
-  typedef map< string, pair< ESDecisionValue, value_map_t > > id_map_type;
-	id_map_type id_map;
-	id_type next_bit;
+private:
+    ESDecisionValueMap (const ESDecisionValueMap&) {assert(false);}	// disable copying
+    typedef ESDecisionValue::id_type id_type;
+    
+    // Map of decision to ( pair ( mask, map of value to id ) )
+    typedef map< string, pair< ESDecisionValue, value_map_t > > id_map_type;
+    id_map_type id_map;
+    id_type next_bit;
 };
 inline ostream& operator<<( ostream& stream, const ESDecisionValueMap::ValueFormatter& f ){
     f.parent.format( f.value, stream );

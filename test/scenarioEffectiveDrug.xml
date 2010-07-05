@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="test D94" schemaVersion="20" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
-  <demography maximumAgeYrs="90" name="test" popSize="100">
+  <demography maximumAgeYrs="90" name="test" popSize="200">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -71,26 +71,84 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No intervention"/>
+  <interventions name="effective health system">
+    <timed>
+      <intervention time="0">
+        <changeHS>
+          <EventScheduler>
+            <uncomplicated>
+              <decisions>
+                <decision depends="" name="treatment" values="effective_treat">
+                  effective_treat
+                </decision>
+                <decision depends="" name="test" values="none,microscopy,RDT">
+                  none
+                </decision>
+              </decisions>
+              <treatments>
+                <treatment name="effective_treat">
+                  <schedule>
+                    <medicate drug="effective" hour="0" mg="1"/>
+                  </schedule>
+                </treatment>
+              </treatments>
+            </uncomplicated>
+            <complicated>
+              <decisions>
+                <decision depends="p" name="treatment" values="effective_treat">
+                  effective_treat
+                </decision>
+                <decision depends="" name="hospitalisation" values="none,delayed,immediate">
+                  immediate
+                </decision>
+                <decision depends="" name="test" values="none,microscopy,RDT">
+                  none
+                </decision>
+              </decisions>
+              <treatments>
+                <treatment name="effective_treat">
+                  <schedule>
+                    <medicate drug="effective" hour="0" mg="1"/>
+                  </schedule>
+                </treatment>
+              </treatments>
+            </complicated>
+            <ClinicalOutcomes>
+              <maxUCSeekingMemory>3</maxUCSeekingMemory>
+              <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
+              <complicatedCaseDuration>6</complicatedCaseDuration>
+              <complicatedRiskDuration>6</complicatedRiskDuration>
+              <pImmediateUC>1</pImmediateUC>
+            </ClinicalOutcomes>
+          </EventScheduler>
+          <CFR>
+            <group cfr="0.09189" lowerbound="0"/>
+            <group cfr="0.0810811" lowerbound="0.25"/>
+            <group cfr="0.0648649" lowerbound="0.75"/>
+            <group cfr="0.0689189" lowerbound="1.5"/>
+            <group cfr="0.0675676" lowerbound="2.5"/>
+            <group cfr="0.0297297" lowerbound="3.5"/>
+            <group cfr="0.0459459" lowerbound="4.5"/>
+            <group cfr="0.0945946" lowerbound="7.5"/>
+            <group cfr="0.1243243" lowerbound="12.5"/>
+            <group cfr="0.1378378" lowerbound="15"/>
+          </CFR>
+        </changeHS>
+      </intervention>
+    </timed>
+  </interventions>
   <healthSystem>
     <EventScheduler>
-      <!-- Simple partially-realistic (poorly researched) health system description (DH). -->
       <uncomplicated>
         <decisions>
-          <decision depends="p" name="treatment" values="effective_treat,none">
-            p(.5): effective_treat
-            p(.5): none
+          <decision depends="p" name="treatment" values="none">
+            none
           </decision>
           <decision depends="" name="test" values="none,microscopy,RDT">
             none
           </decision>
         </decisions>
         <treatments>
-          <treatment name="effective_treat">
-            <schedule>
-              <medicate drug="effective" hour="0" mg="1"/>
-            </schedule>
-          </treatment>
           <treatment name="none">
             <schedule/>
           </treatment>
@@ -98,23 +156,17 @@
       </uncomplicated>
       <complicated>
         <decisions>
-          <decision depends="p" name="treatment" values="effective_treat,none">
-            p(.5): effective_treat
-            p(.5): none
+          <decision depends="p" name="treatment" values="none">
+            none
           </decision>
           <decision depends="" name="hospitalisation" values="none,delayed,immediate">
-            immediate
+            none
           </decision>
           <decision depends="" name="test" values="none,microscopy,RDT">
             none
           </decision>
         </decisions>
         <treatments>
-          <treatment name="effective_treat">
-            <schedule>
-              <medicate drug="effective" hour="0" mg="1"/>
-            </schedule>
-          </treatment>
           <treatment name="none">
             <schedule/>
           </treatment>
@@ -125,7 +177,7 @@
         <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
         <complicatedCaseDuration>6</complicatedCaseDuration>
         <complicatedRiskDuration>6</complicatedRiskDuration>
-        <pImmediateUC>.8</pImmediateUC>
+        <pImmediateUC>1</pImmediateUC>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>

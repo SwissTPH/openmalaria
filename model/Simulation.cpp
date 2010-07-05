@@ -73,8 +73,9 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-    // +1 to let final survey run
-    totalSimDuration = _population->_transmissionModel->vectorInitDuration() + Global::maxAgeIntervals + Surveys.getFinalTimestep() + 1;
+    totalSimDuration = Global::maxAgeIntervals	// ONE_LIFE_SPAN
+	+ _population->_transmissionModel->transmissionInitDuration()	// initial run of TRANSMISSION_INIT
+	+ Surveys.getFinalTimestep() + 1;	// MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
 	readCheckpoint();
@@ -116,28 +117,30 @@ int Simulation::start(){
 	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
 	}
 	
-	// phase transition: end of one phase to start of next
 	if (phase == STARTING_PHASE) {
-	    simPeriodEnd = _population->_transmissionModel->vectorInitDuration();
-	    phase = VECTOR_FITTING;
-	} else if (phase == VECTOR_FITTING) {
-	    int extend = _population->_transmissionModel->vectorInitIterate ();
+	    // Start ONE_LIFE_SPAN:
+	    ++phase;
+	    simPeriodEnd = Global::maxAgeIntervals;
+	} else if (phase == ONE_LIFE_SPAN) {
+	    // Start vector-initialisation:
+	    ++phase;
+	    simPeriodEnd += _population->_transmissionModel->transmissionInitDuration();
+	} else if (phase == TRANSMISSION_INIT) {
+	    int extend = _population->_transmissionModel->transmissionInitIterate();
 	    if (extend > 0) {	// repeat phase
 		simPeriodEnd += extend;
 		totalSimDuration += extend;
 	    } else {		// next phase
-		simPeriodEnd += Global::maxAgeIntervals;
-		phase = ONE_LIFE_SPAN;
+		// Start MAIN_PHASE:
+		++phase;
+		simPeriodEnd = totalSimDuration;
+		Global::timeStep=0;
+		_population->preMainSimInit();
+		_population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
+		Surveys.incrementSurveyPeriod();
 	    }
-	} else if (phase == ONE_LIFE_SPAN) {
-	    simPeriodEnd = totalSimDuration;
-	    Global::timeStep=0;
-	    _population->preMainSimInit();
-	    _population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
-	    Surveys.incrementSurveyPeriod();
-	    phase = MAIN_PHASE;
 	} else if (phase == MAIN_PHASE) {
-	    phase = END_SIM;
+	    ++phase;
 	    cerr << "sim end" << endl;
 	    break;
 	}

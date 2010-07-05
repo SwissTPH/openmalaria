@@ -94,6 +94,7 @@ Population::Population()
     : populationSize (InputData().getDemography().getPopSize())
 {
     using Monitoring::Continuous;
+    Continuous::registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
     Continuous::registerCallback( "patent hosts", "\tpatent hosts", MakeDelegate( this, &Population::ctsPatentHosts ) );
     Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
@@ -114,16 +115,15 @@ void Population::checkpoint (istream& stream)
 {
     size_t popSize; // must be type of population.size()
     popSize & stream;
-    if (popSize != size_t (populationSize))
+    if (popSize > size_t (populationSize))
         throw util::checkpoint_error( (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
-    while (popSize > 0 && !stream.eof()) {
+    for (int i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
         population.push_back (Host::Human (*_transmissionModel, 0, 0));
         population.back() & stream;
-        --popSize;
     }
-    if (int (population.size()) != populationSize)
+    if (population.size() != popSize)
         throw util::checkpoint_error( (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
 }
 void Population::checkpoint (ostream& stream)
@@ -146,7 +146,11 @@ void Population::createInitialHumans ()
     for (int iage = AgeStructure::getMaxTimestepsPerLife() - 1; iage >= 0; iage--) {
 	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
-	    newHuman (-iage);
+	    // Optimisation: don't create humans who would die before end of
+	    // one-life-span init phase. Transmission models require all humans
+	    // during last year of init; humans bound-to-die before that are unneeded:
+	    if( -iage >= -Global::intervalsPerYear )
+		newHuman (-iage);
 	    ++cumulativePop;
 	}
     }
@@ -210,6 +214,12 @@ void Population::update1()
     } // end of per-human updates
 
     // increase population size to targetPop
+    if( Global::simulationTime < Global::maxAgeIntervals - Global::intervalsPerYear ){
+	// Calculate number of people who, due to age structure, could still be alive at
+	// timestep Global::maxAgeIntervals - Global::intervalsPerYear.
+	// WARNING: This assumes no-one dies, so it may not be so accurate!
+	targetPop = AgeStructure::targetCumPop(Global::maxAgeIntervals - Global::intervalsPerYear - Global::simulationTime, targetPop);
+    }
     while (cumPop < targetPop) {
         newHuman (Global::simulationTime);
         //++nCounter;
@@ -238,6 +248,10 @@ void Population::update1()
 
 // -----  non-static methods: reporting  -----
 
+void Population::ctsHosts (ostream& stream){
+    // this option is intended for debugging human initialization; normally this should equal populationSize.
+    stream << '\t' << population.size();
+}
 void Population::ctsRecentBirths (ostream& stream){
     stream << '\t' << recentBirths;
     recentBirths = 0;
