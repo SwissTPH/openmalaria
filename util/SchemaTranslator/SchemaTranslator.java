@@ -958,6 +958,7 @@ public class SchemaTranslator {
     // monitoring -> continuous -> period changed units from days to timesteps
     // IPTI_SP_MODEL option added
     // imr_summary changed name to allCauseIMR
+    // minInfectedThreshold attribute was added to anopheles sections
     public boolean translate19To20() throws Exception {
         Element monitoring = (Element) scenarioElement.getElementsByTagName(
                 "monitoring").item(0);
@@ -975,6 +976,19 @@ public class SchemaTranslator {
 		option.setAttribute("name", "allCauseIMR");
 	    }
 	}
+	
+	Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
+                .item(0);
+        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+        if (vect != null) {
+            NodeList species = vect.getElementsByTagName("anopheles");
+            for (int i = 0; i < species.getLength(); ++i) {
+                Element anoph = (Element) species.item(i);
+                anoph.setAttribute("minInfectedThreshold", "0.01");
+            }
+            System.err
+                    .println("New attribute minInfectedThreshold created with default 0.01 mosquito - please correct (for each anopheles section)!");
+        }
 	
         Element interventions = (Element) scenarioElement.getElementsByTagName(
                 "interventions").item(0);

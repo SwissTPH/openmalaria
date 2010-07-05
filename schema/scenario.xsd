@@ -404,6 +404,12 @@
               <xs:appinfo>name:Human blood index;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="minInfectedThreshold" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>If less than this many mosquitoes remain infected, transmission is interrupted.</xs:documentation>
+              <xs:appinfo>name:Min infected threshold;min:0;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">

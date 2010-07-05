@@ -49,6 +49,8 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability();
 
   humanBase = mosq;
+  
+  minInfectedThreshold = mosq.getMinInfectedThreshold();
 
 
   this->nonHumansHostsPopulations = nonHumansHostsPopulations;
@@ -66,7 +68,11 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 
   setPAs();
   
-  mosqSeekingDeathRate = ((1-initP_A-P_A1-P_An)/(1-initP_A))*(-log(initP_A)/mosqSeekingDuration);
+  mosqSeekingDeathRate = (
+	(1.-initP_A-P_A1-P_An) / (1.-initP_A)
+    )*(
+	-log(initP_A) / mosqSeekingDuration
+    );
 
   double humanEntoAvailability = getHumanEntoAvailability(populationSize);
   humanBase.setEntoAvailability(humanEntoAvailability);
@@ -242,8 +248,8 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   double initOvFromSv = initNv0FromSv;	// temporarily use of initNv0FromSv
   
 
-  FSCoeffic[0] += log (populationSize / sumPFindBite);
   // same as multiplying resultant eir since calcFourierEIR takes exp(...)
+  FSCoeffic[0] += log (populationSize / sumPFindBite);
   calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
   
   // Crude estimate of mosqEmergeRate; in practice, varies on other values
@@ -469,6 +475,20 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
         + sum
         + P_A[t1]*S_v[t1]
         + P_df[ttau]*S_v[ttau];
+    
+    
+    if( isDynamic ){
+	// We cut-off transmission when no more than X mosquitos are infected to
+	// allow true elimination in simulations. Unfortunately, it may cause problems with
+	// trying to simulate extremely low transmission, such as an R_0 case.
+	if( S_v[t] <= minInfectedThreshold ){	// infectious mosquito cut-off
+	    S_v[t] = 0.0;
+	    /* TODO: could report; these reports often occur too frequently, however
+	    if( S_v[t] != 0.0 ){	// potentially reduce reporting
+		cerr << simulationTime <<":\t S_v cut-off"<<endl;
+	    } */
+	}
+    }
     //END S_v
     
 
