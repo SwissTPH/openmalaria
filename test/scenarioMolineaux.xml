@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="526" assimMode="0" name="Bandafassi severe" schemaVersion="20" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" assimMode="0" name="Do" schemaVersion="20" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,46 +23,103 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Monthly Parasitological Surveys">
+  <monitoring name="NDmo">
     <SurveyOptions>
       <option name="nHost" value="true"/>
-      <option name="nPatent" value="true"/>
+      <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
     </SurveyOptions>
-    <surveys detectionLimit="40">
-      <surveyTime>11</surveyTime>
-      <surveyTime>41</surveyTime>
-      <surveyTime>71</surveyTime>
-      <surveyTime>101</surveyTime>
-      <surveyTime>131</surveyTime>
-      <surveyTime>161</surveyTime>
-      <surveyTime>191</surveyTime>
-      <surveyTime>221</surveyTime>
-      <surveyTime>251</surveyTime>
-      <surveyTime>281</surveyTime>
-      <surveyTime>311</surveyTime>
-      <surveyTime>341</surveyTime>
-      <surveyTime>376</surveyTime>
-      <surveyTime>406</surveyTime>
-      <surveyTime>436</surveyTime>
-      <surveyTime>466</surveyTime>
-      <surveyTime>496</surveyTime>
-      <surveyTime>526</surveyTime>
-      <surveyTime>556</surveyTime>
-      <surveyTime>586</surveyTime>
-      <surveyTime>616</surveyTime>
-      <surveyTime>646</surveyTime>
-      <surveyTime>676</surveyTime>
-      <surveyTime>721</surveyTime>
+    <surveys detectionLimit="2.5">
+      <surveyTime>91</surveyTime>
+      <surveyTime>1916</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
+      <group upperbound="1"/>
+      <group upperbound="2"/>
+      <group upperbound="3"/>
+      <group upperbound="4"/>
+      <group upperbound="5"/>
+      <group upperbound="6"/>
+      <group upperbound="7"/>
+      <group upperbound="8"/>
+      <group upperbound="9"/>
       <group upperbound="10"/>
+      <group upperbound="11"/>
+      <group upperbound="12"/>
+      <group upperbound="13"/>
+      <group upperbound="14"/>
+      <group upperbound="15"/>
       <group upperbound="20"/>
+      <group upperbound="25"/>
+      <group upperbound="30"/>
+      <group upperbound="40"/>
       <group upperbound="50"/>
+      <group upperbound="60"/>
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No Intervention"/>
+  <interventions name="Change to monitoring HS">
+    <timed>
+      <intervention time="91">
+        <changeHS>
+          <EventScheduler>
+            <uncomplicated>
+              <decisions>
+                <decision depends="" name="treatment" values="effective_treat,none">effective_treat</decision>
+                <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
+              </decisions>
+              <treatments>
+                <treatment name="effective_treat">
+                  <schedule>
+                    <medicate drug="effective" hour="0" mg="1"/>
+                  </schedule>
+                </treatment>
+                <treatment name="none">
+                  <schedule/>
+                </treatment>
+              </treatments>
+            </uncomplicated>
+            <complicated>
+              <decisions>
+                <decision depends="" name="treatment" values="effective_treat,none">effective_treat</decision>
+                <decision depends="" name="hospitalisation" values="none,delayed,immediate">immediate</decision>
+                <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
+              </decisions>
+              <treatments>
+                <treatment name="effective_treat">
+                  <schedule>
+                    <medicate drug="effective" hour="0" mg="1"/>
+                  </schedule>
+                </treatment>
+                <treatment name="none">
+                  <schedule/>
+                </treatment>
+              </treatments>
+            </complicated>
+            <ClinicalOutcomes>
+              <maxUCSeekingMemory>3</maxUCSeekingMemory>
+              <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
+              <complicatedCaseDuration>5</complicatedCaseDuration>
+              <complicatedRiskDuration>5</complicatedRiskDuration>
+              <pImmediateUC>1</pImmediateUC>
+            </ClinicalOutcomes>
+          </EventScheduler>
+          <CFR>
+            <group cfr="0.09189" lowerbound="0"/>
+            <group cfr="0.0810811" lowerbound="0.25"/>
+            <group cfr="0.0648649" lowerbound="0.75"/>
+            <group cfr="0.0689189" lowerbound="1.5"/>
+            <group cfr="0.0675676" lowerbound="2.5"/>
+            <group cfr="0.0297297" lowerbound="3.5"/>
+            <group cfr="0.0459459" lowerbound="4.5"/>
+            <group cfr="0.0945946" lowerbound="7.5"/>
+            <group cfr="0.1243243" lowerbound="12.5"/>
+            <group cfr="0.1378378" lowerbound="15"/>
+          </CFR>
+        </changeHS>
+      </intervention>
+    </timed>
+  </interventions>
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
@@ -107,753 +164,884 @@
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
-      <group cfr="0.09189" lowerbound="0"/>
-      <group cfr="0.0810811" lowerbound="0.25"/>
-      <group cfr="0.0648649" lowerbound="0.75"/>
-      <group cfr="0.0689189" lowerbound="1.5"/>
-      <group cfr="0.0675676" lowerbound="2.5"/>
-      <group cfr="0.0297297" lowerbound="3.5"/>
-      <group cfr="0.0459459" lowerbound="4.5"/>
-      <group cfr="0.0945946" lowerbound="7.5"/>
-      <group cfr="0.1243243" lowerbound="12.5"/>
-      <group cfr="0.1378378" lowerbound="15"/>
+      <group cfr="0" lowerbound="0"/>
     </CFR>
   </healthSystem>
-  <entoData mode="4" name="Bandafassi">
-    <!-- Bandafassi, Senegal    -->
+  <entoData mode="4" name="Do">
+    <!-- starts 1st Mar-->
     <nonVector eipDuration="10">
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.3117
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 3.4138
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 5.8596
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 2.1767
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.1415
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
-      <EIRDaily origin="monthly"> 0.0000
-</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.2767</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.9038</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.8485</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.3505</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.1476</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0369</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0922</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0553</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0184</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.0738</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">0.3874</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.6417</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">1.3096</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">2.1397</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.5349</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.4796</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.7009</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.6640</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.4242</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.3136</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1107</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
+      <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entoData>
+  <drugDescription>
+    <drug abbrev="effective">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>1e7</max_killing_rate>
+          <IC50>1</IC50>
+          <slope>1</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>1e-5</negligible_concentration>
+        <half_life>0.00069</half_life>
+        <vol_dist>0.01667</vol_dist>
+      </PK>
+    </drug>
+  </drugDescription>
   <model>
     <ModelOptions>
       <option name="MAX_DENS_CORRECTION" value="true"/>
@@ -861,16 +1049,16 @@
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
     </ModelOptions>
-    <clinical healthSystemMemory="28"/>
-    <parameters interval="1" iseed="1" latentp="0">
+    <clinical healthSystemMemory="0"/>
+    <parameters interval="1" iseed="1" latentp="15">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
       <parameter include="false" name="Xstar_p" number="4" value="1514.3858532337"/>
       <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
-      <parameter include="false" name="sigma2i" number="6" value="10.1735986985258"/>
-      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.3113251"/>
-      <parameter include="false" name="CumulativeHstar" number="8" value="97.3346527238977"/>
+      <parameter include="false" name="sigma2i" number="6" value="0"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="500000000.0"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="700.0"/>
       <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
       <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
       <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
@@ -893,11 +1081,11 @@
       <parameter include="false" name="Ystar0" number="28" value="296.3024379"/>
       <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
       <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
-      <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.01"/>
-      <parameter include="false" name="Molineaux first local max density mean" number="34" value="4.79"/>
-      <parameter include="false" name="Molineaux first local max density sd" number="35" value="0.57"/>
-      <parameter include="false" name="Diff positive days mean" number="36" value="2.33"/>
-      <parameter include="false" name="Diff positive days sd" number="37" value="0.26"/>
+      <parameter include="false" name="v in 'Case Fatality Rate proposal'" number="33" value="0.00008"/>
+      <parameter include="false" name="Molineaux first local max density mean" number="34" value="4.0"/>
+      <parameter include="false" name="Molineaux first local max density sd" number="35" value="0.1"/>
+      <parameter include="false" name="Diff positive days mean" number="36" value="1.57"/>
+      <parameter include="false" name="Diff positive days sd" number="37" value="0.15"/>
       <parameter include="false" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.916290731874155"/>
     </parameters>
   </model>
