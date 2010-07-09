@@ -31,17 +31,22 @@ int main(int argc, char* argv[]) {
     try {
         string scenario_name =
             OM::util::CommandLine::parse (argc, argv);
-
+	
         OM::util::BoincWrapper::init();
-
+	
         scenario_name = OM::util::CommandLine::lookupResource (scenario_name);
         OM::util::Checksum cksum = OM::InputData.createDocument(scenario_name);
-
-        {
-            OM::Simulation simulation (cksum);	// constructor runs
-            if ( !OM::util::CommandLine::option(OM::util::CommandLine::VALIDATE_ONLY) )
-                simulation.start();
-        }	// simulation's destructor runs
+	
+	OM::Simulation simulation (cksum);	// constructor runs
+	if ( !OM::util::CommandLine::option(OM::util::CommandLine::VALIDATE_ONLY) )
+	    simulation.start();
+	
+	// We call boinc_finish before cleanup since it should help ensure
+	// app isn't killed between writing output.txt and calling boinc_finish,
+	// and may speed up exit.
+	OM::util::BoincWrapper::finish(exitStatus);	// Never returns
+	
+	// simulation's destructor runs
     } catch (const OM::util::cmd_exit& e) {	// this is not an error, but exiting due to command line
         cerr << e.what() << "; exiting..." << endl;
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
@@ -57,12 +62,12 @@ int main(int argc, char* argv[]) {
         cerr << "Unknown exception" << endl;
         exitStatus = -1;
     }
-
+    
+    //NOTE: calling BoincWrapper::finish first makes this ineffective, but currently saving of changes is not used.
     try {	// free XML memory (if allocated), and potentially save changes
         OM::InputData.cleanDocument();
     } catch (...) {
         cerr << "cleanDocument failed" << endl;
         exitStatus = -1;
     }
-    OM::util::BoincWrapper::finish(exitStatus);	// Never returns
 }

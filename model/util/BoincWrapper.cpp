@@ -76,6 +76,9 @@ namespace BoincWrapper {
     return 0;
   }
   void checkpointCompleted() {}
+  
+  void beginCriticalSection() {}
+  void endCriticalSection() {}
 }
 Checksum Checksum::generate (istream& fileStream) {
     // Return a dummy checksum; making sure it is always the same.
@@ -127,6 +130,13 @@ namespace BoincWrapper {
   }
   void checkpointCompleted() {
     boinc_checkpoint_completed();
+  }
+  
+  void beginCriticalSection() {
+      boinc_begin_critical_section();
+  }
+  void endCriticalSection() {
+      boinc_end_critical_section();
   }
 }
 Checksum Checksum::generate (istream& fileStream) {

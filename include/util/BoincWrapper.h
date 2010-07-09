@@ -47,6 +47,11 @@ namespace BoincWrapper {
   int timeToCheckpoint();
   /// Call when a checkpoint's completed
   void checkpointCompleted();
+  
+  /// Open a critical section (see http://boinc.berkeley.edu/trac/wiki/BasicApi)
+  void beginCriticalSection();
+  /// End a critical section
+  void endCriticalSection();
 }
 
 /// Memory shared with graphics app:

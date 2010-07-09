@@ -153,6 +153,11 @@ int Simulation::start(){
 	}
     }
     
+    // Open a critical section; should prevent app kill while/after writing
+    // output.txt, which we don't currently handle well.
+    // Note: we don't end this critical section; we simply exit.
+    util::BoincWrapper::beginCriticalSection();
+    
     WithinHost::WithinHostModel::printDebugStats();
     
     delete _population;	// must destroy all Human instances to make sure they reported past events
