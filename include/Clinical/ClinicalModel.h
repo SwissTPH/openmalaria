@@ -116,6 +116,12 @@ public:
   /// Summarize PathogenesisModel details
   void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
+  /// Force all pending summaries to be reported. Should only be called when
+  /// class is about to be destroyed anyway to avoid affecting output.
+  inline void flushReports (){
+      latestReport.flush();
+  }
+  
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {

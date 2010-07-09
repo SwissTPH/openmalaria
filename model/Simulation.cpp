@@ -65,8 +65,9 @@ Simulation::Simulation(util::Checksum ck)
 }
 
 Simulation::~Simulation(){
-  //free memory
-  Population::clear();
+    //free memory
+    delete _population;
+    Population::clear();
 }
 
 
@@ -160,7 +161,7 @@ int Simulation::start(){
     
     WithinHost::WithinHostModel::printDebugStats();
     
-    delete _population;	// must destroy all Human instances to make sure they reported past events
+    _population->flushReports();	// ensure all Human instances report past events
     Surveys.writeSummaryArrays();
     
     // Write scenario checksum, only if simulation completed.

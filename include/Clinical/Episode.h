@@ -44,6 +44,9 @@ public:
   Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup() {};
   ~Episode();
   
+  /// Report anything pending, as on destruction
+  void flush();
+  
   /** Report an episode, its severity, and any outcomes it entails.
    *
    * @param simulationTime Time of report (i.e. now)

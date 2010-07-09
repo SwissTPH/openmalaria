@@ -39,6 +39,11 @@ Episode::~Episode ()
   report ();
 }
 
+void Episode::flush(){
+    report();
+    _time = Global::TIMESTEP_NEVER;
+}
+
 
 void Episode::update (int simulationTime, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
 {

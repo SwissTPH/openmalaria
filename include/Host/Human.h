@@ -161,6 +161,9 @@ public:
   //! Summarize the state of a human individual.
   void summarize(Monitoring::Survey& survey);
   
+  /// Flush any information pending reporting. Should only be called at destruction.
+  void flushReports ();
+  
   /// Calculate chance of a biting mosquito becoming infected
   //TODO: per genotype? (for Tiago's resistance modelling)
   inline double probTransmissionToMosquito() const {

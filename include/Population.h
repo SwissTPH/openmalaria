@@ -78,6 +78,9 @@ public:
 
     //! Makes a survey
     void newSurvey();
+    
+    /// Flush anything pending report. Should only be called just before destruction.
+    void flushReports();
 
     /** Checks for time-based interventions and implements them
      *

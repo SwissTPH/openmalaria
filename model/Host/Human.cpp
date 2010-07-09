@@ -270,6 +270,10 @@ void Human::summarize(Monitoring::Survey& survey) {
   clinicalModel->summarize (survey, ageGrp);
 }
 
+void Human::flushReports (){
+    clinicalModel->flushReports();
+}
+
 
 double Human::calcProbTransmissionToMosquito() const {
   /* This model (often referred to as the gametocyte model) was designed for

@@ -290,6 +290,12 @@ void Population::newSurvey ()
     _transmissionModel->summarize (current);
 }
 
+void Population::flushReports (){
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        iter->flushReports();
+    }
+}    
+
 
 // -----  non-static methods: interventions  -----
 
