@@ -286,7 +286,7 @@ bool VectorAnopheles::vectorInitIterate () {
   double factor = sumAnnualForcedS_v / vectors::sum(annualS_v);
 //   cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
   if (!(factor > 1e-6 && factor < 1e6))
-  {// unlikely, but might as well check incase either operand was zero
+  {// unlikely, but might as well check in case either operand was zero
 	//cout << "vectors sum : "<<vectors::sum(annualS_v);
 	//cout << "factor value : "<<factor;
     throw runtime_error ("factor out of bounds");

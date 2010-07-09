@@ -53,6 +53,7 @@ public:
 
 	template<class S>
 	  void operator& (S& stream) {
+		(*static_cast<HostCategoryAnopheles*>(this)) & stream;	// checkpoint base members
 		humanBloodIndex & stream;
 		probMosqOvipositing & stream;
 	}

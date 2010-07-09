@@ -59,9 +59,14 @@ struct eDFunctor
       
       // The difference of logarithms of sample and fourier value
       T diff = val - logSamples[t];		// deriv. wrt. d is just dval
+      // Differences of first and second derivatives of samples
+      // TODO: derivatives of samples shouldn't be zero. Presumably, however, fitting still works.
+      T ddiff = dval - 0.0;
+      T dddiff = ddval - 0.0;
+      
       f += diff*diff;				// add diff²
-      df += 2*diff * (dval - 0.0);		// add 1st deriv. diff²
-      ddf += 2*dval*dval + 2*diff*ddval;	// add 2nd deriv. diff²
+      df += 2.0*diff * ddiff;			// add 1st deriv. diff²
+      ddf += 2.0*ddiff*ddiff + 2.0*diff*dddiff;	// add 2nd deriv. diff²
 //       cout << t << "\t"<< val << "\t" << logSamples[t] << "\t" << diff*diff << "\t" <<2*diff * (dval - 0.0) << "\t" << 2*dval*dval + 2*diff*ddval << endl;
     }
     

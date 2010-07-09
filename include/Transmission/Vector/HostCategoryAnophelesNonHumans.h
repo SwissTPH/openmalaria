@@ -52,12 +52,12 @@ public:
 
 	template<class S>
 	  void operator& (S& stream) {
+		(*static_cast<HostCategoryAnopheles*>(this)) & stream;	// checkpoint base members
 		nonHumanHostName & stream;
 		relativeEntoAvailability & stream;
 	}
-
-
 };
 typedef vector<HostCategoryAnophelesNonHumans> NonHumanHostsType;
+
 }}
 #endif /* HOSTCATEGORYANOPHELESNONHUMANS_H_ */
