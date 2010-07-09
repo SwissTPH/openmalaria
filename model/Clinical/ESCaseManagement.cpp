@@ -296,9 +296,11 @@ public:
 		// possible sources of error, which should be checked:
 		// 1. empty slots in the decisions list
 		// 2. That required decisions are mistakenly optimised out.
+#ifdef WITHOUT_BOINC	// only print in non-BOINC mode to reduce stderr.txt size on server; this isn't a crucial message
 		if( it->first != "result" ) {	// this is a built-in test which may not be used
 		    cerr << "Warning: ESCaseManagement: decision " << it->first << " is unused (for "<<(complicated?"":"un")<<"complicated tree)"<<endl;
 		}
+#endif
 		delete it->second;
 		pending.erase(it);
 		it = pending.begin();	// after erase, we must restart from beginning

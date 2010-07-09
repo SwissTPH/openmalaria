@@ -194,14 +194,13 @@ void Simulation::writeCheckpoint(){
 	oldCheckpointNum = readCheckpointNum();
 	// Get next checkpoint number:
 	checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
-	cerr << "oldCheckpointNum: "<<oldCheckpointNum<<"; checkpointNum: "<<checkpointNum<<endl;
     }
     
     {	// Open the next checkpoint file for writing:
 	ostringstream name;
 	name << CHECKPOINT << checkpointNum;
 	//Writing checkpoint:
-	cerr << Global::simulationTime << " WC: " << name.str();
+// 	cerr << Global::simulationTime << " WC: " << name.str();
 	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
 	    name << ".gz";
 	    ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -231,7 +230,7 @@ void Simulation::writeCheckpoint(){
 	ofstream out(name.str().c_str(), ios::out | ios::binary);
 	out.close();
     }
-    cerr << " OK" << endl;
+//     cerr << " OK" << endl;
 }
 
 void Simulation::readCheckpoint() {
@@ -254,7 +253,8 @@ void Simulation::readCheckpoint() {
     in.close();
   }
   
-  cerr << "Loaded checkpoint with time "<<Global::simulationTime<<" from: " << name.str() << endl;
+  // Keep size of stderr.txt minimal with a short message, since this is a common message:
+  cerr <<Global::simulationTime<<" RC"<<endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))

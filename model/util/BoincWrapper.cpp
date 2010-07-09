@@ -98,7 +98,8 @@ namespace BoincWrapper {
       std::cerr << "APP. boinc_init() failed with code: "<<err<<std::endl;
       exit (err);
     }
-    std::cout << "BoincWrapper: BOINC initialized" << std::endl;
+    // Probably we don't need to know this. Disable to compress stderr.txt:
+//     std::cout << "BoincWrapper: BOINC initialized" << std::endl;
     
     SharedGraphics::init();
   }

@@ -172,14 +172,17 @@ void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
 }
 
 void WithinHostModel::printDebugStats() {
-    long double x = totalInfections-allowedInfections;
-    x *= 100.0 / totalInfections;
+#ifdef WITHOUT_BOINC
+    long double x = 100.0 * totalInfections / allowedInfections;
     cerr
-	<< "Total infections: "<<totalInfections
-	<<"\tallowed: "<<allowedInfections
-	<<"\tprevented: "<<x<<"%"
+	<< "Total/allowed infections: "
+	<<totalInfections<<"/"<<allowedInfections
+	<<"\t("<<x<<"%)"
 	<<endl
     ;
+#else	// use reduced-output mode
+    cerr<<"T/A: "<<totalInfections<<"/"<<allowedInfections<<endl;
+#endif
 }
 
 
