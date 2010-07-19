@@ -92,17 +92,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
   }
   for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
       species[it->second].checkInterventionDescriptions (it->first);
-}
-VectorTransmission::~VectorTransmission () {
-  for (size_t i = 0; i < numSpecies; ++i)
-    species[i].destroy();
-}
-
-void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
-  for (size_t i = 0; i < numSpecies; ++i) {
-    species[i].setupNv0 (i, population, populationSize);
-  }
   
+  
+  // -----  Continuous reporting  -----
   ostringstream ctsNv0, ctsNv, ctsOv, ctsSv;
   // Output in order of species so that (1) we can just iterate through this
   // list when outputting and (2) output is in order specified in XML.
@@ -119,6 +111,16 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
   Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
   Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
   Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
+}
+VectorTransmission::~VectorTransmission () {
+  for (size_t i = 0; i < numSpecies; ++i)
+    species[i].destroy();
+}
+
+void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+  for (size_t i = 0; i < numSpecies; ++i) {
+    species[i].setupNv0 (i, population, populationSize);
+  }
 }
 
 int VectorTransmission::transmissionInitDuration () {

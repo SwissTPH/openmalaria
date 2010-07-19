@@ -73,11 +73,20 @@ namespace OM { namespace Monitoring {
 	ctsOStream.imbue( nfn_put_locale );
 	ctsOStream.width (0);
 	
-	if( isCheckpoint )
+	if( isCheckpoint ){
 	    // When loading a check-point, we resume reporting to this file.
 	    // Don't worry about writing to an existing file (like for "output.txt"): we're appending.
 	    ctsOStream.open (CTS_FILENAME, ios::app | ios::binary);
-	else{
+	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
+	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
+		map<string,Callback>::const_iterator reg_it = registered.find( it->getName() );
+		if( reg_it == registered.end() )
+		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
+		if( it->getValue() ){
+		    toReport.push_back( reg_it->second.cb );
+		}
+	    }
+	}else{
 	    ifstream test (CTS_FILENAME);
 	    if (test.is_open())
 		// It could be from an old run. But we won't remove/truncate
@@ -100,7 +109,7 @@ namespace OM { namespace Monitoring {
 		    toReport.push_back( reg_it->second.cb );
 		}
 	    }
-	    ctsOStream << lineEnd;
+	    ctsOStream << lineEnd << flush;
 	}
     }
     
@@ -127,6 +136,6 @@ namespace OM { namespace Monitoring {
 	ctsOStream << Global::timeStep;
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    (toReport[i])( ctsOStream );
-	ctsOStream << lineEnd;
+	ctsOStream << lineEnd << flush;	// must flush often to avoid temporarily outputting partial lines
     }
 } }
