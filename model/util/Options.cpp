@@ -44,7 +44,7 @@ namespace OM { namespace util {
     }
     
     string CommandLine::parse (int argc, char* argv[]) {
-	bool cloHelp = false;
+	bool cloHelp = false, cloError = false;
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
 	
@@ -79,7 +79,7 @@ namespace OM { namespace util {
 		    t >> time;
 		    if (t.fail() || time <= 0) {
 			cerr << "Expected: --checkpoint=t  where t is a positive integer" << endl;
-			cloHelp = true;
+			cloError = true;
 			break;
 		    }
 		    checkpoint_times.insert( time );
@@ -90,15 +90,17 @@ namespace OM { namespace util {
 		    t >> b;
 		    if (t.fail()) {
 			cerr << "Expected: --compress-checkpoints=x  where x is 1 or 0" << endl;
-			cloHelp = true;
+			cloError = true;
 			break;
 		    }
 		    options[COMPRESS_CHECKPOINTS] = b;
+		} else if (clo == "checkpoint-duplicates") {
+		    options.set (TEST_DUPLICATE_CHECKPOINTS);
 		} else if (clo == "help") {
 		    cloHelp = true;
 		} else {
-		    cerr << "Unrecognised command-line option: --" << clo << endl << endl;
-		    cloHelp = true;
+		    cerr << "Unrecognised command-line option: --" << clo << endl;
+		    cloError = true;
 		}
 	    } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
 		for (size_t j = 1; j < clo.size(); ++j) {
@@ -112,17 +114,22 @@ namespace OM { namespace util {
 			options.set (PRINT_MODEL_OPTIONS);
 		    } else if (clo[j] == 'c') {
 			options.set (TEST_CHECKPOINTING);
+		    } else if (clo[j] == 'd') {
+			options.set (TEST_DUPLICATE_CHECKPOINTS);
 		    } else if (clo[j] == 'h') {
 			cloHelp = true;
+		    } else {
+		    cerr << "Unrecognised command-line option: -" << clo[j] << endl;
+		    cloError = true;
 		    }
 		}
 	    } else {
 		cerr << "Unexpected parameter: " << clo << endl << endl;
-		cloHelp = true;
+		cloError = true;
 	    }
 	}
 	
-	if (cloHelp) {
+	if (cloHelp || cloError) {
 	    cerr << "Usage: " << argv[0] << " [options]" << endl << endl
 	    << "Options:"<<endl
 	    << " -p --resource-path	Path to look up input resources with relative URLs (defaults to"<<endl
@@ -130,17 +137,24 @@ namespace OM { namespace util {
 	    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
-            << "	--validate-only	Initialise and validate scenario, but don't run simulation." << endl
-	    << "	--checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
+            << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
+	    << "    --checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
 	    << "			more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
 	    << "			period, exiting after completing each"<<endl
 	    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
+	    << " -d --checkpoint-duplicates"
+	    << "			Write a checkpoint immediately after reading, which should be" <<endl
+	    << "			identical to that read." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
-	    << "			Set checkpoint compression on or off. Default is on." <<endl
+	    << "			Set checkpoint compression on or off. Default is off (has"<<endl
+	    << "			little effect with binary checkpoints)." <<endl
 	    << " -h --help		Print this message." << endl
 	    ;
-	    throw cmd_exit ("Printed help");
+	    if( cloError )
+		throw std::invalid_argument( "bad argument" );
+	    else
+		throw cmd_exit ("Printed help");
 	}
 	
 	if (checkpoint_times.size())	// timed checkpointing implies this

@@ -263,7 +263,7 @@ void Simulation::readCheckpoint() {
   cerr <<Global::simulationTime<<" RC"<<endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
-  if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING))
+  if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
     writeCheckpoint();
 }
 

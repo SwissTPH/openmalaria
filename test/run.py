@@ -114,7 +114,7 @@ def runScenario(options,omOptions,name):
             print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
         if ret != 0:
-            print "Non-zero exit status: " + str(ret)
+            print "\033[1;31mNon-zero exit status: " + str(ret)
             break
         
         # check for output.txt.gz in place of output.txt and uncompress:
@@ -143,8 +143,8 @@ def runScenario(options,omOptions,name):
             break
         lastTime=checkTime
     
-    if options.logging:
-        print "Done in " + str(time.time()-startTime) + " seconds"
+    if ret == 0 and options.logging:
+        print "\033[0;33mDone in " + str(time.time()-startTime) + " seconds"
     
     if options.cleanup:
         os.remove(scenario_xsd)
@@ -153,56 +153,57 @@ def runScenario(options,omOptions,name):
                 os.remove(f)
     
     # Compare outputs:
-    ret,ident = 0,True
-    
-    # ctsout.txt (this output is optional):
-    if os.path.isfile(ctsoutFile):
-        origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
-        newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
-        if os.path.isfile(origCtsout):
-            ret,ident = compareCtsout.main (origCtsout, ctsoutFile)
+    if ret == 0:
+        # ctsout.txt (this output is optional):
+        if os.path.isfile(ctsoutFile):
+            origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
+            newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
+            if os.path.isfile(origCtsout):
+                ctsret,ctsident = compareCtsout.main (origCtsout, ctsoutFile)
+            else:
+                ctsret,ctsident = 3,False
+                print "\033[1;31mNo original ctsout.txt to compare with."
+            if ctsident and options.cleanup:
+                os.remove(ctsoutFile)
+                if os.path.isfile(newCtsout):
+                    os.remove(newCtsout)
+            else:
+                shutil.copy2(ctsoutFile, newCtsout)
+                if options.diff:
+                    subprocess.call (["kdiff3",origCtsout,ctsoutFile])
         else:
-            ret = 3
-            ident = False
-            print "\033[1;31mNo original ctsout.txt to compare with."
-        if ident and options.cleanup:
-            os.remove(ctsoutFile)
-            if os.path.isfile(newCtsout):
-                os.remove(newCtsout)
+            ctsret,ctsident = 0,True
+        
+        # output.txt (this output is required):
+        if os.path.isfile(outputFile):
+            origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
+            newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
+            if os.path.isfile(origOutput):
+                ret,ident = compareOutput.main (origOutput, outputFile, 3)
+            else:
+                ret,ident = 3,False
+                print "\033[1;31mNo original output.txt to compare with."
+            if ident and options.cleanup:
+                os.remove(outputFile)
+                if os.path.isfile(newOutput):
+                    os.remove(newOutput)
+            else:
+                shutil.copy2(outputFile, newOutput)
+                if options.diff:
+                    subprocess.call (["kdiff3",origOutput,outputFile])
         else:
-            shutil.copy2(ctsoutFile, newCtsout)
-            if options.diff:
-                subprocess.call (["kdiff3",origCtsout,ctsoutFile])
-    
-    # output.txt (this output is required):
-    if os.path.isfile(outputFile):
-        origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
-        newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
-        if os.path.isfile(origOutput):
-            nret,nident = compareOutput.main (origOutput, outputFile, 3)
-            ret=max(ret,nret)
-            ident=ident and nident
-        else:
-            ret = 3
-            ident = False
-            print "\033[1;31mNo original output.txt to compare with."
-        if ident and options.cleanup:
-            os.remove(outputFile)
-            if os.path.isfile(newOutput):
-                os.remove(newOutput)
-        else:
-            shutil.copy2(outputFile, newOutput)
-            if options.diff:
-                subprocess.call (["kdiff3",origOutput,outputFile])
-    else:
-        stderrFile=os.path.join(simDir,"stderr.txt")
-        if os.path.isfile (stderrFile):
-            print "\033[0;31mNo output.txt results; error messages:"
-            se = open(stderrFile)
-            se.read()
-            se.close()
-        else:
-            print "\033[0;31mNo output.txt results"
+            ret,ident = 1,False
+            stderrFile=os.path.join(simDir,"stderr.txt")
+            if os.path.isfile (stderrFile):
+                print "\033[1;31mNo output 'output.txt'; error messages:"
+                se = open(stderrFile)
+                se.read()
+                se.close()
+            else:
+                print "\033[1;31mNo output 'output.txt'"
+        
+        ret=max(ret,ctsret)
+        ident=ident and ctsident
     
     try:
         os.rmdir(simDir)

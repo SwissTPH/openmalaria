@@ -34,6 +34,7 @@ namespace OM { namespace util {
 	enum Options {
 	    PRINT_MODEL_OPTIONS = 0,	// outputs model-options in a human-readable form
 	    TEST_CHECKPOINTING,	// forces a checkpoint in the middle of initialisation, followed by exiting
+	    TEST_DUPLICATE_CHECKPOINTS,	// write a checkpoint immediately after reading, to check a duplicate is produced
 	    COMPRESS_CHECKPOINTS,	// compress checkpoint files with gzip before writing
 	    VALIDATE_ONLY,      // do initialisation+error checks, but don't run simulation
 	    NUM_OPTIONS
