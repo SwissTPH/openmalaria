@@ -149,7 +149,7 @@ void Population::createInitialHumans ()
 	    // Optimisation: don't create humans who would die before end of
 	    // one-life-span init phase. Transmission models require all humans
 	    // during last year of init; humans bound-to-die before that are unneeded:
-	    if( -iage >= -Global::intervalsPerYear )
+	    if( -iage >= -((int)Global::intervalsPerYear) )
 		newHuman (-iage);
 	    ++cumulativePop;
 	}
