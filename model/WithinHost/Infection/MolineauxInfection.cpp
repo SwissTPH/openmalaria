@@ -102,7 +102,7 @@ void MolineauxInfection::initParameters() {
 MolineauxInfection::MolineauxInfection(uint32_t protID):
         CommonInfection(protID)
 {
-    for (int i=0;i<v; i++)
+    for (size_t i=0;i<v; i++)
     {
         m[i] = 0.0;
 
@@ -113,7 +113,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
         }
     }
 
-    for (int tau=0; tau<taus;tau++)
+    for (size_t tau=0; tau<taus;tau++)
     {
         laggedPc[tau] = 0.0;
     }
@@ -131,7 +131,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 MolineauxInfection::Variant::Variant () :
         growthRate(0.0), P(0.0), variantSpecificSummation(0.0), initP(0.0)
 {
-    for (int tau=0; tau<taus; tau++)
+    for (size_t tau=0; tau<taus; tau++)
     {
         laggedP[tau] =  0.0;
     }
@@ -323,11 +323,11 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
         CommonInfection(stream)
 {
     variantTranscendingSummation & stream;
-    for (int i=0;i<v;i++) {
+    for (size_t i=0;i<v;i++) {
         m[i] & stream;
     }
     variants & stream;
-    for (int j=0;j<taus;j++)
+    for (size_t j=0;j<taus;j++)
     {
         laggedPc[j] & stream;
     }
@@ -339,11 +339,11 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
 
     variantTranscendingSummation & stream;
-    for (int i=0;i<v;i++) {
+    for (size_t i=0;i<v;i++) {
         m[i] & stream;
     }
     variants & stream;
-    for (int j=0;j<taus;j++)
+    for (size_t j=0;j<taus;j++)
     {
         laggedPc[j] & stream;
     }
@@ -359,7 +359,7 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
 	P & stream;
 	variantSpecificSummation & stream;
 	initP & stream;
-	for(int i = 0; i < taus; ++i)
+	for(size_t i = 0; i < taus; ++i)
 	    laggedP[i] & stream;
     }
     else
@@ -368,7 +368,7 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
 	P = 0.0;
 	variantSpecificSummation = 0.0;
 	initP = 0.0;
-	for(int i = 0; i < taus; ++i)
+	for(size_t i = 0; i < taus; ++i)
 	    laggedP[i] = 0.0;
     }
 }
@@ -386,7 +386,7 @@ void MolineauxInfection::Variant::operator& (ostream& stream) {
 	P & stream;
 	variantSpecificSummation & stream;
 	initP & stream;
-	for(int i = 0; i < taus; ++i)
+	for(size_t i = 0; i < taus; ++i)
 	    laggedP[i] & stream;
     }
 }

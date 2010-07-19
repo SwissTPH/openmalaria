@@ -56,9 +56,9 @@ private:
     void updateGrowthRateMultiplier();
 
 	// v: number of variants per clone (one infection = one new clone)
-	static const int v = 50;
+	static const size_t v = 50;
 	// taus: used for the variantTranscending and variantSpecific array, 4 Molineaux timesteps = 8 days
-	static const int taus = 4;
+	static const size_t taus = 4;
 
 	///@brief static variables red from parameters
 	//@{

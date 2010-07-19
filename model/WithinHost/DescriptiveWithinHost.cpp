@@ -139,7 +139,7 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    for (int i=0; i<_MOI; ++i) {
+    for (size_t i=0; i<_MOI; ++i) {
         loadInfection(stream);	// create infections using a virtual function call
     }
 }

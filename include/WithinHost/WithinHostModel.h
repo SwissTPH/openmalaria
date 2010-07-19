@@ -162,7 +162,7 @@ protected:
   virtual void clearAllInfections() =0;
   
   //!multiplicity of infection
-  int _MOI;
+  size_t _MOI;
   
   /// Total asexual blood stage density (sum of density of infections).
   double totalDensity;
@@ -204,7 +204,7 @@ protected:
    * infections to baloon stupidly.
    * 
    * Exact constraint is: _MOI <= MAX_INFECTIONS. */
-  static const int MAX_INFECTIONS = 21;
+  static const size_t MAX_INFECTIONS = 21;
   //@}
   
   // Static parameters for use with debug output:

@@ -196,7 +196,7 @@ void WithinHostModel::checkpoint (istream& stream) {
     totalDensity & stream;
     timeStepMaxDensity & stream;
     
-    if (_MOI < 0 || _MOI > MAX_INFECTIONS)
+    if (_MOI > MAX_INFECTIONS)
 	throw util::checkpoint_error( (boost::format("_MOI: %1%") %_MOI).str() );
 }
 void WithinHostModel::checkpoint (ostream& stream) {

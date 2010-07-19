@@ -117,7 +117,7 @@ void Population::checkpoint (istream& stream)
     popSize & stream;
     if (popSize > size_t (populationSize))
         throw util::checkpoint_error( (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
-    for (int i = 0; i < popSize && !stream.eof(); ++i) {
+    for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
         population.push_back (Host::Human (*_transmissionModel, 0, 0));
@@ -214,7 +214,7 @@ void Population::update1()
     } // end of per-human updates
 
     // increase population size to targetPop
-    if( Global::simulationTime < Global::maxAgeIntervals - Global::intervalsPerYear ){
+    if( Global::simulationTime < Global::maxAgeIntervals - (int)Global::intervalsPerYear ){
 	// Calculate number of people who, due to age structure, could still be alive at
 	// timestep Global::maxAgeIntervals - Global::intervalsPerYear.
 	// WARNING: This assumes no-one dies, so it may not be so accurate!

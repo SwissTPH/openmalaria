@@ -67,8 +67,10 @@ void TransmissionModel::ctsCbHumanAvail (ostream& stream){
 TransmissionModel::TransmissionModel() :
     ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
-    _sumAnnualKappa(0.0), annualEIR(0.0),
-    timeStepNumEntoInnocs (0), BSSInnoculationsPerDayOfYear(0.0), BSSTimesteps(0), BSSInitialisationEIR(0.0)
+    _sumAnnualKappa(0.0),
+    BSSInitialisationEIR(0.0), BSSInnoculationsPerDayOfYear(0.0), BSSTimesteps(0),
+    annualEIR(0.0),
+    timeStepNumEntoInnocs (0)
 {
   kappa.resize (Global::intervalsPerYear, 0.0);
   initialisationEIR.resize (Global::intervalsPerYear);

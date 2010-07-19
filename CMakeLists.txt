@@ -20,6 +20,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
+  # This doesn't show up in the cache, but it is passed to gcc:
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  
   option (OM_STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
   if (OM_STATICALLY_LINK)
     link_directories (${CMAKE_SOURCE_DIR}/lib)
