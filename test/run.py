@@ -179,7 +179,7 @@ def runScenario(options,omOptions,name):
             origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
             newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
             if os.path.isfile(origOutput):
-                ret,ident = compareOutput.main (origOutput, outputFile, 3)
+                ret,ident = compareOutput.main (origOutput, outputFile, 0)
             else:
                 ret,ident = 3,False
                 print "\033[1;31mNo original output.txt to compare with."

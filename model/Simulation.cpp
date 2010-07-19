@@ -227,7 +227,12 @@ void Simulation::writeCheckpoint(){
 	if (!checkpointFile)
 	    throw util::checkpoint_error ("error writing to file \"checkpoint\"");
     }
-    if( oldCheckpointNum != checkpointNum ){	// Truncate the old checkpoint to save disk space, when it existed
+    // Truncate the old checkpoint to save disk space, when it existed
+    if( oldCheckpointNum != checkpointNum
+	&& !util::CommandLine::option (
+	    util::CommandLine::TEST_DUPLICATE_CHECKPOINTS
+	)	/* need original in this case */
+    ) {
 	ostringstream name;
 	name << CHECKPOINT << oldCheckpointNum;
 	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
