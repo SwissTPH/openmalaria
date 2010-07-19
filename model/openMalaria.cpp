@@ -27,7 +27,7 @@
 /** main() — initializes and shuts down BOINC, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]) {
-    int exitStatus = 0;
+    int exitStatus = EXIT_SUCCESS;
     try {
         string scenario_name =
             OM::util::CommandLine::parse (argc, argv);
@@ -47,27 +47,32 @@ int main(int argc, char* argv[]) {
 	OM::util::BoincWrapper::finish(exitStatus);	// Never returns
 	
 	// simulation's destructor runs
-    } catch (const OM::util::cmd_exit& e) {	// this is not an error, but exiting due to command line
+    } catch (const OM::util::cmd_exit& e) {
+	// this is not an error, but exiting due to command line
         cerr << e.what() << "; exiting..." << endl;
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
         cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
-        exitStatus = -1;
+        exitStatus = EXIT_FAILURE;
     } catch (const OM::util::checkpoint_error& e) {
         cerr << "Checkpoint exception: " << e.what() << endl;
-        exitStatus = -1;
+        exitStatus = EXIT_FAILURE;
     } catch (const exception& e) {
         cerr << "Exception: " << e.what() << endl;
-        exitStatus = -1;
+        exitStatus = EXIT_FAILURE;
     } catch (...) {
         cerr << "Unknown exception" << endl;
-        exitStatus = -1;
+        exitStatus = EXIT_FAILURE;
     }
     
-    //NOTE: calling BoincWrapper::finish first makes this ineffective, but currently saving of changes is not used.
+    //NOTE: calling BoincWrapper::finish first makes this ineffective, but
+    // currently saving of changes is not used.
     try {	// free XML memory (if allocated), and potentially save changes
         OM::InputData.cleanDocument();
     } catch (...) {
         cerr << "cleanDocument failed" << endl;
-        exitStatus = -1;
+        exitStatus = EXIT_FAILURE;
     }
+    
+    // In case an exception was thrown, we call boinc_finish here:
+    OM::util::BoincWrapper::finish(exitStatus);	// Never returns
 }
