@@ -14,7 +14,7 @@ configure_file (
 
 # working tests (with checkpointing):
 set (OM_BOXTEST_NAMES
-  1 2 3 4 5 6 9 10 11 12
+  1 2 3 4 5 6 9 10 11 12 Molineaux
   EffectiveDrug
   IPT
   VecTest VecFullTest NamawalaArabiensis
