@@ -54,8 +54,9 @@ public:
     template<class S>
     void operator& (S& stream) {
         populationSize & stream;
+	recentBirths & stream;
         (*_transmissionModel) & stream;
-
+	
         checkpoint (stream);
     }
     

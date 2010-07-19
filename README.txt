@@ -27,4 +27,4 @@ util		Extra scripts associated with OpenMalaria.
 
 Scenario schema files:
 model/scenario.xsd	The latest schema file. Code is generated from this file.
-test/scenario_*.xsd	Copies of all schema versions. The latest version here should _always_ be a copy of model/scenario.xsd. Scenario XML files refer to one of these schemas, used for validation (usually the latest schema version, but not required to be).
+schema/scenario_*.xsd	Copies of all schema versions (see schema/policy.txt).

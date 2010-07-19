@@ -1,5 +1,24 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+# This file is part of OpenMalaria.
+# 
+# Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# 
+# OpenMalaria is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
 # With no arguments, run all scenario*.xml files.
 # With arguments A,...,Z, only run scenarioA.xml, ..., scenarioZ.xml
 # Exit status:
@@ -18,7 +37,8 @@ from optparse import OptionParser
 import gzip
 
 sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
-import compareOutputsFloat as compareOuts
+import compareOutput
+import compareCtsout
 
 # replaced by CMake; run the version it puts in the build/test/ dir.
 testSrcDir="@CMAKE_CURRENT_SOURCE_DIR@"
@@ -48,7 +68,7 @@ def findFile (*names):
             newest=path
             return newest
 
-openMalariaExec=findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"])
+openMalariaExec=os.path.abspath(findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"]))
 
 def linkOrCopy (src, dest):
     if hasattr(os, 'symlink'):
@@ -66,13 +86,15 @@ def runScenario(options,omOptions,name):
     cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
     
     if not options.run:
-        print "\033[1;32m"+(" ".join(cmd))+"\033[0;00m"
+        print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
         return 0
     
     # Run from a temporary directory, so checkpoint files won't conflict
     simDir = tempfile.mkdtemp(prefix=name+'-', dir=testBuildDir)
-    outFile=os.path.join(simDir,"output.txt")
-    outFileGz=os.path.join(simDir,"output.txt.gz")
+    outputFile=os.path.join(simDir,"output.txt")
+    outputGzFile=os.path.join(simDir,"output.txt.gz")
+    ctsoutFile=os.path.join(simDir,"ctsout.txt")
+    ctsoutGzFile=os.path.join(simDir,"ctsout.txt.gz")
     checkFile=os.path.join(simDir,"checkpoint")
     
     # Link or copy required files.
@@ -83,27 +105,35 @@ def runScenario(options,omOptions,name):
     linkOrCopy ("@OM_BOXTEST_SCHEMA_PATH@", scenario_xsd)
     
     if options.logging:
-        print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")
+        print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33mscenario%s.xml" % name
     
     startTime=lastTime=time.time()
-    # While no output and cmd exits successfully:
-    while (not os.path.isfile(outFile)):
+    # While no output.txt file and cmd exits successfully:
+    while (not os.path.isfile(outputFile)):
         if options.logging:
-            print "\033[1;32m"+(" ".join(cmd))+"\033[0;00m"
+            print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
         if ret != 0:
             print "Non-zero exit status: " + str(ret)
             break
         
         # check for output.txt.gz in place of output.txt and uncompress:
-        if (os.path.isfile(outFileGz)) and (not os.path.isfile(outFile)):
-            f_in = gzip.open(outFileGz, 'rb')
-            f_out = open(outFile, 'wb')
+        if (os.path.isfile(outputGzFile)) and (not os.path.isfile(outputFile)):
+            f_in = gzip.open(outputGzFile, 'rb')
+            f_out = open(outputFile, 'wb')
             f_out.writelines(f_in)
             f_out.close()
             f_in.close()
-            if options.cleanup:
-                os.remove(outFileGz)
+            os.remove(outputGzFile)
+        
+        # check for ctsout.txt.gz in place of ctsout.txt and uncompress:
+        if (os.path.isfile(ctsoutGzFile)) and (not os.path.isfile(ctsoutFile)):
+            f_in = gzip.open(ctsoutGzFile, 'rb')
+            f_out = open(ctsoutFile, 'wb')
+            f_out.writelines(f_in)
+            f_out.close()
+            f_in.close()
+            os.remove(ctsoutGzFile)
         
         # if the checkpoint file hasn't been updated, stop
         if not os.path.isfile(checkFile):
@@ -113,7 +143,8 @@ def runScenario(options,omOptions,name):
             break
         lastTime=checkTime
     
-    print "Done in " + str(time.time()-startTime) + " seconds"
+    if options.logging:
+        print "Done in " + str(time.time()-startTime) + " seconds"
     
     if options.cleanup:
         os.remove(scenario_xsd)
@@ -121,34 +152,57 @@ def runScenario(options,omOptions,name):
             if os.path.isfile(f):
                 os.remove(f)
     
-    ret = 1
-    if os.path.isfile(outFile):
-        print "\033[1;34m",
-        original = os.path.join(testSrcDir,"original%s.txt"%name)
-        outLoc = os.path.join(testBuildDir,"original%s.txt"%name)
-        if os.path.isfile(original):
-            ret,ident = compareOuts.main (original, outFile, 3)
+    # Compare outputs:
+    ret,ident = 0,True
+    
+    # ctsout.txt (this output is optional):
+    if os.path.isfile(ctsoutFile):
+        origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
+        newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
+        if os.path.isfile(origCtsout):
+            ret,ident = compareCtsout.main (origCtsout, ctsoutFile)
         else:
             ret = 3
             ident = False
-            print "\033[1;31mNo original results to compare with."
+            print "\033[1;31mNo original ctsout.txt to compare with."
         if ident and options.cleanup:
-            os.remove(outFile)
-            if os.path.isfile(outLoc):
-                os.remove(outLoc)
+            os.remove(ctsoutFile)
+            if os.path.isfile(newCtsout):
+                os.remove(newCtsout)
         else:
-            shutil.copy2(outFile, outLoc)
+            shutil.copy2(ctsoutFile, newCtsout)
             if options.diff:
-                subprocess.call (["kdiff3",original,outFile])
+                subprocess.call (["kdiff3",origCtsout,ctsoutFile])
+    
+    # output.txt (this output is required):
+    if os.path.isfile(outputFile):
+        origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
+        newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
+        if os.path.isfile(origOutput):
+            nret,nident = compareOutput.main (origOutput, outputFile, 3)
+            ret=max(ret,nret)
+            ident=ident and nident
+        else:
+            ret = 3
+            ident = False
+            print "\033[1;31mNo original output.txt to compare with."
+        if ident and options.cleanup:
+            os.remove(outputFile)
+            if os.path.isfile(newOutput):
+                os.remove(newOutput)
+        else:
+            shutil.copy2(outputFile, newOutput)
+            if options.diff:
+                subprocess.call (["kdiff3",origOutput,outputFile])
     else:
         stderrFile=os.path.join(simDir,"stderr.txt")
         if os.path.isfile (stderrFile):
-            print "\033[0;31mNo results output; error messages:"
+            print "\033[0;31mNo output.txt results; error messages:"
             se = open(stderrFile)
             se.read()
             se.close()
         else:
-            print "\033[0;31mNo results output; error messages:"
+            print "\033[0;31mNo output.txt results"
     
     try:
         os.rmdir(simDir)
