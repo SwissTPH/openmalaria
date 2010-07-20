@@ -120,13 +120,13 @@ void SurveysType::checkpoint (istream& stream) {
     _surveysTimeIntervals & stream;
     _surveyPeriod & stream;
     _survey & stream;
+    current = &_survey[_surveyPeriod];
 }
 void SurveysType::checkpoint (ostream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
     _surveyPeriod & stream;
     _survey & stream;
-    current = &_survey[_surveyPeriod];
 }
 
 } }
