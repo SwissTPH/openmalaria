@@ -44,6 +44,8 @@ namespace OM { namespace util {
     }
     
     string CommandLine::parse (int argc, char* argv[]) {
+	options[COMPRESS_CHECKPOINTS] = true;	// turn on by default
+	
 	bool cloHelp = false, cloError = false;
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
@@ -147,8 +149,7 @@ namespace OM { namespace util {
 	    << "			Write a checkpoint immediately after reading, which should be" <<endl
 	    << "			identical to that read." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
-	    << "			Set checkpoint compression on or off. Default is off (has"<<endl
-	    << "			little effect with binary checkpoints)." <<endl
+	    << "			Set checkpoint compression on or off. Default is on." <<endl
 	    << " -h --help		Print this message." << endl
 	    ;
 	    if( cloError )
@@ -157,8 +158,9 @@ namespace OM { namespace util {
 		throw cmd_exit ("Printed help");
 	}
 	
-	if (checkpoint_times.size())	// timed checkpointing implies this
-	    options[TEST_CHECKPOINTING] = true;
+	if (checkpoint_times.size())	// timed checkpointing overrides this
+	    // (Setting this to false is not required; it's just documentation.)
+	    options[TEST_CHECKPOINTING] = false;
 	
 	return scenarioFile;
     }

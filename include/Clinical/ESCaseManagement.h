@@ -58,6 +58,7 @@ struct MedicateData {
     void operator& (S& stream) {
 	abbrev & stream;
 	qty & stream;
+	cost_qty & stream;
 	time & stream;
     }
     

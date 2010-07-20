@@ -23,7 +23,7 @@ set (OM_BOXTEST_NAMES
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
-# Disabled due to "in-progress" work: Molineaux
+# Disabled due to "in-progress" work: (none)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})

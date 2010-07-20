@@ -32,11 +32,21 @@ namespace OM { namespace util {
     public:
 	/// Boolean command-line options
 	enum Options {
-	    PRINT_MODEL_OPTIONS = 0,	// outputs model-options in a human-readable form
-	    TEST_CHECKPOINTING,	// forces a checkpoint in the middle of initialisation, followed by exiting
-	    TEST_DUPLICATE_CHECKPOINTS,	// write a checkpoint immediately after reading, to check a duplicate is produced
-	    COMPRESS_CHECKPOINTS,	// compress checkpoint files with gzip before writing
-	    VALIDATE_ONLY,      // do initialisation+error checks, but don't run simulation
+	    /** Outputs non-default "ModelOptions" values in a human-readable form. */
+	    PRINT_MODEL_OPTIONS = 0,
+	    /** Forces checkpoints in the middle of each simulation phase,
+	     * exiting immediately afterwards.
+	     * 
+	     * Also see checkpoint_times, which overrides this option. */
+	    TEST_CHECKPOINTING,
+	    /** Write a checkpoint immediately after loading one. Allows
+	     * confirmation that a duplicate is produced. */
+	    TEST_DUPLICATE_CHECKPOINTS,
+	    /** Compress checkpoint files with gzip before writing.
+	     * Even with binary checkpoints, this has a big effect. */
+	    COMPRESS_CHECKPOINTS,
+	    /** Do initialisation and error checks, but don't run simulation. */
+	    VALIDATE_ONLY,
 	    NUM_OPTIONS
 	};
 	
