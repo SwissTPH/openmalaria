@@ -43,6 +43,12 @@ namespace OM { namespace Monitoring {
 	 * Callbacks should be registered before init() is called. */
 	static void init (bool isCheckpoint);
 	
+	/** @brief Checkpointing functions */
+	//@{
+	static void staticCheckpoint (ostream& stream);
+	static void staticCheckpoint (istream& stream);
+	//@}
+	
 	/** Register a callback function which produces output.
 	 *
 	 * This function will be called to generate output, if enabled in XML.

@@ -79,11 +79,11 @@ int Simulation::start(){
 	+ Surveys.getFinalTimestep() + 1;	// MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
-	readCheckpoint();
 	Continuous::init( true );
+	readCheckpoint();
     } else {
-	_population->createInitialHumans();
 	Continuous::init( false );
+	_population->createInitialHumans();
     }
     // Set to either a checkpointing timestep or <0. We only need to set once,
     // since we exit after a checkpoint triggered this way.
@@ -281,6 +281,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
 	util::CommandLine::staticCheckpoint (stream);
 	Population::staticCheckpoint (stream);
 	Surveys & stream;
+	Continuous::staticCheckpoint (stream);
 	
 	Global::simulationTime & stream;
 	Global::timeStep & stream;
@@ -327,6 +328,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
+    Continuous::staticCheckpoint (stream);
     
     Global::simulationTime & stream;
     Global::timeStep & stream;

@@ -21,6 +21,7 @@
 #include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.hpp"
 #include "inputData.h"
+#include "util/BoincWrapper.h"
 
 #include <vector>
 #include <map>
@@ -38,6 +39,12 @@ namespace OM { namespace Monitoring {
     /// (It used to be csv, but German Excel can't open csv directly.)
     ofstream ctsOStream;
     // Can't simply replace with ogzstream for compression: that doesn't support appending.
+    
+    /* Record last position in file (as position minus start), for checkpointing.
+     * Don't use a streampos directly, because I'm not convinced we can save and
+     * reload a streampos and use on a new file. */
+    streamoff streamOff;
+    streampos streamStart;
     
     // List of all registered callbacks (not used after init() runs)
     struct Callback {
@@ -74,9 +81,6 @@ namespace OM { namespace Monitoring {
 	ctsOStream.width (0);
 	
 	if( isCheckpoint ){
-	    // When loading a check-point, we resume reporting to this file.
-	    // Don't worry about writing to an existing file (like for "output.txt"): we're appending.
-	    ctsOStream.open (CTS_FILENAME, ios::app | ios::binary);
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
 	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		map<string,Callback>::const_iterator reg_it = registered.find( it->getName() );
@@ -86,14 +90,24 @@ namespace OM { namespace Monitoring {
 		    toReport.push_back( reg_it->second.cb );
 		}
 	    }
+	    
+	    // When loading a check-point, we resume reporting to this file.
+	    // Don't worry about writing to an existing file (like for "output.txt"): we're appending.
+	    ctsOStream.open (CTS_FILENAME, ios::binary|ios::app );
+	    if( ctsOStream.fail() )
+		throw util::checkpoint_error ("Continuous: resume error (no file)");
+	    ctsOStream.seekp( 0, ios_base::beg );
+	    streamStart = ctsOStream.tellp();
+	    // we set position later, in staticCheckpoint
 	}else{
 	    ifstream test (CTS_FILENAME);
 	    if (test.is_open())
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
-		throw runtime_error ("File vector.txt exists!");
+		throw runtime_error ("File ctsout.txt exists!");
 	    
-	    ctsOStream.open( CTS_FILENAME );
+	    ctsOStream.open( CTS_FILENAME, ios::binary );
+	    streamStart = ctsOStream.tellp();
 	    ctsOStream << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
 	    
 	    if( duringInit )
@@ -110,10 +124,46 @@ namespace OM { namespace Monitoring {
 		}
 	    }
 	    ctsOStream << lineEnd << flush;
+	    streamOff = ctsOStream.tellp() - streamStart;
 	}
     }
+    void Continuous::staticCheckpoint (ostream& stream){
+        if( ctsPeriod == 0 )
+            return;	// output disabled
+	
+	streamOff & stream;
+    }
+    void Continuous::staticCheckpoint (istream& stream){
+        if( ctsPeriod == 0 )
+            return;	// output disabled
+	
+	/* We attempt to resume output correctly after a reload by:
+	 *
+	 * (a) recording the last position, and relocating there
+	 * (b) trying to avoid kills during writing of a line, by using
+	 *  BOINC critical sections.
+	 * 
+	 * (Keeping results in memory until end of sim would be another,
+	 * slightly safer, option, but loses real-time output.) */
+	streamOff & stream;
+	// We skip back to the last write-point, so anything written after the
+	// last checkpoint will be repeated:
+	
+	//FIXME: figure out how to reposition seek head; this doesn't work (with ios::ate):
+	//ctsOStream.seekp( streamOff, ios_base::beg );
+	//In the mean-time, we use ios::app
+	ctsOStream.seekp( 0, ios_base::end );
+	streamoff curLen = ctsOStream.tellp() - streamStart;
+	if( curLen != streamOff ){
+	    cerr<<"Warning: Continuous output: unable to resume correctly; output should contain "
+	    <<curLen-streamOff<<" repeated bytes."<<endl;
+	}
+	
+	if( ctsOStream.fail() )
+	    throw util::checkpoint_error ("Continuous: resume error (bad pos/file)");
+    }
     
-	void Continuous::registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&> outputCb){
+    void Continuous::registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&> outputCb){
 	Callback s;
 	s.titles = titles;
 	s.cb = outputCb;
@@ -123,7 +173,7 @@ namespace OM { namespace Monitoring {
     
     void Continuous::update (){
         if( ctsPeriod == 0 )
-            return;
+            return;	// output disabled
         if( !duringInit ){
             if( Global::timeStep < 0 || Global::timeStep % ctsPeriod != 0 )
                 return;
@@ -133,9 +183,16 @@ namespace OM { namespace Monitoring {
             ctsOStream << Global::simulationTime << '\t';
         }
 	
+	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
+	
 	ctsOStream << Global::timeStep;
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    (toReport[i])( ctsOStream );
-	ctsOStream << lineEnd << flush;	// must flush often to avoid temporarily outputting partial lines
+	// We must flush often to avoid temporarily outputting partial lines
+	// (resulting in incorrect real-time graphs).
+	ctsOStream << lineEnd << flush;
+	
+	streamOff = ctsOStream.tellp() - streamStart;
+	util::BoincWrapper::endCriticalSection();
     }
 } }
