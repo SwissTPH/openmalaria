@@ -24,6 +24,7 @@
 #include <string>
 #include <set>
 #include <bitset>
+#include <limits>
 using namespace std;
 
 namespace OM { namespace util {
@@ -56,16 +57,12 @@ namespace OM { namespace util {
 	}
 	
 	/** Return first checkpointing timestep _greater than_ timestep passed,
-	 * or -2 if no greater checkpoint times (but were some times), or -1 if
-	 * no checkpointing times. */
+	 * or min int value if no (more) checkpoint times. */
 	static int getNextCheckpointTime( int now ) {
 	    set<int>::iterator it = checkpoint_times.upper_bound( now );
-	    if( it == checkpoint_times.end() ){
-		if( checkpoint_times.size() )
-		    return -2;
-		else
-		    return -1;
-	    } else
+	    if( it == checkpoint_times.end() )
+		return numeric_limits< int >::min();
+	    else
 		return *it;
 	}
 	

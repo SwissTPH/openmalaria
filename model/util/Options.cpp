@@ -159,7 +159,6 @@ namespace OM { namespace util {
 	}
 	
 	if (checkpoint_times.size())	// timed checkpointing overrides this
-	    // (Setting this to false is not required; it's just documentation.)
 	    options[TEST_CHECKPOINTING] = false;
 	
 	return scenarioFile;

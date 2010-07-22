@@ -37,7 +37,7 @@ namespace OM { namespace Monitoring {
     const char* CTS_FILENAME = "ctsout.txt";
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
-    ofstream ctsOStream;
+    fstream ctsOStream;
     // Can't simply replace with ogzstream for compression: that doesn't support appending.
     
     /* Record last position in file (as position minus start), for checkpointing.
@@ -92,8 +92,8 @@ namespace OM { namespace Monitoring {
 	    }
 	    
 	    // When loading a check-point, we resume reporting to this file.
-	    // Don't worry about writing to an existing file (like for "output.txt"): we're appending.
-	    ctsOStream.open (CTS_FILENAME, ios::binary|ios::app );
+	    // Use "ate" mode and seek to desired pos.
+	    ctsOStream.open (CTS_FILENAME, ios::binary|ios::ate|ios::in|ios::out );
 	    if( ctsOStream.fail() )
 		throw util::checkpoint_error ("Continuous: resume error (no file)");
 	    ctsOStream.seekp( 0, ios_base::beg );
@@ -106,7 +106,7 @@ namespace OM { namespace Monitoring {
 		// existing files as a security precaution for running on BOINC.
 		throw runtime_error ("File ctsout.txt exists!");
 	    
-	    ctsOStream.open( CTS_FILENAME, ios::binary );
+	    ctsOStream.open( CTS_FILENAME, ios::binary|ios::out );
 	    streamStart = ctsOStream.tellp();
 	    ctsOStream << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
 	    
@@ -148,16 +148,7 @@ namespace OM { namespace Monitoring {
 	streamOff & stream;
 	// We skip back to the last write-point, so anything written after the
 	// last checkpoint will be repeated:
-	
-	//FIXME: figure out how to reposition seek head; this doesn't work (with ios::ate):
-	//ctsOStream.seekp( streamOff, ios_base::beg );
-	//In the mean-time, we use ios::app
-	ctsOStream.seekp( 0, ios_base::end );
-	streamoff curLen = ctsOStream.tellp() - streamStart;
-	if( curLen != streamOff ){
-	    cerr<<"Warning: Continuous output: unable to resume correctly; output should contain "
-	    <<curLen-streamOff<<" repeated bytes."<<endl;
-	}
+	ctsOStream.seekp( streamOff, ios_base::beg );
 	
 	if( ctsOStream.fail() )
 	    throw util::checkpoint_error ("Continuous: resume error (bad pos/file)");

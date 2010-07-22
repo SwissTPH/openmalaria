@@ -85,10 +85,10 @@ int Simulation::start(){
 	Continuous::init( false );
 	_population->createInitialHumans();
     }
-    // Set to either a checkpointing timestep or <0. We only need to set once,
-    // since we exit after a checkpoint triggered this way.
+    // Set to either a checkpointing timestep or min int value. We only need to
+    // set once, since we exit after a checkpoint triggered this way.
     int testCheckpointStep = util::CommandLine::getNextCheckpointTime( Global::simulationTime );
-    
+    int testCheckpointDieStep = testCheckpointStep;	// kill program at same time
     
     // phase loop
     while (true) {
@@ -98,9 +98,9 @@ int Simulation::start(){
 	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
 		writeCheckpoint();
 		util::BoincWrapper::checkpointCompleted();
-		if (Global::simulationTime == testCheckpointStep)	// caused by a test checkpoint
-		    throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    }
+	    if (Global::simulationTime == testCheckpointDieStep)
+		throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    
 	    // Reporting (happens before timestep updates)
 	    Continuous::update();
@@ -149,8 +149,14 @@ int Simulation::start(){
 	    // First of middle of next phase, or current value (from command line) triggers a checkpoint.
 	    int phase_mid = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
 	    // don't checkpoint 0-length phases or do mid-phase checkpointing when timed checkpoints were specified:
-	    if( testCheckpointStep == -1 && phase_mid > Global::simulationTime )
+	    if( testCheckpointStep == numeric_limits< int >::min()
+		&& phase_mid > Global::simulationTime
+	    ){
 		testCheckpointStep = phase_mid;
+		// Test checkpoint: die a bit later than checkpoint for better
+		// resume testing (specifically, ctsout.txt).
+		testCheckpointDieStep = testCheckpointStep + 2;
+	    }
 	}
     }
     
