@@ -245,16 +245,16 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
   //END P_A, P_Ai, P_df, P_dif
   
-  double initOvFromSv = initNv0FromSv;	// temporarily use of initNv0FromSv
-  
 
+  double initOvFromSv = initNv0FromSv;	// temporarily use of initNv0FromSv
+  initNv0FromSv = initNvFromSv * (1.0 - intP_A - intP_df);
+  
   // same as multiplying resultant eir since calcFourierEIR takes exp(...)
   FSCoeffic[0] += log (populationSize / sumPFindBite);
   calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
   
   // Crude estimate of mosqEmergeRate; in practice, varies on other values
   mosqEmergeRate = forcedS_v;
-  initNv0FromSv = initNvFromSv * (1.0 - intP_A - intP_df);
   vectors::scale (mosqEmergeRate, initNv0FromSv);
   
   // Initialize per-day variables; S_v, N_v and O_v are only estimated

@@ -142,20 +142,22 @@ void Population::preMainSimInit ()
 
 void Population::createInitialHumans ()
 {
+    /* We create a whole population here, regardless of whether humans can
+    survive until start of vector init (vector model needs a whole population
+    structure in any case). However, we don't update humans known not to survive
+    until vector init, which saves computation and memory (no infections). */
+    
     int cumulativePop = 0;
     for (int iage = AgeStructure::getMaxTimestepsPerLife() - 1; iage >= 0; iage--) {
 	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
-	    // Optimisation: don't create humans who would die before end of
-	    // one-life-span init phase. Transmission models require all humans
-	    // during last year of init; humans bound-to-die before that are unneeded:
-	    if( -iage >= -((int)Global::intervalsPerYear) )
-		newHuman (-iage);
+	    newHuman (-iage);
 	    ++cumulativePop;
 	}
     }
     
-    // Vector setup dependant on human population
+    // Vector setup dependant on human population structure (we *want* to
+    // include all humans, whether they'll survive to vector init phase or not).
     // This also updates humans' ageGroupData, which _must_ happen here.
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
     _transmissionModel->setupNv0 (population, populationSize);
@@ -173,10 +175,16 @@ void Population::newHuman (int dob)
 void Population::update1()
 {
     // This also updates humans' ageGroupData, which _must_ happen at beginning of timestep.
+    // Should probably be whole pop, not just those surviving to vector init.
     _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
-
+    
+    // This should only use humans being updated: otherwise too small a proportion
+    // will be infected. However, we don't have another number to use instead.
+    // TODO: add some value to be used until old-enough humans are updated?
     Host::NeonatalMortality::update (population);
+    
     // This should be called before humans contract new infections in the simulation step.
+    // This needs the whole population (it is an approximation before all humans are updated).
     _transmissionModel->vectorUpdate (population, Global::simulationTime);
 
     //NOTE: other parts of code are not set up to handle changing population size. Also
@@ -192,7 +200,12 @@ void Population::update1()
     --last;
     for (HumanIter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old:
-        if (iter->update (Global::simulationTime, _transmissionModel)) {
+        if (iter->update (Global::simulationTime, _transmissionModel,
+		/* Only include humans who can survive until vector init.
+		Note: we could exclude more humans due to age distribution,
+		but how many extra to leave due to deaths isn't obvious. */
+		(int)Global::intervalsPerYear + iter->getDateOfBirth() > 0
+	    )) {
             iter->destroy();
             iter = population.erase (iter);
             continue;
@@ -214,18 +227,14 @@ void Population::update1()
     } // end of per-human updates
 
     // increase population size to targetPop
-    if( Global::simulationTime < Global::maxAgeIntervals - (int)Global::intervalsPerYear ){
-	// Calculate number of people who, due to age structure, could still be alive at
-	// timestep Global::maxAgeIntervals - Global::intervalsPerYear.
-	// WARNING: This assumes no-one dies, so it may not be so accurate!
-	targetPop = AgeStructure::targetCumPop(Global::maxAgeIntervals - Global::intervalsPerYear - Global::simulationTime, targetPop);
-    }
     while (cumPop < targetPop) {
         newHuman (Global::simulationTime);
         //++nCounter;
         ++cumPop;
     }
-
+    
+    // Doesn't matter whether non-updated humans are included (value isn't used
+    // before all humans are updated).
     _transmissionModel->updateKappa (population, Global::simulationTime);
 
 #ifdef OMP_CSV_REPORTING

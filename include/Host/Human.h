@@ -90,9 +90,14 @@ public:
       ageGroupData.update( getAgeInYears() );
   }
       
-  /** If the individual is too old, returns true. Otherwise, updates the
-   * individual for the time-step. */
-  bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel);
+  /** Main human update.
+   *
+   * @param simulationTime Time-step
+   * @param transmissionModel Pointer to transmission data.
+   * @param doUpdate If false, returns immediately after is-dead check.
+   * @returns True if the individual is dead (too old or otherwise killed).
+   */
+  bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel, bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions

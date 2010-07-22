@@ -154,19 +154,21 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel) {
+bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
     int ageTimeSteps = simulationTime-_dateOfBirth;
     if (clinicalModel->isDead(ageTimeSteps))
 	return true;
     
-    double ageYears = ageTimeSteps * Global::yearsPerInterval;
-    monitoringAgeGroup.update( ageYears );
-    
-    updateInterventionStatus();
-    updateInfection(transmissionModel, ageYears);
-    clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, monitoringAgeGroup, ageTimeSteps);
-    clinicalModel->updateInfantDeaths (ageTimeSteps);
-    _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
+    if (doUpdate){
+	double ageYears = ageTimeSteps * Global::yearsPerInterval;
+	monitoringAgeGroup.update( ageYears );
+	
+	updateInterventionStatus();
+	updateInfection(transmissionModel, ageYears);
+	clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, monitoringAgeGroup, ageTimeSteps);
+	clinicalModel->updateInfantDeaths (ageTimeSteps);
+	_probTransmissionToMosquito = calcProbTransmissionToMosquito ();
+    }
     return false;
 }
 

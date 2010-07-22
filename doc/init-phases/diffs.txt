@@ -45,15 +45,8 @@ hence the VecTest scenario was affected by further changes (full diff is 1166:11
 
 
 dhardy@SwissTPH-dhardy ~/c/o/build> ../test/compareOutputsFloat.py woOpt/original6.txt wOpt/original6.txt 
-compareOutputsFloat.py woOpt/original6.txt wOpt/original6.txt 6
+compareOutputsFloat.py woOpt/original6.txt wOpt/original6.txt 0
 Files aren't binary-equal
-survey 73, group 3, measure 4: 665.223 -> 660.682
-survey 35, group 30, measure 10: 0.000937064 -> 0.00064954
-survey 11, group 26, measure 6: 83.0 -> 126.0
-survey 6, group 23, measure 10: 192454.0 -> 205972.0
-survey 2, group 4, measure 6: 187.0 -> 179.0
-survey 10, group 16, measure 2: 907.0 -> 910.0
-[won't print any more line-by-line diffs]
 for measure 0:  sum(1st file):1620000.0 sum(2nd file):1620000.0 diff/sum: 0.0   (abs diff)/sum: 0.0222320987654
 for measure 1:  sum(1st file):115809.0  sum(2nd file):117422.0  diff/sum: 0.0139281057603       (abs diff)/sum: 0.105009109827
 for measure 2:  sum(1st file):1180341.15973     sum(2nd file):1180299.6833      diff/sum: -3.51393575138e-05    (abs diff)/sum: 0.0293025838376
@@ -81,15 +74,8 @@ for measure 24: sum(1st file):1.0       sum(2nd file):2.0       diff/sum: 1.0   
 for measure 26: sum(1st file):0.395714  sum(2nd file):0.4114516 diff/sum: 0.0397701370181       (abs diff)/sum: 0.0397701370181
 8703 significant differences (total relative diff: 1244.03325326)!
 dhardy@SwissTPH-dhardy ~/c/o/build> ../test/compareOutputsFloat.py woOpt/originalEmpirical.txt  wOpt/originalEmpirical.txt 
-compareOutputsFloat.py woOpt/originalEmpirical.txt wOpt/originalEmpirical.txt 6
+compareOutputsFloat.py woOpt/originalEmpirical.txt wOpt/originalEmpirical.txt 0
 Files aren't binary-equal
-survey 1, group 8, measure 41: 0.0 -> 2.0
-survey 1, group 8, measure 42: 0.0 -> 2.0
-survey 1, group 14, measure 23: 3.0 -> 4.0
-survey 1, group 0, measure 39: 21854.0 -> 22487.0
-survey 1, group 16, measure 2: 1033.0 -> 1037.0
-survey 1, group 7, measure 41: 1.0 -> 5.0
-[won't print any more line-by-line diffs]
 for measure 0:  sum(1st file):10000.0   sum(2nd file):10000.0   diff/sum: 0.0   (abs diff)/sum: 0.026
 for measure 2:  sum(1st file):9917.677  sum(2nd file):9918.07   diff/sum: 3.96262148888e-05     (abs diff)/sum: 0.0261763919111
 for measure 3:  sum(1st file):213.0     sum(2nd file):228.0     diff/sum: 0.0704225352113       (abs diff)/sum: 0.408450704225
@@ -107,15 +93,8 @@ for measure 19: sum(1st file):2672.0    sum(2nd file):2690.0    diff/sum: 0.0067
 for measure 23: sum(1st file):2747.0    sum(2nd file):2908.0    diff/sum: 0.0586093920641       (abs diff)/sum: 0.0870040043684
 225 significant differences (total relative diff: 70.7859287618)!
 dhardy@SwissTPH-dhardy ~/c/o/build> ../test/compareOutputsFloat.py woOpt/originalVecTest.txt wOpt/originalVecTest.txt 
-compareOutputsFloat.py woOpt/originalVecTest.txt wOpt/originalVecTest.txt 6
+compareOutputsFloat.py woOpt/originalVecTest.txt wOpt/originalVecTest.txt 0
 Files aren't binary-equal
-survey 1, group 19, measure 11: 0.0 -> 1.0
-survey 1, group 0, measure 36: 1.4791 -> 1.48035
-survey 2, group 9, measure 5: 1980.26 -> 2054.58
-survey 3, group 0, measure 36: 2.43362 -> 2.43728
-survey 2, group 0, measure 36: 2.43471 -> 2.43472
-survey 1, group 10, measure 4: 3733.18 -> 3693.1
-[won't print any more line-by-line diffs]
 for measure 0:  sum(1st file):60000.0   sum(2nd file):60000.0   diff/sum: 0.0   (abs diff)/sum: 0.0200666666667
 for measure 33: sum(1st file):141175.9  sum(2nd file):141496.1  diff/sum: 0.00226809250021      (abs diff)/sum: 0.00226809250021
 for measure 2:  sum(1st file):59708.383 sum(2nd file):59712.088 diff/sum: 6.20515883004e-05     (abs diff)/sum: 0.0202666181732
@@ -141,3 +120,76 @@ survey 2, group 19, measure 12: 1.0 -> 0.0
 survey 3, group 2, measure 12: 1.0 -> 0.0
 survey 2, group 15, measure 12: 0.0 -> 1.0
 for measure 12: sum(1st file):13.0      sum(2nd file):12.0      diff/sum: -0.0769230769231      (abs diff)/sum: 0.692307692308
+
+
+Comparison woOpt -> w2ndOpt
+2nd opt still creates all humans, since in theory the vector model needs full pop. data for init
+(previous optimisation should therefore be broken with vector model).
+
+
+dhardy@SwissTPH-dhardy ~/c/o/d/init-phases> ../../test/compareOutput.py woOpt/original6.txt w2ndOpt/output6.txt 0
+  compareOutput.py woOpt/original6.txt w2ndOpt/output6.txt 0
+output.txt files aren't binary-equal
+for measure 0:  sum(1st file):1620000.0 sum(2nd file):1620000.0 diff/sum: 0.0   (abs diff)/sum: 0.00303703703704
+for measure 1:  sum(1st file):115809.0  sum(2nd file):116625.0  diff/sum: 0.0070460845012       (abs diff)/sum: 0.0440552979475
+for measure 2:  sum(1st file):1180341.15973     sum(2nd file):1180321.18341     diff/sum: -1.69241916503e-05    (abs diff)/sum: 0.00292268920012
+for measure 3:  sum(1st file):22386.0   sum(2nd file):22447.0   diff/sum: 0.00272491735906      (abs diff)/sum: 0.0380148306978
+for measure 4:  sum(1st file):1539437.38614     sum(2nd file):1539311.61507     diff/sum: -8.16993737708e-05    (abs diff)/sum: 0.00653206315277
+for measure 5:  sum(1st file):115448.065        sum(2nd file):115955.86 diff/sum: 0.0043984712953       (abs diff)/sum: 0.0440664449421
+for measure 6:  sum(1st file):259900.0  sum(2nd file):259589.0  diff/sum: -0.00119661408234     (abs diff)/sum: 0.0401885340516
+for measure 7:  sum(1st file):0.1213051 sum(2nd file):0.1221491 diff/sum: 0.00695766295069      (abs diff)/sum: 0.00695766295069
+for measure 8:  sum(1st file):50975.0   sum(2nd file):50970.0   diff/sum: -9.80872976949e-05    (abs diff)/sum: 0.0526336439431
+for measure 10: sum(1st file):109545857.404     sum(2nd file):109583268.035     diff/sum: 0.000341506575198     (abs diff)/sum: 0.0163325125835
+for measure 11: sum(1st file):1251.0    sum(2nd file):1323.0    diff/sum: 0.0575539568345       (abs diff)/sum: 0.201438848921
+for measure 12: sum(1st file):24.0      sum(2nd file):18.0      diff/sum: -0.25 (abs diff)/sum: 0.833333333333
+for measure 13: sum(1st file):89.0      sum(2nd file):99.0      diff/sum: 0.112359550562        (abs diff)/sum: 0.539325842697
+for measure 14: sum(1st file):12402.0   sum(2nd file):12350.0   diff/sum: -0.0041928721174      (abs diff)/sum: 0.0759554910498
+for measure 15: sum(1st file):184.0     sum(2nd file):189.0     diff/sum: 0.0271739130435       (abs diff)/sum: 0.494565217391
+for measure 16: sum(1st file):3.0       sum(2nd file):1.0       diff/sum: -0.666666666667       (abs diff)/sum: 0.666666666667
+for measure 17: sum(1st file):5.0       sum(2nd file):11.0      diff/sum: 1.2   (abs diff)/sum: 2.8
+for measure 18: sum(1st file):20.0      sum(2nd file):19.0      diff/sum: -0.05 (abs diff)/sum: 0.95
+for measure 19: sum(1st file):22.0      sum(2nd file):15.0      diff/sum: -0.318181818182       (abs diff)/sum: 0.954545454545
+for measure 20: sum(1st file):92904.0   sum(2nd file):92916.0   diff/sum: 0.000129165590287     (abs diff)/sum: 0.0022819254284
+for measure 21: sum(1st file):51.1346   sum(2nd file):51.1952   diff/sum: 0.00118510753971      (abs diff)/sum: 0.00118510753971
+for measure 22: sum(1st file):19971.0   sum(2nd file):19971.0   diff/sum: 0.0   (abs diff)/sum: 0.0047068248961
+for measure 23: sum(1st file):78.0      sum(2nd file):84.0      diff/sum: 0.0769230769231       (abs diff)/sum: 0.74358974359
+for measure 24: sum(1st file):1.0       sum(2nd file):0.0       diff/sum: -1.0  (abs diff)/sum: 1.0
+for measure 26: sum(1st file):0.395714  sum(2nd file):0.3963828 diff/sum: 0.00169010952354      (abs diff)/sum: 0.00222787164467
+8598 significant differences (total relative diff: 910.5429512)!
+dhardy@SwissTPH-dhardy ~/c/o/d/init-phases> ../../test/compareOutput.py woOpt/originalEmpirical.txt w2ndOpt/outputEmpirical.txt 0
+  compareOutput.py woOpt/originalEmpirical.txt w2ndOpt/outputEmpirical.txt 0
+output.txt files aren't binary-equal
+for measure 0:  sum(1st file):10000.0   sum(2nd file):10000.0   diff/sum: 0.0   (abs diff)/sum: 0.0164
+for measure 2:  sum(1st file):9917.677  sum(2nd file):9918.992  diff/sum: 0.000132591533279     (abs diff)/sum: 0.0164035388529
+for measure 3:  sum(1st file):213.0     sum(2nd file):228.0     diff/sum: 0.0704225352113       (abs diff)/sum: 0.31455399061
+for measure 4:  sum(1st file):16112.489 sum(2nd file):16001.64  diff/sum: -0.00687969437869     (abs diff)/sum: 0.0526608272626
+for measure 5:  sum(1st file):946.528481        sum(2nd file):991.65843 diff/sum: 0.047679441143        (abs diff)/sum: 0.307074340429
+for measure 39: sum(1st file):21854.0   sum(2nd file):21220.0   diff/sum: -0.029010707422       (abs diff)/sum: 0.029010707422
+for measure 40: sum(1st file):27702344.0        sum(2nd file):27464964.0        diff/sum: -0.00856894997766     (abs diff)/sum: 0.00856894997766
+for measure 41: sum(1st file):269.0     sum(2nd file):258.0     diff/sum: -0.0408921933086      (abs diff)/sum: 0.0780669144981
+for measure 42: sum(1st file):269.0     sum(2nd file):258.0     diff/sum: -0.0408921933086      (abs diff)/sum: 0.0780669144981
+for measure 14: sum(1st file):46487.0   sum(2nd file):45751.0   diff/sum: -0.0158323832469      (abs diff)/sum: 0.0297717641491
+for measure 15: sum(1st file):5419.0    sum(2nd file):5238.0    diff/sum: -0.0334009964938      (abs diff)/sum: 0.0492710832257
+for measure 17: sum(1st file):2672.0    sum(2nd file):2564.0    diff/sum: -0.0404191616766      (abs diff)/sum: 0.062125748503
+for measure 18: sum(1st file):154.0     sum(2nd file):138.0     diff/sum: -0.103896103896       (abs diff)/sum: 0.272727272727
+for measure 19: sum(1st file):2672.0    sum(2nd file):2564.0    diff/sum: -0.0404191616766      (abs diff)/sum: 0.062125748503
+for measure 23: sum(1st file):2747.0    sum(2nd file):2674.0    diff/sum: -0.0265744448489      (abs diff)/sum: 0.049144521296
+239 significant differences (total relative diff: 83.2052365689)!
+dhardy@SwissTPH-dhardy ~/c/o/d/init-phases> ../../test/compareOutput.py woOpt/originalVecTest.txt w2ndOpt/outputVecTest.txt 0
+  compareOutput.py woOpt/originalVecTest.txt w2ndOpt/outputVecTest.txt 0
+output.txt files aren't binary-equal
+for measure 0:  sum(1st file):60000.0   sum(2nd file):60000.0   diff/sum: 0.0   (abs diff)/sum: 0.00166666666667
+for measure 33: sum(1st file):141175.9  sum(2nd file):143176.8  diff/sum: 0.0141730989496       (abs diff)/sum: 0.0141730989496
+for measure 2:  sum(1st file):59708.383 sum(2nd file):59710.944 diff/sum: 4.28917996322e-05     (abs diff)/sum: 0.00176285129008
+for measure 3:  sum(1st file):54629.0   sum(2nd file):54693.0   diff/sum: 0.00117153892621      (abs diff)/sum: 0.011459115122
+for measure 4:  sum(1st file):451477.24 sum(2nd file):451877.9  diff/sum: 0.000887442299417     (abs diff)/sum: 0.00309743188826
+for measure 5:  sum(1st file):230506.46 sum(2nd file):231484.03 diff/sum: 0.00424096574126      (abs diff)/sum: 0.0247109343487
+for measure 32: sum(1st file):1058953.0 sum(2nd file):1074193.0 diff/sum: 0.0143915735637       (abs diff)/sum: 0.0143915735637
+for measure 11: sum(1st file):2081.0    sum(2nd file):2164.0    diff/sum: 0.0398846708313       (abs diff)/sum: 0.132148005766
+for measure 12: sum(1st file):13.0      sum(2nd file):11.0      diff/sum: -0.153846153846       (abs diff)/sum: 0.615384615385
+for measure 13: sum(1st file):251.0     sum(2nd file):228.0     diff/sum: -0.0916334661355      (abs diff)/sum: 0.163346613546
+for measure 34: sum(1st file):75239.4   sum(2nd file):76268.4   diff/sum: 0.0136763451064       (abs diff)/sum: 0.0136763451064
+for measure 36: sum(1st file):6.34743   sum(2nd file):6.42656   diff/sum: 0.0124664628046       (abs diff)/sum: 0.0124664628046
+for measure 30: sum(1st file):17800859.455      sum(2nd file):18021086.246      diff/sum: 0.0123716942745       (abs diff)/sum: 0.0123718516826
+for measure 31: sum(1st file):106512.0  sum(2nd file):108067.8  diff/sum: 0.0146068048671       (abs diff)/sum: 0.0146068048671
+439 significant differences (total relative diff: 29.3449903941)!
