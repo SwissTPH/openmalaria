@@ -67,6 +67,7 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 	|| extraDaysAtRisk>0	// at risk longer than case duration
     )
 	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
+    
     pImmediateUC = coData.getPImmediateUC();
     double alpha = exp( -InputData.getParameter( Params::CFR_NEG_LOG_ALPHA ) );
     if( !(0.0<=alpha && alpha<=1.0)
@@ -251,15 +252,17 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
 	    // for parasite density Y(t). v_neg below is -v.
-	    double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
-	    double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
-	    // community fatality rate when not in hospital
-	    if( !(pgState & Pathogenesis::EVENT_IN_HOSPITAL) )
-		pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
-	    if (random::uniform_01() < pDeath) {
-		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
-		// Human is killed at end of time at risk
-		timeOfRecovery += extraDaysAtRisk;	// may be re-set later (see ATORWD)
+	    if( withinHostModel.getTotalDensity() > 0.0 ){	// avoid division by zero
+		double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
+		double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
+		// community fatality rate when not in hospital
+		if( !(pgState & Pathogenesis::EVENT_IN_HOSPITAL) )
+		    pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
+		if (random::uniform_01() < pDeath) {
+		    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		    // Human is killed at end of time at risk
+		    timeOfRecovery += extraDaysAtRisk;	// may be re-set later (see ATORWD)
+		}
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
@@ -270,6 +273,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
     if( caseStartTime == Global::simulationTime ){
 	// Patients in hospital are removed from the transmission cycle.
 	// This should have an effect from the start of the next timestep.
+	// NOTE: This is not very accurate, but considered of little importance.
 	if (pgState & Pathogenesis::EVENT_IN_HOSPITAL)
 	    hostTransmission.removeFromTransmission( true );
 	

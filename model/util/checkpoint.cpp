@@ -23,6 +23,7 @@
 
 #include <limits>
 #include <sstream>
+#include <assert.h>
 using namespace std;
 
 namespace OM { namespace util { namespace checkpoint {
@@ -255,12 +256,12 @@ namespace OM { namespace util { namespace checkpoint {
 	x.clear ();
 	multimap<double,double>::iterator pos = x.begin ();
 	for (size_t i = 0; i < l; ++i) {
-	    double s;
-	    double t;
+	    double s, t;
 	    s & stream;
 	    t & stream;
 	    pos = x.insert (pos, make_pair (s,t));
 	}
+	assert( x.size() == l );
     }
     
 } } }

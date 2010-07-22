@@ -32,6 +32,7 @@
 
 #include <cassert>
 #include <list>
+#include <limits>
 #include <boost/unordered_map.hpp>
 
 class ESCaseManagementSuite;
@@ -53,6 +54,12 @@ struct CMAuxOutput {
 
 /// Data used for a withinHostModel->medicate() call
 struct MedicateData {
+    MedicateData () :
+	qty(numeric_limits< double >::signaling_NaN()),
+	cost_qty(numeric_limits< double >::signaling_NaN()),
+	time(numeric_limits< double >::signaling_NaN())
+    {}
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -101,7 +108,9 @@ class ESTreatment {
 	/** Construct from a base schedule and modifiers.
 	 * 
 	 * Also neede the decision value map. */
-	ESTreatment (const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt, list<string>& required);
+	ESTreatment (const ESDecisionValueMap& dvMap,
+		     const scnXml::HSESTreatment& elt,
+		     list<string>& required);
 	~ESTreatment();
 	
 	/** Given an input ESDecisionValue, find a variant of the base treatment
@@ -173,7 +182,9 @@ class ESDecisionMap {
 	Treatments treatments;
 	// Used to mask ESDecisionValues before lookup in treatments:
 	ESDecisionValue treatmentsMask;
-	ESDecisionValue hospitalisation_mask, hospitalisation_immediate, hospitalisation_delayed;
+	ESDecisionValue hospitalisation_mask,
+				    hospitalisation_immediate,
+				    hospitalisation_delayed;
 	ESDecisionValue test_mask, test_RDT;
 	
 	friend class ::ESCaseManagementSuite;	// unittests
@@ -200,7 +211,11 @@ class ESCaseManagement : public CaseManagementCommon {
          * applies them to the passed medicateQueue.
          * 
          * Returns: some extra info (see CMAuxOutput definition). */
-	static CMAuxOutput execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, Monitoring::AgeGroup ageGroup);
+	static CMAuxOutput execute (list<MedicateData>& medicateQueue,
+				    Pathogenesis::State pgState,
+				    WithinHost::WithinHostModel& withinHostModel,
+				    double ageYears,
+				    Monitoring::AgeGroup ageGroup);
 	
     private:
 	
