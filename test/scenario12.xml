@@ -702,14 +702,14 @@
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>
       <pSeekOfficialCareSevere value="0"/>
-      <pSequelaeInpatient>
-        <item maxAgeYrs="5" value="0.0132"/>
-        <item maxAgeYrs="99" value="0.005"/>
-      </pSequelaeInpatient>
     </ImmediateOutcomes>
     <CFR>
-      <group cfr="0" lowerbound="0"/>
+      <group lowerbound="0" value="0"/>
     </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
   </healthSystem>
   <entoData mode="4" name="Matsari Preintervention">
     <!--day1 in Garki is 26-10-70-->

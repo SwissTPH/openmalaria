@@ -106,20 +106,6 @@ private:
   //BEGIN Static parameters, set by setHealthSystem()
   // These parameters are reset via a setHealthSystem call on checkpoint
   // load rather than checkpointed.
-  
-  /// Age bounds of probSequelae* parameters
-  //@{
-  static const size_t NUM_SEQUELAE_AGE_GROUPS = 2;
-  static const int SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS];
-  //@}
-  
-  /** pSequelaeTreated is the probability that the patient has sequelae
-   * conditional on hospital treatment for severe disease. */
-  static double probSequelaeTreated[NUM_SEQUELAE_AGE_GROUPS];
-  /** pSequelaeUntreated is the probability that the patient has sequelae
-   * conditional if they don't receive hospital treatment for severe disease.
-   */
-  static double probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
   static double probGetsTreatment[Regimen::NUM];
   static double probParasitesCleared[Regimen::NUM];

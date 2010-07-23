@@ -31,6 +31,7 @@ namespace OM { namespace Clinical {
     int CaseManagementCommon::healthSystemSource;
     map<double,double> CaseManagementCommon::caseFatalityRates;
     double CaseManagementCommon::_oddsRatioThreshold;
+    map<double,double> CaseManagementCommon::pSeqInpatData;
     
     // -----  functions  -----
     
@@ -44,7 +45,7 @@ namespace OM { namespace Clinical {
 	healthSystemSource = source;
 	const scnXml::HealthSystem& healthSystem = getHealthSystem ();
 	
-	readCaseFatalityRatio (healthSystem);
+	readCommon (healthSystem);
 	
 	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
 	    ESCaseManagement::setHealthSystem(healthSystem);
@@ -64,15 +65,16 @@ namespace OM { namespace Clinical {
 	assert(false);	// unreachable
     }
     
-    void CaseManagementCommon::readCaseFatalityRatio (const scnXml::HealthSystem& healthSystem)
+    void CaseManagementCommon::readCommon (const scnXml::HealthSystem& healthSystem)
     {
+	// -----  case fatality rates  -----
 	caseFatalityRates.clear();	// Necessary when re-read from an intervention
 	
-	const scnXml::CFRAgeGroups::GroupSequence& xmlGroupSeq = healthSystem.getCFR().getGroup();
+	const scnXml::AgeGroupValues::GroupSequence& cfrGroups = healthSystem.getCFR().getGroup();
 	
-	BOOST_FOREACH( const scnXml::Group& xmlGroup, xmlGroupSeq ){
-	    double lbound = xmlGroup.getLowerbound();
-	    if( !caseFatalityRates.insert( make_pair( lbound, xmlGroup.getCfr() ) ).second )
+	BOOST_FOREACH( const scnXml::Group& group, cfrGroups ){
+	    double lbound = group.getLowerbound();
+	    if( !caseFatalityRates.insert( make_pair( lbound, group.getValue() ) ).second )
 		throw util::xml_scenario_error( (boost::format("CFR: lower bound %1% listed twice") %lbound).str() );
 	}
 	// CFR is constant for everyone above the highest non-inf upperbound
@@ -82,6 +84,17 @@ namespace OM { namespace Clinical {
 	// first lower-bound must be 0
 	if( caseFatalityRates.begin()->first != 0.0 )
 	    throw util::xml_scenario_error( "CFR: first lower-bound must be 0" );
+	
+	
+	// -----  sequelae  -----
+	pSeqInpatData.clear();
+	const scnXml::AgeGroupValues::GroupSequence& pSeqGroups =
+	    healthSystem.getPSequelaeInpatient().getGroup();
+	BOOST_FOREACH( const scnXml::Group& group, pSeqGroups ){
+	    double lbound = group.getLowerbound();
+	    if( !pSeqInpatData.insert( make_pair( lbound, group.getValue() ) ).second )
+		throw util::xml_scenario_error( (boost::format("pSequelaeInpatient: lower bound %1% listed twice") %lbound).str() );
+	}
     }
     
     double CaseManagementCommon::caseFatality (double ageYears)
@@ -101,6 +114,11 @@ namespace OM { namespace Clinical {
     {
 	double x = caseFatalityRatio * _oddsRatioThreshold;
 	return x / (1 - caseFatalityRatio + x);
+    }
+    
+    double CaseManagementCommon::pSequelaeInpatient(double ageYears){
+	map<double,double>::const_iterator it = pSeqInpatData.lower_bound( ageYears );
+	return it->second;
     }
 
     void CaseManagementCommon::staticCheckpoint (ostream& stream) {

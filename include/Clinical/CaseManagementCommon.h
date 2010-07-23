@@ -79,14 +79,21 @@ namespace OM { namespace Clinical {
 	 * @param ageYears Age of person in years */
 	static double caseFatality(double ageYears);
 	
+	/** Get the probability of in-hospital sequale for a severe bout
+	 * (step-wise constant; I don't think anything else makes sense sicne
+	 * data is currently from two age-groups).
+	 * 
+	 * Currently we use the same values for outpatients. */
+	static double pSequelaeInpatient(double ageYears);
+	
     private:
 	/** Gets the primary description of the health system when
 	 * source == -1, or the replacement description given by
 	 * timed intervention at timestep source. */
 	static const scnXml::HealthSystem& getHealthSystem ();
 	
-	/// Reads in the Case Fatality percentages from the XML.
-	static void readCaseFatalityRatio(const scnXml::HealthSystem& healthSystem);
+	/// Reads the CFR and sequelae data from healthSystem.
+	static void readCommon(const scnXml::HealthSystem& healthSystem);
 	
 	/** Describes which health-system descriptor should be used, in order
 	 * to load the correct one from a checkpoint (see getHealthSystem). */
@@ -100,6 +107,8 @@ namespace OM { namespace Clinical {
 	
 	//log odds ratio of case-fatality in community compared to hospital
 	static double _oddsRatioThreshold;
+	
+	static map<double,double> pSeqInpatData;
       };
 } }
 #endif

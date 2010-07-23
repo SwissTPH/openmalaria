@@ -44,7 +44,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 19;
+    static final int CURRENT_VERSION = 20;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -135,6 +135,7 @@ public class SchemaTranslator {
                     + " file; not validating.");
             return;
         }
+	//System.out.println("Validating against " + schemaDirectory + schemaFileName);
         SchemaFactory factory = SchemaFactory
                 .newInstance("http://www.w3.org/2001/XMLSchema");
         // NOTE: this may throw a java.lang.NullPointerException when run within
@@ -959,20 +960,24 @@ public class SchemaTranslator {
     // IPTI_SP_MODEL option added
     // imr_summary changed name to allCauseIMR
     // minInfectedThreshold attribute was added to anopheles sections
+    // pSequelaeInpatient data moved from ImmediateOutcomes to parent HealthSystem element, and changed form.
     public boolean translate19To20() throws Exception {
         Element monitoring = (Element) scenarioElement.getElementsByTagName(
                 "monitoring").item(0);
-	if (monitoring.getElementsByTagName("continuous").getLength() > 0 ){
-	    //We don't update automatically because (a) very few scenarios should
-	    //require this and (b) people may have thought it was originally timesteps anyway.
-	    System.err.println("Warning: monitoring->continuous->period changed unit from timesteps to days. Please update accordingly.");
+	Element ctsMon = (Element)monitoring.getElementsByTagName("continuous").item(0);
+	if ( ctsMon != null ){
+	    // Guess the common update. If not, complain.
+	    if( ctsMon.getAttribute("period").equals("5") )
+		ctsMon.setAttribute("period", "1");
+	    else
+		System.err.println("Warning: monitoring->continuous->period changed unit from timesteps to days. Please update accordingly.");
 	}
 	
 	Element SurveyOptions = (Element) monitoring.getElementsByTagName("SurveyOptions").item(0);
 	NodeList options = SurveyOptions.getElementsByTagName("option");
 	for (int i = 0; i < options.getLength(); ++i){
 	    Element option = (Element) options.item(i);
-	    if (option.getAttribute("name") == "imr_summary"){
+	    if (option.getAttribute("name").equals( "imr_summary" )){
 		option.setAttribute("name", "allCauseIMR");
 	    }
 	}
@@ -984,12 +989,14 @@ public class SchemaTranslator {
             NodeList species = vect.getElementsByTagName("anopheles");
             for (int i = 0; i < species.getLength(); ++i) {
                 Element anoph = (Element) species.item(i);
-                anoph.setAttribute("minInfectedThreshold", "0.01");
+		Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
+                mosq.setAttribute("minInfectedThreshold", "0.01");
             }
             System.err
                     .println("New attribute minInfectedThreshold created with default 0.01 mosquito - please correct (for each anopheles section)!");
         }
 	
+	// IPTI_SP_MODEL option (try to work out whether it should be used)
         Element interventions = (Element) scenarioElement.getElementsByTagName(
                 "interventions").item(0);
 	if (interventions != null){
@@ -1014,15 +1021,11 @@ public class SchemaTranslator {
 		Element modelElement = (Element)scenarioElement.getElementsByTagName("model").item(0);
 		Element modelOptions = (Element)modelElement.getElementsByTagName("ModelOptions").item(0);
 		Element iptiOption = scenarioDocument.createElement("option");
-		Attr name = scenarioDocument.createAttribute("name");
-		name.setNodeValue("IPTI_SP_MODEL");
-		Attr value = scenarioDocument.createAttribute("value");
-		iptiOption.setAttributeNode(name);
-		iptiOption.setAttributeNode(value);
+		iptiOption.setAttribute("name", "IPTI_SP_MODEL");
 	
 		if (nIPTI>0){
 		    // Definitely need IPTI model
-		    value.setNodeValue("true");
+		    iptiOption.setAttribute("value","true");
 		    modelOptions.appendChild(iptiOption);
 		} else {
 		    // Don't need IPTI model; either it was added on purpose
@@ -1030,19 +1033,95 @@ public class SchemaTranslator {
 		    // or it was a mistake. Require user to decide which.
 		    System.err.println("Warning: iptiDescription without IPT interventions");
 		    if (iptiSpOption == IptiSpBehaviour.assumeIntended){
-			value.setNodeValue("true");
+			iptiOption.setAttribute("value","true");
 			modelOptions.appendChild(iptiOption);
 		    } else if (iptiSpOption == IptiSpBehaviour.assumeUnintented){
-			value.setNodeValue("false");	// make it clear IPTI code is disabled
+			iptiOption.setAttribute("value","false");	// make it clear IPTI code is disabled
 			modelOptions.appendChild(iptiOption);
 		    } else {
 			System.err.println("Error: please specify --iptiSpOptionWithoutInterventions");
 			return false;
 		    }
 		}
+	    } else {
+		// no iptiDescription so no need for IPT model; don't add option
 	    }
 	}
+        
+        Element hs = (Element)scenarioElement.getElementsByTagName("healthSystem").item(0);
+	translateHealthSystem19To20( hs );
+	if (interventions != null){
+	    Element timed = (Element)interventions.getElementsByTagName("timed").item(0);
+	    if (timed != null){
+		NodeList changeHS = timed.getElementsByTagName("changeHS");
+		for (int i = 0; i < changeHS.getLength(); ++i){
+		    if( !translateHealthSystem19To20( (Element)changeHS.item(i) ) )
+			return false;
+		}
+	    }
+	}
+	
         return true;
+    }
+    double[] readV19PSequelaeInpatientValues (Element oldPSeq) {
+	/* The expected upper bounds. At some point previously in the code, age
+	groups as specified in the XML were misleadingly remapped: age groups
+	could be ignored or have different bounds. To avoid letting non-corresponding
+	entries now have a different effect, we check the bounds correspond exactly
+	to what we expected (and which, as far as I am aware, was always the case). */
+	double[] ubound = new double[] { 5, 99 };
+	
+	NodeList items = oldPSeq.getElementsByTagName("item");
+	if (items.getLength() != ubound.length)
+	    return null;
+	
+	double[] values = new double[ubound.length];
+	for( int i=0; i<values.length; ++i ){
+	    if( Double.parseDouble(((Element)items.item(i)).getAttribute("maxAgeYrs")) != ubound[i] )
+		return null;	// require exact match
+	    values[i] = Double.parseDouble(((Element)items.item(i)).getAttribute("value"));
+	}
+	return values;
+    }
+    boolean translateHealthSystem19To20 (Element hs) throws Exception {
+	// pSequelaeInpatient update
+        Element hsio = (Element)hs.getElementsByTagName("ImmediateOutcomes").item(0);
+	double[] pSeqGroupLBound = new double[] { 0.0, 5.0 };
+	double[] pSeqGroupValue;
+        if( hsio != null ){
+	    Element oldPSeq = (Element)hsio.getElementsByTagName("pSequelaeInpatient").item(0);
+	    pSeqGroupValue = readV19PSequelaeInpatientValues( oldPSeq );
+	    if( pSeqGroupValue == null ){
+		System.err.println("Error: expected pSequelaeInpatient to have two age-groups: 0-5 and 5-99");
+		return false;
+	    }
+	    hsio.removeChild( oldPSeq );
+        } else {	// using EventScheduler model which didn't previously have sequelae data
+	    System.err.println("Warning: pSequelaeInpatient element with default data added");
+	    // I guess we can do this, since, as far as I am aware, this same data-set
+	    // has always been used, apart from where zero sequelae is desired.
+	    pSeqGroupValue = new double[] { 0.0132, 0.005 };
+        }
+        if( pSeqGroupLBound.length != pSeqGroupValue.length ) throw new Exception("length mismatch!");
+        Element pSeqGroups = scenarioDocument.createElement("pSequelaeInpatient");
+	for (int i = 0; i < pSeqGroupValue.length; ++i){
+	    Element group = scenarioDocument.createElement("group");
+	    group.setAttribute("value", Double.toString(pSeqGroupValue[i]));
+	    group.setAttribute("lowerbound", Double.toString(pSeqGroupLBound[i]));
+	    pSeqGroups.appendChild( group );
+	}
+	hs.appendChild( pSeqGroups );
+	
+	// CFR element changed
+	Element cfrElt = (Element)hs.getElementsByTagName("CFR").item(0);
+	NodeList cfrList = cfrElt.getElementsByTagName("group");
+	for( int i = 0; i < cfrList.getLength(); ++i ){
+	    Element group = (Element)cfrList.item(i);
+	    String val = group.getAttribute("cfr");
+	    group.removeAttribute("cfr");
+	    group.setAttribute("value",val);
+	}
+	return true;
     }
 
     /**

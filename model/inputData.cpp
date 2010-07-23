@@ -37,7 +37,7 @@ const int SCHEMA_VERSION = 20;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario.xml file references this version and doesn't use
  * members changed in newer versions). */
-const int OLDEST_COMPATIBLE = 13;
+const int OLDEST_COMPATIBLE = 20;
 
 
 // Initialization functions:
@@ -126,12 +126,18 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     scenario = (scnXml::parseScenario (fileStream)).release();
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
-    if (scenario->getSchemaVersion() < OLDEST_COMPATIBLE) {
-        ostringstream msg;
-        msg << "Input scenario.xml uses an outdated schema version; please update with SchemaTranslator. Current version: " << SCHEMA_VERSION;
-        throw util::xml_scenario_error (msg.str());
+    int scenarioVersion = scenario->getSchemaVersion();
+    if (scenarioVersion < SCHEMA_VERSION) {
+	ostringstream msg;
+	if (scenarioVersion < OLDEST_COMPATIBLE) {
+	    msg<<"Error: "<<lXmlFile<<"uses an";
+	} else {
+	    msg<<"Warning: "<<lXmlFile<<"uses a potentially";
+	}
+	msg<<" incompatible old schema version (current = "<<SCHEMA_VERSION<<"). Use SchemaTranslator to update.";
+	throw util::xml_scenario_error (msg.str());
     }
-    if (scenario->getSchemaVersion() > SCHEMA_VERSION)
+    if (scenarioVersion > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
 
     initParameterValues();

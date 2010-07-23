@@ -33,12 +33,9 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-const int OldCaseManagement::SEQUELAE_AGE_BOUND[NUM_SEQUELAE_AGE_GROUPS] = { 5, 99 };
 double OldCaseManagement::probGetsTreatment[3];
 double OldCaseManagement::probParasitesCleared[3];
 double OldCaseManagement::cureRate[3];
-double OldCaseManagement::probSequelaeTreated[NUM_SEQUELAE_AGE_GROUPS];
-double OldCaseManagement::probSequelaeUntreated[NUM_SEQUELAE_AGE_GROUPS];
 
 
 // -----  static init  -----
@@ -52,23 +49,8 @@ void OldCaseManagement::init ()
 void OldCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getImmediateOutcomes().present() )
 	throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
-    const scnXml::HSImmediateOutcomes& immediateOutcomes = healthSystem.getImmediateOutcomes().get();
     
-    setParasiteCaseParameters (immediateOutcomes);
-    
-    const scnXml::ByAgeItems::ItemSequence& pSeqGroups = immediateOutcomes.getPSequelaeInpatient().getItem();
-    /* Note: Previously age groups specified in the XML were remapped; this was misleading
-    (age groups could be ignored or have different bounds). To avoid letting non-corresponding
-    entries now have a different effect, we check the bounds correspond _exactly_ to what we expect
-    (and appears to have always been the case). */
-    if (pSeqGroups.size() != NUM_SEQUELAE_AGE_GROUPS)
-	throw util::xml_scenario_error ("Expected: 2 pSequelaeInpatient age groups with maxAgeYrs 5 and 99");
-    for (size_t agegrp = 0; agegrp < NUM_SEQUELAE_AGE_GROUPS; agegrp++) {
-	if (pSeqGroups[agegrp].getMaxAgeYrs() != SEQUELAE_AGE_BOUND[agegrp])
-	    throw util::xml_scenario_error ("Expected: 2 pSequelaeInpatient age groups with maxAgeYrs 5 and 99");
-	
-	probSequelaeTreated[agegrp] = probSequelaeUntreated[agegrp] = pSeqGroups[agegrp].getValue();
-    }
+    setParasiteCaseParameters (healthSystem.getImmediateOutcomes().get());
 }
 
 
@@ -163,12 +145,6 @@ bool OldCaseManagement::severeMalaria (
     Monitoring::AgeGroup ageGroup,
     int& doomed
 ){
-  BOOST_STATIC_ASSERT (NUM_SEQUELAE_AGE_GROUPS == 2);	// code setting sequelaeIndex assumes this
-  size_t sequelaeIndex = 0;
-  if (ageYears >= SEQUELAE_AGE_BOUND[0]) {
-    sequelaeIndex = 1;
-  }
-  
   Regimen::Type regimen = Regimen::SEVERE;
 
   double p2, p3, p4, p5, p6, p7;
@@ -180,8 +156,10 @@ bool OldCaseManagement::severeMalaria (
   p4 = caseFatality (ageYears);
   // p5 here is the community threshold case-fatality rate
   p5 = getCommunityCaseFatalityRate (p4);
-  p6 = probSequelaeTreated[sequelaeIndex];
-  p7 = probSequelaeUntreated[sequelaeIndex];
+  // p6 is P(seq) for treated patients
+  p6 = pSequelaeInpatient (ageYears);
+  // p7 is P(seq) when parasites aren't cleared
+  p7 = p6;
 
   double q[9];
   // Community deaths

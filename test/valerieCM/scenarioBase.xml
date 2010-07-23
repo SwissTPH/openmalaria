@@ -644,8 +644,12 @@
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
-      <group cfr="0" lowerbound="0"/>
+      <group lowerbound="0" value="0"/>
     </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
   </healthSystem>
   <entoData mode="4" name="Test">
     <nonVector eipDuration="10">
