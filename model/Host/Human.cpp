@@ -32,6 +32,7 @@
 #include "util/gsl.h"
 #include "util/ModelOptions.hpp"
 #include "util/random.h"
+#include "PopulationStats.h"
 
 #include <string>
 #include <string.h>
@@ -155,6 +156,11 @@ void Human::destroy() {
 // -----  Non-static functions: per-timestep update  -----
 
 bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+#ifdef WITHOUT_BOINC
+    PopulationStats::humanUpdateCalls++;
+    if( doUpdate )
+	PopulationStats::humanUpdates++;
+#endif
     int ageTimeSteps = simulationTime-_dateOfBirth;
     if (clinicalModel->isDead(ageTimeSteps))
 	return true;

@@ -21,6 +21,7 @@
 #include <cassert>
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "util/ModelOptions.hpp"
+#include "PopulationStats.h"
 
 using namespace std;
 
@@ -40,11 +41,11 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveWithinHostModel::newInfection() {
-    ++totalInfections;
+    ++PopulationStats::totalInfections;
     if (_MOI < MAX_INFECTIONS) {
         infections.push_back(new DescriptiveInfection());
         _MOI++;
-        ++allowedInfections;
+        ++PopulationStats::allowedInfections;
     }
     assert( _MOI == infections.size() );
 }

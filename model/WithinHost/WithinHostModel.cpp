@@ -46,8 +46,6 @@ double WithinHostModel::immPenalty_22;
 double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
-boost::int64_t WithinHostModel::totalInfections;
-boost::int64_t WithinHostModel::allowedInfections;
 
 // -----  static functions  -----
 
@@ -79,9 +77,6 @@ void WithinHostModel::init() {
     DescriptiveInfection::initParameters ();	// 5-day timestep check
     DescriptiveIPTWithinHost::initParameters();
   }
-  
-  totalInfections = 0;
-  allowedInfections = 0;
 }
 
 void WithinHostModel::clear() {
@@ -98,15 +93,6 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
     else
       return new DescriptiveWithinHostModel();
   }
-}
-
-void WithinHostModel::staticCheckpoint (istream& stream){
-    totalInfections & stream;
-    allowedInfections & stream;
-}
-void WithinHostModel::staticCheckpoint (ostream& stream){
-    totalInfections & stream;
-    allowedInfections & stream;
 }
 
 
@@ -170,21 +156,6 @@ void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
     survey.addToLogDensity(ageGroup, log(totalDensity));
   }
 }
-
-void WithinHostModel::printDebugStats() {
-#ifdef WITHOUT_BOINC
-    long double x = 100.0 * totalInfections / allowedInfections;
-    cerr
-	<< "Total/allowed infections: "
-	<<totalInfections<<"/"<<allowedInfections
-	<<"\t("<<x<<"%)"
-	<<endl
-    ;
-#else	// use reduced-output mode
-    cerr<<"T/A: "<<totalInfections<<"/"<<allowedInfections<<endl;
-#endif
-}
-
 
 
 void WithinHostModel::checkpoint (istream& stream) {

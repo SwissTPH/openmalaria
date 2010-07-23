@@ -1,8 +1,7 @@
 /*
-
   This file is part of OpenMalaria.
  
-  Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+  Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
   OpenMalaria is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -17,7 +16,6 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
 */
 
 #ifndef Hmod_WithinHost_Model
@@ -51,13 +49,6 @@ public:
   
   /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();
-
-    /// Checkpointing for static data members
-    static void staticCheckpoint (istream& stream);
-    static void staticCheckpoint (ostream& stream); ///< ditto
-  
-  // Print some collected debugging info at end of sim.
-  static void printDebugStats();
   //@}
   
   /// @brief Constructors, destructors and checkpointing functions
@@ -206,10 +197,6 @@ protected:
    * Exact constraint is: _MOI <= MAX_INFECTIONS. */
   static const size_t MAX_INFECTIONS = 21;
   //@}
-  
-  // Static parameters for use with debug output:
-  static boost::int64_t totalInfections;
-  static boost::int64_t allowedInfections;
   
   friend class ::UnittestUtil;
 };

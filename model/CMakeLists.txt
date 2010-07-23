@@ -8,6 +8,7 @@ set (Model_CPP
   Global.cpp
   Population.cpp
   PopulationAgeStructure.cpp
+  PopulationStats.cpp
   inputData.cpp
   AgeGroupData.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx

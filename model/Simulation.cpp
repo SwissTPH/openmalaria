@@ -32,7 +32,7 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 #include "util/random.h"
-#include "WithinHost/WithinHostModel.h"
+#include "PopulationStats.h"
 
 #include <fstream>
 #include <gzstream.h>
@@ -165,7 +165,7 @@ int Simulation::start(){
     // Note: we don't end this critical section; we simply exit.
     util::BoincWrapper::beginCriticalSection();
     
-    WithinHost::WithinHostModel::printDebugStats();
+    PopulationStats::print();
     
     _population->flushReports();	// ensure all Human instances report past events
     Surveys.writeSummaryArrays();
@@ -295,7 +295,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
 	totalSimDuration & stream;
 	phase & stream;
 	(*_population) & stream;
-	WithinHost::WithinHostModel::staticCheckpoint( stream );
+	PopulationStats::staticCheckpoint( stream );
 	
 	// read last, because other loads may use random numbers:
 	util::random::checkpoint (stream, checkpointNum);
@@ -342,7 +342,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
-    WithinHost::WithinHostModel::staticCheckpoint( stream );
+    PopulationStats::staticCheckpoint( stream );
     
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;

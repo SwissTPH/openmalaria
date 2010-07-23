@@ -25,6 +25,7 @@
 #include "util/ModelOptions.hpp"
 #include "inputData.h"
 #include "Monitoring/Surveys.h"
+#include "PopulationStats.h"
 
 #include <cmath>
 
@@ -83,12 +84,12 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 // -----  Simple infection adders/removers  -----
 
 void DescriptiveIPTWithinHost::newInfection(){
-    ++totalInfections;
+    ++PopulationStats::totalInfections;
   if (_MOI < MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     _MOI++;
-    ++allowedInfections;
+    ++PopulationStats::allowedInfections;
   }
   assert( _MOI == infections.size() );
 }
