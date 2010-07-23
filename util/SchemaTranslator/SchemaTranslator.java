@@ -52,6 +52,7 @@ public class SchemaTranslator {
     private static boolean doTranslation = true;
     private static boolean doODTTranslation = false;
     private static boolean doDBUpdate = false;
+    private static String schema_folder = "../../schema/";
 
     private enum BugCorrectionBehaviour {
         none, correct, dontCorrect;
@@ -196,7 +197,7 @@ public class SchemaTranslator {
             xformer.transform(new DOMSource(scenarioDocument), result);
         }
         if (doValidation)
-            validate(scenarioDocument, schemaFileName, "../../schema/");
+            validate(scenarioDocument, schemaFileName, schema_folder);
     }
 
     private void updateDB() {
@@ -1990,6 +1991,11 @@ public class SchemaTranslator {
     }
 
     public static void main(String[] args) {
+
+	
+	String output_folder = "translatedScenarios";
+        String input_folder = "scenarios";
+
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals("--required_version")) {
                 _required_version = Integer.parseInt(args[++i]);
@@ -2027,7 +2033,18 @@ public class SchemaTranslator {
                             .println("--iptiSpOptionWithoutInterventions: expected true or false");
                     System.exit(2);
                 }
-            } else {
+
+	    } else if (args[i].equals("--schema_folder")) {
+		String arg = args[++i];
+		schema_folder = arg;	
+            } else if (args[i].equals("--input_folder")) { 
+		String arg = args[++i];
+		input_folder = arg;
+	    } else if (args[i].equals("--output_folder")) {
+		String arg = args[++i];
+		output_folder = arg;
+	
+	    } else {
                 printUsage();
             }
             System.out.println(args[i]);
@@ -2039,16 +2056,17 @@ public class SchemaTranslator {
         }
 
         SchemaTranslator st = new SchemaTranslator();
+	
         try {
             if (doDBUpdate) {
                 st.updateDB();
             } else {
-                File scenarios = new File("scenarios");
+                File scenarios = new File(input_folder);
                 if (!scenarios.isDirectory())
                     scenarios.mkdir();
                 System.out
                         .println("Put XMLs to be translated into the \"scenarios\" directory");
-                File outDir = new File("translatedScenarios");
+                File outDir = new File(output_folder);
                 if (!outDir.isDirectory())
                     outDir.mkdir();
                 st.visitAllFiles(scenarios, outDir);
@@ -2069,6 +2087,9 @@ public class SchemaTranslator {
 	    + "--update-db\t\tUpdate DB entries instead of files"
 	    + "--maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false to explicitly exclude it."
 	    + "--iptiSpOptionWithoutInterventions\tFor scenarios with iptiDescription but without interventions, assume usage of the IPTI model was (t) intended or (f) a mistake."
+            + "--schema_folder\t\t The schema folder, by default ../../schema"
+	    + "--input_folder\t\t The input folder, by default ./scenarios/"
+            + "--output_folder\t\t The output folder, by default ./translatedScenarios/"	
         );
         System.exit(1);
     }
