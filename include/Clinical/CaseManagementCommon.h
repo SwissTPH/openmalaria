@@ -72,7 +72,6 @@ namespace OM { namespace Clinical {
 	 * the hospital case fatality rate. */
 	static double getCommunityCaseFatalityRate(double caseFatalityRatio);
 	
-    protected:
 	/** Stepwise linear interpolation to get age-specific hospital case
 	 * fatality rate from input data.
 	 * 

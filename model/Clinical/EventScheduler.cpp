@@ -148,10 +148,12 @@ void ClinicalEventScheduler::doClinicalUpdate (
         } else if ( pgState & Pathogenesis::PENDING_UC ){
             pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
-	    //TODO: report sequelae?
-	    // if ( Sequelae )
-	    //     pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-	    // else
+	    if ( pgState & Pathogenesis::COMPLICATED ) {
+		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) )
+		    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+		else
+		    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+	    } else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
 	    // report bout, at conclusion of episode:
 	    latestReport.update (Global::simulationTime, ageGroup, pgState);

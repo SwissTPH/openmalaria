@@ -74,7 +74,10 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-    totalSimDuration = Global::maxAgeIntervals	// ONE_LIFE_SPAN
+    int oneLifeSpanLength = Global::maxAgeIntervals;
+    if( oneLifeSpanLength < (int)Global::intervalsPerYear )
+	oneLifeSpanLength = Global::intervalsPerYear;	// transmission init needs at least one year
+    totalSimDuration = oneLifeSpanLength	// ONE_LIFE_SPAN
 	+ _population->_transmissionModel->transmissionInitDuration()	// initial run of TRANSMISSION_INIT
 	+ Surveys.getFinalTimestep() + 1;	// MAIN_PHASE: surveys; +1 to let final survey run
     
