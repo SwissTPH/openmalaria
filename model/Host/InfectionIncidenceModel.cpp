@@ -98,7 +98,7 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
 }
 
 InfectionIncidenceModel::InfectionIncidenceModel () :
-  _pinfected(0.0), _cumulativeEIRa(0.0)
+  _pinfected(0.0), _cumulativeEIRa(0.0), totalInfections(0)
 {}
 
 
@@ -124,6 +124,8 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 
 void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   survey.reportExpectedInfected(ageGroup, _pinfected);
+  survey.report_nNewInfections(ageGroup, totalInfections);
+  totalInfections = 0;
 }
 
 
@@ -188,9 +190,11 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   else if (_pinfected > 1.0)
     _pinfected = 1.0;
   
-  if (expectedNumInfections > 0.0000001)
-    return random::poisson(expectedNumInfections);
-  else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
+  if (expectedNumInfections > 0.0000001){
+    int n = random::poisson(expectedNumInfections);
+    totalInfections += n;
+    return n;
+  } else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
       throw runtime_error( "numNewInfections: NaN");
   else

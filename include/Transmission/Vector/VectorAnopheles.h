@@ -388,8 +388,9 @@ private:
    * the daily kappa values read from XML for validation purposes. */
   vector<double> P_df, P_dif;
   
-  /** Number of host-seeking mosquitos each day; respectively: total number,
-   * infected, and infective.
+  /** Number of host-seeking mosquitos each day; respectively: the total number
+   * seeking, those seeking and infected, and those seeking and infective.
+   * 
    * Index for each day is day % N_v_length. */
   vector<double> N_v, O_v, S_v;
   //@}

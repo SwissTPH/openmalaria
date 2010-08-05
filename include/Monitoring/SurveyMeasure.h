@@ -146,6 +146,9 @@ enum SurveyMeasure {
     Clinical_HospitalFirstDayDeaths = 42,
     //@}
     
+    /** The number of actual infections since the last survey. */
+    nNewInfections = 43,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

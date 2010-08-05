@@ -55,6 +55,7 @@ public:
   void operator& (S& stream) {
       _pinfected & stream;
       _cumulativeEIRa & stream;
+      totalInfections & stream;
   }
   
 protected:
@@ -87,6 +88,7 @@ public:
    * stochastic process. */
   int numNewInfections(double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans);
   
+protected:
   /// Calculates the expected number of infections, excluding vaccine effects
   virtual double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
   
@@ -100,8 +102,8 @@ public:
   
   //!Number of infective bites since birth
   double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
+  int totalInfections;
   
-protected:
   //BEGIN Static data set by init()
   /* Shape constant of (Gamma) distribution of availability
   real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */

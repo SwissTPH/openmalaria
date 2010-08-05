@@ -23,11 +23,16 @@
 #include "Global.h"
 #include "Simulation.h"
 #include "util/CommandLine.hpp"
+#include "Host/Human.h"
 
 /** main() — initializes and shuts down BOINC, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
+    
+    cout << "IIM:\t"<<sizeof(OM::Host::InfectionIncidenceModel)<<endl;
+    cout << "Human:\t"<<sizeof(OM::Host::Human)<<endl;
+    
     try {
         string scenario_name =
             OM::util::CommandLine::parse (argc, argv);

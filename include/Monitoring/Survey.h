@@ -227,6 +227,10 @@ public:
       data_Clinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
       return *this;
   } 
+  Survey& report_nNewInfections (AgeGroup ageGroup, int val) {
+      data_nNewInfections[ageGroup.i()] += val;
+      return *this;
+  }
   void set_Vector_Nv0 (string key, double v) {
     data_Vector_Nv0[key] = v;
   }
@@ -286,6 +290,7 @@ public:
     data_Clinical_DrugUsage & stream;
     data_Clinical_FirstDayDeaths & stream;
     data_Clinical_HospitalFirstDayDeaths & stream;
+    data_nNewInfections & stream;
   }
   
 private:
@@ -329,6 +334,7 @@ private:
   vector<double> _innoculationsPerAgeGroup;
   vector<int> data_Clinical_FirstDayDeaths;
   vector<int> data_Clinical_HospitalFirstDayDeaths;
+  vector<int> data_nNewInfections;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;

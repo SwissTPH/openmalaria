@@ -89,6 +89,7 @@ class SurveyMeasureMap {
 	    codeMap["Clinical_DrugUsage"] = SM::Clinical_DrugUsage;
 	    codeMap["Clinical_FirstDayDeaths"] = SM::Clinical_FirstDayDeaths;
 	    codeMap["Clinical_HospitalFirstDayDeaths"] = SM::Clinical_HospitalFirstDayDeaths;
+	    codeMap["nNewInfections"] = SM::nNewInfections;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -193,6 +194,7 @@ void Survey::allocate ()
     data_Clinical_RDTs = 0;
     data_Clinical_FirstDayDeaths.resize (numAgeGroups);
     data_Clinical_HospitalFirstDayDeaths.resize (numAgeGroups);
+    data_nNewInfections.resize (numAgeGroups);
 }
 
 
@@ -310,6 +312,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::Clinical_HospitalFirstDayDeaths]) {
       writePerAgeGroup (outputFile, SM::Clinical_HospitalFirstDayDeaths, _assimilatorMode, survey, data_Clinical_HospitalFirstDayDeaths);
+  }
+  if (active[SM::nNewInfections]) {
+      writePerAgeGroup (outputFile, SM::nNewInfections, _assimilatorMode, survey, data_nNewInfections);
   }
 }
 
