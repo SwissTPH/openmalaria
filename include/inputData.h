@@ -122,11 +122,13 @@ namespace Interventions {
 	* 
 	* Throws on failure. */
 	util::Checksum createDocument(std::string);
-
-	/**
-	* Some elements in memory have been created. This function deletes the object in memory
-	*/
-	void cleanDocument();
+	
+	/** Save any changes which occurred to the document, if
+	 * documentChanged is true. */
+	void saveDocument();
+	
+	/// Free allocated memory.
+	void freeDocument();
 	
 	/** Get the base scenario element.
 	 *

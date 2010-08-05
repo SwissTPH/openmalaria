@@ -145,7 +145,7 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     return cksum;
 }
 
-void InputDataType::cleanDocument()
+void InputDataType::saveDocument()
 {
     if (documentChanged) {
         // get the "basename" (file name without path) of xmlFileName as a C string:
@@ -168,7 +168,9 @@ void InputDataType::cleanDocument()
 
         outStream.close();
     }
+}
 
+void InputDataType::freeDocument(){
     // Destructors should handle cleanup
     if (scenario != NULL)
         delete scenario;

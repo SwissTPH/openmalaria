@@ -25,13 +25,13 @@
 #include "util/CommandLine.hpp"
 #include "Host/Human.h"
 
+#include <cstdio>
+#include <cerrno>
+
 /** main() — initializes and shuts down BOINC, loads scenario XML and
  * runs simulation. */
 int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
-    
-    cout << "IIM:\t"<<sizeof(OM::Host::InfectionIncidenceModel)<<endl;
-    cout << "Human:\t"<<sizeof(OM::Host::Human)<<endl;
     
     try {
         string scenario_name =
@@ -46,6 +46,9 @@ int main(int argc, char* argv[]) {
 	if ( !OM::util::CommandLine::option(OM::util::CommandLine::VALIDATE_ONLY) )
 	    simulation.start();
 	
+	// Save changes to the document if any occurred.
+        OM::InputData.saveDocument();
+	
 	// We call boinc_finish before cleanup since it should help ensure
 	// app isn't killed between writing output.txt and calling boinc_finish,
 	// and may speed up exit.
@@ -55,28 +58,25 @@ int main(int argc, char* argv[]) {
     } catch (const OM::util::cmd_exit& e) {
 	// this is not an error, but exiting due to command line
         cerr << e.what() << "; exiting..." << endl;
+	goto omExit;
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
         cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
-        exitStatus = EXIT_FAILURE;
     } catch (const OM::util::checkpoint_error& e) {
         cerr << "Checkpoint exception: " << e.what() << endl;
-        exitStatus = EXIT_FAILURE;
     } catch (const exception& e) {
         cerr << "Exception: " << e.what() << endl;
-        exitStatus = EXIT_FAILURE;
     } catch (...) {
         cerr << "Unknown exception" << endl;
-        exitStatus = EXIT_FAILURE;
     }
     
-    //NOTE: calling BoincWrapper::finish first makes this ineffective, but
-    // currently saving of changes is not used.
-    try {	// free XML memory (if allocated), and potentially save changes
-        OM::InputData.cleanDocument();
-    } catch (...) {
-        cerr << "cleanDocument failed" << endl;
-        exitStatus = EXIT_FAILURE;
-    }
+    // If we get to here, we already know an error occurred.
+    if( errno != 0 )
+	std::perror( "OpenMalaria" );
+    exitStatus = EXIT_FAILURE;
+    
+    omExit:
+    // Free memory (though usually we don't bother at exit to save time)
+    OM::InputData.freeDocument();
     
     // In case an exception was thrown, we call boinc_finish here:
     OM::util::BoincWrapper::finish(exitStatus);	// Never returns
