@@ -78,7 +78,8 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
     _dateOfBirth(dateOfBirth),
     _lastVaccineDose(0),
     _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
-    _probTransmissionToMosquito(0.0)
+    _probTransmissionToMosquito(0.0),
+    _inCohort(false)
 {
   if (_dateOfBirth != simulationTime && (Global::simulationTime > 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
@@ -267,15 +268,32 @@ double Human::getAgeInYears() const{
 }
 
 
-void Human::summarize(Monitoring::Survey& survey) {
-  if (WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment())
-    return;	//NOTE: this modifies the denominator to treat the 4*5 day intervals after a bout as 'not at risk' to match the IPTi trials
-  
-  Monitoring::AgeGroup ageGrp = ageGroup();
-  survey.reportHosts (ageGrp, 1);
-  withinHostModel->summarize (survey, ageGrp);
-  infIncidence->summarize (survey, ageGrp);
-  clinicalModel->summarize (survey, ageGrp);
+void Human::summarize(OM::Monitoring::Survey& survey, bool cohortMode) {
+    // Note: when returning below, some counters are not reset. Effect is that
+    // if human is included in a future survey, some stats will be from last
+    // time reported or birth.
+    if( cohortMode && !_inCohort ){
+	// only report humans in cohort, when using cohort mode
+	return;
+    }
+    if( WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment() ){
+	//NOTE: this modifies the denominator to treat the 4*5 day intervals
+	// after a bout as 'not at risk' to match the IPTi trials
+	return;
+    }
+    
+    Monitoring::AgeGroup ageGrp = ageGroup();
+    survey.reportHosts (ageGrp, 1);
+    withinHostModel->summarize (survey, ageGrp);
+    infIncidence->summarize (survey, ageGrp);
+    clinicalModel->summarize (survey, ageGrp);
+}
+
+void Human::addToCohort (){
+    _inCohort = true;
+    // Flush previous data by reporting it to a junk report:
+    // (The point being to reset certain counters, without duplicating code.)
+    summarize( Monitoring::Surveys.at( 0 ), true );
 }
 
 void Human::flushReports (){

@@ -55,7 +55,7 @@ void SurveysType::init ()
 
   _survey.resize (_surveysTimeIntervals.size());
   for (size_t i = 0; i < _survey.size(); ++i)
-    _survey[i].allocate();
+    _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
   
   ifstream readTest( fname );
@@ -119,6 +119,8 @@ void SurveysType::checkpoint (istream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
     _surveyPeriod & stream;
+    // NOTE: don't actually need to checkpoint _survey[0], though in that case
+    // it's allocate() must be called.
     _survey & stream;
     current = &_survey[_surveyPeriod];
 }

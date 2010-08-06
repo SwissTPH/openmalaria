@@ -79,6 +79,7 @@ public:
       _PEVEfficacy & stream;
       _TBVEfficacy & stream;
       _probTransmissionToMosquito & stream;
+      _inCohort & stream;
   }
   //@}
   
@@ -164,7 +165,14 @@ public:
   //@}
   
   //! Summarize the state of a human individual.
-  void summarize(Monitoring::Survey& survey);
+  void summarize(Monitoring::Survey& survey, bool cohortMode);
+  
+  /** Add human to a cohort (assumes cohort mode is active).
+   *
+   * Also makes sure inter-survey stats will only be
+   * summed from this point onwards (i.e. removes data accumulated between
+   * last time human was reported or birth and now). */
+  void addToCohort ();
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
@@ -266,6 +274,9 @@ private:
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
+  
+  /// True if human is included in a cohort.
+  bool _inCohort;
 };
 
 } }

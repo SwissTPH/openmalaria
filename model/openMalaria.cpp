@@ -23,7 +23,6 @@
 #include "Global.h"
 #include "Simulation.h"
 #include "util/CommandLine.hpp"
-#include "Host/Human.h"
 
 #include <cstdio>
 #include <cerrno>

@@ -170,6 +170,13 @@ namespace OM { namespace util {
 	 * intervention. */
 	IPTI_SP_MODEL,
 	
+	/** @brief Cohort mode
+	 *
+	 * If enabled, XX output is restricted to those individuals added into
+	 * the cohort through the appropriate pseudo interventions.
+	 * TODO: determine which outputs are restricted */
+	COHORT_MODE,
+	
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

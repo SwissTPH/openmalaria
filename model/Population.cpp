@@ -292,9 +292,10 @@ void Population::ctsImmunityY (ostream& stream){
 
 void Population::newSurvey ()
 {
+    bool cohortMode = ModelOptions::option(COHORT_MODE);
     Monitoring::Survey& current = *Monitoring::Surveys.current;
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
-        iter->summarize (current);
+        iter->summarize (current, cohortMode);
     }
     _transmissionModel->summarize (current);
 }

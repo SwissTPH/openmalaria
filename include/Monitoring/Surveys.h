@@ -62,7 +62,10 @@ class SurveysType
 
     ///@brief Getter functions
     //@{
-    /// Return Survey number n (counting from 1). Checks n is valid in debug mode.
+    /** Return Survey number n (counting from 1).
+     *
+     * Survey at n=0 is the junk-survey (not reported).
+     * Checks n is valid in debug mode. */
     inline Survey& at (size_t n) {
       assert (n < _survey.size());
       return _survey[n];

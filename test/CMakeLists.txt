@@ -22,7 +22,7 @@ set (OM_BOXTEST_NAMES
   Uninfect
 )
 # tests with broken checkpointing:
-set (OM_BOXTEST_NC_NAMES)
+set (OM_BOXTEST_NC_NAMES Cohort)
 # Disabled due to "in-progress" work: (none)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
