@@ -57,12 +57,6 @@ void SurveysType::init ()
   for (size_t i = 0; i < _survey.size(); ++i)
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
-  
-  ifstream readTest( fname );
-  if( readTest.rdbuf()->is_open() ){
-      // We don't want to overwrite the file if it exists; check for this early.
-      throw runtime_error( OUT_NAME " exists at init" );
-  }
 }
 
 void SurveysType::incrementSurveyPeriod()
@@ -89,9 +83,6 @@ void SurveysType::writeSummaryArrays ()
     outputFile.imbue( nfn_put_locale );
 
   string output_filename = util::BoincWrapper::resolveFile (fname);
-  ifstream test (output_filename.c_str());
-  if (test.is_open())
-    throw runtime_error ("File output.txt exists!");
 
   outputFile.open (output_filename.c_str(), ios::out | ios::binary);
 
