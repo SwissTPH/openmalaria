@@ -18,11 +18,11 @@ set (OM_BOXTEST_NAMES
   EffectiveDrug
   IPT
   VecTest VecFullTest NamawalaArabiensis
-  ESCMTest Empirical
+  ESCMTest
   Uninfect
 )
 # tests with broken checkpointing:
-set (OM_BOXTEST_NC_NAMES Cohort)
+set (OM_BOXTEST_NC_NAMES Empirical Cohort)
 # Disabled due to "in-progress" work: (none)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
