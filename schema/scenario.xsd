@@ -633,6 +633,18 @@
         <xs:appinfo>units:string;name:Name of monitoring information;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="cohortOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, for many output measures, the output comes only from individuals
+          in the cohort; otherwise output is from the entire population.
+          
+          Does not need to be specified if no cohort-selecting "interventions"
+          are present.
+        </xs:documentation>
+        <xs:appinfo>name:Survey only cohort;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <!-- ageGroup -->
   <xs:complexType name="ageGroup">
@@ -792,6 +804,14 @@
             List of age groups for IPTi distribution
           </xs:documentation>
           <xs:appinfo>units:List of elements;name:List of age groups for IPTi</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="cohort" type="ageSpecific">
+        <xs:annotation>
+          <xs:documentation>
+            Description of continuous selection of individuals for a cohort study.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Continuous cohort selection;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -971,6 +991,14 @@
             <xs:element name="anopheles" type="larvicidingAnopheles" maxOccurs="unbounded" />
           </xs:sequence>
         </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="cohort" type="mass">
+        <xs:annotation>
+          <xs:documentation>
+            Description of mass cohort selection.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Mass Cohort Selection;</xs:appinfo>
+        </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute name="time" type="xs:int" use="required">

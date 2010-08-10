@@ -51,7 +51,8 @@ void Human::initHumanParameters () {	// static
     // Init models used by humans:
     ContinuousIntervention::init(
 	&Human::setupITN,
-	&Human::deployIptDose
+	&Human::deployIptDose,
+	&Human::addToCohort
     );
     Transmission::PerHostTransmission::initParameters();
     InfectionIncidenceModel::init();
@@ -268,20 +269,14 @@ double Human::getAgeInYears() const{
 }
 
 
-void Human::summarize(OM::Monitoring::Survey& survey, bool cohortMode) {
-    // Note: when returning below, some counters are not reset. Effect is that
-    // if human is included in a future survey, some stats will be from last
-    // time reported or birth.
-    if( cohortMode && !_inCohort ){
-	// only report humans in cohort, when using cohort mode
-	return;
-    }
+void Human::summarize() {
     if( WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment() ){
 	//NOTE: this modifies the denominator to treat the 4*5 day intervals
 	// after a bout as 'not at risk' to match the IPTi trials
 	return;
     }
     
+    Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( _inCohort ) );
     Monitoring::AgeGroup ageGrp = ageGroup();
     survey.reportHosts (ageGrp, 1);
     withinHostModel->summarize (survey, ageGrp);
@@ -290,10 +285,12 @@ void Human::summarize(OM::Monitoring::Survey& survey, bool cohortMode) {
 }
 
 void Human::addToCohort (){
-    _inCohort = true;
+    assert( !_inCohort );
+    
     // Flush previous data by reporting it to a junk report:
     // (The point being to reset certain counters, without duplicating code.)
-    summarize( Monitoring::Surveys.at( 0 ), true );
+    summarize();
+    _inCohort = true;
 }
 
 void Human::flushReports (){

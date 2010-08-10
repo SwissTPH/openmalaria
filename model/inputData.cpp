@@ -33,10 +33,10 @@ namespace OM {
     using boost::format;
     
 /// Current schema version.
-const int SCHEMA_VERSION = 20;
+const int SCHEMA_VERSION = 21;
 /** Oldest which current code is potentially compatible with
- * (provided the scenario.xml file references this version and doesn't use
- * members changed in newer versions). */
+ * (provided the scenario XML file references its schema version).
+ */
 const int OLDEST_COMPATIBLE = 20;
 
 
@@ -65,6 +65,8 @@ void InputDataType::initTimedInterventions()
 	    activeInterventions.set (Interventions::ITN, true);
 	if (contI.getIpti().size())
 	    activeInterventions.set (Interventions::IPTI, true);
+	if (contI.getCohort().size())
+	    activeInterventions.set (Interventions::COHORT, true);
     }
 
     if (scenario->getInterventions().getTimed().present()) {
@@ -95,10 +97,18 @@ void InputDataType::initTimedInterventions()
                 activeInterventions.set (Interventions::IRS, true);
             if (it->getVectorAvailability().present())
                 activeInterventions.set (Interventions::VEC_AVAIL, true);
+            if (it->getImmuneSuppression().present())
+                activeInterventions.set (Interventions::IMMUNE_SUPPRESSION, true);
+            if (it->getCohort().present())
+                activeInterventions.set (Interventions::COHORT, true);
             if (it->getLarviciding().present())
                 activeInterventions.set (Interventions::LARVICIDING, true);
+            if (it->getInsertR_0Case().present())
+                activeInterventions.set (Interventions::R_0_CASE, true);
             if (it->getImportedInfectionsPerThousandHosts().present())
             	activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
+            if (it->getUninfectVectors().present())
+                activeInterventions.set (Interventions::UNINFECT_VECTORS, true);
 
         }
     }
@@ -129,13 +139,15 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     int scenarioVersion = scenario->getSchemaVersion();
     if (scenarioVersion < SCHEMA_VERSION) {
 	ostringstream msg;
+	msg<<lXmlFile<<" uses "
+	    << ((scenarioVersion < OLDEST_COMPATIBLE) ? "an" : "a potentially")
+	    <<" incompatible old schema version ("<<scenarioVersion<<"; current is "
+	    <<SCHEMA_VERSION<<"). Use SchemaTranslator to update.";
 	if (scenarioVersion < OLDEST_COMPATIBLE) {
-	    msg<<"Error: "<<lXmlFile<<"uses an";
+	    throw util::xml_scenario_error (msg.str());
 	} else {
-	    msg<<"Warning: "<<lXmlFile<<"uses a potentially";
+	    cerr<<"Warning: "<<msg.str()<<endl;
 	}
-	msg<<" incompatible old schema version (current = "<<SCHEMA_VERSION<<"). Use SchemaTranslator to update.";
-	throw util::xml_scenario_error (msg.str());
     }
     if (scenarioVersion > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");

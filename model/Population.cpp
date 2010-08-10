@@ -292,12 +292,10 @@ void Population::ctsImmunityY (ostream& stream){
 
 void Population::newSurvey ()
 {
-    bool cohortMode = ModelOptions::option(COHORT_MODE);
-    Monitoring::Survey& current = *Monitoring::Surveys.current;
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
-        iter->summarize (current, cohortMode);
+        iter->summarize();
     }
-    _transmissionModel->summarize (current);
+    _transmissionModel->summarize( *Monitoring::Surveys.current );
 }
 
 void Population::flushReports (){
@@ -349,7 +347,10 @@ void Population::implementIntervention (int time)
     if (interv->getImmuneSuppression().present()) {
 	massIntervention (interv->getImmuneSuppression().get(), &Host::Human::immuneSuppression);
     }
-
+    if (interv->getCohort().present()) {
+	massIntervention (interv->getCohort().get(), &Host::Human::addToCohort);
+    }
+    
     if (interv->getLarviciding().present()) {
         _transmissionModel->intervLarviciding (interv->getLarviciding().get());
     }

@@ -165,7 +165,7 @@ public:
   //@}
   
   //! Summarize the state of a human individual.
-  void summarize(Monitoring::Survey& survey, bool cohortMode);
+  void summarize();
   
   /** Add human to a cohort (assumes cohort mode is active).
    *

@@ -101,14 +101,18 @@ namespace Interventions {
     enum Flags {
 	CHANGE_HS,
 	CHANGE_EIR,
-	IMPORTED_INFECTIONS,
 	VACCINE,	// any vaccine
 	MDA,
 	IPTI,
 	ITN,
 	IRS,
 	VEC_AVAIL,
+	IMMUNE_SUPPRESSION,
+	COHORT,
 	LARVICIDING,
+	R_0_CASE,
+	IMPORTED_INFECTIONS,
+	UNINFECT_VECTORS,
 	SIZE
     };
 }

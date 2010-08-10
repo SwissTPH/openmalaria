@@ -30,7 +30,8 @@ vector<ContinuousIntervention::AgeIntervention> ContinuousIntervention::ctsInter
 
 void ContinuousIntervention::init (
 	void (Human::*deployItn) (),
-	void (Human::*deployIpti) ()
+	void (Human::*deployIpti) (),
+	void (Human::*deployCohort) ()
 ) {
     if (!InputData().getInterventions().getContinuous().present()) {
 	return;
@@ -42,7 +43,8 @@ void ContinuousIntervention::init (
     const scnXml::Continuous xmlCts = InputData().getInterventions().getContinuous().get();
     const scnXml::Continuous::ITNSequence& seqItn = xmlCts.getITN();
     const scnXml::Continuous::IptiSequence& seqIpti = xmlCts.getIpti();
-    size_t n = seqItn.size() + seqIpti.size();
+    const scnXml::Continuous::CohortSequence& seqCohort = xmlCts.getCohort();
+    size_t n = seqItn.size() + seqIpti.size() + seqCohort.size();
     ctsIntervs.resize( n );
     
     // Now read each type of intervention in turn, then sort.
@@ -63,6 +65,14 @@ void ContinuousIntervention::init (
 	);
 	ctsIntervs[n].coverage = it->getCoverage();
 	ctsIntervs[n].deploy = deployIpti;
+	n++;
+    }
+    for (scnXml::Continuous::CohortConstIterator it = seqCohort.begin(); it != seqCohort.end(); ++it){
+	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
+	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
+	);
+	ctsIntervs[n].coverage = it->getCoverage();
+	ctsIntervs[n].deploy = deployCohort;
 	n++;
     }
     

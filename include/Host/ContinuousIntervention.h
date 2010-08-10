@@ -35,7 +35,8 @@ public:
      * currently be passed from the Human class. */
     static void init (
 	void (Human::*deployItn) (),
-	void (Human::*deployIpti) ()
+	void (Human::*deployIpti) (),
+	void (Human::*deployCohort) ()
     );
     
     ContinuousIntervention () :

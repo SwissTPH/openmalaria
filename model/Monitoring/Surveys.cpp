@@ -19,8 +19,9 @@
 
 #include "Monitoring/Surveys.h"
 #include "inputData.h"
-#include "util/BoincWrapper.h"
 #include "Clinical/ClinicalModel.h"
+#include "util/BoincWrapper.h"
+#include "util/errors.hpp"
 
 #include <gzstream.h>
 #include <fstream>
@@ -41,8 +42,17 @@ const char* fname = OUT_NAME;
 void SurveysType::init ()
 {
   _surveyPeriod = 0;
-
-  const scnXml::Surveys::SurveyTimeSequence& survs = InputData().getMonitoring().getSurveys().getSurveyTime();
+  _cohortOnly = false;
+  const scnXml::Monitoring& mon = InputData().getMonitoring();
+  if( mon.getCohortOnly().present() ){
+      _cohortOnly = mon.getCohortOnly().get();
+  } else {
+      // Trap potential bug in scenario design
+      if( InputData.getActiveInterventions()[Interventions::COHORT] )
+	  throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
+  }
+  
+  const scnXml::Surveys::SurveyTimeSequence& survs = mon.getSurveys().getSurveyTime();
 
   _surveysTimeIntervals.resize (survs.size() + 1);
   for (size_t i = 0; i < survs.size(); i++) {

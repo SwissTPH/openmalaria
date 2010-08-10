@@ -223,7 +223,6 @@ namespace OM { namespace util {
 	    codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
 	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
 	    codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
-	    codeMap["COHORT_MODE"] = COHORT_MODE;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -279,15 +278,21 @@ namespace OM { namespace util {
 	// Originally from "description of variables for interface" excel sheet
 	bitset<NUM_OPTIONS> incompatibilities[NUM_OPTIONS];	// all default to 0
 	
-	incompatibilities[NEGATIVE_BINOMIAL_MASS_ACTION]	.set(LOGNORMAL_MASS_ACTION)
-													.set(TRANS_HET)	.set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[LOGNORMAL_MASS_ACTION]		.set(TRANS_HET)	.set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[NEGATIVE_BINOMIAL_MASS_ACTION]
+	    .set(LOGNORMAL_MASS_ACTION)
+	    .set(TRANS_HET)	.set(COMORB_TRANS_HET)
+	    .set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[LOGNORMAL_MASS_ACTION]
+	    .set(TRANS_HET)	.set(COMORB_TRANS_HET)
+	    .set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
 	
-	incompatibilities[ATTENUATION_ASEXUAL_DENSITY]	.set(INCLUDES_PK_PD)
-													.set(DUMMY_WITHIN_HOST_MODEL)	.set(EMPIRICAL_WITHIN_HOST_MODEL);
+	incompatibilities[ATTENUATION_ASEXUAL_DENSITY]
+	    .set(INCLUDES_PK_PD)
+	    .set(DUMMY_WITHIN_HOST_MODEL)	.set(EMPIRICAL_WITHIN_HOST_MODEL);
 	
-	//Note: also MAX_DENS_CORRECTION is irrelevant when using DUMMY_WITHIN_HOST_MODEL or EMPIRICAL_WITHIN_HOST_MODEL
-	// but we don't mark it incompatible so we can leave MAX_DENS_CORRECTION on by default.
+	// Note: MAX_DENS_CORRECTION is irrelevant when using new
+	// within-host models, but we don't mark it incompatible so that we can
+	// leave MAX_DENS_CORRECTION on by default.
 	incompatibilities[INNATE_MAX_DENS]
 	    .set(DUMMY_WITHIN_HOST_MODEL)
 	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
@@ -303,14 +308,25 @@ namespace OM { namespace util {
 	incompatibilities[MOLINEAUX_WITHIN_HOST_MODEL]
 	    .set(IPTI_SP_MODEL);
 	
-	incompatibilities[NON_MALARIA_FEVERS]	.set(MUELLER_PRESENTATION_MODEL);
+	incompatibilities[NON_MALARIA_FEVERS]
+	    .set(MUELLER_PRESENTATION_MODEL);
 	
-	incompatibilities[TRANS_HET]			.set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)	.set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_HET]			.set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)	.set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[TREAT_HET]			.set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)	.set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_TRANS_HET]	.set(TRANS_TREAT_HET)	.set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[TRANS_TREAT_HET]		.set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_TREAT_HET]	.set(TRIPLE_HET);
+	incompatibilities[TRANS_HET]
+	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
+	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[COMORB_HET]
+	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
+	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[TREAT_HET]
+	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
+	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[COMORB_TRANS_HET]
+	    .set(TRANS_TREAT_HET)
+	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[TRANS_TREAT_HET]
+	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
+	incompatibilities[COMORB_TREAT_HET]
+	    .set(TRIPLE_HET);
 	
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {

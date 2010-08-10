@@ -50,6 +50,13 @@ class SurveysType
      * collected over a period, the period is from the timestep following the
      * previous survey (or the start of the main simulation) until this time. */
     int currentTimestep;
+    /** Get survey for a human -- switched depending on whether
+     * the human is in the cohort and reporting mode. */
+    inline Survey& getSurvey( bool inCohort ){
+	if( _cohortOnly && !inCohort )
+	    return _survey[0];	// output goes to dummy survey: is deleted
+	else return *current;
+    }
 
     /** Read in some params from XML and allocate memory. */
     void init ();
@@ -103,6 +110,9 @@ class SurveysType
     /** Index for the time dimention of the summary arrays
      * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
     int _surveyPeriod;
+    
+    /// If true, many outputs only come from humans in the cohort.
+    bool _cohortOnly;
 
     /// Our collection of surveys. _survey[0] is a dummy container for data
     /// we're not interested in, in order to avoid having to check current is valid.
