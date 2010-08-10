@@ -852,6 +852,14 @@
         <xs:appinfo>units:Proportion;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="cohort" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Restrict distribution to chosen cohort.
+        </xs:documentation>
+        <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ageSpecific">
     <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
@@ -868,6 +876,14 @@
           Coverage of intervention
         </xs:documentation>
         <xs:appinfo>units:Proportion;min:0;max:1;name:Proportion covered;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="cohort" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Restrict distribution to chosen cohort.
+        </xs:documentation>
+        <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

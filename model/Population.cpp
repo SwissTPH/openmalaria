@@ -398,12 +398,19 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::
     double maxAge = mass.getMaxAge().present() ?
                     mass.getMaxAge().get() : 100.0;
     double coverage = mass.getCoverage();
+    bool cohortOnly = mass.getCohort().present() ?
+		    mass.getCohort().get() : false;
 
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         double ageYears = iter->getAgeInYears();
-        if ( (ageYears > minAge) && (ageYears < maxAge) && random::uniform_01() < coverage)
-            // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
-            ( (*iter).*intervention) ();
+        if( ageYears > minAge && ageYears < maxAge ){
+	    if( !cohortOnly || iter->getInCohort() ){
+		if( random::uniform_01() < coverage ){
+		    // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
+		    ( (*iter).*intervention) ();
+		}
+	    }
+	}
     }
 }
 

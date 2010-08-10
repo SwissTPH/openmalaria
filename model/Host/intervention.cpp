@@ -36,7 +36,6 @@ enum VaccineType {
 
 bool Vaccine::anyVaccine = false;
 vector<int> Vaccine::targetAgeTStep;
-double *Vaccine::vaccineCoverage;
 size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
 Vaccine Vaccine::BSV;
@@ -90,7 +89,6 @@ void Vaccine::initParameters()
         _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, 0);
-        vaccineCoverage = (double*) malloc ( ( (_numberOfEpiDoses)) * sizeof (double));
         const scnXml::Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
         for (size_t i = 0;i < _numberOfEpiDoses; i++) {
             if (i >= cVS.size()) {
@@ -99,7 +97,6 @@ void Vaccine::initParameters()
                 throw util::xml_scenario_error (msg.str());
             }
             targetAgeTStep[i] = (int) floor (cVS[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (double) Global::interval);
-            vaccineCoverage[i] = cVS[i].getCoverage();
         }
     }
 }
@@ -129,12 +126,6 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
 
 void Vaccine::clearParameters ()
 {
-    if (!Vaccine::anyVaccine)
-        return;
-
-    if (_numberOfEpiDoses == 0)
-        return;
-    free (vaccineCoverage);
 }
 
 } }

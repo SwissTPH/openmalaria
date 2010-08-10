@@ -34,6 +34,7 @@ public:
      * Member-function pointers are used to deploy interventions; these must
      * currently be passed from the Human class. */
     static void init (
+	void (Human::*deployVaccine) (),
 	void (Human::*deployItn) (),
 	void (Human::*deployIpti) (),
 	void (Human::*deployCohort) ()
@@ -43,7 +44,9 @@ public:
 	nextCtsDist(0)
     {}
     
-    /// Deploy any interventions intended for this age in timesteps.
+    /** Deploy any interventions intended for this age in timesteps.
+     *
+     * Unlike with vaccines, missing one schedule doesn't preclude the next. */
     void deploy (Human* human, int ageTimesteps);
     
     /// Checkpointing
@@ -55,6 +58,7 @@ public:
 private:
     struct AgeIntervention {
 	int ageTimesteps;
+	bool cohortOnly;
 	double coverage;
 	// Member function pointer to the function (in Human) responsible for deploying intervention:
 	void (Human::*deploy) ();

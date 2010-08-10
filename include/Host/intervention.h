@@ -58,8 +58,6 @@ public:
   
    /** Target age for EPI-like vaccination, in time steps. */
   static vector<int> targetAgeTStep;
-   ///Coverage , as a proportion of the poulation in the target age range
-  static double *vaccineCoverage;
   
   /// Preerythrocytic reduces h vaccine parameters
   static Vaccine PEV;

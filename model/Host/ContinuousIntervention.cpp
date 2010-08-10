@@ -19,6 +19,7 @@
 */
 
 #include "Host/ContinuousIntervention.h"
+#include "Host/Human.h"
 #include "inputData.h"
 #include "util/random.h"
 #include <algorithm>
@@ -29,6 +30,7 @@ namespace OM { namespace Host {
 vector<ContinuousIntervention::AgeIntervention> ContinuousIntervention::ctsIntervs;
 
 void ContinuousIntervention::init (
+	void (Human::*deployVaccine) (),
 	void (Human::*deployItn) (),
 	void (Human::*deployIpti) (),
 	void (Human::*deployCohort) ()
@@ -41,36 +43,51 @@ void ContinuousIntervention::init (
     // special deployment rules (see Human::_lastVaccineDose).
     
     const scnXml::Continuous xmlCts = InputData().getInterventions().getContinuous().get();
+    const scnXml::Continuous::VaccineSequence& seqVaccine = xmlCts.getVaccine();
     const scnXml::Continuous::ITNSequence& seqItn = xmlCts.getITN();
     const scnXml::Continuous::IptiSequence& seqIpti = xmlCts.getIpti();
     const scnXml::Continuous::CohortSequence& seqCohort = xmlCts.getCohort();
-    size_t n = seqItn.size() + seqIpti.size() + seqCohort.size();
+    size_t n = seqVaccine.size() + seqItn.size() + seqIpti.size() + seqCohort.size();
     ctsIntervs.resize( n );
+    
+    typedef xsd::cxx::tree::sequence< ::scnXml::AgeSpecific >::const_iterator const_it_t;
     
     // Now read each type of intervention in turn, then sort.
     // Changing XML structure could reduce code duplication here.
     n = 0;	// use as index in ctsIntervs
     
-    for (scnXml::Continuous::ITNConstIterator it = seqItn.begin(); it != seqItn.end(); ++it){
+    for (const_it_t it = seqVaccine.begin(); it != seqVaccine.end(); ++it){
 	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
 	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
 	);
+	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
+	ctsIntervs[n].coverage = it->getCoverage();
+	ctsIntervs[n].deploy = deployVaccine;
+	n++;
+    }
+    for (const_it_t it = seqItn.begin(); it != seqItn.end(); ++it){
+	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
+	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
+	);
+	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
 	ctsIntervs[n].coverage = it->getCoverage();
 	ctsIntervs[n].deploy = deployItn;
 	n++;
     }
-    for (scnXml::Continuous::IptiConstIterator it = seqIpti.begin(); it != seqIpti.end(); ++it){
+    for (const_it_t it = seqIpti.begin(); it != seqIpti.end(); ++it){
 	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
 	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
 	);
+	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
 	ctsIntervs[n].coverage = it->getCoverage();
 	ctsIntervs[n].deploy = deployIpti;
 	n++;
     }
-    for (scnXml::Continuous::CohortConstIterator it = seqCohort.begin(); it != seqCohort.end(); ++it){
+    for (const_it_t it = seqCohort.begin(); it != seqCohort.end(); ++it){
 	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
 	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
 	);
+	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
 	ctsIntervs[n].coverage = it->getCoverage();
 	ctsIntervs[n].deploy = deployCohort;
 	n++;
@@ -85,8 +102,10 @@ void ContinuousIntervention::deploy (Human* human, int ageTimesteps){
 	    break;	// remaining intervs happen in future
 	// If interv for now, do it. (If we missed the time, ignore it.)
 	if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
-	    if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
-		(human->*(ctsIntervs[nextCtsDist].deploy)) ();
+	    if( !ctsIntervs[nextCtsDist].cohortOnly || human->getInCohort() ){
+		if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
+		    (human->*(ctsIntervs[nextCtsDist].deploy)) ();
+		}
 	    }
 	}
 	nextCtsDist++;

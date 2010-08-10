@@ -106,9 +106,10 @@ public:
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
-  /** Wrapper around vaccinate() also reporting; vaccinate() is also used
-   * elsewhere with a different report. */
+  /// Vaccinate & report mass vaccination
   void massVaccinate ();
+  /// If individual hasn't dropped out, vaccinate & report EPI
+  void ctsVaccinate ();
   
   void IPTiTreatment ();
   void deployIptDose ();
@@ -156,12 +157,14 @@ public:
   double getAgeInYears() const;
   
   //! Returns the date of birth
-  inline int getDateOfBirth() {return _dateOfBirth;};
+  inline int getDateOfBirth() {return _dateOfBirth;}
   
   /** Does the Human have a detectible infection? */
   inline bool detectibleInfection () const {
     return withinHostModel->parasiteDensityDetectible();
   }
+  
+  inline bool getInCohort(){ return _inCohort; }
   //@}
   
   //! Summarize the state of a human individual.

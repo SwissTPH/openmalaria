@@ -50,6 +50,7 @@ namespace OM { namespace Host {
 void Human::initHumanParameters () {	// static
     // Init models used by humans:
     ContinuousIntervention::init(
+	&Human::ctsVaccinate,
 	&Human::setupITN,
 	&Human::deployIptDose,
 	&Human::addToCohort
@@ -203,7 +204,6 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 }
 
 void Human::updateInterventionStatus() {
-  int ageTimeSteps = Global::simulationTime-_dateOfBirth;
   if (Vaccine::anyVaccine) {
     /*
       Update the effect of the vaccine
@@ -216,19 +216,9 @@ void Human::updateInterventionStatus() {
       _TBVEfficacy *= Vaccine::TBV.decay;
       _BSVEfficacy *= Vaccine::BSV.decay;
     }
-    
-    if (Global::timeStep >= 0) {
-	if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
-	    if (Vaccine::targetAgeTStep[_lastVaccineDose] == ageTimeSteps){
-		if(random::uniform_01() <  Vaccine::vaccineCoverage[_lastVaccineDose]){
-		    vaccinate();
-		    Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
-		}
-	    }
-	}
-    }
   }
     if (Global::timeStep >= 0) {
+	int ageTimeSteps = Global::simulationTime-_dateOfBirth;
 	ctsIntervention.deploy(this, ageTimeSteps);
     }
 }
@@ -237,6 +227,16 @@ void Human::updateInterventionStatus() {
 void Human::massVaccinate () {
   vaccinate();
   Monitoring::Surveys.current->reportMassVaccinations (ageGroup(), 1);
+}
+void Human::ctsVaccinate () {
+    // Deployment is affected by previous missed doses and mass vaccinations,
+    // unlike other continuous interventions; extra test:
+    if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
+	if (Vaccine::targetAgeTStep[_lastVaccineDose] == Global::simulationTime - _dateOfBirth){
+	    vaccinate();
+	    Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
+	}
+    }
 }
 void Human::vaccinate(){
   //Index to look up initial efficacy relevant for this dose.
