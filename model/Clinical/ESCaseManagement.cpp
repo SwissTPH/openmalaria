@@ -412,8 +412,11 @@ void ESCaseManagement::init () {
 	if( !mdaDesc.get().getSchedule().present() )
 	    throw xml_scenario_error( "MDA description requires a treatment schedule with ES case management" );
 	mdaDoses = new ESTreatmentSchedule ( mdaDesc.get().getSchedule().get() );
-    } else
+    } else {
 	mdaDoses = NULL;
+	if( InputData.getActiveInterventions()[Interventions::MDA] )
+	    throw util::xml_scenario_error ("MDA intervention without description");
+    }
 }
 //TODO: test-case with a change-of-health-system
 void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
@@ -433,10 +436,8 @@ void ESCaseManagement::cleanup () {
 }
 
 void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {
-    if (mdaDoses == NULL)
-	throw util::xml_scenario_error ("MDA intervention without description");
-    else
-	mdaDoses->apply(medicateQueue);
+    assert (mdaDoses != NULL);
+    mdaDoses->apply(medicateQueue);
 }
 
 CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, Monitoring::AgeGroup ageGroup) {

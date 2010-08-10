@@ -75,7 +75,24 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No intervention"/>
+  <interventions name="cohort selection">
+    <MDADescription>
+      <schedule>
+        <medicate drug="MQ" hour="0" mg="1200"/>
+      </schedule>
+    </MDADescription>
+    <continuous>
+      <cohort targetAgeYrs="1.0" coverage="0.05"/>
+    </continuous>
+    <timed>
+      <intervention time="0">
+        <cohort coverage="0.4"/>
+      </intervention>
+      <intervention time="730">
+        <MDA coverage="0.6"/>
+      </intervention>
+    </timed>
+  </interventions>
   <healthSystem>
     <EventScheduler>
       <!-- Simple partially-realistic (poorly researched) health system description (DH). -->
