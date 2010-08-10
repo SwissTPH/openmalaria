@@ -21,7 +21,6 @@
 */
 #include "Host/Human.h"
 
-#include "Host/intervention.h"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"	// only for summarizing
@@ -78,10 +77,8 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
     infIncidence(InfectionIncidenceModel::createModel()),
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
     _dateOfBirth(dateOfBirth),
-    _lastVaccineDose(0),
-    _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0),
-    _probTransmissionToMosquito(0.0),
-    _inCohort(false)
+    _inCohort(false),
+    _probTransmissionToMosquito(0.0)
 {
   if (_dateOfBirth != simulationTime && (Global::simulationTime > 0 || _dateOfBirth > simulationTime))
     throw out_of_range ("Invalid date of birth!");
@@ -190,7 +187,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 	transmissionModel->getEIR(
 	    Global::simulationTime, perHostTransmission, ageGroupData, monitoringAgeGroup
 	),
-	_PEVEfficacy,
+	_vaccine.getPEVEfficacy(),
 	perHostTransmission
     );
     for (int i=1;i<=numInf; i++) {
@@ -200,23 +197,11 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     // Cache total density for infectiousness calculations
     _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
     
-    withinHostModel->calculateDensities(ageYears, _BSVEfficacy);
+    withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
 }
 
 void Human::updateInterventionStatus() {
-  if (Vaccine::anyVaccine) {
-    /*
-      Update the effect of the vaccine
-      We should assume the effect is maximal 25 days after vaccination
-      TODO: consider the sensitivity of the predictions to the introduction 
-      of a delay until the vaccine has reached max. efficacy.
-    */
-    if ( _lastVaccineDose >  0) {
-      _PEVEfficacy *= Vaccine::PEV.decay;
-      _TBVEfficacy *= Vaccine::TBV.decay;
-      _BSVEfficacy *= Vaccine::BSV.decay;
-    }
-  }
+    _vaccine.update();
     if (Global::timeStep >= 0) {
 	int ageTimeSteps = Global::simulationTime-_dateOfBirth;
 	ctsIntervention.deploy(this, ageTimeSteps);
@@ -225,31 +210,14 @@ void Human::updateInterventionStatus() {
 
 
 void Human::massVaccinate () {
-  vaccinate();
-  Monitoring::Surveys.current->reportMassVaccinations (ageGroup(), 1);
+    _vaccine.vaccinate();
+    Monitoring::Surveys.current->reportMassVaccinations (ageGroup(), 1);
 }
 void Human::ctsVaccinate () {
-    // Deployment is affected by previous missed doses and mass vaccinations,
-    // unlike other continuous interventions; extra test:
-    if (_lastVaccineDose < (int)Vaccine::_numberOfEpiDoses){
-	if (Vaccine::targetAgeTStep[_lastVaccineDose] == Global::simulationTime - _dateOfBirth){
-	    vaccinate();
-	    Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
-	}
+    if ( _vaccine.doCtsVaccination( Global::simulationTime - _dateOfBirth ) ){
+	_vaccine.vaccinate();
+	Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
     }
-}
-void Human::vaccinate(){
-  //Index to look up initial efficacy relevant for this dose.
-  if (Vaccine::PEV.active)
-    _PEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
-  
-  if (Vaccine::BSV.active)
-    _BSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
-  
-  if (Vaccine::TBV.active)
-    _TBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
-  
-  ++_lastVaccineDose;
 }
 
 void Human::IPTiTreatment () {
@@ -331,7 +299,7 @@ double Human::calcProbTransmissionToMosquito() const {
   transmit=std::min(transmit, 1.0);
   
   //	Include here the effect of transmission-blocking vaccination
-  return transmit*(1.0-_TBVEfficacy);
+  return transmit*(1.0-_vaccine.getTBVEfficacy());
 }
 
 } }

@@ -16,7 +16,7 @@ set (Model_CPP
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
-  Host/intervention.cpp
+  Host/Vaccine.cpp
   Host/ContinuousIntervention.cpp
   
   Clinical/ClinicalModel.cpp

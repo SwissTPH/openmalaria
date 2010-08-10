@@ -20,13 +20,16 @@
 
 */
 
-#include "Host/intervention.h"
+#include "Host/Vaccine.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/errors.hpp"
 
-namespace OM { namespace Host {
-    using namespace OM::util;
+#include <cmath>
+
+namespace OM {
+namespace Host {
+using namespace OM::util;
 
 enum VaccineType {
     preerythrocytic_reduces_h = 1,
@@ -62,7 +65,7 @@ void Vaccine::initParameters()
     const scnXml::Interventions& interventions = InputData().getInterventions();
     const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
     if (vaccDesc.size() == 0) {
-	if (InputData.getActiveInterventions()[Interventions::VACCINE])
+        if (InputData.getActiveInterventions()[Interventions::VACCINE])
             throw util::xml_scenario_error ("Vaccine intervention without description");
         return;
     }
@@ -128,4 +131,42 @@ void Vaccine::clearParameters ()
 {
 }
 
-} }
+
+PerHumanVaccine::PerHumanVaccine() :
+        _lastVaccineDose(0),
+        _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0)
+{
+}
+
+void PerHumanVaccine::update() {
+    if (Vaccine::anyVaccine) {
+        /*
+          Update the effect of the vaccine
+          We should assume the effect is maximal 25 days after vaccination
+          TODO: consider the sensitivity of the predictions to the introduction
+          of a delay until the vaccine has reached max. efficacy.
+        */
+        if ( _lastVaccineDose >  0) {
+            _PEVEfficacy *= Vaccine::PEV.decay;
+            _TBVEfficacy *= Vaccine::TBV.decay;
+            _BSVEfficacy *= Vaccine::BSV.decay;
+        }
+    }
+}
+
+void PerHumanVaccine::vaccinate() {
+    //Index to look up initial efficacy relevant for this dose.
+    if (Vaccine::PEV.active)
+        _PEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
+
+    if (Vaccine::BSV.active)
+        _BSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
+
+    if (Vaccine::TBV.active)
+        _TBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
+
+    ++_lastVaccineDose;
+}
+
+}
+}

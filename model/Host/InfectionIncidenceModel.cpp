@@ -19,7 +19,6 @@
 */
 
 #include "Host/InfectionIncidenceModel.h"
-#include "Host/intervention.h"
 #include "inputData.h"
 #include "Transmission/PerHostTransmission.h"
 #include "util/ModelOptions.hpp"
@@ -177,9 +176,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-  if (Vaccine::PEV.active) {
     expectedNumInfections *= (1.0 - PEVEfficacy);
-  }
   
   //Update pre-erythrocytic immunity
   _cumulativeEIRa+=effectiveEIR;

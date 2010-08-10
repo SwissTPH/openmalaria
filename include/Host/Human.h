@@ -19,6 +19,7 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
+#include "Host/Vaccine.h"
 #include "Host/ContinuousIntervention.h"
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
@@ -74,10 +75,7 @@ public:
       ctsIntervention & stream;
       _ylag & stream;
       _dateOfBirth & stream;
-      _lastVaccineDose & stream;
-      _BSVEfficacy & stream;
-      _PEVEfficacy & stream;
-      _TBVEfficacy & stream;
+      _vaccine & stream;
       _probTransmissionToMosquito & stream;
       _inCohort & stream;
   }
@@ -137,7 +135,7 @@ public:
   
   /// Remove Transmission Blocking Vaccine from human
   inline void removeTBV() {
-      _TBVEfficacy = 0.0;
+      _vaccine.removeTBV();
   }
   //@}
   
@@ -209,10 +207,6 @@ private:
     efficacy of the latest vaccination if vaccinated before */
     void updateInterventionStatus();
     
-    /*! Update the number of doses and the date of the most recent vaccination in
-     * this human */
-    void vaccinate();
-    
     double calcProbTransmissionToMosquito() const;
     
     void clearInfection(WithinHost::Infection *iCurrent);
@@ -248,8 +242,9 @@ private:
   /// Continuous intervention deployment
   ContinuousIntervention ctsIntervention;
   
-  ///@brief Private variables
-  //@{
+  /// Vaccines
+  PerHumanVaccine _vaccine;
+  
   /** Total asexual blood stage density over last 20 days (need samples from 10, 15 and 20 days ago)
    *
    * _ylag[simulationTime % _ylagLen] corresponds to current timestep. */
@@ -261,25 +256,11 @@ private:
   //!Date of birth, time step since start of warmup
   int _dateOfBirth;
   
-  /** Number of vaccine doses this individual has received.
-   *
-   * If an individual misses one EPI (continuous) vaccine dose, it's
-   * intentional that they also miss following EPI doses (unless a timed mass
-   * vaccination reintroduces them to the EPI schedule). */
-  int _lastVaccineDose;
-  //!Remaining efficacy of Blood-stage vaccines
-  double _BSVEfficacy;
-  //!Remaining efficacy of Pre-erythrocytic vaccines
-  double _PEVEfficacy;
-  //!Remaining efficacy of Transmission-blocking vaccines
-  double _TBVEfficacy;
-  //@}
+  /// True if human is included in a cohort.
+  bool _inCohort;
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
-  
-  /// True if human is included in a cohort.
-  bool _inCohort;
 };
 
 } }

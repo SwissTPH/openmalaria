@@ -20,7 +20,6 @@
 */
 
 #include "WithinHost/Infection/DescriptiveInfection.h"
-#include "Host/intervention.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/CommandLine.hpp"
@@ -30,6 +29,7 @@
 #include <sstream>
 #include <string.h>
 #include <stdexcept>
+#include <cmath>
 
 // This model can only be used with Global::interval == 5.
 // Use a macro instead of Global::interval since the compiler should be able to
@@ -200,22 +200,21 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 	if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
 	    timeStepMaxDensity = 0.0;
     }
-	/* TODO: the code below should be above, at the end of the if(infage>=0) block.
-	 * This changes output if MAX_DENS_CORRECTION isn't used, and since the
-	 * absense of this option explicitly implies previous results should be
-	 * generated, this fix is not employed. */
-	//Compute the proportion of parasites remaining after innate blood stage effect
-	_density *= innateImmSurvFact;
-	// INNATE_MAX_DENS is a bug-fix:
-	if (util::ModelOptions::option (util::INNATE_MAX_DENS))
-	    timeStepMaxDensity *= innateImmSurvFact;
-	
-	//Include here the effect of blood stage vaccination
-	if (Host::Vaccine::BSV.active) {
-	    double factor = 1.0 - BSVEfficacy;
-	    _density *= factor;
-	    timeStepMaxDensity *= factor;
-	}
+    
+    /* TODO: the code below should be above, at the end of the if(infage>=0) block.
+	* This changes output if MAX_DENS_CORRECTION isn't used, and since the
+	* absense of this option explicitly implies previous results should be
+	* generated, this fix is not employed. */
+    //Compute the proportion of parasites remaining after innate blood stage effect
+    _density *= innateImmSurvFact;
+    // INNATE_MAX_DENS is a bug-fix:
+    if (util::ModelOptions::option (util::INNATE_MAX_DENS))
+	timeStepMaxDensity *= innateImmSurvFact;
+    
+    //Include here the effect of blood stage vaccination
+    double factor = 1.0 - BSVEfficacy;
+    _density *= factor;
+    timeStepMaxDensity *= factor;
 }
 
 //Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
