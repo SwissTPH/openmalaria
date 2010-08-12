@@ -31,13 +31,13 @@ endif (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
 
 option (OM_CXXTEST_GUI "Draw a graphical progress bar" OFF)
 # We want abort-on-fail for safety checks (like bad memory accesses) to work
-set (OM_CXXTEST_OPTIONS "--have-std --have-eh --abort-on-fail")
+set (OM_CXXTEST_OPTIONS --have-std --have-eh --abort-on-fail)
 if (OM_CXXTEST_GUI)
   # also supports QT, but that has more dependencies.
   if (WIN32)
-    set (OM_CXXTEST_OPTIONS "${OM_CXXTEST_OPTIONS} --gui=Win32Gui")
+    set (OM_CXXTEST_OPTIONS ${OM_CXXTEST_OPTIONS} --gui=Win32Gui)
   elseif (UNIX)
-    set (OM_CXXTEST_OPTIONS "${OM_CXXTEST_OPTIONS} --gui=X11Gui")
+    set (OM_CXXTEST_OPTIONS ${OM_CXXTEST_OPTIONS} --gui=X11Gui)
     find_library (OM_CXXTEST_GUI_LIB X11)
     if (NOT OM_CXXTEST_GUI_LIB)
       message (SEND_ERROR "Requested use of a gui, but can't find X11 library${OM_CXXTEST_GUI_LIB}!")
@@ -65,7 +65,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/unittest
 )
 
-set (OM_CXXTEST_HEADERS_LIST
+set (OM_CXXTEST_HEADERS
   PerHostTransmissionSuite.h
   #VectorAnophelesSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
@@ -80,17 +80,12 @@ set (OM_CXXTEST_HEADERS_LIST
   ESCaseManagementSuite.h
   ESDecisionTreeSuite.h
 )
-set(OM_CXXTEST_HEADERS "")
-foreach(arg ${OM_CXXTEST_HEADERS_LIST})
-  set(OM_CXXTEST_HEADERS "${OM_CXXTEST_HEADERS} ${arg}")
-endforeach(arg ${OM_CXXTEST_HEADERS_LIST})
 
 #Appears to be problems with this on windows...
-#message(STATUS "${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}")
 if (OM_CXXTEST_INTERPRETER)
   add_custom_command (OUTPUT tests.cpp
     COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}
-    DEPENDS ${OM_CXXTEST_HEADERS_LIST}
+    DEPENDS ${OM_CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating unittest code with cxxtestgen"
     VERBATIM
@@ -102,7 +97,10 @@ endif (OM_CXXTEST_INTERPRETER)
 # This file is needed to run the EmpiricalInfection unittest:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
-add_executable (run tests.cpp)
+add_executable (run
+  tests.cpp
+  ${OM_CXXTEST_HEADERS} # for IDEs
+)
 target_link_libraries (run
   model
   contrib

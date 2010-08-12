@@ -66,7 +66,7 @@ PkPdModel* PkPdModel::createPkPdModel () {
     } else if (activeModel == HOSHEN_PKPD) {
 	return new HoshenPkPdModel ();
     }
-    assert(false);	// execution shouldn't reach this point
+    throw runtime_error("bad PKPD model");
 }
 
 

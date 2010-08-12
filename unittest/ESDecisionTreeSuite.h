@@ -37,23 +37,32 @@ using namespace boost::assign; // bring 'operator+=()' into scope
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
-    ESDecisionTreeSuite () : whm( WithinHostModel::createWithinHostModel() ), hd( numeric_limits< double >::quiet_NaN(), *whm, NONE ) {}
+    ESDecisionTreeSuite () {
+    }
     ~ESDecisionTreeSuite () {
-	delete whm;
     }
     
     void setUp () {
+	// Note: cannot create whm in constructor, since it uses random number
+	// generator which is initialized after constructor runs.
+	util::random::seed (83);	// seed is unimportant, but must be fixed
+	whm = WithinHostModel::createWithinHostModel();
+	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, NONE );
+
 	UnittestUtil::EmpiricalWHM_setup();
 	// could seed random-number-generator, but shouldn't affect outcomes
 	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
 	
 	dvMap = new ESDecisionValueMap;
-	hd.ageYears = numeric_limits< double >::quiet_NaN();
-	hd.pgState = NONE;
+	hd->ageYears = numeric_limits< double >::quiet_NaN();
+	hd->pgState = NONE;
     }
     void tearDown () {
 	delete dvMap;
 	UnittestUtil::PkPdSuiteTearDown ();
+
+	delete hd;
+	delete whm;
     }
     
     void testESDecisionValue () {
@@ -158,8 +167,8 @@ public:
 	);
 	ESDecisionTree* ut_d = ESDecisionTree::create( *dvMap, ut_d_xml );
 	
-	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "1" ), hd ), dvMap->get( "ut_d", "a" ) );
-	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "2" ), hd ), dvMap->get( "ut_d", "b" ) );
+	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "1" ), *hd ), dvMap->get( "ut_d", "a" ) );
+	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "2" ), *hd ), dvMap->get( "ut_d", "b" ) );
 	delete ut_d;
     }
     
@@ -259,12 +268,12 @@ public:
 	);
 	ESDecisionTree* d = ESDecisionTree::create( *dvMap, ut_age5_xml );
 	
-	hd.ageYears = 4.99;	// under
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "under5" ) );
-	hd.ageYears = 5.0;		// boundary
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "over5" ) );
-	hd.ageYears = numeric_limits<double>::max();
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), hd ), dvMap->get( "age5", "over5" ) );
+	hd->ageYears = 4.99;	// under
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "under5" ) );
+	hd->ageYears = 5.0;		// boundary
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "over5" ) );
+	hd->ageYears = (numeric_limits<double>::max)();
+	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "over5" ) );
 	
 	scnXml::HSESDecision ut_age_deep_xml ("\
 		age(0-10){\
@@ -326,39 +335,39 @@ public:
     
     void testUC2Test () {
 	ESDecisionUC2Test d( *dvMap );
-	hd.pgState = STATE_MALARIA;
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "case", "UC1" ) );
-	hd.pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), hd ), dvMap->get( "case", "UC2" ) );
+	hd->pgState = STATE_MALARIA;
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC1" ) );
+	hd->pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
+	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC2" ) );
     }
     
     void testParasiteTest () {
 	ESDecisionParasiteTest d( *dvMap );
-	hd.pgState = STATE_MALARIA;
+	hd->pgState = STATE_MALARIA;
 	const int N = 10000;
 	const double LIM = .02;
 	double propPos;	// proportion positive
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 0. );	// no parasites (so we test specificity)
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "negative" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "negative" ) );
 	TS_ASSERT_DELTA ( propPos, .75, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "negative" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "negative" ) );
 	TS_ASSERT_DELTA ( propPos, .942, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 80. );	// a few parasites
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .85, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .63769, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
 	
 	UnittestUtil::setTotalParasiteDensity( *whm, 2000. );	// lots of parasites
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .99257, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), hd, dvMap->get( "result", "positive" ) );
+	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "positive" ) );
 	TS_ASSERT_DELTA ( propPos, .99702, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
     }
     
     void testESDecisionMap () {
@@ -418,8 +427,8 @@ public:
 	ESDecisionMap dMap;
 	dMap.initialize( xmlCM, false );
 	
-	hd.ageYears = 2;
-	hd.pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
+	hd->ageYears = 2;
+	hd->pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
 	UnittestUtil::setTotalParasiteDensity( *whm, 4000. );	// lots of parasites
 	
 	const int N = 100000;	// number of times to sample
@@ -433,7 +442,7 @@ public:
 	ESDecisionValue second = dMap.dvMap.get( "treatment", "second" );
 	
 	for (int i = 0; i < N; ++i) {
-	    ESDecisionValue outcome = mask & dMap.determine( hd );
+	    ESDecisionValue outcome = mask & dMap.determine( *hd );
 	    if( outcome == minor ) nMinor++;
 	    else if( outcome == normal ) nNormal++;
 	    else if( outcome == second ) nSecond++;
@@ -451,7 +460,7 @@ public:
 private:
     ESDecisionValueMap* dvMap;
     WithinHostModel* whm;
-    ESHostData hd;
+    ESHostData* hd;
 };
 
 #endif

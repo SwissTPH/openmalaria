@@ -85,8 +85,8 @@ public:
 	  y(3.4422e7),
 	  b(true), c(-57),
 	  s(-2843), l(LONG_MIN), ll(LONG_MIN),
-	  uc(250), us(USHRT_MAX), ui(UINT_MAX), ul(ULONG_MAX), ull(0x1000000000llu),
-	  f(numeric_limits<float>::min()), ld(numeric_limits<long double>::max()), n(numeric_limits<double>::quiet_NaN())
+	  uc(250), us(USHRT_MAX), ui(UINT_MAX), ul(ULONG_MAX), ull(0x1000000000ull),
+	  f((numeric_limits<float>::min)()), ld((numeric_limits<long double>::max)()), n(numeric_limits<double>::quiet_NaN())
 	{}
 	
 	virtual void clear () {
@@ -156,7 +156,7 @@ public:
 	    TS_ASSERT_EQUALS (ul, that.ul);
 	    TS_ASSERT_EQUALS (ull, that.ull);
 	    TS_ASSERT (f != 0.0f);
-	    TS_ASSERT_DELTA (f, that.f, numeric_limits<float>::min());
+	    TS_ASSERT_DELTA (f, that.f, (numeric_limits<float>::min)());
 	    TS_ASSERT_EQUALS (f, that.f);
 	    TS_ASSERT (ld == ld);	// not NaN
 	    TS_ASSERT (ld != numeric_limits<double>::infinity());

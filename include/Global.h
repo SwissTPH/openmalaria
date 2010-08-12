@@ -27,6 +27,8 @@
 #ifdef _MSC_VER
 #pragma warning(disable: 4290)	// disable some warnings on MSVC
 #define finite(x) _finite(x)
+// Avoid min/max as macros on windows (breaks numeric_limits<T>::max())
+#define NOMINMAX
 #endif
 
 #include <boost/cstdint.hpp>

@@ -35,7 +35,8 @@
 using namespace OM;
 using namespace WithinHost;
 
-struct UnittestUtil {
+class UnittestUtil {
+public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
 	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
@@ -77,8 +78,8 @@ struct UnittestUtil {
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
 	Infection::latentp = 0;
-	Infection::cumulativeYstar = numeric_limits<double>::quiet_NaN();
-	Infection::cumulativeHstar = numeric_limits<double>::quiet_NaN();
+	Infection::cumulativeYstar = numeric_limits<float>::quiet_NaN();
+	Infection::cumulativeHstar = numeric_limits<float>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
 	Infection::decayM = numeric_limits<double>::quiet_NaN();
     }

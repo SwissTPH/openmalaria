@@ -356,7 +356,7 @@ void Population::implementIntervention (int time)
     }
     
     if (interv->getInsertR_0Case().present()){
-	int i = std::floor (random::uniform_01() * populationSize);	// pick a human
+	int i = (int)std::floor (random::uniform_01() * populationSize);	// pick a human
 	HumanIter it = population.begin();
 	while (i > 0){	// find human (can't use population[i])
 	    ++it;

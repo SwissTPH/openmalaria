@@ -6,6 +6,9 @@
 # GSL_LIBRARIES
 # GSL_INCLUDE_DIRS
 
+# old cache entry; no longer stored in cache:
+unset (GSL_INCLUDE_DIRS CACHE)
+
 # list common paths here:
 # The gsl-111 dir is because people have GSL 1.8 installed in C:/Program Files/GnuWin32/include
 # which isn't supported and gsl-1.11 extracted to in gsl-111
@@ -25,18 +28,17 @@ endif (NOT GSL_INCLUDE_DIR)
 FIND_PATH(GSL_INCLUDE_DIR2 gsl_sys.h
  PATHS
   ${GSL_INCLUDE_DIR}
-  "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/include/gsl"
-  "C:/Program Files/GnuWin32/include/gsl"
-  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/include/gsl"
-  DOC "Extra include path (usually not needed and so often NOTFOUND)"
+  ${GSL_INCLUDE_DIR}/gsl
+ NO_DEFAULT_PATH
 )
+set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR})
 if (GSL_INCLUDE_DIR2)
   MARK_AS_ADVANCED(GSL_INCLUDE_DIR2)
   if (NOT ${GSL_INCLUDE_DIR} STREQUAL ${GSL_INCLUDE_DIR2})
-    set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2} CACHE PATH "GSL include dirs")
+    set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} ${GSL_INCLUDE_DIR2})
   endif (NOT ${GSL_INCLUDE_DIR} STREQUAL ${GSL_INCLUDE_DIR2})
 endif (GSL_INCLUDE_DIR2)
-set (GSL_INCLUDE_DIRS ${GSL_INCLUDE_DIR} CACHE PATH "GSL include dirs")
+message(STATUS "GSL include path(s): ${GSL_INCLUDE_DIRS}")
 
 # gsl puts libraries in various places, with various suffixes. Copy the ones you want to use to ../gsl/lib and remove suffixes.
 find_library (GSL_LIB gsl

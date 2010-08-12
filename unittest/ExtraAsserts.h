@@ -49,8 +49,8 @@
 #ifndef Hmod_ExtraAsserts
 #define Hmod_ExtraAsserts
 
-#include <cxxtest/TestSuite.h>
 #include "Global.h"
+#include <cxxtest/TestSuite.h>
 #include <limits>
 #include <cmath>
 
@@ -102,7 +102,7 @@ namespace ExtraAsserts {
    * May not return inf, since (x <= inf) should not pass. */
   double tolerance (double x, double y, double relPrecision = 1e-7, double absPrecision = 1e-7) {
     double tol = relPrecision * max(fabs(x), fabs(y));
-    if (tol > numeric_limits<double>::max())
+    if (tol > (numeric_limits<double>::max)())
       return numeric_limits<double>::quiet_NaN();
     if (tol < absPrecision)
       return absPrecision;

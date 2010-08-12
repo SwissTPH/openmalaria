@@ -62,7 +62,7 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
 	    next += step;
 	}
 	next_bit += n_bits;
-	assert (next <= (1u<<next_bit));
+	assert (next <= (id_type(1uL)<<next_bit));
 	
 	// Set mask so bits which are used by values are 1:
 	ESDecisionValue mask;

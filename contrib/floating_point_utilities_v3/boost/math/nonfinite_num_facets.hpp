@@ -151,7 +151,7 @@ private:
         OutputIterator& it, std::ios_base& iosb, 
         CharType fill, int width) const
     {
-        for(int i = iosb.width() - width; i > 0; --i)
+        for(std::streamsize i = iosb.width() - width; i > 0; --i)
             *it = fill;
     }
 

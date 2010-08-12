@@ -22,6 +22,10 @@
 #ifndef Hmod_PerHostSuite
 #define Hmod_PerHostSuite
 
+// Note: currently first file included by test.cpp.
+// Must include "Global.h" for some win compat stuff.
+#include "Global.h"
+
 #include <cxxtest/TestSuite.h>
 #include "Transmission/PerHostTransmission.h"
 
