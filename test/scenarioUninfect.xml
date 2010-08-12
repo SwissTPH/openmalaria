@@ -42,6 +42,7 @@
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
       <option name="totalInfs" value="true"/>
+      <option name="nNewInfections" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>73</surveyTime>

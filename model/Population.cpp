@@ -364,7 +364,7 @@ void Population::implementIntervention (int time)
 	}
 	assert( i == 0 );
 	assert( it != population.end() );
-	it->removeTBV();
+	it->R_0Vaccines();
 	it->addInfection();
     }
     if (interv->getImportedInfectionsPerThousandHosts().present()){

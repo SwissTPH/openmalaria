@@ -103,8 +103,10 @@ void InputDataType::initTimedInterventions()
                 activeInterventions.set (Interventions::COHORT, true);
             if (it->getLarviciding().present())
                 activeInterventions.set (Interventions::LARVICIDING, true);
-            if (it->getInsertR_0Case().present())
+            if (it->getInsertR_0Case().present()){
                 activeInterventions.set (Interventions::R_0_CASE, true);
+                activeInterventions.set (Interventions::VACCINE, true);	// uses vaccines
+	    }
             if (it->getImportedInfectionsPerThousandHosts().present())
             	activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
             if (it->getUninfectVectors().present())

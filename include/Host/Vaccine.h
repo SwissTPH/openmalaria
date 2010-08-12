@@ -44,10 +44,7 @@ public:
     static void initParameters ();
     /// Free memory
     static void clearParameters ();
-
-    /// True if any types of vaccine are in use.
-    static bool anyVaccine;
-
+    
 private:
     /*! Common to all vaccine types. Number of vaccine doses that are given
      * either through EPI or as EPI Boosters. */
@@ -64,7 +61,11 @@ private:
     static Vaccine TBV;
 
     //Non-static:
-    Vaccine() : active(false), decay(1.0) {}
+    Vaccine() : active(false), decay(1.0), efficacyB(1.0) {}
+    
+    /** Per-type initialization
+     * @returns decay */
+    void initVaccine (const scnXml::VaccineDescription* vd);
 
     /** Get the efficacy of the vaccine.
      *
@@ -76,9 +77,6 @@ private:
 
     /// exp(-Decay rate)
     double decay;
-    /** Per-type initialization
-     * @returns decay */
-    void initVaccine (const scnXml::VaccineDescription* vd);
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */
@@ -117,11 +115,16 @@ public:
     inline double getTBVEfficacy()const {
         return _TBVEfficacy;
     }
-
-    /// Hack for R_0 deployment
-    inline void removeTBV() {
-        _TBVEfficacy = 0.0;
+    
+    /// @brief Hacks for R_0 deployment
+    //@{
+    inline void setPEV( double effic ) {
+	_PEVEfficacy = effic;
     }
+    inline void setTBV( double effic ) {
+        _TBVEfficacy = effic;
+    }
+    //@}
 
     /// Checkpointing
     template<class S>

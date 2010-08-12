@@ -133,9 +133,10 @@ public:
   /// Infect the human (with an imported infection).
   void addInfection();
   
-  /// Remove Transmission Blocking Vaccine from human
-  inline void removeTBV() {
-      _vaccine.removeTBV();
+  /// Add PEV and remove TBV (vaccines) from human
+  inline void R_0Vaccines() {
+      _vaccine.setPEV( 1.0 );
+      _vaccine.setTBV( 0.0 );
   }
   //@}
   

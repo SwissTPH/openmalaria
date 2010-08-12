@@ -972,9 +972,11 @@
             Used to simulate R_0. First, infections should be eliminated,
             immunity removed, and the population given an effective transmission-
             blocking vaccine (not done by this intervention). Then this
-            intervention may be used to: pick one human, infect him, and remove
+            intervention may be used to: pick one human, infect him, administer
+            a fully effective Preerythrocytic vaccine and remove
             transmission-blocking vaccine effect on this human. Thus only this
-            one human will be a source of infections in an unprotected population.
+            one human will be a source of infections in an unprotected population,
+            and will not reinfected himself.
           </xs:documentation>
           <xs:appinfo>units:List of elements;name:Insert R_0 case;</xs:appinfo>
         </xs:annotation>

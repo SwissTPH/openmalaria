@@ -37,7 +37,6 @@ enum VaccineType {
     transmission_blocking_reduces_k = 3,
 };
 
-bool Vaccine::anyVaccine = false;
 vector<int> Vaccine::targetAgeTStep;
 size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
@@ -69,7 +68,6 @@ void Vaccine::initParameters()
             throw util::xml_scenario_error ("Vaccine intervention without description");
         return;
     }
-    anyVaccine = true;
     for (scnXml::Interventions::VaccineDescriptionConstIterator i = vaccDesc.begin();
             i != vaccDesc.end(); i++) {
         int type = i->getVaccineType();
@@ -139,18 +137,11 @@ PerHumanVaccine::PerHumanVaccine() :
 }
 
 void PerHumanVaccine::update() {
-    if (Vaccine::anyVaccine) {
-        /*
-          Update the effect of the vaccine
-          We should assume the effect is maximal 25 days after vaccination
-          TODO: consider the sensitivity of the predictions to the introduction
-          of a delay until the vaccine has reached max. efficacy.
-        */
-        if ( _lastVaccineDose >  0) {
-            _PEVEfficacy *= Vaccine::PEV.decay;
-            _TBVEfficacy *= Vaccine::TBV.decay;
-            _BSVEfficacy *= Vaccine::BSV.decay;
-        }
+    // Update vaccines' efficacy assuming exponential decay
+    if ( _lastVaccineDose >  0) {
+	_PEVEfficacy *= Vaccine::PEV.decay;
+	_TBVEfficacy *= Vaccine::TBV.decay;
+	_BSVEfficacy *= Vaccine::BSV.decay;
     }
 }
 
