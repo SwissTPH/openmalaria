@@ -13,6 +13,8 @@ FIND_PATH(XERCESC_INCLUDE_DIRS xercesc/dom/DOMNode.hpp
   /usr/include
   "C:/Program Files/CodeSynthesis XSD 3.2/include"
   "D:/Program Files/CodeSynthesis XSD 3.2/include"
+  "C:/Program Files/CodeSynthesis XSD 3.3/include"
+  "C:/Program Files (x86)/CodeSynthesis XSD 3.3/include"
   ${CMAKE_SOURCE_DIR}/../xsd/libxsd
 )
 
@@ -20,6 +22,8 @@ find_library (XERCESC_LIB NAMES xerces-c xerces-c_3 xerces-c_2 xerces-c_static x
   PATHS ${CMAKE_SOURCE_DIR}/lib
   "C:/Program Files/CodeSynthesis XSD 3.2/lib/vc-8.0"
   "D:/Program Files/CodeSynthesis XSD 3.2/lib/vc-8.0"
+  "C:/Program Files/CodeSynthesis XSD 3.3/lib/vc-8.0"
+  "C:/Program Files (x86)/CodeSynthesis XSD 3.3/lib/vc-8.0"
 )
 if (NOT XERCESC_LIB)
   message (FATAL_ERROR "Unable to find xerces-c library")
