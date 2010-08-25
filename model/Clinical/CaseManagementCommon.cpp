@@ -118,6 +118,7 @@ namespace OM { namespace Clinical {
     
     double CaseManagementCommon::pSequelaeInpatient(double ageYears){
 	map<double,double>::const_iterator it = pSeqInpatData.lower_bound( ageYears );
+	--it;
 	return it->second;
     }
 
