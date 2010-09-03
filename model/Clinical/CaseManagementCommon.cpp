@@ -75,7 +75,10 @@ namespace OM { namespace Clinical {
 	BOOST_FOREACH( const scnXml::Group& group, cfrGroups ){
 	    double lbound = group.getLowerbound();
 	    if( !caseFatalityRates.insert( make_pair( lbound, group.getValue() ) ).second )
-		throw util::xml_scenario_error( (boost::format("CFR: lower bound %1% listed twice") %lbound).str() );
+		throw util::xml_scenario_error( (
+		    boost::format("CFR: lower bound %1% listed twice")
+		    %lbound
+		).str() );
 	}
 	// CFR is constant for everyone above the highest non-inf upperbound
 	caseFatalityRates[ numeric_limits<double>::infinity() ] =
@@ -93,7 +96,10 @@ namespace OM { namespace Clinical {
 	BOOST_FOREACH( const scnXml::Group& group, pSeqGroups ){
 	    double lbound = group.getLowerbound();
 	    if( !pSeqInpatData.insert( make_pair( lbound, group.getValue() ) ).second )
-		throw util::xml_scenario_error( (boost::format("pSequelaeInpatient: lower bound %1% listed twice") %lbound).str() );
+		throw util::xml_scenario_error( (
+		    boost::format("pSequelaeInpatient: lower bound %1% listed twice")
+		    %lbound
+		).str() );
 	}
     }
     
@@ -117,7 +123,8 @@ namespace OM { namespace Clinical {
     }
     
     double CaseManagementCommon::pSequelaeInpatient(double ageYears){
-	map<double,double>::const_iterator it = pSeqInpatData.lower_bound( ageYears );
+	map<double,double>::const_iterator it = pSeqInpatData.upper_bound( ageYears );
+	assert( it != pSeqInpatData.begin() );
 	--it;
 	return it->second;
     }

@@ -79,7 +79,7 @@ namespace OM { namespace Clinical {
 	static double caseFatality(double ageYears);
 	
 	/** Get the probability of in-hospital sequale for a severe bout
-	 * (step-wise constant; I don't think anything else makes sense sicne
+	 * (step-wise constant; I don't think anything else makes sense since
 	 * data is currently from two age-groups).
 	 * 
 	 * Currently we use the same values for outpatients. */
