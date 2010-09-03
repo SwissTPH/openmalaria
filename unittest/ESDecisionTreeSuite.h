@@ -344,7 +344,7 @@ public:
     void testParasiteTest () {
 	ESDecisionParasiteTest d( *dvMap );
 	hd->pgState = STATE_MALARIA;
-	const int N = 10000;
+	const int N = 20000;
 	const double LIM = .02;
 	double propPos;	// proportion positive
 	

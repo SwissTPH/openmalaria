@@ -105,7 +105,8 @@ void InputDataType::initTimedInterventions()
                 activeInterventions.set (Interventions::LARVICIDING, true);
             if (it->getInsertR_0Case().present()){
                 activeInterventions.set (Interventions::R_0_CASE, true);
-                activeInterventions.set (Interventions::VACCINE, true);	// uses vaccines
+		// uses vaccines but see note in Vaccine::initParameters()
+                // activeInterventions.set (Interventions::VACCINE, true);
 	    }
             if (it->getImportedInfectionsPerThousandHosts().present())
             	activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
