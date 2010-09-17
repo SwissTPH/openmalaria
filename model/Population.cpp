@@ -336,13 +336,13 @@ void Population::implementIntervention (int time)
     }
 
     if (interv->getITN().present()) {
-        massIntervention (interv->getITN().get(), &Host::Human::setupITN);
+        massIntervention (interv->getITN().get(), &Host::Human::massITN);
     }
     if (interv->getIRS().present()) {
-        massIntervention (interv->getIRS().get(), &Host::Human::setupIRS);
+        massIntervention (interv->getIRS().get(), &Host::Human::massIRS);
     }
     if (interv->getVectorAvailability().present()) {
-        massIntervention (interv->getVectorAvailability().get(), &Host::Human::setupVA);
+        massIntervention (interv->getVectorAvailability().get(), &Host::Human::massVA);
     }
     if (interv->getImmuneSuppression().present()) {
 	massIntervention (interv->getImmuneSuppression().get(), &Host::Human::immuneSuppression);

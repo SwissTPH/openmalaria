@@ -90,6 +90,11 @@ class SurveyMeasureMap {
 	    codeMap["Clinical_FirstDayDeaths"] = SM::Clinical_FirstDayDeaths;
 	    codeMap["Clinical_HospitalFirstDayDeaths"] = SM::Clinical_HospitalFirstDayDeaths;
 	    codeMap["nNewInfections"] = SM::nNewInfections;
+	    codeMap["nMassITNs"] = SM::nMassITNs;
+	    codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
+	    codeMap["nMassIRS"] = SM::nMassIRS;
+	    codeMap["nMassVA"] = SM::nMassVA;
+	    codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -191,10 +196,10 @@ void Survey::allocate ()
     data_Vector_EIR_Input =numeric_limits<double>::signaling_NaN() ;
     data_Vector_EIR_Simulated = numeric_limits<double>::signaling_NaN();
     
-    data_Clinical_RDTs = 0;
-    data_Clinical_FirstDayDeaths.resize (numAgeGroups);
-    data_Clinical_HospitalFirstDayDeaths.resize (numAgeGroups);
-    data_nNewInfections.resize (numAgeGroups);
+    _numClinical_RDTs = 0;
+    _numClinical_FirstDayDeaths.resize (numAgeGroups);
+    _numClinical_HospitalFirstDayDeaths.resize (numAgeGroups);
+    _numNewInfections.resize (numAgeGroups);
 }
 
 
@@ -302,19 +307,34 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
     writeValue (outputFile, SM::Vector_EIR_Simulated, _assimilatorMode, survey, data_Vector_EIR_Simulated);
   }
   if (active[SM::Clinical_RDTs]) {
-      writeValue (outputFile, SM::Clinical_RDTs, _assimilatorMode, survey, data_Clinical_RDTs);
+      writeValue (outputFile, SM::Clinical_RDTs, _assimilatorMode, survey, _numClinical_RDTs);
   }
   if (active[SM::Clinical_DrugUsage]) {
-      writeMap (outputFile, SM::Clinical_DrugUsage, _assimilatorMode, survey, data_Clinical_DrugUsage);
+      writeMap (outputFile, SM::Clinical_DrugUsage, _assimilatorMode, survey, _sumClinical_DrugUsage);
   }
   if (active[SM::Clinical_FirstDayDeaths]) {
-      writePerAgeGroup (outputFile, SM::Clinical_FirstDayDeaths, _assimilatorMode, survey, data_Clinical_FirstDayDeaths);
+      writePerAgeGroup (outputFile, SM::Clinical_FirstDayDeaths, _assimilatorMode, survey, _numClinical_FirstDayDeaths);
   }
   if (active[SM::Clinical_HospitalFirstDayDeaths]) {
-      writePerAgeGroup (outputFile, SM::Clinical_HospitalFirstDayDeaths, _assimilatorMode, survey, data_Clinical_HospitalFirstDayDeaths);
+      writePerAgeGroup (outputFile, SM::Clinical_HospitalFirstDayDeaths, _assimilatorMode, survey, _numClinical_HospitalFirstDayDeaths);
   }
   if (active[SM::nNewInfections]) {
-      writePerAgeGroup (outputFile, SM::nNewInfections, _assimilatorMode, survey, data_nNewInfections);
+      writePerAgeGroup (outputFile, SM::nNewInfections, _assimilatorMode, survey, _numNewInfections);
+  }
+  if (active[SM::nMassITNs]) {
+      writePerAgeGroup (outputFile, SM::nMassITNs, _assimilatorMode, survey, _numMassITNs);
+  }
+  if (active[SM::nEPI_ITNs]) {
+      writePerAgeGroup (outputFile, SM::nEPI_ITNs, _assimilatorMode, survey, _numEPI_ITNs);
+  }
+  if (active[SM::nMassIRS]) {
+      writePerAgeGroup (outputFile, SM::nMassIRS, _assimilatorMode, survey, _numMassIRS);
+  }
+  if (active[SM::nMassVA]) {
+      writePerAgeGroup (outputFile, SM::nMassVA, _assimilatorMode, survey, _numMassVA);
+  }
+  if (active[SM::Clinical_Microscopy]) {
+      writeValue (outputFile, SM::Clinical_Microscopy, _assimilatorMode, survey, _numClinical_Microscopy);
   }
 }
 

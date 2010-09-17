@@ -123,7 +123,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 
 void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   survey.reportExpectedInfected(ageGroup, _pinfected);
-  survey.report_nNewInfections(ageGroup, totalInfections);
+  survey.reportNewInfections(ageGroup, totalInfections);
   totalInfections = 0;
 }
 

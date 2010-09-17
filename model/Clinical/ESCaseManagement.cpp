@@ -348,6 +348,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     required.push_back( "test" );
     test_mask = dvMap.getDecisionMask( "test" );
     test_RDT = dvMap.get( "test", "RDT" );
+    test_microscopy = dvMap.get( "test", "microscopy" );
     
     // Read treatments
     required.push_back( "treatment" );
@@ -464,6 +465,7 @@ CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathog
     else
 	auxOut.hospitalisation = CMAuxOutput::NONE;
     auxOut.RDT_used = map->RDT_used(outcome);
+    auxOut.microscopy_used = map->microscopy_used(outcome);
     return auxOut;
 }
 

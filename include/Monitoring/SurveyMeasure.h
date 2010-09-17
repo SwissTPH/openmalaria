@@ -149,6 +149,26 @@ enum SurveyMeasure {
     /** The number of actual infections since the last survey. */
     nNewInfections = 43,
     
+    /** The number of ITNs delivered by mass distribution since last survey.
+     *
+     * These are "modelled ITNs": cover only a single person, cannot be passed
+     * to someone else for reuse or used for fishing, etc. */
+    nMassITNs = 44,
+    /** The number of ITNs delivered through EPI since last survey.
+     *
+     * Comments from nMassITNs apply. */
+    nEPI_ITNs = 45,
+    /** The number of people newly protected by IRS since last survey.
+     *
+     * Modelled IRS: affects one person, cannot be plastered over. */
+    nMassIRS = 46,
+    /** The number of people newly protected by a vector-availability
+     * intervention since the last survey. */
+    nMassVA = 47,
+    
+    /// Number of malarial tests via microscopy used
+    Clinical_Microscopy = 48,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

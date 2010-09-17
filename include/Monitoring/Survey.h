@@ -100,9 +100,9 @@ public:
   /// @brief reportXXX functions to report val more of measure XXX within age-group ageGroup. Returns this allowing chain calling.
   //Note: generate this list from variable definitions by regexp search-replacing using the following:
   //Search: vector<(\w+)> _num(\w+)\;
-  //Replace: Survey& report\2 (AgeGroup ageGroup, \1 val) {\n    _num\2[ageGroup.i()] += val;\n    return *this;\n  }
+  //Replace: Survey& report\2 (AgeGroup ageGroup, \1 val) {\n        _num\2[ageGroup.i()] += val;\n        return *this;\n    }
   //Search: vector<(\w+)> _sum(\w+)\;
-  //Replace: Survey& addTo\2 (AgeGroup ageGroup, \1 val) {\n    _sum\2[ageGroup.i()] += val;\n    return *this;\n  }
+  //Replace: Survey& addTo\2 (AgeGroup ageGroup, \1 val) {\n        _sum\2[ageGroup.i()] += val;\n        return *this;\n    }
   //@{
     Survey& reportHosts (AgeGroup ageGroup, int val) {
       _numHosts[ageGroup.i()] += val;
@@ -200,6 +200,26 @@ public:
       _numNonMalariaFevers[ageGroup.i()] += val;
       return *this;
     } 
+    Survey& reportNewInfections (AgeGroup ageGroup, int val) {
+	_numNewInfections[ageGroup.i()] += val;
+	return *this;
+    }
+    Survey& reportMassITNs (AgeGroup ageGroup, int val) {
+	_numMassITNs[ageGroup.i()] += val;
+	return *this;
+    }
+    Survey& reportEPI_ITNs (AgeGroup ageGroup, int val) {
+	_numEPI_ITNs[ageGroup.i()] += val;
+	return *this;
+    }
+    Survey& reportMassIRS (AgeGroup ageGroup, int val) {
+	_numMassIRS[ageGroup.i()] += val;
+	return *this;
+    }
+    Survey& reportMassVA (AgeGroup ageGroup, int val) {
+	_numMassVA[ageGroup.i()] += val;
+	return *this;
+    }
   //@}
   
   void setAnnualAverageKappa(double kappa) {
@@ -213,23 +233,22 @@ public:
     _innoculationsPerAgeGroup = v;	// copies v, not just its reference
   }
   void report_Clinical_RDTs (int num) {
-      data_Clinical_RDTs += num;
+      _numClinical_RDTs += num;
   }
   void report_Clinical_DrugUsage (string abbrev, double qty) {
       // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
-      (*((data_Clinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
+      (*((_sumClinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
   }
   Survey& report_Clinical_FirstDayDeaths (AgeGroup ageGroup, int val) {
-      data_Clinical_FirstDayDeaths[ageGroup.i()] += val;
+      _numClinical_FirstDayDeaths[ageGroup.i()] += val;
       return *this;
   } 
   Survey& report_Clinical_HospitalFirstDayDeaths (AgeGroup ageGroup, int val) {
-      data_Clinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
+      _numClinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
       return *this;
   } 
-  Survey& report_nNewInfections (AgeGroup ageGroup, int val) {
-      data_nNewInfections[ageGroup.i()] += val;
-      return *this;
+  void report_Clinical_Microscopy (int num) {
+      _numClinical_Microscopy += num;
   }
   void set_Vector_Nv0 (string key, double v) {
     data_Vector_Nv0[key] = v;
@@ -286,11 +305,16 @@ public:
     data_Vector_Sv & stream;
     data_Vector_EIR_Input & stream;
     data_Vector_EIR_Simulated & stream;
-    data_Clinical_RDTs & stream;
-    data_Clinical_DrugUsage & stream;
-    data_Clinical_FirstDayDeaths & stream;
-    data_Clinical_HospitalFirstDayDeaths & stream;
-    data_nNewInfections & stream;
+    _numClinical_RDTs & stream;
+    _sumClinical_DrugUsage & stream;
+    _numClinical_FirstDayDeaths & stream;
+    _numClinical_HospitalFirstDayDeaths & stream;
+    _numNewInfections & stream;
+    _numMassITNs & stream;
+    _numEPI_ITNs & stream;
+    _numMassIRS & stream;
+    _numMassVA & stream;
+    _numClinical_Microscopy & stream;
   }
   
 private:
@@ -332,9 +356,13 @@ private:
   vector<int> _numIPTDoses;
   vector<int> _numNonMalariaFevers; 
   vector<double> _innoculationsPerAgeGroup;
-  vector<int> data_Clinical_FirstDayDeaths;
-  vector<int> data_Clinical_HospitalFirstDayDeaths;
-  vector<int> data_nNewInfections;
+  vector<int> _numClinical_FirstDayDeaths;
+  vector<int> _numClinical_HospitalFirstDayDeaths;
+  vector<int> _numNewInfections;
+  vector<int> _numMassITNs;
+  vector<int> _numEPI_ITNs;
+  vector<int> _numMassIRS;
+  vector<int> _numMassVA;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;
@@ -344,8 +372,9 @@ private:
     double data_Vector_EIR_Input;
     double data_Vector_EIR_Simulated;
     
-    int data_Clinical_RDTs;
-    map<string,double> data_Clinical_DrugUsage;
+    int _numClinical_RDTs;
+    map<string,double> _sumClinical_DrugUsage;
+    int _numClinical_Microscopy;
     
   friend class SurveysType;
 };

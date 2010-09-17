@@ -112,18 +112,14 @@ public:
   void IPTiTreatment ();
   void deployIptDose ();
   
-  /// Give human a new ITN
-  inline void setupITN () {
-      perHostTransmission.setupITN ();
-  }
-  /// Give human a new IRS
-  inline void setupIRS () {
-    perHostTransmission.setupIRS ();
-  }
-  /// Give human a new VA intervention
-  inline void setupVA () {
-    perHostTransmission.setupVA ();
-  }
+  /// Give human a new ITN via mass deployment
+  void massITN ();
+  /// Give a human a new ITN through EPI
+  void ctsITN ();
+  /// Give human a new IRS through mass deployment
+  void massIRS ();
+  /// Give human a new VA intervention through mass deployment
+  void massVA ();
   
   /// Resets immunity
   inline void immuneSuppression() {

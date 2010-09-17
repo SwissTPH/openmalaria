@@ -92,7 +92,7 @@ struct generator_factory {
 	// that it allows use of distributions from both boost and GSL.
 	gsl_generator = new gsl_rng;
 	gsl_generator->type = &boost_mt_type;
-	gsl_generator->state = NULL;
+	gsl_generator->state = NULL;	// state is stored as static variables
 #	else
 	//use the mersenne twister generator
 	gsl_generator = gsl_rng_alloc(gsl_rng_mt19937);

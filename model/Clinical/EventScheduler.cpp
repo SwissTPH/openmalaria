@@ -225,6 +225,9 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	if ( auxOut.RDT_used ) {
 	    Monitoring::Surveys.current->report_Clinical_RDTs (1);
 	}
+	if ( auxOut.microscopy_used ) {
+	    Monitoring::Surveys.current->report_Clinical_Microscopy (1);
+	}
 	
 	// Case fatality rate (first day of illness)
 	// P(death) is some fixed input scaled by age-specific CFR.

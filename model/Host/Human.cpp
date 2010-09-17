@@ -50,7 +50,7 @@ void Human::initHumanParameters () {	// static
     // Init models used by humans:
     ContinuousIntervention::init(
 	&Human::ctsVaccinate,
-	&Human::setupITN,
+	&Human::ctsITN,
 	&Human::deployIptDose,
 	&Human::addToCohort
     );
@@ -227,10 +227,29 @@ void Human::deployIptDose () {
     withinHostModel->deployIptDose( ageGroup() );
 }
 
-
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*withinHostModel, getAgeInYears());
 }
+
+void Human::massITN (){
+    perHostTransmission.setupITN ();
+    Monitoring::Surveys.current->reportMassITNs( ageGroup(), 1 );
+}
+void Human::ctsITN (){
+    perHostTransmission.setupITN ();
+    Monitoring::Surveys.current->reportEPI_ITNs( ageGroup(), 1 );
+}
+
+void Human::massIRS () {
+    perHostTransmission.setupIRS ();
+    Monitoring::Surveys.current->reportMassIRS( ageGroup(), 1 );
+}
+
+void Human::massVA () {
+    perHostTransmission.setupVA ();
+    Monitoring::Surveys.current->reportMassVA( ageGroup(), 1 );
+}
+
 
 double Human::getAgeInYears() const{
     return (Global::simulationTime - _dateOfBirth) * Global::yearsPerInterval;

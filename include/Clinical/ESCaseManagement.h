@@ -50,6 +50,7 @@ struct CMAuxOutput {
     
     Hospitalisation hospitalisation;	///< was case hospitalised immediately, after a delay, or not at all?
     bool RDT_used;	///< was an RDT test used?
+    bool microscopy_used;	///< was a microscopy test used?
 };
 
 /// Data used for a withinHostModel->medicate() call
@@ -169,6 +170,10 @@ class ESDecisionMap {
 	inline bool RDT_used (ESDecisionValue outcome) const{
 	    return (outcome & test_mask) == test_RDT;
 	}
+	/// Return true if the input outcome indicates microscopy was used
+	inline bool microscopy_used (ESDecisionValue outcome) const{
+	    return (outcome & test_mask) == test_microscopy;
+	}
 	
     private:
 	// All data here should be set by ESCaseManagement::init(); don't checkpoint.
@@ -185,7 +190,7 @@ class ESDecisionMap {
 	ESDecisionValue hospitalisation_mask,
 				    hospitalisation_immediate,
 				    hospitalisation_delayed;
-	ESDecisionValue test_mask, test_RDT;
+	ESDecisionValue test_mask, test_RDT, test_microscopy;
 	
 	friend class ::ESCaseManagementSuite;	// unittests
 	friend class ::ESDecisionTreeSuite;
