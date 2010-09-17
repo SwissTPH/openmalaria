@@ -200,6 +200,10 @@ void Survey::allocate ()
     _numClinical_FirstDayDeaths.resize (numAgeGroups);
     _numClinical_HospitalFirstDayDeaths.resize (numAgeGroups);
     _numNewInfections.resize (numAgeGroups);
+    _numMassITNs.resize (numAgeGroups);
+    _numEPI_ITNs.resize (numAgeGroups);
+    _numMassIRS.resize (numAgeGroups);
+    _numMassVA.resize (numAgeGroups);
 }
 
 
