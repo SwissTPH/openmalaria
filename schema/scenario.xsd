@@ -878,12 +878,31 @@
         <xs:appinfo>units:Proportion;min:0;max:1;name:Proportion covered;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cohort" type="xs:boolean" use="optional">
+    <xs:attribute name="cohort" type="xs:boolean" default="false">
       <xs:annotation>
         <xs:documentation>
-          Restrict distribution to chosen cohort.
+          Restrict distribution to chosen cohort (default: false).
         </xs:documentation>
         <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="begin" type="xs:int" default="0">
+      <xs:annotation>
+        <xs:documentation>
+          First timestep (from 0 at the beginning of the intervention period)
+          this item is active. Defaults to 0.
+        </xs:documentation>
+        <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="end" type="xs:int" default="2147483647">
+      <xs:annotation>
+        <xs:documentation>
+          End of the period during which the intervention is active (to be
+          exact, the first timestep of the intervention period at which the item
+          becomes inactive). Defaults to 2147483647.
+        </xs:documentation>
+        <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

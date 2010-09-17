@@ -57,43 +57,34 @@ void ContinuousIntervention::init (
     n = 0;	// use as index in ctsIntervs
     
     for (const_it_t it = seqVaccine.begin(); it != seqVaccine.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
-	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
-	);
-	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
-	ctsIntervs[n].coverage = it->getCoverage();
-	ctsIntervs[n].deploy = deployVaccine;
+	ctsIntervs[n].assign( *it, deployVaccine );
 	n++;
     }
     for (const_it_t it = seqItn.begin(); it != seqItn.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
-	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
-	);
-	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
-	ctsIntervs[n].coverage = it->getCoverage();
-	ctsIntervs[n].deploy = deployItn;
+	ctsIntervs[n].assign( *it, deployItn );
 	n++;
     }
     for (const_it_t it = seqIpti.begin(); it != seqIpti.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
-	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
-	);
-	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
-	ctsIntervs[n].coverage = it->getCoverage();
-	ctsIntervs[n].deploy = deployIpti;
+	ctsIntervs[n].assign( *it, deployIpti );
 	n++;
     }
     for (const_it_t it = seqCohort.begin(); it != seqCohort.end(); ++it){
-	ctsIntervs[n].ageTimesteps = static_cast<uint32_t>(
-	    floor( it->getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
-	);
-	ctsIntervs[n].cohortOnly = it->getCohort().present() ? it->getCohort().get() : false;
-	ctsIntervs[n].coverage = it->getCoverage();
-	ctsIntervs[n].deploy = deployCohort;
+	ctsIntervs[n].assign( *it, deployCohort );
 	n++;
     }
     
     sort( ctsIntervs.begin(), ctsIntervs.end() );
+}
+
+void ContinuousIntervention::AgeIntervention::assign( const ::scnXml::AgeSpecific& elt, void(Human::*func) () ){
+    begin = elt.getBegin();
+    end = elt.getEnd();
+    ageTimesteps = static_cast<uint32_t>(
+	floor( elt.getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
+    );
+    cohortOnly = elt.getCohort();
+    coverage = elt.getCoverage();
+    deploy = func;
 }
 
 void ContinuousIntervention::deploy (Human* human, int ageTimesteps){
@@ -102,9 +93,11 @@ void ContinuousIntervention::deploy (Human* human, int ageTimesteps){
 	    break;	// remaining intervs happen in future
 	// If interv for now, do it. (If we missed the time, ignore it.)
 	if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
-	    if( !ctsIntervs[nextCtsDist].cohortOnly || human->getInCohort() ){
-		if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
-		    (human->*(ctsIntervs[nextCtsDist].deploy)) ();
+	    if( ctsIntervs[nextCtsDist].begin <= Global::timeStep && Global::timeStep <= ctsIntervs[nextCtsDist].end ){
+		if( !ctsIntervs[nextCtsDist].cohortOnly || human->getInCohort() ){
+		    if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
+			(human->*(ctsIntervs[nextCtsDist].deploy)) ();
+		    }
 		}
 	    }
 	}

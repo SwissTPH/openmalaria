@@ -22,6 +22,10 @@
 
 #include "Global.h"
 
+namespace scnXml {
+    class AgeSpecific;
+}
+
 namespace OM { namespace Host {
 
 class Human;	// we have a circular dependency...
@@ -56,16 +60,21 @@ public:
     }
     
 private:
-    struct AgeIntervention {
+    class AgeIntervention {
+	int begin, end;	// first timeStep active and first timeStep no-longer active
 	int ageTimesteps;
 	bool cohortOnly;
 	double coverage;
 	// Member function pointer to the function (in Human) responsible for deploying intervention:
 	void (Human::*deploy) ();
 	
+    public:
+	void assign( const ::scnXml::AgeSpecific& elt, void(Human::*func) () );
+	
 	inline bool operator< (const AgeIntervention& that) const{
 	    return this->ageTimesteps < that.ageTimesteps;
 	}
+	friend void ContinuousIntervention::deploy (Human* human, int ageTimesteps);
     };
     static vector<AgeIntervention> ctsIntervs;
     
