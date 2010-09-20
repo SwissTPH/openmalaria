@@ -1544,7 +1544,7 @@
         <allele name="sensitive">
           <initial_frequency>1</initial_frequency>
           <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0009</IC50>
+          <IC50>0.009</IC50>
           <slope>4</slope>
         </allele>
       </PD>
