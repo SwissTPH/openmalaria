@@ -36,6 +36,7 @@
 
 #include "util/random.h"
 #include "util/errors.hpp"
+#include "util/StreamValidator.h"
 #include "Global.h"
 
 #ifdef OM_RANDOM_USE_BOOST
@@ -64,7 +65,9 @@ namespace OM { namespace util {
     
     long unsigned int boost_rng_get (void*) {
 	BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
-	return static_cast<long unsigned int> (boost_generator ());
+	long unsigned int val = static_cast<long unsigned int> (boost_generator ());
+	streamValidate( val );
+	return val;
     }
     double boost_rng_get_double_01 (void*) {
 	return rng_uniform01 ();

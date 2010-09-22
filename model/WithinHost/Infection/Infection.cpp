@@ -21,6 +21,7 @@
 #include "WithinHost/Infection/Infection.h"
 #include "inputData.h"
 #include "util/ModelOptions.hpp"
+#include "util/StreamValidator.h"
 
 #include <cmath>
 
@@ -58,7 +59,9 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
-  return std::min(dY*dH*dA, 1.0);
+  double ret = std::min(dY*dH*dA, 1.0);
+  util::streamValidate( ret );
+  return ret;
 }
 
 

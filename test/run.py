@@ -221,6 +221,15 @@ def setWrapArgs(option, opt_str, value, parser, *args, **kwargs):
 
 # Test for options
 def evalOptions (args):
+    #First separate OpenMalaria args and args for this script
+    omArgsBegin = len(args)
+    for i in range(0,len(args)-1):
+        if args[i] == "--":
+            omArgsBegin = i+1
+            break
+    omOptions=args[omArgsBegin:]
+    args = args[:omArgsBegin]
+    
     parser = OptionParser(usage="Usage: %prog [options] [-- openMalaria options] [scenarios]",
 			description="""Scenarios to be run must be of the form scenarioXX.xml; if any are passed on the command line, XX is substituted for each given; if not then all files of the form scenario*.xml are run as test scenarios.
 You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
@@ -257,12 +266,8 @@ You can pass options to openMalaria by first specifying -- (to end options passe
     options.ensure_value("wrapArgs", [])
     
     toRun=set()
-    omOptions=[]
     for arg in others:
-        if (arg[0] == '-'):
-            omOptions = omOptions + [arg]
-        else:
-            toRun.add (arg)
+        toRun.add (arg)
     
     return options,omOptions,toRun
 

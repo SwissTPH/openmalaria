@@ -22,6 +22,7 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 #include "util/BoincWrapper.h"
+#include "util/StreamValidator.h"
 #include "inputData.h"
 
 #include <sstream>
@@ -49,6 +50,9 @@ namespace OM { namespace util {
 	bool cloHelp = false, cloError = false;
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
+#	ifdef OM_STREAM_VALIDATOR
+	string sVFile;
+#	endif
 	
 	/* Simple command line parser. Seems to work fine.
 	* If an extension is wanted, http://tclap.sourceforge.net/ looks good. */
@@ -98,6 +102,12 @@ namespace OM { namespace util {
 		    options[COMPRESS_CHECKPOINTS] = b;
 		} else if (clo == "checkpoint-duplicates") {
 		    options.set (TEST_DUPLICATE_CHECKPOINTS);
+#	ifdef OM_STREAM_VALIDATOR
+		} else if (clo == "stream-validator") {
+		    if (sVFile.size())
+			throw runtime_error ("--stream-validator may only be given once");
+		    sVFile = parseNextArg (argc, argv, i);
+#	endif
 		} else if (clo == "help") {
 		    cloHelp = true;
 		} else {
@@ -150,6 +160,11 @@ namespace OM { namespace util {
 	    << "			identical to that read." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
 	    << "			Set checkpoint compression on or off. Default is on." <<endl
+#	ifdef OM_STREAM_VALIDATOR
+	    << "    --stream-validator PATH" <<endl
+	    << "			Use StreamValidator to validate against reference file PATH." <<endl
+	    << "			(note: PATH must be absolute or relative to resource path)." <<endl
+#	endif
 	    << " -h --help		Print this message." << endl
 	    ;
 	    if( cloError )
@@ -157,6 +172,11 @@ namespace OM { namespace util {
 	    else
 		throw cmd_exit ("Printed help");
 	}
+	
+#	ifdef OM_STREAM_VALIDATOR
+	if( sVFile.size() )
+	    StreamValidator.loadStream( sVFile );
+#	endif
 	
 	if (checkpoint_times.size())	// timed checkpointing overrides this
 	    options[TEST_CHECKPOINTING] = false;

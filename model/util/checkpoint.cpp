@@ -36,8 +36,8 @@ namespace OM { namespace util { namespace checkpoint {
     const double h_nan = numeric_limits<double>::quiet_NaN();
     
     
-    void validateListSize (long length) {
-	if (length < 0 || length > 1000) {
+    void validateListSize (long length, long max) {
+	if (length < 0 || length > max) {
 	    ostringstream s;
 	    s << "List length out of range: " << length;
 	    throw checkpoint_error(s.str());

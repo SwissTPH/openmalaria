@@ -63,6 +63,8 @@ virtual checkpoint (ostream& stream);
  * here. */
 namespace OM { namespace util { namespace checkpoint {
     
+    const long DEFAULT_MAX_LENGTH = 1000;
+    
     ///@brief Utility functions
     //@{
     /** Perform important checks on checkpoint file format.
@@ -83,7 +85,7 @@ namespace OM { namespace util { namespace checkpoint {
    * variables often get completely wrong values which can cause memory
    * allocation to grind the computer to a halt. In this case the values are
    * usually bad enough that a lenient check will still catch them. */
-    void validateListSize (long length);
+    void validateListSize (long length, long max = DEFAULT_MAX_LENGTH);
     //@}
     
     ///@brief Operator& for simple data-types

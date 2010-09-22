@@ -141,6 +141,15 @@ else (OM_BOINC_INTEGRATION)
 endif (OM_BOINC_INTEGRATION)
 
 
+# -----  Compile-time optional features  -----
+# (must come before add_subdirectory (model))
+
+option (OM_STREAM_VALIDATOR "Compile in StreamValidator (useful when looking for checkpointing bugs)" OFF)
+if (OM_STREAM_VALIDATOR)
+  add_definitions (-DOM_STREAM_VALIDATOR)
+endif (OM_STREAM_VALIDATOR)
+
+
 # -----  Compile code  -----
 
 add_subdirectory (contrib)
@@ -188,6 +197,7 @@ if (MSVC)
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
 endif (MSVC)
+
 
 # -----  OM_BOXTEST - black-box & unit testing  -----
 

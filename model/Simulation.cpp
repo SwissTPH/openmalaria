@@ -32,6 +32,7 @@
 #include "util/ModelOptions.hpp"
 #include "util/errors.hpp"
 #include "util/random.h"
+#include "util/StreamValidator.h"
 #include "PopulationStats.h"
 
 #include <fstream>
@@ -176,6 +177,10 @@ int Simulation::start(){
     // Write scenario checksum, only if simulation completed.
     cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
     
+# ifdef OM_STREAM_VALIDATOR
+    util::StreamValidator.saveStream();
+# endif
+    
     return 0;
 }
 
@@ -291,6 +296,9 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
 	Population::staticCheckpoint (stream);
 	Surveys & stream;
 	Continuous::staticCheckpoint (stream);
+#	ifdef OM_STREAM_VALIDATOR
+	util::StreamValidator & stream;
+#	endif
 	
 	Global::simulationTime & stream;
 	Global::timeStep & stream;
@@ -338,6 +346,9 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     Population::staticCheckpoint (stream);
     Surveys & stream;
     Continuous::staticCheckpoint (stream);
+# ifdef OM_STREAM_VALIDATOR
+    util::StreamValidator & stream;
+# endif
     
     Global::simulationTime & stream;
     Global::timeStep & stream;

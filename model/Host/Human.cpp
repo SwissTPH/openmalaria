@@ -28,10 +28,11 @@
 #include "inputData.h"
 #include "Transmission/TransmissionModel.h"
 #include "Monitoring/Surveys.h"
+#include "PopulationStats.h"
 #include "util/gsl.h"
 #include "util/ModelOptions.hpp"
 #include "util/random.h"
-#include "PopulationStats.h"
+#include "util/StreamValidator.h"
 
 #include <string>
 #include <string.h>
@@ -166,6 +167,7 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
 	return true;
     
     if (doUpdate){
+	util::streamValidate( ageTimeSteps );
 	double ageYears = ageTimeSteps * Global::yearsPerInterval;
 	monitoringAgeGroup.update( ageYears );
 	
@@ -318,7 +320,9 @@ double Human::calcProbTransmissionToMosquito() const {
   transmit=std::min(transmit, 1.0);
   
   //	Include here the effect of transmission-blocking vaccination
-  return transmit*(1.0-_vaccine.getTBVEfficacy());
+  double ret = transmit*(1.0-_vaccine.getTBVEfficacy());
+  util::streamValidate( ret );
+  return ret;
 }
 
 } }

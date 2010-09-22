@@ -142,6 +142,7 @@ public:
   void operator& (S& stream) {
       species & stream;
       _relativeAvailabilityHet & stream;
+      outsideTransmission & stream;
       timestepITN & stream;
       timestepIRS & stream;
       timestepVA & stream;

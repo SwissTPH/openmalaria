@@ -73,6 +73,7 @@ set (Model_CPP
   util/checkpoint.cpp
   util/Options.cpp
   util/random.cpp
+  util/StreamValidator.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

@@ -28,6 +28,7 @@
 #include "Simulation.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
+#include "util/StreamValidator.h"
 
 #include <cmath> 
 #include <cfloat>
@@ -183,6 +184,7 @@ double TransmissionModel::getEIR (int simulationTime, PerHostTransmission& host,
   
   timeStepEntoInnocs[ageGroup.i()] += EIR;
   timeStepNumEntoInnocs ++;
+  util::streamValidate( EIR );
   return EIR;
 }
 

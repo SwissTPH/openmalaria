@@ -20,14 +20,16 @@ set (OM_BOXTEST_NAMES
   VecTest VecFullTest NamawalaArabiensis
   ESCMTest
   Uninfect
+  Empirical
+  Cohort
 )
 # tests with broken checkpointing:
-set (OM_BOXTEST_NC_NAMES Empirical Cohort)
+set (OM_BOXTEST_NC_NAMES)
 # Disabled due to "in-progress" work: (none)
 # Use python script. There is also a shell-script, but it still uses python to validate results.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
-    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- --checkpoint ${TEST_NAME})
+    add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py ${TEST_NAME} -- --checkpoint)
   endforeach (TEST_NAME)
   foreach (TEST_NAME ${OM_BOXTEST_NC_NAMES})
     add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- ${TEST_NAME})
