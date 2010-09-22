@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" name="triple correlated heterogeneity" schemaVersion="20" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="90" assimMode="0" name="triple correlated heterogeneity" schemaVersion="21" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="200">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -43,7 +43,9 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No Intervention"/>
+  <interventions name="No Intervention">
+    <descriptions/>
+  </interventions>
   <!-- entoData did have attribute firstDay="18" which is obsolete.
        But has this been accounted for in EIRDaily data? -->
   <healthSystem>

@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni" cohortOnly="true">
+  <monitoring cohortOnly="true" name="Test Moni">
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nExpectd" value="true"/>
@@ -76,13 +76,15 @@
     </ageGroup>
   </monitoring>
   <interventions name="cohort selection">
-    <MDADescription>
-      <schedule>
-        <medicate drug="MQ" hour="0" mg="1200"/>
-      </schedule>
-    </MDADescription>
+    <descriptions>
+      <MDADescription>
+        <schedule>
+          <medicate drug="MQ" hour="0" mg="1200"/>
+        </schedule>
+      </MDADescription>
+    </descriptions>
     <continuous>
-      <cohort targetAgeYrs="1.0" coverage="0.05"/>
+      <cohort coverage="0.05" targetAgeYrs="1.0"/>
     </continuous>
     <timed>
       <intervention time="0">

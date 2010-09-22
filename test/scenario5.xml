@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="20" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" assimMode="0" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="21" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -171,27 +171,29 @@
     </ageGroup>
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
-    <vaccineDescription vaccineType="3">
-      <halfLifeYrs value="0.5"/>
-      <efficacyB value="10"/>
-      <initialEfficacy value="0.4"/>
-      <initialEfficacy value="0.46"/>
-      <initialEfficacy value="0.52"/>
-    </vaccineDescription>
-    <vaccineDescription vaccineType="2">
-      <halfLifeYrs value="0.5"/>
-      <efficacyB value="10"/>
-      <initialEfficacy value="0.4"/>
-      <initialEfficacy value="0.46"/>
-      <initialEfficacy value="0.52"/>
-    </vaccineDescription>
-    <vaccineDescription vaccineType="1">
-      <halfLifeYrs value="0.5"/>
-      <efficacyB value="10"/>
-      <initialEfficacy value="0.4"/>
-      <initialEfficacy value="0.46"/>
-      <initialEfficacy value="0.52"/>
-    </vaccineDescription>
+    <descriptions>
+      <vaccineDescription vaccineType="3">
+        <halfLifeYrs value="0.5"/>
+        <efficacyB value="10"/>
+        <initialEfficacy value="0.4"/>
+        <initialEfficacy value="0.46"/>
+        <initialEfficacy value="0.52"/>
+      </vaccineDescription>
+      <vaccineDescription vaccineType="2">
+        <halfLifeYrs value="0.5"/>
+        <efficacyB value="10"/>
+        <initialEfficacy value="0.4"/>
+        <initialEfficacy value="0.46"/>
+        <initialEfficacy value="0.52"/>
+      </vaccineDescription>
+      <vaccineDescription vaccineType="1">
+        <halfLifeYrs value="0.5"/>
+        <efficacyB value="10"/>
+        <initialEfficacy value="0.4"/>
+        <initialEfficacy value="0.46"/>
+        <initialEfficacy value="0.52"/>
+      </vaccineDescription>
+    </descriptions>
     <continuous>
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>

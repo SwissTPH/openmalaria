@@ -62,7 +62,8 @@ void Vaccine::initParameters()
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
     const scnXml::Interventions& interventions = InputData().getInterventions();
-    const scnXml::Interventions::VaccineDescriptionSequence& vaccDesc = interventions.getVaccineDescription();
+    const scnXml::Descriptions::VaccineDescriptionSequence& vaccDesc =
+	interventions.getDescriptions().getVaccineDescription();
     if (vaccDesc.size() == 0) {
         if (InputData.getActiveInterventions()[Interventions::VACCINE])
             throw util::xml_scenario_error ("Vaccine intervention without description");
@@ -70,7 +71,7 @@ void Vaccine::initParameters()
 	// it is safe to use without vaccine descriptions.
         return;
     }
-    for (scnXml::Interventions::VaccineDescriptionConstIterator i = vaccDesc.begin();
+    for (scnXml::Descriptions::VaccineDescriptionConstIterator i = vaccDesc.begin();
             i != vaccDesc.end(); i++) {
         int type = i->getVaccineType();
         if (type == preerythrocytic_reduces_h)

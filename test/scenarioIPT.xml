@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" assimMode="0" name="IPTi_seas_niak21_d4mo" schemaVersion="20" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" assimMode="0" name="IPTi_seas_niak21_d4mo" schemaVersion="21" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Yearly Surveys">
-    <continuous period="1" duringInit="true">
+    <continuous duringInit="true" period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
@@ -168,11 +168,13 @@
     </ageGroup>
   </monitoring>
   <interventions name="IPTi_seas_SP">
-    <iptiDescription iptiEffect="18">
-      <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-      <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
-      <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
-    </iptiDescription>
+    <descriptions>
+      <iptiDescription iptiEffect="18">
+        <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+        <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
+        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
+      </iptiDescription>
+    </descriptions>
     <continuous>
       <ipti coverage="0.95" targetAgeYrs="0.25"/>
       <ipti coverage="0.95" targetAgeYrs="0.33"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="20" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="21" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -176,67 +176,69 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vaccineDescription vaccineType="3">
-      <halfLifeYrs value="10"/>
-      <efficacyB value="10"/>
-      <initialEfficacy value="0.512"/>
-      <initialEfficacy value="0.64"/>
-      <initialEfficacy value="0.8"/>
-    </vaccineDescription>
-    <vaccineDescription vaccineType="1">
-      <halfLifeYrs value="10"/>
-      <efficacyB value="10"/>
-      <initialEfficacy value="0.512"/>
-      <initialEfficacy value="0.64"/>
-      <initialEfficacy value="0.8"/>
-    </vaccineDescription>
-    <iptiDescription iptiEffect="13">
-      <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-      <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
-      <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
-    </iptiDescription>
-    <anopheles mosquito="gambiae_ss">
-      <ITNDescription name="LLIN test">
-        <deterrency halflife="3" initial="0.44"/>
-        <preprandialKillingEffect halflife="3" initial="0.27"/>
-        <postprandialKillingEffect halflife="3" initial="0.27"/>
-      </ITNDescription>
-      <IRSDescription name="DDT test">
-        <deterrency halflife="0.5" initial="0.56"/>
-        <killingEffect halflife="0.5" initial="0.24"/>
-      </IRSDescription>
-      <VADescription name="hypothetical deterrency">
-        <deterrency halflife="4" initial="0.2"/>
-      </VADescription>
-    </anopheles>
-    <anopheles mosquito="funestus">
-      <ITNDescription name="LLIN test">
-        <deterrency halflife="3" initial="0.44"/>
-        <preprandialKillingEffect halflife="3" initial="0.27"/>
-        <postprandialKillingEffect halflife="3" initial="0.27"/>
-      </ITNDescription>
-      <IRSDescription name="DDT test">
-        <deterrency halflife="0.5" initial="0.56"/>
-        <killingEffect halflife="0.5" initial="0.24"/>
-      </IRSDescription>
-      <VADescription name="hypothetical deterrency">
-        <deterrency halflife="4" initial="0.2"/>
-      </VADescription>
-    </anopheles>
-    <anopheles mosquito="arabiensis">
-      <ITNDescription name="LLIN test">
-        <deterrency halflife="3" initial="0.44"/>
-        <preprandialKillingEffect halflife="3" initial="0.27"/>
-        <postprandialKillingEffect halflife="3" initial="0.27"/>
-      </ITNDescription>
-      <IRSDescription name="DDT test">
-        <deterrency halflife="0.5" initial="0.56"/>
-        <killingEffect halflife="0.5" initial="0.24"/>
-      </IRSDescription>
-      <VADescription name="hypothetical deterrency">
-        <deterrency halflife="4" initial="0.2"/>
-      </VADescription>
-    </anopheles>
+    <descriptions>
+      <vaccineDescription vaccineType="3">
+        <halfLifeYrs value="10"/>
+        <efficacyB value="10"/>
+        <initialEfficacy value="0.512"/>
+        <initialEfficacy value="0.64"/>
+        <initialEfficacy value="0.8"/>
+      </vaccineDescription>
+      <vaccineDescription vaccineType="1">
+        <halfLifeYrs value="10"/>
+        <efficacyB value="10"/>
+        <initialEfficacy value="0.512"/>
+        <initialEfficacy value="0.64"/>
+        <initialEfficacy value="0.8"/>
+      </vaccineDescription>
+      <iptiDescription iptiEffect="13">
+        <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+        <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
+        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
+      </iptiDescription>
+      <anopheles mosquito="gambiae_ss">
+        <ITNDescription name="LLIN test">
+          <deterrency halflife="3" initial="0.44"/>
+          <preprandialKillingEffect halflife="3" initial="0.27"/>
+          <postprandialKillingEffect halflife="3" initial="0.27"/>
+        </ITNDescription>
+        <IRSDescription name="DDT test">
+          <deterrency halflife="0.5" initial="0.56"/>
+          <killingEffect halflife="0.5" initial="0.24"/>
+        </IRSDescription>
+        <VADescription name="hypothetical deterrency">
+          <deterrency halflife="4" initial="0.2"/>
+        </VADescription>
+      </anopheles>
+      <anopheles mosquito="funestus">
+        <ITNDescription name="LLIN test">
+          <deterrency halflife="3" initial="0.44"/>
+          <preprandialKillingEffect halflife="3" initial="0.27"/>
+          <postprandialKillingEffect halflife="3" initial="0.27"/>
+        </ITNDescription>
+        <IRSDescription name="DDT test">
+          <deterrency halflife="0.5" initial="0.56"/>
+          <killingEffect halflife="0.5" initial="0.24"/>
+        </IRSDescription>
+        <VADescription name="hypothetical deterrency">
+          <deterrency halflife="4" initial="0.2"/>
+        </VADescription>
+      </anopheles>
+      <anopheles mosquito="arabiensis">
+        <ITNDescription name="LLIN test">
+          <deterrency halflife="3" initial="0.44"/>
+          <preprandialKillingEffect halflife="3" initial="0.27"/>
+          <postprandialKillingEffect halflife="3" initial="0.27"/>
+        </ITNDescription>
+        <IRSDescription name="DDT test">
+          <deterrency halflife="0.5" initial="0.56"/>
+          <killingEffect halflife="0.5" initial="0.24"/>
+        </IRSDescription>
+        <VADescription name="hypothetical deterrency">
+          <deterrency halflife="4" initial="0.2"/>
+        </VADescription>
+      </anopheles>
+    </descriptions>
     <continuous>
       <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
       <vaccine coverage="0.95" targetAgeYrs="0.17"/>

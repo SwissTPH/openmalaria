@@ -32,7 +32,7 @@ vector<DescriptiveIPTInfection::GenotypeData> DescriptiveIPTInfection::genotypes
 
 // Only called if IPT is present
 void DescriptiveIPTInfection::initParameters (const scnXml::Interventions& xmlInterventions){
-  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getDescriptions().getIptiDescription().get();
   
   const scnXml::IptDescription::InfGenotypeSequence& genotypesData = xmlIPTI.getInfGenotype();
   genotypes.resize (genotypesData.size());

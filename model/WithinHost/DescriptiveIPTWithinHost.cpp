@@ -49,7 +49,7 @@ void DescriptiveIPTWithinHost::initParameters () {
     return;
   }
   const scnXml::Interventions& xmlInterventions = InputData().getInterventions();
-  if (!xmlInterventions.getIptiDescription().present()) {
+  if (!xmlInterventions.getDescriptions().getIptiDescription().present()) {
     throw util::xml_scenario_error ("IPT_SP_MODEL requires iptiDescription");
   }
   
@@ -61,7 +61,7 @@ void DescriptiveIPTWithinHost::initParameters () {
   }
   
   // --- IptiDescription begin ---
-  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getIptiDescription().get();
+  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getDescriptions().getIptiDescription().get();
   
   iptiEffect = xmlIPTI.getIptiEffect();
   // --- IptiDescription end ---

@@ -408,7 +408,8 @@ ESTreatmentSchedule* ESCaseManagement::mdaDoses;
 
 void ESCaseManagement::init () {
     // MDA Intervention data
-    const scnXml::Interventions::MDADescriptionOptional mdaDesc = InputData().getInterventions().getMDADescription();
+    const scnXml::Descriptions::MDADescriptionOptional mdaDesc =
+	InputData().getInterventions().getDescriptions().getMDADescription();
     if (mdaDesc.present()) {
 	if( !mdaDesc.get().getSchedule().present() )
 	    throw xml_scenario_error( "MDA description requires a treatment schedule with ES case management" );

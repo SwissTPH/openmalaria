@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 20;
+    static final int CURRENT_VERSION = 21;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -833,7 +833,7 @@ public class SchemaTranslator {
         return true;
     }
 
-    public boolean translate16To17() throws Exception {
+    public Boolean translate16To17() throws Exception {
 
         Element vector = (Element) scenarioElement.getElementsByTagName(
                 "vector").item(0);
@@ -892,7 +892,7 @@ public class SchemaTranslator {
         return true;
     }
 
-    public boolean translate17To18() throws Exception {
+    public Boolean translate17To18() throws Exception {
 
         Attr popSize = scenarioElement.getAttributeNode("popSize");
         Attr maxAgeYrs = scenarioElement.getAttributeNode("maximumAgeYrs");
@@ -916,7 +916,7 @@ public class SchemaTranslator {
     // Version 19: entoData's "mode" can no longer have value 3.
     // Removed unused "delta" from parameters.
     // Moved two event-scheduler outcome attributes into parameters element -- updated by hand.
-    public boolean translate18To19() throws Exception {
+    public Boolean translate18To19() throws Exception {
 	Element entoData = getChildElement(scenarioElement, "entoData");
 	Attr mode = entoData.getAttributeNode("mode");
 	
@@ -968,7 +968,7 @@ public class SchemaTranslator {
     // imr_summary changed name to allCauseIMR
     // minInfectedThreshold attribute was added to anopheles sections
     // pSequelaeInpatient data moved from ImmediateOutcomes to parent HealthSystem element, and changed form.
-    public boolean translate19To20() throws Exception {
+    public Boolean translate19To20() throws Exception {
         Element monitoring = getChildElement(scenarioElement, "monitoring");
 	Element ctsMon = getChildElement(monitoring, "continuous");
 	if ( ctsMon != null ){
@@ -1125,7 +1125,28 @@ public class SchemaTranslator {
 	}
 	return true;
     }
-
+    
+    /* Moved all intervention descriptions into a sub-element. */
+    public Boolean translate20To21() throws Exception {
+	Element intervs = getChildElement( scenarioElement, "interventions" );
+	Element descs = scenarioDocument.createElement( "descriptions" );
+	intervs.insertBefore( descs, intervs.getFirstChild() );
+	Node elt = descs.getNextSibling();
+	while( elt != null ){
+	    Node next = elt.getNextSibling();
+	    
+	    if( elt instanceof Element
+		&& !elt.getNodeName().equals( "continuous" )
+		&& !elt.getNodeName().equals( "timed" )
+	    ){
+		descs.appendChild( elt );
+	    }
+	    
+	    elt = next;
+	}
+	return true;
+    }
+    
     /**
      * This function is used to translate the 5-day timestep fitting
      * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly
