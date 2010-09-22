@@ -14,6 +14,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -85,6 +86,34 @@ public class SchemaTranslator {
     public static double Standard_RELATIVE_ENTO_AV = 1.0;
     public static double Standard_NHH_NUMBER = 1.0;
 
+    /** Returns all direct children of node with name name.
+     *
+     * Note: not the same as getElementsByTagName(), which finds all descendants. */
+    public static List<Node> getChildNodes( Node node, String name ){
+        ArrayList<Node> r = new ArrayList<Node>();
+        NodeList children = node.getChildNodes();
+        int l = children.getLength();
+        for( int i = 0; i < l; ++i ){
+            if( name.equals( children.item(i).getNodeName() ) )
+                r.add( children.item(i) );
+        }
+        return r;
+    }
+    /** Wrapper around getChildNodes() to get one Element.
+     *
+     * As a compromise between compatibility and safety, this will throw if
+     * there is more one sub-element with given name, but return null if there
+     * are no elements with the given name. */
+    public static Element getChildElement( Node node, String name )throws Exception{
+	List<Node> elts = getChildNodes( node, name );
+	if( elts.size() > 1 )
+	    throw new Exception( "Expected "+node.getNodeName()+" not to have more than one sub-element with name "+name );
+	else if( elts.size() == 1 )
+	    return (Element) elts.get(0);
+	else
+	    return null;
+    }
+    
     public SchemaTranslator() {
         try {
             _builder = DocumentBuilderFactory.newInstance()
@@ -95,8 +124,7 @@ public class SchemaTranslator {
     }
 
     private void validate(Document scenarioDocument, String schemaFileName,
-            String schemaDirectory) throws SAXException, IOException,
-            Exception, TransformerFactoryConfigurationError {
+            String schemaDirectory) throws Exception{
         Document forValidation = (Document) scenarioDocument.cloneNode(true);
         Element scenarioElement = forValidation.getDocumentElement();
         scenarioElement.removeAttribute("xsi:noNamespaceSchemaLocation");
@@ -106,10 +134,8 @@ public class SchemaTranslator {
         // This is set by the work generator
         scenarioElement.setAttribute("wuID", "123");
 
-        Element model = (Element) scenarioElement.getElementsByTagName("model")
-                .item(0);
-        Element t_parameters = (Element) model.getElementsByTagName(
-                "parameters").item(0);
+        Element model = getChildElement(scenarioElement, "model");
+        Element t_parameters = getChildElement(model, "parameters");
 
         if (t_parameters.getNodeValue() != null
                 && t_parameters.getNodeValue().contains("@parameters@")) {
@@ -258,8 +284,7 @@ public class SchemaTranslator {
 	}
     }
 
-    private String translateDocument() throws NoSuchMethodException, Exception,
-            IllegalAccessException, InvocationTargetException {
+    private String translateDocument() throws Exception{
         scenarioElement = scenarioDocument.getDocumentElement();
         // System.out.println("Updating: " +
         // scenarioElement.getAttribute("name"));
@@ -300,7 +325,7 @@ public class SchemaTranslator {
         return true;
     }
 
-    public Boolean translate1To2() {
+    public Boolean translate1To2() throws Exception {
         scenarioElement.setAttribute("xmlns:xsi",
                 "http://www.w3.org/2001/XMLSchema-instance");
         // Done by translate() method
@@ -310,12 +335,12 @@ public class SchemaTranslator {
             scenarioElement.setAttribute("wuID", "0");
         if (!scenarioElement.hasAttribute("assimMode"))
             scenarioElement.setAttribute("assimMode", "0");
-        Element elt = (Element) scenarioElement
-                .getElementsByTagName("entoData").item(0);
+        Element elt = getChildElement(scenarioElement, "entoData");
         if (elt != null && elt.hasAttribute("firstDay")) {
             System.out.println("Warning: Removed firstDay attribute");
             elt.removeAttribute("firstDay");
         }
+        //FIXME: may occur more than once
         elt = (Element) scenarioElement.getElementsByTagName("changeEIR").item(
                 0);
         if (elt != null && elt.hasAttribute("firstDay")) {
@@ -329,10 +354,10 @@ public class SchemaTranslator {
 
         NodeList sourcesElements = scenarioElement
                 .getElementsByTagName("sources");
-        for (int index = 0; index < sourcesElements.getLength(); index++) {
-            Element sourcesElement = (Element) sourcesElements.item(index);
+        while ( sourcesElements.getLength() > 0 ){
+            Element sourcesElement = (Element) sourcesElements.item(0);	// always use index 0 because items are removed
             Element parent = (Element) sourcesElement.getParentNode();
-            parent.removeChild(sourcesElement);
+            parent.removeChild(sourcesElement);	// this removes an item from sourcesElements
             parent.setNodeValue("");
         }
 
@@ -378,9 +403,8 @@ public class SchemaTranslator {
      * parameters have been removed, many have been added, and eipDuration has
      * been moved from param.
      */
-    public Boolean translate3To4() {
-        Element params = (Element) scenarioElement.getElementsByTagName(
-                "parameters").item(0);
+    public Boolean translate3To4() throws Exception {
+        Element params = getChildElement(scenarioElement, "parameters");
         Attr eip = null;
         if (params != null) {
             eip = params.getAttributeNode("eipDuration");
@@ -389,15 +413,14 @@ public class SchemaTranslator {
 
         // Attribute added to nonVector, if used, below.
 
-        Element elt = (Element) scenarioElement
-                .getElementsByTagName("entoData").item(0);
+        Element elt = getChildElement(scenarioElement, "entoData");
         if (elt != null) {
             NodeList list = elt.getElementsByTagName("EIRDaily");
             if (list.getLength() != 0) {
                 Element nonVector = scenarioDocument.createElement("nonVector");
                 elt.appendChild(nonVector);
                 // NOTE: results don't seem to be right if iterating forwards
-                // instead of backwards
+                // instead of backwards (list is "live" view)
                 for (int i = list.getLength() - 1; i >= 0; --i) {
                     // System.out.println (list.getLength());
                     Node eir = list.item(i);
@@ -425,16 +448,15 @@ public class SchemaTranslator {
             elt.removeAttribute("inputType");
         }
 
-        elt = (Element) scenarioElement.getElementsByTagName("interventions")
-                .item(0);
+        elt = getChildElement(scenarioElement, "interventions");
         if (elt != null) {
-            Element timed = (Element) elt.getElementsByTagName("timed").item(0);
+            Element timed = getChildElement(elt, "timed");
             if (timed != null) {
+                // NOTE: should check whole "intervention" list
                 Element interv = (Element) timed.getElementsByTagName(
                         "intervention").item(0);
                 if (interv != null) {
-                    Element cEIR = (Element) interv.getElementsByTagName(
-                            "changeEIR").item(0);
+                    Element cEIR = getChildElement(interv, "changeEIR");
                     if (cEIR != null) {
                         cEIR.removeAttribute("inputType");
                         cEIR.removeAttribute("name"); // part of EntoData not
@@ -497,7 +519,7 @@ public class SchemaTranslator {
         for (int i = 0; i < cMList.getLength(); ++i) {
             Element cM = (Element) cMList.item(i);
             cM.removeAttribute("minAgeYrs");
-            Element nmfNP = (Element) cM.getElementsByTagName("nmf").item(0);
+            Element nmfNP = getChildElement(cM, "nmf");
             scenarioDocument.renameNode(nmfNP, null, "nmfNP");
             Element nmfP = (Element) nmfNP.cloneNode(true);
             scenarioDocument.renameNode(nmfP, null, "nmfP");
@@ -515,13 +537,11 @@ public class SchemaTranslator {
     // Version 8 moved emergence rates and some other parameters into the XML
     // file. The relevant test scenarios have already been converted.
     public Boolean translate7To8() throws Exception {
-        Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
-                .item(0);
-        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+        Element eD = getChildElement(scenarioElement, "entoData");
+        Element vect = getChildElement(eD, "vector");
         if (vect != null) {
-            Element anoph = (Element) vect.getElementsByTagName("anopheles")
-                    .item(0);
-            Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
+            Element anoph = getChildElement(vect, "anopheles");
+            Element mosq = getChildElement(anoph, "mosq");
             // This was required, so this if should always be true:
             if (mosq.getAttribute("emergenceRateFilename") != null) {
                 System.err
@@ -546,14 +566,13 @@ public class SchemaTranslator {
 
     // Version 11 removes cached emerge rates from the schema
     public Boolean translate10To11() throws Exception {
-        Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
-                .item(0);
-        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+        Element eD = getChildElement(scenarioElement, "entoData");
+        Element vect = getChildElement(eD, "vector");
         if (vect != null) {
             NodeList species = vect.getElementsByTagName("anopheles");
             for (int i = 0; i < species.getLength(); ++i) {
                 Element anoph = (Element) species.item(i);
-                Node er = anoph.getElementsByTagName("emergence").item(0);
+                Element er = getChildElement(anoph, "emergence");
                 if (er != null)
                     anoph.removeChild(er);
                 // These are from the parameter values based on Anopheles
@@ -681,10 +700,8 @@ public class SchemaTranslator {
         surveyCode2String[30] = "innoculationsPerAgeGroup";
 
         Element surveyOptions = scenarioDocument.createElement("SurveyOptions");
-        Element monitoring = (Element) scenarioElement.getElementsByTagName(
-                "monitoring").item(0);
-        Element surveys = (Element) monitoring.getElementsByTagName("surveys")
-                .item(0);
+        Element monitoring = getChildElement(scenarioElement, "monitoring");
+        Element surveys = getChildElement(monitoring, "surveys");
         int surveyFlags = Integer.parseInt(surveys
                 .getAttribute("summaryOption"));
 
@@ -717,8 +734,7 @@ public class SchemaTranslator {
     // and there's no direct
     // translation from the old version.
     public Boolean translate13To14() throws Exception {
-        Element cms = (Element) scenarioElement.getElementsByTagName(
-                "drugDescription").item(0);
+        Element cms = getChildElement(scenarioElement, "drugDescription");
         if (cms != null) {
             System.err
                     .println("Warning: drugDescription element has changed; please rewrite manually.");
@@ -738,8 +754,7 @@ public class SchemaTranslator {
         Element clinical = scenarioDocument.createElement("clinical");
         Element modelOptions = (Element) scenarioElement.getElementsByTagName(
                 "ModelOptions").item(0);
-        Element parameters = (Element) scenarioElement.getElementsByTagName(
-                "parameters").item(0);
+        Element parameters = getChildElement(scenarioElement, "parameters");
 
         model.appendChild(modelOptions);
         model.appendChild(clinical);
@@ -747,8 +762,7 @@ public class SchemaTranslator {
 
         scenarioElement.appendChild(model);
 
-        Element healthSystemOld = (Element) scenarioElement
-                .getElementsByTagName("healthSystem").item(0);
+        Element healthSystemOld = getChildElement(scenarioElement, "healthSystem");
         Element eventScheduler = (Element) scenarioElement
                 .getElementsByTagName("EventScheduler").item(0);
         Attr healthSystemMemory;
@@ -784,18 +798,17 @@ public class SchemaTranslator {
             // healthSystemOld.removeAttribute("name");
             scenarioDocument.renameNode(healthSystemOld, null,
                     "ImmediateOutcomes");
-            Element CFR = (Element) healthSystemOld.getElementsByTagName("CFR")
-                    .item(0);
+            Element CFR = getChildElement(healthSystemOld, "CFR");
 
             healthSystemNew.appendChild(healthSystemOld);
             healthSystemNew.appendChild(CFR);
         }
-
+        
+        // FIXME: could be more than one intervention with changeHS
         Element Intervention = (Element) scenarioElement.getElementsByTagName(
                 "intervention").item(0);
         if (Intervention != null) {
-            Element changeHS = (Element) Intervention.getElementsByTagName(
-                    "changeHS").item(0);
+            Element changeHS = getChildElement(Intervention, "changeHS");
 
             if (changeHS != null) {
                 changeHS.removeAttribute("healthSystemMemory");
@@ -808,15 +821,13 @@ public class SchemaTranslator {
                 Intervention.appendChild(changeHSNew);
                 changeHSNew.appendChild(changeHS);
 
-                Element HSCFR = (Element) changeHS.getElementsByTagName("CFR")
-                        .item(0);
+                Element HSCFR = getChildElement(changeHS, "CFR");
                 changeHSNew.appendChild(HSCFR);
             }
 
         }
 
-        scenarioElement.insertBefore(healthSystemNew, scenarioElement
-                .getElementsByTagName("entoData").item(0));
+        scenarioElement.insertBefore(healthSystemNew, getChildElement(scenarioElement, "entoData"));
         clinical.setAttributeNode(healthSystemMemory);
 
         return true;
@@ -891,10 +902,8 @@ public class SchemaTranslator {
         scenarioElement.removeAttribute("maximumAgeYrs");
         scenarioElement.removeAttribute("mode");
 
-        Element demography = (Element) scenarioElement.getElementsByTagName(
-                "demography").item(0);
-        Element entoData = (Element) scenarioElement.getElementsByTagName(
-                "entoData").item(0);
+        Element demography = getChildElement(scenarioElement, "demography");
+        Element entoData = getChildElement(scenarioElement, "entoData");
 
         demography.setAttributeNode(popSize);
         demography.setAttributeNode(maxAgeYrs);
@@ -908,17 +917,16 @@ public class SchemaTranslator {
     // Removed unused "delta" from parameters.
     // Moved two event-scheduler outcome attributes into parameters element -- updated by hand.
     public boolean translate18To19() throws Exception {
-	Element entoData = (Element) scenarioElement.getElementsByTagName(
-	    "entoData").item(0);
+	Element entoData = getChildElement(scenarioElement, "entoData");
 	Attr mode = entoData.getAttributeNode("mode");
 	
 	if (Integer.parseInt(mode.getValue()) == 3){
 	    // unless an intervention at time 0 specifies EIR values, the scenario was buggy
 	    boolean hasTransientEIRAt0 = false;
 	    
-	    Element elt = (Element) scenarioElement.getElementsByTagName("interventions").item(0);
+	    Element elt = getChildElement(scenarioElement, "interventions");
 	    if (elt != null) {
-		Element timed = (Element) elt.getElementsByTagName("timed").item(0);
+		Element timed = getChildElement(elt, "timed");
 		if (timed != null) {
 		    NodeList intervs = timed.getElementsByTagName("intervention");
 		    for (int i = 0; i < intervs.getLength(); i++) {
@@ -926,7 +934,7 @@ public class SchemaTranslator {
 			if (Integer.parseInt(interv.getAttribute("time")) != 0)
 			    continue;	// only interested in interv. at time 0
 			
-			Element cEIR = (Element) interv.getElementsByTagName("changeEIR").item(0);
+			Element cEIR = getChildElement(interv, "changeEIR");
 			if (cEIR != null)	// yes, have applicable transient EIR data
 			    hasTransientEIRAt0 = true;
 		    }
@@ -941,12 +949,10 @@ public class SchemaTranslator {
 	    mode.setValue ("4");
 	}
 	
-        Element model = (Element) scenarioElement.getElementsByTagName("model")
-                .item(0);
+        Element model = getChildElement(scenarioElement, "model");
         if(model!=null)
         {
-            Element t_parameters = (Element) model.getElementsByTagName(
-                "parameters").item(0);
+            Element t_parameters = getChildElement(model, "parameters");
             if(t_parameters!=null)
                 t_parameters.removeAttribute("delta");
         }
@@ -963,9 +969,8 @@ public class SchemaTranslator {
     // minInfectedThreshold attribute was added to anopheles sections
     // pSequelaeInpatient data moved from ImmediateOutcomes to parent HealthSystem element, and changed form.
     public boolean translate19To20() throws Exception {
-        Element monitoring = (Element) scenarioElement.getElementsByTagName(
-                "monitoring").item(0);
-	Element ctsMon = (Element)monitoring.getElementsByTagName("continuous").item(0);
+        Element monitoring = getChildElement(scenarioElement, "monitoring");
+	Element ctsMon = getChildElement(monitoring, "continuous");
 	if ( ctsMon != null ){
 	    // Guess the common update. If not, complain.
 	    if( ctsMon.getAttribute("period").equals("5") )
@@ -974,7 +979,7 @@ public class SchemaTranslator {
 		System.err.println("Warning: monitoring->continuous->period changed unit from timesteps to days. Please update accordingly.");
 	}
 	
-	Element SurveyOptions = (Element) monitoring.getElementsByTagName("SurveyOptions").item(0);
+	Element SurveyOptions = getChildElement(monitoring, "SurveyOptions");
 	NodeList options = SurveyOptions.getElementsByTagName("option");
 	for (int i = 0; i < options.getLength(); ++i){
 	    Element option = (Element) options.item(i);
@@ -983,14 +988,13 @@ public class SchemaTranslator {
 	    }
 	}
 	
-	Element eD = (Element) scenarioElement.getElementsByTagName("entoData")
-                .item(0);
-        Element vect = (Element) eD.getElementsByTagName("vector").item(0);
+	Element eD = getChildElement(scenarioElement, "entoData");
+        Element vect = getChildElement(eD, "vector");
         if (vect != null) {
             NodeList species = vect.getElementsByTagName("anopheles");
             for (int i = 0; i < species.getLength(); ++i) {
                 Element anoph = (Element) species.item(i);
-		Element mosq = (Element) anoph.getElementsByTagName("mosq").item(0);
+		Element mosq = getChildElement(anoph, "mosq");
                 mosq.setAttribute("minInfectedThreshold", "0.01");
             }
             System.err
@@ -998,19 +1002,16 @@ public class SchemaTranslator {
         }
 	
 	// IPTI_SP_MODEL option (try to work out whether it should be used)
-        Element interventions = (Element) scenarioElement.getElementsByTagName(
-                "interventions").item(0);
+        Element interventions = getChildElement(scenarioElement, "interventions");
 	if (interventions != null){
-	    Element iptiDesc = (Element) interventions.getElementsByTagName(
-		"iptiDescription").item(0);
+	    Element iptiDesc = getChildElement(interventions, "iptiDescription");
 	    if (iptiDesc != null){
 		int nIPTI = 0;
-		Element continuous = (Element)interventions.getElementsByTagName(
-		    "continuous").item(0);
+		Element continuous = getChildElement(interventions, "continuous");
 		if (continuous != null){
 		    nIPTI += continuous.getElementsByTagName("ipti").getLength();
 		}
-		Element timed = (Element)interventions.getElementsByTagName("timed").item(0);
+		Element timed = getChildElement(interventions, "timed");
 		if (timed != null){
 		    NodeList tIntervs = timed.getElementsByTagName("intervention");
 		    for (int i = 0; i < tIntervs.getLength(); ++i){
@@ -1019,8 +1020,8 @@ public class SchemaTranslator {
 		    }
 		}
 		
-		Element modelElement = (Element)scenarioElement.getElementsByTagName("model").item(0);
-		Element modelOptions = (Element)modelElement.getElementsByTagName("ModelOptions").item(0);
+		Element modelElement = getChildElement(scenarioElement, "model");
+		Element modelOptions = getChildElement(modelElement, "ModelOptions");
 		Element iptiOption = scenarioDocument.createElement("option");
 		iptiOption.setAttribute("name", "IPTI_SP_MODEL");
 	
@@ -1049,10 +1050,10 @@ public class SchemaTranslator {
 	    }
 	}
         
-        Element hs = (Element)scenarioElement.getElementsByTagName("healthSystem").item(0);
+        Element hs = getChildElement(scenarioElement, "healthSystem");
 	translateHealthSystem19To20( hs );
 	if (interventions != null){
-	    Element timed = (Element)interventions.getElementsByTagName("timed").item(0);
+	    Element timed = getChildElement(interventions, "timed");
 	    if (timed != null){
 		NodeList changeHS = timed.getElementsByTagName("changeHS");
 		for (int i = 0; i < changeHS.getLength(); ++i){
@@ -1086,11 +1087,11 @@ public class SchemaTranslator {
     }
     boolean translateHealthSystem19To20 (Element hs) throws Exception {
 	// pSequelaeInpatient update
-        Element hsio = (Element)hs.getElementsByTagName("ImmediateOutcomes").item(0);
+        Element hsio = getChildElement(hs, "ImmediateOutcomes");
 	double[] pSeqGroupLBound = new double[] { 0.0, 5.0 };
 	double[] pSeqGroupValue;
         if( hsio != null ){
-	    Element oldPSeq = (Element)hsio.getElementsByTagName("pSequelaeInpatient").item(0);
+	    Element oldPSeq = getChildElement(hsio, "pSequelaeInpatient");
 	    pSeqGroupValue = readV19PSequelaeInpatientValues( oldPSeq );
 	    if( pSeqGroupValue == null ){
 		System.err.println("Error: expected pSequelaeInpatient to have two age-groups: 0-5 and 5-99");
@@ -1114,7 +1115,7 @@ public class SchemaTranslator {
 	hs.appendChild( pSeqGroups );
 	
 	// CFR element changed
-	Element cfrElt = (Element)hs.getElementsByTagName("CFR").item(0);
+	Element cfrElt = getChildElement(hs, "CFR");
 	NodeList cfrList = cfrElt.getElementsByTagName("group");
 	for( int i = 0; i < cfrList.getLength(); ++i ){
 	    Element group = (Element)cfrList.item(i);
@@ -1134,7 +1135,7 @@ public class SchemaTranslator {
      * @return true if the translation was a success.
      *
      */
-    private Boolean oDTTranslation() {
+    private Boolean oDTTranslation() throws Exception {
 
     	Element surveys = (Element)scenarioElement.getElementsByTagName("surveys").item(0);
         NodeList surveystimes = surveys.getElementsByTagName("surveyTime");
@@ -1146,8 +1147,8 @@ public class SchemaTranslator {
             surveytime.setTextContent(String.valueOf(((surveyTime -1)*5)+1));
         }
 
-        Element modelElement = (Element)scenarioElement.getElementsByTagName("model").item(0);
-        Element modelOptions = (Element)modelElement.getElementsByTagName("ModelOptions").item(0);
+        Element modelElement = getChildElement(scenarioElement, "model");
+        Element modelOptions = getChildElement(modelElement, "ModelOptions");
 
         Element molineauxOption = scenarioDocument.createElement("option");
         Attr name = scenarioDocument.createAttribute("name");
@@ -1196,7 +1197,7 @@ public class SchemaTranslator {
         for(int i=0;i<changeHSList.getLength();i++)
         {
             Element changeHS = (Element) changeHSList.item(i);
-            Element immediateOutcomes = (Element)changeHS.getElementsByTagName("ImmediateOutcomes").item(0);
+            Element immediateOutcomes = getChildElement(changeHS, "ImmediateOutcomes");
             String valueString = immediateOutcomes.getAttribute("name");
 
             if(valueString.equals("Do Monitoring HS")||valueString.equals("Np Monitoring HS"))
@@ -1391,7 +1392,7 @@ public class SchemaTranslator {
                 eventScheduler.appendChild(clinicalOutcomes);
 
 
-                Element CFR = (Element)changeHS.getElementsByTagName("CFR").item(0);
+                Element CFR = getChildElement(changeHS, "CFR");
                 if(CFR!=null)
                     changeHS.insertBefore(eventScheduler, CFR);
                 else
@@ -1404,7 +1405,7 @@ public class SchemaTranslator {
 
         Element healthSystem = (Element)scenarioDocument.getElementsByTagName("healthSystem").item(0);
 
-        Element immediateOutcomes = (Element)healthSystem.getElementsByTagName("ImmediateOutcomes").item(0);
+        Element immediateOutcomes = getChildElement(healthSystem, "ImmediateOutcomes");
         String valueString = immediateOutcomes.getAttribute("name");
 
         System.out.println(valueString);
@@ -1601,7 +1602,7 @@ public class SchemaTranslator {
             eventScheduler.appendChild(clinicalOutcomes);
 
 
-            Element CFR = (Element)healthSystem.getElementsByTagName("CFR").item(0);
+            Element CFR = getChildElement(healthSystem, "CFR");
             if(CFR!=null)
                 healthSystem.insertBefore(eventScheduler, CFR);
             else
@@ -1829,7 +1830,7 @@ public class SchemaTranslator {
             eventScheduler.appendChild(clinicalOutcomes);
 
 
-            Element CFR = (Element)healthSystem.getElementsByTagName("CFR").item(0);
+            Element CFR = getChildElement(healthSystem, "CFR");
             if(CFR!=null)
                 healthSystem.insertBefore(eventScheduler, CFR);
             else
@@ -1895,7 +1896,7 @@ public class SchemaTranslator {
 
         //creating MDADescription element, if there are interventions...
 
-        Element interventions = (Element)scenarioElement.getElementsByTagName("interventions").item(0);
+        Element interventions = getChildElement(scenarioElement, "interventions");
         if(interventions.getAttribute("name").equals("A2 Intervention"))
         {
             Element mdaDescription = scenarioDocument.createElement("MDADescription");
@@ -2080,16 +2081,22 @@ public class SchemaTranslator {
 
     private static void printUsage() {
         System.out.println("Usage: schemaTranslator [options]:\n"
-	    + "--required_version VERSION\tThe version number to update the document(s) to. Default: CURRENT_VERSION="+CURRENT_VERSION
-	    + "--latest-schema\t\tUse schema scenario.xsd instead of scenario_VERSION.xsd"
-	    + "--no-validation\t\tDon't validate the result"
-	    + "--no-translation\t\tDon't write out the translated result (but still translate internally for validation)"
-	    + "--update-db\t\tUpdate DB entries instead of files"
-	    + "--maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false to explicitly exclude it."
-	    + "--iptiSpOptionWithoutInterventions\tFor scenarios with iptiDescription but without interventions, assume usage of the IPTI model was (t) intended or (f) a mistake."
-            + "--schema_folder\t\t The schema folder, by default ../../schema"
-	    + "--input_folder\t\t The input folder, by default ./scenarios/"
-            + "--output_folder\t\t The output folder, by default ./translatedScenarios/"	
+	    + "\n  --required_version VERSION\tThe version number to update the document(s) to. Default:"
+	    + "\n\t\t\t\tCURRENT_VERSION="+CURRENT_VERSION
+	    + "\n  --latest-schema\t\tUse schema scenario.xsd instead of scenario_VERSION.xsd"
+	    + "\n  --no-validation\t\tDon't validate the result"
+	    + "\n  --no-translation\t\tDon't write out the translated result (but still translate internally for"
+	    + "\n\t\t\t\tvalidation)"
+	    + "\n  --update-db\t\t\tUpdate DB entries instead of files"
+	    + "\n  --maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false"
+	    + "\n\t\t\t\tto explicitly exclude it."
+	    + "\n  --iptiSpOptionWithoutInterventions"
+	    + "\n\t\t\t\tFor scenarios with iptiDescription but without interventions, assume usage"
+	    + "\n\t\t\t\tof the IPTI model"
+	    + "\n\t\t\t\twas (t) intended or (f) a mistake."
+            + "\n  --schema_folder\t\tThe schema folder, by default ../../schema"
+	    + "\n  --input_folder\t\tThe input folder, by default ./scenarios/"
+            + "\n  --output_folder\t\tThe output folder, by default ./translatedScenarios/"
         );
         System.exit(1);
     }

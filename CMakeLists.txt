@@ -144,7 +144,7 @@ endif (OM_BOINC_INTEGRATION)
 # -----  Compile-time optional features  -----
 # (must come before add_subdirectory (model))
 
-option (OM_STREAM_VALIDATOR "Compile in StreamValidator (useful when looking for checkpointing bugs)" OFF)
+option (OM_STREAM_VALIDATOR "Compile in StreamValidator (see include/util/StreamValidator.h for usage notes)" OFF)
 if (OM_STREAM_VALIDATOR)
   add_definitions (-DOM_STREAM_VALIDATOR)
 endif (OM_STREAM_VALIDATOR)
