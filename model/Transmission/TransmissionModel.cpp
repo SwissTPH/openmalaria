@@ -29,6 +29,7 @@
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
+#include "util/CommandLine.hpp"
 
 #include <cmath> 
 #include <cfloat>
@@ -40,14 +41,27 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
   const scnXml::EntoData::VectorOptional& vectorData = InputData().getEntoData().getVector();
+  
+  TransmissionModel *model;
   if (vectorData.present())
-    return new VectorTransmission(vectorData.get(), populationSize);
+    model = new VectorTransmission(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData().getEntoData().getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
-    return new NonVectorTransmission(nonVectorData.get());
+    model = new NonVectorTransmission(nonVectorData.get());
   }
+  
+  if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) )
+      cout << "Total annual (input) EIR: "<<model->annualEIR<<endl;
+  if( util::CommandLine::option( util::CommandLine::SET_ANNUAL_EIR ) ){
+      model->scaleXML_EIR(
+	InputData.getMutableScenario().getEntoData(),
+	util::CommandLine::getNewEIR() / model->annualEIR
+      );
+      InputData.documentChanged = true;
+  }
+  return model;
 }
 
 

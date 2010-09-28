@@ -34,6 +34,9 @@ public:
 
   NonVectorTransmission(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorTransmission();
+  
+  virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
+  
   //! initialise the main simulation 
   void initMainSimulation ();
   

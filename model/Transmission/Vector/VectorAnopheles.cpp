@@ -25,6 +25,7 @@
 #include "inputData.h"
 #include "Simulation.h"
 #include "util/vectors.h"
+#include "util/CommandLine.hpp"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>
@@ -118,6 +119,11 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   // Add to the TransmissionModel's EIR, used for the initalization phase:
   for (size_t i = 0; i < Global::intervalsPerYear; ++i)
     initialisationEIR[i] += speciesEIR[i];
+  
+  if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
+    cout << "Annual (input) EIR for "<<anoph.getMosquito()
+         << ": "<<vectors::sum( speciesEIR )<<endl;
+  }
   
   // Set other data used for mosqEmergeRate calculation:
   FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;	// usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration

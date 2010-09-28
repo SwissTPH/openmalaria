@@ -78,8 +78,10 @@ public:
   /// Creates a derived class
   static TransmissionModel* createTransmissionModel (int populationSize);
   
+protected:
   //! Reads all entomological parameters from the input datafile. 
   TransmissionModel();
+public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();
   
@@ -99,6 +101,14 @@ public:
    * Overriding functions should call this base version too. */
   virtual void summarize (Monitoring::Survey& survey);
   
+  /** Scale the EIR descriptions in the XML element.
+   * This updates the XML, and not the EIR descriptions used for simulations.
+   * In order for changes to be written back to the XML file,
+   * InputData.documentChanged needs to be set.
+   * 
+   * @param ed	Access to XML element to update.
+   * @param factor	Multiplicative factor by which to scale EIR. */
+  virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
   
   /** How many intervals are needed for vector initialisation after one-
    * lifespan initialisation? */
@@ -193,7 +203,8 @@ protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   
-  /** EIR per time step during the pre-intervention phase (slightly different
+  /** Entomological innoculations per person per time step during the
+   * pre-intervention phase (slightly different
    * usage for Vector and NonVector models; in both cases one year long).
    *
    * Units: average innoculations per adult per timestep
@@ -228,7 +239,7 @@ private:
   int BSSTimesteps;
 
 protected:
-  /*! Total annual EIR.
+  /** Total annual innoculations per person.
    *
    * Checkpointed. */
   double annualEIR;

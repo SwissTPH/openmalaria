@@ -40,6 +40,8 @@ public:
    * information from the human population structure. */
   virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
   
+  virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
+  
   /** How long to sample for before first iteration of fitting.
    *
    * (EIR is forced until vectorInitIterate finishes fitting). */

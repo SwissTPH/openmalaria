@@ -47,7 +47,11 @@ namespace OM { namespace util {
 	     * Even with binary checkpoints, this has a big effect. */
 	    COMPRESS_CHECKPOINTS,
 	    /** Do initialisation and error checks, but don't run simulation. */
-	    VALIDATE_ONLY,
+	    SKIP_SIMULATION,
+	    /** Print the annual EIR. */
+	    PRINT_ANNUAL_EIR,
+	    /** Scale EIR to a new annual level. */
+	    SET_ANNUAL_EIR,
 	    NUM_OPTIONS
 	};
 	
@@ -71,6 +75,12 @@ namespace OM { namespace util {
 	* BoincWrapper::resolveFile() and returns the result. */
 	static string lookupResource (const string& path);
 	
+	/** Get the new target annual EIR (only set if SET_ANNUAL_EIR option
+	 * is true). */
+	static inline double getNewEIR (){
+	    return newEIR;
+	}
+	
 	/** Looks through all command line options.
 	*
 	* @returns The name of the scenario XML file to use.
@@ -90,9 +100,11 @@ namespace OM { namespace util {
 	static void staticCheckpoint (ostream& stream);	///< ditto
 	
     private:
-	// Static parameters: set by parse _and_ checked on checkpoint load
+	// Static parameters: don't require checkpointing (set by parse())
 	static bitset<NUM_OPTIONS> options;	// boolean options
 	static string resourcePath;
+	
+	static double newEIR;
 	
 	/** Set of simulation times at which a checkpoint should be written and
 	* program should exit (to allow resume). */

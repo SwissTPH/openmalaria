@@ -101,8 +101,8 @@ class SurveyMeasureMap {
 	    map<string,SM::SurveyMeasure>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-		msg << "Unrecognised survey option: ";
-		msg << s;
+		msg << "Unrecognised survey option: \"";
+		msg << s << '"';
 		throw util::xml_scenario_error(msg.str());
 	    }
 	    return codeIt->second;

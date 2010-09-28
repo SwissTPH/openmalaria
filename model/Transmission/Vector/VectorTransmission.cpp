@@ -125,6 +125,20 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
   }
 }
 
+void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
+    // XML values are exponentiated; so we add some factor to existing a0 values:
+    double add_to_a0 = std::log( factor );
+    
+    assert( ed.getVector().present() );
+    scnXml::Vector::AnophelesSequence& anophelesList = ed.getVector().get().getAnopheles();
+    
+    for( scnXml::Vector::AnophelesIterator it = anophelesList.begin();
+	it != anophelesList.end(); ++it ){
+	double old_a0 = it->getEir().getA0();
+	it->getEir().setA0( old_a0 + add_to_a0 );
+    }
+}
+
 int VectorTransmission::transmissionInitDuration () {
     // Data is summed over the last year of human initialisation.
     return 0;

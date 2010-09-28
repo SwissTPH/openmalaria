@@ -164,8 +164,9 @@ namespace Interventions {
 
 	/** Set true if the xml document has been changed and should be saved.
 	 *
-	 * Currently this is unused. If it is used again, we should be careful about checkpointing since
-	 * none of the scenario element is currently checkpointed. */
+	 * Note that the document will be saved between initialisation and
+	 * running the main simulation, so only changes added during init will
+	 * be saved. (This avoids worrying about checkpointing.) */
 	bool documentChanged;
 
 	

@@ -41,12 +41,13 @@ int main(int argc, char* argv[]) {
         scenario_name = OM::util::CommandLine::lookupResource (scenario_name);
         OM::util::Checksum cksum = OM::InputData.createDocument(scenario_name);
 	
-	OM::Simulation simulation (cksum);	// constructor runs
-	if ( !OM::util::CommandLine::option(OM::util::CommandLine::VALIDATE_ONLY) )
-	    simulation.start();
+	OM::Simulation simulation (cksum);	// constructor runs; various initialisations
 	
 	// Save changes to the document if any occurred.
         OM::InputData.saveDocument();
+	
+	if ( !OM::util::CommandLine::option(OM::util::CommandLine::SKIP_SIMULATION) )
+	    simulation.start();
 	
 	// We call boinc_finish before cleanup since it should help ensure
 	// app isn't killed between writing output.txt and calling boinc_finish,
@@ -62,6 +63,8 @@ int main(int argc, char* argv[]) {
         cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
     } catch (const OM::util::checkpoint_error& e) {
         cerr << "Checkpoint exception: " << e.what() << endl;
+    } catch (const OM::util::xml_scenario_error& e) {
+        cerr << "Error in scenario XML file: " << e.what() << endl;
     } catch (const exception& e) {
         cerr << "Exception: " << e.what() << endl;
     } catch (...) {

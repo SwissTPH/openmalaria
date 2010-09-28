@@ -28,12 +28,15 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
+#include <boost/lexical_cast.hpp>
 
 /// Source code for CommandLine.hpp and ModelOptions.hpp
 namespace OM { namespace util {
+    using boost::lexical_cast;
     
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
+    double CommandLine::newEIR;
     set<int> CommandLine::checkpoint_times;
     uint32_t ModelOptions::optSet;
     
@@ -48,6 +51,7 @@ namespace OM { namespace util {
 	options[COMPRESS_CHECKPOINTS] = true;	// turn on by default
 	
 	bool cloHelp = false, cloError = false;
+	newEIR = numeric_limits<double>::quiet_NaN();
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
 #	ifdef OM_STREAM_VALIDATOR
@@ -74,8 +78,18 @@ namespace OM { namespace util {
 		    fileGiven = true;
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
+                    options.set (SKIP_SIMULATION);
+		} else if (clo == "print-EIR") {
+		    options.set (PRINT_ANNUAL_EIR);
+                    options.set (SKIP_SIMULATION);
+		} else if (clo == "set-EIR") {
+		    if (newEIR == newEIR)	// initialised to NaN
+			throw runtime_error ("--set-EIR already given");
+		    newEIR = lexical_cast<double>(parseNextArg (argc, argv, i));
+		    options.set (SET_ANNUAL_EIR);
+                    options.set (SKIP_SIMULATION);
                 } else if (clo == "validate-only") {
-                    options.set (VALIDATE_ONLY);
+                    options.set (SKIP_SIMULATION);
 		} else if (clo == "checkpoint") {
 		    options.set (TEST_CHECKPOINTING);
 		} else if (clo.compare (0,11,"checkpoint=") == 0) {
@@ -124,6 +138,7 @@ namespace OM { namespace util {
 			resourcePath = parseNextArg (argc, argv, i).append ("/");
 		    } else if (clo[j] == 'm') {
 			options.set (PRINT_MODEL_OPTIONS);
+			options.set (SKIP_SIMULATION);
 		    } else if (clo[j] == 'c') {
 			options.set (TEST_CHECKPOINTING);
 		    } else if (clo[j] == 'd') {
@@ -149,6 +164,10 @@ namespace OM { namespace util {
 	    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
+	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
+	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (innocs./person/year)"<<endl
+	    << "			Note: updated XML file will be generated in working directory,"<<endl
+	    << "			and will have other, mostly insignificant, differences to original."<<endl
             << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "    --checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
 	    << "			more than once. Overrides --checkpoint option."<<endl
@@ -198,6 +217,8 @@ namespace OM { namespace util {
 	return BoincWrapper::resolveFile (ret);
     }
     
+    /* These check parameters are as expected. They only really serve to make
+     * sure important command-line parameters didn't change (and only in DEBUG mode)! */
     void CommandLine::staticCheckpoint (istream& stream) {
 	string tOpt;
 	string tResPath;
@@ -365,10 +386,6 @@ namespace OM { namespace util {
 	// Required options (above table can't check these):
 	if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
 	    throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
-	
-	// Stop OM now if "--print-model" was on command-line
-	if (CommandLine::option (util::CommandLine::PRINT_MODEL_OPTIONS))
-	    throw cmd_exit ("Printed model version");
 	
 	// Convert from bitset to more performant integer with binary operations
 	// Note: use bitset up to now to restrict use of binary operators to

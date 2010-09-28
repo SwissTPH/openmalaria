@@ -171,8 +171,10 @@ void InputDataType::saveDocument()
             baseName = xmlFileName.c_str();
         else
             ++baseName;  // start at next character
-
+	
         ofstream outStream (baseName);
+	// Set schema file. Unfortunately we don't know what it was in input
+	// file, so this is only a guess.
         ostringstream schema;
         schema << "scenario_" << SCHEMA_VERSION << ".xsd";
 
