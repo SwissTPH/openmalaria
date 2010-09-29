@@ -71,6 +71,8 @@ namespace OM {
 	extern double yearsPerInterval;
 	/// Maximum age of individuals in a scenario in time intervals
 	extern int maxAgeIntervals;
+	/// Smallest number such that it is at least maxAgeIntervals and a whole year.
+	extern int lifespanInitIntervals;
 	//@}
 	
 	/** @brief Simulation variables, made global to save continuously passing.

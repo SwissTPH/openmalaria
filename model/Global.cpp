@@ -25,6 +25,7 @@
 
 #include "Global.h"
 #include "inputData.h"
+#include "util/errors.hpp"
 
 namespace OM {
     int Global::interval;
@@ -32,6 +33,7 @@ namespace OM {
     size_t Global::intervalsPerYear;
     double Global::yearsPerInterval;
     int Global::maxAgeIntervals;
+    int Global::lifespanInitIntervals;
     
     int Global::simulationTime;
     int Global::timeStep;
@@ -45,7 +47,18 @@ namespace OM {
 	intervalsPer5Days = 5/interval;
 	intervalsPerYear = Global::DAYS_IN_YEAR/interval;
 	yearsPerInterval = double(interval) / double(Global::DAYS_IN_YEAR);
+	
+	double maxAgeYears = InputData().getDemography().getMaximumAgeYrs();
+	
 	// Changed in r756 (2010-03-04): Did cast max-age-years to int before multiplying (minor effect on output).
-	maxAgeIntervals = static_cast<int> (InputData().getDemography().getMaximumAgeYrs() * intervalsPerYear);
+	maxAgeIntervals = static_cast<int> (maxAgeYears * intervalsPerYear);
+	// For schema 22: Make sure first day of intervention period is same
+	// day-of-year of first day of simulation.
+	lifespanInitIntervals = static_cast<int>(std::ceil(maxAgeYears)) * intervalsPerYear;
+	// NOTE: This is also because both transmission models need at least
+	// one year for initialization. This change is partially the opposite of
+	// r756/r770, but not really the same.
+	if( lifespanInitIntervals < (int)intervalsPerYear )
+	    throw util::xml_scenario_error( "maximumAgeYrs must be positive" );
     }
 }

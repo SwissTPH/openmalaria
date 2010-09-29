@@ -111,14 +111,18 @@ public:
   virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
   
   /** How many intervals are needed for vector initialisation after one-
-   * lifespan initialisation? */
+   * lifespan initialisation?
+   *
+   * Units: timesteps; value should be a whole number of years. */
   virtual int transmissionInitDuration () =0;
   /** Called after end of transmissionInitDuration() to control initialisation
    * iterations.
    * 
    * Should determine whether another init iteration is needed, make necessary
    * adjustments, and return number of timesteps to run this initialisation for
-   * (0 if no further iteration is needed). */
+   * (0 if no further iteration is needed).
+   *
+   * Units: timesteps; value should be a whole number of years. */
   virtual int transmissionInitIterate () {
     return 0;
   }
@@ -207,7 +211,7 @@ protected:
    * pre-intervention phase (slightly different
    * usage for Vector and NonVector models; in both cases one year long).
    *
-   * Units: average innoculations per adult per timestep
+   * Units: innoculations per adult per timestep
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */

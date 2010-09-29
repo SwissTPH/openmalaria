@@ -33,11 +33,11 @@ namespace OM {
     using boost::format;
     
 /// Current schema version.
-const int SCHEMA_VERSION = 21;
+const int SCHEMA_VERSION = 22;
 /** Oldest which current code is potentially compatible with
  * (provided the scenario XML file references its schema version).
  */
-const int OLDEST_COMPATIBLE = 20;
+const int OLDEST_COMPATIBLE = 21;
 
 
 // Initialization functions:

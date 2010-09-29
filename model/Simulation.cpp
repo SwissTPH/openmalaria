@@ -75,10 +75,7 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-    int oneLifeSpanLength = Global::maxAgeIntervals;
-    if( oneLifeSpanLength < (int)Global::intervalsPerYear )
-	oneLifeSpanLength = Global::intervalsPerYear;	// transmission init needs at least one year
-    totalSimDuration = oneLifeSpanLength	// ONE_LIFE_SPAN
+    totalSimDuration = Global::lifespanInitIntervals	// ONE_LIFE_SPAN
 	+ _population->_transmissionModel->transmissionInitDuration()	// initial run of TRANSMISSION_INIT
 	+ Surveys.getFinalTimestep() + 1;	// MAIN_PHASE: surveys; +1 to let final survey run
     
@@ -106,7 +103,7 @@ int Simulation::start(){
 	    if (Global::simulationTime == testCheckpointDieStep)
 		throw util::cmd_exit ("Checkpoint test: checkpoint written");
 	    
-	    // Reporting (happens before timestep updates)
+	    // Reporting: effectively happens at end of time-step due to 
 	    Continuous::update();
 	    if (Global::timeStep == Surveys.currentTimestep) {
 		_population->newSurvey();
@@ -114,18 +111,23 @@ int Simulation::start(){
 	    }
 	    _population->implementIntervention(Global::timeStep);
 	    
-	    // update
+	    // Simulation-time used to be 1-based (from Fortran implementation).
+	    // It is now zero-based with regards to checkpoints but one-based
+	    // with regards to everything else: rather messy.
 	    ++Global::simulationTime;
+	    
+	    // update
 	    _population->update1();
 	    
-	    ++Global::timeStep;
 	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
+	    
+	    ++Global::timeStep;	// zero-based: zero on first time-step of intervention period
 	}
 	
 	if (phase == STARTING_PHASE) {
 	    // Start ONE_LIFE_SPAN:
 	    ++phase;
-	    simPeriodEnd = Global::maxAgeIntervals;
+	    simPeriodEnd = Global::lifespanInitIntervals;
 	} else if (phase == ONE_LIFE_SPAN) {
 	    // Start vector-initialisation:
 	    ++phase;

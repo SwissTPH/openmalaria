@@ -260,9 +260,9 @@
     <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Maximum age of simulated humans
+          Maximum age of simulated humans in years.
         </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
+        <xs:appinfo>units:years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="growthRate" type="xs:double" use="optional">
@@ -304,49 +304,73 @@
       <xs:appinfo>name:Description of input EIR for one vector;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="eir">
-        <xs:annotation>
-          <xs:documentation>
-	    Description of target entomological inoculation rate, used to
-	    calculate the vector emergence rate. An EIR array is generated
-	    from the exponent of the inverse discrete fourier transform of
-	    these parameters.
-	  </xs:documentation>
-          <xs:appinfo>units:Inoculations per person per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="a0" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="a1" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:a1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="b1" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:b1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="a2" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:a2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="b2" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:b2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:choice>
+        <xs:element name="eir">
+          <xs:annotation>
+            <xs:documentation>
+              Description of target entomological inoculation rate as a
+              Fourier series. This is used to estimate a suitible vector
+              emergence rate. The annual (target) EIR is thus the exponent
+              of the fourier series with these parameters, with period
+              scaled to 365 days.
+            </xs:documentation>
+            <xs:appinfo>units:Inoculations per person per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="a0" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="a1" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>name:a1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="b1" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>name:b1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="a2" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>name:a2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="b2" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>name:b2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:appinfo>units:radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="monthlyEir">
+          <xs:annotation>
+            <xs:documentation>
+              Description of target entomological inoculation rate as monthly
+              values. This is used to estimate a suitible vector
+              emergence rate. The annual (target) EIR is derived from a Fourier
+              series fit to these monthly values (used as a smoothing factor).
+              List should contain twelve entries: January to December.
+            </xs:documentation>
+            <xs:appinfo>units:Inoculations per person per month;name:Monthly values for pre-intervention EIR;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item" minOccurs="12" maxOccurs="12" type="xs:double">
+                <xs:annotation>
+                  <xs:appinfo>units:Inoculations per person per month;name:Monthly pre-intervention EIR;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
       <xs:element name="mosq">
         <xs:annotation>
           <xs:documentation>Vector species</xs:documentation>
