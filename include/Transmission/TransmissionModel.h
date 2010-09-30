@@ -101,6 +101,12 @@ public:
    * Overriding functions should call this base version too. */
   virtual void summarize (Monitoring::Survey& survey);
   
+  /** Scale the EIR used by the model.
+   *
+   * EIR is scaled in memory (so will affect this simulation).
+   * XML data is not touched. */
+  virtual void scaleEIR (double factor) =0;
+  
   /** Scale the EIR descriptions in the XML element.
    * This updates the XML, and not the EIR descriptions used for simulations.
    * In order for changes to be written back to the XML file,

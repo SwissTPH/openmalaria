@@ -556,6 +556,15 @@
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
+    <xs:attribute name="annualEIR" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If set, overrides the annual EIR by scaling it to this level.
+          If ommitted, EIR levels are as specified elsewhere.
+        </xs:documentation>
+        <xs:appinfo>units:string;name:Override annual EIR;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="nonVector">
     <xs:sequence>

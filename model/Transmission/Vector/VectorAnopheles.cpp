@@ -35,7 +35,14 @@
 namespace OM { namespace Transmission {
     using namespace OM::util;
     
-string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& initialisationEIR, map<string, double>& nonHumansHostsPopulations, int populationSize) {
+string VectorAnopheles::initialise (
+				    const scnXml::Anopheles& anoph,
+				    size_t sIndex,
+				    vector<double>& initialisationEIR,
+				    map<string, double>& nonHumansHostsPopulations,
+				    int populationSize
+)
+{
   // -----  Set model variables  -----
 
   const scnXml::Mosq& mosq = anoph.getMosq();
@@ -169,7 +176,7 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
     initialisationEIR[i] += speciesEIR[i];
   
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
-    cout << "Annual (input) EIR for "<<anoph.getMosquito()
+    cout << "Annual (pre-scaled) EIR for "<<anoph.getMosquito()
          << ": "<<vectors::sum( speciesEIR )<<endl;
   }
   
@@ -201,6 +208,10 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
   mosqEmergeRate.resize (Global::DAYS_IN_YEAR);	// Only needs to be done here if loading from checkpoint
   
   return anoph.getMosquito();
+}
+
+void VectorAnopheles::scaleEIR( double factor ){
+    FSCoeffic[0] += log( factor );
 }
 
 

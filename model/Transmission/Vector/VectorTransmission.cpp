@@ -55,9 +55,6 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i){
 
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
 {
-  for (size_t j=0;j<Global::intervalsPerYear; j++)
-    initialisationEIR[j]=0.0;
-  
   // Each item in the AnophelesSequence represents an anopheles species.
   // TransmissionModel::createTransmissionModel checks length of list >= 1.
   const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
@@ -79,10 +76,8 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     speciesIndex[name] = i;
   }
   
-  for (size_t i = 0; i < initialisationEIR.size(); ++i) {
     // Calculate total annual EIR
-    annualEIR += initialisationEIR[i];
-  }
+    annualEIR = vectors::sum( initialisationEIR );
   
   
   // -----  Initialise interventions  -----
@@ -125,6 +120,12 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
   }
 }
 
+void VectorTransmission::scaleEIR (double factor){
+    for( size_t i = 0; i < numSpecies; ++i )
+	species[i].scaleEIR( factor );
+    vectors::scale( initialisationEIR, factor );
+    annualEIR = vectors::sum( initialisationEIR );
+}
 void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
     // XML values are exponentiated; so we add some factor to existing a0 values:
     double add_to_a0 = std::log( factor );

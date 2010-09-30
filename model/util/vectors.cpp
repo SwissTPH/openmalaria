@@ -36,6 +36,13 @@ double vectors::sum (vector<double>& vec) {
   return r;
 }
 
+void vectors::addTo (vector<double>& x, vector<double>& y){
+    assert( x.size() == y.size() );
+    for( size_t i=0; i<x.size(); ++i ){
+	x[i] += y[i];
+    }
+}
+
 
 bool vectors::approxEqual (const double a, const double b, const double lim_fact) {
   return (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);

@@ -32,6 +32,9 @@ namespace OM { namespace util { namespace vectors {
   
   /// Return sum of all elements
   double sum (vector<double>& vec);
+  
+  /// Add one vector into another (x += y)
+  void addTo (vector<double>& x, vector<double>& y);
   //@}
   
   

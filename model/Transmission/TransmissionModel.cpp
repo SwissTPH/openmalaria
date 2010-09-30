@@ -30,30 +30,41 @@
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.hpp"
+#include "util/vectors.h"
 
 #include <cmath> 
 #include <cfloat>
 #include <gsl/gsl_vector.h>
 
 namespace OM { namespace Transmission {
-    
+namespace vectors = util::vectors;
+
 TransmissionModel* TransmissionModel::createTransmissionModel (int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData::VectorOptional& vectorData = InputData().getEntoData().getVector();
+  const scnXml::EntoData& entoData = InputData().getEntoData();
+  const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
   
   TransmissionModel *model;
   if (vectorData.present())
     model = new VectorTransmission(vectorData.get(), populationSize);
   else {
-      const scnXml::EntoData::NonVectorOptional& nonVectorData = InputData().getEntoData().getNonVector();
+      const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())	// should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     model = new NonVectorTransmission(nonVectorData.get());
   }
   
-  if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) )
-      cout << "Total annual (input) EIR: "<<model->annualEIR<<endl;
+  if( entoData.getAnnualEIR().present() ){
+      model->scaleEIR( entoData.getAnnualEIR().get() / model->annualEIR );
+      assert( vectors::approxEqual( model->annualEIR, entoData.getAnnualEIR().get() ) );
+  }
+  
+  if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
+      //Note: after internal scaling (which doesn't imply exit)
+      //but before external scaling.
+      cout << "Total annual EIR: "<<model->annualEIR<<endl;
+  }
   if( util::CommandLine::option( util::CommandLine::SET_ANNUAL_EIR ) ){
       model->scaleXML_EIR(
 	InputData.getMutableScenario().getEntoData(),
@@ -61,6 +72,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
       );
       InputData.documentChanged = true;
   }
+  
   return model;
 }
 
@@ -87,11 +99,11 @@ TransmissionModel::TransmissionModel() :
     annualEIR(0.0),
     timeStepNumEntoInnocs (0)
 {
-  kappa.resize (Global::intervalsPerYear, 0.0);
-  initialisationEIR.resize (Global::intervalsPerYear);
-  innoculationsPerAgeGroup.resize (Monitoring::AgeGroup::getNumGroups(), 0.0);
-  innoculationsPerDayOfYear.resize (Global::intervalsPerYear, 0.0);
-  timeStepEntoInnocs.resize (Monitoring::AgeGroup::getNumGroups(), 0.0);
+  kappa.assign (Global::intervalsPerYear, 0.0);
+  initialisationEIR.assign (Global::intervalsPerYear, 0.0);
+  innoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
+  innoculationsPerDayOfYear.assign (Global::intervalsPerYear, 0.0);
+  timeStepEntoInnocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   
   // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
   // memory corruption or extra tests when setting/copying values

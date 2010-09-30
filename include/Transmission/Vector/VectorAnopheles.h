@@ -66,6 +66,9 @@ public:
   
   ///@brief Initialisation and destruction
   //@{
+  /** Scale the internal EIR representation by factor. */
+  void scaleEIR( double factor );
+  
   /** Called to initialise variables instead of a constructor.
    *
    * @param anoph Data structure from XML to use

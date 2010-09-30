@@ -21,11 +21,13 @@
 #include "Transmission/PerHostTransmission.h"
 #include "inputData.h"
 #include "util/random.h"
+#include "util/vectors.h"
 #include "Monitoring/Surveys.h"	// sim-end timestep
 #include <limits>
 
 namespace OM { namespace Transmission {
-    
+    namespace vectors = util::vectors;
+
 //static (class) variables
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
 const double NonVectorTransmission::min_EIR_mult= 0.01; 
@@ -37,7 +39,6 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   initialKappa.resize (Global::intervalsPerYear);
   
   vector<int> nDays (Global::intervalsPerYear, 0);
-  initialisationEIR.assign (Global::intervalsPerYear, 0.0);
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
@@ -64,6 +65,10 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
 
 NonVectorTransmission::~NonVectorTransmission () {}
 
+void NonVectorTransmission::scaleEIR (double factor){
+    vectors::scale( initialisationEIR, factor );
+    annualEIR = vectors::sum( initialisationEIR );
+}
 void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
