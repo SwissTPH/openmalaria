@@ -133,9 +133,9 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
     scnXml::Vector::AnophelesSequence& anophelesList = ed.getVector().get().getAnopheles();
     
     for( scnXml::Vector::AnophelesIterator it = anophelesList.begin();
-	it != anophelesList.end(); ++it ){
-	double old_a0 = it->getEir().getA0();
-	it->getEir().setA0( old_a0 + add_to_a0 );
+	it != anophelesList.end(); ++it ){//FIXME
+	double old_a0 = it->getEir().get().getA0();
+	it->getEir().get().setA0( old_a0 + add_to_a0 );
     }
 }
 

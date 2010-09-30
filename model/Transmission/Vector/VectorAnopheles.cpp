@@ -101,18 +101,66 @@ string VectorAnopheles::initialise (const scnXml::Anopheles& anoph, size_t sInde
 
 
   // -----  EIR  -----
-  const scnXml::Eir& eirData = anoph.getEir();
-  
   FSCoeffic.resize (5);
-  FSCoeffic[0] = eirData.getA0();
-  FSCoeffic[1] = eirData.getA1();
-  FSCoeffic[2] = eirData.getB1();
-  FSCoeffic[3] = eirData.getA2();
-  FSCoeffic[4] = eirData.getB2();
-  EIRRotateAngle = eirData.getEIRRotateAngle();
+  vector<double> speciesEIR (Global::intervalsPerYear);
+  
+    if( anoph.getEir().present() ){
+	const scnXml::Eir& eirData = anoph.getEir().get();
+	
+	FSCoeffic[0] = eirData.getA0();
+	FSCoeffic[1] = eirData.getA1();
+	FSCoeffic[2] = eirData.getB1();
+	FSCoeffic[3] = eirData.getA2();
+	FSCoeffic[4] = eirData.getB2();
+	EIRRotateAngle = eirData.getEIRRotateAngle();
+    } else {
+	assert( anoph.getMonthlyEir().present() );	// XML loading code should enforce this
+	const scnXml::MonthlyEir& eirData = anoph.getMonthlyEir().get();
+	
+	double targetEIR = eirData.getAnnualEIR();
+	
+	const size_t N_m = 12;
+	const scnXml::MonthlyEir::ItemSequence seq = eirData.getItem();
+	assert( seq.size() == N_m );	// enforced by schema
+	double months[N_m];
+	double sum = 0.0;
+	for( size_t i = 0; i < N_m; ++i ){
+	    months[i] = seq[i];
+	    sum += months[i];
+	}
+	// arbitrary minimum we allow (cannot have zeros since we take the logarithm)
+	double min = sum/1000.0;
+	for( size_t i = 0; i < N_m; ++i ){
+	    if( months[i] < min )
+		months[i] = min;
+	}
+	
+	const double PI = 3.14159265;
+	const double w = 2.0 * PI / N_m;
+	FSCoeffic.assign( 5, 0.0 );
+	for( size_t i = 0; i < N_m; ++i ){
+	    double val = log( months[i] );
+	    FSCoeffic[0] += val;
+	    FSCoeffic[1] += val * (sin( w*(i+1) ) - sin( w*i ));
+	    FSCoeffic[2] += val * (cos( w*i ) - cos( w*(i+1) ));
+	    FSCoeffic[3] += val * (sin( 2.0*w*(i+1) ) - sin( 2.0*w*i ));
+	    FSCoeffic[4] += val * (cos( 2.0*w*i ) - cos( 2.0*w*(i+1) ));
+	}
+	FSCoeffic[0] *= 2.0 / N_m;
+	FSCoeffic[1] /= PI;
+	FSCoeffic[2] /= PI;
+	FSCoeffic[3] /= 2.0 * PI;
+	FSCoeffic[4] /= 2.0 * PI;
+	
+	// Now we rescale to get an EIR of targetEIR.
+	// Calculate current sum as is usually done.
+	calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+	sum = vectors::sum( speciesEIR ) * Global::interval;
+	// And scale:
+	FSCoeffic[0] += log( targetEIR / sum );
+    }
 
   // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-  vector<double> speciesEIR (Global::intervalsPerYear);
   calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
   vectors::scale (speciesEIR, Global::interval);	// input EIR is per-capita per-day, so scale to per-interval
   

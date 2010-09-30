@@ -353,7 +353,8 @@
           <xs:annotation>
             <xs:documentation>
               Description of target entomological inoculation rate as monthly
-              values. This is used to estimate a suitible vector
+              values plus an annual override (monthly values are scaled to fit
+              the annual EIR described). This is used to estimate a suitible vector
               emergence rate. The annual (target) EIR is derived from a Fourier
               series fit to these monthly values (used as a smoothing factor).
               List should contain twelve entries: January to December.
@@ -368,6 +369,12 @@
                 </xs:annotation>
               </xs:element>
             </xs:sequence>
+            <xs:attribute name="annualEIR" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>Scales the monthly values to give this annual innoculation rate.</xs:documentation>
+                <xs:appinfo>units:Innoculations per person per year;name:Annual EIR;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
           </xs:complexType>
         </xs:element>
       </xs:choice>
