@@ -39,15 +39,19 @@ import gzip
 sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
 import compareOutput
 import compareCtsout
+import xml.sax.handler
+
+class RunError(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 # replaced by CMake; run the version it puts in the build/test/ dir.
 testSrcDir="@CMAKE_CURRENT_SOURCE_DIR@"
 testBuildDir="@CMAKE_CURRENT_BINARY_DIR@"
 if not os.path.isdir(testSrcDir) or not os.path.isdir(testBuildDir):
     print "Don't run this script directly; configure CMake then use the version in the CMake build dir."
-    sys.exit(-1)
-if not os.path.isfile ("@OM_BOXTEST_SCHEMA_PATH@"):
-    print "File not found (wrong CMake var?): @OM_BOXTEST_SCHEMA_PATH@"
     sys.exit(-1)
 
 # executable
@@ -59,18 +63,38 @@ def findFile (*names):
             execs.add (path)
     
     if not execs:
-        print "Unable to find: openMalaria[.exe]; please compile it."
-        sys.exit(-1)
+        raise RunError("Unable to find: openMalaria[.exe]; please compile it.")
     
     newest=None
     for path in execs:
         if newest is None or os.path.getmtime(path) > os.path.getmtime(newest):
             newest=path
             return newest
+ 
+class ElementHandler(xml.sax.handler.ContentHandler):
+    def ElementHandler():
+        self.schema = None
+    def startElement(self, name, attributes):
+        if name == "scenario":
+            try:
+                self.schema = attributes["xsi:noNamespaceSchemaLocation"]
+            except KeyError:
+                raise RunError("can't find noNamespaceSchemaLocation attribute")
+
+def getSchemaName(scenarioFile):
+    parser = xml.sax.make_parser()
+    handler = ElementHandler()
+    parser.setContentHandler(handler)
+    parser.parse(scenarioFile)
+    if handler.schema == None:
+        raise RunError("no scenario element found??")
+    return handler.schema
 
 openMalariaExec=os.path.abspath(findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"]))
 
 def linkOrCopy (src, dest):
+    if not os.path.isfile(src):
+        raise RunError("linkOrCopy: can't find file "+src)
     if hasattr(os, 'symlink'):
         os.symlink(os.path.abspath(src), dest)
     else:
@@ -79,8 +103,10 @@ def linkOrCopy (src, dest):
 # Run, with file "scenario"+name+".xml"
 def runScenario(options,omOptions,name):
     scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
+    schemaName=getSchemaName(scenarioSrc)
+    scenarioSchema=os.path.abspath(os.path.join(testSrcDir,'../schema',schemaName))
     if options.xmlValidate:
-        cmd=["xmllint","--noout","--schema","@OM_BOXTEST_SCHEMA_PATH@",scenarioSrc]
+        cmd=["xmllint","--noout","--schema",scenarioSchema,scenarioSrc]
         # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]
         if options.logging:
             print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
@@ -104,8 +130,8 @@ def runScenario(options,omOptions,name):
     # The schema file only needs to be copied in BOINC mode, since otherwise the
     # scenario is opened with a path and the schema can be found in the same
     # directory. We copy it anyway.
-    scenario_xsd=os.path.join(simDir,"scenario.xsd")
-    linkOrCopy ("@OM_BOXTEST_SCHEMA_PATH@", scenario_xsd)
+    scenario_xsd=os.path.join(simDir,schemaName)
+    linkOrCopy (scenarioSchema, scenario_xsd)
     
     if options.logging:
         print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33mscenario%s.xml" % name
@@ -273,21 +299,25 @@ You can pass options to openMalaria by first specifying -- (to end options passe
 
 
 def main(args):
-    (options,omOptions,toRun) = evalOptions (args[1:])
-    
-    if not toRun:
-        for p in glob.iglob(os.path.join(testSrcDir,"scenario*.xml")):
-            f = os.path.basename(p)
-            n=f[8:-4]
-            assert ("scenario%s.xml" % n) == f
-            toRun.add(n)
-    
-    retVal=0
-    for name in toRun:
-        r=runScenario(options,omOptions,name)
-        retVal = r if retVal == 0 else retVal
-    
-    return retVal
+    try:
+        (options,omOptions,toRun) = evalOptions (args[1:])
+        
+        if not toRun:
+            for p in glob.iglob(os.path.join(testSrcDir,"scenario*.xml")):
+                f = os.path.basename(p)
+                n=f[8:-4]
+                assert ("scenario%s.xml" % n) == f
+                toRun.add(n)
+        
+        retVal=0
+        for name in toRun:
+            r=runScenario(options,omOptions,name)
+            retVal = r if retVal == 0 else retVal
+        
+        return retVal
+    except RunError,e:
+        print str(e)
+        return -1
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
