@@ -103,6 +103,8 @@ def linkOrCopy (src, dest):
 # Run, with file "scenario"+name+".xml"
 def runScenario(options,omOptions,name):
     scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
+    if not os.path.isfile(scenarioSrc):
+        raise RunError('No such scenario file '+scenarioSrc+'!')
     schemaName=getSchemaName(scenarioSrc)
     scenarioSchema=os.path.abspath(os.path.join(testSrcDir,'../schema',schemaName))
     if options.xmlValidate:
