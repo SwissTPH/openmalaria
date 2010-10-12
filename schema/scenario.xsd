@@ -568,7 +568,16 @@
   </xs:complexType>
   <xs:complexType name="nonVector">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily">
+        <xs:annotation>
+          <xs:documentation>
+            Sequence of EIR values. Should cover at least one whole year. Values
+            are averaged to result in a sequence of EIR-per-timestep values, but
+            are otherwise not smoothed.
+          </xs:documentation>
+          <xs:appinfo>units:innoculations per adult per day;name:Daily EIR;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="eipDuration" type="xs:int" use="required">
       <xs:annotation>

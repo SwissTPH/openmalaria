@@ -124,9 +124,16 @@ enum SurveyMeasure {
     Vector_Ov = 33,
     /// Number of infectious mosquitoes
     Vector_Sv = 34,
-    /// Input EIR (Expected EIR entered into scenario file; units: per person per timestep)
+    /** Input EIR (Expected EIR entered into scenario file)
+     *
+     * Units: innoculations per adult per timestep with non-vector model,
+     * innoculations per person per timestep with vector model.
+     */
     Vector_EIR_Input = 35,
-    /// Simulated EIR (EIR output by the vector model, per person per timestep)
+    /** Simulated EIR (EIR output by the transmission model)
+     *
+     * Units: innoculations per person per timestep.
+     */
     Vector_EIR_Simulated = 36,
     //@}
     

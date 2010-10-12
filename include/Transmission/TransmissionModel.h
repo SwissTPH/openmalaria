@@ -160,7 +160,7 @@ public:
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
   }
   
-  /** Returns the EIR, per host and per time step.
+  /** Returns the EIR (innoculation rate per host per time step).
    *
    * Non-vector:
    * During the pre-intervention phase, the EIR is forced, using values from
@@ -213,11 +213,13 @@ protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   
-  /** Entomological innoculations per person per time step during the
+  /** Entomological innoculation rate for adults during the
    * pre-intervention phase (slightly different
    * usage for Vector and NonVector models; in both cases one year long).
    *
-   * Units: innoculations per adult per timestep
+   * Units: innoculations per adult per timestep (non-vector model), or
+   * innoculations per person per timestep (vector model; i.e. averaged across
+   * both children and adults in population).
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */

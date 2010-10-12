@@ -104,8 +104,8 @@ public:
    * Used to drive a simulation from an input EIR.
    * Is relativeAvailabilityHet()*relativeAvailabilityAge(ageYears).
    * 
-   * Mean output is less than 1.0 (roughly 1.0/ageCorrectionFactor);
-   * this is to avoid changing all NonVector model results. */
+   * Mean output is less than 1.0 (roughly 1.0/ageCorrectionFactor).
+   */
   inline double relativeAvailabilityHetAge (AgeGroupData ageGroupData) const {
     return _relativeAvailabilityHet
         * relativeAvailabilityAge (ageGroupData);
