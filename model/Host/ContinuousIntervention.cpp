@@ -22,6 +22,7 @@
 #include "Host/Human.h"
 #include "inputData.h"
 #include "util/random.h"
+#include "util/errors.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -82,6 +83,13 @@ void ContinuousIntervention::AgeIntervention::assign( const ::scnXml::AgeSpecifi
     ageTimesteps = static_cast<uint32_t>(
 	floor( elt.getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
     );
+    if( ageTimesteps <= 0 ){
+	ostringstream msg;
+	msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
+	msg << " years corresponds to timestep "<<ageTimesteps;
+	msg << "; must be at least timestep 1.";
+	throw util::xml_scenario_error( msg.str() );
+    }
     cohortOnly = elt.getCohort();
     coverage = elt.getCoverage();
     deploy = func;

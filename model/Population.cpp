@@ -136,6 +136,7 @@ void Population::checkpoint (ostream& stream)
 void Population::preMainSimInit ()
 {
     _transmissionModel->initMainSimulation();
+    Host::InfectionIncidenceModel::initMainSimulation();
     Clinical::ClinicalModel::initMainSimulation();
     recentBirths = 0;
 }

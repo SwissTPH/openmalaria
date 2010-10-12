@@ -48,6 +48,11 @@ public:
   static void init();
   /// Create a new instance
   static InfectionIncidenceModel* createModel ();
+  
+  /// Reset summary outputs at beginning of main simulation
+  static inline void initMainSimulation() {
+      ctsNewInfections = 0;
+  }
   //@}
   
   /// Checkpointing
@@ -94,6 +99,8 @@ protected:
   
   double susceptibility ();
   
+  static void ctsReportNewInfections (ostream& stream);
+  
   /** Probability of infection (cumulative or reset to zero in massTreatment).
    *
    * Appears to be used only for calculating expected inoculations for the
@@ -102,6 +109,7 @@ protected:
   
   //!Number of infective bites since birth
   double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
+  /// Number of new infections introduced, per human per survey
   int totalInfections;
   
   //BEGIN Static data set by init()
@@ -127,6 +135,9 @@ protected:
   static double EstarInv;
   //@}
   //END
+  
+  /// Number of new infections introduced, per continuous reporting period
+  static int ctsNewInfections;
 };
 
 /** A workaround to produce the same results as with heterogeneity work-units.

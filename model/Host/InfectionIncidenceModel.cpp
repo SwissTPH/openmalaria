@@ -23,6 +23,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "util/ModelOptions.hpp"
 #include "util/random.h"
+#include "Monitoring/Continuous.h"
 
 #include <stdexcept>
 
@@ -37,6 +38,8 @@ double InfectionIncidenceModel::Sinf;
 double InfectionIncidenceModel::Simm;
 double InfectionIncidenceModel::Xstar_pInv;
 double InfectionIncidenceModel::EstarInv;
+
+int InfectionIncidenceModel::ctsNewInfections = 0;
 
 
 // -----  static initialisation  -----
@@ -78,6 +81,17 @@ void InfectionIncidenceModel::init () {
   
   if (util::ModelOptions::anyTransHet())
     cerr << "Warning: will use heterogeneity workaround." << endl;
+  
+  using Monitoring::Continuous;
+  Continuous::registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
+}
+
+
+// -----  other static methods  -----
+
+void InfectionIncidenceModel::ctsReportNewInfections (ostream& stream){
+    stream << '\t' << ctsNewInfections;
+    ctsNewInfections = 0;
 }
 
 
@@ -190,6 +204,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
     totalInfections += n;
+    ctsNewInfections += n;
     return n;
   } else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
