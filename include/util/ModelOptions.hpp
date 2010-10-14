@@ -167,7 +167,14 @@ namespace OM { namespace util {
 	 * NOTE: code is unmaintained in order to keep results comparable with
 	 * previous experiments run. On a 1-day timestep, we now have a better
 	 * drug model, but will need to rewrite IPT code to purely be an
-	 * intervention. */
+	 * intervention.
+	 * 
+	 * NOTE: this removes from several outputs all humans with a recent
+	 * episode within the healthSystemMemory period, who are therefore not
+	 * currently at risk of an additional episode. Summaries affected include
+	 * nHost, nInfect, nExpectd, nPatent, totalInfs, totalPatentInf, sumlogDens,
+	 * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially
+	 * other outputs added after writing this. */
 	IPTI_SP_MODEL,
 	
 	// Used by tests; should be 1 more than largest option

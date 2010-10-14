@@ -21,6 +21,7 @@ set (OM_BOXTEST_NAMES
   Uninfect
   Empirical
   Cohort
+  VecMonthly
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

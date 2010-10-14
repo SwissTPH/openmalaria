@@ -145,19 +145,27 @@ string VectorAnopheles::initialise (
 	const double PI = 3.14159265;
 	const double w = 2.0 * PI / N_m;
 	FSCoeffic.assign( 5, 0.0 );
+	
+	// Note: we use our values as the left-hand-side of our regions
 	for( size_t i = 0; i < N_m; ++i ){
 	    double val = log( months[i] );
 	    FSCoeffic[0] += val;
-	    FSCoeffic[1] += val * (sin( w*(i+1) ) - sin( w*i ));
-	    FSCoeffic[2] += val * (cos( w*i ) - cos( w*(i+1) ));
-	    FSCoeffic[3] += val * (sin( 2.0*w*(i+1) ) - sin( 2.0*w*i ));
-	    FSCoeffic[4] += val * (cos( 2.0*w*i ) - cos( 2.0*w*(i+1) ));
+	    FSCoeffic[1] += val * cos( w*i );
+	    FSCoeffic[2] += val * sin( w*i );
+	    FSCoeffic[3] += val * cos( 2.0*w*i );
+	    FSCoeffic[4] += val * sin( 2.0*w*i );
 	}
-	FSCoeffic[0] *= 2.0 / N_m;
-	FSCoeffic[1] /= PI;
-	FSCoeffic[2] /= PI;
-	FSCoeffic[3] /= 2.0 * PI;
-	FSCoeffic[4] /= 2.0 * PI;
+	FSCoeffic[0] /=N_m;
+	FSCoeffic[1] *= 2.0 / N_m;
+	FSCoeffic[2] *= 2.0 / N_m;
+	FSCoeffic[3] *= 2.0 / N_m;
+	FSCoeffic[4] *= 2.0 / N_m;
+	
+	// The above places the value for the first month at angle 0, so
+	// effectively the first month starts at angle -2*pi/24 radians.
+	// The first day's value should start 2*pi/(365*2) radians later, so
+	// we set EIRRotateAngle accordingly (rotate forward):
+	EIRRotateAngle = M_PI * ( 1.0/12.0 - 1.0/365.0 );
 	
 	// Now we rescale to get an EIR of targetEIR.
 	// Calculate current sum as is usually done.
