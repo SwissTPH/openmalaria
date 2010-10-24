@@ -46,6 +46,8 @@ public:
    * Converts qty in mg to concentration, and stores along with time (delay past
    * the start of the current timestep) in the doses container. */
   void medicate (double time, double qty, double weight);
+  /** Indicate a new medication via IV this timestep. */
+  void medicateIV (double duration, double endTime, double qty, double weight);
   
   /** Returns the total drug factor for one drug over one day.
    *
@@ -74,7 +76,14 @@ protected:
   
   double concentration;
   
-  /** List of each dose given today, ordered by time.
+  struct IV_dose {
+      IV_dose( double r, double d ): infusRate(r), duration(d) {}
+      double infusRate;	// infusion rate: mg / kg / day
+      double duration;
+  };
+  list<IV_dose> IV_doses;
+  
+  /** List of each dose given today (and possibly tomorrow), ordered by time.
    * First parameter (key) is time in days, second (value) is dose in same units
    * as concentration.
    * 

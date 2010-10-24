@@ -79,9 +79,21 @@ public:
    * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
    * @param qty		Quantity of drug to administer in mg
    * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
+   * @param ageGroupData	Age group of human (passed to avoid having to calculate later)
    * @param age		Age of human in years
    */
   virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age) {}
+
+  /** Medicate drugs via IV (wraps drug's medicate).
+   *
+   * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
+   * @param qty		Quantity of drug to administer in mg
+   * @param duration		Duration of IV administration
+   * @param endTime		Time of end of IV administration (could be >= 1.0 day)
+   * @param ageGroupData	Age group of human (passed to avoid having to calculate later)
+   * @param age		Age of human in years
+   */
+  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age) {}
 
   /** Update the parasite densities of infections.
    *

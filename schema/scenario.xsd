@@ -1787,6 +1787,16 @@
         <xs:appinfo>units:hours;min:0;name:time of administration;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="duration" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+        If this attribute is given, use IV administration instead of orally.
+        
+        Specifies the number of hours over which the dose is administered.
+      </xs:documentation>
+        <xs:appinfo>units:hours;min:0;name:duration of administration;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="HSESTreatmentModifier">
     <xs:annotation>
@@ -2029,6 +2039,28 @@
                       <xs:documentation>
 			  Volume of Distribution
 			</xs:documentation>
+                      <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="IV" minOccurs="0">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="half_life" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Used to calculate elimination rate (which is: ln(2) / half_life).
+                        </xs:documentation>
+                      <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="vol_dist" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Volume of Distribution
+                        </xs:documentation>
                       <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>

@@ -98,7 +98,8 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     abbreviation (drugData.getAbbrev()),
-    allele_rshift (bit_start)
+    allele_rshift (bit_start),
+    IV_params(NULL)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)
@@ -118,6 +119,12 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     negligible_concentration = drugData.getPK().getNegligible_concentration();
     neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
+    
+    if( drugData.getIV().present() ){
+	IV_params = new LSTMDrugIVParameters;
+	IV_params->elimination_rate_constant = log(2.0) / drugData.getIV().get().getHalf_life();
+	IV_params->vol_dist = drugData.getIV().get().getVol_dist();
+    }
     
     PD_params.resize (alleles.size());
     double cum_IF = 0.0;

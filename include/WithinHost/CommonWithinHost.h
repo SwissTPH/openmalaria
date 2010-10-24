@@ -47,6 +47,7 @@ public:
     virtual void clearAllInfections();
     
     virtual void medicate (string drugName, double qty, double time, const AgeGroupData ageGroupData, double age);
+    virtual void medicateIV (string drugName, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age);
     virtual void immuneSuppression();
     
     /** Update densities for timestep (taking into account blood-stage vaccine

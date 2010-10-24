@@ -67,6 +67,20 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, const A
   medicateGotDrug:
   drug->medicate (time, qty, ageToWeight (ageGroupData, ageYears));
 }
+void LSTMPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double ageYears) {
+  list<LSTMDrug>::iterator drug = _drugs.begin();
+  while (drug != _drugs.end()) {
+    if (drug->getAbbreviation() == drugAbbrev)
+      goto medicateGotDrug;
+    ++drug;
+  }
+  // No match, so insert one:
+  _drugs.push_front (LSTMDrug(LSTMDrugType::getDrug(drugAbbrev)));
+  drug = _drugs.begin();	// the drug we just added
+  
+  medicateGotDrug:
+  drug->medicateIV (duration, endTime, qty, ageToWeight (ageGroupData, ageYears));
+}
 
 // This may look complicated but its just some machinery to call updateConcentration() and return its result
 class DecayPredicate {

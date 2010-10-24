@@ -92,6 +92,10 @@ public:
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
   virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age)  {};
+  /** Medicate via IV. Mostly as for medicate(). End-time of IV period is passed
+   * (time at which concentration is added to use oral effect calculation code).
+   */
+  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age)  {};
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () {};

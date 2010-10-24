@@ -44,6 +44,13 @@ namespace OM { namespace PkPd {
 	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     };
     
+    /** Optional per drug IV absorbtion paratemetrs. */
+    struct LSTMDrugIVParameters {
+	double elimination_rate_constant;	/// Elimination rate constant. Found using ln(2)/half_life. (1 / days)
+	double vol_dist;					/// Volume of distribution (l/kg)
+    };
+    
+    
 /** Information about each (type of) drug (rather than each use of a drug).
  *
  * Static data contains a list of all available drug types.
@@ -107,6 +114,9 @@ private:
     double negligible_concentration;		/// Concentration, below which drug is deemed not to have an effect and is removed for performance reasons. (mg/l)
     double neg_elimination_rate_constant;	/// Terminal elimination rate constant (negated). Found using ln(2)/half_life. (1 / days)
     double vol_dist;					/// Volume of distribution (l/kg)
+    
+    /* IV parameters - pointer is 0 if no parameters provided */
+    LSTMDrugIVParameters *IV_params;
     
   // Allow LSTMDrug to access private members
   friend class LSTMDrug;

@@ -305,12 +305,23 @@ void ClinicalEventScheduler::doClinicalUpdate (
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
 	list<MedicateData>::iterator next = it;
 	++next;
-	if ( it->time < 1.0 ) { // Medicate today's medications
+	if( it->duration == it->duration ){	// Have a duration, i.e. via IV administration
+	    if ( it->time + 0.5*it->duration < 1.0 ) { // Medicate today's medications
+	    withinHostModel.medicateIV (it->abbrev, it->qty, it->duration, it->time+it->duration, ageGroupData, ageYears);
+	    //FIXME: separate IV cost reporting?
+	    Monitoring::Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+	    medicateQueue.erase (it);
+	    } else {   // and decrement treatment seeking delay for the rest
+		it->time -= 1.0;
+	    }
+	} else {
+	    if ( it->time < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageGroupData, ageYears);
 	    Monitoring::Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
-	} else {   // and decrement treatment seeking delay for the rest
-	    it->time -= 1.0;
+	    } else {   // and decrement treatment seeking delay for the rest
+		it->time -= 1.0;
+	    }
 	}
 	it = next;
     }

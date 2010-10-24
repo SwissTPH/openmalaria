@@ -58,7 +58,8 @@ struct MedicateData {
     MedicateData () :
 	qty(numeric_limits< double >::signaling_NaN()),
 	cost_qty(numeric_limits< double >::signaling_NaN()),
-	time(numeric_limits< double >::signaling_NaN())
+	time(numeric_limits< double >::signaling_NaN()),
+	duration(numeric_limits< double >::quiet_NaN())
     {}
     
     /// Checkpointing
@@ -68,12 +69,14 @@ struct MedicateData {
 	qty & stream;
 	cost_qty & stream;
 	time & stream;
+	duration & stream;
     }
     
     string abbrev;	/// Drug abbreviation
     double qty;		/// Quantity of drug prescribed (mg?)
     double cost_qty;	/// Effective quantity prescribed, with respect to costs
     double time;	/// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
+    double duration;	/// Duration for IV purposes (use IV admin if a number, oral if is NaN)
 };
 
 /** A final treatment schedule (after application of applicable modifiers). */

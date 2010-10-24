@@ -21,6 +21,7 @@
 */
 
 #include "PkPd/Drug/LSTMDrug.h"
+#include "util/errors.hpp"
 
 #include <assert.h>
 #include <cmath>
@@ -42,6 +43,27 @@ void LSTMDrug::medicate (double time, double qty, double weight) {
     double conc = qty / (typeData->vol_dist * weight);
     // multimap insertion: is ordered
     doses.insert (doses.end(), make_pair (time, conc));
+}
+
+void LSTMDrug::medicateIV (double duration, double endTime, double qty, double weight) {
+    if( typeData->IV_params == NULL ){
+	throw util::xml_scenario_error( "IV medication of a drug without IV parameters!" );
+    }
+    
+    //TODO: decide whether we input mg/kg or just mg
+    double mgPerKg = qty / weight;
+    
+    double infusRate = mgPerKg / duration;	// mg/day
+    double elim_rate_const = typeData->IV_params->elimination_rate_constant;
+    
+    IV_doses.push_back( IV_dose( infusRate, duration ) );
+    
+    // TODO: check formula is correct:
+    double conc = infusRate / (typeData->IV_params->vol_dist * elim_rate_const);
+    conc *= (1.0 - exp( -elim_rate_const * duration ));
+    
+    // multimap insertion: is ordered
+    doses.insert (doses.end(), make_pair (endTime, conc));
 }
 
 
@@ -79,9 +101,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
     const LSTMDrugPDParameters& PD_params = typeData->PD_params[allele];
     
     for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
+	if( dose->first >= 1.0 )
+	    break;	// we know this and any more doses happen tomorrow; don't calculate factors now
+	
 	double duration = dose->first - startTime;
 	// TODO: skip if duration == 0.0?
-	totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);	
+	totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);
 	concentration_today += dose->second;
 	
 	startTime = dose->first;		// KW - Increment the time (assuming doses are in order of time)
@@ -90,6 +115,15 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) const {
     double duration = 1.0 - startTime;
     totalFactor *= drugEffect (PD_params, typeData->neg_elimination_rate_constant, concentration_today, duration);	
     
+    // IV factors
+    //NOTE: we ignore any potential overlap with remaining concentrations in blood.
+    //I.e. if QN is still in blood from previous pills/IV, this factor won't be quite right.
+    for( list<IV_dose>::const_iterator dose = IV_doses.begin(); dose != IV_doses.end(); ++dose ){
+	//FIXME: calculate new factor
+	double factor = 1.0;
+	totalFactor *= factor;
+    }
+    
     return totalFactor;			/* KW -	Returning drug effect per day, per drug */
 }
 
@@ -97,6 +131,9 @@ bool LSTMDrug::updateConcentration () {
     double startTime = 0.0;		// as in calculateDrugFactor()
     
     for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
+	if( dose->first >= 1.0 )
+	    break;
+	
 	double duration = dose->first - startTime;
 	concentration *= exp(typeData->neg_elimination_rate_constant *  duration);
 	concentration += dose->second;
@@ -107,7 +144,22 @@ bool LSTMDrug::updateConcentration () {
     double duration = 1.0 - startTime;
     concentration *= exp(typeData->neg_elimination_rate_constant *  duration);
     
-    doses.clear ();				// Clear today's dose list — they've been added to concentration now.
+    // Clear today's dose list — they've been added to concentration now.
+    multimap<double,double>::iterator firstTomorrow = doses.lower_bound( 1.0 );
+    doses.erase( doses.begin(), firstTomorrow );
+    
+    // Now we've removed today's doses, subtract a day from times of tomorrow's doses.
+    // Keys are read-only, so we have to create a copy.
+    multimap<double,double> newDoses;
+    for (multimap<double,double>::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
+	// tomorrow's dose; decrease time counter by a day
+	newDoses.insert( make_pair<double,double>( dose->first - 1.0, dose->second ) );
+    }
+    doses.swap( newDoses );	// assign it modified doses (swap may be faster than assign)
+    
+    // Clear today's IV administrations
+    IV_doses.clear();
+    
     // return true when concentration is no longer significant:
     return concentration < typeData->negligible_concentration;
 }
