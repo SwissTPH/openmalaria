@@ -81,6 +81,12 @@ namespace OM { namespace util {
 	    return newEIR;
 	}
 	
+	/** Get the name of the output file.
+	 */
+	static inline string getOutputName (){
+	    return outputName;
+	}
+
 	/** Looks through all command line options.
 	*
 	* @returns The name of the scenario XML file to use.
@@ -105,7 +111,9 @@ namespace OM { namespace util {
 	static string resourcePath;
 	
 	static double newEIR;
-	
+	//Output filename (for main output file "output.txt")
+	static string outputName;
+
 	/** Set of simulation times at which a checkpoint should be written and
 	* program should exit (to allow resume). */
 	static set<int> checkpoint_times;

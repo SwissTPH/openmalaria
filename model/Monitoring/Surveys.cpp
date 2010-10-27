@@ -22,6 +22,7 @@
 #include "Clinical/ClinicalModel.h"
 #include "util/BoincWrapper.h"
 #include "util/errors.hpp"
+#include "util/commandline.hpp"
 
 #include <gzstream.h>
 #include <fstream>
@@ -31,13 +32,6 @@
 namespace OM { namespace Monitoring {
     
 SurveysType Surveys;
-
-#ifdef WITHOUT_BOINC
-  #define OUT_NAME "output.txt"
-#else
-  #define OUT_NAME "output.txt.gz"
-#endif
-const char* fname = OUT_NAME;
 
 void SurveysType::init ()
 {
@@ -92,7 +86,7 @@ void SurveysType::writeSummaryArrays ()
     locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
     outputFile.imbue( nfn_put_locale );
 
-  string output_filename = util::BoincWrapper::resolveFile (fname);
+    string output_filename = util::BoincWrapper::resolveFile (util::CommandLine::getOutputName());
 
   outputFile.open (output_filename.c_str(), ios::out | ios::binary);
 

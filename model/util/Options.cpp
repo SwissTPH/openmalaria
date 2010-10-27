@@ -37,6 +37,7 @@ namespace OM { namespace util {
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
     double CommandLine::newEIR;
+    string CommandLine::outputName;
     set<int> CommandLine::checkpoint_times;
     uint32_t ModelOptions::optSet;
     
@@ -54,6 +55,7 @@ namespace OM { namespace util {
 	newEIR = numeric_limits<double>::quiet_NaN();
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
+	outputName = "";
 #	ifdef OM_STREAM_VALIDATOR
 	string sVFile;
 #	endif
@@ -72,10 +74,16 @@ namespace OM { namespace util {
 			throw runtime_error ("--resource-path (or -p) may only be given once");
 		    resourcePath = parseNextArg (argc, argv, i).append ("/");
 		} else if (clo == "scenario") {
-		    if (fileGiven)
+		    if (fileGiven){
 			throw runtime_error ("--scenario argument may only be given once");
+		    }
 		    scenarioFile = parseNextArg (argc, argv, i);
 		    fileGiven = true;
+		} else if (clo == "output") {
+		    if (outputName != ""){
+			throw runtime_error ("--output argument may only be given once");
+		    }
+		    outputName = parseNextArg (argc, argv, i);
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
                     options.set (SKIP_SIMULATION);
@@ -139,6 +147,17 @@ namespace OM { namespace util {
 		    } else if (clo[j] == 'm') {
 			options.set (PRINT_MODEL_OPTIONS);
 			options.set (SKIP_SIMULATION);
+		    } else if (clo[j] == 's') {
+			if (fileGiven){
+			    throw runtime_error ("-s argument may only be given once");
+			}
+			scenarioFile = parseNextArg (argc, argv, i);
+			fileGiven = true;
+		    } else if (clo[j] == 'o') {
+			if (outputName != ""){
+			    throw runtime_error ("-o argument may only be given once");
+			}
+			outputName = parseNextArg (argc, argv, i);
 		    } else if (clo[j] == 'c') {
 			options.set (TEST_CHECKPOINTING);
 		    } else if (clo[j] == 'd') {
@@ -161,8 +180,9 @@ namespace OM { namespace util {
 	    << "Options:"<<endl
 	    << " -p --resource-path	Path to look up input resources with relative URLs (defaults to"<<endl
 	    << "			working directory). Not used for output files."<<endl
-	    << "    --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
+	    << " -s --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
+	    << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
 	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (innocs./person/year)"<<endl
@@ -199,7 +219,14 @@ namespace OM { namespace util {
 	
 	if (checkpoint_times.size())	// timed checkpointing overrides this
 	    options[TEST_CHECKPOINTING] = false;
-	
+
+	if (outputName == ""){
+	    outputName = "output.txt";
+	}
+#ifndef WITHOUT_BOINC
+	outputName.append(".gz");
+#endif
+
 	return scenarioFile;
     }
     
