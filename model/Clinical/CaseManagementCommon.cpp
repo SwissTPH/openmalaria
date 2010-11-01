@@ -22,8 +22,8 @@
 #include "Clinical/OldCaseManagement.h"
 #include "Clinical/ESCaseManagement.h"
 #include "inputData.h"
-#include "util/ModelOptions.hpp"
-#include "util/errors.hpp"
+#include "util/ModelOptions.h"
+#include "util/errors.h"
 #include <limits>
 #include <boost/format.hpp>
 

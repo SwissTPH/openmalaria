@@ -24,7 +24,7 @@
 #define Hmod_UnittestUtil
 
 #include "Global.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 #include "PkPd/PkPdModel.h"
 #include "PkPd/HoshenPkPdModel.h"

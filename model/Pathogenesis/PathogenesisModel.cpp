@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 #include <cmath>
 using namespace std;

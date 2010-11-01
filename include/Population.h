@@ -20,7 +20,7 @@
 #define Hmod_Population
 
 #include "Global.h"
-#include "PopulationAgeStructure.hpp"
+#include "PopulationAgeStructure.h"
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 #include "inputData.h"

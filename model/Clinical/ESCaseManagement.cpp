@@ -23,7 +23,7 @@
 #include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <set>
 #include <sstream>

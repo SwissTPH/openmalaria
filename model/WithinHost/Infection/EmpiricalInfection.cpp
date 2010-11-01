@@ -21,9 +21,9 @@
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "util/random.h"
-#include "util/errors.hpp"
-#include "util/CommandLine.hpp"
-#include "util/ModelOptions.hpp"
+#include "util/errors.h"
+#include "util/CommandLine.h"
+#include "util/ModelOptions.h"
 
 #include <sstream>
 #include <fstream>

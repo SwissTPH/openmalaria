@@ -25,7 +25,7 @@
 #include "inputData.h"
 #include "Simulation.h"
 #include "util/vectors.h"
-#include "util/CommandLine.hpp"
+#include "util/CommandLine.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>

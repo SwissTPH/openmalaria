@@ -18,7 +18,7 @@
  */
 
 #include "util/StreamValidator.h"
-#include "util/CommandLine.hpp"
+#include "util/CommandLine.h"
 
 #include <fstream>
 #include <sstream>

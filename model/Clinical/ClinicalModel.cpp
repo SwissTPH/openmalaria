@@ -27,7 +27,7 @@
 
 #include "inputData.h"
 #include "Monitoring/Surveys.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 namespace OM { namespace Clinical {
 

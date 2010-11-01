@@ -22,9 +22,9 @@
 #include "WithinHost/Infection/DescriptiveInfection.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/CommandLine.hpp"
-#include "util/ModelOptions.hpp"
-#include "util/errors.hpp"
+#include "util/CommandLine.h"
+#include "util/ModelOptions.h"
+#include "util/errors.h"
 #include <algorithm>
 #include <sstream>
 #include <string.h>

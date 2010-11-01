@@ -18,19 +18,17 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "util/CommandLine.hpp"
-#include "util/ModelOptions.hpp"
-#include "util/errors.hpp"
+#include "Global.h"
+#include "util/CommandLine.h"
+#include "util/errors.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
-#include "inputData.h"
 
 #include <sstream>
 #include <iostream>
 #include <cassert>
 #include <boost/lexical_cast.hpp>
 
-/// Source code for CommandLine.hpp and ModelOptions.hpp
 namespace OM { namespace util {
     using boost::lexical_cast;
     
@@ -39,7 +37,6 @@ namespace OM { namespace util {
     double CommandLine::newEIR;
     string CommandLine::outputName;
     set<int> CommandLine::checkpoint_times;
-    uint32_t ModelOptions::optSet;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -257,171 +254,6 @@ namespace OM { namespace util {
     void CommandLine::staticCheckpoint (ostream& stream) {
 	options.to_string() & stream;
 	resourcePath & stream;
-    }
-    
-    // Utility: converts option strings to codes and back
-    class OptionCodeMap {
-	// Lookup table to translate the strings used in the XML file to the internal enumerated values:
-	map<string,OptionCodes> codeMap;
-	
-    public:
-	OptionCodeMap () {
-	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
-	    codeMap["NEGATIVE_BINOMIAL_MASS_ACTION"] = NEGATIVE_BINOMIAL_MASS_ACTION;
-	    codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
-	    codeMap["LOGNORMAL_MASS_ACTION"] = LOGNORMAL_MASS_ACTION;
-	    codeMap["NO_PRE_ERYTHROCYTIC"] = NO_PRE_ERYTHROCYTIC;
-	    codeMap["MAX_DENS_CORRECTION"] = MAX_DENS_CORRECTION;
-	    codeMap["INNATE_MAX_DENS"] = INNATE_MAX_DENS;
-	    // 	codeMap["MAX_DENS_RESET"] = MAX_DENS_RESET;
-	    codeMap["DUMMY_WITHIN_HOST_MODEL"] = DUMMY_WITHIN_HOST_MODEL;
-	    codeMap["PREDETERMINED_EPISODES"] = PREDETERMINED_EPISODES;
-	    codeMap["NON_MALARIA_FEVERS"] = NON_MALARIA_FEVERS;
-	    codeMap["INCLUDES_PK_PD"] = INCLUDES_PK_PD;
-	    codeMap["CLINICAL_EVENT_SCHEDULER"] = CLINICAL_EVENT_SCHEDULER;
-	    codeMap["MUELLER_PRESENTATION_MODEL"] = MUELLER_PRESENTATION_MODEL;
-	    codeMap["TRANS_HET"] = TRANS_HET;
-	    codeMap["COMORB_HET"] = COMORB_HET;
-	    codeMap["TREAT_HET"] = TREAT_HET;
-	    codeMap["COMORB_TRANS_HET"] = COMORB_TRANS_HET;
-	    codeMap["TRANS_TREAT_HET"] = TRANS_TREAT_HET;
-	    codeMap["COMORB_TREAT_HET"] = COMORB_TREAT_HET;
-	    codeMap["TRIPLE_HET"] = TRIPLE_HET;
-	    codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
-	    codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
-	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
-	    codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
-	}
-	
-	OptionCodes operator[] (const string s) {
-	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
-	    if (codeIt == codeMap.end()) {
-		ostringstream msg;
-		msg << "Unrecognised model option: ";
-		msg << s;
-		throw xml_scenario_error(msg.str());
-	    }
-	    return codeIt->second;
-	}
-	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
-	// doesn't ensure code is unique in the map either
-	string toString (const OptionCodes code) {
-	    for (map<string,OptionCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
-		if (codeIt->second == code)
-		    return codeIt->first;
-	    }
-	    throw runtime_error ("toString called with unknown code");	// this is a code error
-	}
-    };
-    
-    void ModelOptions::init () {
-	OptionCodeMap codeMap;
-	
-	// State of all default options:
-	bitset<NUM_OPTIONS> defaultOptSet;
-	defaultOptSet.set (MAX_DENS_CORRECTION);
-	
-	// Set optSet to defaults, then override any given in the XML file:
-	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
-	
-	const scnXml::OptionSet::OptionSequence& optSeq = InputData().getModel().getModelOptions().getOption();
-	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
-	    optSet_bs[codeMap[it->getName()]] = it->getValue();
-	}
-	
-	// Print non-default model options:
-	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
-	    cout << "Non-default model options:";
-	    for (int i = 0; i < NUM_OPTIONS; ++i) {
-		if (optSet_bs[i] != defaultOptSet[i])
-		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
-	    }
-	    cout << endl;
-	}
-	
-	// Test for incompatible options
-	
-	// An incompatibility triangle, listing options incompatible with each option
-	// Doesn't check required versions
-	// Originally from "description of variables for interface" excel sheet
-	bitset<NUM_OPTIONS> incompatibilities[NUM_OPTIONS];	// all default to 0
-	
-	incompatibilities[NEGATIVE_BINOMIAL_MASS_ACTION]
-	    .set(LOGNORMAL_MASS_ACTION)
-	    .set(TRANS_HET)	.set(COMORB_TRANS_HET)
-	    .set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[LOGNORMAL_MASS_ACTION]
-	    .set(TRANS_HET)	.set(COMORB_TRANS_HET)
-	    .set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
-	
-	incompatibilities[ATTENUATION_ASEXUAL_DENSITY]
-	    .set(INCLUDES_PK_PD)
-	    .set(DUMMY_WITHIN_HOST_MODEL)	.set(EMPIRICAL_WITHIN_HOST_MODEL);
-	
-	// Note: MAX_DENS_CORRECTION is irrelevant when using new
-	// within-host models, but we don't mark it incompatible so that we can
-	// leave MAX_DENS_CORRECTION on by default.
-	incompatibilities[INNATE_MAX_DENS]
-	    .set(DUMMY_WITHIN_HOST_MODEL)
-	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL);
-	
-	incompatibilities[DUMMY_WITHIN_HOST_MODEL]
-	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
-	    .set(IPTI_SP_MODEL);
-	incompatibilities[EMPIRICAL_WITHIN_HOST_MODEL]
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
-	    .set(IPTI_SP_MODEL);
-	incompatibilities[MOLINEAUX_WITHIN_HOST_MODEL]
-	    .set(IPTI_SP_MODEL);
-	
-	incompatibilities[NON_MALARIA_FEVERS]
-	    .set(MUELLER_PRESENTATION_MODEL);
-	
-	incompatibilities[TRANS_HET]
-	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
-	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_HET]
-	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
-	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[TREAT_HET]
-	    .set(COMORB_TRANS_HET)	.set(TRANS_TREAT_HET)
-	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_TRANS_HET]
-	    .set(TRANS_TREAT_HET)
-	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[TRANS_TREAT_HET]
-	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
-	incompatibilities[COMORB_TREAT_HET]
-	    .set(TRIPLE_HET);
-	
-	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {
-		ostringstream msg;
-		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i]
-			<< " is incompatible with flags:";
-		bitset<NUM_OPTIONS> incompat = (optSet_bs & incompatibilities[i]);
-		for (int j = 0; j < NUM_OPTIONS; ++j) {
-		    if (incompat[j])
-			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
-		}
-		throw xml_scenario_error (msg.str());
-	    }
-	}
-	
-	// Required options (above table can't check these):
-	if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
-	    throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
-	
-	// Convert from bitset to more performant integer with binary operations
-	// Note: use bitset up to now to restrict use of binary operators to
-	// where it has significant performance benefits.
-	optSet = 0;
-	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-	    if (optSet_bs[i])
-		optSet |= (1<<i);
-	}
     }
     
 } }

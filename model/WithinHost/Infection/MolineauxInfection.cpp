@@ -22,9 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 #include "WithinHost/CommonWithinHost.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/errors.hpp"
-#include "util/CommandLine.hpp"
-#include "util/ModelOptions.hpp"
+#include "util/errors.h"
+#include "util/CommandLine.h"
+#include "util/ModelOptions.h"
 
 #include <iostream>
 #include <sstream>

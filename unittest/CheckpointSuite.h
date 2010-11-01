@@ -22,7 +22,7 @@
 #define Hmod_CheckpointSuite
 
 #include <cxxtest/TestSuite.h>
-#include "util/checkpoint.hpp"
+#include "util/checkpoint.h"
 #include <sstream>
 #include <limits>
 #include <climits>

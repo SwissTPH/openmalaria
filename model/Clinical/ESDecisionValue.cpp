@@ -19,7 +19,7 @@
 */
 
 #include "Clinical/ESDecisionValue.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <set>
 #include <sstream>

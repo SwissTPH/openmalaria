@@ -22,7 +22,7 @@
 
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "util/random.h"
 
 #include <assert.h>

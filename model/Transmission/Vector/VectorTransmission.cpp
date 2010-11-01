@@ -21,7 +21,7 @@
 #include "inputData.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 #include <fstream>
 #include <map>

@@ -25,7 +25,7 @@
 
 #include "Global.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 namespace OM {
     int Global::interval;

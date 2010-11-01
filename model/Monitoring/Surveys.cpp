@@ -21,8 +21,8 @@
 #include "inputData.h"
 #include "Clinical/ClinicalModel.h"
 #include "util/BoincWrapper.h"
-#include "util/errors.hpp"
-#include "util/commandline.hpp"
+#include "util/errors.h"
+#include "util/CommandLine.h"
 
 #include <gzstream.h>
 #include <fstream>

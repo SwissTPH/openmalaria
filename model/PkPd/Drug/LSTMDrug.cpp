@@ -21,7 +21,7 @@
 */
 
 #include "PkPd/Drug/LSTMDrug.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <assert.h>
 #include <cmath>

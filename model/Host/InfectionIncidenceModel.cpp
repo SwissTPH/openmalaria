@@ -21,7 +21,7 @@
 #include "Host/InfectionIncidenceModel.h"
 #include "inputData.h"
 #include "Transmission/PerHostTransmission.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
 

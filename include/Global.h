@@ -34,7 +34,7 @@
 #include <boost/cstdint.hpp>
 using boost::uint32_t;
 
-#include "util/checkpoint.hpp"
+#include "util/checkpoint.h"
 using namespace OM::util::checkpoint;
 
 namespace OM {

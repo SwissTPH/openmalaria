@@ -23,7 +23,7 @@
 #include "WithinHost/CommonWithinHost.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 #include <algorithm>
 #include <sstream>

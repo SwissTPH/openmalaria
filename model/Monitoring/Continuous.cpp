@@ -19,7 +19,7 @@
 
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Survey.h"	// lineEnd
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "inputData.h"
 #include "util/BoincWrapper.h"
 

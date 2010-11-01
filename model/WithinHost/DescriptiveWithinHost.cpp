@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include "WithinHost/DescriptiveWithinHost.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 #include "PopulationStats.h"
 
 using namespace std;

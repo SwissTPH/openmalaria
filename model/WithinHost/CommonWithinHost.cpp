@@ -20,7 +20,7 @@
 
 #include "WithinHost/CommonWithinHost.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "PopulationStats.h"
 
 using namespace std;

@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "Host/Human.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "scenario.hxx"
 
 #include <fstream>

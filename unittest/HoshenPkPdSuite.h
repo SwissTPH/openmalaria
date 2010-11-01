@@ -24,7 +24,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "PkPd/HoshenPkPdModel.h"
-#include "UnittestUtil.hpp"
+#include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
 

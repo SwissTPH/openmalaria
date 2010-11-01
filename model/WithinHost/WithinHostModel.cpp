@@ -29,8 +29,8 @@
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/ModelOptions.hpp"
-#include "util/errors.hpp"
+#include "util/ModelOptions.h"
+#include "util/errors.h"
 //using namespace std;
 
 #include <cmath>

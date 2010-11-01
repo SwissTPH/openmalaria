@@ -29,7 +29,7 @@
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
-#include "util/CommandLine.hpp"
+#include "util/CommandLine.h"
 #include "util/vectors.h"
 
 #include <cmath> 

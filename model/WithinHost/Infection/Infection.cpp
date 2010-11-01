@@ -20,7 +20,7 @@
 
 #include "WithinHost/Infection/Infection.h"
 #include "inputData.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
 
 #include <cmath>

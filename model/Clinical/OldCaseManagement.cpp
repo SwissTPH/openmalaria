@@ -25,8 +25,8 @@
 #include "Global.h"
 #include "Monitoring/Surveys.h"
 #include "util/random.h"
-#include "util/ModelOptions.hpp"
-#include "util/errors.hpp"
+#include "util/ModelOptions.h"
+#include "util/errors.h"
 
 #include <cmath>
 

@@ -20,7 +20,7 @@
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "Transmission/Vector/HostCategoryAnophelesHumans.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 namespace OM { namespace Transmission {
 

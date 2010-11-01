@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include "Clinical/ESCaseManagement.h"
 #include "WithinHost/WithinHostModel.h"
-#include "UnittestUtil.hpp"
+#include "UnittestUtil.h"
 #include <limits>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 

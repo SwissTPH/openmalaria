@@ -18,7 +18,7 @@
  */
 
 #include "util/vectors.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include <cstring>
 #include <cmath>
 

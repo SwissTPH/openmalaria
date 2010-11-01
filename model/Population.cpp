@@ -34,9 +34,9 @@
 #include "Pathogenesis/PathogenesisModel.h"
 #include "PkPd/PkPdModel.h"
 
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "util/random.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 
 #include <boost/format.hpp>
 

@@ -21,7 +21,7 @@
 // This is a small file to separate out ESDecisionRandom's parsers.
 
 #include "Clinical/parser.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <sstream>
 

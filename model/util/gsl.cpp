@@ -20,7 +20,7 @@
 #include "util/gsl.h"
 #include "inputData.h"
 #include "Global.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_multimin.h>

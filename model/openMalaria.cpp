@@ -22,7 +22,7 @@
 
 #include "Global.h"
 #include "Simulation.h"
-#include "util/CommandLine.hpp"
+#include "util/CommandLine.h"
 
 #include <cstdio>
 #include <cerrno>

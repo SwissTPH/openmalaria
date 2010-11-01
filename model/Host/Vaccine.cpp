@@ -23,7 +23,7 @@
 #include "Host/Vaccine.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <cmath>
 

@@ -21,7 +21,7 @@
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/parser.h"
 #include "util/random.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 
 #include <limits>
 #include <list>

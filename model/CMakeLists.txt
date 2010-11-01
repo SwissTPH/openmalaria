@@ -71,7 +71,8 @@ set (Model_CPP
   util/WeibullDecayedValue.cpp
   util/errors.cpp
   util/checkpoint.cpp
-  util/Options.cpp
+  util/ModelOptions.cpp
+  util/CommandLine.cpp
   util/random.cpp
   util/StreamValidator.cpp
   

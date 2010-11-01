@@ -22,7 +22,7 @@
 #define Hmod_EmpiricalInfectionSuite
 
 #include <cxxtest/TestSuite.h>
-#include "UnittestUtil.hpp"
+#include "UnittestUtil.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "util/random.h"
 #include <limits>

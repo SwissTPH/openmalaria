@@ -30,7 +30,7 @@
 #include "Monitoring/Surveys.h"
 #include "PopulationStats.h"
 #include "util/gsl.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
 

@@ -22,7 +22,7 @@
 #include "PkPd/Drug/HoshenDrugType.h"
 #include "Global.h"
 #include "PkPd/Proteome.h"
-#include "util/ModelOptions.hpp"
+#include "util/ModelOptions.h"
 #include "inputData.h"
 
 // submodels:

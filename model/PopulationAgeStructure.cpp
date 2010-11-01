@@ -17,10 +17,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "PopulationAgeStructure.hpp"
+#include "PopulationAgeStructure.h"
 #include "Global.h"
 #include "inputData.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include "util/gsl.h"
 
 #include <cmath>

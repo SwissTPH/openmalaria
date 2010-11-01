@@ -22,7 +22,7 @@
 #include "Host/Human.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "util/errors.hpp"
+#include "util/errors.h"
 #include <algorithm>
 #include <cmath>
 

@@ -22,7 +22,7 @@
 #define Hmod_DummyInfectionSuite
 
 #include <cxxtest/TestSuite.h>
-#include "UnittestUtil.hpp"
+#include "UnittestUtil.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include <limits>
 
