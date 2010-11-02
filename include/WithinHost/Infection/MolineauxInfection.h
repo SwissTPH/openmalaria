@@ -85,10 +85,10 @@ private:
 	 * variantTranscendingSummation: See Molineaux paper, equation 7
 	 * variantSpecificSummation: See Molineaux paper, equation 6
 	 */
-	double m[v],variantTranscendingSummation, laggedPc[taus], Pstar_c, Pstar_m;
+	float m[v],variantTranscendingSummation, laggedPc[taus], Pstar_c, Pstar_m;
 	struct Variant {
-	    double growthRate, P, variantSpecificSummation, initP;
-	    double laggedP[taus];
+	    float growthRate, P, variantSpecificSummation, initP;
+	    float laggedP[taus];
 	    
 	    Variant ();
 	    
