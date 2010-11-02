@@ -22,9 +22,9 @@
 
 #include "Global.h"
 #include <gsl/gsl_vector.h>
-#include "scenario.hxx"
 
 namespace OM { namespace util { namespace vectors {
+
   ///@brief Basic operations on std::vector
   //@{
   /// Scale all elements of a vector by a in-situ
@@ -65,19 +65,10 @@ namespace OM { namespace util { namespace vectors {
   /// Ditto, but taking values from a double[].
   gsl_vector* std2gsl (const double* vec, size_t length);
   //@}
-  
-  
-  ///@brief Convertions between scnXml::DoubleList and std::vector<double>
-  //@{
-  
-  /** Reads a generic list of doubles from XML.
-   *
-   * @param list XML element to read from.
-   * @param length Expected length of list. Will throw if not correct. */
-  vector<double> DoubleList2std (const scnXml::DoubleList& list, size_t length);
-  //@}
+
 }
 
+/// Utility to print a vector (operator must be in namespace)
 template<class T>
 ostream& operator<< (ostream& out, vector<T> vec) {
   out << '[';

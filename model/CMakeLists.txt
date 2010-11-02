@@ -74,6 +74,7 @@ set (Model_CPP
   util/ModelOptions.cpp
   util/CommandLine.cpp
   util/random.cpp
+  util/XmlUtils.cpp
   util/StreamValidator.cpp
   
   Monitoring/Continuous.cpp

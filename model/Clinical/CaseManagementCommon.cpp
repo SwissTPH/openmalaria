@@ -24,6 +24,7 @@
 #include "inputData.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "util/XmlUtils.h"
 #include <limits>
 #include <boost/format.hpp>
 
@@ -69,38 +70,21 @@ namespace OM { namespace Clinical {
     {
 	// -----  case fatality rates  -----
 	caseFatalityRates.clear();	// Necessary when re-read from an intervention
-	
-	const scnXml::AgeGroupValues::GroupSequence& cfrGroups = healthSystem.getCFR().getGroup();
-	
-	BOOST_FOREACH( const scnXml::Group& group, cfrGroups ){
-	    double lbound = group.getLowerbound();
-	    if( !caseFatalityRates.insert( make_pair( lbound, group.getValue() ) ).second )
-		throw util::xml_scenario_error( (
-		    boost::format("CFR: lower bound %1% listed twice")
-		    %lbound
-		).str() );
-	}
-	// CFR is constant for everyone above the highest non-inf upperbound
-	caseFatalityRates[ numeric_limits<double>::infinity() ] =
-	    caseFatalityRates.rbegin()->second;
-	
-	// first lower-bound must be 0
-	if( caseFatalityRates.begin()->first != 0.0 )
-	    throw util::xml_scenario_error( "CFR: first lower-bound must be 0" );
+	util::XmlUtils::lboundGroups2map(
+	    caseFatalityRates,
+	    healthSystem.getCFR().getGroup(),
+	    "CFR",
+	    true
+	);
 	
 	
 	// -----  sequelae  -----
 	pSeqInpatData.clear();
-	const scnXml::AgeGroupValues::GroupSequence& pSeqGroups =
-	    healthSystem.getPSequelaeInpatient().getGroup();
-	BOOST_FOREACH( const scnXml::Group& group, pSeqGroups ){
-	    double lbound = group.getLowerbound();
-	    if( !pSeqInpatData.insert( make_pair( lbound, group.getValue() ) ).second )
-		throw util::xml_scenario_error( (
-		    boost::format("pSequelaeInpatient: lower bound %1% listed twice")
-		    %lbound
-		).str() );
-	}
+	util::XmlUtils::lboundGroups2map(
+	    pSeqInpatData,
+	    healthSystem.getPSequelaeInpatient().getGroup(),
+	    "pSequelaeInpatient"
+	);
     }
     
     double CaseManagementCommon::caseFatality (double ageYears)
