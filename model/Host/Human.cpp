@@ -121,12 +121,15 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
       _treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
-  } else if (util::ModelOptions::option (util::COMORB_TRANS_HET)) {
+  } else if (util::ModelOptions::option (util::COMORB_TREAT_HET)) {
     if (random::uniform_01()<0.5) {
+      _comorbidityFactor=1.8;
       _treatmentSeekingFactor=0.2;
     } else {
+      _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
+  } else if (util::ModelOptions::option (util::COMORB_TRANS_HET)) {
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     if (random::uniform_01()<0.5) {
