@@ -28,6 +28,7 @@
 // submodels:
 #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/VoidPkPdModel.h"
 
 #include <assert.h>
 #include <stdexcept>
@@ -61,7 +62,7 @@ void PkPdModel::cleanup () {
 
 PkPdModel* PkPdModel::createPkPdModel () {
     if (activeModel == NON_PKPD) {
-	return new PkPdModel();
+	return new VoidPkPdModel();
     } else if (activeModel == LSTM_PKPD) {
 	return new LSTMPkPdModel ();
     } else if (activeModel == HOSHEN_PKPD) {

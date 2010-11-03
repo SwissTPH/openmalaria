@@ -19,9 +19,9 @@
 */
 
 #include "PkPd/HoshenPkPdModel.h"
+#include <stdexcept>
 
-namespace OM { namespace PkPd {
-    
+namespace OM { namespace PkPd {    
 
 // -----  non-static set up / tear down functions  -----
 
@@ -65,6 +65,9 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, const
   medicateGotDrug:
   double weight = ageToWeight(ageGroupData, ageYears);
   drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
+}
+void HoshenPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age) {
+    throw logic_error( "Hoshen: doesn't support IV medication" );
 }
 
 struct DecayPredicate {
