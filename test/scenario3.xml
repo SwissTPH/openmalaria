@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" name="Namawala1_16" schemaVersion="21" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" assimMode="0" name="Namawala1_16" schemaVersion="23" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -497,6 +497,7 @@
     <ModelOptions>
       <option name="MAX_DENS_CORRECTION" value="false"/>
       <option name="IPTI_SP_MODEL" value="true"/>
+      <option name="REPORT_ONLY_AT_RISK" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <parameters interval="5" iseed="5" latentp="3">

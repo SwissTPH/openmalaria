@@ -60,7 +60,8 @@ namespace OM { namespace util {
 	    codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
 	    codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
 	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
-	    codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
+            codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
+            codeMap["REPORT_ONLY_AT_RISK"] = REPORT_ONLY_AT_RISK;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -124,10 +125,6 @@ namespace OM { namespace util {
 	    .set(TRANS_HET)	.set(COMORB_TRANS_HET)
 	    .set(TRANS_TREAT_HET)	.set(TRIPLE_HET);
 	
-	incompatibilities[ATTENUATION_ASEXUAL_DENSITY]
-	    .set(INCLUDES_PK_PD)
-	    .set(DUMMY_WITHIN_HOST_MODEL)	.set(EMPIRICAL_WITHIN_HOST_MODEL);
-	
 	// Note: MAX_DENS_CORRECTION is irrelevant when using new
 	// within-host models, but we don't mark it incompatible so that we can
 	// leave MAX_DENS_CORRECTION on by default.
@@ -165,7 +162,7 @@ namespace OM { namespace util {
 	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
 	incompatibilities[COMORB_TREAT_HET]
 	    .set(TRIPLE_HET);
-	
+        
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {
 		ostringstream msg;
@@ -180,9 +177,45 @@ namespace OM { namespace util {
 	    }
 	}
 	
-	// Required options (above table can't check these):
-	if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
-	    throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
+        // Required options (above table can't check these):
+        if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
+            throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
+        
+        if( Global::interval != 1 ){
+            bitset<NUM_OPTIONS> require1DayTS;
+            require1DayTS
+                .set( DUMMY_WITHIN_HOST_MODEL )
+                .set( INCLUDES_PK_PD )
+                .set( CLINICAL_EVENT_SCHEDULER )
+                .set( EMPIRICAL_WITHIN_HOST_MODEL )
+                .set( MOLINEAUX_WITHIN_HOST_MODEL );
+            
+            for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+                if (optSet_bs [i] && require1DayTS[i]) {
+                    ostringstream msg;
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day timestep.";
+                    throw xml_scenario_error (msg.str());
+                }
+            }
+        }
+        if( Global::interval != 5){
+            bitset<NUM_OPTIONS> require5DayTS;
+            require5DayTS
+                .set( ATTENUATION_ASEXUAL_DENSITY )
+                /* This is only relevant to 5-day, but enabled by default.
+                .set( MAX_DENS_CORRECTION ) */
+                .set( INNATE_MAX_DENS )
+                .set( IPTI_SP_MODEL )
+                .set( REPORT_ONLY_AT_RISK );
+            
+            for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+                if (optSet_bs [i] && require5DayTS[i]) {
+                    ostringstream msg;
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day timestep.";
+                    throw xml_scenario_error (msg.str());
+                }
+            }
+        }
 	
 	// Convert from bitset to more performant integer with binary operations
 	// Note: use bitset up to now to restrict use of binary operators to

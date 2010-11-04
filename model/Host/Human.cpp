@@ -262,8 +262,10 @@ double Human::getAgeInYears() const{
 
 
 void Human::summarize() {
-    if( WithinHost::DescriptiveIPTWithinHost::iptActive && clinicalModel->recentTreatment() ){
-	//NOTE: this modifies the denominator to treat the 4*5 day intervals
+    // 5-day only, compatibility option:
+    if( util::ModelOptions::option( util::REPORT_ONLY_AT_RISK ) &&
+        clinicalModel->recentTreatment() ){
+	// This modifies the denominator to treat the 4*5 day intervals
 	// after a bout as 'not at risk' to match the IPTi trials
 	return;
     }

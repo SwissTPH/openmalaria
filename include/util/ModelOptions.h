@@ -168,14 +168,26 @@ namespace OM { namespace util {
 	 * previous experiments run. On a 1-day timestep, we now have a better
 	 * drug model, but will need to rewrite IPT code to purely be an
 	 * intervention.
-	 * 
-	 * NOTE: this removes from several outputs all humans with a recent
-	 * episode within the healthSystemMemory period, who are therefore not
-	 * currently at risk of an additional episode. Summaries affected include
-	 * nHost, nInfect, nExpectd, nPatent, totalInfs, totalPatentInf, sumlogDens,
-	 * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially
-	 * other outputs added after writing this. */
+         * 
+         * Note: previously this implied REPORT_ONLY_AT_RISK; now it does not.
+	 */
 	IPTI_SP_MODEL,
+	
+	/** Turn off reporting of several outputs for humans suffering a recent
+         * clinical episode and therefore not currently at risk of what would
+         * clinically be regarded as a separate episode.
+         * 
+         * <b>This is a compatibility option only.</b> It only works with the
+         * 5-day model and the length of the not-at-risk period is hard-coded,
+         * not dependant on the healthSystemMemory value.
+         * 
+         * This removes from several outputs all humans who recieved treatment
+         * during the previous 4 (5-day) timesteps, who are therefore not
+         * currently at risk of an additional episode. Summaries affected include
+         * nHost, nInfect, nExpectd, nPatent, totalInfs, totalPatentInf, sumlogDens,
+         * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially
+         * other outputs added after writing this. */
+	REPORT_ONLY_AT_RISK,
 	
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
@@ -202,7 +214,8 @@ namespace OM { namespace util {
 	    return (optSet & anyHet) != 0u;
 	}
 	
-	/// Set options from XML file
+	/// Set options from XML file.
+        /// Relies on Global::init() already having been called.
 	static void init ();
 	
     private:

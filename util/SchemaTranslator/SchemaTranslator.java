@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 21;
+    static final int CURRENT_VERSION = 22;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -64,7 +64,12 @@ public class SchemaTranslator {
 	none, assumeIntended, assumeUnintented;
     }
     private static IptiSpBehaviour iptiSpOption = IptiSpBehaviour.none;
-
+    
+    private enum IptiReportOnlyAtRiskBehaviour {
+        none, on, off;
+    }
+    private static IptiReportOnlyAtRiskBehaviour iptiROAR = IptiReportOnlyAtRiskBehaviour.none;
+    
     public static double HumanBloodIndex_NONNHS = 1;
 
     public static int INDEX_GAMBIAE_SS = 0;
@@ -112,6 +117,23 @@ public class SchemaTranslator {
 	    return (Element) elts.get(0);
 	else
 	    return null;
+    }
+    /** Check whether scenario uses a particular model option. */
+    public boolean usesOption( String name )throws Exception{
+        Element opts = (Element) scenarioElement.getElementsByTagName("ModelOptions").item(0);
+        assert opts != null;
+        for( Node n : getChildNodes(opts,"option") ){
+            Element e = (Element) n;
+            assert e != null;
+            if( e.getAttribute("name").equals(name) ){
+                return Boolean.parseBoolean( e.getAttribute("value") );
+            }
+        }
+        // No match: doesn't occur
+        if( name.equals( "MAX_DENS_CORRECTION" ) )
+            return true;        // on by default
+        else
+            return false;       // all other options are off by default
     }
     
     public SchemaTranslator() {
@@ -1147,6 +1169,33 @@ public class SchemaTranslator {
 	return true;
     }
     
+    /* Schema 22 adds some optional features to facilitate EIR entry.
+     No translation required. */
+    public Boolean translate21To22() throws Exception {
+        return true;
+    }
+    
+    /* REPORT_ONLY_AT_RISK option added, potentially changing the behaviour
+    of scenarios using IPTI_SP_MODEL. */
+    public Boolean translate22To23() throws Exception {
+        if( usesOption( "IPTI_SP_MODEL" ) ){
+            if( iptiROAR == IptiReportOnlyAtRiskBehaviour.off ){
+                // do nothing
+            }else if( iptiROAR == IptiReportOnlyAtRiskBehaviour.on ){
+                Element modelElement = getChildElement(scenarioElement, "model");
+                Element modelOptions = getChildElement(modelElement, "ModelOptions");
+                Element roarOption = scenarioDocument.createElement("option");
+                roarOption.setAttribute("name", "REPORT_ONLY_AT_RISK");
+                roarOption.setAttribute("value","true");
+                modelOptions.appendChild(roarOption);
+            }else{
+                System.err.println("Error: please specify --iptiReportOnlyAtRisk");
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * This function is used to translate the 5-day timestep fitting
      * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly
@@ -2055,7 +2104,17 @@ public class SchemaTranslator {
                             .println("--iptiSpOptionWithoutInterventions: expected true or false");
                     System.exit(2);
                 }
-
+            } else if (args[i].equals("--iptiReportOnlyAtRisk")) {
+                String arg = args[++i];
+                if (arg.equalsIgnoreCase("true")) {
+                    iptiROAR = IptiReportOnlyAtRiskBehaviour.on;
+                } else if (arg.equalsIgnoreCase("false")) {
+                    iptiROAR = IptiReportOnlyAtRiskBehaviour.off;
+                } else {
+                    System.err
+                            .println("--iptiReportOnlyAtRisk: expected true or false");
+                    System.exit(2);
+                }
 	    } else if (args[i].equals("--schema_folder")) {
 		String arg = args[++i];
 		schema_folder = arg;	
@@ -2102,19 +2161,25 @@ public class SchemaTranslator {
 
     private static void printUsage() {
         System.out.println("Usage: schemaTranslator [options]:\n"
-	    + "\n  --required_version VERSION\tThe version number to update the document(s) to. Default:"
-	    + "\n\t\t\t\tCURRENT_VERSION="+CURRENT_VERSION
-	    + "\n  --latest-schema\t\tUse schema scenario.xsd instead of scenario_VERSION.xsd"
+	    + "\n  --required_version VERSION\tThe version number to update the document(s) to."
+	    + "\n\t\t\t\tDefault: CURRENT_VERSION="+CURRENT_VERSION
+	    + "\n  --latest-schema\t\tUse schema scenario.xsd instead of scenario_XX.xsd"
 	    + "\n  --no-validation\t\tDon't validate the result"
-	    + "\n  --no-translation\t\tDon't write out the translated result (but still translate internally for"
-	    + "\n\t\t\t\tvalidation)"
+	    + "\n  --no-translation\t\tDon't write out the translated result (but still"
+	    + "\n\t\t\t\ttranslate internally for validation)"
 	    + "\n  --update-db\t\t\tUpdate DB entries instead of files"
-	    + "\n  --maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to include bug fix, false"
-	    + "\n\t\t\t\tto explicitly exclude it."
+	    + "\n  --maxDensCorrection BOOL\tUpdate 12->13 requires this sometimes: set true to"
+	    + "\n\t\t\t\tinclude bug fix, false to explicitly exclude it."
 	    + "\n  --iptiSpOptionWithoutInterventions"
-	    + "\n\t\t\t\tFor scenarios with iptiDescription but without interventions, assume usage"
-	    + "\n\t\t\t\tof the IPTI model"
+	    + "\n\t\t\t\tFor scenarios with iptiDescription but without"
+	    + "\n\t\t\t\tinterventions, assume usage of the IPTI model"
 	    + "\n\t\t\t\twas (t) intended or (f) a mistake."
+            + "\n  --iptiReportOnlyAtRisk\tPreviously the IPTI_SP_MODEL option implied this"
+            + "\n\t\t\t\tbehaviour although not necessarily intended; now"
+            + "\n\t\t\t\tthis behaviour is controlled by the separate option"
+            + "\n\t\t\t\tREPORT_ONLY_AT_RISK. Specifying true here causes"
+            + "\n\t\t\t\toption REPORT_ONLY_AT_RISK to be added to scenarios"
+            + "\n\t\t\t\talready using IPTI_SP_MODEL."
             + "\n  --schema_folder\t\tThe schema folder, by default ../../schema"
 	    + "\n  --input_folder\t\tThe input folder, by default ./scenarios/"
             + "\n  --output_folder\t\tThe output folder, by default ./translatedScenarios/"
