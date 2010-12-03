@@ -121,22 +121,6 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="assimMode" use="required">
-        <xs:annotation>
-          <xs:documentation>
-            Assimilator mode. Defines output of simulator as             either complete (columns:
-            time,agegroup,measure,value) or minimal (single
-            column: value)
-          </xs:documentation>
-          <xs:appinfo>units:Code;name:Assimilator mode;exposed:false;</xs:appinfo>
-        </xs:annotation>
-        <xs:simpleType>
-          <xs:restriction base="xs:int">
-            <xs:enumeration value="0" />
-            <xs:enumeration value="1" />
-          </xs:restriction>
-        </xs:simpleType>
-      </xs:attribute>
     </xs:complexType>
   </xs:element>
   <!--Parameters-->
@@ -692,6 +676,38 @@
           are present.
         </xs:documentation>
         <xs:appinfo>name:Survey only cohort;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstEpisodeOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort at the time of the first episode
+          since the were recruited into the cohort. This intended for cohort studies that 
+          intend to measure time to first episode, using active case detection.
+        </xs:documentation>
+        <xs:appinfo>name:Time to first episode only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstTreamentOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort at the time of the first seeking treatment
+          since the were recruited into the cohort. This intended for cohort studies that
+          intend to measure time to first episode, using passive case detection.
+
+        </xs:documentation>
+        <xs:appinfo>name:Time to first treatment only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstInfectionOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort at the first survey they present with a patent infection
+          since the were recruited into the cohort. This intended for cohort studies that
+          intend to measure time to first infection, using passive case detection.
+
+        </xs:documentation>
+        <xs:appinfo>name:Time to first infection only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

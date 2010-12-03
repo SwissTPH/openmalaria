@@ -102,8 +102,7 @@ void SurveysType::writeSummaryArrays ()
   // Note: Storing a single value instead of one per reporting period is inconsistent with other
   // reporting, but I believe required for parameterisation.
   if (Survey::active[SM::allCauseIMR]) {
-    if (!Survey::_assimilatorMode)
-      outputFile << 1 << "\t" << 1 << "\t" << SM::allCauseIMR;
+    outputFile << 1 << "\t" << 1 << "\t" << SM::allCauseIMR;
     outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() << lineEnd;
   }
 

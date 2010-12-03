@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" assimMode="0" name="Full set of interventions" schemaVersion="23" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0"  name="Full set of interventions" schemaVersion="23" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>

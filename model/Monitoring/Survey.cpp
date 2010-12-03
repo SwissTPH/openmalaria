@@ -28,12 +28,12 @@ namespace OM { namespace Monitoring {
 // -----  Utility forward declarations  -----
 
 template <class T>
-void writeValue(ostream& file, int measure, bool assimilationMode, int survey, T& value);
+void writeValue(ostream& file, int measure, int survey, T& value);
 
-void writeMap (ostream& file, int measure, bool assimilatorMode, int survey, map<string,double>& data);
+void writeMap (ostream& file, int measure, int survey, map<string,double>& data);
 
 template <class T>
-void writePerAgeGroup(ostream& file, int measure, bool assimilationMode, int survey, vector<T>& array);
+void writePerAgeGroup(ostream& file, int measure, int survey, vector<T>& array);
 
 
 // -----  Static members  -----
@@ -41,7 +41,6 @@ void writePerAgeGroup(ostream& file, int measure, bool assimilationMode, int sur
 double AgeGroup::_lowerbound;
 vector<double> AgeGroup::_upperbound;
 bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
-bool Survey::_assimilatorMode;
 
 
 class SurveyMeasureMap {
@@ -130,9 +129,8 @@ void Survey::init () {
     for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 	active[codeMap[it->getName()]] = it->getValue();
     }
-    
-    _assimilatorMode = InputData().getAssimMode();
 }
+
 void AgeGroup::init () {
     const scnXml::Monitoring& mon = InputData().getMonitoring();
     const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
@@ -210,162 +208,159 @@ void Survey::allocate ()
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
   if (active[SM::nHost]) {
-    writePerAgeGroup (outputFile, SM::nHost, _assimilatorMode, survey, _numHosts);
+    writePerAgeGroup (outputFile, SM::nHost, survey, _numHosts);
   }
   if (active[SM::nInfect]) {
-    writePerAgeGroup (outputFile, SM::nInfect, _assimilatorMode, survey, _numInfectedHosts);
+    writePerAgeGroup (outputFile, SM::nInfect, survey, _numInfectedHosts);
   }
   if (active[SM::nExpectd]) {
-    writePerAgeGroup (outputFile, SM::nExpectd, _assimilatorMode, survey, _numExpectedInfected);
+    writePerAgeGroup (outputFile, SM::nExpectd, survey, _numExpectedInfected);
   }
   if (active[SM::nPatent]) {
-    writePerAgeGroup (outputFile, SM::nPatent, _assimilatorMode, survey, _numPatentHosts);
+    writePerAgeGroup (outputFile, SM::nPatent, survey, _numPatentHosts);
   }
   if (active[SM::sumLogPyrogenThres]) {
-    writePerAgeGroup (outputFile, SM::sumLogPyrogenThres, _assimilatorMode, survey, _sumLogPyrogenicThreshold);
+    writePerAgeGroup (outputFile, SM::sumLogPyrogenThres, survey, _sumLogPyrogenicThreshold);
   }
   if (active[SM::sumlogDens]) {
-    writePerAgeGroup (outputFile, SM::sumlogDens, _assimilatorMode, survey, _sumLogDensity);
+    writePerAgeGroup (outputFile, SM::sumlogDens, survey, _sumLogDensity);
   }
   if (active[SM::totalInfs]) {
-    writePerAgeGroup (outputFile, SM::totalInfs, _assimilatorMode, survey, _sumInfections);
+    writePerAgeGroup (outputFile, SM::totalInfs, survey, _sumInfections);
   }
   if (active[SM::nTransmit]) {
-    writeValue (outputFile, SM::nTransmit, _assimilatorMode, survey, _numTransmittingHosts);
+    writeValue (outputFile, SM::nTransmit, survey, _numTransmittingHosts);
   }
   if (active[SM::totalPatentInf]) {
-    writePerAgeGroup (outputFile, SM::totalPatentInf, _assimilatorMode, survey, _sumPatentInfections);
+    writePerAgeGroup (outputFile, SM::totalPatentInf, survey, _sumPatentInfections);
   }
   if (active[SM::sumPyrogenThresh]) {
-    writePerAgeGroup (outputFile, SM::sumPyrogenThresh, _assimilatorMode, survey, _sumPyrogenicThreshold);
+    writePerAgeGroup (outputFile, SM::sumPyrogenThresh, survey, _sumPyrogenicThreshold);
   }
   if (active[SM::nTreatments1]) {
-    writePerAgeGroup (outputFile, SM::nTreatments1, _assimilatorMode, survey, _numTreatments1);
+    writePerAgeGroup (outputFile, SM::nTreatments1, survey, _numTreatments1);
   }
   if (active[SM::nTreatments2]) {
-    writePerAgeGroup (outputFile, SM::nTreatments2, _assimilatorMode, survey, _numTreatments2);
+    writePerAgeGroup (outputFile, SM::nTreatments2, survey, _numTreatments2);
   }
   if (active[SM::nTreatments3]) {
-    writePerAgeGroup (outputFile, SM::nTreatments3, _assimilatorMode, survey, _numTreatments3);
+    writePerAgeGroup (outputFile, SM::nTreatments3, survey, _numTreatments3);
   }
   if (active[SM::nUncomp]) {
-    writePerAgeGroup (outputFile, SM::nUncomp, _assimilatorMode, survey, _numUncomplicatedEpisodes);
+    writePerAgeGroup (outputFile, SM::nUncomp, survey, _numUncomplicatedEpisodes);
   }
   if (active[SM::nSevere]) {
-    writePerAgeGroup (outputFile, SM::nSevere, _assimilatorMode, survey, _numSevereEpisodes);
+    writePerAgeGroup (outputFile, SM::nSevere, survey, _numSevereEpisodes);
   }
   if (active[SM::nSeq]) {
-    writePerAgeGroup (outputFile, SM::nSeq, _assimilatorMode, survey, _numSequelae);
+    writePerAgeGroup (outputFile, SM::nSeq, survey, _numSequelae);
   }
   if (active[SM::nHospitalDeaths]) {
-    writePerAgeGroup (outputFile, SM::nHospitalDeaths, _assimilatorMode, survey, _numHospitalDeaths);
+    writePerAgeGroup (outputFile, SM::nHospitalDeaths, survey, _numHospitalDeaths);
   }
   if (active[SM::nIndDeaths]) {
-    writePerAgeGroup (outputFile, SM::nIndDeaths, _assimilatorMode, survey, _numIndirectDeaths);
+    writePerAgeGroup (outputFile, SM::nIndDeaths, survey, _numIndirectDeaths);
   }
   if (active[SM::nDirDeaths]) {
-    writePerAgeGroup (outputFile, SM::nDirDeaths, _assimilatorMode, survey, _numDirectDeaths);
+    writePerAgeGroup (outputFile, SM::nDirDeaths, survey, _numDirectDeaths);
   }
   if (active[SM::nEPIVaccinations]) {
-    writePerAgeGroup (outputFile, SM::nEPIVaccinations, _assimilatorMode, survey, _numEPIVaccinations);
+    writePerAgeGroup (outputFile, SM::nEPIVaccinations, survey, _numEPIVaccinations);
   }
   if (active[SM::nMassVaccinations]) {
-    writePerAgeGroup (outputFile, SM::nMassVaccinations, _assimilatorMode, survey, _numMassVaccinations);
+    writePerAgeGroup (outputFile, SM::nMassVaccinations, survey, _numMassVaccinations);
   }
   if (active[SM::nHospitalRecovs]) {
-    writePerAgeGroup (outputFile, SM::nHospitalRecovs, _assimilatorMode, survey, _numHospitalRecoveries);
+    writePerAgeGroup (outputFile, SM::nHospitalRecovs, survey, _numHospitalRecoveries);
   }
   if (active[SM::nHospitalSeqs]) {
-    writePerAgeGroup (outputFile, SM::nHospitalSeqs, _assimilatorMode, survey, _numHospitalSequelae);
+    writePerAgeGroup (outputFile, SM::nHospitalSeqs, survey, _numHospitalSequelae);
   }
   if (active[SM::nIPTDoses]) {
-    writePerAgeGroup (outputFile, SM::nIPTDoses, _assimilatorMode, survey, _numIPTDoses);
+    writePerAgeGroup (outputFile, SM::nIPTDoses, survey, _numIPTDoses);
   }
   if (active[SM::annAvgK]) {
-    writeValue (outputFile, SM::annAvgK, _assimilatorMode, survey, _annualAverageKappa);
+    writeValue (outputFile, SM::annAvgK, survey, _annualAverageKappa);
   }
   if (active[SM::nNMFever]) {
-    writePerAgeGroup (outputFile, SM::nNMFever, _assimilatorMode, survey, _numNonMalariaFevers);
+    writePerAgeGroup (outputFile, SM::nNMFever, survey, _numNonMalariaFevers);
   }
 
   if (active[SM::innoculationsPerAgeGroup]) {
-    writePerAgeGroup (outputFile, SM::innoculationsPerAgeGroup, _assimilatorMode, survey, _innoculationsPerAgeGroup);
+    writePerAgeGroup (outputFile, SM::innoculationsPerAgeGroup, survey, _innoculationsPerAgeGroup);
   }
   
   if (active[SM::Vector_Nv0]) {
-    writeMap (outputFile, SM::Vector_Nv0, _assimilatorMode, survey, data_Vector_Nv0);
+    writeMap (outputFile, SM::Vector_Nv0, survey, data_Vector_Nv0);
   }
   if (active[SM::Vector_Nv]) {
-    writeMap (outputFile, SM::Vector_Nv, _assimilatorMode, survey, data_Vector_Nv);
+    writeMap (outputFile, SM::Vector_Nv, survey, data_Vector_Nv);
   }
   if (active[SM::Vector_Ov]) {
-    writeMap (outputFile, SM::Vector_Ov, _assimilatorMode, survey, data_Vector_Ov);
+    writeMap (outputFile, SM::Vector_Ov, survey, data_Vector_Ov);
   }
   if (active[SM::Vector_Sv]) {
-    writeMap (outputFile, SM::Vector_Sv, _assimilatorMode, survey, data_Vector_Sv);
+    writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
   }
   if (active[SM::Vector_EIR_Input]) {
-    writeValue (outputFile, SM::Vector_EIR_Input, _assimilatorMode, survey, data_Vector_EIR_Input);
+    writeValue (outputFile, SM::Vector_EIR_Input, survey, data_Vector_EIR_Input);
   }
   if (active[SM::Vector_EIR_Simulated]) {
-    writeValue (outputFile, SM::Vector_EIR_Simulated, _assimilatorMode, survey, data_Vector_EIR_Simulated);
+    writeValue (outputFile, SM::Vector_EIR_Simulated, survey, data_Vector_EIR_Simulated);
   }
   if (active[SM::Clinical_RDTs]) {
-      writeValue (outputFile, SM::Clinical_RDTs, _assimilatorMode, survey, _numClinical_RDTs);
+      writeValue (outputFile, SM::Clinical_RDTs, survey, _numClinical_RDTs);
   }
   if (active[SM::Clinical_DrugUsage]) {
-      writeMap (outputFile, SM::Clinical_DrugUsage, _assimilatorMode, survey, _sumClinical_DrugUsage);
+      writeMap (outputFile, SM::Clinical_DrugUsage, survey, _sumClinical_DrugUsage);
   }
   if (active[SM::Clinical_FirstDayDeaths]) {
-      writePerAgeGroup (outputFile, SM::Clinical_FirstDayDeaths, _assimilatorMode, survey, _numClinical_FirstDayDeaths);
+      writePerAgeGroup (outputFile, SM::Clinical_FirstDayDeaths, survey, _numClinical_FirstDayDeaths);
   }
   if (active[SM::Clinical_HospitalFirstDayDeaths]) {
-      writePerAgeGroup (outputFile, SM::Clinical_HospitalFirstDayDeaths, _assimilatorMode, survey, _numClinical_HospitalFirstDayDeaths);
+      writePerAgeGroup (outputFile, SM::Clinical_HospitalFirstDayDeaths, survey, _numClinical_HospitalFirstDayDeaths);
   }
   if (active[SM::nNewInfections]) {
-      writePerAgeGroup (outputFile, SM::nNewInfections, _assimilatorMode, survey, _numNewInfections);
+      writePerAgeGroup (outputFile, SM::nNewInfections, survey, _numNewInfections);
   }
   if (active[SM::nMassITNs]) {
-      writePerAgeGroup (outputFile, SM::nMassITNs, _assimilatorMode, survey, _numMassITNs);
+      writePerAgeGroup (outputFile, SM::nMassITNs, survey, _numMassITNs);
   }
   if (active[SM::nEPI_ITNs]) {
-      writePerAgeGroup (outputFile, SM::nEPI_ITNs, _assimilatorMode, survey, _numEPI_ITNs);
+      writePerAgeGroup (outputFile, SM::nEPI_ITNs, survey, _numEPI_ITNs);
   }
   if (active[SM::nMassIRS]) {
-      writePerAgeGroup (outputFile, SM::nMassIRS, _assimilatorMode, survey, _numMassIRS);
+      writePerAgeGroup (outputFile, SM::nMassIRS, survey, _numMassIRS);
   }
   if (active[SM::nMassVA]) {
-      writePerAgeGroup (outputFile, SM::nMassVA, _assimilatorMode, survey, _numMassVA);
+      writePerAgeGroup (outputFile, SM::nMassVA, survey, _numMassVA);
   }
   if (active[SM::Clinical_Microscopy]) {
-      writeValue (outputFile, SM::Clinical_Microscopy, _assimilatorMode, survey, _numClinical_Microscopy);
+      writeValue (outputFile, SM::Clinical_Microscopy, survey, _numClinical_Microscopy);
   }
 }
 
 
 template <class T>
-void writeValue (ostream& file, int measure, bool assimilatorMode, int survey, T& value)
+void writeValue (ostream& file, int measure, int survey, T& value)
 {
-  if (!assimilatorMode)
-    file << survey << "\t" << 0 << "\t" << measure;
+  file << survey << "\t" << 0 << "\t" << measure;
   file << "\t" << value << lineEnd;
 }
 
-void writeMap (ostream& file, int measure, bool assimilatorMode, int survey, map<string,double>& data)
+void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
 {
     for (map<string,double>::const_iterator it = data.begin(); it != data.end(); ++it) {
-	if (!assimilatorMode)
-	    file << survey << "\t" << it->first << "\t" << measure;
+	file << survey << "\t" << it->first << "\t" << measure;
 	file << "\t" << it->second << lineEnd;
     }
 }
 
 template <class T>
-void writePerAgeGroup (ostream& file, int measure, bool assimilatorMode, int survey, vector<T>& array)
+void writePerAgeGroup (ostream& file, int measure, int survey, vector<T>& array)
 {
   for (int j = 0; j < (int) array.size() - 1; j++) { // Don't write out last age-group
-    if (!assimilatorMode)
-      file << survey << "\t" << j + 1 << "\t" << measure;
+    file << survey << "\t" << j + 1 << "\t" << measure;
     file << "\t" << array[j] << lineEnd;
   }
 }

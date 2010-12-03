@@ -89,11 +89,7 @@ class Survey {
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
     static bitset<SM::NUM_SURVEY_OPTIONS> active;
-    
-    /** Assimilator mode
-     *
-     * If true, skip the first 3 columns of output to reduce file size. */
-    static bool _assimilatorMode; 
+
   //@}
   
 public:

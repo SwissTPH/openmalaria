@@ -1195,6 +1195,14 @@ public class SchemaTranslator {
         }
         return true;
     }
+
+	public Boolean translate23To24() throws Exception{
+	  if(scenarioElement.getAttribute("assimMode").equals("1")){
+			System.err.println("Error: assimMode of 1 is no longer supported");
+                return false;
+	  }
+		scenarioElement.removeAttribute("assimMode");
+	}
     
     /**
      * This function is used to translate the 5-day timestep fitting
