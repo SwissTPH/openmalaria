@@ -98,8 +98,7 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     abbreviation (drugData.getAbbrev()),
-    allele_rshift (bit_start),
-    IV_params(NULL)
+    allele_rshift (bit_start)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)
@@ -120,12 +119,6 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life();
     vol_dist = drugData.getPK().getVol_dist();
     
-    if( drugData.getIV().present() ){
-	IV_params = new LSTMDrugIVParameters;
-	IV_params->elimination_rate_constant = log(2.0) / drugData.getIV().get().getHalf_life();
-	IV_params->vol_dist = drugData.getIV().get().getVol_dist();
-    }
-    
     PD_params.resize (alleles.size());
     double cum_IF = 0.0;
     for (size_t i = 0; i < PD_params.size(); ++i) {
@@ -134,6 +127,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
 	PD_params[i].slope = alleles[i].getSlope ();
 	PD_params[i].power = alleles[i].getMax_killing_rate () / (-neg_elimination_rate_constant * PD_params[i].slope);
 	PD_params[i].IC50_pow_slope = pow(alleles[i].getIC50 (), PD_params[i].slope);
+        PD_params[i].max_killing_rate = alleles[i].getMax_killing_rate ();
     }
     for (size_t i = 0; i < PD_params.size(); ++i) {
 	PD_params[i].cum_initial_frequency /= cum_IF;	// scale: initial freq. of each is out of sum of all initial freq.s

@@ -66,7 +66,7 @@ void HoshenPkPdModel::medicate(string drugAbbrev, double qty, double time, const
   double weight = ageToWeight(ageGroupData, ageYears);
   drug->addDose (qty*drug->getAbsorptionFactor()/weight, time);
 }
-void HoshenPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age) {
+void HoshenPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime) {
     throw logic_error( "Hoshen: doesn't support IV medication" );
 }
 

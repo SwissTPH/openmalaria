@@ -29,6 +29,10 @@
 #include <vector>
 #include <list>
 
+/* WARNING: The Hoshen PK/PD model is no longer maintained.
+ * The LSTM model is partially a replacement, and the Hoshen model has so
+ * far had no use. */
+
 using namespace std;
 
 namespace OM { namespace PkPd {

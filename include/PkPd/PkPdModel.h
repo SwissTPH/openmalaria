@@ -21,8 +21,9 @@
 #ifndef Hmod_PkPdModel
 #define Hmod_PkPdModel
 
-#include "PkPd/Proteome.h"
-#include "AgeGroupData.h"
+// #include "PkPd/Proteome.h"
+#include "util/AgeGroupInterpolation.h"
+#include "Global.h"
 
 #include <fstream>
 using namespace std;
@@ -30,6 +31,8 @@ using namespace std;
 class UnittestUtil;
 
 namespace OM { namespace PkPd {
+    
+    using util::AgeGroupInterpolation;
 
 /** Encapsulates both the static operations for PKPD models and the per-human
  * drug proxies.
@@ -58,7 +61,7 @@ public:
   /** Factory function to create a drug interface, type dependant on run-time
    * options.
    * 
-   * Currently may return one of: PkPdModel, HoshenPkPdModel, IhKwPkPdModel. */
+   * Currently may return one of: PkPdModel, IhKwPkPdModel. */
   static PkPdModel* createPkPdModel ();
   //@}
   
@@ -82,8 +85,7 @@ public:
    * \param drugAbbrev - The drug abbreviation.
    * \param qty        - the quantity in mg.
    * \param time       - Time in days since start of this time step to medicate at
-   * \param ageGroupData Age group of human for age data (passed for performance reasons)
-   * \param age        - Age of human in years
+   * \param ageYears        - Age of human in years
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
    * update (calling medicate) and within-host model update (calling
@@ -92,11 +94,11 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age) =0;
+  virtual void medicate(string drugAbbrev, double qty, double time, double ageYears) =0;
   /** Medicate via IV. Mostly as for medicate(). End-time of IV period is passed
    * (time at which concentration is added to use oral effect calculation code).
    */
-  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age) =0;
+  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime) =0;
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () =0;
@@ -125,12 +127,19 @@ protected:
    *
    * @param ageGroupData Age group for weight data
    * @param ageYears Age in years
+   * @param hetMult Multiplies age to introduce heterogeneity
    * @returns Mass in kg */
-  static inline double ageToWeight (const AgeGroupData ageGroupData, double ageYears) {
-      return ageGroupData.ageToWeight( ageYears );
+  static inline double ageToWeight (double ageYears, double hetMult) {
+      return (*weight)( ageYears ) * hetMult;
   }
   
+  static double hetWeightMultStdDev;
+  
+protected:
+    static double minHetWeightMult;
 private:
+    static AgeGroupInterpolation* weight;
+    
     /// Which model is in use (set by init())
     static ActiveModel activeModel;
     

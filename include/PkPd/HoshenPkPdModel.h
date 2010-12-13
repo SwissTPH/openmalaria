@@ -24,6 +24,10 @@
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/HoshenDrug.h"
 
+/* WARNING: The Hoshen PK/PD model is no longer maintained.
+ * The LSTM model is partially a replacement, and the Hoshen model has so
+ * far had no use. */
+
 namespace OM { namespace PkPd {
     
 /** Pharmacokinetic and pharmacodynamics drug model, using the Hoshen
@@ -42,7 +46,7 @@ public:
   virtual void checkpoint (ostream& stream);
   
   virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double age);
-  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double age);
+  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime);
   virtual void decayDrugs ();
   virtual double getDrugFactor (uint32_t proteome_ID);
   

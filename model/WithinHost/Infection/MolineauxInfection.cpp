@@ -81,7 +81,7 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
     return new MolineauxInfection (stream);
 }
 
-void MolineauxInfection::initParameters() {
+void MolineauxInfection::init() {
     if (Global::interval != 1)
         throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
 

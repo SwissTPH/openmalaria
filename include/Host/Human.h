@@ -71,7 +71,6 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
-      ageGroupData & stream;
       ctsIntervention & stream;
       _ylag & stream;
       _dateOfBirth & stream;
@@ -80,14 +79,6 @@ public:
       _inCohort & stream;
   }
   //@}
-  
-  /** @brief Per timestep update functions
-   * Functions called by Population, Simulation or Summary */
-  //@{
-  /// Update ageGroupData. Should happen before anything using this on  the timestep.
-  inline void updateAgeGroupData() {
-      ageGroupData.update( getAgeInYears() );
-  }
       
   /** Main human update.
    *
@@ -138,11 +129,6 @@ public:
   
   /// @brief Small functions
   //@{
-  /// Return ageGroupData
-  inline const AgeGroupData getAgeGroupData() const{
-      return ageGroupData;
-  }
-      
   /// Get the survey age-group. Constant-time; returns result of last update.
   inline const Monitoring::AgeGroup ageGroup() const {
       return monitoringAgeGroup;
@@ -232,9 +218,6 @@ private:
   
   /// Made persistant to save a lookup each timestep (has a significant impact)
   Monitoring::AgeGroup monitoringAgeGroup;
-  
-  /// Age group for compiled-in data (made persistant as for monitoringAgeGroup).
-  AgeGroupData ageGroupData;
   
   /// Continuous intervention deployment
   ContinuousIntervention ctsIntervention;

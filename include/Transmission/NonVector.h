@@ -65,7 +65,7 @@ public:
    * @param simulationTime Time since start of simulation.
    * @param perHost Transmission-related data for this host.
    * @param ageGroupData Age group of this host for availablility data. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& perHost, const AgeGroupData ageGroupData); 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageYears); 
  
 private:
 
@@ -100,7 +100,7 @@ private:
   //@}
   
   /// EIR per time interval during the intervention period
-  /// Units: innoculations per adult per timestep
+  /// Units: inoculations per adult per timestep
   vector<double> interventionEIR;
   
   /** initialKappa[] is the value of kappa during the pre-intervention phase.

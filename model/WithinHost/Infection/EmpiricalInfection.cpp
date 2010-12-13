@@ -66,7 +66,7 @@ CommonInfection* checkpointedEmpiricalInfection (istream& stream) {
 }
 
 
-void EmpiricalInfection::initParameters(){
+void EmpiricalInfection::init(){
     if (Global::interval != 1)
 	throw util::xml_scenario_error ("EmpiricalInfection only supports using an interval of 1");
     

@@ -55,18 +55,19 @@ void Human::initHumanParameters () {	// static
 	&Human::deployIptDose,
 	&Human::addToCohort
     );
-    Transmission::PerHostTransmission::initParameters();
+    Transmission::PerHostTransmission::init();
     InfectionIncidenceModel::init();
     WithinHost::WithinHostModel::init();
     Clinical::ClinicalModel::init();
-    Vaccine::initParameters();
+    Vaccine::init();
     _ylagLen = Global::intervalsPer5Days * 4;
 }
 
 void Human::clear() {	// static clear
-  WithinHost::WithinHostModel::clear();
+  Vaccine::cleanup();
   Clinical::ClinicalModel::cleanup();
-  Vaccine::clearParameters();
+  WithinHost::WithinHostModel::cleanup();
+  Transmission::PerHostTransmission::cleanup();
 }
 
 
@@ -176,7 +177,7 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
 	
 	updateInterventionStatus();
 	updateInfection(transmissionModel, ageYears);
-	clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, ageGroupData, monitoringAgeGroup, ageTimeSteps);
+	clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, monitoringAgeGroup, ageTimeSteps);
 	clinicalModel->updateInfantDeaths (ageTimeSteps);
 	_probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
@@ -190,7 +191,7 @@ void Human::addInfection(){
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     int numInf = infIncidence->numNewInfections(
 	transmissionModel->getEIR(
-	    Global::simulationTime, perHostTransmission, ageGroupData, monitoringAgeGroup
+	    Global::simulationTime, perHostTransmission, ageYears, monitoringAgeGroup
 	),
 	_vaccine.getPEVEfficacy(),
 	perHostTransmission

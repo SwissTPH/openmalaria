@@ -211,7 +211,7 @@ string VectorAnopheles::initialise (
   P_df .resize (N_v_length);
   P_dif.resize (N_v_length);
   
-  annualS_v.assign (Global::DAYS_IN_YEAR, 0.0);
+  quinquennialS_v.assign (Global::DAYS_IN_YEAR*5, 0.0);
   forcedS_v.resize (Global::DAYS_IN_YEAR);
   mosqEmergeRate.resize (Global::DAYS_IN_YEAR);	// Only needs to be done here if loading from checkpoint
   
@@ -297,7 +297,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
 
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeGroupData(), transmissionModel->ageCorrectionFactor);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), transmissionModel->ageCorrectionFactor);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex);
     sumPFindBite += prod;
@@ -340,10 +340,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
     S_v[t] = forcedS_v[sTime % Global::intervalsPerYear];
     N_v[t] = S_v[t] * initNvFromSv;
     O_v[t] = S_v[t] * initOvFromSv;
-
   }
-  
-  sumAnnualForcedS_v = vectors::sum (forcedS_v);
   
   // All set up to drive simulation from forcedS_v
 }
@@ -352,46 +349,56 @@ void VectorAnopheles::destroy () {
 }
 
 bool VectorAnopheles::vectorInitIterate () {
-  // Try to match S_v against its predicted value. Don't try with N_v or O_v
-  // because the predictions will change - would be chasing a moving target!
-  // EIR comes directly from S_v, so should fit after we're done.
-  
-  double factor = sumAnnualForcedS_v / vectors::sum(annualS_v);
-//   cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-  if (!(factor > 1e-6 && factor < 1e6))
-  {// unlikely, but might as well check in case either operand was zero
-	//cout << "vectors sum : "<<vectors::sum(annualS_v);
-	//cout << "factor value : "<<factor;
-    throw runtime_error ("factor out of bounds");
-  }
-  
-  //NOTE: how accurate do we want fits to be? Results seem to be stocastically something like 1-5% different.
-  const double LIMIT = 0.05;
-  if (fabs(factor - 1.0) > LIMIT) {
-//     cout << "Vector iteration: adjusting with factor "<<factor<<endl;
-    // Adjusting mosqEmergeRate is the important bit. The rest should just bring things to a stable state quicker.
+    // Try to match S_v against its predicted value. Don't try with N_v or O_v
+    // because the predictions will change - would be chasing a moving target!
+    // EIR comes directly from S_v, so should fit after we're done.
+    
+    double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
+    //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
+    if (!(factor > 1e-6 && factor < 1e6)){
+        // unlikely, but might as well check in case either operand was zero
+        //cout << "vectors sum : "<<vectors::sum(annualS_v);
+        //cout << "factor value : "<<factor;
+        throw runtime_error ("factor out of bounds");
+    }
+    
+    //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
+    // Adjusting mosqEmergeRate is the important bit. The rest should just
+    // bring things to a stable state quicker.
     initNv0FromSv *= factor;
-    initNvFromSv *= factor;	//(not currently used)
+    initNvFromSv *= factor;     //(not currently used)
     vectors::scale (mosqEmergeRate, factor);
     vectors::scale (N_v, factor);
-    // What factor exactly these should be scaled by isn't obvious; in any case they should reach stable values quickly.
-    //vectors::scale (O_v, factor);
-    //vectors::scale (S_v, factor);
-    return true;	// we scaled mosqEmergeRate; iterate again
-  } else {
-    // Once the amplitude is approximately correct, we try to find the offset
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, annualS_v);
-//     cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    FSRotateAngle -= rAngle;	// annualS_v was already rotated by old value of FSRotateAngle, so increment
+    // What factor exactly these should be scaled by isn't obvious; in any case
+    // they should reach stable values quickly.
+    vectors::scale (O_v, factor);
+    vectors::scale (S_v, factor);
+    vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
+    
+    // average annual period of S_v over 5 years
+    vector<double> avgAnnualS_v( Global::DAYS_IN_YEAR, 0.0 );
+    for( size_t i = 0; i < Global::DAYS_IN_YEAR * 5; ++i ){
+        avgAnnualS_v[i % Global::DAYS_IN_YEAR] =
+            quinquennialS_v[i] / 5.0;
+    }
+    
+    // Once the amplitude is approximately correct, we try to find a
+    // rotation offset.
+    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+    //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
+    // annualS_v was already rotated by old value of FSRotateAngle, so increment:
+    FSRotateAngle -= rAngle;
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
-    sumAnnualForcedS_v = vectors::sum (forcedS_v);
-    
-    return (rAngle > LIMIT * 2*M_PI / Global::intervalsPerYear);	// iterate again if result wasn't close
-  }
+    //Note: we used to keep iterating until both of the following limits passed.
+    // Lets change this and just execute once.
+    return false;
+    /* const double LIMIT = 0.1;
+     * return (fabs(factor - 1.0) > LIMIT) ||
+     * (rAngle > LIMIT * 2*M_PI / Global::intervalsPerYear); */
 }
 
 
@@ -445,7 +452,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   double intP_dif = 0.0;
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeGroupData(), transmissionModel->ageCorrectionFactor);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), transmissionModel->ageCorrectionFactor);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex)
 	  * host.probMosqResting(humanBase, sIndex);
@@ -484,8 +491,9 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     size_t t    = dMod % N_v_length;
     size_t t1   = (dMod - 1) % N_v_length;
     size_t ttau = (dMod - mosqRestDuration) % N_v_length;
-    // Day of year:
-    size_t dYear = (firstDay + i) % Global::DAYS_IN_YEAR;
+    // Day of year and of 5-year cycles:
+    size_t dYear = (firstDay + i) % (Global::DAYS_IN_YEAR);
+    size_t d5Year = (firstDay + i) % (Global::DAYS_IN_YEAR * 5);
     
     
     // These only need to be calculated once per timestep, but should be
@@ -565,7 +573,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     //END S_v
     
 
-    annualS_v[dYear] = S_v[t];
+    quinquennialS_v[d5Year] = S_v[t];
     
     partialEIR += S_v[t] * P_Ai_base;
     

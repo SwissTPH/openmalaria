@@ -41,7 +41,7 @@ int DescriptiveIPTWithinHost::iptiEffect;
 
 // -----  init  -----
 
-void DescriptiveIPTWithinHost::initParameters () {
+void DescriptiveIPTWithinHost::init () {
   iptActive = util::ModelOptions::option( IPTI_SP_MODEL );
   if (!iptActive) {
     if (InputData.getActiveInterventions()[Interventions::IPTI])
@@ -69,9 +69,9 @@ void DescriptiveIPTWithinHost::initParameters () {
   DescriptiveIPTInfection::initParameters(xmlInterventions);
 }
 
-void DescriptiveIPTWithinHost::clearParameters () {
+void DescriptiveIPTWithinHost::cleanup () {
   if (!iptActive) return;
-  DescriptiveIPTInfection::clearParameters();
+  DescriptiveIPTInfection::cleanup();
 }
 
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :

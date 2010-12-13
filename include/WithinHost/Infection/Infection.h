@@ -22,7 +22,6 @@
 #define Hmod_Infection
 
 #include "Global.h"
-#include "PkPd/Proteome.h"
 
 class UnittestUtil;
 
@@ -82,7 +81,7 @@ protected:
   //! Start date of the infection
   int _startdate;
     
-  //! Proteome (used in a different situation than genotype) 
+  //! Proteome/genotype identifier
   uint32_t proteome_ID;
   
   //! Current density of the infection

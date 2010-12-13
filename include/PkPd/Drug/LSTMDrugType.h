@@ -28,7 +28,6 @@
 #include <map>
 #include <vector>
 #include "Global.h"
-#include "PkPd/Proteome.h"
 #include "inputData.h"
 
 using namespace std;
@@ -42,12 +41,7 @@ namespace OM { namespace PkPd {
 	double slope;						/// Slope of the dose response curve (no unit)
 	double power;						/// Maximal drug killing rate per day / (elimination_rate_constant * slope) (no unit)
 	double IC50_pow_slope;			/// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
-    };
-    
-    /** Optional per drug IV absorbtion paratemetrs. */
-    struct LSTMDrugIVParameters {
-	double elimination_rate_constant;	/// Elimination rate constant. Found using ln(2)/half_life. (1 / days)
-	double vol_dist;					/// Volume of distribution (l/kg)
+	double max_killing_rate;    //TODO: keep this and power?    /// Maximal drug killing rate per day
     };
     
     
@@ -115,12 +109,9 @@ private:
     double neg_elimination_rate_constant;	/// Terminal elimination rate constant (negated). Found using ln(2)/half_life. (1 / days)
     double vol_dist;					/// Volume of distribution (l/kg)
     
-    /* IV parameters - pointer is 0 if no parameters provided */
-    LSTMDrugIVParameters *IV_params;
-    
-  // Allow LSTMDrug to access private members
-  friend class LSTMDrug;
-  friend inline double drugEffect (const LSTMDrugType& drugType, double& concentration, double duration, double weight_kg, double dose_mg);
+    // Allow LSTMDrug to access private members
+    friend class LSTMDrug;
+    friend inline double drugEffect (const LSTMDrugType& drugType, double& concentration, double duration, double weight_kg, double dose_mg);
 };
 
 } }

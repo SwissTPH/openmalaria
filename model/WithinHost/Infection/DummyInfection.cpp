@@ -38,7 +38,7 @@ CommonInfection* checkpointedDummyInfection (istream& stream) {
     return new DummyInfection (stream);
 }
 
-void DummyInfection::initParameters () {
+void DummyInfection::init () {
     CommonWithinHost::createInfection = &createDummyInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedDummyInfection;
 }

@@ -58,7 +58,7 @@ double Vaccine::getEfficacy (int numPrevDoses)
         return 1.0;
 }
 
-void Vaccine::initParameters()
+void Vaccine::init()
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
     const scnXml::Interventions& interventions = InputData().getInterventions();
@@ -128,7 +128,7 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
     }
 }
 
-void Vaccine::clearParameters ()
+void Vaccine::cleanup ()
 {
 }
 

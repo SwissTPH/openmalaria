@@ -1,7 +1,7 @@
 /*
  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include "util/errors.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
+#include "inputData.h"
 
 #include <sstream>
 #include <iostream>
@@ -48,7 +49,7 @@ namespace OM { namespace util {
     string CommandLine::parse (int argc, char* argv[]) {
 	options[COMPRESS_CHECKPOINTS] = true;	// turn on by default
 	
-	bool cloHelp = false, cloError = false;
+	bool cloHelp = false, cloVersion = false, cloError = false;
 	newEIR = numeric_limits<double>::quiet_NaN();
 	bool fileGiven = false;
 	string scenarioFile = "scenario.xml";
@@ -127,8 +128,10 @@ namespace OM { namespace util {
 			throw runtime_error ("--stream-validator may only be given once");
 		    sVFile = parseNextArg (argc, argv, i);
 #	endif
-		} else if (clo == "help") {
-		    cloHelp = true;
+                } else if (clo == "version") {
+                    cloVersion = true;
+                } else if (clo == "help") {
+                    cloHelp = true;
 		} else {
 		    cerr << "Unrecognised command-line option: --" << clo << endl;
 		    cloError = true;
@@ -159,8 +162,10 @@ namespace OM { namespace util {
 			options.set (TEST_CHECKPOINTING);
 		    } else if (clo[j] == 'd') {
 			options.set (TEST_DUPLICATE_CHECKPOINTS);
-		    } else if (clo[j] == 'h') {
-			cloHelp = true;
+                    } else if (clo[j] == 'v') {
+                        cloVersion = true;
+                    } else if (clo[j] == 'h') {
+                        cloHelp = true;
 		    } else {
 		    cerr << "Unrecognised command-line option: -" << clo[j] << endl;
 		    cloError = true;
@@ -172,6 +177,19 @@ namespace OM { namespace util {
 	    }
 	}
 	
+	if (cloVersion || cloHelp){
+            cerr<<"OpenMalaria simulator of malaria epidemiology and control, schema version "
+                  <<InputDataType::SCHEMA_VERSION<<endl
+                  <<"(oldest compatible: "<<InputDataType::SCHEMA_VERSION_OLDEST_COMPATIBLE
+                  <<"). For more information, see"<<endl
+                  <<"http://code.google.com/p/openmalaria/"<<endl<<endl
+                  <<"OpenMalaria is copyright © 2005-2010 Swiss Tropical Institute and Liverpool"<<endl
+                  <<"School Of Tropical Medicine."<<endl
+                  <<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl
+                  <<"are welcome to redistribute it under certain conditions. See the file COPYING"<<endl
+                  <<"or http://www.gnu.org/licenses/gpl-2.0.html for details of warranty or terms of"<<endl
+                  <<"redistribution."<<endl<<endl;
+        }
 	if (cloHelp || cloError) {
 	    cerr << "Usage: " << argv[0] << " [options]" << endl << endl
 	    << "Options:"<<endl
@@ -191,7 +209,7 @@ namespace OM { namespace util {
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
 	    << "			period, exiting after completing each"<<endl
 	    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
-	    << " -d --checkpoint-duplicates"
+	    << " -d --checkpoint-duplicates"<<endl
 	    << "			Write a checkpoint immediately after reading, which should be" <<endl
 	    << "			identical to that read." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
@@ -201,13 +219,15 @@ namespace OM { namespace util {
 	    << "			Use StreamValidator to validate against reference file PATH." <<endl
 	    << "			(note: PATH must be absolute or relative to resource path)." <<endl
 #	endif
-	    << " -h --help		Print this message." << endl
+            << " -v --version           Display the current schema version of OpenMalaria." << endl
+            << " -h --help              Print this message." << endl<<endl
 	    ;
 	    if( cloError )
 		throw std::invalid_argument( "bad argument" );
-	    else
-		throw cmd_exit ("Printed help");
 	}
+	if( cloVersion || cloHelp ){
+            throw cmd_exit ("Printed help");
+        }
 	
 #	ifdef OM_STREAM_VALIDATOR
 	if( sVFile.size() )

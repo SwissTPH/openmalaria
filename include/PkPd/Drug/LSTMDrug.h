@@ -24,12 +24,45 @@
 #define Hmod_LSTMDrug
 
 #include "Global.h"
-#include "PkPd/Proteome.h"
 #include "LSTMDrugType.h"
 
 using namespace std;
 
-namespace OM { namespace PkPd {
+namespace OM {
+
+namespace PkPd {
+    struct DoseParams;
+}
+namespace util { namespace checkpoint {
+    void operator& (multimap<double,PkPd::DoseParams> x, ostream& stream);
+    void operator& (multimap<double,PkPd::DoseParams>& x, istream& stream);
+} }
+
+namespace PkPd {
+
+  /** Describes an oral or IV dose.
+   * 
+   * If duration > 0, describes an IV dose. qty refers to the infusion rate
+   * in mg/kg/day.
+   * 
+   * If duration = 0, describes an oral dose. qty refers to the concentration
+   * in mg/kg.
+   */
+  struct DoseParams {
+      DoseParams() : qty(0.0), duration(0.0) {}
+      DoseParams( double r, double d ): qty(r), duration(d) {}
+      double qty;               // infusion rate or dose size
+      //NOTE: duration is now only needed when checking for overlapping doses
+      // and not within factor/concentration calculation code.
+      double duration;  // units: days
+  
+        /// Checkpointing
+        template<class S>
+        void operator& (S& stream) {
+            qty & stream;
+            duration & stream;
+        }
+  };    
     
 /** A class holding pkpd drug use info.
  *
@@ -46,8 +79,15 @@ public:
    * Converts qty in mg to concentration, and stores along with time (delay past
    * the start of the current timestep) in the doses container. */
   void medicate (double time, double qty, double weight);
-  /** Indicate a new medication via IV this timestep. */
-  void medicateIV (double duration, double endTime, double qty, double weight);
+  /** Indicate a new medication via IV this timestep.
+   *
+   * @param duration Days
+   * @param endTime Time between start of current timestep and end-time of
+   * the dose in days. May be greater than 1 day, but endTime-duration must be
+   * less than 1.
+   * @param qty Mg/kg
+   */
+  void medicateIV (double duration, double endTime, double qty);
   
   /** Returns the total drug factor for one drug over one day.
    *
@@ -56,7 +96,7 @@ public:
    * 
    * This doesn't adjust concentration because this function may be called
    * several times (for each infection) per timestep, or not at all. */
-  double calculateDrugFactor(uint32_t proteome_ID) const;
+  double calculateDrugFactor(uint32_t proteome_ID);
   
   /** Updates concentration variable and clears day's doses.
    *
@@ -71,25 +111,26 @@ public:
   }
   
 protected:
+  typedef multimap<double,DoseParams> DoseMap;
+  
+    /** Check whether an IV dose needs to be split into multiple doses
+     * (over two days or when an oral dose occurs in the middle).
+     * If necessary, split.
+     *
+     * Only check against lastInserted. */
+    void check_split_IV( DoseMap::iterator lastInserted );
+    
   /// Always links a drug instance to its drug-type data
   const LSTMDrugType* typeData;
   
   double concentration;
   
-  struct IV_dose {
-      IV_dose( double r, double d ): infusRate(r), duration(d) {}
-      double infusRate;	// infusion rate: mg / kg / day
-      double duration;
-  };
-  list<IV_dose> IV_doses;
-  
   /** List of each dose given today (and possibly tomorrow), ordered by time.
-   * First parameter (key) is time in days, second (value) is dose in same units
-   * as concentration.
+   * First parameter (key) is time in days, second describes dose.
    * 
    * Used in calculateDrugFactor temporarily,
    * and in updateConcentration() to update concentration. */
-  multimap<double,double> doses;
+   DoseMap doses;
 };
 
 } }

@@ -66,19 +66,18 @@ include_directories (
 )
 
 set (OM_CXXTEST_HEADERS
-  PerHostTransmissionSuite.h
   #VectorAnophelesSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
-  HoshenPkPdSuite.h
+  #HoshenPkPdSuite.h
   LSTMPkPdSuite.h
   CheckpointSuite.h
   DummyInfectionSuite.h
   EmpiricalInfectionSuite.h
   InfectionImmunitySuite.h
-  AgeGroupDataSuite.h
   #DescriptiveInfectionSuite.h
   ESCaseManagementSuite.h
   ESDecisionTreeSuite.h
+  AgeGroupInterpolationSuite.h
 )
 
 #Appears to be problems with this on windows...

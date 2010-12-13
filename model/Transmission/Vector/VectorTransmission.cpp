@@ -141,8 +141,9 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
 }
 
 int VectorTransmission::transmissionInitDuration () {
-    // Data is summed over the last year of human initialisation.
-    return 0;
+    // Data is summed over the last year of human initialisation
+    // plus an extra 4 years.
+    return 4*Global::intervalsPerYear;
 }
 int VectorTransmission::transmissionInitIterate () {
   bool iterate = false;
@@ -171,16 +172,16 @@ void VectorTransmission::initMainSimulation() {
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
-double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData) {
+double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears) {
   if (simulationMode == equilibriumMode)
     return initialisationEIR[simulationTime%Global::intervalsPerYear]
-	 * host.relativeAvailabilityHetAge (ageGroupData) * ageCorrectionFactor;
+	 * host.relativeAvailabilityHetAge (ageYears);
   
   double EIR = 0.0;
   for (size_t i = 0; i < numSpecies; ++i) {
     EIR += species[i].calculateEIR (i, host);
   }
-  return EIR * host.relativeAvailabilityAge (ageGroupData) * ageCorrectionFactor;
+  return EIR * host.relativeAvailabilityAge (ageYears);
 }
 
 

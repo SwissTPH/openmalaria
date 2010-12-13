@@ -52,6 +52,7 @@ void ClinicalModel::init () {
   CaseManagementCommon::initCommon();
 }
 void ClinicalModel::cleanup () {
+  CaseManagementCommon::cleanupCommon();
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
 	ClinicalEventScheduler::cleanup();
 }
@@ -116,7 +117,7 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
   return false;
 }
 
-void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup, int ageTimeSteps) {
+void ClinicalModel::update (OM::WithinHost::WithinHostModel& withinHostModel, OM::Transmission::PerHostTransmission& hostTransmission, double ageYears, OM::Monitoring::AgeGroup ageGroup, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
     _doomed -= Global::interval;
   
@@ -135,7 +136,7 @@ void ClinicalModel::update (WithinHost::WithinHostModel& withinHostModel, PerHos
     }
   }
   
-  doClinicalUpdate (withinHostModel, hostTransmission, ageYears, ageGroupData, ageGroup);
+  doClinicalUpdate (withinHostModel, hostTransmission, ageYears, ageGroup);
 }
 
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {

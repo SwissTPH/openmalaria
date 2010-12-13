@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,6 +120,13 @@ namespace Interventions {
     
     class InputDataType {
     public:
+        /// Current schema version.
+        static const int SCHEMA_VERSION = 23;
+        /** Oldest which current code is potentially compatible with
+        * (provided the scenario XML file references its schema version).
+        */
+        static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 23;
+        
 	InputDataType () : scenario(NULL) {}
 	
 	/** @brief Reads the document in the xmlFile

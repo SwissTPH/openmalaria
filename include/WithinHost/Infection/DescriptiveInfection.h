@@ -53,8 +53,8 @@ public:
     from the malariatherapy data and also the category boundaries for the grouping
     of time since first positive slide.
   */
-  static void initParameters();
-  static void clearParameters();
+  static void init();
+  static void cleanup();
   //@}
   
   ///@name CTOR & DTOR

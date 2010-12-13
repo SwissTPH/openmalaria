@@ -241,7 +241,28 @@ namespace OM { namespace util { namespace checkpoint {
 	    pos = x.insert (pos, make_pair (s,t));
 	}
     }
-    
+
+    void operator& (map<double,double> x, ostream& stream) {
+        x.size() & stream;
+        for (map<double,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+            pos->first & stream;
+            pos->second & stream;
+        }
+    }
+    void operator& (map<double,double>& x, istream& stream) {
+        size_t l;
+        l & stream;
+        validateListSize (l);
+        x.clear ();
+        map<double,double>::iterator pos = x.begin ();
+        for (size_t i = 0; i < l; ++i) {
+            double s, t;
+            s & stream;
+            t & stream;
+            pos = x.insert (pos, make_pair (s,t));
+        }
+    }
+
     void operator& (multimap<double,double> x, ostream& stream) {
 	x.size() & stream;
 	for (multimap<double,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {

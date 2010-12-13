@@ -85,7 +85,8 @@ class SurveyMeasureMap {
 	    codeMap["Vector_EIR_Input"] = SM::Vector_EIR_Input;
 	    codeMap["Vector_EIR_Simulated"] = SM::Vector_EIR_Simulated;
 	    codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
-	    codeMap["Clinical_DrugUsage"] = SM::Clinical_DrugUsage;
+            codeMap["Clinical_DrugUsage"] = SM::Clinical_DrugUsage;
+            codeMap["Clinical_DrugUsageIV"] = SM::Clinical_DrugUsageIV;
 	    codeMap["Clinical_FirstDayDeaths"] = SM::Clinical_FirstDayDeaths;
 	    codeMap["Clinical_HospitalFirstDayDeaths"] = SM::Clinical_HospitalFirstDayDeaths;
 	    codeMap["nNewInfections"] = SM::nNewInfections;
@@ -130,7 +131,6 @@ void Survey::init () {
 	active[codeMap[it->getName()]] = it->getValue();
     }
 }
-
 void AgeGroup::init () {
     const scnXml::Monitoring& mon = InputData().getMonitoring();
     const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
@@ -314,6 +314,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   if (active[SM::Clinical_DrugUsage]) {
       writeMap (outputFile, SM::Clinical_DrugUsage, survey, _sumClinical_DrugUsage);
   }
+  if (active[SM::Clinical_DrugUsageIV]) {
+      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, _sumClinical_DrugUsageIV);
+  }
   if (active[SM::Clinical_FirstDayDeaths]) {
       writePerAgeGroup (outputFile, SM::Clinical_FirstDayDeaths, survey, _numClinical_FirstDayDeaths);
   }
@@ -344,25 +347,25 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 template <class T>
 void writeValue (ostream& file, int measure, int survey, T& value)
 {
-  file << survey << "\t" << 0 << "\t" << measure;
-  file << "\t" << value << lineEnd;
+    file << survey << "\t" << 0 << "\t" << measure;
+    file << "\t" << value << lineEnd;
 }
 
 void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
 {
     for (map<string,double>::const_iterator it = data.begin(); it != data.end(); ++it) {
-	file << survey << "\t" << it->first << "\t" << measure;
-	file << "\t" << it->second << lineEnd;
+        file << survey << "\t" << it->first << "\t" << measure;
+        file << "\t" << it->second << lineEnd;
     }
 }
 
 template <class T>
 void writePerAgeGroup (ostream& file, int measure, int survey, vector<T>& array)
 {
-  for (int j = 0; j < (int) array.size() - 1; j++) { // Don't write out last age-group
-    file << survey << "\t" << j + 1 << "\t" << measure;
-    file << "\t" << array[j] << lineEnd;
-  }
+    for (int j = 0; j < (int) array.size() - 1; j++) { // Don't write out last age-group
+        file << survey << "\t" << j + 1 << "\t" << measure;
+        file << "\t" << array[j] << lineEnd;
+    }
 }
 
 } }

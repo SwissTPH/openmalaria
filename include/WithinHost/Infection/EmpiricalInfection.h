@@ -30,7 +30,7 @@ public:
   ///@brief Static methods
   //@{
   /// Static (shared) data initialisation
-  static void initParameters();
+  static void init();
   
   /// only for parameterisation?
   static void overrideInflationFactors(double inflationMean, double inflationVariance, double extinctionLevel, double overallMultiplier);

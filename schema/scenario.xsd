@@ -72,6 +72,7 @@
                 </xs:annotation>
               </xs:element>
               <xs:element name="clinical" type="clinical" />
+              <xs:element name="human" type="human"/>
               <xs:element name="parameters" type="parameters">
                 <xs:annotation>
                   <xs:documentation>
@@ -262,11 +263,14 @@
   <!--Entomology-->
   <xs:complexType name="EIRDaily">
     <xs:annotation>
-      <xs:documentation>There are two distinct ways of inputing the transmission setting.
-      With this option, the values of daily EIR are input separately.  This is only
-      valid for models that do not invoke vector control and is retained only for
-      backward compatibility. When multiple values are given for a single timestep they are averaged.</xs:documentation>
-      <xs:appinfo>units:Inoculations per person per day;name:Entomological Inoculation Rate;exposed:false;</xs:appinfo>
+      <xs:documentation>
+      In the non-vector model, EIR is input as a sequence of daily values.
+      There must be at least a years' worth of entries (365), and if there
+      are more, values are wrapped and averaged (i.e. value for first day
+      of year is taken as the mean of values for days 0, 365+0, 2*365+0,
+      etc.).
+      </xs:documentation>
+      <xs:appinfo>units:Infectious bites per adult per day;name:Daily Entomological Inoculation Rate;exposed:false;</xs:appinfo>
     </xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:double">
@@ -298,7 +302,7 @@
               of the fourier series with these parameters, with period
               scaled to 365 days.
             </xs:documentation>
-            <xs:appinfo>units:Inoculations per person per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
+            <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:attribute name="a0" type="xs:double" use="required">
@@ -343,7 +347,7 @@
               series fit to these monthly values (used as a smoothing factor).
               List should contain twelve entries: January to December.
             </xs:documentation>
-            <xs:appinfo>units:Inoculations per person per month;name:Monthly values for pre-intervention EIR;</xs:appinfo>
+            <xs:appinfo>units:Infectious bites per adult per month;name:Monthly values for pre-intervention EIR;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
@@ -356,7 +360,7 @@
             <xs:attribute name="annualEIR" type="xs:double" use="required">
               <xs:annotation>
                 <xs:documentation>Scales the monthly values to give this annual innoculation rate.</xs:documentation>
-                <xs:appinfo>units:Innoculations per person per year;name:Annual EIR;min:0;</xs:appinfo>
+                <xs:appinfo>units:Infectious bites per adult per year;name:Annual EIR;min:0;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
           </xs:complexType>
@@ -546,22 +550,13 @@
           If set, overrides the annual EIR by scaling it to this level.
           If ommitted, EIR levels are as specified elsewhere.
         </xs:documentation>
-        <xs:appinfo>units:Infectious bites per person/adult per year;name:Override annual EIR;</xs:appinfo>
+        <xs:appinfo>units:Infectious bites per adult per year;name:Override annual EIR;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="nonVector">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily">
-        <xs:annotation>
-          <xs:documentation>
-            Sequence of EIR values. Should cover at least one whole year. Values
-            are averaged to result in a sequence of EIR-per-timestep values, but
-            are otherwise not smoothed.
-          </xs:documentation>
-          <xs:appinfo>units:innoculations per adult per day;name:Daily EIR;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily"/>
     </xs:sequence>
     <xs:attribute name="eipDuration" type="xs:int" use="required">
       <xs:annotation>
@@ -1237,37 +1232,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="WeibullDecayedProportion">
-    <xs:annotation>
-      <xs:documentation>
-        Specification of a proportion with Weibull or exponential decay.
-      </xs:documentation>
-    </xs:annotation>
-    <xs:attribute name="initial" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-	  The value before any decay.
-	</xs:documentation>
-        <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="halflife" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-	  Half-life in years (more generally, halflife/ln(2) is lambda from the Weibull distribution).
-	</xs:documentation>
-        <xs:appinfo>units:Years;min:0;name:half-life;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="Weibullk" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-	  The parameter k of the Weibull distribution. If missing, 1.0 is used (equivalent to exponential decay).
-	</xs:documentation>
-        <xs:appinfo>min:0;name:Weibull k parameter;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:sequence>
       <xs:element name="deterrency" type="WeibullDecayedProportion">
@@ -1595,6 +1559,16 @@
   <xs:complexType name="AgeGroupValues">
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group">
+        <xs:annotation>
+          <xs:documentation>
+            A series of values according to age groups, each specified with
+            a lower-bound and a value. The first lower-bound specified must be
+            zero; a final upper-bound of infinity is added to complete the last
+            age group. At least one age group is required. Normally these are
+            interpolated by a continuous function (see interpolation attribute).
+          </xs:documentation>
+          <xs:appinfo>name:age group;</xs:appinfo>
+        </xs:annotation>
         <xs:complexType>
           <xs:complexContent>
             <xs:extension base="inputValue">
@@ -1611,6 +1585,38 @@
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+    <xs:attribute name="interpolation" default="linear">
+      <xs:annotation>
+        <xs:documentation>
+          Interpolation algorithm. Normally it is desirable for age-based
+          values to be continuous w.r.t. age. By default linear interpolation
+          is used.
+          
+          With all algorithms except "none", the age groups are converted to a
+          set of points centred within each age range. Extra
+          points are added at each end (zero and infinity) to keep value
+          constant at both ends of the function. A zero-length age group may
+          be used as a kind of barrier to adjust the distribution; e.g. with
+          age group boundaries at 15, 20 and 25 years, a (linear) spline would
+          be drawn between ages 17.5 and 22.5, whereas with boundaries at
+          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
+          years (may be desired if individuals are assumed to reach adult size
+          at 20).
+          
+          Algorithms:
+          1. none: input values are used directly
+          2. linear: straight lines (on an age vs. value graph) are used to
+          interpolate data points.
+        </xs:documentation>
+        <xs:appinfo>name:interpolation;units:none;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="none" />
+          <xs:enumeration value="linear" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="HSEventScheduler">
     <xs:sequence>
@@ -1876,7 +1882,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <xs:complexType name="HSESTreatmentModifierEffect">
     <xs:attribute name="value" type="xs:string" use="required">
       <xs:annotation>
@@ -1908,7 +1913,6 @@
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  
   <xs:complexType name="ClinicalOutcomes">
     <xs:annotation>
       <xs:documentation>
@@ -1966,7 +1970,7 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-
+  <!-- Drug model -->
   <xs:complexType name="drugDescription">
     <xs:sequence>
       <xs:element name="drug" maxOccurs="unbounded">
@@ -2061,30 +2065,54 @@
                 </xs:sequence>
               </xs:complexType>
             </xs:element>
-            <xs:element name="IV" minOccurs="0">
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="half_life" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Used to calculate elimination rate (which is: ln(2) / half_life).
-                        </xs:documentation>
-                      <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="vol_dist" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Volume of Distribution
-                        </xs:documentation>
-                      <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
           </xs:sequence>
           <xs:attribute name="abbrev" use="required" type="xs:string" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <!-- Host data -->
+  <xs:complexType name="human">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of host models.
+      </xs:documentation>
+      <xs:appinfo>name:Human;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="availabilityToMosquitoes" type="AgeGroupValues">
+        <xs:annotation>
+          <xs:documentation>
+            By age group data on availability of humans to mosquitoes relative
+            to an adult.
+          </xs:documentation>
+          <xs:appinfo>name:Availability to mosquitoes;units:None;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="weight" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            By age group data on human weight (mass).
+          </xs:documentation>
+          <xs:appinfo>name:Weight;units:kg;min:0</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="AgeGroupValues">
+              <xs:attribute name="multStdDev" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Each human is assigned a weight multiplier from a normal distribution
+                    with mean 1 and this standard deviation at birth. His/her weight
+                    is this multiplier times the mean from age distribution.
+                    A standard deviation of zero for no heterogeneity is valid; a rough
+                    value from Tanzanian data is 0.14.
+                  </xs:documentation>
+                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
         </xs:complexType>
       </xs:element>
     </xs:sequence>
@@ -2094,5 +2122,36 @@
     <xs:sequence>
       <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="WeibullDecayedProportion">
+    <xs:annotation>
+      <xs:documentation>
+        Specification of a proportion with Weibull or exponential decay.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The value before any decay.
+        </xs:documentation>
+        <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="halflife" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Half-life in years (more generally, halflife/ln(2) is lambda from the Weibull distribution).
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;name:half-life;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="Weibullk" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          The parameter k of the Weibull distribution. If missing, 1.0 is used (equivalent to exponential decay).
+        </xs:documentation>
+        <xs:appinfo>min:0;name:Weibull k parameter;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>

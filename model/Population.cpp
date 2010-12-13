@@ -39,28 +39,20 @@
 #include "util/ModelOptions.h"
 
 #include <boost/format.hpp>
+#include <boost/assign.hpp>
 
 namespace OM
 {
     using namespace OM::util;
+    using namespace boost::assign;
 
 // -----  Population: static data / methods  -----
-
-// Optional immediate reporting of population demographics
-// Compile with -DOMP_CSV_REPORTING for gcc or /DOMP_CSV_REPORTING for MSVC.
-#ifdef OMP_CSV_REPORTING
-ofstream csvReporting;
-#endif
-
 
 void Population::init()
 {
     Host::Human::initHumanParameters();
     Host::NeonatalMortality::init();
     PkPd::PkPdModel::init();
-#ifdef OMP_CSV_REPORTING
-    csvReporting.open ("population.csv", ios::app);
-#endif
     
     AgeStructure::init ();
 }
@@ -69,9 +61,6 @@ void Population::clear()
 {
     PkPd::PkPdModel::cleanup ();
     Host::Human::clear();
-#ifdef OMP_CSV_REPORTING
-    csvReporting.close();
-#endif
 }
 
 void Population::staticCheckpoint (istream& stream)
@@ -95,6 +84,13 @@ Population::Population()
 {
     using Monitoring::Continuous;
     Continuous::registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
+    // Age groups are currently hard-coded.
+    ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
+    ostringstream ctsDemogTitle;
+    BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
+        ctsDemogTitle << "\thost % ≤ " << ubound;
+    }
+    Continuous::registerCallback( "host demography", ctsDemogTitle.str(), MakeDelegate( this, &Population::ctsHostDemography ) );
     Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
     Continuous::registerCallback( "patent hosts", "\tpatent hosts", MakeDelegate( this, &Population::ctsPatentHosts ) );
     Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
@@ -237,22 +233,6 @@ void Population::update1()
     // Doesn't matter whether non-updated humans are included (value isn't used
     // before all humans are updated).
     _transmissionModel->updateKappa (population, Global::simulationTime);
-
-#ifdef OMP_CSV_REPORTING
-    if (Global::simulationTime % (Global::intervalsPerYear*5) == 0) {
-        csvReporting << Global::simulationTime << ',';
-        list<Host::Human>::reverse_iterator it = population.rbegin();
-        for (double ageLim = 0; ageLim <= maxLifetimeDays / 365.0; ageLim += 1) {
-            int counter = 0;
-            while (it != population.rend() && it->getAgeInYears() < ageLim) {
-                ++counter;
-                ++it;
-            }
-            csvReporting << counter << ',';
-        }
-        csvReporting << endl;
-    }
-#endif
 }
 
 
@@ -261,6 +241,17 @@ void Population::update1()
 void Population::ctsHosts (ostream& stream){
     // this option is intended for debugging human initialization; normally this should equal populationSize.
     stream << '\t' << population.size();
+}
+void Population::ctsHostDemography (ostream& stream){
+    list<Host::Human>::reverse_iterator it = population.rbegin();
+    int cumCount = 0;
+    BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
+        while( it != population.rend() && it->getAgeInYears() < ubound ){
+            ++cumCount;
+            ++it;
+        }
+        stream << '\t' << cumCount;
+    }
 }
 void Population::ctsRecentBirths (ostream& stream){
     stream << '\t' << recentBirths;

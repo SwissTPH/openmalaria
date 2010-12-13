@@ -41,9 +41,9 @@ class Vaccine {
 public:
     // Static:
     /// Set parameters from xml
-    static void initParameters ();
+    static void init ();
     /// Free memory
-    static void clearParameters ();
+    static void cleanup ();
     
 private:
     /*! Common to all vaccine types. Number of vaccine doses that are given

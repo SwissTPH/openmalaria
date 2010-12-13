@@ -160,7 +160,7 @@ public:
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
   }
   
-  /** Returns the EIR (innoculation rate per host per time step).
+  /** Returns the EIR (inoculation rate per host per time step).
    *
    * Non-vector:
    * During the pre-intervention phase, the EIR is forced, using values from
@@ -172,7 +172,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData, Monitoring::AgeGroup ageGroup);
+  double getEIR (int simulationTime, PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);
@@ -189,8 +189,8 @@ protected:
    * @param ageGroupData Age group of this host for availablility data.
    *
    * @returns  The age- and heterogeneity-specific EIR an individual is exposed
-   * to, in units of innoculations per day. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData) = 0; 
+   * to, in units of inoculations per day. */
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears) = 0; 
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
@@ -200,7 +200,8 @@ private:
     void ctsCbSimulatedEIR (ostream& stream);
     void ctsCbKappa (ostream& stream);
     void ctsCbHumanAvail (ostream& stream);
-  
+    void ctsCbNumTransmittingHumans (ostream& stream);
+    
 public:
   /** Correction factor for PerHostTransmission::getRelativeAvailability.
    *
@@ -213,13 +214,12 @@ protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
   
-  /** Entomological innoculation rate for adults during the
-   * pre-intervention phase (slightly different
-   * usage for Vector and NonVector models; in both cases one year long).
+  /** Entomological inoculation rate for adults during the
+   * pre-intervention phase.
+   * 
+   * Length: Global::intervalsPerYear
    *
-   * Units: innoculations per adult per timestep (non-vector model), or
-   * innoculations per person per timestep (vector model; i.e. averaged across
-   * both children and adults in population).
+   * Units: infectious bites per adult per timestep
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */
@@ -249,25 +249,28 @@ private:
   double BSSInitialisationEIR;
   double BSSInnoculationsPerDayOfYear;
   int BSSTimesteps;
+  
+  /// For "num transmitting humans" cts output.
+  int numTransmittingHumans;
 
 protected:
-  /** Total annual innoculations per person.
+  /** Total annual infectious bites per adult.
    *
    * Checkpointed. */
   double annualEIR;
   
-  /** @brief Variables for reporting of entomological innoculations to humans.
+  /** @brief Variables for reporting of entomological inoculations to humans.
    *
    * innoculationsPer... arrays are checkpointed; timesStep... variables aren't
    * since they're calculated per step. */
   //@{
-  /** Innoculations per human (all ages) per day of year.
+  /** Inoculations per human (all ages) per day of year.
    * 
    * Contains values from today to the previous timestep, one year ago,
    * including the initialisation phase. */
   vector<double> innoculationsPerDayOfYear;
   
-  /** The total number of innoculations per age group, summed over the
+  /** The total number of inoculations per age group, summed over the
    * reporting period. */
   vector<double> innoculationsPerAgeGroup;
   

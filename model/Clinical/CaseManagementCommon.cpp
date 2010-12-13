@@ -24,15 +24,16 @@
 #include "inputData.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-#include "util/XmlUtils.h"
 #include <limits>
 #include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
+    using util::AgeGroupInterpolation;
+    
     int CaseManagementCommon::healthSystemSource;
-    map<double,double> CaseManagementCommon::caseFatalityRates;
+    util::AgeGroupInterpolation* CaseManagementCommon::caseFatalityRate = AgeGroupInterpolation::dummyObject();
     double CaseManagementCommon::_oddsRatioThreshold;
-    map<double,double> CaseManagementCommon::pSeqInpatData;
+    util::AgeGroupInterpolation* CaseManagementCommon::pSeqInpatient = AgeGroupInterpolation::dummyObject();
     
     // -----  functions  -----
     
@@ -40,6 +41,10 @@ namespace OM { namespace Clinical {
 	_oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
 	
 	changeHealthSystem(-1);
+    }
+    void CaseManagementCommon::cleanupCommon (){
+        AgeGroupInterpolation::freeObject( caseFatalityRate );
+        AgeGroupInterpolation::freeObject( pSeqInpatient );
     }
     
     void CaseManagementCommon::changeHealthSystem (int source) {
@@ -69,48 +74,18 @@ namespace OM { namespace Clinical {
     void CaseManagementCommon::readCommon (const scnXml::HealthSystem& healthSystem)
     {
 	// -----  case fatality rates  -----
-	caseFatalityRates.clear();	// Necessary when re-read from an intervention
-	util::XmlUtils::lboundGroups2map(
-	    caseFatalityRates,
-	    healthSystem.getCFR().getGroup(),
-	    "CFR",
-	    true
-	);
-	
+        AgeGroupInterpolation::freeObject( caseFatalityRate );
+	caseFatalityRate = AgeGroupInterpolation::makeObject( healthSystem.getCFR(), "CFR" );
 	
 	// -----  sequelae  -----
-	pSeqInpatData.clear();
-	util::XmlUtils::lboundGroups2map(
-	    pSeqInpatData,
-	    healthSystem.getPSequelaeInpatient().getGroup(),
-	    "pSequelaeInpatient"
-	);
-    }
-    
-    double CaseManagementCommon::caseFatality (double ageYears)
-    {
-	assert ( ageYears >= 0.0 );
-	map<double,double>::const_iterator it = caseFatalityRates.upper_bound( ageYears );
-	assert( it != caseFatalityRates.end() );
-	double a1 = it->first;
-	double f1 = it->second;
-	--it;
-	double a0 = it->first;	// a0 <=ageYears < a1
-	double f0 = it->second;
-	return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
+        AgeGroupInterpolation::freeObject( pSeqInpatient );
+        pSeqInpatient = AgeGroupInterpolation::makeObject( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
     }
     
     double CaseManagementCommon::getCommunityCaseFatalityRate (double caseFatalityRatio)
     {
 	double x = caseFatalityRatio * _oddsRatioThreshold;
 	return x / (1 - caseFatalityRatio + x);
-    }
-    
-    double CaseManagementCommon::pSequelaeInpatient(double ageYears){
-	map<double,double>::const_iterator it = pSeqInpatData.upper_bound( ageYears );
-	assert( it != pSeqInpatData.begin() );
-	--it;
-	return it->second;
     }
 
     void CaseManagementCommon::staticCheckpoint (ostream& stream) {

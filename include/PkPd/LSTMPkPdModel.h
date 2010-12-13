@@ -29,9 +29,6 @@ namespace OM { namespace PkPd {
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
  * within-host model.
  *
- * Placeholder for IH & KW's new PKPD model. Named in honour of the creators-to-
- * be (rename if you're more inspired).
- * 
  * Some of the implementation is contained in the drug.h/drug.cpp files. */
 class LSTMPkPdModel : public PkPdModel {
 public:
@@ -41,8 +38,8 @@ public:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
-  virtual void medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double ageYears);
-  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double ageYears);
+  virtual void medicate(string drugAbbrev, double qty, double time, double ageYears);
+  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime);
   virtual void decayDrugs ();
   virtual double getDrugFactor (uint32_t proteome_ID);
   
@@ -51,7 +48,10 @@ public:
 private:
     // Per-individual variables:
   list<LSTMDrug> _drugs;
-  //double metabolismMultiplier;
+  
+  /// Multiplies the mean weight for age.
+  /// Within PkPd class simply because it's not used elsewhere.
+  double hetWeightMultiplier;
 };
 
 } }

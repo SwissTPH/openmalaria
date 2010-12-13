@@ -37,7 +37,7 @@ public:
 	MolineauxInfection(uint32_t protID);
 
 	virtual ~MolineauxInfection () {};
-	static void initParameters();
+	static void init();
 	virtual bool updateDensity(double survivalFactor, int ageOfInfection);
 
 protected:

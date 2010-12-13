@@ -19,6 +19,7 @@
 */
 
 #include "PkPd/LSTMPkPdModel.h"
+#include "util/random.h"
 
 namespace OM { namespace PkPd {
 
@@ -26,7 +27,16 @@ namespace OM { namespace PkPd {
 
 LSTMPkPdModel::LSTMPkPdModel () {
     // TODO (LSTM): can add initialization, heterogeneity, etc., here
-    //metabolismMultiplier = 3;
+#ifndef NDEBUG
+    int counter = 0;
+#endif
+    do {
+        hetWeightMultiplier = util::random::gauss( 1.0, hetWeightMultStdDev );
+#ifndef NDEBUG
+        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
+        ++counter;
+#endif
+    } while( hetWeightMultiplier < minHetWeightMult );
 }
 LSTMPkPdModel::~LSTMPkPdModel () {}
 
@@ -53,7 +63,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, const AgeGroupData ageGroupData, double ageYears) {
+void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double ageYears) {
   list<LSTMDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -65,9 +75,9 @@ void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, const A
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  drug->medicate (time, qty, ageToWeight (ageGroupData, ageYears));
+  drug->medicate (time, qty, ageToWeight (ageYears, hetWeightMultiplier));
 }
-void LSTMPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime, const AgeGroupData ageGroupData, double ageYears) {
+void LSTMPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, double endTime) {
   list<LSTMDrug>::iterator drug = _drugs.begin();
   while (drug != _drugs.end()) {
     if (drug->getAbbreviation() == drugAbbrev)
@@ -79,7 +89,7 @@ void LSTMPkPdModel::medicateIV(string drugAbbrev, double qty, double duration, d
   drug = _drugs.begin();	// the drug we just added
   
   medicateGotDrug:
-  drug->medicateIV (duration, endTime, qty, ageToWeight (ageGroupData, ageYears));
+  drug->medicateIV (duration, endTime, qty);
 }
 
 // This may look complicated but its just some machinery to call updateConcentration() and return its result

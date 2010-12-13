@@ -63,7 +63,7 @@ void Episode::report () {
   if (_time == Global::TIMESTEP_NEVER)	// Nothing to report
     return;
   
-  //FIXME: with new model, should be considered MF/NMF based on whether treatment was given?
+  // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
   if (_state & Pathogenesis::MALARIA) {
     if (_state & Pathogenesis::COMPLICATED)
       Surveys.at(_surveyPeriod)

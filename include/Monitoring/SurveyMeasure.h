@@ -98,12 +98,12 @@ enum SurveyMeasure {
     annAvgK= 26,
     /// Number of episodes (non-malaria fever)
     nNMFever= 27,
-    /** The total number of innoculations per age group, summed over the
+    /** The total number of inoculations per age group, summed over the
      * reporting period. */
     innoculationsPerAgeGroup = 30,
     
     //BEGIN Per day-of-year data (removed)
-    /// Innoculations per human (all ages) per day of year, over the last year.
+    /// Inoculations per human (all ages) per day of year, over the last year.
     /// (Reporting removed.)
     innoculationsPerDayOfYear = 28,
     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
@@ -126,13 +126,15 @@ enum SurveyMeasure {
     Vector_Sv = 34,
     /** Input EIR (Expected EIR entered into scenario file)
      *
-     * Units: innoculations per adult per timestep with non-vector model,
-     * innoculations per person per timestep with vector model.
+     * Units: inoculations per adult per timestep.
      */
     Vector_EIR_Input = 35,
     /** Simulated EIR (EIR output by the transmission model)
      *
-     * Units: innoculations per person per timestep.
+     * Units: inoculations per person per timestep (not per-adult:
+     * since children are less available to mosquitoes than adults,
+     * this population-average figure ends up being smaller than if
+     * all modelled humans were adults).
      */
     Vector_EIR_Simulated = 36,
     //@}
@@ -141,8 +143,8 @@ enum SurveyMeasure {
     //@{
     /// Number of Rapid Diagnostic Tests used
     Clinical_RDTs = 39,
-    /** Effective total quanty of each drug used, in mg. (Per active ingredient
-     * abbreviation.)
+    /** Effective total quanty of each drug used orally, in mg.
+     * (Per active ingredient abbreviation.)
      * 
      * The quantity is efffective with respect to the cost (see treatment
      * schedule definition). */
@@ -175,6 +177,8 @@ enum SurveyMeasure {
     
     /// Number of malarial tests via microscopy used
     Clinical_Microscopy = 48,
+    /** As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
+    Clinical_DrugUsageIV = 49,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

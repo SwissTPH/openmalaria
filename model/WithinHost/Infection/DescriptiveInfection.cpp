@@ -48,7 +48,7 @@ double DescriptiveInfection::xNuStar;
 
 // -----  static init/clear -----
 
-void DescriptiveInfection::initParameters () {
+void DescriptiveInfection::init () {
     if (Global::interval != 5)
         throw util::xml_scenario_error ("DescriptiveInfection only supports using an interval of 5");
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
@@ -107,7 +107,7 @@ void DescriptiveInfection::initParameters () {
     f_MTherapyDensities.close();
 }
 
-void DescriptiveInfection::clearParameters () {}
+void DescriptiveInfection::cleanup () {}
 
 
 // -----  non-static init/destruction  -----

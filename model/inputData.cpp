@@ -32,14 +32,6 @@
 namespace OM {
     using boost::format;
     
-/// Current schema version.
-const int SCHEMA_VERSION = 23;
-/** Oldest which current code is potentially compatible with
- * (provided the scenario XML file references its schema version).
- */
-const int OLDEST_COMPATIBLE = 23;
-
-
 // Initialization functions:
 
 void InputDataType::initParameterValues()
@@ -143,10 +135,10 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     if (scenarioVersion < SCHEMA_VERSION) {
 	ostringstream msg;
 	msg<<lXmlFile<<" uses "
-	    << ((scenarioVersion < OLDEST_COMPATIBLE) ? "an" : "a potentially")
+	    << ((scenarioVersion < SCHEMA_VERSION_OLDEST_COMPATIBLE) ? "an" : "a potentially")
 	    <<" incompatible old schema version ("<<scenarioVersion<<"; current is "
 	    <<SCHEMA_VERSION<<"). Use SchemaTranslator to update.";
-	if (scenarioVersion < OLDEST_COMPATIBLE) {
+	if (scenarioVersion < SCHEMA_VERSION_OLDEST_COMPATIBLE) {
 	    throw util::xml_scenario_error (msg.str());
 	} else {
 	    cerr<<"Warning: "<<msg.str()<<endl;

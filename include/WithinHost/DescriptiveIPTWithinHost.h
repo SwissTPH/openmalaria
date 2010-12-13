@@ -37,8 +37,8 @@ public:
   //@{
   /** Determines whether IPT is present or not (iptActive), and if so
    * initialises parameters here and in DescriptiveIPTInfection. */
-  static void initParameters();
-  static void clearParameters();
+  static void init();
+  static void cleanup();
   //@}
   
   DescriptiveIPTWithinHost ();

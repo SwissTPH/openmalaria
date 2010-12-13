@@ -59,16 +59,12 @@ protected:
     virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel,
 				   PerHostTransmission& hostTransmission,
 				   double ageYears,
-				   const AgeGroupData ageGroupData,
 				   Monitoring::AgeGroup ageGroup);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
  
 private:
-    /// Utility find to take a value from pDeathInitial.
-    double getPDeathInitial (double ageYears);
-    
     /// Maximum number of timesteps (including first of case) an individual will
     /// remember they are sick before resetting.
     static int maxUCSeekingMemory;
@@ -82,10 +78,6 @@ private:
     /// Probability that UC treatment seeking will be done immediately when
     /// sick, on second day given that it wasn't done on first, etc.
     static double pImmediateUC;
-    
-    /// Probability of death on first day of a complicated case (1 - S(0)).
-    /// Depends on age-group.
-    static map<double,double> pDeathInitial;
     
     /// Parameter of S(t) for t > 0
     static double neg_v;

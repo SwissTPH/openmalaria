@@ -73,7 +73,7 @@ public:
    *
    * @param anoph Data structure from XML to use
    * @param sIndex Index in VectorTransmission.species of this class.
-   * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: innoculations.
+   * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: inoculations.
    */
   string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR, map<string, double>& nonHumanHostsPopulations, int populationSize);
   
@@ -182,8 +182,7 @@ public:
     FSCoeffic & stream;
     mosqEmergeRate & stream;
     forcedS_v & stream;
-    annualS_v & stream;
-    sumAnnualForcedS_v & stream;
+    quinquennialS_v & stream;
     initNv0FromSv & stream;
     initNvFromSv & stream;
     N_v_length & stream;
@@ -321,7 +320,8 @@ private:
    * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
    * 
    * When calcFourierEIR is used to produce an EIR from this over 365
-   * (DAYS_IN_YEAR) elements, the resulting EIR has units innoculations.
+   * (DAYS_IN_YEAR) elements, the resulting EIR has units of infectious bites
+   * per adult per day.
    * 
    * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
    * FSCoeffic[0] needs checkpointing, the rest doesn't. */
@@ -341,13 +341,13 @@ private:
    * Should be checkpointed. */
   vector<double> forcedS_v;
   
-  /** Used by vectorInitIterate to calculate scaling factor.
-  *
-  * Length of annualS_v is Global::DAYS_IN_YEAR. Checkpoint.
-  * 
-  * Units of both should be innoculations. */
-  vector<double> annualS_v;
-  double sumAnnualForcedS_v;	///< ditto
+  /** Summary of S_v over the last five years, used by vectorInitIterate to
+   * calculate scaling factor.
+   *
+   * Length of annualS_v is Global::DAYS_IN_YEAR * 5. Checkpoint.
+   * 
+   * Units of both should be inoculations. */
+  vector<double> quinquennialS_v;
   
   /** Conversion factor from forcedS_v to mosqEmergeRate.
    *

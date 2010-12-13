@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 22;
+    static final int CURRENT_VERSION = 23;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -1195,14 +1195,20 @@ public class SchemaTranslator {
         }
         return true;
     }
-
-	public Boolean translate23To24() throws Exception{
-	  if(scenarioElement.getAttribute("assimMode").equals("1")){
-			System.err.println("Error: assimMode of 1 is no longer supported");
-                return false;
-	  }
-		scenarioElement.removeAttribute("assimMode");
-	}
+    
+    /* Units of EIR inputs in vector model changed.
+     * assimMode attribute removed. */
+    public Boolean translate23To24() throws Exception {
+        if(scenarioElement.getAttribute("assimMode").equals("1")){
+            System.err.println("Error: assimMode of 1 is no longer supported");
+            return false;
+        }
+        scenarioElement.removeAttribute("assimMode");
+        if( getChildNodes(getChildElement(scenarioElement, "entoData"), "vector").size() > 0 ){
+            System.err.println("Warning: units of EIR for vector model changed from inoculations per averaged person to inoculations per average adult.");
+        }
+        return true;
+    }
     
     /**
      * This function is used to translate the 5-day timestep fitting

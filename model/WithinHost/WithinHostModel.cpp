@@ -68,20 +68,20 @@ void WithinHostModel::init() {
   detectionLimit=InputData().getMonitoring().getSurveys().getDetectionLimit()*densitybias;
   
   if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
-    DummyInfection::initParameters ();
+    DummyInfection::init ();
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
-    EmpiricalInfection::initParameters();	// 1-day timestep check
+    EmpiricalInfection::init();	// 1-day timestep check
   } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
-	MolineauxInfection::initParameters();
+	MolineauxInfection::init();
   } else {
-    DescriptiveInfection::initParameters ();	// 5-day timestep check
-    DescriptiveIPTWithinHost::initParameters();
+    DescriptiveInfection::init ();	// 5-day timestep check
+    DescriptiveIPTWithinHost::init();
   }
 }
 
-void WithinHostModel::clear() {
-  DescriptiveIPTWithinHost::clearParameters();
-  DescriptiveInfection::clearParameters();
+void WithinHostModel::cleanup() {
+  DescriptiveIPTWithinHost::cleanup();
+  DescriptiveInfection::cleanup();
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {

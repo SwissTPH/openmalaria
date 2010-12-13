@@ -23,6 +23,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
+#include "ExtraAsserts.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include <limits>
 
@@ -33,7 +34,7 @@ class DummyInfectionSuite : public CxxTest::TestSuite
 public:
     void setUp () {
 	UnittestUtil::Infection_init_NaN ();
-	DummyInfection::initParameters();
+	DummyInfection::init();
 	Global::interval = 1;
 	Global::simulationTime = 1;	// value isn't really important
 	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here

@@ -64,7 +64,7 @@ public:
    * @param simulationTime Time since start of simulation.
    * @param host Transmission-related data for this host.
    * @param ageGroupData Age group of this host for availablility data. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, const AgeGroupData ageGroupData); 
+  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears); 
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();

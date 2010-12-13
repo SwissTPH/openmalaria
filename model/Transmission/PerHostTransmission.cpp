@@ -26,8 +26,13 @@ namespace OM { namespace Transmission {
 
 // -----  PerHostTransmission static  -----
 
-void PerHostTransmission::initParameters () {
-    AgeGroupData::initParameters ();
+AgeGroupInterpolation* PerHostTransmission::relAvailAge = AgeGroupInterpolation::dummyObject();
+
+void PerHostTransmission::init () {
+    relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
+}
+void PerHostTransmission::cleanup (){
+    AgeGroupInterpolation::freeObject( relAvailAge );
 }
 
 

@@ -63,7 +63,7 @@ virtual checkpoint (ostream& stream);
  * here. */
 namespace OM { namespace util { namespace checkpoint {
     
-    const long DEFAULT_MAX_LENGTH = 1000;
+    const long DEFAULT_MAX_LENGTH = 2000;
     
     ///@brief Utility functions
     //@{
@@ -228,6 +228,9 @@ namespace OM { namespace util { namespace checkpoint {
     
     void operator& (map<string,double> x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);
+    
+    void operator& (map<double,double> x, ostream& stream);
+    void operator& (map<double, double>& x, istream& stream);
     
     void operator& (multimap<double,double> x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);

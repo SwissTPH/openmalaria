@@ -39,7 +39,7 @@ public:
     
     virtual ~DummyInfection () {}
   
-  static void initParameters ();
+  static void init ();
   
   //! Get the last timestep before the infection is cleared.
   /*!

@@ -22,6 +22,8 @@
 #define Hmod_CaseManagementCommon
 
 #include "Global.h"
+#include "util/AgeGroupInterpolation.h"
+
 #include <map>
 
 namespace scnXml {
@@ -43,6 +45,8 @@ namespace OM { namespace Clinical {
 	 * Both derived case management systems have their own init function;
 	 * this is named "initCommon" to avoid confusion over which is called. */
 	static void initCommon ();
+        /// Free memory
+        static void cleanupCommon ();
 	
 	/** Checkpointing: load state.
 	 *
@@ -64,9 +68,9 @@ namespace OM { namespace Clinical {
 	static void changeHealthSystem (int source);
 	
 	/// Return the case-fatality-rate map (needed by EventScheduler)
-	static inline const map<double,double>& getCaseFatalityRates (){
-	    return caseFatalityRates;
-	}
+// 	static inline const map<double,double>& getCaseFatalityRates (){
+// 	    return caseFatalityRates;
+// 	}
 	
 	/** Calculate the case fatality rate in the community as a function of
 	 * the hospital case fatality rate. */
@@ -76,14 +80,23 @@ namespace OM { namespace Clinical {
 	 * fatality rate from input data.
 	 * 
 	 * @param ageYears Age of person in years */
-	static double caseFatality(double ageYears);
+	static inline double caseFatality(double ageYears) {
+            return (*caseFatalityRate)( ageYears );
+        }
+        
+        /** Scale case fatality rates by a factor. */
+        static inline void scaleCaseFatalityRate( double factor ){
+            caseFatalityRate->scale( factor );
+        }
 	
 	/** Get the probability of in-hospital sequale for a severe bout
 	 * (step-wise constant; I don't think anything else makes sense since
 	 * data is currently from two age-groups).
 	 * 
 	 * Currently we use the same values for outpatients. */
-	static double pSequelaeInpatient(double ageYears);
+	static inline double pSequelaeInpatient(double ageYears) {
+            return (*pSeqInpatient)(ageYears);
+        }
 	
     private:
 	/** Gets the primary description of the health system when
@@ -98,16 +111,13 @@ namespace OM { namespace Clinical {
 	 * to load the correct one from a checkpoint (see getHealthSystem). */
 	static int healthSystemSource;
 	
-	// A map from age-group upper-bounds to CFR values. The first lower-
-	// bound we assume to be less than or equal to any input value, and we
-	// assume no input can be greater than the last upper-bound (which
-	// should be inf).
-	static map<double,double> caseFatalityRates;
+	// An interpolation function from age-groups to CFR values.
+        static util::AgeGroupInterpolation* caseFatalityRate;
 	
 	//log odds ratio of case-fatality in community compared to hospital
 	static double _oddsRatioThreshold;
 	
-	static map<double,double> pSeqInpatData;
+	static util::AgeGroupInterpolation* pSeqInpatient;
       };
 } }
 #endif

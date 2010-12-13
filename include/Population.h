@@ -97,6 +97,8 @@ private:
     
     /// Delegate to print the number of hosts
     void ctsHosts (ostream& stream);
+    /// Delegate to print cumulative numbers of hosts under various age limits
+    void ctsHostDemography (ostream& stream);
     /// Delegate to print the number of births since last count
     void ctsRecentBirths (ostream& stream);
     /// Delegate to print the number of patent hosts
@@ -133,8 +135,13 @@ private:
     //! Size of the human population
     int populationSize;
     
+    ///@brief Variables for continuous reporting
+    //@{
+    vector<double> ctsDemogAgeGroups;
+    
     /// Births since last continuous output
     int recentBirths;
+    //@}
 public:
     //! TransmissionModel model
     Transmission::TransmissionModel* _transmissionModel;

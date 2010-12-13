@@ -10,7 +10,6 @@ set (Model_CPP
   PopulationAgeStructure.cpp
   PopulationStats.cpp
   inputData.cpp
-  AgeGroupData.cpp
   ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
   
   Host/Human.cpp
@@ -36,13 +35,13 @@ set (Model_CPP
   Pathogenesis/Predet.cpp
   
   PkPd/PkPdModel.cpp
-  PkPd/HoshenPkPdModel.cpp
+  #PkPd/HoshenPkPdModel.cpp
   PkPd/LSTMPkPdModel.cpp
-  PkPd/Drug/HoshenDrug.cpp
-  PkPd/Drug/HoshenDrugType.cpp
+  #PkPd/Drug/HoshenDrug.cpp
+  #PkPd/Drug/HoshenDrugType.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
-  PkPd/Proteome.cpp
+  #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp
@@ -74,8 +73,8 @@ set (Model_CPP
   util/ModelOptions.cpp
   util/CommandLine.cpp
   util/random.cpp
-  util/XmlUtils.cpp
   util/StreamValidator.cpp
+  util/AgeGroupInterpolation.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp
