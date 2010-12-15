@@ -150,9 +150,11 @@ public class SchemaTranslator {
         Document forValidation = (Document) scenarioDocument.cloneNode(true);
         Element scenarioElement = forValidation.getDocumentElement();
         scenarioElement.removeAttribute("xsi:noNamespaceSchemaLocation");
-
-        // This is set by generateRun
-        scenarioElement.setAttribute("assimMode", "0");
+        
+        if( _required_version <= 23 ){
+            // This is set by generateRun, but removed in schema 24
+            scenarioElement.setAttribute("assimMode", "0");
+        }
         // This is set by the work generator
         scenarioElement.setAttribute("wuID", "123");
 
@@ -341,8 +343,8 @@ public class SchemaTranslator {
     }
     
     
-
-    // / Exactly what version 1 is has been forgotten; it's merged into 2.
+    // Version 0 refers to before schema versioning was started.
+    // Exactly what version 1 is has been forgotten; it's merged into 2.
     public Boolean translate0To1() {
         return true;
     }
@@ -1199,13 +1201,59 @@ public class SchemaTranslator {
     /* Units of EIR inputs in vector model changed.
      * assimMode attribute removed. */
     public Boolean translate23To24() throws Exception {
-        if(scenarioElement.getAttribute("assimMode").equals("1")){
-            System.err.println("Error: assimMode of 1 is no longer supported");
+        //Remove assimMode:
+        if(!scenarioElement.getAttribute("assimMode").equals("0")){
+            System.err.println("Error: assimMode is no longer supported");
             return false;
         }
         scenarioElement.removeAttribute("assimMode");
+        //Warn about change in EIR units, but don't update automatically (intended unit unknown):
         if( getChildNodes(getChildElement(scenarioElement, "entoData"), "vector").size() > 0 ){
             System.err.println("Warning: units of EIR for vector model changed from inoculations per averaged person to inoculations per average adult.");
+        }
+        
+        //Add human element into scenario:
+        // Data from Tanzanian survey, as was previously hard-coded within OpenMalaria
+        double[] groupLbounds = new double[] { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,20 };
+        double[] groupAvMosq = new double[] {
+            0.225940909648,0.286173633441,0.336898395722,0.370989854675,
+            0.403114915112,0.442585112522,0.473839351511,0.512630464378,
+            0.54487872702,0.581527755812,0.630257580698,0.663063362714,
+            0.702417432755,0.734605377277,0.788908765653,0.839587932303,
+            1.0,1.0
+        };
+        double[] groupWeight = new double[] { 
+            13.9856718,18.30372108,21.745749,24.25753512,
+            26.06595444,28.48868784,30.84202788,33.48638244,
+            35.20335432,37.19394024,40.1368962,42.00539916,
+            44.53731348,46.77769728,49.48396092,54.36,
+            60.0,60.0
+        };
+        assert groupLbounds.length == groupAvMosq.length;
+        assert groupLbounds.length == groupWeight.length;
+        
+        Element model = getChildElement(scenarioElement,"model");
+        Element human = scenarioDocument.createElement("human");
+        model.insertBefore(human, getChildElement(model,"parameters"));
+        Element avMosq = scenarioDocument.createElement("availabilityToMosquitoes");
+        human.appendChild(avMosq);
+        for(int i=0;i<groupLbounds.length;i++){
+            Element g = scenarioDocument.createElement("group");
+            avMosq.appendChild(g);
+            g.setAttribute("lowerbound",Double.toString(groupLbounds[i]));
+            g.setAttribute("value",Double.toString(groupAvMosq[i]));
+        }
+        if( Integer.parseInt( getChildElement(model,"parameters").getAttribute("interval") ) == 1 ){
+            // Add weight data, only used with PkPd model
+            Element weight = scenarioDocument.createElement("weight");
+            human.appendChild(weight);
+            for(int i=0;i<groupLbounds.length;i++){
+                Element g = scenarioDocument.createElement("group");
+                weight.appendChild(g);
+                g.setAttribute("lowerbound",Double.toString(groupLbounds[i]));
+                g.setAttribute("value",Double.toString(groupWeight[i]));
+            }
+            weight.setAttribute("multStdDev","0.14");   // rough figure from Tanzanian data
         }
         return true;
     }
@@ -2076,73 +2124,70 @@ public class SchemaTranslator {
     }
 
     public static void main(String[] args) {
-
 	
 	String output_folder = "translatedScenarios";
         String input_folder = "scenarios";
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("--required_version")) {
+            // Allow _ instead of - :
+            String arg = args[i].replace('_','-');
+            if (arg.equals("--required-version")) {
                 _required_version = Integer.parseInt(args[++i]);
-            } else if (args[i].equals("--oneDayTimesteps")) {
+            } else if (arg.equals("--oneDayTimesteps")) {
             	doODTTranslation = true;
                 doValidation = false;
                 System.out.println("You have chosen the --oneDayTimesteps option, this option is only intended for the fitting scenarii or scenarii using no intervention and/or no ");
-            } else if (args[i].equals("--latest-schema")) {
+            } else if (arg.equals("--latest-schema")) {
                 latestSchema = true;
-            } else if (args[i].equals("--no-validation")) {
+            } else if (arg.equals("--no-validation")) {
                 doValidation = false;
-            } else if (args[i].equals("--no-translation")) {
+            } else if (arg.equals("--no-translation")) {
                 doTranslation = false;
-            } else if (args[i].equals("--update-db")) {
+            } else if (arg.equals("--update-db")) {
                 doDBUpdate = true;
-            } else if (args[i].equals("--maxDensCorrection")) {
-                String arg = args[++i];
-                if (arg.equalsIgnoreCase("true")) {
+            } else if (arg.equals("--maxDensCorrection")) {
+                String arg2 = args[++i];
+                if (arg2.equalsIgnoreCase("true")) {
                     maxDensBug = BugCorrectionBehaviour.correct;
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if (arg2.equalsIgnoreCase("false")) {
                     maxDensBug = BugCorrectionBehaviour.dontCorrect;
                 } else {
                     System.err
                             .println("--maxDensCorrection: expected true or false");
                     System.exit(2);
                 }
-            } else if (args[i].equals("--iptiSpOptionWithoutInterventions")) {
-                String arg = args[++i];
-                if (arg.equalsIgnoreCase("true")) {
+            } else if (arg.equals("--iptiSpOptionWithoutInterventions")) {
+                String arg2 = args[++i];
+                if (arg2.equalsIgnoreCase("true")) {
                     iptiSpOption = IptiSpBehaviour.assumeIntended;
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if (arg2.equalsIgnoreCase("false")) {
                     iptiSpOption = IptiSpBehaviour.assumeUnintented;
                 } else {
                     System.err
                             .println("--iptiSpOptionWithoutInterventions: expected true or false");
                     System.exit(2);
                 }
-            } else if (args[i].equals("--iptiReportOnlyAtRisk")) {
-                String arg = args[++i];
-                if (arg.equalsIgnoreCase("true")) {
+            } else if (arg.equals("--iptiReportOnlyAtRisk")) {
+                String arg2 = args[++i];
+                if (arg2.equalsIgnoreCase("true")) {
                     iptiROAR = IptiReportOnlyAtRiskBehaviour.on;
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if (arg2.equalsIgnoreCase("false")) {
                     iptiROAR = IptiReportOnlyAtRiskBehaviour.off;
                 } else {
                     System.err
                             .println("--iptiReportOnlyAtRisk: expected true or false");
                     System.exit(2);
                 }
-	    } else if (args[i].equals("--schema_folder")) {
-		String arg = args[++i];
-		schema_folder = arg;	
-            } else if (args[i].equals("--input_folder")) { 
-		String arg = args[++i];
-		input_folder = arg;
-	    } else if (args[i].equals("--output_folder")) {
-		String arg = args[++i];
-		output_folder = arg;
-	
+	    } else if (arg.equals("--schema-folder")) {
+		schema_folder = args[++i];
+            } else if (arg.equals("--input-folder")) { 
+		input_folder = args[++i];
+	    } else if (arg.equals("--output-folder")) {
+		output_folder = args[++i];
 	    } else {
                 printUsage();
             }
-            System.out.println(args[i]);
+            System.out.println(arg);
         }
         if (_required_version == 1) {
             System.out
@@ -2175,7 +2220,7 @@ public class SchemaTranslator {
 
     private static void printUsage() {
         System.out.println("Usage: schemaTranslator [options]:\n"
-	    + "\n  --required_version VERSION\tThe version number to update the document(s) to."
+	    + "\n  --required-version VERSION\tThe version number to update the document(s) to."
 	    + "\n\t\t\t\tDefault: CURRENT_VERSION="+CURRENT_VERSION
 	    + "\n  --latest-schema\t\tUse schema scenario.xsd instead of scenario_XX.xsd"
 	    + "\n  --no-validation\t\tDon't validate the result"
@@ -2194,9 +2239,9 @@ public class SchemaTranslator {
             + "\n\t\t\t\tREPORT_ONLY_AT_RISK. Specifying true here causes"
             + "\n\t\t\t\toption REPORT_ONLY_AT_RISK to be added to scenarios"
             + "\n\t\t\t\talready using IPTI_SP_MODEL."
-            + "\n  --schema_folder\t\tThe schema folder, by default ../../schema"
-	    + "\n  --input_folder\t\tThe input folder, by default ./scenarios/"
-            + "\n  --output_folder\t\tThe output folder, by default ./translatedScenarios/"
+            + "\n  --schema-folder\t\tThe schema folder, by default ../../schema"
+	    + "\n  --input-folder\t\tThe input folder, by default ./scenarios/"
+            + "\n  --output-folder\t\tThe output folder, by default ./translatedScenarios/"
         );
         System.exit(1);
     }

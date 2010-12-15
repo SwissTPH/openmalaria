@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" name="Navrongo IPTi treated" schemaVersion="23" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" name="Navrongo IPTi treated" schemaVersion="24" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="4" name="Navrongo" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="2.941827" upperbound="1"/>
@@ -508,24 +508,24 @@
     <clinical healthSystemMemory="4"/>
     <human>
       <availabilityToMosquitoes>
-        <group lowerbound="0" value="0.225940909648"/>
-        <group lowerbound="1" value="0.286173633441"/>
-        <group lowerbound="2" value="0.336898395722"/>
-        <group lowerbound="3" value="0.370989854675"/>
-        <group lowerbound="4" value="0.403114915112"/>
-        <group lowerbound="5" value="0.442585112522"/>
-        <group lowerbound="6" value="0.473839351511"/>
-        <group lowerbound="7" value="0.512630464378"/>
-        <group lowerbound="8" value="0.54487872702"/>
-        <group lowerbound="9" value="0.581527755812"/>
-        <group lowerbound="10" value="0.630257580698"/>
-        <group lowerbound="11" value="0.663063362714"/>
-        <group lowerbound="12" value="0.702417432755"/>
-        <group lowerbound="13" value="0.734605377277"/>
-        <group lowerbound="14" value="0.788908765653"/>
-        <group lowerbound="15" value="0.839587932303"/>
-        <group lowerbound="20" value="1.0"/>
-        <group lowerbound="20" value="1.0"/>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
     <parameters interval="5" iseed="0" latentp="3">

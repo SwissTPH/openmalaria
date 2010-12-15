@@ -121,11 +121,11 @@ namespace Interventions {
     class InputDataType {
     public:
         /// Current schema version.
-        static const int SCHEMA_VERSION = 23;
+        static const int SCHEMA_VERSION = 24;
         /** Oldest which current code is potentially compatible with
         * (provided the scenario XML file references its schema version).
         */
-        static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 23;
+        static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 24;
         
 	InputDataType () : scenario(NULL) {}
 	
