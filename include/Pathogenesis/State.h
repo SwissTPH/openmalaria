@@ -30,7 +30,7 @@ namespace OM { namespace Pathogenesis {
     /* Values here are written in hexadecimal: http://en.wikipedia.org/wiki/Hexadecimal
      * Many are designed to be "flags", so the value corresponds to a single bit:
      * http://en.wikipedia.org/wiki/Flag_byte
-     * Max: 0x4000
+     * Max: 0x80000000
      * (note & | ^ are C++'s binary AND, OR and XOR operators). */
     NONE		= 0,		///< Not sick
     

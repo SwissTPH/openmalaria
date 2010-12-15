@@ -26,6 +26,7 @@
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "util/StreamValidator.h"
 
 #include <limits>
 
@@ -119,6 +120,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
+    util::streamValidate( (newState << 16) & pgState );
     
     if ( Global::simulationTime == timeOfRecovery ) {
 	if( pgState & Pathogenesis::DIRECT_DEATH ){

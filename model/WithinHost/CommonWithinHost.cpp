@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
+#include "util/StreamValidator.h"
 
 using namespace std;
 
@@ -110,6 +111,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     
     ++inf;
   }
+  util::streamValidate(totalDensity);
   
   pkpdModel->decayDrugs ();
 }

@@ -50,6 +50,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(abbrev)));
 	_drugs.back() & stream;
     }
+    hetWeightMultiplier & stream;
 }
 
 void LSTMPkPdModel::checkpoint (ostream& stream) {
@@ -58,6 +59,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 	it->getAbbreviation() & stream;
 	(*it) & stream;
     }
+    hetWeightMultiplier & stream;
 }
 
 

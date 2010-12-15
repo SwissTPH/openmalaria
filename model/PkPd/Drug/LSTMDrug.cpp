@@ -22,6 +22,7 @@
 
 #include "PkPd/Drug/LSTMDrug.h"
 #include "util/errors.h"
+#include "util/StreamValidator.h"
 
 #include <assert.h>
 #include <cmath>
@@ -266,6 +267,8 @@ bool LSTMDrug::updateConcentration () {
 	newDoses.insert( make_pair<double,DoseParams>( dose->first - 1.0, dose->second ) );
     }
     doses.swap( newDoses );	// assign it modified doses (swap may be faster than assign)
+    
+    util::streamValidate( concentration );
     
     // return true when concentration is no longer significant:
     return concentration < typeData->negligible_concentration;

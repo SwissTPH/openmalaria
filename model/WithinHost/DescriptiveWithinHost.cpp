@@ -22,6 +22,7 @@
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
+#include "util/StreamValidator.h"
 
 using namespace std;
 
@@ -119,6 +120,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
     assert( _MOI == infections.size() );
 
     IPTattenuateAsexualMinTotalDensity();
+    util::streamValidate( totalDensity );
 }
 
 

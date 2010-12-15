@@ -55,14 +55,21 @@ namespace OM { namespace util {
      * 3. Run scenario with checkpointing and the "--stream-validator" option,
      * through a debugger. For example, from the build directory:
      * "test/run.py Empirical --gdb -- --stream-validator ../build/test/Empirical-6_Fsvp/StreamValidator --checkpoint"
-     * In theory, the first section before checkpointing will be in-sync, so just
-     * run ("run", "quit"). The second section after loading a checkpoint is
-     * expected to run out of sync. Before running this, add a breakpoint at
-     * the line mentioned in StreamValidator.cpp:
-     * "break StreamValidator.cpp:103". Now run, and when the debugger stops
-     * at your break-point, grab a stack trace ("bt"). If this doesn't accurately
-     * enough show where the desync occurs, add some extra calls to the
-     * "streamValidate()" macro in strategic code locations and repeat.
+     * 
+     * 4. Run in debugger (step 3 should have loaded the debugger).
+     * In theory, the first section before checkpointing will be in-sync, while
+     * the second section after loading a checkpoint should run out of sync.
+     * We want to catch where it runs out of sync; to do this, we add a break
+     * point at the line mentioned in StreamValidator.cpp:
+     * "break StreamValidator.cpp:103". Now run the program until it hits this
+     * break-point (probably twice), then get a stack trace ("bt"). The desync
+     * occurred somewhere between here and the previous call to streamValidate()
+     * in the code. If the debugger never reaches the "out of sync" message in
+     * StreamValidator.cpp however, it isn't noticing any desyncronizations.
+     * 
+     * If this doesn't accurately enough show where the desync occurs, add some
+     * extra calls to the "streamValidate()" macro in strategic code locations
+     * and repeat steps 2-4.
      */
     class StreamValidatorType {
     public:
