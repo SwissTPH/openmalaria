@@ -32,6 +32,8 @@ class AgeGroupInterpolationSuite : public CxxTest::TestSuite
 {
 public:
     AgeGroupInterpolationSuite () {
+        // Set maximum age to 90 years:
+        UnittestUtil::AgeGroupInterpolation_init();
         scnXml::AgeGroupValues::GroupSequence& seq = agvElt.getGroup();
         seq.resize( dataLen, scnXml::Group::Group(0.0,0.0) );
         for( size_t i = 0; i < dataLen; ++i ){
@@ -72,8 +74,8 @@ public:
     }
     
 private:
-    static const size_t dataLen = 18;
-    static const size_t testLen = 7;
+    static const size_t dataLen = 5;
+    static const size_t testLen = 8;
     static const double stdLbounds[dataLen];
     static const double stdValues[dataLen];
     static const double testAges[testLen];
@@ -83,27 +85,23 @@ private:
 };
 
 const double AgeGroupInterpolationSuite::stdLbounds[] = {
-    0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,20
+    0,5,10,15,60
 };
 const double AgeGroupInterpolationSuite::stdValues[] = {
-    0.225940909648,0.286173633441,0.336898395722,0.370989854675,
-    0.403114915112,0.442585112522,0.473839351511,0.512630464378,
-    0.54487872702,0.581527755812,0.630257580698,0.663063362714,
-    0.702417432755,0.734605377277,0.788908765653,0.839587932303,
-    1.0,1.0
+    6.08,3.81,2.62,4.05,5.41
 };
 const double AgeGroupInterpolationSuite::testAges[] = {
     // various ages, designed to test limits, boundary points and interpolation
-    15.2,18.09,7.0, 2.5,
-    0.0,20.0,900.0
+    15.2,18.09,7.0,2.5,
+    0.0,20.0,900.0,62.0
 };
 const double AgeGroupInterpolationSuite::piecewiseConstValues[] = {
-    0.839587932303, 0.839587932303, 0.51263046437799997, 0.33689839572199998,
-    0.22594090964800001, 1.0, 1.0
+    4.0499999999999998, 4.0499999999999998, 3.8100000000000001, 6.0800000000000001,
+    6.0800000000000001, 4.0499999999999998, 5.4100000000000001, 5.4100000000000001
 };
 const double AgeGroupInterpolationSuite::linearInterpValues[] = {
-    0.87701741476563333, 1.0, 0.52875459569899996, 0.37098985467500001,
-    0.22594090964800001, 1.0, 1.0
+    2.7744400000000002, 2.9397479999999998, 4.0369999999999999, 6.0800000000000001,
+    6.0800000000000001, 3.0489999999999999, 5.4100000000000001, 4.938533333333333
 };
 
 #endif

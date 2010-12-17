@@ -83,7 +83,7 @@
     <CFR>
       <group lowerbound="0" value="0"/>
     </CFR>
-    <pSequelaeInpatient>
+    <pSequelaeInpatient interpolation="none">
       <group lowerbound="0.0" value="0.0132"/>
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>

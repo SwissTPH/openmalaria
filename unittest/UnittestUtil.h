@@ -117,6 +117,13 @@ public:
 	util::ModelOptions::optSet = util::EMPIRICAL_WITHIN_HOST_MODEL;
     }
     
+    static void AgeGroupInterpolation_init() {
+        Global::interval = 5;
+        Global::intervalsPerYear = Global::DAYS_IN_YEAR/Global::interval;
+        Global::yearsPerInterval = double(Global::interval) / double(Global::DAYS_IN_YEAR);
+        Global::maxAgeIntervals = static_cast<int> (90.0 * Global::intervalsPerYear);
+    }
+    
     // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
     static void setTotalParasiteDensity (WithinHostModel& whm, double density) {
 	whm.totalDensity = density;

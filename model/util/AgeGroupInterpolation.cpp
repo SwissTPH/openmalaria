@@ -155,13 +155,15 @@ namespace OM { namespace util {
         // Add first point at zero
         pos = dataPoints.insert( pos, make_pair( 0.0, it->getValue() ) );
         
-        double greatestLbound = 0.0;    // also last lbound: distribution must be weakly monotonic
+        double greatestLbound = 0.0;    // also last lbound: age groups must be ordered lowest to highest
+        double lastValue =it->getValue();       // first value is repeated for const start
         for( ; it!=ageGroups.getGroup().end(); ++it ){
             double lbound = it->getLowerbound();
             if( lbound >= greatestLbound ){
                 double insBound = 0.5*(greatestLbound + lbound);
-                pos = dataPoints.insert( pos, make_pair( insBound, it->getValue() ) );
+                pos = dataPoints.insert( pos, make_pair( insBound, lastValue ) );
                 greatestLbound = lbound;
+                lastValue = it->getValue();     // always insert previous value
             } else {
                 throw util::xml_scenario_error( (
                     boost::format("%3%: lower bound %1% less than previous %2%")
@@ -170,7 +172,9 @@ namespace OM { namespace util {
             }
         }
         
-        dataPoints[ numeric_limits<double>::infinity() ] = dataPoints.rbegin()->second;
+        // add a point in middle of last age group, and one at infinity to catch remaining values:
+        dataPoints[ 0.5*(greatestLbound + Global::maxAgeIntervals*Global::yearsPerInterval) ] = lastValue;
+        dataPoints[ numeric_limits<double>::infinity() ] = lastValue;
     }
     
     double AgeGroupPiecewiseLinear::operator() (double ageYears) const {
