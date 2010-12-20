@@ -86,10 +86,29 @@ const=Interpolator(ageLB,values)
 linear=LinearInterpolator(ageLB,values)
 
 fig = plt.figure(1)
-p = fig.add_subplot(1,1,1)
-p.set_title('Interpolation methods for age group data')
+p = fig.add_subplot(2,1,1)
+p.set_title('Human availability to mosquitoes by age')
+#p.set_xlabel('age (years)')
+p.set_ylabel('availability relative to an adult')
+
+const.plot(p)
+linear.plot(p)
+
+#weight values:
+values=[
+    13.9856718,18.30372108,21.745749,24.25753512,26.06595444,
+    28.48868784,30.84202788,33.48638244,35.20335432,37.19394024,
+    40.1368962,42.00539916,44.53731348,46.77769728,49.48396092,
+    54.36,60.0,60.0
+]
+
+const=Interpolator(ageLB,values)
+linear=LinearInterpolator(ageLB,values)
+
+p = fig.add_subplot(2,1,2)
+p.set_title('Human mean weight by age')
 p.set_xlabel('age (years)')
-p.set_ylabel('availability to mosquitoes')
+p.set_ylabel('mass (kg)')
 
 const.plot(p)
 linear.plot(p)
@@ -111,7 +130,7 @@ linear=LinearInterpolator(ageLB,values)
 
 fig = plt.figure(2)
 p = fig.add_subplot(1,1,1)
-p.set_title('Interpolation methods for age group data')
+p.set_title('Interpolation methods for non-malaria fever incidence by age')
 p.set_xlabel('age (years)')
 p.set_ylabel('NMFs per person per year')
 
@@ -146,7 +165,7 @@ linear=LinearInterpolator(ageLB,values)
 
 fig = plt.figure(3)
 p = fig.add_subplot(1,1,1)
-p.set_title('Interpolation methods for age group data')
+p.set_title('Interpolation methods for case fatality rate by age')
 p.set_xlabel('age (years)')
 p.set_ylabel('in-patient severe malaria CFR per person per year')
 
@@ -165,9 +184,9 @@ linear=LinearInterpolator(ageLB,values)
 
 fig = plt.figure(4)
 p = fig.add_subplot(1,1,1)
-p.set_title('Interpolation methods for age group data')
+p.set_title('Interpolation methods for neurological sequelae by age')
 p.set_xlabel('age (years)')
-p.set_ylabel('in-patient severe malaria sequelae per person per year')
+p.set_ylabel('probability of severe malaria in-patients developing sequelae')
 
 const.plot(p)
 linear.plot(p)
