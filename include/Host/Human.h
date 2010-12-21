@@ -206,7 +206,6 @@ public:
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
   
-private:
   /// The WithinHostModel models parasite density and immunity
   WithinHost::WithinHostModel *withinHostModel;
   

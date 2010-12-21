@@ -117,26 +117,26 @@ bool ClinicalModel::isDead (int ageTimeSteps) {
   return false;
 }
 
-void ClinicalModel::update (OM::WithinHost::WithinHostModel& withinHostModel, OM::Transmission::PerHostTransmission& hostTransmission, double ageYears, OM::Monitoring::AgeGroup ageGroup, int ageTimeSteps) {
+void ClinicalModel::update (Human& human, double ageYears, int ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
     _doomed -= Global::interval;
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical bout 6 intervals before
-    Monitoring::Surveys.current->reportIndirectDeaths (ageGroup, 1);
+    Monitoring::Surveys.getSurvey(human._inCohort).reportIndirectDeaths (human.monitoringAgeGroup, 1);
     _doomed = DOOMED_INDIRECT;
     return;
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
-      Monitoring::Surveys.current->reportIndirectDeaths (ageGroup, 1);
+      Monitoring::Surveys.getSurvey(human._inCohort).reportIndirectDeaths (human.monitoringAgeGroup, 1);
       _doomed = DOOMED_NEONATAL;
       return;
     }
   }
   
-  doClinicalUpdate (withinHostModel, hostTransmission, ageYears, ageGroup);
+  doClinicalUpdate (human, ageYears);
 }
 
 void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {

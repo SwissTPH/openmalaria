@@ -42,10 +42,10 @@ public:
     return caseManagement.recentTreatment();
   }
   
-  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears);
+  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel);
   
 protected:
-    virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, const Monitoring::AgeGroup ageGroup);
+    virtual void doClinicalUpdate (Human& human, double ageYears);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

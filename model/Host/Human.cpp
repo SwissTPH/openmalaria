@@ -177,7 +177,7 @@ bool Human::update(int simulationTime, Transmission::TransmissionModel* transmis
 	
 	updateInterventionStatus();
 	updateInfection(transmissionModel, ageYears);
-	clinicalModel->update (*withinHostModel, perHostTransmission, ageYears, monitoringAgeGroup, ageTimeSteps);
+	clinicalModel->update (*this, ageYears, ageTimeSteps);
 	clinicalModel->updateInfantDeaths (ageTimeSteps);
 	_probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
@@ -217,43 +217,43 @@ void Human::updateInterventionStatus() {
 
 void Human::massVaccinate () {
     _vaccine.vaccinate();
-    Monitoring::Surveys.current->reportMassVaccinations (ageGroup(), 1);
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (ageGroup(), 1);
 }
 void Human::ctsVaccinate () {
     if ( _vaccine.doCtsVaccination( Global::simulationTime - _dateOfBirth ) ){
 	_vaccine.vaccinate();
-	Monitoring::Surveys.current->reportEPIVaccinations (ageGroup(), 1);
+	Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (ageGroup(), 1);
     }
 }
 
 void Human::IPTiTreatment () {
-  withinHostModel->IPTiTreatment (ageGroup());
+  withinHostModel->IPTiTreatment (ageGroup(), _inCohort);
 }
 void Human::deployIptDose () {
-    withinHostModel->deployIptDose( ageGroup() );
+    withinHostModel->deployIptDose( ageGroup(), _inCohort );
 }
 
 void Human::massDrugAdministration () {
-    clinicalModel->massDrugAdministration (*withinHostModel, getAgeInYears());
+    clinicalModel->massDrugAdministration (*withinHostModel);
 }
 
 void Human::massITN (){
     perHostTransmission.setupITN ();
-    Monitoring::Surveys.current->reportMassITNs( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( ageGroup(), 1 );
 }
 void Human::ctsITN (){
     perHostTransmission.setupITN ();
-    Monitoring::Surveys.current->reportEPI_ITNs( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( ageGroup(), 1 );
 }
 
 void Human::massIRS () {
     perHostTransmission.setupIRS ();
-    Monitoring::Surveys.current->reportMassIRS( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( ageGroup(), 1 );
 }
 
 void Human::massVA () {
     perHostTransmission.setupVA ();
-    Monitoring::Surveys.current->reportMassVA( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( ageGroup(), 1 );
 }
 
 

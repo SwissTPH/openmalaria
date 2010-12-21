@@ -17,6 +17,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+// Must not be included _after_ boost/math/special_functions/fpclassify.hpp
+#include <boost/math/nonfinite_num_facets.hpp>
+
 #include "Monitoring/Surveys.h"
 #include "inputData.h"
 #include "Clinical/ClinicalModel.h"
@@ -27,7 +30,6 @@
 #include <gzstream.h>
 #include <fstream>
 #include <stdexcept>
-#include <boost/math/nonfinite_num_facets.hpp>
 
 namespace OM { namespace Monitoring {
     

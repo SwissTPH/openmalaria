@@ -123,7 +123,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   clearAllInfections();
 }
 
-void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup) {
+void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort) {
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
@@ -150,11 +150,11 @@ void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup) {
     */
     if (iptiEffect >=  10) {
 	_lastSPDose=Global::simulationTime;
-	Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
+	Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
     }
 }
 
-void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup) {
+void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort) {
   //Set the last SP Dose given for the eligible humans - is this all we need to do?
   
   _lastIptiOrPlacebo = Global::simulationTime;
@@ -163,7 +163,7 @@ void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup) {
   // and also the treatment given when sick (trial-dependent)
   if (iptiEffect >= 10){
     _lastSPDose = Global::simulationTime;
-    Monitoring::Surveys.current->reportIPTDoses (ageGroup, 1);
+    Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
   }
 }
 

@@ -93,17 +93,18 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
         timeLastTreatment (Global::TIMESTEP_NEVER),
         previousDensity (numeric_limits<double>::quiet_NaN())
 {
-    if( tSF != 1.0 )
+    if( tSF != 1.0 ){
 	// p(treatment seeking) is part of tree & handled generically, so we
 	// don't have a way of modifying it.
 	throw xml_scenario_error("treatment seeking heterogeneity not supported");
+    }
 }
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 
 // -----  other methods  -----
 
-void ClinicalEventScheduler::massDrugAdministration(OM::WithinHost::WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalEventScheduler::massDrugAdministration(WithinHost::WithinHostModel& withinHostModel) {
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
@@ -111,12 +112,8 @@ void ClinicalEventScheduler::massDrugAdministration(OM::WithinHost::WithinHostMo
     ESCaseManagement::massDrugAdministration (medicateQueue);
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (
-    WithinHost::WithinHostModel& withinHostModel,
-    PerHostTransmission& hostTransmission,
-    double ageYears,
-    Monitoring::AgeGroup ageGroup
-){
+void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
+    WithinHostModel& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
@@ -127,7 +124,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (Global::simulationTime, ageGroup, pgState);
+	    latestReport.update (Global::simulationTime, human.monitoringAgeGroup, pgState);
         } else if ( pgState & Pathogenesis::PENDING_UC ){
             pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
@@ -139,13 +136,13 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	    } else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
 	    // report bout, at conclusion of episode:
-	    latestReport.update (Global::simulationTime, ageGroup, pgState);
+	    latestReport.update (Global::simulationTime, human.monitoringAgeGroup, pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
 	    
 	    // And returns to transmission (if was removed)
-	    hostTransmission.removeFromTransmission( false );
+	    human.perHostTransmission.removeFromTransmission( false );
 	}
     }
     
@@ -193,7 +190,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	}
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    medicateQueue, pgState, withinHostModel, ageYears, ageGroup
+	    medicateQueue, pgState, withinHostModel, ageYears, human.monitoringAgeGroup
 	);
 	
 	if( medicateQueue.size() )	// I.E. some treatment was given (list is cleared either way)
@@ -206,10 +203,10 @@ void ClinicalEventScheduler::doClinicalUpdate (
 		caseStartTime++;
 	}
 	if ( auxOut.RDT_used ) {
-	    Monitoring::Surveys.current->report_Clinical_RDTs (1);
+	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_RDTs (1);
 	}
 	if ( auxOut.microscopy_used ) {
-	    Monitoring::Surveys.current->report_Clinical_Microscopy (1);
+	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_Microscopy (1);
 	}
 	
 	// Case fatality rate (first day of illness)
@@ -263,7 +260,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	// This should have an effect from the start of the next timestep.
 	// NOTE: This is not very accurate, but considered of little importance.
 	if (pgState & Pathogenesis::EVENT_IN_HOSPITAL)
-	    hostTransmission.removeFromTransmission( true );
+	    human.perHostTransmission.removeFromTransmission( true );
 	
 	if (pgState & Pathogenesis::COMPLICATED) {
 	    // complicatedCaseDuration should to some respects be associated
@@ -291,7 +288,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	if( it->duration == it->duration ){	// Have a duration, i.e. via IV administration
 	    if ( it->time + 0.5*it->duration < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicateIV (it->abbrev, it->qty, it->duration, it->time+it->duration);
-	    Monitoring::Surveys.current->report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
+	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	    } else {   // and decrement treatment seeking delay for the rest
 		it->time -= 1.0;
@@ -299,7 +296,7 @@ void ClinicalEventScheduler::doClinicalUpdate (
 	} else {
 	    if ( it->time < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
-	    Monitoring::Surveys.current->report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	    } else {   // and decrement treatment seeking delay for the rest
 		it->time -= 1.0;

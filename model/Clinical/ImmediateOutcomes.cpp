@@ -42,7 +42,7 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHostModel& withinHostModel, double ageYears) {
+void ClinicalImmediateOutcomes::massDrugAdministration(WithinHost::WithinHostModel& withinHostModel) {
     /* TODO: here we assume a 100% clearance rate for the MDA drug we use.
        This is not consistent with the way we treat according to the Health
        system description. The default clearance rate for MDA should be 100%
@@ -53,12 +53,11 @@ void ClinicalImmediateOutcomes::massDrugAdministration(OM::WithinHost::WithinHos
     withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
 }
 
-void ClinicalImmediateOutcomes::doClinicalUpdate (OM::WithinHost::WithinHostModel& withinHostModel, OM::Transmission::PerHostTransmission& hostTransmission, double ageYears, const OM::Monitoring::AgeGroup ageGroup) {
-  caseManagement.doCaseManagement (pathogenesisModel->determineState (ageYears, withinHostModel),
-				    withinHostModel,
+void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
+  caseManagement.doCaseManagement (human,
+                                   pathogenesisModel->determineState (ageYears, *human.withinHostModel),
 				    latestReport,
 				    ageYears,
-				    ageGroup,
 				    _doomed);
 }
 

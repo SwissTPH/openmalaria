@@ -136,21 +136,21 @@ void AgeGroup::init () {
     const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
     /* note that the last age group includes individuals who are        *
     * either younger than Lowerbound or older than the last Upperbound */
-    size_t numAgeGroups = groups.size() + 1;
-    _upperbound.resize (numAgeGroups);
+    _upperbound.resize (groups.size() + 1);
     _lowerbound = mon.getAgeGroup().getLowerbound();
     if (!(_lowerbound <= 0.0))
 	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
 
-    for (size_t i = 0;i < numAgeGroups - 1; i++) {
+    for (size_t i = 0;i < groups.size(); i++) {
 	_upperbound[i] = groups[i].getUpperbound();
     }
-    _upperbound[numAgeGroups-1] = numeric_limits<double>::infinity();
+    _upperbound[groups.size()] = numeric_limits<double>::infinity();
 }
 
 void AgeGroup::update (double ageYears) {
-    while (ageYears > _upperbound[_i])
+    while (ageYears > _upperbound[_i]){
 	_i++;
+    }
 }
 
 

@@ -28,7 +28,11 @@ namespace scnXml {
     class HSImmediateOutcomes;
 }
 
-namespace OM { namespace Clinical {
+namespace OM {
+    namespace Host {
+        class Human;
+    }
+    namespace Clinical {
 
 namespace Regimen {
     /** Regimen: UC / UC2 / SEVERE.
@@ -60,14 +64,13 @@ public:
   ~OldCaseManagement();
   
   /** Determine treatment for a human.
+   * @param human Reference to human variables
    * @param pgState Wellbeing of subject (well, severe malaria sickness, etc.)
-   * @param withinHostModel WithinHostModel of human.
    * @param latestReport Reporting memory
    * @param ageYears Age of human.
-   * @param ageGroup Survey age group of human.
    * @param doomed _doomed variable of Human; used to kill the human.
    *	Passing like this isn't ideal. */
-  void doCaseManagement (Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed);
+  void doCaseManagement (Host::Human& human, Pathogenesis::State pgState, Episode& latestReport, double ageYears, int& doomed);
   
   inline bool recentTreatment() {
     return (Global::simulationTime-_tLastTreatment >= 1 &&
@@ -85,14 +88,14 @@ private:
    /** Called when a non-severe/complicated malaria sickness occurs.
     *
     * @returns True in case of effective or partially effective treatment, false otherwise. */
-   bool uncomplicatedEvent(OM::Clinical::Episode& latestReport, OM::Pathogenesis::State pgState, double ageYears, OM::Monitoring::AgeGroup ageGroup);
+   bool uncomplicatedEvent(OM::Clinical::Episode& latestReport, OM::Pathogenesis::State pgState, double ageYears, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
 
    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
     *
     * @returns True in case of effective or partially effective treatment, false otherwise.
     * 
     * Note: sets doomed = 4 if patient dies. */
-  bool severeMalaria(Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed);
+  bool severeMalaria(Episode& latestReport, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed, bool inCohort);
   
   /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
   int _tLastTreatment;

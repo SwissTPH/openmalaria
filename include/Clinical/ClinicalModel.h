@@ -21,15 +21,12 @@
 #ifndef Hmod_ClinicalModel
 #define Hmod_ClinicalModel
 
+#include "Host/Human.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 
-namespace OM {
-    namespace Transmission {
-	class PerHostTransmission;
-    }
-    using Transmission::PerHostTransmission;
-namespace Clinical {
+namespace OM { namespace Clinical {
+    using Host::Human;
 
 /** The clinical model models the effects of sickness dependant on malarial
  * parasite densities and administers anti-malaria treatments via the drug
@@ -87,16 +84,9 @@ public:
   /** Run main part of the model: determine the sickness status and any
    * treatment for the human.
    * 
-   * Yes, the age _is_ passed 3 times...
-   * 
-   * @param withinHostModel Used to get the parasite density and to medicate
-   *	drugs/clear infections.
-   * @param hostTransmission Used to switch off/on transmission for human.
    * @param ageYears Age of human.
-   * @param ageGroupData Age group of availability data.
-   * @param ageGroup Survey age group of human.
    * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, Monitoring::AgeGroup ageGroup, int ageTimeSteps);
+  void update (Human& human, double ageYears, int ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -110,7 +100,7 @@ public:
     return false;
   }
   
-  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel, double ageYears) =0;
+  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel) =0;
   
   /// Summarize PathogenesisModel details
   void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
@@ -141,8 +131,6 @@ private:
 protected:
   /// Constructor.
   ClinicalModel (double cF);
-  /// Constructor, loading from a checkpoint.
-  ClinicalModel (istream& in);
   
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
@@ -150,11 +138,10 @@ protected:
    * @param hostTransmission PerHostTransmission of human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human. */
-  virtual void doClinicalUpdate (WithinHost::WithinHostModel& withinHostModel, PerHostTransmission& hostTransmission, double ageYears, Monitoring::AgeGroup ageGroup) =0;
+  virtual void doClinicalUpdate (Human& human, double ageYears) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
-  
   
   /// The PathogenesisModel introduces illness dependant on parasite density
   Pathogenesis::PathogenesisModel *pathogenesisModel;
