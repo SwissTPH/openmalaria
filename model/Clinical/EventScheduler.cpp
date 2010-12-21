@@ -304,6 +304,13 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
 	it = next;
     }
+    
+    if( human.cohortFirstTreatmentOnly && timeLastTreatment == Global::simulationTime ){
+        human._inCohort = false;
+    }
+    if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
+        human._inCohort = false;
+    }
 }
 
 

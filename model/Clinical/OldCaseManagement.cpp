@@ -98,6 +98,13 @@ void OldCaseManagement::doCaseManagement (
   if (effectiveTreatment) {
       human.withinHostModel->clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
   }
+  
+  if( human.cohortFirstTreatmentOnly && _tLastTreatment == Global::simulationTime ){
+      human._inCohort = false;
+  }
+  if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
+      human._inCohort = false;
+  }
 }
 
 

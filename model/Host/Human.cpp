@@ -42,8 +42,10 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    int Human::_ylagLen;
-
+    int Human::_ylagLen = 0;
+    bool Human::cohortFirstBoutOnly = false;
+    bool Human::cohortFirstTreatmentOnly = false;
+    bool Human::cohortFirstInfectionOnly = false;
 
 // -----  Static functions  -----
 
@@ -61,6 +63,10 @@ void Human::initHumanParameters () {	// static
     Clinical::ClinicalModel::init();
     Vaccine::init();
     _ylagLen = Global::intervalsPer5Days * 4;
+    
+    cohortFirstBoutOnly = InputData().getMonitoring().getFirstBoutOnly();
+    cohortFirstTreatmentOnly = InputData().getMonitoring().getFirstTreatmentOnly();
+    cohortFirstInfectionOnly = InputData().getMonitoring().getFirstInfectionOnly();
 }
 
 void Human::clear() {	// static clear
@@ -274,9 +280,13 @@ void Human::summarize() {
     Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( _inCohort ) );
     Monitoring::AgeGroup ageGrp = ageGroup();
     survey.reportHosts (ageGrp, 1);
-    withinHostModel->summarize (survey, ageGrp);
+    bool patent = withinHostModel->summarize (survey, ageGrp);
     infIncidence->summarize (survey, ageGrp);
     clinicalModel->summarize (survey, ageGrp);
+    
+    if( cohortFirstInfectionOnly && patent ){
+        _inCohort = false;
+    }
 }
 
 void Human::addToCohort (){

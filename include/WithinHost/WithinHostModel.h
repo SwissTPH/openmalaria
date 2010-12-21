@@ -62,7 +62,8 @@ public:
   }
   //@}
   
-  void summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+  /// @returns true if host has patent parasites
+  bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /// Create a new infection within this human
   virtual void newInfection() =0;

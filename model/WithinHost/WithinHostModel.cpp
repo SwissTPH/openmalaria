@@ -141,7 +141,7 @@ void WithinHostModel::immunityPenalisation() {
 
 // -----  Summarize  -----
 
-void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
+bool WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   int patentInfections;
   int numInfections = countInfections (patentInfections);
   if (numInfections) {
@@ -154,7 +154,9 @@ void WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
   if (parasiteDensityDetectible()) {
     survey.reportPatentHosts(ageGroup, 1);
     survey.addToLogDensity(ageGroup, log(totalDensity));
+    return true;
   }
+  return false;
 }
 
 

@@ -240,6 +240,13 @@ public:
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
+  
+  /// Remove from cohort as soon as individual has patent parasites?
+  static bool cohortFirstInfectionOnly;
+  /// Remove from cohort as soon as individual receives treatment?
+  static bool cohortFirstTreatmentOnly;
+  /// Remove from cohort as soon as individual gets sick (any sickness)?
+  static bool cohortFirstBoutOnly;
 };
 
 } }
