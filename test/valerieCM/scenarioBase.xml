@@ -456,6 +456,38 @@
             }
             provider(none): good
           </decision>
+          <decision name="NMF_treatment" depends="result,malarial_treatment" values="antibacterial,none">
+            result(positive){
+              malarial_treatment(true){
+                p(.3): antibacterial
+                p(.7): none
+              }
+              malarial_treatment(false){
+                p(.3): antibacterial
+                p(.7): none
+              }
+            }
+            result(negative){
+              malarial_treatment(true){
+                p(.3): antibacterial
+                p(.7): none
+              }
+              malarial_treatment(false){
+                p(.3): antibacterial
+                p(.7): none
+              }
+            }
+            result(none){
+              malarial_treatment(true){
+                p(.3): antibacterial
+                p(.7): none
+              }
+              malarial_treatment(false){
+                p(.3): antibacterial
+                p(.7): none
+              }
+            }
+          </decision>
         </decisions>
         <treatments>
           <treatment name="none">
