@@ -200,29 +200,31 @@ namespace OM { namespace util { namespace checkpoint {
 	}
     }
     
-    /* The following templates don't work on gcc, so you'll need to provide them as non-templates.
+    /* The following templates compile on gcc but don't appear to work when S is a string and T a double.
+    // Template templates:
     template<class S, class T>
     void operator& (map<S,T> x, ostream& stream) {
-	x.size() & stream;
-	BOOST_FOREACH (T& y, x) {
-	    y->first & stream;
-	    y->second & stream;
-	}
+        x.size() & stream;
+        for( typename map<S,T>::const_iterator it = x.begin(); it != x.end(); ++it ){
+            it->first & stream;
+            it->second & stream;
+        }
+        cerr<<"operator&(map<S,T> x, ostream&) where S="<<typeid(S).name()<<", T="<<typeid(T).name()<<", x.size()="<<x.size()<<endl;
     }
     template<class S, class T>
     void operator& (map<S,T> x, istream& stream) {
-	size_t l;
-	l & stream;
-	validateListSize (l);
-	x.clear ();
-	map<S,T>::iterator pos = x.begin ();
-	for (size_t i = 0; i < l; ++i) {
-	    S s;
-	    T t;
-	    s & stream;
-	    t & stream;
-	    pos = x.insert (pos, make_pair (s,t));
-	}
+        size_t l;
+        l & stream;
+        validateListSize (l);
+        x.clear ();
+        typename map<S,T>::iterator pos = x.begin ();
+        for (size_t i = 0; i < l; ++i) {
+            S s;
+            T t;
+            s & stream;
+            t & stream;
+            pos = x.insert (pos, make_pair (s,t));
+        }
     }
     */
     
