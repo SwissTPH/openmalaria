@@ -19,6 +19,7 @@
 */
 
 #include "Host/InfectionIncidenceModel.h"
+#include "Host/Human.h"
 #include "inputData.h"
 #include "Transmission/PerHostTransmission.h"
 #include "util/ModelOptions.h"
@@ -111,7 +112,7 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
 }
 
 InfectionIncidenceModel::InfectionIncidenceModel () :
-  _pinfected(0.0), _cumulativeEIRa(0.0), totalInfections(0)
+  _pinfected(0.0), _cumulativeEIRa(0.0)
 {}
 
 
@@ -137,27 +138,25 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 
 void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   survey.reportExpectedInfected(ageGroup, _pinfected);
-  survey.reportNewInfections(ageGroup, totalInfections);
-  totalInfections = 0;
 }
 
 
-double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
+double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/Global::interval*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans) {
+double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/(Global::interval*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
+double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&) {
   return random::gamma(InfectionrateShapeParam,
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
-double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&) {
+double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&) {
   return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
@@ -180,8 +179,8 @@ double InfectionIncidenceModel::susceptibility () {
   }
 }
 
-int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans) {
-  double expectedNumInfections = getModelExpectedInfections (effectiveEIR, phTrans);
+int InfectionIncidenceModel::numNewInfections (const Human& human, double effectiveEIR) {
+  double expectedNumInfections = getModelExpectedInfections (effectiveEIR, human.perHostTransmission);
   // error check (should be OK if kappa is checked, for nonVector model):
   if (!finite(effectiveEIR)) {
     ostringstream out;
@@ -190,7 +189,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-    expectedNumInfections *= (1.0 - PEVEfficacy);
+    expectedNumInfections *= (1.0 - human.getVaccine().getPEVEfficacy());
   
   //Update pre-erythrocytic immunity
   _cumulativeEIRa+=effectiveEIR;
@@ -203,7 +202,7 @@ int InfectionIncidenceModel::numNewInfections (double effectiveEIR, double PEVEf
   
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
-    totalInfections += n;
+    human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
     ctsNewInfections += n;
     return n;
   } else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number

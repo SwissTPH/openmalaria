@@ -82,8 +82,8 @@ void Human::clear() {	// static clear
 // Create new human
 Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulationTime) :
     perHostTransmission(),
-    infIncidence(InfectionIncidenceModel::createModel()),
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
+    infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     _inCohort(false),
     _probTransmissionToMosquito(0.0)
@@ -195,13 +195,9 @@ void Human::addInfection(){
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-    int numInf = infIncidence->numNewInfections(
-	transmissionModel->getEIR(
-	    Global::simulationTime, perHostTransmission, ageYears, monitoringAgeGroup
-	),
-	_vaccine.getPEVEfficacy(),
-	perHostTransmission
-    );
+    double EIR = transmissionModel->getEIR( Global::simulationTime,
+            perHostTransmission, ageYears, monitoringAgeGroup );
+    int numInf = infIncidence->numNewInfections( *this, EIR );
     for (int i=1;i<=numInf; i++) {
 	withinHostModel->newInfection();
     }
@@ -291,12 +287,17 @@ void Human::summarize() {
 
 void Human::addToCohort (){
     assert( !_inCohort );
-    
-    // Flush previous data by reporting it to a junk report:
-    // (The point being to reset certain counters, without duplicating code.)
-    summarize();
+    // Data accumulated between reports should be flushed. Currently all this
+    // data remembers which survey it should go to or is reported immediately.
     _inCohort = true;
 }
+void Human::removeFromCohort(){
+    if( _inCohort ){
+        // Data should be flushed as with addToCohort().
+        _inCohort = false;
+    }
+}
+
 
 void Human::flushReports (){
     clinicalModel->flushReports();

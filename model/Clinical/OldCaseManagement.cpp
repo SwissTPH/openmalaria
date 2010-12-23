@@ -77,12 +77,12 @@ void OldCaseManagement::doCaseManagement (
 
   if (pgState & Pathogenesis::MALARIA) {
     if (pgState & Pathogenesis::COMPLICATED)
-      effectiveTreatment = severeMalaria (latestReport, ageYears, human.monitoringAgeGroup, doomed, human._inCohort);
+      effectiveTreatment = severeMalaria (latestReport, ageYears, human.getMonitoringAgeGroup(), doomed, human.getInCohort());
     else if (pgState == Pathogenesis::STATE_MALARIA) {
       // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
       // included. Validity is debatable, but there's no point changing now.
       // (This does affect tests.)
-      effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, human.monitoringAgeGroup, human._inCohort);
+      effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, human.getMonitoringAgeGroup(), human.getInCohort());
     }
 
     if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && doomed == 0)
@@ -92,7 +92,7 @@ void OldCaseManagement::doCaseManagement (
       human.withinHostModel->immunityPenalisation();
     }
   } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
-    effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, human.monitoringAgeGroup, human._inCohort);
+    effectiveTreatment = uncomplicatedEvent (latestReport, pgState, ageYears, human.getMonitoringAgeGroup(), human.getInCohort());
   }
 
   if (effectiveTreatment) {
@@ -100,10 +100,10 @@ void OldCaseManagement::doCaseManagement (
   }
   
   if( human.cohortFirstTreatmentOnly && _tLastTreatment == Global::simulationTime ){
-      human._inCohort = false;
+      human.removeFromCohort();
   }
   if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
-      human._inCohort = false;
+      human.removeFromCohort();
   }
 }
 

@@ -123,14 +123,14 @@ void ClinicalModel::update (Human& human, double ageYears, int ageTimeSteps) {
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical bout 6 intervals before
-    Monitoring::Surveys.getSurvey(human._inCohort).reportIndirectDeaths (human.monitoringAgeGroup, 1);
+     Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
     _doomed = DOOMED_INDIRECT;
     return;
   }
   if(ageTimeSteps == 1) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
-      Monitoring::Surveys.getSurvey(human._inCohort).reportIndirectDeaths (human.monitoringAgeGroup, 1);
+      Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
       _doomed = DOOMED_NEONATAL;
       return;
     }

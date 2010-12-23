@@ -124,7 +124,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (Global::simulationTime, human.monitoringAgeGroup, pgState);
+	    latestReport.update (Global::simulationTime, human.getMonitoringAgeGroup(), pgState);
         } else if ( pgState & Pathogenesis::PENDING_UC ){
             pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
@@ -136,7 +136,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    } else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
 	    // report bout, at conclusion of episode:
-	    latestReport.update (Global::simulationTime, human.monitoringAgeGroup, pgState);
+	    latestReport.update (Global::simulationTime, human.getMonitoringAgeGroup(), pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
@@ -190,7 +190,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    medicateQueue, pgState, withinHostModel, ageYears, human.monitoringAgeGroup
+	    medicateQueue, pgState, withinHostModel, ageYears, human.getMonitoringAgeGroup()
 	);
 	
 	if( medicateQueue.size() )	// I.E. some treatment was given (list is cleared either way)
@@ -203,10 +203,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		caseStartTime++;
 	}
 	if ( auxOut.RDT_used ) {
-	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_RDTs (1);
+	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_RDTs (1);
 	}
 	if ( auxOut.microscopy_used ) {
-	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_Microscopy (1);
+	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_Microscopy (1);
 	}
 	
 	// Case fatality rate (first day of illness)
@@ -288,7 +288,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( it->duration == it->duration ){	// Have a duration, i.e. via IV administration
 	    if ( it->time + 0.5*it->duration < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicateIV (it->abbrev, it->qty, it->duration, it->time+it->duration);
-	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
+	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	    } else {   // and decrement treatment seeking delay for the rest
 		it->time -= 1.0;
@@ -296,7 +296,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	} else {
 	    if ( it->time < 1.0 ) { // Medicate today's medications
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
-	    Monitoring::Surveys.getSurvey(human._inCohort).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
 	    medicateQueue.erase (it);
 	    } else {   // and decrement treatment seeking delay for the rest
 		it->time -= 1.0;
@@ -306,10 +306,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     }
     
     if( human.cohortFirstTreatmentOnly && timeLastTreatment == Global::simulationTime ){
-        human._inCohort = false;
+        human.removeFromCohort();
     }
     if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
-        human._inCohort = false;
+        human.removeFromCohort();
     }
 }
 

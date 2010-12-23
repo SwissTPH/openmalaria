@@ -27,6 +27,7 @@
 #include "inputData.h"
 
 namespace OM { namespace Host {
+    class Human;
     
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
@@ -60,7 +61,6 @@ public:
   void operator& (S& stream) {
       _pinfected & stream;
       _cumulativeEIRa & stream;
-      totalInfections & stream;
   }
   
 protected:
@@ -91,11 +91,11 @@ public:
    * 
    * Secondly calculates the number of new infections to introduce via a
    * stochastic process. */
-  int numNewInfections(double effectiveEIR, double PEVEfficacy, Transmission::PerHostTransmission& phTrans);
+  int numNewInfections(const OM::Host::Human& human, double effectiveEIR);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
+  virtual double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans);
   
   double susceptibility ();
   
@@ -109,8 +109,6 @@ protected:
   
   //!Number of infective bites since birth
   double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
-  /// Number of new infections introduced, per human per survey
-  int totalInfections;
   
   //BEGIN Static data set by init()
   /* Shape constant of (Gamma) distribution of availability
@@ -151,7 +149,7 @@ public:
   HeterogeneityWorkaroundII () {}
   virtual ~HeterogeneityWorkaroundII() {}
 protected:
-  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission& phTrans);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans);
 };
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
@@ -159,7 +157,7 @@ public:
   virtual ~NegBinomMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
@@ -167,7 +165,7 @@ public:
   virtual ~LogNormalMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, Transmission::PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&);
 };
 
 } }

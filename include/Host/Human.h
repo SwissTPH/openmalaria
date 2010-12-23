@@ -24,7 +24,7 @@
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Monitoring/Survey.h"
+#include "Monitoring/Surveys.h"
 
 namespace OM {
     namespace Transmission {
@@ -148,6 +148,12 @@ public:
   inline bool getInCohort(){ return _inCohort; }
   //@}
   
+  /// Return the current survey to use (depends on survey time and whether or
+  /// not individual is in the cohort).
+  Monitoring::Survey& getSurvey() const{
+      return Monitoring::Surveys.getSurvey( _inCohort );
+  }
+  
   //! Summarize the state of a human individual.
   void summarize();
   
@@ -157,6 +163,11 @@ public:
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
   void addToCohort ();
+  
+  /** Remove from cohort. As with addToCohort, deals with reporting.
+   *
+   * Can be safely called when human is not in cohort. */
+  void removeFromCohort();
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
@@ -170,8 +181,17 @@ public:
   ///@brief Access to sub-models
   //@{
   /// The WithinHostModel models parasite density and immunity
-  inline const WithinHost::WithinHostModel& getWithinHostModel (){
+  inline const WithinHost::WithinHostModel& getWithinHostModel () const{
       return *withinHostModel;
+  }
+  
+  /// Get monitoring age group
+  inline const Monitoring::AgeGroup& getMonitoringAgeGroup() const{
+      return monitoringAgeGroup;
+  }
+  
+  inline const PerHumanVaccine& getVaccine() const{
+      return _vaccine;
   }
   //@}
   
@@ -203,11 +223,12 @@ public:
   /// Contains per-species vector data (VectorTransmission only).
   Transmission::PerHostTransmission perHostTransmission;
   
-  /// The InfectionIncidenceModel translates per-host EIR into new infections
-  InfectionIncidenceModel *infIncidence;
-  
   /// The WithinHostModel models parasite density and immunity
   WithinHost::WithinHostModel *withinHostModel;
+  
+private:
+  /// The InfectionIncidenceModel translates per-host EIR into new infections
+  InfectionIncidenceModel *infIncidence;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
@@ -241,6 +262,7 @@ public:
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
   
+public: //lazy: give read access to these
   /// Remove from cohort as soon as individual has patent parasites?
   static bool cohortFirstInfectionOnly;
   /// Remove from cohort as soon as individual receives treatment?
