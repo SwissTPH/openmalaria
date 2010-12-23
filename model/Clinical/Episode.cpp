@@ -45,13 +45,13 @@ void Episode::flush(){
 }
 
 
-void Episode::update (int simulationTime, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
+void Episode::update (int simulationTime, bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
 {
   if (simulationTime > (_time + healthSystemMemory)) {
     report ();
     
     _time = simulationTime;
-    _surveyPeriod = Surveys.getSurveyPeriod();
+    _surveyPeriod = Surveys.getSurveyNumber( inCohort );
     _ageGroup = ageGroup;
     _state = newState;
   } else {

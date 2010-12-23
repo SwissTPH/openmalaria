@@ -288,12 +288,15 @@ void Human::summarize() {
 void Human::addToCohort (){
     assert( !_inCohort );
     // Data accumulated between reports should be flushed. Currently all this
-    // data remembers which survey it should go to or is reported immediately.
+    // data remembers which survey it should go to or is reported immediately,
+    // although episode reports still need to be flushed.
+    flushReports();
     _inCohort = true;
 }
 void Human::removeFromCohort(){
     if( _inCohort ){
         // Data should be flushed as with addToCohort().
+        flushReports();
         _inCohort = false;
     }
 }

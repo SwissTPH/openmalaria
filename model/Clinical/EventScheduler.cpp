@@ -124,7 +124,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (Global::simulationTime, human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (Global::simulationTime, human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
         } else if ( pgState & Pathogenesis::PENDING_UC ){
             pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
@@ -136,7 +136,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    } else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
 	    // report bout, at conclusion of episode:
-	    latestReport.update (Global::simulationTime, human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (Global::simulationTime, human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)

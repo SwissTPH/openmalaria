@@ -53,7 +53,7 @@ public:
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(int simulationTime, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
+  void update(int simulationTime, bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
   
   Pathogenesis::State getState() const {return _state;};
   
@@ -80,10 +80,9 @@ private:
   
   /// Timestep of event (TIMESTEP_NEVER if no event).
   int _time;
-  //! survey period during which the event occured
-  //! TODO: we could use the survey array to map time to survey period. slower, but less memory.
+  /// Survey during which the event occured
   int _surveyPeriod;
-  //! agegroup of the individual which experienced the episode's first bout
+  /// Age group of the individual when the episode's first bout occurred
   Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).

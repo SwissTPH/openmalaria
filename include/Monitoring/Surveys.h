@@ -57,6 +57,13 @@ class SurveysType
 	    return _survey[0];	// output goes to dummy survey: is deleted
 	else return *current;
     }
+    /** As getSurvey(), except returns a number instead of a reference. */
+    inline int getSurveyNumber( bool inCohort ){
+        if( _cohortOnly && !inCohort )
+            return 0;
+        else
+            return _surveyPeriod;
+    }
 
     /** Read in some params from XML and allocate memory. */
     void init ();
@@ -77,12 +84,6 @@ class SurveysType
       assert (n < _survey.size());
       return _survey[n];
     }
-
-    /// Returns current survey index (for later reporting of a bout which
-    /// happened now).
-    int getSurveyPeriod() {
-      return _surveyPeriod;
-    };
     
     /** Return timestep of the final survey.
      *
