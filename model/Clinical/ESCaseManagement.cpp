@@ -286,8 +286,7 @@ public:
 	    addRequires( req );
 	}
 	
-	decisions.resize (pending.size());
-	size_t i = 0;
+	decisions.reserve (pending.size());
 	set<string> added;	// names of decisions added; used since it's faster to lookup decision names here than linearly in "decisions"
 	for (DecisionList::iterator it = pending.begin(); ;) {
 	    if (it == pending.end ()) {
@@ -311,15 +310,13 @@ public:
 		pending.erase(it);
 		it = pending.begin();	// after erase, we must restart from beginning
 	    } else if (hasAllDependencies (it->second, added)) {
-		decisions[i++] = it->second;
+		decisions.push_back( it->second );
 		added.insert (it->second->decision);
 		pending.erase (it);
 		it = pending.begin ();	// restart from beginning as above; also means we know if we reach the end there shouldn't be any elements left
 	    } else
 		++it;
 	}
-	assert( i <= decisions.size() );	// some decisions may have been optimised out
-	decisions.resize( i );	// don't leave invalid indexes at the end!
     }
 };
 inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t& vmap, const string& value) {

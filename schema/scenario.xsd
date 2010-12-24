@@ -991,8 +991,11 @@
       </xs:element>
       <xs:element minOccurs="0" name="importedInfectionsPerThousandHosts" type="xs:double">
       <xs:annotation>
-          <xs:documentation />
-          <xs:appinfo />
+          <xs:documentation>
+          Import infections (as if a mosquito bites a human). Imported via a
+          Bernoulli trial per host.
+          </xs:documentation>
+          <xs:appinfo>name:Import infections;units:Number per 1000 hosts;min:0</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="MDA" type="mass">
