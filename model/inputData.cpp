@@ -128,7 +128,7 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
 	string msg = "Error: unable to open "+lXmlFile;
 	throw util::xml_scenario_error (msg);
     }
-    scenario = (scnXml::parseScenario (fileStream)).release();
+    scenario = scnXml::parseScenario (fileStream);
     util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
     int scenarioVersion = scenario->getSchemaVersion();
@@ -173,7 +173,7 @@ void InputDataType::saveDocument()
         xml_schema::NamespaceInfomap map;
         map[""].name = "";
         map[""].schema = schema.str();
-        serializeScenario (outStream, *scenario, map);
+        scnXml::serializeScenario (outStream, *scenario, map);
 
         outStream.close();
     }
@@ -181,8 +181,6 @@ void InputDataType::saveDocument()
 
 void InputDataType::freeDocument(){
     // Destructors should handle cleanup
-    if (scenario != NULL)
-        delete scenario;
 }
 
 

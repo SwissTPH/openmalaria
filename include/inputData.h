@@ -29,6 +29,7 @@
 #include <scenario.hxx>
 #include <string>
 #include <bitset>
+#include <memory>
 
 namespace OM {
 
@@ -185,7 +186,7 @@ namespace Interventions {
 	std::string xmlFileName;
 	
 	/** @brief The xml data structure. */
-	scnXml::Scenario* scenario;
+	auto_ptr<scnXml::Scenario> scenario;
 	
 	// Initialized (derived) values:
 	std::map<int, double> parameterValues;
