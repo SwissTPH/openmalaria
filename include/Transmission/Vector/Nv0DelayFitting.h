@@ -22,6 +22,7 @@
 
 #include <boost/foreach.hpp>
 #include <boost/math/tools/roots.hpp>
+#include <boost/tr1/tuple.hpp>  // import for compatibility with both boost 1.42 and 1.45
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
