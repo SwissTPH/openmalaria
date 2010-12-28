@@ -25,7 +25,6 @@ set (Model_CPP
   Clinical/ESDecisionTree.cpp
   Clinical/ESDecisionValue.cpp
   Clinical/ImmediateOutcomes.cpp
-  Clinical/OldCaseManagement.cpp
   Clinical/Episode.cpp
   Clinical/parser.cpp
   

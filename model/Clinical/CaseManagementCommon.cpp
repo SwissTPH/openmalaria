@@ -19,7 +19,7 @@
 */
 
 #include "Clinical/CaseManagementCommon.h"
-#include "Clinical/OldCaseManagement.h"
+#include "Clinical/ImmediateOutcomes.h"
 #include "Clinical/ESCaseManagement.h"
 #include "inputData.h"
 #include "util/ModelOptions.h"
@@ -56,7 +56,7 @@ namespace OM { namespace Clinical {
 	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
 	    ESCaseManagement::setHealthSystem(healthSystem);
 	else
-	    OldCaseManagement::setHealthSystem(healthSystem);
+	    ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
     }
     
     const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem () {
