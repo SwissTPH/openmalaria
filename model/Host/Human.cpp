@@ -281,7 +281,7 @@ void Human::summarize() {
     clinicalModel->summarize (survey, ageGrp);
     
     if( cohortFirstInfectionOnly && patent ){
-        _inCohort = false;
+        removeFromCohort();
     }
 }
 

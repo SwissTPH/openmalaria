@@ -42,6 +42,9 @@
       <option name="Clinical_DrugUsage" value="true"/>
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>3650</surveyTime>

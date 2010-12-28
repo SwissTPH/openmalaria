@@ -65,13 +65,16 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 	|| maxUCSeekingMemory<0
 	|| extraDaysAtRisk+complicatedCaseDuration<1	// at risk at least 1 day
 	|| extraDaysAtRisk>0	// at risk longer than case duration
-    )
-	throw util::xml_scenario_error("Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
+    ){
+	throw util::xml_scenario_error(
+            "Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
+    }
     
     pImmediateUC = coData.getPImmediateUC();
     double alpha = exp( -InputData.getParameter( Params::CFR_NEG_LOG_ALPHA ) );
     if( !(0.0<=alpha && alpha<=1.0) || !(0.0<=pImmediateUC && pImmediateUC<=1.0) ){
-	throw util::xml_scenario_error("Clinical outcomes: pImmediateUC and propDeathsFirstDay should be within range [0,1]");
+	throw util::xml_scenario_error(
+            "Clinical outcomes: pImmediateUC and propDeathsFirstDay should be within range [0,1]");
     }
     
     CaseManagementCommon::scaleCaseFatalityRate( alpha );
@@ -104,7 +107,9 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 // -----  other methods  -----
 
-void ClinicalEventScheduler::massDrugAdministration(WithinHost::WithinHostModel& withinHostModel) {
+void ClinicalEventScheduler::massDrugAdministration(
+    WithinHost::WithinHostModel& withinHostModel
+) {
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
@@ -124,7 +129,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (Global::simulationTime, human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (Global::simulationTime, human.getInCohort(),
+                                 human.getMonitoringAgeGroup(), pgState);
         } else if ( pgState & Pathogenesis::PENDING_UC ){
             pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
@@ -136,7 +142,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    } else
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
 	    // report bout, at conclusion of episode:
-	    latestReport.update (Global::simulationTime, human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (Global::simulationTime, human.getInCohort(),
+                                 human.getMonitoringAgeGroup(), pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
@@ -175,7 +182,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     
     if ( cmEvent )	// note: new event can override pending delayed event
     {
-        pgState = Pathogenesis::State (pgState & ~Pathogenesis::PENDING_UC);    // remove PENDING_UC bit
+        // remove PENDING_UC bit
+        pgState = Pathogenesis::State (pgState & ~Pathogenesis::PENDING_UC);
 
 	// If last treatment prescribed was in recent memory, consider second line.
 	if (timeLastTreatment + Episode::healthSystemMemory > Global::simulationTime)
@@ -193,8 +201,21 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    medicateQueue, pgState, withinHostModel, ageYears, human.getMonitoringAgeGroup()
 	);
 	
-	if( medicateQueue.size() )	// I.E. some treatment was given (list is cleared either way)
+	if( medicateQueue.size() ){	// I.E. some treatment was given
 	    timeLastTreatment = Global::simulationTime;
+            if( pgState & Pathogenesis::COMPLICATED ){
+                Monitoring::Surveys.getSurvey(human.getInCohort())
+                    .reportTreatments3( human.getMonitoringAgeGroup(), 1 );
+            }else{
+                if( pgState & Pathogenesis::SECOND_CASE ){
+                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                        .reportTreatments2( human.getMonitoringAgeGroup(), 1 );
+                }else{
+                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                        .reportTreatments1( human.getMonitoringAgeGroup(), 1 );
+                }
+            }
+        }
 	
 	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
