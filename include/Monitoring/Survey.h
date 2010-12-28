@@ -215,6 +215,14 @@ public:
 	_numMassVA[ageGroup.i()] += val;
 	return *this;
     }
+    Survey& reportAddedToCohort (AgeGroup ageGroup, int val) {
+        _numAddedToCohort[ageGroup.i()] += val;
+        return *this;
+    }
+    Survey& reportRemovedFromCohort (AgeGroup ageGroup, int val) {
+        _numRemovedFromCohort[ageGroup.i()] += val;
+        return *this;
+    }
   //@}
   
   void setAnnualAverageKappa(double kappa) {
@@ -315,6 +323,8 @@ public:
     _numMassIRS & stream;
     _numMassVA & stream;
     _numClinical_Microscopy & stream;
+    _numAddedToCohort & stream;
+    _numRemovedFromCohort & stream;
   }
   
 private:
@@ -363,6 +373,8 @@ private:
   vector<int> _numEPI_ITNs;
   vector<int> _numMassIRS;
   vector<int> _numMassVA;
+  vector<int> _numAddedToCohort;
+  vector<int> _numRemovedFromCohort;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;

@@ -292,12 +292,14 @@ void Human::addToCohort (){
     // although episode reports still need to be flushed.
     flushReports();
     _inCohort = true;
+    Monitoring::Surveys.current->reportAddedToCohort( ageGroup(), 1 );
 }
 void Human::removeFromCohort(){
     if( _inCohort ){
         // Data should be flushed as with addToCohort().
         flushReports();
         _inCohort = false;
+        Monitoring::Surveys.current->reportRemovedFromCohort( ageGroup(), 1 );
     }
 }
 

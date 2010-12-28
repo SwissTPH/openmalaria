@@ -94,7 +94,9 @@ class SurveyMeasureMap {
 	    codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
 	    codeMap["nMassIRS"] = SM::nMassIRS;
 	    codeMap["nMassVA"] = SM::nMassVA;
-	    codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
+            codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
+            codeMap["nAddedToCohort"] = SM::nAddedToCohort;
+            codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -202,6 +204,8 @@ void Survey::allocate ()
     _numEPI_ITNs.resize (numAgeGroups);
     _numMassIRS.resize (numAgeGroups);
     _numMassVA.resize (numAgeGroups);
+    _numAddedToCohort.resize (numAgeGroups);
+    _numRemovedFromCohort.resize (numAgeGroups);
 }
 
 
@@ -340,6 +344,12 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::Clinical_Microscopy]) {
       writeValue (outputFile, SM::Clinical_Microscopy, survey, _numClinical_Microscopy);
+  }
+  if (active[SM::nAddedToCohort]) {
+      writePerAgeGroup (outputFile, SM::nAddedToCohort, survey, _numAddedToCohort);
+  }
+  if (active[SM::nRemovedFromCohort]) {
+      writePerAgeGroup (outputFile, SM::nRemovedFromCohort, survey, _numRemovedFromCohort);
   }
 }
 
