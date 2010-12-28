@@ -170,7 +170,7 @@
               <xs:appinfo>name:Model options required;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="value" type="xs:boolean" use="required">
+          <xs:attribute name="value" type="xs:boolean" default="true">
             <xs:annotation>
               <xs:documentation>
 		Option value (true/false). Each option has a default value used
