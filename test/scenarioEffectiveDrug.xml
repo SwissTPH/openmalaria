@@ -96,7 +96,7 @@
             </uncomplicated>
             <complicated>
               <decisions>
-                <decision depends="p" name="treatment" values="effective_treat">
+                <decision depends="" name="treatment" values="effective_treat">
                   effective_treat
                 </decision>
                 <decision depends="" name="hospitalisation" values="none,delayed,immediate">
@@ -146,7 +146,7 @@
     <EventScheduler>
       <uncomplicated>
         <decisions>
-          <decision depends="p" name="treatment" values="none">
+          <decision depends="" name="treatment" values="none">
             none
           </decision>
           <decision depends="" name="test" values="none,microscopy,RDT">
@@ -161,7 +161,7 @@
       </uncomplicated>
       <complicated>
         <decisions>
-          <decision depends="p" name="treatment" values="none">
+          <decision depends="" name="treatment" values="none">
             none
           </decision>
           <decision depends="" name="hospitalisation" values="none,delayed,immediate">

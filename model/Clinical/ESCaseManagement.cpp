@@ -235,10 +235,13 @@ class ESDecisionMapProcessor {
     bool complicated;
     ESDecisionValueMap& dvMap;
     
+    // Collection of all decisions not yet added into decisions or culled.
+    // Filled by constructor, emptied by process().
     typedef map<string,ESDecisionTree*> DecisionList;
     DecisionList pending;
     
-    set<ESDecisionTree*> required;	// all required tests; any others are removed (optimisation)
+    // Set of all tests required. Filled by process().
+    set<ESDecisionTree*> required;
     
     // Add by key "decision", and return true if added
     bool addToPending( ESDecisionTree* d ){
@@ -331,8 +334,10 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     decisions.clear();
     treatments.clear();
     
-    // Construct processor & read from XML (must be done before evaluating treatments):
+    // Construct processor & read from XML.
+    // Fills dvMap (which must be done before evaluating treatments).
     ESDecisionMapProcessor processor( dvMap, xmlCM, complicated );
+    
     list<string> required;	// list required decisions, to avoid optimising out
     
     if( complicated ){
@@ -347,7 +352,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
 	hospitalisation_delayed = dvMap.get( "hospitalisation", "delayed" );
     }
     
-    // Register "test" decision, which determines diagnostic usage.
+    // "test" decision: determines diagnostic usage and reported.
     required.push_back( "test" );
     test_mask = dvMap.getDecisionMask( "test" );
     test_RDT = dvMap.get( "test", "RDT" );
