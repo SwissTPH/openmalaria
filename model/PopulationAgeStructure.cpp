@@ -21,14 +21,14 @@
 #include "Global.h"
 #include "inputData.h"
 #include "util/errors.h"
-#include "util/gsl.h"
 
 #include <cmath>
+#include <gsl_vector_double.h>
+#include <gsl/gsl_multimin.h>
 
 namespace OM {
     using namespace OM::util;
 
-#ifdef OM_HAVE_GSL
 double AgeStructure::ageGroupBounds[ngroups+1];
 double AgeStructure::ageGroupPercent[ngroups];
 
@@ -42,7 +42,6 @@ double AgeStructure::mu1;
 double AgeStructure::alpha0;
 double AgeStructure::alpha1;
 double AgeStructure::rho;
-#endif
 
 int AgeStructure::maxTimestepsPerLife;
 vector<double> AgeStructure::cumAgeProp;
@@ -52,10 +51,8 @@ void AgeStructure::init () {
     maxTimestepsPerLife = maxLifetimeDays / Global::interval;
     cumAgeProp.resize (maxTimestepsPerLife);
     
-#ifdef OM_HAVE_GSL
     estimateRemovalRates();
     calcCumAgeProp();
-#endif	// TODO: alternative load-from-XML functionality
 }
 
 int AgeStructure::targetCumPop (int ageTSteps, int targetPop)
@@ -64,7 +61,57 @@ int AgeStructure::targetCumPop (int ageTSteps, int targetPop)
 }
 
 
-#ifdef OM_HAVE_GSL
+// function pointer for wCalcRSS's func
+double (*wCalcRSSFunc) (double param1, double param2);
+double wCalcRSS(const gsl_vector *v, void* params){
+  double x, y;  
+  x = gsl_vector_get(v, 0);
+  y = gsl_vector_get(v, 1);
+
+  return (*wCalcRSSFunc)(x,y); 
+}
+/** Presumably from AR. Searches iteratively for a minimum to function func.
+ *
+ * @param func A function pointer to the function used for ...
+ * @param param1 Initial guess of first param taken by func
+ * @param param2 Initial guess of second
+ */
+void minimizeCalc_rss(double (*func) (double,double), double param1,double param2){
+    wCalcRSSFunc = func;
+    
+    gsl_vector *stepSize = gsl_vector_alloc (2);
+    gsl_vector_set_all (stepSize, 0.1);
+    
+    gsl_vector *initialValues = gsl_vector_alloc (2);
+    gsl_vector_set (initialValues, 0, param1);
+    gsl_vector_set (initialValues, 1, param2);
+    
+    gsl_multimin_function minex_func;
+    minex_func.f = &wCalcRSS;
+    minex_func.params = (void *) NULL;
+    minex_func.n = 2;
+    
+    const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
+    gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc (T, 2);
+    gsl_multimin_fminimizer_set (minimizer, &minex_func, initialValues, stepSize);
+    
+    for (size_t iter = 0; iter < 100; ++iter) {
+        if (gsl_multimin_fminimizer_iterate(minimizer))
+            throw runtime_error ("gsl_multimin_fminimizer_iterate failed");
+        
+        double size = gsl_multimin_fminimizer_size (minimizer);
+        int status = gsl_multimin_test_size (size, 1e-2);
+        if (status == GSL_SUCCESS)
+            break;
+    }
+    // Call again to set final value. NOTE: this changes previous results.
+    wCalcRSS (minimizer->x, NULL);
+    
+    gsl_vector_free(initialValues);
+    gsl_vector_free(stepSize);
+    gsl_multimin_fminimizer_free (minimizer);
+}
+
 void AgeStructure::estimateRemovalRates ()
 {
     // mu1, alpha1: These are estimated here
@@ -105,7 +152,7 @@ void AgeStructure::estimateRemovalRates ()
     double p1 = 0.371626412;
     double p2 = 0.841209593;
     // returns "double rss":
-    gsl::minimizeCalc_rss (&setDemoParameters, p1, p2);
+    minimizeCalc_rss (&setDemoParameters, p1, p2);
 }
 
 // Static method used by estimateRemovalRates
@@ -179,6 +226,5 @@ void AgeStructure::calcCumAgeProp ()
 	cumAgeProp[j] = cumAgeProp[j] / totalCumPC;
     }
 }
-#endif
 
 }

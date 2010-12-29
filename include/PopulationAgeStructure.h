@@ -21,19 +21,6 @@
 
 #include <vector>
 
-/*  TODO:
-    Provide saving and loading functionality for cumAgeProp, to allow building a
-    version of the program without GSL (useful if random-number generators are
-    also re-written).
-
-1.  Needs to be stored somewhere; probably <demography> in the XML document
-    is a good place (InputData already can save changes to the scenario document).
-2.  If compiled with GSL, calculate cumAgeProp (as currently done) and save/
-    validate. If not, use cumAgeProp from the XML (or complain if not present).
-3.  OM_HAVE_GSL can become a macro added by CMake.
-******************************************************************************/
-#define OM_HAVE_GSL
-
 namespace OM
 {
     /** Encapsulates code just setting up the age structure (i.e.  cumAgeProp). */
@@ -53,12 +40,9 @@ namespace OM
 	static int targetCumPop (int ageTSteps, int targetPop);
 	
     private:
-#ifdef OM_HAVE_GSL
         /*! Estimates demography parameters to define a smooth curve for the target
         population age-distribution (age in years) */
         static void estimateRemovalRates();
-	
-	static double minimizeCalc_rss(double* par1, double* par2);
 	
         /** For input values for alpha1 and mu1, the fit to field data (residualSS)
         * is calculated and returned function called iteratively by
@@ -111,7 +95,6 @@ namespace OM
 	static double rho;
         //@}
 	//END
-#endif	// defined OM_HAVE_GSL
 	
 	//BEGIN static parameters set by init() or calcCumAgeProp()
         //! max lifespan in intervals

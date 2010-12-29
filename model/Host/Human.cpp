@@ -29,7 +29,6 @@
 #include "Transmission/TransmissionModel.h"
 #include "Monitoring/Surveys.h"
 #include "PopulationStats.h"
-#include "util/gsl.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
@@ -39,6 +38,7 @@
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
+#include <gsl/gsl_cdf.h>
 
 namespace OM { namespace Host {
     using namespace OM::util;
@@ -335,7 +335,7 @@ double Human::calcProbTransmissionToMosquito() const {
     return 0.0;
   
   double zval=(log(x)+mu)/sqrt(1.0/tau);
-  double pone = gsl::cdfUGaussianP (zval);
+  double pone = gsl_cdf_ugaussian_P(zval);
   double transmit=(pone*pone);
   //transmit has to be between 0 and 1
   transmit=std::max(transmit, 0.0);

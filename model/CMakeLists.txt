@@ -64,7 +64,6 @@ set (Model_CPP
   
   util/BoincWrapper.cpp
   util/timer.cpp
-  util/gsl.cpp
   util/vectors.cpp
   util/WeibullDecayedValue.cpp
   util/errors.cpp
