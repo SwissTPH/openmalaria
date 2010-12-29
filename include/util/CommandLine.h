@@ -52,6 +52,9 @@ namespace OM { namespace util {
 	    PRINT_ANNUAL_EIR,
 	    /** Scale EIR to a new annual level. */
 	    SET_ANNUAL_EIR,
+            /** Outputs samples from the active interpolation methods of all
+             * age-group data suitible for graphing. */
+            SAMPLE_INTERPOLATIONS,
 	    NUM_OPTIONS
 	};
 	

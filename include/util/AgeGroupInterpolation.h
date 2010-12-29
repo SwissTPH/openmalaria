@@ -24,9 +24,6 @@
 #include "Global.h"
 #include "inputData.h"
 
-#include <limits>
-#include <stdexcept>
-
 namespace OM { namespace util {
     
 /** A class representing deterministic interpolation of data collected
@@ -38,6 +35,8 @@ namespace OM { namespace util {
 class AgeGroupInterpolation
 {
 public:
+    virtual ~AgeGroupInterpolation() {}
+    
     /** Return a dummy object (avoids dangling pointer). */
     static AgeGroupInterpolation* dummyObject();
     /** Return a new age-group-data interpolator. XML fragment specifies
@@ -69,58 +68,11 @@ public:
 protected:
     virtual void checkpoint (ostream& stream) =0;
     virtual void checkpoint (istream& stream) =0;
+    
+    /** Sample interpolator between 0 and max age, outputting to a csv file
+     * called name.csv. */
+    void outputSamples( const string name );
 };
-
-
-/** This class gives direct access to input age-group
- * data (discontinuous).
- ********************************************/
-class AgeGroupPiecewiseConstant : public AgeGroupInterpolation
-{
-public:
-    AgeGroupPiecewiseConstant (
-        const scnXml::AgeGroupValues& ageGroups, const char* eltName
-    );
-    
-    virtual double operator() (double ageYears) const;
-    
-    virtual void scale( double factor );
-    
-protected:
-    virtual void checkpoint (ostream& stream);
-    virtual void checkpoint (istream& stream);
-    
-    // Points to interpolate between in the middle of input age groups. Extra
-    // points at zero and infinity are added with equal value to first and last
-    // points respectively.
-    map<double,double> dataPoints;
-};
-
-
-/** This class gives piecewise linear inpolation on top of input age-group
- * data (continuous but with discontinuous derivative).
- ********************************************/
-class AgeGroupPiecewiseLinear : public AgeGroupInterpolation
-{
-public:
-    AgeGroupPiecewiseLinear (
-        const scnXml::AgeGroupValues& ageGroups, const char* eltName
-    );
-    
-    virtual double operator() (double ageYears) const;
-    
-    virtual void scale( double factor );
-    
-protected:
-    virtual void checkpoint (ostream& stream);
-    virtual void checkpoint (istream& stream);
-    
-    // Points to interpolate between in the middle of input age groups. Extra
-    // points at zero and infinity are added with equal value to first and last
-    // points respectively.
-    map<double,double> dataPoints;
-};
-
 
 } }
 #endif

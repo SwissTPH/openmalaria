@@ -94,6 +94,9 @@ namespace OM { namespace util {
 		    newEIR = lexical_cast<double>(parseNextArg (argc, argv, i));
 		    options.set (SET_ANNUAL_EIR);
                     options.set (SKIP_SIMULATION);
+		} else if (clo == "sample-interpolations") {
+		    options.set (SAMPLE_INTERPOLATIONS);
+		    options.set (SKIP_SIMULATION);
                 } else if (clo == "validate-only") {
                     options.set (SKIP_SIMULATION);
 		} else if (clo == "checkpoint") {
@@ -203,6 +206,9 @@ namespace OM { namespace util {
 	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (innocs./person/year)"<<endl
 	    << "			Note: updated XML file will be generated in working directory,"<<endl
 	    << "			and will have other, mostly insignificant, differences to original."<<endl
+            << "    --sample-interpolations"<<endl
+            << "			Output samples of all used age-group data according to active"<<endl
+            << "			interpolation method and exit."<<endl
             << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "    --checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
 	    << "			more than once. Overrides --checkpoint option."<<endl
