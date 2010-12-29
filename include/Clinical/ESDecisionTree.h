@@ -25,13 +25,11 @@
 #include "Clinical/ESDecisionValue.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
+#include "inputData.h"
 
 #include <map>
 #include <boost/unordered_map.hpp>
 
-namespace scnXml{
-    class HSESDecision;
-}
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
     using boost::unordered_map;
@@ -84,7 +82,44 @@ class ESDecisionAge : public ESDecisionTree {
 	friend struct DA_processor;
 };
 
-class ESDecisionRandom : public ESDecisionTree {
+class ESDecisionValueBase : public ESDecisionTree {
+    public:
+        /** Set up.
+         *
+         * @param dvMap Decision-value map to add decision-outcomes into.
+         * @param xmlDc XML element describing tree
+         * @param dependsInput Prerequisites of this decision. (Also described
+         * within xmlDc; passed to avoid re-parsing.) */
+        ESDecisionValueBase (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput);
+        
+    protected:
+        // A map from depended decision values (represented as an or-d list of one
+        // value (or 0) from each dependency) to a list of cumulative probabilities.
+        // Indecies in this list map to the same index in values; last entry must be 1.0.
+        // (Representation is primarily designed for random decisions.)
+        //NOTE: be interesting to compare performance between boost::unordered_map and std::map
+        typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
+        map_cum_p_t map_cum_p;
+        
+        vector<ESDecisionValue> values;    // ids associated with each possible output
+        
+        friend struct DR_processor;
+};
+
+/* The only real point of this is to avoid an extra random number generator call. */
+class ESDecisionDeterministic : public ESDecisionValueBase {
+    public:
+        /** Set up.
+         *
+         * @param dvMap Decision-value map to add decision-outcomes into.
+         * @param xmlDc XML element describing tree
+         * @param dependsInput Prerequisites of this decision. (Also described
+         * within xmlDc; passed to avoid re-parsing.) */
+        ESDecisionDeterministic (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput);
+        virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
+};
+
+class ESDecisionRandom : public ESDecisionValueBase {
     public:
 	/** Set up.
 	 *
@@ -94,18 +129,6 @@ class ESDecisionRandom : public ESDecisionTree {
 	 * within xmlDc; passed to avoid re-parsing.) */
 	ESDecisionRandom (ESDecisionValueMap& dvMap, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput);
 	virtual ESDecisionValue determineImpl (const ESDecisionValue input, const ESHostData& hostData) const;
-	
-    private:
-	// A map from depended decision values (represented as an or-d list of one
-	// value (or 0) from each dependency) to a list of cumulative probabilities.
-	// Indecies in this list map to the same index in values; last entry must be 1.0.
-	//NOTE: be interesting to compare performance between boost::unordered_map and std::map
-	typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
-	map_cum_p_t map_cum_p;
-	
-	vector<ESDecisionValue> values;    // ids associated with each possible output
-	
-	friend struct DR_processor;
 };
 
 class ESDecisionUC2Test : public ESDecisionTree {

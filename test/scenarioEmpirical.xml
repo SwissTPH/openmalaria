@@ -134,7 +134,8 @@
             result(negative): none
             result(none): none
           </decision>
-          <decision depends="" name="hospitalisation" values="none,delayed,immediate">
+          <!-- note: dependency on "p" causes an extra random number sample -->
+          <decision depends="p" name="hospitalisation" values="none,delayed,immediate">
             immediate
           </decision>
           <decision depends="p" name="test" values="none,microscopy,RDT">

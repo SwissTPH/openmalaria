@@ -22,11 +22,9 @@
 #include "Clinical/parser.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "inputData.h"
 
 #include <limits>
 #include <list>
-#include <sstream>
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
@@ -46,7 +44,7 @@ namespace OM { namespace Clinical {
 	 * @param allowP "p" decisions are only allowed when this is true, in
 	 * order to enforce the specification.
 	 */
-	DR_processor (const ESDecisionValueMap& dvm, ESDecisionRandom& d, bool allowP) : dvMap(dvm), dR(d), allowPDecisions(allowP) {
+	DR_processor (const ESDecisionValueMap& dvm, ESDecisionValueBase& d, bool allowP) : dvMap(dvm), dR(d), allowPDecisions(allowP) {
 	    BOOST_FOREACH( const string& dependency, dR.depends ){
 		tuple<ESDecisionValue,const ESDecisionValueMap::value_map_t&> decMap = dvMap.getDecision( dependency );
 		dR.mask |= decMap.get<0>();	// add this decision's inputs into the mask
@@ -191,7 +189,7 @@ namespace OM { namespace Clinical {
 	}
 	
 	const ESDecisionValueMap& dvMap;
-	ESDecisionRandom& dR;
+	ESDecisionValueBase& dR;
 	bool allowPDecisions;
 	list< pair< string, ESDecisionValueSet > > inputDependencies;
     };
@@ -397,43 +395,67 @@ namespace OM { namespace Clinical {
 	return it->second;
     }
     
-    ESDecisionRandom::ESDecisionRandom (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc, const vector<string>& dependsInput) /*: dvMap(dvm)*/ {
-	decision = xmlDc.getName();
-	string decErrStr = "decision "+decision;
-	
-	// Prerequisites for deciding this decision.
-	// According to spec, "p" must be listed as a dependency in order to
-	// allow probability-based decisions. We could more efficiently decide
-	// non-random decisions with a separate class, but this is only a
-	// corner-case.
-	depends = dependsInput;
-	bool allowPDecisions = false;
-	vector<string>::iterator it = find( depends.begin(), depends.end(), "p" );
-	if( it != depends.end() ){
-	    depends.erase( it );
-	    if( find( depends.begin(), depends.end(), "p" ) != depends.end() )
-		throw xml_scenario_error( (boost::format(
-		    "decision tree %1%: dependency \"p\" occurred twice"
-		) %decision).str() );
-	    allowPDecisions = true;
-	}
-	
-	vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
-	dvm.add_decision_values (decision, valueList);
-	values.resize (valueList.size());
-	for( size_t i = 0; i < valueList.size(); ++i ) {
-	    values[i] = dvm.get (decision, valueList[i]);
-	}
-	
-	// Get content of this element:
-	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
-	if (content_p == NULL)
-	    throw runtime_error ("ESDecision: bad upcast?!");
-	
-	DR_processor processor (dvm, *this, allowPDecisions);
-	// 2-stage parse: first produces a parser::Outcome object, second the
-	// processor object does the work of converting into map_cum_p:
-	processor.process( parser::parseTree( *content_p, decision ) );
+    ESDecisionValueBase::ESDecisionValueBase (
+        ESDecisionValueMap& dvm,
+        const ::scnXml::HSESDecision& xmlDc,
+        const vector<string>& dependsInput) /*: dvMap(dvm)*/
+    {
+        decision = xmlDc.getName();
+        string decErrStr = "decision "+decision;
+        depends = dependsInput;
+        
+        vector<string> valueList = parser::parseSymbolList( xmlDc.getValues(), decision+" values attribute" );
+        dvm.add_decision_values (decision, valueList);
+        values.resize (valueList.size());
+        for( size_t i = 0; i < valueList.size(); ++i ) {
+            values[i] = dvm.get (decision, valueList[i]);
+        }
+    }
+    
+    ESDecisionDeterministic::ESDecisionDeterministic (
+        ESDecisionValueMap& dvm,
+        const ::scnXml::HSESDecision& xmlDc,
+        const vector<string>& dependsInput) :
+        ESDecisionValueBase(dvm, xmlDc, dependsInput)
+    {
+        // Get content of this element:
+        const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
+        if (content_p == NULL)
+            throw runtime_error ("ESDecision: bad upcast?!");
+        
+        DR_processor processor (dvm, *this, false);
+        // 2-stage parse: first produces a parser::Outcome object, second the
+        // processor object does the work of converting into map_cum_p:
+        processor.process( parser::parseTree( *content_p, decision ) );
+    }
+    ESDecisionValue ESDecisionDeterministic::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
+        map_cum_p_t::const_iterator it = map_cum_p.find (input);
+        if (it == map_cum_p.end()){
+            // All possible input combinations should be in map_cum_p
+            throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
+        }
+        double sample = 0.5;
+        size_t i = 0;
+        while (it->second[i] <= sample)
+            ++i;
+        return values[0];
+    }
+    
+    ESDecisionRandom::ESDecisionRandom (
+        ESDecisionValueMap& dvm,
+        const ::scnXml::HSESDecision& xmlDc,
+        const vector<string>& dependsInput) :
+        ESDecisionValueBase(dvm, xmlDc, dependsInput)
+    {
+        // Get content of this element:
+        const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
+        if (content_p == NULL)
+            throw runtime_error ("ESDecision: bad upcast?!");
+        
+        DR_processor processor (dvm, *this, true);
+        // 2-stage parse: first produces a parser::Outcome object, second the
+        // processor object does the work of converting into map_cum_p:
+        processor.process( parser::parseTree( *content_p, decision ) );
     }
     ESDecisionValue ESDecisionRandom::determineImpl (const ESDecisionValue input, const ESHostData& hostData) const {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
@@ -443,7 +465,7 @@ namespace OM { namespace Clinical {
 	}
 	double sample = random::uniform_01 ();
 	size_t i = 0;
-	while (it->second[i] < sample)
+	while (it->second[i] <= sample)
 	    ++i;
 	return values[i];
     }
@@ -464,6 +486,12 @@ namespace OM { namespace Clinical {
 	    return new ESDecisionAge( dvm, xmlDc );
 	}
 	
-	return new ESDecisionRandom( dvm, xmlDc, depends );
+	it = find( depends.begin(), depends.end(), "p" );
+        if( it != depends.end() ){
+            depends.erase( it );
+            return new ESDecisionRandom( dvm, xmlDc, depends );
+        }else{
+            return new ESDecisionDeterministic( dvm, xmlDc, depends );
+        }
     }
 } }
