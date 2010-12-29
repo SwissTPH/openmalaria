@@ -25,11 +25,13 @@
 #include "Clinical/ESDecisionValue.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
-#include "inputData.h"
 
 #include <map>
 #include <boost/unordered_map.hpp>
 
+namespace scnXml{
+    class HSESDecision;
+}
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
     using boost::unordered_map;

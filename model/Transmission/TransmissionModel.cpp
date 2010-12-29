@@ -25,7 +25,6 @@
 #include "Transmission/PerHostTransmission.h"
 
 #include "inputData.h"
-#include "Simulation.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"

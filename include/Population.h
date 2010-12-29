@@ -23,7 +23,6 @@
 #include "PopulationAgeStructure.h"
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
-#include "inputData.h"
 
 #include <list>
 #include <fstream>

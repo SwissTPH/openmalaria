@@ -28,10 +28,13 @@
 #include <map>
 #include <vector>
 #include "Global.h"
-#include "inputData.h"
 
 using namespace std;
 
+namespace scnXml{
+    class DrugDescription;
+    class Drug;
+}
 namespace OM { namespace PkPd {
     
     /** Per drug, per genotype, PD parameters of drug. */

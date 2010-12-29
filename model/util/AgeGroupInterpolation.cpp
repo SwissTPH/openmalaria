@@ -21,9 +21,10 @@
 #include "util/AgeGroupInterpolation.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "boost/format.hpp"
+#include "inputData.h"
 
 #include <fstream>
+#include <boost/format.hpp>
 
 /* Required by AgeGroupSplineInterpolation
 #include <gsl_interp.h>

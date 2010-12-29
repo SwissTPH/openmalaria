@@ -21,6 +21,8 @@
 #include "PkPd/LSTMPkPdModel.h"
 #include "util/random.h"
 
+#include <cassert>
+
 namespace OM { namespace PkPd {
 
 // -----  non-static set up / tear down functions  -----

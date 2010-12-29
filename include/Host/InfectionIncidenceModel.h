@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Monitoring/Survey.h"
 #include "Transmission/PerHostTransmission.h"
-#include "inputData.h"
 
 namespace OM { namespace Host {
     class Human;

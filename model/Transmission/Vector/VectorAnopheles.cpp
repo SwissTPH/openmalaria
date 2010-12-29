@@ -20,12 +20,13 @@
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "Transmission/Vector/Nv0DelayFitting.h"
 #include "Transmission/PerHostTransmission.h"
+#include "Transmission/TransmissionModel.h"
 #include "Host/Human.h"
 
 #include "inputData.h"
-#include "Simulation.h"
 #include "util/vectors.h"
 #include "util/CommandLine.h"
+#include "util/errors.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_sf.h>

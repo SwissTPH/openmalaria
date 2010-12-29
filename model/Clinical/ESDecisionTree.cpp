@@ -22,9 +22,11 @@
 #include "Clinical/parser.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "inputData.h"
 
 #include <limits>
 #include <list>
+#include <sstream>
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 

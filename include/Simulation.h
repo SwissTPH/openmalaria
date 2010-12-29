@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Population.h"
+#include "util/BoincWrapper.h"
 
 using namespace std;
 

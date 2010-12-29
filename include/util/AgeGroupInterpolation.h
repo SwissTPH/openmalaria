@@ -22,8 +22,10 @@
 #define Hmod_AgeDistribution
 
 #include "Global.h"
-#include "inputData.h"
 
+namespace scnXml {
+    class AgeGroupValues;
+}
 namespace OM { namespace util {
     
 /** A class representing deterministic interpolation of data collected

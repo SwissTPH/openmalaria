@@ -25,6 +25,7 @@
 
 #include "Global.h"
 #include "util/ModelOptions.h"
+#include "inputData.h"
 
 #include "PkPd/PkPdModel.h"
 // #include "PkPd/HoshenPkPdModel.h"

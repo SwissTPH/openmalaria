@@ -28,7 +28,6 @@
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Survey.h"
-#include "inputData.h"
 
 #include <cassert>
 #include <list>
@@ -38,6 +37,11 @@
 class ESCaseManagementSuite;
 class ESDecisionTreeSuite;
 
+namespace scnXml{
+    class HSESTreatmentSchedule;
+    class HSESTreatment;
+    class HSESCaseManagement;
+}
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
     using boost::unordered_map;
