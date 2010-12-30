@@ -185,6 +185,11 @@ enum SurveyMeasure {
     /// Number of individuals removed from cohort
     nRemovedFromCohort = 51,
     
+    /** Number of people (per age group) treated by mass drug administration
+     * campaign. (Note that in one day time-step model MDA can be configured
+     * as screen-and-treat. This option repeats actual treatments.) */
+    nMDAs = 52,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

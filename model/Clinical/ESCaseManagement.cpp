@@ -232,7 +232,7 @@ ESTreatmentSchedule* ESTreatment::getSchedule (ESDecisionValue& outcome) const {
 // -----  ESDecisionMap  -----
 
 class ESDecisionMapProcessor {
-    bool complicated;
+    ESDecisionMap::TreeType treeType;
     ESDecisionValueMap& dvMap;
     
     // Collection of all decisions not yet added into decisions or culled.
@@ -251,7 +251,17 @@ class ESDecisionMapProcessor {
 	DecisionList::const_iterator it = pending.find( x );
 	if( it == pending.end() ) {
 	    ostringstream msg;
-	    msg << "ESCaseManagement: decision " << x << " required (for "<<(complicated?"":"un")<<"complicated tree)";
+	    msg << "ESCaseManagement: decision " << x << " required (for ";
+            if( treeType == ESDecisionMap::MDA ){
+                msg << "MDA";
+            }else if( treeType == ESDecisionMap::Uncomplicated ){
+                msg << "uncomplicated";
+            }else if( treeType == ESDecisionMap::Complicated ){
+                msg << "complicated";
+            }else{
+                assert (false);
+            }
+            msg << " tree)";
 	    throw xml_scenario_error(msg.str());
 	}
 	if( required.insert( it->second ).second ){	// if newly inserted...
@@ -271,9 +281,13 @@ class ESDecisionMapProcessor {
     
 public:
     /* Read from XML into a temporary list. */
-    ESDecisionMapProcessor (ESDecisionValueMap& dvm, const ::scnXml::HSESCaseManagement& xmlCM, bool c) : complicated(c), dvMap(dvm) {
+    ESDecisionMapProcessor (ESDecisionValueMap& dvm,
+                            const ::scnXml::HSESCaseManagement& xmlCM,
+                            ESDecisionMap::TreeType tt) :
+        treeType(tt), dvMap(dvm)
+    {
 	// Assemble a list of all tests we might need to add
-	if (!complicated) {
+	if ( treeType == ESDecisionMap::Uncomplicated ) {
 	    addToPending (new ESDecisionUC2Test (dvMap));	// this test only makes sense for UC case
 	}
 	addToPending (new ESDecisionParasiteTest (dvMap));	// optimised away if not used
@@ -305,8 +319,18 @@ public:
 		// 1. empty slots in the decisions list
 		// 2. That required decisions are mistakenly optimised out.
 #ifdef WITHOUT_BOINC	// only print in non-BOINC mode to reduce stderr.txt size on server; this isn't a crucial message
-		if( it->first != "result" ) {	// this is a built-in test which may not be used
-		    cerr << "Warning: ESCaseManagement: decision " << it->first << " is unused (for "<<(complicated?"":"un")<<"complicated tree)"<<endl;
+		if( it->first != "result" && it->first != "case" ) {	// these are built-in tests which may not be used
+		    cerr << "Warning: ESCaseManagement: decision " << it->first << " is unused (for ";
+                    if( treeType == ESDecisionMap::MDA ){
+                        cerr << "MDA";
+                    }else if( treeType == ESDecisionMap::Uncomplicated ){
+                        cerr << "uncomplicated";
+                    }else if( treeType == ESDecisionMap::Complicated ){
+                        cerr << "complicated";
+                    }else{
+                        assert (false);
+                    }
+                    cerr << " tree)"<<endl;
 		}
 #endif
 		delete it->second;
@@ -328,7 +352,7 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
 	throw xml_scenario_error((format("Treatment description given for treatment %1% which isn't an output of \"treatment\" decision") %value).str());
     return it->second;
 }
-void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool complicated) {
+void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeType treeType) {
     // This function is also used to load a new health-system from intervention data; therefore clear old data:
     dvMap.clear();
     decisions.clear();
@@ -336,11 +360,11 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, bool 
     
     // Construct processor & read from XML.
     // Fills dvMap (which must be done before evaluating treatments).
-    ESDecisionMapProcessor processor( dvMap, xmlCM, complicated );
+    ESDecisionMapProcessor processor( dvMap, xmlCM, treeType );
     
     list<string> required;	// list required decisions, to avoid optimising out
     
-    if( complicated ){
+    if( treeType == Complicated ){
 	// Register required "hospitalisation" output, before decisions are created
 	// (by ESDecisionMapProcessor). Effects: no transmission in hospital, delay
 	// simply adds one day to time before returning to treatment seeking.
@@ -380,7 +404,7 @@ ESDecisionMap::~ESDecisionMap () {
 	delete it->second;
 }
 
-ESDecisionValue ESDecisionMap::determine (OM::Clinical::ESHostData& hostData) const {
+ESDecisionValue ESDecisionMap::determine (const OM::Clinical::ESHostData& hostData) const {
     ESDecisionValue outcomes;	// initialized to 0
     // At this point, decisions is ordered such that all dependencies should be
     // met if evaluated in order, so we just do that.
@@ -412,18 +436,15 @@ ESTreatmentSchedule* ESDecisionMap::getSchedule (ESDecisionValue outcome) const 
 // -----  ESCaseManagement  -----
 
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
-ESTreatmentSchedule* ESCaseManagement::mdaDoses;
+ESDecisionMap ESCaseManagement::mda;
 
 void ESCaseManagement::init () {
     // MDA Intervention data
     const scnXml::Descriptions::MDADescriptionOptional mdaDesc =
 	InputData().getInterventions().getDescriptions().getMDADescription();
     if (mdaDesc.present()) {
-	if( !mdaDesc.get().getSchedule().present() )
-	    throw xml_scenario_error( "MDA description requires a treatment schedule with ES case management" );
-	mdaDoses = new ESTreatmentSchedule ( mdaDesc.get().getSchedule().get() );
+	mda.initialize( mdaDesc.get(), ESDecisionMap::MDA );
     } else {
-	mdaDoses = NULL;
 	if( InputData.getActiveInterventions()[Interventions::MDA] )
 	    throw util::xml_scenario_error ("MDA intervention without description");
     }
@@ -433,48 +454,64 @@ void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem
     if( !healthSystem.getEventScheduler().present() )
 	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");
     const scnXml::HSEventScheduler& esData = healthSystem.getEventScheduler().get();
-    uncomplicated.initialize (esData.getUncomplicated (), false);
-    complicated.initialize (esData.getComplicated (), true);
+    uncomplicated.initialize (esData.getUncomplicated (), ESDecisionMap::Uncomplicated);
+    complicated.initialize (esData.getComplicated (), ESDecisionMap::Complicated);
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
     ClinicalEventScheduler::setParameters( esData );
 }
 void ESCaseManagement::cleanup () {
-    if( mdaDoses != NULL )
-	delete mdaDoses;
 }
 
-void ESCaseManagement::massDrugAdministration(list<MedicateData>& medicateQueue) {
-    assert (mdaDoses != NULL);
-    mdaDoses->apply(medicateQueue);
-}
-
-CMAuxOutput ESCaseManagement::execute (list<MedicateData>& medicateQueue, Pathogenesis::State pgState, WithinHost::WithinHostModel& withinHostModel, double ageYears, Monitoring::AgeGroup ageGroup) {
-    assert (pgState & Pathogenesis::SICK);
-    ESDecisionMap* map;
-    if (pgState & Pathogenesis::COMPLICATED)
-        map = &complicated;
-    else
-        map = &uncomplicated;
-    
-    ESHostData hostData (ageYears, withinHostModel, pgState);
-    
+pair<ESDecisionValue, bool> executeTree(
+        ESDecisionMap* map,
+        const ESHostData& hostData,
+        list<MedicateData>& medicateQueue,
+        bool inCohort
+){
     ESDecisionValue outcome = map->determine (hostData);
-    
     ESTreatmentSchedule* schedule = map->getSchedule(outcome);
-    
-    // We always remove any queued medications.
-    medicateQueue.clear();
     schedule->apply (medicateQueue);
     
+    if ( map->RDT_used(outcome) ) {
+        Monitoring::Surveys.getSurvey(inCohort).report_Clinical_RDTs (1);
+    }
+    if ( map->microscopy_used(outcome) ) {
+        Monitoring::Surveys.getSurvey(inCohort).report_Clinical_Microscopy (1);
+    }
+    
+    return make_pair( outcome, schedule->anyTreatments() );
+}
+
+void ESCaseManagement::massDrugAdministration(
+        const ESHostData& hostData,
+        list<MedicateData>& medicateQueue,
+        bool inCohort,
+        Monitoring::AgeGroup ageGroup
+){
+    bool anyTreatment = executeTree( &mda, hostData, medicateQueue, inCohort ).second;
+    if( anyTreatment ){
+        Monitoring::Surveys.getSurvey(inCohort).reportMDA(ageGroup, 1);
+    }
+}
+
+CMAuxOutput ESCaseManagement::execute (
+        const ESHostData& hostData,
+        list<MedicateData>& medicateQueue,
+        bool inCohort
+) {
+    assert (hostData.pgState & Pathogenesis::SICK);
+    // We always remove any queued medications.
+    medicateQueue.clear();
+    
+    ESDecisionMap *map = (hostData.pgState & Pathogenesis::COMPLICATED) ? &complicated : &uncomplicated;
+    ESDecisionValue outcome = executeTree( map, hostData, medicateQueue, inCohort ).first;
+    
     CMAuxOutput auxOut;
-    if( pgState & Pathogenesis::COMPLICATED )
+    auxOut.hospitalisation = CMAuxOutput::NONE;
+    if( hostData.pgState & Pathogenesis::COMPLICATED )
 	auxOut.hospitalisation = map->hospitalisation(outcome);
-    else
-	auxOut.hospitalisation = CMAuxOutput::NONE;
-    auxOut.RDT_used = map->RDT_used(outcome);
-    auxOut.microscopy_used = map->microscopy_used(outcome);
     return auxOut;
 }
 

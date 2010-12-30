@@ -160,7 +160,7 @@ public:
 	::scnXml::HSESCaseManagement xmlCM( decisions, treatments );
 	
 	// use complicated tree, because it doesn't add so many unwanted decisions
-	dMap.initialize( xmlCM, true );
+	dMap.initialize( xmlCM, ESDecisionMap::Complicated );
     }
     
     // Note: use ETS_..., not TS_..., when assertion should throw if false (prevent dangerous operations)

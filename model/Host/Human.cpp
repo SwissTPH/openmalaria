@@ -236,7 +236,7 @@ void Human::deployIptDose () {
 }
 
 void Human::massDrugAdministration () {
-    clinicalModel->massDrugAdministration (*withinHostModel);
+    clinicalModel->massDrugAdministration (*this);
 }
 
 void Human::massITN (){

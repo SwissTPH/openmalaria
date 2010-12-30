@@ -53,8 +53,6 @@ struct CMAuxOutput {
     };
     
     Hospitalisation hospitalisation;	///< was case hospitalised immediately, after a delay, or not at all?
-    bool RDT_used;	///< was an RDT test used?
-    bool microscopy_used;	///< was a microscopy test used?
 };
 
 /// Data used for a withinHostModel->medicate() call
@@ -99,6 +97,10 @@ struct ESTreatmentSchedule {
 	for (vector<MedicateData>::const_iterator it = medications.begin(); it != medications.end(); ++it)
 	    medicateQueue.push_back (*it);
     }
+    /// Does this contain a positive number of treatments?
+    inline bool anyTreatments () const {
+        return !medications.empty();
+    }
     
     private:
 	/// Data for each medicate() call.
@@ -139,6 +141,12 @@ class ESTreatment {
  *****************************************************************************/
 class ESDecisionMap {
     public:
+        enum TreeType {
+            MDA,
+            Uncomplicated,
+            Complicated
+        };
+        
         /// Constructor. Element is created statically, so initialize later
         ESDecisionMap () {}
         ~ESDecisionMap();
@@ -147,12 +155,12 @@ class ESDecisionMap {
 	 * @param cm XML element describing probabilistic decisions and treatments
 	 * @param complicated Determines whether hard-coded decisions for the
 	 * uncomplicated or complicated case are added. */
-	void initialize (const ::scnXml::HSESCaseManagement& cm, bool complicated);
+	void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType);
         
         /** Run decision tree to arrive at an outcome.
 	 *
 	 * @returns An outcome as a binary-or'd list of decision values. */
-        ESDecisionValue determine (ESHostData& hostData) const;
+        ESDecisionValue determine (const OM::Clinical::ESHostData& hostData) const;
 	
 	/** Given a decision-tree outcome, return a corresponding treatment
 	 * schedule. Return-value should always point to an existing
@@ -217,25 +225,30 @@ class ESCaseManagement : public CaseManagementCommon {
 	
 	static void cleanup ();
 	
-	static void massDrugAdministration(list< OM::Clinical::MedicateData >& medicateQueue);
+	static void massDrugAdministration(
+            const ESHostData& hostData,
+            list<MedicateData>& medicateQueue,
+            bool inCohort,
+            Monitoring::AgeGroup ageGroup
+        );
 	
         /** Runs through case management decisions, selects treatments and
          * applies them to the passed medicateQueue.
          * 
          * Returns: some extra info (see CMAuxOutput definition). */
-	static CMAuxOutput execute (list<MedicateData>& medicateQueue,
-				    Pathogenesis::State pgState,
-				    WithinHost::WithinHostModel& withinHostModel,
-				    double ageYears,
-				    Monitoring::AgeGroup ageGroup);
+	static CMAuxOutput execute (
+            const ESHostData& hostData,
+            list<MedicateData>& medicateQueue,
+            bool inCohort
+        );
 	
     private:
 	
 	//BEGIN Static parameters — set by init()
         static ESDecisionMap uncomplicated, complicated;
 	
-	/// MDA dosage info; null pointer if not provided
-	static ESTreatmentSchedule* mdaDoses;
+	/// MDA description
+	static ESDecisionMap mda;
 	//END
 };
 

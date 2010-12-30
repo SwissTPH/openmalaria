@@ -107,14 +107,15 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
 // -----  other methods  -----
 
-void ClinicalEventScheduler::massDrugAdministration(
-    WithinHost::WithinHostModel& withinHostModel
-) {
+void ClinicalEventScheduler::massDrugAdministration(Human& human){
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
-    ESCaseManagement::massDrugAdministration (medicateQueue);
+    ESCaseManagement::massDrugAdministration (
+        ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
+        medicateQueue, human.getInCohort(), human.getMonitoringAgeGroup()
+    );
 }
 
 void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
@@ -198,7 +199,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    medicateQueue, pgState, withinHostModel, ageYears, human.getMonitoringAgeGroup()
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
 	);
 	
 	if( medicateQueue.size() ){	// I.E. some treatment was given
@@ -222,12 +223,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    
 	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
 		caseStartTime++;
-	}
-	if ( auxOut.RDT_used ) {
-	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_RDTs (1);
-	}
-	if ( auxOut.microscopy_used ) {
-	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_Microscopy (1);
 	}
 	
 	// Case fatality rate (first day of illness)

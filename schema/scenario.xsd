@@ -785,21 +785,17 @@
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="1" minOccurs="0" name="MDADescription">
+            <xs:element minOccurs="0" name="MDADescription" type="HSESCaseManagement">
               <xs:annotation>
                 <xs:documentation>
-                  Description of drug dose(s) used in a mass-drug-administration intervention.
-                  
-                  When using the new (Event Scheduler) case management model, a
-                  treatment schedule must be present.
+                  Description of treatment type used by mass treatment option
+                  of one-day case management model. Can be used to describe
+                  one-size-fits-all mass drug dosing, age-based mass drug dosing
+                  and screen-and-treat. Number of treatments given can be
+                  reported by the nMDAs option.
                 </xs:documentation>
-                <xs:appinfo>units:List of medicate elements;name:Drug dose(s) used in MDA;</xs:appinfo>
+                <xs:appinfo>name:Description of MDA;</xs:appinfo>
               </xs:annotation>
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="schedule" type="HSESTreatmentSchedule" minOccurs="0" />
-                </xs:sequence>
-              </xs:complexType>
             </xs:element>
             <xs:element maxOccurs="3" minOccurs="0" name="vaccineDescription" type="vaccineDescription" />
             <xs:element maxOccurs="1" minOccurs="0" name="iptiDescription" type="iptDescription" />

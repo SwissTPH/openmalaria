@@ -97,6 +97,7 @@ class SurveyMeasureMap {
             codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
             codeMap["nAddedToCohort"] = SM::nAddedToCohort;
             codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
+            codeMap["nMDAs"] = SM::nMDAs;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -206,6 +207,7 @@ void Survey::allocate ()
     _numMassVA.resize (numAgeGroups);
     _numAddedToCohort.resize (numAgeGroups);
     _numRemovedFromCohort.resize (numAgeGroups);
+    _numMDAs.resize (numAgeGroups);
 }
 
 
@@ -350,6 +352,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::nRemovedFromCohort]) {
       writePerAgeGroup (outputFile, SM::nRemovedFromCohort, survey, _numRemovedFromCohort);
+  }
+  if (active[SM::nMDAs]) {
+      writePerAgeGroup (outputFile, SM::nMDAs, survey, _numMDAs);
   }
 }
 

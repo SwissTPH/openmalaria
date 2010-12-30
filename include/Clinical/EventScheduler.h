@@ -52,7 +52,7 @@ public:
   ClinicalEventScheduler (double cF, double tSF);
   ~ClinicalEventScheduler ();
   
-  virtual void massDrugAdministration(WithinHost::WithinHostModel& withinHostModel);
+  virtual void massDrugAdministration(Human& human);
   
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);

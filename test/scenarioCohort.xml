@@ -80,9 +80,17 @@
   <interventions name="cohort selection">
     <descriptions>
       <MDADescription>
-        <schedule>
-          <medicate drug="MQ" hour="0" mg="1200"/>
-        </schedule>
+        <decisions>
+          <decision name="treatment" depends="" values="1">1</decision>
+          <decision name="test" depends="" values="none,microscopy,RDT">none</decision>
+        </decisions>
+        <treatments>
+          <treatment name="1">
+            <schedule>
+              <medicate drug="MQ" hour="0" mg="1200"/>
+            </schedule>
+          </treatment>
+        </treatments>
       </MDADescription>
     </descriptions>
     <continuous>

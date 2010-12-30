@@ -59,7 +59,7 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::massDrugAdministration(WithinHost::WithinHostModel& withinHostModel) {
+void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
     /* TODO: here we assume a 100% clearance rate for the MDA drug we use.
        This is not consistent with the way we treat according to the Health
        system description. The default clearance rate for MDA should be 100%
@@ -67,7 +67,7 @@ void ClinicalImmediateOutcomes::massDrugAdministration(WithinHost::WithinHostMod
        this by introducing an optional clearance rate that can be < 100%.
     */
     // We need to pass the is-severe state for the IPT code.
-    withinHostModel.clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
+    human.withinHostModel->clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
 }
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {

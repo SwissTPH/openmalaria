@@ -425,7 +425,7 @@ public:
 	
 	// use uncomplicated tree with its extra tests
 	ESDecisionMap dMap;
-	dMap.initialize( xmlCM, false );
+	dMap.initialize( xmlCM, ESDecisionMap::Uncomplicated );
 	
 	hd->ageYears = 2;
 	hd->pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
