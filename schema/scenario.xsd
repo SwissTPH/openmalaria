@@ -931,7 +931,7 @@
   <xs:complexType name="massCum">
     <xs:complexContent>
       <xs:extension base="mass">
-        <xs:attribute name="cumulativeWithMaxAge" type="xs:int" use="optional">
+        <xs:attribute name="cumulativeWithMaxAge" type="xs:double" use="optional">
           <xs:annotation>
             <xs:documentation>
               If present, activate cumulate deployment mode where intervention
@@ -940,8 +940,8 @@
               covered up to level described by "coverage".
               
               Individuals are considered already protected by this intervention
-              when they last received this intervention less the "maximum age"
-              (this attribute) number of timesteps ago (i.e. when
+              when the age of the last net/dose/etc. received is less than
+              "maximum age" (this attribute) years old (i.e. when
               timeLastDeployment+maximumAge>currentTimeStep).
             </xs:documentation>
             <xs:appinfo>units:Years;name:Cumulative deployment: maximum age;min:0</xs:appinfo>

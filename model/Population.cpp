@@ -414,7 +414,7 @@ void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::H
     double minAge = mass.getMinAge();
     double maxAge = mass.getMaxAge();
     double coverage = mass.getCoverage();
-    int maxInterventionAge = mass.getCumulativeWithMaxAge().get();
+    int maxInterventionAge = static_cast<int>( mass.getCumulativeWithMaxAge().get() * Global::intervalsPerYear );
     bool cohortOnly = mass.getCohort();
     
     vector<Host::Human*> unprotected;
