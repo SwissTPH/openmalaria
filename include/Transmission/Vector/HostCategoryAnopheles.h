@@ -56,21 +56,6 @@ public:
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
   }
   
-  /// Checkpointing
-  template<class S>
-  void operator& (S& stream) {
-      entoAvailability & stream;
-      probMosqBiting & stream;
-      probMosqFindRestSite & stream;
-      probMosqSurvivalResting & stream;
-      ITNDeterrency & stream;
-      ITNPreprandialKillingEffect & stream;
-      ITNPostprandialKillingEffect & stream;
-      IRSDeterrency & stream;
-      IRSKillingEffect & stream;
-      VADeterrency & stream;
-  }
-  
   /// @brief Probabilities of finding a host and surviving a feeding cycle
   //@{
   /** Availability rate (α_i) */

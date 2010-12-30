@@ -258,6 +258,21 @@ void Human::massVA () {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( ageGroup(), 1 );
 }
 
+bool Human::hasVaccineProtection(int maxInterventionAge) const{
+    return _vaccine.hasProtection(maxInterventionAge);
+}
+bool Human::hasIPTiProtection(int maxInterventionAge) const{
+    return withinHostModel->hasIPTiProtection(maxInterventionAge);
+}
+bool Human::hasITNProtection(int maxInterventionAge) const{
+    return perHostTransmission.hasITNProtection(maxInterventionAge);
+}
+bool Human::hasIRSProtection(int maxInterventionAge) const{
+    return perHostTransmission.hasIRSProtection(maxInterventionAge);
+}
+bool Human::hasVAProtection(int maxInterventionAge) const{
+    return perHostTransmission.hasVAProtection(maxInterventionAge);
+}
 
 double Human::getAgeInYears() const{
     return (Global::simulationTime - _dateOfBirth) * Global::yearsPerInterval;

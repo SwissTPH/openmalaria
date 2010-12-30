@@ -166,6 +166,9 @@ void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup, boo
     Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
   }
 }
+bool DescriptiveIPTWithinHost::hasIPTiProtection (int maxInterventionAge) const{
+    return _lastIptiOrPlacebo + maxInterventionAge > Global::simulationTime;
+}
 
 
 // -----  update (from SPAction)  -----

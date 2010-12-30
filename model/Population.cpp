@@ -317,29 +317,29 @@ void Population::implementIntervention (int time)
     }
 
     if (interv->getVaccinate().present()) {
-        massIntervention (interv->getVaccinate().get(), &Host::Human::massVaccinate);
+        massCumIntervention (interv->getVaccinate().get(), &Host::Human::hasVaccineProtection, &Host::Human::massVaccinate);
     }
     if (interv->getMDA().present()) {
 	massIntervention (interv->getMDA().get().getCoverage(), &Host::Human::massDrugAdministration);
     }
     if (interv->getIpti().present()) {
-        massIntervention (interv->getIpti().get(), &Host::Human::IPTiTreatment);
+        massCumIntervention (interv->getIpti().get(), &Host::Human::hasIPTiProtection, &Host::Human::IPTiTreatment);
     }
 
     if (interv->getITN().present()) {
-        massIntervention (interv->getITN().get(), &Host::Human::massITN);
+        massCumIntervention (interv->getITN().get(), &Host::Human::hasITNProtection, &Host::Human::massITN);
     }
     if (interv->getIRS().present()) {
-        massIntervention (interv->getIRS().get(), &Host::Human::massIRS);
+        massCumIntervention (interv->getIRS().get(), &Host::Human::hasIRSProtection, &Host::Human::massIRS);
     }
     if (interv->getVectorAvailability().present()) {
-        massIntervention (interv->getVectorAvailability().get(), &Host::Human::massVA);
+        massCumIntervention (interv->getVectorAvailability().get(), &Host::Human::hasVAProtection, &Host::Human::massVA);
     }
     if (interv->getImmuneSuppression().present()) {
 	massIntervention (interv->getImmuneSuppression().get(), &Host::Human::immuneSuppression);
     }
     if (interv->getCohort().present()) {
-	massIntervention (interv->getCohort().get(), &Host::Human::addToCohort);
+	massCumIntervention (interv->getCohort().get(), &Host::Human::getInCohort, &Host::Human::addToCohort);
     }
     
     if (interv->getLarviciding().present()) {
@@ -384,14 +384,11 @@ void Population::importedInfections(double importedInfectionsPerThousandHosts)
 
 void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ())
 {
-    double minAge = mass.getMinAge().present() ?
-                    mass.getMinAge().get() : 0.0;
-    double maxAge = mass.getMaxAge().present() ?
-                    mass.getMaxAge().get() : 100.0;
+    double minAge = mass.getMinAge();
+    double maxAge = mass.getMaxAge();
     double coverage = mass.getCoverage();
-    bool cohortOnly = mass.getCohort().present() ?
-		    mass.getCohort().get() : false;
-
+    bool cohortOnly = mass.getCohort();
+    
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         double ageYears = iter->getAgeInYears();
         if( ageYears > minAge && ageYears < maxAge ){
@@ -402,6 +399,46 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::
 		}
 	    }
 	}
+    }
+}
+
+void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (int) const, void (Host::Human::*intervention) ())
+{
+    if( mass.getCumulativeWithMaxAge().present() == false ){
+        // Usual case: simply deploy to coverage% of target group
+        massIntervention( mass, intervention );
+        return;
+    }
+    // Cumulative case: bring target group's coverage up to target coverage
+    
+    double minAge = mass.getMinAge();
+    double maxAge = mass.getMaxAge();
+    double coverage = mass.getCoverage();
+    int maxInterventionAge = mass.getCumulativeWithMaxAge().get();
+    bool cohortOnly = mass.getCohort();
+    
+    vector<Host::Human*> unprotected;
+    size_t total = 0;       // number of humans within age bound and optionally cohort
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+        double ageYears = iter->getAgeInYears();
+        if( ageYears > minAge && ageYears < maxAge ){
+            if( !cohortOnly || iter->getInCohort() ){
+                total+=1;
+                if( !((*iter).*isProtected)(maxInterventionAge) )
+                    unprotected.push_back( &*iter );
+            }
+        }
+    }
+    
+    double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
+    if( propProtected < coverage ){
+        // In range (0,1]:
+        double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
+        for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+            if( random::uniform_01() < additionalCoverage ){
+                ( (*iter).*intervention) ();
+            }
+        }
     }
 }
 

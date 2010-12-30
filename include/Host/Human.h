@@ -127,6 +127,15 @@ public:
   }
   //@}
   
+  ///@brief Functions to check coverage by interventions
+  //@{
+    bool hasVaccineProtection(int maxInterventionAge) const;
+    bool hasIPTiProtection(int maxInterventionAge) const;
+    bool hasITNProtection(int maxInterventionAge) const;
+    bool hasIRSProtection(int maxInterventionAge) const;
+    bool hasVAProtection(int maxInterventionAge) const;
+  //@}
+  
   /// @brief Small functions
   //@{
   /// Get the survey age-group. Constant-time; returns result of last update.
@@ -145,7 +154,9 @@ public:
     return withinHostModel->parasiteDensityDetectible();
   }
   
-  inline bool getInCohort(){ return _inCohort; }
+  // crux for timed deployment as intervention up to some limit:
+  inline bool getInCohort(int)const{ return _inCohort; }
+  inline bool getInCohort()const{ return _inCohort; }
   //@}
   
   /// Return the current survey to use (depends on survey time and whether or

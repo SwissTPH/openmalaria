@@ -53,6 +53,8 @@ public:
   virtual void deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Last IPTi dose recent enough to give protection?
+  virtual bool hasIPTiProtection (int maxInterventionAge) const;
   
   /// Is IPT present?
   /// set by initParameters

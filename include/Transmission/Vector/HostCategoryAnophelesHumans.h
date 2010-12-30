@@ -36,28 +36,18 @@
 namespace OM { namespace Transmission {
 
 class HostCategoryAnophelesHumans : public HostCategoryAnopheles {
-
 public:
-	HostCategoryAnophelesHumans() :
-		    humanBloodIndex(0.0), probMosqOvipositing(0.0)
-		  {}
-        /** The proportion of resting mosquitoes that have recently fed on human blood. */
-	double humanBloodIndex;
-	double probMosqOvipositing;
-	/**
-	 * this operator is used to set all the parameters
-	 * for the human hosts.
-	 *
-	 */
-	void operator= (const scnXml::Mosq& mosq);
-
-	template<class S>
-	  void operator& (S& stream) {
-		(*static_cast<HostCategoryAnopheles*>(this)) & stream;	// checkpoint base members
-		humanBloodIndex & stream;
-		probMosqOvipositing & stream;
-	}
-
+    HostCategoryAnophelesHumans() :
+            humanBloodIndex(0.0), probMosqOvipositing(0.0)
+    {}
+    /** The proportion of resting mosquitoes that have recently fed on human blood. */
+    double humanBloodIndex;
+    double probMosqOvipositing;
+    /**
+        * this operator is used to set all the parameters
+        * for the human hosts.
+        */
+    void operator= (const scnXml::Mosq& mosq);
 };
 #endif /* HOSTCATEGORYANOPHELESHUMANS_H_ */
 }}

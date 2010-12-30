@@ -115,6 +115,19 @@ private:
      * @param intervention A member-function pointer to a "void func ()" function
      * within human which activates the intervention. */
     void massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ());
+    /** As massIntervention, but supports "increase to target coverage" mode:
+     * Deployment is only to unprotected humans and brings
+     * total coverage up to the level given in description.
+     *
+     * @param mass XML element specifying the age range and compliance
+     * (proportion of eligible individuals who receive the intervention).
+     * @param isProtected A member-function pointer to a "bool func (int) const"
+     * function which returns true if the human is already protected by this
+     * intervention, taking "protected" to mean last deployment was than the
+     * integer passed number-of-timesteps-ago.
+     * @param intervention A member-function pointer to a "void func ()" function
+     * within human which activates the intervention. */
+    void massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (int) const, void (Host::Human::*intervention) ());
 
 
     /** This function sets the imported infections in a population.

@@ -41,7 +41,7 @@ void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1
     IRSKillingEffect = irsDesc.getKillingEffect ();
   }
   if (intervDesc.getVADescription().present()) {
-    const scnXml::VADescription& vaDesc = intervDesc.getVADescription().get();
+    const scnXml::BaseInterventionDescription& vaDesc = intervDesc.getVADescription().get();
     VADeterrency = vaDesc.getDeterrency ();
   }
 }

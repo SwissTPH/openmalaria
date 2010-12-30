@@ -170,13 +170,11 @@ public:
   //Note: below comments about what does and doesn't need checkpointing are ignored here.
   template<class S>
   void operator& (S& stream) {
-    humanBase & stream;
     mosqSeekingDeathRate & stream;	
     mosqSeekingDuration & stream;
     mosqRestDuration & stream;
     EIPDuration & stream;
     probMosqSurvivalOvipositing & stream;
-    nonHumanHosts & stream;
     EIRRotateAngle & stream;
     FSRotateAngle & stream;
     FSCoeffic & stream;

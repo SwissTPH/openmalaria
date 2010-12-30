@@ -134,7 +134,7 @@ void Vaccine::cleanup ()
 
 
 PerHumanVaccine::PerHumanVaccine() :
-        _lastVaccineDose(0),
+        _lastVaccineDose(0), _timeLastVaccine(Global::TIMESTEP_NEVER),
         _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0)
 {
 }
@@ -160,6 +160,10 @@ void PerHumanVaccine::vaccinate() {
         _TBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
 
     ++_lastVaccineDose;
+    _timeLastVaccine = Global::simulationTime;
+}
+bool PerHumanVaccine::hasProtection(int maxInterventionAge)const{
+    return _timeLastVaccine + maxInterventionAge > Global::simulationTime;
 }
 
 }

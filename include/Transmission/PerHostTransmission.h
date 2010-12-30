@@ -139,6 +139,19 @@ public:
     timestepVA = Global::simulationTime;
   }
   
+  /// Is individual protected by an ITN? FIXME: which base? Want a single parameter encompasing all species
+  inline bool hasITNProtection(int maxInterventionAge)const{
+      return timestepITN + maxInterventionAge > Global::simulationTime;
+  }
+  /// Is individual protected by IRS?
+  inline bool hasIRSProtection(int maxInterventionAge)const{
+      return timestepIRS + maxInterventionAge > Global::simulationTime;
+  }
+  /// Is individual protected by a VA?
+  inline bool hasVAProtection(int maxInterventionAge)const{
+      return timestepVA + maxInterventionAge > Global::simulationTime;
+  }
+  
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {

@@ -804,7 +804,7 @@
                 <xs:sequence>
                   <xs:element maxOccurs="1" minOccurs="0" name="ITNDescription" type="ITNDescription" />
                   <xs:element maxOccurs="1" minOccurs="0" name="IRSDescription" type="IRSDescription" />
-                  <xs:element maxOccurs="1" minOccurs="0" name="VADescription" type="VADescription" />
+                  <xs:element maxOccurs="1" minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
                 </xs:sequence>
                 <xs:attribute name="mosquito" type="xs:string" use="required">
                   <xs:annotation>
@@ -895,7 +895,7 @@
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="mass">
-    <xs:attribute name="maxAge" type="xs:double" use="optional">
+    <xs:attribute name="maxAge" type="xs:double" default="100">
       <xs:annotation>
         <xs:documentation>
           Maximum age of eligible individuals (defaults to 100)
@@ -903,7 +903,7 @@
         <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="minAge" type="xs:double" use="optional">
+    <xs:attribute name="minAge" type="xs:double" default="0">
       <xs:annotation>
         <xs:documentation>
           Minimum age of eligible individuals (defaults to 0)
@@ -919,7 +919,7 @@
         <xs:appinfo>units:Proportion;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cohort" type="xs:boolean" use="optional">
+    <xs:attribute name="cohort" type="xs:boolean" default="false">
       <xs:annotation>
         <xs:documentation>
           Restrict distribution to chosen cohort.
@@ -927,6 +927,28 @@
         <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="massCum">
+    <xs:complexContent>
+      <xs:extension base="mass">
+        <xs:attribute name="cumulativeWithMaxAge" type="xs:int" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If present, activate cumulate deployment mode where intervention
+              is only deployed to individuals not already considered protected
+              in sufficient quantity to bring the total proportion of people
+              covered up to level described by "coverage".
+              
+              Individuals are considered already protected by this intervention
+              when they last received this intervention less the "maximum age"
+              (this attribute) number of timesteps ago (i.e. when
+              timeLastDeployment+maximumAge>currentTimeStep).
+            </xs:documentation>
+            <xs:appinfo>units:Years;name:Cumulative deployment: maximum age;min:0</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="ageSpecific">
     <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
@@ -1002,7 +1024,7 @@
           <xs:appinfo>units:List of elements;name:Mass Drug Administration;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="vaccinate" type="mass">
+      <xs:element minOccurs="0" name="vaccinate" type="massCum">
         <xs:annotation>
           <xs:documentation>
             Description of vaccine deployment in the
@@ -1011,7 +1033,7 @@
           <xs:appinfo>units:List of elements;name:Vaccination;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="ITN" type="mass">
+      <xs:element minOccurs="0" name="ITN" type="massCum">
         <xs:annotation>
           <xs:documentation>
             Description of ITN deployment in the community
@@ -1019,7 +1041,7 @@
           <xs:appinfo>units:List of elements;name:ITN deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="IRS" type="mass">
+      <xs:element minOccurs="0" name="IRS" type="massCum">
         <xs:annotation>
           <xs:documentation>
             Description of IRS deployment in the community
@@ -1027,7 +1049,7 @@
           <xs:appinfo>units:List of elements;name:IRS deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="VectorAvailability" type="mass">
+      <xs:element minOccurs="0" name="VectorAvailability" type="massCum">
         <xs:annotation>
           <xs:documentation>
             Description of a mosquito deterrent deployment in the community
@@ -1035,7 +1057,7 @@
           <xs:appinfo>units:List of elements;name:Mosquito deterrent;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="ipti" type="mass">
+      <xs:element minOccurs="0" name="ipti" type="massCum">
         <xs:annotation>
           <xs:documentation>
             List of age groups for IPTi distribution
@@ -1099,7 +1121,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="cohort" type="mass">
+      <xs:element minOccurs="0" name="cohort" type="massCum">
         <xs:annotation>
           <xs:documentation>
             Description of mass cohort selection.
@@ -1233,70 +1255,46 @@
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ITNDescription">
-    <xs:sequence>
-      <xs:element name="deterrency" type="WeibullDecayedProportion">
-        <xs:annotation>
-          <xs:documentation>
-	  One minus this multiplies the host's availability (before decay).
-	</xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Deterrency;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="preprandialKillingEffect" type="WeibullDecayedProportion">
-        <xs:annotation>
-          <xs:documentation>
-	  One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
-	</xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="postprandialKillingEffect" type="WeibullDecayedProportion">
-        <xs:annotation>
-          <xs:documentation>
-	  One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
-	</xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of Insecticide Treated Net intervention
-        </xs:documentation>
-        <xs:appinfo>units:string;name:ITN effects;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="BaseInterventionDescription">
+        <xs:sequence>
+          <xs:element name="preprandialKillingEffect" type="WeibullDecayedProportion">
+            <xs:annotation>
+              <xs:documentation>
+              One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
+            </xs:documentation>
+              <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="postprandialKillingEffect" type="WeibullDecayedProportion">
+            <xs:annotation>
+              <xs:documentation>
+              One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
+            </xs:documentation>
+              <xs:appinfo>units:None;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="IRSDescription">
-    <xs:sequence>
-      <xs:element name="deterrency" type="WeibullDecayedProportion">
-        <xs:annotation>
-          <xs:documentation>
-	  One minus this multiplies the host's availability.
-	</xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Deterrency</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="killingEffect" type="WeibullDecayedProportion">
-        <xs:annotation>
-          <xs:documentation>
-	  One minus this multiplies the survival rate of resting mosquitoes.
-	</xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:killing effect;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of Indoor Residual Spraying intervention
-        </xs:documentation>
-        <xs:appinfo>units:string;name:name of IRS intervention;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="BaseInterventionDescription">
+        <xs:sequence>
+          <xs:element name="killingEffect" type="WeibullDecayedProportion">
+            <xs:annotation>
+              <xs:documentation>
+              One minus this multiplies the survival rate of resting mosquitoes.
+            </xs:documentation>
+              <xs:appinfo>units:None;min:0;max:1;name:killing effect;</xs:appinfo>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="VADescription">
+  <xs:complexType name="BaseInterventionDescription">
     <xs:sequence>
       <xs:element name="deterrency" type="WeibullDecayedProportion">
         <xs:annotation>
@@ -1310,9 +1308,9 @@
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Name of mosquito deterrency intervention
+          Name of intervention
         </xs:documentation>
-        <xs:appinfo>units:string;name:Name of mosquito deterrency intervention;</xs:appinfo>
+        <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

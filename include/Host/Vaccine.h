@@ -105,6 +105,8 @@ public:
 
     /** Update efficacies and the number of doses in this human. */
     void vaccinate();
+    /// Has been vaccinated within considered effective duration?
+    bool hasProtection(int maxInterventionAge)const;
 
     inline double getBSVEfficacy()const {
         return _BSVEfficacy;
@@ -130,6 +132,7 @@ public:
     template<class S>
     void operator& (S& stream) {
         _lastVaccineDose & stream;
+        _timeLastVaccine & stream;
         _BSVEfficacy & stream;
         _PEVEfficacy & stream;
         _TBVEfficacy & stream;
@@ -143,6 +146,8 @@ private:
      * intentional that they also miss following EPI doses (unless a timed mass
      * vaccination reintroduces them to the EPI schedule). */
     int _lastVaccineDose;
+    /// Timestep of last vaccination
+    int _timeLastVaccine;
     //!Remaining efficacy of Blood-stage vaccines
     double _BSVEfficacy;
     //!Remaining efficacy of Pre-erythrocytic vaccines

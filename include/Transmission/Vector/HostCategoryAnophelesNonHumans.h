@@ -35,27 +35,19 @@ namespace OM { namespace Transmission {
  */
 
 class HostCategoryAnophelesNonHumans : public HostCategoryAnopheles {
-
 public:
-	HostCategoryAnophelesNonHumans() :
-	    relativeEntoAvailability(0.0)
-	  {}
+    HostCategoryAnophelesNonHumans() :
+        relativeEntoAvailability(0.0)
+    {}
+    
+    /** non human host type name, we need this value to retrieve non human host population size */
+    string nonHumanHostName;
 
-	/** non human host type name, we need this value to retrieve non human host population size */
-	string nonHumanHostName;
+    /** the relativeEntoAvailability is only useful if Non Human hosts types > 1, otherwise this value = 1 */
+    double relativeEntoAvailability;
 
-	/** the relativeEntoAvailability is only useful if Non Human hosts types > 1, otherwise this value = 1 */
-	double relativeEntoAvailability;
-
-	/** this operator is used to set all the parameters for non human hosts */
-	void operator= (const scnXml::NonHumanHosts& nnh);
-
-	template<class S>
-	  void operator& (S& stream) {
-		(*static_cast<HostCategoryAnopheles*>(this)) & stream;	// checkpoint base members
-		nonHumanHostName & stream;
-		relativeEntoAvailability & stream;
-	}
+    /** this operator is used to set all the parameters for non human hosts */
+    void operator= (const scnXml::NonHumanHosts& nnh);
 };
 typedef vector<HostCategoryAnophelesNonHumans> NonHumanHostsType;
 
