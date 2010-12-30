@@ -125,7 +125,7 @@ struct ESDecisionValueMap {
     /** Formats all decision outcomes indicated by an ESDecisionValue, in the
      * format "decision(value), d2(v2)".
      * 
-     * Use: "stream << format( value );"
+     * Use: "stream << dvMap.format( value );"
      *
      * This is for error reporting in exceptional situations, and therefore
      * doesn't need to be fast.

@@ -438,7 +438,7 @@ namespace OM { namespace Clinical {
         size_t i = 0;
         while (it->second[i] <= sample)
             ++i;
-        return values[0];
+        return values[i];
     }
     
     ESDecisionRandom::ESDecisionRandom (
