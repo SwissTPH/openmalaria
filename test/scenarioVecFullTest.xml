@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="24" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="25" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -177,14 +177,14 @@
   </monitoring>
   <interventions name="Full Set">
     <descriptions>
-      <vaccineDescription vaccineType="3">
+      <vaccineDescription vaccineType="TBV">
         <halfLifeYrs value="10"/>
         <efficacyB value="10"/>
         <initialEfficacy value="0.512"/>
         <initialEfficacy value="0.64"/>
         <initialEfficacy value="0.8"/>
       </vaccineDescription>
-      <vaccineDescription vaccineType="1">
+      <vaccineDescription vaccineType="PEV">
         <halfLifeYrs value="10"/>
         <efficacyB value="10"/>
         <initialEfficacy value="0.512"/>

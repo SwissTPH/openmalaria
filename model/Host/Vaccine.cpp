@@ -31,12 +31,6 @@ namespace OM {
 namespace Host {
 using namespace OM::util;
 
-enum VaccineType {
-    preerythrocytic_reduces_h = 1,
-    erythrocytic_reduces_y = 2,
-    transmission_blocking_reduces_k = 3,
-};
-
 vector<int> Vaccine::targetAgeTStep;
 size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
@@ -73,12 +67,12 @@ void Vaccine::init()
     }
     for (scnXml::Descriptions::VaccineDescriptionConstIterator i = vaccDesc.begin();
             i != vaccDesc.end(); i++) {
-        int type = i->getVaccineType();
-        if (type == preerythrocytic_reduces_h)
+        const string& type = i->getVaccineType();
+        if (type == "PEV")
             VdPEV = & (*i);
-        else if (type == erythrocytic_reduces_y)
+        else if (type == "BSV")
             VdBSV = & (*i);
-        else if (type == transmission_blocking_reduces_k)
+        else if (type == "TBV")
             VdTBV = & (*i);
         else
             throw util::xml_scenario_error ("vaccineType invalid");

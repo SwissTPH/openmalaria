@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Do" schemaVersion="24" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Do" schemaVersion="25" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -81,8 +81,8 @@
     <descriptions>
       <MDADescription>
         <decisions>
-          <decision name="treatment" depends="" values="1">1</decision>
-          <decision name="test" depends="" values="none,microscopy,RDT">none</decision>
+          <decision depends="" name="treatment" values="1">1</decision>
+          <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
         </decisions>
         <treatments>
           <treatment name="1">

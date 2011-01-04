@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 23;
+    static final int CURRENT_VERSION = 24;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -161,7 +161,7 @@ public class SchemaTranslator {
         Element model = getChildElement(scenarioElement, "model");
         Element t_parameters = getChildElement(model, "parameters");
 
-        if (t_parameters.getNodeValue() != null
+        if (t_parameters != null && t_parameters.getNodeValue() != null
                 && t_parameters.getNodeValue().contains("@parameters@")) {
             t_parameters.getLastChild().setNodeValue("");
             // Add a dummy parameter
@@ -1199,7 +1199,9 @@ public class SchemaTranslator {
     }
     
     /* Units of EIR inputs in vector model changed.
-     * assimMode attribute removed. */
+     * assimMode attribute removed.
+     * Human weight and availability to mosquito age-group data moved out of
+     * code and into XML. */
     public Boolean translate23To24() throws Exception {
         //Remove assimMode:
         if(!scenarioElement.getAttribute("assimMode").equals("0")){
@@ -1254,6 +1256,26 @@ public class SchemaTranslator {
                 g.setAttribute("value",Double.toString(groupWeight[i]));
             }
             weight.setAttribute("multStdDev","0.14");   // rough figure from Tanzanian data
+        }
+        return true;
+    }
+    
+    /* Vaccine type was changed from an integer to a string identifier. */
+    public Boolean translate24To25() throws Exception {
+        NodeList vaccs = scenarioElement.getElementsByTagName ("vaccineDescription");
+        for (int i = 0; i < vaccs.getLength(); i++) {
+            Element vd = (Element)vaccs.item(i);
+            int t = Integer.parseInt(vd.getAttribute("vaccineType"));
+            if( t == 1 ){
+                vd.setAttribute("vaccineType","PEV");
+            }else if( t==2 ){
+                vd.setAttribute("vaccineType","BSV");
+            }else if(t==3){
+                vd.setAttribute("vaccineType","TBV");
+            }else{
+                System.err.println("Unrecognized vaccine type: "+t);
+                return false;
+            }
         }
         return true;
     }

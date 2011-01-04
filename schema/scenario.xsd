@@ -1185,11 +1185,18 @@
       </xs:element>
       <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="inputValue" />
     </xs:sequence>
-    <xs:attribute name="vaccineType" type="xs:int" use="required">
+    <xs:attribute name="vaccineType" use="required">
       <xs:annotation>
         <xs:documentation>Type of vaccine</xs:documentation>
         <xs:appinfo>units:Code;name:Type of vaccine;</xs:appinfo>
       </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="PEV" />
+          <xs:enumeration value="BSV" />
+          <xs:enumeration value="TBV" />
+        </xs:restriction>
+      </xs:simpleType>
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="iptDescription">
