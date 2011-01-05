@@ -48,8 +48,8 @@ ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& s
 	medications[j].cost_qty = medications[j].qty;	// effective quantity w.r.t. cost starts off equal to quantity
 	medications[j].time = mSeq[j].getHour() / 24.0;	// convert from hours to days
 	if( mSeq[j].getDuration().present() ){
-	    if( mSeq[j].getDuration().get() < 0.2 ){
-		throw util::xml_scenario_error( "duration of an IV dose must be some significant amount of time; arbitrary minimum set to 0.2 hours" );
+	    if( !(mSeq[j].getDuration().get() > 0.0) ){
+		throw util::xml_scenario_error( "duration of an IV dose must be some positive amount of time" );
 	    }
 	    medications[j].duration = mSeq[j].getDuration().get() / 24.0;
 	}

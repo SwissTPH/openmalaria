@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <stdexcept>
 #include <sstream>
+#include <algorithm>
 
 #include <gsl/gsl_integration.h>
 
@@ -56,15 +57,15 @@ void LSTMDrug::medicate (double time, double qty, double weight) {
     check_split_IV( lastInserted );
 }
 
-void LSTMDrug::medicateIV (double duration, double endTime, double qty ) {
+void LSTMDrug::medicateIV (double time, double duration, double qty ) {
     assert( duration > 0.0 );
     
     double infusRate = qty / duration;	// mg/day
     DoseMap::iterator lastInserted =
-    doses.insert(doses.end(), make_pair( endTime-duration, DoseParams( infusRate, duration ) ) );    
+    doses.insert(doses.end(), make_pair( time, DoseParams( infusRate, duration ) ) );    
     check_split_IV( lastInserted );
     
-    doses.insert( doses.end(), make_pair( endTime, DoseParams() ) );
+    doses.insert( doses.end(), make_pair( time+duration, DoseParams() ) );
 }
 
 void LSTMDrug::check_split_IV( DoseMap::iterator lastInserted ){
@@ -77,8 +78,13 @@ void LSTMDrug::check_split_IV( DoseMap::iterator lastInserted ){
                 it->second.qty += lastInserted->second.qty;
                 doses.erase( lastInserted );
                 return;
-            } else if( it->second.duration != 0.0 && lastInserted->second.duration != 0.0 ){
-                throw util::xml_scenario_error( "IV/oral medications overlap — not supported!" );
+            } else if( it->second.duration == 0.0 ){
+                // oral followed by IV; no problem
+            } else if( lastInserted->second.duration == 0.0 ){
+                // IV followed by oral; needs to be analysed in other order
+                swap( it->second, lastInserted->second );
+            } else {
+                throw util::xml_scenario_error( "IV,IV medications overlap — not supported!" );
             }
         } else if( it->first < lastInserted->first ){
             if( it->first + it->second.duration > lastInserted->first ){
@@ -155,13 +161,13 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     DoseMap::const_iterator next_dose = dose;
     next_dose++;
     while (next_dose!=doses.end()) {
-        double duration = next_dose->first - dose->first;
+        double time_to_next = next_dose->first - dose->first;
 	if( dose->second.duration == 0.0 ){
             // Oral dose
             concentration_today += dose->second.qty;
             
             double initial_conc = concentration_today;
-            concentration_today *= exp(typeData->neg_elimination_rate_constant *  duration);
+            concentration_today *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
             
             // Note: these look a little different from original equations because PD_params.IC50_pow_slope
             // and PD_params.power are calculated when read from the scenario document instead of here.
@@ -170,7 +176,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             totalFactor *= pow( numerator / denominator, PD_params.power );
         } else {
             // IV dose
-            assert( duration == dose->second.duration );
+            assert( time_to_next == dose->second.duration );
             
             //TODO: implement caching here: if already evaluated for this dose
             // and these PD_params, then reuse result.
@@ -193,7 +199,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             double intfC, err_eps;
             size_t n_evals;
             
-            gsl_integration_qng (&F, 0.0, duration, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
+            gsl_integration_qng (&F, 0.0, time_to_next, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
             
 #ifndef NDEBUG
             cout << "IV: iterations: "<<n_evals<<"; error epsilon: "<<err_eps<<endl;
@@ -203,9 +209,9 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             
             totalFactor *= 1.0 / exp( intfC );
             
-            concentration_today *= exp(typeData->neg_elimination_rate_constant * duration);
+            concentration_today *= exp(typeData->neg_elimination_rate_constant * time_to_next);
             concentration_today += dose->second.qty
-                * (1.0 - exp(typeData->neg_elimination_rate_constant * duration) )
+                * (1.0 - exp(typeData->neg_elimination_rate_constant * time_to_next) )
                 / p.elim_rate_dist;
         }
         
@@ -232,20 +238,20 @@ bool LSTMDrug::updateConcentration () {
     DoseMap::const_iterator next_dose = dose;
     next_dose++;
     while (next_dose!=doses.end()) {
-        double duration = next_dose->first - dose->first;
+        double time_to_next = next_dose->first - dose->first;
         if( dose->second.duration == 0.0 ){
             // Oral dose
             concentration += dose->second.qty;
-            concentration *= exp(typeData->neg_elimination_rate_constant *  duration);
+            concentration *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
         } else {
             // IV dose
-            assert( duration == dose->second.duration );
+            assert( time_to_next == dose->second.duration );
             
             //NOTE: could calculate equivalent oral dose, add at start, then decay everything instead
             // then decay could be done irrespective of case
-            concentration *= exp(typeData->neg_elimination_rate_constant *  duration);
+            concentration *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
             concentration += dose->second.qty
-                * (1.0 - exp(typeData->neg_elimination_rate_constant * duration) )
+                * (1.0 - exp(typeData->neg_elimination_rate_constant * time_to_next) )
                 / ( -typeData->neg_elimination_rate_constant * typeData->vol_dist );
         }
         

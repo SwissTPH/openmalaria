@@ -301,23 +301,17 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
 	list<MedicateData>::iterator next = it;
 	++next;
-	if( it->duration == it->duration ){	// Have a duration, i.e. via IV administration
-	    if ( it->time + 0.5*it->duration < 1.0 ) { // Medicate today's medications
-	    withinHostModel.medicateIV (it->abbrev, it->qty, it->duration, it->time+it->duration);
-	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
+        if ( it->time < 1.0 ) { // Medicate today's medications
+	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, ageYears);
+            if( it->duration > 0.0 ){
+                Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
+            }else{      // 0 or NaN
+                Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+            }
 	    medicateQueue.erase (it);
-	    } else {   // and decrement treatment seeking delay for the rest
-		it->time -= 1.0;
-	    }
-	} else {
-	    if ( it->time < 1.0 ) { // Medicate today's medications
-	    withinHostModel.medicate (it->abbrev, it->qty, it->time, ageYears);
-	    Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
-	    medicateQueue.erase (it);
-	    } else {   // and decrement treatment seeking delay for the rest
-		it->time -= 1.0;
-	    }
-	}
+        } else {   // and decrement treatment seeking delay for the rest
+            it->time -= 1.0;
+        }
 	it = next;
     }
     

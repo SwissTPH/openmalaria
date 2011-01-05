@@ -81,13 +81,12 @@ public:
   void medicate (double time, double qty, double weight);
   /** Indicate a new medication via IV this timestep.
    *
-   * @param duration Days
-   * @param endTime Time between start of current timestep and end-time of
-   * the dose in days. May be greater than 1 day, but endTime-duration must be
-   * less than 1.
+   * @param time Time of start of administration in days. Should be less than
+   * 1 (although time+duration may be greater than 1).
+   * @param duration Duration in days.
    * @param qty Mg/kg
    */
-  void medicateIV (double duration, double endTime, double qty);
+  void medicateIV (double time, double duration, double qty);
   
   /** Returns the total drug factor for one drug over one day.
    *

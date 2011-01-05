@@ -82,10 +82,11 @@ public:
   /** Medicate drugs to an individual, which act on infections the following
    * timesteps, until rendered ineffective by decayDrugs().
    *
-   * \param drugAbbrev - The drug abbreviation.
-   * \param qty        - the quantity in mg.
-   * \param time       - Time in days since start of this time step to medicate at
-   * \param ageYears        - Age of human in years
+   * \param drugAbbrev The drug abbreviation.
+   * \param qty The quantity in mg.
+   * \param time Time in days since start of this time step to medicate at
+   * \param duration  Duration in days. 0 or an NaN indicates no duration.
+   * \param ageYears Age of human in years
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
    * update (calling medicate) and within-host model update (calling
@@ -94,11 +95,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, double ageYears) =0;
-  /** Medicate via IV. Mostly as for medicate(). End-time of IV period is passed
-   * (time at which concentration is added to use oral effect calculation code).
-   */
-  virtual void medicateIV(string drugAbbrev, double qty, double duration, double endTime) =0;
+  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double ageYears) =0;
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () =0;
