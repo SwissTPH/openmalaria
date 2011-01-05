@@ -38,7 +38,7 @@ public:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
-  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double ageYears);
+  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass);
   virtual void decayDrugs ();
   virtual double getDrugFactor (uint32_t proteome_ID);
   
@@ -47,10 +47,6 @@ public:
 private:
     // Per-individual variables:
   list<LSTMDrug> _drugs;
-  
-  /// Multiplies the mean weight for age.
-  /// Within PkPd class simply because it's not used elsewhere.
-  double hetWeightMultiplier;
 };
 
 } }

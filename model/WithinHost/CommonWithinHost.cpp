@@ -68,8 +68,8 @@ void CommonWithinHost::clearAllInfections(){
 
 // -----  interventions -----
 
-void CommonWithinHost::medicate(string drugName, double qty, double time, double duration, double age) {
-    pkpdModel->medicate(drugName, qty, time, duration, age);
+void CommonWithinHost::medicate(string drugName, double qty, double time, double duration, double bodyMass) {
+    pkpdModel->medicate(drugName, qty, time, duration, bodyMass);
 }
 void CommonWithinHost::immuneSuppression() {
     for(std::list<CommonInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {

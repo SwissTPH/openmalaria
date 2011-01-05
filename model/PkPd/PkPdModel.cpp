@@ -37,23 +37,13 @@
 
 namespace OM { namespace PkPd {
 
-double PkPdModel::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
-double PkPdModel::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
-AgeGroupInterpolation* PkPdModel::weight = AgeGroupInterpolation::dummyObject();
 PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
+
 
 // -----  static functions  -----
 
 void PkPdModel::init () {
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-        if( !InputData().getModel().getHuman().getWeight().present() ){
-            throw util::xml_scenario_error( "model->human->weight element required by drug model" );
-        }
-        weight = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getWeight().get(), "weight" );
-        hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
-        // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-        minHetWeightMult = 0.5 / (*weight)( 0.0 );
-        
 	if (InputData().getDrugDescription().present()) {
 	    activeModel = LSTM_PKPD;
 	    LSTMDrugType::init(InputData().getDrugDescription().get ());
@@ -74,7 +64,6 @@ void PkPdModel::cleanup () {
 // 	HoshenDrugType::cleanup();
 // 	ProteomeManager::cleanup ();
     }
-    AgeGroupInterpolation::freeObject( weight );
 }
 
 PkPdModel* PkPdModel::createPkPdModel () {

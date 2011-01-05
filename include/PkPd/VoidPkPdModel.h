@@ -31,7 +31,7 @@ namespace OM { namespace PkPd {
     * empty implementation in this class.
     */
     class VoidPkPdModel : public PkPdModel {
-        virtual void medicate(string drugAbbrev, double qty, double time, double duration, double ageYears) {}
+        virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {}
         virtual void decayDrugs () {}
         virtual double getDrugFactor (uint32_t proteome_ID) {
             return 1.0;

@@ -80,9 +80,9 @@ public:
    * @param qty		Quantity of drug to administer in mg
    * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
    * @param duration Duration in days. 0 or NaN indicate oral treatment.
-   * @param age		Age of human in years
+   * @param bodyMass	Weight of human in kg
    */
-  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double age) {}
+  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {}
 
   /** Update the parasite densities of infections.
    *

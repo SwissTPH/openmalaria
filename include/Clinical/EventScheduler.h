@@ -1,18 +1,18 @@
 /*
  This file is part of OpenMalaria.
- 
+
  Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
+
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation; either version 2 of the License, or (at
  your option) any later version.
- 
+
  This program is distributed in the hope that it will be useful, but
  WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  General Public License for more details.
- 
+
  You should have received a copy of the GNU General Public License
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -24,20 +24,25 @@
 #include "Global.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/ESCaseManagement.h"
+#include "util/AgeGroupInterpolation.h"
+
 #include <boost/unordered_map.hpp>
 #include <list>
 
 namespace scnXml {
-    class HSEventScheduler;
+class HSEventScheduler;
 }
 
-namespace OM { namespace Clinical {
+namespace OM {
+namespace Clinical {
+
+using util::AgeGroupInterpolation;
 
 /** Tracks clinical status (sickness), triggers case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
- * 
+ *
  * TODO: Reporting of parasitological status (not model specific).
- * 
+ *
  * Note: there are several variables that only need to be used during a
  * bout. It's possible that memory usage could be reduced by storing them
  * externally in a temporary object during episodes (but unlikely worth doing).
@@ -45,21 +50,21 @@ namespace OM { namespace Clinical {
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-  static void init ();
-  static void setParameters (const scnXml::HSEventScheduler& esData);
-  static void cleanup ();
-  
-  ClinicalEventScheduler (double cF, double tSF);
-  ~ClinicalEventScheduler ();
-  
-  virtual void massDrugAdministration(Human& human);
-  
+    static void init ();
+    static void setParameters (const scnXml::HSEventScheduler& esData);
+    static void cleanup ();
+
+    ClinicalEventScheduler (double cF, double tSF);
+    ~ClinicalEventScheduler ();
+
+    virtual void massDrugAdministration(Human& human);
+
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);
-  
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
- 
+
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+
 private:
     /// Maximum number of timesteps (including first of case) an individual will
     /// remember they are sick before resetting.
@@ -74,35 +79,54 @@ private:
     /// Probability that UC treatment seeking will be done immediately when
     /// sick, on second day given that it wasn't done on first, etc.
     static double pImmediateUC;
-    
+
     /// Parameter of S(t) for t > 0
     static double neg_v;
     
+    /** Weight model. Currently looks up a weight dependant on age from a table
+     * in an entirely deterministic way.
+     *
+     * @param ageGroupData Age group for weight data
+     * @param ageYears Age in years
+     * @returns Mass in kg */
+    inline double ageToWeight (double ageYears) {
+        return (*weight)( ageYears ) * hetWeightMultiplier;
+    }
+    
+    static double hetWeightMultStdDev;
+    static double minHetWeightMult;
+    static AgeGroupInterpolation* weight;
+
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
-  /// Current state of sickness
-  Pathogenesis::State pgState;
-  
-  /** Set to when a bout should start. If simulationTime equals this, a bout
-   * is started (UC & severe behaviour different).
-   * 
-   * Note: medications are not delayed by this. */
-  int caseStartTime;
-  
-  /** The individual recovers when Global::simulationTime >= timeOfRecovery,
-   * assuming they didn't die. */
-  int timeOfRecovery;
-  
-  /// Time at which last treatment was recieved (for second-case considerations).
-  int timeLastTreatment;
-  
-  /// Total parasite density at previous timestep (used during a bout).
-  double previousDensity;
-  
-  /// All pending medications
-  list<MedicateData> medicateQueue;
+    /// Current state of sickness
+    Pathogenesis::State pgState;
+
+    /** Set to when a bout should start. If simulationTime equals this, a bout
+     * is started (UC & severe behaviour different).
+     *
+     * Note: medications are not delayed by this. */
+    int caseStartTime;
+
+    /** The individual recovers when Global::simulationTime >= timeOfRecovery,
+     * assuming they didn't die. */
+    int timeOfRecovery;
+
+    /// Time at which last treatment was recieved (for second-case considerations).
+    int timeLastTreatment;
+
+    /// Total parasite density at previous timestep (used during a bout).
+    double previousDensity;
+    
+    /// Multiplies the mean weight for age.
+    /// Within PkPd class simply because it's not used elsewhere.
+    double hetWeightMultiplier;
+
+    /// All pending medications
+    list<MedicateData> medicateQueue;
 };
 
-} }
+}
+}
 #endif

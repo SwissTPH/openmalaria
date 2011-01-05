@@ -46,19 +46,7 @@ public:
 	//PkPdModel::init ();
 	
 	PkPd::PkPdModel::activeModel = modelID;
-        PkPd::PkPdModel::hetWeightMultStdDev = 0.0;
 	if (modelID == PkPd::PkPdModel::LSTM_PKPD) {
-            scnXml::AgeGroupValues agvElt;
-            // We're not testing the interpolation, so a constant value is enough.
-            // 60.0 would be the correct value (for age 21), but this is what
-            // our old distribution gave us (avoids having to update results):
-            agvElt.getGroup().push_back( scnXml::Group::Group( 55.4993, 0.0 ) );
-            
-            PkPd::PkPdModel::weight = util::AgeGroupInterpolation::makeObject( agvElt, "UnittestUtil_weight" );
-            PkPd::PkPdModel::hetWeightMultStdDev = 0.0;
-            // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-            PkPd::PkPdModel::minHetWeightMult = 0.5 / (*PkPd::PkPdModel::weight)( 0.0 );
-            
  	    scnXml::Allele allele ( 1.0 /* initial_frequency */, 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */, "sensitive" /* name */ );
 	    
 	    scnXml::PD pd;
@@ -83,7 +71,6 @@ public:
     static void PkPdSuiteTearDown () {
 	if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::LSTM_PKPD) {
 	    PkPd::LSTMDrugType::cleanup();
-            util::AgeGroupInterpolation::freeObject( PkPd::PkPdModel::weight );
 	} else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
             assert( false );
 // 	    PkPd::HoshenDrugType::cleanup();

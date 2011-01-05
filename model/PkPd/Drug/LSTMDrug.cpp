@@ -49,8 +49,8 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 // IV doses must be split over the end of the day and if an oral dose occurs in the middle.
 // Overlapping IV doses are not supported.
 
-void LSTMDrug::medicate (double time, double qty, double weight) {
-    double conc = qty / (typeData->vol_dist * weight);
+void LSTMDrug::medicate (double time, double qty, double bodyMass) {
+    double conc = qty / (typeData->vol_dist * bodyMass);
     // multimap insertion: is ordered
     DoseMap::iterator lastInserted =
     doses.insert (doses.end(), make_pair (time, DoseParams( conc, 0 )));

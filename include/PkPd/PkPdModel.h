@@ -22,7 +22,6 @@
 #define Hmod_PkPdModel
 
 // #include "PkPd/Proteome.h"
-#include "util/AgeGroupInterpolation.h"
 #include "Global.h"
 
 #include <fstream>
@@ -32,8 +31,6 @@ class UnittestUtil;
 
 namespace OM { namespace PkPd {
     
-    using util::AgeGroupInterpolation;
-
 /** Encapsulates both the static operations for PKPD models and the per-human
  * drug proxies.
  * 
@@ -86,7 +83,7 @@ public:
    * \param qty The quantity in mg.
    * \param time Time in days since start of this time step to medicate at
    * \param duration  Duration in days. 0 or an NaN indicates no duration.
-   * \param ageYears Age of human in years
+   * \param bodyMass Weight of human in kg
    * 
    * Due to the fact we're using a discrete timestep model, the case-management
    * update (calling medicate) and within-host model update (calling
@@ -95,7 +92,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double ageYears) =0;
+  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) =0;
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () =0;
@@ -119,24 +116,7 @@ protected:
   virtual void checkpoint (istream& stream) =0;
   virtual void checkpoint (ostream& stream) =0;
   
-  /** Weight model. Currently looks up a weight dependant on age from a table
-   * in an entirely deterministic way.
-   *
-   * @param ageGroupData Age group for weight data
-   * @param ageYears Age in years
-   * @param hetMult Multiplies age to introduce heterogeneity
-   * @returns Mass in kg */
-  static inline double ageToWeight (double ageYears, double hetMult) {
-      return (*weight)( ageYears ) * hetMult;
-  }
-  
-  static double hetWeightMultStdDev;
-  
-protected:
-    static double minHetWeightMult;
 private:
-    static AgeGroupInterpolation* weight;
-    
     /// Which model is in use (set by init())
     static ActiveModel activeModel;
     

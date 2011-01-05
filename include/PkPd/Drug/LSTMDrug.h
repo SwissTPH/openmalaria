@@ -78,7 +78,7 @@ public:
    *
    * Converts qty in mg to concentration, and stores along with time (delay past
    * the start of the current timestep) in the doses container. */
-  void medicate (double time, double qty, double weight);
+  void medicate (double time, double qty, double bodyMass);
   /** Indicate a new medication via IV this timestep.
    *
    * @param time Time of start of administration in days. Should be less than

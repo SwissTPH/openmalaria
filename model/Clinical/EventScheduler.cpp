@@ -40,6 +40,10 @@ int ClinicalEventScheduler::extraDaysAtRisk;
 double ClinicalEventScheduler::pImmediateUC;
 double ClinicalEventScheduler::neg_v;
 
+double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
+AgeGroupInterpolation* ClinicalEventScheduler::weight = AgeGroupInterpolation::dummyObject();
+
 
 // -----  static init  -----
 
@@ -49,6 +53,14 @@ void ClinicalEventScheduler::init ()
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
+    
+    if( !InputData().getModel().getHuman().getWeight().present() ){
+        throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
+    }
+    weight = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getWeight().get(), "weight" );
+    hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
+    // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
+    minHetWeightMult = 0.5 / (*weight)( 0.0 );
     
     ESCaseManagement::init ();
 }
@@ -83,6 +95,7 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 
 void ClinicalEventScheduler::cleanup () {
     ESCaseManagement::cleanup ();
+    AgeGroupInterpolation::freeObject( weight );
 }
 
 
@@ -101,6 +114,16 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
 	// don't have a way of modifying it.
 	throw xml_scenario_error("treatment seeking heterogeneity not supported");
     }
+#ifndef NDEBUG
+    int counter = 0;
+#endif
+    do {
+        hetWeightMultiplier = util::random::gauss( 1.0, hetWeightMultStdDev );
+#ifndef NDEBUG
+        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
+        ++counter;
+#endif
+    } while( hetWeightMultiplier < minHetWeightMult );
 }
 ClinicalEventScheduler::~ClinicalEventScheduler() {}
 
@@ -302,11 +325,14 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	list<MedicateData>::iterator next = it;
 	++next;
         if ( it->time < 1.0 ) { // Medicate today's medications
-	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, ageYears);
+            double bodyMass = ageToWeight( ageYears );
+	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty);
+                Monitoring::Surveys.getSurvey(human.getInCohort())
+                .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Monitoring::Surveys.getSurvey(human.getInCohort()).report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+                Monitoring::Surveys.getSurvey(human.getInCohort())
+                .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest
@@ -333,6 +359,7 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
+    hetWeightMultiplier & stream;
     medicateQueue & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
@@ -342,6 +369,7 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
+    hetWeightMultiplier & stream;
     medicateQueue & stream;
 }
 
