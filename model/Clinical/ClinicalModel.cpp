@@ -55,6 +55,7 @@ void ClinicalModel::cleanup () {
   CaseManagementCommon::cleanupCommon();
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
 	ClinicalEventScheduler::cleanup();
+    Pathogenesis::PathogenesisModel::cleanup ();
 }
 
 void ClinicalModel::staticCheckpoint (istream& stream) {

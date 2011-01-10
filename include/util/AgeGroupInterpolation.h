@@ -61,6 +61,11 @@ public:
         checkpoint( stream );
     }
     
+    /// Return true if instance represents something other than the dummy object.
+    inline bool isSet() {
+        return this != dummyObject();
+    }
+    
     /** Return a value interpolated for age ageYears. */
     virtual double operator() (double ageYears) const =0;
     

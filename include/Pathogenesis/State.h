@@ -43,7 +43,9 @@ namespace OM { namespace Pathogenesis {
     SECOND_CASE		= 0x10,
     COMPLICATED		= 0x20,		///< Flag used to indicate SEVERE and/or COINFECTION
     
-    MORBIDITY_MASK	= 0x3F,		///< Mask coving all above states
+    NEED_ANTIBIOTIC     = 0x40,         ///< Flag indicates a non-malaria fever requires (antibiotic) treatment
+    
+    MORBIDITY_MASK	= 0x7F,		///< Mask coving all above states
     
     // Flag used by pathogenesis model to tell the clinical model that individual will die; not used for reporting:
     INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
@@ -56,6 +58,8 @@ namespace OM { namespace Pathogenesis {
     EVENT_FIRST_DAY	= 0x8000,	///< Used in combination with DIRECT_DEATH to report death happens on first day (before treatment has effect)
     PENDING_UC	= 0x10000,	///< Memory that a UC sickness occured and human should seek treatment
     
+    STATE_NMF           = SICK, ///< Alias: SICK
+    STATE_NMF_NEED_AB    = SICK | NEED_ANTIBIOTIC,       ///< Combination: SICK, NEED_ANTIBIOTIC
     STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
     STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
     STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION

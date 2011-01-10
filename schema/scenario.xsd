@@ -1333,6 +1333,40 @@
       </xs:documentation>
       <xs:appinfo>units:List of elements;name:Description of clinical parameters;</xs:appinfo>
     </xs:annotation>
+    <xs:sequence>
+      <xs:element name="NonMalariaFevers" minOccurs="0">
+        <xs:complexType>
+          <xs:annotation>
+            <xs:documentation>
+              Description of non-malaria fever incidence. Non-malaria fevers
+              are only modelled if the NON_MALARIA_FEVERS option is used.
+            </xs:documentation>
+            <xs:appinfo>name:Non-malaria fevers;</xs:appinfo>
+          </xs:annotation>
+          <xs:sequence>
+            <xs:element name="incidence" type="AgeGroupValues">
+              <xs:annotation>
+                <xs:documentation>
+                  Probability that a non-malaria fever occurs given that no concurrent
+                  malaria fever occurs.
+                </xs:documentation>
+                <xs:appinfo>name:P(NMF);units:none;min:0;max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="prNeedTreatment" type="AgeGroupValues">
+              <xs:annotation>
+                <xs:documentation>
+                  Probability that a non-malaria fever needs treatment with
+                  antibiotics (assuming fever is not induced by malaria, although
+                  concurrent parasites are possible).
+                </xs:documentation>
+                <xs:appinfo>name:P(need treatment);units:none;min:0;max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
     <xs:attribute name="healthSystemMemory" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -1628,6 +1662,7 @@
       <xs:element name="uncomplicated" type="HSESCaseManagement" />
       <xs:element name="complicated" type="HSESCaseManagement" />
       <xs:element name="ClinicalOutcomes" type="ClinicalOutcomes" />
+      <xs:element name="NonMalariaFevers" type="HSESNMF" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESCaseManagement">
@@ -1971,6 +2006,66 @@
             sick, on second day given that it wasn't done on first, etc.
           </xs:documentation>
           <xs:appinfo>name:Probability of immediate UC treatment seeking;units:none;min:0;max:1</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="HSESNMF">
+    <xs:annotation>
+      <xs:documentation>
+        Description of non-malaria fever health-system modelling (treatment,
+        outcomes and costing). Incidence is described by the 
+        model->clinical->NonMalariaFevers element. Non-malaria fevers are only
+        modelled if the NON_MALARIA_FEVERS option is used.
+      </xs:documentation>
+      <xs:appinfo>name:Non-malaria fevers;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="prTreatment" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Average probability of a non-malaria fever being treated with an
+            antibiotic given that no malaria diagnostic was used but independent
+            of need.
+          </xs:documentation>
+          <xs:appinfo>name:P(treatment|no diagnostic);units:none;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectNegativeTest" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            The effect of a negative malaria diagnostic on the log odds of the
+            probability of treatment.
+          </xs:documentation>
+          <xs:appinfo>name:Effect of a negative test;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectPositiveTest" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            The effect of a positive malaria diagnostic on the log odds of the
+            probability of treatment.
+          </xs:documentation>
+          <xs:appinfo>name:Effect of a positive test;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectNeed" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            The effect of needing antibiotic treatment on the log odds of the
+            probability of treatment.
+          </xs:documentation>
+          <xs:appinfo>name:Effect of a negative test;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="CFR" type="AgeGroupValues">
+        <xs:annotation>
+          <xs:documentation>
+            Base case fatality rate for non-malaria fevers (probability of
+            death from a fever requiring antibiotic treatment given that no
+            antibiotic treatment is received, per age-group).
+          </xs:documentation>
+          <xs:appinfo>name:Case fatality rate;units:none;min:0;max:1;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "Clinical/ESDecisionTree.h"	// needed for ESDecisionMap
+#include "Clinical/ESDecisionTree.h"    // needed for ESDecisionMap
 #include "Clinical/parser.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
@@ -49,36 +49,37 @@ namespace OM { namespace Clinical {
 /// Auxilliary output from running case management
 struct CMAuxOutput {
     enum Hospitalisation {
-	NONE, IMMEDIATE, DELAYED
-    };
-    
-    Hospitalisation hospitalisation;	///< was case hospitalised immediately, after a delay, or not at all?
+        NONE=0, IMMEDIATE, DELAYED
+    } hospitalisation;  ///< was case hospitalised immediately, after a delay, or not at all?
+    enum Diagnostic {
+        NO_TEST=0, POSITIVE, NEGATIVE
+    } diagnostic;        ///< Was a malaria-parasite diagnostic used, and if so what was the outcome?
 };
 
 /// Data used for a withinHostModel->medicate() call
 struct MedicateData {
     MedicateData () :
-	qty(numeric_limits< double >::signaling_NaN()),
-	cost_qty(numeric_limits< double >::signaling_NaN()),
-	time(numeric_limits< double >::signaling_NaN()),
-	duration(numeric_limits< double >::quiet_NaN())
+        qty(numeric_limits< double >::signaling_NaN()),
+        cost_qty(numeric_limits< double >::signaling_NaN()),
+        time(numeric_limits< double >::signaling_NaN()),
+        duration(numeric_limits< double >::quiet_NaN())
     {}
     
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	abbrev & stream;
-	qty & stream;
-	cost_qty & stream;
-	time & stream;
-	duration & stream;
+        abbrev & stream;
+        qty & stream;
+        cost_qty & stream;
+        time & stream;
+        duration & stream;
     }
     
-    string abbrev;	/// Drug abbreviation
-    double qty;		/// Quantity of drug prescribed (mg?)
-    double cost_qty;	/// Effective quantity prescribed, with respect to costs
-    double time;	/// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
-    double duration;	/// Duration for IV purposes (use IV admin if a number, oral if is NaN)
+    string abbrev;      /// Drug abbreviation
+    double qty;         /// Quantity of drug prescribed (mg?)
+    double cost_qty;    /// Effective quantity prescribed, with respect to costs
+    double time;        /// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
+    double duration;    /// Duration for IV purposes (use IV admin if a number, oral if is NaN)
 };
 
 /** A final treatment schedule (after application of applicable modifiers). */
@@ -94,8 +95,8 @@ struct ESTreatmentSchedule {
     
     /// Add medications into medicate queue
     inline void apply (list<MedicateData>& medicateQueue) const {
-	for (vector<MedicateData>::const_iterator it = medications.begin(); it != medications.end(); ++it)
-	    medicateQueue.push_back (*it);
+        for (vector<MedicateData>::const_iterator it = medications.begin(); it != medications.end(); ++it)
+            medicateQueue.push_back (*it);
     }
     /// Does this contain a positive number of treatments?
     inline bool anyTreatments () const {
@@ -103,8 +104,8 @@ struct ESTreatmentSchedule {
     }
     
     private:
-	/// Data for each medicate() call.
-	vector<MedicateData> medications;
+        /// Data for each medicate() call.
+        vector<MedicateData> medications;
 };
 
 /** A set of all modified forms of a treatment schedule. Corresponds to a
@@ -115,24 +116,24 @@ struct ESTreatmentSchedule {
  *****************************************************************************/
 class ESTreatment {
     public:
-	/** Construct from a base schedule and modifiers.
-	 * 
-	 * Also neede the decision value map. */
-	ESTreatment (const ESDecisionValueMap& dvMap,
-		     const scnXml::HSESTreatment& elt,
-		     list<string>& required);
-	~ESTreatment();
-	
-	/** Given an input ESDecisionValue, find a variant of the base treatment
-	 * schedule.
-	 *
-	 * May return NULL (handled by ESDecisionMap::getTreatment()). */
-	ESTreatmentSchedule* getSchedule (ESDecisionValue&) const;
-	
+        /** Construct from a base schedule and modifiers.
+         * 
+         * Also neede the decision value map. */
+        ESTreatment (const ESDecisionValueMap& dvMap,
+                     const scnXml::HSESTreatment& elt,
+                     list<string>& required);
+        ~ESTreatment();
+        
+        /** Given an input ESDecisionValue, find a variant of the base treatment
+         * schedule.
+         *
+         * May return NULL (handled by ESDecisionMap::getTreatment()). */
+        ESTreatmentSchedule* getSchedule (ESDecisionValue&) const;
+        
     private:
-	typedef unordered_map<ESDecisionValue,ESTreatmentSchedule*> Schedules;
-	Schedules schedules;
-	ESDecisionValue schedulesMask;
+        typedef unordered_map<ESDecisionValue,ESTreatmentSchedule*> Schedules;
+        Schedules schedules;
+        ESDecisionValue schedulesMask;
 };
 
 /** Decision trees representation, mapping inputs to a ESTreatmentSchedule pointer.
@@ -150,65 +151,79 @@ class ESDecisionMap {
         /// Constructor. Element is created statically, so initialize later
         ESDecisionMap () {}
         ~ESDecisionMap();
-	/** Read decision trees from an XML element.
-	 *
-	 * @param cm XML element describing probabilistic decisions and treatments
-	 * @param complicated Determines whether hard-coded decisions for the
-	 * uncomplicated or complicated case are added. */
-	void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType);
+        /** Read decision trees from an XML element.
+         *
+         * @param cm XML element describing probabilistic decisions and treatments
+         * @param complicated Determines whether hard-coded decisions for the
+         * uncomplicated or complicated case are added. */
+        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType);
         
         /** Run decision tree to arrive at an outcome.
-	 *
-	 * @returns An outcome as a binary-or'd list of decision values. */
+         *
+         * @returns An outcome as a binary-or'd list of decision values. */
         ESDecisionValue determine (const OM::Clinical::ESHostData& hostData) const;
-	
-	/** Given a decision-tree outcome, return a corresponding treatment
-	 * schedule. Return-value should always point to an existing
-	 * ESTreatmentSchedule object (shouldn't be deleted by the caller).
-	 * 
-	 * If the treatment decision is but not found, or found but a treatment
-	 * schedule is not, an error is thrown. */
-	ESTreatmentSchedule* getSchedule (ESDecisionValue outcome) const;
         
-	/// Return one of CMAuxOutput::Hospitalisation's values.
-	inline CMAuxOutput::Hospitalisation hospitalisation (ESDecisionValue outcome) const{
-	    ESDecisionValue masked = outcome & hospitalisation_mask;
-	    if( masked == hospitalisation_immediate )
-		return CMAuxOutput::IMMEDIATE;
-	    else if( masked == hospitalisation_delayed )
-		return CMAuxOutput::DELAYED;
-	    else
-		return CMAuxOutput::NONE;
-	}
-	
-	/// Return true if the input outcome indicates an RDT was used
-	inline bool RDT_used (ESDecisionValue outcome) const{
-	    return (outcome & test_mask) == test_RDT;
-	}
-	/// Return true if the input outcome indicates microscopy was used
-	inline bool microscopy_used (ESDecisionValue outcome) const{
-	    return (outcome & test_mask) == test_microscopy;
-	}
-	
+        /** Given a decision-tree outcome, return a corresponding treatment
+         * schedule. Return-value should always point to an existing
+         * ESTreatmentSchedule object (shouldn't be deleted by the caller).
+         * 
+         * If the treatment decision is but not found, or found but a treatment
+         * schedule is not, an error is thrown. */
+        ESTreatmentSchedule* getSchedule (ESDecisionValue outcome) const;
+        
+        /// Return one of CMAuxOutput::Hospitalisation's values.
+        inline CMAuxOutput::Hospitalisation hospitalisation (ESDecisionValue outcome) const{
+            ESDecisionValue masked = outcome & hospitalisation_mask;
+            if( masked == hospitalisation_immediate )
+                return CMAuxOutput::IMMEDIATE;
+            else if( masked == hospitalisation_delayed )
+                return CMAuxOutput::DELAYED;
+            else
+                return CMAuxOutput::NONE;
+        }
+        
+        /// Return one of CMAuxOutput::Diagnostic's values.
+        inline CMAuxOutput::Diagnostic diagnostic (ESDecisionValue outcome) const{
+            ESDecisionValue masked = outcome & diagnostic_mask;
+            if( masked == diagnostic_positive )
+                return CMAuxOutput::POSITIVE;
+            else if( masked == diagnostic_negative )
+                return CMAuxOutput::NEGATIVE;
+            else
+                return CMAuxOutput::NO_TEST;
+        }
+        
+        /// Return true if the input outcome indicates an RDT was used
+        inline bool RDT_used (ESDecisionValue outcome) const{
+            return (outcome & test_mask) == test_RDT;
+        }
+        /// Return true if the input outcome indicates microscopy was used
+        inline bool microscopy_used (ESDecisionValue outcome) const{
+            return (outcome & test_mask) == test_microscopy;
+        }
+        
     private:
-	// All data here should be set by ESCaseManagement::init(); don't checkpoint.
-	
-	ESDecisionValueMap dvMap;
-	
+        // All data here should be set by ESCaseManagement::init(); don't checkpoint.
+        
+        ESDecisionValueMap dvMap;
+        
         // Currently we walk through all decisions, required or not
         vector<ESDecisionTree*> decisions;
-	
-	typedef unordered_map<ESDecisionValue,ESTreatment*> Treatments;
-	Treatments treatments;
-	// Used to mask ESDecisionValues before lookup in treatments:
-	ESDecisionValue treatmentsMask;
-	ESDecisionValue hospitalisation_mask,
-				    hospitalisation_immediate,
-				    hospitalisation_delayed;
-	ESDecisionValue test_mask, test_RDT, test_microscopy;
-	
-	friend class ::ESCaseManagementSuite;	// unittests
-	friend class ::ESDecisionTreeSuite;
+        
+        typedef unordered_map<ESDecisionValue,ESTreatment*> Treatments;
+        Treatments treatments;
+        // Used to mask ESDecisionValues before lookup in treatments:
+        ESDecisionValue treatmentsMask;
+        ESDecisionValue hospitalisation_mask,
+                                    hospitalisation_immediate,
+                                    hospitalisation_delayed;
+        ESDecisionValue test_mask, test_RDT, test_microscopy;
+        ESDecisionValue diagnostic_mask,
+                                    diagnostic_positive,
+                                    diagnostic_negative;
+        
+        friend class ::ESCaseManagementSuite;   // unittests
+        friend class ::ESDecisionTreeSuite;
 };
 
 
@@ -217,39 +232,39 @@ class ESDecisionMap {
  *****************************************************************************/
 class ESCaseManagement : public CaseManagementCommon {
     public:
-	static void init ();
-	
-	/** Load health system data from initial data or an intervention's data (both from XML).
-	* (Re)loads all data affected by this healthSystem element. */
-	static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
-	
-	static void cleanup ();
-	
-	static void massDrugAdministration(
+        static void init ();
+        
+        /** Load health system data from initial data or an intervention's data (both from XML).
+        * (Re)loads all data affected by this healthSystem element. */
+        static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
+        
+        static void cleanup ();
+        
+        static void massDrugAdministration(
             const ESHostData& hostData,
             list<MedicateData>& medicateQueue,
             bool inCohort,
             Monitoring::AgeGroup ageGroup
         );
-	
+        
         /** Runs through case management decisions, selects treatments and
          * applies them to the passed medicateQueue.
          * 
          * Returns: some extra info (see CMAuxOutput definition). */
-	static CMAuxOutput execute (
+        static CMAuxOutput execute (
             const ESHostData& hostData,
             list<MedicateData>& medicateQueue,
             bool inCohort
         );
-	
+        
     private:
-	
-	//BEGIN Static parameters — set by init()
+        
+        //BEGIN Static parameters — set by init()
         static ESDecisionMap uncomplicated, complicated;
-	
-	/// MDA description
-	static ESDecisionMap mda;
-	//END
+        
+        /// MDA description
+        static ESDecisionMap mda;
+        //END
 };
 
 } }

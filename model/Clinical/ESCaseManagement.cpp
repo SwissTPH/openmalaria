@@ -382,6 +382,11 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
     test_RDT = dvMap.get( "test", "RDT" );
     test_microscopy = dvMap.get( "test", "microscopy" );
     
+    // "result" decision: result of diagnostic (added automatically, but we need the keys)
+    diagnostic_mask = dvMap.getDecisionMask( "result" );
+    diagnostic_negative = dvMap.get( "result", "negative" );
+    diagnostic_positive = dvMap.get( "result", "positive" );
+    
     // Read treatments
     required.push_back( "treatment" );
     tuple< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
@@ -512,6 +517,7 @@ CMAuxOutput ESCaseManagement::execute (
     auxOut.hospitalisation = CMAuxOutput::NONE;
     if( hostData.pgState & Pathogenesis::COMPLICATED )
 	auxOut.hospitalisation = map->hospitalisation(outcome);
+    auxOut.diagnostic = map->diagnostic(outcome);
     return auxOut;
 }
 

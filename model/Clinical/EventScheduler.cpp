@@ -225,6 +225,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
 	);
 	
+        //TODO: NMF decisions
 	if( medicateQueue.size() ){	// I.E. some treatment was given
 	    timeLastTreatment = Global::simulationTime;
             if( pgState & Pathogenesis::COMPLICATED ){
