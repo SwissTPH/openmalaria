@@ -64,6 +64,12 @@ public:
      * May introduce severe or uncomplicated cases of malaria, as well as non-
      * malaria fevers. */
     State determineState(double ageYears, WithinHost::WithinHostModel& withinHostModel);
+    
+    /** Given a non-malaria fever, return the probability of it requiring
+     * treatment. */
+    inline double pNmfRequiresTreatment(double ageYears){
+        return (*NMF_need_antibiotic)( ageYears );
+    }
 
     /** Summarize PathogenesisModel details
      *

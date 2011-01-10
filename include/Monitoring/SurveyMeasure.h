@@ -37,16 +37,18 @@ namespace SM {
 enum SurveyMeasure {
     /// Total number of humans
     nHost = 0,
-    /// number of infected hosts 
+    /// Number of infected hosts 
     nInfect = 1,
-    /// expected number of infected hosts
+    /// Expected number of infected hosts
     nExpectd= 2,
-    /// number of patent hosts
+    /// Number of patent hosts
     nPatent= 3,
+    
     /// Sum of the log of the pyrogen threshold
     sumLogPyrogenThres = 4,
     /// Sum of the logarithm of the parasite density
     sumlogDens= 5,
+    
     /// Total infections
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
@@ -56,17 +58,18 @@ enum SurveyMeasure {
     nTransmit= 7,
     /// Total patent infections
     totalPatentInf= 8,
-    /// Contribution to immunity functions
-    ///NOTE: not used
+    /// Contribution to immunity functions (output not used)
     contrib= 9,
     /// Sum of the pyrogenic threshold
     sumPyrogenThresh = 10,
+    
     /// number of treatments (1st line)
     nTreatments1= 11,
     /// number of treatments (2nd line)
     nTreatments2= 12,
     /// number of treatments (inpatient)
     nTreatments3= 13,
+    
     /// number of episodes (uncomplicated)
     nUncomp= 14,
     /// number of episodes (severe)
@@ -75,29 +78,37 @@ enum SurveyMeasure {
     nSeq= 16,
     /// deaths in hospital
     nHospitalDeaths= 17,
-    /// number of deaths (indirect)
+    /// Number of deaths indirectly caused by malaria
     nIndDeaths= 18,
-    /// number of deaths (direct)
+    /// Number of deaths directly caused by malaria
     nDirDeaths= 19,
+    
     /// number of EPI vaccine doses given
     nEPIVaccinations= 20,
+    
     /// all cause infant mortality rate
     allCauseIMR= 21,
+    
     /// number of Mass / Campaign vaccine doses given
     nMassVaccinations= 22,
+    
     /// recoveries in hospital
     nHospitalRecovs= 23,
     /// sequelae in hospital
     nHospitalSeqs= 24,
+    
     /// number of IPT Doses
     nIPTDoses= 25,
+    
     /** Annual Average Kappa
      *
      * Calculated once a year as sum of human infectiousness divided by initial
      * EIR summed over a year. Single value, not per age-group. */
     annAvgK= 26,
+    
     /// Number of episodes (non-malaria fever)
     nNMFever= 27,
+    
     /** The total number of inoculations per age group, summed over the
      * reporting period. */
     innoculationsPerAgeGroup = 30,
@@ -124,6 +135,7 @@ enum SurveyMeasure {
     Vector_Ov = 33,
     /// Number of infectious mosquitoes
     Vector_Sv = 34,
+    
     /** Input EIR (Expected EIR entered into scenario file)
      *
      * Units: inoculations per adult per timestep.
@@ -189,6 +201,11 @@ enum SurveyMeasure {
      * campaign. (Note that in one day time-step model MDA can be configured
      * as screen-and-treat. This option repeats actual treatments.) */
     nMDAs = 52,
+    
+    /// Number of deaths caused by non-malaria fevers
+    nNmfDeaths = 53,
+    /// Number of antibiotic treatments given
+    nAntibioticTreatments = 54,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

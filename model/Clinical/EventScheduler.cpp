@@ -44,6 +44,13 @@ double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>
 double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
 AgeGroupInterpolation* ClinicalEventScheduler::weight = AgeGroupInterpolation::dummyObject();
 
+double ClinicalEventScheduler::logOddsAbBase = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::logOddsAbNegTest = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::logOddsAbPosTest = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::logOddsAbNeed = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
+AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
+
 
 // -----  static init  -----
 
@@ -91,6 +98,21 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     
     CaseManagementCommon::scaleCaseFatalityRate( alpha );
     neg_v = - InputData.getParameter( Params::CFR_SCALE_FACTOR );
+    
+    if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
+        if( !esData.getNonMalariaFevers().present() ){
+            throw util::xml_scenario_error("NonMalariaFevers element of healthSystem->EventScheduler required");
+        }
+        const scnXml::HSESNMF& nmfDesc = esData.getNonMalariaFevers().get();
+        
+        double pT = nmfDesc.getPrTreatment();
+        logOddsAbNegTest = nmfDesc.getEffectNegativeTest();
+        logOddsAbPosTest = nmfDesc.getEffectPositiveTest();
+        logOddsAbNeed = nmfDesc.getEffectNeed();
+        logOddsAbBase = log( pT / (1.0 - pT) );
+        oneMinusEfficacyAb = 1.0 - nmfDesc.getTreatmentEfficacy();
+        severeNmfMortality = AgeGroupInterpolation::makeObject( nmfDesc.getCFR(), "CFR" );
+    }
 }
 
 void ClinicalEventScheduler::cleanup () {
@@ -125,7 +147,9 @@ ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
 #endif
     } while( hetWeightMultiplier < minHetWeightMult );
 }
-ClinicalEventScheduler::~ClinicalEventScheduler() {}
+ClinicalEventScheduler::~ClinicalEventScheduler() {
+    AgeGroupInterpolation::freeObject( severeNmfMortality );
+}
 
 
 // -----  other methods  -----
@@ -225,8 +249,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
 	);
 	
-        //TODO: NMF decisions
-	if( medicateQueue.size() ){	// I.E. some treatment was given
+        if( medicateQueue.size() ){	// I.E. some treatment was given
 	    timeLastTreatment = Global::simulationTime;
             if( pgState & Pathogenesis::COMPLICATED ){
                 Monitoring::Surveys.getSurvey(human.getInCohort())
@@ -265,6 +288,46 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
+	
+	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
+            if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
+                // Have a NMF or UC malaria case
+                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears );
+                bool needTreat = random::uniform_01() < pNeedTreat;
+                
+                // Calculate chance of antibiotic administration:
+                double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
+                if( auxOut.diagnostic & CMAuxOutput::NEGATIVE ){
+                    logOddsAb += logOddsAbNegTest;
+                }else if( auxOut.diagnostic & CMAuxOutput::POSITIVE ){
+                    logOddsAb += logOddsAbPosTest;
+                }
+                if( needTreat ){
+                    logOddsAb += logOddsAbNeed;
+                }
+                //TODO: check whether to add another indicator (e.g. UC malaria)
+                
+                double oddsTreatment = exp( logOddsAb );
+                double pTreatment = oddsTreatment / (1 + oddsTreatment);
+                
+                double treatmentEffectMult = 1.0;
+                
+                if( random::uniform_01() < pTreatment ){
+                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                        .reportAntibioticTreatments( human.getMonitoringAgeGroup(), 1 );
+                    treatmentEffectMult = oneMinusEfficacyAb;
+                }
+                
+                // In a severe NMF case (only when not malarial), there is a
+                // chance of death:
+                if( needTreat ){
+                    double pDeath = (*severeNmfMortality)( ageYears ) * treatmentEffectMult;
+                    if( random::uniform_01() < pDeath ){
+                        pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+                    }
+                }
+            }
+        }
     } else {
 	// No new event (haven't changed state this timestep).
 	

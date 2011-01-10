@@ -132,11 +132,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
             ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     } else if ( NMF_incidence->isSet() ) {
         if( random::uniform_01() < (*NMF_incidence)( ageYears ) ){
-            if( random::uniform_01() < (*NMF_need_antibiotic)( ageYears ) ){
-                ret = Pathogenesis::STATE_NMF_NEED_AB;
-            }else{
-                ret = Pathogenesis::STATE_NMF;
-            }
+            ret = Pathogenesis::STATE_NMF;
         }
     }
     return ret;

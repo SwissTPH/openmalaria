@@ -68,7 +68,7 @@ class SurveyMeasureMap {
 	    codeMap["nSeq"] = SM::nSeq;
 	    codeMap["nHospitalDeaths"] = SM::nHospitalDeaths;
 	    codeMap["nIndDeaths"] = SM::nIndDeaths;
-	    codeMap["nDirDeaths"] = SM::nDirDeaths;
+            codeMap["nDirDeaths"] = SM::nDirDeaths;
 	    codeMap["nEPIVaccinations"] = SM::nEPIVaccinations;
 	    codeMap["allCauseIMR"] = SM::allCauseIMR;
 	    codeMap["nMassVaccinations"] = SM::nMassVaccinations;
@@ -98,6 +98,8 @@ class SurveyMeasureMap {
             codeMap["nAddedToCohort"] = SM::nAddedToCohort;
             codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
             codeMap["nMDAs"] = SM::nMDAs;
+            codeMap["nNmfDeaths"] = SM::nNmfDeaths;
+            codeMap["nAntibioticTreatments"] = SM::nAntibioticTreatments;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -208,6 +210,8 @@ void Survey::allocate ()
     _numAddedToCohort.resize (numAgeGroups);
     _numRemovedFromCohort.resize (numAgeGroups);
     _numMDAs.resize (numAgeGroups);
+    _numNmfDeaths.resize (numAgeGroups);
+    _numAntibioticTreatments.resize (numAgeGroups);
 }
 
 
@@ -355,6 +359,12 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::nMDAs]) {
       writePerAgeGroup (outputFile, SM::nMDAs, survey, _numMDAs);
+  }
+  if (active[SM::nNmfDeaths]) {
+    writePerAgeGroup (outputFile, SM::nNmfDeaths, survey, _numNmfDeaths);
+  }
+  if (active[SM::nAntibioticTreatments]) {
+    writePerAgeGroup (outputFile, SM::nAntibioticTreatments, survey, _numAntibioticTreatments);
   }
 }
 

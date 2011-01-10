@@ -2024,9 +2024,8 @@
       <xs:element name="prTreatment" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-            Average probability of a non-malaria fever being treated with an
-            antibiotic given that no malaria diagnostic was used but independent
-            of need.
+            Probability of a non-malaria fever being treated with an antibiotic
+            given that no malaria diagnostic was used but independent of need.
           </xs:documentation>
           <xs:appinfo>name:P(treatment|no diagnostic);units:none;min:0;max:1;</xs:appinfo>
         </xs:annotation>
@@ -2066,6 +2065,15 @@
             antibiotic treatment is received, per age-group).
           </xs:documentation>
           <xs:appinfo>name:Case fatality rate;units:none;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="TreatmentEfficacy" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that treatment would prevent a death (i.e. CFR is
+            multiplied by one minus this when treatment occurs).
+          </xs:documentation>
+          <xs:appinfo>name:Treatment efficacy;units:none;min:0;max:1;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

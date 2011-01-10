@@ -96,7 +96,24 @@ private:
     static double hetWeightMultStdDev;
     static double minHetWeightMult;
     static AgeGroupInterpolation* weight;
-
+    
+    /// Base log odds of treatment of non-malarial fevers in absense of a
+    /// malaria diagnostic and irrespective of whether treatment is needed.
+    static double logOddsAbBase;
+    /// Added to log odds treatment when a malaria diagnostic indicates no parasites
+    static double logOddsAbNegTest;
+    /// Added to log odds treatment when a malaria diagnostic indicates parasites
+    static double logOddsAbPosTest;
+    /// Added to log odds treatment when NMF is categorized as an illness
+    /// potentially leading to death (Pathogenesis::NEED_ANTIBIOTIC).
+    static double logOddsAbNeed;
+    /// One minus the efficacy of antibiotic/NMF treatment (i.e. a multiplier
+    /// for fatality-rate given that the case is treated).
+    static double oneMinusEfficacyAb;
+    /// Case fatality rate of non-malaria fevers requiring treatment given that
+    /// the case is not treated.
+    static AgeGroupInterpolation* severeNmfMortality;
+    
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
@@ -122,7 +139,7 @@ private:
     /// Multiplies the mean weight for age.
     /// Within PkPd class simply because it's not used elsewhere.
     double hetWeightMultiplier;
-
+    
     /// All pending medications
     list<MedicateData> medicateQueue;
 };
