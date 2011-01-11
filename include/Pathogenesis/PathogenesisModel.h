@@ -68,7 +68,7 @@ public:
     /** Given a non-malaria fever, return the probability of it requiring
      * treatment. */
     inline double pNmfRequiresTreatment(double ageYears){
-        return (*NMF_need_antibiotic)( ageYears );
+        return NMF_need_antibiotic->eval( ageYears );
     }
 
     /** Summarize PathogenesisModel details

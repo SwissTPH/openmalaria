@@ -67,7 +67,7 @@ void ClinicalEventScheduler::init ()
     weight = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getWeight().get(), "weight" );
     hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-    minHetWeightMult = 0.5 / (*weight)( 0.0 );
+    minHetWeightMult = 0.5 / weight->eval( 0.0 );
     
     ESCaseManagement::init ();
 }
@@ -321,7 +321,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 // In a severe NMF case (only when not malarial), there is a
                 // chance of death:
                 if( needTreat ){
-                    double pDeath = (*severeNmfMortality)( ageYears ) * treatmentEffectMult;
+                    double pDeath = severeNmfMortality->eval( ageYears ) * treatmentEffectMult;
                     if( random::uniform_01() < pDeath ){
                         pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
                     }

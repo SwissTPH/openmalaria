@@ -59,7 +59,7 @@ public:
    * Also has a switch to put individuals entirely outside transmission. */
   inline double relativeAvailabilityAge (double ageYears) const {
     return outsideTransmission ? 0.0 :
-	(*relAvailAge)( ageYears );
+	relAvailAge->eval( ageYears );
   }
   //@}
   

@@ -81,7 +81,7 @@ namespace OM { namespace Clinical {
 	 * 
 	 * @param ageYears Age of person in years */
 	static inline double caseFatality(double ageYears) {
-            return (*caseFatalityRate)( ageYears );
+            return caseFatalityRate->eval( ageYears );
         }
         
         /** Scale case fatality rates by a factor. */
@@ -95,7 +95,7 @@ namespace OM { namespace Clinical {
 	 * 
 	 * Currently we use the same values for outpatients. */
 	static inline double pSequelaeInpatient(double ageYears) {
-            return (*pSeqInpatient)(ageYears);
+            return pSeqInpatient->eval(ageYears);
         }
 	
     private:

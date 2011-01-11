@@ -51,7 +51,7 @@ public:
     
     void testDummy() {
         AgeGroupInterpolation *o = AgeGroupInterpolation::dummyObject();
-        TS_ASSERT_THROWS( (*o)(5.7), const std::logic_error &e );
+        TS_ASSERT_THROWS( o->eval(5.7), const std::logic_error &e );
         AgeGroupInterpolation::freeObject(o);
     }
     
@@ -59,7 +59,7 @@ public:
         agvElt.setInterpolation( "none" );
         AgeGroupInterpolation *o = AgeGroupInterpolation::makeObject( agvElt, "testPiecewiseConst" );
         for( size_t i = 0; i < testLen; ++i ){
-            TS_ASSERT_APPROX( (*o)( testAges[ i ] ), piecewiseConstValues[ i ] );
+            TS_ASSERT_APPROX( o->eval( testAges[ i ] ), piecewiseConstValues[ i ] );
         }
         AgeGroupInterpolation::freeObject(o);
     }
@@ -68,7 +68,7 @@ public:
         agvElt.setInterpolation( "linear" );
         AgeGroupInterpolation *o = AgeGroupInterpolation::makeObject( agvElt, "testLinearInterp" );
         for( size_t i = 0; i < testLen; ++i ){
-            TS_ASSERT_APPROX( (*o)( testAges[ i ] ), linearInterpValues[ i ] );
+            TS_ASSERT_APPROX( o->eval( testAges[ i ] ), linearInterpValues[ i ] );
         }
         AgeGroupInterpolation::freeObject(o);
     }

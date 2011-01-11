@@ -46,7 +46,7 @@ public:
         agvElt.getGroup().push_back( scnXml::Group::Group( 55.4993, 0.0 ) );
         AgeGroupInterpolation* weight =
         util::AgeGroupInterpolation::makeObject( agvElt, "UnittestUtil_weight" );
-        massAt21 = (*weight)(21);
+        massAt21 = weight->eval(21);
         util::AgeGroupInterpolation::freeObject( weight );
     }
     

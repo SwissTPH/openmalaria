@@ -45,7 +45,7 @@ public:
      * which interpolation and values to use.
      * 
      * @param ageGroups XML element of per-age-group values
-     * @param eltName Name of XML element (to all reasonable error reporting)
+     * @param eltName Name of XML element (for reasonable error reporting)
      */
     static AgeGroupInterpolation* makeObject(
         const scnXml::AgeGroupValues& ageGroups, const char* eltName
@@ -67,9 +67,9 @@ public:
     }
     
     /** Return a value interpolated for age ageYears. */
-    virtual double operator() (double ageYears) const =0;
+    virtual double eval (double ageYears) const =0;
     
-    /** Scale held fatality rate by factor. */
+    /** Scale function by factor. */
     virtual void scale( double factor ) =0;
     
 protected:

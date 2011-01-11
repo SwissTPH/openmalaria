@@ -90,7 +90,7 @@ private:
      * @param ageYears Age in years
      * @returns Mass in kg */
     inline double ageToWeight (double ageYears) {
-        return (*weight)( ageYears ) * hetWeightMultiplier;
+        return weight->eval( ageYears ) * hetWeightMultiplier;
     }
     
     static double hetWeightMultStdDev;

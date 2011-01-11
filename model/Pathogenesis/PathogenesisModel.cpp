@@ -131,7 +131,7 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHo
         if (random::uniform_01() < indirectRisk)
             ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     } else if ( NMF_incidence->isSet() ) {
-        if( random::uniform_01() < (*NMF_incidence)( ageYears ) ){
+        if( random::uniform_01() < NMF_incidence->eval( ageYears ) ){
             ret = Pathogenesis::STATE_NMF;
         }
     }

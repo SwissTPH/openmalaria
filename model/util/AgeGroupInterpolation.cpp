@@ -40,7 +40,7 @@ namespace OM { namespace util {
     public:
         static AgeGroupDummy singleton;
         
-        virtual double operator() (double ageYears) const {
+        virtual double eval( double ageYears ) const {
             throw logic_error( "AgeGroupDummy" );
         }
         virtual void scale( double factor ) {
@@ -64,7 +64,7 @@ namespace OM { namespace util {
             const scnXml::AgeGroupValues& ageGroups, const char* eltName
         );
         
-        virtual double operator() (double ageYears) const;
+        virtual double eval( double ageYears ) const;
         
         virtual void scale( double factor ){
             for( map<double,double>::iterator it = dataGroups.begin(); it != dataGroups.end(); ++it ){
@@ -122,7 +122,7 @@ namespace OM { namespace util {
         outputSamples( eltName );
     }
     
-    double AgeGroupPiecewiseConstant::operator() (double ageYears) const {
+    double AgeGroupPiecewiseConstant::eval( double ageYears ) const {
         assert ( ageYears >= 0.0 );
         map<double,double>::const_iterator it = dataGroups.upper_bound( ageYears );
         --it;   // previous point when ordered by age
@@ -225,7 +225,7 @@ namespace OM { namespace util {
             outputSamples( eltName );
         }
         
-        virtual double operator() (double ageYears) const{
+        virtual double eval( double ageYears ) const{
             assert ( ageYears >= 0.0 );
             // Get the first point with age greater than ageYears:
             map<double,double>::const_iterator it = dataPoints.upper_bound( ageYears );
@@ -272,7 +272,7 @@ namespace OM { namespace util {
             gsl_interp_accel_free (acc);
         }
         
-        virtual double operator() (double ageYears) const{
+        virtual double eval( double ageYears ) const{
             return gsl_spline_eval( spline, ageYears, acc );
         }
         
@@ -317,7 +317,7 @@ namespace OM { namespace util {
         
         double max = Global::maxAgeIntervals*Global::yearsPerInterval;
         for( double age = 0.0; age < max; age += 0.1 ){
-            fstream << age << "," << (*this)( age ) << endl;
+            fstream << age << "," << this->eval( age ) << endl;
         }
     }
 } }
