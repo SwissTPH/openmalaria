@@ -21,7 +21,6 @@
 #define HOSTCATEGORYANOPHELESHUMANS_H_
 
 #include "HostCategoryAnopheles.h"
-#include "util/WeibullDecayedValue.h"
 #include "scenario.hxx"
 
 

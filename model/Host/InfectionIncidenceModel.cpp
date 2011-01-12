@@ -27,6 +27,7 @@
 #include "Monitoring/Continuous.h"
 
 #include <stdexcept>
+#include <cmath>
 
 namespace OM { namespace Host {
     using namespace OM::util;

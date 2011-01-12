@@ -65,7 +65,7 @@ set (Model_CPP
   util/BoincWrapper.cpp
   util/timer.cpp
   util/vectors.cpp
-  util/WeibullDecayedValue.cpp
+  util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
   util/ModelOptions.cpp

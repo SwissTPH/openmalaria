@@ -24,6 +24,7 @@
 #include "util/vectors.h"
 #include "Monitoring/Surveys.h"	// sim-end timestep
 #include <limits>
+#include <cmath>
 
 namespace OM { namespace Transmission {
     namespace vectors = util::vectors;

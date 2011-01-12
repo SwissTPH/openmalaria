@@ -55,12 +55,6 @@ public:
      * (Note: dummy object should not be freed; this checks for that.) */
     static void freeObject( AgeGroupInterpolation* obj );
     
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        checkpoint( stream );
-    }
-    
     /// Return true if instance represents something other than the dummy object.
     inline bool isSet() {
         return this != dummyObject();
@@ -73,9 +67,6 @@ public:
     virtual void scale( double factor ) =0;
     
 protected:
-    virtual void checkpoint (ostream& stream) =0;
-    virtual void checkpoint (istream& stream) =0;
-    
     /** Sample interpolator between 0 and max age, outputting to a csv file
      * called name.csv. */
     void outputSamples( const string name );

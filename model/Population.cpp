@@ -37,6 +37,7 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 
+#include <cmath>
 #include <boost/format.hpp>
 #include <boost/assign.hpp>
 

@@ -1265,7 +1265,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="preprandialKillingEffect" type="WeibullDecayedProportion">
+          <xs:element name="preprandialKillingEffect" type="DecayFunction">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
@@ -1273,7 +1273,7 @@
               <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
             </xs:annotation>
           </xs:element>
-          <xs:element name="postprandialKillingEffect" type="WeibullDecayedProportion">
+          <xs:element name="postprandialKillingEffect" type="DecayFunction">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
@@ -1289,7 +1289,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="killingEffect" type="WeibullDecayedProportion">
+          <xs:element name="killingEffect" type="DecayFunction">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of resting mosquitoes.
@@ -1303,7 +1303,7 @@
   </xs:complexType>
   <xs:complexType name="BaseInterventionDescription">
     <xs:sequence>
-      <xs:element name="deterrency" type="WeibullDecayedProportion">
+      <xs:element name="deterrency" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
 		  One minus this multiplies the host's availability.
@@ -2231,10 +2231,10 @@
       <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="WeibullDecayedProportion">
+  <xs:complexType name="DecayFunction">
     <xs:annotation>
       <xs:documentation>
-        Specification of a proportion with Weibull or exponential decay.
+        Specification of decay or survival of a parameter.
       </xs:documentation>
     </xs:annotation>
     <xs:attribute name="initial" type="xs:double" use="required">
@@ -2245,20 +2245,56 @@
         <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="halflife" type="xs:double" use="required">
+    <xs:attribute name="function" use="required">
       <xs:annotation>
         <xs:documentation>
-          Half-life in years (more generally, halflife/ln(2) is lambda from the Weibull distribution).
+          Determines which decay function to use. Available decay functions,
+          for age t in years:
+          
+          constant: initial
+          
+          linear: initial * (1 - t/L)
+          
+          exponential: initial * exp( - t/L * log(2) )
+          
+          weibull: initial * exp( -(t/L)^k * log(2) )
+          
+          hill: initial / (1 + (t/L)^k)
+          
+          chitnis: initial * exp( k - k / (1 - (t/L)^2) ) for t less than L,
+            0 for t greater than or equal to L.
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;name:half-life;</xs:appinfo>
+        <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="constant" />
+          <xs:enumeration value="linear" />
+          <xs:enumeration value="exponential" />
+          <xs:enumeration value="weibull" />
+          <xs:enumeration value="hill" />
+          <xs:enumeration value="chitnis" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="L" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Scale parameter of distribution. With Chintnis' function, this is the
+          age at which the parameter has decayed to 0; with the other three
+          functions, this is the age at which the parameter has decayed to half
+          its original value.
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="Weibullk" type="xs:double" use="optional">
+    <xs:attribute name="k" type="xs:double" default="1.0">
       <xs:annotation>
         <xs:documentation>
-          The parameter k of the Weibull distribution. If missing, 1.0 is used (equivalent to exponential decay).
+          Shape parameter of distribution. If not specified, default value of
+          1 is used. Meaning depends on function; not used with exponential.
         </xs:documentation>
-        <xs:appinfo>min:0;name:Weibull k parameter;</xs:appinfo>
+        <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

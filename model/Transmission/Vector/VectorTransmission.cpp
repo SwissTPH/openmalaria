@@ -25,6 +25,7 @@
 
 #include <fstream>
 #include <map>
+#include <cmath>
 
 namespace OM { namespace Transmission {
     using namespace OM::util;

@@ -20,10 +20,13 @@
 #ifndef Hmod_HostCategoryAnopheles
 #define Hmod_HostCategoryAnopheles
 
-#include "util/WeibullDecayedValue.h"
+#include "util/DecayFunction.h"
 #include "scenario.hxx"
 
+#include <stdexcept>
+
 namespace OM { namespace Transmission {
+    using util::DecayFunction;
     
 /** Stores vector model data applicable between a category of host and a
  * mosquito species.
@@ -40,6 +43,8 @@ public:
     entoAvailability(0.0), probMosqBiting(0.0),
     probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0)
   {}
+  
+  ~HostCategoryAnopheles() {}
   
   /** set the (human or non human) ento Availability.
    *  This is only a helper method, since the ento availability
@@ -75,23 +80,24 @@ public:
 
   /** @brief Intervention description parameters */
   //@{
+  //FIXME: copy construction/assignment copies pointers (tempor;
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  util::WeibullDecayedValue ITNDeterrency;
+  shared_ptr<DecayFunction> ITNDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
    * an individual. */
-  util::WeibullDecayedValue ITNPreprandialKillingEffect;
+  shared_ptr<DecayFunction> ITNPreprandialKillingEffect;
   /** (1 - this) is the proportion of mosquitoes killed when trying to escape
    * after feeding on an individual. */
-  util::WeibullDecayedValue ITNPostprandialKillingEffect;
+  shared_ptr<DecayFunction> ITNPostprandialKillingEffect;
   /** Effectiveness of IRS in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  util::WeibullDecayedValue IRSDeterrency;
+  shared_ptr<DecayFunction> IRSDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  util::WeibullDecayedValue IRSKillingEffect;
+  shared_ptr<DecayFunction> IRSKillingEffect;
   /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  util::WeibullDecayedValue VADeterrency;
+  shared_ptr<DecayFunction> VADeterrency;
   //@}
 };
 

@@ -46,10 +46,6 @@ namespace OM { namespace util {
         virtual void scale( double factor ) {
             throw logic_error( "AgeGroupDummy" );
         }
-        
-    protected:
-        virtual void checkpoint (ostream& stream) {}
-        virtual void checkpoint (istream& stream) {}
     };
     AgeGroupDummy AgeGroupDummy::singleton;
     
@@ -73,13 +69,6 @@ namespace OM { namespace util {
         }
         
     protected:
-        virtual void checkpoint (ostream& stream){
-            dataGroups & stream;
-        }
-        virtual void checkpoint (istream& stream){
-            dataGroups & stream;
-        }
-        
         // All data groups as (lower-age-bound, value) pairs.
         map<double,double> dataGroups;
     };
@@ -147,13 +136,6 @@ namespace OM { namespace util {
         }
         
     protected:
-        virtual void checkpoint (ostream& stream){
-            dataPoints & stream;
-        }
-        virtual void checkpoint (istream& stream){
-            dataPoints & stream;
-        }
-        
         // Points to interpolate between in the middle of input age groups. Extra
         // points at zero and infinity are added with equal value to first and last
         // points respectively.

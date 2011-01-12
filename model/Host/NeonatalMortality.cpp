@@ -22,6 +22,8 @@
 #include "Host/Human.h"
 #include "util/random.h"
 
+#include <cmath>
+
 namespace OM { namespace Host {
     using namespace OM::util;
 

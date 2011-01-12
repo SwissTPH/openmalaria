@@ -1260,7 +1260,9 @@ public class SchemaTranslator {
         return true;
     }
     
-    /* Vaccine type was changed from an integer to a string identifier. */
+    /* Vaccine type was changed from an integer to a string identifier.
+     * WeibullDecayedValue replaced with more general DecayFunction interface.
+     */
     public Boolean translate24To25() throws Exception {
         NodeList vaccs = scenarioElement.getElementsByTagName ("vaccineDescription");
         for (int i = 0; i < vaccs.getLength(); i++) {
@@ -1277,7 +1279,26 @@ public class SchemaTranslator {
                 return false;
             }
         }
+        
+        WeibullDecayedValueToDecayFunction(scenarioElement.getElementsByTagName ("preprandialKillingEffect"));
+        WeibullDecayedValueToDecayFunction(scenarioElement.getElementsByTagName ("postprandialKillingEffect"));
+        WeibullDecayedValueToDecayFunction(scenarioElement.getElementsByTagName ("killingEffect"));
+        WeibullDecayedValueToDecayFunction(scenarioElement.getElementsByTagName ("deterrency"));
         return true;
+    }
+    void WeibullDecayedValueToDecayFunction (NodeList nodes){
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Element node = (Element)nodes.item(i);
+            node.setAttribute("L", node.getAttribute("halflife"));      // value should be same for 2 possible distributions
+            node.removeAttribute("halflife");
+            if (node.hasAttribute("Weibullk")){
+                node.setAttribute("function","weibull");
+                node.setAttribute("k",node.getAttribute("Weibullk"));
+                node.removeAttribute("Weibullk");
+            }else{
+                node.setAttribute("function","exponential");
+            }
+        }
     }
     
     /**
