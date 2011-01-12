@@ -113,12 +113,7 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
         for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
             initialMeanEfficacy[i] = ies[i].getValue();
 
-        // now, if halfLifeYrs > 0, calculate delay:
-        double halfLifeYrs = vd->getHalfLifeYrs().getValue();
-        if (halfLifeYrs <= 0)
-            decay = 1.0;
-        else
-            decay = exp (-log (2.0) / (halfLifeYrs * Global::DAYS_IN_YEAR / (double) Global::interval));
+        decayFunc = DecayFunction::makeObject( vd->getDecay(), "decay" );
     }
 }
 
@@ -129,29 +124,20 @@ void Vaccine::cleanup ()
 
 PerHumanVaccine::PerHumanVaccine() :
         _lastVaccineDose(0), _timeLastVaccine(Global::TIMESTEP_NEVER),
-        _BSVEfficacy(0.0), _PEVEfficacy(0.0), _TBVEfficacy(0.0)
+        _initialBSVEfficacy(0.0), _initialPEVEfficacy(0.0), _initialTBVEfficacy(0.0)
 {
-}
-
-void PerHumanVaccine::update() {
-    // Update vaccines' efficacy assuming exponential decay
-    if ( _lastVaccineDose >  0) {
-	_PEVEfficacy *= Vaccine::PEV.decay;
-	_TBVEfficacy *= Vaccine::TBV.decay;
-	_BSVEfficacy *= Vaccine::BSV.decay;
-    }
 }
 
 void PerHumanVaccine::vaccinate() {
     //Index to look up initial efficacy relevant for this dose.
     if (Vaccine::PEV.active)
-        _PEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
+        _initialPEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
 
     if (Vaccine::BSV.active)
-        _BSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
+        _initialBSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
 
     if (Vaccine::TBV.active)
-        _TBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
+        _initialTBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
 
     ++_lastVaccineDose;
     _timeLastVaccine = Global::simulationTime;

@@ -122,8 +122,8 @@ public:
   
   /// Add PEV and remove TBV (vaccines) from human
   inline void R_0Vaccines() {
-      _vaccine.setPEV( 1.0 );
-      _vaccine.setTBV( 0.0 );
+      _vaccine.setInitialPEV( 1.0 );
+      _vaccine.setInitialTBV( 0.0 );
   }
   //@}
   

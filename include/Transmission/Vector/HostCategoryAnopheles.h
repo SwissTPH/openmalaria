@@ -26,7 +26,7 @@
 #include <stdexcept>
 
 namespace OM { namespace Transmission {
-    using util::DecayFunction;
+    using util::DecayFunctionValue;
     
 /** Stores vector model data applicable between a category of host and a
  * mosquito species.
@@ -83,21 +83,21 @@ public:
   //FIXME: copy construction/assignment copies pointers (tempor;
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  shared_ptr<DecayFunction> ITNDeterrency;
+  DecayFunctionValue ITNDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
    * an individual. */
-  shared_ptr<DecayFunction> ITNPreprandialKillingEffect;
+  DecayFunctionValue ITNPreprandialKillingEffect;
   /** (1 - this) is the proportion of mosquitoes killed when trying to escape
    * after feeding on an individual. */
-  shared_ptr<DecayFunction> ITNPostprandialKillingEffect;
+  DecayFunctionValue ITNPostprandialKillingEffect;
   /** Effectiveness of IRS in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  shared_ptr<DecayFunction> IRSDeterrency;
+  DecayFunctionValue IRSDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  shared_ptr<DecayFunction> IRSKillingEffect;
+  DecayFunctionValue IRSKillingEffect;
   /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  shared_ptr<DecayFunction> VADeterrency;
+  DecayFunctionValue VADeterrency;
   //@}
 };
 

@@ -19,7 +19,9 @@
 */
 #ifndef Hmod_Vaccine
 #define Hmod_Vaccine
+
 #include "Global.h"
+#include "util/DecayFunction.h"
 
 // Forward declare: doesn't need to be known about here
 namespace scnXml {
@@ -28,6 +30,7 @@ class VaccineDescription;
 
 namespace OM {
 namespace Host {
+    using util::DecayFunction;
 
 /** Vaccine intervention parameters.
  *
@@ -61,7 +64,7 @@ private:
     static Vaccine TBV;
 
     //Non-static:
-    Vaccine() : active(false), decay(1.0), efficacyB(1.0) {}
+    Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
     
     /** Per-type initialization
      * @returns decay */
@@ -75,8 +78,8 @@ private:
     /// True if this vaccine is in use
     bool active;
 
-    /// exp(-Decay rate)
-    double decay;
+    /// Function representing decay of effect
+    shared_ptr<DecayFunction> decayFunc;
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */
@@ -92,9 +95,6 @@ class PerHumanVaccine {
 public:
     PerHumanVaccine();
 
-    /// Decay vaccines
-    void update();
-
     /// Returns true if a continuous vaccine dose should be given.
     bool doCtsVaccination (int ageTSteps) {
         // Deployment is affected by previous missed doses and mass vaccinations,
@@ -109,22 +109,22 @@ public:
     bool hasProtection(int maxInterventionAge)const;
 
     inline double getBSVEfficacy()const {
-        return _BSVEfficacy;
+        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
     }
     inline double getPEVEfficacy()const {
-        return _PEVEfficacy;
+        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
     }
     inline double getTBVEfficacy()const {
-        return _TBVEfficacy;
+        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
     }
     
     /// @brief Hacks for R_0 deployment
     //@{
-    inline void setPEV( double effic ) {
-	_PEVEfficacy = effic;
+    inline void setInitialPEV( double effic ) {
+	_initialPEVEfficacy = effic;
     }
-    inline void setTBV( double effic ) {
-        _TBVEfficacy = effic;
+    inline void setInitialTBV( double effic ) {
+        _initialTBVEfficacy = effic;
     }
     //@}
 
@@ -133,9 +133,9 @@ public:
     void operator& (S& stream) {
         _lastVaccineDose & stream;
         _timeLastVaccine & stream;
-        _BSVEfficacy & stream;
-        _PEVEfficacy & stream;
-        _TBVEfficacy & stream;
+        _initialBSVEfficacy & stream;
+        _initialPEVEfficacy & stream;
+        _initialTBVEfficacy & stream;
     }
 
 
@@ -149,11 +149,11 @@ private:
     /// Timestep of last vaccination
     int _timeLastVaccine;
     //!Remaining efficacy of Blood-stage vaccines
-    double _BSVEfficacy;
+    double _initialBSVEfficacy;
     //!Remaining efficacy of Pre-erythrocytic vaccines
-    double _PEVEfficacy;
+    double _initialPEVEfficacy;
     //!Remaining efficacy of Transmission-blocking vaccines
-    double _TBVEfficacy;
+    double _initialTBVEfficacy;
 };
 
 }

@@ -1167,12 +1167,12 @@
   </xs:complexType>
   <xs:complexType name="vaccineDescription">
     <xs:sequence>
-      <xs:element name="halfLifeYrs" type="inputValue">
+      <xs:element name="decay" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
-            Half life of drug effect
+            Specification of decay of efficacy
           </xs:documentation>
-          <xs:appinfo>units:Years;min:0;max:100;name:Half life of drug effect;</xs:appinfo>
+          <xs:appinfo>name:Decay of effect;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="efficacyB" type="inputValue">
@@ -1265,7 +1265,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="preprandialKillingEffect" type="DecayFunction">
+          <xs:element name="preprandialKillingEffect" type="DecayFunctionValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
@@ -1273,7 +1273,7 @@
               <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
             </xs:annotation>
           </xs:element>
-          <xs:element name="postprandialKillingEffect" type="DecayFunction">
+          <xs:element name="postprandialKillingEffect" type="DecayFunctionValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
@@ -1289,7 +1289,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="killingEffect" type="DecayFunction">
+          <xs:element name="killingEffect" type="DecayFunctionValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of resting mosquitoes.
@@ -1303,7 +1303,7 @@
   </xs:complexType>
   <xs:complexType name="BaseInterventionDescription">
     <xs:sequence>
-      <xs:element name="deterrency" type="DecayFunction">
+      <xs:element name="deterrency" type="DecayFunctionValue">
         <xs:annotation>
           <xs:documentation>
 		  One minus this multiplies the host's availability.
@@ -2237,14 +2237,6 @@
         Specification of decay or survival of a parameter.
       </xs:documentation>
     </xs:annotation>
-    <xs:attribute name="initial" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The value before any decay.
-        </xs:documentation>
-        <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute name="function" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -2283,7 +2275,8 @@
           Scale parameter of distribution. With Chintnis' function, this is the
           age at which the parameter has decayed to 0; with the other three
           functions, this is the age at which the parameter has decayed to half
-          its original value.
+          its original value. Not used for constant decay (though must be
+          specified anyway).
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
       </xs:annotation>
@@ -2292,10 +2285,29 @@
       <xs:annotation>
         <xs:documentation>
           Shape parameter of distribution. If not specified, default value of
-          1 is used. Meaning depends on function; not used with exponential.
+          1 is used. Meaning depends on function; not used in some cases.
         </xs:documentation>
         <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DecayFunctionValue">
+    <xs:annotation>
+      <xs:documentation>
+        Specification of decay or survival of a parameter along with initial value.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DecayFunction">
+        <xs:attribute name="initial" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              The value before any decay.
+            </xs:documentation>
+            <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 </xs:schema>

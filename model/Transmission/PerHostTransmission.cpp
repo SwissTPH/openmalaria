@@ -63,27 +63,27 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double alpha_i = species[speciesIndex].entoAvailability;
   if (timestepITN >= 0)
-    alpha_i *= (1.0 - base.ITNDeterrency->eval (Global::simulationTime - timestepITN));
+    alpha_i *= (1.0 - base.ITNDeterrency.eval (Global::simulationTime - timestepITN));
   if (timestepIRS >= 0)
-    alpha_i *= (1.0 - base.IRSDeterrency->eval (Global::simulationTime - timestepIRS));
+    alpha_i *= (1.0 - base.IRSDeterrency.eval (Global::simulationTime - timestepIRS));
   if (timestepVA >= 0)
-    alpha_i *= (1.0 - base.VADeterrency->eval (Global::simulationTime - timestepVA));
+    alpha_i *= (1.0 - base.VADeterrency.eval (Global::simulationTime - timestepVA));
 
   return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_B_i = species[speciesIndex].probMosqBiting;
   if (timestepITN >= 0)
-    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect->eval (Global::simulationTime - timestepITN));
+    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect.eval (Global::simulationTime - timestepITN));
   return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_C_i = species[speciesIndex].probMosqFindRestSite;
   if (timestepITN >= 0)
-    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect->eval (Global::simulationTime - timestepITN));
+    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect.eval (Global::simulationTime - timestepITN));
   double P_D_i = species[speciesIndex].probMosqSurvivalResting;
   if (timestepIRS >= 0)
-    P_D_i *= (1.0 - base.IRSKillingEffect->eval (Global::simulationTime - timestepIRS));
+    P_D_i *= (1.0 - base.IRSKillingEffect.eval (Global::simulationTime - timestepIRS));
   return P_C_i * P_D_i;
 }
 

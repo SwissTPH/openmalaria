@@ -173,21 +173,21 @@
   <interventions name="BSVPEVTBV Ref EPI modified modified">
     <descriptions>
       <vaccineDescription vaccineType="TBV">
-        <halfLifeYrs value="0"/>
+        <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
       </vaccineDescription>
       <vaccineDescription vaccineType="BSV">
-        <halfLifeYrs value="0"/>
+        <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
       </vaccineDescription>
       <vaccineDescription vaccineType="PEV">
-        <halfLifeYrs value="0"/>
+        <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>

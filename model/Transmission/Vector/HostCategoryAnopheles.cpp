@@ -31,33 +31,33 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
 void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
   if (intervDesc.getITNDescription().present()) {
     const scnXml::ITNDescription& itnDesc = intervDesc.getITNDescription().get();
-    ITNDeterrency = util::DecayFunction::makeObject( itnDesc.getDeterrency(), "deterrency" );
-    ITNPreprandialKillingEffect = util::DecayFunction::makeObject( itnDesc.getPreprandialKillingEffect(), "preprandialKillingEffect" );
-    ITNPostprandialKillingEffect = util::DecayFunction::makeObject( itnDesc.getPostprandialKillingEffect(), "postprandialKillingEffect" );
+    ITNDeterrency.set( itnDesc.getDeterrency(), "deterrency" );
+    ITNPreprandialKillingEffect.set( itnDesc.getPreprandialKillingEffect(), "preprandialKillingEffect" );
+    ITNPostprandialKillingEffect.set( itnDesc.getPostprandialKillingEffect(), "postprandialKillingEffect" );
   }
   if (intervDesc.getIRSDescription().present()) {
     const scnXml::IRSDescription& irsDesc = intervDesc.getIRSDescription().get();
-    IRSDeterrency = util::DecayFunction::makeObject( irsDesc.getDeterrency(), "deterrency" );
-    IRSKillingEffect = util::DecayFunction::makeObject( irsDesc.getKillingEffect(), "killingEffect" );
+    IRSDeterrency.set( irsDesc.getDeterrency(), "deterrency" );
+    IRSKillingEffect.set( irsDesc.getKillingEffect(), "killingEffect" );
   }
   if (intervDesc.getVADescription().present()) {
     const scnXml::BaseInterventionDescription& vaDesc = intervDesc.getVADescription().get();
-    VADeterrency = util::DecayFunction::makeObject( vaDesc.getDeterrency(), "deterrency" );
+    VADeterrency.set( vaDesc.getDeterrency(), "deterrency" );
   }
 }
 void HostCategoryAnopheles::checkInterventionDescriptions (string species) {
     if (InputData.getActiveInterventions()[Interventions::ITN]) {
-	if (ITNDeterrency.get()==0 ||
-	    ITNPreprandialKillingEffect.get()==0 ||
-	    ITNPostprandialKillingEffect.get()==0)
+	if (ITNDeterrency.notSet() ||
+	    ITNPreprandialKillingEffect.notSet() ||
+	    ITNPostprandialKillingEffect.notSet())
 	    throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
     }
     if (InputData.getActiveInterventions()[Interventions::IRS]) {
-	if (IRSDeterrency.get()==0 || IRSKillingEffect.get()==0)
+	if (IRSDeterrency.notSet() || IRSKillingEffect.notSet())
 	    throw util::xml_scenario_error (string("IRS intervention without description for ").append(species));
     }
     if (InputData.getActiveInterventions()[Interventions::VEC_AVAIL]) {
-	if (VADeterrency.get()==0)
+	if (VADeterrency.notSet())
 	    throw util::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
     }
 }

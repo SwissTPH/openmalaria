@@ -178,14 +178,14 @@
   <interventions name="Full Set">
     <descriptions>
       <vaccineDescription vaccineType="TBV">
-        <halfLifeYrs value="10"/>
+        <decay L="10.0" function="exponential"/>
         <efficacyB value="10"/>
         <initialEfficacy value="0.512"/>
         <initialEfficacy value="0.64"/>
         <initialEfficacy value="0.8"/>
       </vaccineDescription>
       <vaccineDescription vaccineType="PEV">
-        <halfLifeYrs value="10"/>
+        <decay L="10.0" function="exponential"/>
         <efficacyB value="10"/>
         <initialEfficacy value="0.512"/>
         <initialEfficacy value="0.64"/>

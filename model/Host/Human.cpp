@@ -209,7 +209,6 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 }
 
 void Human::updateInterventionStatus() {
-    _vaccine.update();
     if (Global::timeStep >= 0) {
 	int ageTimeSteps = Global::simulationTime-_dateOfBirth;
 	ctsIntervention.deploy(this, ageTimeSteps);

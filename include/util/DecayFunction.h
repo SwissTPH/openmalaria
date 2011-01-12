@@ -28,6 +28,7 @@
 namespace scnXml
 {
     class DecayFunction;
+    class DecayFunctionValue;
 }
 
 using boost::shared_ptr;
@@ -55,12 +56,36 @@ public:
     static shared_ptr<DecayFunction> makeObject(
         const scnXml::DecayFunction& elt, const char* eltName
     );
+    /** Return an object representing no decay (useful default). */
+    static shared_ptr<DecayFunction> makeConstantObject();
     
     /** Return a value for age ageTS in time steps. */
     virtual double eval(int ageTS) const =0;
     
 protected:
     DecayFunction() {}
+};
+
+/** Wrapper around DecayFunction adding initial value. */
+class DecayFunctionValue
+{
+    double initial;
+    shared_ptr<DecayFunction> decayFunc;
+public:
+    DecayFunctionValue() : initial(numeric_limits<double>::quiet_NaN()) {}
+    
+    /** Assignment from XML element. */
+    void set (const scnXml::DecayFunctionValue& elt, const char* eltName);
+    
+    /** Return true if decay function was never initialized. */
+    bool notSet (){
+        return decayFunc.get() == 0;
+    }
+    
+    /** Return value for age ageTS in time steps. */
+    double eval(int ageTS) const{
+        return initial * decayFunc->eval(ageTS);
+    }
 };
 
 } }

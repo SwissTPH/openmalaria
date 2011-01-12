@@ -31,68 +31,55 @@ namespace util {
 
 class ConstantDecayFunction : public DecayFunction {
 public:
-    ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() )
-    {}
-    
     double eval(int ageTS) const{
-        return initial;
+        return 1.0;
     }
-    
-private:
-    double initial;
 };
 
 class LinearDecayFunction : public DecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() ),
         L( elt.getL() * Global::intervalsPerYear )
     {}
     
     double eval(int ageTS) const{
         if( ageTS < L ){
-            return initial * (1.0 - ageTS / L);
+            return 1.0 - ageTS / L;
         }else{
             return 0.0;
         }
     }
     
 private:
-    double initial;
     double L;
 };
 
 class ExponentialDecayFunction : public DecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() ),
         negInvLambda( -log(2.0) / (elt.getL() * Global::intervalsPerYear) )
     {}
     
     double eval(int ageTS) const{
-        return initial * exp( ageTS * negInvLambda );
+        return exp( ageTS * negInvLambda );
     }
     
 private:
-    double initial;
     double negInvLambda;
 };
 
 class WeibullDecayFunction : public DecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() ),
         constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * Global::intervalsPerYear) ),
         k( elt.getK() )
     {}
     
     double eval(int ageTS) const{
-        return initial * exp( -pow(ageTS * constOverLambda, k) );
+        return exp( -pow(ageTS * constOverLambda, k) );
     }
     
 private:
-    double initial;
     double constOverLambda;
     double k;
 };
@@ -100,38 +87,34 @@ private:
 class HillDecayFunction : public DecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() ),
         invL( 1.0 / (elt.getL() * Global::intervalsPerYear) ),
         k( elt.getK() )
     {}
     
     double eval(int ageTS) const{
-        return initial / (1.0 + pow(ageTS * invL, k));
+        return 1.0 / (1.0 + pow(ageTS * invL, k));
     }
     
 private:
-    double initial;
     double invL, k;
 };
 
 class ChitnisDecayFunction : public DecayFunction {
 public:
     ChitnisDecayFunction( const scnXml::DecayFunction& elt ) :
-        initial( elt.getInitial() ),
         L( elt.getL() * Global::intervalsPerYear ),
         k( elt.getK() )
     {}
     
     double eval(int ageTS) const{
         if( ageTS < L ){
-            return initial * exp( k - k / (1.0 - pow(ageTS / L, 2.0)) );
+            return exp( k - k / (1.0 - pow(ageTS / L, 2.0)) );
         }else{
             return 0.0;
         }
     }
     
 private:
-    double initial;
     double L, k;
 };
 
@@ -144,7 +127,7 @@ shared_ptr<DecayFunction> DecayFunction::makeObject(
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
     if( func == "constant" ){
-        return shared_ptr<DecayFunction>(new ConstantDecayFunction( elt ));
+        return shared_ptr<DecayFunction>(new ConstantDecayFunction);
     }else if( func == "linear" ){
         return shared_ptr<DecayFunction>(new LinearDecayFunction( elt ));
     }else if( func == "exponential" ){
@@ -159,5 +142,17 @@ shared_ptr<DecayFunction> DecayFunction::makeObject(
         throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
     }
 }
+shared_ptr<DecayFunction> DecayFunction::makeConstantObject(){
+    return shared_ptr<DecayFunction>(new ConstantDecayFunction);
+}
+
+
+// -----  DecayFunctionValue  -----
+
+void DecayFunctionValue::set (const scnXml::DecayFunctionValue& elt, const char* eltName){
+    initial = elt.getInitial();
+    decayFunc = DecayFunction::makeObject( elt, eltName );
+}
+
 
 } }

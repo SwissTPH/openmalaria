@@ -1278,6 +1278,18 @@ public class SchemaTranslator {
                 System.err.println("Unrecognized vaccine type: "+t);
                 return false;
             }
+            
+            Element hly = getChildElement(vd,"halfLifeYrs");
+            double hl = Double.parseDouble(hly.getAttribute("value"));
+            Element decay = scenarioDocument.createElement("decay");
+            decay.setAttribute("L",Double.toString(hl));
+            if(hl == 0.0){
+                // special case: no decay
+                decay.setAttribute("function","constant");
+            }else{
+                decay.setAttribute("function","exponential");
+            }
+            vd.replaceChild(decay,hly);
         }
         
         WeibullDecayedValueToDecayFunction(scenarioElement.getElementsByTagName ("preprandialKillingEffect"));
