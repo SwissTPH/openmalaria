@@ -2017,6 +2017,19 @@
         outcomes and costing). Incidence is described by the 
         model->clinical->NonMalariaFevers element. Non-malaria fevers are only
         modelled if the NON_MALARIA_FEVERS option is used.
+        
+        As further explanation of the parameters below, we first take:
+        β₀ = logit(P₀) - β₃·P(need),
+        and then calculate the probability of antibiotic administration, P(AB),
+        dependent on treatment seeking location.
+        No seeking: P(AB) = 0
+        Informal sector: logit(P(AB)) = β₀ + β₄
+        Health facility: logit(P(AB)) = β₀ + β₁·I(neg) + β₂·I(pos) + β₃·I(need)
+        (where I(X) is 1 when event X is true and 0 otherwise,
+        logit(p)=log(p/(1-p)), event "need" is the event that death may occur
+        without treatment, events "neg" and "pos" are the events that a malaria
+        parasite diagnositic was used and indicated no parasites and parasites
+        respectively).
       </xs:documentation>
       <xs:appinfo>name:Non-malaria fevers;</xs:appinfo>
     </xs:annotation>
@@ -2026,6 +2039,7 @@
           <xs:documentation>
             Probability of a non-malaria fever being treated with an antibiotic
             given that no malaria diagnostic was used but independent of need.
+            Symbol: P₀.
           </xs:documentation>
           <xs:appinfo>name:P(treatment|no diagnostic);units:none;min:0;max:1;</xs:appinfo>
         </xs:annotation>
@@ -2033,8 +2047,8 @@
       <xs:element name="effectNegativeTest" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-            The effect of a negative malaria diagnostic on the log odds of the
-            probability of treatment.
+            The effect of a negative malaria diagnostic on the odds ratio of
+            receiving antibiotics. Symbol: exp(β₁).
           </xs:documentation>
           <xs:appinfo>name:Effect of a negative test;</xs:appinfo>
         </xs:annotation>
@@ -2042,8 +2056,8 @@
       <xs:element name="effectPositiveTest" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-            The effect of a positive malaria diagnostic on the log odds of the
-            probability of treatment.
+            The effect of a positive malaria diagnostic on the odds ratio of
+            receiving antibiotics. Symbol: exp(β₂).
           </xs:documentation>
           <xs:appinfo>name:Effect of a positive test;</xs:appinfo>
         </xs:annotation>
@@ -2051,10 +2065,20 @@
       <xs:element name="effectNeed" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-            The effect of needing antibiotic treatment on the log odds of the
-            probability of treatment.
+            The effect of needing antibiotic treatment on the odds ratio of
+            receiving antibiotics. Symbol: exp(β₃).
           </xs:documentation>
-          <xs:appinfo>name:Effect of a negative test;</xs:appinfo>
+          <xs:appinfo>name:Effect of need;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectInformal" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+            The effect of seeking treatment from an informal provider (i.e.
+            a provider untrained in NMF diagnosis) on the odds ratio of
+            receiving antibiotics. Symbol: exp(β₄)
+          </xs:documentation>
+          <xs:appinfo>name:Effect of informal provider;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="CFR" type="AgeGroupValues">

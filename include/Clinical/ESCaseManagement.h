@@ -54,6 +54,9 @@ struct CMAuxOutput {
     enum Diagnostic {
         NO_TEST=0, POSITIVE, NEGATIVE
     } diagnostic;        ///< Was a malaria-parasite diagnostic used, and if so what was the outcome?
+    enum AB_provider_T {
+        NO_AB=0, FACILITY, INFORMAL
+    } AB_provider;
 };
 
 /// Data used for a withinHostModel->medicate() call
@@ -201,6 +204,17 @@ class ESDecisionMap {
         inline bool microscopy_used (ESDecisionValue outcome) const{
             return (outcome & test_mask) == test_microscopy;
         }
+        /** Return one of CMAuxOutput::AntibioticProvider's values. Will only
+         * return a correct answer if NON_MALARIA_FEVERS option is enabled. */
+        inline CMAuxOutput::AB_provider_T AB_provider (ESDecisionValue outcome) const{
+            ESDecisionValue masked = outcome & AB_provider_mask;
+            if( masked == AB_provider_facility )
+                return CMAuxOutput::FACILITY;
+            else if( masked == AB_provider_informal )
+                return CMAuxOutput::INFORMAL;
+            else
+                return CMAuxOutput::NO_AB;
+        }
         
     private:
         // All data here should be set by ESCaseManagement::init(); don't checkpoint.
@@ -221,6 +235,9 @@ class ESDecisionMap {
         ESDecisionValue diagnostic_mask,
                                     diagnostic_positive,
                                     diagnostic_negative;
+        ESDecisionValue AB_provider_mask,
+                                    AB_provider_facility,
+                                    AB_provider_informal;
         
         friend class ::ESCaseManagementSuite;   // unittests
         friend class ::ESDecisionTreeSuite;

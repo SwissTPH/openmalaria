@@ -48,6 +48,7 @@ double ClinicalEventScheduler::logOddsAbBase = std::numeric_limits<double>::sign
 double ClinicalEventScheduler::logOddsAbNegTest = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbPosTest = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbNeed = std::numeric_limits<double>::signaling_NaN();
+double ClinicalEventScheduler::logOddsAbInformal = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
 AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
 
@@ -106,10 +107,11 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
         const scnXml::HSESNMF& nmfDesc = esData.getNonMalariaFevers().get();
         
         double pT = nmfDesc.getPrTreatment();
-        logOddsAbNegTest = nmfDesc.getEffectNegativeTest();
-        logOddsAbPosTest = nmfDesc.getEffectPositiveTest();
-        logOddsAbNeed = nmfDesc.getEffectNeed();
         logOddsAbBase = log( pT / (1.0 - pT) );
+        logOddsAbNegTest = log(nmfDesc.getEffectNegativeTest());
+        logOddsAbPosTest = log(nmfDesc.getEffectPositiveTest());
+        logOddsAbNeed = log(nmfDesc.getEffectNeed());
+        logOddsAbInformal = log(nmfDesc.getEffectInformal());
         oneMinusEfficacyAb = 1.0 - nmfDesc.getTreatmentEfficacy();
         severeNmfMortality = AgeGroupInterpolation::makeObject( nmfDesc.getCFR(), "CFR" );
     }
@@ -296,19 +298,28 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 bool needTreat = random::uniform_01() < pNeedTreat;
                 
                 // Calculate chance of antibiotic administration:
-                double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
-                if( auxOut.diagnostic & CMAuxOutput::NEGATIVE ){
-                    logOddsAb += logOddsAbNegTest;
-                }else if( auxOut.diagnostic & CMAuxOutput::POSITIVE ){
-                    logOddsAb += logOddsAbPosTest;
+                double pTreatment;
+                if( auxOut.AB_provider == CMAuxOutput::NO_AB ){
+                    pTreatment = 0.0;
+                }else{
+                    double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
+                    if( auxOut.AB_provider == CMAuxOutput::FACILITY ){
+                        if( auxOut.diagnostic == CMAuxOutput::NEGATIVE ){
+                            logOddsAb += logOddsAbNegTest;
+                        }else if( auxOut.diagnostic == CMAuxOutput::POSITIVE ){
+                            logOddsAb += logOddsAbPosTest;
+                        }
+                        if( needTreat ){
+                            logOddsAb += logOddsAbNeed;
+                        }
+                    }else{
+                         assert( auxOut.AB_provider == CMAuxOutput::INFORMAL );
+                        logOddsAb += logOddsAbInformal;
+                    }
+                    
+                    double oddsTreatment = exp( logOddsAb );
+                    pTreatment = oddsTreatment / (1.0 + oddsTreatment);
                 }
-                if( needTreat ){
-                    logOddsAb += logOddsAbNeed;
-                }
-                //TODO: check whether to add another indicator (e.g. UC malaria)
-                
-                double oddsTreatment = exp( logOddsAb );
-                double pTreatment = oddsTreatment / (1 + oddsTreatment);
                 
                 double treatmentEffectMult = 1.0;
                 

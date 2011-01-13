@@ -24,6 +24,7 @@
 #include "Clinical/parser.h"
 #include "inputData.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 
 #include <set>
 #include <sstream>
@@ -387,6 +388,15 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
     diagnostic_negative = dvMap.get( "result", "negative" );
     diagnostic_positive = dvMap.get( "result", "positive" );
     
+    if( util::ModelOptions::option(util::NON_MALARIA_FEVERS) ){
+        required.push_back( "AB_provider" );
+        vector<string> outcomes;
+        outcomes += "none","facility","informal";
+        AB_provider_mask = dvMap.add_decision_values( "AB_provider", outcomes );
+        AB_provider_facility = dvMap.get( "AB_provider", "facility" );
+        AB_provider_informal = dvMap.get( "AB_provider", "informal" );
+    }
+    
     // Read treatments
     required.push_back( "treatment" );
     tuple< ESDecisionValue, ESDecisionValueMap::value_map_t > mask_vmap_pair = dvMap.getDecision("treatment");
@@ -518,6 +528,7 @@ CMAuxOutput ESCaseManagement::execute (
     if( hostData.pgState & Pathogenesis::COMPLICATED )
 	auxOut.hospitalisation = map->hospitalisation(outcome);
     auxOut.diagnostic = map->diagnostic(outcome);
+    auxOut.AB_provider = map->AB_provider(outcome);
     return auxOut;
 }
 

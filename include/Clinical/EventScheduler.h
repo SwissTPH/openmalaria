@@ -97,21 +97,29 @@ private:
     static double minHetWeightMult;
     static AgeGroupInterpolation* weight;
     
-    /// Base log odds of treatment of non-malarial fevers in absense of a
-    /// malaria diagnostic and irrespective of whether treatment is needed.
+    /** Base log odds of treatment of non-malarial fevers in absense of a
+     * malaria diagnostic and irrespective of whether treatment is needed.
+     * 
+     * In our model, this is logit(P₀), not β₀. */
     static double logOddsAbBase;
-    /// Added to log odds treatment when a malaria diagnostic indicates no parasites
+    /** Added to log odds treatment when a malaria diagnostic indicates no
+     * parasites. Symbol in model: β₁. */
     static double logOddsAbNegTest;
-    /// Added to log odds treatment when a malaria diagnostic indicates parasites
+    /** Added to log odds treatment when a malaria diagnostic indicates
+     * parasites. Symbol in model: β₂. */
     static double logOddsAbPosTest;
-    /// Added to log odds treatment when NMF is categorized as an illness
-    /// potentially leading to death (Pathogenesis::NEED_ANTIBIOTIC).
+    /** Added to log odds treatment when NMF is categorized as an illness
+     * potentially leading to death (Pathogenesis::NEED_ANTIBIOTIC).
+     * Symbol in model: β₃. */
     static double logOddsAbNeed;
-    /// One minus the efficacy of antibiotic/NMF treatment (i.e. a multiplier
-    /// for fatality-rate given that the case is treated).
+    /** Added to log odds treatment when given by an informal provider.
+     * Symbol in model: β₄. */
+    static double logOddsAbInformal;
+    /** One minus the efficacy of antibiotic/NMF treatment (i.e. a multiplier
+     * for fatality-rate given that the case is treated). */
     static double oneMinusEfficacyAb;
-    /// Case fatality rate of non-malaria fevers requiring treatment given that
-    /// the case is not treated.
+    /** Case fatality rate of non-malaria fevers requiring treatment given that
+     * the case is not treated. */
     static AgeGroupInterpolation* severeNmfMortality;
     
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
