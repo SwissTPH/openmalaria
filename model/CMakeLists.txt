@@ -40,6 +40,7 @@ set (Model_CPP
   #PkPd/Drug/HoshenDrugType.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
+  PkPd/Drug/LSTMDrugAllele.cpp
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp

@@ -31,8 +31,6 @@
 #include <sstream>
 #include <algorithm>
 
-#include <gsl/gsl_integration.h>
-
 using namespace std;
 
 namespace OM { namespace PkPd {
@@ -50,7 +48,7 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 // Overlapping IV doses are not supported.
 
 void LSTMDrug::medicate (double time, double qty, double bodyMass) {
-    double conc = qty / (typeData->vol_dist * bodyMass);
+    double conc = qty / (typeData->getVolumeOfDistribution() * bodyMass);
     // multimap insertion: is ordered
     DoseMap::iterator lastInserted =
     doses.insert (doses.end(), make_pair (time, DoseParams( conc, 0 )));
@@ -110,29 +108,6 @@ void LSTMDrug::check_split_IV( DoseMap::iterator lastInserted ){
 }
 
 
-struct IV_conc_params {
-    double C0;
-    double ivRate; // dose->second.qty
-    double neg_elimination_rate_constant;
-    double elim_rate_dist;      // -neg_elimination_rate_constant * vol_dist
-    double slope;
-    double max_kill_rate;
-    double IC50_pow_slope;
-};
-/** Function for calculating killing factor of IV and requiring integration.
- */
-double func_IV_conc( double t, void* pp ){
-    IV_conc_params *p = static_cast<IV_conc_params*>( pp );
-    
-    double conc_decay = exp(p->neg_elimination_rate_constant * t);
-    double infusion = p->ivRate * (1.0 - conc_decay ) / p->elim_rate_dist
-        + p->C0 * conc_decay;
-    double infusion_pow_slope = pow(infusion, p->slope);
-    double fC = p->max_kill_rate * infusion_pow_slope / (infusion_pow_slope + p->IC50_pow_slope);
-    return fC;
-}
-
-
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
@@ -144,8 +119,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     // function may be called multiple times (or not at all) in a day.
     double concentration_today = concentration;
     
-    size_t allele = (proteome_ID >> typeData->allele_rshift) & typeData->allele_mask;
-    const LSTMDrugPDParameters& PD_params = typeData->PD_params[allele];
+    const LSTMDrugAllele& drugAllele = typeData->getAllele(proteome_ID);
     
     // Make sure we have a dose at both time 0 and time 1
     //TODO: analyse efficiency of this method
@@ -166,53 +140,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             // Oral dose
             concentration_today += dose->second.qty;
             
-            double initial_conc = concentration_today;
-            concentration_today *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
-            
-            // Note: these look a little different from original equations because PD_params.IC50_pow_slope
-            // and PD_params.power are calculated when read from the scenario document instead of here.
-            double numerator = PD_params.IC50_pow_slope + pow(concentration_today,PD_params.slope);
-            double denominator = PD_params.IC50_pow_slope + pow(initial_conc,PD_params.slope);
-            totalFactor *= pow( numerator / denominator, PD_params.power );
+            totalFactor *= drugAllele.calcFactor( *typeData, concentration_today, time_to_next );
         } else {
             // IV dose
             assert( time_to_next == dose->second.duration );
             
-            //TODO: implement caching here: if already evaluated for this dose
-            // and these PD_params, then reuse result.
-            
-            IV_conc_params p;
-            p.C0 = concentration_today;
-            p.ivRate =  dose->second.qty;
-            p.neg_elimination_rate_constant = typeData->neg_elimination_rate_constant;
-            p.elim_rate_dist =-p.neg_elimination_rate_constant * typeData->vol_dist;
-            p.slope = PD_params.slope;
-            p.max_kill_rate = PD_params.max_killing_rate;
-            p.IC50_pow_slope = PD_params.IC50_pow_slope;
-            
-            gsl_function F;
-            F.function = &func_IV_conc;
-            F.params = static_cast<void*>(&p);
-            
-            //TODO: consider desired limits
-            double abs_eps = 0.0, rel_eps = 1e-7;
-            double intfC, err_eps;
-            size_t n_evals;
-            
-            gsl_integration_qng (&F, 0.0, time_to_next, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
-            
-#ifndef NDEBUG
-            cout << "IV: iterations: "<<n_evals<<"; error epsilon: "<<err_eps<<endl;
-#endif
-            //TODO: check err_eps is OK
-            //TODO: check qng is the best integration algorithm
-            
-            totalFactor *= 1.0 / exp( intfC );
-            
-            concentration_today *= exp(typeData->neg_elimination_rate_constant * time_to_next);
-            concentration_today += dose->second.qty
-                * (1.0 - exp(typeData->neg_elimination_rate_constant * time_to_next) )
-                / p.elim_rate_dist;
+            totalFactor *= drugAllele.calcFactorIV( *typeData, concentration_today, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -242,17 +175,12 @@ bool LSTMDrug::updateConcentration () {
         if( dose->second.duration == 0.0 ){
             // Oral dose
             concentration += dose->second.qty;
-            concentration *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
+            typeData->updateConcentration( concentration, time_to_next );
         } else {
             // IV dose
             assert( time_to_next == dose->second.duration );
             
-            //NOTE: could calculate equivalent oral dose, add at start, then decay everything instead
-            // then decay could be done irrespective of case
-            concentration *= exp(typeData->neg_elimination_rate_constant *  time_to_next);
-            concentration += dose->second.qty
-                * (1.0 - exp(typeData->neg_elimination_rate_constant * time_to_next) )
-                / ( -typeData->neg_elimination_rate_constant * typeData->vol_dist );
+            typeData->updateConcentrationIV( concentration, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -277,7 +205,7 @@ bool LSTMDrug::updateConcentration () {
     util::streamValidate( concentration );
     
     // return true when concentration is no longer significant:
-    return concentration < typeData->negligible_concentration;
+    return concentration < typeData->getNegligibleConcentration();
 }
 
 }
