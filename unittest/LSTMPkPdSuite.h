@@ -99,32 +99,32 @@ public:
     void testIV () {
         // IV over whole day
         proxy->medicate ("MF", 50, 0, 1, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.02212236680144665);
+        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.10315895127530212);
     }
     
     void testIVSplit (){
         // As above, but split into two doses
-        proxy->medicate ("MF", 50, 0, 0.5, massAt21);
-        proxy->medicate ("MF", 50, 0.5, 0.5, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.02212236680144665);
+        proxy->medicate ("MF", 25, 0, 0.5, massAt21);
+        proxy->medicate ("MF", 25, 0.5, 0.5, massAt21);
+        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.10315895127530212);
     }
     
     void testCombined (){
         proxy->medicate ("MF", 50, 0, 0.5, massAt21);
         proxy->medicate ("MF", 1500, 0.5, NaN, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.02714870841762252);
+        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.05850739976088096);
     }
     
     void testSimultaneous (){
         proxy->medicate ("MF", 1500, 0, NaN, massAt21);
         proxy->medicate ("MF", 50, 0, 0.5, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.02715899967167571);
+        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.03545674227382148);
     }
     void testSimultaneousReversed (){
         // Note: IV dose registered first. Drug code must rearrange these to work correctly.
         proxy->medicate ("MF", 50, 0, 0.5, massAt21);
         proxy->medicate ("MF", 1500, 0, NaN, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.02715899967167571);
+        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.03545674227382148);
     }
     
 private:

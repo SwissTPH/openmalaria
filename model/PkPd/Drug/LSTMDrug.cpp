@@ -128,7 +128,7 @@ double func_IV_conc( double t, void* pp ){
     double infusion = p->ivRate * (1.0 - conc_decay ) / p->elim_rate_dist
         + p->C0 * conc_decay;
     double infusion_pow_slope = pow(infusion, p->slope);
-    double fC = p->max_kill_rate * infusion_pow_slope / infusion_pow_slope + p->IC50_pow_slope;
+    double fC = p->max_kill_rate * infusion_pow_slope / (infusion_pow_slope + p->IC50_pow_slope);
     return fC;
 }
 
