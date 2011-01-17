@@ -27,6 +27,8 @@
 #include <deque>
 #include <map>
 #include <vector>
+#include <set>
+#include <cassert>
 #include "Global.h"
 
 using namespace std;
@@ -43,6 +45,29 @@ class LSTMDrugType;
 /** Per drug, per allele parameters and functions to calculate drug factors and
  * concentrations. */
 class LSTMDrugAllele {
+    struct Cache {
+        Cache( double c, double d, double r );
+        
+        // hash, used as a way of organizing in a map
+        size_t hash;
+        // inputs:
+        double C0, duration, rate;
+        // cached outputs:
+        double C1, drugFactor;
+        
+        // check inputs are equal (used to assert relation):
+        bool operator== (const Cache& rhs) const{
+            return C0 == rhs.C0 && duration == rhs.duration && rate == rhs.rate;
+        }
+    };
+    struct CacheCompare {
+        bool operator()(const Cache& x,const Cache& y) const {
+            return x.hash>y.hash;
+        }
+    };
+    typedef std::set<Cache,CacheCompare> CachedIV;
+    mutable CachedIV cachedIV;
+    
     /// Slope of the dose response curve (no unit)
     double slope;
     /// Maximal drug killing rate per day / (elimination_rate_constant * slope) (no unit)

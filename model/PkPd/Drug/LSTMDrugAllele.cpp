@@ -23,12 +23,22 @@
 #include "inputData.h"
 
 #include <cmath>
+#include <stdexcept>
+#include <boost/functional/hash.hpp>
 
 #include <gsl/gsl_integration.h>
 
 using namespace std;
 
 namespace OM { namespace PkPd {
+
+LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
+    C0(c), duration(d), rate(r) {
+    assert(sizeof(double)==sizeof(hash));
+    // Generate hash using XOR and boost::hash
+    boost::hash<double> hasher;
+    hash = hasher(c) ^ hasher(d) ^ hasher(r);
+}
 
 LSTMDrugAllele::LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant ){
     slope = allele.getSlope ();
@@ -72,38 +82,55 @@ double func_IV_conc( double t, void* pp ){
 }
 
 double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
-    //TODO: implement caching here: if already evaluated for this dose
-    // and these drugAllele, then reuse result.
-    
-    IV_conc_params p;
-    p.C0 = C0;
-    p.ivRate = rate;
-    p.neg_elimination_rate_constant = drug.neg_elimination_rate_constant;
-    p.elim_rate_dist =-p.neg_elimination_rate_constant * drug.vol_dist;
-    p.slope = slope;
-    p.max_kill_rate = max_killing_rate;
-    p.IC50_pow_slope = IC50_pow_slope;
-    
-    gsl_function F;
-    F.function = &func_IV_conc;
-    F.params = static_cast<void*>(&p);
-    
-    //TODO: consider desired limits
-    double abs_eps = 0.0, rel_eps = 1e-7;
-    double intfC, err_eps;
-    size_t n_evals;
-    
-    gsl_integration_qng (&F, 0.0, duration, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
-    
+    //TODO: properly test cache function and performance impact once we have a test scenario
+    Cache key( C0, duration, rate );
+    CachedIV::const_iterator it = cachedIV.find( key );
+    if( it != cachedIV.end() ){
+        // NOTE: we assume hash-conflicts won't occur, although this is not impossible
+        // So do a little check (TODO: maybe make this a debug-only assert later?)
+        if( !(key == *it) ){
+            throw runtime_error( "LSTMDrugAllele::calcFactorIV: hash collision" );
+        }
+        
+        C0 = it->C1;
+        return it->drugFactor;
+    } else {
+        IV_conc_params p;
+        p.C0 = C0;
+        p.ivRate = rate;
+        p.neg_elimination_rate_constant = drug.neg_elimination_rate_constant;
+        p.elim_rate_dist =-p.neg_elimination_rate_constant * drug.vol_dist;
+        p.slope = slope;
+        p.max_kill_rate = max_killing_rate;
+        p.IC50_pow_slope = IC50_pow_slope;
+        
+        gsl_function F;
+        F.function = &func_IV_conc;
+        F.params = static_cast<void*>(&p);
+        
+        //TODO: consider desired limits
+        double abs_eps = 0.0, rel_eps = 1e-7;
+        double intfC, err_eps;
+        size_t n_evals;
+        
+        gsl_integration_qng (&F, 0.0, duration, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
+        
 #ifndef NDEBUG
-    cout << "IV: iterations: "<<n_evals<<"; error epsilon: "<<err_eps<<endl;
+        cout << "IV: iterations: "<<n_evals<<"; error epsilon: "<<err_eps<<endl;
 #endif
-    //TODO: check err_eps is OK
-    //TODO: check qng is the best integration algorithm
-    
-    drug.updateConcentrationIV( C0, duration, rate );
-    
-    return 1.0 / exp( intfC );
+        //TODO: check err_eps is OK
+        //TODO: check qng is the best integration algorithm
+        
+        drug.updateConcentrationIV( C0, duration, rate );
+        
+        // use key as our new cache
+        key.C1 = C0;
+        key.drugFactor = 1.0 / exp( intfC );
+        bool inserted = cachedIV.insert( key ).second;
+        assert( inserted );
+        
+        return key.drugFactor;
+    }
 }
 
 } }
