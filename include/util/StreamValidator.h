@@ -28,15 +28,6 @@
 #endif
 
 namespace OM { namespace util {
-    /// Use this function at validation points in code. If validator is not compile-
-    /// time enabled, it will have no effect and should be optimised out.
-    template<class T>
-    inline void streamValidate (T x){
-# ifdef OM_STREAM_VALIDATOR
-	StreamValidator( x );
-# endif
-    }
-
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -120,5 +111,15 @@ namespace OM { namespace util {
     extern StreamValidatorType StreamValidator;
 
 #endif	//OM_STREAM_VALIDATOR
+    
+    /// Use this function at validation points in code. If validator is not compile-
+    /// time enabled, it will have no effect and should be optimised out.
+    template<class T>
+    inline void streamValidate (T x){
+# ifdef OM_STREAM_VALIDATOR
+        StreamValidator( x );
+# endif
+    }
+    
 } }
 #endif	//Hmod_StreamValidator
