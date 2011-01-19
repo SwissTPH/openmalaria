@@ -56,8 +56,8 @@ public:
     ~ClinicalImmediateOutcomes ();
 
     inline bool recentTreatment() {
-        return (Global::simulationTime-_tLastTreatment >= 1 &&
-                Global::simulationTime-_tLastTreatment <= 4);
+        return (TimeStep::simulation-_tLastTreatment >= TimeStep(1) &&
+                TimeStep::simulation-_tLastTreatment <= TimeStep(4));
     }
 
     virtual void massDrugAdministration(Human& human);
@@ -82,7 +82,7 @@ private:
     bool severeMalaria(double ageYears, Monitoring::AgeGroup ageGroup, int& doomed, bool inCohort);
 
     /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    int _tLastTreatment;
+    TimeStep _tLastTreatment;
 
     //! treatment seeking for heterogeneity
     double _treatmentSeekingFactor;

@@ -166,17 +166,17 @@ namespace OM { namespace Monitoring {
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){
-            if( Global::timeStep < 0 || Global::timeStep % ctsPeriod != 0 )
+            if( TimeStep::interventionPeriod < TimeStep(0) || TimeStep::interventionPeriod % ctsPeriod != 0 )
                 return;
         } else {
-            if( Global::simulationTime % ctsPeriod != 0 )
+            if( TimeStep::simulation % ctsPeriod != 0 )
                 return;
-            ctsOStream << Global::simulationTime << '\t';
+            ctsOStream << TimeStep::simulation << '\t';
         }
 	
 	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
 	
-	ctsOStream << Global::timeStep;
+	ctsOStream << TimeStep::interventionPeriod;
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    (toReport[i])( ctsOStream );
 	// We must flush often to avoid temporarily outputting partial lines

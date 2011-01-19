@@ -37,7 +37,7 @@ namespace OM { namespace util {
     string CommandLine::resourcePath;
     double CommandLine::newEIR;
     string CommandLine::outputName;
-    set<int> CommandLine::checkpoint_times;
+    set<TimeStep> CommandLine::checkpoint_times;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -111,7 +111,7 @@ namespace OM { namespace util {
 			cloError = true;
 			break;
 		    }
-		    checkpoint_times.insert( time );
+		    checkpoint_times.insert( TimeStep(time) );
 		} else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
 		    stringstream t;
 		    t << clo.substr (21);

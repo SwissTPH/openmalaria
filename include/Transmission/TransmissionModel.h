@@ -120,7 +120,7 @@ public:
    * lifespan initialisation?
    *
    * Units: timesteps; value should be a whole number of years. */
-  virtual int transmissionInitDuration () =0;
+  virtual TimeStep transmissionInitDuration () =0;
   /** Called after end of transmissionInitDuration() to control initialisation
    * iterations.
    * 
@@ -129,8 +129,8 @@ public:
    * (0 if no further iteration is needed).
    *
    * Units: timesteps; value should be a whole number of years. */
-  virtual int transmissionInitIterate () {
-    return 0;
+  virtual TimeStep transmissionInitIterate () {
+    return TimeStep( 0 );
   }
   
   /** Initialise the main simulation.
@@ -149,12 +149,12 @@ public:
   /** Needs to be called each step of the simulation
    *
    * Runs internal calculations of Vector model. */
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {};
+  virtual void vectorUpdate (const std::list<Host::Human>& population) {};
   
   /** Needs to be called each step of the simulation
    *
    * Summarises infectiousness of humans and of mosquitoes. */
-  void updateKappa (const std::list<Host::Human>& population, int simulationTime);
+  void updateKappa (const std::list<Host::Human>& population);
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
@@ -172,7 +172,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (int simulationTime, PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
+  double getEIR (PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);
@@ -184,13 +184,12 @@ public:
 protected:
   /** Calculates the EIR individuals are exposed to.
    * 
-   * @param simulationTime Time since start of simulation.
    * @param host Transmission data for the human to calculate EIR for.
    * @param ageGroupData Age group of this host for availablility data.
    *
    * @returns  The age- and heterogeneity-specific EIR an individual is exposed
    * to, in units of inoculations per day. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears) = 0; 
+  virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

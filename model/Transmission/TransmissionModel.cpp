@@ -49,7 +49,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
     model = new VectorTransmission(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
-    if (!nonVectorData.present())	// should be a validation error, but anyway...
+    if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     model = new NonVectorTransmission(nonVectorData.get());
   }
@@ -66,8 +66,8 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
   }
   if( util::CommandLine::option( util::CommandLine::SET_ANNUAL_EIR ) ){
       model->scaleXML_EIR(
-	InputData.getMutableScenario().getEntoData(),
-	util::CommandLine::getNewEIR() / model->annualEIR
+        InputData.getMutableScenario().getEntoData(),
+        util::CommandLine::getNewEIR() / model->annualEIR
       );
       InputData.documentChanged = true;
   }
@@ -78,13 +78,13 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[Global::simulationTime%Global::intervalsPerYear];
+    stream<<'\t'<<initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
-    stream<<'\t'<<innoculationsPerDayOfYear[(Global::simulationTime-1) % Global::intervalsPerYear];
+    stream<<'\t'<<innoculationsPerDayOfYear[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
-    stream<<'\t'<<kappa[(Global::simulationTime-1) % Global::intervalsPerYear];
+    stream<<'\t'<<kappa[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbHumanAvail (ostream& stream){
     stream<<'\t'<<1.0/ageCorrectionFactor;
@@ -101,10 +101,10 @@ TransmissionModel::TransmissionModel() :
     annualEIR(0.0),
     timeStepNumEntoInnocs (0)
 {
-  kappa.assign (Global::intervalsPerYear, 0.0);
-  initialisationEIR.assign (Global::intervalsPerYear, 0.0);
+  kappa.assign (TimeStep::stepsPerYear, 0.0);
+  initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
   innoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
-  innoculationsPerDayOfYear.assign (Global::intervalsPerYear, 0.0);
+  innoculationsPerDayOfYear.assign (TimeStep::stepsPerYear, 0.0);
   timeStepEntoInnocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   
   // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
@@ -131,15 +131,15 @@ void TransmissionModel::updateAgeCorrectionFactor (std::list<Host::Human>& popul
     // etc., will have a mean of 1.0.
     double sumRelativeAvailability = 0.0;
     for (std::list<Host::Human>::iterator h = population.begin(); h != population.end(); ++h){
-	sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
     }
-    ageCorrectionFactor = populationSize / sumRelativeAvailability;	// 1 / mean-rel-avail
+    ageCorrectionFactor = populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
     if( sumRelativeAvailability == 0.0 )
-	// value should be unimportant when no humans are available, though inf/nan is not acceptable
-	ageCorrectionFactor = 1.0;
+        // value should be unimportant when no humans are available, though inf/nan is not acceptable
+        ageCorrectionFactor = 1.0;
 }
 
-void TransmissionModel::updateKappa (const std::list<Host::Human>& population, int simulationTime) {
+void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
   // We calculate kappa for output and non-vector model, and kappaByAge for
   // the shared graphics.
   
@@ -164,21 +164,22 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   }
   
   
-  size_t tmod = (simulationTime-1) % Global::intervalsPerYear;
-  if( population.empty() ){	// this is valid
-      kappa[tmod] = 0.0;	// no humans: no infectiousness
+  int tmod = TimeStep::simulation % TimeStep::stepsPerYear;
+  int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;
+  if( population.empty() ){     // this is valid
+      kappa[tmod] = 0.0;        // no humans: no infectiousness
   } else {
-    if ( !(sumWeight > DBL_MIN * 10.0) ){	// if approx. eq. 0, negative or an NaN
-	ostringstream msg;
-	msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
-	throw runtime_error(msg.str());
+    if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
+        ostringstream msg;
+        msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
+        throw runtime_error(msg.str());
     }
     kappa[tmod] = sumWt_kappa / sumWeight;
   }
   
   //Calculate time-weighted average of kappa
-  _sumAnnualKappa += kappa[tmod] * initialisationEIR[tmod];
-  if (tmod == Global::intervalsPerYear - 1) {
+  _sumAnnualKappa += kappa[tmod] * initialisationEIR[t1mod];
+  if (tmod == 0) {
       // if annualEIR == 0.0 (or an NaN), we just get some nonsense output like inf or nan.
       // This is a better solution than printing a warning no-one will see and outputting 0.
       _annualAverageKappa = _sumAnnualKappa / annualEIR;
@@ -186,7 +187,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   }
   
   // Shared graphics: report infectiousness
-  if (Global::simulationTime % 6 ==  0) {
+  if (TimeStep::simulation % 6 ==  0) {
     for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
       kappaByAge[i] /= nByAge[i];
     util::SharedGraphics::copyKappa(&kappaByAge[0]);
@@ -202,19 +203,19 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population, i
   }
   innoculationsPerDayOfYear[tmod] = timeStepTotal / timeStepNumEntoInnocs;
 
-  BSSInitialisationEIR += initialisationEIR[simulationTime % Global::intervalsPerYear];
+  BSSInitialisationEIR += initialisationEIR[tmod];
   BSSInnoculationsPerDayOfYear +=innoculationsPerDayOfYear[tmod];
   BSSTimesteps++;
 
   timeStepNumEntoInnocs = 0;
 }
 
-double TransmissionModel::getEIR (int simulationTime, OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
-  double EIR = calculateEIR (simulationTime, host, ageYears);
+  double EIR = calculateEIR (host, ageYears);
   
   timeStepEntoInnocs[ageGroup.i()] += EIR;
   timeStepNumEntoInnocs ++;
@@ -223,10 +224,10 @@ double TransmissionModel::getEIR (int simulationTime, OM::Transmission::PerHostT
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setNumTransmittingHosts(kappa[(Global::simulationTime-1) % Global::intervalsPerYear]);
+  survey.setNumTransmittingHosts(kappa[TimeStep::simulation % TimeStep::stepsPerYear]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
   
-  survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);	// Array contents must be copied.
+  survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);        // Array contents must be copied.
   innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
 
   survey.set_Vector_EIR_Input (BSSInitialisationEIR/(double)BSSTimesteps);

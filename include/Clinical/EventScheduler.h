@@ -68,14 +68,14 @@ protected:
 private:
     /// Maximum number of timesteps (including first of case) an individual will
     /// remember they are sick before resetting.
-    static int maxUCSeekingMemory;
+    static TimeStep maxUCSeekingMemory;
     /// Length of an uncomplicated case
-    static int uncomplicatedCaseDuration;
+    static TimeStep uncomplicatedCaseDuration;
     /// Length of a complicated case
-    static int complicatedCaseDuration;
+    static TimeStep complicatedCaseDuration;
     /// Time-span for which individual is at risk of death in complicated case
     /// minus length of complicated case (must be <= 0)
-    static int extraDaysAtRisk;
+    static TimeStep extraDaysAtRisk;
     /// Probability that UC treatment seeking will be done immediately when
     /// sick, on second day given that it wasn't done on first, etc.
     static double pImmediateUC;
@@ -128,18 +128,18 @@ private:
     /// Current state of sickness
     Pathogenesis::State pgState;
 
-    /** Set to when a bout should start. If simulationTime equals this, a bout
+    /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
      * is started (UC & severe behaviour different).
      *
      * Note: medications are not delayed by this. */
-    int caseStartTime;
+    TimeStep caseStartTime;
 
-    /** The individual recovers when Global::simulationTime >= timeOfRecovery,
+    /** The individual recovers when TimeStep::simulation >= timeOfRecovery,
      * assuming they didn't die. */
-    int timeOfRecovery;
+    TimeStep timeOfRecovery;
 
     /// Time at which last treatment was recieved (for second-case considerations).
-    int timeLastTreatment;
+    TimeStep timeLastTreatment;
 
     /// Total parasite density at previous timestep (used during a bout).
     double previousDensity;

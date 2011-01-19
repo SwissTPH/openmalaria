@@ -35,18 +35,18 @@ void DescriptiveIPTInfection::initParameters (const scnXml::Interventions& xmlIn
   const scnXml::IptDescription& xmlIPTI = xmlInterventions.getDescriptions().getIptiDescription().get();
   
   const scnXml::IptDescription::InfGenotypeSequence& genotypesData = xmlIPTI.getInfGenotype();
-  genotypes.resize (genotypesData.size());
+  genotypes.reserve (genotypesData.size());
   
   double genotypeCumFreq = 0.0;
-  size_t i = 0;
-  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it, ++i) {
+  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
     genotypeCumFreq += it->getFreq();
-    genotypes[i].cumFreq = genotypeCumFreq;
-    genotypes[i].ACR = it->getACR();
-    genotypes[i].proph = it->getProph();
-    genotypes[i].tolPeriod = it->getTolPeriod();
-    genotypes[i].atten = it->getAtten();
+    genotypes.push_back( GenotypeData(
+        genotypeCumFreq,
+        TimeStep(it->getTolPeriod()), TimeStep(it->getProph()),
+        it->getACR(), it->getAtten()
+    ) );
   }
+  assert( genotypes.size() == genotypesData.size() );
   genotypes[genotypes.size()-1].cumFreq = 1.0;	// make sure.. for random draws
   // (otherwise we rely on specification with XML and floating-point arithmatic)
 }
@@ -54,7 +54,7 @@ void DescriptiveIPTInfection::initParameters (const scnXml::Interventions& xmlIn
 
 // -----  non-static init/destruction  -----
 
-DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
+DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
   DescriptiveInfection(), _SPattenuate(false)
 {
     // proteome_ID is initialized to 0xFFFFFFFF
@@ -76,18 +76,18 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(int lastSPdose) :
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (Global::simulationTime-lastSPdose > genotypes[proteome_ID].proph &&
-	Global::simulationTime-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
+    if (TimeStep::simulation-lastSPdose > genotypes[proteome_ID].proph &&
+	TimeStep::simulation-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
       _SPattenuate=true;
     }
 }
 
-bool DescriptiveIPTInfection::eventSPClears (int _lastSPDose) {
-    if(Global::simulationTime - _startdate - latentp < 0)
+bool DescriptiveIPTInfection::eventSPClears (TimeStep _lastSPDose) {
+    if(TimeStep::simulation - _startdate < latentp)
 	return false;	// don't consider pre-patent infections
     
     return
-	(Global::simulationTime - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
+	(TimeStep::simulation - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
 	&& (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR);
 }
 

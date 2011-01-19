@@ -20,6 +20,7 @@
 #define Hmod_PopulationAgeStructure
 
 #include <vector>
+#include "Global.h"
 
 namespace OM
 {
@@ -31,13 +32,13 @@ namespace OM
 	static void init ();
 	
 	/** Return maximum individual lifetime in intervals that AgeStructure can handle. */
-	static inline int getMaxTimestepsPerLife () {
+	static inline TimeStep getMaxTimestepsPerLife () {
 	    return maxTimestepsPerLife;
 	}
 	
 	/** Return the expected population size of individuals aged ageTSteps or
 	* older, based on a total population size of targetPop. */
-	static int targetCumPop (int ageTSteps, int targetPop);
+	static int targetCumPop (TimeStep ageTSteps, int targetPop);
 	
     private:
         /*! Estimates demography parameters to define a smooth curve for the target
@@ -98,7 +99,7 @@ namespace OM
 	
 	//BEGIN static parameters set by init() or calcCumAgeProp()
         //! max lifespan in intervals
-	static int maxTimestepsPerLife;
+	static TimeStep maxTimestepsPerLife;
 	
 	/** Target cumulative percentage of population by age, from oldest age to youngest.
 	*

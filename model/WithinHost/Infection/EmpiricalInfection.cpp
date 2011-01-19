@@ -67,7 +67,7 @@ CommonInfection* checkpointedEmpiricalInfection (istream& stream) {
 
 
 void EmpiricalInfection::init(){
-    if (Global::interval != 1)
+    if (TimeStep::interval != 1)
 	throw util::xml_scenario_error ("EmpiricalInfection only supports using an interval of 1");
     
     CommonWithinHost::createInfection = &createEmpiricalInfection;
@@ -161,11 +161,11 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 // TODO: TS needs to improve documentation of this function.
 const int EI_MAX_SAMPLES = 10;
-bool EmpiricalInfection::updateDensity (double survivalFactor, int ageOfInfection) {
+bool EmpiricalInfection::updateDensity (double survivalFactor, TimeStep ageOfInfection) {
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
-  if (ageOfInfection > _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
+  if (ageOfInfection.asInt() > _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
   // constraints to ensure the density is defined and not exploding
@@ -175,15 +175,15 @@ bool EmpiricalInfection::updateDensity (double survivalFactor, int ageOfInfectio
   for (int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for (int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
-      double b_1=random::gauss(_mu_beta1[ageOfInfection],_sigma_beta1[ageOfInfection]);
-      double b_2=random::gauss(_mu_beta2[ageOfInfection],_sigma_beta2[ageOfInfection]);
-      double b_3=random::gauss(_mu_beta3[ageOfInfection],_sigma_beta3[ageOfInfection]);
+      double b_1=random::gauss(_mu_beta1[ageOfInfection.asInt()],_sigma_beta1[ageOfInfection.asInt()]);
+      double b_2=random::gauss(_mu_beta2[ageOfInfection.asInt()],_sigma_beta2[ageOfInfection.asInt()]);
+      double b_3=random::gauss(_mu_beta3[ageOfInfection.asInt()],_sigma_beta3[ageOfInfection.asInt()]);
       double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
       + b_2 * (L[2]-L[0]) / 2
       + b_3 * (L[2]+L[0]-2*L[1]) / 4;
       
       //include sampling error
-      logDensity=random::gauss(expectedlogDensity,sigma_noise(ageOfInfection));
+      logDensity=random::gauss(expectedlogDensity,sigma_noise(ageOfInfection.asInt()));
       //include drug and immunity effects via growthRateMultiplier 
       logDensity += log(_patentGrowthRateMultiplier);
       
@@ -198,7 +198,7 @@ bool EmpiricalInfection::updateDensity (double survivalFactor, int ageOfInfectio
     localDensity *= survivalFactor;	// Apply drug and vaccine effects
     
     // Infections that get killed before they become patent:
-    if ((ageOfInfection==0) && (localDensity < _subPatentLimit))
+    if ((ageOfInfection==TimeStep(0)) && (localDensity < _subPatentLimit))
       localDensity=0.0;
     
     amplificationPerCycle=localDensity/exp(L[1]);
@@ -213,7 +213,7 @@ bool EmpiricalInfection::updateDensity (double survivalFactor, int ageOfInfectio
   _laggedLogDensities[0]=log(localDensity);
   
   _density = localDensity;
-  _cumulativeExposureJ += Global::interval * _density;
+  _cumulativeExposureJ += TimeStep::interval * _density;
   
   // Note: here use a positive test for survival, since if _density became an NaN tests against it will return false:
   if (_density > _extinctionLevel)

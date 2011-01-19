@@ -46,10 +46,10 @@ public:
   /** Initialise all variables of a human datatype.
    * 
    * \param tm Transmission model reference (to initialize TM code)
-   * \param dateOfBirth date of birth in time steps (equal to simulationTime,
+   * \param dateOfBirth date of birth in time steps (equal to TimeStep::simulation,
    *	except for initial population set up)
-   * \param simulationTime Simulation timestep */
-  Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulationTime);
+   */
+  Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth);
 
   /** Destructor
    * 
@@ -82,12 +82,11 @@ public:
       
   /** Main human update.
    *
-   * @param simulationTime Time-step
    * @param transmissionModel Pointer to transmission data.
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(int simulationTime, Transmission::TransmissionModel* transmissionModel, bool doUpdate);
+  bool update(Transmission::TransmissionModel* transmissionModel, bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -129,11 +128,11 @@ public:
   
   ///@brief Functions to check coverage by interventions
   //@{
-    bool hasVaccineProtection(int maxInterventionAge) const;
-    bool hasIPTiProtection(int maxInterventionAge) const;
-    bool hasITNProtection(int maxInterventionAge) const;
-    bool hasIRSProtection(int maxInterventionAge) const;
-    bool hasVAProtection(int maxInterventionAge) const;
+    bool hasVaccineProtection(TimeStep maxInterventionAge) const;
+    bool hasIPTiProtection(TimeStep maxInterventionAge) const;
+    bool hasITNProtection(TimeStep maxInterventionAge) const;
+    bool hasIRSProtection(TimeStep maxInterventionAge) const;
+    bool hasVAProtection(TimeStep maxInterventionAge) const;
   //@}
   
   /// @brief Small functions
@@ -143,11 +142,11 @@ public:
       return monitoringAgeGroup;
   }
   
-  //! Get the age in years, based on current simulationTime.
+  //! Get the age in years, based on current TimeStep::simulation.
   double getAgeInYears() const;
   
   //! Returns the date of birth
-  inline int getDateOfBirth() {return _dateOfBirth;}
+  inline TimeStep getDateOfBirth() {return _dateOfBirth;}
   
   /** Does the Human have a detectible infection? */
   inline bool detectibleInfection () const {
@@ -155,7 +154,7 @@ public:
   }
   
   // crux for timed deployment as intervention up to some limit:
-  inline bool getInCohort(int)const{ return _inCohort; }
+  inline bool getInCohort(TimeStep)const{ return _inCohort; }
   inline bool getInCohort()const{ return _inCohort; }
   //@}
   
@@ -258,14 +257,14 @@ private:
   
   /** Total asexual blood stage density over last 20 days (need samples from 10, 15 and 20 days ago)
    *
-   * _ylag[simulationTime % _ylagLen] corresponds to current timestep. */
+   * _ylag[TimeStep::simulation % _ylagLen] corresponds to current time step. */
   vector<double> _ylag;
   /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
   /// set by initHumanParameters
   static int _ylagLen;
   
   //!Date of birth, time step since start of warmup
-  int _dateOfBirth;
+  TimeStep _dateOfBirth;
   
   /// True if human is included in a cohort.
   bool _inCohort;

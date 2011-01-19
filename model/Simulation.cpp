@@ -48,10 +48,10 @@ namespace OM {
 Simulation::Simulation(util::Checksum ck)
 : simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL), workUnitIdentifier(0), cksum(ck)
 {
-    OM::Global::init ();
+    OM::TimeStep::init(InputData().getModel().getParameters().getInterval(),
+                       InputData().getDemography().getMaximumAgeYrs());
     
-    Global::simulationTime = 0;
-    Global::timeStep = numeric_limits<int>::min();
+    TimeStep::simulation = TimeStep( 0 );
     
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
@@ -75,95 +75,94 @@ Simulation::~Simulation(){
 // -----  run simulations  -----
 
 int Simulation::start(){
-    totalSimDuration = Global::lifespanInitIntervals	// ONE_LIFE_SPAN
-	+ _population->_transmissionModel->transmissionInitDuration()	// initial run of TRANSMISSION_INIT
-	+ Surveys.getFinalTimestep() + 1;	// MAIN_PHASE: surveys; +1 to let final survey run
+    totalSimDuration = TimeStep::lifespanInitIntervals  // ONE_LIFE_SPAN
+        + _population->_transmissionModel->transmissionInitDuration()   // initial run of TRANSMISSION_INIT
+        + Surveys.getFinalTimestep() + TimeStep( 1 );   // MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
-	Continuous::init( true );
-	readCheckpoint();
+        Continuous::init( true );
+        readCheckpoint();
     } else {
-	Continuous::init( false );
-	_population->createInitialHumans();
+        Continuous::init( false );
+        _population->createInitialHumans();
     }
     // Set to either a checkpointing timestep or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    int testCheckpointStep = util::CommandLine::getNextCheckpointTime( Global::simulationTime );
-    int testCheckpointDieStep = testCheckpointStep;	// kill program at same time
+    TimeStep testCheckpointStep = util::CommandLine::getNextCheckpointTime( TimeStep::simulation );
+    TimeStep testCheckpointDieStep = testCheckpointStep;        // kill program at same time
     
     // phase loop
     while (true) {
-	// loop for steps within a phase
-	while (Global::simulationTime < simPeriodEnd) {
-	    // checkpoint
-	    if (util::BoincWrapper::timeToCheckpoint() || Global::simulationTime == testCheckpointStep) {
-		writeCheckpoint();
-		util::BoincWrapper::checkpointCompleted();
-	    }
-	    if (Global::simulationTime == testCheckpointDieStep)
-		throw util::cmd_exit ("Checkpoint test: checkpoint written");
-	    
-	    // Reporting: effectively happens at end of time-step due to 
-	    Continuous::update();
-	    if (Global::timeStep == Surveys.currentTimestep) {
-		_population->newSurvey();
-		Surveys.incrementSurveyPeriod();
-	    }
-	    _population->implementIntervention(Global::timeStep);
-	    
-	    // Simulation-time used to be 1-based (from Fortran implementation).
-	    // It is now zero-based with regards to checkpoints but one-based
-	    // with regards to everything else: rather messy.
-	    ++Global::simulationTime;
-	    
-	    // update
-	    _population->update1();
-	    
-	    util::BoincWrapper::reportProgress (double(Global::simulationTime) / totalSimDuration);
-	    
-	    ++Global::timeStep;	// zero-based: zero on first time-step of intervention period
-	}
-	
-	if (phase == STARTING_PHASE) {
-	    // Start ONE_LIFE_SPAN:
-	    ++phase;
-	    simPeriodEnd = Global::lifespanInitIntervals;
-	} else if (phase == ONE_LIFE_SPAN) {
-	    // Start vector-initialisation:
-	    ++phase;
-	    simPeriodEnd += _population->_transmissionModel->transmissionInitDuration();
-	} else if (phase == TRANSMISSION_INIT) {
-	    int extend = _population->_transmissionModel->transmissionInitIterate();
-	    if (extend > 0) {	// repeat phase
-		simPeriodEnd += extend;
-		totalSimDuration += extend;
-	    } else {		// next phase
-		// Start MAIN_PHASE:
-		++phase;
-		simPeriodEnd = totalSimDuration;
-		Global::timeStep=0;
-		_population->preMainSimInit();
-		_population->newSurvey();	// Only to reset TransmissionModel::innoculationsPerAgeGroup
-		Surveys.incrementSurveyPeriod();
-	    }
-	} else if (phase == MAIN_PHASE) {
-	    ++phase;
-	    cerr << "sim end" << endl;
-	    break;
-	}
-	if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
-	    // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-	    int phase_mid = Global::simulationTime + (simPeriodEnd - Global::simulationTime) / 2;
-	    // don't checkpoint 0-length phases or do mid-phase checkpointing when timed checkpoints were specified:
-	    if( testCheckpointStep == numeric_limits< int >::min()
-		&& phase_mid > Global::simulationTime
-	    ){
-		testCheckpointStep = phase_mid;
-		// Test checkpoint: die a bit later than checkpoint for better
-		// resume testing (specifically, ctsout.txt).
-		testCheckpointDieStep = testCheckpointStep + 2;
-	    }
-	}
+        // loop for steps within a phase
+        while (TimeStep::simulation < simPeriodEnd) {
+            // checkpoint
+            if (util::BoincWrapper::timeToCheckpoint() || TimeStep::simulation == testCheckpointStep) {
+                writeCheckpoint();
+                util::BoincWrapper::checkpointCompleted();
+            }
+            if (TimeStep::simulation == testCheckpointDieStep)
+                throw util::cmd_exit ("Checkpoint test: checkpoint written");
+            
+            Continuous::update();
+            if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
+                _population->newSurvey();
+                Surveys.incrementSurveyPeriod();
+            }
+            _population->implementIntervention(TimeStep::interventionPeriod);
+            
+            // Simulation-time used to be 1-based (from Fortran implementation).
+            // It is now zero-based with regards to checkpoints but one-based
+            // with regards to everything else: rather messy.
+            ++TimeStep::simulation;
+            
+            // update
+            _population->update1();
+            
+            util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
+            
+            ++TimeStep::interventionPeriod;     // zero-based: zero on first time-step of intervention period
+        }
+        
+        if (phase == STARTING_PHASE) {
+            // Start ONE_LIFE_SPAN:
+            ++phase;
+            simPeriodEnd = TimeStep::lifespanInitIntervals;
+        } else if (phase == ONE_LIFE_SPAN) {
+            // Start vector-initialisation:
+            ++phase;
+            simPeriodEnd += _population->_transmissionModel->transmissionInitDuration();
+        } else if (phase == TRANSMISSION_INIT) {
+            TimeStep extend = _population->_transmissionModel->transmissionInitIterate();
+            if (extend > TimeStep( 0 )) {       // repeat phase
+                simPeriodEnd += extend;
+                totalSimDuration += extend;
+            } else {            // next phase
+                // Start MAIN_PHASE:
+                ++phase;
+                simPeriodEnd = totalSimDuration;
+                TimeStep::interventionPeriod=TimeStep(0);
+                _population->preMainSimInit();
+                _population->newSurvey();       // Only to reset TransmissionModel::innoculationsPerAgeGroup
+                Surveys.incrementSurveyPeriod();
+            }
+        } else if (phase == MAIN_PHASE) {
+            ++phase;
+            cerr << "sim end" << endl;
+            break;
+        }
+        if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
+            // First of middle of next phase, or current value (from command line) triggers a checkpoint.
+            TimeStep phase_mid = TimeStep::simulation + TimeStep( (simPeriodEnd - TimeStep::simulation).asInt() / 2 );
+            // don't checkpoint 0-length phases or do mid-phase checkpointing when timed checkpoints were specified:
+            if( testCheckpointStep == TimeStep::never
+                && phase_mid > TimeStep::simulation
+            ){
+                testCheckpointStep = phase_mid;
+                // Test checkpoint: die a bit later than checkpoint for better
+                // resume testing (specifically, ctsout.txt).
+                testCheckpointDieStep = testCheckpointStep + TimeStep(2);
+            }
+        }
     }
     
     // Open a critical section; should prevent app kill while/after writing
@@ -173,7 +172,7 @@ int Simulation::start(){
     
     PopulationStats::print();
     
-    _population->flushReports();	// ensure all Human instances report past events
+    _population->flushReports();        // ensure all Human instances report past events
     Surveys.writeSummaryArrays();
     
     // Write scenario checksum, only if simulation completed.
@@ -203,7 +202,7 @@ int readCheckpointNum () {
     checkpointFile >> checkpointNum;
     checkpointFile.close();
     if (!checkpointFile)
-	throw util::checkpoint_error ("error reading from file \"checkpoint\"");
+        throw util::checkpoint_error ("error reading from file \"checkpoint\"");
     return checkpointNum;
 }
 
@@ -213,49 +212,49 @@ void Simulation::writeCheckpoint(){
     
     int oldCheckpointNum = 0, checkpointNum = 0;
     if (isCheckpoint()) {
-	oldCheckpointNum = readCheckpointNum();
-	// Get next checkpoint number:
-	checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
+        oldCheckpointNum = readCheckpointNum();
+        // Get next checkpoint number:
+        checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
     }
     
-    {	// Open the next checkpoint file for writing:
-	ostringstream name;
-	name << CHECKPOINT << checkpointNum;
-	//Writing checkpoint:
-// 	cerr << Global::simulationTime << " WC: " << name.str();
-	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
-	    name << ".gz";
-	    ogzstream out(name.str().c_str(), ios::out | ios::binary);
-	    checkpoint (out, checkpointNum);
-	    out.close();
-	} else {
-	    ofstream out(name.str().c_str(), ios::out | ios::binary);
-	    checkpoint (out, checkpointNum);
-	    out.close();
-	}
+    {   // Open the next checkpoint file for writing:
+        ostringstream name;
+        name << CHECKPOINT << checkpointNum;
+        //Writing checkpoint:
+//      cerr << TimeStep::simulation << " WC: " << name.str();
+        if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
+            name << ".gz";
+            ogzstream out(name.str().c_str(), ios::out | ios::binary);
+            checkpoint (out, checkpointNum);
+            out.close();
+        } else {
+            ofstream out(name.str().c_str(), ios::out | ios::binary);
+            checkpoint (out, checkpointNum);
+            out.close();
+        }
     }
     
-    {	// Indicate which is the latest checkpoint file.
-	ofstream checkpointFile;
-	checkpointFile.open(CHECKPOINT,ios::out);
-	checkpointFile << checkpointNum;
-	checkpointFile.close();
-	if (!checkpointFile)
-	    throw util::checkpoint_error ("error writing to file \"checkpoint\"");
+    {   // Indicate which is the latest checkpoint file.
+        ofstream checkpointFile;
+        checkpointFile.open(CHECKPOINT,ios::out);
+        checkpointFile << checkpointNum;
+        checkpointFile.close();
+        if (!checkpointFile)
+            throw util::checkpoint_error ("error writing to file \"checkpoint\"");
     }
     // Truncate the old checkpoint to save disk space, when it existed
     if( oldCheckpointNum != checkpointNum
-	&& !util::CommandLine::option (
-	    util::CommandLine::TEST_DUPLICATE_CHECKPOINTS
-	)	/* need original in this case */
+        && !util::CommandLine::option (
+            util::CommandLine::TEST_DUPLICATE_CHECKPOINTS
+        )       /* need original in this case */
     ) {
-	ostringstream name;
-	name << CHECKPOINT << oldCheckpointNum;
-	if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
-	    name << ".gz";
-	}
-	ofstream out(name.str().c_str(), ios::out | ios::binary);
-	out.close();
+        ostringstream name;
+        name << CHECKPOINT << oldCheckpointNum;
+        if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
+            name << ".gz";
+        }
+        ofstream out(name.str().c_str(), ios::out | ios::binary);
+        out.close();
     }
 //     cerr << " OK" << endl;
 }
@@ -265,13 +264,13 @@ void Simulation::readCheckpoint() {
     
   // Open the latest file
   ostringstream name;
-  name << CHECKPOINT << checkpointNum;	// try uncompressed
+  name << CHECKPOINT << checkpointNum;  // try uncompressed
   ifstream in(name.str().c_str(), ios::in | ios::binary);
   if (in.good()) {
     checkpoint (in, checkpointNum);
     in.close();
   } else {
-    name << ".gz";				// then compressed
+    name << ".gz";                              // then compressed
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
@@ -281,7 +280,7 @@ void Simulation::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr <<Global::simulationTime<<" RC"<<endl;
+  cerr <<TimeStep::simulation<<" RC"<<endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
@@ -293,55 +292,56 @@ void Simulation::readCheckpoint() {
 
 void Simulation::checkpoint (istream& stream, int checkpointNum) {
     try {
-	util::checkpoint::header (stream);
-	util::CommandLine::staticCheckpoint (stream);
-	Population::staticCheckpoint (stream);
-	Surveys & stream;
-	Continuous::staticCheckpoint (stream);
-#	ifdef OM_STREAM_VALIDATOR
-	util::StreamValidator & stream;
-#	endif
-	
-	Global::simulationTime & stream;
-	Global::timeStep & stream;
-	simPeriodEnd & stream;
-	totalSimDuration & stream;
-	phase & stream;
-	(*_population) & stream;
-	PopulationStats::staticCheckpoint( stream );
-	
-	// read last, because other loads may use random numbers:
-	util::random::checkpoint (stream, checkpointNum);
-	
-	// Check scenario.xml and checkpoint files correspond:
-	int oldWUID(workUnitIdentifier);
-	util::Checksum oldCksum(cksum);
-	workUnitIdentifier & stream;
-	cksum & stream;
-	if (workUnitIdentifier != oldWUID || cksum != oldCksum)
-	    throw util::checkpoint_error ("mismatched checkpoint");
-    } catch (const util::checkpoint_error& e) {	// append " (pos X of Y bytes)"
-	ostringstream pos;
-	pos<<" (pos "<<stream.tellg()<<" of ";
-	stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
-	pos<<stream.tellg()<<" bytes)";
-	throw util::checkpoint_error( e.what() + pos.str() );
+        util::checkpoint::header (stream);
+        util::CommandLine::staticCheckpoint (stream);
+        Population::staticCheckpoint (stream);
+        Surveys & stream;
+        Continuous::staticCheckpoint (stream);
+#       ifdef OM_STREAM_VALIDATOR
+        util::StreamValidator & stream;
+#       endif
+        
+        TimeStep::interventionPeriod & stream;
+        simPeriodEnd & stream;
+        totalSimDuration & stream;
+        phase & stream;
+        (*_population) & stream;
+        PopulationStats::staticCheckpoint( stream );
+        
+        // read last, because other loads may use random numbers or expect time
+        // to be negative
+        TimeStep::simulation & stream;
+        util::random::checkpoint (stream, checkpointNum);
+        
+        // Check scenario.xml and checkpoint files correspond:
+        int oldWUID(workUnitIdentifier);
+        util::Checksum oldCksum(cksum);
+        workUnitIdentifier & stream;
+        cksum & stream;
+        if (workUnitIdentifier != oldWUID || cksum != oldCksum)
+            throw util::checkpoint_error ("mismatched checkpoint");
+    } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
+        ostringstream pos;
+        pos<<" (pos "<<stream.tellg()<<" of ";
+        stream.ignore (numeric_limits<streamsize>::max()-1);    // skip to end of file
+        pos<<stream.tellg()<<" bytes)";
+        throw util::checkpoint_error( e.what() + pos.str() );
     }
     
     
-    stream.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
+    stream.ignore (numeric_limits<streamsize>::max()-1);        // skip to end of file
     if (stream.gcount () != 0) {
-	ostringstream msg;
-	msg << "Checkpointing file has " << stream.gcount() << " bytes remaining." << endl;
-	throw util::checkpoint_error (msg.str());
+        ostringstream msg;
+        msg << "Checkpointing file has " << stream.gcount() << " bytes remaining." << endl;
+        throw util::checkpoint_error (msg.str());
     } else if (stream.fail())
-	throw util::checkpoint_error ("stream read error");
+        throw util::checkpoint_error ("stream read error");
 }
 
 void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
     if (stream == NULL || !stream.good())
-	throw util::checkpoint_error ("Unable to write to file");
+        throw util::checkpoint_error ("Unable to write to file");
     util::timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
@@ -352,21 +352,21 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     util::StreamValidator & stream;
 # endif
     
-    Global::simulationTime & stream;
-    Global::timeStep & stream;
+    TimeStep::interventionPeriod & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
     phase & stream;
     (*_population) & stream;
     PopulationStats::staticCheckpoint( stream );
     
+    TimeStep::simulation & stream;
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
     cksum & stream;
     
     util::timer::stopCheckpoint ();
     if (stream.fail())
-	throw util::checkpoint_error ("stream write error");
+        throw util::checkpoint_error ("stream write error");
 }
 
 }

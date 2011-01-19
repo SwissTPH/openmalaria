@@ -38,7 +38,7 @@ public:
 
 	virtual ~MolineauxInfection () {};
 	static void init();
-	virtual bool updateDensity(double survivalFactor, int ageOfInfection);
+	virtual bool updateDensity(double survivalFactor, TimeStep ageOfInfection);
 
 protected:
     virtual void checkpoint (ostream& stream);
@@ -97,7 +97,7 @@ private:
 	    void operator& (istream& stream);
 	    
 	    void updateGrowthRateMultiplier( double pd, double immune_response_escape );
-	    double updateDensity (double survivalFactor, int ageOfInfection);
+	    double updateDensity (double survivalFactor, TimeStep ageOfInfection);
 	    double getVariantSpecificSummation();
 	};
 	//TODO: resizes may be slow; should check.

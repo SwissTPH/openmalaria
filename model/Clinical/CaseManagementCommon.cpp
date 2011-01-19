@@ -30,7 +30,7 @@
 namespace OM { namespace Clinical {
     using util::AgeGroupInterpolation;
     
-    int CaseManagementCommon::healthSystemSource;
+    TimeStep CaseManagementCommon::healthSystemSource( TimeStep::never );
     util::AgeGroupInterpolation* CaseManagementCommon::caseFatalityRate = AgeGroupInterpolation::dummyObject();
     double CaseManagementCommon::_oddsRatioThreshold;
     util::AgeGroupInterpolation* CaseManagementCommon::pSeqInpatient = AgeGroupInterpolation::dummyObject();
@@ -40,14 +40,14 @@ namespace OM { namespace Clinical {
     void CaseManagementCommon::initCommon (){
 	_oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
 	
-	changeHealthSystem(-1);
+	changeHealthSystem(TimeStep::never);
     }
     void CaseManagementCommon::cleanupCommon (){
         AgeGroupInterpolation::freeObject( caseFatalityRate );
         AgeGroupInterpolation::freeObject( pSeqInpatient );
     }
     
-    void CaseManagementCommon::changeHealthSystem (int source) {
+    void CaseManagementCommon::changeHealthSystem (TimeStep source) {
 	healthSystemSource = source;
 	const scnXml::HealthSystem& healthSystem = getHealthSystem ();
 	
@@ -60,7 +60,7 @@ namespace OM { namespace Clinical {
     }
     
     const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem () {
-	if (healthSystemSource == -1) {
+	if (healthSystemSource == TimeStep::never) {
 	    return InputData().getHealthSystem();
 	} else {
 	    const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
@@ -93,7 +93,7 @@ namespace OM { namespace Clinical {
     }
     void CaseManagementCommon::staticCheckpoint (istream& stream) {
 	healthSystemSource & stream;
-	if (healthSystemSource != -1)
+	if (healthSystemSource != TimeStep::never)
 	    changeHealthSystem( healthSystemSource );
     }
 } }

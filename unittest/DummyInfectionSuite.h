@@ -35,9 +35,10 @@ public:
     void setUp () {
 	UnittestUtil::Infection_init_NaN ();
 	DummyInfection::init();
-	Global::interval = 1;
-	Global::simulationTime = 1;	// value isn't really important
+	TimeStep::init( 1, 90.0 );
+	TimeStep::simulation = TimeStep(1);	// value isn't really important
 	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
+        TimeStep::simulation = TimeStep(2);     // next time step
     }
     void tearDown () {
 	delete infection;
@@ -48,24 +49,27 @@ public:
     }
     
     void testUpdatedInf () {
-	infection->update (Global::simulationTime + 1, 1.0);
+	infection->update (1.0);
 	TS_ASSERT_APPROX (infection->getDensity(), 128.00000008620828820);
     }
     void testUpdated2Inf () {
-	infection->update (Global::simulationTime + 1, 1.0);
-	infection->update (Global::simulationTime + 2, 1.0);
+	infection->update (1.0);
+        TimeStep::simulation += TimeStep(1);
+	infection->update (1.0);
 	TS_ASSERT_APPROX (infection->getDensity(), 1024.00000082264208600);
     }
     
     void testUpdatedReducedInf () {
-	infection->update (Global::simulationTime + 1, 1.0);
-	infection->update (Global::simulationTime + 2, 0.1);
+	infection->update (1.0);
+        TimeStep::simulation += TimeStep(1);
+	infection->update (0.1);
 	// This is, as expected, 1/10th of that in testUpdated2Inf
 	TS_ASSERT_APPROX (infection->getDensity(), 102.40000008226420860);
     }
     void testUpdatedReducedInf2 () {
-	infection->update (Global::simulationTime + 1, 0.1);
-	infection->update (Global::simulationTime + 2, 1.0);
+	infection->update (0.1);
+        TimeStep::simulation += TimeStep(1);
+	infection->update (1.0);
 	// This is nearly the same
 	TS_ASSERT_APPROX (infection->getDensity(), 102.00000008286288040);
     }

@@ -107,10 +107,9 @@ public:
    *
    * @param population The human population; so we can sum up availability and
    *	infectiousness.
-   * @param simulationTime
    * @param sIndex Index of the type of mosquito in per-type/species lists.
    * @param isDynamic True to use full model; false to drive model from current contents of S_v. */
-  void advancePeriod (const std::list<Host::Human>& population, int simulationTime, size_t sIndex, bool isDynamic);
+  void advancePeriod (const std::list<Host::Human>& population, size_t sIndex, bool isDynamic);
   
   /** Returns the EIR calculated by advancePeriod().
    * 
@@ -425,7 +424,7 @@ private:
    * initialisation period (so can be reinitialised). */
   //@{
   /** Timestep at which larviciding effects dissappear. */
-  int larvicidingEndStep;
+  TimeStep larvicidingEndStep;
   /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
    * this parameter. */
   double larvicidingIneffectiveness;

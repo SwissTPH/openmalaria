@@ -20,6 +20,11 @@
 #ifndef OM_util_checkpoint
 #define OM_util_checkpoint
 
+#ifndef Hmod_Global
+#error "Please include Global.h not checkpoint.h directly."
+// otherwise "using ..." declaration in Global.h won't work
+#endif
+
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <vector>

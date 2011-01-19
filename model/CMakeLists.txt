@@ -5,7 +5,6 @@
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
   Simulation.cpp
-  Global.cpp
   Population.cpp
   PopulationAgeStructure.cpp
   PopulationStats.cpp
@@ -74,6 +73,7 @@ set (Model_CPP
   util/random.cpp
   util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
+  util/TimeStep.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

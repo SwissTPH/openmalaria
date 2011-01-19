@@ -32,8 +32,8 @@ std::vector<double> NeonatalMortality::_prevalenceByGestationalAge;
 
 
 void NeonatalMortality::init() {
-  int timeStepsPer5Months = 150 / Global::interval;
-  _prevalenceByGestationalAge.assign(timeStepsPer5Months, 0.0);
+  TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
+  _prevalenceByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -84,15 +84,15 @@ void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pC
   prev2025 = double(pCounter) / nCounter;  
   double maxprev = prev2025;
   //gestational age is in time steps for the last 5 months of pregnancy only
-  int timeStepsMinus1 = 150 / Global::interval - 1;
+  TimeStep timeStepsMinus1( 150 / TimeStep::interval - 1 );
   //update the vector containing the prevalence by gestational age
-  for (int t=0; t < timeStepsMinus1; t++) {
-    _prevalenceByGestationalAge[t] = _prevalenceByGestationalAge[t+1];
-    if (_prevalenceByGestationalAge[t] > maxprev) {
-      maxprev = _prevalenceByGestationalAge[t];
+  for (TimeStep t(0); t < timeStepsMinus1; ++t) {
+    _prevalenceByGestationalAge[t.asInt()] = _prevalenceByGestationalAge[t.asInt()+1];
+    if (_prevalenceByGestationalAge[t.asInt()] > maxprev) {
+      maxprev = _prevalenceByGestationalAge[t.asInt()];
     }
   }
-  _prevalenceByGestationalAge[timeStepsMinus1] = prev2025;
+  _prevalenceByGestationalAge[timeStepsMinus1.asInt()] = prev2025;
   //equation (2) p 75 AJTMH 75 suppl 2
   double prevpg= maxprev / (critPrevPrim + maxprev);
   //equation (1) p 75 AJTMH 75 suppl 2

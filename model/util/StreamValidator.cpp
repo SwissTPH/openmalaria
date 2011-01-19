@@ -100,7 +100,7 @@ void StreamValidatorType::handle( size_t value ){
     }else{
 	if( value != *readIt ){
 	    // Attach a debugger with a breakpoint here to get the backtrace.
-	    cerr << "StreamValidator: out of sync!" << endl;
+	    throw runtime_error ("StreamValidator: out of sync!");
 	}
 	++readIt;
     }

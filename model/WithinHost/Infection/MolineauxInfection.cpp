@@ -82,7 +82,7 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
 }
 
 void MolineauxInfection::init() {
-    if (Global::interval != 1)
+    if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
 
     CommonWithinHost::createInfection = &createMolineauxInfection;
@@ -231,7 +231,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
     }
 }
 
-double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ageOfInfection) {
+double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeStep ageOfInfection) {
     // growthRate:
     // p(t+1) = p(t) * sqrt(p(t+2)/p(t))
     // p(t+2) = p(t+1) * sqrt(p(t+2)/p(t))
@@ -258,8 +258,8 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ag
     return P;
 }
 
-bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection) {
-    if (ageOfInfection == 0)
+bool MolineauxInfection::updateDensity(double survivalFactor, TimeStep ageOfInfection) {
+    if (ageOfInfection == TimeStep(0))
     {
         _density = variants[0].P;
     }
@@ -275,7 +275,7 @@ bool MolineauxInfection::updateDensity(double survivalFactor, int ageOfInfection
         _density = newDensity;
     }
 
-    _cumulativeExposureJ += Global::interval * _density;
+    _cumulativeExposureJ += TimeStep::interval * _density;
 
     if (_density>1.0e-5)
     {
@@ -299,7 +299,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //the time steps are two days and the dimension of sigma is per day.
 
     //Molineaux paper equation 6
-    size_t index = (Global::simulationTime % 8)/2;	// 8 days ago has same index as today
+    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
     variantSpecificSummation = (variantSpecificSummation * exp(-2.0*sigma))+laggedP[index];
     laggedP[index] = P;
 
@@ -309,7 +309,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
 double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 5
-    size_t index = (Global::simulationTime % 8)/2;	// 8 days ago has same index as today
+    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
     variantTranscendingSummation = (variantTranscendingSummation * exp(-2.0*rho))+laggedPc[index];
 
     //Molineaux paper equation 8

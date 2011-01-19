@@ -39,8 +39,8 @@ double ClinicalModel::_nonMalariaMortality;
 // -----  static methods  -----
 
 void ClinicalModel::init () {
-  infantDeaths.resize(Global::intervalsPerYear);
-  infantIntervalsAtRisk.resize(Global::intervalsPerYear);
+  infantDeaths.resize(TimeStep::stepsPerYear);
+  infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
   _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
   
   Pathogenesis::PathogenesisModel::init();
@@ -78,18 +78,18 @@ ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
 
 
 void ClinicalModel::initMainSimulation () {
-    for (size_t i=0;i<Global::intervalsPerYear; i++) {
-	Clinical::ClinicalModel::infantIntervalsAtRisk[i]=0;
-	Clinical::ClinicalModel::infantDeaths[i]=0;
+    for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
+	Clinical::ClinicalModel::infantIntervalsAtRisk[i.asInt()]=0;
+	Clinical::ClinicalModel::infantDeaths[i.asInt()]=0;
     }
 }
 
 double ClinicalModel::infantAllCauseMort(){
   double infantPropSurviving=1.0;	// use to calculate proportion surviving
-  for (size_t i=0;i<Global::intervalsPerYear; i++) {
+  for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
     // multiply by proportion of infants surviving at each interval
-    infantPropSurviving *= double(ClinicalModel::infantIntervalsAtRisk[i]-ClinicalModel::infantDeaths[i])
-      / double(ClinicalModel::infantIntervalsAtRisk[i]);
+    infantPropSurviving *= double(ClinicalModel::infantIntervalsAtRisk[i.asInt()]-ClinicalModel::infantDeaths[i.asInt()])
+      / double(ClinicalModel::infantIntervalsAtRisk[i.asInt()]);
   }
   // Child deaths due to malaria (per 1000), plus non-malaria child deaths. Deaths per 1000 births is the return unit.
   return (1.0 - infantPropSurviving) * 1000.0 + _nonMalariaMortality;
@@ -110,17 +110,17 @@ ClinicalModel::~ClinicalModel () {
 
 // -----  other non-static methods  -----
 
-bool ClinicalModel::isDead (int ageTimeSteps) {
-  if (ageTimeSteps > Global::maxAgeIntervals)	// too old (reached age limit)
+bool ClinicalModel::isDead (TimeStep ageTimeSteps) {
+  if (ageTimeSteps > TimeStep::maxAgeIntervals)	// too old (reached age limit)
     _doomed = DOOMED_TOO_OLD;
   if (_doomed > 0)	// killed by some means
     return true;	// remove from population
   return false;
 }
 
-void ClinicalModel::update (Human& human, double ageYears, int ageTimeSteps) {
+void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps) {
   if (_doomed < 0)	// Countdown to indirect mortality
-    _doomed -= Global::interval;
+    _doomed -= TimeStep::interval;
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical bout 6 intervals before
@@ -128,7 +128,7 @@ void ClinicalModel::update (Human& human, double ageYears, int ageTimeSteps) {
     _doomed = DOOMED_INDIRECT;
     return;
   }
-  if(ageTimeSteps == 1) {
+  if(ageTimeSteps == TimeStep(1)) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
       Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
@@ -140,14 +140,14 @@ void ClinicalModel::update (Human& human, double ageYears, int ageTimeSteps) {
   doClinicalUpdate (human, ageYears);
 }
 
-void ClinicalModel::updateInfantDeaths (int ageTimeSteps) {
+void ClinicalModel::updateInfantDeaths (TimeStep ageTimeSteps) {
   // update array for the infant death rates
-  if (ageTimeSteps <= (int)Global::intervalsPerYear){
-    ++infantIntervalsAtRisk[ageTimeSteps-1];
+  if (ageTimeSteps <= TimeStep::intervalsPerYear){
+    ++infantIntervalsAtRisk[ageTimeSteps.asInt()-1];
     // Testing _doomed == -30 gives very slightly different results than
     // testing _doomed == DOOMED_INDIRECT (due to above if(..))
     if (_doomed == DOOMED_COMPLICATED || _doomed == -30 || _doomed == DOOMED_NEONATAL){
-      ++infantDeaths[ageTimeSteps-1];
+      ++infantDeaths[ageTimeSteps.asInt()-1];
     }
   }
 }

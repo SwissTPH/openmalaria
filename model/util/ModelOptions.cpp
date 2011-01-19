@@ -181,7 +181,7 @@ namespace OM { namespace util {
         if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
         
-        if( Global::interval != 1 ){
+        if( TimeStep::interval != 1 ){
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
                 .set( DUMMY_WITHIN_HOST_MODEL )
@@ -198,7 +198,7 @@ namespace OM { namespace util {
                 }
             }
         }
-        if( Global::interval != 5){
+        if( TimeStep::interval != 5){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
                 .set( ATTENUATION_ASEXUAL_DENSITY )

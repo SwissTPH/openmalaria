@@ -37,6 +37,10 @@ public:
         dfElt.setK( 1.6 );
     }
     
+    void setUp() {
+        TimeStep::init(5,90.0);
+    }
+    
     void testBad() {
         dfElt.setFunction( "unknown" );
         string errMsg = "decay function type unknown of DecayFunctionSuite unrecognized";
@@ -47,48 +51,48 @@ public:
     void testConstant () {
         dfElt.setFunction( "constant" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 1.9 );
     }
     
     void testLinear () {
         dfElt.setFunction( "linear" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 438 ), 0.76 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 0.0 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 0.76 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
     }
     
     void testExponential () {
         dfElt.setFunction( "exponential" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 438 ), 1.2535325 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 0.475 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.2535325 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.475 );
     }
     
     void testWeibull () {
         dfElt.setFunction( "weibull" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 438 ), 1.3989906 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 0.2323814 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.3989906 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.2323814 );
     }
     
     void testHill () {
         dfElt.setFunction( "hill" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 438 ), 1.3179680 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 0.47129642 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.3179680 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.47129642 );
     }
     
     void testChitnis () {
         dfElt.setFunction( "chitnis" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( 0 ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( 438 ), 0.77248235 );
-        TS_ASSERT_APPROX( df.eval( 1460 ), 0.0 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 0.77248235 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
     }
     
 private:

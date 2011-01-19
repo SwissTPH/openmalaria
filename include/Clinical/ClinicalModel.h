@@ -79,18 +79,18 @@ public:
    *
    * @returns True if the human has been killed by some means. The clinical
    *	model now tracks this status. */
-  bool isDead (int ageTimeSteps);
+  bool isDead (TimeStep ageTimeSteps);
   
   /** Run main part of the model: determine the sickness status and any
    * treatment for the human.
    * 
    * @param ageYears Age of human.
    * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (Human& human, double ageYears, int ageTimeSteps);
+  void update (Human& human, double ageYears, TimeStep ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
-  void updateInfantDeaths (int ageTimeSteps);
+  void updateInfantDeaths (TimeStep ageTimeSteps);
   
   /** Used with IPT within host model to potentially skip summarizing.
    *

@@ -37,8 +37,8 @@ void MuellerPathogenesis::init(){
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
-  double incidenceDensity = rateMultiplier_31 * (pow(totalDensity, densityExponent_32)) * Global::yearsPerInterval;
-  return 1-exp(-incidenceDensity);
+  double incidenceDensity = rateMultiplier_31 * (pow(totalDensity, densityExponent_32)) * TimeStep::yearsPerInterval;
+  return 1.0-exp(-incidenceDensity);
 }
 
 } }

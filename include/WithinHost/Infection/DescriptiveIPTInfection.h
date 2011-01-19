@@ -47,7 +47,7 @@ public:
   //@{
   //! Constructor
   /*! \param lastSPdose Time interval of last SP Dose. */
-  DescriptiveIPTInfection(int lastSPdose);
+  DescriptiveIPTInfection(TimeStep lastSPdose);
   DescriptiveIPTInfection (istream& stream);
   
   /** Destructor */
@@ -55,14 +55,14 @@ public:
   //@}
   
   /** The event that the last SP dose clears parasites. */
-  bool eventSPClears (int _lastSPDose);
+  bool eventSPClears (TimeStep _lastSPDose);
   
   /// Return: _SPattenuate == 1. Name by DH.
   bool doSPAttenuation () { return _SPattenuate == 1; }
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
-  double getAsexualAttenuationEndDate () {
-    return _startdate + _duration * genotypes[proteome_ID].atten;	//FIXME: should probably add latentp
+  TimeStep getAsexualAttenuationEndDate () {
+    return _startdate + TimeStep(_duration.asInt() * genotypes[proteome_ID].atten);	//FIXME: should probably add latentp
   }
   
 protected:
@@ -72,20 +72,21 @@ private:
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;
   
-//!In order to save memory, we just define the ID of the genotype. Attributes of the
-//!genotype can be accessed via arrays in mod_intervention.
-//!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
-//!attributes are:
-//!freq: Probability of being infected by this specific genotype
-//!ACR: Probability of being cured (due to SP)
-//!proph: Prophylactic effect of SP (measured in time steps)
-//!tolperiod: time window of tolerance period
-//!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
+  //!In order to save memory, we just define the ID of the genotype. Attributes of the
+  //!genotype can be accessed via arrays in mod_intervention.
+  //!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
   struct GenotypeData {
+      GenotypeData(double cF, TimeStep tP, TimeStep p, double acr, double at) :
+        cumFreq(cF), tolPeriod(tP), proph(p), ACR(acr), atten(at) {}
+    //!freq: Probability of being infected by this specific genotype
     double cumFreq;
-    int tolPeriod;
-    int proph;
+    //!tolperiod: time window of tolerance period
+    TimeStep tolPeriod;
+    //!proph: Prophylactic effect of SP (measured in time steps)
+    TimeStep proph;
+    //!ACR: Probability of being cured (due to SP)
     double ACR;
+    //!SPattenuation: Factor of how parasites are attenuated  by SP (genotype specific)
     double atten;
   };
   /// Per genotype data, set by initParameters

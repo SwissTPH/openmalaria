@@ -21,6 +21,7 @@
 #include "util/DecayFunction.h"
 #include "util/errors.h"
 #include "inputData.h"
+#include "util/StreamValidator.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -31,7 +32,7 @@ namespace util {
 
 class ConstantDecayFunction : public DecayFunction {
 public:
-    double eval(int ageTS) const{
+    double eval(TimeStep age) const{
         return 1.0;
     }
 };
@@ -39,29 +40,33 @@ public:
 class LinearDecayFunction : public DecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
-        L( elt.getL() * Global::intervalsPerYear )
+        L( TimeStep::fromYears( elt.getL() ) ),
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
     {}
     
-    double eval(int ageTS) const{
-        if( ageTS < L ){
-            return 1.0 - ageTS / L;
+    double eval(TimeStep age) const{
+        if( age < L ){
+            return 1.0 - age.asInt() * invL;
         }else{
             return 0.0;
         }
     }
     
 private:
-    double L;
+    TimeStep L;
+    double invL;
 };
 
 class ExponentialDecayFunction : public DecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        negInvLambda( -log(2.0) / (elt.getL() * Global::intervalsPerYear) )
-    {}
+        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
+    {
+        util::streamValidate(negInvLambda);
+    }
     
-    double eval(int ageTS) const{
-        return exp( ageTS * negInvLambda );
+    double eval(TimeStep age) const{
+        return exp( age.asInt() * negInvLambda );
     }
     
 private:
@@ -71,12 +76,12 @@ private:
 class WeibullDecayFunction : public DecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
-        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * Global::intervalsPerYear) ),
+        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * TimeStep::stepsPerYear) ),
         k( elt.getK() )
     {}
     
-    double eval(int ageTS) const{
-        return exp( -pow(ageTS * constOverLambda, k) );
+    double eval(TimeStep age) const{
+        return exp( -pow(age.asInt() * constOverLambda, k) );
     }
     
 private:
@@ -87,12 +92,12 @@ private:
 class HillDecayFunction : public DecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
-        invL( 1.0 / (elt.getL() * Global::intervalsPerYear) ),
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
         k( elt.getK() )
     {}
     
-    double eval(int ageTS) const{
-        return 1.0 / (1.0 + pow(ageTS * invL, k));
+    double eval(TimeStep age) const{
+        return 1.0 / (1.0 + pow(age.asInt() * invL, k));
     }
     
 private:
@@ -102,20 +107,22 @@ private:
 class ChitnisDecayFunction : public DecayFunction {
 public:
     ChitnisDecayFunction( const scnXml::DecayFunction& elt ) :
-        L( elt.getL() * Global::intervalsPerYear ),
+        L( TimeStep::fromYears( elt.getL() ) ),
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
         k( elt.getK() )
     {}
     
-    double eval(int ageTS) const{
-        if( ageTS < L ){
-            return exp( k - k / (1.0 - pow(ageTS / L, 2.0)) );
+    double eval(TimeStep age) const{
+        if( age < L ){
+            return exp( k - k / (1.0 - pow(age.asInt() * invL, 2.0)) );
         }else{
             return 0.0;
         }
     }
     
 private:
-    double L, k;
+    TimeStep L;
+    double invL, k;
 };
 
 

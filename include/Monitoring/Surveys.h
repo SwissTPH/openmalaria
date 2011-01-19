@@ -40,6 +40,8 @@ namespace OM { namespace Monitoring {
 class SurveysType
 {
   public:
+      SurveysType() : currentTimestep(TimeStep::never) {}
+      
     /** Points to _survey[_surveyPeriod] (the dummy element _survey[0] before
      * start of main sim and after completion of last survey).
      * This is for data being collected for the next survey. */
@@ -49,7 +51,7 @@ class SurveysType
      * For point-time surveys this is the time of the survey; where data is
      * collected over a period, the period is from the timestep following the
      * previous survey (or the start of the main simulation) until this time. */
-    int currentTimestep;
+    TimeStep currentTimestep;
     /** Get survey for a human -- switched depending on whether
      * the human is in the cohort and reporting mode. */
     inline Survey& getSurvey( bool inCohort ){
@@ -91,7 +93,7 @@ class SurveysType
      * This isn't quite the same as before when the simulation end was
      * explicitly specified and has a small affect on
      * infantAllCauseMortality (survey 21) output. */
-    inline int getFinalTimestep () {
+    inline TimeStep getFinalTimestep () {
       return _surveysTimeIntervals[_survey.size()-2];	// final entry is a concatenated -1
     }
     //@}
@@ -107,7 +109,7 @@ class SurveysType
     void checkpoint (ostream& stream);
     
     //! Time intervals for all surveys specified in the XML, appended with -1
-    vector<int> _surveysTimeIntervals;
+    vector<TimeStep> _surveysTimeIntervals;
     /** Index for the time dimention of the summary arrays
      * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
     int _surveyPeriod;

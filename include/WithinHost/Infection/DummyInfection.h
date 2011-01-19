@@ -48,7 +48,7 @@ public:
   int getEndDate();
 
   
-  virtual bool updateDensity (double survivalFactor, int ageOfInfection);
+  virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection);
 };
 
 } }

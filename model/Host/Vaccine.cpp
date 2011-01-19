@@ -31,7 +31,7 @@ namespace OM {
 namespace Host {
 using namespace OM::util;
 
-vector<int> Vaccine::targetAgeTStep;
+vector<TimeStep> Vaccine::targetAgeTStep;
 size_t Vaccine::_numberOfEpiDoses = 0;
 Vaccine Vaccine::PEV;
 Vaccine Vaccine::BSV;
@@ -86,7 +86,7 @@ void Vaccine::init()
     if (interventions.getContinuous().present())
         _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
     if (_numberOfEpiDoses) {
-        targetAgeTStep.resize (_numberOfEpiDoses, 0);
+        targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
         const scnXml::Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
         for (size_t i = 0;i < _numberOfEpiDoses; i++) {
             if (i >= cVS.size()) {
@@ -94,7 +94,7 @@ void Vaccine::init()
                 msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
                 throw util::xml_scenario_error (msg.str());
             }
-            targetAgeTStep[i] = (int) floor (cVS[i].getTargetAgeYrs() * Global::DAYS_IN_YEAR / (double) Global::interval);
+            targetAgeTStep[i] = TimeStep::fromYears( cVS[i].getTargetAgeYrs() );
         }
     }
 }
@@ -123,7 +123,7 @@ void Vaccine::cleanup ()
 
 
 PerHumanVaccine::PerHumanVaccine() :
-        _lastVaccineDose(0), _timeLastVaccine(Global::TIMESTEP_NEVER),
+        _lastVaccineDose(0), _timeLastVaccine(TimeStep::never),
         _initialBSVEfficacy(0.0), _initialPEVEfficacy(0.0), _initialTBVEfficacy(0.0)
 {
 }
@@ -140,10 +140,10 @@ void PerHumanVaccine::vaccinate() {
         _initialTBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
 
     ++_lastVaccineDose;
-    _timeLastVaccine = Global::simulationTime;
+    _timeLastVaccine = TimeStep::simulation;
 }
-bool PerHumanVaccine::hasProtection(int maxInterventionAge)const{
-    return _timeLastVaccine + maxInterventionAge > Global::simulationTime;
+bool PerHumanVaccine::hasProtection(TimeStep maxInterventionAge)const{
+    return _timeLastVaccine + maxInterventionAge > TimeStep::simulation;
 }
 
 }

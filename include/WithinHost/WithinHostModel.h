@@ -106,7 +106,7 @@ public:
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Last IPTi dose recent enough to give protection?
-  virtual bool hasIPTiProtection (int maxInterventionAge) const;
+  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   //@}
   
   ///@brief Immunity model

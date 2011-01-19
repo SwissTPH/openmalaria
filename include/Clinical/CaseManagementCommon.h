@@ -50,7 +50,7 @@ namespace OM { namespace Clinical {
 	
 	/** Checkpointing: load state.
 	 *
-	 * If healthSystemSource != -1, this calls changeHealthSystem to re-load
+	 * If healthSystemSource != TimeStep::never, this calls changeHealthSystem to re-load
 	 * a parameters from an intervention. */
 	static void staticCheckpoint (istream& stream);
 	/// Checkpointing: save state
@@ -60,12 +60,12 @@ namespace OM { namespace Clinical {
 	 * following an intervention.
 	 * 
 	 * Gets the primary description of the health system when
-	 * source == -1, or the replacement description given by
+	 * source == TimeStep::never, or the replacement description given by
 	 * timed intervention at timestep source, then calls
 	 * setHealthSystem from a derived class.
 	 * 
 	 * Also calls readCaseFatalityRatio with the new data. */
-	static void changeHealthSystem (int source);
+	static void changeHealthSystem (TimeStep source);
 	
 	/// Return the case-fatality-rate map (needed by EventScheduler)
 // 	static inline const map<double,double>& getCaseFatalityRates (){
@@ -100,7 +100,7 @@ namespace OM { namespace Clinical {
 	
     private:
 	/** Gets the primary description of the health system when
-	 * source == -1, or the replacement description given by
+	 * source == TimeStep::never, or the replacement description given by
 	 * timed intervention at timestep source. */
 	static const scnXml::HealthSystem& getHealthSystem ();
 	
@@ -109,7 +109,7 @@ namespace OM { namespace Clinical {
 	
 	/** Describes which health-system descriptor should be used, in order
 	 * to load the correct one from a checkpoint (see getHealthSystem). */
-	static int healthSystemSource;
+	static TimeStep healthSystemSource;
 	
 	// An interpolation function from age-groups to CFR values.
         static util::AgeGroupInterpolation* caseFatalityRate;

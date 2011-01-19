@@ -85,14 +85,14 @@ public:
     /** Checks for time-based interventions and implements them
      *
      * \param time Current time (in tsteps) */
-    void implementIntervention (int time);
+    void implementIntervention (TimeStep time);
 
 private:
     //! Creates initializes and add to the population list a new uninfected human
     /*!
        \param dob date of birth (usually current time)
     */
-    void newHuman (int dob);
+    void newHuman (TimeStep dob);
     
     /// Delegate to print the number of hosts
     void ctsHosts (ostream& stream);
@@ -127,7 +127,7 @@ private:
      * integer passed number-of-timesteps-ago.
      * @param intervention A member-function pointer to a "void func ()" function
      * within human which activates the intervention. */
-    void massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (int) const, void (Host::Human::*intervention) ());
+    void massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (TimeStep) const, void (Host::Human::*intervention) ());
 
 
     /** This function sets the imported infections in a population.

@@ -27,11 +27,11 @@ namespace OM {
 namespace Clinical {
 using Monitoring::Surveys;
 
-int Episode::healthSystemMemory;
+TimeStep Episode::healthSystemMemory( TimeStep::never );
 
 
 void Episode::init() {
-    healthSystemMemory = InputData().getModel().getClinical().getHealthSystemMemory();
+    healthSystemMemory = TimeStep(InputData().getModel().getClinical().getHealthSystemMemory());
 }
 
 
@@ -42,16 +42,16 @@ Episode::~Episode ()
 
 void Episode::flush() {
     report();
-    _time = Global::TIMESTEP_NEVER;
+    _time = TimeStep::never;
 }
 
 
-void Episode::update (int simulationTime, bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
+void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
 {
-    if (simulationTime > (_time + healthSystemMemory)) {
+    if (TimeStep::simulation > (_time + healthSystemMemory)) {
         report ();
 
-        _time = simulationTime;
+        _time = TimeStep::simulation;
         _surveyPeriod = Surveys.getSurveyNumber( inCohort );
         _ageGroup = ageGroup;
         _state = newState;
@@ -61,7 +61,7 @@ void Episode::update (int simulationTime, bool inCohort, Monitoring::AgeGroup ag
 }
 
 void Episode::report () {
-    if (_time == Global::TIMESTEP_NEVER)        // Nothing to report
+    if (_time == TimeStep::never)        // Nothing to report
         return;
 
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
@@ -122,7 +122,7 @@ void Episode::report () {
 
 void Episode::operator& (istream& stream) {
     _time & stream;
-    if (_time != Global::TIMESTEP_NEVER) {
+    if (_time != TimeStep::never) {
         _surveyPeriod & stream;
         _ageGroup & stream;
         int s;
@@ -132,7 +132,7 @@ void Episode::operator& (istream& stream) {
 }
 void Episode::operator& (ostream& stream) {
     _time & stream;
-    if (_time != Global::TIMESTEP_NEVER) {
+    if (_time != TimeStep::never) {
         _surveyPeriod & stream;
         _ageGroup & stream;
         _state & stream;

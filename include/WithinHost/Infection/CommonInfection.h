@@ -42,12 +42,11 @@ public:
     
     /** Update: calculate new density.
     *
-    * @param simulationTime Simulation timestep (expected to be a 1-day timestep)
     * @param survivalFactor Density multiplier to introduce drug & vaccine effects
     * @returns True when the infection goes extinct. */
-    inline bool update (int simulationTime, double survivalFactor){
-	int ageOfInfection = simulationTime - _startdate - latentp;	// age in days
-	if( ageOfInfection < 0 )
+    inline bool update (double survivalFactor){
+	TimeStep ageOfInfection = TimeStep::simulation - _startdate - latentp;	// age in days
+	if( ageOfInfection < TimeStep(0) )
 	    return false;	// latent period (liver stage) — don't do anything
 	else
 	    return updateDensity( survivalFactor, ageOfInfection );
@@ -59,7 +58,7 @@ protected:
     * @param survivalFactor Density multiplier to introduce drug & vaccine effects
     * @param ageOfInfection Age of the blood-stage infection in timesteps (0 on first day)
     * @returns True when the infection goes extinct. */
-    virtual bool updateDensity (double survivalFactor, int ageOfInfection) =0;
+    virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection) =0;
 };
 
 } }

@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "util/random.h"
 #include "util/vectors.h"
+#include "util/StreamValidator.h"
 #include "Monitoring/Surveys.h"	// sim-end timestep
 #include <limits>
 #include <cmath>
@@ -33,24 +34,25 @@ namespace OM { namespace Transmission {
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
 const double NonVectorTransmission::min_EIR_mult= 0.01; 
 
-NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData)
+NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData) :
+  nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
 {
-  nspore = nonVectorData.getEipDuration() / Global::interval;
+  initialKappa.resize (TimeStep::stepsPerYear);
   
-  initialKappa.resize (Global::intervalsPerYear);
-  
-  vector<int> nDays (Global::intervalsPerYear, 0);
+  vector<int> nDays (TimeStep::stepsPerYear, 0);
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
+  
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-  if( daily.size() < static_cast<size_t>(Global::DAYS_IN_YEAR) )
+  if( daily.size() < static_cast<size_t>(TimeStep::intervalsPerYear.inDays()) )
       throw util::xml_scenario_error( "insufficient EIRDaily data for a year" );
+  
   for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
     double EIRdaily = std::max((double)daily[mpcday], minEIR);
     
     // istep is the time period to which the day is assigned.  The result of the
     // division is automatically rounded down to the next integer.
-    size_t i1 = (mpcday / Global::interval) % Global::intervalsPerYear;
+    size_t i1 = (mpcday / TimeStep::interval) % TimeStep::stepsPerYear;
     //EIR() is the sum of the EIRs assigned to the 73 different recurring time points
     nDays[i1]++;
     initialisationEIR[i1] += EIRdaily;
@@ -58,9 +60,9 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
   
   // Calculate total annual EIR
   // divide by number of records assigned to each interval (usually one per day)
-  for (size_t j=0;j<Global::intervalsPerYear; j++) {
-    initialisationEIR[j] *= Global::interval / (double)nDays[j];
-    annualEIR += initialisationEIR[j];
+  for (TimeStep j(0);j<TimeStep::intervalsPerYear; ++j) {
+    initialisationEIR[j.asInt()] *= TimeStep::interval / (double)nDays[j.asInt()];
+    annualEIR += initialisationEIR[j.asInt()];
   }
 }
 
@@ -99,24 +101,24 @@ void NonVectorTransmission::initMainSimulation (){
       throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
-int NonVectorTransmission::transmissionInitDuration (){
+TimeStep NonVectorTransmission::transmissionInitDuration (){
     // 0 maintains old behaviour; human infectiousness over the last year of
     // human initialisation is used.
-    return 0;
+    return TimeStep(0);
 }
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
-    // Note: requires Global::timeStep >= 0, but this can only be called in intervention period anyway.
+    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be called in intervention period anyway.
   simulationMode = transientEIRknown;
   
-  if (nspore != nonVectorData.getEipDuration() / Global::interval)
+  if (nspore != TimeStep::fromDays( nonVectorData.getEipDuration() ))
       throw util::xml_scenario_error ("change-of-EIR intervention cannot change EIP duration");
   
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-  vector<int> nDays ((daily.size()-1)/Global::interval + 1, 0);
+  vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (static_cast<int>(nDays.size()) < Monitoring::Surveys.getFinalTimestep()+1) {
-    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Monitoring::Surveys.getFinalTimestep()+1 << endl;
+  if (daily.size() < static_cast<size_t>(Monitoring::Surveys.getFinalTimestep().inDays()+1)) {
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
     throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
@@ -126,13 +128,13 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
     
     // istep is the time period to which the day is assigned.  The result of the
     // division is automatically rounded down to the next integer.
-    size_t istep = mpcday / Global::interval;
+    size_t istep = mpcday / TimeStep::interval;
     nDays[istep]++;
     interventionEIR[istep] += EIRdaily;
   }
   // divide by number of records assigned to each interval (usually one per day)
   for (size_t i = 0; i < interventionEIR.size(); ++i)
-    interventionEIR[i] *= Global::interval / nDays[i];
+    interventionEIR[i] *= TimeStep::interval / nDays[i];
   
   // I've no idea what this should be, so until someone asks it can be NaN.
   // It was -9.99 and later 0.0. It could of course be recalculated from interventionEIR.
@@ -150,27 +152,28 @@ void NonVectorTransmission::uninfectVectors(){
 }
 
 
-double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageYears){
+double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
     case equilibriumMode:
-      eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
+      //FIXME: figure out if it is correct that 1 is subtracted here and below but not elsewhere
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array
-      eir = interventionEIR[Global::timeStep];
+      eir = interventionEIR[TimeStep::interventionPeriod.asInt()];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[(simulationTime-1) % Global::intervalsPerYear];
-      if (Global::timeStep >= 0) {
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
+      if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness nspore timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
 	eir *=
-            kappa[(simulationTime-nspore-1) % Global::intervalsPerYear] /
-            initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear];
+            kappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] /
+            initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
       }
       break;
     default:	// Anything else.. don't continue silently
@@ -180,8 +183,8 @@ double NonVectorTransmission::calculateEIR(int simulationTime, PerHostTransmissi
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nkappa:\t" << kappa[(simulationTime-nspore-1) % Global::intervalsPerYear]
-	<< "\ninitialKappa:\t" << initialKappa[(simulationTime-nspore-1) % Global::intervalsPerYear] << endl;
+	<< "\nkappa:\t" << kappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear]
+	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
     throw overflow_error(msg.str());
   }
 #endif

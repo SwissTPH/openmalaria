@@ -40,9 +40,9 @@ void PerHostTransmission::cleanup (){
 
 PerHostTransmission::PerHostTransmission () :
     outsideTransmission(false),
-    timestepITN(Global::TIMESTEP_NEVER),
-    timestepIRS(Global::TIMESTEP_NEVER),
-    timestepVA(Global::TIMESTEP_NEVER)
+    timestepITN(TimeStep::never),
+    timestepIRS(TimeStep::never),
+    timestepVA(TimeStep::never)
 {}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
   _relativeAvailabilityHet = availabilityFactor;
@@ -56,34 +56,34 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over (Global::simulationTime - Global::TIMESTEP_NEVER) timesteps
+// of Weibull decay over (TimeStep::simulation - TimeStep::never) timesteps
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double alpha_i = species[speciesIndex].entoAvailability;
-  if (timestepITN >= 0)
-    alpha_i *= (1.0 - base.ITNDeterrency.eval (Global::simulationTime - timestepITN));
-  if (timestepIRS >= 0)
-    alpha_i *= (1.0 - base.IRSDeterrency.eval (Global::simulationTime - timestepIRS));
-  if (timestepVA >= 0)
-    alpha_i *= (1.0 - base.VADeterrency.eval (Global::simulationTime - timestepVA));
+  if (timestepITN >= TimeStep(0))
+    alpha_i *= (1.0 - base.ITNDeterrency.eval (TimeStep::simulation - timestepITN));
+  if (timestepIRS >= TimeStep(0))
+    alpha_i *= (1.0 - base.IRSDeterrency.eval (TimeStep::simulation - timestepIRS));
+  if (timestepVA >= TimeStep(0))
+    alpha_i *= (1.0 - base.VADeterrency.eval (TimeStep::simulation - timestepVA));
 
   return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_B_i = species[speciesIndex].probMosqBiting;
-  if (timestepITN >= 0)
-    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect.eval (Global::simulationTime - timestepITN));
+  if (timestepITN >= TimeStep(0))
+    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect.eval (TimeStep::simulation - timestepITN));
   return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_C_i = species[speciesIndex].probMosqFindRestSite;
-  if (timestepITN >= 0)
-    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect.eval (Global::simulationTime - timestepITN));
+  if (timestepITN >= TimeStep(0))
+    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect.eval (TimeStep::simulation - timestepITN));
   double P_D_i = species[speciesIndex].probMosqSurvivalResting;
-  if (timestepIRS >= 0)
-    P_D_i *= (1.0 - base.IRSKillingEffect.eval (Global::simulationTime - timestepIRS));
+  if (timestepIRS >= TimeStep(0))
+    P_D_i *= (1.0 - base.IRSKillingEffect.eval (TimeStep::simulation - timestepIRS));
   return P_C_i * P_D_i;
 }
 

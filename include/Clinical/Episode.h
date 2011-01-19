@@ -41,7 +41,7 @@ public:
     /** Set healthSystemMemory. */
     static void init();
     
-  Episode() : _time(Global::TIMESTEP_NEVER), _ageGroup() {};
+  Episode() : _time(TimeStep::never), _ageGroup() {};
   ~Episode();
   
   /// Report anything pending, as on destruction
@@ -49,11 +49,11 @@ public:
   
   /** Report an episode, its severity, and any outcomes it entails.
    *
-   * @param simulationTime Time of report (i.e. now)
+   * @param TimeStep::simulation Time of report (i.e. now)
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(int simulationTime, bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
+  void update(bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
   
   Pathogenesis::State getState() const {return _state;};
   
@@ -67,7 +67,7 @@ public:
    * 
    * Used by both the clinical models in roughly the same way, but will have
    * different values in each to match Global::interval. */
-  static int healthSystemMemory;
+  static TimeStep healthSystemMemory;
   
 private:
   /** Report a clinical episode.
@@ -79,7 +79,7 @@ private:
   void report();
   
   /// Timestep of event (TIMESTEP_NEVER if no event).
-  int _time;
+  TimeStep _time;
   /// Survey during which the event occured
   int _surveyPeriod;
   /// Age group of the individual when the episode's first bout occurred

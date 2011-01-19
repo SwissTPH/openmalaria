@@ -54,7 +54,7 @@ public:
   /// Prescribe IPTi with probability compliance. Only called if IPT present.
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Last IPTi dose recent enough to give protection?
-  virtual bool hasIPTiProtection (int maxInterventionAge) const;
+  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   
   /// Is IPT present?
   /// set by initParameters
@@ -70,11 +70,11 @@ protected:
   
 private:
   //! time at which attenuated infection 'would' end if SP present
-  int _SPattenuationt;
+  TimeStep _SPattenuationt;
   /** Timestep of last SP Dose given (TIMESTEP_NEVER if no SP dose given). */
-  int _lastSPDose;
+  TimeStep _lastSPDose;
   /// Timestep of last IPTi or placebo dose given (TIMESTEP_NEVER if never given).
-  int _lastIptiOrPlacebo;
+  TimeStep _lastIptiOrPlacebo;
   
   //!Cumulative number of infections since birth
   //NOTE: we also have _cumulativeh; why both?
@@ -82,8 +82,21 @@ private:
   
   /// @brief Static data set by initParameters
   //@{
+    // When 10≤effect<30: IPT dose
+    // 2 or 12: SP; 3 or 13: short-acting drug
+    // 14-22: something to do with seasonality
+    enum IPTiEffects {
+        PLACEBO_SP  = 2,
+        PLACEBO_CLEAR_INFECTIONS = 3,
+        IPT_MIN = 10,   // likely 10 and 11 are unused
+        IPT_SP = 12,
+        IPT_CLEAR_INFECTIONS = 13,
+        IPT_SEASONAL_MIN = 14,
+        IPT_SEASONAL_MAX = 22,
+        IPT_MAX = 30    // no idea what values greater than 22 mean... maybe nothing
+    };
   /// Values (codes)
-  static int iptiEffect;
+  static IPTiEffects iptiEffect;
   //@}
 };
 

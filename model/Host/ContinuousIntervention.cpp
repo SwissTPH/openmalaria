@@ -49,59 +49,56 @@ void ContinuousIntervention::init (
     const scnXml::Continuous::IptiSequence& seqIpti = xmlCts.getIpti();
     const scnXml::Continuous::CohortSequence& seqCohort = xmlCts.getCohort();
     size_t n = seqVaccine.size() + seqItn.size() + seqIpti.size() + seqCohort.size();
-    ctsIntervs.resize( n );
+    ctsIntervs.reserve( n );
     
     typedef xsd::cxx::tree::sequence< ::scnXml::AgeSpecific >::const_iterator const_it_t;
     
     // Now read each type of intervention in turn, then sort.
     // Changing XML structure could reduce code duplication here.
-    n = 0;	// use as index in ctsIntervs
     
     for (const_it_t it = seqVaccine.begin(); it != seqVaccine.end(); ++it){
-	ctsIntervs[n].assign( *it, deployVaccine );
-	n++;
+	ctsIntervs.push_back(AgeIntervention( *it, deployVaccine ));
     }
     for (const_it_t it = seqItn.begin(); it != seqItn.end(); ++it){
-	ctsIntervs[n].assign( *it, deployItn );
-	n++;
+        ctsIntervs.push_back(AgeIntervention( *it, deployItn ));
     }
     for (const_it_t it = seqIpti.begin(); it != seqIpti.end(); ++it){
-	ctsIntervs[n].assign( *it, deployIpti );
-	n++;
+        ctsIntervs.push_back(AgeIntervention( *it, deployIpti ));
     }
     for (const_it_t it = seqCohort.begin(); it != seqCohort.end(); ++it){
-	ctsIntervs[n].assign( *it, deployCohort );
-	n++;
+        ctsIntervs.push_back(AgeIntervention( *it, deployCohort ));
     }
     
     sort( ctsIntervs.begin(), ctsIntervs.end() );
+    assert( ctsIntervs.size() == n );
 }
 
-void ContinuousIntervention::AgeIntervention::assign( const ::scnXml::AgeSpecific& elt, void(Human::*func) () ){
-    begin = elt.getBegin();
-    end = elt.getEnd();
-    ageTimesteps = static_cast<uint32_t>(
-	floor( elt.getTargetAgeYrs() * Global::DAYS_IN_YEAR / (1.0*Global::interval) )
-    );
-    if( ageTimesteps <= 0 ){
+ContinuousIntervention::AgeIntervention::AgeIntervention(
+    const ::scnXml::AgeSpecific& elt, void(Human::*func) ()
+) :
+    begin( elt.getBegin() ),
+    end( elt.getEnd() ),
+    ageTimesteps( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
+    cohortOnly( elt.getCohort() ),
+    coverage( elt.getCoverage() ),
+    deploy( func )
+{
+    if( ageTimesteps <= TimeStep(0) ){
 	ostringstream msg;
 	msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
 	msg << " years corresponds to timestep "<<ageTimesteps;
 	msg << "; must be at least timestep 1.";
 	throw util::xml_scenario_error( msg.str() );
     }
-    cohortOnly = elt.getCohort();
-    coverage = elt.getCoverage();
-    deploy = func;
 }
 
-void ContinuousIntervention::deploy (Human* human, int ageTimesteps){
+void ContinuousIntervention::deploy (Human* human, TimeStep ageTimesteps){
     while( nextCtsDist < ctsIntervs.size() ){
 	if( ctsIntervs[nextCtsDist].ageTimesteps > ageTimesteps )
 	    break;	// remaining intervs happen in future
 	// If interv for now, do it. (If we missed the time, ignore it.)
 	if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
-	    if( ctsIntervs[nextCtsDist].begin <= Global::timeStep && Global::timeStep <= ctsIntervs[nextCtsDist].end ){
+	    if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
 		if( !ctsIntervs[nextCtsDist].cohortOnly || human->getInCohort() ){
 		    if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
 			(human->*(ctsIntervs[nextCtsDist].deploy)) ();

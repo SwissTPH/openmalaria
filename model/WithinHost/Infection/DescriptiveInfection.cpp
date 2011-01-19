@@ -25,23 +25,19 @@
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "util/StreamValidator.h"
 #include <algorithm>
 #include <sstream>
 #include <string.h>
 #include <stdexcept>
 #include <cmath>
 
-// This model can only be used with Global::interval == 5.
-// Use a macro instead of Global::interval since the compiler should be able to
-// evaluate it at compile-time.
-#define INTERVAL 5
-
 namespace OM {
 namespace WithinHost {
 using namespace util;
 //static (class) variables
 
-double DescriptiveInfection::meanLogParasiteCount[maxDur*maxDur];
+double DescriptiveInfection::meanLogParasiteCount[maxDur][maxDur];
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
@@ -49,7 +45,7 @@ double DescriptiveInfection::xNuStar;
 // -----  static init/clear -----
 
 void DescriptiveInfection::init () {
-    if (Global::interval != 5)
+    if (TimeStep::interval != 5)
         throw util::xml_scenario_error ("DescriptiveInfection only supports using an interval of 5");
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
         throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
@@ -96,10 +92,10 @@ void DescriptiveInfection::init () {
         csvNum3 >> meanlogdens;
 
         //fill initial matrix
-        meanLogParasiteCount[i-1+(j-1)*maxDur]=meanlogdens;
+        meanLogParasiteCount[i-1][j-1]=meanlogdens;
         //fill also the triangle that will not be used (to ensure everything is initialised)
         if (j!=i) {
-            meanLogParasiteCount[j-1+(i-1)*maxDur]=0.0;
+            meanLogParasiteCount[j-1][i-1]=0.0;
         }
 
     }
@@ -113,10 +109,9 @@ void DescriptiveInfection::cleanup () {}
 // -----  non-static init/destruction  -----
 
 DescriptiveInfection::DescriptiveInfection () :
-        Infection(0xFFFFFFFF)
-{
-    _duration=infectionDuration();
-}
+        Infection(0xFFFFFFFF),
+        _duration(infectionDuration())
+{}
 
 DescriptiveInfection::~DescriptiveInfection() {
 }
@@ -124,27 +119,27 @@ DescriptiveInfection::~DescriptiveInfection() {
 
 // -----  other  -----
 
-int DescriptiveInfection::infectionDuration() {
+TimeStep DescriptiveInfection::infectionDuration() {
     double meanlogdur=5.1300001144409179688;
     //Std of the logduration
     double sdlogdur=0.80000001192092895508;
     double dur=random::log_normal(meanlogdur, sdlogdur);
-    return (1+(int)floor(dur)) / INTERVAL;
+    return TimeStep::fromDays(1.0+dur);
 }
 
 void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
 {
     //Age of infection. (Blood stage infection starts latentp intervals later than inoculation.)
-    int infage = Global::simulationTime - _startdate - latentp;
-    if ( infage >= 0) {
-        if ( infage < maxDur ) {
-            int iduration=_duration;
-            if ( iduration > maxDur)
-                iduration=maxDur;
+    TimeStep infage = TimeStep::simulation - _startdate - latentp;
+    if ( infage >= TimeStep(0)) {
+        if ( infage < TimeStep(maxDur) ) {
+            TimeStep iduration=_duration;
+            if ( iduration > TimeStep(maxDur))
+                iduration = TimeStep(maxDur);
 
-            _density=exp(meanLogParasiteCount[infage + (iduration - 1)*maxDur]);
+            _density=exp(meanLogParasiteCount[infage.asInt()][iduration.asInt() - 1]);
         } else {
-            _density=exp(meanLogParasiteCount[maxDur-1 + (maxDur-1)*maxDur]);
+            _density=exp(meanLogParasiteCount[maxDur-1][maxDur-1]);
         }
         if (_density < 1.0)
             _density=1.0;
@@ -165,12 +160,12 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
         double meanlog = log(_density) - stdlog*stdlog / 2.0;
         timeStepMaxDensity = 0.0;
         if (stdlog > 0.0000001) {
-            if (INTERVAL > 1) {
+            if (TimeStep::interval > 1) {
                 /*
                 sample the maximum density over the T-1 remaining days in the
                 time interval, (where T is the duration of the time interval)
                 */
-                double normp = pow(random::uniform_01(), 1.0 / (INTERVAL-1));
+                double normp = pow(random::uniform_01(), 1.0 / (TimeStep::interval-1));
                 /*
                 To mimic sampling T-1 repeated values, we transform the sampling
                 distribution and use only one sampled value, which has the sampling
@@ -220,12 +215,12 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 //Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
 void DescriptiveInfection::determineDensityFinal () {
     _density = std::min(maxDens, _density);
-    _cumulativeExposureJ += INTERVAL * _density;
+    _cumulativeExposureJ += TimeStep::interval * _density;
 }
 
 
 DescriptiveInfection::DescriptiveInfection (istream& stream) :
-        Infection(stream)
+        Infection(stream), _duration(TimeStep::never)
 {
     _duration & stream;
 }

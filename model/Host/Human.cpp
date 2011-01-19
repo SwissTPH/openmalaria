@@ -23,7 +23,7 @@
 
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"	// only for summarizing
+#include "WithinHost/DescriptiveIPTWithinHost.h"        // only for summarizing
 
 #include "inputData.h"
 #include "Transmission/TransmissionModel.h"
@@ -49,27 +49,27 @@ namespace OM { namespace Host {
 
 // -----  Static functions  -----
 
-void Human::initHumanParameters () {	// static
+void Human::initHumanParameters () {    // static
     // Init models used by humans:
     ContinuousIntervention::init(
-	&Human::ctsVaccinate,
-	&Human::ctsITN,
-	&Human::deployIptDose,
-	&Human::addToCohort
+        &Human::ctsVaccinate,
+        &Human::ctsITN,
+        &Human::deployIptDose,
+        &Human::addToCohort
     );
     Transmission::PerHostTransmission::init();
     InfectionIncidenceModel::init();
     WithinHost::WithinHostModel::init();
     Clinical::ClinicalModel::init();
     Vaccine::init();
-    _ylagLen = Global::intervalsPer5Days * 4;
+    _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     cohortFirstBoutOnly = InputData().getMonitoring().getFirstBoutOnly();
     cohortFirstTreatmentOnly = InputData().getMonitoring().getFirstTreatmentOnly();
     cohortFirstInfectionOnly = InputData().getMonitoring().getFirstInfectionOnly();
 }
 
-void Human::clear() {	// static clear
+void Human::clear() {   // static clear
   Vaccine::cleanup();
   Clinical::ClinicalModel::cleanup();
   WithinHost::WithinHostModel::cleanup();
@@ -80,7 +80,7 @@ void Human::clear() {	// static clear
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulationTime) :
+Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(),
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
     infIncidence(InfectionIncidenceModel::createModel()),
@@ -88,7 +88,7 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
     _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
-  if (_dateOfBirth != simulationTime && (Global::simulationTime > 0 || _dateOfBirth > simulationTime))
+  if (_dateOfBirth != TimeStep::simulation && (TimeStep::simulation > TimeStep(0) || _dateOfBirth > TimeStep::simulation))
     throw out_of_range ("Invalid date of birth!");
   
   _ylag.assign (_ylagLen, 0.0);
@@ -113,13 +113,13 @@ Human::Human(Transmission::TransmissionModel& tm, int dateOfBirth, int simulatio
     _comorbidityFactor=0.2;
     if (random::uniform_01() < 0.5) {
       _comorbidityFactor=1.8;
-    }	
+    }   
   }
   if (util::ModelOptions::option (util::TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
     if (random::uniform_01() < 0.5) {            
       _treatmentSeekingFactor=1.8;
-    }	
+    }   
   }
   if (util::ModelOptions::option (util::TRANS_TREAT_HET)) {
     _treatmentSeekingFactor=0.2;
@@ -166,26 +166,26 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(int simulationTime, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     PopulationStats::humanUpdateCalls++;
     if( doUpdate )
-	PopulationStats::humanUpdates++;
+        PopulationStats::humanUpdates++;
 #endif
-    int ageTimeSteps = simulationTime-_dateOfBirth;
+    TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
     if (clinicalModel->isDead(ageTimeSteps))
-	return true;
+        return true;
     
     if (doUpdate){
-	util::streamValidate( ageTimeSteps );
-	double ageYears = ageTimeSteps * Global::yearsPerInterval;
-	monitoringAgeGroup.update( ageYears );
-	
-	updateInterventionStatus();
-	updateInfection(transmissionModel, ageYears);
-	clinicalModel->update (*this, ageYears, ageTimeSteps);
-	clinicalModel->updateInfantDeaths (ageTimeSteps);
-	_probTransmissionToMosquito = calcProbTransmissionToMosquito ();
+        util::streamValidate( ageTimeSteps.asInt() );
+        double ageYears = ageTimeSteps.inYears();
+        monitoringAgeGroup.update( ageYears );
+        
+        updateInterventionStatus();
+        updateInfection(transmissionModel, ageYears);
+        clinicalModel->update (*this, ageYears, ageTimeSteps);
+        clinicalModel->updateInfantDeaths (ageTimeSteps);
+        _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
     return false;
 }
@@ -195,23 +195,22 @@ void Human::addInfection(){
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-    double EIR = transmissionModel->getEIR( Global::simulationTime,
-            perHostTransmission, ageYears, monitoringAgeGroup );
+    double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int numInf = infIncidence->numNewInfections( *this, EIR );
     for (int i=1;i<=numInf; i++) {
-	withinHostModel->newInfection();
+        withinHostModel->newInfection();
     }
     
     // Cache total density for infectiousness calculations
-    _ylag[Global::simulationTime%_ylagLen]=withinHostModel->getTotalDensity();
+    _ylag[TimeStep::simulation.asInt()%_ylagLen]=withinHostModel->getTotalDensity();
     
     withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
 }
 
 void Human::updateInterventionStatus() {
-    if (Global::timeStep >= 0) {
-	int ageTimeSteps = Global::simulationTime-_dateOfBirth;
-	ctsIntervention.deploy(this, ageTimeSteps);
+    if (TimeStep::interventionPeriod >= TimeStep(0)) {
+        TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
+        ctsIntervention.deploy(this, ageTimeSteps);
     }
 }
 
@@ -221,9 +220,9 @@ void Human::massVaccinate () {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (ageGroup(), 1);
 }
 void Human::ctsVaccinate () {
-    if ( _vaccine.doCtsVaccination( Global::simulationTime - _dateOfBirth ) ){
-	_vaccine.vaccinate();
-	Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (ageGroup(), 1);
+    if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
+        _vaccine.vaccinate();
+        Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (ageGroup(), 1);
     }
 }
 
@@ -257,24 +256,24 @@ void Human::massVA () {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( ageGroup(), 1 );
 }
 
-bool Human::hasVaccineProtection(int maxInterventionAge) const{
+bool Human::hasVaccineProtection(TimeStep maxInterventionAge) const{
     return _vaccine.hasProtection(maxInterventionAge);
 }
-bool Human::hasIPTiProtection(int maxInterventionAge) const{
+bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
     return withinHostModel->hasIPTiProtection(maxInterventionAge);
 }
-bool Human::hasITNProtection(int maxInterventionAge) const{
+bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasITNProtection(maxInterventionAge);
 }
-bool Human::hasIRSProtection(int maxInterventionAge) const{
+bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasIRSProtection(maxInterventionAge);
 }
-bool Human::hasVAProtection(int maxInterventionAge) const{
+bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);
 }
 
 double Human::getAgeInYears() const{
-    return (Global::simulationTime - _dateOfBirth) * Global::yearsPerInterval;
+    return (TimeStep::simulation - _dateOfBirth).inYears();
 }
 
 
@@ -282,9 +281,9 @@ void Human::summarize() {
     // 5-day only, compatibility option:
     if( util::ModelOptions::option( util::REPORT_ONLY_AT_RISK ) &&
         clinicalModel->recentTreatment() ){
-	// This modifies the denominator to treat the 4*5 day intervals
-	// after a bout as 'not at risk' to match the IPTi trials
-	return;
+        // This modifies the denominator to treat the 4*5 day intervals
+        // after a bout as 'not at risk' to match the IPTi trials
+        return;
     }
     
     Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( _inCohort ) );
@@ -328,8 +327,8 @@ double Human::calcProbTransmissionToMosquito() const {
   5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
   for 1-day timesteps to avoid having to design and analyse a new model.
   Description: AJTMH pp.32-33 */
-  int ageTimeSteps=Global::simulationTime-_dateOfBirth;
-  if (ageTimeSteps*Global::interval <= 20 || Global::simulationTime*Global::interval <= 20)
+  TimeStep ageTimeSteps=TimeStep::simulation-_dateOfBirth;
+  if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20)
     return 0.0;
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
@@ -342,9 +341,10 @@ double Human::calcProbTransmissionToMosquito() const {
   // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
   // These values are one timestep more recent than that, however the calculated
   // value is not used until the next timestep when then ages would be correct.
-  double x = beta1 * _ylag[(Global::simulationTime-2*Global::intervalsPer5Days+1) % _ylagLen]
-	   + beta2 * _ylag[(Global::simulationTime-3*Global::intervalsPer5Days+1) % _ylagLen]
-	   + beta3 * _ylag[(Global::simulationTime-4*Global::intervalsPer5Days+1) % _ylagLen];
+  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
+  double x = beta1 * _ylag[firstIndex % _ylagLen]
+           + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
+           + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];
   if (x < 0.001)
     return 0.0;
   
@@ -355,7 +355,7 @@ double Human::calcProbTransmissionToMosquito() const {
   transmit=std::max(transmit, 0.0);
   transmit=std::min(transmit, 1.0);
   
-  //	Include here the effect of transmission-blocking vaccination
+  //    Include here the effect of transmission-blocking vaccination
   double ret = transmit*(1.0-_vaccine.getTBVEfficacy());
   util::streamValidate( ret );
   return ret;

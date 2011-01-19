@@ -128,28 +128,28 @@ public:
   
   /// Give individual a new ITN as of time timeStep.
   inline void setupITN () {
-    timestepITN = Global::simulationTime;
+    timestepITN = TimeStep::simulation;
   }
   /// Give individual a new IRS as of time timeStep.
   inline void setupIRS () {
-    timestepIRS = Global::simulationTime;
+    timestepIRS = TimeStep::simulation;
   }
   /// Give individual a new VA intervention as of time timeStep.
   inline void setupVA () {
-    timestepVA = Global::simulationTime;
+    timestepVA = TimeStep::simulation;
   }
   
   /// Is individual protected by an ITN? FIXME: which base? Want a single parameter encompasing all species
-  inline bool hasITNProtection(int maxInterventionAge)const{
-      return timestepITN + maxInterventionAge > Global::simulationTime;
+  inline bool hasITNProtection(TimeStep maxInterventionAge)const{
+      return timestepITN + maxInterventionAge > TimeStep::simulation;
   }
   /// Is individual protected by IRS?
-  inline bool hasIRSProtection(int maxInterventionAge)const{
-      return timestepIRS + maxInterventionAge > Global::simulationTime;
+  inline bool hasIRSProtection(TimeStep maxInterventionAge)const{
+      return timestepIRS + maxInterventionAge > TimeStep::simulation;
   }
   /// Is individual protected by a VA?
-  inline bool hasVAProtection(int maxInterventionAge)const{
-      return timestepVA + maxInterventionAge > Global::simulationTime;
+  inline bool hasVAProtection(TimeStep maxInterventionAge)const{
+      return timestepVA + maxInterventionAge > TimeStep::simulation;
   }
   
   /// Checkpointing
@@ -174,12 +174,12 @@ private:
   // Determines whether human is outside transmission
   bool outsideTransmission;
   
-  // (simulationTime - timestepXXX) is the age of the intervention.
+  // (TimeStep::simulation - timestepXXX) is the age of the intervention.
   // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
   
-  int timestepITN;
-  int timestepIRS;
-  int timestepVA;
+  TimeStep timestepITN;
+  TimeStep timestepIRS;
+  TimeStep timestepVA;
   
   static AgeGroupInterpolation* relAvailAge;
 };

@@ -50,11 +50,11 @@ void SurveysType::init ()
   
   const scnXml::Surveys::SurveyTimeSequence& survs = mon.getSurveys().getSurveyTime();
 
-  _surveysTimeIntervals.resize (survs.size() + 1);
+  _surveysTimeIntervals.reserve (survs.size() + 1);
   for (size_t i = 0; i < survs.size(); i++) {
-    _surveysTimeIntervals[i] = survs[i];
+    _surveysTimeIntervals.push_back( TimeStep(survs[i]) );
   }
-  _surveysTimeIntervals[survs.size()] = -1;
+  _surveysTimeIntervals.push_back( TimeStep::never );
   currentTimestep = _surveysTimeIntervals[0];
 
   Survey::init ();

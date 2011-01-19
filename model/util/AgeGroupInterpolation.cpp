@@ -185,7 +185,7 @@ namespace OM { namespace util {
         }
         
         // add a point in middle of last age group (taking upper bound as max-age-years:
-        dataPoints[ 0.5*(greatestLbound + Global::maxAgeIntervals*Global::yearsPerInterval) ] = lastValue;
+        dataPoints[ 0.5*(greatestLbound + TimeStep::maxAgeIntervals.inYears()) ] = lastValue;
     }
     
     
@@ -297,7 +297,7 @@ namespace OM { namespace util {
         }
         ofstream fstream( (name+".csv").c_str() );
         
-        double max = Global::maxAgeIntervals*Global::yearsPerInterval;
+        double max = TimeStep::maxAgeIntervals.inYears();
         for( double age = 0.0; age < max; age += 0.1 ){
             fstream << age << "," << this->eval( age ) << endl;
         }

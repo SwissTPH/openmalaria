@@ -39,7 +39,7 @@ using namespace WithinHost;
 class UnittestUtil {
 public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
-	Global::interval = 1;	// I think the drug model is always going to be used with an interval of 1 day.
+	TimeStep::init( 1, 90.0 );	// I think the drug model is always going to be used with an interval of 1 day.
 	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
@@ -80,7 +80,7 @@ public:
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
-	Infection::latentp = 0;
+	Infection::latentp = TimeStep(0);
 	Infection::cumulativeYstar = numeric_limits<float>::quiet_NaN();
 	Infection::cumulativeHstar = numeric_limits<float>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
@@ -88,7 +88,7 @@ public:
     }
     static void Infection_init () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
-	Infection::latentp = 3;
+	Infection::latentp = TimeStep(3);
 	Infection::cumulativeYstar = (float) 68564384.7102;
 	Infection::cumulativeHstar = (float) 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
@@ -96,20 +96,17 @@ public:
     }
     
     static void DescriptiveInfection_init () {
-	Global::interval = 5;
+	TimeStep::init( 5, 90.0 );
 	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
     }
     
     static void EmpiricalWHM_setup () {
-	Global::interval = 1;
+	TimeStep::init( 1, 90.0 );
 	util::ModelOptions::optSet = util::EMPIRICAL_WITHIN_HOST_MODEL;
     }
     
     static void AgeGroupInterpolation_init() {
-        Global::interval = 5;
-        Global::intervalsPerYear = Global::DAYS_IN_YEAR/Global::interval;
-        Global::yearsPerInterval = double(Global::interval) / double(Global::DAYS_IN_YEAR);
-        Global::maxAgeIntervals = static_cast<int> (90.0 * Global::intervalsPerYear);
+        TimeStep::init( 5, 90.0 );
     }
     
     // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes

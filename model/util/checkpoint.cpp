@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include "util/checkpoint.h"
+#include "Global.h"
 #include "util/errors.h"
 
 #include <limits>

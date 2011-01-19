@@ -36,6 +36,7 @@
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
+#include "util/StreamValidator.h"
 
 #include <cmath>
 #include <boost/format.hpp>
@@ -116,7 +117,7 @@ void Population::checkpoint (istream& stream)
     for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back (Host::Human (*_transmissionModel, 0, 0));
+        population.push_back (Host::Human (*_transmissionModel, TimeStep(0)));
         population.back() & stream;
     }
     if (population.size() != popSize)
@@ -145,7 +146,9 @@ void Population::createInitialHumans ()
     until vector init, which saves computation and memory (no infections). */
     
     int cumulativePop = 0;
-    for (int iage = AgeStructure::getMaxTimestepsPerLife() - 1; iage >= 0; iage--) {
+    for (TimeStep iage = AgeStructure::getMaxTimestepsPerLife() - TimeStep(1);
+         iage >= TimeStep(0); --iage )
+    {
 	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
 	    newHuman (-iage);
@@ -163,9 +166,10 @@ void Population::createInitialHumans ()
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::newHuman (int dob)
+void Population::newHuman (TimeStep dob)
 {
-    population.push_back (Host::Human (*_transmissionModel, dob, Global::simulationTime));
+    util::streamValidate( dob.asInt() );
+    population.push_back (Host::Human (*_transmissionModel, dob));
     ++recentBirths;
 }
 
@@ -182,12 +186,12 @@ void Population::update1()
     
     // This should be called before humans contract new infections in the simulation step.
     // This needs the whole population (it is an approximation before all humans are updated).
-    _transmissionModel->vectorUpdate (population, Global::simulationTime);
+    _transmissionModel->vectorUpdate (population);
 
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * Global::simulationTime));
+    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * TimeStep::simulation));
     int targetPop = populationSize;
     int cumPop = 0;
 
@@ -197,11 +201,11 @@ void Population::update1()
     --last;
     for (HumanIter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old:
-        if (iter->update (Global::simulationTime, _transmissionModel,
+        if (iter->update (_transmissionModel,
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
-		(int)Global::intervalsPerYear + iter->getDateOfBirth() > 0
+		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
 	    )) {
             iter->destroy();
             iter = population.erase (iter);
@@ -210,7 +214,7 @@ void Population::update1()
 
         //BEGIN Population size & age structure
         ++cumPop;
-        int age = (Global::simulationTime - iter->getDateOfBirth());
+        TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age) ...
         if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
@@ -225,14 +229,14 @@ void Population::update1()
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman (Global::simulationTime);
+        newHuman (TimeStep::simulation);
         //++nCounter;
         ++cumPop;
     }
     
     // Doesn't matter whether non-updated humans are included (value isn't used
     // before all humans are updated).
-    _transmissionModel->updateKappa (population, Global::simulationTime);
+    _transmissionModel->updateKappa (population);
 }
 
 
@@ -299,7 +303,7 @@ void Population::flushReports (){
 
 // -----  non-static methods: interventions  -----
 
-void Population::implementIntervention (int time)
+void Population::implementIntervention (TimeStep time)
 {
     const scnXml::Intervention* interv = InputData.getInterventionByTime (time);
     if (interv == NULL)
@@ -403,7 +407,7 @@ void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::
     }
 }
 
-void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (int) const, void (Host::Human::*intervention) ())
+void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (TimeStep) const, void (Host::Human::*intervention) ())
 {
     if( mass.getCumulativeWithMaxAge().present() == false ){
         // Usual case: simply deploy to coverage% of target group
@@ -415,7 +419,7 @@ void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::H
     double minAge = mass.getMinAge();
     double maxAge = mass.getMaxAge();
     double coverage = mass.getCoverage();
-    int maxInterventionAge = static_cast<int>( mass.getCumulativeWithMaxAge().get() * Global::intervalsPerYear );
+    TimeStep maxInterventionAge = TimeStep::fromYears( mass.getCumulativeWithMaxAge().get() );
     bool cohortOnly = mass.getCohort();
     
     vector<Host::Human*> unprotected;

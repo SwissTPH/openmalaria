@@ -43,21 +43,21 @@ double AgeStructure::alpha0;
 double AgeStructure::alpha1;
 double AgeStructure::rho;
 
-int AgeStructure::maxTimestepsPerLife;
+TimeStep AgeStructure::maxTimestepsPerLife( TimeStep::never );
 vector<double> AgeStructure::cumAgeProp;
 
 
 void AgeStructure::init () {
-    maxTimestepsPerLife = maxLifetimeDays / Global::interval;
-    cumAgeProp.resize (maxTimestepsPerLife);
+    maxTimestepsPerLife = TimeStep(maxLifetimeDays / TimeStep::interval);
+    cumAgeProp.resize (maxTimestepsPerLife.asInt());
     
     estimateRemovalRates();
     calcCumAgeProp();
 }
 
-int AgeStructure::targetCumPop (int ageTSteps, int targetPop)
+int AgeStructure::targetCumPop (TimeStep ageTSteps, int targetPop)
 {
-    return (int) floor (cumAgeProp[maxTimestepsPerLife-1-ageTSteps] * targetPop + 0.5);
+    return (int) floor (cumAgeProp[(maxTimestepsPerLife-TimeStep(1)-ageTSteps).asInt()] * targetPop + 0.5);
 }
 
 
@@ -162,7 +162,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     if (InputData().getDemography().getGrowthRate().present())
     	rho = InputData().getDemography().getGrowthRate().get();
 
-    rho = rho * (0.01 * Global::yearsPerInterval);
+    rho = rho * (0.01 * TimeStep::yearsPerInterval);
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,
 	// however, some code currently uses this as the total population size.
@@ -208,22 +208,22 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
-    for (int j = 1;j < maxTimestepsPerLife; j++) {
-	int age = maxTimestepsPerLife - j - 1;
-	double ageYears = age * Global::yearsPerInterval;
+    for (TimeStep j(1);j < maxTimestepsPerLife; ++j) {
+	TimeStep age = maxTimestepsPerLife - j - TimeStep(1);
+	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);
 	double Ms = M1s + M2s;
 	double predperc = exp (-rho * ageYears - Ms);
-	if (age >= Global::maxAgeIntervals) {
+	if (age >= TimeStep::maxAgeIntervals) {
 	    predperc = 0.0;
 	}
-	cumAgeProp[j] = cumAgeProp[j-1] + predperc;
+	cumAgeProp[j.asInt()] = cumAgeProp[j.asInt()-1] + predperc;
     }
-    double totalCumPC = cumAgeProp[maxTimestepsPerLife-1];
-    for (int j = 1;j < maxTimestepsPerLife; j++) {
+    double totalCumPC = cumAgeProp[maxTimestepsPerLife.asInt()-1];
+    for (TimeStep j(1);j < maxTimestepsPerLife; ++j) {
 	//Scale using the total cumAgeProp
-	cumAgeProp[j] = cumAgeProp[j] / totalCumPC;
+	cumAgeProp[j.asInt()] = cumAgeProp[j.asInt()] / totalCumPC;
     }
 }
 

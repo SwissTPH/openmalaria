@@ -51,7 +51,7 @@ public:
     /** Deploy any interventions intended for this age in timesteps.
      *
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
-    void deploy (Human* human, int ageTimesteps);
+    void deploy (Human* human, TimeStep ageTimesteps);
     
     /// Checkpointing
     template<class S>
@@ -61,20 +61,20 @@ public:
     
 private:
     class AgeIntervention {
-	int begin, end;	// first timeStep active and first timeStep no-longer active
-	int ageTimesteps;
+	TimeStep begin, end;	// first timeStep active and first timeStep no-longer active
+	TimeStep ageTimesteps;
 	bool cohortOnly;
 	double coverage;
 	// Member function pointer to the function (in Human) responsible for deploying intervention:
 	void (Human::*deploy) ();
 	
     public:
-	void assign( const ::scnXml::AgeSpecific& elt, void(Human::*func) () );
+	AgeIntervention( const ::scnXml::AgeSpecific& elt, void(Human::*func) () );
 	
 	inline bool operator< (const AgeIntervention& that) const{
 	    return this->ageTimesteps < that.ageTimesteps;
 	}
-	friend void ContinuousIntervention::deploy (Human* human, int ageTimesteps);
+	friend void ContinuousIntervention::deploy (Human* human, TimeStep ageTimesteps);
     };
     static vector<AgeIntervention> ctsIntervs;
     

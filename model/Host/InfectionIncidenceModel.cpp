@@ -145,12 +145,12 @@ void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring:
 double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/Global::interval*EstarInv)) *
+    (1 + effectiveEIR/TimeStep::interval*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/(Global::interval*phTrans.relativeAvailabilityHet())*EstarInv)) *
+    (1 + effectiveEIR/(TimeStep::interval*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&) {

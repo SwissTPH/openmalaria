@@ -161,7 +161,7 @@ namespace Interventions {
 
 	/// Get the intervention from interventions->timed with time time.
 	/// @returns NULL if not available
-	const scnXml::Intervention* getInterventionByTime(int time);
+	const scnXml::Intervention* getInterventionByTime(TimeStep time);
 
 	/// Returns and enum representing which interventions are active.
 	const bitset<Interventions::SIZE> getActiveInterventions ();
@@ -190,7 +190,7 @@ namespace Interventions {
 	
 	// Initialized (derived) values:
 	std::map<int, double> parameterValues;
-	std::map<int, const scnXml::Intervention*> timedInterventions;
+	std::map<TimeStep, const scnXml::Intervention*> timedInterventions;
 	bitset<Interventions::SIZE> activeInterventions;
     };
     /// InputData entry point.

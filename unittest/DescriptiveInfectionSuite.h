@@ -37,7 +37,7 @@ public:
 	DescriptiveInfection::initParameters();	//FIXME: this gets data from InputData
 	gsl::setUp (83);	// seed is unimportant, but must be fixed
 	Global::interval = 5;
-	Global::simulationTime = 1;	// value isn't really important
+	TimeStep::simulation = 1;	// value isn't really important
 	infection = new DescriptiveInfection ();
     }
     void tearDown () {

@@ -32,7 +32,7 @@ public:
   static void init();
   
   Infection (uint32_t protID) :
-    _startdate(Global::simulationTime),
+    _startdate(TimeStep::simulation),
     proteome_ID(protID),
     _density(0.0),
     _cumulativeExposureJ(0.0)
@@ -41,7 +41,7 @@ public:
   virtual ~Infection () {}
 
   //! Start date of the infection
-  inline int getStartDate() {
+  inline TimeStep getStartDate() {
       return _startdate;
   }
   //! Get proteome
@@ -79,7 +79,7 @@ protected:
     virtual void checkpoint (ostream& stream);
   
   //! Start date of the infection
-  int _startdate;
+  TimeStep _startdate;
     
   //! Proteome/genotype identifier
   uint32_t proteome_ID;
@@ -94,7 +94,7 @@ protected:
   //@{
 public:
   /// pre-erythrocytic latent period, in time steps
-  static int latentp;
+  static TimeStep latentp;
   
   static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
   static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)

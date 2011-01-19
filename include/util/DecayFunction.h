@@ -60,7 +60,7 @@ public:
     static shared_ptr<DecayFunction> makeConstantObject();
     
     /** Return a value for age ageTS in time steps. */
-    virtual double eval(int ageTS) const =0;
+    virtual double eval(TimeStep age) const =0;
     
 protected:
     DecayFunction() {}
@@ -83,8 +83,8 @@ public:
     }
     
     /** Return value for age ageTS in time steps. */
-    double eval(int ageTS) const{
-        return initial * decayFunc->eval(ageTS);
+    double eval(TimeStep age) const{
+        return initial * decayFunc->eval(age);
     }
 };
 

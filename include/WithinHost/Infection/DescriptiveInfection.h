@@ -26,8 +26,9 @@
 #include <fcntl.h>
 
 namespace OM { namespace WithinHost {
-//Max duration of an infection in intervals.
-const int maxDur=84;
+//Max duration of an infection in intervals. (Should be TimeStep but can't be
+//used for static array dimensions then.)
+const int maxDur = 84;
 
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
 const double maxDens=2000000;
@@ -73,7 +74,7 @@ public:
     \return The interval before clearance.
   */
   bool expired () {
-    return Global::simulationTime >= _startdate+_duration;
+    return TimeStep::simulation >= _startdate+_duration;
   }
   
   /** Determines parasite density of an individual infection (5-day timestep update)
@@ -96,7 +97,7 @@ public:
     Mean log duration of an infection values from AJTM p.9 eq.5.
     \return The duration in simulation intervals.
   */
-  int infectionDuration();
+  TimeStep infectionDuration();
 
   
   //! Write an infection to the checkpointing file.
@@ -112,7 +113,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
   //! Arbitrary maximum duration of the infection, in timesteps
-  int _duration; 
+  TimeStep _duration; 
   
 private:
   /// @brief Static parameters set by initParameters
@@ -122,7 +123,7 @@ private:
     Mean Log Parasite Count at time step i for an infection that lasts j days.
     only about one half of the matrix is initialized. (right upper triangle)
   */
-  static double meanLogParasiteCount[maxDur*maxDur];
+  static double meanLogParasiteCount[maxDur][maxDur];
  
   static double sigma0sq; //!< Sigma0^2 in AJTM p.9 eq. 13
 

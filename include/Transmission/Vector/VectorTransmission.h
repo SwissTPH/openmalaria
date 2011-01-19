@@ -46,25 +46,24 @@ public:
   /** How long to sample for before first iteration of fitting.
    *
    * (EIR is forced until vectorInitIterate finishes fitting). */
-  virtual int transmissionInitDuration ();
+  virtual TimeStep transmissionInitDuration ();
   /** Called after end of vectorInitDuration() and after init iterations.
    *
    * Should determine whether another init iteration is needed, make necessary
    * adjustments, and return number of timesteps to run this initialisation for
    * (0 if a further iteration is not needed). */
-  virtual int transmissionInitIterate ();
+  virtual TimeStep transmissionInitIterate ();
   
   /** Initialise the main simulation. */
   void initMainSimulation ();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int simulationTime);
+  virtual void vectorUpdate (const std::list<Host::Human>& population);
   
   /** Calculates EIR (in adults).
    * 
-   * @param simulationTime Time since start of simulation.
    * @param host Transmission-related data for this host.
    * @param ageGroupData Age group of this host for availablility data. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears); 
+  virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();

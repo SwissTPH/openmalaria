@@ -32,19 +32,19 @@ namespace OM { namespace Transmission {
 
 void VectorTransmission::ctsCbN_v0 (ostream& stream){
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastN_v0()/Global::interval;
+	stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
 }
 void VectorTransmission::ctsCbN_v (ostream& stream){
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastN_v()/Global::interval;
+	stream << '\t' << species[i].getLastN_v()/TimeStep::interval;
 }
 void VectorTransmission::ctsCbO_v (ostream& stream){
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastO_v()/Global::interval;
+	stream << '\t' << species[i].getLastO_v()/TimeStep::interval;
 }
 void VectorTransmission::ctsCbS_v (ostream& stream){
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastS_v()/Global::interval;
+	stream << '\t' << species[i].getLastS_v()/TimeStep::interval;
 }
 const string& reverseLookup (const map<string,size_t>& m, size_t i){
     for( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ){
@@ -141,21 +141,21 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
     }
 }
 
-int VectorTransmission::transmissionInitDuration () {
+TimeStep VectorTransmission::transmissionInitDuration () {
     // Data is summed over the last year of human initialisation
     // plus an extra 4 years.
-    return 4*Global::intervalsPerYear;
+    return TimeStep::fromYears( 4 );
 }
-int VectorTransmission::transmissionInitIterate () {
+TimeStep VectorTransmission::transmissionInitIterate () {
   bool iterate = false;
   for (size_t i = 0; i < numSpecies; ++i)
     iterate |= species[i].vectorInitIterate ();
   if (iterate) {
     simulationMode = equilibriumMode;
-    return Global::intervalsPerYear*2;	// Data is summed over one year, so allow extra time for some stabilisation first.
+    return TimeStep::fromYears(2);	// Data is summed over one year, so allow extra time for some stabilisation first.
   } else {
     simulationMode = dynamicEIR;
-    return 0;
+    return TimeStep(0);
   }
 }
 
@@ -173,9 +173,9 @@ void VectorTransmission::initMainSimulation() {
     throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
 }
 
-double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission& host, double ageYears) {
+double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
   if (simulationMode == equilibriumMode)
-    return initialisationEIR[simulationTime%Global::intervalsPerYear]
+    return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
 	 * host.relativeAvailabilityHetAge (ageYears);
   
   double EIR = 0.0;
@@ -187,9 +187,9 @@ double VectorTransmission::calculateEIR(int simulationTime, PerHostTransmission&
 
 
 // Every Global::interval days:
-void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int simulationTime) {
+void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population) {
   for (size_t i = 0; i < numSpecies; ++i)
-    species[i].advancePeriod (population, simulationTime, i, simulationMode == dynamicEIR);
+    species[i].advancePeriod (population, i, simulationMode == dynamicEIR);
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {

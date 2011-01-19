@@ -21,6 +21,7 @@
 #ifndef Hmod_util_CommandLine
 #define Hmod_util_CommandLine
 
+#include "Global.h"
 #include <string>
 #include <set>
 #include <bitset>
@@ -65,10 +66,10 @@ namespace OM { namespace util {
 	
 	/** Return first checkpointing timestep _greater than_ timestep passed,
 	 * or min int value if no (more) checkpoint times. */
-	static int getNextCheckpointTime( int now ) {
-	    set<int>::iterator it = checkpoint_times.upper_bound( now );
+	static TimeStep getNextCheckpointTime( TimeStep now ) {
+	    set<TimeStep>::iterator it = checkpoint_times.upper_bound( now );
 	    if( it == checkpoint_times.end() )
-		return numeric_limits< int >::min();
+		return TimeStep::never;
 	    else
 		return *it;
 	}
@@ -119,7 +120,7 @@ namespace OM { namespace util {
 	
 	/** Set of simulation times at which a checkpoint should be written and
 	* program should exit (to allow resume). */
-	static set<int> checkpoint_times;
+	static set<TimeStep> checkpoint_times;
     };
 } }
 #endif

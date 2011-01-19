@@ -95,7 +95,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, _cumulativeh, timestepCumY);
     
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
-    if ((*inf)->update(Global::simulationTime, survivalFactor)) {
+    if ((*inf)->update(survivalFactor)) {
 	delete *inf;
       inf = infections.erase(inf);	// inf points to next infection now so don't increment with ++inf
       --_MOI;
@@ -104,7 +104,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     
     totalDensity += (*inf)->getDensity();
     timeStepMaxDensity = max(timeStepMaxDensity, (*inf)->getDensity());
-    _cumulativeY += Global::interval*(*inf)->getDensity();
+    _cumulativeY += TimeStep::interval*(*inf)->getDensity();
     
     ++inf;
   }

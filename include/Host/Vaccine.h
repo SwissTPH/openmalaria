@@ -54,7 +54,7 @@ private:
     static size_t _numberOfEpiDoses;
 
     /** Target age for EPI-like vaccination, in time steps. */
-    static vector<int> targetAgeTStep;
+    static vector<TimeStep> targetAgeTStep;
 
     /// Preerythrocytic reduces h vaccine parameters
     static Vaccine PEV;
@@ -96,7 +96,7 @@ public:
     PerHumanVaccine();
 
     /// Returns true if a continuous vaccine dose should be given.
-    bool doCtsVaccination (int ageTSteps) {
+    bool doCtsVaccination (TimeStep ageTSteps) {
         // Deployment is affected by previous missed doses and mass vaccinations,
         // unlike other continuous interventions; extra test:
         return _lastVaccineDose < (int)Vaccine::_numberOfEpiDoses
@@ -106,16 +106,16 @@ public:
     /** Update efficacies and the number of doses in this human. */
     void vaccinate();
     /// Has been vaccinated within considered effective duration?
-    bool hasProtection(int maxInterventionAge)const;
+    bool hasProtection(TimeStep maxInterventionAge)const;
 
     inline double getBSVEfficacy()const {
-        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
+        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
     }
     inline double getPEVEfficacy()const {
-        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
+        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
     }
     inline double getTBVEfficacy()const {
-        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( Global::simulationTime - _timeLastVaccine );
+        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
     }
     
     /// @brief Hacks for R_0 deployment
@@ -147,7 +147,7 @@ private:
      * vaccination reintroduces them to the EPI schedule). */
     int _lastVaccineDose;
     /// Timestep of last vaccination
-    int _timeLastVaccine;
+    TimeStep _timeLastVaccine;
     //!Remaining efficacy of Blood-stage vaccines
     double _initialBSVEfficacy;
     //!Remaining efficacy of Pre-erythrocytic vaccines

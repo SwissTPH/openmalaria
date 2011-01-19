@@ -41,7 +41,7 @@ public:
   //! initialise the main simulation 
   void initMainSimulation ();
   
-  virtual int transmissionInitDuration ();
+  virtual TimeStep transmissionInitDuration ();
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
@@ -62,10 +62,9 @@ public:
   /** Calculates EIR (in adults) during the main period of the simulation,
    * based on vectorial capacity or looks up EIR in the input data.
    * 
-   * @param simulationTime Time since start of simulation.
    * @param perHost Transmission-related data for this host.
    * @param ageGroupData Age group of this host for availablility data. */
-  virtual double calculateEIR(int simulationTime, PerHostTransmission& perHost, double ageYears); 
+  virtual double calculateEIR(PerHostTransmission& perHost, double ageYears); 
  
 private:
 
@@ -96,7 +95,7 @@ private:
   
   //! The duration of sporogony in time steps
   // doesn't need checkpointing
-  int nspore;
+  TimeStep nspore;
   //@}
   
   /// EIR per time interval during the intervention period

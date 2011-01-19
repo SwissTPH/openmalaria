@@ -65,7 +65,7 @@ void InputDataType::initTimedInterventions()
         const scnXml::Timed::InterventionSequence& interventionSeq =
             scenario->getInterventions().getTimed().get().getIntervention();
         for (scnXml::Timed::InterventionConstIterator it (interventionSeq.begin()); it != interventionSeq.end(); ++it) {
-            int time = it->getTime();
+            TimeStep time = TimeStep(it->getTime());
             if (timedInterventions.count (time)) {
                 ostringstream msg;
                 msg << "Error: multiple timed interventions with time: " << time;
@@ -191,9 +191,9 @@ double InputDataType::getParameter (size_t i)
 	throw util::xml_scenario_error( (format("parameter %1% required but not described") %i).str() );
     return it->second;
 }
-const scnXml::Intervention* InputDataType::getInterventionByTime (int time)
+const scnXml::Intervention* InputDataType::getInterventionByTime (TimeStep time)
 {
-    std::map<int, const scnXml::Intervention*>::iterator i = timedInterventions.find (time);
+    std::map<TimeStep, const scnXml::Intervention*>::iterator i = timedInterventions.find (time);
     if (i != timedInterventions.end())
         return i->second;
     else
