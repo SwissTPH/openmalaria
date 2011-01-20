@@ -25,17 +25,13 @@
 #include <cmath>
 #include <gsl_vector_double.h>
 #include <gsl/gsl_multimin.h>
+#include <fstream>
 
 namespace OM {
     using namespace OM::util;
 
-double AgeStructure::ageGroupBounds[ngroups+1];
-double AgeStructure::ageGroupPercent[ngroups];
-
-double AgeStructure::M1[ngroups];
-double AgeStructure::M2[ngroups];
-double AgeStructure::M[ngroups];
-double AgeStructure::pred[ngroups];
+vector<double> AgeStructure::ageGroupBounds;
+vector<double> AgeStructure::ageGroupPercent;
 
 double AgeStructure::mu0;
 double AgeStructure::mu1;
@@ -43,13 +39,12 @@ double AgeStructure::alpha0;
 double AgeStructure::alpha1;
 double AgeStructure::rho;
 
-TimeStep AgeStructure::maxTimestepsPerLife( TimeStep::never );
 vector<double> AgeStructure::cumAgeProp;
 
 
 void AgeStructure::init () {
-    maxTimestepsPerLife = TimeStep(maxLifetimeDays / TimeStep::interval);
-    cumAgeProp.resize (maxTimestepsPerLife.asInt());
+    // this number of cells are needed:
+    cumAgeProp.resize (TimeStep::maxAgeIntervals.asInt()+1);
     
     estimateRemovalRates();
     calcCumAgeProp();
@@ -57,7 +52,7 @@ void AgeStructure::init () {
 
 int AgeStructure::targetCumPop (TimeStep ageTSteps, int targetPop)
 {
-    return (int) floor (cumAgeProp[(maxTimestepsPerLife-TimeStep(1)-ageTSteps).asInt()] * targetPop + 0.5);
+    return (int) floor (cumAgeProp[cumAgeProp.size()-1-ageTSteps.asInt()] * targetPop + 0.5);
 }
 
 
@@ -121,22 +116,22 @@ void AgeStructure::estimateRemovalRates ()
     //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
     double sumperc = 0.0;
     const scnXml::AgeGroupPerC::GroupSequence& group = InputData().getDemography().getAgeGroup().getGroup();
-    if (group.size() < ngroups - 1) {
-	ostringstream msg;
-	msg << "expected " << ngroups - 1 << " elements of \"group\" in demography->ageGroup (in scenario.xml)";
-	throw util::xml_scenario_error (msg.str());
-    }
+    
+    size_t ngroups = group.size() + 1;
+    ageGroupBounds.resize(ngroups+1,0);
+    ageGroupPercent.resize(ngroups,0);
+    
     //Add age group for first month of life
     ageGroupBounds[0] = 0.0;
     ageGroupBounds[1] = 1.0 / 12.0;
     ageGroupPercent[0] = 0.0;
-    for (int i = 1;i < ngroups; i++) {
+    for (size_t i = 1;i < ngroups; i++) {
 	ageGroupBounds[i+1] = group[i-1].getUpperbound();
 	ageGroupPercent[i] = group[i-1].getPoppercent();
 	sumperc += ageGroupPercent[i];
     }
     sumperc = 100.0 / sumperc; // multiplier to get percentages
-    for (int i = 0;i < ngroups; i++) {
+    for (size_t i = 0;i < ngroups; i++) {
 	ageGroupPercent[i]  = ageGroupPercent[i] * sumperc;
     }
     /*
@@ -177,17 +172,21 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     mu0 = (M_inf - mu1 * (exp (alpha1 * 0.5) - 1) * alpha0) /
     (alpha1 * (1 - exp (-alpha0 * 0.5)));
     
+    size_t ngroups = ageGroupPercent.size();
     double sumpred = 0.0;
-    for (int i = 0; i < ngroups - 1; i++) {
+    vector<double> M(ngroups,0);
+    vector<double> pred(ngroups,0);
+    
+    for (size_t i = 0; i < ngroups - 1; i++) {
 	double midpt = (ageGroupBounds[i+1] + ageGroupBounds[i]) * 0.5;
-	M1[i] = mu0 * (1.0 - exp (-alpha0 * midpt)) / alpha0;
-	M2[i] = mu1 * (exp (alpha1 * midpt) - 1.0) / alpha1;
-	M[i]  = M1[i] + M2[i];
+	double M1 = mu0 * (1.0 - exp (-alpha0 * midpt)) / alpha0;
+	double M2 = mu1 * (exp (alpha1 * midpt) - 1.0) / alpha1;
+	M[i]  = M1 + M2;
 	pred[i] = (ageGroupBounds[i+1] - ageGroupBounds[i])
 	* exp (-rho * midpt - M[i]);
 	sumpred += pred[i];
     }
-    for (int i = 0; i < ngroups - 1; i++) {
+    for (size_t i = 0; i < ngroups - 1; i++) {
 	pred[i] = pred[i] / sumpred * 100.0;
     }
     double L_inf = exp (-rho * 0.5 - M[1]);
@@ -198,7 +197,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     ageGroupPercent[1] = perc_inf - ageGroupPercent[0];
     
     double valsetDemoParameters = 0.0;
-    for (int i = 0; i < ngroups - 1; i++) {
+    for (size_t i = 0; i < ngroups - 1; i++) {
 	double residual = log (pred[i]) - log (ageGroupPercent[i]);
 	valsetDemoParameters += residual * residual;
     }
@@ -208,8 +207,8 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
-    for (TimeStep j(1);j < maxTimestepsPerLife; ++j) {
-	TimeStep age = maxTimestepsPerLife - j - TimeStep(1);
+    for (size_t j=1;j < cumAgeProp.size(); ++j) {
+	TimeStep age( cumAgeProp.size() - j - 1 );
 	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);
@@ -218,12 +217,12 @@ void AgeStructure::calcCumAgeProp ()
 	if (age >= TimeStep::maxAgeIntervals) {
 	    predperc = 0.0;
 	}
-	cumAgeProp[j.asInt()] = cumAgeProp[j.asInt()-1] + predperc;
+	cumAgeProp[j] = cumAgeProp[j-1] + predperc;
     }
-    double totalCumPC = cumAgeProp[maxTimestepsPerLife.asInt()-1];
-    for (TimeStep j(1);j < maxTimestepsPerLife; ++j) {
+    double totalCumPC = cumAgeProp[cumAgeProp.size()-1];
+    for (size_t j=1;j < cumAgeProp.size(); ++j) {
 	//Scale using the total cumAgeProp
-	cumAgeProp[j.asInt()] = cumAgeProp[j.asInt()] / totalCumPC;
+	cumAgeProp[j] = cumAgeProp[j] / totalCumPC;
     }
 }
 

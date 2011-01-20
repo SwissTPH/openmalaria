@@ -33,7 +33,7 @@ namespace OM
 	
 	/** Return maximum individual lifetime in intervals that AgeStructure can handle. */
 	static inline TimeStep getMaxTimestepsPerLife () {
-	    return maxTimestepsPerLife;
+	    return TimeStep(cumAgeProp.size());
 	}
 	
 	/** Return the expected population size of individuals aged ageTSteps or
@@ -53,14 +53,7 @@ namespace OM
         /** Takes the best-fitting demography parameters estimated by
         * estimateRemovalRates and calculates the age structure (cumAgeProp). */
 	static void calcCumAgeProp ();
-
-        /** This is the maximum age of an individual that the simulation program can
-        * handle. Max age for a scenario is given in the xml file. */
-	//TODO: both these constants could instead be read from the XML file, if we use vectors
-        static const int maxLifetimeDays = 32855;
-	/// Maximum number of age-groups for demography
-        static const int ngroups = 20;
-	
+        
 	//BEGIN static parameters only used by estimateRemovalRates(), setDemoParameters() and calcCumAgeProp()
 	/** The bounds for each age group and percentage of population in this age
         * group for the field data demography age groups.
@@ -72,17 +65,8 @@ namespace OM
         * Set by estimateRemovalRates() and used internally (by
         * setDemoParameters()). */
         //@{
-        static double ageGroupBounds[ngroups+1];
-	static double ageGroupPercent[ngroups];
-        //@}
-        /** Demography variables used in estimating the smooth curve.
-        *
-        * Only used in setDemoParameters() calculations. */
-        //@{
-        static double M1[ngroups];
-	static double M2[ngroups];
-	static double M[ngroups];
-	static double pred[ngroups];
+        static vector<double> ageGroupBounds;
+	static vector<double> ageGroupPercent;
         //@}
         /** Parameters defining smooth curve of target age-distribution.
         *
@@ -98,12 +82,9 @@ namespace OM
 	//END
 	
 	//BEGIN static parameters set by init() or calcCumAgeProp()
-        //! max lifespan in intervals
-	static TimeStep maxTimestepsPerLife;
-	
-	/** Target cumulative percentage of population by age, from oldest age to youngest.
+        /** Target cumulative percentage of population by age, from oldest age to youngest.
 	*
-	* cumAgeProp[_maxTimestepsPerLife+1-i] gives the proportion of people aged i timesteps or older.
+	* cumAgeProp[size()+1-i] gives the proportion of people aged i timesteps or older.
 	*/
 	static std::vector<double> cumAgeProp;
 	//END
