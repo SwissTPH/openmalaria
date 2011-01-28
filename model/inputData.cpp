@@ -199,10 +199,6 @@ const scnXml::Intervention* InputDataType::getInterventionByTime (TimeStep time)
     else
         return NULL;
 }
-const bitset<Interventions::SIZE> InputDataType::getActiveInterventions ()
-{
-    return activeInterventions;
-}
 
 
 

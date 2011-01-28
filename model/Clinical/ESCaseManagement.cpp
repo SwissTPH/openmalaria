@@ -460,7 +460,7 @@ void ESCaseManagement::init () {
     if (mdaDesc.present()) {
 	mda.initialize( mdaDesc.get(), ESDecisionMap::MDA );
     } else {
-	if( InputData.getActiveInterventions()[Interventions::MDA] )
+	if( InputData.isInterventionActive(Interventions::MDA) )
 	    throw util::xml_scenario_error ("MDA intervention without description");
     }
 }

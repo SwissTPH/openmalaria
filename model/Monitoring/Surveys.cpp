@@ -44,7 +44,7 @@ void SurveysType::init ()
       _cohortOnly = mon.getCohortOnly().get();
   } else {
       // Trap potential bug in scenario design
-      if( InputData.getActiveInterventions()[Interventions::COHORT] )
+      if( InputData.isInterventionActive(Interventions::COHORT) )
 	  throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
   }
   

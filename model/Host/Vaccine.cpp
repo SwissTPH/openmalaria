@@ -59,7 +59,7 @@ void Vaccine::init()
     const scnXml::Descriptions::VaccineDescriptionSequence& vaccDesc =
 	interventions.getDescriptions().getVaccineDescription();
     if (vaccDesc.size() == 0) {
-        if (InputData.getActiveInterventions()[Interventions::VACCINE])
+        if (InputData.isInterventionActive(Interventions::VACCINE))
             throw util::xml_scenario_error ("Vaccine intervention without description");
 	// Note: R_0 intervention uses vaccines, but not deployment; hence
 	// it is safe to use without vaccine descriptions.

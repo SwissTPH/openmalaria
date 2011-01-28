@@ -44,7 +44,7 @@ DescriptiveIPTWithinHost::IPTiEffects DescriptiveIPTWithinHost::iptiEffect;
 void DescriptiveIPTWithinHost::init () {
   iptActive = util::ModelOptions::option( IPTI_SP_MODEL );
   if (!iptActive) {
-    if (InputData.getActiveInterventions()[Interventions::IPTI])
+    if (InputData.isInterventionActive(Interventions::IPTI))
       throw util::xml_scenario_error ("IPTI interventions require IPT_SP_MODEL option");
     return;
   }

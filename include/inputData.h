@@ -163,8 +163,11 @@ namespace Interventions {
 	/// @returns NULL if not available
 	const scnXml::Intervention* getInterventionByTime(TimeStep time);
 
-	/// Returns and enum representing which interventions are active.
-	const bitset<Interventions::SIZE> getActiveInterventions ();
+	/// Returns true if intervention is active
+	inline bool isInterventionActive( Interventions::Flags intervention ) const{
+            assert( intervention < Interventions::SIZE );
+            return activeInterventions[intervention];
+        }
 
 
 	/// Get a parameter from the parameter list. i should be less than Params::MAX.
