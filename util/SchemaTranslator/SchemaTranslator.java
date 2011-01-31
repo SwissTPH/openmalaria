@@ -2288,7 +2288,7 @@ public class SchemaTranslator {
 	    + "\n\t\t\t\tFor scenarios with iptiDescription but without"
 	    + "\n\t\t\t\tinterventions, assume usage of the IPTI model"
 	    + "\n\t\t\t\twas (t) intended or (f) a mistake."
-            + "\n  --iptiReportOnlyAtRisk\tPreviously the IPTI_SP_MODEL option implied this"
+            + "\n  --iptiReportOnlyAtRisk BOOL\tPreviously the IPTI_SP_MODEL option implied this"
             + "\n\t\t\t\tbehaviour although not necessarily intended; now"
             + "\n\t\t\t\tthis behaviour is controlled by the separate option"
             + "\n\t\t\t\tREPORT_ONLY_AT_RISK. Specifying true here causes"

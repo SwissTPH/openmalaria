@@ -93,11 +93,11 @@ class Value(object):
         self.n+=1
     
     def get(self):
-        try:
-            return self.v/self.n
-        except ZeroDivisionError:
-            # wtf is wrong with python if this is an NaN but 0/0 isn't???
-            return 1e10000 * 0
+        if self.n > 0:
+            return self.v
+            #return self.v/self.n
+        else:
+            return 1e10000 * 0 # NaN
 
 class SimOutputs(object):
     def __init__(self,outFile):
