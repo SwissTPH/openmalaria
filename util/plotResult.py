@@ -25,9 +25,10 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import cnames
 import sys
 import string
-import math as m
+import math
+from readOutput import Keys, ValDict
 
-measure_names = {
+measureNames = {
     0 : 'nHost',
     1 : 'nInfect',
     2 : 'nExpectd',
@@ -83,93 +84,292 @@ measure_names = {
     54 : 'nAntibioticTreatments',
     }
 
-class Value(object):
-    def __init__(self):
-        self.n=0
-        self.v=0.0
-    
-    def add(self,val):
-        self.v+=val
-        self.n+=1
-    
-    def get(self):
-        if self.n > 0:
-            return self.v
-            #return self.v/self.n
+# for each combined measure, list included measures: id, name, colour
+# encompasses all measures
+combinedMeasures = [
+    ('hosts',[(0,'all','black')]),
+    ('infected hosts',[(1,'all','red'),(2,'expected','green'),(3,'patent','blue'),(43,'new','purple')]),
+    ('sum log',[(4,'pyrogenic threshold','purple'),(5,'parasite density','green')]),
+    ('total infections',[(6,'all','red'),(8,'patent','blue')]),
+    ('transmitting humans',[(7,'sum(p(transmit))','green'),(26,'annual sum(p(transmit)) / annual EIR','blue')]),
+    ('sum pyrog thres',[(10,'sum pyrogenic threshold','purple')]),
+    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange')]),
+    ('episodes',[(14,'UC','red'),(15,'severe','orange'),(27,'NMF','blue')]),
+    ('sequelae',[(16,'all','red'),(24,'hospital','orange')]),
+    ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green')]),
+    ('intervention doses',[(20,'EPI vaccinations','red'),(22,'mass vaccinations','darkred'),(25,'IPT doses','brown')]),
+    ('infant mortality rate',[(21,'IMR','red')]),
+    ('hospital recoveries',[(23,'hospital recoveries','orange')]),
+    ('innoculations',[(30,'all','red')]),
+    ('feeding vectors',[(31,'emergence - N_v0','green'),(32,'all - N_v','blue'),(33,'infected - O_v','purple'),(34,'infectious - S_v','red')]),
+    ('EIR (innocs/pers/year)',[(35,'requested','orange'),(36,'simulated','red')]),
+    ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown')]),
+    ('drug usage (mg)',[(40,'oral','blue'),(49,'intrevenous','orange')]),
+    ('vector interventions',[(44,'mass ITNs','darkgreen'),(45,'EPI ITNs','green'),(46,'mass IRS','darkred'),(47,'mass deterrents','brown')]),
+    ('cohort delta',[(50,'added','orange'),(51,'removed','blue')])
+]
+def findMeasureGroup(m):
+    for i in range(len(combinedMeasures)):
+        for md in combinedMeasures[i][1]:
+            if m==md[0]:
+                return i
+    raise KeyError("measure "+str(m)+" not in combinedMeasures")
+def getMeasureLabel(mg,m):
+    if mg is None:
+        return measureNames[m]+" ("+str(m)+")"
+    else:
+        for md in combinedMeasures[mg][1]:
+            if m==md[0]:
+                return md[1]
+        raise KeyError("measure "+str(m)+" not in combinedMeasures["+str(mg)+"]")
+def getMeasureColour(mg,m):
+    if mg is None:
+        return 'blue'
+    else:
+        for md in combinedMeasures[mg][1]:
+            if m==md[0]:
+                return md[2]
+        raise KeyError("measure "+str(m)+" not in combinedMeasures["+str(mg)+"]")
+
+class MultiKey(object):
+    __slots__ = ["mg","m","s","g","f"]
+    def __init__(self,measureGroup=None,measure=None,survey=None,group=None,fileName=None):
+        self.mg=measureGroup #int index in combinedMeasures
+        self.m=measure #int
+        self.s=survey #int
+        self.g=group #string
+        self.f=fileName #string
+    def __and__(self,other):
+        """Set each member from other is not set in self.
+        Should complain if set in self and in other, but this is a bit unnecessary."""
+        first=MultiKey(self.mg,self.m,self.s,self.g,self.f)
+        if first.mg==None:
+            first.mg=other.mg
+        if first.m==None:
+            first.m=other.m
+        if first.s==None:
+            first.s=other.s
+        if first.g==None:
+            first.g=other.g
+        if first.f==None:
+            first.f=other.f
+        return first
+    @staticmethod
+    def fromMeasureGroups(measureGroups):
+        r= [MultiKey(measureGroup=measureGroup) for measureGroup in measureGroups]
+        return r
+    @staticmethod
+    def fromMeasures(measures):
+        r= [MultiKey(measure=measure) for measure in measures]
+        return r
+    @staticmethod
+    def fromSurveys(surveys):
+        return [MultiKey(survey=survey) for survey in surveys]
+    @staticmethod
+    def fromGroups(groups):
+        return [MultiKey(group=group) for group in groups]
+    @staticmethod
+    def fromFiles(files):
+        return [MultiKey(fileName=fl) for fl in files]
+    @staticmethod
+    def expand(r,x):
+        lx=len(x)
+        assert lx>0, "expected len>0"
+        r *= lx # shallow copy: all references point to same object
+        for i in range(len(r)):
+            r[i] = r[i] & x[i%lx]
+    def __str__(self):
+        return self.label(MultiKey())
+    def label(self,base):
+        r=""
+        if self.m!=base.m:
+            r=getMeasureLabel(self.mg,self.m)
+        if self.s!=base.s:
+            if len(r):
+                r+=","
+            r+="survey "+str(self.s)
+        if self.g!=base.g:
+            if len(r):
+                r+=","
+            r+="group "+self.g
+        if self.f!=base.f:
+            if len(r):
+                r+=","
+            r+=self.f
+        return r
+
+class Plotter(object):
+    def __init__(self,keys):
+        self.values=ValDict(keys)
+    def read(self,fileName,measures):
+        self.values.read(fileName,measures)
+    def plot(self,am,s,g,f):
+        x_axis=Keys.NONE
+        x_label=""
+        if s=="x-axis":
+            assert x_axis==Keys.NONE, "dual assignment to x-axis!"
+            x_axis=Keys.SURVEY
+            x_label="survey"
+        if g=="x-axis":
+            assert x_axis==Keys.NONE, "dual assignment to x-axis!"
+            x_axis=Keys.GROUP
+            x_label="group"
+        if f=="x-axis":
+            assert x_axis==Keys.NONE, "dual assignment to x-axis!"
+            x_axis=Keys.FILE
+            x_label="file"
+            x=self.values.getFiles()
+        assert x_axis!=Keys.NONE, "nothing to plot on x-axis!"
+        
+        lines=set()
+        if s=="line": lines.add(Keys.SURVEY)
+        if g=="line": lines.add(Keys.GROUP)
+        if f=="line": lines.add(Keys.FILE)
+        
+        plots=[MultiKey()]
+        if am:
+            measureGroups=dict()
+            for m in self.values.getMeasures():
+                mg=findMeasureGroup(m)
+                if mg in measureGroups:
+                    measureGroups[mg].append(m)
+                else:
+                    measureGroups[mg]=list([m])
+            #note: here "measure" is used to represent "measure group"
+            MultiKey.expand(plots, MultiKey.fromMeasureGroups(measureGroups.keys()))
         else:
-            return 1e10000 * 0 # NaN
-
-class SimOutputs(object):
-    def __init__(self,outFile):
-        measures=set()
-        maxSurvey=0
-        f=open(outFile)
-        for line in f:
-            items=string.split(line,"\t")
-            if (len(items) != 4):
-                raise Exception("expected 4 items on line: "+line)
-            measures.add(int(items[2]))
-            maxSurvey=max(maxSurvey,int(items[0]))
-        self.m=dict()
-        for measure in measures:
-            self.m[measure]=[Value() for i in range(maxSurvey+1)]
-        f.close()
-        f=open(outFile)
-        for line in f:
-            items=string.split(line,"\t")
-            if (len(items) != 4):
-                raise Exception("expected 4 items on line")
-            self.m[int(items[2])][int(items[0])].add(float(items[3]))
-    
-    def plot(self,measure,subplot):
-        x=range(len(self.m[measure]))
-        y=[v.get() for v in self.m[measure]]
-        #different colours (possibly also white): color=cnames.values()[measure]
-        p=subplot.plot(x,y)
-
-def plot(outFile,measures):
-    output=SimOutputs(outFile)
-    if(len(measures)==0):
-        measures=output.m.keys()
-        measures.sort()
-    
-    fig = plt.figure(1)
-    n=len(measures)
-    d1=int(m.ceil(m.sqrt(float(n))))
-    d2=int(m.ceil(float(n)/float(d1)))
-    i=1
-    for measure in measures:
-        p = fig.add_subplot(d1,d2,i)
-        p.set_xlabel('survey')
-        try:
-            p.set_ylabel(measure_names[measure]+' ('+str(measure)+')')
-        except KeyError:
-            p.set_ylabel('measure '+str(measure))
-        output.plot(measure,p)
-        i+=1
-    plt.show()
+            MultiKey.expand(plots, MultiKey.fromMeasures(self.values.getMeasures()))
+        if s=="plot":
+            MultiKey.expand(plots, MultiKey.fromSurveys(self.values.getSurveys()))
+        if g=="plot":
+            raise Exception("Cannot separate group by plot!")
+        if f=="plot":
+            MultiKey.expand(plots, MultiKey.fromFiles(self.values.getFiles()))
+        
+        n=len(plots)
+        d1=int(math.ceil(math.sqrt(float(n))))
+        d2=int(math.ceil(float(n)/float(d1)))
+        
+        fig = plt.figure(1)
+        i=1
+        for plot in plots:
+            subplot = fig.add_subplot(d1,d2,i)
+            i+=1
+            
+            m=plot.m
+            if am:
+                m=measureGroups[plot.mg][0] # take first — not necessary correct but we need a measure
+            
+            if x_axis==Keys.GROUP:
+                x=self.values.getGroups(m)
+                x_label=self.values.getGroupLabel(m)
+            elif x_axis==Keys.SURVEY:
+                x=self.values.getSurveys(m)
+            #else x was set previously
+            
+            subplot.set_title(plot.label(MultiKey(measure=plot.m)))
+            # Don't set x-label: is always the same and gets in the way of title
+            #subplot.set_xlabel(x_label)
+            if am:
+                subplot.set_ylabel(combinedMeasures[plot.mg][0])
+                
+                pLines=[plot]
+                measures=measureGroups[plot.mg]
+                MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
+            else:
+                subplot.set_ylabel(getMeasureLabel(plot.m))
+                
+                pLines=[plot]
+            
+            if Keys.SURVEY in lines:
+                MultiKey.expand(pLines, MultiKey.fromSurveys(self.values.getSurveys(m)))
+            if Keys.GROUP in lines:
+                MultiKey.expand(pLines, MultiKey.fromGroups(self.values.getGroups(m)))
+            if Keys.FILE in lines:
+                MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
+            
+            if len(x)>1:
+                plotted=list()
+                for pLine in pLines:
+                    xKeys=[pLine]
+                    if x_axis==Keys.SURVEY:
+                        MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
+                    elif x_axis==Keys.GROUP:
+                        MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
+                    elif x_axis==Keys.FILE:
+                        MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
+                    y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
+                    colour=getMeasureColour(pLine.mg,pLine.m)
+                    plotted.append(subplot.plot(x,y,colour))
+                
+                if len(plotted)>1:
+                    legends=[pLine.label(plot) for pLine in pLines]
+                    plt.legend(plotted,legends,'upper right')
+            else: #one x-coord; plot each output as a bar instead
+                pBars=pLines[:]
+                for j in range(len(pBars)):
+                    #add in other keys (we know each array has length 1)
+                    if x_axis==Keys.SURVEY:
+                        pBars[j] = pBars[j] & MultiKey(survey=self.values.getSurveys()[0])
+                    elif x_axis==Keys.GROUP:
+                        pBars[j] = pBars[j] & MultiKey(group=self.values.getGroups(m)[0])
+                    elif x_axis==Keys.FILE:
+                        pBars[j] = pBars[j] & MultiKey(file=self.values.getFiles()[0])
+                ind = numpy.arange(len(pBars))    # the x locations for the groups
+                vals = [self.values.get(k.m,k.s,k.g,k.f) for k in pBars]
+                width = 0.8
+                bars = plt.bar(ind, vals, width)
+                for j in range(len(bars)):
+                    bars[j].set_facecolor(getMeasureColour(pLines[j].mg,pLines[j].m))
+                
+                legends=[pLine.label(plot) for pLine in pLines]
+                plt.xticks(ind+width/2., legends)
+        
+        plt.show()
 
 def main(args):
-    parser = OptionParser(usage="Usage: %prog [options] FILE",
+    parser = OptionParser(usage="Usage: %prog [options] FILES",
             description="""Plots results from an OpenMalaria (surveys) output
 file by time. Currently no support for simultaeneously handling
-multiple files or plotting according to age group.""",version="%prog 0.1")
+multiple files or plotting according to age group.
+
+Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, line.""",version="%prog 0.1")
     
-    parser.add_option("-m", action="store", type="string", dest="measures",
-            help="Plot only measures X (comma-separated list of numbers")
+    parser.add_option("-m","--measures", action="store", type="string", dest="measures", default="",
+            help="Plot only MEASURES (comma-separated list of numbers)")
+    parser.add_option("-a","--auto-measures", action="store_true", dest="am", default=True,
+            help="Automatically put similar measures as different lines on the same plot.")
+    #parser.add_option("-m","--measure", action="store", type="choice", dest="m", default="plot",
+            #choices=["none","x-axis","plot","line"],help="How to plot measures")
+    parser.add_option("-s","--survey", action="store", type="choice", dest="s", default="x-axis",
+            choices=["none","x-axis","plot","line"],help="How to plot surveys")
+    parser.add_option("-g","--group", action="store", type="choice", dest="g", default="none",
+            choices=["none","x-axis","plot","line"],help="How to plot (age) groups")
+    parser.add_option("-f","--file", action="store", type="choice", dest="f", default="plot",
+            choices=["none","x-axis","plot","line"],help="How to plot outputs from different files")
     
-    (options, others) = parser.parse_args(args=args)
+    (options, others) = parser.parse_args(args=args[1:])
     if len(others)==0:
         parser.print_usage()
         return 1
     
-    options.ensure_value("measures", "")
     measures=options.measures.split(",")
     if(measures[-1].strip()==""):
         measures=measures[:-1]
+    measures=[int(m) for m in measures]
     
-    for output in others[1:]:
-        plot(output,[int(m) for m in measures])
+    keys=set()
+    keys.add(Keys.MEASURE)
+    if options.s != "none": keys.add(Keys.SURVEY)
+    if options.g != "none": keys.add(Keys.GROUP)
+    if options.f != "none": keys.add(Keys.FILE)
+    
+    plotter=Plotter(keys)
+    
+    for output in others:
+        plotter.read(output,measures)
+    
+    plotter.plot(options.am,options.s,options.g,options.f)
     
     return 0
 

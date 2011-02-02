@@ -20,42 +20,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 import sys
-import string
 import math
-import unittest
 from optparse import OptionParser
 from approxEqual import ApproxEqual
+from readOutput import readEntries
 
 REL_PRECISION=1e-6
 ABS_PRECISION=1e-6
-
-class ValIdentifier:
-    def __init__(self,s,g,m):
-        self.survey = s
-        self.group = g
-        self.measure = m
-    def __eq__(self,other):
-        return (self.survey == other.survey) and (self.group == other.group) and (self.measure == other.measure)
-    def __hash__(self):
-        return self.survey.__hash__() ^ self.group.__hash__() ^ self.measure.__hash__()
-
-class TestValIdentifier (unittest.TestCase):
-    def setUp(self):
-        self.a1 = ValIdentifier(2,4,0);
-        self.a2 = ValIdentifier(2,4,0);
-        self.a3 = ValIdentifier(2,2,0);
-        self.b1 = ValIdentifier(0,"abc",5);
-        self.b2 = ValIdentifier(0,"abc",5);
-    def testEq (self):
-        self.assert_ (self.a1.survey == self.a2.survey)
-        self.assert_ (self.a1 == self.a2)
-        self.assert_ (self.b1 == self.b2)
-        self.assert_ (self.a1 != self.a3)
-    def testHash (self):
-        self.assert_ (self.a1.__hash__ == self.a2.__hash__)
-        self.assert_ (self.a1.__hash__ != self.a3.__hash__) # actually, could sometimes be
-        self.assert_ (self.b1.__hash__ == self.b2.__hash__)
-
 
 def charEqual (fn1,fn2):
     MAX=10*1024
@@ -69,30 +40,6 @@ def charEqual (fn1,fn2):
             return len(s1) == len(s2)
         if s1 != s2:
             return False
-
-#http://stackoverflow.com/questions/2974124/reading-floating-point-numbers-with-1-qnan-values-in-python
-def robust_float(s):
-    try:
-        return float(s)
-    except ValueError:
-        if 'nan' in s.lower():
-            return 1e1000-1e1000 # NaN
-        else:
-            raise
-
-def ReadEntries (fname):
-    values=dict()
-    fileObj = open(fname, 'r')
-    for line in fileObj:
-        items=string.split(line)
-        if (len(items) != 4):
-            print "expected 4 items on line; found (following line):"
-            print line
-            continue
-            
-        key=ValIdentifier(int(items[0]),items[1],int(items[2]))
-        values[key]=robust_float(items[3])
-    return values
 
 def main(fn1,fn2,maxDiffsToPrint=6):
     """Takes names of the two files to compare and optionally an argument describing
@@ -114,8 +61,8 @@ ident is 1 if files are binary-equal."""
             return 0,True
         print "output.txt files aren't binary-equal"
         
-        values1=ReadEntries(fn1)
-        values2=ReadEntries(fn2)
+        values1=readEntries(fn1)
+        values2=readEntries(fn2)
     # python 3000 syntax is "except IOError as e", backported to 2.6 but not always supported. Old syntax:
     except IOError, e:
         print str(e)
@@ -212,9 +159,6 @@ You can pass options to openMalaria by first specifying -- (to end options passe
     return options,others
 
 if __name__ == '__main__':
-    #uncomment to run unittests:
-    #unittest.main()
-    
     (options,others) = evalOptions (sys.argv[1:])
     if options.rel_precision:
         REL_PRECISION=options.rel_precision

@@ -36,7 +36,7 @@ import shutil
 from optparse import OptionParser
 import gzip
 
-sys.path[0]="@CMAKE_CURRENT_SOURCE_DIR@"
+sys.path[0]="@CMAKE_SOURCE_DIR@/util"
 import compareOutput
 import compareCtsout
 import xml.sax.handler
