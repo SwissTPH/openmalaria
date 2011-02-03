@@ -27,6 +27,7 @@ import sys
 import string
 import math
 from readOutput import Keys, ValDict
+from numbers import Number
 
 measureNames = {
     0 : 'nHost',
@@ -137,8 +138,8 @@ class MultiKey(object):
         self.mg=measureGroup #int index in combinedMeasures
         self.m=measure #int
         self.s=survey #int
-        self.g=group #string
-        self.f=fileName #string
+        self.g=group #string or int
+        self.f=fileName #int
     def __and__(self,other):
         """Set each member from other is not set in self.
         Should complain if set in self and in other, but this is a bit unnecessary."""
@@ -179,8 +180,8 @@ class MultiKey(object):
         for i in range(len(r)):
             r[i] = r[i] & x[i%lx]
     def __str__(self):
-        return self.label(MultiKey())
-    def label(self,base):
+        return self.label(MultiKey(),True,None)
+    def label(self,base,replaceFN,valDict):
         r=""
         if self.m!=base.m:
             r=getMeasureLabel(self.mg,self.m)
@@ -191,11 +192,14 @@ class MultiKey(object):
         if self.g!=base.g:
             if len(r):
                 r+=","
-            r+="group "+self.g
+            r+="group "+str(self.g)
         if self.f!=base.f:
             if len(r):
                 r+=","
-            r+=self.f
+            if replaceFN:
+                r+="run "+str(self.f)
+            else:
+                r+=valDict.getFileName(self.f)
         return r
 
 class Plotter(object):
@@ -203,7 +207,7 @@ class Plotter(object):
         self.values=ValDict(keys)
     def read(self,fileName,measures):
         self.values.read(fileName,measures)
-    def plot(self,am,s,g,f):
+    def plot(self,am,replaceFN,showLegends,s,g,f):
         x_axis=Keys.NONE
         x_label=""
         if s=="x-axis":
@@ -218,7 +222,7 @@ class Plotter(object):
             assert x_axis==Keys.NONE, "dual assignment to x-axis!"
             x_axis=Keys.FILE
             x_label="file"
-            x=self.values.getFiles()
+            x=self.values.getFileNames(replaceFN)
         assert x_axis!=Keys.NONE, "nothing to plot on x-axis!"
         
         lines=set()
@@ -267,7 +271,7 @@ class Plotter(object):
                 x=self.values.getSurveys(m)
             #else x was set previously
             
-            subplot.set_title(plot.label(MultiKey(measure=plot.m)))
+            subplot.set_title(plot.label(MultiKey(measure=plot.m),replaceFN,self.values))
             # Don't set x-label: is always the same and gets in the way of title
             #subplot.set_xlabel(x_label)
             if am:
@@ -281,6 +285,8 @@ class Plotter(object):
                 
                 pLines=[plot]
             
+            #TODO: colour is not unique for any key other than measures from measure groups
+            # i.e. we need to somehow manipulate colours to make them unique
             if Keys.SURVEY in lines:
                 MultiKey.expand(pLines, MultiKey.fromSurveys(self.values.getSurveys(m)))
             if Keys.GROUP in lines:
@@ -288,7 +294,7 @@ class Plotter(object):
             if Keys.FILE in lines:
                 MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
             
-            if len(x)>1:
+            if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
                 plotted=list()
                 for pLine in pLines:
                     xKeys=[pLine]
@@ -300,30 +306,47 @@ class Plotter(object):
                         MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
                     y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
                     colour=getMeasureColour(pLine.mg,pLine.m)
-                    plotted.append(subplot.plot(x,y,colour))
+                    try:
+                        plotted.append(subplot.plot(x,y,colour))
+                    except ValueError,e:
+                        print "Bad plot values (script error):"
+                        print "x:",x
+                        print "y:",y
                 
-                if len(plotted)>1:
-                    legends=[pLine.label(plot) for pLine in pLines]
-                    plt.legend(plotted,legends,'upper right')
-            else: #one x-coord; plot each output as a bar instead
-                pBars=pLines[:]
-                for j in range(len(pBars)):
-                    #add in other keys (we know each array has length 1)
+                if showLegends and len(plotted)>1:
+                    legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
+                    subplot.legend(plotted,legends,'upper right')
+            else: #one x-coord or non-numeric x-coords: draw a bar chart
+                plotted=list()
+                xind=numpy.arange(len(x))
+                width=0.9/len(pLines)
+                xincr=0.0
+                for pLine in pLines:
+                    xKeys=[pLine]
                     if x_axis==Keys.SURVEY:
-                        pBars[j] = pBars[j] & MultiKey(survey=self.values.getSurveys()[0])
+                        MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
                     elif x_axis==Keys.GROUP:
-                        pBars[j] = pBars[j] & MultiKey(group=self.values.getGroups(m)[0])
+                        MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
                     elif x_axis==Keys.FILE:
-                        pBars[j] = pBars[j] & MultiKey(file=self.values.getFiles()[0])
-                ind = numpy.arange(len(pBars))    # the x locations for the groups
-                vals = [self.values.get(k.m,k.s,k.g,k.f) for k in pBars]
-                width = 0.8
-                bars = plt.bar(ind, vals, width)
-                for j in range(len(bars)):
-                    bars[j].set_facecolor(getMeasureColour(pLines[j].mg,pLines[j].m))
+                        MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
+                    y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
+                    colour=getMeasureColour(pLine.mg,pLine.m)
+                    try:
+                        plotted.append(subplot.bar(xind+xincr,y,width,color=colour))
+                    except ValueError,e:
+                        print "Bad plot values (script error):"
+                        print "x:",xind+xincr
+                        print "y:",y
+                    xincr+=width
                 
-                legends=[pLine.label(plot) for pLine in pLines]
-                plt.xticks(ind+width/2., legends)
+                if showLegends and len(plotted)>1:
+                    plots=[p[0] for p in plotted]
+                    legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
+                    subplot.legend(plots,legends,'upper right')
+                if len(x)>1:
+                    subplot.set_xticks(xind+0.45)
+                    subplot.set_xticklabels(x)
+                subplot.set_xlim((-0.1,len(x)))
         
         plt.show()
 
@@ -333,7 +356,9 @@ def main(args):
 file by time. Currently no support for simultaeneously handling
 multiple files or plotting according to age group.
 
-Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, line.""",version="%prog 0.1")
+Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, line.
+If no key is set to the x-axis, the first unassigned of survey, group, file will be
+assigned to the x-axis.""",version="%prog 0.1")
     
     parser.add_option("-m","--measures", action="store", type="string", dest="measures", default="",
             help="Plot only MEASURES (comma-separated list of numbers)")
@@ -341,12 +366,16 @@ Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, lin
             help="Automatically put similar measures as different lines on the same plot.")
     #parser.add_option("-m","--measure", action="store", type="choice", dest="m", default="plot",
             #choices=["none","x-axis","plot","line"],help="How to plot measures")
-    parser.add_option("-s","--survey", action="store", type="choice", dest="s", default="x-axis",
+    parser.add_option("-s","--survey", action="store", type="choice", dest="s", default="none",
             choices=["none","x-axis","plot","line"],help="How to plot surveys")
     parser.add_option("-g","--group", action="store", type="choice", dest="g", default="none",
             choices=["none","x-axis","plot","line"],help="How to plot (age) groups")
     parser.add_option("-f","--file", action="store", type="choice", dest="f", default="plot",
             choices=["none","x-axis","plot","line"],help="How to plot outputs from different files")
+    parser.add_option("-n","--file-names", action="store_true", dest="fn", default=False,
+            help="Use full file names instead of replacing with short versions")
+    parser.add_option("-l","--no-legends", action="store_true", dest="nl", default=False,
+            help="Turn off legends (sometimes they hide parts of the plots)")
     
     (options, others) = parser.parse_args(args=args[1:])
     if len(others)==0:
@@ -357,6 +386,17 @@ Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, lin
     if(measures[-1].strip()==""):
         measures=measures[:-1]
     measures=[int(m) for m in measures]
+    
+    if options.s != "x-axis" and options.g != "x-axis" and options.f != "x-axis":
+        if options.s == "none":
+            options.s="x-axis"
+        elif options.g == "none":
+            options.g="x-axis"
+        elif options.f == "none":
+            options.f="x-axis"
+        else:
+            print "Error: nothing assigned to x-axis!"
+            return 1
     
     keys=set()
     keys.add(Keys.MEASURE)
@@ -369,7 +409,7 @@ Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, lin
     for output in others:
         plotter.read(output,measures)
     
-    plotter.plot(options.am,options.s,options.g,options.f)
+    plotter.plot(options.am,not options.fn,not options.nl,options.s,options.g,options.f)
     
     return 0
 

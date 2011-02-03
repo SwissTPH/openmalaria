@@ -99,7 +99,7 @@ def isAgeGroup(measure):
 
 class MeasureDict(object):
     def add(self,survey,group,f,value):
-        """survey:int, group:string, f:string, value:float"""
+        """survey:int, group:string or int, f:int, value:float"""
         pass
     def get(self,survey,group,f):
         """survey:int, group:string, f:string"""
@@ -109,31 +109,35 @@ class MeasureDict(object):
 class MeasureAGDict(object):
     def __init__(self):
         self.nAGroups = 0
-        self.nSurveys=0
+        #(list by fileID) of (list by survey) of (list by group)
         self.v=list()
         self.groupLabel="age group"
     def add(self,survey,group,f,value):
-        ag = int(group)
-        while survey >= self.nSurveys:
-            self.v.append([dict() for x in range(0,self.nAGroups)])
-            self.nSurveys += 1
-        while ag >= self.nAGroups:
-            for v in self.v:
-                v.append(dict())
-            self.nAGroups += 1
-        g=self.v[survey][ag]
-        g[f] = g.get(f,0.0) + value
+        """survey: int, group: string, f: int"""
+        ag = int(group) # force type as int
+        if ag >= self.nAGroups:
+            self.nAGroups = ag+1
+        
+        while f>=len(self.v):
+            self.v.append(list())
+        surveys=self.v[f]
+        while survey >= len(surveys):
+            surveys.append(list())
+        groups=surveys[survey]
+        while ag >= len(groups):
+            groups.append(0.0)
+        groups[ag] += value
     def get(self,survey,group,f):
         try:
-            return self.v[survey][int(group)][f]
+            return self.v[f][survey][int(group)]
         except KeyError:
             return 1e1000 - 1e0000 # NaN
     def getGroups(self):
-        return [str(g) for g in range(0,self.nAGroups)]
+        return range(0,self.nAGroups)
 class MeasureOGDict(object):
     def __init__(self,m):
-        self.groups=set()
-        self.nSurveys=0
+        self.groups=set() # record of all groups this measure has
+        #(list by fileID) of (list by survey) of (dict by group)
         self.v=list()
         if m in set([40,49]):
             self.groupLabel="drug ID"
@@ -142,18 +146,21 @@ class MeasureOGDict(object):
         else:
             self.groupLabel="(none)"
     def add(self,survey,group,f,value):
+        """survey: int, group: string, f: int"""
         group=str(group) # force same type to make sure hash sums match
         self.groups.add(group)
-        while survey >= self.nSurveys:
-            self.v.append(dict())
-            self.nSurveys += 1
-        g=self.v[survey]
-        key = Multi2Keys(group,f)
-        g[key] = g.get(key,0.0) + value
+        
+        while f>=len(self.v):
+            self.v.append(list())
+        surveys=self.v[f]
+        while survey >= len(surveys):
+            surveys.append(dict())
+        groups=surveys[survey]
+        groups[group] = groups.get(group,0.0) + value
     def get(self,survey,group,f):
         group=str(group)
         try:
-            return self.v[survey][Multi2Keys(group,f)]
+            return self.v[f][survey][group]
         except KeyError:
             print "can't find:",survey,group,f
             print "hash:",Multi2Keys(group,f).__hash__()
@@ -173,7 +180,7 @@ class ValDict (object):
         self.nSurveys=0 # set to max survey number; indecies are +1
         self.values=list() #key: measure number
         self.measures=set() #set of used measures
-        self.files=set()
+        self.files=list()
     
     def read(self,fileName,measures):
         """Read from fileName. If measures is non-empty, only read these measures."""
@@ -182,18 +189,23 @@ class ValDict (object):
         kS = Keys.SURVEY not in self.aggregateKeys
         kG = Keys.GROUP not in self.aggregateKeys
         if Keys.FILE not in self.aggregateKeys:
-            fID = fileName
-            self.files.add(fileName)
+            assert fileName not in self.files, "Reading same file twice?"
+            fID = len(self.files)
+            self.files.append(fileName)
         else:
             fID = 0
         s = 0
         g = 0
         fileObj = open(fileName, 'r')
+        nErrs=0
         for line in fileObj:
             items=string.split(line)
             if (len(items) != 4):
                 print "expected 4 items on line; found (following line):"
                 print line
+                nErrs+=1
+                if nErrs>5:
+                    raise Exception ("Too many errors reading "+fileName)
                 continue
             
             m=int(items[2])
@@ -212,9 +224,16 @@ class ValDict (object):
             self.values[m].add(s,g,fID,robustFloat(items[3]))
     
     def getFiles(self):
-        return self.files
+        return range(len(self.files))
+    def getFileName(self,n):
+        return self.files[n]
+    def getFileNames(self,replaceFN):
+        if replaceFN:
+            return ["run "+str(n) for n in range(len(self.files))]
+        else:
+            return self.files
     def getMeasures(self):
-        return self.measures
+        return list(self.measures)
     def getSurveys(self,m):
         """takes measure no. This does something special for measure 21, otherwise
         normal behaviour, so passing a const like 0 is fine."""
