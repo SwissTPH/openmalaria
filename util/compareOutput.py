@@ -96,9 +96,9 @@ ident is 1 if files are binary-equal."""
         elif v2==None:
             numMissing2 += 1
         else:
-            perMeasureNum[k.measure] = perMeasureNum.get(k.measure, 0) + 1
-            perMeasureTotal1[k.measure] = perMeasureTotal1.get(k.measure, 0.0) + v1
-            perMeasureTotal2[k.measure] = perMeasureTotal2.get(k.measure, 0.0) + v2
+            perMeasureNum[k.a] = perMeasureNum.get(k.a, 0) + 1
+            perMeasureTotal1[k.a] = perMeasureTotal1.get(k.a, 0.0) + v1
+            perMeasureTotal2[k.a] = perMeasureTotal2.get(k.a, 0.0) + v2
             
             # Compare with relative precision
             if approxEqual (v1, v2):
@@ -106,13 +106,13 @@ ident is 1 if files are binary-equal."""
             
             numDiffs += 1
             # Sum up total difference per measure
-            perMeasureDiffSum[k.measure]    = perMeasureDiffSum.get(k.measure,0.0)    + v2 - v1
-            perMeasureDiffAbsSum[k.measure] = perMeasureDiffAbsSum.get(k.measure,0.0) + math.fabs(v2-v1)
+            perMeasureDiffSum[k.a]    = perMeasureDiffSum.get(k.a,0.0)    + v2 - v1
+            perMeasureDiffAbsSum[k.a] = perMeasureDiffAbsSum.get(k.a,0.0) + math.fabs(v2-v1)
         
         numPrinted += 1
-        perMeasureNumDiff[k.measure] = perMeasureNumDiff.get(k.measure,0) + 1;
+        perMeasureNumDiff[k.a] = perMeasureNumDiff.get(k.a,0) + 1;
         if (numPrinted <= maxDiffsToPrint):
-            print "survey "+str(k.survey)+", group "+str(k.group)+", measure "+str(k.measure)+": "+str(v1)+" -> "+str(v2)
+            print "survey "+str(k.b)+", group "+str(k.c)+", measure "+str(k.a)+": "+str(v1)+" -> "+str(v2)
             if (numPrinted == maxDiffsToPrint):
                 print "[won't print any more line-by-line diffs]"
     
@@ -120,7 +120,7 @@ ident is 1 if files are binary-equal."""
         print str(numMissing1) + " entries missing from first file, " + str(numMissing2) +" from second"
         ret = 3
     
-    for (k.measure,absDiff) in perMeasureDiffAbsSum.iteritems():
+    for (k.a,absDiff) in perMeasureDiffAbsSum.iteritems():
         if not (absDiff <= 1e-6):   # handle NANs
             # standard division throws on divide-by-zero, which I don't want
             def div(x,y):
@@ -129,10 +129,10 @@ ident is 1 if files are binary-equal."""
                 except ZeroDivisionError:
                     return 1e400 * 0 # nan
             
-            diff=perMeasureDiffSum[k.measure]
-            sum1=perMeasureTotal1[k.measure]
-            sum2=perMeasureTotal2[k.measure]
-            print "for measure "+str(k.measure)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
+            diff=perMeasureDiffSum[k.a]
+            sum1=perMeasureTotal1[k.a]
+            sum2=perMeasureTotal2[k.a]
+            print "for measure "+str(k.a)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:

@@ -45,17 +45,6 @@ class Keys:
         else:
             raise Exception("invalid key: "+str)
 
-class Multi2Keys(object):
-    __slots__=["a","b"]
-    """Class combining two keys into a single key."""
-    def __init__(self,a,b):
-        self.a = a
-        self.b = b
-    def __eq__(self,other):
-        return (self.a == other.a) and (self.b == other.b)
-    def __hash__(self):
-        return self.a.__hash__() ^ self.b.__hash__()
-
 class Multi3Keys(object):
     __slots__=["a","b","c"]
     """Class combining three keys into a single key."""
@@ -75,22 +64,15 @@ class TestMultiKeys (unittest.TestCase):
         self.a3 = Multi3Keys(2,2,0);
         self.b1 = Multi3Keys(0,"abc",5);
         self.b2 = Multi3Keys(0,"abc",5);
-        self.c1 = Multi2Keys(13,"x-");
-        self.c2 = Multi2Keys(13,"x-");
-        self.c3 = Multi2Keys(13,"x_");
     def testEq (self):
         self.assert_ (self.a1.a == self.a2.a)
         self.assert_ (self.a1 == self.a2)
         self.assert_ (self.b1 == self.b2)
         self.assert_ (self.a1 != self.a3)
-        self.assert_ (self.c1 == self.c2)
-        self.assert_ (self.c1 != self.c3)
     def testHash (self):
         self.assert_ (self.a1.__hash__() == self.a2.__hash__())
         self.assert_ (self.a1.__hash__() != self.a3.__hash__()) # actually, hash collisions are possible
         self.assert_ (self.b1.__hash__() == self.b2.__hash__())
-        self.assert_ (self.c1.__hash__() == self.c2.__hash__())
-        self.assert_ (self.c3.__hash__() != self.c2.__hash__()) # again, collision possible
 
 def isAgeGroup(measure):
     if measure in set([7,21,26,31,32,33,34,35,36,39,40,48,49]):
@@ -162,8 +144,7 @@ class MeasureOGDict(object):
         try:
             return self.v[f][survey][group]
         except KeyError:
-            print "can't find:",survey,group,f
-            print "hash:",Multi2Keys(group,f).__hash__()
+            print "can't find:",f,survey,group
             print "have:",self.v
             return 1e1000 - 1e1000 # NaN
     def getGroups(self):
@@ -267,7 +248,9 @@ def robustFloat(s):
             raise
 
 def readEntries (fname):
-    """Return a dict of entries read from file. Keys have type ValIdentifier."""
+    """Return a dict of entries read from file. Keys have type Multi3Keys.
+    
+    Note: ValDict is probably more efficient due to use of arrays over dicts."""
     values=dict()
     fileObj = open(fname, 'r')
     for line in fileObj:
@@ -277,7 +260,7 @@ def readEntries (fname):
             print line
             continue
             
-        key=ValIdentifier(int(items[0]),items[1],int(items[2]))
+        key=Multi3Keys(int(items[0]),items[1],int(items[2]))
         values[key]=robustFloat(items[3])
     return values
 
