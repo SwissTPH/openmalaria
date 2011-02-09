@@ -74,20 +74,24 @@ private:
 	 * this prevent the recalculation of those values on every two timesteps. */
 	static double qPow[v];
 	
-	/*
-	 * The dynamic variables:
-	 * m[i]: Multiplication factor, per two-day cycle of variant i
-	 * growthRate[i]: variant's i growthRate
-	 * P[i]: variant's i density
-	 * initP[i]: Density of in t+2 emerging variant i
-	 * Pstar_c, Pstar_m: two host-specific critical densities... Those two values depend on the first local maximum or the difference
-	 * between the last positive day and the first positive day.
-	 * variantTranscendingSummation: See Molineaux paper, equation 7
-	 * variantSpecificSummation: See Molineaux paper, equation 6
-	 */
-	float m[v],variantTranscendingSummation, laggedPc[taus], Pstar_c, Pstar_m;
+	// m[i]: Multiplication factor, per two-day cycle of variant i
+	float m[v];
+        // variantTranscendingSummation: See Molineaux paper, equation 7
+        float variantTranscendingSummation;
+        float laggedPc[taus];
+        /* Pstar_c, Pstar_m: two host-specific critical densities...
+         * Those two values depend on the first local maximum or the difference
+         * between the last positive day and the first positive day. */
+        float Pstar_c, Pstar_m;
 	struct Variant {
-	    float growthRate, P, variantSpecificSummation, initP;
+            // growthRate[i]: variant's i growthRate
+            float growthRate;
+            // P[i]: variant's i density
+            float P;
+            // variantSpecificSummation: See Molineaux paper, equation 6
+            float variantSpecificSummation;
+            // initP[i]: Density of in t+2 emerging variant i
+            float initP;
 	    float laggedP[taus];
 	    
 	    Variant ();

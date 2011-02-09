@@ -146,14 +146,21 @@ namespace OM { namespace util {
 	COMORB_TREAT_HET,
 	/// @brief Allow correlated heterogeneities in transmission, comorbidity and treatment seeking
 	TRIPLE_HET,
-	
-	/** @brief Parasite densities are predicted from an empirical model
+        // @}
+        
+	/** @brief Selection of within host models
 	*/
+        //@{
+        /// Parasite densities are predicted from an empirical model
 	EMPIRICAL_WITHIN_HOST_MODEL,
-	// @}
 	
+        /// Use Molineaux within host model
 	MOLINEAUX_WITHIN_HOST_MODEL,
-
+        
+        /** Use Penny infection model. */
+        PENNY_WITHIN_HOST_MODEL,
+        // @}
+        
 	/** Use the Garki density bias instead of the default one in the detection limit.
 	 *
 	 * The default bias corresponds to counting parasites and white blood cells
@@ -188,7 +195,7 @@ namespace OM { namespace util {
          * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially
          * other outputs added after writing this. */
 	REPORT_ONLY_AT_RISK,
-	
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

@@ -27,6 +27,7 @@
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
+#include "WithinHost/Infection/PennyInfection.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -72,7 +73,9 @@ void WithinHostModel::init() {
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::init();	// 1-day timestep check
   } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
-	MolineauxInfection::init();
+    MolineauxInfection::init();
+  } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
+      PennyInfection::init();
   } else {
     DescriptiveInfection::init ();	// 5-day timestep check
     DescriptiveIPTWithinHost::init();

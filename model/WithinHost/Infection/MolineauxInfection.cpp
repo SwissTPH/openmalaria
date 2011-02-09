@@ -57,7 +57,8 @@ double MolineauxInfection::qPow[v];
  * mu_m, sigma_m: Mean and standard deviation to use for the normal distribution setting the variant specific multiplication factor.
  */
 //@{
-const double sigma=0.02;
+const double sigma = 0.02;
+const double sigma_decay=exp(-2.0*sigma);
 const double rho=0.0;
 const double beta=0.01;
 const double sProb=0.02;
@@ -123,7 +124,6 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
     variants[0].P = 0.1;
     variantTranscendingSummation = 0.0;
 
-    // TODO: use static variables
     Pstar_c = k_c*pow(random::gauss(mean_first_local_max,sd_first_local_max),10.0);
     Pstar_m = k_m*pow(random::gauss(mean_diff_pos_days,sd_diff_pos_days),10.0);
 }
@@ -207,7 +207,8 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
         }
 	
 	if( i < variants.size() ){
-	    variants[i].updateGrowthRateMultiplier( p_i*_density, m[i]*S[i]*Sc*Sm );
+            double immune_response_escape = m[i]*S[i]*Sc*Sm;
+	    variants[i].updateGrowthRateMultiplier( p_i*_density, immune_response_escape );
 	} else {
 	    // Molineaux paper equation 1
 	    // newPi: Variant density at t = t + 2
@@ -296,11 +297,12 @@ bool MolineauxInfection::updateDensity(double survivalFactor, TimeStep ageOfInfe
 double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //The effective exposure is computed by adding in the 8-day lagged parasite density (i.e. 4 time steps)
     //and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
-    //the time steps are two days and the dimension of sigma is per day.
+    //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
 
     //Molineaux paper equation 6
     size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
-    variantSpecificSummation = (variantSpecificSummation * exp(-2.0*sigma))+laggedP[index];
+    //note: sigma_decay = exp(-2*sigma)
+    variantSpecificSummation = (variantSpecificSummation * sigma_decay)+laggedP[index];
     laggedP[index] = P;
 
     return variantSpecificSummation;
@@ -310,7 +312,8 @@ double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 5
     size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
-    variantTranscendingSummation = (variantTranscendingSummation * exp(-2.0*rho))+laggedPc[index];
+    //Note: rho is zero, so the decay here is unnecessary:
+    variantTranscendingSummation = (variantTranscendingSummation /* * exp(-2.0*rho) */)+laggedPc[index];
 
     //Molineaux paper equation 8
     //We could use min here, but it seems that min has problems with static const double C

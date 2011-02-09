@@ -58,8 +58,9 @@ namespace OM { namespace util {
 	    codeMap["COMORB_TREAT_HET"] = COMORB_TREAT_HET;
 	    codeMap["TRIPLE_HET"] = TRIPLE_HET;
 	    codeMap["EMPIRICAL_WITHIN_HOST_MODEL"] = EMPIRICAL_WITHIN_HOST_MODEL;
-	    codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
-	    codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
+            codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
+            codeMap["PENNY_WITHIN_HOST_MODEL"] = PENNY_WITHIN_HOST_MODEL;
+            codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
             codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
             codeMap["REPORT_ONLY_AT_RISK"] = REPORT_ONLY_AT_RISK;
 	}
@@ -128,20 +129,15 @@ namespace OM { namespace util {
 	// Note: MAX_DENS_CORRECTION is irrelevant when using new
 	// within-host models, but we don't mark it incompatible so that we can
 	// leave MAX_DENS_CORRECTION on by default.
-	incompatibilities[INNATE_MAX_DENS]
-	    .set(DUMMY_WITHIN_HOST_MODEL)
+	incompatibilities[DUMMY_WITHIN_HOST_MODEL]
+            .set(PENNY_WITHIN_HOST_MODEL)
 	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
 	    .set(MOLINEAUX_WITHIN_HOST_MODEL);
-	
-	incompatibilities[DUMMY_WITHIN_HOST_MODEL]
-	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
-	    .set(IPTI_SP_MODEL);
 	incompatibilities[EMPIRICAL_WITHIN_HOST_MODEL]
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
-	    .set(IPTI_SP_MODEL);
+            .set(MOLINEAUX_WITHIN_HOST_MODEL)
+            .set(PENNY_WITHIN_HOST_MODEL);
 	incompatibilities[MOLINEAUX_WITHIN_HOST_MODEL]
-	    .set(IPTI_SP_MODEL);
+            .set(PENNY_WITHIN_HOST_MODEL);
 	
 	incompatibilities[NON_MALARIA_FEVERS]
 	    .set(MUELLER_PRESENTATION_MODEL);
@@ -188,7 +184,8 @@ namespace OM { namespace util {
                 .set( INCLUDES_PK_PD )
                 .set( CLINICAL_EVENT_SCHEDULER )
                 .set( EMPIRICAL_WITHIN_HOST_MODEL )
-                .set( MOLINEAUX_WITHIN_HOST_MODEL );
+                .set( MOLINEAUX_WITHIN_HOST_MODEL )
+                .set( PENNY_WITHIN_HOST_MODEL );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (optSet_bs [i] && require1DayTS[i]) {

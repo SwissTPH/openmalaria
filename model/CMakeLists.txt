@@ -61,6 +61,7 @@ set (Model_CPP
   WithinHost/Infection/DummyInfection.cpp
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp
+  WithinHost/Infection/PennyInfection.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp
