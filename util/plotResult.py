@@ -101,7 +101,7 @@ combinedMeasures = [
     ('intervention doses',[(20,'EPI vaccinations','red'),(22,'mass vaccinations','darkred'),(25,'IPT doses','brown')]),
     ('infant mortality rate',[(21,'IMR','red')]),
     ('hospital recoveries',[(23,'hospital recoveries','orange')]),
-    ('innoculations',[(30,'all','red')]),
+    ('inoculations',[(30,'all','red')]),
     ('feeding vectors',[(31,'emergence - N_v0','green'),(32,'all - N_v','blue'),(33,'infected - O_v','purple'),(34,'infectious - S_v','red')]),
     ('EIR (innocs/pers/year)',[(35,'requested','orange'),(36,'simulated','red')]),
     ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown')]),

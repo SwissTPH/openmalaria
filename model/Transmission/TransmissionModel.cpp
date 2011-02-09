@@ -81,7 +81,7 @@ void TransmissionModel::ctsCbInputEIR (ostream& stream){
     stream<<'\t'<<initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
-    stream<<'\t'<<innoculationsPerDayOfYear[TimeStep::simulation % TimeStep::stepsPerYear];
+    stream<<'\t'<<inoculationsPerTimeStep[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     stream<<'\t'<<kappa[TimeStep::simulation % TimeStep::stepsPerYear];
@@ -98,9 +98,9 @@ TransmissionModel::TransmissionModel() :
     simulationMode(equilibriumMode),
     interventionMode(InputData().getEntoData().getMode()),
     _sumAnnualKappa(0.0),
-    BSSInitialisationEIR(0.0), BSSInnoculationsPerDayOfYear(0.0), BSSTimesteps(0),
+    surveyInputEIR(0.0), surveySimulatedEIR(0.0),
     annualEIR(0.0),
-    timeStepNumEntoInnocs (0)
+    timeStepNumEntoInocs (0)
 {
     if (interventionMode != equilibriumMode && interventionMode != dynamicEIR){
         // Note: previously 3 was allowed -- but mode is set to 3 anyway when
@@ -110,9 +110,9 @@ TransmissionModel::TransmissionModel() :
     
   kappa.assign (TimeStep::stepsPerYear, 0.0);
   initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
-  innoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
-  innoculationsPerDayOfYear.assign (TimeStep::stepsPerYear, 0.0);
-  timeStepEntoInnocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
+  inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
+  inoculationsPerTimeStep.assign (TimeStep::stepsPerYear, 0.0);
+  timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   
   // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
   // memory corruption or extra tests when setting/copying values
@@ -200,21 +200,20 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
     util::SharedGraphics::copyKappa(&kappaByAge[0]);
   }
   
-  // Sum up innoculations this timestep
+  // Sum up inoculations this timestep
   double timeStepTotal = 0.0;
-  for (size_t group = 0; group < timeStepEntoInnocs.size(); ++group) {
-    timeStepTotal += timeStepEntoInnocs[group];
-    innoculationsPerAgeGroup[group] += timeStepEntoInnocs[group];
+  for (size_t group = 0; group < timeStepEntoInocs.size(); ++group) {
+    timeStepTotal += timeStepEntoInocs[group];
+    inoculationsPerAgeGroup[group] += timeStepEntoInocs[group];
     // Reset to zero:
-    timeStepEntoInnocs[group] = 0.0;
+    timeStepEntoInocs[group] = 0.0;
   }
-  innoculationsPerDayOfYear[tmod] = timeStepTotal / timeStepNumEntoInnocs;
+  inoculationsPerTimeStep[tmod] = timeStepTotal / timeStepNumEntoInocs * ageCorrectionFactor;
 
-  BSSInitialisationEIR += initialisationEIR[tmod];
-  BSSInnoculationsPerDayOfYear +=innoculationsPerDayOfYear[tmod];
-  BSSTimesteps++;
+  surveyInputEIR += initialisationEIR[tmod];
+  surveySimulatedEIR +=inoculationsPerTimeStep[tmod];
 
-  timeStepNumEntoInnocs = 0;
+  timeStepNumEntoInocs = 0;
 }
 
 double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
@@ -224,8 +223,8 @@ double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, d
    * availability. */
   double EIR = calculateEIR (host, ageYears);
   
-  timeStepEntoInnocs[ageGroup.i()] += EIR;
-  timeStepNumEntoInnocs ++;
+  timeStepEntoInocs[ageGroup.i()] += EIR;
+  timeStepNumEntoInocs ++;
   util::streamValidate( EIR );
   return EIR;
 }
@@ -234,15 +233,16 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   survey.setNumTransmittingHosts(kappa[TimeStep::simulation % TimeStep::stepsPerYear]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
   
-  survey.setInnoculationsPerAgeGroup (innoculationsPerAgeGroup);        // Array contents must be copied.
-  innoculationsPerAgeGroup.assign (innoculationsPerAgeGroup.size(), 0.0);
+  survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
+  inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
+  
+  double duration = (lastSurveyTime-TimeStep::simulation).asInt();
+  survey.set_Vector_EIR_Input (surveyInputEIR / duration);
+  survey.set_Vector_EIR_Simulated (surveySimulatedEIR / duration);
 
-  survey.set_Vector_EIR_Input (BSSInitialisationEIR/(double)BSSTimesteps);
-  survey.set_Vector_EIR_Simulated (BSSInnoculationsPerDayOfYear/(double)BSSTimesteps);
-
-  BSSInitialisationEIR = 0.0;
-  BSSInnoculationsPerDayOfYear = 0.0;
-  BSSTimesteps = 0;
+  surveyInputEIR = 0.0;
+  surveySimulatedEIR = 0.0;
+  lastSurveyTime = TimeStep::simulation;
 }
 
 void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
@@ -260,16 +260,16 @@ void TransmissionModel::checkpoint (istream& stream) {
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
     annualEIR & stream;
-    innoculationsPerDayOfYear & stream;
-    innoculationsPerAgeGroup & stream;
-    timeStepEntoInnocs & stream;
-    timeStepNumEntoInnocs & stream;
+    inoculationsPerTimeStep & stream;
+    inoculationsPerAgeGroup & stream;
+    timeStepEntoInocs & stream;
+    timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
-    BSSInitialisationEIR & stream;
-    BSSInnoculationsPerDayOfYear & stream;
-    BSSTimesteps & stream;
+    surveyInputEIR & stream;
+    surveySimulatedEIR & stream;
+    lastSurveyTime & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     ageCorrectionFactor & stream;
@@ -279,16 +279,16 @@ void TransmissionModel::checkpoint (ostream& stream) {
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
     annualEIR & stream;
-    innoculationsPerDayOfYear & stream;
-    innoculationsPerAgeGroup & stream;
-    timeStepEntoInnocs & stream;
-    timeStepNumEntoInnocs & stream;
+    inoculationsPerTimeStep & stream;
+    inoculationsPerAgeGroup & stream;
+    timeStepEntoInocs & stream;
+    timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
-    BSSInitialisationEIR & stream;
-    BSSInnoculationsPerDayOfYear & stream;
-    BSSTimesteps & stream;
+    surveyInputEIR & stream;
+    surveySimulatedEIR & stream;
+    lastSurveyTime & stream;
 }
 
 } }

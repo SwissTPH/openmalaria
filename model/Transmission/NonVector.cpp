@@ -86,8 +86,8 @@ TimeStep NonVectorTransmission::minPreinitDuration (){
     if( InputData().getEntoData().getMode() == equilibriumMode ){
         return TimeStep(0);
     }
-    // 1 year required, 50 years stabilization
-    return TimeStep::fromYears(51);
+    // 5 years for data collection, 50 years stabilization
+    return TimeStep::fromYears(55);
 }
 TimeStep NonVectorTransmission::expectedInitDuration (){
     return TimeStep(0);

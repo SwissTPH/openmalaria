@@ -35,10 +35,7 @@ namespace util {
 /** Class encapsulating a time step to add type safety. Conversion to this
     * class must be explicit; also potentially conversion from this class?
     * 
-    * There is no default constructor; it is recommended to initialize with
-    * TimeStep::TIMESTEP_NEVER when a value is not desired.
-    *
-    * Type represents both time since start of simulation and durations.
+    * Type represents both times and durations.
     */
 class TimeStep {
     int _ts;        // time step

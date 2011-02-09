@@ -297,7 +297,7 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
 
   if (active[SM::innoculationsPerAgeGroup]) {
-    writePerAgeGroup (outputFile, SM::innoculationsPerAgeGroup, survey, _innoculationsPerAgeGroup);
+    writePerAgeGroup (outputFile, SM::innoculationsPerAgeGroup, survey, _inoculationsPerAgeGroup);
   }
   
   if (active[SM::Vector_Nv0]) {

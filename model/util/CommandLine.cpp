@@ -203,7 +203,7 @@ namespace OM { namespace util {
 	    << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
-	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (innocs./person/year)"<<endl
+	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (inocs./person/year)"<<endl
 	    << "			Note: updated XML file will be generated in working directory,"<<endl
 	    << "			and will have other, mostly insignificant, differences to original."<<endl
             << "    --sample-interpolations"<<endl

@@ -244,8 +244,8 @@ public:
     _numTransmittingHosts = value;
   }
   
-  void setInnoculationsPerAgeGroup (vector<double>& v) {
-    _innoculationsPerAgeGroup = v;	// copies v, not just its reference
+  void setInoculationsPerAgeGroup (vector<double>& v) {
+    _inoculationsPerAgeGroup = v;	// copies v, not just its reference
   }
   void report_Clinical_RDTs (int num) {
       _numClinical_RDTs += num;
@@ -317,7 +317,7 @@ public:
     _numIPTDoses & stream;
     _annualAverageKappa & stream;
     _numNonMalariaFevers & stream; 
-    _innoculationsPerAgeGroup & stream;
+    _inoculationsPerAgeGroup & stream;
     data_Vector_Nv0 & stream;
     data_Vector_Nv & stream;
     data_Vector_Ov & stream;
@@ -380,7 +380,7 @@ private:
   vector<int> _numHospitalSequelae;
   vector<int> _numIPTDoses;
   vector<int> _numNonMalariaFevers; 
-  vector<double> _innoculationsPerAgeGroup;
+  vector<double> _inoculationsPerAgeGroup;
   vector<int> _numClinical_FirstDayDeaths;
   vector<int> _numClinical_HospitalFirstDayDeaths;
   vector<int> _numNewInfections;

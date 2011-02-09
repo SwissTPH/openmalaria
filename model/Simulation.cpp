@@ -172,7 +172,7 @@ int Simulation::start(){
             simPeriodEnd = totalSimDuration;
             TimeStep::interventionPeriod = TimeStep(0);
             _population->preMainSimInit();
-            _population->newSurvey();       // Only to reset TransmissionModel::innoculationsPerAgeGroup
+            _population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             Surveys.incrementSurveyPeriod();
         } else if (phase == END_SIM) {
             cerr << "sim end" << endl;

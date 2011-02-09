@@ -239,9 +239,14 @@ private:
    * Checkpointed. */
   double _sumAnnualKappa;
   
-  double BSSInitialisationEIR;
-  double BSSInnoculationsPerDayOfYear;
-  int BSSTimesteps;
+  /** Per-timestep input EIR summed over inter-survey period.
+   * Units: infectious bites/adult/inter-survey period. */
+  double surveyInputEIR;
+  /** Per-timestep simulated EIR summed over inter-survey period.
+   * Units: infectious bites/adult/inter-survey period. */
+  double surveySimulatedEIR;
+  /** Time of last survey. */
+  TimeStep lastSurveyTime;
   
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
@@ -254,25 +259,26 @@ protected:
   
   /** @brief Variables for reporting of entomological inoculations to humans.
    *
-   * innoculationsPer... arrays are checkpointed; timesStep... variables aren't
+   * inoculationsPer... arrays are checkpointed; timesStep... variables aren't
    * since they're calculated per step. */
   //@{
-  /** Inoculations per human (all ages) per day of year.
+  /** Infectious bites per human per time step scaled to have units of
+   * bites/adult/timestep.
    * 
    * Contains values from today to the previous timestep, one year ago,
    * including the initialisation phase. */
-  vector<double> innoculationsPerDayOfYear;
+  vector<double> inoculationsPerTimeStep;
   
   /** The total number of inoculations per age group, summed over the
    * reporting period. */
-  vector<double> innoculationsPerAgeGroup;
+  vector<double> inoculationsPerAgeGroup;
   
   /** Sum of all EIR returned in this timestep, per age group
    * Doesn't need to be checkpointed. */
-  vector<double> timeStepEntoInnocs;
+  vector<double> timeStepEntoInocs;
   /** Total number of EIRs output in the timestep (roughly equal to populationSize)
    * Doesn't need to be checkpointed. */
-  size_t timeStepNumEntoInnocs;
+  size_t timeStepNumEntoInocs;
   //@}
   
   /** @brief Variables for shared graphics kappa-by-age graph
