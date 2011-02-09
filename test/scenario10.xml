@@ -90,7 +90,7 @@
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>
   </healthSystem>
-  <entoData mode="4" name="Idete">
+  <entoData mode="2" name="Idete">
     <!--first day is 17-03-92-->
     <nonVector eipDuration="10">
       <EIRDaily>31.5389</EIRDaily>
