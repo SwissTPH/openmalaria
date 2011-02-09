@@ -38,10 +38,9 @@ public:
   virtual void scaleEIR (double factor);
   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
-  //! initialise the main simulation 
-  void initMainSimulation ();
-  
-  virtual TimeStep transmissionInitDuration ();
+  virtual TimeStep minPreinitDuration ();
+  virtual TimeStep expectedInitDuration ();
+  virtual TimeStep initIterate ();
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);

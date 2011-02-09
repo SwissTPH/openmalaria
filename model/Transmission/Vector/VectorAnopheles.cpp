@@ -394,12 +394,9 @@ bool VectorAnopheles::vectorInitIterate () {
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
-    //Note: we used to keep iterating until both of the following limits passed.
-    // Lets change this and just execute once.
-    return false;
-    /* const double LIMIT = 0.1;
-     * return (fabs(factor - 1.0) > LIMIT) ||
-     * (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear); */
+    const double LIMIT = 0.1;
+    return (fabs(factor - 1.0) > LIMIT) ||
+        (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear);
 }
 
 

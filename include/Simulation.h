@@ -78,7 +78,7 @@ private:
 	MAIN_PHASE,
 	END_SIM		// should have largest value of all enumerations
     };
-    int phase;
+    int phase;  // only need be a class member because value is checkpointed
     
     Population* _population;
     

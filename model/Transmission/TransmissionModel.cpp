@@ -96,11 +96,18 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
 TransmissionModel::TransmissionModel() :
     ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
+    interventionMode(InputData().getEntoData().getMode()),
     _sumAnnualKappa(0.0),
     BSSInitialisationEIR(0.0), BSSInnoculationsPerDayOfYear(0.0), BSSTimesteps(0),
     annualEIR(0.0),
     timeStepNumEntoInnocs (0)
 {
+    if (interventionMode != equilibriumMode && interventionMode != dynamicEIR){
+        // Note: previously 3 was allowed -- but mode is set to 3 anyway when
+        // "intervention" EIR data is loaded, so 2 or 4 should be used here.
+        throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
+    }
+    
   kappa.assign (TimeStep::stepsPerYear, 0.0);
   initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
   innoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);

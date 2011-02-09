@@ -44,7 +44,6 @@ TimeStep::ReadOnly<double> TimeStep::yearsPerInterval;
 TimeStep TimeStep::intervalsPer5Days( TimeStep::never );
 TimeStep TimeStep::intervalsPerYear( TimeStep::never );
 TimeStep TimeStep::maxAgeIntervals( TimeStep::never );
-TimeStep TimeStep::lifespanInitIntervals( TimeStep::never );
 TimeStep::ReadOnly<int> TimeStep::stepsPerYear;
 
 const TimeStep TimeStep::never, TimeStep::future(0x7FFFFFFF);
@@ -55,24 +54,17 @@ TimeStep TimeStep::interventionPeriod( TimeStep::never );
 void TimeStep::init( int daysPerTimeStep, double maxAgeYears ) {
     interval = daysPerTimeStep;
     if (DAYS_IN_YEAR % interval != 0) {
-        cerr << "Global::DAYS_IN_YEAR not a multiple of interval" << endl;
-        exit(-12);
+        throw util::xml_scenario_error( "Global::DAYS_IN_YEAR not a multiple of interval" );
+    }else if (maxAgeYears < 1.0){
+        throw util::xml_scenario_error( "maximumAgeYrs must be at least 1" );
     }
     intervalsPer5Days = TimeStep(5/interval);
     stepsPerYear = DAYS_IN_YEAR/interval;
     intervalsPerYear = TimeStep( stepsPerYear );
     yearsPerInterval = double(interval) / DAYS_IN_YEAR;
-
-    // Changed in r756 (2010-03-04): Did cast max-age-years to int before multiplying (minor effect on output).
+    
+    // Maximum age of an individual:
     maxAgeIntervals = TimeStep (maxAgeYears * stepsPerYear);
-    // For schema 22: Make sure first day of intervention period is same
-    // day-of-year of first day of simulation.
-    lifespanInitIntervals = TimeStep(std::ceil(maxAgeYears) * stepsPerYear);
-    // NOTE: This is also because both transmission models need at least
-    // one year for initialization. This change is partially the opposite of
-    // r756/r770, but not really the same.
-    if ( lifespanInitIntervals < intervalsPerYear )
-        throw util::xml_scenario_error( "maximumAgeYrs must be positive" );
 }
 
 }

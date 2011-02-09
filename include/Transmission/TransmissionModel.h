@@ -116,28 +116,20 @@ public:
    * @param factor	Multiplicative factor by which to scale EIR. */
   virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
   
-  /** How many intervals are needed for vector initialisation after one-
-   * lifespan initialisation?
-   *
-   * Units: timesteps; value should be a whole number of years. */
-  virtual TimeStep transmissionInitDuration () =0;
-  /** Called after end of transmissionInitDuration() to control initialisation
-   * iterations.
+  /** How many intervals are needed for transmission initialization during the
+   * "human" phase (before vector init)?
    * 
-   * Should determine whether another init iteration is needed, make necessary
-   * adjustments, and return number of timesteps to run this initialisation for
-   * (0 if no further iteration is needed).
-   *
-   * Units: timesteps; value should be a whole number of years. */
-  virtual TimeStep transmissionInitIterate () {
-    return TimeStep( 0 );
-  }
-  
-  /** Initialise the main simulation.
-   *
-   * Although we should have (population.size() == populationSize), it appears
-   * that it's better not to use population.size(). */
-  virtual void initMainSimulation ()=0; 
+   * Should include time for both data collection and to give the data
+   * collected time to stabilize. */
+  virtual TimeStep minPreinitDuration () =0;
+  /** Length of time that initIterate() is most likely to add: only used to
+   * estimate total runtime. */
+  virtual TimeStep expectedInitDuration () =0;
+  /** Check whether transmission has been sufficiently well initialized. If so,
+   * switch to dynamic transmission mode. If not, try to improve the situation
+   * and return the length of sim-time before this should be called again.
+   */
+  virtual TimeStep initIterate ()=0;
   
   /** Needs to be called each step of the simulation before nearly anything
    * else.
@@ -212,6 +204,8 @@ public:
 protected:
   /** The type of EIR calculation. Checkpointed. */
   int simulationMode;
+  /** New simulation mode during intervention period. Not checkpointed. */
+  int interventionMode;
   
   /** Entomological inoculation rate for adults during the
    * pre-intervention phase.

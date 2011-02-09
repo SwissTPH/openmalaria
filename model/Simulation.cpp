@@ -73,10 +73,41 @@ Simulation::~Simulation(){
 
 
 // -----  run simulations  -----
+enum Phase {
+    STARTING_PHASE = 0,
+    /*! Run the simulation using the equilibrium inoculation rates over one complete
+        lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
+        classes. Don't report any events */
+    ONE_LIFE_SPAN,
+    /** Initialisation/fitting phase for transmission models. */
+    TRANSMISSION_INIT,
+    //!  This procedure starts with the current state of the simulation 
+    /*! It continues updating    assuming:
+        (i)         the default (exponential) demographic model
+        (ii)        the entomological input defined by the EIRs in intEIR()
+        (iii)       the intervention packages defined in Intervention()
+        (iv)        the survey times defined in Survey() */
+    MAIN_PHASE,
+    END_SIM         // should have largest value of all enumerations
+};
 
 int Simulation::start(){
-    totalSimDuration = TimeStep::lifespanInitIntervals  // ONE_LIFE_SPAN
-        + _population->_transmissionModel->transmissionInitDuration()   // initial run of TRANSMISSION_INIT
+    // Make sure warmup period is at least as long as a human lifespan, as the
+    // length required by vector warmup, and a whole number of years.
+    TimeStep humanWarmupLength = TimeStep::maxAgeIntervals;
+    if( humanWarmupLength < _population->_transmissionModel->minPreinitDuration() ){
+        cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
+        cerr << ") shorter than length of warm-up requested by" << endl;
+        cerr << "transmission model (" << _population->_transmissionModel->minPreinitDuration().inYears();
+        cerr << "). Transmission may be unstable; perhaps use forced" << endl;
+        cerr << "transmission (mode=2) or a longer life-span." << endl;
+        humanWarmupLength = _population->_transmissionModel->minPreinitDuration();
+    }
+    humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1) / TimeStep::stepsPerYear + 1);
+    cout<<"Warmup length: "<<humanWarmupLength.asInt()<<endl;
+    
+    totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
+        + _population->_transmissionModel->expectedInitDuration()
         + Surveys.getFinalTimestep() + TimeStep( 1 );   // MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
@@ -123,30 +154,27 @@ int Simulation::start(){
             ++TimeStep::interventionPeriod;     // zero-based: zero on first time-step of intervention period
         }
         
-        if (phase == STARTING_PHASE) {
-            // Start ONE_LIFE_SPAN:
-            ++phase;
-            simPeriodEnd = TimeStep::lifespanInitIntervals;
-        } else if (phase == ONE_LIFE_SPAN) {
-            // Start vector-initialisation:
-            ++phase;
-            simPeriodEnd += _population->_transmissionModel->transmissionInitDuration();
+        ++phase;        // advance to next phase
+        if (phase == ONE_LIFE_SPAN) {
+            simPeriodEnd = humanWarmupLength;
         } else if (phase == TRANSMISSION_INIT) {
-            TimeStep extend = _population->_transmissionModel->transmissionInitIterate();
-            if (extend > TimeStep( 0 )) {       // repeat phase
-                simPeriodEnd += extend;
-                totalSimDuration += extend;
-            } else {            // next phase
-                // Start MAIN_PHASE:
-                ++phase;
-                simPeriodEnd = totalSimDuration;
-                TimeStep::interventionPeriod=TimeStep(0);
-                _population->preMainSimInit();
-                _population->newSurvey();       // Only to reset TransmissionModel::innoculationsPerAgeGroup
-                Surveys.incrementSurveyPeriod();
+            TimeStep iterate = _population->_transmissionModel->initIterate();
+            if( iterate > TimeStep(0) ) {
+                simPeriodEnd += iterate;
+                --phase;        // repeat phase
+            } else {
+                // nothing to do: start main phase immediately
             }
+            // adjust estimation of final time step: end of current period + length of main phase
+            totalSimDuration = simPeriodEnd + Surveys.getFinalTimestep() + TimeStep( 1 );
         } else if (phase == MAIN_PHASE) {
-            ++phase;
+            // Start MAIN_PHASE:
+            simPeriodEnd = totalSimDuration;
+            TimeStep::interventionPeriod = TimeStep(0);
+            _population->preMainSimInit();
+            _population->newSurvey();       // Only to reset TransmissionModel::innoculationsPerAgeGroup
+            Surveys.incrementSurveyPeriod();
+        } else if (phase == END_SIM) {
             cerr << "sim end" << endl;
             break;
         }

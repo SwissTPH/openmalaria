@@ -27,6 +27,7 @@
 #endif
 
 #include <iostream>
+#include <cassert>
 
 namespace OM {
 namespace util {
@@ -88,8 +89,6 @@ public:
     static TimeStep intervalsPerYear;
     /// Maximum age of individuals in a scenario in time intervals
     static TimeStep maxAgeIntervals;
-    /// Smallest number such that it is at least maxAgeIntervals and a whole year.
-    static TimeStep lifespanInitIntervals;
     /// Same as intervalsPerYear, but as an integer: useful for array indecies and lengths
     static ReadOnly<int> stepsPerYear;
     //@}
@@ -115,11 +114,13 @@ public:
     static TimeStep fromDays( double d );
     /// Convert a whole number of years to TimeStep type
     static TimeStep fromYears( int y ){
+        assert( intervalsPerYear._ts != 0 );    // not initialized yet
         return TimeStep( y * intervalsPerYear._ts );
     }
     /** Convert a floating-point number of years to TimeStep type (rounding
      * down where rounding is necessary). */
     static TimeStep fromYears( double y ){
+        assert( intervalsPerYear._ts != 0 );    // not initialized yet
         return TimeStep( y * intervalsPerYear._ts );
     }
     

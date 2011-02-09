@@ -37,8 +37,6 @@ const double NonVectorTransmission::min_EIR_mult= 0.01;
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData) :
   nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
 {
-  initialKappa.resize (TimeStep::stepsPerYear);
-  
   vector<int> nDays (TimeStep::stepsPerYear, 0);
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
@@ -84,27 +82,31 @@ void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) c
 }
 
 
-//! initialise the main simulation 
-void NonVectorTransmission::initMainSimulation (){
-  // initialKappa is used in calculateEIR
-  initialKappa = kappa;
-  // error check:
-  for (size_t  i = 0; i < initialKappa.size(); ++i) {
-      if (!(initialKappa[i] > 0.0))	// if not positive
-	  throw runtime_error ("initialKappa is invalid");
-  }
-  
-  simulationMode = InputData().getEntoData().getMode();
-  if (simulationMode != 2 && simulationMode != 4)
-      // Note: previously 3 was allowed -- but mode is set to 3 anyway when
-      // "intervention" EIR data is loaded, so 2 or 4 should be used here.
-      throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
+TimeStep NonVectorTransmission::minPreinitDuration (){
+    if( InputData().getEntoData().getMode() == equilibriumMode ){
+        return TimeStep(0);
+    }
+    // 1 year required, 50 years stabilization
+    return TimeStep::fromYears(51);
 }
-
-TimeStep NonVectorTransmission::transmissionInitDuration (){
-    // 0 maintains old behaviour; human infectiousness over the last year of
-    // human initialisation is used.
+TimeStep NonVectorTransmission::expectedInitDuration (){
     return TimeStep(0);
+}
+TimeStep NonVectorTransmission::initIterate (){
+    simulationMode = interventionMode;
+    if( simulationMode == equilibriumMode ){
+        return TimeStep(0);
+    }
+    
+    // initialKappa is used in calculateEIR
+    initialKappa = kappa;
+    // error check:
+    for (size_t  i = 0; i < initialKappa.size(); ++i) {
+        if (!(initialKappa[i] > 0.0))     // if not positive
+            throw runtime_error ("initialKappa is invalid");
+    }
+    
+    return TimeStep(0); // nothing to do
 }
 
 void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {

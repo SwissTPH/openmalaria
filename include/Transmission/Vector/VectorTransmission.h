@@ -43,19 +43,9 @@ public:
   virtual void scaleEIR (double factor);
   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
-  /** How long to sample for before first iteration of fitting.
-   *
-   * (EIR is forced until vectorInitIterate finishes fitting). */
-  virtual TimeStep transmissionInitDuration ();
-  /** Called after end of vectorInitDuration() and after init iterations.
-   *
-   * Should determine whether another init iteration is needed, make necessary
-   * adjustments, and return number of timesteps to run this initialisation for
-   * (0 if a further iteration is not needed). */
-  virtual TimeStep transmissionInitIterate ();
-  
-  /** Initialise the main simulation. */
-  void initMainSimulation ();
+  virtual TimeStep minPreinitDuration ();
+  virtual TimeStep expectedInitDuration ();
+  virtual TimeStep initIterate ();
   
   virtual void vectorUpdate (const std::list<Host::Human>& population);
   
@@ -93,6 +83,9 @@ private:
   void ctsCbS_v (ostream& stream);
   
   
+    /// Number of iterations performed during initialization, or negative when done.
+    int initIterations;
+    
   /** @brief Access to per (anopheles) species data.
    *
    * Set by constructor so don't checkpoint. */
