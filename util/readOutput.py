@@ -248,7 +248,8 @@ def robustFloat(s):
             raise
 
 def readEntries (fname):
-    """Return a dict of entries read from file. Keys have type Multi3Keys.
+    """Return a dict of entries read from file. Keys have type Multi3Keys,
+    where a corresponds to measure, b to survey and c to group.
     
     Note: ValDict is probably more efficient due to use of arrays over dicts."""
     values=dict()
@@ -260,7 +261,7 @@ def readEntries (fname):
             print line
             continue
             
-        key=Multi3Keys(int(items[0]),items[1],int(items[2]))
+        key=Multi3Keys(int(items[2]),int(items[0]),items[1])
         values[key]=robustFloat(items[3])
     return values
 
