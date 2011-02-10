@@ -22,8 +22,7 @@
 import sys
 import string
 from optparse import OptionParser
-
-totalRelDiff = 0.0
+from approxEqual import ApproxEqual
 
 REL_PRECISION=1e-6
 ABS_PRECISION=1e-6
@@ -42,6 +41,45 @@ def charEqual (fn1,fn2):
         if s1 != s2:
             return False
 
+def readSums(fn):
+    """return list of titles and list of column sums"""
+    f=open(fn,'r')
+    titles=[s.strip() for s in f.readline().split('\t')]
+    if titles==['##','##']:
+        # first line is auxilliary header...
+        titles=[s.strip() for s in f.readline().split('\t')]
+    cols=[0.0 for x in range(len(titles))]
+    for line in f:
+        i=0
+        for item in line.split('\t'):
+            cols[i] += float(item.strip())
+            i+=1
+    return titles,cols
+
+def sumsApproxEq (fn1,fn2):
+    """ return true if approx equal, false otherwise
+    also prints about unequal stuff"""
+    t1,vec1=readSums(fn1)
+    t2,vec2=readSums(fn2)
+    approxEq = ApproxEqual(REL_PRECISION,ABS_PRECISION)
+    if t1 != t2:
+        print "\033[1;31mColumns not equal:"
+        print t1
+        print t2
+        print "\033[0;0m",
+        return False
+    allApEq=True
+    assert len(vec1)==len(vec2)
+    for i in range(len(vec1)):
+        if not approxEq(vec1[i],vec2[i]):
+            print "\033[0;31mSignificantly different:",t1[i],"; sums:",vec1[i],",",vec2[i]
+            allApEq=False
+    if allApEq:
+        print "No significant differences (total relative diff: "+str(approxEq.totalRelDiff/1.e6)+"), ok."
+    else:
+        print "\033[1;31mSome significant differences (total relative diff: "+str(approxEq.totalRelDiff/1.e6)+ ")!\033[0;0m"
+    return allApEq
+
 def main(fn1,fn2):
     ret=0
     opt=""
@@ -56,7 +94,8 @@ def main(fn1,fn2):
         if charEqual (fn1,fn2):
             print "ctsout.txt files are identical"
             return 0,True
-        print "\033[1;31m"+"ctsout.txt files aren't binary-equal; no approximate comparison implemented.\033[0;0m"
+        elif sumsApproxEq (fn1,fn2):
+            return 0,False
         return 1,False
     # python 3000 syntax is "except IOError as e", backported to 2.6 but not always supported. Old syntax:
     except IOError, e:

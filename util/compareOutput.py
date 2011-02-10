@@ -136,7 +136,7 @@ ident is 1 if files are binary-equal."""
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
-        print "No significant differences (total relative diff: "+str(approxEqual.totalRelDiff/1.e6)+"), ok..."
+        print "No significant differences (total relative diff: "+str(approxEqual.totalRelDiff/1.e6)+"), ok."
         return ret,False
     else:
         print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxEqual.totalRelDiff/1.e6)+ ")!\033[0;0m"
