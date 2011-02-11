@@ -2267,23 +2267,26 @@
           Determines which decay function to use. Available decay functions,
           for age t in years:
           
-          constant: initial
+          constant: 1
           
-          linear: initial * (1 - t/L) for t less than L, otherwise 0
+          step: 1 for t less than L, otherwise 0
           
-          exponential: initial * exp( - t/L * log(2) )
+          linear: 1 - t/L for t less than L, otherwise 0
           
-          weibull: initial * exp( -(t/L)^k * log(2) )
+          exponential: exp( - t/L * log(2) )
           
-          hill: initial / (1 + (t/L)^k)
+          weibull: exp( -(t/L)^k * log(2) )
           
-          chitnis: initial * exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+          hill: 1 / (1 + (t/L)^k)
+          
+          chitnis: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
         </xs:documentation>
         <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="constant" />
+          <xs:enumeration value="step" />
           <xs:enumeration value="linear" />
           <xs:enumeration value="exponential" />
           <xs:enumeration value="weibull" />
@@ -2317,7 +2320,8 @@
   <xs:complexType name="DecayFunctionValue">
     <xs:annotation>
       <xs:documentation>
-        Specification of decay or survival of a parameter along with initial value.
+        Specification of decay or survival of a parameter along with initial
+        value (i.e. the decay function's value is multiplied by "initial").
       </xs:documentation>
     </xs:annotation>
     <xs:complexContent>
@@ -2325,7 +2329,7 @@
         <xs:attribute name="initial" type="xs:double" use="required">
           <xs:annotation>
             <xs:documentation>
-              The value before any decay.
+              A value multiplying the decay function, thus equal to the function's value at time 0.
             </xs:documentation>
             <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
           </xs:annotation>

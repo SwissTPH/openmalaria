@@ -37,6 +37,24 @@ public:
     }
 };
 
+class StepDecayFunction : public DecayFunction {
+public:
+    StepDecayFunction( const scnXml::DecayFunction& elt ) :
+        L( TimeStep::fromYears( elt.getL() ) )
+    {}
+    
+    double eval(TimeStep age) const{
+        if( age < L ){
+            return 1.0;
+        }else{
+            return 0.0;
+        }
+    }
+    
+private:
+    TimeStep L;
+};
+
 class LinearDecayFunction : public DecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
@@ -135,6 +153,8 @@ shared_ptr<DecayFunction> DecayFunction::makeObject(
     const scnXml::Function& func = elt.getFunction();
     if( func == "constant" ){
         return shared_ptr<DecayFunction>(new ConstantDecayFunction);
+    }else if( func == "step" ){
+        return shared_ptr<DecayFunction>(new StepDecayFunction( elt ));
     }else if( func == "linear" ){
         return shared_ptr<DecayFunction>(new LinearDecayFunction( elt ));
     }else if( func == "exponential" ){

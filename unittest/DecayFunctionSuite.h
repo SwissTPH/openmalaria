@@ -55,6 +55,14 @@ public:
         TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 1.9 );
     }
     
+    void testStep () {
+        dfElt.setFunction( "step" );
+        df.set( dfElt, "DecayFunctionSuite" );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
+    }
+    
     void testLinear () {
         dfElt.setFunction( "linear" );
         df.set( dfElt, "DecayFunctionSuite" );
