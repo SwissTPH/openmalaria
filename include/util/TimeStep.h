@@ -149,10 +149,12 @@ public:
     inline TimeStep operator+( const TimeStep rhs )const {
         return TimeStep( _ts + rhs._ts );
     }
-    // this one returns an int, but if that's not expected from a modulo
-    // operation something's wrong anyway (so type safety mostly maintained)
+    // returns an int since common usage is to get an array index
     inline int operator%( int rhs )const {
         return  _ts % rhs;
+    }
+    inline int operator%( TimeStep rhs )const {
+        return  _ts % rhs._ts;
     }
     
     // boolean operators

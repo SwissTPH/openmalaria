@@ -84,7 +84,7 @@ void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<lastTsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
-    stream<<'\t'<<kappa[TimeStep::simulation % TimeStep::stepsPerYear];
+    stream<<'\t'<<currentKappa;
 }
 void TransmissionModel::ctsCbHumanAvail (ostream& stream){
     stream<<'\t'<<1.0/ageCorrectionFactor;
@@ -97,9 +97,13 @@ TransmissionModel::TransmissionModel() :
     ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
     interventionMode(InputData().getEntoData().getMode()),
+    currentKappa(0.0),
+    _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    surveyInputEIR(0.0), surveySimulatedEIR(0.0),
+    surveyInputEIR(0.0),
+    surveySimulatedEIR(0.0),
     adultAge(PerHostTransmission::adultAge()),
+    numTransmittingHumans(0),
     annualEIR(0.0),
     lastTsAdultEIR(0.0),
     timeStepNumEntoInocs (0),
@@ -112,7 +116,6 @@ TransmissionModel::TransmissionModel() :
         throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
     }
 
-  kappa.assign (TimeStep::stepsPerYear, 0.0);
   initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
@@ -177,18 +180,18 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
     int tmod = TimeStep::simulation % TimeStep::stepsPerYear;
     int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;
     if( population.empty() ){     // this is valid
-        kappa[tmod] = 0.0;        // no humans: no infectiousness
+        currentKappa = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
             msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
             throw runtime_error(msg.str());
         }
-        kappa[tmod] = sumWt_kappa / sumWeight;
+        currentKappa = sumWt_kappa / sumWeight;
     }
 
     //Calculate time-weighted average of kappa
-    _sumAnnualKappa += kappa[tmod] * initialisationEIR[t1mod];
+    _sumAnnualKappa += currentKappa * initialisationEIR[t1mod];
     if (tmod == 0) {
         // if annualEIR == 0.0 (or an NaN), we just get some nonsense output like inf or nan.
         // This is a better solution than printing a warning no-one will see and outputting 0.
@@ -217,6 +220,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
 
     surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += lastTsAdultEIR;
+    modelUpdateKappa();
 }
 
 double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
@@ -238,7 +242,7 @@ double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, d
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setNumTransmittingHosts(kappa[TimeStep::simulation % TimeStep::stepsPerYear]);
+  survey.setNumTransmittingHosts(currentKappa);
   survey.setAnnualAverageKappa(_annualAverageKappa);
 
   survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
@@ -264,7 +268,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     ageCorrectionFactor & stream;
     simulationMode & stream;
     initialisationEIR & stream;
-    kappa & stream;
+    currentKappa & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
     annualEIR & stream;
@@ -285,7 +289,7 @@ void TransmissionModel::checkpoint (ostream& stream) {
     ageCorrectionFactor & stream;
     simulationMode & stream;
     initialisationEIR & stream;
-    kappa & stream;
+    currentKappa & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
     annualEIR & stream;

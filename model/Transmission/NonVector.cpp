@@ -32,7 +32,9 @@ namespace OM { namespace Transmission {
 
 //static (class) variables
 const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
-const double NonVectorTransmission::min_EIR_mult= 0.01; 
+const double NonVectorTransmission::min_EIR_mult= 0.01;
+
+const int nYearsWarmupData = 5;
 
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData) :
   nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
@@ -62,6 +64,8 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
     initialisationEIR[j.asInt()] *= TimeStep::interval / (double)nDays[j.asInt()];
     annualEIR += initialisationEIR[j.asInt()];
   }
+  
+  initialKappa.assign( TimeStep::fromYears(nYearsWarmupData).asInt(), 0.0 );
 }
 
 NonVectorTransmission::~NonVectorTransmission () {}
@@ -86,22 +90,30 @@ TimeStep NonVectorTransmission::minPreinitDuration (){
     if( InputData().getEntoData().getMode() == equilibriumMode ){
         return TimeStep(0);
     }
-    // 5 years for data collection, 50 years stabilization
-    return TimeStep::fromYears(55);
+    // nYearsWarmupData years for data collection, 50 years stabilization
+    return TimeStep::fromYears(50) + TimeStep::fromYears(nYearsWarmupData);
 }
 TimeStep NonVectorTransmission::expectedInitDuration (){
     return TimeStep(0);
 }
 TimeStep NonVectorTransmission::initIterate (){
     simulationMode = interventionMode;
-    if( simulationMode == equilibriumMode ){
+    if( simulationMode != dynamicEIR ){
         return TimeStep(0);
     }
     
     // initialKappa is used in calculateEIR
-    initialKappa = kappa;
-    // error check:
+    size_t yearLen = TimeStep::fromYears(1).asInt();
+    assert( initialKappa.size() >= yearLen );
+    assert( initialKappa.size() % yearLen == 0 );
+    for( size_t i=yearLen; i<initialKappa.size(); ++i ){
+        initialKappa[ i % yearLen ] += initialKappa[ i ];
+    }
+    double factor = static_cast<double>(yearLen) / static_cast<double>(initialKappa.size());
+    initialKappa.resize( yearLen );
     for (size_t  i = 0; i < initialKappa.size(); ++i) {
+        initialKappa[ i ] *= factor;
+        // error check:
         if (!(initialKappa[i] > 0.0))     // if not positive
             throw runtime_error ("initialKappa is invalid");
     }
@@ -149,8 +161,14 @@ void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) 
 
 void NonVectorTransmission::uninfectVectors(){
     if( simulationMode != dynamicEIR )
-	cerr <<"Warning: uninfectVectors is not effectaceous with changeEIR"<<endl;
-    kappa.assign( kappa.size(), 0.0 );	// reset history of human infectivity, which scales dynamic EIR
+	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
+    currentKappa = 0.0;	// reset history of human infectivity, which scales dynamic EIR
+}
+
+void NonVectorTransmission::modelUpdateKappa() {
+    if( simulationMode == equilibriumMode ){
+        initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
+    }
 }
 
 
@@ -174,7 +192,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
 	eir *=
-            kappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] /
+            currentKappa /
             initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
       }
       break;
@@ -185,7 +203,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nkappa:\t" << kappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear]
+	<< "\nkappa:\t" << currentKappa
 	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
     throw overflow_error(msg.str());
   }

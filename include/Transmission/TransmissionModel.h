@@ -183,6 +183,9 @@ protected:
    * to, in units of inoculations per day. */
   virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
   
+  /** Model-specific extensions to updateKappa(). */
+  virtual void modelUpdateKappa() =0;
+  
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
@@ -218,13 +221,11 @@ protected:
    * occurs. */
   vector<double> initialisationEIR; 
 
-  /** kappa[] is the probability of infection of a mosquito at each bite.
+  /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
    * Checkpointed. */
-  //TODO: kappa should be moved to NonVectorTransmission class. Reporting should
-  // be model specific (isn't currently correct for VectorTransmission).
-  vector<double> kappa;
+  double currentKappa;
   
   /** Total annual infectious bites per adult.
    *

@@ -104,7 +104,6 @@ int Simulation::start(){
         humanWarmupLength = _population->_transmissionModel->minPreinitDuration();
     }
     humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1) / TimeStep::stepsPerYear + 1);
-    cout<<"Warmup length: "<<humanWarmupLength.asInt()<<endl;
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + _population->_transmissionModel->expectedInitDuration()

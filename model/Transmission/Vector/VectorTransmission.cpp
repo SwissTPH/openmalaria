@@ -173,7 +173,7 @@ TimeStep VectorTransmission::expectedInitDuration (){
 }
 
 TimeStep VectorTransmission::initIterate () {
-    if( interventionMode == equilibriumMode ) {
+    if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
         return TimeStep(0); // no initialization to do
     }
@@ -190,7 +190,6 @@ TimeStep VectorTransmission::initIterate () {
         needIterate = needIterate || species[i].vectorInitIterate ();
     }
     if( needIterate == false ){
-        cout<<"iterations: "<<initIterations<<endl;
         initIterations = -1;
     }
     if( initIterations > 10 ){

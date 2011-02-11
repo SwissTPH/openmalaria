@@ -49,11 +49,8 @@ public:
   
   virtual void vectorUpdate (const std::list<Host::Human>& population);
   
-  /** Calculates EIR (in adults).
-   * 
-   * @param host Transmission-related data for this host.
-   * @param ageGroupData Age group of this host for availablility data. */
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
+  virtual void modelUpdateKappa() {}
 
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();

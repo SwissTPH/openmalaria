@@ -58,13 +58,9 @@ public:
   
   virtual void uninfectVectors();
   
-  /** Calculates EIR (in adults) during the main period of the simulation,
-   * based on vectorial capacity or looks up EIR in the input data.
-   * 
-   * @param perHost Transmission-related data for this host.
-   * @param ageGroupData Age group of this host for availablility data. */
-  virtual double calculateEIR(PerHostTransmission& perHost, double ageYears); 
- 
+  virtual double calculateEIR(PerHostTransmission& perHost, double ageYears);
+  virtual void modelUpdateKappa();
+  
 private:
 
   /// Processes each daily EIR estimate, allocating each day in turn to the
@@ -101,9 +97,11 @@ private:
   /// Units: inoculations per adult per timestep
   vector<double> interventionEIR;
   
-  /** initialKappa[] is the value of kappa during the pre-intervention phase.
+  /** When simulationMode == dynamicEIR, this is the annual cycle of kappa
+   * from the warmup phase and has length 1 year (in timesteps).
    * 
-   * Doesn't need to be checkpointed. */
+   * When simulationMode == equilibriumMode, this may be multiple years long and
+   * is used to collect values of kappa (human infectiousness). */
   vector<double> initialKappa; 
 };
 } }
