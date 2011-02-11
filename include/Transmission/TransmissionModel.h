@@ -226,6 +226,11 @@ protected:
   // be model specific (isn't currently correct for VectorTransmission).
   vector<double> kappa;
   
+  /** Total annual infectious bites per adult.
+   *
+   * Checkpointed. */
+  double annualEIR;
+
 private:
   /*! annAvgKappa is the overall proportion of mosquitoes that get infected
    * allowing for the different densities in different seasons (approximating
@@ -238,7 +243,16 @@ private:
    *
    * Checkpointed. */
   double _sumAnnualKappa;
-  
+
+  /// age at which an individual is considered an adult
+  double adultAge;
+
+  /// accumulator for timestep EIR of adults
+  double tsAdultEntoInocs;
+
+  /// adult-only EIR from last time-step
+  double lastTsAdultEIR;
+
   /** Per-timestep input EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
   double surveyInputEIR;
@@ -251,24 +265,14 @@ private:
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
 
-protected:
-  /** Total annual infectious bites per adult.
-   *
-   * Checkpointed. */
-  double annualEIR;
-  
+  /// accumulator for timestep adults requesting EIR
+  int tsNumAdults;
+
   /** @brief Variables for reporting of entomological inoculations to humans.
    *
    * inoculationsPer... arrays are checkpointed; timesStep... variables aren't
    * since they're calculated per step. */
   //@{
-  /** Infectious bites per human per time step scaled to have units of
-   * bites/adult/timestep.
-   * 
-   * Contains values from today to the previous timestep, one year ago,
-   * including the initialisation phase. */
-  vector<double> inoculationsPerTimeStep;
-  
   /** The total number of inoculations per age group, summed over the
    * reporting period. */
   vector<double> inoculationsPerAgeGroup;

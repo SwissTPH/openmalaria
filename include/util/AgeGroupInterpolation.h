@@ -65,6 +65,11 @@ public:
     
     /** Scale function by factor. */
     virtual void scale( double factor ) =0;
+
+    /** Find the youngest age which is the global maximum (i.e. the age at
+     * which individuals are considered adults where all adults have the same
+     * same value). */
+    virtual double firstGlobalMaximum() =0;
     
 protected:
     /** Sample interpolator between 0 and max age, outputting to a csv file

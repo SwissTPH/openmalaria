@@ -178,12 +178,6 @@ TimeStep VectorTransmission::initIterate () {
         return TimeStep(0); // no initialization to do
     }
     if( initIterations < 0 ){
-        // Check that to a low tolerence, the EIR produced is what was expected.
-        // Shape will be a bit different with current fitting, so only check sum.
-        if (!vectors::approxEqual(vectors::sum(initialisationEIR), vectors::sum(inoculationsPerTimeStep), 0.1)) {
-            cerr << "Generated EIR not as expected (expected, generated):\n";
-            cerr << initialisationEIR << '\n' << inoculationsPerTimeStep << endl;
-        }
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
         return TimeStep(0);

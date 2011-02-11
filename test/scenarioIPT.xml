@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Yearly Surveys">
-    <continuous duringInit="true" period="1">
+    <continuous duringInit="false" period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>

@@ -46,6 +46,9 @@ namespace OM { namespace util {
         virtual void scale( double factor ) {
             throw logic_error( "AgeGroupDummy" );
         }
+        virtual double firstGlobalMaximum() {
+            throw logic_error( "AgeGroupDummy" );
+        }
     };
     AgeGroupDummy AgeGroupDummy::singleton;
     
@@ -56,68 +59,72 @@ namespace OM { namespace util {
     class AgeGroupPiecewiseConstant : public AgeGroupInterpolation
     {
     public:
-        AgeGroupPiecewiseConstant (
-            const scnXml::AgeGroupValues& ageGroups, const char* eltName
-        );
-        
-        virtual double eval( double ageYears ) const;
+        AgeGroupPiecewiseConstant ( const scnXml::AgeGroupValues& ageGroups,
+                                    const char* eltName )
+        {
+            if( ageGroups.getGroup().size() == 0 ){
+                throw util::xml_scenario_error( (
+                    boost::format( "%1%: at least one age group required" ) %eltName
+                ).str() );
+            }
+
+            map<double,double>::iterator pos = dataGroups.begin();
+            assert(pos == dataGroups.end());
+
+            double greatestLbound = -1.0;
+            BOOST_FOREACH( const scnXml::Group& group, ageGroups.getGroup() ){
+                double lbound = group.getLowerbound();
+                if( lbound >= greatestLbound ){
+                    greatestLbound = lbound;
+                    pos = dataGroups.insert( pos, make_pair( lbound, group.getValue() ) );
+                } else {
+                    throw util::xml_scenario_error( (
+                        boost::format("%3%: lower bound %1% not greater than previous %2%")
+                        %lbound %greatestLbound %eltName
+                    ).str() );
+                }
+            }
+
+            // first lower-bound must be 0
+            if( dataGroups.begin()->first != 0.0 ){
+                throw util::xml_scenario_error( (
+                    boost::format("%1%: first lower-bound must be 0")
+                    %eltName
+                ).str() );
+            }
+
+            outputSamples( eltName );
+        }
+
+        virtual double eval( double ageYears ) const {
+            assert ( ageYears >= 0.0 );
+            map<double,double>::const_iterator it = dataGroups.upper_bound( ageYears );
+            --it;   // previous point when ordered by age (it->first <= ageYears < (it+1)->first)
+            return it->second;
+        }
         
         virtual void scale( double factor ){
             for( map<double,double>::iterator it = dataGroups.begin(); it != dataGroups.end(); ++it ){
                 it->second *= factor;
             }
         }
-        
+
+        virtual double firstGlobalMaximum() {
+            double age = 0.0, max = numeric_limits<double>::min();
+            for( map<double,double>::iterator it = dataGroups.begin(); it != dataGroups.end(); ++it ){
+                if( it->second > max ){
+                    max = it->second;
+                    age = it->first;
+                }
+            }
+            return age;
+        }
+
     protected:
         // All data groups as (lower-age-bound, value) pairs.
         map<double,double> dataGroups;
     };
-    
-    AgeGroupPiecewiseConstant::AgeGroupPiecewiseConstant(
-        const scnXml::AgeGroupValues& ageGroups,
-        const char* eltName
-    ){
-        if( ageGroups.getGroup().size() == 0 ){
-            throw util::xml_scenario_error( (
-                boost::format( "%1%: at least one age group required" ) %eltName
-            ).str() );
-        }
-        
-        map<double,double>::iterator pos = dataGroups.begin();
-        assert(pos == dataGroups.end());
-        
-        double greatestLbound = -1.0;
-        BOOST_FOREACH( const scnXml::Group& group, ageGroups.getGroup() ){
-            double lbound = group.getLowerbound();
-            if( lbound >= greatestLbound ){
-                greatestLbound = lbound;
-                pos = dataGroups.insert( pos, make_pair( lbound, group.getValue() ) );
-            } else {
-                throw util::xml_scenario_error( (
-                    boost::format("%3%: lower bound %1% not greater than previous %2%")
-                    %lbound %greatestLbound %eltName
-                ).str() );
-            }
-        }
-        
-        // first lower-bound must be 0
-        if( dataGroups.begin()->first != 0.0 ){
-            throw util::xml_scenario_error( (
-                boost::format("%1%: first lower-bound must be 0")
-                %eltName
-            ).str() );
-        }
-        
-        outputSamples( eltName );
-    }
-    
-    double AgeGroupPiecewiseConstant::eval( double ageYears ) const {
-        assert ( ageYears >= 0.0 );
-        map<double,double>::const_iterator it = dataGroups.upper_bound( ageYears );
-        --it;   // previous point when ordered by age
-        return it->second;
-    }
-    
+
     
     /** Filter class to convert data groups into points in middle of groups plus
      * stabilization points at ends.
@@ -125,10 +132,51 @@ namespace OM { namespace util {
     class AgeGroupInterpolationPoints : public AgeGroupInterpolation
     {
     public:
-        AgeGroupInterpolationPoints(
-            const scnXml::AgeGroupValues& ageGroups, const char* eltName
-        );
-        
+        AgeGroupInterpolationPoints( const scnXml::AgeGroupValues& ageGroups,
+                                     const char* eltName )
+        {
+            // Our read iterator
+            typedef scnXml::AgeGroupValues::GroupConstIterator GroupIt;
+            GroupIt it = ageGroups.getGroup().begin();
+
+            if( it == ageGroups.getGroup().end() ){
+                throw util::xml_scenario_error( (
+                    boost::format( "%1%: at least one age group required" ) %eltName
+                ).str() );
+            }
+            // first lower-bound must be 0
+            if( it->getLowerbound() != 0.0 ){
+                throw util::xml_scenario_error( (
+                    boost::format("%1%: first lower-bound must be 0")
+                    %eltName
+                ).str() );
+            }
+
+            // Our insert iterator (used for performance)
+            map<double,double>::iterator pos = dataPoints.begin();
+            assert(pos == dataPoints.end());
+
+            double greatestLbound = 0.0;    // also last lbound: age groups must be ordered lowest to highest
+            double lastValue =it->getValue();       // first value is repeated for const start
+            for( ; it!=ageGroups.getGroup().end(); ++it ){
+                double lbound = it->getLowerbound();
+                if( lbound >= greatestLbound ){
+                    double insBound = 0.5*(greatestLbound + lbound);
+                    pos = dataPoints.insert( pos, make_pair( insBound, lastValue ) );
+                    greatestLbound = lbound;
+                    lastValue = it->getValue();     // always insert previous value
+                } else {
+                    throw util::xml_scenario_error( (
+                        boost::format("%3%: lower bound %1% less than previous %2%")
+                        %lbound %greatestLbound %eltName
+                    ).str() );
+                }
+            }
+
+            // add a point in middle of last age group (taking upper bound as max-age-years:
+            dataPoints[ 0.5*(greatestLbound + TimeStep::maxAgeIntervals.inYears()) ] = lastValue;
+        }
+
         virtual void scale( double factor ){
             for( map<double,double>::iterator it = dataPoints.begin(); it != dataPoints.end(); ++it ){
                 it->second *= factor;
@@ -141,53 +189,7 @@ namespace OM { namespace util {
         // points respectively.
         map<double,double> dataPoints;
     };
-    
-    AgeGroupInterpolationPoints::AgeGroupInterpolationPoints(
-        const scnXml::AgeGroupValues& ageGroups,
-        const char* eltName
-    ){
-        // Our read iterator
-        typedef scnXml::AgeGroupValues::GroupConstIterator GroupIt;
-        GroupIt it = ageGroups.getGroup().begin();
-        
-        if( it == ageGroups.getGroup().end() ){
-            throw util::xml_scenario_error( (
-                boost::format( "%1%: at least one age group required" ) %eltName
-            ).str() );
-        }
-        // first lower-bound must be 0
-        if( it->getLowerbound() != 0.0 ){
-            throw util::xml_scenario_error( (
-                boost::format("%1%: first lower-bound must be 0")
-                %eltName
-            ).str() );
-        }
-        
-        // Our insert iterator (used for performance)
-        map<double,double>::iterator pos = dataPoints.begin();
-        assert(pos == dataPoints.end());
-        
-        double greatestLbound = 0.0;    // also last lbound: age groups must be ordered lowest to highest
-        double lastValue =it->getValue();       // first value is repeated for const start
-        for( ; it!=ageGroups.getGroup().end(); ++it ){
-            double lbound = it->getLowerbound();
-            if( lbound >= greatestLbound ){
-                double insBound = 0.5*(greatestLbound + lbound);
-                pos = dataPoints.insert( pos, make_pair( insBound, lastValue ) );
-                greatestLbound = lbound;
-                lastValue = it->getValue();     // always insert previous value
-            } else {
-                throw util::xml_scenario_error( (
-                    boost::format("%3%: lower bound %1% less than previous %2%")
-                    %lbound %greatestLbound %eltName
-                ).str() );
-            }
-        }
-        
-        // add a point in middle of last age group (taking upper bound as max-age-years:
-        dataPoints[ 0.5*(greatestLbound + TimeStep::maxAgeIntervals.inYears()) ] = lastValue;
-    }
-    
+
     
     /** This class gives piecewise linear inpolation on top of input age-group
      * data (continuous but with discontinuous derivative).
@@ -218,6 +220,17 @@ namespace OM { namespace util {
             double a0 = it->first;  // a0 ≤ ageYears
             double f0 = it->second;
             return (ageYears - a0) / (a1 - a0) * (f1 - f0) + f0;
+        }
+
+        virtual double firstGlobalMaximum() {
+            double age = 0.0, max = numeric_limits<double>::min();
+            for( map<double,double>::iterator it = dataPoints.begin(); it != dataPoints.end(); ++it ){
+                if( it->second > max ){
+                    max = it->second;
+                    age = it->first;
+                }
+            }
+            return age;
         }
     };
     

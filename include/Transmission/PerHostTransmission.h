@@ -151,6 +151,12 @@ public:
   inline bool hasVAProtection(TimeStep maxInterventionAge)const{
       return timestepVA + maxInterventionAge > TimeStep::simulation;
   }
+
+  /** Get the age at which individuals are considered adults (i.e. where
+   * availability to mosquitoes reaches its maximum). */
+  static inline double adultAge() {
+      return relAvailAge->firstGlobalMaximum();
+  }
   
   /// Checkpointing
   template<class S>
