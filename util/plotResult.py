@@ -281,7 +281,7 @@ class Plotter(object):
                 measures=measureGroups[plot.mg]
                 MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
             else:
-                subplot.set_ylabel(getMeasureLabel(plot.m))
+                subplot.set_ylabel(getMeasureLabel(plot.mg,plot.m))
                 
                 pLines=[plot]
             
@@ -362,8 +362,8 @@ assigned to the x-axis.""",version="%prog 0.1")
     
     parser.add_option("-m","--measures", action="store", type="string", dest="measures", default="",
             help="Plot only MEASURES (comma-separated list of numbers)")
-    parser.add_option("-a","--auto-measures", action="store_true", dest="am", default=True,
-            help="Automatically put similar measures as different lines on the same plot.")
+    parser.add_option("-a","--no-auto-measures", action="store_false", dest="am", default=True,
+            help="Don't automatically put similar measures on the same plot.")
     #parser.add_option("-m","--measure", action="store", type="choice", dest="m", default="plot",
             #choices=["none","x-axis","plot","line"],help="How to plot measures")
     parser.add_option("-s","--survey", action="store", type="choice", dest="s", default="none",
