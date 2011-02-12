@@ -34,7 +34,14 @@
             <xs:appinfo>units:List of elements;name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="healthSystem"/>
+        <xs:element name="healthSystem" type="healthSystem">
+          <xs:annotation>
+            <xs:documentation>
+              Description of health system.
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Health system description;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
         <xs:element name="entoData" type="entoData">
           <xs:annotation>
             <xs:documentation>
