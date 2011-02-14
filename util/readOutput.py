@@ -150,6 +150,12 @@ class MeasureOGDict(object):
     def getGroups(self):
         return list(self.groups)
 
+def stringIndexAllMatch(strs,ind,char):
+    for s in strs:
+        if s[ind] != char:
+            return False
+    return True
+
 class ValDict (object):
     """Class looking like a dictionary of outputs, but supporting aggregation
     and keeping lists of all keys.
@@ -209,10 +215,25 @@ class ValDict (object):
     def getFileName(self,n):
         return self.files[n]
     def getFileNames(self,replaceFN):
-        if replaceFN:
+        if not hasattr(self,"fnIndex"):
+            if len(self.files) <= 1:
+                self.fnIndex=0
+            else:
+                i=0
+                try:
+                    while True:
+                        c=self.files[0][i]
+                        if not stringIndexAllMatch(self.files[1:],i,c):
+                            break
+                        i+=1
+                except IndexError:
+                    pass
+                self.fnIndex=i
+        longNames=[f[self.fnIndex:] for f in self.files]
+        if replaceFN and max([len(n) for n in longNames])>8:
             return ["run "+str(n) for n in range(len(self.files))]
         else:
-            return self.files
+            return longNames
     def getMeasures(self):
         return list(self.measures)
     def getSurveys(self,m):

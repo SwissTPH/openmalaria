@@ -30,6 +30,7 @@
 #include <gzstream.h>
 #include <fstream>
 #include <stdexcept>
+#include <algorithm>
 
 namespace OM { namespace Monitoring {
     
@@ -51,8 +52,19 @@ void SurveysType::init ()
   const scnXml::Surveys::SurveyTimeSequence& survs = mon.getSurveys().getSurveyTime();
 
   _surveysTimeIntervals.reserve (survs.size() + 1);
+  TimeStep last( TimeStep::never );
   for (size_t i = 0; i < survs.size(); i++) {
-    _surveysTimeIntervals.push_back( TimeStep(survs[i]) );
+      TimeStep cur(survs[i]);
+    _surveysTimeIntervals.push_back( cur );
+    if( last >= cur ){
+        last = TimeStep::future;
+    }else{
+        last = cur;
+    }
+  }
+  if( last == TimeStep::future ){
+      cerr << "Warning: survey times are not listed in increasing order; will be reordered" << endl;
+      sort( _surveysTimeIntervals.begin(), _surveysTimeIntervals.end() );
   }
   _surveysTimeIntervals.push_back( TimeStep::never );
   currentTimestep = _surveysTimeIntervals[0];

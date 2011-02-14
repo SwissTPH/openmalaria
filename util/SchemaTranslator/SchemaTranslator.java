@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 25;
+    static final int CURRENT_VERSION = 26;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -1311,6 +1311,15 @@ public class SchemaTranslator {
                 node.setAttribute("function","exponential");
             }
         }
+    }
+    
+    /* Transmission model's initialization strategies updated.
+     * Simulated EIR outputs changed to only be outputs from adults.
+     * Implementation of Penny infection model.
+     * Decay functions updated with "step" function.
+     * 
+     * (These require no updates to existing XMLs.) */
+    public Boolean translate25To26() throws Exception {
     }
     
     /**
