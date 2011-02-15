@@ -314,31 +314,49 @@
           <xs:complexType>
             <xs:attribute name="a0" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  a0 parameter of Fourier approximation to ln(EIR)
+                </xs:documentation>
                 <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="a1" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  a1 parameter of Fourier approximation to ln(EIR)
+                </xs:documentation>
                 <xs:appinfo>name:a1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="b1" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  b1 parameter of Fourier approximation to ln(EIR)
+                </xs:documentation>
                 <xs:appinfo>name:b1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="a2" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  a2 parameter of Fourier approximation to ln(EIR)
+                </xs:documentation>
                 <xs:appinfo>name:a2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="b2" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  b2 parameter of Fourier approximation to ln(EIR)
+                </xs:documentation>
                 <xs:appinfo>name:b2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
               <xs:annotation>
+                <xs:documentation>
+                  Rotation angle defining the origin of the Fourier approximation to ln (EIR)
+                </xs:documentation>
                 <xs:appinfo>units:radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
@@ -360,6 +378,9 @@
             <xs:sequence>
               <xs:element name="item" minOccurs="12" maxOccurs="12" type="xs:double">
                 <xs:annotation>
+                  <xs:documentation>
+                    Inoculations per person per month
+                  </xs:documentation>
                   <xs:appinfo>units:Inoculations per person per month;name:Monthly pre-intervention EIR;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
@@ -381,46 +402,55 @@
         <xs:complexType>
           <xs:attribute name="mosqRestDuration" type="xs:int" use="required">
             <xs:annotation>
+              <xs:documentation>name:Duration of the resting period of the vector (days);</xs:documentation>
               <xs:appinfo>name:Duration of the resting period of the vector (days);</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="extrinsicIncubationPeriod" type="xs:int" use="required">
             <xs:annotation>
+              <xs:documentation>name:Extrinsic incubation period (days)</xs:documentation>
               <xs:appinfo>name:Extrinsic incubation period (days);</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqLaidEggsSameDayProportion" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Proportion of mosquitoes host seeking on same day as ovipositing</xs:documentation>
               <xs:appinfo>name:Proportion of mosquitoes host seeking on same day as ovipositing;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqSeekingDuration" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Duration of the host-seeking period of the vector (days)</xs:documentation>
               <xs:appinfo>name:Duration of the host-seeking period of the vector (days);</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqSurvivalFeedingCycleProbability" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Probability that the mosquito survives the feeding cycle</xs:documentation>
               <xs:appinfo>name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Probability that the mosquito succesfully bites chosen host</xs:documentation>
               <xs:appinfo>name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
               <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbResting" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
               <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbOvipositing" type="xs:double" use="required">
             <xs:annotation>
+              <xs:documentation>Probability of a mosquito successfully laying eggs given that it has rested</xs:documentation>
               <xs:appinfo>name:Probability of a mosquito successfully laying eggs given that it has rested;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
@@ -446,27 +476,32 @@
         <xs:complexType>
           <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
+              <xs:documentation>Identifier for this category of non-human hosts</xs:documentation>
               <xs:appinfo>name:Identifier for this category of non-human hosts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqRelativeEntoAvailability" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Relative availability of nonhuman hosts of type i (to other nonhuman hosts) ;</xs:appinfo>
+              <xs:documentation>Relative availability of nonhuman hosts of type i (to other nonhuman hosts)</xs:documentation>
+              <xs:appinfo>name:Relative availability of nonhuman hosts of type i (to other nonhuman hosts);</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbBiting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability of mosquito successfully biting host ;</xs:appinfo>
+              <xs:documentation>Probability of mosquito successfully biting host</xs:documentation>
+              <xs:appinfo>name:Probability of mosquito successfully biting host;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbFindRestSite" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting ;</xs:appinfo>
+              <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
+              <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="mosqProbResting" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site ;</xs:appinfo>
+              <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
+              <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -474,6 +509,7 @@
     </xs:sequence>
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>
+        <xs:documentation>Identifier for this anopheles species</xs:documentation>
         <xs:appinfo>name:Identifier for this anopheles species;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
