@@ -27,6 +27,7 @@
 #include "util/DecayFunction.h"
 
 using ::OM::util::DecayFunctionValue;
+using ::OM::util::DecayFuncHet;
 
 class DecayFunctionSuite : public CxxTest::TestSuite
 {
@@ -35,6 +36,8 @@ public:
         dfElt( "", 10.0, 1.9 )
     {
         dfElt.setK( 1.6 );
+        dHetOne.tMult = 1.0;
+        dHetHalf.tMult = 0.5;
     }
     
     void setUp() {
@@ -51,61 +54,69 @@ public:
     void testConstant () {
         dfElt.setFunction( "constant" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetHalf ), 1.9 );
     }
     
     void testStep () {
         dfElt.setFunction( "step" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.0 );
     }
     
     void testLinear () {
         dfElt.setFunction( "linear" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 0.76 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 0.76 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 0.76 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.0 );
     }
     
     void testExponential () {
         dfElt.setFunction( "exponential" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.2535325 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.475 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 1.2535325 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 1.2535325 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.475 );
     }
     
     void testWeibull () {
         dfElt.setFunction( "weibull" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.3989906 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.2323814 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 1.3989906 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 1.3989906 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.2323814 );
     }
     
     void testHill () {
         dfElt.setFunction( "hill" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 1.3179680 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.47129642 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 1.3179680 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 1.3179680 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.47129642 );
     }
     
     void testChitnis () {
         dfElt.setFunction( "chitnis" );
         df.set( dfElt, "DecayFunctionSuite" );
-        TS_ASSERT_APPROX( df.eval( TimeStep(0) ), 1.9 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(438) ), 0.77248235 );
-        TS_ASSERT_APPROX( df.eval( TimeStep(1460) ), 0.0 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 0.77248235 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(876), dHetHalf ), 0.77248235 );
+        TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.0 );
     }
     
 private:
     scnXml::DecayFunctionValue dfElt;
     DecayFunctionValue df;
+    DecayFuncHet dHetOne;
+    DecayFuncHet dHetHalf;
 };
 
 #endif

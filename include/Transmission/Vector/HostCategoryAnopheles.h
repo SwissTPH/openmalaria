@@ -20,13 +20,13 @@
 #ifndef Hmod_HostCategoryAnopheles
 #define Hmod_HostCategoryAnopheles
 
-#include "util/DecayFunction.h"
-#include "scenario.hxx"
+#include "Global.h"
+#include "inputData.h"
 
 #include <stdexcept>
+#include <string>
 
 namespace OM { namespace Transmission {
-    using util::DecayFunctionValue;
     
 /** Stores vector model data applicable between a category of host and a
  * mosquito species.
@@ -53,9 +53,7 @@ public:
   void setEntoAvailability(double entoAvailability);
 
   /** Set up any vector-model intervention parameters. */
-  void setInterventionDescription (const scnXml::Anopheles1& intervDesc);
-  /** Check required intervention descriptions are present. */
-  void checkInterventionDescriptions (string species);
+  void setInterventionDescription (const scnXml::Anopheles1& intervDesc, const string& species);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
@@ -78,26 +76,29 @@ public:
   double probMosqSurvivalResting;
   //@}
 
-  /** @brief Intervention description parameters */
+  /** @brief Intervention description parameters
+   *
+   * These describe initial effectiveness. Decay rate/shape is specified
+   * elsewhere (by DecayFunction type). */
   //@{
   //FIXME: copy construction/assignment copies pointers (tempor;
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  DecayFunctionValue ITNDeterrency;
+  double ITNDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
    * an individual. */
-  DecayFunctionValue ITNPreprandialKillingEffect;
+  double ITNPreprandialKillingEffect;
   /** (1 - this) is the proportion of mosquitoes killed when trying to escape
    * after feeding on an individual. */
-  DecayFunctionValue ITNPostprandialKillingEffect;
+  double ITNPostprandialKillingEffect;
   /** Effectiveness of IRS in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  DecayFunctionValue IRSDeterrency;
+  double IRSDeterrency;
   /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  DecayFunctionValue IRSKillingEffect;
+  double IRSKillingEffect;
   /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
-  DecayFunctionValue VADeterrency;
+  double VADeterrency;
   //@}
 };
 

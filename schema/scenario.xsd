@@ -842,12 +842,15 @@
             </xs:element>
             <xs:element maxOccurs="3" minOccurs="0" name="vaccineDescription" type="vaccineDescription" />
             <xs:element maxOccurs="1" minOccurs="0" name="iptiDescription" type="iptDescription" />
+            <xs:element minOccurs="0" name="ITNDecay" type="DecayFunction"/>
+            <xs:element minOccurs="0" name="IRSDecay" type="DecayFunction"/>
+            <xs:element minOccurs="0" name="VADecay" type="DecayFunction"/>
             <xs:element name="anopheles" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element maxOccurs="1" minOccurs="0" name="ITNDescription" type="ITNDescription" />
-                  <xs:element maxOccurs="1" minOccurs="0" name="IRSDescription" type="IRSDescription" />
-                  <xs:element maxOccurs="1" minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
+                  <xs:element minOccurs="0" name="ITNDescription" type="ITNDescription" />
+                  <xs:element minOccurs="0" name="IRSDescription" type="IRSDescription" />
+                  <xs:element minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
                 </xs:sequence>
                 <xs:attribute name="mosquito" type="xs:string" use="required">
                   <xs:annotation>
@@ -1308,7 +1311,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="preprandialKillingEffect" type="DecayFunctionValue">
+          <xs:element name="preprandialKillingEffect" type="inputValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
@@ -1316,7 +1319,7 @@
               <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
             </xs:annotation>
           </xs:element>
-          <xs:element name="postprandialKillingEffect" type="DecayFunctionValue">
+          <xs:element name="postprandialKillingEffect" type="inputValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
@@ -1332,7 +1335,7 @@
     <xs:complexContent>
       <xs:extension base="BaseInterventionDescription">
         <xs:sequence>
-          <xs:element name="killingEffect" type="DecayFunctionValue">
+          <xs:element name="killingEffect" type="inputValue">
             <xs:annotation>
               <xs:documentation>
               One minus this multiplies the survival rate of resting mosquitoes.
@@ -1345,8 +1348,15 @@
     </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="BaseInterventionDescription">
+    <xs:annotation>
+      <xs:documentation>
+        Descriptions of initial effectiveness of each of the effects of
+        interventions. Decay is specified by a separate element (ITNDecay etc.)
+      </xs:documentation>
+      <xs:appinfo>units:None;min:0;max:1;name:Deterrency;</xs:appinfo>
+    </xs:annotation>
     <xs:sequence>
-      <xs:element name="deterrency" type="DecayFunctionValue">
+      <xs:element name="deterrency" type="inputValue">
         <xs:annotation>
           <xs:documentation>
 		  One minus this multiplies the host's availability.
@@ -2357,6 +2367,17 @@
           1 is used. Meaning depends on function; not used in some cases.
         </xs:documentation>
         <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        If non-zero, heterogeneity of decay is introduced via a variate sampled
+        from the log-normal distribution with mu zero (i.e. median is 1) and
+        this sigma. Age is then divided by this variate before being passed to
+        the decay function.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:σ (sigma);units:none;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

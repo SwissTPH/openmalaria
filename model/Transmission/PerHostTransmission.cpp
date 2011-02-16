@@ -27,9 +27,20 @@ namespace OM { namespace Transmission {
 // -----  PerHostTransmission static  -----
 
 AgeGroupInterpolation* PerHostTransmission::relAvailAge = AgeGroupInterpolation::dummyObject();
+shared_ptr<DecayFunction> PerHostTransmission::ITNDecay;
+shared_ptr<DecayFunction> PerHostTransmission::IRSDecay;
+shared_ptr<DecayFunction> PerHostTransmission::VADecay;
 
 void PerHostTransmission::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
+    
+    scnXml::Descriptions intervDesc = InputData().getInterventions().getDescriptions();
+    if( intervDesc.getITNDecay().present() )
+        ITNDecay = DecayFunction::makeObject( intervDesc.getITNDecay().get(), "ITNDecay" );
+    if( intervDesc.getIRSDecay().present() )
+        IRSDecay = DecayFunction::makeObject( intervDesc.getIRSDecay().get(), "IRSDecay" );
+    if( intervDesc.getVADecay().present() )
+        VADecay = DecayFunction::makeObject( intervDesc.getVADecay().get(), "VADecay" );
 }
 void PerHostTransmission::cleanup (){
     AgeGroupInterpolation::freeObject( relAvailAge );
@@ -43,7 +54,14 @@ PerHostTransmission::PerHostTransmission () :
     timestepITN(TimeStep::never),
     timestepIRS(TimeStep::never),
     timestepVA(TimeStep::never)
-{}
+{
+    if( ITNDecay.get() != 0 )
+        hetSampleITN = ITNDecay->hetSample();
+    if( IRSDecay.get() != 0 )
+        hetSampleIRS = IRSDecay->hetSample();
+    if( VADecay.get() != 0 )
+        hetSampleVA = VADecay->hetSample();
+}
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
   _relativeAvailabilityHet = availabilityFactor;
   VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
@@ -63,27 +81,27 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double alpha_i = species[speciesIndex].entoAvailability;
   if (timestepITN >= TimeStep(0))
-    alpha_i *= (1.0 - base.ITNDeterrency.eval (TimeStep::simulation - timestepITN));
+    alpha_i *= (1.0 - base.ITNDeterrency * ITNDecay->eval (TimeStep::simulation - timestepITN, hetSampleITN));
   if (timestepIRS >= TimeStep(0))
-    alpha_i *= (1.0 - base.IRSDeterrency.eval (TimeStep::simulation - timestepIRS));
+    alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
   if (timestepVA >= TimeStep(0))
-    alpha_i *= (1.0 - base.VADeterrency.eval (TimeStep::simulation - timestepVA));
+    alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
 
   return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_B_i = species[speciesIndex].probMosqBiting;
   if (timestepITN >= TimeStep(0))
-    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect.eval (TimeStep::simulation - timestepITN));
+    P_B_i *= (1.0 - base.ITNPreprandialKillingEffect * ITNDecay->eval (TimeStep::simulation - timestepITN, hetSampleITN));
   return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const {
   double P_C_i = species[speciesIndex].probMosqFindRestSite;
   if (timestepITN >= TimeStep(0))
-    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect.eval (TimeStep::simulation - timestepITN));
+    P_C_i *= (1.0 - base.ITNPostprandialKillingEffect * ITNDecay->eval (TimeStep::simulation - timestepITN, hetSampleITN));
   double P_D_i = species[speciesIndex].probMosqSurvivalResting;
   if (timestepIRS >= TimeStep(0))
-    P_D_i *= (1.0 - base.IRSKillingEffect.eval (TimeStep::simulation - timestepIRS));
+    P_D_i *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
   return P_C_i * P_D_i;
 }
 

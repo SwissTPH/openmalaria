@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="25" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="26" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -196,46 +196,49 @@
         <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
         <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
       </iptiDescription>
+      <ITNDecay L="3" function="exponential"/>
+      <IRSDecay L="0.5" function="exponential"/>
+      <VADecay L="4" function="exponential"/>
       <anopheles mosquito="gambiae_ss">
         <ITNDescription name="LLIN test">
-          <deterrency L="3" function="exponential" initial="0.44"/>
-          <preprandialKillingEffect L="3" function="exponential" initial="0.27"/>
-          <postprandialKillingEffect L="3" function="exponential" initial="0.27"/>
+          <deterrency value="0.44"/>
+          <preprandialKillingEffect value="0.27"/>
+          <postprandialKillingEffect value="0.27"/>
         </ITNDescription>
         <IRSDescription name="DDT test">
-          <deterrency L="0.5" function="exponential" initial="0.56"/>
-          <killingEffect L="0.5" function="exponential" initial="0.24"/>
+          <deterrency value="0.56"/>
+          <killingEffect value="0.24"/>
         </IRSDescription>
         <VADescription name="hypothetical deterrency">
-          <deterrency L="4" function="exponential" initial="0.2"/>
+          <deterrency value="0.2"/>
         </VADescription>
       </anopheles>
       <anopheles mosquito="funestus">
         <ITNDescription name="LLIN test">
-          <deterrency L="3" function="exponential" initial="0.44"/>
-          <preprandialKillingEffect L="3" function="exponential" initial="0.27"/>
-          <postprandialKillingEffect L="3" function="exponential" initial="0.27"/>
+          <deterrency value="0.44"/>
+          <preprandialKillingEffect value="0.27"/>
+          <postprandialKillingEffect value="0.27"/>
         </ITNDescription>
         <IRSDescription name="DDT test">
-          <deterrency L="0.5" function="exponential" initial="0.56"/>
-          <killingEffect L="0.5" function="exponential" initial="0.24"/>
+          <deterrency value="0.56"/>
+          <killingEffect value="0.24"/>
         </IRSDescription>
         <VADescription name="hypothetical deterrency">
-          <deterrency L="4" function="exponential" initial="0.2"/>
+          <deterrency value="0.2"/>
         </VADescription>
       </anopheles>
       <anopheles mosquito="arabiensis">
         <ITNDescription name="LLIN test">
-          <deterrency L="3" function="exponential" initial="0.44"/>
-          <preprandialKillingEffect L="3" function="exponential" initial="0.27"/>
-          <postprandialKillingEffect L="3" function="exponential" initial="0.27"/>
+          <deterrency value="0.44"/>
+          <preprandialKillingEffect value="0.27"/>
+          <postprandialKillingEffect value="0.27"/>
         </ITNDescription>
         <IRSDescription name="DDT test">
-          <deterrency L="0.5" function="exponential" initial="0.56"/>
-          <killingEffect L="0.5" function="exponential" initial="0.24"/>
+          <deterrency value="0.56"/>
+          <killingEffect value="0.24"/>
         </IRSDescription>
         <VADescription name="hypothetical deterrency">
-          <deterrency L="4" function="exponential" initial="0.2"/>
+          <deterrency value="0.2"/>
         </VADescription>
       </anopheles>
     </descriptions>

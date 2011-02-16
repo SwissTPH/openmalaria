@@ -156,6 +156,10 @@ public:
     inline int operator%( TimeStep rhs )const {
         return  _ts % rhs._ts;
     }
+    // scale the TimeStep by a double, rounding to nearest
+    inline TimeStep operator*( double rhs )const {
+        return TimeStep( _ts * rhs + 0.5 );
+    }
     
     // boolean operators
     inline bool operator==( const TimeStep rhs )const {

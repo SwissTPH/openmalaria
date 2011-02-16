@@ -102,10 +102,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
             InputData().getInterventions().getDescriptions().getAnopheles();
         for (scnXml::Descriptions::AnophelesSequence::const_iterator it =
                     intervSeq.begin(); it != intervSeq.end(); ++it) {
-            species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it);
-        }
-        for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it){
-            species[it->second].checkInterventionDescriptions (it->first);
+            species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it, it->getMosquito());
         }
     }
 

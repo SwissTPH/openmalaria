@@ -23,12 +23,15 @@
 #include "util/random.h"
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "util/AgeGroupInterpolation.h"
+#include "util/DecayFunction.h"
 
 namespace OM { namespace Transmission {
     
 class HostMosquitoInteraction;
 class TransmissionModel;
 using util::AgeGroupInterpolation;
+using util::DecayFunction;
+using util::DecayFuncHet;
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
@@ -177,6 +180,10 @@ private:
   // entoAvailability param stored in HostMosquitoInteraction.
   double _relativeAvailabilityHet;
   
+  DecayFuncHet hetSampleITN;
+  DecayFuncHet hetSampleIRS;
+  DecayFuncHet hetSampleVA;
+
   // Determines whether human is outside transmission
   bool outsideTransmission;
   
@@ -188,6 +195,10 @@ private:
   TimeStep timestepVA;
   
   static AgeGroupInterpolation* relAvailAge;
+  
+  static shared_ptr<DecayFunction> ITNDecay;
+  static shared_ptr<DecayFunction> IRSDecay;
+  static shared_ptr<DecayFunction> VADecay;
 };
 
 /** Data needed for each human which is per-mosquito species. */

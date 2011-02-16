@@ -183,14 +183,13 @@ double random::gamma (double a, double b){
     return gsl_ran_gamma(rng.gsl_generator, a, b);
 }
 
-double random::log_normal (double mean, double std){
+double random::log_normal (double mu, double sigma){
 /*# ifdef OM_RANDOM_USE_BOOST
-    // This doesn't work... boost version takes actual mean and sigma and computes
-    // parameters; gsl version takes computed parameters.
+    // This doesn't work: boost version takes mean and sigma while gsl version takes mu and sigma.
     boost::lognormal_distribution<> dist (mean, std);
     return dist (boost_generator);
 # else*/
-    return gsl_ran_lognormal (rng.gsl_generator, mean, std);
+    return gsl_ran_lognormal (rng.gsl_generator, mu, sigma);
 //# endif
 }
 

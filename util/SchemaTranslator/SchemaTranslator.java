@@ -318,26 +318,33 @@ public class SchemaTranslator {
         String schemaFileName = genSchemaName (schemaVersion);
         Class<? extends SchemaTranslator> cls = this.getClass();
         
-        while (schemaVersion < _required_version) {
-            ++schemaVersion;
-            schemaFileName = genSchemaName (schemaVersion);
-            scenarioElement.setAttribute("schemaVersion", Integer
-                    .toString(schemaVersion));
-            scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
-                    schemaFileName);
+        try{
+            while (schemaVersion < _required_version) {
+                ++schemaVersion;
+                schemaFileName = genSchemaName (schemaVersion);
+                scenarioElement.setAttribute("schemaVersion", Integer
+                        .toString(schemaVersion));
+                scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation",
+                        schemaFileName);
 
-            String translateMeth = "translate" + (schemaVersion - 1) + "To"
-                    + schemaVersion;
-            Method method = cls.getMethod(translateMeth, new Class[] {});
-            if (method == null)
-                throw new Exception("Method " + translateMeth + " not found");
-            if (!(Boolean) method.invoke(this, new Object[] {}))
-                return null;
+                String translateMeth = "translate" + (schemaVersion - 1) + "To"
+                        + schemaVersion;
+                Method method = cls.getMethod(translateMeth, new Class[] {});
+                if (method == null)
+                    throw new Exception("Method " + translateMeth + " not found");
+                if (!(Boolean) method.invoke(this, new Object[] {}))
+                    return null;
+            }
+            
+            if(schemaVersion == 18 && doODTTranslation){
+                if(!oDTTranslation())
+                    return null;
+            }
+        }catch(java.lang.reflect.InvocationTargetException ite){
+            System.err.println("Error:");
+            ite.getCause().printStackTrace();
+            return null;
         }
-        
-        if(schemaVersion >= 18 && doODTTranslation)
-        	if(!oDTTranslation())
-        		return null;
         
         return schemaFileName;
     }
@@ -1313,13 +1320,80 @@ public class SchemaTranslator {
         }
     }
     
-    /* Transmission model's initialization strategies updated.
-     * Simulated EIR outputs changed to only be outputs from adults.
-     * Implementation of Penny infection model.
-     * Decay functions updated with "step" function.
-     * 
-     * (These require no updates to existing XMLs.) */
+    /* Vector interventions no longer have independent decay functions per
+     * effect, but have heterogeneity. */
     public Boolean translate25To26() throws Exception {
+        Element intervs = getChildElement(scenarioElement,"interventions");
+        Element iDescs = getChildElement(intervs,"descriptions");
+        List<Node> anophs = getChildNodes(iDescs,"anopheles");
+        if(!(
+            t26VecInterv(iDescs,anophs,"ITNDescription","ITNDecay") &&
+            t26VecInterv(iDescs,anophs,"IRSDescription","IRSDecay") &&
+            t26VecInterv(iDescs,anophs,"VADescription","VADecay") ) ){
+            return false;
+        }
+        return true;
+    }
+    private boolean t26VecInterv (Element iDescs,List<Node> anophs, String descriptionElt, String decayElt) throws Exception{
+        class VIDesc {
+            String function, L, k, initial;
+        }
+        VIDesc desc = null;
+        for( Node n : anophs ){
+            Element a = (Element) n;
+            Element interv;
+            interv = getChildElement(a,descriptionElt);
+            if (interv != null){
+                NodeList effects = interv.getChildNodes();
+                for(int i=0; i<effects.getLength();++i){
+                    if(!(effects.item(i) instanceof Element)){
+                        continue;
+                    }
+                    Element effect = (Element)effects.item(i);
+                    if (desc == null){
+                        desc = new VIDesc();
+                        desc.function = effect.getAttribute("function");
+                        desc.L = effect.getAttribute("L");
+                        if (effect.hasAttribute("k")){
+                            desc.k = effect.getAttribute("k");
+                        }else{
+                            desc.k="1";
+                        }
+                    }else{
+                        if (!desc.function.equals(effect.getAttribute("function"))){
+                            System.err.println(descriptionElt+": differing decay functions no longer supported. function: "+desc.function+" and "+effect.getAttribute("function"));
+                            return false;
+                        }
+                        if (Double.parseDouble(desc.L) != Double.parseDouble(effect.getAttribute("L"))){
+                            System.err.println(descriptionElt+": differing decay functions no longer supported. L: "+desc.L+" and "+effect.getAttribute("L"));
+                            return false;
+                        }
+                        String k = effect.hasAttribute("k")?effect.getAttribute("k"):"1";
+                        if (Double.parseDouble(desc.k) != Double.parseDouble(k)){
+                            System.err.println(descriptionElt+": differing decay functions no longer supported. k: "+desc.k+" and "+k);
+                            return false;
+                        }
+                    }
+                    effect.removeAttribute("function");
+                    effect.removeAttribute("L");
+                    if(effect.hasAttribute("k")){
+                        effect.removeAttribute("k");
+                    }
+                    effect.setAttribute("value",effect.getAttribute("initial"));
+                    effect.removeAttribute("initial");
+                }
+            }
+        }
+        if (desc != null){
+            Element newDesc = scenarioDocument.createElement(decayElt);
+            newDesc.setAttribute("function",desc.function);
+            newDesc.setAttribute("L",desc.L);
+            if(Double.parseDouble(desc.k)!=1){
+                newDesc.setAttribute("k",desc.k);
+            }
+            iDescs.insertBefore(newDesc,anophs.get(0));
+        }
+        return true;
     }
     
     /**

@@ -31,6 +31,7 @@ class VaccineDescription;
 namespace OM {
 namespace Host {
     using util::DecayFunction;
+    using util::DecayFuncHet;
 
 /** Vaccine intervention parameters.
  *
@@ -108,14 +109,14 @@ public:
     /// Has been vaccinated within considered effective duration?
     bool hasProtection(TimeStep maxInterventionAge)const;
 
-    inline double getBSVEfficacy()const {
-        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
-    }
     inline double getPEVEfficacy()const {
-        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
+        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSamplePEV );
+    }
+    inline double getBSVEfficacy()const {
+        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleBSV );
     }
     inline double getTBVEfficacy()const {
-        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine );
+        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleTBV );
     }
     
     /// @brief Hacks for R_0 deployment
@@ -136,6 +137,9 @@ public:
         _initialBSVEfficacy & stream;
         _initialPEVEfficacy & stream;
         _initialTBVEfficacy & stream;
+        hetSamplePEV & stream;
+        hetSampleBSV & stream;
+        hetSampleTBV & stream;
     }
 
 
@@ -148,12 +152,16 @@ private:
     int _lastVaccineDose;
     /// Timestep of last vaccination
     TimeStep _timeLastVaccine;
-    //!Remaining efficacy of Blood-stage vaccines
-    double _initialBSVEfficacy;
     //!Remaining efficacy of Pre-erythrocytic vaccines
     double _initialPEVEfficacy;
+    //!Remaining efficacy of Blood-stage vaccines
+    double _initialBSVEfficacy;
     //!Remaining efficacy of Transmission-blocking vaccines
     double _initialTBVEfficacy;
+    
+    DecayFuncHet hetSamplePEV;
+    DecayFuncHet hetSampleBSV;
+    DecayFuncHet hetSampleTBV;
 };
 
 }

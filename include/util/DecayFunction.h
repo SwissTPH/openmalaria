@@ -30,18 +30,43 @@ namespace scnXml
     class DecayFunction;
     class DecayFunctionValue;
 }
+class DecayFunctionSuite;
 
 using boost::shared_ptr;
 
 namespace OM {
 namespace util {
 
+/** A sample of parameters used to make decay functions heterogenious.
+ *
+ * The default constructor only sets an NaN value; new instances must be
+ * sampled by DecayFunction::hetSample() before use. */
+class DecayFuncHet {
+    double tMult;
+public:
+    DecayFuncHet() : tMult( numeric_limits<double>::quiet_NaN() ) {}
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        tMult & stream;
+    }
+    
+    friend class BaseHetDecayFunction;
+    friend class StepDecayFunction;
+    friend class LinearDecayFunction;
+    friend class ExponentialDecayFunction;
+    friend class WeibullDecayFunction;
+    friend class HillDecayFunction;
+    friend class ChitnisDecayFunction;
+    friend class ::DecayFunctionSuite;
+ };
+
 /** An interface for a few types of decay function (some of which may also be
  * suitible survival functions).
  *
- * Implemented functions:
- *
- * No heterogeneity implemented here; no need for an instance per individual.
+ * Heterogeneity is implemented by passing a DecayFuncHet object to the eval
+ * function; this should be sampled by the same DecayFunction.
  *****************************************************************************/
 class DecayFunction
 {
@@ -59,8 +84,16 @@ public:
     /** Return an object representing no decay (useful default). */
     static shared_ptr<DecayFunction> makeConstantObject();
     
-    /** Return a value for age ageTS in time steps. */
-    virtual double eval(TimeStep age) const =0;
+    /** Sample a DecayFuncHet value (should be stored per individual). */
+    virtual DecayFuncHet hetSample () const =0;
+    
+    /** Return a value in the range [0,1] describing remaining effectiveness of
+     * the intervention.
+     * 
+     * @param age Age of intervention/decayed property.
+     * @param sample A DecayFuncHet value sampled for the intervention and
+     *  individual. */
+    virtual double eval(TimeStep age, DecayFuncHet sample) const =0;
     
 protected:
     DecayFunction() {}
@@ -82,9 +115,9 @@ public:
         return decayFunc.get() == 0;
     }
     
-    /** Return value for age ageTS in time steps. */
-    double eval(TimeStep age) const{
-        return initial * decayFunc->eval(age);
+    /** As DecayFunction::eval(), but multiplied by initial value. */
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        return initial * decayFunc->eval(age, sample);
     }
 };
 

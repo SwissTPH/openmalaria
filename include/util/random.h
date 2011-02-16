@@ -47,7 +47,7 @@ namespace random {
     double gamma (double a, double b);
     
     /** This function returns a random variate from the lognormal distribution. */
-    double log_normal (double mean, double std);
+    double log_normal (double mu, double sigma);
     
     /** Used for performance reasons. Calling rngLogNormal 5 times is 50% slower. */
     double sampleFromLogNormal (double normp, double meanlog, double stdlog);

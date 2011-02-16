@@ -22,6 +22,7 @@
 #include "util/errors.h"
 #include "inputData.h"
 #include "util/StreamValidator.h"
+#include "util/random.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -30,21 +31,49 @@
 namespace OM {
 namespace util {
 
+class BaseHetDecayFunction : public DecayFunction {
+    double sigma;
+public:
+    BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
+        sigma( elt.getSigma() )
+    {}
+    
+    DecayFuncHet hetSample () const{
+        // In theory, there are a few ways this value could be sampled. The
+        // current implementation fixes the median at 1. Another interesting
+        // method would be to fix the mean total effect for each function (fix
+        // mean of integral of eval() for age from 0 to infinity or a cut-off).
+        DecayFuncHet ret;
+        if(sigma>0.0){
+            ret.tMult = 1.0 / random::log_normal( 0.0, sigma );
+        }else{
+            assert(sigma==0.0);
+            ret.tMult = 1.0;    // same answer as above but without using the random-number generator
+        }
+        return ret;
+    }
+};
+
 class ConstantDecayFunction : public DecayFunction {
 public:
-    double eval(TimeStep age) const{
+    DecayFuncHet hetSample () const{
+        return DecayFuncHet();
+    }
+    double eval(TimeStep age, DecayFuncHet sample) const{
         return 1.0;
     }
 };
 
-class StepDecayFunction : public DecayFunction {
+class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
-        L( TimeStep::fromYears( elt.getL() ) )
+        L( TimeStep::fromYears( elt.getL() ) ),
+        BaseHetDecayFunction( elt )
     {}
     
-    double eval(TimeStep age) const{
-        if( age < L ){
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        if( effectiveAge < L ){
             return 1.0;
         }else{
             return 0.0;
@@ -55,16 +84,18 @@ private:
     TimeStep L;
 };
 
-class LinearDecayFunction : public DecayFunction {
+class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         L( TimeStep::fromYears( elt.getL() ) ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
+        BaseHetDecayFunction( elt )
     {}
     
-    double eval(TimeStep age) const{
-        if( age < L ){
-            return 1.0 - age.asInt() * invL;
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        if( effectiveAge < L ){
+            return 1.0 - effectiveAge.asInt() * invL;
         }else{
             return 0.0;
         }
@@ -75,31 +106,35 @@ private:
     double invL;
 };
 
-class ExponentialDecayFunction : public DecayFunction {
+class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
+        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) ),
+        BaseHetDecayFunction( elt )
     {
         util::streamValidate(negInvLambda);
     }
     
-    double eval(TimeStep age) const{
-        return exp( age.asInt() * negInvLambda );
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        return exp( effectiveAge.asInt() * negInvLambda );
     }
     
 private:
     double negInvLambda;
 };
 
-class WeibullDecayFunction : public DecayFunction {
+class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
         constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() )
+        k( elt.getK() ),
+        BaseHetDecayFunction( elt )
     {}
     
-    double eval(TimeStep age) const{
-        return exp( -pow(age.asInt() * constOverLambda, k) );
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        return exp( -pow(effectiveAge.asInt() * constOverLambda, k) );
     }
     
 private:
@@ -107,32 +142,36 @@ private:
     double k;
 };
 
-class HillDecayFunction : public DecayFunction {
+class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() )
+        k( elt.getK() ),
+        BaseHetDecayFunction( elt )
     {}
     
-    double eval(TimeStep age) const{
-        return 1.0 / (1.0 + pow(age.asInt() * invL, k));
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        return 1.0 / (1.0 + pow(effectiveAge.asInt() * invL, k));
     }
     
 private:
     double invL, k;
 };
 
-class ChitnisDecayFunction : public DecayFunction {
+class ChitnisDecayFunction : public BaseHetDecayFunction {
 public:
     ChitnisDecayFunction( const scnXml::DecayFunction& elt ) :
         L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() )
+        k( elt.getK() ),
+        BaseHetDecayFunction( elt )
     {}
     
-    double eval(TimeStep age) const{
-        if( age < L ){
-            return exp( k - k / (1.0 - pow(age.asInt() * invL, 2.0)) );
+    double eval(TimeStep age, DecayFuncHet sample) const{
+        TimeStep effectiveAge = age * sample.tMult;
+        if( effectiveAge < L ){
+            return exp( k - k / (1.0 - pow(effectiveAge.asInt() * invL, 2.0)) );
         }else{
             return 0.0;
         }

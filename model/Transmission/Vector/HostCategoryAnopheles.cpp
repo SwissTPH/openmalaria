@@ -28,38 +28,28 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
 	this->entoAvailability = entoAvailability;
 }
 
-void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc) {
+void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc, const string& species) {
   if (intervDesc.getITNDescription().present()) {
     const scnXml::ITNDescription& itnDesc = intervDesc.getITNDescription().get();
-    ITNDeterrency.set( itnDesc.getDeterrency(), "deterrency" );
-    ITNPreprandialKillingEffect.set( itnDesc.getPreprandialKillingEffect(), "preprandialKillingEffect" );
-    ITNPostprandialKillingEffect.set( itnDesc.getPostprandialKillingEffect(), "postprandialKillingEffect" );
+    ITNDeterrency = itnDesc.getDeterrency().getValue();
+    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect().getValue();
+    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect().getValue();
+  }else{
+    throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
   }
   if (intervDesc.getIRSDescription().present()) {
     const scnXml::IRSDescription& irsDesc = intervDesc.getIRSDescription().get();
-    IRSDeterrency.set( irsDesc.getDeterrency(), "deterrency" );
-    IRSKillingEffect.set( irsDesc.getKillingEffect(), "killingEffect" );
+    IRSDeterrency = irsDesc.getDeterrency().getValue();
+    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
+  }else{
+    throw util::xml_scenario_error (string("IRS intervention without description for ").append(species));
   }
   if (intervDesc.getVADescription().present()) {
     const scnXml::BaseInterventionDescription& vaDesc = intervDesc.getVADescription().get();
-    VADeterrency.set( vaDesc.getDeterrency(), "deterrency" );
+    VADeterrency = vaDesc.getDeterrency().getValue();
+  }else{
+    throw util::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
   }
-}
-void HostCategoryAnopheles::checkInterventionDescriptions (string species) {
-    if (InputData.isInterventionActive(Interventions::ITN)) {
-	if (ITNDeterrency.notSet() ||
-	    ITNPreprandialKillingEffect.notSet() ||
-	    ITNPostprandialKillingEffect.notSet())
-	    throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
-    }
-    if (InputData.isInterventionActive(Interventions::IRS)) {
-	if (IRSDeterrency.notSet() || IRSKillingEffect.notSet())
-	    throw util::xml_scenario_error (string("IRS intervention without description for ").append(species));
-    }
-    if (InputData.isInterventionActive(Interventions::VEC_AVAIL)) {
-	if (VADeterrency.notSet())
-	    throw util::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
-    }
 }
 
 } }
