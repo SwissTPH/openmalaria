@@ -86,13 +86,18 @@ public:
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
 	Infection::decayM = numeric_limits<double>::quiet_NaN();
     }
-    static void Infection_init () {
+    static void Infection_init_5day () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
 	Infection::latentp = TimeStep(3);
 	Infection::cumulativeYstar = (float) 68564384.7102;
 	Infection::cumulativeHstar = (float) 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
 	Infection::decayM = 2.717773;
+    }
+    static void Infection_init_1day () {
+        // don't set immunity vars: currently they're not used by unittest
+        Infection_init_NaN();
+        Infection::latentp = TimeStep(15);      // probably 15 days is not correct, but it'll do
     }
     
     static void DescriptiveInfection_init () {

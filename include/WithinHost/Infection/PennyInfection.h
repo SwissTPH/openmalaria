@@ -30,13 +30,23 @@ namespace OM { namespace WithinHost {
 
 class PennyInfection : public CommonInfection {
 public:
-	PennyInfection (istream& stream);
-	    //! Constructor
-	PennyInfection(uint32_t protID);
-
-	virtual ~PennyInfection () {};
-	static void init();
-	virtual bool updateDensity(double survivalFactor, TimeStep ageOfInfection);
+    /// Static initialization (happens once)
+    static void init();
+    
+    /// Constructor
+    PennyInfection(uint32_t protID);
+    /// Resume from a checkpoint
+    PennyInfection (istream& stream);
+    /// Destructor
+    virtual ~PennyInfection () {};
+    
+    virtual bool updateDensity(double survivalFactor, TimeStep ageOfInfection);
+    
+    /** Get the density of sequestered parasites. */
+    inline double seqDensity(){
+        size_t todayV = TimeStep::simulation % delta_V;
+        return seqDensities[todayV];
+    }
 
 protected:
     virtual void checkpoint (ostream& stream);
