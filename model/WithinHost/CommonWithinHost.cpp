@@ -109,6 +109,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     ++inf;
   }
   util::streamValidate(totalDensity);
+  assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
   
   pkpdModel->decayDrugs ();
 }

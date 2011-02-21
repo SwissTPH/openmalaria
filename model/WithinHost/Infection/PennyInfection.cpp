@@ -140,15 +140,22 @@ void PennyInfection::init() {
 }
 
 PennyInfection::PennyInfection(uint32_t protID):
-        CommonInfection(protID)
+        CommonInfection(protID),
+        variantSpecificSummation(0),
+        clonalSummation(0)
 {
     // assign infection dependent immune thresholds
     do 
     {
-        threshold_N = exp(random::gauss(mu_TN,sigma_TN));
+        double sample;
+        sample = random::gauss(mu_TN,sigma_TN);
+        threshold_N = exp(sample);
         threshold_C = exp(random::gauss(mu_TC,sigma_TC));
         threshold_V = exp(random::gauss(mu_TV,sigma_TV));
     }while(threshold_N <= threshold_C || threshold_N <= threshold_V);
+    cout <<"threshold_N: "<< threshold_N << endl;
+    cout <<"threshold_C: "<< threshold_C << endl;
+    cout <<"threshold_V: "<< threshold_V << endl;
     
     for(int i=0; i<delta_C; ++i){
         cirDensities[i] = 0.0;

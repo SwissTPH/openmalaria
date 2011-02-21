@@ -79,6 +79,7 @@ set (OM_CXXTEST_HEADERS
   ESDecisionTreeSuite.h
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
+  PennyInfectionSuite.h
 )
 
 #Appears to be problems with this on windows...

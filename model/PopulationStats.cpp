@@ -28,19 +28,19 @@ namespace OM {
     
     void PopulationStats::print() {
 #	ifdef WITHOUT_BOINC
-	long double x = 100.0 * totalInfections / allowedInfections;
+	long double x = 100.0 * (totalInfections - allowedInfections) / totalInfections;
 	cerr
 	    << "Total/allowed infections: "
 	    <<totalInfections<<"/"<<allowedInfections
-	    <<"\t("<<x<<"%)"
+	    <<"\t("<<x<<"% prevented)"
 	    <<endl
 	;
 	
-	x = 100.0 * humanUpdates / humanUpdateCalls;
+	x = 100.0 * (humanUpdateCalls - humanUpdates) / humanUpdateCalls;
 	cerr
 	    << "Human updates/total calls: "
 	    <<humanUpdates<<"/"<<humanUpdateCalls
-	    <<"\t("<<x<<"%)"
+	    <<"\t("<<x<<"% skipped)"
 	    <<endl
 	;
 #	else	// use reduced-output mode

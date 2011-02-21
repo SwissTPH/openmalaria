@@ -378,7 +378,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // complicatedCaseDuration should to some respects be associated
 	    // with medication duration, however ongoing medications after
 	    // exiting hospital are OK and medications terminating before the
-	    // end of hospitalization shouldn't matter too much if the person
+	    // end of hospitalisation shouldn't matter too much if the person
 	    // can't recieve new infections due to zero transmission in hospital.
 	    timeOfRecovery = TimeStep::simulation + complicatedCaseDuration;
 	    // Time should be adjusted to end of at-risk period when patient dies:
