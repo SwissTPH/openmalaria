@@ -22,6 +22,7 @@ set (OM_BOXTEST_NAMES
   Empirical
   Cohort
   VecMonthly
+  Penny
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

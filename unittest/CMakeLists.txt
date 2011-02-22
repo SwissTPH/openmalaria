@@ -97,6 +97,9 @@ endif (OM_CXXTEST_INTERPRETER)
 
 # This file is needed to run the EmpiricalInfection unittest:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# and these by the PennyInfection unittest:
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (run
   tests.cpp

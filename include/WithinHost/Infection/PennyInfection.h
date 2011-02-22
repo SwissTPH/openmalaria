@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "WithinHost/Infection/CommonInfection.h"
 
+class PennyInfectionSuite;
+
 namespace OM { namespace WithinHost {
 
 class PennyInfection : public CommonInfection {
@@ -79,6 +81,9 @@ private:
     double variantSpecificSummation;
     // tracked summation of densities with decay for clonal immunity (sigmoidal function)
     double clonalSummation;
+    
+    // allow unittest to access private vars
+    friend class PennyInfectionSuite;
 };
 
 }}
