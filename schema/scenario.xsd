@@ -867,47 +867,39 @@
       </xs:element>
       <xs:element minOccurs="0" name="continuous" type="continuous">
         <xs:annotation>
-          <xs:documentation />
+          <xs:documentation>Continuously applied interventions</xs:documentation>
           <xs:appinfo>name:Continuously applied interventions;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="timed" type="timed">
         <xs:annotation>
-          <xs:documentation>
-            List of timed interventions
-          </xs:documentation>
+          <xs:documentation>List of timed interventions</xs:documentation>
           <xs:appinfo>units:List of elements;name:Timed interventions;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
-        <xs:documentation>
-          Name of age specific intervention
-        </xs:documentation>
+        <xs:documentation>Name of age specific intervention</xs:documentation>
         <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="continuous">
     <xs:annotation>
-      <xs:documentation />
+      <xs:documentation>Interventions to be deployed continuously</xs:documentation>
       <xs:appinfo>name:Interventions to be deployed continuously;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="vaccine" type="ageSpecific">
         <xs:annotation>
-          <xs:documentation>
-            List of age groups for vaccination
-          </xs:documentation>
+          <xs:documentation>List of age groups for vaccination</xs:documentation>
           <xs:appinfo>units:List of elements;name:List of age groups for vaccination;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="ITN" type="ageSpecific">
         <xs:annotation>
-          <xs:documentation>
-            Description of ITN deployment in the community
-          </xs:documentation>
+          <xs:documentation>Description of ITN deployment in the community</xs:documentation>
           <xs:appinfo>units:List of elements;name:Description of ITN deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -1160,6 +1152,7 @@
           <xs:documentation>
             Simple larviciding intervention description.
           </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Simple larviciding intervention;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -1302,8 +1295,8 @@
     </xs:sequence>
     <xs:attribute name="iptiEffect" type="xs:int" use="required">
       <xs:annotation>
-        <xs:documentation />
-        <xs:appinfo />
+        <xs:documentation>Description of ipti effect</xs:documentation>
+        <xs:appinfo>units:List of Elementes;name:Description of ipti effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1454,6 +1447,7 @@
             Case fatality rate (probability of an inpatient fatality from a
             bout of severe malaria, per age-group).
           </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Case fatality rate in inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSequelaeInpatient" type="AgeGroupValues">
@@ -1852,6 +1846,7 @@
         A description of a base treatment schedule along with modifiers to handle
         delays, quality variations, etc.
       </xs:documentation>
+      <xs:appinfo>units:List of elements;name:Description of a base treatment schedule;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="schedule" type="HSESTreatmentSchedule" />
@@ -1871,6 +1866,7 @@
       <xs:documentation>
         The base (unmodified) schedule of drugs administered for this treatment.
       </xs:documentation>
+      <xs:appinfo>units:List of elements;name:Base schedule of drugs for this treatment;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded" />
@@ -1881,10 +1877,8 @@
       <xs:annotation>
         <xs:documentation>
       Abbreviated name of drug compound
-      </xs:documentation>
-        <xs:appinfo>
-      units:string;name:drug;
-      </xs:appinfo>
+        </xs:documentation>
+        <xs:appinfo>units:string;name:drug;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="mg" type="xs:double" use="required">
@@ -1922,6 +1916,7 @@
         multipyQty, delay or selectTimeRange sub-elements, each of which corresponds to one value
         output of the decision.
       </xs:documentation>
+      <xs:appinfo>units:Choice of elements;name:Treatment modifier;</xs:appinfo>
     </xs:annotation>
     <xs:choice>
       <xs:element name="multiplyQty" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
@@ -1935,6 +1930,7 @@
             the "drugs" attribute. E.g. with drugs="A,B" and content "0.5,1" the quantity of drug A is
             halved while that of B is unchanged.
           </xs:documentation>
+          <xs:appinfo>units:Comma separated list of values;name:Active ingredient multipliers;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="delay" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
@@ -1948,6 +1944,7 @@
             the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
             in the base schedule while drug B is administered 6 hours later than specified.
           </xs:documentation>
+          <xs:appinfo>units:Comma separated list of values;name:Active ingredient delays;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="selectTimeRange" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
@@ -1963,6 +1960,7 @@
             interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
             administered if <![CDATA[x <= t < y]]>.
           </xs:documentation>
+          <xs:appinfo>units:Comma separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:choice>
@@ -1981,7 +1979,7 @@
         <xs:documentation>
           Specifies a value of the decision to act on.
         </xs:documentation>
-            <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
+        <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="effect" type="xs:string" use="required">
@@ -2174,6 +2172,7 @@
           <xs:documentation>
 	    Sequence of drug descriptions forming a library of drug parameters.
 	    </xs:documentation>
+          <xs:appinfo>name:Library of drug parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -2187,7 +2186,8 @@
 			  
 			  Note: we assume a one-to-one correspondance of drugs to loci, hence each
 			  drug has an independent set of alleles here.
-			</xs:documentation>
+			    </xs:documentation>
+                      <xs:appinfo>name:PD parameters per allele;</xs:appinfo>
                     </xs:annotation>
                     <xs:complexType>
                       <xs:sequence>
@@ -2324,6 +2324,7 @@
       <xs:documentation>
         Specification of decay or survival of a parameter.
       </xs:documentation>
+      <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="function" use="required">
       <xs:annotation>
@@ -2398,6 +2399,7 @@
         Specification of decay or survival of a parameter along with initial
         value (i.e. the decay function's value is multiplied by "initial").
       </xs:documentation>
+      <xs:appinfo>name:Decay or survival of a parameter;</xs:appinfo>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="DecayFunction">
