@@ -119,7 +119,7 @@
               <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
               <complicatedCaseDuration>6</complicatedCaseDuration>
               <complicatedRiskDuration>6</complicatedRiskDuration>
-              <pImmediateUC>1</pImmediateUC>
+              <dailyPrImmUCTS>1</dailyPrImmUCTS>
             </ClinicalOutcomes>
           </EventScheduler>
           <CFR>
@@ -182,7 +182,7 @@
         <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
         <complicatedCaseDuration>6</complicatedCaseDuration>
         <complicatedRiskDuration>6</complicatedRiskDuration>
-        <pImmediateUC>1</pImmediateUC>
+        <dailyPrImmUCTS>1</dailyPrImmUCTS>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>

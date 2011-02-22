@@ -104,7 +104,9 @@
         <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
         <complicatedCaseDuration>5</complicatedCaseDuration>
         <complicatedRiskDuration>5</complicatedRiskDuration>
-        <pImmediateUC>1</pImmediateUC>
+        <dailyPrImmUCTS>0.6</dailyPrImmUCTS>
+        <dailyPrImmUCTS>0.3</dailyPrImmUCTS>
+        <dailyPrImmUCTS>0.1</dailyPrImmUCTS>
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>

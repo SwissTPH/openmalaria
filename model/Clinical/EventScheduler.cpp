@@ -37,7 +37,7 @@ TimeStep ClinicalEventScheduler::maxUCSeekingMemory(TimeStep::never);
 TimeStep ClinicalEventScheduler::uncomplicatedCaseDuration(TimeStep::never);
 TimeStep ClinicalEventScheduler::complicatedCaseDuration(TimeStep::never);
 TimeStep ClinicalEventScheduler::extraDaysAtRisk(TimeStep::never);
-double ClinicalEventScheduler::pImmediateUC;
+vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
 
 double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
@@ -90,11 +90,21 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
             "Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
     }
     
-    pImmediateUC = coData.getPImmediateUC();
+    cumDailyPrImmUCTS.reserve( coData.getDailyPrImmUCTS().size() );
+    double cumP = 0.0;
+    for( scnXml::ClinicalOutcomes::DailyPrImmUCTSConstIterator it = coData.getDailyPrImmUCTS().begin(); it != coData.getDailyPrImmUCTS().end(); ++it ){
+        cumP += *it;
+        cumDailyPrImmUCTS.push_back( cumP );
+    }
+    if( cumP < 0.999 || cumP > 1.001 ){
+        throw util::xml_scenario_error( "Event scheduler: dailyPrImmUCTS seq must add up to 1" );
+    }
+    cumDailyPrImmUCTS.back() = 1.0;
+    
     double alpha = exp( -InputData.getParameter( Params::CFR_NEG_LOG_ALPHA ) );
-    if( !(0.0<=alpha && alpha<=1.0) || !(0.0<=pImmediateUC && pImmediateUC<=1.0) ){
+    if( !(0.0<=alpha && alpha<=1.0) ){
 	throw util::xml_scenario_error(
-            "Clinical outcomes: pImmediateUC and propDeathsFirstDay should be within range [0,1]");
+            "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
     }
     
     CaseManagementCommon::scaleCaseFatalityRate( alpha );
@@ -180,16 +190,16 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    _doomed = DOOMED_COMPLICATED;
 	    
 	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
-        } else if ( pgState & Pathogenesis::PENDING_UC ){
-            pgState = Pathogenesis::NONE;	// reset: forget was UC (don't seek treatment)
         } else {
 	    if ( pgState & Pathogenesis::COMPLICATED ) {
-		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) )
+		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) ){
 		    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
-		else
+                }else{
 		    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
-	    } else
+                }
+	    } else {
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+            }
 	    // report bout, at conclusion of episode:
 	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
 	    
@@ -201,38 +211,46 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    bool cmEvent = false;	// set true when we need to do case management
-    if ( pgState & Pathogenesis::COMPLICATED ) {	// previous state: complicated
-	// if severe, no events happen for course of medication
-    } else if ( pgState & Pathogenesis::SICK ) {	// previous state: uncomplicated (UC/UC2/NMF)
-	// if uc/uc2/nmf, the only event that can happen within 3 days is progression to severe/coinfection
-	if ( newState & Pathogenesis::COMPLICATED ) {
-	    pgState = Pathogenesis::State (pgState | newState);
-	    cmEvent = true;
-	}
-    } else {	// previous state: healthy or delayed UC
+    if ( newState & Pathogenesis::SICK ){
+        // we have some new case: is it severe/complicated?
+        //FIXME: in any case here, indirect mortality can be triggered, right?
         if ( newState & Pathogenesis::COMPLICATED ){
-	    pgState = Pathogenesis::State (pgState | newState);
-	    cmEvent = true;
+            if ( pgState & Pathogenesis::COMPLICATED ) {
+                // previously severe: no events happen for course of medication
+            } else {
+                // previously healthy or UC: progress to severe
+                pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
+                caseStartTime = TimeStep::simulation;
+            }
         } else {
-          if ( newState & Pathogenesis::SICK ) {	// any (malarial/non-malarial) sickness
-	    if( (pgState & Pathogenesis::PENDING_UC) == 0 ) {
-		timeOfRecovery = TimeStep::simulation + maxUCSeekingMemory;
-		pgState = Pathogenesis::State (pgState | newState | Pathogenesis::PENDING_UC);
-	    }
-	  }
-	  if( pgState & Pathogenesis::PENDING_UC ) {
-	    if( random::uniform_01() < pImmediateUC)
-		cmEvent = true;
-	  }
+            // uncomplicated case (UC/UC2/NMF): is it new?
+            if (pgState & Pathogenesis::SICK) {
+                // previously UC; nothing to do
+            }else{
+                if( caseStartTime < TimeStep::simulation ) {
+                    // new UC case
+                    pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
+                    
+                    double uVariate = random::uniform_01();
+                    size_t i = 0;
+                    for (; i < cumDailyPrImmUCTS.size(); ++i){
+                        if( uVariate < cumDailyPrImmUCTS[i] ){
+                            goto gotDelay;
+                        }
+                    }
+                    assert(false);      // should have uVariate < 1 = cumDailyPrImmUCTS[len-1]
+                    gotDelay:
+                    // set start time: current time plus length of delay (days)
+                    caseStartTime = TimeStep::simulation + TimeStep(i);
+                }
+            }
         }
     }
     
-    if ( cmEvent )	// note: new event can override pending delayed event
-    {
-        // remove PENDING_UC bit
-        pgState = Pathogenesis::State (pgState & ~Pathogenesis::PENDING_UC);
-
+    if ( caseStartTime == TimeStep::simulation && pgState & Pathogenesis::RUN_CM_TREE ){
+        // OK, we're about to run the CM tree
+        pgState = Pathogenesis::State (pgState & ~Pathogenesis::RUN_CM_TREE);
+        
 	// If last treatment prescribed was in recent memory, consider second line.
 	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);

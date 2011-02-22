@@ -2052,13 +2052,24 @@
           <xs:appinfo>name:Complicated risk duration;units:days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
-       <xs:element name="pImmediateUC" type="xs:double">
+       <xs:element name="dailyPrImmUCTS" type="xs:double" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
-            Probability that UC treatment seeking will be done immediately when
-            sick, on second day given that it wasn't done on first, etc.
+            It is sometimes desirable to model delays to treatment seeking in
+            uncomplicated cases. While treatment of drugs can be delayed within
+            case management trees to provide a similar effect, this doesn't
+            delay any of the decisions, including diagnostics using the current
+            parasite density.
+            
+            Instead a list of dailyPrImmUCTS elements can be used, describing
+            successive daily probabilities of treatment (sum must be 1). For
+            example, with a list of two elements with values 0.8 and 0.2, for
+            80% of UC cases the decision tree is evaluated immediately, and for
+            20% of cases evaluation is delayed by one day.
+            
+            For no delay, use one element with a value of 1.
           </xs:documentation>
-          <xs:appinfo>name:Probability of immediate UC treatment seeking;units:none;min:0;max:1</xs:appinfo>
+          <xs:appinfo>name:Daily probability of immediate treatment seeking for uncomplicated cases;units:none;min:0;max:1</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

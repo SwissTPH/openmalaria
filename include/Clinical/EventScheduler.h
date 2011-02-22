@@ -76,9 +76,9 @@ private:
     /// Time-span for which individual is at risk of death in complicated case
     /// minus length of complicated case (must be <= 0)
     static TimeStep extraDaysAtRisk;
-    /// Probability that UC treatment seeking will be done immediately when
-    /// sick, on second day given that it wasn't done on first, etc.
-    static double pImmediateUC;
+    /// First value is probability immediate treatment, second is first +
+    /// probability 1-day delay to treatment seeking, etc. Last value must be 1.
+    static vector<double> cumDailyPrImmUCTS;
 
     /// Parameter of S(t) for t > 0
     static double neg_v;
