@@ -213,7 +213,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     
     if ( newState & Pathogenesis::SICK ){
         // we have some new case: is it severe/complicated?
-        //FIXME: in any case here, indirect mortality can be triggered, right?
         if ( newState & Pathogenesis::COMPLICATED ){
             if ( pgState & Pathogenesis::COMPLICATED ) {
                 // previously severe: no events happen for course of medication
@@ -245,6 +244,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 }
             }
         }
+        
+        if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
+            _doomed = -TimeStep::interval; // start indirect mortality countdown
     }
     
     if ( caseStartTime == TimeStep::simulation && pgState & Pathogenesis::RUN_CM_TREE ){
@@ -407,9 +409,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    
-    if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
-        _doomed = -TimeStep::interval; // start indirect mortality countdown
     
     // Process pending medications (in interal queue) and apply/update:
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
