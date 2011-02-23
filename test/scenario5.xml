@@ -42,17 +42,12 @@
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
       <option name="nSeq" value="true"/>
-      <option name="nHospitalDeaths" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
       <option name="nEPIVaccinations" value="true"/>
       <option name="allCauseIMR" value="true"/>
       <option name="nMassVaccinations" value="true"/>
-      <option name="nHospitalRecovs" value="true"/>
-      <option name="nHospitalSeqs" value="true"/>
-      <option name="nIPTDoses" value="true"/>
       <option name="annAvgK" value="true"/>
-      <option name="nNMFever" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>1</surveyTime>
