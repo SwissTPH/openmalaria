@@ -257,8 +257,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
 	
-	caseStartTime = TimeStep::simulation;
-	
 	if (pgState & Pathogenesis::MALARIA) {
 	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
 		withinHostModel.immunityPenalisation();
@@ -312,14 +310,17 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
             if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
                 // Have a NMF or UC malaria case
-                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears );
+                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, pgState & Pathogenesis::MALARIA );
                 bool needTreat = random::uniform_01() < pNeedTreat;
                 
                 // Calculate chance of antibiotic administration:
                 double pTreatment;
                 if( auxOut.AB_provider == CMAuxOutput::NO_AB ){
+                    // No treatment seeking
                     pTreatment = 0.0;
                 }else{
+                    // Treatment seeking; may be at a health facility or from
+                    // the informal sector.
                     double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
                     if( auxOut.AB_provider == CMAuxOutput::FACILITY ){
                         if( auxOut.diagnostic == CMAuxOutput::NEGATIVE ){
@@ -331,7 +332,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                             logOddsAb += logOddsAbNeed;
                         }
                     }else{
-                         assert( auxOut.AB_provider == CMAuxOutput::INFORMAL );
+                        assert( auxOut.AB_provider == CMAuxOutput::INFORMAL );
                         logOddsAb += logOddsAbInformal;
                     }
                     

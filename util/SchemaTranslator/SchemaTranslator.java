@@ -1321,7 +1321,12 @@ public class SchemaTranslator {
     }
     
     /* Vector interventions no longer have independent decay functions per
-     * effect, but have heterogeneity. */
+     * effect, but have heterogeneity.
+     * 
+     * Non-malaria fevers/complications: formula for P(antibiotic treatment)
+     * changed to use independent values for P(need treatment) in malaria and
+     * non-malaria fevers (prNeedTreatmentNMF and prNeedTreatmentMF).
+     * Never previously used, so manual update. */
     public Boolean translate25To26() throws Exception {
         Element intervs = getChildElement(scenarioElement,"interventions");
         Element iDescs = getChildElement(intervs,"descriptions");

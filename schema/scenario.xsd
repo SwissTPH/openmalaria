@@ -1399,14 +1399,27 @@
                 <xs:appinfo>name:P(NMF);units:none;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="prNeedTreatment" type="AgeGroupValues">
+            <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a non-malaria fever needs treatment with
                   antibiotics (assuming fever is not induced by malaria, although
-                  concurrent parasites are possible).
+                  concurrent parasites may be present).
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment);units:none;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | NMF);units:none;min:0;max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="prNeedTreatmentMF" type="AgeGroupValues">
+              <xs:annotation>
+                <xs:documentation>
+                  Probability that a malaria fever needs treatment with
+                  antibiotics (assuming fever is induced by malaria, although
+                  concurrent bacteria may be present).
+                  
+                  Meaning partially overlaps with separate model for comorbidity
+                  given malaria.
+                </xs:documentation>
+                <xs:appinfo>name:P(need treatment | MF);units:none;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>

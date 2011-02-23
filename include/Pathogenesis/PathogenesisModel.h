@@ -67,8 +67,12 @@ public:
     
     /** Given a non-malaria fever, return the probability of it requiring
      * treatment. */
-    inline double pNmfRequiresTreatment(double ageYears){
-        return NMF_need_antibiotic->eval( ageYears );
+    inline double pNmfRequiresTreatment(double ageYears, bool isMalarial){
+        if (isMalarial) {
+            return MF_need_antibiotic->eval( ageYears );
+        }else{
+            return NMF_need_antibiotic->eval( ageYears );
+        }
     }
 
     /** Summarize PathogenesisModel details
@@ -103,8 +107,13 @@ private:
     static double comorbintercept_24;
     /// Rate of Non-Malaria Fever incidence by age. Non-seasonal.
     static AgeGroupInterpolation* NMF_incidence;
-    /// Probability that an NMF is severe (should be treated and may lead to death).
+    /// Probability that an NMF needs antibiotic treatment and could lead to death.
     static AgeGroupInterpolation* NMF_need_antibiotic;
+    /** Probability that a malarial fever classified as uncomplicated requires
+     * antibiotic treatment (and death could occur from non-malarial causes).
+     * Unclear whether using this at the same time as comorbidity parameters
+     * makes any sense. */
+    static AgeGroupInterpolation* MF_need_antibiotic;
     //@}
 
 protected:

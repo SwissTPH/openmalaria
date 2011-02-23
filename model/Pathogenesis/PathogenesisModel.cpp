@@ -45,6 +45,7 @@ double PathogenesisModel::critAgeComorb_30;
 
 AgeGroupInterpolation* PathogenesisModel::NMF_incidence = AgeGroupInterpolation::dummyObject();
 AgeGroupInterpolation* PathogenesisModel::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolation* PathogenesisModel::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
 
 void PathogenesisModel::init() {
@@ -70,12 +71,14 @@ void PathogenesisModel::init() {
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc =
             InputData().getModel().getClinical().getNonMalariaFevers().get();
         NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
-        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatment(), "prNeedTreatment" );
+        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
     }
 }
 void PathogenesisModel::cleanup() {
     AgeGroupInterpolation::freeObject( NMF_incidence );
     AgeGroupInterpolation::freeObject( NMF_need_antibiotic );
+    AgeGroupInterpolation::freeObject( MF_need_antibiotic );
 }
 
 PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
