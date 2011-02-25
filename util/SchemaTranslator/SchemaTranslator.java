@@ -1326,8 +1326,33 @@ public class SchemaTranslator {
      * Non-malaria fevers/complications: formula for P(antibiotic treatment)
      * changed to use independent values for P(need treatment) in malaria and
      * non-malaria fevers (prNeedTreatmentNMF and prNeedTreatmentMF).
-     * Never previously used, so manual update. */
+     * Never previously used, so manual update.
+     *
+     * pImmediateUC replaced by dailyPrImmUCTS. */
     public Boolean translate25To26() throws Exception {
+        NodeList clinOutcomes = scenarioElement.getElementsByTagName("ClinicalOutcomes");
+        for (int i=0; i<clinOutcomes.getLength(); i++){
+            Element ci = (Element) clinOutcomes.item(i);
+            Element immUCElt = getChildElement(ci, "pImmediateUC");
+            double pImmUC = Double.parseDouble(immUCElt.getTextContent());
+            ci.removeChild(immUCElt);
+            if(pImmUC == 1){
+                Element dailyP = scenarioDocument.createElement("dailyPrImmUCTS");
+                dailyP.setTextContent("1");
+                ci.appendChild(dailyP);
+            }else{
+                assert pImmUC < 1.0 && pImmUC > 0;
+                System.err.println("pImmediateUC element replaced with dailyPrImmUCTS: not an exact equivalent");
+                double invP = 1-pImmUC;
+                double[] pArr = { pImmUC, invP*pImmUC, invP*invP*pImmUC };
+                double total = pArr[0]+pArr[1]+pArr[2];
+                for(int j=0;j<3;++j){
+                    Element dailyP=scenarioDocument.createElement("dailyPrImmUCTS");
+                    dailyP.setTextContent(Double.toString(pArr[j]/total));
+                    ci.appendChild(dailyP);
+                }
+            }
+        }
         Element intervs = getChildElement(scenarioElement,"interventions");
         Element iDescs = getChildElement(intervs,"descriptions");
         List<Node> anophs = getChildNodes(iDescs,"anopheles");
