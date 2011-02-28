@@ -83,7 +83,7 @@ private:
     double clonalSummation;
     
     // allow unittest to access private vars
-    friend class PennyInfectionSuite;
+    friend class ::PennyInfectionSuite;
 };
 
 }}
