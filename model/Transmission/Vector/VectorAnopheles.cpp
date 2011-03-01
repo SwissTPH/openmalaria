@@ -327,7 +327,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   FSCoeffic[0] += log (populationSize / sumPFindBite);
   calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
   
-  // Crude estimate of mosqEmergeRate; in practice, varies on other values
+  // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
   mosqEmergeRate = forcedS_v;
   vectors::scale (mosqEmergeRate, initNv0FromSv);
   
