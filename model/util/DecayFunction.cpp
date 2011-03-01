@@ -67,8 +67,8 @@ public:
 class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
-        L( TimeStep::fromYears( elt.getL() ) ),
-        BaseHetDecayFunction( elt )
+        BaseHetDecayFunction( elt ),
+        L( TimeStep::fromYears( elt.getL() ) )
     {}
     
     double eval(TimeStep age, DecayFuncHet sample) const{
@@ -87,9 +87,9 @@ private:
 class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
+        BaseHetDecayFunction( elt ),
         L( TimeStep::fromYears( elt.getL() ) ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
-        BaseHetDecayFunction( elt )
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
     {}
     
     double eval(TimeStep age, DecayFuncHet sample) const{
@@ -109,8 +109,8 @@ private:
 class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
-        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) ),
-        BaseHetDecayFunction( elt )
+        BaseHetDecayFunction( elt ),
+        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
     {
         util::streamValidate(negInvLambda);
     }
@@ -127,9 +127,9 @@ private:
 class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
+        BaseHetDecayFunction( elt ),
         constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() ),
-        BaseHetDecayFunction( elt )
+        k( elt.getK() )
     {}
     
     double eval(TimeStep age, DecayFuncHet sample) const{
@@ -145,9 +145,9 @@ private:
 class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
+        BaseHetDecayFunction( elt ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() ),
-        BaseHetDecayFunction( elt )
+        k( elt.getK() )
     {}
     
     double eval(TimeStep age, DecayFuncHet sample) const{
@@ -162,10 +162,10 @@ private:
 class ChitnisDecayFunction : public BaseHetDecayFunction {
 public:
     ChitnisDecayFunction( const scnXml::DecayFunction& elt ) :
+        BaseHetDecayFunction( elt ),
         L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
-        k( elt.getK() ),
-        BaseHetDecayFunction( elt )
+        k( elt.getK() )
     {}
     
     double eval(TimeStep age, DecayFuncHet sample) const{

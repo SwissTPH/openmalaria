@@ -124,7 +124,7 @@ void Vaccine::cleanup ()
 
 PerHumanVaccine::PerHumanVaccine() :
         _lastVaccineDose(0), _timeLastVaccine(TimeStep::never),
-        _initialBSVEfficacy(0.0), _initialPEVEfficacy(0.0), _initialTBVEfficacy(0.0)
+        _initialPEVEfficacy(0.0), _initialBSVEfficacy(0.0), _initialTBVEfficacy(0.0)
 {
     if (Vaccine::PEV.active)
         hetSamplePEV = Vaccine::PEV.decayFunc->hetSample();

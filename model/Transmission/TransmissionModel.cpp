@@ -98,17 +98,17 @@ TransmissionModel::TransmissionModel() :
     simulationMode(equilibriumMode),
     interventionMode(InputData().getEntoData().getMode()),
     currentKappa(0.0),
+    annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
+    adultAge(PerHostTransmission::adultAge()),
+    tsAdultEntoInocs(0.0),
+    lastTsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
-    adultAge(PerHostTransmission::adultAge()),
     numTransmittingHumans(0),
-    annualEIR(0.0),
-    lastTsAdultEIR(0.0),
-    timeStepNumEntoInocs (0),
-    tsAdultEntoInocs(0.0),
-    tsNumAdults(0)
+    tsNumAdults(0),
+    timeStepNumEntoInocs (0)
 {
     if (interventionMode != equilibriumMode && interventionMode != dynamicEIR){
         // Note: previously 3 was allowed -- but mode is set to 3 anyway when
@@ -267,44 +267,50 @@ void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
 void TransmissionModel::checkpoint (istream& stream) {
     ageCorrectionFactor & stream;
     simulationMode & stream;
+    interventionMode & stream;
     initialisationEIR & stream;
     currentKappa & stream;
+    annualEIR & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
-    annualEIR & stream;
+    adultAge & stream;
+    tsAdultEntoInocs & stream;
+    lastTsAdultEIR & stream;
+    surveyInputEIR & stream;
+    surveySimulatedEIR & stream;
+    lastSurveyTime & stream;
+    numTransmittingHumans & stream;
+    tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
     timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
-    surveyInputEIR & stream;
-    surveySimulatedEIR & stream;
-    lastSurveyTime & stream;
-    tsAdultEntoInocs & stream;
-    tsNumAdults & stream;
-    lastTsAdultEIR & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     ageCorrectionFactor & stream;
     simulationMode & stream;
+    interventionMode & stream;
     initialisationEIR & stream;
     currentKappa & stream;
+    annualEIR & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
-    annualEIR & stream;
+    adultAge & stream;
+    tsAdultEntoInocs & stream;
+    lastTsAdultEIR & stream;
+    surveyInputEIR & stream;
+    surveySimulatedEIR & stream;
+    lastSurveyTime & stream;
+    numTransmittingHumans & stream;
+    tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
     timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
-    surveyInputEIR & stream;
-    surveySimulatedEIR & stream;
-    lastSurveyTime & stream;
-    tsAdultEntoInocs & stream;
-    tsNumAdults & stream;
-    lastTsAdultEIR & stream;
 }
 
 } }
