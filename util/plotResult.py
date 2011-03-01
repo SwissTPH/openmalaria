@@ -94,11 +94,12 @@ combinedMeasures = [
     ('total infections',[(6,'all','red'),(8,'patent','blue')]),
     ('transmitting humans',[(7,'sum(p(transmit))','green'),(26,'annual sum(p(transmit)) / annual EIR','blue')]),
     ('sum pyrog thres',[(10,'sum pyrogenic threshold','purple')]),
-    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange')]),
+    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange'),(54,'antibiotics','blue')]),
     ('episodes',[(14,'UC','red'),(15,'severe','orange'),(27,'NMF','blue')]),
     ('sequelae',[(16,'all','red'),(24,'hospital','orange')]),
-    ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green')]),
-    ('intervention doses',[(20,'EPI vaccinations','red'),(22,'mass vaccinations','darkred'),(25,'IPT doses','brown')]),
+    ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green'),(53,'non-malaria fevers','blue')]),
+    ('vaccination doses',[(20,'EPI','green'),(22,'mass','grey')]),
+    ('drug doses (non-treatment)',[(25,'IPT','brown'),(52,'MDA','red')]),
     ('infant mortality rate',[(21,'IMR','red')]),
     ('hospital recoveries',[(23,'hospital recoveries','orange')]),
     ('inoculations',[(30,'all','red')]),
@@ -121,7 +122,7 @@ def getMeasureLabel(mg,m):
     else:
         for md in combinedMeasures[mg][1]:
             if m==md[0]:
-                return md[1]
+                return md[1]+" ("+str(m)+")"
         raise KeyError("measure "+str(m)+" not in combinedMeasures["+str(mg)+"]")
 def getMeasureColour(mg,m):
     if mg is None:
@@ -197,7 +198,7 @@ class MultiKey(object):
             if len(r):
                 r+=","
             if replaceFN:
-                r+="run "+str(self.f)
+                r+="file "+str(self.f+1)
             else:
                 r+=valDict.getFileName(self.f)
         return r
@@ -205,8 +206,10 @@ class MultiKey(object):
 class Plotter(object):
     def __init__(self,keys):
         self.values=ValDict(keys)
-    def read(self,fileName,measures):
-        self.values.read(fileName,measures)
+    def read(self,fileName,filterExpr,debugFilter):
+        self.values.read(fileName,filterExpr,debugFilter)
+        if len(self.values.getMeasures())==0:
+            raise Exception("No data to plot (after filtering)!")
     def plot(self,am,replaceFN,showLegends,s,g,f):
         x_axis=Keys.NONE
         x_label=""
@@ -313,7 +316,7 @@ class Plotter(object):
                         print "x:",x
                         print "y:",y
                 
-                if showLegends and len(plotted)>1:
+                if showLegends and (am or len(plotted)>1):
                     legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
                     subplot.legend(plotted,legends,'upper right')
             else: #one x-coord or non-numeric x-coords: draw a bar chart
@@ -339,7 +342,7 @@ class Plotter(object):
                         print "y:",y
                     xincr+=width
                 
-                if showLegends and len(plotted)>1:
+                if showLegends and (am or len(plotted)>1):
                     plots=[p[0] for p in plotted]
                     legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
                     subplot.legend(plots,legends,'upper right')
@@ -360,12 +363,12 @@ Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, lin
 If no key is set to the x-axis, the first unassigned of survey, group, file will be
 assigned to the x-axis.""",version="%prog 0.1")
     
-    parser.add_option("-m","--measures", action="store", type="string", dest="measures", default="",
-            help="Plot only MEASURES (comma-separated list of numbers)")
+    parser.add_option("-e","--filter", action="store", type="string", dest="filterExpr", default="m!=0",
+            help="Filter entries read according to this rule (i.e. values are included when this returns true). Parameters available: f, m, s, g. Examples: 'True', 'm!=0' (default), 'm in [11,12,13]', 's > 73 and m!=0'.")
+    parser.add_option("--debug-filter", action="store_true", dest="debugFilter", default=False,
+            help="Each time FILTEREXPR is called, print input values and output. Warning: will print a lot of data!")
     parser.add_option("-a","--no-auto-measures", action="store_false", dest="am", default=True,
             help="Don't automatically put similar measures on the same plot.")
-    #parser.add_option("-m","--measure", action="store", type="choice", dest="m", default="plot",
-            #choices=["none","x-axis","plot","line"],help="How to plot measures")
     parser.add_option("-s","--survey", action="store", type="choice", dest="s", default="none",
             choices=["none","x-axis","plot","line"],help="How to plot surveys")
     parser.add_option("-g","--group", action="store", type="choice", dest="g", default="none",
@@ -381,11 +384,6 @@ assigned to the x-axis.""",version="%prog 0.1")
     if len(others)==0:
         parser.print_usage()
         return 1
-    
-    measures=options.measures.split(",")
-    if(measures[-1].strip()==""):
-        measures=measures[:-1]
-    measures=[int(m) for m in measures]
     
     if options.s != "x-axis" and options.g != "x-axis" and options.f != "x-axis":
         if options.s == "none":
@@ -407,7 +405,7 @@ assigned to the x-axis.""",version="%prog 0.1")
     plotter=Plotter(keys)
     
     for output in others:
-        plotter.read(output,measures)
+        plotter.read(output,options.filterExpr,options.debugFilter)
     
     plotter.plot(options.am,not options.fn,not options.nl,options.s,options.g,options.f)
     

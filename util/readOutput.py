@@ -112,7 +112,7 @@ class MeasureAGDict(object):
     def get(self,survey,group,f):
         try:
             return self.v[f][survey][int(group)]
-        except KeyError:
+        except LookupError:
             return 1e1000 - 1e0000 # NaN
     def getGroups(self):
         return range(0,self.nAGroups)
@@ -143,7 +143,7 @@ class MeasureOGDict(object):
         group=str(group)
         try:
             return self.v[f][survey][group]
-        except KeyError:
+        except LookupError:
             print "can't find:",f,survey,group
             print "have:",self.v
             return 1e1000 - 1e1000 # NaN
@@ -169,10 +169,13 @@ class ValDict (object):
         self.measures=set() #set of used measures
         self.files=list()
     
-    def read(self,fileName,measures):
+    def read(self,fileName,filterExpr,exprDebug):
         """Read from fileName. If measures is non-empty, only read these measures."""
-        if len(measures)==0:
-            measures=None
+        def filterFun(f,m,s,g):
+            r=eval(filterExpr)
+            if exprDebug:
+                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g)+":",r
+            return r
         kS = Keys.SURVEY not in self.aggregateKeys
         kG = Keys.GROUP not in self.aggregateKeys
         if Keys.FILE not in self.aggregateKeys:
@@ -196,18 +199,18 @@ class ValDict (object):
                 continue
             
             m=int(items[2])
-            if measures!=None and m not in measures:
+            if kS:
+                s=int(items[0])
+            if kG:
+                g=items[1]
+            if not filterFun(fileName,m,s,g):
                 continue
-            self.measures.add(m)
             i=len(self.values)
             while m >= i:
                 self.values.append(MeasureAGDict() if isAgeGroup(i) else MeasureOGDict(m))
                 i+=1
-            if kS:
-                s=int(items[0])
-                self.nSurveys=max(self.nSurveys,s)
-            if kG:
-                g=items[1]
+            self.measures.add(m)
+            self.nSurveys=max(self.nSurveys,s)
             self.values[m].add(s,g,fID,robustFloat(items[3]))
     
     def getFiles(self):
@@ -231,7 +234,7 @@ class ValDict (object):
                 self.fnIndex=i
         longNames=[f[self.fnIndex:] for f in self.files]
         if replaceFN and max([len(n) for n in longNames])>8:
-            return ["run "+str(n) for n in range(len(self.files))]
+            return ["file "+str(n+1) for n in range(len(self.files))]
         else:
             return longNames
     def getMeasures(self):
