@@ -18,11 +18,11 @@ set (OM_BOXTEST_NAMES
   IPT
   VecTest VecFullTest NamawalaArabiensis
   ESCMTest
-  Uninfect
   Empirical
   Cohort
   VecMonthly
   Penny
+  R_0
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
