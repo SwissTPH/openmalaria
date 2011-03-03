@@ -33,10 +33,10 @@ const int DAYS_IN_YEAR = 365;
 
 TimeStep::TimeStep() : _ts(-0x3FFFFFFF) {}
 TimeStep TimeStep::fromDaysNearest( double d ){
-    return TimeStep( std::floor( d / interval + 0.5 ) );
+    return TimeStep( static_cast<int>(std::floor( d / interval + 0.5 )) );
 }
 TimeStep TimeStep::fromDays( double d ){
-    return TimeStep( std::floor( d / interval ) );
+    return TimeStep( static_cast<int>(std::floor( d / interval )) );
 }
 
 TimeStep::ReadOnly<int> TimeStep::interval;
@@ -64,7 +64,7 @@ void TimeStep::init( int daysPerTimeStep, double maxAgeYears ) {
     yearsPerInterval = double(interval) / DAYS_IN_YEAR;
     
     // Maximum age of an individual:
-    maxAgeIntervals = TimeStep (maxAgeYears * stepsPerYear);
+    maxAgeIntervals = TimeStep( static_cast<int>(maxAgeYears * stepsPerYear) );
 }
 
 }

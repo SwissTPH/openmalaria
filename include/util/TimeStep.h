@@ -118,7 +118,7 @@ public:
      * down where rounding is necessary). */
     static TimeStep fromYears( double y ){
         assert( intervalsPerYear._ts != 0 );    // not initialized yet
-        return TimeStep( y * intervalsPerYear._ts );
+        return TimeStep( static_cast<int>(y * intervalsPerYear._ts) );
     }
     
     /// Checkpointing
@@ -158,7 +158,7 @@ public:
     }
     // scale the TimeStep by a double, rounding to nearest
     inline TimeStep operator*( double rhs )const {
-        return TimeStep( _ts * rhs + 0.5 );
+        return TimeStep( static_cast<int>(_ts * rhs + 0.5) );
     }
     
     // boolean operators

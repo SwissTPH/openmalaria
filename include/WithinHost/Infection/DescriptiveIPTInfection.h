@@ -62,7 +62,7 @@ public:
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   TimeStep getAsexualAttenuationEndDate () {
-    return _startdate + TimeStep(_duration.asInt() * genotypes[proteome_ID].atten);	//FIXME: should probably add latentp
+    return _startdate + TimeStep(static_cast<int>(_duration.asInt() * genotypes[proteome_ID].atten));	//FIXME: should probably add latentp
   }
   
 protected:
