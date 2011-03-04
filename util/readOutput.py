@@ -176,16 +176,14 @@ class ValDict (object):
             if exprDebug:
                 print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g)+":",r
             return r
-        kS = Keys.SURVEY not in self.aggregateKeys
-        kG = Keys.GROUP not in self.aggregateKeys
+        aKS = Keys.SURVEY in self.aggregateKeys
+        aKG = Keys.GROUP in self.aggregateKeys
         if Keys.FILE not in self.aggregateKeys:
             assert fileName not in self.files, "Reading same file twice?"
             fID = len(self.files)
             self.files.append(fileName)
         else:
             fID = 0
-        s = 0
-        g = 0
         fileObj = open(fileName, 'r')
         nErrs=0
         for line in fileObj:
@@ -199,12 +197,14 @@ class ValDict (object):
                 continue
             
             m=int(items[2])
-            if kS:
-                s=int(items[0])
-            if kG:
-                g=items[1]
+            s=int(items[0])
+            g=items[1]
             if not filterFun(fileName,m,s,g):
                 continue
+            if aKS:
+                s=0
+            if aKG:
+                g=0
             i=len(self.values)
             while m >= i:
                 self.values.append(MeasureAGDict() if isAgeGroup(i) else MeasureOGDict(m))
