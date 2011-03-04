@@ -41,21 +41,34 @@ endif (GSL_INCLUDE_DIR2)
 message(STATUS "GSL include path(s): ${GSL_INCLUDE_DIRS}")
 
 # gsl puts libraries in various places, with various suffixes. Copy the ones you want to use to ../gsl/lib and remove suffixes.
-find_library (GSL_LIB gsl
+set (GSL_LIB_PATHS
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"
 )
-find_library (GSL_CBLAS_LIB NAMES gsl_cblas gslcblas cblas
-  PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
-  "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
-  "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
-  "C:/Program Files/GnuWin32/lib"
-)
-if (NOT GSL_LIB OR NOT GSL_CBLAS_LIB)
+find_library (GSL_LIB_OPT gsl ${GSL_LIB_PATHS})
+find_library (GSL_LIB_DBG gsl_d ${GSL_LIB_PATHS})
+find_library (GSL_CBLAS_LIB_OPT NAMES gslcblas cblas ${GSL_LIB_PATHS})
+find_library (GSL_CBLAS_LIB_DBG NAMES gslcblas_d cblas_d ${GSL_LIB_PATHS})
+if (GSL_LIB_OPT AND GSL_LIB_DBG)
+  set (GSL_LIB optimized ${GSL_LIB_OPT} debug ${GSL_LIB_DBG})
+elseif (GSL_LIB_OPT)
+  set (GSL_LIB ${GSL_LIB_OPT})
+elseif (GSL_LIB_DBG)
+  set (GSL_LIB ${GSL_LIB_DBG})
+else (GSL_LIB_OPT AND GSL_LIB_DBG)
   message (FATAL_ERROR "Unable to find gsl library")
-endif (NOT GSL_LIB OR NOT GSL_CBLAS_LIB)
+endif (GSL_LIB_OPT AND GSL_LIB_DBG)
+if (GSL_CBLAS_LIB_OPT AND GSL_CBLAS_LIB_DBG)
+  set (GSL_CBLAS_LIB optimized ${GSL_CBLAS_LIB_OPT} debug ${GSL_CBLAS_LIB_DBG})
+elseif (GSL_CBLAS_LIB_OPT)
+  set (GSL_CBLAS_LIB ${GSL_CBLAS_LIB_OPT})
+elseif (GSL_CBLAS_LIB_DBG)
+  set (GSL_CBLAS_LIB ${GSL_CBLAS_LIB_DBG})
+else (GSL_CBLAS_LIB_OPT AND GSL_CBLAS_LIB_DBG)
+  message (FATAL_ERROR "Unable to find gsl cblas library")
+endif (GSL_CBLAS_LIB_OPT AND GSL_CBLAS_LIB_DBG)
 
 SET (GSL_LIBRARIES ${GSL_LIB} ${GSL_CBLAS_LIB})
 
@@ -64,4 +77,8 @@ MARK_AS_ADVANCED(
   GSL_INCLUDE_DIRS
   GSL_LIB
   GSL_CBLAS_LIB
+  GSL_LIB_OPT
+  GSL_LIB_DBG
+  GSL_CBLAS_LIB_OPT
+  GSL_CBLAS_LIB_DBG
 )

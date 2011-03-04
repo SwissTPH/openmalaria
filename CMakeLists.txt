@@ -119,23 +119,42 @@ if (OM_BOINC_INTEGRATION)
     set (BOINC_LIB_POSTFIX "")
   endif (OM_USE_LIBCMT)
   message (STATUS "Looking for: boinc${BOINC_LIB_POSTFIX}")
-  message (STATUS "in: ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release")
-  find_library (BOINC_LIB boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
-    PATHS ${CMAKE_SOURCE_DIR}/../boinc/lib
-    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release
-    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Debug
+  set (BOINC_BASE_PATH ${CMAKE_SOURCE_DIR}/../boinc)
+  message (STATUS "in: ${BOINC_BASE_PATH}/win_build/Build/Win32/Release (and /Debug)")
+  find_library (BOINC_LIB_OPT boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
+    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
   )
-  find_library (BOINC_API_LIB boinc_api${BOINC_LIB_POSTFIX} libboincapi${BOINC_LIB_POSTFIX}
-    PATHS ${CMAKE_SOURCE_DIR}/../boinc/api
-    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Release
-    ${CMAKE_SOURCE_DIR}/../boinc/win_build/Build/Win32/Debug
+  find_library (BOINC_LIB_DBG boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
+    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
   )
-  include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
-  if (NOT BOINC_LIB OR NOT BOINC_API_LIB)
-    message (FATAL_ERROR "Unable to find a boinc library (boinc or boinc_api)")
-  endif (NOT BOINC_LIB OR NOT BOINC_API_LIB)
+  if (BOINC_LIB_OPT and BOINC_LIB_DBG)
+    set (BOINC_LIB optimized ${BOINC_LIB_OPT} debug ${BOINC_LIB_DBG})
+  elseif (BOINC_LIB_OPT)
+    set (BOINC_LIB ${BOINC_LIB_OPT})
+  elseif (BOINC_LIB_DBG)
+    set (BOINC_LIB ${BOINC_LIB_DBG})
+  else ()
+    message (FATAL_ERROR "Unable to find boinc library")
+  endif ()
+  find_library (BOINC_API_LIB_OPT boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
+    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
+  )
+  find_library (BOINC_API_LIB_DBG boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
+    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
+  )
+  if (BOINC_API_LIB_OPT and BOINC_API_LIB_DBG)
+    set (BOINC_API_LIB optimized ${BOINC_API_LIB_OPT} debug ${BOINC_API_LIB_DBG})
+  elseif (BOINC_API_LIB_OPT)
+    set (BOINC_API_LIB ${BOINC_API_LIB_OPT})
+  elseif (BOINC_API_LIB_DBG)
+    set (BOINC_API_LIB ${BOINC_API_LIB_DBG})
+  else ()
+    message (FATAL_ERROR "Unable to find boinc_api/libboincapi library")
+  endif ()
   set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
-  mark_as_advanced (BOINC_API_LIB BOINC_LIB)
+  
+  include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
+  mark_as_advanced (BOINC_API_LIB BOINC_LIB BOINC_API_LIB_OPT BOINC_API_LIB_DBG BOINC_LIB_OPT BOINC_LIB_DBG)
 else (OM_BOINC_INTEGRATION)
   add_definitions (-DWITHOUT_BOINC)
 endif (OM_BOINC_INTEGRATION)

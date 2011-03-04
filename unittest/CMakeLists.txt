@@ -114,7 +114,6 @@ target_link_libraries (run
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
-  #${YAML_CPP_LIB}
 )
 
 if (MSVC)
