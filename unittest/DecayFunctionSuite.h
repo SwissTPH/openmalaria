@@ -103,8 +103,8 @@ public:
         TS_ASSERT_APPROX( df.eval( TimeStep(1460), dHetOne ), 0.47129642 );
     }
     
-    void testChitnis () {
-        dfElt.setFunction( "chitnis" );
+    void testSmoothCompact () {
+        dfElt.setFunction( "smooth-compact" );
         df.set( dfElt, "DecayFunctionSuite" );
         TS_ASSERT_APPROX( df.eval( TimeStep(0), dHetOne ), 1.9 );
         TS_ASSERT_APPROX( df.eval( TimeStep(438), dHetOne ), 0.77248235 );

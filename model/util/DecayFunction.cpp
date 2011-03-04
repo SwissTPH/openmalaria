@@ -159,9 +159,9 @@ private:
     double invL, k;
 };
 
-class ChitnisDecayFunction : public BaseHetDecayFunction {
+class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
-    ChitnisDecayFunction( const scnXml::DecayFunction& elt ) :
+    SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
         L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
@@ -202,8 +202,8 @@ shared_ptr<DecayFunction> DecayFunction::makeObject(
         return shared_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
     }else if( func == "hill" ){
         return shared_ptr<DecayFunction>(new HillDecayFunction( elt ));
-    }else if( func == "chitnis" ){
-        return shared_ptr<DecayFunction>(new ChitnisDecayFunction( elt ));
+    }else if( func == "smooth-compact" ){
+        return shared_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
     }

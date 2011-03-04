@@ -58,7 +58,7 @@ public:
     friend class ExponentialDecayFunction;
     friend class WeibullDecayFunction;
     friend class HillDecayFunction;
-    friend class ChitnisDecayFunction;
+    friend class SmoothCompactDecayFunction;
     friend class ::DecayFunctionSuite;
  };
 

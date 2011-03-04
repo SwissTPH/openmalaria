@@ -92,19 +92,19 @@ labels.append('linear')
 y=[m.exp( k - k / (1 - (t/L)**2) ) if t<L else 0 for t in x]
 pl=p.plot(x,y,color='green')
 lines.append(pl)
-labels.append('chitnis (k=0.5)')
+labels.append('smooth-compact (k=0.5)')
 
 k=1
 y=[m.exp( k - k / (1 - (t/L)**2) ) if t<L else 0 for t in x]
 pl=p.plot(x,y,color='blue')
 lines.append(pl)
-labels.append('chitnis (k=1)')
+labels.append('smooth-compact (k=1)')
 
 k=2
 y=[m.exp( k - k / (1 - (t/L)**2) ) if t<L else 0 for t in x]
 pl=p.plot(x,y,color='lightblue')
 lines.append(pl)
-labels.append('chitnis (k=2)')
+labels.append('smooth-compact (k=2)')
 
 plt.legend(lines,labels,'upper right')
 

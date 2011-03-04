@@ -2357,7 +2357,7 @@
           
           hill: 1 / (1 + (t/L)^k)
           
-          chitnis: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
         </xs:documentation>
         <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
       </xs:annotation>
@@ -2369,14 +2369,15 @@
           <xs:enumeration value="exponential" />
           <xs:enumeration value="weibull" />
           <xs:enumeration value="hill" />
-          <xs:enumeration value="chitnis" />
+          <xs:enumeration value="smooth-compact" />
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
     <xs:attribute name="L" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Scale parameter of distribution. With Chintnis' function, this is the
+          Scale parameter of distribution. With the smooth-compact (smooth
+          function with compact support), step and linear functions, this is the
           age at which the parameter has decayed to 0; with the other three
           functions, this is the age at which the parameter has decayed to half
           its original value. Not used for constant decay (though must be
