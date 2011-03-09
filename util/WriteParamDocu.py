@@ -60,7 +60,7 @@ def main():
     sheet.write(0,6,"Parameter exposed in GUI")
     sheet.write(0,7,"Parameter is sweepable")
     tree = ElementTree()
-    tree.parse("scenario.xsd")
+    tree.parse("../schema/scenario.xsd")
     #we know that the first element in the schema defines scenario
     scenarioElement=tree.find("{http://www.w3.org/2001/XMLSchema}element")
     drillDown(scenarioElement,"")
