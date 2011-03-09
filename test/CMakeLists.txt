@@ -23,6 +23,7 @@ set (OM_BOXTEST_NAMES
   VecMonthly
   Penny
   R_0
+  1DayIntervs
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
