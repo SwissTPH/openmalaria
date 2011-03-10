@@ -26,12 +26,10 @@
 #include "PkPd/LSTMPkPdModel.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
-#include "util/AgeGroupInterpolation.h"
 #include <limits>
 
 using namespace OM;
 using namespace OM::PkPd;
-using util::AgeGroupInterpolation;
 
 const double NaN = numeric_limits<double>::quiet_NaN();
 
@@ -39,15 +37,9 @@ class LSTMPkPdSuite : public CxxTest::TestSuite
 {
 public:
     LSTMPkPdSuite(){
-        scnXml::AgeGroupValues agvElt;
-        // We're not testing the interpolation, so a constant value is enough.
-        // 60.0 would be the correct value (for age 21), but this is what
-        // our old distribution gave us (avoids having to update results):
-        agvElt.getGroup().push_back( scnXml::Group::Group( 55.4993, 0.0 ) );
-        AgeGroupInterpolation* weight =
-        util::AgeGroupInterpolation::makeObject( agvElt, "UnittestUtil_weight" );
-        massAt21 = weight->eval(21);
-        util::AgeGroupInterpolation::freeObject( weight );
+        // This is what a previously-used weight distribution gave us,
+        // and is good enough for testing purposes:
+        massAt21 = 55.4993;
     }
     
     void setUp () {
@@ -95,7 +87,14 @@ public:
 	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03245158219000328);
     }
     
-    // IV tests. MF may not be used as an IV drug, but we can still use it to test.
+    // IV tests. MF may not be used as an IV drug, but our code doesn't care.
+    void testIVEquiv () {
+        // As duration tends to zero, factor should tend to that for an oral
+        // dose. Code uses duration!=0 to enable IV mode so we use a small value.
+        proxy->medicate ("MF", 3000/massAt21, 0, 1e-10, massAt21);
+        TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
+    }
+    
     void testIV () {
         // IV over whole day
         proxy->medicate ("MF", 50, 0, 1, massAt21);

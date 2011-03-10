@@ -46,7 +46,13 @@ void vectors::addTo (vector<double>& x, vector<double>& y){
 
 
 bool vectors::approxEqual (const double a, const double b, const double lim_fact) {
-  return (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);
+    bool aE = (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);
+#ifndef NDEBUG
+    if (!aE){
+        cerr<<"not approx equal: "<<a<<", "<<b<<endl;
+    }
+#endif
+    return aE;
 }
 
 bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact) {

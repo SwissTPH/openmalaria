@@ -23,6 +23,7 @@
 #include "PkPd/Drug/LSTMDrug.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
+#include "util/vectors.h"
 
 #include <assert.h>
 #include <cmath>
@@ -143,7 +144,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             totalFactor *= drugAllele.calcFactor( *typeData, concentration_today, time_to_next );
         } else {
             // IV dose
-            assert( time_to_next == dose->second.duration );
+            assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
             totalFactor *= drugAllele.calcFactorIV( *typeData, concentration_today, time_to_next, dose->second.qty );
         }
@@ -178,7 +179,7 @@ bool LSTMDrug::updateConcentration () {
             typeData->updateConcentration( concentration, time_to_next );
         } else {
             // IV dose
-            assert( time_to_next == dose->second.duration );
+            assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
             typeData->updateConcentrationIV( concentration, time_to_next, dose->second.qty );
         }

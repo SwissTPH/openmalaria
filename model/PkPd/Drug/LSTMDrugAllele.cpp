@@ -27,6 +27,7 @@
 #include <boost/functional/hash.hpp>
 
 #include <gsl/gsl_integration.h>
+#include <fstream>
 
 using namespace std;
 
@@ -82,16 +83,9 @@ double func_IV_conc( double t, void* pp ){
 }
 
 double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
-    //TODO: properly test cache function and performance impact once we have a test scenario
     Cache key( C0, duration, rate );
     CachedIV::const_iterator it = cachedIV.find( key );
     if( it != cachedIV.end() ){
-        // NOTE: we assume hash-conflicts won't occur, although this is not impossible
-        // So do a little check (TODO: maybe make this a debug-only assert later?)
-        if( !(key == *it) ){
-            throw runtime_error( "LSTMDrugAllele::calcFactorIV: hash collision" );
-        }
-        
         C0 = it->C1;
         return it->drugFactor;
     } else {
@@ -108,18 +102,23 @@ double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, doubl
         F.function = &func_IV_conc;
         F.params = static_cast<void*>(&p);
         
-        //TODO: consider desired limits
-        double abs_eps = 0.0, rel_eps = 1e-7;
+        // What error limits do we want? Probably don't _need_ such small limits.
+        // Note that gsl_integration_qng doesn't always appear to be accurate
+        // enough even with much less stringent limits.
+        const double abs_eps = 0, rel_eps = 1e-10;
+        const int qag_rule = 2; // GSL_INTEG_GAUSS21 should be sufficient?
         double intfC, err_eps;
-        size_t n_evals;
         
-        gsl_integration_qng (&F, 0.0, duration, abs_eps, rel_eps, &intfC, &err_eps, &n_evals); 
+        const size_t max_iterations = 1000;     // 100 seems enough, but no harm in using a higher value
+        gsl_integration_workspace *workspace = gsl_integration_workspace_alloc (max_iterations);
+        if( gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps, max_iterations, qag_rule, workspace, &intfC, &err_eps) ){
+            throw runtime_error( "calcFactorIV: error from gsl_integration_qag" );
+        }
+        if( err_eps > 1e-8 ){
+            cerr << "Warning in calcFactorIV: error epsilon is: "<<err_eps<<" (integral is "<<intfC<<")"<<endl;
+        }
+        gsl_integration_workspace_free (workspace);
         
-#ifndef NDEBUG
-        cout << "IV: iterations: "<<n_evals<<"; error epsilon: "<<err_eps<<endl;
-#endif
-        //TODO: check err_eps is OK
-        //TODO: check qng is the best integration algorithm
         
         drug.updateConcentrationIV( C0, duration, rate );
         

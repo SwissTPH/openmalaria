@@ -29,6 +29,7 @@
 #include <vector>
 #include <set>
 #include <cassert>
+#include <boost/unordered_set.hpp>
 #include "Global.h"
 
 using namespace std;
@@ -60,12 +61,13 @@ class LSTMDrugAllele {
             return C0 == rhs.C0 && duration == rhs.duration && rate == rhs.rate;
         }
     };
-    struct CacheCompare {
-        bool operator()(const Cache& x,const Cache& y) const {
-            return x.hash>y.hash;
+    struct Cache_hash : std::unary_function<Cache, std::size_t> {
+        std::size_t operator()(Cache const& c) const {
+            return c.hash;
         }
     };
-    typedef std::set<Cache,CacheCompare> CachedIV;
+
+    typedef boost::unordered_set<Cache,Cache_hash> CachedIV;
     mutable CachedIV cachedIV;
     
     /// Slope of the dose response curve (no unit)

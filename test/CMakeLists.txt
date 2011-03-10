@@ -24,6 +24,7 @@ set (OM_BOXTEST_NAMES
   Penny
   R_0
   1DayIntervs
+  ESTS
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

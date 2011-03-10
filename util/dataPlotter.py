@@ -23,6 +23,11 @@
 # combined outputs as produced by resultAssimilator.py. It is currently
 # very incomplete.
 
+# This could be replaced with a data agglomerator:
+#  a sweep may be preserved
+#  data from a particular arm may be picked (all others ignored)
+#  data may be agglomerated using some expression involving the arm
+
 import string
 import os.path
 import sys
