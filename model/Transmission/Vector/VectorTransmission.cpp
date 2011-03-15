@@ -190,8 +190,7 @@ TimeStep VectorTransmission::initIterate () {
         initIterations = -1;
     }
     if( initIterations > 10 ){
-        cerr << "Warning: transmission warmup exceeded 10 iterations!" << endl;
-        initIterations = -1;
+        throw runtime_error("Transmission warmup exceeded 10 iterations!");
     }
     
     // Time to let parameters settle after each iteration. I would expect one year
