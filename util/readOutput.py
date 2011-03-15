@@ -246,6 +246,12 @@ class ValDict (object):
             return [1]
         else:
             return range(1,self.nSurveys+1)
+    def getAllGroups(self):
+        groups=set()
+        for x in self.values:
+            for y in x.getGroups():
+                groups.add(y)
+        return groups
     def getGroups(self,measure):
         return self.values[measure].getGroups()
     def getGroupLabel(self,measure):

@@ -132,6 +132,22 @@ def getMeasureColour(mg,m):
             if m==md[0]:
                 return md[2]
         raise KeyError("measure "+str(m)+" not in combinedMeasures["+str(mg)+"]")
+def ensureUnique(colour,used):
+    if colour in used:
+        colours=cnames.keys()
+        i=0
+        while colours[i]!=colour:
+            i+=1
+            if i>=len(colours):
+                raise KeyError("colour "+colour+" not found!")
+        while colours[i] in used or colours[i]=='white':
+            i+=1
+            if i >= len(colours):
+                i-=1
+                break
+        colour=colours[i]
+    used.add(colour)
+    return colour
 
 class MultiKey(object):
     __slots__ = ["mg","m","s","g","f"]
@@ -247,9 +263,10 @@ class Plotter(object):
         else:
             MultiKey.expand(plots, MultiKey.fromMeasures(self.values.getMeasures()))
         if s=="plot":
-            MultiKey.expand(plots, MultiKey.fromSurveys(self.values.getSurveys()))
+            # NOTE: probably not going to include measure 21
+            MultiKey.expand(plots, MultiKey.fromSurveys(self.values.getSurveys(0)))
         if g=="plot":
-            raise Exception("Cannot separate group by plot!")
+            MultiKey.expand(plots, MultiKey.fromGroups(self.values.getAllGroups()))
         if f=="plot":
             MultiKey.expand(plots, MultiKey.fromFiles(self.values.getFiles()))
         
@@ -297,6 +314,9 @@ class Plotter(object):
             if Keys.FILE in lines:
                 MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
             
+            # use to avoid reusing colours
+            lineColours=set()
+            
             if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
                 plotted=list()
                 for pLine in pLines:
@@ -308,7 +328,7 @@ class Plotter(object):
                     elif x_axis==Keys.FILE:
                         MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
                     y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
-                    colour=getMeasureColour(pLine.mg,pLine.m)
+                    colour=ensureUnique(getMeasureColour(pLine.mg,pLine.m),lineColours)
                     try:
                         plotted.append(subplot.plot(x,y,colour))
                     except ValueError,e:
@@ -333,7 +353,7 @@ class Plotter(object):
                     elif x_axis==Keys.FILE:
                         MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
                     y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
-                    colour=getMeasureColour(pLine.mg,pLine.m)
+                    colour=ensureUnique(getMeasureColour(pLine.mg,pLine.m),lineColours)
                     try:
                         plotted.append(subplot.bar(xind+xincr,y,width,color=colour))
                     except ValueError,e:

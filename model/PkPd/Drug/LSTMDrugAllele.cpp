@@ -86,9 +86,13 @@ double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, doubl
     Cache key( C0, duration, rate );
     CachedIV::const_iterator it = cachedIV.find( key );
     if( it != cachedIV.end() ){
+        // cached result: use it
         C0 = it->C1;
         return it->drugFactor;
     } else {
+        // First time called with this C0, duration and rate. Calculate and add
+        // the result to the cache since numerical integration is slow.
+        
         IV_conc_params p;
         p.C0 = C0;
         p.ivRate = rate;
