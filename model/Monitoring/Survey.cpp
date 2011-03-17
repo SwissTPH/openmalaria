@@ -200,6 +200,7 @@ void Survey::allocate ()
     data_Vector_EIR_Simulated = numeric_limits<double>::signaling_NaN();
     
     _numClinical_RDTs = 0;
+    _numClinical_Microscopy = 0;
     _numClinical_FirstDayDeaths.resize (numAgeGroups);
     _numClinical_HospitalFirstDayDeaths.resize (numAgeGroups);
     _numNewInfections.resize (numAgeGroups);
