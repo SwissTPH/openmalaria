@@ -67,6 +67,6 @@ namespace random {
     /** This function returns 1 or 0 (Bernoulli distribution).
      *
      */
-    int bernoulli(double prob);
+    bool bernoulli(double prob);
 }
 } }

@@ -240,9 +240,14 @@ multiset<unsigned long int> random::randomPicks(int populationSize, long picksNb
 	return chosenHumans;
 }
 
-int random::bernoulli(double prob)
+bool random::bernoulli(double prob)
 {
-	return gsl_ran_bernoulli(rng.gsl_generator,prob);
+    double u = random::uniform_01();
+    if (u < prob){
+        return true;
+    }else{
+        return false;
+    }
 }
 
 } }

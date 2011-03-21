@@ -379,7 +379,7 @@ void Population::importedInfections(double importedInfectionsPerThousandHosts)
 
 	if(importedInfectionsNbr>0)
 		for(HumanIter humanIterator = population.begin(); humanIterator!=population.end(); humanIterator++)
-			if(random::bernoulli(importedInfectionsProb)==1)
+			if(random::bernoulli(importedInfectionsProb))
 			{
 				humanIterator->addInfection();
 				totalImportedInfections++;

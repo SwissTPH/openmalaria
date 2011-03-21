@@ -310,8 +310,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
             if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
                 // Have a NMF or UC malaria case
-                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, pgState & Pathogenesis::MALARIA );
-                bool needTreat = random::uniform_01() < pNeedTreat;
+                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, (pgState & Pathogenesis::MALARIA) != Pathogenesis::NONE );
+                bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
                 double pTreatment;

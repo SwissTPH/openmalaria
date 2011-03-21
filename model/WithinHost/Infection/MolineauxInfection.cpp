@@ -110,7 +110,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
         // Molineaux paper, equation 11
         while (m[i]<1.0)
         {
-            m[i]=random::gauss(mu_m, sigma_m);
+            m[i]=static_cast<float>(random::gauss(mu_m, sigma_m));
         }
     }
 
@@ -121,11 +121,11 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 
     // the initial density is set to 0.1... The first chosen variant is the variant 1
     variants.resize(1);
-    variants[0].P = 0.1;
+    variants[0].P = 0.1f;
     variantTranscendingSummation = 0.0;
 
-    Pstar_c = k_c*pow(random::gauss(mean_first_local_max,sd_first_local_max),10.0);
-    Pstar_m = k_m*pow(random::gauss(mean_diff_pos_days,sd_diff_pos_days),10.0);
+    Pstar_c = static_cast<float>(k_c*pow(random::gauss(mean_first_local_max,sd_first_local_max),10.0));
+    Pstar_m = static_cast<float>(k_m*pow(random::gauss(mean_diff_pos_days,sd_diff_pos_days),10.0));
 }
 
 MolineauxInfection::Variant::Variant () :
@@ -157,12 +157,12 @@ void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double 
     // density is stored in the initP array,  so that we are able to add
     // the survival factor's effect to the emerging variant's density.
     if (P==0) {
-	initP = newPi;
+	initP = static_cast<float>(newPi);
 	growthRate = 0.0;
     }
     else {
 	initP = 0.0;
-	growthRate = sqrt(newPi/P);
+	growthRate = static_cast<float>(sqrt(newPi/P));
     }
 }
 
@@ -226,7 +226,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
 		// variant wasn't expressed yet
 		
 		variants.resize( i+1 );
-		variants[i].initP = newPi;
+		variants[i].initP = static_cast<float>(newPi);
 	    }
 	}
     }
@@ -240,8 +240,8 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
     P *= growthRate;
 
     // survivalFactor: effects of drugs, immunity and vaccines
-    P *= survivalFactor;
-    initP *= survivalFactor;
+    P *= static_cast<float>(survivalFactor);
+    initP *= static_cast<float>(survivalFactor);
 
     // if t+2: The new variant is now expressed. For already extinct
     // variants this doesn't matter, since initP = 0 for those variants.
@@ -302,7 +302,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //Molineaux paper equation 6
     size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
     //note: sigma_decay = exp(-2*sigma)
-    variantSpecificSummation = (variantSpecificSummation * sigma_decay)+laggedP[index];
+    variantSpecificSummation = static_cast<float>((variantSpecificSummation * sigma_decay)+laggedP[index]);
     laggedP[index] = P;
 
     return variantSpecificSummation;
@@ -317,7 +317,7 @@ double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 8
     //We could use min here, but it seems that min has problems with static const double C
-    laggedPc[index] = _density < C ? _density:C;
+    laggedPc[index] = static_cast<float>(_density < C ? _density:C);
 
     return variantTranscendingSummation;
 }
