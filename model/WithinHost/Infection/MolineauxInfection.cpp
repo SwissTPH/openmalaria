@@ -240,8 +240,8 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
     P *= growthRate;
 
     // survivalFactor: effects of drugs, immunity and vaccines
-    P *= static_cast<float>(survivalFactor);
-    initP *= static_cast<float>(survivalFactor);
+    P = static_cast<float>(P * survivalFactor);
+    initP = static_cast<float>(initP * survivalFactor);
 
     // if t+2: The new variant is now expressed. For already extinct
     // variants this doesn't matter, since initP = 0 for those variants.
