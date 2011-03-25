@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #Write parameter documenation to an Excel File. You may need to
 #install http://www.python-excel.org/ xlwt, e.g.:
 #apt-get install python-xlwt
@@ -32,18 +33,18 @@ def formatElement(el,path):
             sheet.write(row,colIndex,splitPair[1],docu_xf)
         row=row+1
         
-def drillDown(el,path):
+def drillDown(el,path,isExtType):
     name=el.get("name")
-    if (name):
+    if (name and not isExtType):
         path=path+"/"+name
         formatElement(el,path)
     for elem in el.getchildren():
-        drillDown(elem,path)
+        drillDown(elem,path,False)
     elType=el.get("type")
     if (elType):
         for typeDefinition in tree.findall("{http://www.w3.org/2001/XMLSchema}complexType"):
             if (typeDefinition.get("name")==elType):
-                drillDown(typeDefinition,path)
+                drillDown(typeDefinition,path,True)
                 break      
     
 def main():
@@ -63,7 +64,7 @@ def main():
     tree.parse("../schema/scenario.xsd")
     #we know that the first element in the schema defines scenario
     scenarioElement=tree.find("{http://www.w3.org/2001/XMLSchema}element")
-    drillDown(scenarioElement,"")
+    drillDown(scenarioElement,"",False)
     book.save('Documentation.xls')
 
 if __name__ == '__main__':

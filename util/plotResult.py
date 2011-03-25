@@ -140,7 +140,8 @@ def ensureUnique(colour,used):
             i+=1
             if i>=len(colours):
                 raise KeyError("colour "+colour+" not found!")
-        while colours[i] in used or colours[i]=='white':
+        # TODO: replace the following with a check of whether the colour is similar to any used colour
+        while colours[i] in used:
             i+=1
             if i >= len(colours):
                 i-=1
@@ -314,8 +315,8 @@ class Plotter(object):
             if Keys.FILE in lines:
                 MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
             
-            # use to avoid reusing colours
-            lineColours=set()
+            # use to avoid reusing colours or white
+            lineColours=set('white')
             
             if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
                 plotted=list()
