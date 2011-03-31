@@ -2,6 +2,7 @@
 #Write parameter documenation to an Excel File. You may need to
 #install http://www.python-excel.org/ xlwt, e.g.:
 #apt-get install python-xlwt
+#or download the windows installer
 
 from xlwt import Workbook
 from xlwt import easyxf
@@ -12,14 +13,23 @@ import re
 
 appinfoOrder=['name','units','min','max','exposed','sweepable']
 docu_xf = easyxf('align: wrap on, vert centre')
+worksheets = {}
 
 def normalizeNewlines(string):
     string=" ".join(string.split())
     return re.sub(r'(\r\n|\r|\n)', ' ', string)
 
 def formatElement(el,path):
-    global row,sheet, tree
     if (el.find("{http://www.w3.org/2001/XMLSchema}annotation")):
+        splitPath=string.split(path,'/')
+        #set default component to "scenario", i.e. write to the "Scenario" worksheet below
+        component="scenario"
+        #update component if a know child element of scenario, i.e. write to another worksheet below
+        if (len(splitPath)>2):
+            if (splitPath[2] in worksheets):
+                component=splitPath[2]
+        sheet= worksheets[component][0]
+        row=worksheets[component][1]
         sheet.write(row,0,path)
         annotation=el.find("{http://www.w3.org/2001/XMLSchema}annotation")
         docu=annotation.find("{http://www.w3.org/2001/XMLSchema}documentation").text
@@ -31,7 +41,8 @@ def formatElement(el,path):
             splitPair=string.split(keyValue,":")
             colIndex=appinfoOrder.index(string.strip(str(splitPair[0])))+2
             sheet.write(row,colIndex,splitPair[1],docu_xf)
-        row=row+1
+        #update next row to be written in that sheet
+        worksheets[component][1]=worksheets[component][1]+1
         
 def drillDown(el,path,isExtType):
     name=el.get("name")
@@ -46,12 +57,10 @@ def drillDown(el,path,isExtType):
             if (typeDefinition.get("name")==elType):
                 drillDown(typeDefinition,path,True)
                 break      
-    
-def main():
-    global row, sheet, tree
-    row=1
-    book = Workbook()
-    sheet = book.add_sheet('Params')
+
+def initWorksheets(elementName,sheetName):
+    sheet=book.add_sheet(sheetName)
+    worksheets[elementName]=[sheet,1]
     sheet.write(0,0,"Parameter name and path (in XML document)")
     sheet.write(0,1,"Parameter documentation       ")
     sheet.write(0,2,"Parameter name (in GUI)")
@@ -60,6 +69,18 @@ def main():
     sheet.write(0,5,"Parameter max value")
     sheet.write(0,6,"Parameter exposed in GUI")
     sheet.write(0,7,"Parameter is sweepable")
+    
+def main():
+    global tree,book
+    book = Workbook()
+    initWorksheets("scenario", "Scenario")
+    initWorksheets("demography", "Demography")
+    initWorksheets("monitoring", "Monitoring")
+    initWorksheets("interventions", "Interventions")
+    initWorksheets("healthSystem", "HealthSystem")
+    initWorksheets("entoData", "EntoData")
+    initWorksheets("drugDescription", "DrugDescription")
+    initWorksheets("model", "Model")
     tree = ElementTree()
     tree.parse("../schema/scenario.xsd")
     #we know that the first element in the schema defines scenario
