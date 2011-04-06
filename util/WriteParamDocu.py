@@ -24,13 +24,15 @@ def formatElement(el,path):
         splitPath=string.split(path,'/')
         #set default component to "scenario", i.e. write to the "Scenario" worksheet below
         component="scenario"
+        printPath=string.replace(path,"/"+component,"")
         #update component if a know child element of scenario, i.e. write to another worksheet below
         if (len(splitPath)>2):
             if (splitPath[2] in worksheets):
                 component=splitPath[2]
+                printPath=string.replace(printPath,"/"+component,"")
         sheet= worksheets[component][0]
         row=worksheets[component][1]
-        sheet.write(row,0,path)
+        sheet.write(row,0,string.lstrip(printPath,"/"))
         annotation=el.find("{http://www.w3.org/2001/XMLSchema}annotation")
         docu=annotation.find("{http://www.w3.org/2001/XMLSchema}documentation").text
         content=string.strip(docu)
@@ -61,6 +63,8 @@ def drillDown(el,path,isExtType):
 def initWorksheets(elementName,sheetName):
     sheet=book.add_sheet(sheetName)
     worksheets[elementName]=[sheet,1]
+    sheet.col(0).width =10000
+    sheet.col(1).width =15000
     sheet.write(0,0,"Parameter name and path (in XML document)")
     sheet.write(0,1,"Parameter documentation       ")
     sheet.write(0,2,"Parameter name (in GUI)")
