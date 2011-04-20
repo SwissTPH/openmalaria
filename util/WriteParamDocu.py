@@ -65,6 +65,12 @@ def initWorksheets(elementName,sheetName):
     worksheets[elementName]=[sheet,1]
     sheet.col(0).width =10000
     sheet.col(1).width =15000
+    sheet.col(2).width =6500
+    sheet.col(3).width =4300
+    sheet.col(4).width =4500
+    sheet.col(5).width =4800
+    sheet.col(6).width =6000
+    sheet.col(7).width =5500
     sheet.write(0,0,"Parameter name and path (in XML document)")
     sheet.write(0,1,"Parameter documentation       ")
     sheet.write(0,2,"Parameter name (in GUI)")
