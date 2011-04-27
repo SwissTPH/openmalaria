@@ -35,7 +35,7 @@ public:
         // Set maximum age to 90 years:
         UnittestUtil::AgeGroupInterpolation_init();
         scnXml::AgeGroupValues::GroupSequence& seq = agvElt.getGroup();
-        seq.resize( dataLen, scnXml::Group::Group(0.0,0.0) );
+        seq.resize( dataLen, scnXml::Group(0.0,0.0) );
         for( size_t i = 0; i < dataLen; ++i ){
             seq[ i ].setLowerbound( stdLbounds[ i ] );
             seq[ i ].setValue( stdValues[ i ] );

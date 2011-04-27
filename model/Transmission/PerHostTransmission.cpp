@@ -35,12 +35,24 @@ void PerHostTransmission::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
     
     scnXml::Descriptions intervDesc = InputData().getInterventions().getDescriptions();
-    if( intervDesc.getITNDecay().present() )
+    if ( InputData.isInterventionActive(Interventions::ITN) ) {
+        if( !intervDesc.getITNDecay().present() ){
+            throw util::xml_scenario_error ("ITN intervention without description of decay");
+        }
         ITNDecay = DecayFunction::makeObject( intervDesc.getITNDecay().get(), "ITNDecay" );
-    if( intervDesc.getIRSDecay().present() )
+    }
+    if ( InputData.isInterventionActive(Interventions::IRS) ) {
+        if( !intervDesc.getIRSDecay().present() ){
+            throw util::xml_scenario_error ("IRS intervention without description of decay");
+        }
         IRSDecay = DecayFunction::makeObject( intervDesc.getIRSDecay().get(), "IRSDecay" );
-    if( intervDesc.getVADecay().present() )
+    }
+    if ( InputData.isInterventionActive(Interventions::VEC_AVAIL) ) {
+        if( !intervDesc.getVADecay().present() ){
+            throw util::xml_scenario_error ("Vector availability intervention without description of decay");
+        }
         VADecay = DecayFunction::makeObject( intervDesc.getVADecay().get(), "VADecay" );
+    }
 }
 void PerHostTransmission::cleanup (){
     AgeGroupInterpolation::freeObject( relAvailAge );

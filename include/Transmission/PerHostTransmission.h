@@ -196,6 +196,8 @@ private:
   
   static AgeGroupInterpolation* relAvailAge;
   
+  // descriptions of decay of interventions
+  // set if specific intervention is used
   static shared_ptr<DecayFunction> ITNDecay;
   static shared_ptr<DecayFunction> IRSDecay;
   static shared_ptr<DecayFunction> VADecay;
