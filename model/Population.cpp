@@ -96,6 +96,7 @@ Population::Population()
     Continuous::registerCallback( "patent hosts", "\tpatent hosts", MakeDelegate( this, &Population::ctsPatentHosts ) );
     Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
     Continuous::registerCallback( "immunity Y", "\timmunity Y", MakeDelegate( this, &Population::ctsImmunityY ) );
+    Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y", MakeDelegate( this, &Population::ctsMedianImmunityY ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
@@ -282,6 +283,22 @@ void Population::ctsImmunityY (ostream& stream){
         x += iter->getWithinHostModel().getCumulativeY();
     }
     x /= populationSize;
+    stream << '\t' << x;
+}
+void Population::ctsMedianImmunityY (ostream& stream){
+    vector<double> list;
+    list.reserve( populationSize );
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        list.push_back( iter->getWithinHostModel().getCumulativeY() );
+    }
+    sort( list.begin(), list.end() );
+    double x;
+    if( populationSize % 2 == 0 ){
+        size_t i = populationSize / 2;
+        x = (list[i-1]+list[i])/2.0;
+    }else{
+        x = list[populationSize / 2];
+    }
     stream << '\t' << x;
 }
 

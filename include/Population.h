@@ -104,8 +104,10 @@ private:
     void ctsPatentHosts (ostream& stream);
     /// Delegate to print immunity's cumulativeh parameter
     void ctsImmunityh (ostream& stream);
-    /// Delegate to print immunity's cumulativeY parameter
+    /// Delegate to print immunity's cumulativeY parameter (mean across population)
     void ctsImmunityY (ostream& stream);
+    /// Delegate to print immunity's cumulativeY parameter (median across population)
+    void ctsMedianImmunityY (ostream& stream);
     
     /** Generic function to activate some intervention on all humans within the
      * age range and passing the compliance test given by mass.
