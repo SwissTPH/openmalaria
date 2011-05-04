@@ -102,7 +102,7 @@ def linkOrCopy (src, dest):
 
 # Run, with file "scenario"+name+".xml"
 def runScenario(options,omOptions,name):
-    scenarioSrc=os.path.join(testSrcDir,"scenario%s.xml" % name)
+    scenarioSrc=os.path.abspath(os.path.join(testSrcDir,"scenario%s.xml" % name))
     if not os.path.isfile(scenarioSrc):
         raise RunError('No such scenario file '+scenarioSrc+'!')
     schemaName=getSchemaName(scenarioSrc)
@@ -114,7 +114,7 @@ def runScenario(options,omOptions,name):
             print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
         return subprocess.call (cmd,cwd=testBuildDir)
     
-    cmd=options.wrapArgs+[openMalariaExec,"--resource-path",testSrcDir,"--scenario",scenarioSrc]+omOptions
+    cmd=options.wrapArgs+[openMalariaExec,"--resource-path",os.path.abspath(testSrcDir),"--scenario",scenarioSrc]+omOptions
     
     if not options.run:
         print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"

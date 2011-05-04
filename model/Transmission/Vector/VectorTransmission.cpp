@@ -31,6 +31,19 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
+double VectorTransmission::invMeanPopAvail (const std::list<Host::Human>& population, int populationSize) {
+    double sumRelativeAvailability = 0.0;
+    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+    }
+    if( sumRelativeAvailability > 0.0 ){
+        return populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
+    }else{
+        // value should be unimportant when no humans are available, though inf/nan is not acceptable
+        return 1.0;
+    }
+}
+
 void VectorTransmission::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
@@ -131,8 +144,9 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+    double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].setupNv0 (i, population, populationSize);
+        species[i].setupNv0 (i, population, populationSize, iMPA);
     }
 }
 
@@ -218,9 +232,11 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 
 
 // Every Global::interval days:
-void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population) {
-    for (size_t i = 0; i < numSpecies; ++i)
-        species[i].advancePeriod (population, i, simulationMode == dynamicEIR);
+void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
+    double iMPA = invMeanPopAvail(population, populationSize);
+    for (size_t i = 0; i < numSpecies; ++i){
+        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
+    }
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {

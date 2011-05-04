@@ -281,7 +281,7 @@ double VectorAnopheles::getNonHumanEntoAvailability(double populationSize, doubl
 }
 
 
-void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize) {
+void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize, double invMeanPopAvail) {
   // -----  N_v0, N_v, O_v, S_v  -----
   //BEGIN P_A, P_Ai, P_df, P_dif
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
@@ -298,7 +298,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
 
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), transmissionModel->ageCorrectionFactor);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex);
     sumPFindBite += prod;
@@ -357,10 +357,12 @@ bool VectorAnopheles::vectorInitIterate () {
     double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)){
-        // unlikely, but might as well check in case either operand was zero
-        //cout << "vectors sum : "<<vectors::sum(annualS_v);
-        //cout << "factor value : "<<factor;
-        throw runtime_error ("factor out of bounds");
+        if( vectors::sum(forcedS_v) == 0.0 ){
+            return false;   // no EIR desired: nothing to do
+        }
+        cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
+        cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
+        throw logic_error ("factor out of bounds (likely a code error)");
     }
     
     //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
@@ -401,7 +403,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 
 // Every TimeStep::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, size_t sIndex, bool isDynamic) {
+void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail) {
   if (TimeStep::simulation >= larvicidingEndStep) {
     larvicidingEndStep = TimeStep::future;
     larvicidingIneffectiveness = 1.0;
@@ -450,7 +452,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, s
   double intP_dif = 0.0;
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), transmissionModel->ageCorrectionFactor);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex)
           * host.probMosqResting(humanBase, sIndex);

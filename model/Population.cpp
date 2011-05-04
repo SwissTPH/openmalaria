@@ -158,8 +158,6 @@ void Population::createInitialHumans ()
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    // This also updates humans' ageGroupData, which _must_ happen here.
-    _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
     _transmissionModel->setupNv0 (population, populationSize);
 }
 
@@ -175,10 +173,6 @@ void Population::newHuman (TimeStep dob)
 
 void Population::update1()
 {
-    // This also updates humans' ageGroupData, which _must_ happen at beginning of timestep.
-    // Should probably be whole pop, not just those surviving to vector init.
-    _transmissionModel->updateAgeCorrectionFactor (population, populationSize);
-    
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // TODO: add some value to be used until old-enough humans are updated?
@@ -186,7 +180,7 @@ void Population::update1()
     
     // This should be called before humans contract new infections in the simulation step.
     // This needs the whole population (it is an approximation before all humans are updated).
-    _transmissionModel->vectorUpdate (population);
+    _transmissionModel->vectorUpdate (population, populationSize);
 
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.

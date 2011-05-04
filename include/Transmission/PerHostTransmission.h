@@ -57,7 +57,7 @@ public:
    * @return the ratio of bites received by the host to the average for an adult 
    *
    * This is the age factor of availiability; mean output should be
-   *  1.0/ageCorrectionFactor.
+   * mean population availability (that is, 1.0/invMeanPopAvail).
    * 
    * Also has a switch to put individuals entirely outside transmission. */
   inline double relativeAvailabilityAge (double ageYears) const {
@@ -83,11 +83,11 @@ public:
 	const HostCategoryAnopheles& base,
 	size_t speciesIndex,
 	double ageYears,
-	double ageCorrectionFactor
+	double invMeanPopAvail
     ) const {
 	return entoAvailabilityHetVecItv (base, speciesIndex)
 	    * relativeAvailabilityAge (ageYears)
-	    * ageCorrectionFactor;
+	    * invMeanPopAvail;
   }
   /** @brief Availability of host to mosquitoes (α_i) excluding age factor.
    *
@@ -109,7 +109,7 @@ public:
    * Used to drive a simulation from an input EIR.
    * Is relativeAvailabilityHet()*relativeAvailabilityAge(ageYears).
    * 
-   * Mean output is less than 1.0 (roughly 1.0/ageCorrectionFactor).
+   * Mean output is less than 1.0 (roughly 1.0/invMeanPopAvail).
    */
   inline double relativeAvailabilityHetAge (double ageYears) const {
     return _relativeAvailabilityHet

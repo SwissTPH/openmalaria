@@ -47,7 +47,7 @@ public:
   virtual TimeStep expectedInitDuration ();
   virtual TimeStep initIterate ();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population);
+  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
   
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
   virtual void modelUpdateKappa() {}
@@ -73,6 +73,9 @@ private:
     }
     return sIndex->second;
   }
+  
+    /** Return one over the mean availability of human population to mosquitoes. */
+    static double invMeanPopAvail (const std::list<Host::Human>& population, int populationSize);
   
   void ctsCbN_v0 (ostream& stream);
   void ctsCbN_v (ostream& stream);

@@ -131,17 +131,10 @@ public:
    */
   virtual TimeStep initIterate ()=0;
   
-  /** Needs to be called each step of the simulation before nearly anything
-   * else.
-   * 
-   * Calculates the ageCorrectionFactor which is used in much of the
-   * transmission code, including getEIR (used in Human update). */
-  void updateAgeCorrectionFactor (std::list<Host::Human>& population, int populationSize);
-  
   /** Needs to be called each step of the simulation
    *
    * Runs internal calculations of Vector model. */
-  virtual void vectorUpdate (const std::list<Host::Human>& population) {};
+  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {};
   
   /** Needs to be called each step of the simulation
    *
@@ -193,16 +186,7 @@ private:
     void ctsCbInputEIR (ostream& stream);
     void ctsCbSimulatedEIR (ostream& stream);
     void ctsCbKappa (ostream& stream);
-    void ctsCbHumanAvail (ostream& stream);
     void ctsCbNumTransmittingHumans (ostream& stream);
-    
-public:
-  /** Correction factor for PerHostTransmission::getRelativeAvailability.
-   *
-   * This parameter is recalculated every time-step; dependant on the population,
-   * thus it is better to store it in a per-population object than as a static
-   * parameter. */
-  double ageCorrectionFactor;
   
 protected:
   /** The type of EIR calculation. Checkpointed. */

@@ -86,15 +86,11 @@ void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
 void TransmissionModel::ctsCbKappa (ostream& stream){
     stream<<'\t'<<currentKappa;
 }
-void TransmissionModel::ctsCbHumanAvail (ostream& stream){
-    stream<<'\t'<<1.0/ageCorrectionFactor;
-}
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
 }
 
 TransmissionModel::TransmissionModel() :
-    ageCorrectionFactor(numeric_limits<double>::signaling_NaN()),
     simulationMode(equilibriumMode),
     interventionMode(InputData().getEntoData().getMode()),
     currentKappa(0.0),
@@ -128,29 +124,12 @@ TransmissionModel::TransmissionModel() :
   Continuous::registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous::registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
   Continuous::registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
-  Continuous::registerCallback( "human availability", "\tmean human availability", MakeDelegate( this, &TransmissionModel::ctsCbHumanAvail ) );
   Continuous::registerCallback( "num transmitting humans", "\tnum transmitting humans", MakeDelegate( this, &TransmissionModel::ctsCbNumTransmittingHumans ) );
 }
 
 TransmissionModel::~TransmissionModel () {
 }
 
-
-void TransmissionModel::updateAgeCorrectionFactor (std::list<Host::Human>& population, int populationSize) {
-    //NOTE: ageCorrectionFactor is now only used within the vector
-    // init & update, so could be calculated there.
-
-    // Calculate relative availability correction, so calls from vectorUpdate,
-    // etc., will have a mean of 1.0.
-    double sumRelativeAvailability = 0.0;
-    for (std::list<Host::Human>::iterator h = population.begin(); h != population.end(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
-    }
-    ageCorrectionFactor = populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
-    if( sumRelativeAvailability == 0.0 )
-        // value should be unimportant when no humans are available, though inf/nan is not acceptable
-        ageCorrectionFactor = 1.0;
-}
 
 void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
     // We calculate kappa for output and non-vector model, and kappaByAge for
@@ -265,7 +244,6 @@ void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
 // -----  checkpointing  -----
 
 void TransmissionModel::checkpoint (istream& stream) {
-    ageCorrectionFactor & stream;
     simulationMode & stream;
     interventionMode & stream;
     initialisationEIR & stream;
@@ -289,7 +267,6 @@ void TransmissionModel::checkpoint (istream& stream) {
     nByAge & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
-    ageCorrectionFactor & stream;
     simulationMode & stream;
     interventionMode & stream;
     initialisationEIR & stream;
