@@ -25,6 +25,7 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
+#include "util/errors.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -79,6 +80,9 @@ void InfectionIncidenceModel::init () {
   
     InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(BaselineAvailabilityShapeParam, 2));
     InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
+    if( InfectionrateShapeParam != InfectionrateShapeParam ){
+        throw util::xml_scenario_error( "bad parameter 16 (BASELINE_AVAILABILITY_SHAPE)" );
+    }
   }
   
   if (util::ModelOptions::anyTransHet())
