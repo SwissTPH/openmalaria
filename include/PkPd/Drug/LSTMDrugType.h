@@ -29,6 +29,7 @@
 #include <vector>
 #include <set>
 #include <cassert>
+#include <memory>
 #include <boost/unordered_set.hpp>
 #include "Global.h"
 
@@ -122,8 +123,9 @@ public:
     /// Remove set-up drugs. (Must be called before init can be re-called.)
     static void cleanup ();
     
-    //! Adds a new drug type to the list
-    static void addDrug(const LSTMDrugType* drug);
+    /** Adds a new drug type to the list. This function becomes responsible
+     * for deleting the object on exit. */
+    static void addDrug(auto_ptr<LSTMDrugType> drug);
     
     /** Find a DrugType by its abbreviation, and create a new Drug from that.
      *

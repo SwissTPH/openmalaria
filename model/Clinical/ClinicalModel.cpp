@@ -103,7 +103,6 @@ ClinicalModel::ClinicalModel (double cF) :
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
-  delete pathogenesisModel;
   // latestReport is reported, if any, by destructor
 }
 

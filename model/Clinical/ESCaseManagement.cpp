@@ -127,21 +127,19 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	    modifierList.push_back( &modifier );
     }
     
-    schedules[ ESDecisionValue() ] = new ESTreatmentSchedule( elt.getSchedule() );
+    ESDecisionValue zero;       // "insert" has no support for anonymous objects, so can't declare inline
+    schedules.insert( zero, new ESTreatmentSchedule( elt.getSchedule() ) );
     Schedules startSchedules;
     
     BOOST_FOREACH( const scnXml::HSESTreatmentModifier* modifier, modifierList ){
 	schedules.swap( startSchedules );
-	for( Schedules::iterator it = schedules.begin(); it != schedules.end(); ++it ) {
-	    delete it->second;
-	}
 	schedules.clear();
 	
 	required.push_back( modifier->getDecision() );	// make sure this decision isn't optimised out
 	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier->getDecision() );
 	schedulesMask |= decPair.get<0>();
 	value_map_t decVals = decPair.get<1>();	// copy
-  schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
+        schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
 	
 	if( modifier->getMultiplyQty().size() ) {
 	    assert( modifier->getDelay().size() == 0 );
@@ -155,7 +153,8 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
 		    ts->multiplyQty( m, affectsCost, errObj );
-		    schedules[ s->first | val ] = ts;
+                    ESDecisionValue key = s->first | val;
+		    schedules.insert( key, ts );
 		}
 	    }
 	} else if( modifier->getDelay().size() ) {
@@ -168,7 +167,8 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
 		    ts->delay( m, errObj );
-		    schedules[ s->first | val ] = ts;
+                    ESDecisionValue key = s->first | val;
+                    schedules.insert( key, ts );
 		}
 	    }
 	} else if( modifier->getSelectTimeRange().size() ) {
@@ -181,7 +181,8 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
 		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
 		    ts->selectTimeRange( m, affectsCost, errObj );
-		    schedules[ s->first | val ] = ts;
+                    ESDecisionValue key = s->first | val;
+                    schedules.insert( key, ts );
 		}
 	    }
 	} else {
@@ -203,9 +204,6 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	}
     }
     
-    for( Schedules::iterator it = startSchedules.begin(); it != startSchedules.end(); ++it ) {
-	delete it->second;
-    }
     /*
     cout<<"schedules for "<<elt.getName()<<":";
     for( Schedules::iterator it = schedules.begin(); it != schedules.end(); ++it ) {
@@ -216,18 +214,14 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 }
 
 ESTreatment::~ESTreatment() {
-    for( Schedules::iterator it = schedules.begin(); it != schedules.end(); ++it ) {
-	delete it->second;
-    }
 }
 
-ESTreatmentSchedule* ESTreatment::getSchedule (ESDecisionValue& outcome) const {
+ESTreatmentSchedule* ESTreatment::getSchedule (ESDecisionValue& outcome) {
     outcome = outcome & schedulesMask;
-    Schedules::const_iterator it = schedules.find (outcome);
+    Schedules::iterator it = schedules.find (outcome);
     if (it == schedules.end ())
 	return NULL;
-    else
-	return it->second;
+    return it->second;
 }
 
 // -----  ESDecisionMap  -----
@@ -430,16 +424,14 @@ ESDecisionValue ESDecisionMap::determine (const OM::Clinical::ESHostData& hostDa
     }
     return outcomes;
 }
-ESTreatmentSchedule* ESDecisionMap::getSchedule (ESDecisionValue outcome) const {
+ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) const {
     ESDecisionValue masked = outcome & treatmentsMask;
     Treatments::const_iterator it = treatments.find (masked);
     if (it != treatments.end ()) {
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )
-	    return ret;
-	else
-	    throw logic_error( "a required modifier decision's output is unexpected (code error)" );
-	masked = masked & outcome;	// change error message below
+	    return *ret;
+	throw logic_error( "a required modifier decision's output is unexpected (code error)" );
     }
     
     ostringstream msg;
@@ -486,8 +478,8 @@ pair<ESDecisionValue, bool> executeTree(
         bool inCohort
 ){
     ESDecisionValue outcome = map->determine (hostData);
-    ESTreatmentSchedule* schedule = map->getSchedule(outcome);
-    schedule->apply (medicateQueue);
+    ESTreatmentSchedule& schedule = map->getSchedule(outcome);
+    schedule.apply (medicateQueue);
     
     if ( map->RDT_used(outcome) ) {
         Monitoring::Surveys.getSurvey(inCohort).report_Clinical_RDTs (1);
@@ -496,7 +488,7 @@ pair<ESDecisionValue, bool> executeTree(
         Monitoring::Surveys.getSurvey(inCohort).report_Clinical_Microscopy (1);
     }
     
-    return make_pair( outcome, schedule->anyTreatments() );
+    return make_pair( outcome, schedule.anyTreatments() );
 }
 
 void ESCaseManagement::massDrugAdministration(

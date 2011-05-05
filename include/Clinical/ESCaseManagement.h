@@ -32,7 +32,7 @@
 #include <cassert>
 #include <list>
 #include <limits>
-#include <boost/unordered_map.hpp>
+#include <boost/ptr_container/ptr_unordered_map.hpp>
 
 class ESCaseManagementSuite;
 class ESDecisionTreeSuite;
@@ -44,8 +44,7 @@ namespace scnXml{
 }
 namespace OM { namespace Clinical {
     using WithinHost::WithinHostModel;
-    using boost::unordered_map;
-
+    
 /// Auxilliary output from running case management
 struct CMAuxOutput {
     enum Hospitalisation {
@@ -131,10 +130,10 @@ class ESTreatment {
          * schedule.
          *
          * May return NULL (handled by ESDecisionMap::getTreatment()). */
-        ESTreatmentSchedule* getSchedule (ESDecisionValue&) const;
+        ESTreatmentSchedule* getSchedule (ESDecisionValue&);
         
     private:
-        typedef unordered_map<ESDecisionValue,ESTreatmentSchedule*> Schedules;
+        typedef boost::ptr_unordered_map<ESDecisionValue,ESTreatmentSchedule> Schedules;
         Schedules schedules;
         ESDecisionValue schedulesMask;
 };
@@ -167,12 +166,11 @@ class ESDecisionMap {
         ESDecisionValue determine (const OM::Clinical::ESHostData& hostData) const;
         
         /** Given a decision-tree outcome, return a corresponding treatment
-         * schedule. Return-value should always point to an existing
-         * ESTreatmentSchedule object (shouldn't be deleted by the caller).
+         * schedule.
          * 
-         * If the treatment decision is but not found, or found but a treatment
+         * If the treatment decision is not found, or found but a treatment
          * schedule is not, an error is thrown. */
-        ESTreatmentSchedule* getSchedule (ESDecisionValue outcome) const;
+        ESTreatmentSchedule& getSchedule (ESDecisionValue outcome) const;
         
         /// Return one of CMAuxOutput::Hospitalisation's values.
         inline CMAuxOutput::Hospitalisation hospitalisation (ESDecisionValue outcome) const{

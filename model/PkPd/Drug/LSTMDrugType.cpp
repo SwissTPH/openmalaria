@@ -23,7 +23,6 @@
 #include "util/errors.h"
 #include "util/random.h"
 
-#include <assert.h>
 #include <cmath>
 
 using namespace std;
@@ -41,7 +40,7 @@ void LSTMDrugType::init (const scnXml::DrugDescription& data) {
     uint32_t start_bit = 0;
 
     for (scnXml::DrugDescription::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
-        LSTMDrugType::addDrug (new LSTMDrugType (*drug, start_bit));
+        LSTMDrugType::addDrug (auto_ptr<LSTMDrugType>(new LSTMDrugType (*drug, start_bit)));
     }
 }
 void LSTMDrugType::cleanup () {
@@ -51,13 +50,13 @@ void LSTMDrugType::cleanup () {
     available.clear ();
 }
 
-void LSTMDrugType::addDrug(const LSTMDrugType* drug) {
+void LSTMDrugType::addDrug(auto_ptr<LSTMDrugType> drug) {
     const string& abbrev = drug->abbreviation;
     // Check drug doesn't already exist
     if (available.find (abbrev) != available.end())
         throw invalid_argument (string ("Drug already in registry: ").append(abbrev));
 
-    available[ abbrev ] = drug;
+    available[ abbrev ] = drug.release();
 }
 
 const LSTMDrugType& LSTMDrugType::getDrug(string _abbreviation) {

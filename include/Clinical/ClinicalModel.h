@@ -24,6 +24,7 @@
 #include "Host/Human.h"
 #include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
+#include <memory>
 
 namespace OM { namespace Clinical {
     using Host::Human;
@@ -144,7 +145,7 @@ protected:
   virtual void checkpoint (ostream& stream);
   
   /// The PathogenesisModel introduces illness dependant on parasite density
-  Pathogenesis::PathogenesisModel *pathogenesisModel;
+  auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
   
   /** Last episode; report to survey pending a new episode or human's death. */
   Episode latestReport;

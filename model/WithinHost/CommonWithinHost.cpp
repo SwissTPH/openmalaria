@@ -83,6 +83,7 @@ void CommonWithinHost::immuneSuppression() {
 // -----  Density calculations  -----
 
 void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy) {
+    cout<<"calculateDensities"<<endl;
     updateImmuneStatus ();
     
     totalDensity = 0.0;
