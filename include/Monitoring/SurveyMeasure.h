@@ -199,7 +199,8 @@ enum SurveyMeasure {
     
     /** Number of people (per age group) treated by mass drug administration
      * campaign. (Note that in one day time-step model MDA can be configured
-     * as screen-and-treat. This option repeats actual treatments.) */
+     * as screen-and-treat. This option reports treatments administered not
+     * the number of tests used.) */
     nMDAs = 52,
     
     /// Number of deaths caused by non-malaria fevers
