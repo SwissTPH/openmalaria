@@ -293,7 +293,7 @@ public:
     }
     
     /* Filter and output. */
-    void process (vector<ESDecisionTree*>& decisions, list<string>& requiredOutputs) {
+    void process (ESDecisionMap::Decisions& decisions, list<string>& requiredOutputs) {
 	BOOST_FOREACH( const string& req, requiredOutputs ){
 	    addRequires( req );
 	}
@@ -398,7 +398,8 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
     
     const ESDecisionValueMap::value_map_t& treatmentCodes = mask_vmap_pair.get<1>();
     BOOST_FOREACH( const ::scnXml::HSESTreatment& treatment, xmlCM.getTreatments().getTreatment() ){
-	treatments[treatmentGetValue( treatmentCodes, treatment.getName() )] = new ESTreatment( dvMap, treatment, required );
+        ESDecisionValue key = treatmentGetValue( treatmentCodes, treatment.getName() );
+	treatments.insert( key, new ESTreatment( dvMap, treatment, required ) );
     }
     
     // Filter and add decisions (must be done after reading treatments):
@@ -406,27 +407,22 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
 }
 
 ESDecisionMap::~ESDecisionMap () {
-    BOOST_FOREACH ( ESDecisionTree* d, decisions ) {
-	delete d;
-    }
-    for( Treatments::iterator it = treatments.begin(); it != treatments.end(); ++it )
-	delete it->second;
 }
 
 ESDecisionValue ESDecisionMap::determine (const OM::Clinical::ESHostData& hostData) const {
     ESDecisionValue outcomes;	// initialized to 0
     // At this point, decisions is ordered such that all dependencies should be
     // met if evaluated in order, so we just do that.
-    BOOST_FOREACH ( const ESDecisionTree* decision, decisions ) {
-	// Pass determine the outcomes of previous decisions, filtered to the decisions it depends on.
+    for( Decisions::const_iterator it=decisions.begin(); it!=decisions.end(); ++it ){
+    // Pass determine the outcomes of previous decisions, filtered to the decisions it depends on.
 	// Get back another outcome and add it into the outcomes set.
-	outcomes |= decision->determine (outcomes, hostData);
+	outcomes |= it->determine (outcomes, hostData);
     }
     return outcomes;
 }
-ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) const {
+ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
     ESDecisionValue masked = outcome & treatmentsMask;
-    Treatments::const_iterator it = treatments.find (masked);
+    Treatments::iterator it = treatments.find (masked);
     if (it != treatments.end ()) {
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )

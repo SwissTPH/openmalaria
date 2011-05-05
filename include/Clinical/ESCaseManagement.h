@@ -33,6 +33,7 @@
 #include <list>
 #include <limits>
 #include <boost/ptr_container/ptr_unordered_map.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 class ESCaseManagementSuite;
 class ESDecisionTreeSuite;
@@ -170,7 +171,7 @@ class ESDecisionMap {
          * 
          * If the treatment decision is not found, or found but a treatment
          * schedule is not, an error is thrown. */
-        ESTreatmentSchedule& getSchedule (ESDecisionValue outcome) const;
+        ESTreatmentSchedule& getSchedule (ESDecisionValue outcome);
         
         /// Return one of CMAuxOutput::Hospitalisation's values.
         inline CMAuxOutput::Hospitalisation hospitalisation (ESDecisionValue outcome) const{
@@ -214,15 +215,16 @@ class ESDecisionMap {
                 return CMAuxOutput::NO_AB;
         }
         
+        typedef boost::ptr_vector<ESDecisionTree> Decisions;
     private:
         // All data here should be set by ESCaseManagement::init(); don't checkpoint.
         
         ESDecisionValueMap dvMap;
         
         // Currently we walk through all decisions, required or not
-        vector<ESDecisionTree*> decisions;
+        Decisions decisions;
         
-        typedef unordered_map<ESDecisionValue,ESTreatment*> Treatments;
+        typedef boost::ptr_unordered_map<ESDecisionValue,ESTreatment> Treatments;
         Treatments treatments;
         // Used to mask ESDecisionValues before lookup in treatments:
         ESDecisionValue treatmentsMask;

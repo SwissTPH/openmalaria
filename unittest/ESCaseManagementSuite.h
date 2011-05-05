@@ -173,12 +173,10 @@ public:
 	treatment1 |= dMap.dvMap.get( "modD2", "B2" );	// delay B by 2 hours
 	treatment1 |= dMap.dvMap.get( "modSTR", "selective" );	// A-0 and B-12 should be kept (B-0 shouldn't, since delays should be added after selection)
 	
-	const ESTreatmentSchedule *sched
-	    = dMap.getSchedule( treatment1 );
-	ETS_ASSERT( sched != NULL );
+	const ESTreatmentSchedule& sched = dMap.getSchedule( treatment1 );
 	
 	list<MedicateData> medQueue;
-	sched->apply( medQueue );
+	sched.apply( medQueue );
 	ETS_ASSERT_EQUALS( medQueue.size(), 2u );
 	
 	const MedicateData& md1 = medQueue.front();
@@ -209,12 +207,10 @@ public:
 	ESDecisionValue result_none = dMap.dvMap.get( "result", "none" );
 	TS_ASSERT_EQUALS( outcome & result_mask, result_none );
 	
-	const ESTreatmentSchedule *sched
-	    = dMap.getSchedule( outcome );
-	ETS_ASSERT( sched != NULL );
+	const ESTreatmentSchedule& sched = dMap.getSchedule( outcome );
 	
 	list<MedicateData> medQueue;
-	sched->apply( medQueue );
+	sched.apply( medQueue );
 	ETS_ASSERT_EQUALS( medQueue.size(), 3u );
 	
 	const MedicateData& md1 = medQueue.front();

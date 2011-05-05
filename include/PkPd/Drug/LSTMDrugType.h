@@ -25,12 +25,13 @@
 
 #include <string>
 #include <deque>
-#include <map>
 #include <vector>
 #include <set>
 #include <cassert>
 #include <memory>
+#include <map>
 #include <boost/unordered_set.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "Global.h"
 
 using namespace std;
@@ -190,7 +191,7 @@ private:
     uint32_t allele_rshift, allele_mask;
     
     /*PD parameters required - varies with infection genotype*/
-    vector<LSTMDrugAllele*> drugAllele;
+    boost::ptr_vector<LSTMDrugAllele> drugAllele;
     
     /*PK parameters required - varies with humans age and severity of disease*/
     /** Concentration, below which drug is deemed not to have an effect and is

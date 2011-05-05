@@ -134,14 +134,11 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     }
 }
 LSTMDrugType::~LSTMDrugType () {
-    for (size_t i = 0; i < drugAllele.size(); ++i) {
-        delete drugAllele[i];
-    }
 }
 
 const LSTMDrugAllele& LSTMDrugType::getAllele( uint32_t proteome_ID ) const {
     uint32_t allele = (proteome_ID >> allele_rshift) & allele_mask;
-    return *drugAllele[allele];
+    return drugAllele[allele];
 }
 
 void LSTMDrugType::updateConcentration( double& C0, double duration ) const {
