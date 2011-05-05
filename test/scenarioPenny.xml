@@ -32,9 +32,15 @@
       <option name="nExpectd" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens"/>
+      <option name="nUncomp"/>
+      <option name="nSevere"/>
+      <option name="nDirDeaths"/>
+      <option name="nIndDeaths"/>
+      <option name="allCauseIMR"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>365</surveyTime>
+      <surveyTime>730</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
@@ -110,7 +116,16 @@
       </ClinicalOutcomes>
     </EventScheduler>
     <CFR>
-      <group lowerbound="0" value="0"/>
+      <group lowerbound="0" value="0.09189"/>
+      <group lowerbound="0.25" value="0.0810811"/>
+      <group lowerbound="0.75" value="0.0648649"/>
+      <group lowerbound="1.5" value="0.0689189"/>
+      <group lowerbound="2.5" value="0.0675676"/>
+      <group lowerbound="3.5" value="0.0297297"/>
+      <group lowerbound="4.5" value="0.0459459"/>
+      <group lowerbound="7.5" value="0.0945946"/>
+      <group lowerbound="12.5" value="0.1243243"/>
+      <group lowerbound="15" value="0.1378378"/>
     </CFR>
     <pSequelaeInpatient interpolation="none">
       <group lowerbound="0.0" value="0.0132"/>
@@ -1041,40 +1056,44 @@
         <group lowerbound="20.0" value="60.0"/>
       </weight>
     </human>
-    <parameters interval="1" iseed="1" latentp="15">
-      <!-- run id=898 parameterization id=238466 sampling date=2011-01-06 06:31:05 lossfunction=69.924592 -->
-      <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
-      <parameter include="0" name="Estar" number="2" value="0.03247"/>
-      <parameter include="1" name="Simm" number="3" value="0.211028"/>
-      <parameter include="1" name="Xstar_p" number="4" value="870.895434"/>
-      <parameter include="1" name="gamma_p" number="5" value="1.933378"/>
-      <parameter include="0" name="sigma2i" number="6" value="0.0"/>
-      <parameter include="1" name="CumulativeYstar" number="7" value="81344761.9247"/>
-      <parameter include="1" name="CumulativeHstar" number="8" value="6170.822801"/>
-      <parameter include="1" name="'-ln(1-alpha_m)'" number="9" value="1.832637"/>
-      <parameter include="1" name="decay_m" number="10" value="2.08432"/>
-      <parameter include="1" name="sigma2_0" number="11" value="0.454089"/>
-      <parameter include="1" name="Xstar_v" number="12" value="0.906429"/>
-      <parameter include="1" name="Ystar2" number="13" value="2541.51055"/>
-      <parameter include="1" name="alpha" number="14" value="47145.316314"/>
-      <parameter include="1" name="Density bias (non Garki)" number="15" value="0.186495"/>
-      <parameter include="0" name="No Use 1" number="16" value="1.0"/>
-      <parameter include="1" name="log oddsr CF community" number="17" value="1.516953"/>
-      <parameter include="1" name="Indirect risk cofactor" number="18" value="0.012659"/>
-      <parameter include="1" name="Non-malaria infant mortality" number="19" value="55.436519"/>
-      <parameter include="1" name="Density bias (Garki)" number="20" value="5.008413"/>
-      <parameter include="1" name="Severe Malaria Threshhold" number="21" value="196737225.766"/>
-      <parameter include="0" name="Immunity Penalty" number="22" value="1.0"/>
-      <parameter include="0" name="Immune effector decay" number="23" value="0.0"/>
-      <parameter include="1" name="comorbidity intercept" number="24" value="0.00078"/>
-      <parameter include="1" name="Ystar half life" number="25" value="0.383259"/>
-      <parameter include="1" name="Ystar1" number="26" value="0.453994"/>
-      <parameter include="0" name="Asex immune decay" number="27" value="0.0"/>
-      <parameter include="1" name="Ystar0" number="28" value="423.586828"/>
-      <parameter include="1" name="Idete multiplier" number="29" value="3.234475"/>
-      <parameter include="1" name="critical age for comorbidity" number="30" value="0.000204"/>
-      <parameter include="1" name="v in 'Case Fatality Rate proposal'" number="33" value="0.0"/>
-      <parameter include="1" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.936448"/>
+    <!-- run id=1101 parameterization id=220288 sampling date=2011-04-10 13:58:03 lossfunction=4699975.42996 -->
+    <parameters latentp="15" interval="1" iseed="0">
+      <parameter number="1" name="'-ln(1-Sinf)'" value="0.050736" include="0"/>
+      <parameter number="2" name="Estar" value="0.03247" include="0"/>
+      <parameter number="3" name="Simm" value="0.184877" include="1"/>
+      <parameter number="4" name="Xstar_p" value="612.012574" include="1"/>
+      <parameter number="5" name="gamma_p" value="2.046664" include="1"/>
+      <parameter number="6" name="sigma2i" value="0.0" include="0"/>
+      <parameter number="7" name="CumulativeYstar" value="28354970.5539" include="1"/>
+      <parameter number="8" name="CumulativeHstar" value="1451.502427" include="1"/>
+      <parameter number="9" name="'-ln(1-alpha_m)'" value="2.519506" include="1"/>
+      <parameter number="10" name="decay_m" value="2.252497" include="1"/>
+      <parameter number="11" name="sigma2_0" value="0.592265" include="1"/>
+      <parameter number="12" name="Xstar_v" value="0.952878" include="1"/>
+      <parameter number="13" name="Ystar2" value="4003.131282" include="1"/>
+      <parameter number="14" name="alpha" value="75456.396726" include="1"/>
+      <parameter number="15" name="Density bias (non Garki)" value="0.184058" include="1"/>
+      <parameter number="16" name="No Use 1" value="1.0" include="0"/>
+      <parameter number="17" name="log oddsr CF community" value="1.537648" include="1"/>
+      <parameter number="18" name="Indirect risk cofactor" value="0.009016" include="1"/>
+      <parameter number="19" name="Non-malaria infant mortality" value="90.909964" include="1"/>
+      <parameter number="20" name="Density bias (Garki)" value="6.479123" include="1"/>
+      <parameter number="21" name="Severe Malaria Threshhold" value="250844182.688" include="1"/>
+      <parameter number="22" name="Immunity Penalty" value="1.0" include="0"/>
+      <parameter number="23" name="Immune effector decay" value="0.0" include="0"/>
+      <parameter number="24" name="comorbidity intercept" value="0.001396" include="1"/>
+      <parameter number="25" name="Ystar half life" value="0.313304" include="1"/>
+      <parameter number="26" name="Ystar1" value="0.457107" include="1"/>
+      <parameter number="27" name="Asex immune decay" value="0.0" include="0"/>
+      <parameter number="28" name="Ystar0" value="781.931486" include="1"/>
+      <parameter number="29" name="Idete multiplier" value="2.997404" include="1"/>
+      <parameter number="30" name="critical age for comorbidity" value="0.001183" include="1"/>
+      <parameter number="33" name="v in 'Case Fatality Rate proposal'" value="0.0" include="1"/>
+      <parameter number="34" name="Molineaux first local max density mean" value="4.7601" include="0"/>
+      <parameter number="35" name="Molineaux first local max density sd" value="0.5008" include="0"/>
+      <parameter number="36" name="Diff positive days mean" value="2.2736" include="0"/>
+      <parameter number="37" name="Diff positive days sd" value="0.2315" include="0"/>
+      <parameter number="38" name="-log(alpha) in 'Case Fatality Rate proposal'" value="0.940524" include="1"/>
     </parameters>
   </model>
 </scenario>

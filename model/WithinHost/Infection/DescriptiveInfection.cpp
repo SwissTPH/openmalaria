@@ -111,7 +111,9 @@ void DescriptiveInfection::cleanup () {}
 DescriptiveInfection::DescriptiveInfection () :
         Infection(0xFFFFFFFF),
         _duration(infectionDuration())
-{}
+{
+    assert( TimeStep::interval == 5 );
+}
 
 DescriptiveInfection::~DescriptiveInfection() {
 }

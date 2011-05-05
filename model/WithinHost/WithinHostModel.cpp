@@ -88,7 +88,10 @@ void WithinHostModel::cleanup() {
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
-  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL) || util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
+  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) ||
+      util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL) ||
+      util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL) ||
+      util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
     return new CommonWithinHost();
   } else {
     if (DescriptiveIPTWithinHost::iptActive)

@@ -32,7 +32,9 @@ namespace OM { namespace WithinHost {
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
         WithinHostModel()
-{}
+{
+    assert( TimeStep::interval == 5 );
+}
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
     clearAllInfections();

@@ -36,7 +36,9 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 CommonWithinHost::CommonWithinHost() :
     WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
-{}
+{
+    assert( TimeStep::interval == 1 );
+}
 
 CommonWithinHost::~CommonWithinHost() {
   delete pkpdModel;
@@ -83,7 +85,6 @@ void CommonWithinHost::immuneSuppression() {
 // -----  Density calculations  -----
 
 void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy) {
-    cout<<"calculateDensities"<<endl;
     updateImmuneStatus ();
     
     totalDensity = 0.0;
