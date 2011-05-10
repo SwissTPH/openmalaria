@@ -1,235 +1,235 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="26" wuID="0" xsi:noNamespaceSchemaLocation="scenario.xsd">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
-    <ageGroup lowerbound="0">
-      <group poppercent="3.474714994" upperbound="1"/>
-      <group poppercent="12.76004028" upperbound="5"/>
-      <group poppercent="14.52151394" upperbound="10"/>
-      <group poppercent="12.75565434" upperbound="15"/>
-      <group poppercent="10.83632374" upperbound="20"/>
-      <group poppercent="8.393312454" upperbound="25"/>
-      <group poppercent="7.001421452" upperbound="30"/>
-      <group poppercent="5.800587654" upperbound="35"/>
-      <group poppercent="5.102136612" upperbound="40"/>
-      <group poppercent="4.182561874" upperbound="45"/>
-      <group poppercent="3.339409351" upperbound="50"/>
-      <group poppercent="2.986112356" upperbound="55"/>
-      <group poppercent="2.555766582" upperbound="60"/>
-      <group poppercent="2.332763433" upperbound="65"/>
-      <group poppercent="1.77400255" upperbound="70"/>
-      <group poppercent="1.008525491" upperbound="75"/>
-      <group poppercent="0.74167341" upperbound="80"/>
-      <group poppercent="0.271863401" upperbound="85"/>
-      <group poppercent="0.161614642" upperbound="90"/>
-    </ageGroup>
-  </demography>
-  <monitoring name="Quarterly Surveys">
-    <continuous duringInit="false" period="1">
-      <option name="simulated EIR" value="true"/>
-      <option name="human infectiousness" value="true"/>
-      <option name="new infections" value="true"/>
-      <option name="num transmitting humans" value="true"/>
-    </continuous>
-    <SurveyOptions>
-      <option name="nPatent" value="true"/>
-      <option name="totalPatentInf" value="true"/>
-      <option name="nTransmit" value="true"/>
-      <option name="totalInfs" value="true"/>
-      <option name="nNewInfections" value="true"/>
-      <option name="innoculationsPerAgeGroup" value="true"/>
-      <option name="Vector_EIR_Input" value="true"/>
-      <option name="Vector_EIR_Simulated" value="true"/>
-    </SurveyOptions>
-    <surveys detectionLimit="40">
-      <surveyTime>1</surveyTime>
-      <surveyTime>19</surveyTime>
-      <surveyTime>37</surveyTime>
-      <surveyTime>55</surveyTime>
-      <surveyTime>74</surveyTime>
-      <surveyTime>92</surveyTime>
-      <surveyTime>110</surveyTime>
-      <surveyTime>128</surveyTime>
-      <surveyTime>147</surveyTime>
-      <surveyTime>165</surveyTime>
-      <surveyTime>183</surveyTime>
-      <surveyTime>201</surveyTime>
-      <surveyTime>220</surveyTime>
-      <surveyTime>238</surveyTime>
-      <surveyTime>256</surveyTime>
-      <surveyTime>274</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>311</surveyTime>
-      <surveyTime>329</surveyTime>
-      <surveyTime>347</surveyTime>
-    </surveys>
-    <ageGroup lowerbound="0">
-      <group upperbound="99"/>
-    </ageGroup>
-  </monitoring>
-  <interventions name="Full Set">
-    <descriptions>
-      <vaccineDescription vaccineType="TBV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="1"/>
-        <initialEfficacy value="1"/>
-      </vaccineDescription>
-    </descriptions>
-    <continuous>
-      <vaccine coverage="1" targetAgeYrs="0.0137"/>
-    </continuous>
-    <timed>
-      <intervention time="73">
-        <!-- eliminate current infections -->
-        <MDA coverage="1"/>
-        <!-- prevent further infections -->
-        <vaccinate coverage="1"/>
-        <!-- clear past & current mosquito infections -->
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="74">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="75">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="76">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="77">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="78">
-        <MDA coverage="1"/>
-        <immuneSuppression coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="146">
-        <insertR_0Case/>
-      </intervention>
-    </timed>
-  </interventions>
-  <healthSystem>
-    <ImmediateOutcomes name="no treatment">
-      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
-      <initialACR>
-        <ACT value="0.98"/>
-        <QN value="0.998"/>
-        <selfTreatment value="0.63"/>
-      </initialACR>
-      <compliance>
-        <ACT value="0.9"/>
-        <selfTreatment value="0.85"/>
-      </compliance>
-      <nonCompliersEffective>
-        <ACT value="0.2"/>
-        <selfTreatment value="0"/>
-      </nonCompliersEffective>
-      <pSeekOfficialCareUncomplicated1 value="0.0"/>
-      <pSelfTreatUncomplicated value="0.0"/>
-      <pSeekOfficialCareUncomplicated2 value="0.0"/>
-      <pSeekOfficialCareSevere value="0.0"/>
-    </ImmediateOutcomes>
-    <CFR>
-      <group lowerbound="0" value="0.09189"/>
-      <group lowerbound="0.25" value="0.0810811"/>
-      <group lowerbound="0.75" value="0.0648649"/>
-      <group lowerbound="1.5" value="0.0689189"/>
-      <group lowerbound="2.5" value="0.0675676"/>
-      <group lowerbound="3.5" value="0.0297297"/>
-      <group lowerbound="4.5" value="0.0459459"/>
-      <group lowerbound="7.5" value="0.0945946"/>
-      <group lowerbound="12.5" value="0.1243243"/>
-      <group lowerbound="15" value="0.1378378"/>
-    </CFR>
-    <pSequelaeInpatient interpolation="none">
-      <group lowerbound="0.0" value="0.0132"/>
-      <group lowerbound="5.0" value="0.005"/>
-    </pSequelaeInpatient>
-  </healthSystem>
-  <entoData mode="4" name="Namawala">
-    <vector>
-      <!-- Total annual EIR: 12 -->
-      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <eir EIRRotateAngle="0" a0="-9.13366528669896" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.939" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
-      </anopheles>
-      <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
-        <eir EIRRotateAngle="0" a0="-8.15166528869896" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.98" mosqLaidEggsSameDayProportion="0.616" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.611"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
-      </anopheles>
-      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <eir EIRRotateAngle="0" a0="-6.93766528869897" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.871" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
-      </anopheles>
-      <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
-    </vector>
-  </entoData>
-  <model>
-    <ModelOptions>
-      <option name="MAX_DENS_CORRECTION" value="true"/>
-    </ModelOptions>
-    <clinical healthSystemMemory="6"/>
-    <human>
-      <availabilityToMosquitoes>
-        <group lowerbound="0.0" value="0.225940909648"/>
-        <group lowerbound="1.0" value="0.286173633441"/>
-        <group lowerbound="2.0" value="0.336898395722"/>
-        <group lowerbound="3.0" value="0.370989854675"/>
-        <group lowerbound="4.0" value="0.403114915112"/>
-        <group lowerbound="5.0" value="0.442585112522"/>
-        <group lowerbound="6.0" value="0.473839351511"/>
-        <group lowerbound="7.0" value="0.512630464378"/>
-        <group lowerbound="8.0" value="0.54487872702"/>
-        <group lowerbound="9.0" value="0.581527755812"/>
-        <group lowerbound="10.0" value="0.630257580698"/>
-        <group lowerbound="11.0" value="0.663063362714"/>
-        <group lowerbound="12.0" value="0.702417432755"/>
-        <group lowerbound="13.0" value="0.734605377277"/>
-        <group lowerbound="14.0" value="0.788908765653"/>
-        <group lowerbound="15.0" value="0.839587932303"/>
-        <group lowerbound="20.0" value="1.0"/>
-        <group lowerbound="20.0" value="1.0"/>
-      </availabilityToMosquitoes>
-    </human>
-    <parameters interval="5" iseed="0" latentp="3">
-      <!-- run id=121 modelVers=64 parameterization id=253695 sampling date=2009-12-01 01:58:05 lossfunction=49.46573 -->
-      <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
-      <parameter include="0" name="Estar" number="2" value="0.03247"/>
-      <parameter include="1" name="Simm" number="3" value="0.148481"/>
-      <parameter include="1" name="Xstar_p" number="4" value="2920.741499"/>
-      <parameter include="1" name="gamma_p" number="5" value="2.105994"/>
-      <parameter include="1" name="sigma2i" number="6" value="10.26069"/>
-      <parameter include="1" name="CumulativeYstar" number="7" value="68564384.7102"/>
-      <parameter include="1" name="CumulativeHstar" number="8" value="71.676733"/>
-      <parameter include="1" name="'-ln(1-alpha_m)'" number="9" value="2.411434"/>
-      <parameter include="1" name="decay_m" number="10" value="2.717773"/>
-      <parameter include="1" name="sigma2_0" number="11" value="0.675205"/>
-      <parameter include="1" name="Xstar_v" number="12" value="0.918329"/>
-      <parameter include="1" name="Ystar2" number="13" value="10239.500357"/>
-      <parameter include="1" name="alpha" number="14" value="138185.950622"/>
-      <parameter include="1" name="Density bias (non Garki)" number="15" value="0.150426"/>
-      <parameter include="0" name="No Use 1" number="16" value="1.0"/>
-      <parameter include="1" name="log oddsr CF community" number="17" value="0.739609"/>
-      <parameter include="1" name="Indirect risk cofactor" number="18" value="0.020977"/>
-      <parameter include="1" name="Non-malaria infant mortality" number="19" value="45.100508"/>
-      <parameter include="1" name="Density bias (Garki)" number="20" value="4.962416"/>
-      <parameter include="1" name="Severe Malaria Threshhold" number="21" value="329389.646588"/>
-      <parameter include="0" name="Immunity Penalty" number="22" value="1.0"/>
-      <parameter include="0" name="Immune effector decay" number="23" value="9e-06"/>
-      <parameter include="1" name="comorbidity intercept" number="24" value="0.076526"/>
-      <parameter include="1" name="Ystar half life" number="25" value="0.265169"/>
-      <parameter include="1" name="Ystar1" number="26" value="0.618741"/>
-      <parameter include="0" name="Asex immune decay" number="27" value="0.0"/>
-      <parameter include="1" name="Ystar0" number="28" value="576.377794"/>
-      <parameter include="1" name="Idete multiplier" number="29" value="2.697203"/>
-      <parameter include="1" name="critical age for comorbidity" number="30" value="0.124479"/>
-    </parameters>
-  </model>
+<?xml version="1.0" encoding="UTF-8"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="27" wuID="0" xsi:noNamespaceSchemaLocation="scenario_27.xsd">
+<demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+<ageGroup lowerbound="0">
+<group poppercent="3.474714994" upperbound="1"/>
+<group poppercent="12.76004028" upperbound="5"/>
+<group poppercent="14.52151394" upperbound="10"/>
+<group poppercent="12.75565434" upperbound="15"/>
+<group poppercent="10.83632374" upperbound="20"/>
+<group poppercent="8.393312454" upperbound="25"/>
+<group poppercent="7.001421452" upperbound="30"/>
+<group poppercent="5.800587654" upperbound="35"/>
+<group poppercent="5.102136612" upperbound="40"/>
+<group poppercent="4.182561874" upperbound="45"/>
+<group poppercent="3.339409351" upperbound="50"/>
+<group poppercent="2.986112356" upperbound="55"/>
+<group poppercent="2.555766582" upperbound="60"/>
+<group poppercent="2.332763433" upperbound="65"/>
+<group poppercent="1.77400255" upperbound="70"/>
+<group poppercent="1.008525491" upperbound="75"/>
+<group poppercent="0.74167341" upperbound="80"/>
+<group poppercent="0.271863401" upperbound="85"/>
+<group poppercent="0.161614642" upperbound="90"/>
+</ageGroup>
+</demography>
+<monitoring name="Quarterly Surveys">
+<continuous duringInit="false" period="1">
+<option name="simulated EIR" value="true"/>
+<option name="human infectiousness" value="true"/>
+<option name="new infections" value="true"/>
+<option name="num transmitting humans" value="true"/>
+</continuous>
+<SurveyOptions>
+<option name="nPatent" value="true"/>
+<option name="totalPatentInf" value="true"/>
+<option name="nTransmit" value="true"/>
+<option name="totalInfs" value="true"/>
+<option name="nNewInfections" value="true"/>
+<option name="innoculationsPerAgeGroup" value="true"/>
+<option name="Vector_EIR_Input" value="true"/>
+<option name="Vector_EIR_Simulated" value="true"/>
+</SurveyOptions>
+<surveys detectionLimit="40">
+<surveyTime>1</surveyTime>
+<surveyTime>19</surveyTime>
+<surveyTime>37</surveyTime>
+<surveyTime>55</surveyTime>
+<surveyTime>74</surveyTime>
+<surveyTime>92</surveyTime>
+<surveyTime>110</surveyTime>
+<surveyTime>128</surveyTime>
+<surveyTime>147</surveyTime>
+<surveyTime>165</surveyTime>
+<surveyTime>183</surveyTime>
+<surveyTime>201</surveyTime>
+<surveyTime>220</surveyTime>
+<surveyTime>238</surveyTime>
+<surveyTime>256</surveyTime>
+<surveyTime>274</surveyTime>
+<surveyTime>293</surveyTime>
+<surveyTime>311</surveyTime>
+<surveyTime>329</surveyTime>
+<surveyTime>347</surveyTime>
+</surveys>
+<ageGroup lowerbound="0">
+<group upperbound="99"/>
+</ageGroup>
+</monitoring>
+<interventions name="Full Set">
+<descriptions>
+<vaccineDescription vaccineType="TBV">
+<decay L="0.0" function="constant"/>
+<efficacyB value="1"/>
+<initialEfficacy value="1"/>
+</vaccineDescription>
+</descriptions>
+<continuous>
+<vaccine coverage="1" targetAgeYrs="0.0137"/>
+</continuous>
+<timed>
+<intervention time="73">
+<!-- eliminate current infections -->
+<MDA coverage="1"/>
+<!-- prevent further infections -->
+<vaccinate coverage="1"/>
+<!-- clear past & current mosquito infections -->
+<uninfectVectors/>
+</intervention>
+<intervention time="74">
+<MDA coverage="1"/>
+<uninfectVectors/>
+</intervention>
+<intervention time="75">
+<MDA coverage="1"/>
+<uninfectVectors/>
+</intervention>
+<intervention time="76">
+<MDA coverage="1"/>
+<uninfectVectors/>
+</intervention>
+<intervention time="77">
+<MDA coverage="1"/>
+<uninfectVectors/>
+</intervention>
+<intervention time="78">
+<MDA coverage="1"/>
+<immuneSuppression coverage="1"/>
+<uninfectVectors/>
+</intervention>
+<intervention time="146">
+<insertR_0Case/>
+</intervention>
+</timed>
+</interventions>
+<healthSystem>
+<ImmediateOutcomes name="no treatment">
+<drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+<initialACR>
+<ACT value="0.98"/>
+<QN value="0.998"/>
+<selfTreatment value="0.63"/>
+</initialACR>
+<compliance>
+<ACT value="0.9"/>
+<selfTreatment value="0.85"/>
+</compliance>
+<nonCompliersEffective>
+<ACT value="0.2"/>
+<selfTreatment value="0"/>
+</nonCompliersEffective>
+<pSeekOfficialCareUncomplicated1 value="0.0"/>
+<pSelfTreatUncomplicated value="0.0"/>
+<pSeekOfficialCareUncomplicated2 value="0.0"/>
+<pSeekOfficialCareSevere value="0.0"/>
+</ImmediateOutcomes>
+<CFR>
+<group lowerbound="0" value="0.09189"/>
+<group lowerbound="0.25" value="0.0810811"/>
+<group lowerbound="0.75" value="0.0648649"/>
+<group lowerbound="1.5" value="0.0689189"/>
+<group lowerbound="2.5" value="0.0675676"/>
+<group lowerbound="3.5" value="0.0297297"/>
+<group lowerbound="4.5" value="0.0459459"/>
+<group lowerbound="7.5" value="0.0945946"/>
+<group lowerbound="12.5" value="0.1243243"/>
+<group lowerbound="15" value="0.1378378"/>
+</CFR>
+<pSequelaeInpatient interpolation="none">
+<group lowerbound="0.0" value="0.0132"/>
+<group lowerbound="5.0" value="0.005"/>
+</pSequelaeInpatient>
+</healthSystem>
+<entoData mode="4" name="Namawala">
+<vector>
+<!-- Total annual EIR: 12 -->
+<anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+<eir EIRRotateAngle="0" a0="-9.13366528669896" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+<mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.939" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+<nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+</anopheles>
+<anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
+<eir EIRRotateAngle="0" a0="-8.15166528869896" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
+<mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.98" mosqLaidEggsSameDayProportion="0.616" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.611"/>
+<nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+</anopheles>
+<anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+<eir EIRRotateAngle="0" a0="-6.93766528869897" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+<mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.0" mosqHumanBloodIndex="0.871" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
+<nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+</anopheles>
+<nonHumanHosts name="unprotectedAnimals" number="1.0"/>
+</vector>
+</entoData>
+<model>
+<ModelOptions>
+<option name="MAX_DENS_CORRECTION" value="true"/>
+</ModelOptions>
+<clinical healthSystemMemory="6"/>
+<human>
+<availabilityToMosquitoes>
+<group lowerbound="0.0" value="0.225940909648"/>
+<group lowerbound="1.0" value="0.286173633441"/>
+<group lowerbound="2.0" value="0.336898395722"/>
+<group lowerbound="3.0" value="0.370989854675"/>
+<group lowerbound="4.0" value="0.403114915112"/>
+<group lowerbound="5.0" value="0.442585112522"/>
+<group lowerbound="6.0" value="0.473839351511"/>
+<group lowerbound="7.0" value="0.512630464378"/>
+<group lowerbound="8.0" value="0.54487872702"/>
+<group lowerbound="9.0" value="0.581527755812"/>
+<group lowerbound="10.0" value="0.630257580698"/>
+<group lowerbound="11.0" value="0.663063362714"/>
+<group lowerbound="12.0" value="0.702417432755"/>
+<group lowerbound="13.0" value="0.734605377277"/>
+<group lowerbound="14.0" value="0.788908765653"/>
+<group lowerbound="15.0" value="0.839587932303"/>
+<group lowerbound="20.0" value="1.0"/>
+<group lowerbound="20.0" value="1.0"/>
+</availabilityToMosquitoes>
+</human>
+<parameters interval="5" iseed="0" latentp="3">
+<!-- run id=121 modelVers=64 parameterization id=253695 sampling date=2009-12-01 01:58:05 lossfunction=49.46573 -->
+<parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
+<parameter include="0" name="Estar" number="2" value="0.03247"/>
+<parameter include="1" name="Simm" number="3" value="0.148481"/>
+<parameter include="1" name="Xstar_p" number="4" value="2920.741499"/>
+<parameter include="1" name="gamma_p" number="5" value="2.105994"/>
+<parameter include="1" name="sigma2i" number="6" value="10.26069"/>
+<parameter include="1" name="CumulativeYstar" number="7" value="68564384.7102"/>
+<parameter include="1" name="CumulativeHstar" number="8" value="71.676733"/>
+<parameter include="1" name="'-ln(1-alpha_m)'" number="9" value="2.411434"/>
+<parameter include="1" name="decay_m" number="10" value="2.717773"/>
+<parameter include="1" name="sigma2_0" number="11" value="0.675205"/>
+<parameter include="1" name="Xstar_v" number="12" value="0.918329"/>
+<parameter include="1" name="Ystar2" number="13" value="10239.500357"/>
+<parameter include="1" name="alpha" number="14" value="138185.950622"/>
+<parameter include="1" name="Density bias (non Garki)" number="15" value="0.150426"/>
+<parameter include="0" name="No Use 1" number="16" value="1.0"/>
+<parameter include="1" name="log oddsr CF community" number="17" value="0.739609"/>
+<parameter include="1" name="Indirect risk cofactor" number="18" value="0.020977"/>
+<parameter include="1" name="Non-malaria infant mortality" number="19" value="45.100508"/>
+<parameter include="1" name="Density bias (Garki)" number="20" value="4.962416"/>
+<parameter include="1" name="Severe Malaria Threshhold" number="21" value="329389.646588"/>
+<parameter include="0" name="Immunity Penalty" number="22" value="1.0"/>
+<parameter include="0" name="Immune effector decay" number="23" value="9e-06"/>
+<parameter include="1" name="comorbidity intercept" number="24" value="0.076526"/>
+<parameter include="1" name="Ystar half life" number="25" value="0.265169"/>
+<parameter include="1" name="Ystar1" number="26" value="0.618741"/>
+<parameter include="0" name="Asex immune decay" number="27" value="0.0"/>
+<parameter include="1" name="Ystar0" number="28" value="576.377794"/>
+<parameter include="1" name="Idete multiplier" number="29" value="2.697203"/>
+<parameter include="1" name="critical age for comorbidity" number="30" value="0.124479"/>
+</parameters>
+</model>
 </scenario>

@@ -123,33 +123,43 @@ if (OM_BOINC_INTEGRATION)
   message (STATUS "in: ${BOINC_BASE_PATH}/win_build/Build/Win32/Release (and /Debug)")
   find_library (BOINC_LIB_OPT boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
     PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
+    ${BOINC_BASE_PATH}/lib
   )
   find_library (BOINC_LIB_DBG boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
     PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
   )
-  if (BOINC_LIB_OPT and BOINC_LIB_DBG)
-    set (BOINC_LIB optimized ${BOINC_LIB_OPT} debug ${BOINC_LIB_DBG})
-  elseif (BOINC_LIB_OPT)
-    set (BOINC_LIB ${BOINC_LIB_OPT})
-  elseif (BOINC_LIB_DBG)
-    set (BOINC_LIB ${BOINC_LIB_DBG})
+  if (BOINC_LIB_OPT)
+    if (BOINC_LIB_DBG)
+      set (BOINC_LIB optimized ${BOINC_LIB_OPT} debug ${BOINC_LIB_DBG})
+    else ()
+      set (BOINC_LIB ${BOINC_LIB_OPT})
+    endif ()
   else ()
-    message (FATAL_ERROR "Unable to find boinc library")
+    if (BOINC_LIB_DBG)
+      set (BOINC_LIB ${BOINC_LIB_DBG})
+    else ()
+      message (FATAL_ERROR "Unable to find boinc library")
+    endif ()
   endif ()
   find_library (BOINC_API_LIB_OPT boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
     PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
+    ${BOINC_BASE_PATH}/api
   )
   find_library (BOINC_API_LIB_DBG boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
     PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
   )
-  if (BOINC_API_LIB_OPT and BOINC_API_LIB_DBG)
-    set (BOINC_API_LIB optimized ${BOINC_API_LIB_OPT} debug ${BOINC_API_LIB_DBG})
-  elseif (BOINC_API_LIB_OPT)
-    set (BOINC_API_LIB ${BOINC_API_LIB_OPT})
-  elseif (BOINC_API_LIB_DBG)
-    set (BOINC_API_LIB ${BOINC_API_LIB_DBG})
+  if (BOINC_API_LIB_OPT)
+    if (BOINC_API_LIB_DBG)
+      set (BOINC_API_LIB optimized ${BOINC_API_LIB_OPT} debug ${BOINC_API_LIB_DBG})
+    else ()
+      set (BOINC_API_LIB ${BOINC_API_LIB_OPT})
+    endif ()
   else ()
-    message (FATAL_ERROR "Unable to find boinc_api/libboincapi library")
+    if (BOINC_API_LIB_DBG)
+      set (BOINC_API_LIB ${BOINC_API_LIB_DBG})
+    else ()
+      message (FATAL_ERROR "Unable to find boinc_api/libboincapi library")
+    endif ()
   endif ()
   set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
   

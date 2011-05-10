@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 26;
+    static final int CURRENT_VERSION = 27;
 
     private static int _required_version = CURRENT_VERSION;
     private static boolean latestSchema = false;
@@ -1426,6 +1426,11 @@ public class SchemaTranslator {
         return true;
     }
     
+    /* Nothing needs updating. */
+    public Boolean translate26To27() throws Exception {
+         return true;
+    }
+
     /**
      * This function is used to translate the 5-day timestep fitting
      * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly
