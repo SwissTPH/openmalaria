@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Host/Human.h"
 #include "util/errors.h"
-#include "scenario.hxx"
 
 #include <fstream>
 #include <string.h>

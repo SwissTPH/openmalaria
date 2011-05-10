@@ -19,7 +19,6 @@
 
 
 #include "inputData.h"
-#include "scenario.hxx"
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 

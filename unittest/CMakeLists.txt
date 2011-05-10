@@ -107,6 +107,7 @@ add_executable (run
 )
 target_link_libraries (run
   model
+  schema
   contrib
   ${OM_CXXTEST_GUI_LIB}
   ${GSL_LIBRARIES}

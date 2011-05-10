@@ -21,7 +21,6 @@
 #define HOSTCATEGORYANOPHELESNONHUMANS_H_
 
 #include "HostCategoryAnopheles.h"
-#include "scenario.hxx"
 
 namespace OM { namespace Transmission {
 

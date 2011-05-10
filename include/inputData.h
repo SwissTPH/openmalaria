@@ -26,7 +26,7 @@
 
 #include "Global.h"
 #include "util/BoincWrapper.h"
-#include <scenario.hxx>
+#include <schema/scenario.h>
 #include <string>
 #include <bitset>
 #include <memory>

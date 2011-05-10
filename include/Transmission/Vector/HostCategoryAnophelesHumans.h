@@ -21,7 +21,6 @@
 #define HOSTCATEGORYANOPHELESHUMANS_H_
 
 #include "HostCategoryAnopheles.h"
-#include "scenario.hxx"
 
 
 /** Stores vector model data applicable between a category of host and a

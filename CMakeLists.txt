@@ -182,6 +182,7 @@ endif (OM_STREAM_VALIDATOR)
 # -----  Compile code  -----
 
 add_subdirectory (contrib)
+add_subdirectory (schema)
 add_subdirectory (model)
 
 
@@ -204,7 +205,7 @@ include_directories (SYSTEM
   ${SPIRIT_INCLUDE_DIRS}
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model
+  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
 )
 link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
@@ -212,6 +213,7 @@ add_executable (openMalaria model/openMalaria.cpp)
 
 target_link_libraries (openMalaria
   model
+  schema
   contrib
   ${GSL_LIBRARIES}
   ${XERCESC_LIBRARIES}

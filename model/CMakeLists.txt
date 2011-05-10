@@ -9,7 +9,6 @@ set (Model_CPP
   PopulationAgeStructure.cpp
   PopulationStats.cpp
   inputData.cpp
-  ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
@@ -84,20 +83,6 @@ set (Model_CPP
 # Headers - only included so they show up in IDEs:
 file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
 
-set (XSD_FILE ${CMAKE_SOURCE_DIR}/schema/scenario.xsd)
-add_custom_command (
-  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/scenario.cxx ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
-  COMMAND ${XSD_EXECUTABLE} cxx-tree
-      --type-naming ucc --function-naming java
-      --namespace-map =scnXml
-      --generate-serialization --generate-inline
-      --generate-doxygen --generate-intellisense
-      ${XSD_FILE}
-  MAIN_DEPENDENCY ${XSD_FILE}
-  COMMENT "Compiling ${XSD_FILE}"
-  VERBATIM
-)
-
 
 include_directories (SYSTEM
   ${XSD_INCLUDE_DIRS}
@@ -112,13 +97,12 @@ include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}/model
+  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
 )
 
 add_library (model
   ${Model_CPP}
   ${Model_H}
-  ${CMAKE_CURRENT_BINARY_DIR}/scenario.ixx ${CMAKE_CURRENT_BINARY_DIR}/scenario.hxx
 )
 
 if (MSVC)
