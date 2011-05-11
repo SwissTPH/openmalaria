@@ -25,6 +25,7 @@ set (OM_BOXTEST_NAMES
   R_0
   1DayIntervs
   ESTS
+  MSAT
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

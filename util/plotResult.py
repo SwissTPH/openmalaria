@@ -99,7 +99,7 @@ combinedMeasures = [
     ('sequelae',[(16,'all','red'),(24,'hospital','orange')]),
     ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green'),(53,'non-malaria fevers','blue')]),
     ('vaccination doses',[(20,'EPI','green'),(22,'mass','grey')]),
-    ('drug doses (non-treatment)',[(25,'IPT','brown'),(52,'MDA','red')]),
+    ('drug doses (MDA/MSAT)',[(25,'IPT','brown'),(52,'MDA','red')]),
     ('infant mortality rate',[(21,'IMR','red')]),
     ('hospital recoveries',[(23,'hospital recoveries','orange')]),
     ('inoculations',[(30,'all','red')]),
