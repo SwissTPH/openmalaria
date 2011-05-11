@@ -35,7 +35,6 @@ namespace OM { namespace PkPd {
 
 LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
     C0(c), duration(d), rate(r) {
-    assert(sizeof(double)==sizeof(hash));
     // Generate hash using XOR and boost::hash
     boost::hash<double> hasher;
     hash = hasher(c) ^ hasher(d) ^ hasher(r);
