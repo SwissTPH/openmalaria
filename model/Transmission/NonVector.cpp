@@ -87,7 +87,7 @@ void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) c
 
 
 TimeStep NonVectorTransmission::minPreinitDuration (){
-    if( InputData().getEntoData().getMode() == equilibriumMode ){
+    if( InputData().getEntomology().getMode() == equilibriumMode ){
         return TimeStep(0);
     }
     // nYearsWarmupData years for data collection, 50 years stabilization

@@ -87,7 +87,7 @@ void Vaccine::init()
         _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
-        const scnXml::Continuous::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
+        const scnXml::ContinuousInterv::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
         for (size_t i = 0;i < _numberOfEpiDoses; i++) {
             if (i >= cVS.size()) {
                 ostringstream msg;

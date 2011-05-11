@@ -56,7 +56,7 @@ public:
 	    
 	    scnXml::Drug drug ( pd, pk, "MF" /* abbrev */ );
 	    
-	    scnXml::DrugDescription dd;
+	    scnXml::Pharmacology dd;
 	    dd.getDrug().push_back (drug);
 	    
 	    PkPd::LSTMDrugType::init (dd);

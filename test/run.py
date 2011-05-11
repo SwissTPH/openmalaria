@@ -107,6 +107,10 @@ def runScenario(options,omOptions,name):
         raise RunError('No such scenario file '+scenarioSrc+'!')
     schemaName=getSchemaName(scenarioSrc)
     scenarioSchema=os.path.abspath(os.path.join(testSrcDir,'../schema',schemaName))
+    if not os.path.isfile(scenarioSchema):
+        scenarioSchema=os.path.abspath(os.path.join(testBuildDir,'../schema',schemaName))
+        if not os.path.isfile(scenarioSchema):
+            raise RunError("can't find "+schemaName)
     if options.xmlValidate:
         cmd=["xmllint","--noout","--schema",scenarioSchema,scenarioSrc]
         # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]

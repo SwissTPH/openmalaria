@@ -37,7 +37,7 @@ namespace OM { namespace Transmission {
     using namespace OM::util;
     
 string VectorAnopheles::initialise (
-                                    const scnXml::Anopheles& anoph,
+                                    const scnXml::AnophelesParams& anoph,
                                     size_t sIndex,
                                     vector<double>& initialisationEIR,
                                     map<string, double>& nonHumansHostsPopulations,
@@ -69,7 +69,7 @@ string VectorAnopheles::initialise (
   }
   N_v_length = EIPDuration + mosqRestDuration;
   
-  const scnXml::Anopheles::NonHumanHostsSequence& otherHosts = anoph.getNonHumanHosts();
+  const scnXml::AnophelesParams::NonHumanHostsSequence& otherHosts = anoph.getNonHumanHosts();
   nonHumanHosts.resize (otherHosts.size());
   for (size_t i = 0; i < otherHosts.size(); ++i) {
     nonHumanHosts[i] = otherHosts[i];

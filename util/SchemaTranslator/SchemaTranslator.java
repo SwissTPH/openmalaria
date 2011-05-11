@@ -48,7 +48,10 @@ public class SchemaTranslator {
     static final int CURRENT_VERSION = 27;
 
     private static int _required_version = CURRENT_VERSION;
-    private static boolean latestSchema = false;
+    private enum SchemaName {
+        versioned, no_suffix, current;
+    }
+    private static SchemaName latestSchema = SchemaName.versioned;
     private static boolean doValidation = true;
     private static boolean doTranslation = true;
     private static boolean doODTTranslation = false;
@@ -301,8 +304,10 @@ public class SchemaTranslator {
     }
     
     private static String genSchemaName (int schemaVersion){
-	if (latestSchema){
+	if (latestSchema == SchemaName.no_suffix){
 	    return "scenario.xsd";
+        } else if (latestSchema == SchemaName.current){
+            return "scenario_current.xsd";
 	}else{
 	    return "scenario_" + schemaVersion + ".xsd";
 	}
@@ -1431,6 +1436,17 @@ public class SchemaTranslator {
          return true;
     }
 
+    /* Several name changes. */
+    public Boolean translate27To28() throws Exception {
+        for (Node n : getChildNodes(scenarioElement,"entoData")){
+            scenarioDocument.renameNode(n,null,"entomology");
+        }
+        for (Node n : getChildNodes(scenarioElement,"drugDescription")){
+            scenarioDocument.renameNode(n,null,"pharmacology");
+        }
+        return true;
+    }
+    
     /**
      * This function is used to translate the 5-day timestep fitting
      * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly
@@ -2311,7 +2327,15 @@ public class SchemaTranslator {
                 doValidation = false;
                 System.out.println("You have chosen the --oneDayTimesteps option, this option is only intended for the fitting scenarii or scenarii using no intervention and/or no ");
             } else if (arg.equals("--latest-schema")) {
-                latestSchema = true;
+                if(latestSchema != SchemaName.versioned){
+                    System.err.println("Warning: overwriting another schema-name option");
+                }
+                latestSchema = SchemaName.no_suffix;
+            } else if (arg.equals("--current-schema")) {
+                if(latestSchema != SchemaName.versioned){
+                    System.err.println("Warning: overwriting another schema-name option");
+                }
+                latestSchema = SchemaName.current;
             } else if (arg.equals("--no-validation")) {
                 doValidation = false;
             } else if (arg.equals("--no-translation")) {
@@ -2360,7 +2384,6 @@ public class SchemaTranslator {
 	    } else {
                 printUsage();
             }
-            System.out.println(arg);
         }
         if (_required_version == 1) {
             System.out
@@ -2396,6 +2419,7 @@ public class SchemaTranslator {
 	    + "\n  --required-version VERSION\tThe version number to update the document(s) to."
 	    + "\n\t\t\t\tDefault: CURRENT_VERSION="+CURRENT_VERSION
 	    + "\n  --latest-schema\t\tUse schema scenario.xsd instead of scenario_XX.xsd"
+            + "\n  --current-schema\t\tUse schema scenario_current.xsd instead of scenario_XX.xsd"
 	    + "\n  --no-validation\t\tDon't validate the result"
 	    + "\n  --no-translation\t\tDon't write out the translated result (but still"
 	    + "\n\t\t\t\ttranslate internally for validation)"

@@ -96,7 +96,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     annualEIR = vectors::sum( initialisationEIR );
 
 
-    if( InputData().getEntoData().getMode() == equilibriumMode ) {
+    if( InputData().getEntomology().getMode() == equilibriumMode ) {
         // We don't need these anymore (now we have initialisationEIR); free memory
         numSpecies = 0;
         species.clear();

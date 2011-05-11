@@ -41,7 +41,7 @@ namespace vectors = util::vectors;
 TransmissionModel* TransmissionModel::createTransmissionModel (int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData& entoData = InputData().getEntoData();
+  const scnXml::EntoData& entoData = InputData().getEntomology();
   const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
@@ -66,7 +66,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
   }
   if( util::CommandLine::option( util::CommandLine::SET_ANNUAL_EIR ) ){
       model->scaleXML_EIR(
-        InputData.getMutableScenario().getEntoData(),
+        InputData.getMutableScenario().getEntomology(),
         util::CommandLine::getNewEIR() / model->annualEIR
       );
       InputData.documentChanged = true;
@@ -92,7 +92,7 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
 
 TransmissionModel::TransmissionModel() :
     simulationMode(equilibriumMode),
-    interventionMode(InputData().getEntoData().getMode()),
+    interventionMode(InputData().getEntomology().getMode()),
     currentKappa(0.0),
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),

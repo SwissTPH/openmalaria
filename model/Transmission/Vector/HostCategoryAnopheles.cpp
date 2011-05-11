@@ -29,7 +29,7 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
     this->entoAvailability = entoAvailability;
 }
 
-void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles1& intervDesc, const string& species) {
+void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species) {
     if ( InputData.isInterventionActive(Interventions::ITN) ) {
         if (!intervDesc.getITNDescription().present()) {
             throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));

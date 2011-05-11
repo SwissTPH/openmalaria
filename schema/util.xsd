@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<!-- standard types used -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="OptionSet">
+    <xs:sequence>
+      <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+            Options define different model structures.
+                Option name. Must be one of a strictly defined set.
+                Options are not required to be listed if their default value is desired.
+              </xs:documentation>
+              <xs:appinfo>name:Model options required;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="value" type="xs:boolean" default="true">
+            <xs:annotation>
+              <xs:documentation>
+                Option value (true/false). Each option has a default value used
+                if the option is not listed (usually false but sometimes true).
+              </xs:documentation>
+            <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="doubleList">
+    <xs:sequence>
+      <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DecayFunction">
+    <xs:annotation>
+      <xs:documentation>
+        Specification of decay or survival of a parameter.
+      </xs:documentation>
+      <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="function" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Determines which decay function to use. Available decay functions,
+          for age t in years:
+          
+          constant: 1
+          
+          step: 1 for t less than L, otherwise 0
+          
+          linear: 1 - t/L for t less than L, otherwise 0
+          
+          exponential: exp( - t/L * log(2) )
+          
+          weibull: exp( -(t/L)^k * log(2) )
+          
+          hill: 1 / (1 + (t/L)^k)
+          
+          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+        </xs:documentation>
+        <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="constant" />
+          <xs:enumeration value="step" />
+          <xs:enumeration value="linear" />
+          <xs:enumeration value="exponential" />
+          <xs:enumeration value="weibull" />
+          <xs:enumeration value="hill" />
+          <xs:enumeration value="smooth-compact" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="L" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Scale parameter of distribution. With the smooth-compact (smooth
+          function with compact support), step and linear functions, this is the
+          age at which the parameter has decayed to 0; with the other three
+          functions, this is the age at which the parameter has decayed to half
+          its original value. Not used for constant decay (though must be
+          specified anyway).
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="k" type="xs:double" default="1.0">
+      <xs:annotation>
+        <xs:documentation>
+          Shape parameter of distribution. If not specified, default value of
+          1 is used. Meaning depends on function; not used in some cases.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        If non-zero, heterogeneity of decay is introduced via a variate sampled
+        from the log-normal distribution with mu zero (i.e. median is 1) and
+        this sigma. Age is then divided by this variate before being passed to
+        the decay function.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:σ (sigma);units:none;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DecayFunctionValue">
+    <xs:annotation>
+      <xs:documentation>
+        Specification of decay or survival of a parameter along with initial
+        value (i.e. the decay function's value is multiplied by "initial").
+      </xs:documentation>
+      <xs:appinfo>name:Decay or survival of a parameter;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="DecayFunction">
+        <xs:attribute name="initial" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              A value multiplying the decay function, thus equal to the function's value at time 0.
+            </xs:documentation>
+            <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

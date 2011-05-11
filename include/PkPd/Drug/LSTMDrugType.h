@@ -37,7 +37,7 @@
 using namespace std;
 
 namespace scnXml{
-    class DrugDescription;
+    class Pharmacology;
     class Drug;
     class Allele;
 }
@@ -120,7 +120,7 @@ public:
     ///@brief Static functions
     //@{
     /** Initialise the drug model. Called at start of simulation. */
-    static void init (const scnXml::DrugDescription& data);
+    static void init (const scnXml::Pharmacology& data);
     /// Remove set-up drugs. (Must be called before init can be re-called.)
     static void cleanup ();
     

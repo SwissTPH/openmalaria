@@ -75,7 +75,7 @@ public:
      * @param sIndex Index in VectorTransmission.species of this class.
      * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: inoculations.
      */
-    string initialise (const scnXml::Anopheles& anoph, size_t sIndex, vector<double>& EIR, map<string, double>& nonHumanHostsPopulations, int populationSize);
+    string initialise (const scnXml::AnophelesParams& anoph, size_t sIndex, vector<double>& EIR, map<string, double>& nonHumanHostsPopulations, int populationSize);
 
 
 
@@ -140,7 +140,7 @@ public:
     /** Set up intervention descriptions for humans, for this anopheles species.
      *
      * Currently no interventions for non-human hosts, although planned. */
-    inline void setInterventionDescription (const scnXml::Anopheles1& intervDesc, const string& species) {
+    inline void setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species) {
         humanBase.setInterventionDescription (intervDesc, species);
     }
 

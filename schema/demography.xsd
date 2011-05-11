@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!---HumanPopulationStructure-->
   <xs:complexType name="demography">

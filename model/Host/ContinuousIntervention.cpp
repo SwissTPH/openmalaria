@@ -43,11 +43,11 @@ void ContinuousIntervention::init (
     // NOTE: "vaccine" interventions we don't deal with; they have some rather
     // special deployment rules (see Human::_lastVaccineDose).
     
-    const scnXml::Continuous xmlCts = InputData().getInterventions().getContinuous().get();
-    const scnXml::Continuous::VaccineSequence& seqVaccine = xmlCts.getVaccine();
-    const scnXml::Continuous::ITNSequence& seqItn = xmlCts.getITN();
-    const scnXml::Continuous::IptiSequence& seqIpti = xmlCts.getIpti();
-    const scnXml::Continuous::CohortSequence& seqCohort = xmlCts.getCohort();
+    const scnXml::ContinuousInterv xmlCts = InputData().getInterventions().getContinuous().get();
+    const scnXml::ContinuousInterv::VaccineSequence& seqVaccine = xmlCts.getVaccine();
+    const scnXml::ContinuousInterv::ITNSequence& seqItn = xmlCts.getITN();
+    const scnXml::ContinuousInterv::IptiSequence& seqIpti = xmlCts.getIpti();
+    const scnXml::ContinuousInterv::CohortSequence& seqCohort = xmlCts.getCohort();
     size_t n = seqVaccine.size() + seqItn.size() + seqIpti.size() + seqCohort.size();
     ctsIntervs.reserve( n );
     

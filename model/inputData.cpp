@@ -49,7 +49,7 @@ void InputDataType::initParameterValues()
 void InputDataType::initTimedInterventions()
 {
     if (scenario->getInterventions().getContinuous().present()) {
-        const scnXml::Continuous& contI = scenario->getInterventions().getContinuous().get();
+        const scnXml::ContinuousInterv& contI = scenario->getInterventions().getContinuous().get();
         if (contI.getVaccine().size())
             activeInterventions.set (Interventions::VACCINE, true);
 	if (contI.getITN().size())

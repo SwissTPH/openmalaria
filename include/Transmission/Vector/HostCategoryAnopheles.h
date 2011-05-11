@@ -53,7 +53,7 @@ public:
   void setEntoAvailability(double entoAvailability);
 
   /** Set up any vector-model intervention parameters. */
-  void setInterventionDescription (const scnXml::Anopheles1& intervDesc, const string& species);
+  void setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
