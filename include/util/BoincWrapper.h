@@ -37,8 +37,13 @@ namespace BoincWrapper {
   /// Cleans up BOINC and exits
   void finish (int err);
   
-  /// Calls boinc_resolve_filename_s with inName, returning the result.
+  /** Calls boinc_resolve_filename_s with inName, returning the result.
+   * Needs to be used for input and output files. */
   std::string resolveFile (const std::string& inName);
+  
+  /// Check whether a file exists. If using BOINC, use it's filesystem function;
+  /// otherwise use an istream.
+  bool fileExists(const char* path);
   
   /// Report the proportion of work done
   void reportProgress (double progress);

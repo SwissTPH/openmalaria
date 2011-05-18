@@ -37,6 +37,7 @@
 #include "boinc_api.h"
 #include "diagnostics.h"
 #include "md5.h"
+#include "lib/filesys.h"
 #include <sstream>
 #endif
 
@@ -61,6 +62,11 @@ namespace BoincWrapper {
   
   string resolveFile (const string& inName) {
     return inName;
+  }
+  
+  bool fileExists (const char* path){
+    ifstream test (path);
+    return test.is_open();
   }
   
   int lastPercent = -1;	// last _integer_ percentage value
@@ -119,6 +125,10 @@ namespace BoincWrapper {
       throw runtime_error (t.str());	// can't call finish/exit here; need to free memory
     }
     return ret;
+  }
+  
+  bool fileExists (const char* path){
+    return boinc_file_exists(path);
   }
   
   void reportProgress (double progress) {

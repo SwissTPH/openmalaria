@@ -34,7 +34,7 @@ namespace OM { namespace Monitoring {
     using util::xml_scenario_error;
     
     /// Output file name
-    const char* CTS_FILENAME = "ctsout.txt";
+    string cts_filename;
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
     fstream ctsOStream;
@@ -74,6 +74,8 @@ namespace OM { namespace Monitoring {
         if( ctsOpt.get().getDuringInit().present() )
             duringInit = ctsOpt.get().getDuringInit().get();
         
+        cts_filename = util::BoincWrapper::resolveFile("ctsout.txt");
+        
 	// This locale ensures uniform formatting of nans and infs on all platforms.
 	locale old_locale;
 	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
@@ -93,20 +95,20 @@ namespace OM { namespace Monitoring {
 	    
 	    // When loading a check-point, we resume reporting to this file.
 	    // Use "ate" mode and seek to desired pos.
-	    ctsOStream.open (CTS_FILENAME, ios::binary|ios::ate|ios::in|ios::out );
+	    ctsOStream.open (cts_filename.c_str(), ios::binary|ios::ate|ios::in|ios::out );
 	    if( ctsOStream.fail() )
 		throw util::checkpoint_error ("Continuous: resume error (no file)");
 	    ctsOStream.seekp( 0, ios_base::beg );
 	    streamStart = ctsOStream.tellp();
 	    // we set position later, in staticCheckpoint
 	}else{
-	    ifstream test (CTS_FILENAME);
-	    if (test.is_open())
+	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
 		throw runtime_error ("File ctsout.txt exists!");
+            }
 	    
-	    ctsOStream.open( CTS_FILENAME, ios::binary|ios::out );
+	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
 	    streamStart = ctsOStream.tellp();
 	    ctsOStream << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
 	    
