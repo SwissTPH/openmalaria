@@ -42,6 +42,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="changeEIR">
@@ -83,6 +91,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="MDA" minOccurs="0">
@@ -129,6 +145,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="vaccine" minOccurs="0">
@@ -158,6 +182,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="IPT" minOccurs="0">
@@ -187,6 +219,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="ITN" minOccurs="0">
@@ -198,14 +238,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="ITNDecay" type="DecayFunction"/>
+            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
             <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="AnophelesParams">
-                    <xs:sequence>
-                      <xs:element minOccurs="0" name="ITNDescription" type="ITNDescription" />
-                    </xs:sequence>
+                  <xs:extension base="ITNDescription">
+                    <xs:attribute name="mosquito" type="xs:string" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Name of the affected anopheles-mosquito species.
+                        </xs:documentation>
+                        <xs:appinfo>name:Mosquito species</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
                   </xs:extension>
                 </xs:complexContent>
               </xs:complexType>
@@ -227,6 +272,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="IRS" minOccurs="0">
@@ -239,14 +292,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="IRSDecay" type="DecayFunction"/>
+            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
             <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="AnophelesParams">
-                    <xs:sequence>
-                      <xs:element minOccurs="0" name="IRSDescription" type="IRSDescription" />
-                    </xs:sequence>
+                  <xs:extension base="IRSDescription">
+                    <xs:attribute name="mosquito" type="xs:string" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Name of the affected anopheles-mosquito species.
+                        </xs:documentation>
+                        <xs:appinfo>name:Mosquito species</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
                   </xs:extension>
                 </xs:complexContent>
               </xs:complexType>
@@ -260,6 +318,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="vectorDeterrent" minOccurs="0">
@@ -272,14 +338,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="VADecay" type="DecayFunction"/>
+            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
             <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="AnophelesParams">
-                    <xs:sequence>
-                  <xs:element minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
-                    </xs:sequence>
+                  <xs:extension base="BaseInterventionDescription">
+                    <xs:attribute name="mosquito" type="xs:string" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Name of the affected anopheles-mosquito species.
+                        </xs:documentation>
+                        <xs:appinfo>name:Mosquito species</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
                   </xs:extension>
                 </xs:complexContent>
               </xs:complexType>
@@ -293,6 +364,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="cohort" minOccurs="0">
@@ -319,6 +398,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="importedInfections">
@@ -360,7 +447,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:restriction>
               </xs:simpleType>
             </xs:element>
-            <xs:element name="rate">
+            <xs:element name="timed">
               <xs:annotation>
                 <xs:documentation>
                   Rate of case importation, as a step function. Each value is
@@ -370,7 +457,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                  <xs:element name="rate" minOccurs="0" maxOccurs="unbounded">
                     <xs:complexType>
                       <xs:complexContent>
                         <xs:extension base="inputValue">
@@ -403,6 +490,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="immuneSuppression">
@@ -531,6 +626,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
     </xs:all>
@@ -821,23 +924,5 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of intervention
-        </xs:documentation>
-        <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="AnophelesParams">
-    <xs:attribute name="mosquito" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of the affected anopheles-mosquito species.
-        </xs:documentation>
-        <xs:appinfo>name:Mosquito species</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
 </xs:schema>

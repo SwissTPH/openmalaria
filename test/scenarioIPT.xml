@@ -168,18 +168,16 @@
     </ageGroup>
   </monitoring>
   <interventions name="IPTi_seas_SP">
-    <descriptions>
-      <iptiDescription iptiEffect="18">
+    <IPT>
+      <description iptiEffect="18">
         <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
         <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
         <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
-      </iptiDescription>
-    </descriptions>
-    <continuous>
-      <ipti coverage="0.95" targetAgeYrs="0.25"/>
-      <ipti coverage="0.95" targetAgeYrs="0.33"/>
-      <ipti coverage="0.95" targetAgeYrs="0.75"/>
-    </continuous>
+      </description>
+      <continuous coverage="0.95" targetAgeYrs="0.25"/>
+      <continuous coverage="0.95" targetAgeYrs="0.33"/>
+      <continuous coverage="0.95" targetAgeYrs="0.75"/>
+    </IPT>
   </interventions>
   <!-- Niakhar seasonality scaled to an EIR of 21 -->
   <healthSystem>

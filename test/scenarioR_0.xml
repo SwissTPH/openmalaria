@@ -67,50 +67,37 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <descriptions>
-      <vaccineDescription vaccineType="TBV">
+    <vaccine>
+      <description vaccineType="TBV">
         <decay L="0.0" function="constant"/>
         <efficacyB value="1"/>
         <initialEfficacy value="1"/>
-      </vaccineDescription>
-    </descriptions>
-    <continuous>
-      <vaccine coverage="1" targetAgeYrs="0.0137"/>
-    </continuous>
-    <timed>
-      <intervention time="73">
-        <!-- eliminate current infections -->
-        <MDA coverage="1"/>
-        <!-- prevent further infections -->
-        <vaccinate coverage="1"/>
-        <!-- clear past & current mosquito infections -->
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="74">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="75">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="76">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="77">
-        <MDA coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="78">
-        <MDA coverage="1"/>
-        <immuneSuppression coverage="1"/>
-        <uninfectVectors/>
-      </intervention>
-      <intervention time="146">
-        <insertR_0Case/>
-      </intervention>
-    </timed>
+      </description>
+      <continuous coverage="1" targetAgeYrs="0.0137"/>
+      <timed coverage="1" time="73"/>
+    </vaccine>
+    <MDA>
+      <timed coverage="1" time="73"/>
+      <timed coverage="1" time="74"/>
+      <timed coverage="1" time="75"/>
+      <timed coverage="1" time="76"/>
+      <timed coverage="1" time="77"/>
+      <timed coverage="1" time="78"/>
+    </MDA>
+    <uninfectVectors>
+      <timed time="73"/>
+      <timed time="74"/>
+      <timed time="75"/>
+      <timed time="76"/>
+      <timed time="77"/>
+      <timed time="78"/>
+    </uninfectVectors>
+    <immuneSuppression>
+      <timed coverage="1" time="78"/>
+    </immuneSuppression>
+    <insertR_0Case>
+      <timed time="146"/>
+    </insertR_0Case>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="no treatment">

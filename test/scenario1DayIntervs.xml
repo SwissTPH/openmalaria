@@ -84,8 +84,8 @@
     </ageGroup>
   </monitoring>
   <interventions name="none">
-    <descriptions>
-      <MDADescription>
+    <MDA>
+      <description>
         <decisions>
           <decision depends="result" name="treatment" values="MQ,none">
             result(negative): none
@@ -106,42 +106,28 @@
             <schedule/>
           </treatment>
         </treatments>
-      </MDADescription>
-      <vaccineDescription vaccineType="PEV">
+      </description>
+      <timed coverage="0.6" time="160"/>
+      <timed coverage="0.6" time="860"/>
+      <timed coverage="0.6" time="870"/>
+      <timed coverage="0.6" time="1580"/>
+      <timed coverage="0.6" time="1595"/>
+      <timed coverage="0.6" time="1610"/>
+    </MDA>
+    <vaccine>
+      <description vaccineType="PEV">
         <decay L="5" function="exponential"/>
         <efficacyB value="10"/>
         <initialEfficacy value="0.512"/>
         <initialEfficacy value="0.64"/>
         <initialEfficacy value="0.8"/>
-      </vaccineDescription>
-    </descriptions>
-    <continuous>
-      <vaccine coverage="0.95" targetAgeYrs="0.0833"/>
-      <vaccine coverage="0.95" targetAgeYrs="0.17"/>
-      <vaccine coverage="0.99" targetAgeYrs="0.25"/>
-      <vaccine coverage="0.99" targetAgeYrs="2"/>
-      <vaccine coverage="0.99" targetAgeYrs="5"/>
-    </continuous>
-    <timed>
-      <intervention time="160">
-        <MDA coverage="0.6"/>
-      </intervention>
-      <intervention time="860">
-        <MDA coverage="0.6"/>
-      </intervention>
-      <intervention time="870">
-        <MDA coverage="0.6"/>
-      </intervention>
-      <intervention time="1580">
-        <MDA coverage="0.6"/>
-      </intervention>
-      <intervention time="1595">
-        <MDA coverage="0.6"/>
-      </intervention>
-      <intervention time="1610">
-        <MDA coverage="0.6"/>
-      </intervention>
-    </timed>
+      </description>
+      <continuous coverage="0.95" targetAgeYrs="0.0833"/>
+      <continuous coverage="0.95" targetAgeYrs="0.17"/>
+      <continuous coverage="0.99" targetAgeYrs="0.25"/>
+      <continuous coverage="0.99" targetAgeYrs="2"/>
+      <continuous coverage="0.99" targetAgeYrs="5"/>
+    </vaccine>
   </interventions>
   <healthSystem>
     <EventScheduler>

@@ -72,75 +72,72 @@
     </ageGroup>
   </monitoring>
   <interventions name="effective health system">
-    <descriptions/>
-    <timed>
-      <intervention time="0">
-        <changeHS>
-          <EventScheduler>
-            <uncomplicated>
-              <decisions>
-                <decision depends="" name="treatment" values="effective_treat">
+    <changeHS>
+      <timed time="0">
+        <EventScheduler>
+          <uncomplicated>
+            <decisions>
+              <decision depends="" name="treatment" values="effective_treat">
                   effective_treat
                 </decision>
-                <decision depends="" name="test" values="none,microscopy,RDT">
+              <decision depends="" name="test" values="none,microscopy,RDT">
                   none
                 </decision>
-              </decisions>
-              <treatments>
-                <treatment name="effective_treat">
-                  <schedule>
-                    <medicate drug="effective" hour="0" mg="1"/>
-                  </schedule>
-                </treatment>
-              </treatments>
-            </uncomplicated>
-            <complicated>
-              <decisions>
-                <decision depends="" name="treatment" values="effective_treat">
+            </decisions>
+            <treatments>
+              <treatment name="effective_treat">
+                <schedule>
+                  <medicate drug="effective" hour="0" mg="1"/>
+                </schedule>
+              </treatment>
+            </treatments>
+          </uncomplicated>
+          <complicated>
+            <decisions>
+              <decision depends="" name="treatment" values="effective_treat">
                   effective_treat
                 </decision>
-                <decision depends="" name="hospitalisation" values="none,delayed,immediate">
+              <decision depends="" name="hospitalisation" values="none,delayed,immediate">
                   immediate
                 </decision>
-                <decision depends="" name="test" values="none,microscopy,RDT">
+              <decision depends="" name="test" values="none,microscopy,RDT">
                   none
                 </decision>
-              </decisions>
-              <treatments>
-                <treatment name="effective_treat">
-                  <schedule>
-                    <medicate drug="effective" hour="0" mg="1"/>
-                  </schedule>
-                </treatment>
-              </treatments>
-            </complicated>
-            <ClinicalOutcomes>
-              <maxUCSeekingMemory>3</maxUCSeekingMemory>
-              <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
-              <complicatedCaseDuration>6</complicatedCaseDuration>
-              <complicatedRiskDuration>6</complicatedRiskDuration>
-              <dailyPrImmUCTS>1</dailyPrImmUCTS>
-            </ClinicalOutcomes>
-          </EventScheduler>
-          <CFR>
-            <group lowerbound="0" value="0.09189"/>
-            <group lowerbound="0.25" value="0.0810811"/>
-            <group lowerbound="0.75" value="0.0648649"/>
-            <group lowerbound="1.5" value="0.0689189"/>
-            <group lowerbound="2.5" value="0.0675676"/>
-            <group lowerbound="3.5" value="0.0297297"/>
-            <group lowerbound="4.5" value="0.0459459"/>
-            <group lowerbound="7.5" value="0.0945946"/>
-            <group lowerbound="12.5" value="0.1243243"/>
-            <group lowerbound="15" value="0.1378378"/>
-          </CFR>
-          <pSequelaeInpatient interpolation="none">
-            <group lowerbound="0.0" value="0.0132"/>
-            <group lowerbound="5.0" value="0.005"/>
-          </pSequelaeInpatient>
-        </changeHS>
-      </intervention>
-    </timed>
+            </decisions>
+            <treatments>
+              <treatment name="effective_treat">
+                <schedule>
+                  <medicate drug="effective" hour="0" mg="1"/>
+                </schedule>
+              </treatment>
+            </treatments>
+          </complicated>
+          <ClinicalOutcomes>
+            <maxUCSeekingMemory>3</maxUCSeekingMemory>
+            <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
+            <complicatedCaseDuration>6</complicatedCaseDuration>
+            <complicatedRiskDuration>6</complicatedRiskDuration>
+            <dailyPrImmUCTS>1</dailyPrImmUCTS>
+          </ClinicalOutcomes>
+        </EventScheduler>
+        <CFR>
+          <group lowerbound="0" value="0.09189"/>
+          <group lowerbound="0.25" value="0.0810811"/>
+          <group lowerbound="0.75" value="0.0648649"/>
+          <group lowerbound="1.5" value="0.0689189"/>
+          <group lowerbound="2.5" value="0.0675676"/>
+          <group lowerbound="3.5" value="0.0297297"/>
+          <group lowerbound="4.5" value="0.0459459"/>
+          <group lowerbound="7.5" value="0.0945946"/>
+          <group lowerbound="12.5" value="0.1243243"/>
+          <group lowerbound="15" value="0.1378378"/>
+        </CFR>
+        <pSequelaeInpatient interpolation="none">
+          <group lowerbound="0.0" value="0.0132"/>
+          <group lowerbound="5.0" value="0.005"/>
+        </pSequelaeInpatient>
+      </timed>
+    </changeHS>
   </interventions>
   <healthSystem>
     <EventScheduler>

@@ -67,18 +67,16 @@
     </ageGroup>
   </monitoring>
   <interventions name="Navrongo IPTi treated">
-    <descriptions>
-      <iptiDescription iptiEffect="12">
+    <IPT>
+      <description iptiEffect="12">
         <infGenotype ACR="1.0" atten="1" freq="0.6" name="wt" proph="10" tolPeriod="4"/>
         <infGenotype ACR="1.0" atten="1" freq="0.2" name="108" proph="2" tolPeriod="4"/>
         <infGenotype ACR="0.5" atten="1" freq="0.2" name="triples" proph="0" tolPeriod="4"/>
-      </iptiDescription>
-    </descriptions>
-    <continuous>
-      <ipti coverage="0.955" targetAgeYrs="0.25"/>
-      <ipti coverage="0.901" targetAgeYrs="0.75"/>
-      <ipti coverage="0.919" targetAgeYrs="1.25"/>
-    </continuous>
+      </description>
+      <continuous coverage="0.955" targetAgeYrs="0.25"/>
+      <continuous coverage="0.901" targetAgeYrs="0.75"/>
+      <continuous coverage="0.919" targetAgeYrs="1.25"/>
+    </IPT>
   </interventions>
   <!--data are scaled to give annual total of 418 inf bites (corresponds to Appawu et al,)-->
   <healthSystem>

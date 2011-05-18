@@ -121,6 +121,19 @@ public class SchemaTranslator {
 	else
 	    return null;
     }
+    /** Get or create a child element.
+     * 
+     * If parent has a single existing element by name name, return that.
+     * If it has none, create one and append it, then return it. Multiple
+     * existing children by this name are not expected. */
+    private Element getOrCreateSubElt(Element parent, String name)throws Exception{
+        Element child = getChildElement(parent,name);
+        if(child==null){
+            child = scenarioDocument.createElement(name);
+            parent.appendChild(child);
+        }
+        return child;
+    }
     /** Check whether scenario uses a particular model option. */
     public boolean usesOption( String name )throws Exception{
         Element opts = (Element) scenarioElement.getElementsByTagName("ModelOptions").item(0);
@@ -1449,8 +1462,79 @@ public class SchemaTranslator {
         NodeList descs = descriptions.getChildNodes();
         int l = descs.getLength();
         for( int i = 0; i < l; ++i ){
-            System.err.println("Update to 28: no support for updating intervention "+descs.item(i).getNodeName());
-            return false;
+            if (!(descs.item(i) instanceof Element)) continue;
+            Element oldElt = (Element) descs.item(i);
+            Element newElt = null;
+            String descName = oldElt.getNodeName();
+            if(descName.equals("iptiDescription")){
+                newElt = getOrCreateSubElt(interventions,"IPT");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"description");
+            }else if(descName.equals("vaccineDescription")){
+                newElt = getOrCreateSubElt(interventions,"vaccine");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"description");
+            }else if(descName.equals("MDADescription")){
+                newElt = getOrCreateSubElt(interventions,"MDA");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"description");
+            }else if(descName.equals("ITNDecay")){
+                newElt = getOrCreateSubElt(interventions,"ITN");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"decay");
+            }else if(descName.equals("IRSDecay")){
+                newElt = getOrCreateSubElt(interventions,"IRS");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"decay");
+            }else if(descName.equals("VADecay")){
+                newElt = getOrCreateSubElt(interventions,"vectorDeterrent");
+                newElt.appendChild(oldElt);
+                scenarioDocument.renameNode(oldElt,null,"decay");
+            }else if(descName.equals("anopheles")){
+                NodeList aDescs = oldElt.getChildNodes();
+                String mosqName = oldElt.getAttribute("mosquito");
+                int l2 = aDescs.getLength();
+                for( int j = 0; j < l2; ++j ){
+                    if (!(aDescs.item(j) instanceof Element)) continue;
+                    Element oldAElt = (Element) aDescs.item(j);
+                    
+                    String aDescName = oldAElt.getNodeName();
+                    if(aDescName.equals("ITNDescription")){
+                        newElt = getOrCreateSubElt(interventions,"ITN");
+                        newElt.appendChild(oldAElt);
+                        scenarioDocument.renameNode(oldAElt,null,"anophelesParams");
+                        oldAElt.setAttribute("mosquito",mosqName);
+                        if(!newElt.hasAttribute("name")){
+                            newElt.setAttribute("name",oldAElt.getAttribute("name"));
+                        }
+                        oldAElt.removeAttribute("name");
+                    }else if(aDescName.equals("IRSDescription")){
+                        newElt = getOrCreateSubElt(interventions,"IRS");
+                        newElt.appendChild(oldAElt);
+                        scenarioDocument.renameNode(oldAElt,null,"anophelesParams");
+                        oldAElt.setAttribute("mosquito",mosqName);
+                        if(!newElt.hasAttribute("name")){
+                            newElt.setAttribute("name",oldAElt.getAttribute("name"));
+                        }
+                        oldAElt.removeAttribute("name");
+                    }else if(aDescName.equals("VADescription")){
+                        newElt = getOrCreateSubElt(interventions,"vectorDeterrent");
+                        newElt.appendChild(oldAElt);
+                        scenarioDocument.renameNode(oldAElt,null,"anophelesParams");
+                        oldAElt.setAttribute("mosquito",mosqName);
+                        if(!newElt.hasAttribute("name")){
+                            newElt.setAttribute("name",oldAElt.getAttribute("name"));
+                        }
+                        oldAElt.removeAttribute("name");
+                    }else{
+                        System.err.println("Unexpected element interventions.descriptions.anopheles."+aDescName);
+                        return false;
+                    }
+                }
+            }else{
+                System.err.println("Unexpected element interventions.descriptions."+descName);
+                return false;
+            }
         }
         interventions.removeChild(descriptions);
         Element continuous = getChildElement(interventions,"continuous");
@@ -1458,20 +1542,142 @@ public class SchemaTranslator {
             NodeList cont = continuous.getChildNodes();
             l = cont.getLength();
             for( int i = 0; i < l; ++i ){
-                System.err.println("TODO: continuous");
-                return false;
+                if (!(cont.item(i) instanceof Element)) continue;
+                Element oldElt = (Element) cont.item(i);
+                Element newElt = null;
+                String contName = oldElt.getNodeName();
+                if(contName.equals("ipti")){
+                    newElt = getOrCreateSubElt(interventions,"IPT");
+                    newElt.appendChild(oldElt);
+                    scenarioDocument.renameNode(oldElt,null,"continuous");
+                }else if(contName.equals("vaccine")){
+                    newElt = getOrCreateSubElt(interventions,"vaccine");
+                    newElt.appendChild(oldElt);
+                    scenarioDocument.renameNode(oldElt,null,"continuous");
+                }else if(contName.equals("cohort")){
+                    newElt = getOrCreateSubElt(interventions,"cohort");
+                    newElt.appendChild(oldElt);
+                    scenarioDocument.renameNode(oldElt,null,"continuous");
+                }else if(contName.equals("ITN")){
+                    newElt = getOrCreateSubElt(interventions,"ITN");
+                    newElt.appendChild(oldElt);
+                    scenarioDocument.renameNode(oldElt,null,"continuous");
+                }else{
+                    System.err.println("Unexpected element interventions.continuous."+contName);
+                    return false;
+                }
             }
             interventions.removeChild(continuous);
         }
         Element timed = getChildElement(interventions,"timed");
         if(timed != null){
-            NodeList times = timed.getChildNodes();
-            l = times.getLength();
-            for( int i = 0; i < l; ++i ){
-                System.err.println("TODO: timed");
-                return false;
+            List<Node> times = getChildNodes(timed,"intervention");
+            for( Node timeNode : times ){
+                Element timeElt = (Element) timeNode;
+                String intervTime = timeElt.getAttribute("time");
+                
+                NodeList timedIntervs = timeElt.getChildNodes();
+                l = timedIntervs.getLength();
+                for( int i=0; i<l; ++i ){
+                    if (!(timedIntervs.item(i) instanceof Element)) continue;
+                    Element oldElt = (Element) timedIntervs.item(i);
+                    String interv = oldElt.getNodeName();
+                    Element newElt = null;
+                    if(interv.equals("changeHS")){
+                        newElt = getOrCreateSubElt(interventions,"changeHS");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("changeEIR")){
+                        newElt = getOrCreateSubElt(interventions,"changeEIR");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("MDA")){
+                        newElt = getOrCreateSubElt(interventions,"MDA");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("vaccinate")){
+                        newElt = getOrCreateSubElt(interventions,"vaccine");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("ITN")){
+                        newElt = getOrCreateSubElt(interventions,"ITN");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("IRS")){
+                        newElt = getOrCreateSubElt(interventions,"IRS");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("VectorAvailability")){
+                        newElt = getOrCreateSubElt(interventions,"vectorDeterrent");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("ipti")){
+                        newElt = getOrCreateSubElt(interventions,"IPT");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("cohort")){
+                        newElt = getOrCreateSubElt(interventions,"cohort");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("uninfectVectors")){
+                        newElt = getOrCreateSubElt(interventions,"uninfectVectors");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("immuneSuppression")){
+                        newElt = getOrCreateSubElt(interventions,"immuneSuppression");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("insertR_0Case")){
+                        newElt = getOrCreateSubElt(interventions,"insertR_0Case");
+                        newElt.appendChild(oldElt);
+                        scenarioDocument.renameNode(oldElt,null,"timed");
+                        oldElt.setAttribute("time",intervTime);
+                    }else if(interv.equals("larviciding")){
+                        System.err.println("larviciding intervention model has changed significantly; please remove and re-add");
+                        return false;
+                    }else if(interv.equals("importedInfectionsPerThousandHosts")){
+                        newElt = getOrCreateSubElt(interventions,"importedInfections");
+                        Element method=getChildElement(newElt,"method");
+                        if(method==null){
+                            method=scenarioDocument.createElement("method");
+                            method.setTextContent("infection");
+                            newElt.appendChild(method);
+                        }
+                        
+                        Element timedII=getOrCreateSubElt(newElt,"timed");
+                        List<Node> prevII=getChildNodes(timedII,"rate");
+                        Element IINow;
+                        if(prevII.size()>0 && Integer.parseInt(((Element)prevII.get(prevII.size()-1)).getAttribute("time"))==Integer.parseInt(intervTime)){
+                            IINow=(Element)prevII.get(prevII.size()-1);     // previous value, presumably an added zero, at same time point
+                        }else{
+                            IINow=scenarioDocument.createElement("rate");
+                            timedII.appendChild(IINow);
+                            IINow.setAttribute("time",intervTime);
+                        }
+                        IINow.setAttribute("value",oldElt.getTextContent());
+                        // Now set the rate back to zero next time step, since this is what the old model did
+                        Element IINext = scenarioDocument.createElement("rate");
+                        timedII.appendChild(IINext);
+                        IINext.setAttribute("time",Integer.toString(Integer.parseInt(intervTime)+1));
+                        IINext.setAttribute("value","0");
+                    }else{
+                        System.err.println("Unexpected element interventions.timed.intervention."+interv);
+                        return false;
+                    }
+                }
             }
-            interventions.removeChild(continuous);
+            interventions.removeChild(timed);
         }
         return true;
     }

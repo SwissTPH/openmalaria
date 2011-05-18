@@ -78,8 +78,8 @@
     </ageGroup>
   </monitoring>
   <interventions name="cohort selection">
-    <descriptions>
-      <MDADescription>
+    <MDA>
+      <description>
         <decisions>
           <decision depends="" name="treatment" values="1">1</decision>
           <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
@@ -91,19 +91,13 @@
             </schedule>
           </treatment>
         </treatments>
-      </MDADescription>
-    </descriptions>
-    <continuous>
-      <cohort coverage="0.05" targetAgeYrs="1.0"/>
-    </continuous>
-    <timed>
-      <intervention time="0">
-        <cohort coverage="0.4"/>
-      </intervention>
-      <intervention time="730">
-        <MDA coverage="0.6"/>
-      </intervention>
-    </timed>
+      </description>
+      <timed coverage="0.6" time="730"/>
+    </MDA>
+    <cohort>
+      <continuous coverage="0.05" targetAgeYrs="1.0"/>
+      <timed coverage="0.4" time="0"/>
+    </cohort>
   </interventions>
   <healthSystem>
     <EventScheduler>

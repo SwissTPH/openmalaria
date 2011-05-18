@@ -166,41 +166,35 @@
     </ageGroup>
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
-    <descriptions>
-      <vaccineDescription vaccineType="TBV">
+    <vaccine>
+      <description vaccineType="TBV">
         <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
-      </vaccineDescription>
-      <vaccineDescription vaccineType="BSV">
+      </description>
+      <description vaccineType="BSV">
         <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
-      </vaccineDescription>
-      <vaccineDescription vaccineType="PEV">
+      </description>
+      <description vaccineType="PEV">
         <decay L="0.0" function="constant"/>
         <efficacyB value="10"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
         <initialEfficacy value="1"/>
-      </vaccineDescription>
-    </descriptions>
-    <continuous>
-      <vaccine coverage="1" targetAgeYrs="0.0833"/>
-      <vaccine coverage="1" targetAgeYrs="0.17"/>
-      <vaccine coverage="1" targetAgeYrs="0.25"/>
-      <vaccine coverage="1" targetAgeYrs="1.25"/>
-      <vaccine coverage="1" targetAgeYrs="2.25"/>
-    </continuous>
-    <timed>
-      <intervention time="26">
-        <vaccinate coverage="1" maxAge="999" minAge="0"/>
-      </intervention>
-    </timed>
+      </description>
+      <continuous coverage="1" targetAgeYrs="0.0833"/>
+      <continuous coverage="1" targetAgeYrs="0.17"/>
+      <continuous coverage="1" targetAgeYrs="0.25"/>
+      <continuous coverage="1" targetAgeYrs="1.25"/>
+      <continuous coverage="1" targetAgeYrs="2.25"/>
+      <timed coverage="1" maxAge="999" minAge="0" time="26"/>
+    </vaccine>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">
