@@ -67,9 +67,7 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="none">
-    <descriptions/>
-  </interventions>
+  <interventions name="none"/>
   <healthSystem>
     <EventScheduler>
       <uncomplicated>

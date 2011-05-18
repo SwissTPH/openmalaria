@@ -46,7 +46,7 @@ namespace OM {
 // -----  Set-up & tear-down  -----
 
 Simulation::Simulation(util::Checksum ck)
-: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), _population(NULL), workUnitIdentifier(0), cksum(ck)
+: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), workUnitIdentifier(0), cksum(ck)
 {
     OM::TimeStep::init(InputData().getModel().getParameters().getInterval(),
                        InputData().getDemography().getMaximumAgeYrs());
@@ -60,14 +60,15 @@ Simulation::Simulation(util::Checksum ck)
     util::ModelOptions::init ();
     Surveys.init();
     Population::init();
-    _population = new Population();
+    population = auto_ptr<Population>(new Population);
+    interventions = auto_ptr<InterventionManager>(new InterventionManager(InputData().getInterventions(), *population));
+    Surveys.initCohortOnly( *interventions );
     
     workUnitIdentifier = InputData().getWuID();
 }
 
 Simulation::~Simulation(){
     //free memory
-    delete _population;
     Population::clear();
 }
 
@@ -95,18 +96,18 @@ int Simulation::start(){
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and a whole number of years.
     TimeStep humanWarmupLength = TimeStep::maxAgeIntervals;
-    if( humanWarmupLength < _population->_transmissionModel->minPreinitDuration() ){
+    if( humanWarmupLength < population->_transmissionModel->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
         cerr << ") shorter than length of warm-up requested by" << endl;
-        cerr << "transmission model (" << _population->_transmissionModel->minPreinitDuration().inYears();
+        cerr << "transmission model (" << population->_transmissionModel->minPreinitDuration().inYears();
         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
         cerr << "transmission (mode=2) or a longer life-span." << endl;
-        humanWarmupLength = _population->_transmissionModel->minPreinitDuration();
+        humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
     humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1) / TimeStep::stepsPerYear + 1);
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
-        + _population->_transmissionModel->expectedInitDuration()
+        + population->_transmissionModel->expectedInitDuration()
         + Surveys.getFinalTimestep() + TimeStep( 1 );   // MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
@@ -114,7 +115,7 @@ int Simulation::start(){
         readCheckpoint();
     } else {
         Continuous::init( false );
-        _population->createInitialHumans();
+        population->createInitialHumans();
     }
     // Set to either a checkpointing timestep or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
@@ -135,10 +136,10 @@ int Simulation::start(){
             
             Continuous::update();
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
-                _population->newSurvey();
+                population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
-            _population->implementIntervention(TimeStep::interventionPeriod);
+            population->implementIntervention(TimeStep::interventionPeriod);
             
             // Simulation-time used to be 1-based (from Fortran implementation).
             // It is now zero-based with regards to checkpoints but one-based
@@ -146,7 +147,7 @@ int Simulation::start(){
             ++TimeStep::simulation;
             
             // update
-            _population->update1();
+            population->update1();
             
             util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
             
@@ -157,7 +158,7 @@ int Simulation::start(){
         if (phase == ONE_LIFE_SPAN) {
             simPeriodEnd = humanWarmupLength;
         } else if (phase == TRANSMISSION_INIT) {
-            TimeStep iterate = _population->_transmissionModel->initIterate();
+            TimeStep iterate = population->_transmissionModel->initIterate();
             if( iterate > TimeStep(0) ) {
                 simPeriodEnd += iterate;
                 --phase;        // repeat phase
@@ -170,8 +171,8 @@ int Simulation::start(){
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
             TimeStep::interventionPeriod = TimeStep(0);
-            _population->preMainSimInit();
-            _population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
+            population->preMainSimInit();
+            population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             Surveys.incrementSurveyPeriod();
         } else if (phase == END_SIM) {
             cerr << "sim end" << endl;
@@ -199,7 +200,7 @@ int Simulation::start(){
     
     PopulationStats::print();
     
-    _population->flushReports();        // ensure all Human instances report past events
+    population->flushReports();        // ensure all Human instances report past events
     Surveys.writeSummaryArrays();
     
     // Write scenario checksum, only if simulation completed.
@@ -332,7 +333,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
         simPeriodEnd & stream;
         totalSimDuration & stream;
         phase & stream;
-        (*_population) & stream;
+        (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
         
         // read last, because other loads may use random numbers or expect time
@@ -383,7 +384,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     simPeriodEnd & stream;
     totalSimDuration & stream;
     phase & stream;
-    (*_population) & stream;
+    (*population) & stream;
     PopulationStats::staticCheckpoint( stream );
     
     TimeStep::simulation & stream;

@@ -61,7 +61,6 @@ void Human::initHumanParameters () {    // static
     InfectionIncidenceModel::init();
     WithinHost::WithinHostModel::init();
     Clinical::ClinicalModel::init();
-    Vaccine::init();
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     cohortFirstBoutOnly = InputData().getMonitoring().getFirstBoutOnly();
@@ -70,9 +69,7 @@ void Human::initHumanParameters () {    // static
 }
 
 void Human::clear() {   // static clear
-  Vaccine::cleanup();
   Clinical::ClinicalModel::cleanup();
-  WithinHost::WithinHostModel::cleanup();
   Transmission::PerHostTransmission::cleanup();
 }
 

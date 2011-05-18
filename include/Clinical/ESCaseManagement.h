@@ -249,13 +249,13 @@ class ESDecisionMap {
  *****************************************************************************/
 class ESCaseManagement : public CaseManagementCommon {
     public:
-        static void init ();
-        
         /** Load health system data from initial data or an intervention's data (both from XML).
         * (Re)loads all data affected by this healthSystem element. */
         static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
         
-        static void cleanup ();
+        /** Set up MDA drug. Must be called if massDrugAdministration() is
+         * ever used to deploy an MDA intervention. */
+        static void initMDA (const scnXml::MDA::DescriptionType& desc);
         
         static void massDrugAdministration(
             const ESHostData& hostData,

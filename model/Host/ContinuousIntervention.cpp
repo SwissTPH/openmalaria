@@ -36,10 +36,7 @@ void ContinuousIntervention::init (
 	void (Human::*deployIpti) (),
 	void (Human::*deployCohort) ()
 ) {
-    if (!InputData().getInterventions().getContinuous().present()) {
-	return;
-    }
-    
+    /* FIXME
     // NOTE: "vaccine" interventions we don't deal with; they have some rather
     // special deployment rules (see Human::_lastVaccineDose).
     
@@ -71,6 +68,7 @@ void ContinuousIntervention::init (
     
     sort( ctsIntervs.begin(), ctsIntervs.end() );
     assert( ctsIntervs.size() == n );
+    */
 }
 
 ContinuousIntervention::AgeIntervention::AgeIntervention(

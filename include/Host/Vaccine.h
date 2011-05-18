@@ -22,11 +22,7 @@
 
 #include "Global.h"
 #include "util/DecayFunction.h"
-
-// Forward declare: doesn't need to be known about here
-namespace scnXml {
-class VaccineDescription;
-}
+#include "schema/interventions.h"
 
 namespace OM {
 namespace Host {
@@ -44,10 +40,8 @@ namespace Host {
 class Vaccine {
 public:
     // Static:
-    /// Set parameters from xml
-    static void init ();
-    /// Free memory
-    static void cleanup ();
+    /// Set parameters from xml (only called if vaccines are used)
+    static void init (const scnXml::Vaccine& xmlVaccine);
     
 private:
     /*! Common to all vaccine types. Number of vaccine doses that are given

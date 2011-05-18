@@ -26,6 +26,7 @@
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
+#include "Interventions.h"
 
 #include <gzstream.h>
 #include <fstream>
@@ -41,13 +42,6 @@ void SurveysType::init ()
   _surveyPeriod = 0;
   _cohortOnly = false;
   const scnXml::Monitoring& mon = InputData().getMonitoring();
-  if( mon.getCohortOnly().present() ){
-      _cohortOnly = mon.getCohortOnly().get();
-  } else {
-      // Trap potential bug in scenario design
-      if( InputData.isInterventionActive(Interventions::COHORT) )
-	  throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
-  }
   
   const scnXml::Surveys::SurveyTimeSequence& survs = mon.getSurveys().getSurveyTime();
 
@@ -75,6 +69,20 @@ void SurveysType::init ()
   for (size_t i = 0; i < _survey.size(); ++i)
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
+}
+void SurveysType::initCohortOnly(OM::InterventionManager& interventions){
+    //TODO: re-integrate with above. Probably most of above initialization could
+    // happen later, but for now it's easier not to change order.
+  _cohortOnly = false;
+  const scnXml::Monitoring& mon = InputData().getMonitoring();
+  if( mon.getCohortOnly().present() ){
+      _cohortOnly = mon.getCohortOnly().get();
+  } else {
+      // Trap potential bug in scenario design
+      if( interventions.isActive(Interventions::COHORT) ){
+          throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
+      }
+  }
 }
 
 void SurveysType::incrementSurveyPeriod()

@@ -30,6 +30,8 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
 }
 
 void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species) {
+    assert(false);
+    /*FIXME
     if ( InputData.isInterventionActive(Interventions::ITN) ) {
         if (!intervDesc.getITNDescription().present()) {
             throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
@@ -54,6 +56,7 @@ void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles&
         const scnXml::BaseInterventionDescription& vaDesc = intervDesc.getVADescription().get();
         VADeterrency = vaDesc.getDeterrency().getValue();
     }
+    */
 }
 
 }

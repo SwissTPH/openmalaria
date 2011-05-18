@@ -23,7 +23,6 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
-#include "inputData.h"
 #include "Monitoring/Surveys.h"
 #include "PopulationStats.h"
 
@@ -32,25 +31,16 @@
 namespace OM { namespace WithinHost {
     using namespace util;
 
-bool DescriptiveIPTWithinHost::iptActive = false;
-
 // -----  static data  -----
 
-DescriptiveIPTWithinHost::IPTiEffects DescriptiveIPTWithinHost::iptiEffect;
+DescriptiveIPTWithinHost::IPTiEffects DescriptiveIPTWithinHost::iptiEffect = NO_IPT;
 
 
 // -----  init  -----
 
-void DescriptiveIPTWithinHost::init () {
-  iptActive = util::ModelOptions::option( IPTI_SP_MODEL );
-  if (!iptActive) {
-    if (InputData.isInterventionActive(Interventions::IPTI))
+void DescriptiveIPTWithinHost::init (const scnXml::IPTDescription& xmlIPTI) {
+  if( !util::ModelOptions::option( IPTI_SP_MODEL ) ){
       throw util::xml_scenario_error ("IPTI interventions require IPT_SP_MODEL option");
-    return;
-  }
-  const scnXml::Interventions& xmlInterventions = InputData().getInterventions();
-  if (!xmlInterventions.getDescriptions().getIptiDescription().present()) {
-    throw util::xml_scenario_error ("IPT_SP_MODEL requires iptiDescription");
   }
   
   if (TimeStep::interval != 5)
@@ -60,24 +50,22 @@ void DescriptiveIPTWithinHost::init () {
       // The IPT code has its own implementation of non-instantaneous drug action (SPAction, etc).
   }
   
-  // --- IptiDescription begin ---
-  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getDescriptions().getIptiDescription().get();
-  
   iptiEffect = static_cast<IPTiEffects>(xmlIPTI.getIptiEffect());
-  // --- IptiDescription end ---
+  if( iptiEffect <= NO_IPT || iptiEffect > IPT_MAX ){
+      throw util::xml_scenario_error("Invalid iptiEffect (expected from 1 to 30)");
+      //TODO: are all these values valid?
+  }
   
-  DescriptiveIPTInfection::initParameters(xmlInterventions);
-}
-
-void DescriptiveIPTWithinHost::cleanup () {
-  if (!iptActive) return;
-  DescriptiveIPTInfection::cleanup();
+  DescriptiveIPTInfection::initParameters(xmlIPTI);
 }
 
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
     _SPattenuationt(TimeStep::never), _lastSPDose (TimeStep::never), _lastIptiOrPlacebo (TimeStep::never),
     _cumulativeInfections(0)
 {
+    if( iptiEffect == NO_IPT ){
+        throw util::xml_scenario_error ("IPT_SP_MODEL requires IPTDescription");
+    }
 }
 
 
@@ -107,17 +95,15 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   } else if(TimeStep::simulation-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
-    
-    if this code is to survive, then the iptiEffect values should be 
-    symbolic constants
-    however: code is dead (only used for repeat experiments) anyway
           */
   } else if( iptiEffect ==  PLACEBO_SP ||  iptiEffect ==  IPT_SP) {
       // add 1 to delay start until next update since effect of SP already happened this time step
     _lastSPDose=TimeStep::simulation+TimeStep(1);
   } else if( iptiEffect ==  PLACEBO_CLEAR_INFECTIONS ||  iptiEffect ==  IPT_CLEAR_INFECTIONS) {
   } else if(iptiEffect >= IPT_SEASONAL_MIN && iptiEffect < IPT_MAX) {
+      //TODO: this isn't SP then?
   } else {
+      //TODO: what is this? Also SP?
       // add 1 to delay start until next update since effect of SP already happened this time step
     _lastSPDose=TimeStep::simulation+TimeStep(1);
     // SPAction will first act at the beginning of the next Global::interval
@@ -151,6 +137,7 @@ void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup, boo
     and also the treatment given when sick (trial-dependent)
     */
     if (iptiEffect >= IPT_MIN) {
+        //TODO: is this SP?
 	_lastSPDose=TimeStep::simulation;
 	Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
     }

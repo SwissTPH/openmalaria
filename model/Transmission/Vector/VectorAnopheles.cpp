@@ -585,10 +585,12 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
 }
 
 
-void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingAnopheles& elt) {
+void VectorAnopheles::intervLarviciding (/*const scnXml::LarvicidingAnopheles& elt*/) {
+    /*FIXME
   cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
   larvicidingIneffectiveness = 1 - elt.getEffectiveness();
   larvicidingEndStep = TimeStep::simulation + TimeStep::fromDays(elt.getDuration());
+  */
 }
 void VectorAnopheles::uninfectVectors(){
     O_v.assign( O_v.size(), 0.0 );

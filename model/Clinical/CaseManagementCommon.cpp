@@ -63,10 +63,12 @@ namespace OM { namespace Clinical {
 	if (healthSystemSource == TimeStep::never) {
 	    return InputData().getHealthSystem();
 	} else {
+            /*FIXME
 	    const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
 	    if (interv == NULL || !interv->getChangeHS().present())
 		throw runtime_error ("healthSystemSource invalid");
 	    return interv->getChangeHS().get();
+	    */
 	}
 	assert(false);	// unreachable
     }

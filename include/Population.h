@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  *
- * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,11 +81,21 @@ public:
     
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
-
+    
     /** Checks for time-based interventions and implements them
      *
      * \param time Current time (in tsteps) */
     void implementIntervention (TimeStep time);
+    
+    /// Type of population list
+    typedef list<Host::Human> HumanPop;
+    /// Iterator type of population
+    typedef HumanPop::iterator HumanIter;
+    
+    /** Return the list of humans. */
+    inline HumanPop& getList() {
+        return population;
+    }
 
 private:
     //! Creates initializes and add to the population list a new uninfected human
@@ -109,38 +119,16 @@ private:
     /// Delegate to print immunity's cumulativeY parameter (median across population)
     void ctsMedianImmunityY (ostream& stream);
     
-    /** Generic function to activate some intervention on all humans within the
-     * age range and passing the compliance test given by mass.
-     *
-     * @param mass XML element specifying the age range and compliance
-     * (proportion of eligible individuals who receive the intervention).
-     * @param intervention A member-function pointer to a "void func ()" function
-     * within human which activates the intervention. */
-    void massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ());
-    /** As massIntervention, but supports "increase to target coverage" mode:
-     * Deployment is only to unprotected humans and brings
-     * total coverage up to the level given in description.
-     *
-     * @param mass XML element specifying the age range and compliance
-     * (proportion of eligible individuals who receive the intervention).
-     * @param isProtected A member-function pointer to a "bool func (int) const"
-     * function which returns true if the human is already protected by this
-     * intervention, taking "protected" to mean last deployment was than the
-     * integer passed number-of-timesteps-ago.
-     * @param intervention A member-function pointer to a "void func ()" function
-     * within human which activates the intervention. */
-    void massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (TimeStep) const, void (Host::Human::*intervention) ());
-
-
     /** This function sets the imported infections in a population.
      *  The probability of an host to import an infection is calculated
      *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
      *  is then used to predict if an human has imported the infection in the
-     *  population or not. An human can only import one infection between two
-     *  intervention times.
-     *
-     */
-    void importedInfections(double importedInfectionsPerThousandHosts);
+     *  population or not. A maximum of one infection can be imported per
+     * intervention.
+     * 
+     * @param rate Number of infections imported per 1000 humans at this time
+     * point.  */
+    void importedInfections(double rate);
 
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
@@ -159,15 +147,12 @@ private:
 public:
     //! TransmissionModel model
     Transmission::TransmissionModel* _transmissionModel;
-
+    
 private:
     /** The simulated human population
      *
      * The list of all humans, ordered from oldest to youngest. */
-    std::list<Host::Human> population;
-
-    /// Iterator type of population
-    typedef std::list<Host::Human>::iterator HumanIter;
+    HumanPop population;
 
     friend class VectorAnophelesSuite;
 };

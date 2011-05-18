@@ -315,6 +315,7 @@ void Population::flushReports (){
 
 void Population::implementIntervention (TimeStep time)
 {
+    /*FIXME
     const scnXml::Intervention* interv = InputData.getInterventionByTime (time);
     if (interv == NULL)
         return;
@@ -329,16 +330,6 @@ void Population::implementIntervention (TimeStep time)
 
     if (interv->getChangeEIR().present()) {
         _transmissionModel->changeEIRIntervention (interv->getChangeEIR().get());
-    }
-
-    if (interv->getVaccinate().present()) {
-        massCumIntervention (interv->getVaccinate().get(), &Host::Human::hasVaccineProtection, &Host::Human::massVaccinate);
-    }
-    if (interv->getMDA().present()) {
-	massIntervention (interv->getMDA().get().getCoverage(), &Host::Human::massDrugAdministration);
-    }
-    if (interv->getIpti().present()) {
-        massCumIntervention (interv->getIpti().get(), &Host::Human::hasIPTiProtection, &Host::Human::IPTiTreatment);
     }
 
     if (interv->getITN().present()) {
@@ -379,80 +370,16 @@ void Population::implementIntervention (TimeStep time)
     if (interv->getUninfectVectors().present()){
 	_transmissionModel->uninfectVectors();
     }
+    */
 }
 
 void Population::importedInfections(double importedInfectionsPerThousandHosts)
 {
-	double prop = (double)populationSize/1000.0;
-	double importedInfectionsNbr = importedInfectionsPerThousandHosts * prop;
-	double importedInfectionsProb = importedInfectionsNbr/(double) populationSize;
-	int totalImportedInfections = 0;
-
-	if(importedInfectionsNbr>0)
-		for(HumanIter humanIterator = population.begin(); humanIterator!=population.end(); humanIterator++)
-			if(random::bernoulli(importedInfectionsProb))
-			{
-				humanIterator->addInfection();
-				totalImportedInfections++;
-			}
-}
-
-void Population::massIntervention (const scnXml::Mass& mass, void (Host::Human::*intervention) ())
-{
-    double minAge = mass.getMinAge();
-    double maxAge = mass.getMaxAge();
-    double coverage = mass.getCoverage();
-    bool cohortOnly = mass.getCohort();
+    double pImportedInf = importedInfectionsPerThousandHosts / 1000.0;
     
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        double ageYears = iter->getAgeInYears();
-        if( ageYears > minAge && ageYears < maxAge ){
-	    if( !cohortOnly || iter->getInCohort() ){
-		if( random::uniform_01() < coverage ){
-		    // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
-		    ( (*iter).*intervention) ();
-		}
-	    }
-	}
-    }
-}
-
-void Population::massCumIntervention (const scnXml::MassCum& mass, bool (Host::Human::*isProtected) (TimeStep) const, void (Host::Human::*intervention) ())
-{
-    if( mass.getCumulativeWithMaxAge().present() == false ){
-        // Usual case: simply deploy to coverage% of target group
-        massIntervention( mass, intervention );
-        return;
-    }
-    // Cumulative case: bring target group's coverage up to target coverage
-    
-    double minAge = mass.getMinAge();
-    double maxAge = mass.getMaxAge();
-    double coverage = mass.getCoverage();
-    TimeStep maxInterventionAge = TimeStep::fromYears( mass.getCumulativeWithMaxAge().get() );
-    bool cohortOnly = mass.getCohort();
-    
-    vector<Host::Human*> unprotected;
-    size_t total = 0;       // number of humans within age bound and optionally cohort
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        double ageYears = iter->getAgeInYears();
-        if( ageYears > minAge && ageYears < maxAge ){
-            if( !cohortOnly || iter->getInCohort() ){
-                total+=1;
-                if( !((*iter).*isProtected)(maxInterventionAge) )
-                    unprotected.push_back( &*iter );
-            }
-        }
-    }
-    
-    double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
-    if( propProtected < coverage ){
-        // In range (0,1]:
-        double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
-        for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-            if( random::uniform_01() < additionalCoverage ){
-                ( (*iter).*intervention) ();
-            }
+    for(HumanIter it = population.begin(); it!=population.end(); it++){
+        if(random::bernoulli(pImportedInf)){
+            it->addInfection();
         }
     }
 }

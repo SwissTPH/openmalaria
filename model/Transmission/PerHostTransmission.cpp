@@ -34,6 +34,7 @@ shared_ptr<DecayFunction> PerHostTransmission::VADecay;
 void PerHostTransmission::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
     
+    /*FIXME
     scnXml::Descriptions intervDesc = InputData().getInterventions().getDescriptions();
     if ( InputData.isInterventionActive(Interventions::ITN) ) {
         if( !intervDesc.getITNDecay().present() ){
@@ -53,6 +54,7 @@ void PerHostTransmission::init () {
         }
         VADecay = DecayFunction::makeObject( intervDesc.getVADecay().get(), "VADecay" );
     }
+    */
 }
 void PerHostTransmission::cleanup (){
     AgeGroupInterpolation::freeObject( relAvailAge );

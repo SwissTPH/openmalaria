@@ -28,7 +28,6 @@
 #include "util/BoincWrapper.h"
 #include <schema/scenario.h>
 #include <string>
-#include <bitset>
 #include <memory>
 
 namespace OM {
@@ -97,27 +96,6 @@ namespace Params {
   };
 }
 
-/** Used to describe which interventions are in use. */
-namespace Interventions {
-    enum Flags {
-	CHANGE_HS,
-	CHANGE_EIR,
-	VACCINE,	// any vaccine
-	MDA,
-	IPTI,
-	ITN,
-	IRS,
-	VEC_AVAIL,
-	IMMUNE_SUPPRESSION,
-	COHORT,
-	LARVICIDING,
-	R_0_CASE,
-	IMPORTED_INFECTIONS,
-	UNINFECT_VECTORS,
-	SIZE
-    };
-}
-    
     
     class InputDataType {
     public:
@@ -159,16 +137,6 @@ namespace Interventions {
 	    return *scenario;
 	}
 
-	/// Get the intervention from interventions->timed with time time.
-	/// @returns NULL if not available
-	const scnXml::Intervention* getInterventionByTime(TimeStep time);
-
-	/// Returns true if intervention is active
-	inline bool isInterventionActive( Interventions::Flags intervention ) const{
-            assert( intervention < Interventions::SIZE );
-            return activeInterventions[intervention];
-        }
-
 
 	/// Get a parameter from the parameter list. i should be less than Params::MAX.
 	double getParameter (size_t i);
@@ -183,7 +151,6 @@ namespace Interventions {
 	
     private:
 	void initParameterValues ();
-	void initTimedInterventions ();
 	
 	/// Sometimes used to save changes to the xml.
 	std::string xmlFileName;
@@ -193,8 +160,6 @@ namespace Interventions {
 	
 	// Initialized (derived) values:
 	std::map<int, double> parameterValues;
-	std::map<TimeStep, const scnXml::Intervention*> timedInterventions;
-	bitset<Interventions::SIZE> activeInterventions;
     };
     /// InputData entry point.
     extern InputDataType InputData;

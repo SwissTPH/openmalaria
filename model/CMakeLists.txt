@@ -9,6 +9,7 @@ set (Model_CPP
   PopulationAgeStructure.cpp
   PopulationStats.cpp
   inputData.cpp
+  Interventions.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp

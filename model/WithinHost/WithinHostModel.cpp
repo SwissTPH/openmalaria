@@ -78,13 +78,7 @@ void WithinHostModel::init() {
       PennyInfection::init();
   } else {
     DescriptiveInfection::init ();	// 5-day timestep check
-    DescriptiveIPTWithinHost::init();
   }
-}
-
-void WithinHostModel::cleanup() {
-  DescriptiveIPTWithinHost::cleanup();
-  DescriptiveInfection::cleanup();
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
@@ -94,7 +88,7 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
       util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
     return new CommonWithinHost();
   } else {
-    if (DescriptiveIPTWithinHost::iptActive)
+    if ( util::ModelOptions::option( IPTI_SP_MODEL ) )
       return new DescriptiveIPTWithinHost();
     else
       return new DescriptiveWithinHostModel();

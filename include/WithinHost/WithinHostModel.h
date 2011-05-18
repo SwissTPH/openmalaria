@@ -43,9 +43,6 @@ public:
   /// Initialise static parameters
   static void init();
   
-  /// Free memory
-  static void cleanup();
-  
   /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();
   //@}

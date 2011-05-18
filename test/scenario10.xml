@@ -38,9 +38,7 @@
       <group upperbound="1.0"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No Intervention">
-    <descriptions/>
-  </interventions>
+  <interventions name="No Intervention"/>
   <healthSystem>
     <ImmediateOutcomes name="Ironmal">
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>

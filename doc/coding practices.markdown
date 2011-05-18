@@ -57,3 +57,22 @@ Forward declarations of classes, etc. just to avoid #including another file shou
 
 * necessary to avoid a circular dependency of headers
 * the header being written is included in a lot of compilation units (compilation performance)
+
+
+Memory management
+-----------------------------
+
+There are two forms of memory management in C++:
+
+*   do-it-yourself C-style with pointers
+*   managed containers: vector, auto_ptr, etc.
+
+I've tended towards the latter. Usually it's possible to arrange data into a
+hierarchical structure, and in this case these containers will do most of the
+work.
+
+There is however one caveat to watch out for: auto_ptr doesn't have the usual
+copy semantics, and so cannot be used in lists (std::vector, std::map, etc.)!
+There are several ways of getting around this: boost::shared_ptr, storing
+pointers in lists rather than the objects themselves (boost::ptr_container is
+useful for this, since at some point the objects also need to be deleted).

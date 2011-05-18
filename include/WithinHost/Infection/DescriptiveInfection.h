@@ -55,7 +55,6 @@ public:
     of time since first positive slide.
   */
   static void init();
-  static void cleanup();
   //@}
   
   ///@name CTOR & DTOR

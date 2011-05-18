@@ -14,9 +14,11 @@ set (SCHEMA_NAMES
 )
 set (SCHEMA_CPP "")
 set (SCHEMA_H "")
+set (SCHEMA_XSD "")
 foreach (XSD_NAME ${SCHEMA_NAMES})
   list (APPEND SCHEMA_CPP "${XSD_NAME}.cpp")
   list (APPEND SCHEMA_H "${XSD_NAME}.h")
+  list (APPEND SCHEMA_XSD "${XSD_NAME}.xsd")
   
   set (XSD_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${XSD_NAME}.xsd)
   add_custom_command (
@@ -36,6 +38,7 @@ endforeach (XSD_NAME)
 
 set( INLINED_XSD ${CMAKE_CURRENT_BINARY_DIR}/scenario_current.xsd )
 add_custom_command (OUTPUT ${INLINED_XSD}
+  DEPENDS ${SCHEMA_XSD}
   COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/util/inlineSchema.py
   scenario.xsd ${INLINED_XSD}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

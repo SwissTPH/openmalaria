@@ -14,7 +14,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>units:List of elements;name:Scenario;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
-      <xs:sequence>
+      <xs:all>
         <xs:element name="demography" type="demography">
           <xs:annotation>
             <xs:documentation>
@@ -75,7 +75,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:List of elements;name:Model options and parameters;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
-            <xs:sequence>
+            <xs:all>
               <xs:element name="ModelOptions" type="OptionSet">
                 <xs:annotation>
                   <xs:documentation>
@@ -96,10 +96,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>units:List of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-            </xs:sequence>
+            </xs:all>
           </xs:complexType>
         </xs:element>
-      </xs:sequence>
+      </xs:all>
       <xs:attribute name="schemaVersion" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>

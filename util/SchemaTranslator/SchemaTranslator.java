@@ -1444,6 +1444,35 @@ public class SchemaTranslator {
         for (Node n : getChildNodes(scenarioElement,"drugDescription")){
             scenarioDocument.renameNode(n,null,"pharmacology");
         }
+        Element interventions = getChildElement(scenarioElement,"interventions");
+        Element descriptions = getChildElement(interventions,"descriptions");
+        NodeList descs = descriptions.getChildNodes();
+        int l = descs.getLength();
+        for( int i = 0; i < l; ++i ){
+            System.err.println("Update to 28: no support for updating intervention "+descs.item(i).getNodeName());
+            return false;
+        }
+        interventions.removeChild(descriptions);
+        Element continuous = getChildElement(interventions,"continuous");
+        if(continuous != null){
+            NodeList cont = continuous.getChildNodes();
+            l = cont.getLength();
+            for( int i = 0; i < l; ++i ){
+                System.err.println("TODO: continuous");
+                return false;
+            }
+            interventions.removeChild(continuous);
+        }
+        Element timed = getChildElement(interventions,"timed");
+        if(timed != null){
+            NodeList times = timed.getChildNodes();
+            l = times.getLength();
+            for( int i = 0; i < l; ++i ){
+                System.err.println("TODO: timed");
+                return false;
+            }
+            interventions.removeChild(continuous);
+        }
         return true;
     }
     

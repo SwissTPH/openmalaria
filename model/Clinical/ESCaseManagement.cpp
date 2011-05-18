@@ -441,17 +441,6 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESDecisionMap ESCaseManagement::mda;
 
-void ESCaseManagement::init () {
-    // MDA Intervention data
-    const scnXml::Descriptions::MDADescriptionOptional mdaDesc =
-	InputData().getInterventions().getDescriptions().getMDADescription();
-    if (mdaDesc.present()) {
-	mda.initialize( mdaDesc.get(), ESDecisionMap::MDA );
-    } else {
-	if( InputData.isInterventionActive(Interventions::MDA) )
-	    throw util::xml_scenario_error ("MDA intervention without description");
-    }
-}
 //TODO: test-case with a change-of-health-system
 void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getEventScheduler().present() )
@@ -463,8 +452,6 @@ void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
     ClinicalEventScheduler::setParameters( esData );
-}
-void ESCaseManagement::cleanup () {
 }
 
 pair<ESDecisionValue, bool> executeTree(
@@ -485,6 +472,10 @@ pair<ESDecisionValue, bool> executeTree(
     }
     
     return make_pair( outcome, schedule.anyTreatments() );
+}
+
+void ESCaseManagement::initMDA (const scnXml::MDA::DescriptionType& desc){
+    mda.initialize( desc, ESDecisionMap::MDA );
 }
 
 void ESCaseManagement::massDrugAdministration(

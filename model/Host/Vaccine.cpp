@@ -21,9 +21,9 @@
 */
 
 #include "Host/Vaccine.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "schema/interventions.h"
 
 #include <cmath>
 
@@ -52,20 +52,18 @@ double Vaccine::getEfficacy (int numPrevDoses)
         return 1.0;
 }
 
-void Vaccine::init()
+void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-    const scnXml::Interventions& interventions = InputData().getInterventions();
-    const scnXml::Descriptions::VaccineDescriptionSequence& vaccDesc =
-	interventions.getDescriptions().getVaccineDescription();
+    const scnXml::Vaccine::DescriptionSequence& vaccDesc =
+	xmlVaccine.getDescription();
     if (vaccDesc.size() == 0) {
-        if (InputData.isInterventionActive(Interventions::VACCINE))
-            throw util::xml_scenario_error ("Vaccine intervention without description");
+        // Since this function was called, we know Vaccines are used
+        throw util::xml_scenario_error ("Vaccine intervention without description");
 	// Note: R_0 intervention uses vaccines, but not deployment; hence
 	// it is safe to use without vaccine descriptions.
-        return;
     }
-    for (scnXml::Descriptions::VaccineDescriptionConstIterator i = vaccDesc.begin();
+    for (scnXml::Vaccine::DescriptionSequence::const_iterator i = vaccDesc.begin();
             i != vaccDesc.end(); i++) {
         const string& type = i->getVaccineType();
         if (type == "PEV")
@@ -83,11 +81,10 @@ void Vaccine::init()
     BSV.initVaccine (VdBSV);
     TBV.initVaccine (VdTBV);
 
-    if (interventions.getContinuous().present())
-        _numberOfEpiDoses = interventions.getContinuous().get().getVaccine().size();
+    _numberOfEpiDoses = xmlVaccine.getContinuous().size();
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
-        const scnXml::ContinuousInterv::VaccineSequence& cVS = interventions.getContinuous().get().getVaccine();
+        const scnXml::Vaccine::ContinuousSequence& cVS = xmlVaccine.getContinuous();
         for (size_t i = 0;i < _numberOfEpiDoses; i++) {
             if (i >= cVS.size()) {
                 ostringstream msg;
@@ -115,10 +112,6 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
 
         decayFunc = DecayFunction::makeObject( vd->getDecay(), "decay" );
     }
-}
-
-void Vaccine::cleanup ()
-{
 }
 
 

@@ -43,9 +43,7 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No Intervention">
-    <descriptions/>
-  </interventions>
+  <interventions name="No Intervention"/>
   <!-- entoData did have attribute firstDay="18" which is obsolete.
        But has this been accounted for in EIRDaily data? -->
   <healthSystem>

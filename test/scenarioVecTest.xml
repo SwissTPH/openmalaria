@@ -71,9 +71,7 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No interventions">
-    <descriptions/>
-  </interventions>
+  <interventions name="No interventions"/>
   <healthSystem>
     <ImmediateOutcomes name="TanzaniaSP 04">
       <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>

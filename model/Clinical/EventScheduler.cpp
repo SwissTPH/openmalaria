@@ -69,8 +69,6 @@ void ClinicalEventScheduler::init ()
     hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetWeightMult = 0.5 / weight->eval( 0.0 );
-    
-    ESCaseManagement::init ();
 }
 
 void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
@@ -128,7 +126,6 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 }
 
 void ClinicalEventScheduler::cleanup () {
-    ESCaseManagement::cleanup ();
     AgeGroupInterpolation::freeObject( weight );
 }
 

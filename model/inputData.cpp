@@ -46,68 +46,6 @@ void InputDataType::initParameterValues()
     }
 }
 
-void InputDataType::initTimedInterventions()
-{
-    if (scenario->getInterventions().getContinuous().present()) {
-        const scnXml::ContinuousInterv& contI = scenario->getInterventions().getContinuous().get();
-        if (contI.getVaccine().size())
-            activeInterventions.set (Interventions::VACCINE, true);
-	if (contI.getITN().size())
-	    activeInterventions.set (Interventions::ITN, true);
-	if (contI.getIpti().size())
-	    activeInterventions.set (Interventions::IPTI, true);
-	if (contI.getCohort().size())
-	    activeInterventions.set (Interventions::COHORT, true);
-    }
-
-    if (scenario->getInterventions().getTimed().present()) {
-        const scnXml::Timed::InterventionSequence& interventionSeq =
-            scenario->getInterventions().getTimed().get().getIntervention();
-        for (scnXml::Timed::InterventionConstIterator it (interventionSeq.begin()); it != interventionSeq.end(); ++it) {
-            TimeStep time = TimeStep(it->getTime());
-            if (timedInterventions.count (time)) {
-                ostringstream msg;
-                msg << "Error: multiple timed interventions with time: " << time;
-                throw util::xml_scenario_error (msg.str());
-            }
-            timedInterventions[time] = & (*it);
-
-            if (it->getChangeHS().present())
-                activeInterventions.set (Interventions::CHANGE_HS, true);
-            if (it->getChangeEIR().present())
-                activeInterventions.set (Interventions::CHANGE_EIR, true);
-            if (it->getVaccinate().present())
-                activeInterventions.set (Interventions::VACCINE, true);
-            if (it->getMDA().present())
-                activeInterventions.set (Interventions::MDA, true);
-            if (it->getIpti().present())
-                activeInterventions.set (Interventions::IPTI, true);
-            if (it->getITN().present())
-                activeInterventions.set (Interventions::ITN, true);
-            if (it->getIRS().present())
-                activeInterventions.set (Interventions::IRS, true);
-            if (it->getVectorAvailability().present())
-                activeInterventions.set (Interventions::VEC_AVAIL, true);
-            if (it->getImmuneSuppression().present())
-                activeInterventions.set (Interventions::IMMUNE_SUPPRESSION, true);
-            if (it->getCohort().present())
-                activeInterventions.set (Interventions::COHORT, true);
-            if (it->getLarviciding().present())
-                activeInterventions.set (Interventions::LARVICIDING, true);
-            if (it->getInsertR_0Case().present()){
-                activeInterventions.set (Interventions::R_0_CASE, true);
-		// uses vaccines but see note in Vaccine::initParameters()
-                // activeInterventions.set (Interventions::VACCINE, true);
-	    }
-            if (it->getImportedInfectionsPerThousandHosts().present())
-            	activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
-            if (it->getUninfectVectors().present())
-                activeInterventions.set (Interventions::UNINFECT_VECTORS, true);
-
-        }
-    }
-}
-
 
 util::Checksum InputDataType::createDocument (std::string lXmlFile)
 {
@@ -147,7 +85,6 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
 
     initParameterValues();
-    initTimedInterventions();
     return cksum;
 }
 
@@ -189,14 +126,6 @@ double InputDataType::getParameter (size_t i)
     if( it == parameterValues.end() )
 	throw util::xml_scenario_error( (format("parameter %1% required but not described") %i).str() );
     return it->second;
-}
-const scnXml::Intervention* InputDataType::getInterventionByTime (TimeStep time)
-{
-    std::map<TimeStep, const scnXml::Intervention*>::iterator i = timedInterventions.find (time);
-    if (i != timedInterventions.end())
-        return i->second;
-    else
-        return NULL;
 }
 
 

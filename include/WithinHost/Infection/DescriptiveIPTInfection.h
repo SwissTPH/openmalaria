@@ -21,6 +21,7 @@
 #ifndef Hmod_DescriptiveIPTInfection
 #define Hmod_DescriptiveIPTInfection
 #include "DescriptiveInfection.h"
+#include "schema/interventions.h"
 
 namespace scnXml {
     class Interventions;	// XML data passed to initParameters
@@ -40,7 +41,7 @@ class DescriptiveIPTInfection : public DescriptiveInfection {
 public:
   ///@name Static init/cleanup
   //@{
-  static void initParameters(const scnXml::Interventions& xmlInterventions);
+  static void initParameters(const scnXml::IPTDescription& xmlIPTI);
   //@}
   
   ///@name CTOR & DTOR

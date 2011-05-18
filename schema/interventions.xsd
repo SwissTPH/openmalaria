@@ -7,15 +7,96 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:include schemaLocation="entomology.xsd"/>
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="interventions">
-    <xs:sequence>
-      <xs:element name="descriptions">
+    <xs:all>
+      <xs:element minOccurs="0" name="changeHS">
         <xs:annotation>
-          <xs:documentation>Descriptions applying across all uses of an intervention.</xs:documentation>
-          <xs:appinfo>name:descriptions;</xs:appinfo>
+          <xs:documentation>
+            Changes to the health system
+          </xs:documentation>
+          <xs:appinfo>name:Change health system;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="MDADescription" type="HSESCaseManagement">
+            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="healthSystem">
+                    <xs:annotation>
+                      <xs:documentation>
+                        A complete replacement health system. Replaces all previous properties.
+                        (Health system can be replaced multiple times if necessary.)
+                      </xs:documentation>
+                      <xs:appinfo>name:Timed replacement;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:attribute name="time" type="xs:int" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Time-step at which this replacement occurs, starting
+                          from 0, the first intervention-period time-step.
+                        </xs:documentation>
+                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="changeEIR">
+        <xs:annotation>
+          <xs:documentation>
+            New description of transmission level for models not
+            supporting vector control interventions. Use of this overrides
+            previous transmission levels such that human infectiousness no
+            longer has any feedback effect on transmission. Supplied EIR
+            data must last until end of simulation.
+          </xs:documentation>
+          <xs:appinfo>name:Change transmission levels;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="nonVector">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Replacement transmission levels. Disables feedback of
+                        human infectiousness to mosquitoes on further mosquito
+                        to human transmission. Must last until end of simulation.
+                      </xs:documentation>
+                      <xs:appinfo>name:Timed replacement;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:attribute name="time" type="xs:int" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Time-step at which this replacement occurs, starting
+                          from 0, the first intervention-period time-step.
+                        </xs:documentation>
+                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="MDA" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of MDA interventions
+            (can also be configured as screen and treat or intermittent
+            preventative treatment with 1-day time-step models).
+          </xs:documentation>
+          <xs:appinfo>name:Mass drug administration;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="description" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Description of treatment type used by mass treatment option
@@ -26,25 +107,297 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:documentation>
                 <xs:appinfo>name:Description of MDA;</xs:appinfo>
               </xs:annotation>
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="HSESCaseManagement">
+                    <xs:attribute name="name" type="xs:string" use="optional">
+                      <xs:annotation>
+                        <xs:documentation>Name of set of interventions</xs:documentation>
+                        <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
             </xs:element>
-            <xs:element maxOccurs="3" minOccurs="0" name="vaccineDescription" type="vaccineDescription" />
-            <xs:element maxOccurs="1" minOccurs="0" name="iptiDescription" type="iptDescription" />
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="mass">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed deployments of mass-drug-administration.
+                </xs:documentation>
+                <xs:appinfo>name:Mass administration;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="vaccine" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of vaccine interventions.
+          </xs:documentation>
+          <xs:appinfo>name:Vaccines;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+              <xs:annotation>
+                <xs:documentation>List of ages at which vaccination takes place
+                (through EPI, post-natal and school-based programmes, etc.).
+                </xs:documentation>
+                <xs:appinfo>name:Age-based vaccination;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed mass vaccinations in the community
+                </xs:documentation>
+                <xs:appinfo>name:Mass vaccination;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="IPT" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of IPT interventions.
+          </xs:documentation>
+          <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="1" name="description" type="IPTDescription" />
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+              <xs:annotation>
+                <xs:documentation>List of ages at which IPTi/IPTc deployment takes place
+                (through EPI, post-natal and school-based programmes, etc.).
+                </xs:documentation>
+                <xs:appinfo>name:Age-based IPT deployment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed IPTi/IPTc distribution
+                </xs:documentation>
+                <xs:appinfo>name:Mass IPT administration;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ITN" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of bed-net interventions (ITNs, LLINs).
+          </xs:documentation>
+          <xs:appinfo>name:Bed nets;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
             <xs:element minOccurs="0" name="ITNDecay" type="DecayFunction"/>
+            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="AnophelesParams">
+                    <xs:sequence>
+                      <xs:element minOccurs="0" name="ITNDescription" type="ITNDescription" />
+                    </xs:sequence>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+              <xs:annotation>
+                <xs:documentation>List of ages at which bed-net deployment takes place
+                (through EPI, post-natal and school-based programmes, etc.).
+                </xs:documentation>
+                <xs:appinfo>name:Age-based bed-net deployment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed ITN deployment in the community
+                </xs:documentation>
+                <xs:appinfo>name:Mass ITN deployment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="IRS" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of indoor insecticide interventions
+            (IRS, durable wall linings, insecticide-treated-paint, etc.)
+          </xs:documentation>
+          <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
             <xs:element minOccurs="0" name="IRSDecay" type="DecayFunction"/>
+            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="AnophelesParams">
+                    <xs:sequence>
+                      <xs:element minOccurs="0" name="IRSDescription" type="IRSDescription" />
+                    </xs:sequence>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed IRS deployment in the community
+                </xs:documentation>
+                <xs:appinfo>name:Mass IRS deployment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="vectorDeterrent" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of interventions affecting only
+            human-mosquito availability (deterrents).
+          </xs:documentation>
+          <xs:appinfo>name:Vector deterrents;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
             <xs:element minOccurs="0" name="VADecay" type="DecayFunction"/>
-            <xs:element name="anopheles" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="AnophelesParams">
+                    <xs:sequence>
+                  <xs:element minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
+                    </xs:sequence>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed mosquito deterrent deployment in the community
+                </xs:documentation>
+                <xs:appinfo>name:Mass deployment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="cohort" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Recruitment of cohort as a pseudo-intervention.
+          </xs:documentation>
+          <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+              <xs:annotation>
+                <xs:documentation>List of ages at which cohort recruitment takes place.
+                </xs:documentation>
+                <xs:appinfo>name:Age-based cohort recruitment;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+              <xs:annotation>
+                <xs:documentation>List of times of mass cohort selection.
+                </xs:documentation>
+                <xs:appinfo>name:Mass cohort selection;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="importedInfections">
+        <xs:annotation>
+          <xs:documentation>
+            Models importation of P. falciparum infections from an external
+            source.
+          </xs:documentation>
+          <xs:appinfo>name:Imported infections;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="method">
+              <xs:annotation>
+                <xs:documentation>
+                  Supported methods of importing infections, based on a
+                  per-timestep rate r.
+                  
+                  infection: Randomly infect people via Bernoulli sample, where
+                  each person can have at most 1 new infection per time-step
+                  with probability r.
+                  
+                  inoculation: Give all humans an extra entomological
+                  inoculation rate of r, post availability and intervention
+                  effects (i.e. as if each person were forcibly exposed to
+                  mosquito bites).
+                  
+                  transmission: Increase level of transmission from vectors,
+                  such that age-based and intervention-based availability
+                  affects the increased number of inoculations recieved by
+                  individuals.
+                </xs:documentation>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="infection" />
+                  <xs:enumeration value="inoculation" />
+                  <xs:enumeration value="transmission" />
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:element>
+            <xs:element name="rate">
+              <xs:annotation>
+                <xs:documentation>
+                  Rate of case importation, as a step function. Each value is
+                  valid until replaced by the next value.
+                </xs:documentation>
+                <xs:appinfo>name:Rate of importation</xs:appinfo>
+              </xs:annotation>
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element minOccurs="0" name="ITNDescription" type="ITNDescription" />
-                  <xs:element minOccurs="0" name="IRSDescription" type="IRSDescription" />
-                  <xs:element minOccurs="0" name="VADescription" type="BaseInterventionDescription" />
+                  <xs:element name="item" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                      <xs:complexContent>
+                        <xs:extension base="inputValue">
+                          <xs:annotation>
+                            <xs:documentation>A time-rate pair.</xs:documentation>
+                            <xs:appinfo>name:List item;</xs:appinfo>
+                          </xs:annotation>
+                          <xs:attribute name="time" type="xs:int" use="required">
+                            <xs:annotation>
+                              <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                            </xs:annotation>
+                          </xs:attribute>
+                        </xs:extension>
+                      </xs:complexContent>
+                    </xs:complexType>
+                  </xs:element>
                 </xs:sequence>
-                <xs:attribute name="mosquito" type="xs:string" use="required">
+                <xs:attribute name="period" type="xs:int" default="0">
                   <xs:annotation>
                     <xs:documentation>
-                  Description of the entomological effects of interventions
-                  </xs:documentation>
-                    <xs:appinfo>name:Entomological effects of interventions</xs:appinfo>
+                      If period is 0 (or effectively infinite), the last specified
+                      value remains indefinitely in effect, otherwise the times of
+                      all values specified must be less than the period, and values
+                      are repeated modulo period (timestep period+2 has same value
+                      as timestep 2, etc.).
+                    </xs:documentation>
+                    <xs:appinfo>name:Period of repetition;units:time-steps;min:0</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -52,74 +405,152 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="continuous" type="continuousInterv">
+      <xs:element minOccurs="0" name="immuneSuppression">
         <xs:annotation>
-          <xs:documentation>Continuously applied interventions</xs:documentation>
-          <xs:appinfo>name:Continuously applied interventions;</xs:appinfo>
+          <xs:documentation>
+            Removes all exposure-related immunity gained over time by hosts
+            without removing infections.
+            
+            Hypothetical, but potentially useful to simulate scenarios with
+            unprotected humans.
+          </xs:documentation>
+          <xs:appinfo>name:Immune suppression;</xs:appinfo>
         </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timed" type="mass" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="timed" type="timed">
+      <xs:element minOccurs="0" name="insertR_0Case">
         <xs:annotation>
-          <xs:documentation>List of timed interventions</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Timed interventions;</xs:appinfo>
+          <xs:documentation>
+            Used to simulate R_0. First, infections should be eliminated,
+            immunity removed, and the population given an effective transmission-
+            blocking vaccine (not done by this intervention). Then this
+            intervention may be used to: pick one human, infect him, administer
+            a fully effective Preerythrocytic vaccine and remove
+            transmission-blocking vaccine effect on this human. Thus only this
+            one human will be a source of infections in an unprotected population,
+            and will not reinfected himself.
+          </xs:documentation>
+          <xs:appinfo>name:Insert R_0 case;</xs:appinfo>
         </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:annotation>
+                  <xs:appinfo>name:Timed occurrence;</xs:appinfo>
+                </xs:annotation>
+                <xs:attribute name="time" type="xs:int" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Time-step at which this intervention occurs, starting
+                      from 0, the first intervention-period time-step.
+                    </xs:documentation>
+                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
-    </xs:sequence>
+      <xs:element minOccurs="0" name="uninfectVectors">
+        <xs:annotation>
+          <xs:documentation>
+            Removes all infections from mosquitoes -- resulting in zero EIR to
+            humans, until such time that mosquitoes are re-infected and become
+            infectious. Only effectious in dynamic EIR mode (when changeEIR was
+            not used).
+            
+            Hypothetical, but potentially useful to simulate a setting starting
+            from no infections, but with enough mosquitoes to reach a set
+            equilibrium of exposure.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Uninfect vectors;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:annotation>
+                  <xs:appinfo>name:Timed occurrence;</xs:appinfo>
+                </xs:annotation>
+                <xs:attribute name="time" type="xs:int" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Time-step at which this intervention occurs, starting
+                      from 0, the first intervention-period time-step.
+                    </xs:documentation>
+                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="larviciding">
+        <xs:annotation>
+          <xs:documentation>
+            Simple larviciding intervention description.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Simple larviciding intervention;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <!-- FIXME: this needs to be a list per time, or something -->
+            <xs:element name="anopheles" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:attribute name="mosquito" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Mosquito to be larvicided
+                    </xs:documentation>
+                    <xs:appinfo>name:Mosquito to be larvicided;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="effectiveness" type="xs:double" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Proportional reduction in emergence rate
+                    </xs:documentation>
+                    <xs:appinfo>units:none;min:0;max:1;name:Proportionate reduction in emergence;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="duration" type="xs:int" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Number of days for which the intervention is active.
+                    </xs:documentation>
+                    <xs:appinfo>units:days;min:0;max:inf;name:Duration of activity;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
-        <xs:documentation>Name of age specific intervention</xs:documentation>
+        <xs:documentation>Name of set of interventions</xs:documentation>
         <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="continuousInterv">
-    <xs:annotation>
-      <xs:documentation>Interventions to be deployed continuously</xs:documentation>
-      <xs:appinfo>name:Interventions to be deployed continuously;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="vaccine" type="ageSpecific">
-        <xs:annotation>
-          <xs:documentation>List of age groups for vaccination</xs:documentation>
-          <xs:appinfo>units:List of elements;name:List of age groups for vaccination;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="ITN" type="ageSpecific">
-        <xs:annotation>
-          <xs:documentation>Description of ITN deployment in the community</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Description of ITN deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="ipti" type="ageSpecific">
-        <xs:annotation>
-          <xs:documentation>
-            List of age groups for IPTi distribution
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:List of age groups for IPTi</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="cohort" type="ageSpecific">
-        <xs:annotation>
-          <xs:documentation>
-            Description of continuous selection of individuals for a cohort study.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Continuous cohort selection;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="timed">
-    <xs:annotation>
-      <xs:documentation>
-        List of timed interventions
-      </xs:documentation>
-      <xs:appinfo>units:List of elements;name:List of timed interventions;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="intervention" type="intervention" />
-    </xs:sequence>
-  </xs:complexType>
   <xs:complexType name="mass">
+    <xs:attribute name="time" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Time-step at which this intervention occurs, starting
+          from 0, the first intervention-period time-step.
+        </xs:documentation>
+        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="maxAge" type="xs:double" default="100">
       <xs:annotation>
         <xs:documentation>
@@ -220,178 +651,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="intervention">
-    <xs:sequence>
-      <xs:element minOccurs="0" name="changeHS" type="healthSystem"/>
-      <xs:element minOccurs="0" name="changeEIR" type="nonVector">
-          <xs:annotation>
-            <xs:documentation>
-              New description of transmission setting for models without vector control interventions
-              (included for backward compatibility)
-            </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Replacement transmission setting (vector control not enabled);</xs:appinfo>
-          </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="importedInfectionsPerThousandHosts" type="xs:double">
-      <xs:annotation>
-          <xs:documentation>
-          Import infections (as if a mosquito bites a human). Imported via a
-          Bernoulli trial per host.
-          </xs:documentation>
-          <xs:appinfo>name:Import infections;units:Number per 1000 hosts;min:0</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="MDA" type="mass">
-        <xs:annotation>
-          <xs:documentation>
-            Description of mass drug deployment in the community.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Mass Drug Administration;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="vaccinate" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            Description of vaccine deployment in the
-            community
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Vaccination;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="ITN" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            Description of ITN deployment in the community
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:ITN deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="IRS" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            Description of IRS deployment in the community
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:IRS deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="VectorAvailability" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            Description of a mosquito deterrent deployment in the community
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Mosquito deterrent;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="ipti" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            List of age groups for IPTi distribution
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:IPTi deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="immuneSuppression" type="mass">
-        <xs:annotation>
-          <xs:documentation>
-            Removes all exposure-related immunity gained over time by hosts
-            without removing infections.
-            
-            Hypothetical, but potentially useful to simulate scenarios with
-            unprotected humans.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Immune suppression deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element minOccurs="0" name="insertR_0Case">
-        <xs:annotation>
-          <xs:documentation>
-            Used to simulate R_0. First, infections should be eliminated,
-            immunity removed, and the population given an effective transmission-
-            blocking vaccine (not done by this intervention). Then this
-            intervention may be used to: pick one human, infect him, administer
-            a fully effective Preerythrocytic vaccine and remove
-            transmission-blocking vaccine effect on this human. Thus only this
-            one human will be a source of infections in an unprotected population,
-            and will not reinfected himself.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Insert R_0 case;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType/>
-      </xs:element>
-      <xs:element minOccurs="0" name="uninfectVectors">
-        <xs:annotation>
-          <xs:documentation>
-            Removes all infections from mosquitoes -- resulting in zero EIR to
-            humans, until such time that mosquitoes are re-infected and become
-            infectious. Only effectious in dynamic EIR mode (when changeEIR was
-            not used).
-            
-            Hypothetical, but potentially useful to simulate a setting starting
-            from no infections, but with enough mosquitoes to reach a set
-            equilibrium of exposure.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Uninfect vectors;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType/>
-      </xs:element>
-      <xs:element minOccurs="0" name="larviciding">
-        <xs:annotation>
-          <xs:documentation>
-            Simple larviciding intervention description.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Simple larviciding intervention;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="anopheles" type="larvicidingAnopheles" maxOccurs="unbounded" />
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="cohort" type="massCum">
-        <xs:annotation>
-          <xs:documentation>
-            Description of mass cohort selection.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Mass Cohort Selection;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="time" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Time step of intervention
-        </xs:documentation>
-        <xs:appinfo>units:Number;min:1;max:10000;name:Time step of intervention;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="larvicidingAnopheles">
-    <xs:attribute name="mosquito" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Mosquito to be larvicided
-        </xs:documentation>
-        <xs:appinfo>name:Mosquito to be larvicided;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="effectiveness" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Proportional reduction in emergence rate
-        </xs:documentation>
-        <xs:appinfo>units:none;min:0;max:1;name:Proportionate reduction in emergence;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="duration" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Number of days for which the intervention is active.
-        </xs:documentation>
-        <xs:appinfo>units:days;min:0;max:inf;name:Duration of activity;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
   <xs:complexType name="vaccineDescription">
+    <xs:annotation>
+      <xs:documentation>List of vaccine descriptions</xs:documentation>
+      <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
+    </xs:annotation>
     <xs:sequence>
       <xs:element name="decay" type="DecayFunction">
         <xs:annotation>
@@ -424,8 +688,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Name of vaccine</xs:documentation>
+        <xs:appinfo>units:string;name:Vaccine;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="iptDescription">
+  <xs:complexType name="IPTDescription">
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="infGenotype">
         <xs:complexType>
@@ -484,6 +754,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>Description of ipti effect</xs:documentation>
         <xs:appinfo>units:List of Elementes;name:Description of ipti effect;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>Name of IPT intervention</xs:documentation>
+        <xs:appinfo>units:string;name:IPT name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -551,6 +827,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Name of intervention
         </xs:documentation>
         <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="AnophelesParams">
+    <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the affected anopheles-mosquito species.
+        </xs:documentation>
+        <xs:appinfo>name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

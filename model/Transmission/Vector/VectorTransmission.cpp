@@ -102,6 +102,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         species.clear();
         speciesIndex.clear();
         
+        /*FIXME
         if( InputData.isInterventionActive(Interventions::ITN) ||
             InputData.isInterventionActive(Interventions::IRS) ||
             InputData.isInterventionActive(Interventions::VEC_AVAIL) ||
@@ -109,14 +110,17 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         {
             throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
         }
+        */
     }else{
         // -----  Initialise interventions  -----
+        /*FIXME
         const scnXml::Descriptions::AnophelesSequence& intervSeq =
             InputData().getInterventions().getDescriptions().getAnopheles();
         for (scnXml::Descriptions::AnophelesSequence::const_iterator it =
                     intervSeq.begin(); it != intervSeq.end(); ++it) {
             species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it, it->getMosquito());
         }
+        */
     }
 
 
@@ -240,9 +244,12 @@ void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population,
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
+    assert(false);
+    /*FIXME
     const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();
     for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
         species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
+    */
 }
 void VectorTransmission::uninfectVectors() {
     for (size_t i = 0; i < numSpecies; ++i)

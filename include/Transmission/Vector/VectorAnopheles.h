@@ -144,7 +144,7 @@ public:
         humanBase.setInterventionDescription (intervDesc, species);
     }
 
-    void intervLarviciding (const scnXml::LarvicidingAnopheles&);
+    void intervLarviciding (/*const scnXml::LarvicidingAnopheles&*/);
 
     void uninfectVectors();
 

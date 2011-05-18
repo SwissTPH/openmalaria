@@ -103,8 +103,6 @@ void DescriptiveInfection::init () {
     f_MTherapyDensities.close();
 }
 
-void DescriptiveInfection::cleanup () {}
-
 
 // -----  non-static init/destruction  -----
 

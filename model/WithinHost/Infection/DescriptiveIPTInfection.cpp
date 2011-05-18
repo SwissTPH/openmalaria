@@ -19,7 +19,6 @@
 */
 
 #include "WithinHost/Infection/DescriptiveIPTInfection.h"
-#include "inputData.h"
 #include "util/random.h"
 
 namespace OM { namespace WithinHost {
@@ -31,14 +30,12 @@ vector<DescriptiveIPTInfection::GenotypeData> DescriptiveIPTInfection::genotypes
 // -----  static init/clear -----
 
 // Only called if IPT is present
-void DescriptiveIPTInfection::initParameters (const scnXml::Interventions& xmlInterventions){
-  const scnXml::IptDescription& xmlIPTI = xmlInterventions.getDescriptions().getIptiDescription().get();
-  
-  const scnXml::IptDescription::InfGenotypeSequence& genotypesData = xmlIPTI.getInfGenotype();
+void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlIPTI){
+  const scnXml::IPTDescription::InfGenotypeSequence& genotypesData = xmlIPTI.getInfGenotype();
   genotypes.reserve (genotypesData.size());
   
   double genotypeCumFreq = 0.0;
-  for (scnXml::IptDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
+  for (scnXml::IPTDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
     genotypeCumFreq += it->getFreq();
     genotypes.push_back( GenotypeData(
         genotypeCumFreq,

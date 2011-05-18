@@ -22,6 +22,7 @@
 #define Hmod_DescriptiveIPT
 
 #include "WithinHost/DescriptiveWithinHost.h"
+#include "schema/interventions.h"
 
 namespace OM { namespace WithinHost {
     
@@ -37,8 +38,7 @@ public:
   //@{
   /** Determines whether IPT is present or not (iptActive), and if so
    * initialises parameters here and in DescriptiveIPTInfection. */
-  static void init();
-  static void cleanup();
+  static void init(const scnXml::IPTDescription& xmlIPTI);
   //@}
   
   DescriptiveIPTWithinHost ();
@@ -55,10 +55,6 @@ public:
   virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Last IPTi dose recent enough to give protection?
   virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
-  
-  /// Is IPT present?
-  /// set by initParameters
-  static bool iptActive;
   
 protected:
   virtual bool eventSPClears (DescriptiveInfection* inf);
@@ -85,7 +81,10 @@ private:
     // When 10≤effect<30: IPT dose
     // 2 or 12: SP; 3 or 13: short-acting drug
     // 14-22: something to do with seasonality
+    // NOTE: if the logic in clearInfections() is anything to go by, other
+    // values are valid for SP but totally undocumented
     enum IPTiEffects {
+        NO_IPT = 0,
         PLACEBO_SP  = 2,
         PLACEBO_CLEAR_INFECTIONS = 3,
         IPT_MIN = 10,   // likely 10 and 11 are unused

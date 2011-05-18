@@ -30,7 +30,7 @@ namespace OM { namespace Host {
 
 class Human;	// we have a circular dependency...
 
-/** */
+/** Management of interventions deployed as humans reach a certain age. */
 class ContinuousIntervention {
 public:
     /** Read XML descriptions.
