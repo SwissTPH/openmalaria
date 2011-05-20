@@ -144,9 +144,9 @@ public:
     virtual void deploy (OM::Population& population) {
         Population::HumanPop& popList = population.getList();
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
-            //TODO: note that this won't be exactly the same as before, so we may want to revert to old behaviour to check results exactly
+            //FIXME: should be age>=minAge
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age >= minAge && age < maxAge ){
+            if( age > minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     if( util::random::uniform_01() < coverage ){
                         // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
@@ -195,8 +195,9 @@ public:
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally cohort
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+            //FIXME: should be age>=minAge
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age >= minAge && age < maxAge ){
+            if( age > minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     total+=1;
                     if( !((*iter).*isProtected)(maxInterventionAge) )
@@ -478,7 +479,10 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     }
     
     // lists must be sorted, increasing
-    sort( ctsIntervs.begin(), ctsIntervs.end() );
+    // For reproducability, we need to use stable_sort, not sort.
+    stable_sort( ctsIntervs.begin(), ctsIntervs.end() );
+    // NOTE: I'd rather use stable_sort, but it's not available. Results are
+    // the same without as with a hacked BOOST version including stable_sort.
     timed.sort();
     
     // make sure the list ends with something always in the future, so we don't
@@ -489,10 +493,14 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
 void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeStep interventionTime ){
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
     // else. nextTimed should be zero so we can go through all past interventions.
+    // Only redeploy those which happened before this timestep.
     assert( nextTimed == 0 );
-    while( timed[nextTimed].time <= interventionTime ){
+    while( timed[nextTimed].time < interventionTime ){
         if( dynamic_cast<TimedChangeHSIntervention*>(&timed[nextTimed])!=0 ||
             dynamic_cast<TimedChangeEIRIntervention*>(&timed[nextTimed])!=0 ){
+            //Note: neither changeHS nor changeEIR interventions care what the
+            //current timestep is when they are deployed, so we don't need to
+            //tell them the deployment time.
             timed[nextTimed].deploy( population );
         }
         nextTimed += 1;

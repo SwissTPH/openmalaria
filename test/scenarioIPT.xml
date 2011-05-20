@@ -177,6 +177,8 @@
       <continuous coverage="0.95" targetAgeYrs="0.25"/>
       <continuous coverage="0.95" targetAgeYrs="0.33"/>
       <continuous coverage="0.95" targetAgeYrs="0.75"/>
+      <timed time="7" coverage=".8"/>
+      <timed time="79" coverage=".8"/>
     </IPT>
   </interventions>
   <!-- Niakhar seasonality scaled to an EIR of 21 -->

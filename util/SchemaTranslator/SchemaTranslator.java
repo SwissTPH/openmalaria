@@ -1449,14 +1449,29 @@ public class SchemaTranslator {
          return true;
     }
 
-    /* Several name changes. */
+    /* Several name changes.
+     * A major change to the interventions element.
+     */
     public Boolean translate27To28() throws Exception {
-        for (Node n : getChildNodes(scenarioElement,"entoData")){
-            scenarioDocument.renameNode(n,null,"entomology");
+        // Name changes:
+        Element ento = getChildElement(scenarioElement,"entoData");
+        scenarioDocument.renameNode(ento,null,"entomology");
+        Element vec = getChildElement(ento,"vector");
+        if( vec!=null ){
+            for(Node n:getChildNodes(vec,"anopheles")){
+                for(Node m:getChildNodes((Element)n,"eir")){
+                    scenarioDocument.renameNode(m,null,"EIR");
+                }
+                for(Node m:getChildNodes((Element)n,"monthlyEir")){
+                    scenarioDocument.renameNode(m,null,"monthlyEIR");
+                }
+            }
         }
         for (Node n : getChildNodes(scenarioElement,"drugDescription")){
             scenarioDocument.renameNode(n,null,"pharmacology");
         }
+        
+        // Interventions elt changes:
         Element interventions = getChildElement(scenarioElement,"interventions");
         Element descriptions = getChildElement(interventions,"descriptions");
         NodeList descs = descriptions.getChildNodes();

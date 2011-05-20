@@ -46,6 +46,8 @@ public:
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
   
   /** @brief Sets up the EIR used in a change of EIR intervention.
+   * 
+   * EIR is always set from intervention-period step 0, not the current step.
    *
    * Reads in the estimates of the EIR for each village and each day
    * and converts this into EIR estimates per five day period
