@@ -128,7 +128,7 @@
   <entomology mode="4" name="Namawala, single vector">
     <vector>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <eir EIRRotateAngle="0" a0="-3.251" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+        <EIR EIRRotateAngle="0" a0="-3.251" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
         <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.1" mosqHumanBloodIndex="1.0" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
       </anopheles>
     </vector>

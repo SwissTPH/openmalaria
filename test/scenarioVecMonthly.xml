@@ -129,7 +129,7 @@
   <entomology mode="4" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <monthlyEir annualEIR="20">
+        <monthlyEIR annualEIR="20">
           <item>10</item>
           <item>1</item>
           <item>1</item>
@@ -142,7 +142,7 @@
           <item>1</item>
           <item>1</item>
           <item>1</item>
-        </monthlyEir>
+        </monthlyEIR>
         <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.1" mosqHumanBloodIndex="1.0" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
       </anopheles>
     </vector>
