@@ -23,12 +23,7 @@
 
 #include "Global.h"
 #include "util/AgeGroupInterpolation.h"
-
-#include <map>
-
-namespace scnXml {
-    class HealthSystem;
-}
+#include "schema/interventions.h"
 
 namespace OM { namespace Clinical {
     /** Code shared between case management systems, to:
@@ -47,25 +42,12 @@ namespace OM { namespace Clinical {
 	static void initCommon ();
         /// Free memory
         static void cleanupCommon ();
-	
-	/** Checkpointing: load state.
-	 *
-	 * If healthSystemSource != TimeStep::never, this calls changeHealthSystem to re-load
-	 * a parameters from an intervention. */
-	static void staticCheckpoint (istream& stream);
-	/// Checkpointing: save state
-	static void staticCheckpoint (ostream& stream);
-	
+        
 	/** Serves both to set initial health-system data and to change
 	 * following an intervention.
 	 * 
-	 * Gets the primary description of the health system when
-	 * source == TimeStep::never, or the replacement description given by
-	 * timed intervention at timestep source, then calls
-	 * setHealthSystem from a derived class.
-	 * 
 	 * Also calls readCaseFatalityRatio with the new data. */
-	static void changeHealthSystem (TimeStep source);
+	static void changeHealthSystem (const scnXml::HealthSystem& healthSystem);
 	
 	/// Return the case-fatality-rate map (needed by EventScheduler)
 // 	static inline const map<double,double>& getCaseFatalityRates (){
@@ -99,17 +81,8 @@ namespace OM { namespace Clinical {
         }
 	
     private:
-	/** Gets the primary description of the health system when
-	 * source == TimeStep::never, or the replacement description given by
-	 * timed intervention at timestep source. */
-	static const scnXml::HealthSystem& getHealthSystem ();
-	
 	/// Reads the CFR and sequelae data from healthSystem.
 	static void readCommon(const scnXml::HealthSystem& healthSystem);
-	
-	/** Describes which health-system descriptor should be used, in order
-	 * to load the correct one from a checkpoint (see getHealthSystem). */
-	static TimeStep healthSystemSource;
 	
 	// An interpolation function from age-groups to CFR values.
         static util::AgeGroupInterpolation* caseFatalityRate;

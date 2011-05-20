@@ -36,7 +36,8 @@ namespace OM { namespace Transmission {
 class HostCategoryAnophelesHumans : public HostCategoryAnopheles {
 public:
     HostCategoryAnophelesHumans() :
-            humanBloodIndex(0.0), probMosqOvipositing(0.0)
+        humanBloodIndex(numeric_limits< double >::signaling_NaN()),
+        probMosqOvipositing(numeric_limits< double >::signaling_NaN())
     {}
     /** The proportion of resting mosquitoes that have recently fed on human blood. */
     double humanBloodIndex;

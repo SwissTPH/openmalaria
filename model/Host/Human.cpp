@@ -32,6 +32,7 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
+#include "Interventions.h"
 
 #include <string>
 #include <string.h>
@@ -51,12 +52,6 @@ namespace OM { namespace Host {
 
 void Human::initHumanParameters () {    // static
     // Init models used by humans:
-    ContinuousIntervention::init(
-        &Human::ctsVaccinate,
-        &Human::ctsITN,
-        &Human::deployIptDose,
-        &Human::addToCohort
-    );
     Transmission::PerHostTransmission::init();
     InfectionIncidenceModel::init();
     WithinHost::WithinHostModel::init();
@@ -83,6 +78,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     _inCohort(false),
+    nextCtsDist(0),
     _probTransmissionToMosquito(0.0)
 {
   if (_dateOfBirth != TimeStep::simulation && (TimeStep::simulation > TimeStep(0) || _dateOfBirth > TimeStep::simulation))
@@ -207,7 +203,8 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 void Human::updateInterventionStatus() {
     if (TimeStep::interventionPeriod >= TimeStep(0)) {
         TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
-        ctsIntervention.deploy(this, ageTimeSteps);
+        //HACK
+        InterventionManager::getSingleton().deployCts(*this, ageTimeSteps, nextCtsDist);
     }
 }
 

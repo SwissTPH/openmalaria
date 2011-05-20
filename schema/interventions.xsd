@@ -238,8 +238,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="anophelesParams" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
                   <xs:extension base="ITNDescription">
@@ -292,8 +292,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="anophelesParams" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
                   <xs:extension base="IRSDescription">
@@ -338,8 +338,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element minOccurs="0" name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="anophelesParams" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
                   <xs:extension base="BaseInterventionDescription">

@@ -52,6 +52,9 @@ public:
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
   virtual void modelUpdateKappa() {}
 
+  virtual void setITNDescription (const scnXml::ITN&);
+  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();
   

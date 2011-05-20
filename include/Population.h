@@ -82,11 +82,6 @@ public:
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
     
-    /** Checks for time-based interventions and implements them
-     *
-     * \param time Current time (in tsteps) */
-    void implementIntervention (TimeStep time);
-    
     /// Type of population list
     typedef list<Host::Human> HumanPop;
     /// Iterator type of population
@@ -95,6 +90,14 @@ public:
     /** Return the list of humans. */
     inline HumanPop& getList() {
         return population;
+    }
+    /** Return the number of humans. */
+    inline int getSize() {
+        return populationSize;
+    }
+    /** Return access to the transmission model. */
+    inline Transmission::TransmissionModel& transmissionModel() {
+        return *_transmissionModel;
     }
 
 private:
@@ -119,17 +122,6 @@ private:
     /// Delegate to print immunity's cumulativeY parameter (median across population)
     void ctsMedianImmunityY (ostream& stream);
     
-    /** This function sets the imported infections in a population.
-     *  The probability of an host to import an infection is calculated
-     *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
-     *  is then used to predict if an human has imported the infection in the
-     *  population or not. A maximum of one infection can be imported per
-     * intervention.
-     * 
-     * @param rate Number of infections imported per 1000 humans at this time
-     * point.  */
-    void importedInfections(double rate);
-
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
 

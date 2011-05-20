@@ -24,6 +24,7 @@
 #include "Transmission/Vector/HostCategoryAnopheles.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
+#include "util/errors.h"
 
 namespace OM { namespace Transmission {
     
@@ -45,6 +46,10 @@ public:
   static void init ();
   /** Static cleanup. */
   static void cleanup ();
+  
+    static void setITNDescription (const scnXml::ITN& elt);
+    static void setIRSDescription (const scnXml::IRS& elt);
+    static void setVADescription (const scnXml::VectorDeterrent& elt);
   
   /** Calculates the adjustment for body size in exposure to mosquitoes,
    * relative to an average adult.
@@ -131,18 +136,27 @@ public:
   
   /// Give individual a new ITN as of time timeStep.
   inline void setupITN () {
+      if( ITNDecay.get() == 0 ){
+        throw util::xml_scenario_error ("ITN intervention without description of decay");
+      }
     timestepITN = TimeStep::simulation;
   }
   /// Give individual a new IRS as of time timeStep.
   inline void setupIRS () {
+      if( IRSDecay.get() == 0 ){
+        throw util::xml_scenario_error ("IRS intervention without description of decay");
+      }
     timestepIRS = TimeStep::simulation;
   }
   /// Give individual a new VA intervention as of time timeStep.
   inline void setupVA () {
+      if( VADecay.get() == 0 ){
+        throw util::xml_scenario_error ("Vector availability intervention without description of decay");
+      }
     timestepVA = TimeStep::simulation;
   }
   
-  /// Is individual protected by an ITN? FIXME: which base? Want a single parameter encompasing all species
+  /// Is individual protected by an ITN?
   inline bool hasITNProtection(TimeStep maxInterventionAge)const{
       return timestepITN + maxInterventionAge > TimeStep::simulation;
   }

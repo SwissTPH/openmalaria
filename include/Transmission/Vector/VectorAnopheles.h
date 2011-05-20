@@ -137,11 +137,17 @@ public:
         return humanBase;
     }
 
-    /** Set up intervention descriptions for humans, for this anopheles species.
-     *
-     * Currently no interventions for non-human hosts, although planned. */
-    inline void setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species) {
-        humanBase.setInterventionDescription (intervDesc, species);
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setITNDescription (const scnXml::ITNDescription& itnDesc) {
+        humanBase.setITNDescription (itnDesc);
+    }
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {
+        humanBase.setIRSDescription (irsDesc);
+    }
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+        humanBase.setVADescription (vaDesc);
     }
 
     void intervLarviciding (/*const scnXml::LarvicidingAnopheles&*/);

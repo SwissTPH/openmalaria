@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "Host/Human.h"
 #include "util/errors.h"
+#include "schema/interventions.h"
 
 #include <fstream>
 #include <string.h>
@@ -158,6 +159,12 @@ public:
    * called before this function in order to return the correct value. */
   double getEIR (PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
+  /** Set ITN parameters. */
+  virtual void setITNDescription (const scnXml::ITN&);
+  /** Set IRS parameters. */
+  virtual void setIRSDescription (const scnXml::IRS&);
+  /** Set vector deterrent parameters. */
+  virtual void setVADescription (const scnXml::VectorDeterrent&);
   /** Set the larviciding intervention params. */
   virtual void intervLarviciding (const scnXml::Larviciding&);
   

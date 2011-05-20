@@ -20,7 +20,6 @@
 #define Hmod_human
 #include "Global.h"
 #include "Host/Vaccine.h"
-#include "Host/ContinuousIntervention.h"
 #include "Transmission/PerHostTransmission.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
@@ -71,12 +70,12 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
-      ctsIntervention & stream;
       _ylag & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
       _probTransmissionToMosquito & stream;
       _inCohort & stream;
+      nextCtsDist & stream;
   }
   //@}
       
@@ -249,9 +248,6 @@ private:
   /// Made persistant to save a lookup each timestep (has a significant impact)
   Monitoring::AgeGroup monitoringAgeGroup;
   
-  /// Continuous intervention deployment
-  ContinuousIntervention ctsIntervention;
-  
   /// Vaccines
   PerHumanVaccine _vaccine;
   
@@ -265,6 +261,9 @@ private:
   
   //!Date of birth, time step since start of warmup
   TimeStep _dateOfBirth;
+  
+  /// The next continuous distribution in the series
+  uint32_t nextCtsDist;
   
   /// True if human is included in a cohort.
   bool _inCohort;

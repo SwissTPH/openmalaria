@@ -49,20 +49,50 @@ namespace Interventions {
     };
 }
 
+/** Age-based (continuous) deployment. */
+class AgeIntervention {
+public:
+    AgeIntervention( const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) () );
+    
+    inline bool operator< (const AgeIntervention& that) const{
+        return this->ageTimesteps < that.ageTimesteps;
+    }
+    
+    TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
+    TimeStep ageTimesteps;
+    bool cohortOnly;
+    double coverage;
+    // Member function pointer to the function (in Human) responsible for deploying intervention:
+    void (Host::Human::*deploy) ();
+};
+
 /** Interface of a timed intervention. */
 class TimedIntervention {
 public:
     /// Create, passing time of deployment
     TimedIntervention(TimeStep deploymentTime);
     virtual ~TimedIntervention() {}
-    virtual void deploy () =0;
+    
+    inline bool operator< (const TimedIntervention& that) const{
+        return this->time < that.time;
+    }
+    
+    virtual void deploy (OM::Population&) =0;
+    
     TimeStep time;
 };
 
 /** Management of interventions deployed on a per-timestep basis. */
 class InterventionManager {
 public:
+    /** Read XML descriptions. */
     InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population);
+    
+    /** Call after loading a checkpoint, passing the intervention-period time.
+     * 
+     * Serves to replace health-system and EIR where changeHS/changeEIR
+     * interventions have been used. */
+    void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
     
     /// Returns true if intervention is active
     inline bool isActive( Interventions::Flags intervention ) const{
@@ -70,8 +100,19 @@ public:
         return activeInterventions[intervention];
     }
     
-    /** Deploy interventions for this timestep. */
-    void deploy ();
+    // Included for now as a HACK.
+    static void setSingleton(InterventionManager* im);
+    static const InterventionManager& getSingleton();
+    
+    /** @brief Deploy interventions
+     *
+     * Timed interventions are deployed for this timestep. */
+    void deploy (OM::Population& population);
+    /** Second part of deployment. Currently separate to avoid changing RNGs.
+     * 
+     * Continuous interventions are deployed as humans reach the target ages.
+     * Unlike with vaccines, missing one schedule doesn't preclude the next. */
+    void deployCts (OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const;
     
     /// Checkpointing
     template<class S>
@@ -81,6 +122,8 @@ public:
     
 private:
     bitset<Interventions::SIZE> activeInterventions;
+    // All continuous interventions, sorted by deployment age (weakly increasing)
+    vector<AgeIntervention> ctsIntervs;
     // List of all timed interventions. Should be sorted (time weakly increasing).
     ptr_vector<TimedIntervention> timed;
     uint32_t nextTimed;

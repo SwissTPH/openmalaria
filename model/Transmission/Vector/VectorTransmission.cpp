@@ -101,26 +101,6 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         numSpecies = 0;
         species.clear();
         speciesIndex.clear();
-        
-        /*FIXME
-        if( InputData.isInterventionActive(Interventions::ITN) ||
-            InputData.isInterventionActive(Interventions::IRS) ||
-            InputData.isInterventionActive(Interventions::VEC_AVAIL) ||
-            InputData.isInterventionActive(Interventions::LARVICIDING) )
-        {
-            throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-        }
-        */
-    }else{
-        // -----  Initialise interventions  -----
-        /*FIXME
-        const scnXml::Descriptions::AnophelesSequence& intervSeq =
-            InputData().getInterventions().getDescriptions().getAnopheles();
-        for (scnXml::Descriptions::AnophelesSequence::const_iterator it =
-                    intervSeq.begin(); it != intervSeq.end(); ++it) {
-            species[getSpeciesIndex(it->getMosquito())].setInterventionDescription (*it, it->getMosquito());
-        }
-        */
     }
 
 
@@ -153,6 +133,7 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
         species[i].setupNv0 (i, population, populationSize, iMPA);
     }
 }
+
 
 void VectorTransmission::scaleEIR (double factor) {
     for ( size_t i = 0; i < numSpecies; ++i )
@@ -243,7 +224,38 @@ void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population,
     }
 }
 
+void VectorTransmission::setITNDescription (const scnXml::ITN& elt){
+    if( InputData().getEntomology().getMode() == equilibriumMode ){
+        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+    }
+    PerHostTransmission::setITNDescription (elt);
+    for(scnXml::ITN::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
+        species[getSpeciesIndex(it->getMosquito())].setITNDescription (*it);
+    }
+}
+void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
+    if( InputData().getEntomology().getMode() == equilibriumMode ){
+        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+    }
+    PerHostTransmission::setIRSDescription (elt);
+    for(scnXml::IRS::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
+        species[getSpeciesIndex(it->getMosquito())].setIRSDescription (*it);
+    }
+}
+void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
+    if( InputData().getEntomology().getMode() == equilibriumMode ){
+        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+    }
+    PerHostTransmission::setVADescription (elt);
+    for(scnXml::VectorDeterrent::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
+        species[getSpeciesIndex(it->getMosquito())].setVADescription (*it);
+    }
+}
+
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
+    if( InputData().getEntomology().getMode() == equilibriumMode ){
+        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+    }
     assert(false);
     /*FIXME
     const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();

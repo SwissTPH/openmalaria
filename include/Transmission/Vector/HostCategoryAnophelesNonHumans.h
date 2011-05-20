@@ -35,7 +35,7 @@ namespace OM { namespace Transmission {
 class HostCategoryAnophelesNonHumans : public HostCategoryAnopheles {
 public:
     HostCategoryAnophelesNonHumans() :
-        relativeEntoAvailability(0.0)
+        relativeEntoAvailability(numeric_limits< double >::signaling_NaN())
     {}
     
     /** non human host type name, we need this value to retrieve non human host population size */

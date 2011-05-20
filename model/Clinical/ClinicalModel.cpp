@@ -61,12 +61,10 @@ void ClinicalModel::cleanup () {
 void ClinicalModel::staticCheckpoint (istream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
-    CaseManagementCommon::staticCheckpoint(stream);
 }
 void ClinicalModel::staticCheckpoint (ostream& stream) {
     infantDeaths & stream;
     infantIntervalsAtRisk & stream;
-    CaseManagementCommon::staticCheckpoint(stream);
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {

@@ -33,31 +33,19 @@ shared_ptr<DecayFunction> PerHostTransmission::VADecay;
 
 void PerHostTransmission::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
-    
-    /*FIXME
-    scnXml::Descriptions intervDesc = InputData().getInterventions().getDescriptions();
-    if ( InputData.isInterventionActive(Interventions::ITN) ) {
-        if( !intervDesc.getITNDecay().present() ){
-            throw util::xml_scenario_error ("ITN intervention without description of decay");
-        }
-        ITNDecay = DecayFunction::makeObject( intervDesc.getITNDecay().get(), "ITNDecay" );
-    }
-    if ( InputData.isInterventionActive(Interventions::IRS) ) {
-        if( !intervDesc.getIRSDecay().present() ){
-            throw util::xml_scenario_error ("IRS intervention without description of decay");
-        }
-        IRSDecay = DecayFunction::makeObject( intervDesc.getIRSDecay().get(), "IRSDecay" );
-    }
-    if ( InputData.isInterventionActive(Interventions::VEC_AVAIL) ) {
-        if( !intervDesc.getVADecay().present() ){
-            throw util::xml_scenario_error ("Vector availability intervention without description of decay");
-        }
-        VADecay = DecayFunction::makeObject( intervDesc.getVADecay().get(), "VADecay" );
-    }
-    */
 }
 void PerHostTransmission::cleanup (){
     AgeGroupInterpolation::freeObject( relAvailAge );
+}
+
+void PerHostTransmission::setITNDescription (const scnXml::ITN& elt){
+    ITNDecay = DecayFunction::makeObject( elt.getDecay(), "ITNDecay" );
+}
+void PerHostTransmission::setIRSDescription (const scnXml::IRS& elt){
+    IRSDecay = DecayFunction::makeObject( elt.getDecay(), "IRSDecay" );
+}
+void PerHostTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
+    VADecay = DecayFunction::makeObject( elt.getDecay(), "VADecay" );
 }
 
 

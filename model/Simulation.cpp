@@ -61,8 +61,9 @@ Simulation::Simulation(util::Checksum ck)
     Surveys.init();
     Population::init();
     population = auto_ptr<Population>(new Population);
-    interventions = auto_ptr<InterventionManager>(new InterventionManager(InputData().getInterventions(), *population));
+    interventions = auto_ptr<InterventionManager>( new InterventionManager( InputData().getInterventions(), *population ) );
     Surveys.initCohortOnly( *interventions );
+    InterventionManager::setSingleton( &*interventions );
     
     workUnitIdentifier = InputData().getWuID();
 }
@@ -139,7 +140,7 @@ int Simulation::start(){
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
-            population->implementIntervention(TimeStep::interventionPeriod);
+            interventions->deploy( *population );
             
             // Simulation-time used to be 1-based (from Fortran implementation).
             // It is now zero-based with regards to checkpoints but one-based
@@ -335,6 +336,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
         phase & stream;
         (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
+        interventions->loadFromCheckpoint( *population, TimeStep::interventionPeriod );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative

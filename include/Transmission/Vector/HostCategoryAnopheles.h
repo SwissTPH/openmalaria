@@ -25,6 +25,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <limits>
 
 namespace OM { namespace Transmission {
     
@@ -41,7 +42,13 @@ public:
   /** Initialise entoAvailability and probMosq... to 0. */
   HostCategoryAnopheles () :
     entoAvailability(0.0), probMosqBiting(0.0),
-    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0)
+    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0),
+    ITNDeterrency(numeric_limits< double >::signaling_NaN()),
+    ITNPreprandialKillingEffect(numeric_limits< double >::signaling_NaN()),
+    ITNPostprandialKillingEffect(numeric_limits< double >::signaling_NaN()),
+    IRSDeterrency(numeric_limits< double >::signaling_NaN()),
+    IRSKillingEffect(numeric_limits< double >::signaling_NaN()),
+    VADeterrency(numeric_limits< double >::signaling_NaN())
   {}
   
   ~HostCategoryAnopheles() {}
@@ -52,8 +59,12 @@ public:
    */
   void setEntoAvailability(double entoAvailability);
 
-  /** Set up any vector-model intervention parameters. */
-  void setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species);
+    /** Set up vector-model intervention parameters. */
+    void setITNDescription (const scnXml::ITNDescription& itnDesc);
+    /** Set up vector-model intervention parameters. */
+    void setIRSDescription (const scnXml::IRSDescription& irsDesc);
+    /** Set up vector-model intervention parameters. */
+    void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
@@ -81,7 +92,6 @@ public:
    * These describe initial effectiveness. Decay rate/shape is specified
    * elsewhere (by DecayFunction type). */
   //@{
-  //FIXME: copy construction/assignment copies pointers (tempor;
   /** Effectiveness of net in preventing a mosquito from finding an individual,
    * but not killing the mosquito. (1 - this) multiplies availability. */
   double ITNDeterrency;

@@ -29,34 +29,19 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
     this->entoAvailability = entoAvailability;
 }
 
-void HostCategoryAnopheles::setInterventionDescription (const scnXml::Anopheles& intervDesc, const string& species) {
-    assert(false);
-    /*FIXME
-    if ( InputData.isInterventionActive(Interventions::ITN) ) {
-        if (!intervDesc.getITNDescription().present()) {
-            throw util::xml_scenario_error (string("ITN intervention without description for ").append(species));
-        }
-        const scnXml::ITNDescription& itnDesc = intervDesc.getITNDescription().get();
-        ITNDeterrency = itnDesc.getDeterrency().getValue();
-        ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect().getValue();
-        ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect().getValue();
-    }
-    if (InputData.isInterventionActive(Interventions::IRS)) {
-        if (!intervDesc.getIRSDescription().present()) {
-            throw util::xml_scenario_error (string("IRS intervention without description for ").append(species));
-        }
-        const scnXml::IRSDescription& irsDesc = intervDesc.getIRSDescription().get();
-        IRSDeterrency = irsDesc.getDeterrency().getValue();
-        IRSKillingEffect = irsDesc.getKillingEffect().getValue();
-    }
-    if (InputData.isInterventionActive(Interventions::VEC_AVAIL)) {
-        if (!intervDesc.getVADescription().present()) {
-            throw util::xml_scenario_error (string("Vector Availability intervention without description for ").append(species));
-        }
-        const scnXml::BaseInterventionDescription& vaDesc = intervDesc.getVADescription().get();
-        VADeterrency = vaDesc.getDeterrency().getValue();
-    }
-    */
+void HostCategoryAnopheles::setITNDescription (const scnXml::ITNDescription& itnDesc){
+    ITNDeterrency = itnDesc.getDeterrency().getValue();
+    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect().getValue();
+    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect().getValue();
+}
+
+void HostCategoryAnopheles::setIRSDescription (const scnXml::IRSDescription& irsDesc){
+    IRSDeterrency = irsDesc.getDeterrency().getValue();
+    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
+}
+
+void HostCategoryAnopheles::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+    VADeterrency = vaDesc.getDeterrency().getValue();
 }
 
 }

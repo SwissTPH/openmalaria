@@ -30,7 +30,6 @@
 namespace OM { namespace Clinical {
     using util::AgeGroupInterpolation;
     
-    TimeStep CaseManagementCommon::healthSystemSource( TimeStep::never );
     util::AgeGroupInterpolation* CaseManagementCommon::caseFatalityRate = AgeGroupInterpolation::dummyObject();
     double CaseManagementCommon::_oddsRatioThreshold;
     util::AgeGroupInterpolation* CaseManagementCommon::pSeqInpatient = AgeGroupInterpolation::dummyObject();
@@ -40,37 +39,21 @@ namespace OM { namespace Clinical {
     void CaseManagementCommon::initCommon (){
 	_oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
 	
-	changeHealthSystem(TimeStep::never);
+	changeHealthSystem(InputData().getHealthSystem());
     }
     void CaseManagementCommon::cleanupCommon (){
         AgeGroupInterpolation::freeObject( caseFatalityRate );
         AgeGroupInterpolation::freeObject( pSeqInpatient );
     }
     
-    void CaseManagementCommon::changeHealthSystem (TimeStep source) {
-	healthSystemSource = source;
-	const scnXml::HealthSystem& healthSystem = getHealthSystem ();
-	
+    void CaseManagementCommon::changeHealthSystem (const scnXml::HealthSystem& healthSystem) {
 	readCommon (healthSystem);
 	
-	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
 	    ESCaseManagement::setHealthSystem(healthSystem);
-	else
+        }else{
 	    ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
-    }
-    
-    const scnXml::HealthSystem& CaseManagementCommon::getHealthSystem () {
-	if (healthSystemSource == TimeStep::never) {
-	    return InputData().getHealthSystem();
-	} else {
-            /*FIXME
-	    const scnXml::Intervention* interv = InputData.getInterventionByTime (healthSystemSource);
-	    if (interv == NULL || !interv->getChangeHS().present())
-		throw runtime_error ("healthSystemSource invalid");
-	    return interv->getChangeHS().get();
-	    */
-	}
-	assert(false);	// unreachable
+        }
     }
     
     void CaseManagementCommon::readCommon (const scnXml::HealthSystem& healthSystem)
@@ -88,14 +71,5 @@ namespace OM { namespace Clinical {
     {
 	double x = caseFatalityRatio * _oddsRatioThreshold;
 	return x / (1 - caseFatalityRatio + x);
-    }
-
-    void CaseManagementCommon::staticCheckpoint (ostream& stream) {
-	healthSystemSource & stream;
-    }
-    void CaseManagementCommon::staticCheckpoint (istream& stream) {
-	healthSystemSource & stream;
-	if (healthSystemSource != TimeStep::never)
-	    changeHealthSystem( healthSystemSource );
     }
 } }
