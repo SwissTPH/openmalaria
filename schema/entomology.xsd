@@ -117,7 +117,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
-        <xs:element name="eir">
+        <xs:element name="EIR">
           <xs:annotation>
             <xs:documentation>
               Description of target entomological inoculation rate as a
@@ -179,7 +179,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             </xs:attribute>
           </xs:complexType>
         </xs:element>
-        <xs:element name="monthlyEir">
+        <xs:element name="monthlyEIR">
           <xs:annotation>
             <xs:documentation>
               Description of target entomological inoculation rate as monthly

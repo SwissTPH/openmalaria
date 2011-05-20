@@ -112,8 +112,8 @@ string VectorAnopheles::initialise (
   FSCoeffic.resize (5);
   vector<double> speciesEIR (TimeStep::stepsPerYear);
   
-    if( anoph.getEir().present() ){
-        const scnXml::Eir& eirData = anoph.getEir().get();
+    if( anoph.getEIR().present() ){
+        const scnXml::EIR& eirData = anoph.getEIR().get();
         
         FSCoeffic[0] = eirData.getA0();
         FSCoeffic[1] = eirData.getA1();
@@ -122,13 +122,13 @@ string VectorAnopheles::initialise (
         FSCoeffic[4] = eirData.getB2();
         EIRRotateAngle = eirData.getEIRRotateAngle();
     } else {
-        assert( anoph.getMonthlyEir().present() );      // XML loading code should enforce this
-        const scnXml::MonthlyEir& eirData = anoph.getMonthlyEir().get();
+        assert( anoph.getMonthlyEIR().present() );      // XML loading code should enforce this
+        const scnXml::MonthlyEIR& eirData = anoph.getMonthlyEIR().get();
         
         double targetEIR = eirData.getAnnualEIR();
         
         const size_t N_m = 12;
-        const scnXml::MonthlyEir::ItemSequence seq = eirData.getItem();
+        const scnXml::MonthlyEIR::ItemSequence seq = eirData.getItem();
         assert( seq.size() == N_m );    // enforced by schema
         double months[N_m];
         double sum = 0.0;

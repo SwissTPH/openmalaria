@@ -149,9 +149,16 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
     scnXml::Vector::AnophelesSequence& anophelesList = ed.getVector().get().getAnopheles();
 
     for ( scnXml::Vector::AnophelesIterator it = anophelesList.begin();
-            it != anophelesList.end(); ++it ) {//FIXME
-        double old_a0 = it->getEir().get().getA0();
-        it->getEir().get().setA0( old_a0 + add_to_a0 );
+            it != anophelesList.end(); ++it ) {
+        if( it->getEIR().present() ){
+            double old_a0 = it->getEIR().get().getA0();
+            it->getEIR().get().setA0( old_a0 + add_to_a0 );
+        }else{
+            // schema should enforce that one of the two is here
+            assert( it->getMonthlyEIR().present() );
+            double oldAnnual = it->getMonthlyEIR().get().getAnnualEIR();
+            it->getMonthlyEIR().get().setAnnualEIR( oldAnnual * factor );
+        }
     }
 }
 
