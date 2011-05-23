@@ -404,33 +404,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         }
     }
     if( intervElt.getImportedInfections().present() ){
-        //TODO
-        /* * This function sets the imported infections in a population.
-        *  The probability of an host to import an infection is calculated
-        *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
-        *  is then used to predict if an human has imported the infection in the
-        *  population or not. A maximum of one infection can be imported per
-        * intervention.
-        * 
-        * @param rate Number of infections imported per 1000 humans at this time
-        * point.  * /
-        void importedInfections(double rate);
-        void Population::importedInfections(double importedInfectionsPerThousandHosts)
-        {
-            double pImportedInf = importedInfectionsPerThousandHosts / 1000.0;
-            
-            for(HumanIter it = population.begin(); it!=population.end(); it++){
-                if(random::bernoulli(pImportedInf)){
-                    it->addInfection();
-                }
-            }
+        const scnXml::ImportedInfections& ii = intervElt.getImportedInfections().get();
+        if( importedInfections.init( ii ) ){
+            // init() returns true when infections get imported
+            activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
         }
-            if (it->getImportedInfectionsPerThousandHosts().present())
-                activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
-    if (interv->getImportedInfectionsPerThousandHosts().present()){
-        importedInfections(interv->getImportedInfectionsPerThousandHosts().get());
-    }
-        */
     }
     if( intervElt.getImmuneSuppression().present() ){
         const scnXml::ImmuneSuppression& elt = intervElt.getImmuneSuppression().get();
@@ -509,6 +487,14 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeSt
 
 
 void InterventionManager::deploy(OM::Population& population) {
+    if( TimeStep::interventionPeriod < TimeStep(0) )
+        return;
+    
+    // deploy imported infections (not strictly speaking an intervention)
+    if( activeInterventions[ Interventions::IMPORTED_INFECTIONS ] ){
+        importedInfections.import( population );
+    }
+    
     // deploy timed interventions
     while( timed[nextTimed].time <= TimeStep::interventionPeriod ){
         timed[nextTimed].deploy( population );

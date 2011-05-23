@@ -153,8 +153,8 @@ public:
     inline int operator%( int rhs )const {
         return  _ts % rhs;
     }
-    inline int operator%( TimeStep rhs )const {
-        return  _ts % rhs._ts;
+    inline TimeStep operator%( TimeStep rhs )const {
+        return  TimeStep( _ts % rhs._ts );
     }
     // scale the TimeStep by a double, rounding to nearest
     inline TimeStep operator*( double rhs )const {

@@ -411,42 +411,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element minOccurs="0" name="importedInfections">
         <xs:annotation>
           <xs:documentation>
-            Models importation of P. falciparum infections from an external
-            source.
+            Models importation of P. falciparum infections directly into humans
+            from an external source. This is infections, not inoculations or
+            EIR being imported.
           </xs:documentation>
           <xs:appinfo>name:Imported infections;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="method">
-              <xs:annotation>
-                <xs:documentation>
-                  Supported methods of importing infections, based on a
-                  per-timestep rate r.
-                  
-                  infection: Randomly infect people via Bernoulli sample, where
-                  each person can have at most 1 new infection per time-step
-                  with probability r.
-                  
-                  inoculation: Give all humans an extra entomological
-                  inoculation rate of r, post availability and intervention
-                  effects (i.e. as if each person were forcibly exposed to
-                  mosquito bites).
-                  
-                  transmission: Increase level of transmission from vectors,
-                  such that age-based and intervention-based availability
-                  affects the increased number of inoculations recieved by
-                  individuals.
-                </xs:documentation>
-              </xs:annotation>
-              <xs:simpleType>
-                <xs:restriction base="xs:string">
-                  <xs:enumeration value="infection" />
-                  <xs:enumeration value="inoculation" />
-                  <xs:enumeration value="transmission" />
-                </xs:restriction>
-              </xs:simpleType>
-            </xs:element>
             <xs:element name="timed">
               <xs:annotation>
                 <xs:documentation>
@@ -457,13 +429,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:sequence>
-                  <xs:element name="rate" minOccurs="0" maxOccurs="unbounded">
+                  <xs:element name="rate" minOccurs="1" maxOccurs="unbounded">
                     <xs:complexType>
                       <xs:complexContent>
                         <xs:extension base="inputValue">
                           <xs:annotation>
                             <xs:documentation>A time-rate pair.</xs:documentation>
-                            <xs:appinfo>name:List item;</xs:appinfo>
+                            <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
                           </xs:annotation>
                           <xs:attribute name="time" type="xs:int" use="required">
                             <xs:annotation>

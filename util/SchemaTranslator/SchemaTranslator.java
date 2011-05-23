@@ -1584,6 +1584,7 @@ public class SchemaTranslator {
             }
             interventions.removeChild(continuous);
         }
+        boolean givenIIWarning = false;
         Element timed = getChildElement(interventions,"timed");
         if(timed != null){
             List<Node> times = getChildNodes(timed,"intervention");
@@ -1662,13 +1663,13 @@ public class SchemaTranslator {
                         System.err.println("larviciding intervention model has changed significantly; please remove and re-add");
                         return false;
                     }else if(interv.equals("importedInfectionsPerThousandHosts")){
-                        newElt = getOrCreateSubElt(interventions,"importedInfections");
-                        Element method=getChildElement(newElt,"method");
-                        if(method==null){
-                            method=scenarioDocument.createElement("method");
-                            method.setTextContent("infection");
-                            newElt.appendChild(method);
+                        if( !givenIIWarning ){
+                            System.err.println("Warning: doing an exact conversion from old imported infections representation to new. This is probably not what you want unless you need to replicate results.");
+                            givenIIWarning = true;
                         }
+                        newElt = getOrCreateSubElt(interventions,"importedInfections");
+                        
+                        double stepsPerYear = 365.0 / Integer.parseInt(getChildElement(getChildElement(scenarioElement,"model"),"parameters").getAttribute("interval"));
                         
                         Element timedII=getOrCreateSubElt(newElt,"timed");
                         List<Node> prevII=getChildNodes(timedII,"rate");
@@ -1680,7 +1681,7 @@ public class SchemaTranslator {
                             timedII.appendChild(IINow);
                             IINow.setAttribute("time",intervTime);
                         }
-                        IINow.setAttribute("value",oldElt.getTextContent());
+                        IINow.setAttribute("value",Double.toString(Double.parseDouble(oldElt.getTextContent())*stepsPerYear));
                         // Now set the rate back to zero next time step, since this is what the old model did
                         Element IINext = scenarioDocument.createElement("rate");
                         timedII.appendChild(IINext);

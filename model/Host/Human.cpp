@@ -77,8 +77,8 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
-    _inCohort(false),
     nextCtsDist(0),
+    _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
   if (_dateOfBirth != TimeStep::simulation && (TimeStep::simulation > TimeStep(0) || _dateOfBirth > TimeStep::simulation))

@@ -21,6 +21,7 @@
 
 #include "Global.h"
 #include "Population.h"
+#include "Host/ImportedInfections.h"
 #include "schema/interventions.h"
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <bitset>
@@ -88,6 +89,15 @@ public:
     /** Read XML descriptions. */
     InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population);
     
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        using namespace OM::util::checkpoint;
+        // most members are only set from XML,
+        // nextTimed varies but is re-set by loadFromCheckpoint
+        importedInfections & stream;
+    }
+
     /** Call after loading a checkpoint, passing the intervention-period time.
      * 
      * Serves to replace health-system and EIR where changeHS/changeEIR
@@ -114,12 +124,6 @@ public:
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
     void deployCts (OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const;
     
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-	nextTimed & stream;
-    }
-    
 private:
     bitset<Interventions::SIZE> activeInterventions;
     // All continuous interventions, sorted by deployment age (weakly increasing)
@@ -127,6 +131,10 @@ private:
     // List of all timed interventions. Should be sorted (time weakly increasing).
     ptr_vector<TimedIntervention> timed;
     uint32_t nextTimed;
+    
+    // imported infections are not really interventions, and handled by a separate class
+    // (but are grouped here for convenience and due toassociation in schema)
+    Host::ImportedInfections importedInfections;
 };
 
 }
