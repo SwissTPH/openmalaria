@@ -144,9 +144,8 @@ public:
     virtual void deploy (OM::Population& population) {
         Population::HumanPop& popList = population.getList();
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
-            //FIXME: should be age>=minAge
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age > minAge && age < maxAge ){
+            if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     if( util::random::uniform_01() < coverage ){
                         // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
@@ -195,9 +194,8 @@ public:
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally cohort
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
-            //FIXME: should be age>=minAge
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age > minAge && age < maxAge ){
+            if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     total+=1;
                     if( !((*iter).*isProtected)(maxInterventionAge) )
