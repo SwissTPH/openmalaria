@@ -441,7 +441,6 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESDecisionMap ESCaseManagement::mda;
 
-//TODO: test-case with a change-of-health-system
 void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getEventScheduler().present() )
 	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");

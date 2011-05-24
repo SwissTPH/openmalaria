@@ -75,7 +75,6 @@ public:
 
     ///@brief Variables read from XML configuration which remain constant after set up
     //@{
-        //TODO: some of these should not be public
     /// temporal resolution of simulation, in days
     static ReadOnly<int> interval;
     /// 1.0/intervalsPerYear

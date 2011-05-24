@@ -41,8 +41,6 @@ using util::AgeGroupInterpolation;
 /** Tracks clinical status (sickness), triggers case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
  *
- * TODO: Reporting of parasitological status (not model specific).
- *
  * Note: there are several variables that only need to be used during a
  * bout. It's possible that memory usage could be reduced by storing them
  * externally in a temporary object during episodes (but unlikely worth doing).

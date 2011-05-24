@@ -56,7 +56,6 @@ void InfectionIncidenceModel::init () {
   EstarInv = 1.0/InputData.getParameter(Params::E_STAR);
   Xstar_pInv = 1.0/InputData.getParameter(Params::X_STAR_P);
   
-  //TODO: Sanity check for sqrt and division by zero
   //! constant defining the constraint for the Gamma shape parameters
   /// Used for the case where availability is assumed gamma distributed
   double r_square_Gamma;

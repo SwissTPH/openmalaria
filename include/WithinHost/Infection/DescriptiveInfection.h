@@ -39,7 +39,6 @@ const double maxDens=2000000;
   Models related to the within-host dynamics of infections.
 */
 class DescriptiveInfection : public Infection {
-//TODO: should be private, and immune decay and immune proxies need to be discussed in light of new WIH-models 
 public:
   ///@name Static init/cleanup
   //@{
