@@ -21,25 +21,42 @@
 #define OM_util_errors
 
 #include <stdexcept>
+
 using namespace std;
 
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
     
+    /** Extension of runtime_error which tries to get a stack trace. */
+    class traced_exception : public runtime_error
+    {
+    public:
+        explicit traced_exception(const string& msg);
+        virtual ~traced_exception() throw();
+    private:
+#ifdef __GNU_LIBRARY__
+    size_t length;
+    char** trace;
+#endif
+        friend ostream& operator<<(ostream& stream, const traced_exception& e);
+    };
+    /// Print trace to stream (a series of lines, each with \\n appended)
+    ostream& operator<<(ostream& stream, const traced_exception& e);
+    
     /** Thrown to indicate an error in the scenario.xml file.  */
     class xml_scenario_error : public runtime_error
     {
-	public:
-	    explicit xml_scenario_error(const string&  __arg);
+    public:
+        explicit xml_scenario_error(const string&  msg);
     };
     
     /** Thrown to indicate an error while loading/saving a checkpoint.
     *
     * Prepends "Error reading checkpoint: " to the message. */
-    class checkpoint_error : public runtime_error
+    class checkpoint_error : public traced_exception
     {
-	public:
-	    explicit checkpoint_error(const string&  __arg);
+    public:
+        explicit checkpoint_error(const string&  msg);
     };
     
     /** Thrown to halt, when a command-line argument prompts an early exit.
@@ -47,8 +64,8 @@ namespace OM { namespace util {
     * (Not an error; exits with status 0.) */
     class cmd_exit : public runtime_error
     {
-	public:
-	    explicit cmd_exit(const string& __arg);
+    public:
+        explicit cmd_exit(const string& msg);
     };
     
 } }

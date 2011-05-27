@@ -215,29 +215,9 @@ double random::beta (double a, double b){
 int random::poisson(double lambda){
     if (!finite(lambda)) {
 	//This would lead to an inifinite loop in gsl_ran_poisson
-	cerr << "lambda isInf" << endl;
-	exit(-1);
+	throw new traced_exception( "random::poisson: lambda is inf" );
     }
     return gsl_ran_poisson (rng.gsl_generator, lambda);
-}
-
-multiset<unsigned long int> random::randomPicks(int populationSize, long picksNbr){
-
-	multiset<unsigned long int> chosenHumans;
-	long i = 0;
-
-	while(i<picksNbr)
-	{
-		unsigned long int  randomPick = gsl_rng_uniform_int (rng.gsl_generator, (unsigned long int) populationSize);
-		multiset<unsigned long int>::iterator iterator = chosenHumans.find(randomPick);
-
-		if(iterator==chosenHumans.end())
-		{
-			chosenHumans.insert(randomPick);
-			i++;
-		}
-	}
-	return chosenHumans;
 }
 
 bool random::bernoulli(double prob)

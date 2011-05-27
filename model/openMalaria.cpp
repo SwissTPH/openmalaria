@@ -63,6 +63,10 @@ int main(int argc, char* argv[]) {
         cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
     } catch (const OM::util::checkpoint_error& e) {
         cerr << "Checkpoint exception: " << e.what() << endl;
+        cerr << e << flush;
+    } catch (const OM::util::traced_exception& e) {
+        cerr << "Exception: " << e.what() << endl;
+        cerr << e << flush;
     } catch (const OM::util::xml_scenario_error& e) {
         cerr << "Error in scenario XML file: " << e.what() << endl;
     } catch (const exception& e) {
