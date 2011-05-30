@@ -1,24 +1,22 @@
-/*
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
-  This file is part of OpenMalaria.
- 
-  Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
-  OpenMalaria is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or (at
-  your option) any later version.
- 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
-*/
 #include "Host/Human.h"
 
 #include "Host/InfectionIncidenceModel.h"
@@ -159,7 +157,7 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+bool Human::update(const OM::Population& population, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     PopulationStats::humanUpdateCalls++;
     if( doUpdate )
@@ -174,7 +172,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         double ageYears = ageTimeSteps.inYears();
         monitoringAgeGroup.update( ageYears );
         
-        updateInterventionStatus();
+        updateInterventionStatus(population);
         updateInfection(transmissionModel, ageYears);
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
@@ -200,52 +198,52 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
 }
 
-void Human::updateInterventionStatus() {
+void Human::updateInterventionStatus(const OM::Population& population) {
     if (TimeStep::interventionPeriod >= TimeStep(0)) {
         TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
         //HACK
-        InterventionManager::getSingleton().deployCts(*this, ageTimeSteps, nextCtsDist);
+        InterventionManager::getSingleton().deployCts(population, *this, ageTimeSteps, nextCtsDist);
     }
 }
 
 
-void Human::massVaccinate () {
+void Human::massVaccinate (const OM::Population&) {
     _vaccine.vaccinate();
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (ageGroup(), 1);
 }
-void Human::ctsVaccinate () {
+void Human::ctsVaccinate (const OM::Population&) {
     if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
         _vaccine.vaccinate();
         Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (ageGroup(), 1);
     }
 }
 
-void Human::IPTiTreatment () {
+void Human::IPTiTreatment (const OM::Population&) {
   withinHostModel->IPTiTreatment (ageGroup(), _inCohort);
 }
-void Human::deployIptDose () {
+void Human::deployIptDose (const OM::Population&) {
     withinHostModel->deployIptDose( ageGroup(), _inCohort );
 }
 
-void Human::massDrugAdministration () {
+void Human::massDrugAdministration (const OM::Population&) {
     clinicalModel->massDrugAdministration (*this);
 }
 
-void Human::massITN (){
-    perHostTransmission.setupITN ();
+void Human::massITN (const OM::Population& population){
+    perHostTransmission.setupITN (population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( ageGroup(), 1 );
 }
-void Human::ctsITN (){
-    perHostTransmission.setupITN ();
+void Human::ctsITN (const OM::Population& population){
+    perHostTransmission.setupITN (population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( ageGroup(), 1 );
 }
 
-void Human::massIRS () {
+void Human::massIRS (const OM::Population&) {
     perHostTransmission.setupIRS ();
     Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( ageGroup(), 1 );
 }
 
-void Human::massVA () {
+void Human::massVA (const OM::Population&) {
     perHostTransmission.setupVA ();
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( ageGroup(), 1 );
 }
@@ -292,7 +290,7 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (){
+void Human::addToCohort (const OM::Population&){
     assert( !_inCohort );
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,

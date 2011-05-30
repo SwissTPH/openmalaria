@@ -211,6 +211,7 @@ namespace OM { namespace util {
         
         virtual double eval( double ageYears ) const{
             assert ( ageYears >= 0.0 );
+            //TODO: optimise by putting (f1-f0)/(a1-a0) into the array and checking usage
             // Get the first point with age greater than ageYears:
             map<double,double>::const_iterator it = dataPoints.upper_bound( ageYears );
             assert( it != dataPoints.end() );

@@ -30,7 +30,7 @@ namespace OM {
 // -----  AgeIntervention  -----
 
 AgeIntervention::AgeIntervention(
-    const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) ()
+    const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) (const OM::Population&)
 ) :
     begin( elt.getBegin() ),
     end( elt.getEnd() ),
@@ -129,10 +129,12 @@ public:
     /** 
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
-     * @param intervention A member-function pointer to a "void func ()" function
-     * within human which activates the intervention. */
+     * @param deployIntervention A member-function pointer to a
+     *      "void func (const OM::Population&)" function within human which
+     *      activates the intervention. Population is passed for acces to static
+     *      params. */
     TimedMassIntervention( const scnXml::Mass& mass,
-                           void (Host::Human::*deployIntervention)() ) :
+                           void (Host::Human::*deployIntervention)(const OM::Population&) ) :
         TimedIntervention( TimeStep( mass.getTime() ) ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
@@ -149,7 +151,7 @@ public:
                 if( !cohortOnly || iter->getInCohort() ){
                     if( util::random::uniform_01() < coverage ){
                         // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
-                        ( (*iter).*intervention) ();
+                        ( (*iter).*intervention) (population);
                     }
                 }
             }
@@ -162,7 +164,7 @@ protected:
     TimeStep maxAge;
     bool cohortOnly;
     double coverage;    // proportion coverage within group meeting above restrictions
-    void (Host::Human::*intervention) ();       // callback: per-human deployment
+    void (Host::Human::*intervention) (const OM::Population&);       // callback: per-human deployment
 };
 
 /// Deployment of mass-to-human interventions with cumulative-deployment support
@@ -174,14 +176,16 @@ public:
      * 
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
-     * @param intervention A member-function pointer to a "void func ()" function
-     * within human which activates the intervention.
+     * @param deployIntervention A member-function pointer to a
+     *      "void func (const OM::Population&)" function within human which
+     *      activates the intervention. Population is passed for acces to static
+     *      params.
      * @param isProtectedCb A member-function pointer to a
      * "bool func (TimeStep maxAge)" function on a Human which returns true if
      * the Human is still protected by an intervention of the type in question
      * which is no older than maxAge. */
     TimedMassCumIntervention( const scnXml::MassCum& mass,
-                              void (Host::Human::*deployIntervention)(),
+                              void (Host::Human::*deployIntervention)(const OM::Population&),
                               bool (Host::Human::*isProtectedCb) (TimeStep) const ) :
         TimedMassIntervention( mass, deployIntervention ),
         isProtected( isProtectedCb ),
@@ -210,7 +214,7 @@ public:
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
                 if( util::random::uniform_01() < additionalCoverage ){
-                    ( (*iter).*intervention) ();
+                    ( (*iter).*intervention) (population);
                 }
             }
         }
@@ -229,15 +233,16 @@ private:
  * 
  * @param mass XML element specifying the age range and compliance
  * (proportion of eligible individuals who receive the intervention).
- * @param intervention A member-function pointer to a "void func ()" function
- * within human which activates the intervention.
+ * @param deployIntervention A member-function pointer to a
+ *      "void func (const OM::Population&)" function within human which
+ *      activates the intervention. Population is passed for acces to static params.
  * @param isProtectedCb A member-function pointer to a
  * "bool func (TimeStep maxAge)" function on a Human which returns true if
  * the Human is still protected by an intervention of the type in question
  * which is no older than maxAge. */
 TimedMassIntervention* createTimedMassCumIntervention(
     const scnXml::MassCum& mass,
-    void (Host::Human::*deployIntervention)(),
+    void (Host::Human::*deployIntervention)(const OM::Population&),
     bool (Host::Human::*isProtectedCb) (TimeStep) const
 ){
     if( mass.getCumulativeWithMaxAge().present() ){
@@ -346,7 +351,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         if( itn.getTimed().size() + itn.getContinuous().size() > 0 ){
             activeInterventions.set (Interventions::ITN, true);
             // read description
-            population.transmissionModel().setITNDescription( itn );
+            population.transmissionModel().setITNDescription( itn.getDescription() );
             // continuous deployments:
             typedef scnXml::ITN::ContinuousSequence::const_iterator CIt;
             for( CIt it = itn.getContinuous().begin(); it != itn.getContinuous().end(); ++it ){
@@ -499,7 +504,7 @@ void InterventionManager::deploy(OM::Population& population) {
         nextTimed += 1;
     }
 }
-void InterventionManager::deployCts (OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const{
+void InterventionManager::deployCts (const OM::Population& population, OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const{
     // deploy continuous interventions
     while( nextCtsDist < ctsIntervs.size() ){
         if( ctsIntervs[nextCtsDist].ageTimesteps > ageTimesteps )
@@ -509,7 +514,7 @@ void InterventionManager::deployCts (OM::Host::Human& human, TimeStep ageTimeste
             if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
                 if( !ctsIntervs[nextCtsDist].cohortOnly || human.getInCohort() ){
                     if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
-                        (human.*(ctsIntervs[nextCtsDist].deploy)) ();
+                        (human.*(ctsIntervs[nextCtsDist].deploy)) (population);
                     }
                 }
             }

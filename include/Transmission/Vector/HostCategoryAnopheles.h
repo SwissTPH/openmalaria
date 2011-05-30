@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #define Hmod_HostCategoryAnopheles
 
 #include "Global.h"
-#include "inputData.h"
+#include "Transmission/Vector/ITN.h"
 
 #include <stdexcept>
 #include <string>
@@ -42,13 +42,7 @@ public:
   /** Initialise entoAvailability and probMosq... to 0. */
   HostCategoryAnopheles () :
     entoAvailability(0.0), probMosqBiting(0.0),
-    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0),
-    ITNDeterrency(numeric_limits< double >::signaling_NaN()),
-    ITNPreprandialKillingEffect(numeric_limits< double >::signaling_NaN()),
-    ITNPostprandialKillingEffect(numeric_limits< double >::signaling_NaN()),
-    IRSDeterrency(numeric_limits< double >::signaling_NaN()),
-    IRSKillingEffect(numeric_limits< double >::signaling_NaN()),
-    VADeterrency(numeric_limits< double >::signaling_NaN())
+    probMosqFindRestSite(0.0), probMosqSurvivalResting(0.0)
   {}
   
   ~HostCategoryAnopheles() {}
@@ -58,13 +52,6 @@ public:
    *  is calculated in VectorAnopheles.
    */
   void setEntoAvailability(double entoAvailability);
-
-    /** Set up vector-model intervention parameters. */
-    void setITNDescription (const scnXml::ITNDescription& itnDesc);
-    /** Set up vector-model intervention parameters. */
-    void setIRSDescription (const scnXml::IRSDescription& irsDesc);
-    /** Set up vector-model intervention parameters. */
-    void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
   
   inline double probMosqBitingAndResting() const {
     return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
@@ -85,30 +72,6 @@ public:
   /** Probability of mosquito successfully resting after finding a resting site
    * (P_D_i). */
   double probMosqSurvivalResting;
-  //@}
-
-  /** @brief Intervention description parameters
-   *
-   * These describe initial effectiveness. Decay rate/shape is specified
-   * elsewhere (by DecayFunction type). */
-  //@{
-  /** Effectiveness of net in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  double ITNDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to feed on
-   * an individual. */
-  double ITNPreprandialKillingEffect;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to escape
-   * after feeding on an individual. */
-  double ITNPostprandialKillingEffect;
-  /** Effectiveness of IRS in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  double IRSDeterrency;
-  /** (1 - this) is the proportion of mosquitoes killed when trying to rest. */
-  double IRSKillingEffect;
-  /** Effectiveness of [intervention] in preventing a mosquito from finding an individual,
-   * but not killing the mosquito. (1 - this) multiplies availability. */
-  double VADeterrency;
   //@}
 };
 

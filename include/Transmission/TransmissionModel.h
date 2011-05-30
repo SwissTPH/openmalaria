@@ -145,7 +145,9 @@ public:
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
   }
   
-  /** Returns the EIR (inoculation rate per host per time step).
+  /** Does per-timestep updates and returns the EIR (inoculation rate per host
+   * per time step). Should be called exactly once per time-step (at least,
+   * during the intervention period when ITNs may be in use).
    *
    * Non-vector:
    * During the pre-intervention phase, the EIR is forced, using values from
@@ -160,7 +162,7 @@ public:
   double getEIR (PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set ITN parameters. */
-  virtual void setITNDescription (const scnXml::ITN&);
+  virtual void setITNDescription ( const scnXml::ITNDescription&);
   /** Set IRS parameters. */
   virtual void setIRSDescription (const scnXml::IRS&);
   /** Set vector deterrent parameters. */
@@ -174,6 +176,8 @@ public:
   
 protected:
   /** Calculates the EIR individuals are exposed to.
+   * 
+   * Call once per time-step: updates ITNs in vector model.
    * 
    * @param host Transmission data for the human to calculate EIR for.
    * @param ageGroupData Age group of this host for availablility data.

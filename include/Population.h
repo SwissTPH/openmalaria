@@ -99,6 +99,9 @@ public:
     inline Transmission::TransmissionModel& transmissionModel() {
         return *_transmissionModel;
     }
+    inline const Transmission::TransmissionModel& transmissionModel() const {
+        return *_transmissionModel;
+    }
 
 private:
     //! Creates initializes and add to the population list a new uninfected human

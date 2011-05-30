@@ -43,8 +43,12 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulation::Simulation(util::Checksum ck)
-: simPeriodEnd(0), totalSimDuration(0), phase(STARTING_PHASE), workUnitIdentifier(0), cksum(ck)
+Simulation::Simulation(util::Checksum ck) :
+    simPeriodEnd(0),
+    totalSimDuration(0),
+    phase(STARTING_PHASE),
+    workUnitIdentifier(0),
+    cksum(ck)
 {
     OM::TimeStep::init(InputData().getModel().getParameters().getInterval(),
                        InputData().getDemography().getMaximumAgeYrs());

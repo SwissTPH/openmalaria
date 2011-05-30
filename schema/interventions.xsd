@@ -238,25 +238,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="ITNDescription">
-                    <xs:attribute name="mosquito" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
-                          Name of the affected anopheles-mosquito species.
-                        </xs:documentation>
-                        <xs:appinfo>name:Mosquito species</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
-              <xs:annotation>
+            <xs:element name="description" type="ITNDescription"/>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific"> <xs:annotation>
                 <xs:documentation>List of ages at which bed-net deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 </xs:documentation>
@@ -293,22 +276,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="IRSDescription">
-                    <xs:attribute name="mosquito" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
-                          Name of the affected anopheles-mosquito species.
-                        </xs:documentation>
-                        <xs:appinfo>name:Mosquito species</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="anophelesParams" maxOccurs="unbounded" type="IRSDescription"/>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
               <xs:annotation>
                 <xs:documentation>
@@ -339,22 +307,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="BaseInterventionDescription">
-                    <xs:attribute name="mosquito" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
-                          Name of the affected anopheles-mosquito species.
-                        </xs:documentation>
-                        <xs:appinfo>name:Mosquito species</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="anophelesParams" maxOccurs="unbounded" type="BaseInterventionDescription"/>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
               <xs:annotation>
                 <xs:documentation>
@@ -839,26 +792,184 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ITNDescription">
+    <xs:annotation>
+      <xs:appinfo>name:Description</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="usage" type="inputValue">
+        <xs:annotation>
+          <xs:documentation>
+          The proportion of the time humans actually use nets while indoors.
+          
+          At the moment this is constant across humans and deterministic:
+          availability/survival factor is base*(1-usage*m) + intervention_factor*usage*m
+          where m is the proportion of time mosquitoes bite while humans are
+          indoors.
+        </xs:documentation>
+          <xs:appinfo>units:none;min:0;max:0;name:Usage level of nets by humans</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="holeRate" type="LognormalSample">
+        <xs:annotation>
+          <xs:documentation>
+          The rate at which new holes are made in nets.
+          
+          nHoles(t) = nHoles(t-1) + X where X~Pois(R). R is sampled from
+          log-normal: R ~ log N( log(mean)-sigma²/2, sigma² ).
+        </xs:documentation>
+          <xs:appinfo>units:Holes per time step;min:0;name:Rate at which holes are made</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ripRate" type="LognormalSample">
+        <xs:annotation>
+          <xs:documentation>
+          The rate at which existing holes in nets are enlarged.
+          
+          New rips occur at rate F×X where X~Pois(h×R), F is the rip factor
+          and h is the number of existing holes.
+          R sampled from log-normal: R ~ log N( log(mean)-sigma²/2, sigma² ).
+        </xs:documentation>
+          <xs:appinfo>units:Rips per hole per time step;min:0;name:Rate at which holes are enlarged</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ripFactor" type="inputValue">
+        <xs:annotation>
+          <xs:documentation>
+          The significance of new rips (see doc on ripRate for formula).
+        </xs:documentation>
+          <xs:appinfo>units:none;min:0;name:Rip factor</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="initialInsecticide" type="LognormalSample">
+        <xs:annotation>
+          <xs:documentation>
+          The insecticide content of a new net, X. Sampled from log-normal:
+          X ~ log N( log(mean)-sigma²/2, sigma² ).
+        </xs:documentation>
+          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="insecticideDecay" type="DecayFunction">
+        <xs:annotation>
+          <xs:documentation>
+          Decay curve for insecticide content of nets
+        </xs:documentation>
+          <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="anophelesParams" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="proportionBitingIndoors" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                The proportion of the mosquito's host-seeking time during which
+                humans are protected by nets, assuming ownership and use.
+                </xs:documentation>
+                <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="relativeAvailability" type="ITNAvailEffect">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of net on availability of humans to mosquitoes relative to
+                an unprotected adult human.
+                
+                Relative availability of the human is multiplied by
+                H×h + P×p + I×h×p
+                where H, P and I are the hole, insecticide and interaction factors
+                respectively, h=exp(-holeIndex×holeScalingFactor) and
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Relative availability</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of net on survival mosquitoes as they seek to bite a human
+                after choosing that human.
+                
+                Killing proportion is calculated as K = B + H×h + P×p + I×h×p
+                where B is the base (without net) probability of death,
+                H, P and I are the hole, insecticide and interaction factors
+                respectively, h=exp(-holeIndex×holeScalingFactor) and
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                
+                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="postprandialKillingEffect" type="ITNKillingEffect">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of net on survival mosquitoes as they seek to escape from
+                a human host after a blood mean.
+                
+                Killing proportion is calculated as K = B + H×h + P×p + I×h×p
+                where B is the base (without net) probability of death,
+                H, P and I are the hole, insecticide and interaction factors
+                respectively, h=exp(-holeIndex×holeScalingFactor) and
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                
+                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="mosquito" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Name of the affected anopheles-mosquito species.
+              </xs:documentation>
+              <xs:appinfo>name:Mosquito species</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ITNAvailEffect">
+    <xs:attribute name="holeFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Hole factor;min:0;max:1</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Insecticide factor;min:0;max:1</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="interactionFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          holeFactor + insecticideFactor + interactionFactor must be in the
+          range [0,1].
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Interaction factor;min:-2;max:1</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Hole scaling factor;min:-1;max:1</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Insecticide scaling factor;min:-1;max:1</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ITNKillingEffect">
     <xs:complexContent>
-      <xs:extension base="BaseInterventionDescription">
-        <xs:sequence>
-          <xs:element name="preprandialKillingEffect" type="inputValue">
-            <xs:annotation>
-              <xs:documentation>
-              One minus this multiplies the survival rate of mosquitoes attempting to bite a host.
-            </xs:documentation>
-              <xs:appinfo>units:None;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
-            </xs:annotation>
-          </xs:element>
-          <xs:element name="postprandialKillingEffect" type="inputValue">
-            <xs:annotation>
-              <xs:documentation>
-              One minus this multiplies the survival rate of mosquitoes attempting to escape after biting a host.
-            </xs:documentation>
-              <xs:appinfo>units:None;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
-            </xs:annotation>
-          </xs:element>
-        </xs:sequence>
+      <xs:extension base="ITNAvailEffect">
+        <xs:attribute name="baseFactor" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -896,5 +1007,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
       </xs:element>
     </xs:sequence>
+    <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the affected anopheles-mosquito species.
+        </xs:documentation>
+        <xs:appinfo>name:Mosquito species</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>

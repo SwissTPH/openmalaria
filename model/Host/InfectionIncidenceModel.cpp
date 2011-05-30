@@ -26,6 +26,7 @@
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
 #include "util/errors.h"
+#include "WithinHost/WithinHostModel.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -206,6 +207,10 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
+    if( n > WithinHost::WithinHostModel::MAX_INFECTIONS ){
+        cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
+        n = WithinHost::WithinHostModel::MAX_INFECTIONS;
+    }
     human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
     ctsNewInfections += n;
     return n;

@@ -33,4 +33,17 @@ void HostCategoryAnophelesHumans::operator =(const scnXml::Mosq& mosq)
 	probMosqOvipositing = mosq.getMosqProbOvipositing();
 }
 
+void HostCategoryAnophelesHumans::setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
+    net.init( elt, proportionUse );
+}
+
+void HostCategoryAnophelesHumans::setIRSDescription (const scnXml::IRSDescription& irsDesc){
+    IRSDeterrency = irsDesc.getDeterrency().getValue();
+    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
+}
+
+void HostCategoryAnophelesHumans::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+    VADeterrency = vaDesc.getDeterrency().getValue();
+}
+
 }}

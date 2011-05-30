@@ -51,13 +51,13 @@ CommonWithinHost::~CommonWithinHost() {
 
 void CommonWithinHost::newInfection(){
     ++PopulationStats::totalInfections;
-  if (_MOI < MAX_INFECTIONS) {
+  if (numInfs < MAX_INFECTIONS) {
     infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
-    _MOI++;
+    numInfs++;
     _cumulativeh++;
     ++PopulationStats::allowedInfections;
   }
-  assert( _MOI == infections.size() );
+  assert( numInfs == infections.size() );
 }
 
 void CommonWithinHost::clearAllInfections(){
@@ -65,7 +65,7 @@ void CommonWithinHost::clearAllInfections(){
     delete *it;
   }
   infections.clear();
-  _MOI=0;
+  numInfs=0;
 }
 
 // -----  interventions -----
@@ -100,7 +100,7 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     if ((*inf)->update(survivalFactor)) {
 	delete *inf;
       inf = infections.erase(inf);	// inf points to next infection now so don't increment with ++inf
-      --_MOI;
+      --numInfs;
       continue;	// infection no longer exists so skip the rest
     }
     
@@ -133,10 +133,10 @@ int CommonWithinHost::countInfections (int& patentInfections) {
 void CommonWithinHost::checkpoint (istream& stream) {
   WithinHostModel::checkpoint (stream);
   (*pkpdModel) & stream;
-  for (size_t i = 0; i < _MOI; ++i) {
+  for (size_t i = 0; i < numInfs; ++i) {
     infections.push_back (checkpointedInfection (stream));
   }
-  assert( _MOI == infections.size() );
+  assert( numInfs == infections.size() );
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {

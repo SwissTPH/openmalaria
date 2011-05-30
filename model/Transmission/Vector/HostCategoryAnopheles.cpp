@@ -29,20 +29,5 @@ void HostCategoryAnopheles::setEntoAvailability(double entoAvailability)
     this->entoAvailability = entoAvailability;
 }
 
-void HostCategoryAnopheles::setITNDescription (const scnXml::ITNDescription& itnDesc){
-    ITNDeterrency = itnDesc.getDeterrency().getValue();
-    ITNPreprandialKillingEffect = itnDesc.getPreprandialKillingEffect().getValue();
-    ITNPostprandialKillingEffect = itnDesc.getPostprandialKillingEffect().getValue();
-}
-
-void HostCategoryAnopheles::setIRSDescription (const scnXml::IRSDescription& irsDesc){
-    IRSDeterrency = irsDesc.getDeterrency().getValue();
-    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
-}
-
-void HostCategoryAnopheles::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-    VADeterrency = vaDesc.getDeterrency().getValue();
-}
-
 }
 }

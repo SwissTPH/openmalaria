@@ -50,6 +50,7 @@ set (Model_CPP
   Transmission/Vector/HostCategoryAnopheles.cpp
   Transmission/Vector/HostCategoryAnophelesHumans.cpp
   Transmission/Vector/HostCategoryAnophelesNonHumans.cpp
+  Transmission/Vector/ITN.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp

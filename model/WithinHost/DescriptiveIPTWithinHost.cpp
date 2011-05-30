@@ -73,13 +73,13 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 
 void DescriptiveIPTWithinHost::newInfection(){
     ++PopulationStats::totalInfections;
-  if (_MOI < MAX_INFECTIONS) {
+  if (numInfs < MAX_INFECTIONS) {
     _cumulativeInfections++;
     infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
-    _MOI++;
+    numInfs++;
     ++PopulationStats::allowedInfections;
   }
-  assert( _MOI == infections.size() );
+  assert( numInfs == infections.size() );
 }
 void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));

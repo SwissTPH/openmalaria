@@ -53,7 +53,7 @@ namespace Interventions {
 /** Age-based (continuous) deployment. */
 class AgeIntervention {
 public:
-    AgeIntervention( const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) () );
+    AgeIntervention( const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) (const OM::Population&) );
     
     inline bool operator< (const AgeIntervention& that) const{
         return this->ageTimesteps < that.ageTimesteps;
@@ -64,7 +64,7 @@ public:
     bool cohortOnly;
     double coverage;
     // Member function pointer to the function (in Human) responsible for deploying intervention:
-    void (Host::Human::*deploy) ();
+    void (Host::Human::*deploy) (const OM::Population&);
 };
 
 /** Interface of a timed intervention. */
@@ -122,7 +122,8 @@ public:
      * 
      * Continuous interventions are deployed as humans reach the target ages.
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
-    void deployCts (OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const;
+    //FIXME: passing population AND calling from humans does not make sense
+    void deployCts (const OM::Population&, OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const;
     
 private:
     bitset<Interventions::SIZE> activeInterventions;

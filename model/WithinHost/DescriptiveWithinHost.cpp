@@ -45,12 +45,12 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 
 void DescriptiveWithinHostModel::newInfection() {
     ++PopulationStats::totalInfections;
-    if (_MOI < MAX_INFECTIONS) {
+    if (numInfs < MAX_INFECTIONS) {
         infections.push_back(new DescriptiveInfection());
-        _MOI++;
+        numInfs++;
         ++PopulationStats::allowedInfections;
     }
-    assert( _MOI == infections.size() );
+    assert( numInfs == infections.size() );
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
@@ -62,7 +62,7 @@ void DescriptiveWithinHostModel::clearAllInfections() {
         delete *i;
     }
     infections.clear();
-    _MOI=0;
+    numInfs=0;
 }
 
 // -----  Interventions  -----
@@ -95,7 +95,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
            ) {
             delete *iter;
             iter=infections.erase(iter);
-            _MOI--;
+            numInfs--;
         }
         else {
             // Should be: infStepMaxDens = 0.0, but has some history.
@@ -119,7 +119,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             iter++;
         }
     }
-    assert( _MOI == infections.size() );
+    assert( numInfs == infections.size() );
 
     IPTattenuateAsexualMinTotalDensity();
     util::streamValidate( totalDensity );
@@ -144,7 +144,7 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
-    for (size_t i=0; i<_MOI; ++i) {
+    for (size_t i=0; i<numInfs; ++i) {
         loadInfection(stream);	// create infections using a virtual function call
     }
 }

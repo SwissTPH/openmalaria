@@ -32,6 +32,7 @@ namespace OM {
     namespace Clinical {
 	class ClinicalModel;
     }
+    class Population;
 namespace Host {
 
 /** Interface to all sub-models storing data per-human individual.
@@ -85,33 +86,33 @@ public:
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(Transmission::TransmissionModel* transmissionModel, bool doUpdate);
+  bool update(const OM::Population&, Transmission::TransmissionModel* transmissionModel, bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions
   //@{
   /// Asks the clinical model to deal with this
-  void massDrugAdministration ();
+  void massDrugAdministration (const OM::Population&);
   
   /// Vaccinate & report mass vaccination
-  void massVaccinate ();
+  void massVaccinate (const OM::Population&);
   /// If individual hasn't dropped out, vaccinate & report EPI
-  void ctsVaccinate ();
+  void ctsVaccinate (const OM::Population&);
   
-  void IPTiTreatment ();
-  void deployIptDose ();
+  void IPTiTreatment (const OM::Population&);
+  void deployIptDose (const OM::Population&);
   
   /// Give human a new ITN via mass deployment
-  void massITN ();
+  void massITN (const OM::Population&);
   /// Give a human a new ITN through EPI
-  void ctsITN ();
+  void ctsITN (const OM::Population&);
   /// Give human a new IRS through mass deployment
-  void massIRS ();
+  void massIRS (const OM::Population&);
   /// Give human a new VA intervention through mass deployment
-  void massVA ();
+  void massVA (const OM::Population&);
   
   /// Resets immunity
-  inline void immuneSuppression() {
+  inline void immuneSuppression(const OM::Population&) {
       withinHostModel->immuneSuppression();
   }
   
@@ -171,7 +172,7 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort ();
+  void addToCohort (const OM::Population&);
   
   /** Remove from cohort. As with addToCohort, deals with reporting.
    *
@@ -217,7 +218,7 @@ private:
     
     /*! Apply interventions to this human if eligible. Calculate the remaining
     efficacy of the latest vaccination if vaccinated before */
-    void updateInterventionStatus();
+    void updateInterventionStatus(const OM::Population&);
     
     double calcProbTransmissionToMosquito() const;
     

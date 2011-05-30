@@ -35,6 +35,7 @@ namespace OM { namespace util {
 traced_exception::traced_exception(const string& msg)
  : runtime_error(msg) {
 #ifdef __GNU_LIBRARY__
+    // http://www.gnu.org/software/libc/manual/html_node/Backtraces.html
 // probably 100 is big enough
 #define MAX_STACK_SIZE 100
     void *array[MAX_STACK_SIZE];
@@ -44,7 +45,8 @@ traced_exception::traced_exception(const string& msg)
     
     //TODO: work out why OM catches this as an unknown exception
     //until then, dump the stack trace here
-    std::cerr << *this << endl;
+    cerr << "Exception: "<<msg<<'\n';
+    cerr << *this << endl;
 #endif
 }
 traced_exception::~traced_exception() throw(){

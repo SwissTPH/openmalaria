@@ -5,6 +5,6 @@
 # Defines PYTHON_EXECUTABLE. Doesn't abort if not found.
 
 find_program (PYTHON_EXECUTABLE python
-  DOC "Path to python. Needed for testing.")
+  DOC "Path to python (required).")
 
 mark_as_advanced (PYTHON_EXECUTABLE)

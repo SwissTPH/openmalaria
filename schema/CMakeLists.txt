@@ -2,6 +2,8 @@
 # Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
+find_package (Python)
+
 set (SCHEMA_NAMES
   scenario
   demography
@@ -39,7 +41,7 @@ endforeach (XSD_NAME)
 set( INLINED_XSD ${CMAKE_CURRENT_BINARY_DIR}/scenario_current.xsd )
 add_custom_command (OUTPUT ${INLINED_XSD}
   DEPENDS ${SCHEMA_XSD}
-  COMMAND ${PYTHON} ${CMAKE_SOURCE_DIR}/util/inlineSchema.py
+  COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/util/inlineSchema.py
   scenario.xsd ${INLINED_XSD}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Inlining scenario.xsd and dependencies into ${INLINED_XSD}"

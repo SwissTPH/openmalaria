@@ -215,7 +215,7 @@ double random::beta (double a, double b){
 int random::poisson(double lambda){
     if (!finite(lambda)) {
 	//This would lead to an inifinite loop in gsl_ran_poisson
-	throw new traced_exception( "random::poisson: lambda is inf" );
+	throw new traced_exception( "lambda is inf" );
     }
     return gsl_ran_poisson (rng.gsl_generator, lambda);
 }

@@ -23,6 +23,7 @@
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Vector/VectorAnopheles.h"
+#include "Transmission/Vector/ITN.h"
 
 namespace scnXml {
   class Vector;
@@ -52,7 +53,7 @@ public:
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
   virtual void modelUpdateKappa() {}
 
-  virtual void setITNDescription (const scnXml::ITN&);
+  virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void intervLarviciding (const scnXml::Larviciding&);
@@ -60,18 +61,22 @@ public:
   
   virtual void summarize (Monitoring::Survey& survey);
   
+  inline const ITNParams& getITNParams() const{
+      return _ITNParams;
+  }
+  
 protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
 private:
   /** Return the index in speciesIndex of mosquito, throwing if not found. */
-  size_t getSpeciesIndex (string mosquito) {
+  size_t getSpeciesIndex (string mosquito)const {
     map<string,size_t>::const_iterator sIndex = speciesIndex.find (mosquito);
     if (sIndex == speciesIndex.end()) {
       ostringstream oss;
-      oss << "Intervention description for unincluded anopheles species \""
-	  << mosquito << '"';
+      oss << "Intervention description for anopheles species \""
+	  << mosquito << "\": species not found in entomology description";
       throw util::xml_scenario_error(oss.str());
     }
     return sIndex->second;
@@ -114,6 +119,9 @@ private:
    * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
   //@}
+  
+  /** Parameters used by ITN model. */
+  ITNParams _ITNParams;
   
   friend class PerHostTransmission;
   friend class VectorAnophelesSuite;

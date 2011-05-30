@@ -84,7 +84,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, VectorAnopheles(this));
+    species.resize (numSpecies, VectorAnopheles(this,&_ITNParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i], i,
@@ -208,6 +208,7 @@ TimeStep VectorTransmission::initIterate () {
 }
 
 double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
+    host.update(_ITNParams);
     double simEIR = 0.0;
     for (size_t i = 0; i < numSpecies; ++i) {
         simEIR += species[i].calculateEIR (i, host);
@@ -231,13 +232,20 @@ void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population,
     }
 }
 
-void VectorTransmission::setITNDescription (const scnXml::ITN& elt){
+void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     if( InputData().getEntomology().getMode() == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
-    PerHostTransmission::setITNDescription (elt);
-    for(scnXml::ITN::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
-        species[getSpeciesIndex(it->getMosquito())].setITNDescription (*it);
+    double proportionUse = _ITNParams.init( elt );
+    typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    if( ap.size() != numSpecies ){
+        throw util::xml_scenario_error(
+            "ITNDescription.anophelesParams: must have one element for each mosquito species described in entomology"
+        );
+    }
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
+        species[getSpeciesIndex(it->getMosquito())].setITNDescription (*it, proportionUse);
     }
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
@@ -245,7 +253,14 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     PerHostTransmission::setIRSDescription (elt);
-    for(scnXml::IRS::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
+    typedef scnXml::IRS::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    if( ap.size() != numSpecies ){
+        throw util::xml_scenario_error(
+            "IRS.anophelesParams: must have one element for each mosquito species described in entomology"
+        );
+    }
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
         species[getSpeciesIndex(it->getMosquito())].setIRSDescription (*it);
     }
 }
@@ -254,7 +269,14 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     PerHostTransmission::setVADescription (elt);
-    for(scnXml::VectorDeterrent::AnophelesParamsSequence::const_iterator it = elt.getAnophelesParams().begin(); it != elt.getAnophelesParams().end(); ++it) {
+    typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    if( ap.size() != numSpecies ){
+        throw util::xml_scenario_error(
+            "vectorDeterrent.anophelesParams: must have one element for each mosquito species described in entomology"
+        );
+    }
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
         species[getSpeciesIndex(it->getMosquito())].setVADescription (*it);
     }
 }
@@ -286,7 +308,7 @@ void VectorTransmission::summarize (Monitoring::Survey& survey) {
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this));
+    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this,&_ITNParams));
 }
 void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

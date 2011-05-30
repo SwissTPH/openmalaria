@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  *
- * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,18 +35,40 @@ namespace OM { namespace Transmission {
 
 class HostCategoryAnophelesHumans : public HostCategoryAnopheles {
 public:
-    HostCategoryAnophelesHumans() :
+    HostCategoryAnophelesHumans(const ITNParams* baseITNParams) :
+        net( baseITNParams ),
+        IRSDeterrency(numeric_limits< double >::signaling_NaN()),
+        IRSKillingEffect(numeric_limits< double >::signaling_NaN()),
+        VADeterrency(numeric_limits< double >::signaling_NaN()),
         humanBloodIndex(numeric_limits< double >::signaling_NaN()),
         probMosqOvipositing(numeric_limits< double >::signaling_NaN())
     {}
-    /** The proportion of resting mosquitoes that have recently fed on human blood. */
-    double humanBloodIndex;
-    double probMosqOvipositing;
     /**
         * this operator is used to set all the parameters
         * for the human hosts.
         */
     void operator= (const scnXml::Mosq& mosq);
+
+    /** Set up vector-model intervention parameters. */
+    void setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
+    /** Set up vector-model intervention parameters. */
+    void setIRSDescription (const scnXml::IRSDescription& irsDesc);
+    /** Set up vector-model intervention parameters. */
+    void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
+    
+  /** @brief Intervention description parameters
+   *
+   * These describe initial effectiveness. Decay rate/shape is specified
+   * elsewhere (by DecayFunction type). */
+  //@{
+  ITNAnophelesParams net;
+  double IRSDeterrency;
+  double IRSKillingEffect;
+  double VADeterrency;
+    double humanBloodIndex;
+    double probMosqOvipositing;
 };
-#endif /* HOSTCATEGORYANOPHELESHUMANS_H_ */
+
+    
 }}
+#endif /* HOSTCATEGORYANOPHELESHUMANS_H_ */

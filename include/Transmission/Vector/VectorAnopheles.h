@@ -56,8 +56,9 @@ using namespace std;
 class VectorAnopheles
 {
 public:
-    VectorAnopheles (const TransmissionModel* const tm) :
+    VectorAnopheles (const TransmissionModel* const tm, const ITNParams* baseITNParams) :
             transmissionModel(tm),
+            humanBase(baseITNParams),
             partialEIR(0.0),
             larvicidingEndStep (std::numeric_limits<int>::max()),
             larvicidingIneffectiveness (1.0),
@@ -138,8 +139,8 @@ public:
     }
 
     /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setITNDescription (const scnXml::ITNDescription& itnDesc) {
-        humanBase.setITNDescription (itnDesc);
+    inline void setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+        humanBase.setITNDescription (elt, proportionUse);
     }
     /** Set up intervention descriptions for humans, for this anopheles species. */
     inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {

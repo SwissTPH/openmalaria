@@ -193,7 +193,7 @@ void Population::update1()
     --last;
     for (HumanIter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old:
-        if (iter->update (_transmissionModel,
+        if (iter->update (*this, _transmissionModel,
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */

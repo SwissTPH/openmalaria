@@ -1,22 +1,21 @@
-/*
-  This file is part of OpenMalaria.
- 
-  Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
-  OpenMalaria is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or (at
-  your option) any later version.
- 
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
- 
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #ifndef Hmod_WithinHost_Model
 #define Hmod_WithinHost_Model
@@ -114,6 +113,13 @@ public:
   /// Special intervention: clears all immunity
   virtual void immuneSuppression() =0;
   
+  /** The maximum number of infections a human can have. The only real reason
+   * for this limit is to prevent incase bad input from causing the number of
+   * infections to baloon stupidly.
+   * 
+   * Exact constraint is: _MOI <= MAX_INFECTIONS. */
+  static const size_t MAX_INFECTIONS = 21;
+  
 protected:
   /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
    * have already been incremented.
@@ -152,8 +158,8 @@ protected:
    * PK_PD integration). */
   virtual void clearAllInfections() =0;
   
-  //!multiplicity of infection
-  size_t _MOI;
+  /// Multiplicity of infection
+  int numInfs;
   
   /// Total asexual blood stage density (sum of density of infections).
   double totalDensity;
@@ -189,13 +195,6 @@ protected:
   The density bias allows the detection limit for microscopy to be higher for other sites
   */
   static double detectionLimit;
-  
-  /** The maximum number of infections a human can have. The only real reason
-   * for this limit is to prevent incase bad input from causing the number of
-   * infections to baloon stupidly.
-   * 
-   * Exact constraint is: _MOI <= MAX_INFECTIONS. */
-  static const size_t MAX_INFECTIONS = 21;
   //@}
   
   friend class ::UnittestUtil;

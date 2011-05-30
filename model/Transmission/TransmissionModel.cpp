@@ -242,8 +242,8 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   lastSurveyTime = TimeStep::simulation;
 }
 
-const char* viError = "vector interventions require Vector model";
-void TransmissionModel::setITNDescription (const scnXml::ITN&) {
+const char* viError = "vector interventions require vector model";
+void TransmissionModel::setITNDescription (const scnXml::ITNDescription&) {
   throw util::xml_scenario_error (viError);
 }
 void TransmissionModel::setIRSDescription (const scnXml::IRS&) {

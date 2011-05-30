@@ -21,7 +21,8 @@
 #define Hmod_PerHostTransmission
 
 #include "util/random.h"
-#include "Transmission/Vector/HostCategoryAnopheles.h"
+#include "Transmission/Vector/HostCategoryAnophelesHumans.h"
+#include "Transmission/Vector/ITN.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include "util/errors.h"
@@ -47,7 +48,6 @@ public:
   /** Static cleanup. */
   static void cleanup ();
   
-    static void setITNDescription (const scnXml::ITN& elt);
     static void setIRSDescription (const scnXml::IRS& elt);
     static void setVADescription (const scnXml::VectorDeterrent& elt);
   
@@ -77,6 +77,11 @@ public:
   void initialise (TransmissionModel& tm, double availabilityFactor);
   //@}
   
+  /// Call once per timestep. Updates net holes.
+  inline void update(const ITNParams& params) {
+      net.update(params);
+  }
+  
   /** @brief Get model parameters for species[speciesIndex].
    *
    * @param speciesIndex = Index in species list of this mosquito type. */
@@ -85,7 +90,7 @@ public:
    *
    * Mean should be same as entoAvailabilityHetVecItv(). */
     inline double entoAvailabilityFull (
-	const HostCategoryAnopheles& base,
+	const HostCategoryAnophelesHumans& base,
 	size_t speciesIndex,
 	double ageYears,
 	double invMeanPopAvail
@@ -100,12 +105,12 @@ public:
    * rate factors.)
    * 
    * Assume mean is human-to-vector availability rate factor. */
-  double entoAvailabilityHetVecItv (const HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double entoAvailabilityHetVecItv ( const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully biting a host (P_B_i). */
-  double probMosqBiting (const HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double probMosqBiting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
   /** Probability of a mosquito succesfully finding a resting
    * place after biting and then resting (P_C_i * P_D_i). */
-  double probMosqResting (const HostCategoryAnopheles& base, size_t speciesIndex) const;
+  double probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
   //@}
   
   /** Get the availability of this host to mosquitoes relative to an average
@@ -135,12 +140,7 @@ public:
   }
   
   /// Give individual a new ITN as of time timeStep.
-  inline void setupITN () {
-      if( ITNDecay.get() == 0 ){
-        throw util::xml_scenario_error ("ITN intervention without description of decay");
-      }
-    timestepITN = TimeStep::simulation;
-  }
+  void setupITN (const TransmissionModel& tm);
   /// Give individual a new IRS as of time timeStep.
   inline void setupIRS () {
       if( IRSDecay.get() == 0 ){
@@ -158,7 +158,7 @@ public:
   
   /// Is individual protected by an ITN?
   inline bool hasITNProtection(TimeStep maxInterventionAge)const{
-      return timestepITN + maxInterventionAge > TimeStep::simulation;
+      return net.timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
   }
   /// Is individual protected by IRS?
   inline bool hasIRSProtection(TimeStep maxInterventionAge)const{
@@ -181,9 +181,9 @@ public:
       species & stream;
       _relativeAvailabilityHet & stream;
       outsideTransmission & stream;
-      timestepITN & stream;
       timestepIRS & stream;
       timestepVA & stream;
+      net & stream;
   }
   
   
@@ -204,15 +204,15 @@ private:
   // (TimeStep::simulation - timestepXXX) is the age of the intervention.
   // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
   
-  TimeStep timestepITN;
   TimeStep timestepIRS;
   TimeStep timestepVA;
+  
+  ITN net;
   
   static AgeGroupInterpolation* relAvailAge;
   
   // descriptions of decay of interventions
   // set if specific intervention is used
-  static shared_ptr<DecayFunction> ITNDecay;
   static shared_ptr<DecayFunction> IRSDecay;
   static shared_ptr<DecayFunction> VADecay;
 };
