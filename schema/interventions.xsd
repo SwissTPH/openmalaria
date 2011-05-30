@@ -876,7 +876,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 an unprotected adult human.
                 
                 Relative availability of the human is multiplied by
-                H×h + P×p + I×h×p
+                1 − H×h + P×p + I×h×p
                 where H, P and I are the hole, insecticide and interaction factors
                 respectively, h=exp(-holeIndex×holeScalingFactor) and
                 p=1−exp(-insecticideContent×insecticideScalingFactor).
@@ -934,31 +934,40 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="ITNAvailEffect">
     <xs:attribute name="holeFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Hole factor;min:0;max:1</xs:appinfo>
+        <xs:documentation>
+          Value expected to be at least 0. Negative values are not
+          necessarily invalid, but allow nets to increase transmission.
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Hole factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Insecticide factor;min:0;max:1</xs:appinfo>
+        <xs:documentation>
+          Value expected to be at least 0. Negative values are not
+          necessarily invalid, but allow nets to increase transmission.
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="interactionFactor" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          holeFactor + insecticideFactor + interactionFactor must be in the
-          range [0,1].
+          holeFactor + insecticideFactor + interactionFactor must not be greater
+          than 1, and is expected to be at least 0. A negative value is not
+          necessarily invalid, but allows nets to increase transmission.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Interaction factor;min:-2;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Interaction factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Hole scaling factor;min:-1;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Hole scaling factor;min:0;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Insecticide scaling factor;min:-1;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

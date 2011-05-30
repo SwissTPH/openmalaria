@@ -83,7 +83,15 @@ void ITNAnophelesParams::RelativeAvailability::init(const scnXml::ITNAvailEffect
     if( !(inRange01(elt.getInsecticideFactor()) &&
             inRange01(elt.getHoleFactor()) &&
             inRange01(holePlusInteraction+elt.getInsecticideFactor())) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams: expected hole factor, insecticide factor and hole+insecticide+interaction factors all to be in range [0,1]");
+        if( !(elt.getInsecticideFactor() <= 1.0) || !(elt.getHoleFactor() <= 1.0) ||
+            !(holePlusInteraction+elt.getInsecticideFactor() <= 1.0) ){
+            throw util::xml_scenario_error("ITN.description.anophelesParams: expected hole factor, insecticide factor and hole+insecticide+interaction factors to be no more than 1");
+        }
+        if( elt.getInsecticideFactor() < 0.0 && elt.getHoleFactor() < 0.0 &&
+            holePlusInteraction+elt.getInsecticideFactor() < 0.0 ){
+            throw util::xml_scenario_error("ITN.description.anophelesParams: hole factor, insecticide factor and hole+insecticide+interaction factors are all negative; this guarantees that nets increase transmission!");
+        }
+        cerr << "Warning: expected hole factor, insecticide factor and hole+insecticide+interaction factors to be non-negative; this is not so which means nets may increase transmission." << endl;
     }
 }
 void ITNAnophelesParams::KillingEffect::init(const scnXml::ITNKillingEffect& elt){
@@ -100,19 +108,19 @@ void ITNAnophelesParams::KillingEffect::init(const scnXml::ITNKillingEffect& elt
 }
 double ITNAnophelesParams::RelativeAvailability::effect( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
-    // The model formula uses 1 minus the exponential here. We adjust
-    // the factors in the constructor to achieve the same effect.
     double insecticideComponent = exp(-insecticideContent*insecticideScaling);
+    // this tends to the base effect (or zero) as nets age, so
+    // we subtract from 1 to get a multiplication factor
     double unadjusted = basePlusInsecticide
         + holePlusInteraction*holeComponent
         + negInsecticide*insecticideComponent
         + negInteraction*holeComponent*insecticideComponent;
     assert( inRange01(unadjusted) );
-    return unadjusted;
+    return 1.0 - unadjusted;
 }
 double ITNAnophelesParams::KillingEffect::effect( double holeIndex, double insecticideContent )const {
-    double killingEffect = RelativeAvailability::effect( holeIndex, insecticideContent );
-    double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
+    double survivalEffect = RelativeAvailability::effect( holeIndex, insecticideContent );
+    double survivalFactor = survivalEffect * invBaseSurvival;
     assert( inRange01(survivalFactor) );
     return survivalFactor;
 }
