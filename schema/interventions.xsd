@@ -815,7 +815,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           The rate at which new holes are made in nets.
           
           nHoles(t) = nHoles(t-1) + X where X~Pois(R). R is sampled from
-          log-normal: R ~ log N( log(mean)-sigma²/2, sigma² ).
+          log-normal: R ~ log N( log(mean)-sigma²/2, sigma² ) and is covariant
+          with ripRate and insecticideDecay. (To be exact, a single Gaussian
+          sample is taken, adjusted for the each and sigma then exponentiated.)
         </xs:documentation>
           <xs:appinfo>units:Holes per time step;min:0;name:Rate at which holes are made</xs:appinfo>
         </xs:annotation>
@@ -827,7 +829,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           
           New rips occur at rate F×X where X~Pois(h×R), F is the rip factor
           and h is the number of existing holes.
-          R sampled from log-normal: R ~ log N( log(mean)-sigma²/2, sigma² ).
+          R sampled from log-normal: R ~ log N( log(mean)-sigma²/2, sigma² )
+          and is covariant with holeRate and insecticideDecay. (To be exact, a
+          single Gaussian sample is taken, adjusted for the each and sigma
+          then exponentiated.)
         </xs:documentation>
           <xs:appinfo>units:Rips per hole per time step;min:0;name:Rate at which holes are enlarged</xs:appinfo>
         </xs:annotation>
@@ -852,7 +857,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="insecticideDecay" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
-          Decay curve for insecticide content of nets
+          Decay curve for insecticide content of nets.
+          
+          Decay rate is covariant with ripRate and insecticideDecay. (To be
+          exact, a single Gaussian sample is taken, adjusted for the each
+          and sigma then exponentiated.)
         </xs:documentation>
           <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
         </xs:annotation>

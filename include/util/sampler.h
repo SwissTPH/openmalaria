@@ -28,6 +28,33 @@
 
 namespace OM { namespace util {
     
+    /** A normal sample, which can be turned into various log-normal samples.
+     * 
+     * Allows generation of correlated log-normal samples with different sigma.
+     */
+    class NormalSample {
+    public:
+        NormalSample() : x(numeric_limits<double>::signaling_NaN()) {}
+        
+        /// convert sample to N(mu,sigma)
+        double asNormal( double mu, double sigma ){
+            return sigma*x + mu;
+        }
+        /// convert sample to lnN(mu,sigma)
+        double asLognormal( double mu, double sigma ){
+            return exp( sigma*x + mu );
+        }
+        
+        static NormalSample generate() {
+            return NormalSample( random::gauss(0.0, 1.0) );
+        }
+        
+    private:
+        NormalSample( double variate ) : x(variate) {}
+        
+        double x;	// variate (sampled from N(0,1))
+    };
+    
     /** Sampler for log-normal values */
     class LognormalSampler {
     public:
@@ -54,6 +81,11 @@ namespace OM { namespace util {
         /** Sample a value. */
         inline double sample() const{
             return random::log_normal( mu, sigma );
+        }
+        
+        /** Create a log-normal sample from an existing normal sample. */
+        inline double sample(NormalSample sample) const{
+            return sample.asLognormal( mu, sigma );
         }
         
     private:

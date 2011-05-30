@@ -22,6 +22,7 @@
 #define Hmod_DecayFunction
 
 #include "Global.h"
+#include "util/sampler.h"
 #include <limits>
 #include <boost/shared_ptr.hpp>
 
@@ -84,9 +85,6 @@ public:
     /** Return an object representing no decay (useful default). */
     static shared_ptr<DecayFunction> makeConstantObject();
     
-    /** Sample a DecayFuncHet value (should be stored per individual). */
-    virtual DecayFuncHet hetSample () const =0;
-    
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
      * 
@@ -94,6 +92,12 @@ public:
      * @param sample A DecayFuncHet value sampled for the intervention and
      *  individual. */
     virtual double eval(TimeStep age, DecayFuncHet sample) const =0;
+    
+    /** Sample a DecayFuncHet value (should be stored per individual). */
+    virtual DecayFuncHet hetSample () const =0;
+    
+    /** Generate a DecayFuncHet value from an existing sample. */
+    virtual DecayFuncHet hetSample (NormalSample sample) const =0;
     
 protected:
     DecayFunction() {}

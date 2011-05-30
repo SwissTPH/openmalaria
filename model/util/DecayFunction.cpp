@@ -52,11 +52,20 @@ public:
         }
         return ret;
     }
+    DecayFuncHet hetSample (NormalSample sample) const{
+        // fix median=1 as above
+        DecayFuncHet ret;
+        ret.tMult = 1.0 / sample.asLognormal( 1.0, sigma );
+        return ret;
+    }
 };
 
 class ConstantDecayFunction : public DecayFunction {
 public:
     DecayFuncHet hetSample () const{
+        return DecayFuncHet();
+    }
+    DecayFuncHet hetSample (NormalSample) const{
         return DecayFuncHet();
     }
     double eval(TimeStep age, DecayFuncHet sample) const{

@@ -129,11 +129,14 @@ void ITN::deploy(const ITNParams& params) {
     deployTime = TimeStep::simulation;
     nHoles = 0;
     holeIndex = 0.0;
+    // this is sampled independently: initial insecticide content doesn't depend on handling
     initialInsecticide = params.initialInsecticide.sample();
     
-    holeRate = params.holeRate.sample();
-    ripRate = params.ripRate.sample();
-    insecticideDecayHet = params.insecticideDecay->hetSample();
+    // net rips and insecticide loss are assumed to co-vary dependent on handling of net
+    util::NormalSample x = util::NormalSample::generate();
+    holeRate = params.holeRate.sample(x);
+    ripRate = params.ripRate.sample(x);
+    insecticideDecayHet = params.insecticideDecay->hetSample(x);
 }
 
 void ITN::update(const ITNParams& params){
