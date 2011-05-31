@@ -133,7 +133,7 @@ int CommonWithinHost::countInfections (int& patentInfections) {
 void CommonWithinHost::checkpoint (istream& stream) {
   WithinHostModel::checkpoint (stream);
   (*pkpdModel) & stream;
-  for (size_t i = 0; i < numInfs; ++i) {
+  for (int i = 0; i < numInfs; ++i) {
     infections.push_back (checkpointedInfection (stream));
   }
   assert( numInfs == infections.size() );

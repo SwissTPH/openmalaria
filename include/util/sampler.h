@@ -55,6 +55,43 @@ namespace OM { namespace util {
         double x;	// variate (sampled from N(0,1))
     };
     
+    /** Sampler for normal values */
+    class NormalSampler {
+    public:
+        NormalSampler() :
+            mu( numeric_limits<double>::signaling_NaN() ),
+            sigma( numeric_limits<double>::signaling_NaN() )
+        {}
+        
+        /** Set parameters such that samples taken are:
+         * X ~ N( m, s² )
+         * 
+         * @param m Mean of sampled variates
+         * @param s Square-root of variance of sampled variates
+         */
+        void setParams( double m, double s ){
+            mu = m;
+            sigma = s;
+        }
+        /** As above, using an XML element. */
+        void setParams( const scnXml::NormalSample& elt ){
+            setParams( elt.getMu(), elt.getSigma() );
+        }
+        
+        /** Sample a value. */
+        inline double sample() const{
+            return random::log_normal( mu, sigma );
+        }
+        
+        /** Create a log-normal sample from an existing normal sample. */
+        inline double sample(NormalSample sample) const{
+            return sample.asNormal( mu, sigma );
+        }
+        
+    private:
+        double mu, sigma;
+    };
+    
     /** Sampler for log-normal values */
     class LognormalSampler {
     public:

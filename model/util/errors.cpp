@@ -105,7 +105,7 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
         stream << '\n';
     }
 #else
-    stream << "sorry, no trace\n"
+    stream << "sorry, no trace\n";
 #endif
     return stream;
 }

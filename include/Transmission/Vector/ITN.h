@@ -27,6 +27,7 @@
 namespace OM { namespace Transmission {
     using util::DecayFunction;
     using util::DecayFuncHet;
+    using util::NormalSampler;
     using util::LognormalSampler;
 
 /** Constant parameters for extended ITN model. */
@@ -37,7 +38,7 @@ public:
     double init( const scnXml::ITNDescription& elt);
     
 private:
-    LognormalSampler initialInsecticide;
+    NormalSampler initialInsecticide;
     LognormalSampler holeRate;
     LognormalSampler ripRate;
     double ripFactor;   // factor expressing how significant rips are in comparison to holes
@@ -58,28 +59,29 @@ public:
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAvailability( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _relativeAvailability.effect( holeIndex, insecticideContent ) + proportionUnprotected;
+        return proportionProtected * _relativeAvailability.relativeAvailability( holeIndex, insecticideContent ) + proportionUnprotected;
     }
     /// Get killing effect on mosquitoes before feeding.
     /// See ComponentParams::effect for a more detailed description.
     inline double preprandialSurvivalFactor( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _preprandialKillingEffect.effect( holeIndex, insecticideContent ) + proportionUnprotected;
+        return proportionProtected * _preprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) + proportionUnprotected;
     }
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     inline double postprandialSurvivalFactor( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _postprandialKillingEffect.effect( holeIndex, insecticideContent ) + proportionUnprotected;
+        return proportionProtected * _postprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) + proportionUnprotected;
     }
     
 private:
     class RelativeAvailability {
     public:
+        RelativeAvailability();
+        
         /** Set parameters.
          * 
-         * It is suggested that the parameters are such that the effect is
-         * always between 0 and 1. The constant factor is calculated such that
-         * in the limit when holeIndex reaches infinity and insecticideContent
-         * is zero the effect is zero. */
+         * It is checked that input parameters lie in a range such that
+         * the relative availability is always in the range (0,1] — that is,
+         * the deterrent can never be perfect, but can have zero effect. */
         void init(const scnXml::ITNAvailEffect& elt);
         
         /** Calculate effect. Positive is interpreted as having a positive effect
@@ -88,31 +90,37 @@ private:
         * zero as holeIndex becomes large and insecticideContent tends to zero,
         * and parameters should be defined such that it is always in the
         * range [0,1]. */
-        double effect( double holeIndex, double insecticideContent )const;
+        double relativeAvailability( double holeIndex, double insecticideContent )const;
         
     protected:
-        // various factors:
-        double basePlusInsecticide;
-        double holePlusInteraction;
-        double negInsecticide;
-        double negInteraction;
-        double holeScaling;
-        double insecticideScaling;
+        double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
+        double holeScaling, insecticideScaling;
     };
-    class KillingEffect : public RelativeAvailability {
+    class SurvivalFactor {
     public:
+        SurvivalFactor();
+        
+        /** Set parameters.
+         * 
+         * It is checked that parameters lie in a suitible range, giving a
+         * survival factor between 0 and 1. */
         void init(const scnXml::ITNKillingEffect& elt);
-        // Override base. Not virtual because we don't need polymorphism.
-        double effect( double holeIndex, double insecticideContent )const;
+        
+        /** Calculate additional survival factor imposed by nets on pre-/post-
+         * prandial killing. Should be bounded to [0,1] and tend to 1 as the
+         * net ages. */
+        double survivalFactor( double holeIndex, double insecticideContent )const;
     private:
+        double BF, HF, PF, IF;	// base, hole, insecticide and interaction factors
+        double holeScaling, insecticideScaling;
         double invBaseSurvival; // stored for performance only
     };
     const ITNParams* base;
     double proportionProtected;
     double proportionUnprotected;
     RelativeAvailability _relativeAvailability;
-    KillingEffect _preprandialKillingEffect;
-    KillingEffect _postprandialKillingEffect;
+    SurvivalFactor _preprandialKillingEffect;
+    SurvivalFactor _postprandialKillingEffect;
     
     friend class ITN;
 };

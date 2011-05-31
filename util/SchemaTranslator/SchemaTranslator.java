@@ -45,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 27;
+    static final int CURRENT_VERSION = 28;
 
     private static int _required_version = CURRENT_VERSION;
     private enum SchemaName {

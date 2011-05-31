@@ -146,7 +146,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           The mean of the lognormal distribution.
         </xs:documentation>
-        <xs:appinfo>units:(same as base units);min:0;max:1;name:mean;</xs:appinfo>
+        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="sigma" type="xs:double" use="required">
@@ -155,7 +155,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Sigma parameter of the lognormal distribution; sigma squared is the
           variance of the log of samples.
         </xs:documentation>
-        <xs:appinfo>units:none;min:0;max:1;name:sigma;</xs:appinfo>
+        <xs:appinfo>name:sigma;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="NormalSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a normal distribution.
+        
+        Variates are sampled as: X ~ N( mu, sigma² ).
+      </xs:documentation>
+      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mu" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the normal distribution.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:mu;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:sigma;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

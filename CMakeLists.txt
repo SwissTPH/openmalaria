@@ -71,7 +71,7 @@ find_package (Z)
 # suggested on windows: install boost such that paths are:
 # C:\Program Files\boost\boost_VER\boost\config.hpp
 # Add versions greater than 1.38 here:
-set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0")
+set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0"  "1.43.0" "1.44.0" "1.45.0")
 #set (Boost_DEBUG)
 find_package( Boost 1.37.0 )
 if(Boost_FOUND)
@@ -184,7 +184,7 @@ endif (OM_STREAM_VALIDATOR)
 add_subdirectory (contrib)
 add_subdirectory (schema)
 add_subdirectory (model)
-
+add_dependencies (model schema)
 
 # -----  generate openMalaria  -----
 

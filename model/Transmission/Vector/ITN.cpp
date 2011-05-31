@@ -60,67 +60,101 @@ void ITNAnophelesParams::init(
 inline bool inRange01( double x ){
     return x>=0.0 && x<= 1.0;
 }
+ITNAnophelesParams::RelativeAvailability::RelativeAvailability() :
+    lHF( numeric_limits< double >::signaling_NaN() ),
+    lPF( numeric_limits< double >::signaling_NaN() ),
+    lIF( numeric_limits< double >::signaling_NaN() ),
+    holeScaling( numeric_limits< double >::signaling_NaN() ),
+    insecticideScaling( numeric_limits< double >::signaling_NaN() )
+{}
 void ITNAnophelesParams::RelativeAvailability::init(const scnXml::ITNAvailEffect& elt){
-    // Factors are adjusted such that we don't need to take 1 minus
-    // the exponential of neg. scaled insecticide content.
-    basePlusInsecticide = elt.getInsecticideFactor();
-    holePlusInteraction = elt.getHoleFactor() + elt.getInteractionFactor();
-    negInsecticide = -elt.getInsecticideFactor();
-    negInteraction = -elt.getInteractionFactor();
+    double HF = elt.getHoleFactor();
+    double PF = elt.getInsecticideFactor();
+    double IF = elt.getInteractionFactor();
     holeScaling = elt.getHoleScalingFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
     if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
         throw util::xml_scenario_error("ITN.description.anophelesParams: expected scaling factors to be non-negative");
     }
     
-    // We want the calculated effect to be in the range [0,1].
-    // Since holeIndex*holeScaling and insecticideContent*insecticideScaling are
-    // both non-negative, both exponentials are in the range (0,1]. Considering
-    // extreme values for the exponentials and realising that their product is
-    // no greater than either alone leads us to the following requirements:
-    // hole and insecticide factors are in the range [0,1], and
-    // hole+insecticide+interaction factors are in the range [0,1].
-    if( !(inRange01(elt.getInsecticideFactor()) &&
-            inRange01(elt.getHoleFactor()) &&
-            inRange01(holePlusInteraction+elt.getInsecticideFactor())) ){
-        if( !(elt.getInsecticideFactor() <= 1.0) || !(elt.getHoleFactor() <= 1.0) ||
-            !(holePlusInteraction+elt.getInsecticideFactor() <= 1.0) ){
-            throw util::xml_scenario_error("ITN.description.anophelesParams: expected hole factor, insecticide factor and hole+insecticide+interaction factors to be no more than 1");
-        }
-        if( elt.getInsecticideFactor() < 0.0 && elt.getHoleFactor() < 0.0 &&
-            holePlusInteraction+elt.getInsecticideFactor() < 0.0 ){
-            throw util::xml_scenario_error("ITN.description.anophelesParams: hole factor, insecticide factor and hole+insecticide+interaction factors are all negative; this guarantees that nets increase transmission!");
-        }
-        cerr << "Warning: expected hole factor, insecticide factor and hole+insecticide+interaction factors to be non-negative; this is not so which means nets may increase transmission." << endl;
-    }
-}
-void ITNAnophelesParams::KillingEffect::init(const scnXml::ITNKillingEffect& elt){
-    ITNAnophelesParams::RelativeAvailability::init( elt );
-    // We want to assert that (1-killingFactor) <= (1-baseFactor). This turns
-    // out to be the same as requiring the effect >= 0 as above.
+    /* We need to ensure the relative availability is in the range [0,1]. It's
+    an exponentiated value, so we require log(HF)*h + log(PF)*p + log(IF)*h*p ≤ 0
+    where HF, PF and IF are the hole, insecticide and interaction factors
+    respectively, with h and p defined as: h=exp(-holeIndex*holeScalingFactor),
+    p=1−exp(-insecticideContent*insecticideScalingFactor).
     
-    if( !(elt.getBaseFactor() >= 0.0 && elt.getBaseFactor() <= 1.0) ){
-        // is a probability so must be in range [0,1]
+    h and p will always be in the range [0,1], so we need log(HF) ≤ 0,
+    log(PF) ≤ 0 and log(HF)+log(PF)+log(IF) = log(HF×PF×IF) ≤ 0.
+    This implies that we need HF∈(0,1], PF∈(0,1] and HF×PF×IF∈(0,1].
+    */
+    if( !( HF > 0.0 && HF <= 1.0 && PF > 0.0 && PF <= 1.0 &&
+            HF*PF*IF > 0.0 && HF*PF*IF <= 1.0 ) ){
+        throw util::xml_scenario_error("ITN.description.anophelesParams.relativeAvailability: "
+        "bounds not met: HF∈(0,1], PF∈(0,1] and HF×PF×IF∈(0,1]" );
+    }
+    lHF = log( HF );
+    lPF = log( PF );
+    lIF = log( IF );
+}
+ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
+    BF( numeric_limits< double >::signaling_NaN() ),
+    HF( numeric_limits< double >::signaling_NaN() ),
+    PF( numeric_limits< double >::signaling_NaN() ),
+    IF( numeric_limits< double >::signaling_NaN() ),
+    holeScaling( numeric_limits< double >::signaling_NaN() ),
+    insecticideScaling( numeric_limits< double >::signaling_NaN() ),
+    invBaseSurvival( numeric_limits< double >::signaling_NaN() )
+{}
+void ITNAnophelesParams::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt){
+    BF = elt.getBaseFactor();
+    HF = elt.getHoleFactor();
+    PF = elt.getInsecticideFactor();
+    IF = elt.getInteractionFactor();
+    holeScaling = elt.getHoleScalingFactor();
+    insecticideScaling = elt.getInsecticideScalingFactor();
+    invBaseSurvival = 1.0 / (1.0 - BF);
+    if( !( BF >= 0.0 && BF < 1.0) ){
         throw util::xml_scenario_error("ITN.description.anophelesParams: expected baseFactor to be in range [0,1]");
     }
-    basePlusInsecticide += elt.getBaseFactor();
-    invBaseSurvival = 1.0 / (1.0 - elt.getBaseFactor());
+    if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
+        throw util::xml_scenario_error("ITN.description.anophelesParams: expected scaling factors to be non-negative");
+    }
+    
+    /* We want the calculated survival factor (1−K)/(1−BF) to be in the range
+    [0,1] where K is the killing factor: K=BF+HF*h+PF*p+IF*h*p, with h and p
+    defined as: h=exp(-holeIndex*holeScalingFactor),
+    p=1−exp(-insecticideContent*insecticideScalingFactor).
+    
+    Since 1−BF > 0 we need 1−K ≥ 0 or equivalently BF+HF*h+PF*p+IF*h*p ≤ 1.
+    Since holeIndex*holeScaling and insecticideContent*insecticideScaling are
+    both non-negative, both h and p are in the range (0,1]. Considering
+    extreme values for the exponentials and realising that their product is
+    no greater than either alone leads us to the following requirements:
+    BF+HF ≤ 1, BF+PF ≤ 1 and BF+HF+PF+IF ≤ 1.
+    
+    We also need 1-K ≤ 1-BF, or equivalently K ≥ BF which reduces to
+    HF*h + PF*p + IF*h*p ≥ 0. Similar to the above, this gives us the requirement
+    that HF ≥ 0, PF ≥ 0 and HF+PF+IF ≥ 0.
+    */
+    if( !( BF+HF <= 1.0 && BF+PF <= 1.0 && BF+HF+PF+IF <= 1.0 &&
+        HF >= 0.0 && PF >= 0.0 && HF+PF+IF >= 0.0 ) ){
+        throw util::xml_scenario_error("ITN.description.anophelesParams.*killingFactor: "
+        "bounds not met: BF+HF ≤ 1, BF+PF ≤ 1, BF+HF+PF+IF ≤ 1, HF ≥ 0, PF ≥ 0 and HF+PF+IF ≥ 0" );
+    }
 }
-double ITNAnophelesParams::RelativeAvailability::effect( double holeIndex, double insecticideContent )const {
+double ITNAnophelesParams::RelativeAvailability::relativeAvailability( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
-    double insecticideComponent = exp(-insecticideContent*insecticideScaling);
-    // this tends to the base effect (or zero) as nets age, so
-    // we subtract from 1 to get a multiplication factor
-    double unadjusted = basePlusInsecticide
-        + holePlusInteraction*holeComponent
-        + negInsecticide*insecticideComponent
-        + negInteraction*holeComponent*insecticideComponent;
-    assert( inRange01(unadjusted) );
-    return 1.0 - unadjusted;
+    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
+    double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
+    assert( inRange01(relAvail) );
+    return relAvail;
 }
-double ITNAnophelesParams::KillingEffect::effect( double holeIndex, double insecticideContent )const {
-    double survivalEffect = RelativeAvailability::effect( holeIndex, insecticideContent );
-    double survivalFactor = survivalEffect * invBaseSurvival;
+double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
+    double holeComponent = exp(-holeIndex*holeScaling);
+    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
+    double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
+    assert( inRange01(killingEffect) );
+    double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
     assert( inRange01(survivalFactor) );
     return survivalFactor;
 }
@@ -131,10 +165,12 @@ void ITN::deploy(const ITNParams& params) {
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling
     initialInsecticide = params.initialInsecticide.sample();
+    if( initialInsecticide < 0.0 )
+        initialInsecticide = 0.0;	// avoid negative samples
     
     // net rips and insecticide loss are assumed to co-vary dependent on handling of net
     util::NormalSample x = util::NormalSample::generate();
-    holeRate = params.holeRate.sample(x);
+    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
     ripRate = params.ripRate.sample(x);
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 }

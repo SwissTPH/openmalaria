@@ -59,7 +59,7 @@ namespace OM { namespace Host {
         
     private:
         TimeStep period;
-        uint lastIndex;
+        uint32_t lastIndex;
         struct Rate {
             Rate( TimeStep t, double v ): time(t), value(v) {}
             TimeStep time;

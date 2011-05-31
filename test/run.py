@@ -90,7 +90,7 @@ def getSchemaName(scenarioFile):
         raise RunError("no scenario element found??")
     return handler.schema
 
-openMalariaExec=os.path.abspath(findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../debug/openMalaria.exe", "../release/openMalaria.exe"]))
+openMalariaExec=os.path.abspath(findFile (*["../openMalaria", "../Debug/openMalaria", "../Release/openMalaria", "../openMalaria.exe", "../Debug/openMalaria.exe", "../Release/openMalaria.exe", "../RelWithDebInfo/openMalaria.exe"]))
 
 def linkOrCopy (src, dest):
     if not os.path.isfile(src):
