@@ -147,7 +147,7 @@
         <ripRate mean=".2" sigma=".2"/>
         <ripFactor value="1"/>
         <initialInsecticide mu=".2" sigma=".2"/>
-        <insecticideDecay L="0.5" function="exponential" sigma=".2"/>
+        <insecticideDecay L="0.5" function="exponential" mu="-0.02" sigma=".2"/>
         <anophelesParams mosquito="gambiae_ss">
           <proportionBitingIndoors value="0.8"/>
           <relativeAvailability holeFactor="0.5" insecticideFactor="0.1" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>

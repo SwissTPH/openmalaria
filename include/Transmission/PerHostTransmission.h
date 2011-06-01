@@ -190,16 +190,12 @@ public:
 private:
   vector<HostMosquitoInteraction> species;
   
+  // Determines whether human is outside transmission
+  bool outsideTransmission;
+  
   // Heterogeneity factor in availability; this is already multiplied into the
   // entoAvailability param stored in HostMosquitoInteraction.
   double _relativeAvailabilityHet;
-  
-  DecayFuncHet hetSampleITN;
-  DecayFuncHet hetSampleIRS;
-  DecayFuncHet hetSampleVA;
-
-  // Determines whether human is outside transmission
-  bool outsideTransmission;
   
   // (TimeStep::simulation - timestepXXX) is the age of the intervention.
   // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
@@ -207,6 +203,9 @@ private:
   TimeStep timestepIRS;
   TimeStep timestepVA;
   
+  DecayFuncHet hetSampleIRS;
+  DecayFuncHet hetSampleVA;
+
   ITN net;
   
   static AgeGroupInterpolation* relAvailAge;

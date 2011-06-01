@@ -32,13 +32,16 @@ namespace OM {
 namespace util {
 
 class BaseHetDecayFunction : public DecayFunction {
-    double sigma;
+    double mu, sigma;
 public:
     BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
-        sigma( elt.getSigma() )
-    {}
+        mu( elt.getMu() ), sigma( elt.getSigma() )
+    {
+        if( mu != 0.0 && sigma == 0.0 ){
+            cerr << "Warning: for some decay function mu != 0 while sigma = 0 (or unspecified); in this case the mu parameter has no effect" << endl;
+        }
+    }
     
-    //FIXME: we're changing samples? multiply? mean 1?
     DecayFuncHet hetSample () const{
         // In theory, there are a few ways this value could be sampled. The
         // current implementation fixes the median at 1. Another interesting
@@ -46,7 +49,7 @@ public:
         // mean of integral of eval() for age from 0 to infinity or a cut-off).
         DecayFuncHet ret;
         if(sigma>0.0){
-            ret.tMult = random::log_normal( 0.0, sigma );
+            ret.tMult = random::log_normal( mu, sigma );
         }else{
             assert(sigma==0.0);
             ret.tMult = 1.0;    // same answer as above but without using the random-number generator
@@ -56,7 +59,7 @@ public:
     DecayFuncHet hetSample (NormalSample sample) const{
         // fix median=1 as above
         DecayFuncHet ret;
-        ret.tMult = sample.asLognormal( -0.5*sigma*sigma, sigma );
+        ret.tMult = sample.asLognormal( mu, sigma );
         return ret;
     }
 };

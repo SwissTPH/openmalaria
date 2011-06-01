@@ -39,8 +39,8 @@ public:
     
 private:
     NormalSampler initialInsecticide;
-    LognormalSampler holeRate;
-    LognormalSampler ripRate;
+    LognormalSampler holeRate;	// holes per annum
+    LognormalSampler ripRate;	// rips per hole per annum
     double ripFactor;   // factor expressing how significant rips are in comparison to holes
     shared_ptr<DecayFunction> insecticideDecay;
     
@@ -177,8 +177,8 @@ private:
     double initialInsecticide;	// TODO: units; mg/m²?
     
     // these parameters are sampled from log-normal per net, but thereafter constant:
-    double holeRate;	// rate at which new holes are created
-    double ripRate;		// rate at which holes are enlarged
+    double holeRate;	// rate at which new holes are created (holes/time-step)
+    double ripRate;		// rate at which holes are enlarged (rips/hole/time-step)
     DecayFuncHet insecticideDecayHet;
 };
 

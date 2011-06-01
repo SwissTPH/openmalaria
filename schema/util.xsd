@@ -99,15 +99,38 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="mu" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        If sigma is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution with mu and sigma as
+        specified. Both mu and sigma default to zero when not specified.
+        
+        The decay rate is multiplied by this variable (effectively, the
+        half-life is divided by it).
+        
+        Note that with m=0, the median of the variable and the median value of
+        L is unchanged, and thus the time at which the median decay amongst the
+        population of decaying objects reaches half (assuming exponential,
+        Weibull or Hill decay) is L. With m=-½σ² (negative half sigma squared)
+        the mean of the variable will be 1 and mean of the half-life L, but the
+        time at which mean decay of the population has reached half may not be
+        L.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:μ (mu);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
     <xs:attribute name="sigma" type="xs:double" default="0">
       <xs:annotation>
         <xs:documentation>
-        If non-zero, heterogeneity of decay is introduced via a variate sampled
-        from the log-normal distribution with mu zero (i.e. median is 1) and
-        this sigma. Age is then divided by this variate before being passed to
-        the decay function.
+        If sigma is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution with mu and sigma as
+        specified. Both mu and sigma default to zero when not specified.
+        
+        The decay rate is multiplied by this variable (effectively, the
+        half-life is divided by it).
         </xs:documentation>
-        <xs:appinfo>min:0;name:σ (sigma);units:none;</xs:appinfo>
+        <xs:appinfo>min:0;name:σ (sigma);</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

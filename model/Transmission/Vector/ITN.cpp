@@ -43,17 +43,10 @@ void ITNAnophelesParams::init(
     _relativeAvailability.init( elt.getRelativeAvailability() );
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect() );
     _postprandialKillingEffect.init( elt.getPostprandialKillingEffect() );
-    // Nets only affect people while they're indoors and using the net.
-    // TODO: This could perhaps be extracted from ITN code since it also
-    // affects IRS and mosquito deterrents.
+    // Nets only affect people while they're using the net. NOTE: we may want
+    // to revise this at some point (heterogeneity, seasonal usage patterns).
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
-    double propBitingIndoors = elt.getProportionBitingIndoors().getValue();
-    if( !(propBitingIndoors >= 0.0 && propBitingIndoors <= 1.0 ) ){
-        throw util::xml_scenario_error(
-            "ITN.description.anophelesParams.proportionBitingIndoors: must be within range [0,1]"
-        );
-    }
-    proportionProtected = proportionUse * propBitingIndoors;
+    proportionProtected = proportionUse;
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
@@ -171,7 +164,7 @@ void ITN::deploy(const ITNParams& params) {
     // net rips and insecticide loss are assumed to co-vary dependent on handling of net
     util::NormalSample x = util::NormalSample::generate();
     holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-    ripRate = params.ripRate.sample(x);
+    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 }
 
