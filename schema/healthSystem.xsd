@@ -780,7 +780,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="interpolation" default="linear">
+    <!-- NOTE: would specify default="linear" except for a possible bug in Code
+    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
+    <xs:attribute name="interpolation" use="optional">
       <xs:annotation>
         <xs:documentation>
           Interpolation algorithm. Normally it is desirable for age-based

@@ -101,11 +101,11 @@ configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CU
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
-add_executable (run
+add_executable (unittest
   tests.cpp
   ${OM_CXXTEST_HEADERS} # for IDEs
 )
-target_link_libraries (run
+target_link_libraries (unittest
   model
   schema
   contrib
@@ -118,13 +118,13 @@ target_link_libraries (run
 )
 
 if (MSVC)
-  set_target_properties (run PROPERTIES
+  set_target_properties (unittest PROPERTIES
     LINK_FLAGS "${OM_LINK_FLAGS}"
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
 endif (MSVC)
 
-add_test (unittest run -keep)
+add_test (unittest unittest -keep)
 set_tests_properties (unittest
   PROPERTIES PASS_REGULAR_EXPRESSION "^Running [0-9]+ tests.*OK![ \r\n]*$")
 

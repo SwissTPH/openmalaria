@@ -118,7 +118,7 @@ public:
    * infections to baloon stupidly.
    * 
    * Exact constraint is: _MOI <= MAX_INFECTIONS. */
-  static const size_t MAX_INFECTIONS = 21;
+  static const int MAX_INFECTIONS = 21;
   
 protected:
   /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY

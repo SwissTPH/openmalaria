@@ -24,6 +24,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "Clinical/ESCaseManagement.h"
+#include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <list>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
@@ -195,6 +196,7 @@ public:
 	// Aim: check wanted decisions are _not_ optimised out and the unwanted
 	// "result" decision is optimised out.
 	
+	UnittestUtil::EmpiricalWHM_setup();	// use a 1-day-TS model
 	WithinHostModel* whm = WithinHostModel::createWithinHostModel();
 	UnittestUtil::setTotalParasiteDensity( *whm, numeric_limits< double >::infinity() );	// infinite, which means P(true outcome) should be 1.0 with an RDT test
 	ESHostData hd( 16., *whm, OM::Pathogenesis::NONE );

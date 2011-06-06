@@ -79,7 +79,7 @@ void DescriptiveIPTWithinHost::newInfection(){
     numInfs++;
     ++PopulationStats::allowedInfections;
   }
-  assert( numInfs == infections.size() );
+  assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));

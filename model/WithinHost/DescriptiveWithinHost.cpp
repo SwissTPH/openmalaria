@@ -50,7 +50,7 @@ void DescriptiveWithinHostModel::newInfection() {
         numInfs++;
         ++PopulationStats::allowedInfections;
     }
-    assert( numInfs == infections.size() );
+    assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
@@ -119,7 +119,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             iter++;
         }
     }
-    assert( numInfs == infections.size() );
+    assert( numInfs == static_cast<int>(infections.size()) );
 
     IPTattenuateAsexualMinTotalDensity();
     util::streamValidate( totalDensity );

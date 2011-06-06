@@ -40,7 +40,7 @@ class UnittestUtil {
 public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	TimeStep::init( 1, 90.0 );	// I think the drug model is always going to be used with an interval of 1 day.
-	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
+	util::ModelOptions::optSet = 1u<<util::INCLUDES_PK_PD;
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
 	//PkPdModel::init ();
@@ -102,12 +102,12 @@ public:
     
     static void DescriptiveInfection_init () {
 	TimeStep::init( 5, 90.0 );
-	util::ModelOptions::optSet = util::INCLUDES_PK_PD;
+	util::ModelOptions::optSet = 1u<<util::INCLUDES_PK_PD;
     }
     
     static void EmpiricalWHM_setup () {
 	TimeStep::init( 1, 90.0 );
-	util::ModelOptions::optSet = util::EMPIRICAL_WITHIN_HOST_MODEL;
+	util::ModelOptions::optSet = 1u<<util::EMPIRICAL_WITHIN_HOST_MODEL;
     }
     
     static void AgeGroupInterpolation_init() {

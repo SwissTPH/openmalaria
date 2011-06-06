@@ -288,10 +288,10 @@ namespace OM { namespace util {
         const scnXml::AgeGroupValues& ageGroups, const char* eltName
     ){
         // Type mostly equivalent to a std::string:
-        const scnXml::Interpolation& interp = ageGroups.getInterpolation();
-        if( interp == "linear" ){
+        const scnXml::AgeGroupValues::InterpolationOptional& interp = ageGroups.getInterpolation();
+        if( !interp.present() || interp.get() == "linear" ){
             return new AgeGroupPiecewiseLinear( ageGroups, eltName );
-        }else if( interp == "none" ){
+        }else if( interp.get() == "none" ){
             return new AgeGroupPiecewiseConstant( ageGroups, eltName );
         }else{
             throw util::xml_scenario_error( (boost::format( "age group interpolation %1% not implemented" ) %interp).str() );

@@ -57,7 +57,7 @@ void CommonWithinHost::newInfection(){
     _cumulativeh++;
     ++PopulationStats::allowedInfections;
   }
-  assert( numInfs == infections.size() );
+  assert( numInfs == static_cast<int>(infections.size()) );
 }
 
 void CommonWithinHost::clearAllInfections(){
@@ -136,7 +136,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
   for (int i = 0; i < numInfs; ++i) {
     infections.push_back (checkpointedInfection (stream));
   }
-  assert( numInfs == infections.size() );
+  assert( numInfs == static_cast<int>(infections.size()) );
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {

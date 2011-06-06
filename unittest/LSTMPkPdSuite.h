@@ -90,8 +90,10 @@ public:
     // IV tests. MF may not be used as an IV drug, but our code doesn't care.
     void testIVEquiv () {
         // As duration tends to zero, factor should tend to that for an oral
-        // dose. Code uses duration!=0 to enable IV mode so we use a small value.
-        proxy->medicate ("MF", 3000/massAt21, 0, 1e-10, massAt21);
+        // dose. Code uses duration!=0 to enable IV mode so we use a small value;
+        // if this is too small, however, the gsl_integration_qag function complains
+        // it cannot reach the requested tolerance.
+        proxy->medicate ("MF", 3000/massAt21, 0, 1e-6, massAt21);
         TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
     }
     
