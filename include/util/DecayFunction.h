@@ -94,6 +94,16 @@ public:
     /** Generate a DecayFuncHet value from an existing sample. */
     virtual DecayFuncHet hetSample (NormalSample sample) const =0;
     
+    /** Say you have a population of objects which each have two states:
+     * decayed and not decayed. If you want to use a DecayFunction to model
+     * the proportion of objects which have decayed, you need to work out per
+     * object the age of decay. This function does that.
+     * 
+     * This is only valid where mu and sigma parameters are zero.
+     * 
+     * @returns Age at which an object should decay. */
+    virtual TimeStep sampleAgeOfDecay () const =0;
+    
 protected:
     DecayFunction() {}
 };

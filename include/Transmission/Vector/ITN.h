@@ -45,6 +45,7 @@ private:
     LognormalSampler ripRate;	// rips per hole per annum
     double ripFactor;   // factor expressing how significant rips are in comparison to holes
     shared_ptr<DecayFunction> insecticideDecay;
+    shared_ptr<DecayFunction> attritionOfNets;
     
     friend class ITN;
 };
@@ -146,6 +147,7 @@ public:
     template<class S>
     void operator& (S& stream) {
         deployTime & stream;
+        disposalTime & stream;
         nHoles & stream;
         holeIndex & stream;
         initialInsecticide & stream;
@@ -174,6 +176,7 @@ public:
 private:
     // these parameters express the current state of the net:
     TimeStep deployTime;	// time of deployment or TimeStep::never
+    TimeStep disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
     int nHoles;			// total number of holes
     double holeIndex;	// a measure of both the number and size of holes
     double initialInsecticide;	// TODO: units; mg/m²?

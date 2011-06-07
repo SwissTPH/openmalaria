@@ -74,6 +74,9 @@ public:
     double eval(TimeStep age, DecayFuncHet sample) const{
         return 1.0;
     }
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep::never;
+    }
 };
 
 class StepDecayFunction : public BaseHetDecayFunction {
@@ -95,6 +98,10 @@ public:
         }
     }
     
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep::never;
+    }
+    
 private:
     double invL;
 };
@@ -103,6 +110,7 @@ class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
+        L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
     {}
     
@@ -118,7 +126,13 @@ public:
         }
     }
     
+    TimeStep sampleAgeOfDecay () const{
+        // Note: rounds to nearest. Object may decay instantly or at time L.
+        return L * random::uniform_01();
+    }
+    
 private:
+    TimeStep L;
     double invL;
 };
 
@@ -137,6 +151,10 @@ public:
     double eval(TimeStep age, DecayFuncHet sample) const{
         double effectiveAge = age.asInt() * sample.getTMult();
         return exp( effectiveAge );
+    }
+    
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep(log(random::uniform_01())/negInvLambda);
     }
     
 private:
@@ -159,6 +177,10 @@ public:
         return exp( -pow(effectiveAge, k) );
     }
     
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
+    }
+    
 private:
     double constOverLambda;
     double k;
@@ -178,6 +200,10 @@ public:
     double eval(TimeStep age, DecayFuncHet sample) const{
         double effectiveAge = age.asInt() * sample.getTMult();
         return 1.0 / (1.0 + pow(effectiveAge, k));
+    }
+    
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -202,6 +228,10 @@ public:
         }else{
             return 0.0;
         }
+    }
+    
+    TimeStep sampleAgeOfDecay () const{
+        return TimeStep( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
     }
     
 private:

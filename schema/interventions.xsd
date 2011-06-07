@@ -879,6 +879,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="attritionOfNets" type="DecayFunction">
+        <xs:annotation>
+          <xs:documentation>
+          Specifies the rate at which nets are disposed of over time.
+          
+          In the current model, nets are disposed of randomly (no correlation
+          with state of decay) such that the chance of each net surviving until
+          age t is the value of this decay function at time t. Equivalently
+          (where a large number of nets are distributed at the same time), the
+          proportion of nets remaining in use should match this decay function
+          over time.
+        </xs:documentation>
+          <xs:appinfo>units:none;name:Attrition of nets</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="anophelesParams" maxOccurs="unbounded">
         <xs:complexType>
           <xs:sequence>

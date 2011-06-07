@@ -30,6 +30,7 @@ double ITNParams::init( const scnXml::ITNDescription& elt) {
     ripRate.setParams( elt.getRipRate() );
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
+    attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
     double propUse = elt.getUsage().getValue();
     if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
         throw util::xml_scenario_error("ITN.description.proportionUse: must be within range [0,1]");
@@ -154,6 +155,7 @@ double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, dou
 
 void ITN::deploy(const ITNParams& params) {
     deployTime = TimeStep::simulation;
+    disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling
@@ -170,6 +172,9 @@ void ITN::deploy(const ITNParams& params) {
 
 void ITN::update(const ITNParams& params){
     if( deployTime != TimeStep::never ){
+        if( TimeStep::simulation >= disposalTime ){
+            deployTime = TimeStep::never;
+        }
         int newHoles = poisson( holeRate );
         nHoles += newHoles;
         holeIndex += newHoles + params.ripFactor * poisson( nHoles * ripRate );
