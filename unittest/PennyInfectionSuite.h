@@ -56,11 +56,12 @@ public:
     
     static void readVector(std::vector<double>& vec, const char* file){
         ifstream istr(file);
+        ETS_ASSERT( istr.is_open() );
         double val;
         while( istr >> val ){
             vec.push_back( val );
         }
-        TS_ASSERT( istr.eof() );
+        ETS_ASSERT( istr.eof() );
     }
     
     void testDensities(){
@@ -73,7 +74,7 @@ public:
         int iterations=0;
         do{
             extinct = infection->update(1.0);
-            TS_ASSERT_LESS_THAN( iterations, cirDens.size() );
+            ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(), seqDens[iterations] );
             TimeStep::simulation += TimeStep(1);
