@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "util/sampler.h"
 #include <limits>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace scnXml
 {
@@ -32,8 +32,6 @@ namespace scnXml
     class DecayFunctionValue;
 }
 class DecayFunctionSuite;
-
-using boost::shared_ptr;
 
 namespace OM {
 namespace util {
@@ -47,6 +45,10 @@ class DecayFuncHet {
 public:
     DecayFuncHet() : tMult( numeric_limits<double>::quiet_NaN() ) {}
     
+    inline double getTMult() const{
+        return tMult;
+    }
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -54,13 +56,6 @@ public:
     }
     
     friend class BaseHetDecayFunction;
-    friend class StepDecayFunction;
-    friend class LinearDecayFunction;
-    friend class ExponentialDecayFunction;
-    friend class WeibullDecayFunction;
-    friend class HillDecayFunction;
-    friend class SmoothCompactDecayFunction;
-    friend class ::DecayFunctionSuite;
  };
 
 /** An interface for a few types of decay function (some of which may also be
@@ -79,11 +74,11 @@ public:
      * @param elt XML element specifying which function to use and parameters
      * @param eltName Name of XML element (for reasonable error reporting)
      */
-    static shared_ptr<DecayFunction> makeObject(
+    static auto_ptr<DecayFunction> makeObject(
         const scnXml::DecayFunction& elt, const char* eltName
     );
     /** Return an object representing no decay (useful default). */
-    static shared_ptr<DecayFunction> makeConstantObject();
+    static auto_ptr<DecayFunction> makeConstantObject();
     
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
@@ -101,28 +96,6 @@ public:
     
 protected:
     DecayFunction() {}
-};
-
-/** Wrapper around DecayFunction adding initial value. */
-class DecayFunctionValue
-{
-    double initial;
-    shared_ptr<DecayFunction> decayFunc;
-public:
-    DecayFunctionValue() : initial(numeric_limits<double>::quiet_NaN()) {}
-    
-    /** Assignment from XML element. */
-    void set (const scnXml::DecayFunctionValue& elt, const char* eltName);
-    
-    /** Return true if decay function was never initialized. */
-    bool notSet (){
-        return decayFunc.get() == 0;
-    }
-    
-    /** As DecayFunction::eval(), but multiplied by initial value. */
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        return initial * decayFunc->eval(age, sample);
-    }
 };
 
 } }

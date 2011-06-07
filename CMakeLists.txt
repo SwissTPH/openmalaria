@@ -207,7 +207,6 @@ include_directories (SYSTEM
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
 )
-link_directories (${CMAKE_BINARY_DIR}/xsdcxx)
 
 add_executable (openMalaria model/openMalaria.cpp)
 

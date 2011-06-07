@@ -23,11 +23,13 @@
 #include "Global.h"
 #include "util/DecayFunction.h"
 #include "schema/interventions.h"
+#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Host {
     using util::DecayFunction;
     using util::DecayFuncHet;
+    using boost::shared_ptr;
 
 /** Vaccine intervention parameters.
  *

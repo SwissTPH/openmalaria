@@ -23,12 +23,14 @@
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
+#include <boost/shared_ptr.hpp>
 
 namespace OM { namespace Transmission {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
+    using boost::shared_ptr;
 
 /** Constant parameters for extended ITN model. */
 class ITNParams {

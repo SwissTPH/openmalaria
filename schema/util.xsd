@@ -134,27 +134,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="DecayFunctionValue">
-    <xs:annotation>
-      <xs:documentation>
-        Specification of decay or survival of a parameter along with initial
-        value (i.e. the decay function's value is multiplied by "initial").
-      </xs:documentation>
-      <xs:appinfo>name:Decay or survival of a parameter;</xs:appinfo>
-    </xs:annotation>
-    <xs:complexContent>
-      <xs:extension base="DecayFunction">
-        <xs:attribute name="initial" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              A value multiplying the decay function, thus equal to the function's value at time 0.
-            </xs:documentation>
-            <xs:appinfo>units:None;min:0;max:1;name:Initial proportion;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:complexType name="LognormalSample">
     <xs:annotation>
       <xs:documentation>
@@ -205,6 +184,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           The standard deviation of variates.
         </xs:documentation>
         <xs:appinfo>units:(same as base units);name:sigma;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="inputValue">
+    <xs:attribute name="value" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>A double-precision floating-point value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

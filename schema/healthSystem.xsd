@@ -4,6 +4,7 @@ Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- HealthSystem & Clinical data -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="clinical">
     <xs:annotation>
       <xs:documentation>
@@ -813,14 +814,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:enumeration value="linear" />
         </xs:restriction>
       </xs:simpleType>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="inputValue">
-    <xs:attribute name="value" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>A double-precision floating-point value.</xs:documentation>
-        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
-      </xs:annotation>
     </xs:attribute>
   </xs:complexType>
 </xs:schema>

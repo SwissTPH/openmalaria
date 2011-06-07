@@ -26,6 +26,7 @@
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include "util/errors.h"
+#include <boost/shared_ptr.hpp>
 
 namespace OM { namespace Transmission {
     
@@ -34,6 +35,7 @@ class TransmissionModel;
 using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
+using boost::shared_ptr;
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *

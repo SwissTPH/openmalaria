@@ -42,11 +42,9 @@ public:
         }
     }
     
+    virtual double getBaseTMult() const =0;
+    
     DecayFuncHet hetSample () const{
-        // In theory, there are a few ways this value could be sampled. The
-        // current implementation fixes the median at 1. Another interesting
-        // method would be to fix the mean total effect for each function (fix
-        // mean of integral of eval() for age from 0 to infinity or a cut-off).
         DecayFuncHet ret;
         if(sigma>0.0){
             ret.tMult = random::log_normal( mu, sigma );
@@ -54,12 +52,13 @@ public:
             assert(sigma==0.0);
             ret.tMult = 1.0;    // same answer as above but without using the random-number generator
         }
+        ret.tMult *= getBaseTMult();
         return ret;
     }
     DecayFuncHet hetSample (NormalSample sample) const{
-        // fix median=1 as above
         DecayFuncHet ret;
         ret.tMult = sample.asLognormal( mu, sigma );
+        ret.tMult *= getBaseTMult();
         return ret;
     }
 };
@@ -81,12 +80,15 @@ class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        L( TimeStep::fromYears( elt.getL() ) )
+        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
     {}
     
+    double getBaseTMult() const{
+        return invL;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        if( effectiveAge < L ){
+        double effectiveAge = age.asInt() * sample.getTMult();
+        if( effectiveAge < 1.0 ){
             return 1.0;
         }else{
             return 0.0;
@@ -94,28 +96,29 @@ public:
     }
     
 private:
-    TimeStep L;
+    double invL;
 };
 
 class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
     {}
     
+    double getBaseTMult() const{
+        return invL;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        if( effectiveAge < L ){
-            return 1.0 - effectiveAge.asInt() * invL;
+        double effectiveAge = age.asInt() * sample.getTMult();
+        if( effectiveAge < 1.0 ){
+            return 1.0 - effectiveAge;
         }else{
             return 0.0;
         }
     }
     
 private:
-    TimeStep L;
     double invL;
 };
 
@@ -128,9 +131,12 @@ public:
         util::streamValidate(negInvLambda);
     }
     
+    double getBaseTMult() const{
+        return negInvLambda;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        return exp( effectiveAge.asInt() * negInvLambda );
+        double effectiveAge = age.asInt() * sample.getTMult();
+        return exp( effectiveAge );
     }
     
 private:
@@ -145,9 +151,12 @@ public:
         k( elt.getK() )
     {}
     
+    double getBaseTMult() const{
+        return constOverLambda;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        return exp( -pow(effectiveAge.asInt() * constOverLambda, k) );
+        double effectiveAge = age.asInt() * sample.getTMult();
+        return exp( -pow(effectiveAge, k) );
     }
     
 private:
@@ -163,9 +172,12 @@ public:
         k( elt.getK() )
     {}
     
+    double getBaseTMult() const{
+        return invL;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        return 1.0 / (1.0 + pow(effectiveAge.asInt() * invL, k));
+        double effectiveAge = age.asInt() * sample.getTMult();
+        return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
 private:
@@ -176,61 +188,54 @@ class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        L( TimeStep::fromYears( elt.getL() ) ),
         invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
         k( elt.getK() )
     {}
     
+    double getBaseTMult() const{
+        return invL;
+    }
     double eval(TimeStep age, DecayFuncHet sample) const{
-        TimeStep effectiveAge = age * sample.tMult;
-        if( effectiveAge < L ){
-            return exp( k - k / (1.0 - pow(effectiveAge.asInt() * invL, 2.0)) );
+        double effectiveAge = age.asInt() * sample.getTMult();
+        if( effectiveAge < 1.0 ){
+            return exp( k - k / (1.0 - pow(effectiveAge, 2.0)) );
         }else{
             return 0.0;
         }
     }
     
 private:
-    TimeStep L;
     double invL, k;
 };
 
 
 // -----  interface / static functions  -----
 
-shared_ptr<DecayFunction> DecayFunction::makeObject(
+auto_ptr<DecayFunction> DecayFunction::makeObject(
     const scnXml::DecayFunction& elt, const char* eltName
 ){
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
     if( func == "constant" ){
-        return shared_ptr<DecayFunction>(new ConstantDecayFunction);
+        return auto_ptr<DecayFunction>(new ConstantDecayFunction);
     }else if( func == "step" ){
-        return shared_ptr<DecayFunction>(new StepDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new StepDecayFunction( elt ));
     }else if( func == "linear" ){
-        return shared_ptr<DecayFunction>(new LinearDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new LinearDecayFunction( elt ));
     }else if( func == "exponential" ){
-        return shared_ptr<DecayFunction>(new ExponentialDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new ExponentialDecayFunction( elt ));
     }else if( func == "weibull" ){
-        return shared_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
     }else if( func == "hill" ){
-        return shared_ptr<DecayFunction>(new HillDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
-        return shared_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
+        return auto_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
     }
 }
-shared_ptr<DecayFunction> DecayFunction::makeConstantObject(){
-    return shared_ptr<DecayFunction>(new ConstantDecayFunction);
-}
-
-
-// -----  DecayFunctionValue  -----
-
-void DecayFunctionValue::set (const scnXml::DecayFunctionValue& elt, const char* eltName){
-    initial = elt.getInitial();
-    decayFunc = DecayFunction::makeObject( elt, eltName );
+auto_ptr<DecayFunction> DecayFunction::makeConstantObject(){
+    return auto_ptr<DecayFunction>(new ConstantDecayFunction);
 }
 
 
