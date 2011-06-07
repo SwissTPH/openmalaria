@@ -104,6 +104,10 @@ public:
     /** Convert an integer to a TimeStep. */
     explicit TimeStep( int ts ) : _ts(ts) {}
     
+    /// Convert a real number of timesteps to the nearest TimeStep
+    static inline TimeStep fromNearest( double d ){
+        return TimeStep( static_cast<int>(d+0.5) );
+    }
     /// Convert a number of days to TimeStep type, rounding to nearest.
     static TimeStep fromDaysNearest( double d );
     /// Convert a number of days to TimeStep type, rounding down.

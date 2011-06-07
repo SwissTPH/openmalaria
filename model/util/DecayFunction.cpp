@@ -154,7 +154,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep(log(random::uniform_01())/negInvLambda);
+        return TimeStep::fromNearest(log(random::uniform_01())/negInvLambda);
     }
     
 private:
@@ -178,7 +178,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
+        return TimeStep::fromNearest( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -203,7 +203,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
+        return TimeStep::fromNearest( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -231,7 +231,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
+        return TimeStep::fromNearest( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
     }
     
 private:
