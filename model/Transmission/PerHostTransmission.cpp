@@ -77,7 +77,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].entoAvailability;
     if (net.timeOfDeployment() >= TimeStep(0)) {
-        alpha_i *= net.relativeAvailability(base.net);
+        alpha_i *= net.relativeAttractiveness(base.net);
     }
     if (timestepIRS >= TimeStep(0))
         alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));

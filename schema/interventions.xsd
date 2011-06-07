@@ -803,7 +803,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           while indoors (fixed parameter).
           
           At the moment this is constant across humans and deterministic:
-          availability/survival factor is base*(1-usage*m) + intervention_factor*usage*m
+          relative attractiveness and survival factors are
+          base*(1-usage*m) + intervention_factor*usage*m
           where m is the proportion of time mosquitoes bite while humans are
           indoors.
         </xs:documentation>
@@ -897,20 +898,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="anophelesParams" maxOccurs="unbounded">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="relativeAvailability" type="ITNAvailEffect">
+            <xs:element name="deterrency" type="ITNDeterrency">
               <xs:annotation>
                 <xs:documentation>
-                Effect of net on availability of humans to mosquitoes relative to
+                Effect of net on attractiveness of humans to mosquitoes relative to
                 an unprotected adult human. Parameterisations should take into
                 account that mosquitoes do not always bite indoors.
                 
-                Relative availability of the human is multiplied by
-                1 − H×h + P×p + I×h×p
+                Attractiveness of the human is multiplied by
+                exp(log(H)×h + log(P)×p + log(I)×h×p
                 where H, P and I are the hole, insecticide and interaction factors
                 respectively, h=exp(-holeIndex×holeScalingFactor) and
                 p=1−exp(-insecticideContent×insecticideScalingFactor).
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Relative availability</xs:appinfo>
+                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
@@ -968,7 +969,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ITNAvailEffect">
+  <xs:complexType name="ITNDeterrency">
     <xs:attribute name="holeFactor" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -1010,7 +1011,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="ITNKillingEffect">
     <xs:complexContent>
-      <xs:extension base="ITNAvailEffect">
+      <xs:extension base="ITNDeterrency">
         <xs:attribute name="baseFactor" type="xs:double" use="required">
           <xs:annotation>
             <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>

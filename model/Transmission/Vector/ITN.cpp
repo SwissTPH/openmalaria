@@ -41,7 +41,7 @@ double ITNParams::init( const scnXml::ITNDescription& elt) {
 void ITNAnophelesParams::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse)
 {
-    _relativeAvailability.init( elt.getRelativeAvailability() );
+    _relativeAttractiveness.init( elt.getDeterrency() );
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect() );
     _postprandialKillingEffect.init( elt.getPostprandialKillingEffect() );
     // Nets only affect people while they're using the net. NOTE: we may want
@@ -54,14 +54,14 @@ void ITNAnophelesParams::init(
 inline bool inRange01( double x ){
     return x>=0.0 && x<= 1.0;
 }
-ITNAnophelesParams::RelativeAvailability::RelativeAvailability() :
+ITNAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
     lHF( numeric_limits< double >::signaling_NaN() ),
     lPF( numeric_limits< double >::signaling_NaN() ),
     lIF( numeric_limits< double >::signaling_NaN() ),
     holeScaling( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::RelativeAvailability::init(const scnXml::ITNAvailEffect& elt){
+void ITNAnophelesParams::RelativeAttractiveness::init(const scnXml::ITNDeterrency& elt){
     double HF = elt.getHoleFactor();
     double PF = elt.getInsecticideFactor();
     double IF = elt.getInteractionFactor();
@@ -83,7 +83,7 @@ void ITNAnophelesParams::RelativeAvailability::init(const scnXml::ITNAvailEffect
     */
     if( !( HF > 0.0 && HF <= 1.0 && PF > 0.0 && PF <= 1.0 &&
             HF*PF*IF > 0.0 && HF*PF*IF <= 1.0 ) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams.relativeAvailability: "
+        throw util::xml_scenario_error("ITN.description.anophelesParams.deterrency: "
         "bounds not met: HF∈(0,1], PF∈(0,1] and HF×PF×IF∈(0,1]" );
     }
     lHF = log( HF );
@@ -136,7 +136,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const scnXml::ITNKillingEffect& el
         "bounds not met: BF+HF ≤ 1, BF+PF ≤ 1, BF+HF+PF+IF ≤ 1, HF ≥ 0, PF ≥ 0 and HF+PF+IF ≥ 0" );
     }
 }
-double ITNAnophelesParams::RelativeAvailability::relativeAvailability( double holeIndex, double insecticideContent )const {
+double ITNAnophelesParams::RelativeAttractiveness::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
@@ -181,8 +181,8 @@ void ITN::update(const ITNParams& params){
     }
 }
 
-double ITN::relativeAvailability(const ITNAnophelesParams& params) const{
-    return params.relativeAvailability( holeIndex, initialInsecticide * params.base->insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet));
+double ITN::relativeAttractiveness(const ITNAnophelesParams& params) const{
+    return params.relativeAttractiveness( holeIndex, initialInsecticide * params.base->insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet));
 }
 
 double ITN::preprandialSurvivalFactor(const ITNAnophelesParams& params) const{

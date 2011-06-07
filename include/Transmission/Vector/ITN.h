@@ -61,8 +61,8 @@ public:
     void init(const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    inline double relativeAvailability( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _relativeAvailability.relativeAvailability( holeIndex, insecticideContent ) + proportionUnprotected;
+    inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
+        return proportionProtected * _relativeAttractiveness.relativeAttractiveness( holeIndex, insecticideContent ) + proportionUnprotected;
     }
     /// Get killing effect on mosquitoes before feeding.
     /// See ComponentParams::effect for a more detailed description.
@@ -76,16 +76,16 @@ public:
     }
     
 private:
-    class RelativeAvailability {
+    class RelativeAttractiveness {
     public:
-        RelativeAvailability();
+        RelativeAttractiveness();
         
         /** Set parameters.
          * 
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        void init(const scnXml::ITNAvailEffect& elt);
+        void init(const scnXml::ITNDeterrency& elt);
         
         /** Calculate effect. Positive is interpreted as having a positive effect
         * (thus decreasing availability or survival) and negative as having a
@@ -93,7 +93,7 @@ private:
         * zero as holeIndex becomes large and insecticideContent tends to zero,
         * and parameters should be defined such that it is always in the
         * range [0,1]. */
-        double relativeAvailability( double holeIndex, double insecticideContent )const;
+        double relativeAttractiveness( double holeIndex, double insecticideContent )const;
         
     protected:
         double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
@@ -121,7 +121,7 @@ private:
     const ITNParams* base;
     double proportionProtected;
     double proportionUnprotected;
-    RelativeAvailability _relativeAvailability;
+    RelativeAttractiveness _relativeAttractiveness;
     SurvivalFactor _preprandialKillingEffect;
     SurvivalFactor _postprandialKillingEffect;
     
@@ -165,7 +165,7 @@ public:
     void update(const ITNParams& params);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    double relativeAvailability(const ITNAnophelesParams& params) const;
+    double relativeAttractiveness(const ITNAnophelesParams& params) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     double preprandialSurvivalFactor(const ITNAnophelesParams& params) const;
