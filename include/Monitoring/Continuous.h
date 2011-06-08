@@ -42,6 +42,10 @@ namespace OM { namespace Monitoring {
 	 * 
 	 * Callbacks should be registered before init() is called. */
 	static void init (bool isCheckpoint);
+        
+        /** When compiled in BOINC mode, this copies data to the final
+         * compressing output file. Otherwise it does nothing. */
+        static void finalise ();
 	
 	/** @brief Checkpointing functions */
 	//@{

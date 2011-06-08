@@ -37,6 +37,7 @@ namespace OM { namespace util {
     string CommandLine::resourcePath;
     double CommandLine::newEIR;
     string CommandLine::outputName;
+    string CommandLine::ctsoutName;
     set<TimeStep> CommandLine::checkpoint_times;
     
     string parseNextArg (int argc, char* argv[], int& i) {
@@ -51,9 +52,9 @@ namespace OM { namespace util {
 	
 	bool cloHelp = false, cloVersion = false, cloError = false;
 	newEIR = numeric_limits<double>::quiet_NaN();
-	bool fileGiven = false;
-	string scenarioFile = "scenario.xml";
-	outputName = "";
+	string scenarioFile = "";
+        outputName = "";
+        ctsoutName = "";
 #	ifdef OM_STREAM_VALIDATOR
 	string sVFile;
 #	endif
@@ -72,16 +73,28 @@ namespace OM { namespace util {
 			throw runtime_error ("--resource-path (or -p) may only be given once");
 		    resourcePath = parseNextArg (argc, argv, i).append ("/");
 		} else if (clo == "scenario") {
-		    if (fileGiven){
+		    if (scenarioFile != ""){
 			throw runtime_error ("--scenario argument may only be given once");
 		    }
 		    scenarioFile = parseNextArg (argc, argv, i);
-		    fileGiven = true;
 		} else if (clo == "output") {
 		    if (outputName != ""){
 			throw runtime_error ("--output argument may only be given once");
 		    }
 		    outputName = parseNextArg (argc, argv, i);
+                } else if (clo == "ctsout") {
+                    if (ctsoutName != ""){
+                        throw runtime_error ("--ctsout argument may only be given once");
+                    }
+                    ctsoutName = parseNextArg (argc, argv, i);
+                } else if (clo == "name") {
+                    if (ctsoutName != "" || outputName != "" || scenarioFile != ""){
+                        throw runtime_error ("--name may not be used along with --scenario, --output or --ctsout");
+                    }
+                    string name = parseNextArg (argc, argv, i);
+                    (scenarioFile = "scenario").append(name).append(".xml");
+                    (outputName = "output").append(name).append(".txt");
+                    (ctsoutName = "ctsout").append(name).append(".txt");
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
                     options.set (SKIP_SIMULATION);
@@ -151,16 +164,23 @@ namespace OM { namespace util {
 			options.set (PRINT_MODEL_OPTIONS);
 			options.set (SKIP_SIMULATION);
 		    } else if (clo[j] == 's') {
-			if (fileGiven){
+			if (scenarioFile != ""){
 			    throw runtime_error ("-s argument may only be given once");
 			}
 			scenarioFile = parseNextArg (argc, argv, i);
-			fileGiven = true;
 		    } else if (clo[j] == 'o') {
 			if (outputName != ""){
 			    throw runtime_error ("-o argument may only be given once");
 			}
 			outputName = parseNextArg (argc, argv, i);
+                    } else if (clo[j] == 'n') {
+                        if (ctsoutName != "" || outputName != "" || scenarioFile != ""){
+                            throw runtime_error ("--name may not be used along with --scenario, --output or --ctsout");
+                        }
+                        string name = parseNextArg (argc, argv, i);
+                        (scenarioFile = "scenario").append(name).append(".xml");
+                        (outputName = "output").append(name).append(".txt");
+                        (ctsoutName = "ctsout").append(name).append(".txt");
 		    } else if (clo[j] == 'c') {
 			options.set (TEST_CHECKPOINTING);
 		    } else if (clo[j] == 'd') {
@@ -200,7 +220,9 @@ namespace OM { namespace util {
 	    << "			working directory). Not used for output files."<<endl
 	    << " -s --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
-	    << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
+            << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
+            << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
+            << " -n --name NAME	Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt --ctsout ctsoutNAME.txt" <<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
 	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (inocs./person/year)"<<endl
@@ -242,12 +264,19 @@ namespace OM { namespace util {
 	
 	if (checkpoint_times.size())	// timed checkpointing overrides this
 	    options[TEST_CHECKPOINTING] = false;
-
+        
+        if (scenarioFile == ""){
+            scenarioFile = "scenario.xml";
+        }
 	if (outputName == ""){
 	    outputName = "output.txt";
 	}
+	if (ctsoutName == ""){
+            ctsoutName = "ctsout.txt";
+        }
 #ifndef WITHOUT_BOINC
 	outputName.append(".gz");
+        ctsoutName.append(".gz");
 #endif
 
 	return scenarioFile;

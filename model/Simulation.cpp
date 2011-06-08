@@ -205,6 +205,7 @@ int Simulation::start(){
     
     population->flushReports();        // ensure all Human instances report past events
     Surveys.writeSummaryArrays();
+    Continuous::finalise();
     
     // Write scenario checksum, only if simulation completed.
     cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));

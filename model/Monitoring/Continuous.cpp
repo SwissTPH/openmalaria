@@ -17,28 +17,36 @@
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
+#include "Global.h"
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.h"
 #include "inputData.h"
 #include "util/BoincWrapper.h"
+#include "util/CommandLine.h"
 
 #include <vector>
 #include <map>
 #include <fstream>
 #include <boost/format.hpp>
 #include <boost/math/nonfinite_num_facets.hpp>
+#include <gzstream.h>
 
 namespace OM { namespace Monitoring {
     using namespace fastdelegate;
     using util::xml_scenario_error;
     
-    /// Output file name
+    /// File we send uncompressed output to
     string cts_filename;
+#ifndef WITHOUT_BOINC
+    /// At end of simulation, compress the output file. Don't compress data as
+    /// it's output, because gzstream doesn't support seeking, which is needed
+    /// for checkpoint resume.
+    string compressedCtsoutName;
+#endif
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
     fstream ctsOStream;
-    // Can't simply replace with ogzstream for compression: that doesn't support appending.
     
     /* Record last position in file (as position minus start), for checkpointing.
      * Don't use a streampos directly, because I'm not convinced we can save and
@@ -74,7 +82,13 @@ namespace OM { namespace Monitoring {
         if( ctsOpt.get().getDuringInit().present() )
             duringInit = ctsOpt.get().getDuringInit().get();
         
-        cts_filename = util::BoincWrapper::resolveFile("ctsout.txt");
+        cts_filename = util::BoincWrapper::resolveFile(util::CommandLine::getCtsoutName());
+#ifndef WITHOUT_BOINC
+        // redirect output to a temporary file; copy and compress this to the
+        // final output at end of simulation
+        compressedCtsoutName = cts_filename;
+        cts_filename = "ctsout_temp.txt";
+#endif
         
 	// This locale ensures uniform formatting of nans and infs on all platforms.
 	locale old_locale;
@@ -105,7 +119,7 @@ namespace OM { namespace Monitoring {
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
-		throw runtime_error ("File ctsout.txt exists!");
+		throw runtime_error (string("File ").append(cts_filename).append(" exists!"));
             }
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
@@ -128,6 +142,18 @@ namespace OM { namespace Monitoring {
 	    ctsOStream << lineEnd << flush;
 	    streamOff = ctsOStream.tellp() - streamStart;
 	}
+    }
+    void Continuous::finalise (){
+#ifndef WITHOUT_BOINC
+        if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
+            throw runtime_error (string("File ").append(compressedCtsoutName).append(" exists!"));
+        }
+        ctsOStream.close();
+        ifstream origFile(cts_filename.c_str());
+        assert(origFile.is_open());
+        ogzstream finalFile(compressedCtsoutName.c_str());
+        finalFile << origFile.rdbuf();
+#endif
     }
     void Continuous::staticCheckpoint (ostream& stream){
         if( ctsPeriod == 0 )
