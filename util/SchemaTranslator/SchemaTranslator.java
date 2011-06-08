@@ -2544,14 +2544,16 @@ public class SchemaTranslator {
     }
 
     private void visitAllFiles(File file, File outDir) throws Exception {
+        if (!outDir.isDirectory())
+            outDir.mkdir();
         if (file.isDirectory()) {
+            File subDir = new File( outDir, file.getName() );
             String[] children = file.list();
             for (int i = 0; i < children.length; i++) {
                 try {
-                    visitAllFiles(new File(file, children[i]), outDir);
+                    visitAllFiles(new File(file, children[i]), subDir);
                 } catch (Exception exc) {
-                    System.out
-                            .println("Error translating " + file + ": " + exc);
+                    System.out.println("Error translating " + file + ": " + exc);
                     exc.printStackTrace();
                 }
             }
@@ -2654,9 +2656,10 @@ public class SchemaTranslator {
                 System.out
                         .println("Put XMLs to be translated into the \"scenarios\" directory");
                 File outDir = new File(output_folder);
-                if (!outDir.isDirectory())
-                    outDir.mkdir();
-                st.visitAllFiles(scenarios, outDir);
+                String[] children = scenarios.list();
+                for (int i = 0; i < children.length; i++) {
+                    st.visitAllFiles(new File(scenarios, children[i]), outDir);
+                }
             }
 
         } catch (Exception e) {
