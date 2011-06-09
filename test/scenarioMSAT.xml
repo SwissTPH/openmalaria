@@ -24,6 +24,10 @@
     </ageGroup>
   </demography>
   <monitoring name="Quarterly Surveys">
+    <continuous period="5">
+      <option name="nets owned"/>
+      <option name="human age availability"/>
+    </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>

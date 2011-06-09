@@ -94,14 +94,13 @@ double PerHostTransmission::probMosqBiting (const HostCategoryAnophelesHumans& b
     return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
-    double P_C_i = species[speciesIndex].probMosqFindRestSite;
+    double pRest = species[speciesIndex].probMosqRest;
     if (net.timeOfDeployment() >= TimeStep(0)) {
-        P_C_i *= net.postprandialSurvivalFactor(base.net);
+        pRest *= net.postprandialSurvivalFactor(base.net);
     }
-    double P_D_i = species[speciesIndex].probMosqSurvivalResting;
     if (timestepIRS >= TimeStep(0))
-        P_D_i *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
-    return P_C_i * P_D_i;
+        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
+    return pRest;
 }
 
 void PerHostTransmission::setupITN (const TransmissionModel& tm) {
@@ -120,8 +119,7 @@ void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double av
 
     entoAvailability = base.entoAvailability * availabilityFactor;
     probMosqBiting = base.probMosqBiting;
-    probMosqFindRestSite = base.probMosqFindRestSite;
-    probMosqSurvivalResting = base.probMosqSurvivalResting;
+    probMosqRest = base.probMosqFindRestSite * base.probMosqSurvivalResting;
 }
 
 }

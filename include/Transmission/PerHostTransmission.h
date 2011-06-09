@@ -135,6 +135,10 @@ public:
     return _relativeAvailabilityHet;
   }
   
+  /** Return true if the human has been removed from transmission. */
+  inline bool isOutsideTransmission() {
+      return outsideTransmission;
+  }
   /** Set true to remove human from transmission. Must set back to false
    * to restore transmission. */
   inline void removeFromTransmission (bool s){
@@ -233,8 +237,7 @@ public:
   void operator& (S& stream) {
       entoAvailability & stream;
       probMosqBiting & stream;
-      probMosqFindRestSite & stream;
-      probMosqSurvivalResting & stream;
+      probMosqRest & stream;
   }
   
 private:
@@ -246,13 +249,9 @@ private:
   /** Probability of mosquito successfully biting host (P_B_i) */
   double probMosqBiting;
   
-  /** Probability of mosquito escaping human and finding a resting site without
-  * dying, after biting the human (P_C_i). */
-  double probMosqFindRestSite;
-  
-  /** Probability of mosquito successfully resting after finding a resting site
-  * (P_D_i). */
-  double probMosqSurvivalResting;
+  /** Probability of mosquito escaping human and finding a resting site, then
+   * resting without dying, after biting the human (P_C_i * P_D_i). */
+  double probMosqRest;
   //@}
 };
 

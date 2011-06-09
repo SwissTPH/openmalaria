@@ -209,16 +209,15 @@ TimeStep VectorTransmission::initIterate () {
 
 double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
     host.update(_ITNParams);
-    double simEIR = 0.0;
-    for (size_t i = 0; i < numSpecies; ++i) {
-        simEIR += species[i].calculateEIR (i, host);
-    }
-    simEIR *= host.relativeAvailabilityAge (ageYears);
-    
     if (simulationMode == equilibriumMode){
         return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{      // dynamicMode
+        double simEIR = 0.0;
+        for (size_t i = 0; i < numSpecies; ++i) {
+            simEIR += species[i].calculateEIR (i, host);
+        }
+        simEIR *= host.relativeAvailabilityAge (ageYears);
         return simEIR;
     }
 }

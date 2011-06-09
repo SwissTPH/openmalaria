@@ -124,6 +124,10 @@ private:
     void ctsImmunityY (ostream& stream);
     /// Delegate to print immunity's cumulativeY parameter (median across population)
     void ctsMedianImmunityY (ostream& stream);
+    /// Delegate to print the mean age-based availability reduction of each human relative to an adult
+    void ctsMeanAgeAvailEffect (ostream& stream);
+    /// Delegate to print the number of humans who own an ITN
+    void ctsNetsOwned (ostream& stream);
     
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);

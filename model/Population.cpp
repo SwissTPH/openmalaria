@@ -95,6 +95,8 @@ Population::Population()
     Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
     Continuous::registerCallback( "immunity Y", "\timmunity Y", MakeDelegate( this, &Population::ctsImmunityY ) );
     Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y", MakeDelegate( this, &Population::ctsMedianImmunityY ) );
+    Continuous::registerCallback( "human age availability", "\thuman age availability", MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
+    Continuous::registerCallback( "nets owned", "\tnets owned", MakeDelegate( this, &Population::ctsNetsOwned ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
@@ -293,7 +295,29 @@ void Population::ctsMedianImmunityY (ostream& stream){
     }
     stream << '\t' << x;
 }
-
+void Population::ctsMeanAgeAvailEffect (ostream& stream){
+    int nHumans = 0;
+    double avail = 0.0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        if( !iter->perHostTransmission.isOutsideTransmission() ){
+            ++nHumans;
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
+        }
+    }
+    stream << '\t' << avail/nHumans;
+}
+void Population::ctsNetsOwned (ostream& stream){
+    int nNets = 0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        // slightly hacky use: we want to know whether time of deployment is
+        // greater than or equal to 0. This tests
+        // deployTime - TimeStep::never > TimeStep::simulation.
+        if( iter->hasITNProtection(-TimeStep::never) )
+            ++nNets;
+    }
+    stream << '\t' << nNets;
+}
+  
 void Population::newSurvey ()
 {
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
