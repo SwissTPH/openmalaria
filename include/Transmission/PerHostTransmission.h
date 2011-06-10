@@ -162,10 +162,6 @@ public:
     timestepVA = TimeStep::simulation;
   }
   
-  /// Is individual protected by an ITN?
-  inline bool hasITNProtection(TimeStep maxInterventionAge)const{
-      return net.timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
-  }
   /// Is individual protected by IRS?
   inline bool hasIRSProtection(TimeStep maxInterventionAge)const{
       return timestepIRS + maxInterventionAge > TimeStep::simulation;
@@ -173,6 +169,11 @@ public:
   /// Is individual protected by a VA?
   inline bool hasVAProtection(TimeStep maxInterventionAge)const{
       return timestepVA + maxInterventionAge > TimeStep::simulation;
+  }
+  
+  /// Get a reference to the net
+  inline const ITN& getITN() const{
+      return net;
   }
 
   /** Get the age at which individuals are considered adults (i.e. where

@@ -23,6 +23,7 @@
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
+#include "Transmission/Vector/VectorTransmission.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -97,6 +98,8 @@ Population::Population()
     Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y", MakeDelegate( this, &Population::ctsMedianImmunityY ) );
     Continuous::registerCallback( "human age availability", "\thuman age availability", MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
     Continuous::registerCallback( "nets owned", "\tnets owned", MakeDelegate( this, &Population::ctsNetsOwned ) );
+    Continuous::registerCallback( "mean hole index", "\tmean hole index", MakeDelegate( this, &Population::ctsNetHoleIndex ) );
+    Continuous::registerCallback( "mean insecticide content", "\tmean insecticide content", MakeDelegate( this, &Population::ctsNetInsecticideContent ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
@@ -309,15 +312,39 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
 void Population::ctsNetsOwned (ostream& stream){
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
-        // slightly hacky use: we want to know whether time of deployment is
-        // greater than or equal to 0. This tests
-        // deployTime - TimeStep::never > TimeStep::simulation.
-        if( iter->hasITNProtection(-TimeStep::never) )
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
             ++nNets;
     }
     stream << '\t' << nNets;
 }
-  
+void Population::ctsNetHoleIndex (ostream& stream){
+    double meanVar = 0.0;
+    int nNets = 0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+            ++nNets;
+            meanVar += iter->perHostTransmission.getITN().getHoleIndex();
+        }
+    }
+    stream << '\t' << meanVar/nNets;
+}
+void Population::ctsNetInsecticideContent (ostream& stream){
+    const Transmission::VectorTransmission* vt = reinterpret_cast<Transmission::VectorTransmission*>(_transmissionModel);
+    if( vt == 0 ){
+        throw util::xml_scenario_error("mean insecticide content: invalid in non-vector mode!");
+    }
+    const Transmission::ITNParams& params = vt->getITNParams();
+    double meanVar = 0.0;
+    int nNets = 0;
+    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+            ++nNets;
+            meanVar += iter->perHostTransmission.getITN().getInsecticideContent(params);
+        }
+    }
+    stream << '\t' << meanVar/nNets;
+}
+
 void Population::newSurvey ()
 {
     for (HumanIter iter = population.begin(); iter != population.end(); iter++) {

@@ -26,6 +26,8 @@
   <monitoring name="Quarterly Surveys">
     <continuous period="5">
       <option name="nets owned"/>
+      <option name="mean hole index"/>
+      <option name="mean insecticide content"/>
       <option name="human age availability"/>
     </continuous>
     <SurveyOptions>

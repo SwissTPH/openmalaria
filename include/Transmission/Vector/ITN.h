@@ -160,6 +160,12 @@ public:
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
+    inline double getHoleIndex()const{
+        return holeIndex;
+    }
+    inline double getInsecticideContent(const ITNParams& params)const{
+        return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet);
+    }
     
     /// Call once per timestep to update holes
     void update(const ITNParams& params);
@@ -177,9 +183,9 @@ private:
     // these parameters express the current state of the net:
     TimeStep deployTime;	// time of deployment or TimeStep::never
     TimeStep disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
-    int nHoles;			// total number of holes
-    double holeIndex;	// a measure of both the number and size of holes
-    double initialInsecticide;	// TODO: units; mg/m²?
+    int nHoles;				// total number of holes
+    double holeIndex;		// a measure of both the number and size of holes
+    double initialInsecticide;	// units: mg/m²
     
     // these parameters are sampled from log-normal per net, but thereafter constant:
     double holeRate;	// rate at which new holes are created (holes/time-step)

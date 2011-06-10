@@ -255,7 +255,7 @@ bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
     return withinHostModel->hasIPTiProtection(maxInterventionAge);
 }
 bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.hasITNProtection(maxInterventionAge);
+    return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }
 bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasIRSProtection(maxInterventionAge);

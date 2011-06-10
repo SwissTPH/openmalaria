@@ -182,15 +182,15 @@ void ITN::update(const ITNParams& params){
 }
 
 double ITN::relativeAttractiveness(const ITNAnophelesParams& params) const{
-    return params.relativeAttractiveness( holeIndex, initialInsecticide * params.base->insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet));
+    return params.relativeAttractiveness( holeIndex, getInsecticideContent(*params.base) );
 }
 
 double ITN::preprandialSurvivalFactor(const ITNAnophelesParams& params) const{
-    return params.preprandialSurvivalFactor( holeIndex, initialInsecticide * params.base->insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet));
+    return params.preprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
 }
 
 double ITN::postprandialSurvivalFactor(const ITNAnophelesParams& params) const{
-    return params.postprandialSurvivalFactor( holeIndex, initialInsecticide * params.base->insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet));
+    return params.postprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
 }
 
 } }

@@ -59,6 +59,9 @@ public:
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();
   
+  inline const ITNParams& getITNParams () {
+      return _ITNParams;
+  }
   virtual void summarize (Monitoring::Survey& survey);
   
   inline const ITNParams& getITNParams() const{

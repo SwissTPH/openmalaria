@@ -128,6 +128,10 @@ private:
     void ctsMeanAgeAvailEffect (ostream& stream);
     /// Delegate to print the number of humans who own an ITN
     void ctsNetsOwned (ostream& stream);
+    /// Delegate to print the mean hole index of all bed nets
+    void ctsNetHoleIndex (ostream& stream);
+    /// Delegate to print the mean insecticide content of all bed nets
+    void ctsNetInsecticideContent (ostream& stream);
     
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
