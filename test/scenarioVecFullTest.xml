@@ -31,7 +31,11 @@
       <option name="N_v0" value="true"/>
       <option name="immunity h" value="true"/>
       <option name="immunity Y" value="true"/>
-      <option name="hosts" value="true"/>
+      <option name="new infections" value="true"/>
+      <option name="num transmitting humans" value="true"/>
+      <option name="nets owned" value="true"/>
+      <option name="mean hole index"/>
+      <option name="mean insecticide content"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -211,51 +215,29 @@
       <continuous coverage="0.95" targetAgeYrs="0.25"/>
       <continuous coverage="0.95" targetAgeYrs="0.75"/>
     </IPT>
-    <!--ITN name="LLIN test">
-      <decay L="3" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0.44"/>
-        <preprandialKillingEffect value="0.27"/>
-        <postprandialKillingEffect value="0.27"/>
-      </anophelesParams>
-      <anophelesParams mosquito="funestus">
-        <deterrency value="0.44"/>
-        <preprandialKillingEffect value="0.27"/>
-        <postprandialKillingEffect value="0.27"/>
-      </anophelesParams>
-      <anophelesParams mosquito="arabiensis">
-        <deterrency value="0.44"/>
-        <preprandialKillingEffect value="0.27"/>
-        <postprandialKillingEffect value="0.27"/>
-      </anophelesParams>
-      <continuous coverage="0.95" targetAgeYrs="0.0833"/>
-      <timed coverage="0.95" time="7"/>
-    </ITN-->
     <ITN name="Extended ITNs">
       <description>
         <usage value="0.8"/>
-        <holeRate mean=".2" sigma=".2"/>
-        <ripRate mean=".2" sigma=".2"/>
-        <ripFactor value="1"/>
-        <initialInsecticide mean=".2" sigma=".2"/>
-        <insecticideDecay L="0.5" function="exponential" sigma=".2"/>
+        <holeRate mean=".9" sigma=".8"/>
+        <ripRate mean=".7" sigma=".8"/>
+        <ripFactor value="0.4"/>
+        <initialInsecticide mu="70" sigma="20"/>
+        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+        <attritionOfNets L="12" k="2" function="smooth-compact"/>
         <anophelesParams mosquito="gambiae_ss">
-          <proportionBitingIndoors value="0.8"/>
-          <relativeAvailability holeFactor="0.5" insecticideFactor="0" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
         <anophelesParams mosquito="funestus">
-          <proportionBitingIndoors value="0.8"/>
-          <relativeAvailability holeFactor="0.5" insecticideFactor="0" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
         <anophelesParams mosquito="arabiensis">
-          <proportionBitingIndoors value="0.8"/>
-          <relativeAvailability holeFactor="0.5" insecticideFactor="0" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
       </description>
       <continuous coverage="0.95" targetAgeYrs="0.0833"/>

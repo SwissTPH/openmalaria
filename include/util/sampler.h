@@ -80,7 +80,7 @@ namespace OM { namespace util {
         
         /** Sample a value. */
         inline double sample() const{
-            return random::log_normal( mu, sigma );
+            return random::gauss( mu, sigma );
         }
         
         /** Create a log-normal sample from an existing normal sample. */

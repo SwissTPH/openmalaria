@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="28" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
-  <demography maximumAgeYrs="90" name="test" popSize="85">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Mass screen-and-treat and ITNs" schemaVersion="28" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -23,16 +23,28 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Quarterly Surveys">
-    <continuous period="5">
-      <option name="nets owned"/>
+  <monitoring cohortOnly="false" name="Quarterly Surveys">
+    <continuous duringInit="false" period="6">
+      <option name="recent births" value="true"/>
+      <option name="S_v" value="true"/>
+      <option name="input EIR" value="false"/>
+      <option name="simulated EIR" value="true"/>
+      <option name="human infectiousness" value="true"/>
+      <option name="human age availability" value="true"/>
+      <option name="immunity h" value="true"/>
+      <option name="immunity Y" value="true"/>
+      <option name="new infections" value="true"/>
+      <option name="num transmitting humans" value="true"/>
+      <option name="nets owned" value="true"/>
       <option name="mean hole index"/>
       <option name="mean insecticide content"/>
-      <option name="human age availability"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
+      <option name="nInfect" value="true"/>
+      <option name="nExpectd" value="true"/>
       <option name="nPatent" value="true"/>
+      <option name="totalInfs" value="true"/>
       <option name="nTransmit" value="true"/>
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
@@ -40,22 +52,37 @@
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
       <option name="nSeq" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+      <option name="allCauseIMR" value="true"/>
+      <option name="annAvgK" value="true"/>
+      <option name="nNMFever" value="true"/>
+      <option name="innoculationsPerAgeGroup" value="true"/>
+      <option name="Vector_Nv0" value="true"/>
+      <option name="Vector_Nv" value="true"/>
+      <option name="Vector_Ov" value="true"/>
+      <option name="Vector_Sv" value="true"/>
+      <option name="Vector_EIR_Input" value="true"/>
       <option name="Vector_EIR_Simulated" value="true"/>
+      <option name="nNewInfections" value="true"/>
       <option name="Clinical_RDTs" value="true"/>
       <option name="Clinical_DrugUsage" value="true"/>
       <option name="nMassITNs" value="true"/>
       <option name="Clinical_Microscopy" value="true"/>
       <option name="Clinical_DrugUsageIV" value="true"/>
       <option name="nMDAs" value="true"/>
+      <option name="nAddedToCohort" value="true"/>
+      <option name="nRemovedFromCohort" value="true"/>
+      <option name="nNmfDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <!-- we don't actually need many for testing -->
-      <surveyTime>0</surveyTime>
-      <surveyTime>1170</surveyTime>
-      <surveyTime>2970</surveyTime>
-      <surveyTime>4770</surveyTime>
-      <surveyTime>6480</surveyTime>
-      <surveyTime>7290</surveyTime>
+      <surveyTime>438</surveyTime>
+      <surveyTime>876</surveyTime>
+      <surveyTime>1314</surveyTime>
+      <surveyTime>1752</surveyTime>
+      <surveyTime>2190</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="0.25"/>
@@ -149,32 +176,33 @@
     <ITN name="Extended ITNs">
       <description>
         <usage value="0.8"/>
-        <holeRate mean=".18" sigma=".2"/>
-        <ripRate mean=".18" sigma=".2"/>
-        <ripFactor value="1"/>
-        <initialInsecticide mu=".2" sigma=".2"/>
-        <insecticideDecay L="0.5" function="exponential" mu="-0.02" sigma=".2"/>
-        <attritionOfNets L="5" k="5" function="smooth-compact"/>
+        <holeRate mean=".9" sigma=".8"/>
+        <ripRate mean=".7" sigma=".8"/>
+        <ripFactor value="0.4"/>
+        <initialInsecticide mu="70" sigma="20"/>
+        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+        <attritionOfNets L="12" k="2" function="smooth-compact"/>
         <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
         <anophelesParams mosquito="funestus">
-          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
         <anophelesParams mosquito="arabiensis">
-          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <preprandialKillingEffect baseFactor="0.23" holeFactor="0.43" insecticideFactor="0.5" interactionFactor="-0.33" holeScalingFactor="1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="1" insecticideScalingFactor="1"/>
+          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
         </anophelesParams>
       </description>
-      <timed coverage="0.60" time="0"/>
-      <timed coverage="0.60" time="1095"/>
-      <timed coverage="0.60" time="2190"/>
-      <timed coverage="0.60" time="3285"/>
+      <!-- at 2, 6, 10 and 16 years -->
+      <timed coverage="0.20" time="146"/>
+      <timed coverage="0.20" time="438"/>
+      <timed coverage="0.20" time="730"/>
+      <timed coverage="0.20" time="1168"/>
     </ITN>
     <IRS name="DDT test">
       <decay L="0.5" function="exponential"/>
@@ -191,21 +219,9 @@
         <killingEffect value="0.24"/>
       </anophelesParams>
     </IRS>
-    <vectorDeterrent name="hypothetical deterrency">
-      <decay L="4" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-      <anophelesParams mosquito="funestus">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-      <anophelesParams mosquito="arabiensis">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-    </vectorDeterrent>
     <importedInfections>
       <timed>
-        <rate time="0" value="1"/>
+        <rate time="0" value="5"/>
       </timed>
     </importedInfections>
   </interventions>
@@ -225,16 +241,16 @@
           </decision>
           <decision depends="case,p" name="provider" values="formal, community_health_worker, informal, none">
             case(UC1){
-              p(1.0): formal
+              p(0.2): formal
               p(0): community_health_worker
               p(0): informal
-              p(0): none 
+              p(0.8): none 
             }
             case(UC2){
-              p(1.0): formal
+              p(0.2): formal
               p(0): community_health_worker
               p(0): informal
-              p(0): none
+              p(0.8): none
             }
           </decision>
           <decision depends="age5,provider,p" name="test" values="none,microscopy,RDT">
