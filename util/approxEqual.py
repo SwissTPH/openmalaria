@@ -25,7 +25,10 @@ import unittest
 # Could use math.isinf, but it's not present in python 2.5
 def isinf (a):
     return (a-a) != 0
+def isnan (a):
+    return a != a
 
+# Object to test whether two values are equal to a certain precision
 class ApproxEqual (object):
     def __init__(self, relPrec, absPrec):
         self.relPrecision = relPrec
@@ -45,7 +48,7 @@ class ApproxEqual (object):
     # might lead to confusing outcomes.
     def __call__ (self,a,b):
         if isinf(a) or isinf(b):
-            relDiff = 1e1000-1e1000 # NaN
+            relDiff = 1e10000 * 0.0 # NaN
         else:
             tolerance = self.relPrecision * max(math.fabs(a),math.fabs(b))
             tolerance = max(tolerance, self.absPrecision)
@@ -53,13 +56,29 @@ class ApproxEqual (object):
         self.totalRelDiff += relDiff
         return (relDiff < 1.0)
 
+# As ApproxEqual, but considers two NaNs or two pos./neg. infs "the same"
+class ApproxSame (ApproxEqual):
+    def __init__(self, relPrec, absPrec):
+        ApproxEqual.__init__(self, relPrec, absPrec)
+    
+    def __call__ (self,a,b):
+        if isnan(a) and isnan(b):
+            return True
+        elif isinf(a) and isinf(b):
+            if copysign(1.0,a)==copysign(1.0,b):
+                return True
+            else:
+                self.totalRelDiff += 1e10000
+                return False
+        else:
+            return ApproxEqual.__call__(self,a,b)
 
 class TestApproxEqual (unittest.TestCase):
     approxEqual6 = ApproxEqual(1e-6, 1e-6)
     
     def testNaN (self):
         Inf = 1e10000
-        NaN = Inf * 0
+        NaN = Inf * 0.0
         self.assert_ (not self.approxEqual6 (NaN, 1))
         self.assert_ (not self.approxEqual6 (NaN, 0))
         self.assert_ (not self.approxEqual6 (NaN, NaN))

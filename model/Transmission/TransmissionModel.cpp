@@ -230,7 +230,7 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   double duration = (TimeStep::simulation-lastSurveyTime).asInt();
   if( duration == 0.0 ){
       if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-          throw runtime_error( "non-zero EIR over zero duration??" );
+          throw logic_error( "non-zero EIR over zero duration??" );
       }
       duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
   }

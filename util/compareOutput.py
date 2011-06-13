@@ -22,7 +22,7 @@
 import sys
 import math
 from optparse import OptionParser
-from approxEqual import ApproxEqual
+from approxEqual import ApproxSame
 from readOutput import readEntries
 
 REL_PRECISION=1e-6
@@ -88,7 +88,7 @@ ident is 1 if files are binary-equal."""
     perMeasureNumDiff = dict()
     perMeasureDiffSum = dict()
     perMeasureDiffAbsSum = dict()
-    approxEqual = ApproxEqual(REL_PRECISION, ABS_PRECISION)
+    approxSame = ApproxSame(REL_PRECISION, ABS_PRECISION)
     
     for (k,(v1,v2)) in values.iteritems():
         if v1==None:
@@ -101,7 +101,7 @@ ident is 1 if files are binary-equal."""
             perMeasureTotal2[k.a] = perMeasureTotal2.get(k.a, 0.0) + v2
             
             # Compare with relative precision
-            if approxEqual (v1, v2):
+            if approxSame (v1, v2):
                 continue
             
             numDiffs += 1
@@ -136,10 +136,10 @@ ident is 1 if files are binary-equal."""
     
     # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
-        print "No significant differences (total relative diff: "+str(approxEqual.totalRelDiff/1.e6)+"), ok."
+        print "No significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+"), ok."
         return ret,False
     else:
-        print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxEqual.totalRelDiff/1.e6)+ ")!\033[0;0m"
+        print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+ ")!\033[0;0m"
         return 1,False
 
 # Test for options

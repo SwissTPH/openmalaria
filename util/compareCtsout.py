@@ -22,7 +22,7 @@
 import sys
 import string
 from optparse import OptionParser
-from approxEqual import ApproxEqual
+from approxEqual import ApproxSame
 
 REL_PRECISION=1e-6
 ABS_PRECISION=1e-6
@@ -61,7 +61,7 @@ def sumsApproxEq (fn1,fn2):
     also prints about unequal stuff"""
     t1,vec1=readSums(fn1)
     t2,vec2=readSums(fn2)
-    approxEq = ApproxEqual(REL_PRECISION,ABS_PRECISION)
+    approxSame = ApproxSame(REL_PRECISION,ABS_PRECISION)
     if t1 != t2:
         print "\033[1;31mColumns not equal:"
         print t1
@@ -71,13 +71,13 @@ def sumsApproxEq (fn1,fn2):
     allApEq=True
     assert len(vec1)==len(vec2)
     for i in range(len(vec1)):
-        if not approxEq(vec1[i],vec2[i]):
+        if not approxSame(vec1[i],vec2[i]):
             print "\033[0;31mSignificantly different:",t1[i],"; sums:",vec1[i],",",vec2[i]
             allApEq=False
     if allApEq:
-        print "No significant differences (total relative diff: "+str(approxEq.totalRelDiff/1.e6)+"), ok."
+        print "No significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+"), ok."
     else:
-        print "\033[1;31mSome significant differences (total relative diff: "+str(approxEq.totalRelDiff/1.e6)+ ")!\033[0;0m"
+        print "\033[1;31mSome significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+ ")!\033[0;0m"
     return allApEq
 
 def main(fn1,fn2):
