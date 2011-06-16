@@ -544,8 +544,7 @@ void InterventionManager::deployCts (const OM::Population& population, OM::Host:
             break;      // remaining intervs happen in future
         // If interv for now, do it. (If we missed the time, ignore it.)
         if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
-            //FIXME: use begin < now, not <=
-            if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
+            if( ctsIntervs[nextCtsDist].begin < TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
                 if( !ctsIntervs[nextCtsDist].cohortOnly || human.getInCohort() ){
                     if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
                         (human.*(ctsIntervs[nextCtsDist].deploy)) (population);
