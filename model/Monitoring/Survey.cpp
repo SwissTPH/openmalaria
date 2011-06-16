@@ -119,7 +119,7 @@ class SurveyMeasureMap {
 		if (codeIt->second == code)
 		    return codeIt->first;
 	    }
-	    throw runtime_error ("toString called with unknown code");	// this is a code error
+	    throw util::traced_exception ("toString called with unknown code");	// this is a code error
 	}
 };
 

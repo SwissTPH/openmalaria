@@ -52,7 +52,7 @@ public:
     
     void testDummy() {
         AgeGroupInterpolation *o = AgeGroupInterpolation::dummyObject();
-        TS_ASSERT_THROWS( o->eval(5.7), const std::logic_error& );
+        TS_ASSERT_THROWS( o->eval(5.7), const std::exception& );
         AgeGroupInterpolation::freeObject(o);
     }
     

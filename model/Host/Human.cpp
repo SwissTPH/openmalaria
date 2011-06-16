@@ -80,7 +80,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     _probTransmissionToMosquito(0.0)
 {
   if (_dateOfBirth != TimeStep::simulation && (TimeStep::simulation > TimeStep(0) || _dateOfBirth > TimeStep::simulation))
-    throw out_of_range ("Invalid date of birth!");
+    throw util::traced_exception ("Invalid date of birth!");
   
   _ylag.assign (_ylagLen, 0.0);
   

@@ -215,19 +215,15 @@ double random::beta (double a, double b){
 int random::poisson(double lambda){
     if (!finite(lambda)) {
 	//This would lead to an inifinite loop in gsl_ran_poisson
-	throw new traced_exception( "lambda is inf" );
+	throw traced_exception( "lambda is inf", Error::InfLambda );
     }
     return gsl_ran_poisson (rng.gsl_generator, lambda);
 }
 
 bool random::bernoulli(double prob)
 {
-    double u = random::uniform_01();
-    if (u < prob){
-        return true;
-    }else{
-        return false;
-    }
+    // return true iff our variate is less than the probability
+    return random::uniform_01() < prob;
 }
 
 } }

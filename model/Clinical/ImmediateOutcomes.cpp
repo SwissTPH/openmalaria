@@ -229,25 +229,31 @@ bool ClinicalImmediateOutcomes::severeMalaria (
 }
 
 
-double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string firstLineDrug)
+double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, string drug)
 {
-    if (firstLineDrug == "CQ")
-        return td.getCQ().present() ? td.getCQ().get().getValue() : 0;
-    else if (firstLineDrug == "SP")
-        return td.getSP().present() ? td.getSP().get().getValue() : 0;
-    else if (firstLineDrug == "AQ")
-        return td.getAQ().present() ? td.getAQ().get().getValue() : 0;
-    else if (firstLineDrug == "SPAQ")
-        return td.getSPAQ().present() ? td.getSPAQ().get().getValue() : 0;
-    else if (firstLineDrug == "ACT")
-        return td.getACT().present() ? td.getACT().get().getValue() : 0;
-    else if (firstLineDrug == "QN")
-        return td.getQN().present() ? td.getQN().get().getValue() : 0;
-    else if (firstLineDrug == "selfTreatment")
-        return td.getSelfTreatment().getValue();
+    double val;
+    if (drug == "CQ")
+        val = td.getCQ().present() ? td.getCQ().get().getValue() : 0;
+    else if (drug == "SP")
+        val = td.getSP().present() ? td.getSP().get().getValue() : 0;
+    else if (drug == "AQ")
+        val = td.getAQ().present() ? td.getAQ().get().getValue() : 0;
+    else if (drug == "SPAQ")
+        val = td.getSPAQ().present() ? td.getSPAQ().get().getValue() : 0;
+    else if (drug == "ACT")
+        val = td.getACT().present() ? td.getACT().get().getValue() : 0;
+    else if (drug == "QN")
+        val = td.getQN().present() ? td.getQN().get().getValue() : 0;
+    else if (drug == "selfTreatment")
+        val = td.getSelfTreatment().getValue();
     else {
         throw util::xml_scenario_error ("healthSystem.drugRegimen->firstLine has bad value");
     }
+    
+    if( !(val >= 0.0 && val <= 1.0) ){
+        throw util::xml_scenario_error (string("healthSystem initialACR/compliance/nonCompliersEffective: ").append(drug).append(" value must be in range [0,1]"));
+    }
+    return val;
 }
 
 void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& hsioData)
@@ -259,8 +265,8 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
                                             hsioData.getDrugRegimen().getFirstLine());
 
     //Calculate curerate 0
-    double pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
-    double pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
+    const double pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
+    const double pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
     if (pSeekOfficialCareUncomplicated1 + pSelfTreatment > 0) {
         double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
 
@@ -281,27 +287,39 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
     probGetsTreatment[0] = hsioData.getPSeekOfficialCareUncomplicated1().getValue() + hsioData.getPSelfTreatUncomplicated().getValue();
     probGetsTreatment[1] = hsioData.getPSeekOfficialCareUncomplicated2().getValue();
     probGetsTreatment[2] = hsioData.getPSeekOfficialCareSevere().getValue();
-
+    if( !(
+        pSeekOfficialCareUncomplicated1 >= 0.0 && pSelfTreatment >= 0.0
+        && probGetsTreatment[0] <= 1.0
+        && probGetsTreatment[1] >= 0.0 && probGetsTreatment[1] <= 1.0
+        && probGetsTreatment[2] >= 0.0 && probGetsTreatment[2] <= 1.0
+    ) ){
+        throw util::xml_scenario_error ("healthSystem: pSeekOfficialCareXXX and pSelfTreatUncomplicated must be in range [0,1]");
+    }
 
     // --- calculate probParasitesCleared ---
 
-    string firstLineDrug = hsioData.getDrugRegimen().getFirstLine();
-    string secondLineDrug = hsioData.getDrugRegimen().getSecondLine();
-    pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
+    const string firstLineDrug = hsioData.getDrugRegimen().getFirstLine();
+    const string secondLineDrug = hsioData.getDrugRegimen().getSecondLine();
+    
+    const double complianceFirstLine = getHealthSystemACRByName (hsioData.getCompliance(), firstLineDrug);
+    const double complianceSecondLine = getHealthSystemACRByName (hsioData.getCompliance(), secondLineDrug);
 
-    double complianceFirstLine = getHealthSystemACRByName (hsioData.getCompliance(), firstLineDrug);
-    double complianceSecondLine = getHealthSystemACRByName (hsioData.getCompliance(), secondLineDrug);
+    const double cureRateFirstLine = getHealthSystemACRByName (hsioData.getInitialACR(), firstLineDrug);
+    const double cureRateSecondLine = getHealthSystemACRByName (hsioData.getInitialACR(), secondLineDrug);
 
-    double cureRateFirstLine = getHealthSystemACRByName (hsioData.getInitialACR(), firstLineDrug);
-    double cureRateSecondLine = getHealthSystemACRByName (hsioData.getInitialACR(), secondLineDrug);
+    const double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), firstLineDrug);
+    const double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), secondLineDrug);
 
-    double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), firstLineDrug);
-    double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), secondLineDrug);
-
-    pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
-    double complianceSelfTreatment = hsioData.getCompliance().getSelfTreatment().getValue();
-    double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
-
+    const double complianceSelfTreatment = hsioData.getCompliance().getSelfTreatment().getValue();
+    const double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
+    if( !(
+        complianceSelfTreatment >= 0.0 && complianceSelfTreatment <= 1.0
+        && cureRateSelfTreatment >= 0.0 && cureRateSelfTreatment <= 1.0
+    ) ){
+        throw util::xml_scenario_error ("healthSystem initialACR/compliance/nonCompliersEffective: pSelfTreatment must be in range [0,1]");
+    }
+    
+    
     //calculate probParasitesCleared 0
     if ( (pSeekOfficialCareUncomplicated1 + pSelfTreatment) > 0) {
         probParasitesCleared[0] = (pSeekOfficialCareUncomplicated1

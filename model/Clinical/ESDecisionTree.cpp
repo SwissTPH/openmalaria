@@ -135,7 +135,7 @@ namespace OM { namespace Clinical {
 		size_t i = 0;	// get index i in dR.values of this outcome
 		while (true) {
 		    if (i >= dR.values.size())
-			throw logic_error( (
+			throw traced_exception( (
 			    boost::format("decision tree %1%: unable to find index for value %2% (code error)")
 			    %dR.decision
 			    %*val_p
@@ -381,7 +381,7 @@ namespace OM { namespace Clinical {
 	// Get content of this element:
 	const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
 	if (content_p == NULL)
-	    throw runtime_error ("ESDecision: bad upcast?!");
+	    throw util::traced_exception ("ESDecision: bad upcast?!");
 	
 	DA_processor processor (dvm, *this);
 	// 2-stage parse: first produces a parser::Outcome object, second the
@@ -421,7 +421,7 @@ namespace OM { namespace Clinical {
         // Get content of this element:
         const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
         if (content_p == NULL)
-            throw runtime_error ("ESDecision: bad upcast?!");
+            throw util::traced_exception ("ESDecision: bad upcast?!");
         
         DR_processor processor (dvm, *this, false);
         // 2-stage parse: first produces a parser::Outcome object, second the
@@ -432,7 +432,7 @@ namespace OM { namespace Clinical {
         map_cum_p_t::const_iterator it = map_cum_p.find (input);
         if (it == map_cum_p.end()){
             // All possible input combinations should be in map_cum_p
-            throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
+            throw traced_exception( "ESDecisionRandom: input combination not found in map (code error)" );
         }
         double sample = 0.5;
         size_t i = 0;
@@ -450,7 +450,7 @@ namespace OM { namespace Clinical {
         // Get content of this element:
         const ::xml_schema::String *content_p = dynamic_cast< const ::xml_schema::String * > (&xmlDc);
         if (content_p == NULL)
-            throw runtime_error ("ESDecision: bad upcast?!");
+            throw util::traced_exception ("ESDecision: bad upcast?!");
         
         DR_processor processor (dvm, *this, true);
         // 2-stage parse: first produces a parser::Outcome object, second the
@@ -461,7 +461,7 @@ namespace OM { namespace Clinical {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
 	if (it == map_cum_p.end()){
 	    // All possible input combinations should be in map_cum_p
-	    throw logic_error( "ESDecisionRandom: input combination not found in map (code error)" );
+	    throw traced_exception( "ESDecisionRandom: input combination not found in map (code error)" );
 	}
 	double sample = random::uniform_01 ();
 	size_t i = 0;

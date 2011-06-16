@@ -60,7 +60,7 @@ void StreamValidatorType::saveStream() {
     if( storeMode ){
 	ofstream f_str( OM_SV_FILE, ios::out | ios::binary );
 	if( !f_str.is_open() )
-	    throw runtime_error( "unable to write " OM_SV_FILE );
+	    throw traced_exception( "unable to write " OM_SV_FILE, Error::FileIO );
 	f_str.write( reinterpret_cast<const char*>(&OM_SV_HEAD), sizeof(char)*4 );
 	stream & f_str;	// use checkpointing operation
 	f_str.close();
@@ -75,20 +75,20 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw runtime_error( (boost::format("unable to read %1%") %file).str() );
+	throw traced_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw runtime_error( (boost::format("%1% is not a valid StreamValidator file") %file).str() );
+	throw traced_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
     stream & f_str;	// checkpointing operator
     
     f_str.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
     if (f_str.gcount () != 0) {
 	ostringstream msg;
 	msg << file<<" has " << f_str.gcount() << " bytes remaining." << endl;
-	throw runtime_error (msg.str());
+	throw traced_exception (msg.str(), Error::FileIO);
     } else if (f_str.fail())
-	throw runtime_error ("StreamValidator load error");
+	throw traced_exception ("StreamValidator load error", Error::FileIO);
     
     f_str.close();
     readIt = stream.begin();
@@ -99,8 +99,9 @@ void StreamValidatorType::handle( size_t value ){
 	stream.push_back( value );
     }else{
 	if( value != *readIt ){
-	    // Attach a debugger with a breakpoint here to get the backtrace.
-	    throw runtime_error ("StreamValidator: out of sync!");
+	    // Attach a debugger with a breakpoint here to get the backtrace,
+	    // if the one caught by traced_exception isn't enough.
+	    throw traced_exception ("StreamValidator: out of sync!");
 	}
 	++readIt;
     }

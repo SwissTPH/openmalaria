@@ -32,8 +32,14 @@
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
 
-traced_exception::traced_exception(const string& msg)
- : runtime_error(msg) {
+base_exception::base_exception(const string& msg,int code) :
+    runtime_error(msg),
+    errCode(code)
+{}
+
+traced_exception::traced_exception(const string& msg,int code) :
+    base_exception(msg,code)
+{
 #ifdef __GNU_LIBRARY__
     // http://www.gnu.org/software/libc/manual/html_node/Backtraces.html
 // probably 100 is big enough
@@ -42,11 +48,6 @@ traced_exception::traced_exception(const string& msg)
     
     length = backtrace (array, MAX_STACK_SIZE);
     trace = backtrace_symbols (array, length);
-    
-    //TODO: work out why OM catches this as an unknown exception
-    //until then, dump the stack trace here
-    cerr << "Exception: "<<msg<<'\n';
-    cerr << *this << endl;
 #endif
 }
 traced_exception::~traced_exception() throw(){
@@ -59,15 +60,8 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
     // demangle output: http://gcc.gnu.org/onlinedocs/libstdc++/manual/ext_demangling.html
     // spec: http://www.ib.cnea.gov.ar/~oop/biblio/libstdc++/namespaceabi.html
     
+    string binary;
     // start from 1, since the first entry is the traced_exception ctor
-    if( e.length >= 1 ){
-        char *line = e.trace[0];
-        char *lb = strchr(line, '(');
-        if( lb != 0 ){
-            *lb = '\0';
-            stream << "in " << line << ":\n";
-        }
-    }
     for( size_t i=1; i<e.length; ++i ){
         char *line = e.trace[i];
         char *lb = strchr(line, '(');
@@ -75,6 +69,10 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
         char *rb = 0;
         char *demangled = 0;
         if( lb != 0 ){
+            if( binary != string( line, lb-line ) ){
+                binary = string( line, lb-line );
+                stream << "in " << binary << ":\n";
+            }
             *lb = '\0';
             plus = strchr(lb+1,'+');
             if( plus != 0 ){
@@ -92,15 +90,18 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
                 *rb = '\0';
             }
         }
-        //stream << line << ": ";
-        if( plus != 0 ){
-            stream << "+" << (plus+1);
-        }
-        if( demangled != 0 ){
-            stream << '\t' << demangled;
-            free(demangled);
-        }else if( lb != 0 && rb > lb ){
-            stream << '\t' << (lb+1) << "()";
+        if( lb == 0 ){
+            stream << line;
+        }else{
+            if( plus != 0 ){
+                stream << "+" << (plus+1);
+            }
+            if( demangled != 0 ){
+                stream << '\t' << demangled;
+                free(demangled);
+            }else if( lb != 0 && rb > lb ){
+                stream << '\t' << (lb+1) << "()";
+            }
         }
         stream << '\n';
     }
@@ -110,13 +111,16 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
     return stream;
 }
  
-xml_scenario_error::xml_scenario_error(const string&  msg)
-  : runtime_error(msg) { }
+xml_scenario_error::xml_scenario_error(const string& msg) :
+    base_exception(msg, Error::XmlScenario)
+{}
 
-checkpoint_error::checkpoint_error(const string&  msg)
-  : traced_exception(msg) { }
+checkpoint_error::checkpoint_error(const string& msg) :
+    traced_exception(msg)
+{}
 
-cmd_exit::cmd_exit(const string& msg)
-  : runtime_error(msg) { }
+cmd_exception::cmd_exception(const string& msg, int code) :
+    base_exception(msg, code)
+{}
    
 } }

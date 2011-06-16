@@ -43,7 +43,7 @@ namespace OM { namespace util {
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
 	if (i >= argc)
-	    throw runtime_error ("Expected an argument following the last option");
+	    throw cmd_exception ("Expected an argument following the last option");
 	return string(argv[i]);
     }
     
@@ -70,26 +70,26 @@ namespace OM { namespace util {
 		
 		if (clo == "resource-path") {
 		    if (resourcePath.size())
-			throw runtime_error ("--resource-path (or -p) may only be given once");
+			throw cmd_exception ("--resource-path (or -p) may only be given once");
 		    resourcePath = parseNextArg (argc, argv, i).append ("/");
 		} else if (clo == "scenario") {
 		    if (scenarioFile != ""){
-			throw runtime_error ("--scenario argument may only be given once");
+			throw cmd_exception ("--scenario argument may only be given once");
 		    }
 		    scenarioFile = parseNextArg (argc, argv, i);
 		} else if (clo == "output") {
 		    if (outputName != ""){
-			throw runtime_error ("--output argument may only be given once");
+			throw cmd_exception ("--output argument may only be given once");
 		    }
 		    outputName = parseNextArg (argc, argv, i);
                 } else if (clo == "ctsout") {
                     if (ctsoutName != ""){
-                        throw runtime_error ("--ctsout argument may only be given once");
+                        throw cmd_exception ("--ctsout argument may only be given once");
                     }
                     ctsoutName = parseNextArg (argc, argv, i);
                 } else if (clo == "name") {
                     if (ctsoutName != "" || outputName != "" || scenarioFile != ""){
-                        throw runtime_error ("--name may not be used along with --scenario, --output or --ctsout");
+                        throw cmd_exception ("--name may not be used along with --scenario, --output or --ctsout");
                     }
                     string name = parseNextArg (argc, argv, i);
                     (scenarioFile = "scenario").append(name).append(".xml");
@@ -103,7 +103,7 @@ namespace OM { namespace util {
                     options.set (SKIP_SIMULATION);
 		} else if (clo == "set-EIR") {
 		    if (newEIR == newEIR)	// initialised to NaN
-			throw runtime_error ("--set-EIR already given");
+			throw cmd_exception ("--set-EIR already given");
 		    newEIR = lexical_cast<double>(parseNextArg (argc, argv, i));
 		    options.set (SET_ANNUAL_EIR);
                     options.set (SKIP_SIMULATION);
@@ -141,7 +141,7 @@ namespace OM { namespace util {
 #	ifdef OM_STREAM_VALIDATOR
 		} else if (clo == "stream-validator") {
 		    if (sVFile.size())
-			throw runtime_error ("--stream-validator may only be given once");
+			throw cmd_exception ("--stream-validator may only be given once");
 		    sVFile = parseNextArg (argc, argv, i);
 #	endif
                 } else if (clo == "version") {
@@ -156,26 +156,26 @@ namespace OM { namespace util {
 		for (size_t j = 1; j < clo.size(); ++j) {
 		    if (clo[j] == 'p') {
 			if (j + 1 != clo.size())
-			    throw runtime_error ("a path must be given as next argument after -p");
+			    throw cmd_exception ("a path must be given as next argument after -p");
 			if (resourcePath.size())
-			    throw runtime_error ("--resource-path (or -p) may only be given once");
+			    throw cmd_exception ("--resource-path (or -p) may only be given once");
 			resourcePath = parseNextArg (argc, argv, i).append ("/");
 		    } else if (clo[j] == 'm') {
 			options.set (PRINT_MODEL_OPTIONS);
 			options.set (SKIP_SIMULATION);
 		    } else if (clo[j] == 's') {
 			if (scenarioFile != ""){
-			    throw runtime_error ("-s argument may only be given once");
+			    throw cmd_exception ("-s argument may only be given once");
 			}
 			scenarioFile = parseNextArg (argc, argv, i);
 		    } else if (clo[j] == 'o') {
 			if (outputName != ""){
-			    throw runtime_error ("-o argument may only be given once");
+			    throw cmd_exception ("-o argument may only be given once");
 			}
 			outputName = parseNextArg (argc, argv, i);
                     } else if (clo[j] == 'n') {
                         if (ctsoutName != "" || outputName != "" || scenarioFile != ""){
-                            throw runtime_error ("--name may not be used along with --scenario, --output or --ctsout");
+                            throw cmd_exception ("--name may not be used along with --scenario, --output or --ctsout");
                         }
                         string name = parseNextArg (argc, argv, i);
                         (scenarioFile = "scenario").append(name).append(".xml");
@@ -251,10 +251,10 @@ namespace OM { namespace util {
             << " -h --help              Print this message." << endl<<endl
 	    ;
 	    if( cloError )
-		throw std::invalid_argument( "bad argument" );
+		throw cmd_exception( "bad argument" );
 	}
 	if( cloVersion || cloHelp ){
-            throw cmd_exit ("Printed help");
+            throw cmd_exception("Printed help",Error::None);
         }
 	
 #	ifdef OM_STREAM_VALIDATOR

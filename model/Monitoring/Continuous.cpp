@@ -119,7 +119,7 @@ namespace OM { namespace Monitoring {
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
-		throw runtime_error (string("File ").append(cts_filename).append(" exists!"));
+		util::traced_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
             }
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
@@ -146,7 +146,7 @@ namespace OM { namespace Monitoring {
     void Continuous::finalise (){
 #ifndef WITHOUT_BOINC
         if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
-            throw runtime_error (string("File ").append(compressedCtsoutName).append(" exists!"));
+            throw util::traced_exception (string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
         }
         ctsOStream.close();
         ifstream origFile(cts_filename.c_str());

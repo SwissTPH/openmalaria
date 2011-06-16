@@ -55,32 +55,43 @@ int main(int argc, char* argv[]) {
 	OM::util::BoincWrapper::finish(exitStatus);	// Never returns
 	
 	// simulation's destructor runs
-    } catch (const OM::util::cmd_exit& e) {
-	// this is not an error, but exiting due to command line
-        cerr << e.what() << "; exiting..." << endl;
-	goto omExit;
+    } catch (const OM::util::cmd_exception& e) {
+        if( e.getCode() == 0 ){
+            // this is not an error, but exiting due to command line
+            cerr << e.what() << "; exiting..." << endl;
+        }else{
+            cerr << "Command-line error: "<<e.what();
+            exitStatus = e.getCode();
+        }
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
         cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
+        exitStatus = OM::util::Error::XSD;
     } catch (const OM::util::checkpoint_error& e) {
         cerr << "Checkpoint exception: " << e.what() << endl;
         cerr << e << flush;
+        exitStatus = e.getCode();
     } catch (const OM::util::traced_exception& e) {
         cerr << "Exception: " << e.what() << endl;
         cerr << e << flush;
+        exitStatus = e.getCode();
     } catch (const OM::util::xml_scenario_error& e) {
         cerr << "Error in scenario XML file: " << e.what() << endl;
+        exitStatus = e.getCode();
+    } catch (const OM::util::base_exception& e) {
+        cerr << "Exception: " << e.what() << endl;
+        exitStatus = e.getCode();
     } catch (const exception& e) {
         cerr << "Exception: " << e.what() << endl;
+        exitStatus = EXIT_FAILURE;
     } catch (...) {
         cerr << "Unknown exception" << endl;
+        exitStatus = EXIT_FAILURE;
     }
     
     // If we get to here, we already know an error occurred.
     if( errno != 0 )
 	std::perror( "OpenMalaria" );
-    exitStatus = EXIT_FAILURE;
     
-    omExit:
     // Free memory (though usually we don't bother at exit to save time)
     OM::InputData.freeDocument();
     

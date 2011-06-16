@@ -44,27 +44,27 @@
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
       <initialACR>
         <CQ value="0.6"/>
-        <SP value="-99"/>
-        <AQ value="-99"/>
-        <ACT value="-99"/>
-        <QN value="-99"/>
-        <selfTreatment value="-99"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
       </initialACR>
       <compliance>
         <CQ value="1"/>
-        <SP value="-99"/>
-        <AQ value="-99"/>
-        <ACT value="-99"/>
-        <QN value="-99"/>
-        <selfTreatment value="-99"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
       </compliance>
       <nonCompliersEffective>
         <CQ value="0"/>
-        <SP value="-99"/>
-        <AQ value="-99"/>
-        <ACT value="-99"/>
-        <QN value="-99"/>
-        <selfTreatment value="-99"/>
+        <SP value="0"/>
+        <AQ value="0"/>
+        <ACT value="0"/>
+        <QN value="0"/>
+        <selfTreatment value="0"/>
       </nonCompliersEffective>
       <pSeekOfficialCareUncomplicated1 value="0.64"/>
       <pSelfTreatUncomplicated value="0"/>

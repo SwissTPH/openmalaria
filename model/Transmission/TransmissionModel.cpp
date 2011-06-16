@@ -164,7 +164,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
             msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
-            throw runtime_error(msg.str());
+            throw util::traced_exception(msg.str(),util::Error::SumWeight);
         }
         currentKappa = sumWt_kappa / sumWeight;
     }
@@ -230,7 +230,7 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   double duration = (TimeStep::simulation-lastSurveyTime).asInt();
   if( duration == 0.0 ){
       if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-          throw logic_error( "non-zero EIR over zero duration??" );
+          throw util::traced_exception( "non-zero EIR over zero duration??" );
       }
       duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
   }

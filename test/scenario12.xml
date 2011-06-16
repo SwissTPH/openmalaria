@@ -646,9 +646,6 @@
       <timed coverage="1" maxAge="999" minAge="0" time="70"/>
       <timed coverage="1" maxAge="999" minAge="0" time="84"/>
       <timed coverage="1" maxAge="999" minAge="0" time="98"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="112"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="126"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="140"/>
     </MDA>
   </interventions>
   <healthSystem>

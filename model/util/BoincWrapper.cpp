@@ -24,7 +24,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <stdexcept>	// runtime_error
+#include "util/errors.h"
 
 #ifdef WITHOUT_BOINC
 #include <stdlib.h>	// exit()
@@ -122,7 +122,7 @@ namespace BoincWrapper {
     if (err) {
       stringstream t;
       t << "APP. boinc_resolve_filename_s failed with code: "<<err;
-      throw runtime_error (t.str());	// can't call finish/exit here; need to free memory
+      throw util::traced_exception (t.str(),util::Error::FileIO);	// can't call finish/exit here; need to free memory
     }
     return ret;
   }
@@ -181,7 +181,7 @@ Checksum Checksum::generate (istream& fileStream) {
     if (firstLen != bytes_read) {	// fileStream.tellg () returns -1 now, not what I'd expect
 	ostringstream msg;
 	msg << "Initialisation read error:\tfirst: "<<firstLen<<"\tsecond:"<<fileStream.tellg()<<"\tread:  "<<bytes_read;
-	throw runtime_error (msg.str());
+	throw util::traced_exception (msg.str(),Error::Checksum);
     }
     
     return output;
@@ -189,7 +189,7 @@ Checksum Checksum::generate (istream& fileStream) {
 void Checksum::writeToFile (string filename) {
     ifstream test (filename.c_str());
     if (test.is_open())
-	throw runtime_error ("File scenario.sum exists!");
+	throw util::traced_exception ("File scenario.sum exists!",Error::Checksum);
     
     // Use C file commands, since these have clearer behaviour with binary data:
     FILE *f = fopen( filename.c_str(), "wb" );
@@ -198,7 +198,7 @@ void Checksum::writeToFile (string filename) {
 	written=fwrite( data, 1, 16, f );
     fclose( f );
     if( written != 16 )
-	throw runtime_error("Error writing scenario.sum");
+	throw util::traced_exception("Error writing scenario.sum",Error::Checksum);
 }
 #endif	// Without/with BOINC
 

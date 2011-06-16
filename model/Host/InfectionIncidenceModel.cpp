@@ -136,7 +136,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
     // and baseAvailability = mean, this is a draw from the log-normal distribution.
     if( baseAvailability != 1.0 )
         // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
-        throw logic_error("LogNormalMAII::getAvailabilityFactor");
+        throw util::traced_exception("LogNormalMAII::getAvailabilityFactor");
   return random::log_normal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 		     BaselineAvailabilityShapeParam);
 }
@@ -190,7 +190,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   if (!finite(effectiveEIR)) {
     ostringstream out;
     out << "effectiveEIR is not finite: " << effectiveEIR << endl;
-    throw overflow_error (out.str());
+    throw util::traced_exception (out.str(), util::Error::EffectiveEIR);
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
@@ -208,7 +208,8 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
     if( n > WithinHost::WithinHostModel::MAX_INFECTIONS ){
-        cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
+        // don't report: according to TS this is OK, and it generates a LOT of warnings
+        // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WithinHostModel::MAX_INFECTIONS;
     }
     human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
@@ -216,7 +217,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
     return n;
   } else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
-      throw runtime_error( "numNewInfections: NaN");
+      throw util::traced_exception( "numNewInfections: NaN", util::Error::NumNewInfections );
   else
     return 0;
 }

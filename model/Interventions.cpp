@@ -24,6 +24,7 @@
 #include "Clinical/ESCaseManagement.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "Clinical/CaseManagementCommon.h"
+#include "Monitoring/Surveys.h"
 
 namespace OM {
 
@@ -39,6 +40,9 @@ AgeIntervention::AgeIntervention(
     coverage( elt.getCoverage() ),
     deploy( func )
 {
+    if( begin < TimeStep(0) || end < begin ){
+        throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
+    }
     if( ageTimesteps <= TimeStep(0) ){
         ostringstream msg;
         msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
@@ -46,19 +50,41 @@ AgeIntervention::AgeIntervention(
         msg << "; must be at least timestep 1.";
         throw util::xml_scenario_error( msg.str() );
     }
+    if( ageTimesteps > TimeStep::maxAgeIntervals ){
+        ostringstream msg;
+        msg << "continuous intervention must have target age no greater than ";
+        msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
+        throw util::xml_scenario_error( msg.str() );
+    }
+    if( !(coverage >= 0.0 && coverage <= 1.0) ){
+        throw util::xml_scenario_error("continuous intervention coverage must be in range [0,1]");
+    }
 }
 
 // -----  TimedIntervention and derivatives  -----
 
 TimedIntervention::TimedIntervention(TimeStep deploymentTime) :
     time( deploymentTime )
-{}
+{
+    if( deploymentTime < TimeStep(0) ){
+        throw util::xml_scenario_error("timed intervention deployment: may not be negative");
+    }else if( deploymentTime >= Monitoring::Surveys.getFinalTimestep() ){
+        cerr << "Warning: timed intervention deployment at time "<<deploymentTime.asInt();
+        cerr << " happens after last survey" << endl;
+    }
+}
 
 class DummyIntervention : public TimedIntervention {
 public:
     DummyIntervention() :
-        TimedIntervention( TimeStep::future )
-    {}
+        TimedIntervention( TimeStep(0) )
+    {
+        // TimedIntervention's ctor checks that the deployment time-step is
+        // within the intervention period. We want this time to be after the
+        // last time-step, so set the time here after TimedIntervention's ctor
+        // check has been done (hacky).
+        time = TimeStep::future;
+    }
     virtual void deploy (OM::Population&) {}
 };
 
@@ -141,7 +167,14 @@ public:
         cohortOnly( mass.getCohort() ),
         coverage( mass.getCoverage() ),
         intervention( deployIntervention )
-    {}
+    {
+        if( !(coverage >= 0.0 && coverage <= 1.0) ){
+            throw util::xml_scenario_error("timed intervention coverage must be in range [0,1]");
+        }
+        if( minAge < TimeStep(0) || maxAge < minAge ){
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
+        }
+    }
     
     virtual void deploy (OM::Population& population) {
         Population::HumanPop& popList = population.getList();
@@ -511,6 +544,7 @@ void InterventionManager::deployCts (const OM::Population& population, OM::Host:
             break;      // remaining intervs happen in future
         // If interv for now, do it. (If we missed the time, ignore it.)
         if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
+            //FIXME: use begin < now, not <=
             if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
                 if( !ctsIntervs[nextCtsDist].cohortOnly || human.getInCohort() ){
                     if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){

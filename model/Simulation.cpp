@@ -135,7 +135,7 @@ int Simulation::start(){
                 util::BoincWrapper::checkpointCompleted();
             }
             if (TimeStep::simulation == testCheckpointDieStep)
-                throw util::cmd_exit ("Checkpoint test: checkpoint written");
+                throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
             Continuous::update();
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {

@@ -41,13 +41,13 @@ namespace OM { namespace util {
         static AgeGroupDummy singleton;
         
         virtual double eval( double ageYears ) const {
-            throw logic_error( "AgeGroupDummy" );
+            throw util::traced_exception( "AgeGroupDummy" );
         }
         virtual void scale( double factor ) {
-            throw logic_error( "AgeGroupDummy" );
+            throw util::traced_exception( "AgeGroupDummy" );
         }
         virtual double firstGlobalMaximum() {
-            throw logic_error( "AgeGroupDummy" );
+            throw util::traced_exception( "AgeGroupDummy" );
         }
     };
     AgeGroupDummy AgeGroupDummy::singleton;

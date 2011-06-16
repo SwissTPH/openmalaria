@@ -92,14 +92,14 @@ void EmpiricalInfection::init(){
   _maximumPermittedAmplificationPerCycle=1000.0;
   fstream f_autoRegressionParameters(util::CommandLine::lookupResource("autoRegressionParameters.csv").c_str(),ios::in);
   if (!f_autoRegressionParameters.is_open())
-    throw runtime_error ("file not found: autoRegressionParameters.csv");
+    throw util::traced_exception ("file not found: autoRegressionParameters.csv",util::Error::FileIO);
 
   //read header of file (unused)
   string csvLine;
   getline(f_autoRegressionParameters,csvLine);
   if (csvLine != "day,mub1,sigb1,mub2,sigb2,mub3,sigb3")
       // this check is here to catch unexpected alterations
-      throw runtime_error ("autoRegressionParameters.csv does not have expected header line");
+      throw util::traced_exception ("autoRegressionParameters.csv does not have expected header line");
 
   // read every line from the stream
   while(getline(f_autoRegressionParameters, csvLine)){
@@ -122,7 +122,7 @@ void EmpiricalInfection::init(){
     int day;
     csvNum1 >> day;
     if (day >= _maximumDurationInDays)
-      throw runtime_error ("EmpiricalInfection::init(): invalid day");
+      throw util::traced_exception ("EmpiricalInfection::init(): invalid day");
     csvNum2 >> _mu_beta1[day];
     csvNum3 >> _sigma_beta1[day];
     csvNum4 >> _mu_beta2[day];
