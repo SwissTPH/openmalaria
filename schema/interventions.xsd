@@ -1000,12 +1000,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
     <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Hole scaling factor;min:0;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Hole scaling factor;min:0</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
