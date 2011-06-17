@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" name="IPTi_seas_niak21_d4mo" schemaVersion="28" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" name="IPTi_seas_niak21_d4mo" schemaVersion="29" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -177,8 +177,8 @@
       <continuous coverage="0.95" targetAgeYrs="0.25"/>
       <continuous coverage="0.95" targetAgeYrs="0.33"/>
       <continuous coverage="0.95" targetAgeYrs="0.75"/>
-      <timed time="7" coverage=".8"/>
-      <timed time="79" coverage=".8"/>
+      <timed coverage=".8" time="7"/>
+      <timed coverage=".8" time="79"/>
     </IPT>
   </interventions>
   <!-- Niakhar seasonality scaled to an EIR of 21 -->

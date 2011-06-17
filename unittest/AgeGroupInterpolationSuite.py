@@ -191,4 +191,24 @@ p.set_ylabel('probability of severe malaria in-patients developing sequelae')
 const.plot(p)
 linear.plot(p)
 
+
+# 5th plot: new age-based availability to mosquitoes
+#age group lower bounds:
+ageLB=[ 0,0,5,5 ]
+#age group values:
+values=[ 0.7076,0.8538,1,1 ]
+
+const=Interpolator(ageLB,values)
+linear=LinearInterpolator(ageLB,values)
+
+fig = plt.figure(5)
+p = fig.add_subplot(1,1,1)
+p.set_title('New age-based availability to mosquitoes')
+p.set_xlabel('age (years)')
+p.set_ylabel('availability relative to an adult')
+
+const.plot(p)
+linear.plot(p)
+
+
 plt.show()

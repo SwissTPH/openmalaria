@@ -239,7 +239,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="description" type="ITNDescription"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific"> <xs:annotation>
+            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+            <xs:annotation>
                 <xs:documentation>List of ages at which bed-net deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 </xs:documentation>
