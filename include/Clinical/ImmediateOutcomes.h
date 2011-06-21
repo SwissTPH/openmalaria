@@ -23,6 +23,7 @@
 
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
+#include "Clinical/Diagnostic.h"
 
 namespace OM {
 namespace Clinical {
@@ -48,6 +49,12 @@ public:
     /** Initialises parameters, loading from XML data. */
     static void initParameters ();
 
+    /** Set up MDA drug. Must be called if massDrugAdministration() is
+        * ever used to deploy an MDA intervention. */
+    static inline void initMDA (const scnXml::HSDiagnostic& elt){
+        massTreatDiagnostic.init( elt );
+    }
+    
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
@@ -86,6 +93,9 @@ private:
 
     //! treatment seeking for heterogeneity
     double _treatmentSeekingFactor;
+    
+    // Diagnostic used by MDA/MSAT
+    static Diagnostic massTreatDiagnostic;
 
     /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
     static void setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem);

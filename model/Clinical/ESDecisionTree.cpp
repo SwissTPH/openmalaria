@@ -362,7 +362,7 @@ namespace OM { namespace Clinical {
 		specificity = .942;
 	    }
 	    double dens = hostData.withinHost.getTotalDensity ();
-	    double pPositive = 1.0 - specificity + specificity * dens / (dens + dens_50);
+	    double pPositive = 1.0 + specificity * (dens / (dens + dens_50) - 1.0);
 	    if (random::uniform_01() < pPositive)
 		return positive;
 	    else

@@ -27,6 +27,7 @@ namespace Clinical {
 using namespace ::OM::util;
 using ::OM::Pathogenesis::State;
 
+Diagnostic ClinicalImmediateOutcomes::massTreatDiagnostic;
 double ClinicalImmediateOutcomes::probGetsTreatment[3];
 double ClinicalImmediateOutcomes::probParasitesCleared[3];
 double ClinicalImmediateOutcomes::cureRate[3];
@@ -60,6 +61,9 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 // -----  other methods  -----
 
 void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
+    if( !massTreatDiagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
+        return;
+    }
     // We need to pass the is-severe state for the IPT code.
     human.withinHostModel->clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
     Monitoring::Surveys.getSurvey(human.getInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);

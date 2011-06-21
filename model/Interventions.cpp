@@ -22,6 +22,7 @@
 #include "Population.h"
 #include "util/random.h"
 #include "Clinical/ESCaseManagement.h"
+#include "Clinical/ImmediateOutcomes.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Surveys.h"
@@ -328,12 +329,19 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             activeInterventions.set( Interventions::MDA, true );
             // read description:
             if( TimeStep::interval == 5 ){
-                if( mda.getDescription().present() ){
-                    cerr << "warning: MDA description not expected for 5-day timestep" << endl;
+                if( !mda.getDiagnostic().present() ){
+                    // Note: allow no description for now to avoid XML changes.
+                    //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
+                    scnXml::HSDiagnostic diagnostic;
+                    scnXml::Deterministic det(0.0);
+                    diagnostic.setDeterministic(det);
+                    Clinical::ClinicalImmediateOutcomes::initMDA(diagnostic);
+                }else{
+                    Clinical::ClinicalImmediateOutcomes::initMDA( mda.getDiagnostic().get() );
                 }
             }else{
                 if( !mda.getDescription().present() ){
-                    throw util::xml_scenario_error( "error: MDA description required for 1-day timestep" );
+                    throw util::xml_scenario_error( "error: interventions.MDA.description element required for MDA with 1-day timestep" );
                 }
                 Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
             }

@@ -816,4 +816,78 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:simpleType>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="HSDiagnostic">
+    <!-- Description of a generic parasitaemia diagnostic. -->
+    <!-- Garki/non-Garki measurement biases are not taken into account by this
+      code; the effect could be included via parameterisation or via adjusting
+      input density. -->
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="deterministic">
+          <xs:annotation>
+            <xs:documentation>
+              Specify that an artificial deterministic test is used: drugs are
+              administered if parasite density is at least the minimum given.
+            </xs:documentation>
+            <xs:appinfo>name:Deterministic detection</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="minDensity" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The minimum density at which parasites can be detected. If 0,
+                  the test outcome is always positive.
+                </xs:documentation>
+                <xs:appinfo>name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="stochastic">
+          <xs:annotation>
+            <xs:documentation>
+              An improved model of detection which is non-deterministic, including
+              false positive results as well as false negatives.
+              
+              The probability of a positive outcome is modelled as 1 + s×(x/(x+d) - 1)
+              where x is the parasite density, d is the density at which the test outcome
+              has a 50% chance of being positive, and s is the probability of a positive
+              outcome given no parasites (the specificity).
+              
+              Some parameterisations:
+              
+              Microscopy sensitivity/specificity data in Africa;
+              Source: expert opinion — Allan Schapira
+                dens_50 = 20.0
+                specificity = .75
+              
+              RDT sensitivity/specificity for Plasmodium falciparum in Africa
+              Source: Murray et al (Clinical Microbiological Reviews, Jan. 2008)
+                dens_50 = 50.0;
+                specificity = .942;
+            </xs:documentation>
+            <xs:appinfo>name:Non-deterministic detection</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="dens_50" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The density at which the test outcome has a 50% chance of being positive.
+                </xs:documentation>
+                <xs:appinfo>name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="specificity" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The probability of a positive test outcome in the absense of parasites.
+                </xs:documentation>
+                <xs:appinfo>name:Specificity;units:none;min:0;max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
 </xs:schema>

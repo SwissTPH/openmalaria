@@ -73,10 +73,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="detectionLimit" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                Detection limit for parasitemia
+                Limit above which a human's infection is reported as patent.
               </xs:documentation>
               <xs:appinfo>
-                units:parasites/micolitre;min:0;max:1000;name:Detection limit for parasitaemia;
+                units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;
               </xs:appinfo>
             </xs:annotation>
           </xs:attribute>
