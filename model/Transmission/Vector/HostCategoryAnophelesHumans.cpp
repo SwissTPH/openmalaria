@@ -33,8 +33,8 @@ void HostCategoryAnophelesHumans::operator =(const scnXml::Mosq& mosq)
 	probMosqOvipositing = mosq.getMosqProbOvipositing();
 }
 
-void HostCategoryAnophelesHumans::setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
-    net.init( elt, proportionUse );
+void HostCategoryAnophelesHumans::setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
+    net.init( params, elt, proportionUse );
 }
 
 void HostCategoryAnophelesHumans::setIRSDescription (const scnXml::IRSDescription& irsDesc){

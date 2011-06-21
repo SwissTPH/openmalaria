@@ -20,12 +20,15 @@
 #include "Transmission/Vector/ITN.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "R_nmath/qnorm.h"
 
 namespace OM { namespace Transmission {
     using util::random::poisson;
 
 double ITNParams::init( const scnXml::ITNDescription& elt) {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
+    const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
+    maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     holeRate.setParams( elt.getHoleRate() );
     ripRate.setParams( elt.getRipRate() );
     ripFactor = elt.getRipFactor().getValue();
@@ -39,11 +42,13 @@ double ITNParams::init( const scnXml::ITNDescription& elt) {
 }
 
 void ITNAnophelesParams::init(
-    const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse)
+    const ITNParams& params,
+    const scnXml::ITNDescription::AnophelesParamsType& elt,
+    double proportionUse)
 {
-    _relativeAttractiveness.init( elt.getDeterrency() );
-    _preprandialKillingEffect.init( elt.getPreprandialKillingEffect() );
-    _postprandialKillingEffect.init( elt.getPostprandialKillingEffect() );
+    _relativeAttractiveness.init( params, elt.getDeterrency() );
+    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
+    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
@@ -61,34 +66,72 @@ ITNAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
     holeScaling( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::RelativeAttractiveness::init(const scnXml::ITNDeterrency& elt){
+void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, const scnXml::ITNDeterrency& elt){
     double HF = elt.getHoleFactor();
     double PF = elt.getInsecticideFactor();
     double IF = elt.getInteractionFactor();
     holeScaling = elt.getHoleScalingFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
     if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams: expected scaling factors to be non-negative");
+        throw util::xml_scenario_error("ITN.description.anophelesParams.deterrency: expected scaling factors to be non-negative");
     }
     
-    /* We need to ensure the relative availability is in the range [0,1]. It's
-    an exponentiated value, so we require log(HF)*h + log(PF)*p + log(IF)*h*p ≤ 0
-    where HF, PF and IF are the hole, insecticide and interaction factors
-    respectively, with h and p defined as: h=exp(-holeIndex*holeScalingFactor),
-    p=1−exp(-insecticideContent*insecticideScalingFactor).
-    
-    h and p will always be in the range [0,1], so the following limits are
-    sufficient to keep the relative availability in the range [0,1]:
-    log(HF) ≤ 0, log(PF) ≤ 0 and log(HF)+log(PF)+log(IF) = log(HF×PF×IF) ≤ 0,
-    or equivalently HF∈(0,1], PF∈(0,1] and HF×PF×IF∈(0,1].
-    Weaker limits would not be sufficient, as with the argument for the limits
-    of killing effect arguments below.
-    */
-    if( !( HF > 0.0 && HF <= 1.0 && PF > 0.0 && PF <= 1.0 &&
-            HF*PF*IF > 0.0 && HF*PF*IF <= 1.0 ) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams.deterrency: "
-        "bounds not met: HF∈(0,1], PF∈(0,1] and HF×PF×IF∈(0,1]" );
+    /* We need to ensure the relative availability is non-negative. However,
+     * since it's an exponentiated value, it always will be.
+     * 
+     * If don't want nets to be able to increase transmission, the following
+     * limits could also be applied. In general, however, there is no reason
+     * nets couldn't make individuals more attractive to mosquitoes.
+     * 
+     * To ensure relative availability is at most one: relative availability is
+     *  exp( log(HF)*h + log(PF)*p + log(IF)*h*p )
+     * where HF, PF and IF are the hole, insecticide and interaction factors
+     * respectively, with h and p defined as:
+     *  h=exp(-holeIndex*holeScalingFactor),
+     *  p=1−exp(-insecticideContent*insecticideScalingFactor).
+     * We therefore need to ensure that:
+     *  log(HF)*h + log(PF)*p + log(IF)*h*p ≤ 0
+     * 
+     * As with the argument below concerning limits of the killing effect
+     * parameters, h and p will always be in the range [0,1] and p ≤ pmax.
+     * We can then derive some bounds for HF and PF:
+     *  log(HF) ≤ 0
+     *  log(PF)×pmax = log(PF^pmax) ≤ 0
+     *  log(HF) + (log(PF)+log(IF))×pmax = log(HF×(PF×IF)^pmax) ≤ 0
+     * or equivalently
+     *  HF ∈ (0,1]
+     *  PF^pmax ∈ (0,1]
+     *  HF×(PF×IF)^pmax ∈ (0,1]
+     *
+     * Weaker limits would not be sufficient, as with the argument for the
+     * limits of killing effect arguments below. */
+#ifdef WITHOUT_BOINC
+    // Print out a warning if nets may increase transmission, but only in
+    // non-BOINC mode, since it is not unreasonable and volunteers often
+    // mistake this kind of warning as indicating a problem.
+    double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
+    if( !( HF > 0.0 && PF > 0.0 && IF > 0.0 &&
+            HF <= 1.0 && pow(PF,pmax) <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
+    {
+        cerr << "Note: since the following bounds are not met, the ITN may make humans more\n";
+        cerr << "attractive to mosquitoes than they would be without a net.\n";
+        cerr << "This note is only shown by non-BOINC executables.\n";
+        cerr << "ITN.description.anophelesParams.deterrency: bounds not met:\n";
+        if( !(HF>0.0) )
+            cerr << "  holeFactor>0\n";
+        if( !(PF>0.0) )
+            cerr << "  insecticideFactor>0\n";
+        if( !(IF>0.0) )
+            cerr << "  interactionFactor>0\n";
+        if( !(HF<=1.0) )
+            cerr << "  holeFactor≤1\n";
+        if( !(pow(PF,pmax)<=1.0) )
+            cerr << "  insecticideFactor^"<<pmax<<"≤1\n";
+        if( !(HF*pow(PF*IF,pmax))<=1.0 )
+            cerr << "  holeFactor×(insecticideFactor×interactionFactor)^"<<pmax<<"≤1\n";
+        cerr.flush();
     }
+#endif
     lHF = log( HF );
     lPF = log( PF );
     lIF = log( IF );
@@ -102,7 +145,7 @@ ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt){
+void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scnXml::ITNKillingEffect& elt, bool postPrandial){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -111,54 +154,108 @@ void ITNAnophelesParams::SurvivalFactor::init(const scnXml::ITNKillingEffect& el
     insecticideScaling = elt.getInsecticideScalingFactor();
     invBaseSurvival = 1.0 / (1.0 - BF);
     if( !( BF >= 0.0 && BF < 1.0) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams: expected baseFactor to be in range [0,1]");
+        ostringstream msg;
+        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: expected baseFactor to be in range [0,1]";
+        throw util::xml_scenario_error( msg.str() );
     }
     if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams: expected scaling factors to be non-negative");
+        ostringstream msg;
+        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: expected scaling factors to be non-negative";
+        throw util::xml_scenario_error( msg.str() );
     }
     
     /* We want the calculated survival factor (1−K)/(1−BF) to be in the range
     [0,1] where K is the killing factor: K=BF+HF×h+PF×p+IF×h×p, with h and p
     defined as: h=exp(-holeIndex×holeScalingFactor),
-    p=1−exp(-insecticideContent×insecticideScalingFactor).
+    p=1−exp(-insecticideContent×insecticideScalingFactor). 
     
-    Since 1−BF > 0 we need 1−K ≥ 0 or equivalently BF+HF×h+PF×p+IF×h×p ≤ 1.
-    We also need 1-K ≤ 1-BF, or equivalently K ≥ BF which reduces to
-    HF×h + PF×p + IF×h×p ≥ 0.
+    By their nature, holeIndex ≥ 0 and insecticideContent ≥ 0. We restrict:
+        holeScalingFactor ≥ 0
+        insecticideScalingFactor ≥ 0
+    Which implies both h and p lie in the range [0,1]. We also know the base
+    survival factor, 1−BF, is in the range [0,1].
     
-    Initially h is 1 (when holeIndex=0), and since holeIndex increases towards
-    infinity with net age, h will tend to 0 (assuming the scaling factor is
-    positive). p will tend towards 0 as the insecticide content tends towards
-    0, however it's initial value p₀ depends on the initial content and the
-    scaling factor. We know 0 ≤ p ≤ p₀ ≤ 1 but not the exact value of p₀ since
-    insecticideContent is sampled from a normal distribution per net; in theory
-    though the maximum sample is unlimited and thus p₀ can take any value less
-    than 1.
+    To make sure the survival factor is not negative we need (1−K)/(1−BF) ≥ 0.
+    Since 1−BF > 0 we need 1−K ≥ 0, which, substituting K, gives us
+        BF + HF×h + PF×p + IF×h×p ≤ 1	(1)
+    We also want to make sure the survival factor is not greater than one (since
+    nets shouldn't increase mosquito survival), (1−K)/(1−BF) ≤ 1 or equivalently
+    1-K ≤ 1-BF or K ≥ BF, which, substituting K, yields
+        HF×h + PF×p + IF×h×p ≥ 0		(2)
     
-    Substituting the initial values for h and p we require:
-    BF + HF + (PF+IF)×p₀ ≤ 1, and HF + (PF+IF)×p₀ ≥ 0.
-    Since p₀ may be as low as 0, we require HF ≥ 0 and BF + HF ≤ 1. The extreme
-    when both h and p tend to zero doesn't tell us much, but it is also possible
-    for h and p to take values in between. Exactly what limit would be needed
-    in all these cases isn't obvious, but certainly requiring PF ≥ 0 and
-    BF + PF×p₀ ≤ 1 (which assumes h→0 while p=p₀) is sufficient.
+    Lets derive some limits on HF, PF and IF such that the above inequalities
+    (1) and (2) are satisfied.
     
-    Since we want limits without p₀, observe that the initial insecticide
-    content is sampled from a normal distribution and thus has no maximum
-    bound, implying that p₀ can take any value less than 1, so substituting p₀
-    with the value 1 is the only way to guarantee that (1−K)/(1−BF) ∈ [0,1].
-    */
-    if( !( BF+HF <= 1.0 && BF+PF <= 1.0 && BF+HF+PF+IF <= 1.0 &&
-        HF >= 0.0 && PF >= 0.0 && HF+PF+IF >= 0.0 ) ){
-        throw util::xml_scenario_error("ITN.description.anophelesParams.*killingFactor: "
-        "bounds not met: BF+HF ≤ 1, BF+PF ≤ 1, BF+HF+PF+IF ≤ 1, HF ≥ 0, PF ≥ 0 and HF+PF+IF ≥ 0" );
+    A net can theoretically be unholed (holeIndex=0 ⇒ h=1) and have no
+    insecticide (thus have p=0). Substituting these values in (1) and (2) yields:
+        BF + HF ≤ 1	(3)
+        HF ≥ 0		(4)
+    
+    The maximum value for p depends on the maximum insecticide content; denote
+    pmax = max(p). Note that holeIndex has no finite maximum; thus, although
+    for any finite value of holeIndex, h > 0, there is no h₀ > 0 s.t. for all
+    values of holeIndex h ≥ h₀. For the limiting case of a tattered but
+    insecticide-saturated net our parameters are therefore p=pmax, h=0:
+        BF + PF×pmax ≤ 1	(5)
+        PF×pmax ≥ 0			(6)
+    (Assuming pmax > 0, (6) is equivalent to PF ≥ 0.)
+    
+    Consider a net saturated with insecticide (p=pmax) and without holes (h=1):
+        BF + HF + (PF+IF)×pmax ≤ 1	(7)
+        HF + (PF+IF)×pmax ≥ 0		(8)
+    
+    The opposite extreme (the limiting case of a decayed net with no remaining
+    insecticide and a large number of holes) yields only BF ≤ 1 which we already
+    know.
+    
+    Some of the above examples of nets may be unlikely, but there is only one
+    restriction in our model making any of these cases impossible: some
+    insecticide must have been lost by the time any holes occur. We ignore this
+    since its effect is likely small, and thus all of the above are required to
+    keep the survival factor in the range [0,1]. Further, these six inequalities
+    (3) - (8) are sufficient to keep the survival factor within [0,1] since h
+    and p are non-negative and act linearly in (1) and (2).
+    
+    From the definition of p, we always have pmax ≤ 1, so substituting pmax=1
+    in (5) - (8) gives us bounds which imply our requirement, however if pmax
+    is finite they are stricter than necessary. Since insecticideScalingFactor
+    is constant, max(p) coincides with max(insecticideContent) which, since
+    insecticide content only decays over time, coincides with the maximum
+    initial insecticide content, Pmax. Since the initial insecticide content is
+    sampled from a normal distribution in our model it should have no finite
+    maximum, thus implying we cannot achieve more relaxed bounds than (5) - (8)
+    when pmax=1 (unless the standard deviation of our normal distribution is 1).
+    We would however like to impose less strict bounds than these, thus we
+    impose a maximum value on the initial insecticide content, Pmax, such that
+    the probability of sampling a value from our parameterise normal
+    distribution greater than Pmax is 0.001. */
+    double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
+    if( !( BF+HF <= 1.0 && HF >= 0.0
+        && BF+PF*pmax <= 1.0 && PF*pmax >= 0.0
+        && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
+    {
+        ostringstream msg;
+        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: bounds not met:";
+        if( !(BF+HF<=1.0) )
+            msg << " baseFactor+holeFactor≤1";
+        if( !(HF>=0.0) )
+            msg << " holeFactor≥0";
+        if( !(BF+PF*pmax<=1.0) )
+            msg << " baseFactor+"<<pmax<<"×insecticideFactor≤1";
+        if( !(PF*pmax>=0.0) )
+            msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
+        if( !(PF+HF+(PF+IF)*pmax<=1.0) )
+            msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
+        if( !(HF+(PF+IF)*pmax)>=0.0 )
+            msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
+        throw util::xml_scenario_error( msg.str() );
     }
 }
 double ITNAnophelesParams::RelativeAttractiveness::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
-    assert( inRange01(relAvail) );
+    assert( relAvail>=0.0 );
     return relAvail;
 }
 double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
@@ -180,6 +277,8 @@ void ITN::deploy(const ITNParams& params) {
     initialInsecticide = params.initialInsecticide.sample();
     if( initialInsecticide < 0.0 )
         initialInsecticide = 0.0;	// avoid negative samples
+    if( initialInsecticide > params.maxInsecticide )
+        initialInsecticide = params.maxInsecticide;
     
     // net rips and insecticide loss are assumed to co-vary dependent on handling of net
     util::NormalSample x = util::NormalSample::generate();

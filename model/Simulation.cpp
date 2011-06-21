@@ -34,7 +34,7 @@
 #include "PopulationStats.h"
 
 #include <fstream>
-#include <gzstream.h>
+#include <gzstream/gzstream.h>
 
 
 namespace OM {

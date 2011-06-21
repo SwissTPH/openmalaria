@@ -30,7 +30,7 @@
 #include <fstream>
 #include <boost/format.hpp>
 #include <boost/math/nonfinite_num_facets.hpp>
-#include <gzstream.h>
+#include <gzstream/gzstream.h>
 
 namespace OM { namespace Monitoring {
     using namespace fastdelegate;

@@ -3,7 +3,8 @@
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
 set (Contrib_CPP
-    gzstream/gzstream.C
+  gzstream/gzstream.C
+  R_nmath/qnorm.cpp
 )
 
 include_directories (SYSTEM
@@ -15,6 +16,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/contrib/cxxtest
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
+  ${CMAKE_SOURCE_DIR}/contrib/R_nmath
 )
 
 add_library (contrib

@@ -139,8 +139,8 @@ public:
     }
 
     /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
-        humanBase.setITNDescription (elt, proportionUse);
+    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+        humanBase.setITNDescription (params, elt, proportionUse);
     }
     /** Set up intervention descriptions for humans, for this anopheles species. */
     inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {

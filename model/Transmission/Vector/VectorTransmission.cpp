@@ -244,7 +244,7 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
         );
     }
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].setITNDescription (*it, proportionUse);
+        species[getSpeciesIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
     }
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){

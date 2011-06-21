@@ -1,5 +1,21 @@
-// This file is part of OpenMalaria.
-// Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+/* This file is part of OpenMalaria.
+ *
+ * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ *
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -74,7 +90,7 @@ public class SchemaTranslator {
     private static IptiReportOnlyAtRiskBehaviour iptiROAR = IptiReportOnlyAtRiskBehaviour.none;
     
     private enum ITN29ParameterTranslation {
-        none, replace;  // note: could add option to approximate old behaviour
+        none, replace, manual;  // note: could add option to approximate old behaviour
     }
     private static ITN29ParameterTranslation ITN29Translation = ITN29ParameterTranslation.none;
 
@@ -1825,9 +1841,10 @@ public class SchemaTranslator {
             Element ITNDesc = getChildElement(interventions,"ITN");
             if( ITNDesc != null ){
                 if( ITN29Translation == ITN29ParameterTranslation.none ){
-                    System.err.println("Error: ITN description changed. Specify --replace-ITN-description to replace");
-                    System.err.println("with a default parameterisation, otherwise update manually.");
+                    System.err.println("Error: ITN description changed. Pass argument --ITN-description to replace or ignore (see help)");
                     return false;
+                }else if( ITN29Translation == ITN29ParameterTranslation.manual ){
+                    System.err.println("Warning: leaving ITN description unchanged as requested");
                 }else{
                     assert ITN29Translation == ITN29ParameterTranslation.replace;
                     
@@ -2823,7 +2840,7 @@ public class SchemaTranslator {
                 } else {
                     System.err
                     .println("--maxDensCorrection: expected true or false");
-                    System.exit(2);
+                    printUsage();
                 }
             } else if (arg.equals("--iptiSpOptionWithoutInterventions")) {
                 String arg2 = args[++i];
@@ -2834,7 +2851,7 @@ public class SchemaTranslator {
                 } else {
                     System.err
                     .println("--iptiSpOptionWithoutInterventions: expected true or false");
-                    System.exit(2);
+                    printUsage();
                 }
             } else if (arg.equals("--iptiReportOnlyAtRisk")) {
                 String arg2 = args[++i];
@@ -2845,7 +2862,7 @@ public class SchemaTranslator {
                 } else {
                     System.err
                     .println("--iptiReportOnlyAtRisk: expected true or false");
-                    System.exit(2);
+                    printUsage();
                 }
             } else if (arg.equals("--schema-folder")) {
                 schema_folder = args[++i];
@@ -2853,8 +2870,18 @@ public class SchemaTranslator {
                 input_folder = args[++i];
             } else if (arg.equals("--output-folder")) {
                 output_folder = args[++i];
-            } else if (arg.equals("--replace-ITN-description")) {
-                ITN29Translation = ITN29ParameterTranslation.replace;
+            } else if (arg.equals("--ITN-description")) {
+                assert ITN29Translation == ITN29ParameterTranslation.none;      // assert not changed twice
+                
+                String arg2 = args[++i];
+                if (arg2.equalsIgnoreCase("replace")){
+                    ITN29Translation = ITN29ParameterTranslation.replace;
+                }else if (arg2.equalsIgnoreCase("manual")){
+                    ITN29Translation = ITN29ParameterTranslation.manual;
+                }else{
+                    System.err.println("--ITN-description received unexpected argument: "+arg2);
+                    printUsage();
+                }
             } else {
                 printUsage();
             }
@@ -2912,6 +2939,10 @@ public class SchemaTranslator {
                            + "\n\t\t\t\tREPORT_ONLY_AT_RISK. Specifying true here causes"
                            + "\n\t\t\t\toption REPORT_ONLY_AT_RISK to be added to scenarios"
                            + "\n\t\t\t\talready using IPTI_SP_MODEL."
+                           + "\n  --ITN-description ARG\t\tUpdate 29: new parameterisation is needed."
+                           + "\n\t\t\t\tUse ARG \"replace\" to replace old parameters with a new default"
+                           + "\n\t\t\t\tparameterisation, or \"manual\" if you will update by hand"
+                           + "\n\t\t\t\t(in the second case, you should use --no-validation)."
                            + "\n  --schema-folder\t\tThe schema folder, by default ../../schema"
                            + "\n  --input-folder\t\tThe input folder, by default ./scenarios/"
                            + "\n  --output-folder\t\tThe output folder, by default ./translatedScenarios/"

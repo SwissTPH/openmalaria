@@ -50,7 +50,7 @@ public:
     void operator= (const scnXml::Mosq& mosq);
 
     /** Set up vector-model intervention parameters. */
-    void setITNDescription (const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
+    void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     /** Set up vector-model intervention parameters. */
     void setIRSDescription (const scnXml::IRSDescription& irsDesc);
     /** Set up vector-model intervention parameters. */

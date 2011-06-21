@@ -28,7 +28,7 @@
 #include "util/CommandLine.h"
 #include "Interventions.h"
 
-#include <gzstream.h>
+#include <gzstream/gzstream.h>
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>

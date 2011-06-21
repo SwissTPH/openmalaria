@@ -204,21 +204,6 @@
       <timed coverage="0.20" time="730"/>
       <timed coverage="0.20" time="1168"/>
     </ITN>
-    <IRS name="DDT test">
-      <decay L="0.5" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0.56"/>
-        <killingEffect value="0.24"/>
-      </anophelesParams>
-      <anophelesParams mosquito="funestus">
-        <deterrency value="0.56"/>
-        <killingEffect value="0.24"/>
-      </anophelesParams>
-      <anophelesParams mosquito="arabiensis">
-        <deterrency value="0.56"/>
-        <killingEffect value="0.24"/>
-      </anophelesParams>
-    </IRS>
     <importedInfections>
       <timed>
         <rate time="0" value="5"/>

@@ -88,6 +88,15 @@ namespace OM { namespace util {
             return sample.asNormal( mu, sigma );
         }
         
+        /// Return mu / mean of distribution
+        inline double getMu() {
+            return mu;
+        }
+        /// Return sigma / standard deviation of distribution
+        inline double getSigma() {
+            return sigma;
+        }
+        
     private:
         double mu, sigma;
     };

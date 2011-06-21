@@ -43,11 +43,13 @@ private:
     NormalSampler initialInsecticide;
     LognormalSampler holeRate;	// holes per annum
     LognormalSampler ripRate;	// rips per hole per annum
-    double ripFactor;   // factor expressing how significant rips are in comparison to holes
+    double maxInsecticide;		// maximum initial insecticide
+    double ripFactor;			// factor expressing how significant rips are in comparison to holes
     shared_ptr<DecayFunction> insecticideDecay;
     shared_ptr<DecayFunction> attritionOfNets;
     
     friend class ITN;
+    friend class ITNAnophelesParams;
 };
 
 /** Per mosquito-species parameters for extended ITN model. */
@@ -58,7 +60,7 @@ public:
         proportionProtected( numeric_limits<double>::signaling_NaN() ),
         proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
-    void init(const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
+    void init(const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
@@ -85,7 +87,7 @@ private:
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        void init(const scnXml::ITNDeterrency& elt);
+        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNDeterrency& elt);
         
         /** Calculate effect. Positive is interpreted as having a positive effect
         * (thus decreasing availability or survival) and negative as having a
@@ -107,7 +109,7 @@ private:
          * 
          * It is checked that parameters lie in a suitible range, giving a
          * survival factor between 0 and 1. */
-        void init(const scnXml::ITNKillingEffect& elt);
+        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, bool postPrandial);
         
         /** Calculate additional survival factor imposed by nets on pre-/post-
          * prandial killing. Should be bounded to [0,1] and tend to 1 as the

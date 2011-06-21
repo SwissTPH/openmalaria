@@ -94,7 +94,7 @@ include_directories (SYSTEM
   ${Boost_INCLUDE_DIRS}
   ${SPIRIT_INCLUDE_DIRS}
 
-  ${CMAKE_SOURCE_DIR}/contrib/gzstream
+  ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
