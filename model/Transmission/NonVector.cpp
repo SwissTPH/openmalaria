@@ -39,33 +39,35 @@ const int nYearsWarmupData = 5;
 NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData) :
   nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
 {
-  vector<int> nDays (TimeStep::stepsPerYear, 0);
-  //The minimum EIR allowed in the array. The product of the average EIR and a constant.
-  double minEIR=min_EIR_mult*averageEIR(nonVectorData);
-  
-  const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-  if( daily.size() < static_cast<size_t>(TimeStep::intervalsPerYear.inDays()) )
-      throw util::xml_scenario_error( "insufficient EIRDaily data for a year" );
-  
-  for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-    double EIRdaily = std::max((double)daily[mpcday], minEIR);
+    laggedKappa.resize( nspore.asInt()+1, 0.0 );
     
-    // istep is the time period to which the day is assigned.  The result of the
-    // division is automatically rounded down to the next integer.
-    size_t i1 = (mpcday / TimeStep::interval) % TimeStep::stepsPerYear;
-    //EIR() is the sum of the EIRs assigned to the 73 different recurring time points
-    nDays[i1]++;
-    initialisationEIR[i1] += EIRdaily;
-  }
-  
-  // Calculate total annual EIR
-  // divide by number of records assigned to each interval (usually one per day)
-  for (TimeStep j(0);j<TimeStep::intervalsPerYear; ++j) {
-    initialisationEIR[j.asInt()] *= TimeStep::interval / (double)nDays[j.asInt()];
-    annualEIR += initialisationEIR[j.asInt()];
-  }
-  
-  initialKappa.assign( TimeStep::fromYears(nYearsWarmupData).asInt(), 0.0 );
+    vector<int> nDays (TimeStep::stepsPerYear, 0);
+    //The minimum EIR allowed in the array. The product of the average EIR and a constant.
+    double minEIR=min_EIR_mult*averageEIR(nonVectorData);
+    
+    const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
+    if( daily.size() < static_cast<size_t>(TimeStep::intervalsPerYear.inDays()) )
+        throw util::xml_scenario_error( "insufficient EIRDaily data for a year" );
+    
+    for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
+        double EIRdaily = std::max((double)daily[mpcday], minEIR);
+        
+        // istep is the time period to which the day is assigned.  The result of the
+        // division is automatically rounded down to the next integer.
+        size_t i1 = (mpcday / TimeStep::interval) % TimeStep::stepsPerYear;
+        //EIR() is the sum of the EIRs assigned to the 73 different recurring time points
+        nDays[i1]++;
+        initialisationEIR[i1] += EIRdaily;
+    }
+    
+    // Calculate total annual EIR
+    // divide by number of records assigned to each interval (usually one per day)
+    for (TimeStep j(0);j<TimeStep::intervalsPerYear; ++j) {
+        initialisationEIR[j.asInt()] *= TimeStep::interval / (double)nDays[j.asInt()];
+        annualEIR += initialisationEIR[j.asInt()];
+    }
+    
+    initialKappa.assign( TimeStep::fromYears(nYearsWarmupData).asInt(), 0.0 );
 }
 
 NonVectorTransmission::~NonVectorTransmission () {}
@@ -162,10 +164,11 @@ void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) 
 void NonVectorTransmission::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
-    currentKappa = 0.0;	// reset history of human infectivity, which scales dynamic EIR
+    // reset history of human infectivity, which scales dynamic EIR:
+    laggedKappa.assign( laggedKappa.size(), 0.0 );
 }
 
-void NonVectorTransmission::modelUpdateKappa() {
+void NonVectorTransmission::modelUpdateKappa( double currentKappa ) {
     if( simulationMode == equilibriumMode ){
         initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
     }
@@ -188,11 +191,12 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
     case dynamicEIR:
       eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
-	  // we modulate the initialization based on the human infectiousness nspore timesteps ago in the
+	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
+	  //FIXME: temporarily using index - 1 to reproce old behaviour
 	eir *=
-            currentKappa /
+            laggedKappa[(TimeStep::simulation-TimeStep(1)) % laggedKappa.size()] /
             initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
       }
       break;
@@ -203,7 +207,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nkappa:\t" << currentKappa
+	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()]
 	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
     throw util::traced_exception(msg.str(),util::Error::InitialKappa);
   }

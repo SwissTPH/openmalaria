@@ -172,7 +172,7 @@ void Survey::allocate ()
   _sumLogPyrogenicThreshold.resize (numAgeGroups);
   _sumLogDensity.resize (numAgeGroups);
   _sumInfections.resize (numAgeGroups);
-  _numTransmittingHosts = numeric_limits<double>::signaling_NaN();
+  _infectiousnessToMosq = numeric_limits<double>::signaling_NaN();
   _sumPatentInfections.resize (numAgeGroups);
   _sumPyrogenicThreshold.resize (numAgeGroups);
   _numTreatments1.resize (numAgeGroups);
@@ -240,7 +240,7 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
     writePerAgeGroup (outputFile, SM::totalInfs, survey, _sumInfections);
   }
   if (active[SM::nTransmit]) {
-    writeValue (outputFile, SM::nTransmit, survey, _numTransmittingHosts);
+    writeValue (outputFile, SM::nTransmit, survey, _infectiousnessToMosq);
   }
   if (active[SM::totalPatentInf]) {
     writePerAgeGroup (outputFile, SM::totalPatentInf, survey, _sumPatentInfections);

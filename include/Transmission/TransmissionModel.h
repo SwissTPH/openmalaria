@@ -187,7 +187,7 @@ protected:
   virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
   
   /** Model-specific extensions to updateKappa(). */
-  virtual void modelUpdateKappa() =0;
+  virtual void modelUpdateKappa(double currentKappa) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
@@ -218,8 +218,16 @@ protected:
   /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
+   * The value in index t mod Y (where t is TimeStep::simulation and Y is
+   * TimeStep::stepsPerYear) is for this time-step respectively (size)
+   * time-steps ago: the latter during human updates since this value is not
+   * updated until the end of the time-step update. The value in index
+   * (t-1) mod Y is from the previous time-step, index (t-2) mod Y corresponds
+   * to the one before that, etc. Length depends on entomological incubation
+   * period from non-vector model.
+   * 
    * Checkpointed. */
-  double currentKappa;
+  vector<double> laggedKappa;
   
   /** Total annual infectious bites per adult.
    *

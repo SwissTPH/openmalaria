@@ -240,8 +240,8 @@ public:
   void setAnnualAverageKappa(double kappa) {
     _annualAverageKappa = kappa;
   }
-  void setNumTransmittingHosts(double value) {
-    _numTransmittingHosts = value;
+  void setInfectiousnessToMosq(double value) {
+    _infectiousnessToMosq = value;
   }
   
   void setInoculationsPerAgeGroup (vector<double>& v) {
@@ -298,7 +298,7 @@ public:
     _sumLogPyrogenicThreshold & stream;
     _sumLogDensity & stream;
     _sumInfections & stream;
-    _numTransmittingHosts & stream;
+    _infectiousnessToMosq & stream;
     _sumPatentInfections & stream;
     _sumPyrogenicThreshold & stream;
     _numTreatments1 & stream;
@@ -352,7 +352,7 @@ private:
   void writeSummaryArrays (ostream& outputFile, int survey);
   
   // atomic data:
-  double _numTransmittingHosts;
+  double _infectiousnessToMosq;
   double _annualAverageKappa;
   
   // data, per AgeGroup:

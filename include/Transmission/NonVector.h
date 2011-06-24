@@ -61,7 +61,7 @@ public:
   virtual void uninfectVectors();
   
   virtual double calculateEIR(PerHostTransmission& perHost, double ageYears);
-  virtual void modelUpdateKappa();
+  virtual void modelUpdateKappa(double currentKappa);
   
 private:
 

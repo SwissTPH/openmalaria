@@ -51,7 +51,7 @@ public:
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
   
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
-  virtual void modelUpdateKappa() {}
+  virtual void modelUpdateKappa(double currentKappa) {}
 
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
