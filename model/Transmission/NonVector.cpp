@@ -194,9 +194,8 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
-	  //FIXME: temporarily using index - 1 to reproce old behaviour
 	eir *=
-            laggedKappa[(TimeStep::simulation-TimeStep(1)) % laggedKappa.size()] /
+            laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()] /
             initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
       }
       break;
