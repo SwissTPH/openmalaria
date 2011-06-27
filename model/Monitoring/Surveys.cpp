@@ -47,7 +47,7 @@ void SurveysType::init ()
 
   _surveysTimeIntervals.reserve (survs.size() + 1);
   TimeStep last( TimeStep::never );
-  for (size_t i = 0; i < survs.size(); i++) {
+  for (size_t i = 0; i < survs.size(); ++i) {
       TimeStep cur(survs[i]);
     _surveysTimeIntervals.push_back( cur );
     if( last >= cur ){
@@ -88,7 +88,7 @@ void SurveysType::initCohortOnly(OM::InterventionManager& interventions){
 void SurveysType::incrementSurveyPeriod()
 {
   currentTimestep = _surveysTimeIntervals[_surveyPeriod];
-  _surveyPeriod++;
+  ++_surveyPeriod;
   if (_surveyPeriod >= (int) _survey.size())
     // In this case, currentTimestep gets set to -1 so no further surveys get taken
     _surveyPeriod = 0;

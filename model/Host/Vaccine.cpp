@@ -64,7 +64,7 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
 	// it is safe to use without vaccine descriptions.
     }
     for (scnXml::Vaccine::DescriptionSequence::const_iterator i = vaccDesc.begin();
-            i != vaccDesc.end(); i++) {
+            i != vaccDesc.end(); ++it) {
         const string& type = i->getVaccineType();
         if (type == "PEV")
             VdPEV = & (*i);
@@ -85,7 +85,7 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
         const scnXml::Vaccine::ContinuousSequence& cVS = xmlVaccine.getContinuous();
-        for (size_t i = 0;i < _numberOfEpiDoses; i++) {
+        for (size_t i = 0;i < _numberOfEpiDoses; ++i) {
             if (i >= cVS.size()) {
                 ostringstream msg;
                 msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";

@@ -36,7 +36,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
     size_t numDrugs;	// type must be same as _drugs.size()
     numDrugs & stream;
     validateListSize (numDrugs);
-    for (size_t i=0; i<numDrugs; i++) {
+    for (size_t i=0; i<numDrugs; ++i) {
 	string abbrev;
 	abbrev & stream;
 	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(abbrev)));
@@ -46,7 +46,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 
 void LSTMPkPdModel::checkpoint (ostream& stream) {
     _drugs.size() & stream;
-    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
 	it->getAbbreviation() & stream;
 	(*it) & stream;
     }
@@ -89,7 +89,7 @@ void LSTMPkPdModel::decayDrugs () {
 double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
     double factor = 1.0; //no effect
     
-    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); it++) {
+    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
 	double drugFactor = it->calculateDrugFactor(proteome_ID);
 	factor *= drugFactor;
     }

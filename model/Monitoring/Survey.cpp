@@ -146,7 +146,7 @@ void AgeGroup::init () {
     if (!(_lowerbound <= 0.0))
 	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
 
-    for (size_t i = 0;i < groups.size(); i++) {
+    for (size_t i = 0;i < groups.size(); ++i) {
 	_upperbound[i] = groups[i].getUpperbound();
     }
     _upperbound[groups.size()] = numeric_limits<double>::infinity();
@@ -154,7 +154,7 @@ void AgeGroup::init () {
 
 void AgeGroup::update (double ageYears) {
     while (ageYears > _upperbound[_i]){
-	_i++;
+	++_i;
     }
 }
 
@@ -388,7 +388,7 @@ void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
 template <class T>
 void writePerAgeGroup (ostream& file, int measure, int survey, vector<T>& array)
 {
-    for (int j = 0; j < (int) array.size() - 1; j++) { // Don't write out last age-group
+    for (int j = 0; j < (int) array.size() - 1; ++j) { // Don't write out last age-group
         file << survey << "\t" << j + 1 << "\t" << measure;
         file << "\t" << array[j] << lineEnd;
     }

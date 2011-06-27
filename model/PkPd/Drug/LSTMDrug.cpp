@@ -134,7 +134,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     
     DoseMap::const_iterator dose = doses.begin();
     DoseMap::const_iterator next_dose = dose;
-    next_dose++;
+    ++next_dose;
     while (next_dose!=doses.end()) {
         double time_to_next = next_dose->first - dose->first;
 	if( dose->second.duration == 0.0 ){
@@ -150,7 +150,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
         }
         
         dose = next_dose;
-        next_dose++;
+        ++next_dose;
         if( dose->first >= 1.0 )
             break;      // we know this and any more doses happen tomorrow; don't calculate factors now
     }
@@ -170,7 +170,7 @@ bool LSTMDrug::updateConcentration () {
     
     DoseMap::const_iterator dose = doses.begin();
     DoseMap::const_iterator next_dose = dose;
-    next_dose++;
+    ++next_dose;
     while (next_dose!=doses.end()) {
         double time_to_next = next_dose->first - dose->first;
         if( dose->second.duration == 0.0 ){
@@ -185,7 +185,7 @@ bool LSTMDrug::updateConcentration () {
         }
         
         dose = next_dose;
-        next_dose++;
+        ++next_dose;
         if( dose->first >= 1.0 )
             break;      // we know this and any more doses happen tomorrow; don't calculate factors now
     }

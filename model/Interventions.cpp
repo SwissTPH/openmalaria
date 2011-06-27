@@ -560,7 +560,7 @@ void InterventionManager::deployCts (const OM::Population& population, OM::Host:
                 }
             }
         }
-        nextCtsDist++;
+        ++nextCtsDist;
     }
 }
 

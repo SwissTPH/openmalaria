@@ -50,10 +50,10 @@ struct eDFunctor
     T f = 0.0, df = 0.0, ddf = 0.0;
     
     // Calculate inverse discrete Fourier transform
-    for (size_t t=0; t<p; t++) {
+    for (size_t t=0; t<p; ++t) {
       T wt = w*t+fcR+d;
       T val = fc[0], dval = 0.0, ddval = 0.0;
-      for(size_t n=1;n<=fn;n++){
+      for(size_t n=1;n<=fn; ++n){
 	T temp = fc[2*n-1]*cos(n*wt) + fc[2*n]*sin(n*wt);	// value
 	val  += temp;
 	dval += (n*fc[2*n]*cos(n*wt)) - (n*fc[2*n-1]*sin(n*wt));	// first derivative wrt d

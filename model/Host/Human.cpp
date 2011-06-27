@@ -159,9 +159,9 @@ void Human::destroy() {
 
 bool Human::update(const OM::Population& population, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
-    PopulationStats::humanUpdateCalls++;
+    ++PopulationStats::humanUpdateCalls;
     if( doUpdate )
-        PopulationStats::humanUpdates++;
+        ++PopulationStats::humanUpdates;
 #endif
     TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
     if (clinicalModel->isDead(ageTimeSteps))
@@ -188,7 +188,7 @@ void Human::addInfection(){
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int numInf = infIncidence->numNewInfections( *this, EIR );
-    for (int i=1;i<=numInf; i++) {
+    for (int i=1;i<=numInf; ++i) {
         withinHostModel->newInfection();
     }
     

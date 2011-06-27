@@ -96,9 +96,9 @@ void HoshenDrugType::addPDRule(vector<Mutation*> ruleRequiredMutations, double p
 void HoshenDrugType::parseProteomeInstances() {
   vector<ProteomeInstance> instances = ProteomeInstance::getInstances();
   int numRules = requiredMutations.size();
-  for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); it++) {
+  for (vector<ProteomeInstance>::const_iterator it=instances.begin(); it !=instances.end(); ++it) {
     //cerr << " Here goes instance";
-    for(int rule=0; rule<numRules; rule++) {
+    for(int rule=0; rule<numRules; ++rule) {
       if (it->hasMutations(requiredMutations[rule])) {
 	proteomePDParameters[it->getProteomeID()] = pdParameters[rule];
 	//cerr << " rule: " << rule << "\n";

@@ -58,7 +58,7 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
 
 void DescriptiveWithinHostModel::clearAllInfections() {
     std::list<DescriptiveInfection*>::iterator i;
-    for (i=infections.begin(); i != infections.end(); i++) {
+    for (i=infections.begin(); i != infections.end(); ++i) {
         delete *i;
     }
     infections.clear();
@@ -116,7 +116,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             (*iter)->determineDensityFinal ();
             _cumulativeY += TimeStep::interval*(*iter)->getDensity();
 
-            iter++;
+            ++iter;
         }
     }
     assert( numInfs == static_cast<int>(infections.size()) );

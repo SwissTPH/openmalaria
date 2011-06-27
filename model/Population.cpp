@@ -260,7 +260,7 @@ void Population::ctsRecentBirths (ostream& stream){
 }
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->getWithinHostModel().parasiteDensityDetectible() )
             ++patent;
     }
@@ -268,7 +268,7 @@ void Population::ctsPatentHosts (ostream& stream){
 }
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         x += iter->getWithinHostModel().getCumulativeh();
     }
     x /= populationSize;
@@ -276,7 +276,7 @@ void Population::ctsImmunityh (ostream& stream){
 }
 void Population::ctsImmunityY (ostream& stream){
     double x = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         x += iter->getWithinHostModel().getCumulativeY();
     }
     x /= populationSize;
@@ -285,7 +285,7 @@ void Population::ctsImmunityY (ostream& stream){
 void Population::ctsMedianImmunityY (ostream& stream){
     vector<double> list;
     list.reserve( populationSize );
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         list.push_back( iter->getWithinHostModel().getCumulativeY() );
     }
     sort( list.begin(), list.end() );
@@ -301,7 +301,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
 void Population::ctsMeanAgeAvailEffect (ostream& stream){
     int nHumans = 0;
     double avail = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
             avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
@@ -311,7 +311,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
 }
 void Population::ctsNetsOwned (ostream& stream){
     int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
             ++nNets;
     }
@@ -320,7 +320,7 @@ void Population::ctsNetsOwned (ostream& stream){
 void Population::ctsNetHoleIndex (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
@@ -336,7 +336,7 @@ void Population::ctsNetInsecticideContent (ostream& stream){
     const Transmission::ITNParams& params = vt->getITNParams();
     double meanVar = 0.0;
     int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(params);
@@ -347,14 +347,14 @@ void Population::ctsNetInsecticideContent (ostream& stream){
 
 void Population::newSurvey ()
 {
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         iter->summarize();
     }
     _transmissionModel->summarize( *Monitoring::Surveys.current );
 }
 
 void Population::flushReports (){
-    for (HumanIter iter = population.begin(); iter != population.end(); iter++) {
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         iter->flushReports();
     }
 }    
