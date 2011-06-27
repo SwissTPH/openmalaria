@@ -97,7 +97,7 @@ enum Phase {
 
 int Simulation::start(){
     // Make sure warmup period is at least as long as a human lifespan, as the
-    // length required by vector warmup, and a whole number of years.
+    // length required by vector warmup, and is a whole number of years.
     TimeStep humanWarmupLength = TimeStep::maxAgeIntervals;
     if( humanWarmupLength < population->_transmissionModel->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
@@ -184,9 +184,14 @@ int Simulation::start(){
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
             TimeStep phase_mid = TimeStep::simulation + TimeStep( (simPeriodEnd - TimeStep::simulation).asInt() / 2 );
-            // don't checkpoint 0-length phases or do mid-phase checkpointing when timed checkpoints were specified:
+            // Don't checkpoint 0-length phases or do mid-phase checkpointing
+            // when timed checkpoints were specified, and don't checkpoint
+            // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
+            // these are extra transmission inits, and we don't want to
+            // checkpoint every one of them.
             if( testCheckpointStep == TimeStep::never
                 && phase_mid > TimeStep::simulation
+                && (phase != ONE_LIFE_SPAN || TimeStep::simulation < humanWarmupLength)
             ){
                 testCheckpointStep = phase_mid;
                 // Test checkpoint: die a bit later than checkpoint for better

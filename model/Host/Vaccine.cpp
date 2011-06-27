@@ -64,7 +64,7 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
 	// it is safe to use without vaccine descriptions.
     }
     for (scnXml::Vaccine::DescriptionSequence::const_iterator i = vaccDesc.begin();
-            i != vaccDesc.end(); ++it) {
+            i != vaccDesc.end(); ++i) {
         const string& type = i->getVaccineType();
         if (type == "PEV")
             VdPEV = & (*i);
