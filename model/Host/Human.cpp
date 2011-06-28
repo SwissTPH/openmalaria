@@ -333,7 +333,9 @@ double Human::calcProbTransmissionToMosquito() const {
   // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
   // These values are one timestep more recent than that, however the calculated
   // value is not used until the next timestep when then ages would be correct.
-  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
+  // Add _ylagLen to make sure the value on the LHS of '%' is non-negative
+  // (C++ doesn't specify behaviour when it is.)
+  int firstIndex = _ylagLen + TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
   double x = beta1 * _ylag[firstIndex % _ylagLen]
            + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
            + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];

@@ -19,6 +19,7 @@
 
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
+#include "util/errors.h"
 
 #include <fstream>
 #include <sstream>
