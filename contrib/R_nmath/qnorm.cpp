@@ -46,67 +46,80 @@
  *      Applied Statistics, 37, 477-484.
  */
 
-#include "nmath.h"
+
+#include <math.h>
+#include <float.h> /* DBL_MIN etc */
+
+
+#ifdef _MSC_VER
+#define isnan(x) _isnan(x)
+#endif
+#define ISNAN(x) (isnan(x)!=0)
+
+#define ML_POSINF       (1.0 / 0.0)
+#define ML_NEGINF       ((-1.0) / 0.0)
+#define ML_NAN          (0.0 / 0.0)
+
+/* end standalone */
+#include <boost/math/special_functions/expm1.hpp>
 
 namespace R {
 
-        /* Utilities for `dpq' handling (density/probability/quantile) */
+    /* Utilities for `dpq' handling (density/probability/quantile) */
 
-/* Use 0.5 - p + 0.5 to perhaps gain 1 bit of accuracy */
-#define R_D_Lval(p)     (lower_tail ? (p) : (0.5 - (p) + 0.5))  /*  p  */
-#define R_D_Cval(p)     (lower_tail ? (0.5 - (p) + 0.5) : (p))  /*  1 - p */
-
-/*#define R_DT_qIv(p)   R_D_Lval(R_D_qIv(p))             *  p  in qF ! */
-#define R_DT_qIv(p)     (log_p ? (lower_tail ? exp(p) : - expm1(p)) \
-                               : R_D_Lval(p))
-
-/*#define R_DT_CIv(p)   R_D_Cval(R_D_qIv(p))             *  1 - p in qF */
-#define R_DT_CIv(p)     (log_p ? (lower_tail ? -expm1(p) : exp(p)) \
-                               : R_D_Cval(p))
-
-/* Do the boundaries exactly for q*() functions :
- * Often  _LEFT_ = ML_NEGINF , and very often _RIGHT_ = ML_POSINF;
- *
- * R_Q_P01_boundaries(p, _LEFT_, _RIGHT_)  :<==>
- *
- *     R_Q_P01_check(p);
- *     if (p == R_DT_0) return _LEFT_ ;
- *     if (p == R_DT_1) return _RIGHT_;
- *
- * the following implementation should be more efficient (less tests):
- */
-#define R_Q_P01_boundaries(p, _LEFT_, _RIGHT_)          \
-    if (log_p) {                                        \
-        if(p > 0)                                       \
-            return ML_NAN;                          \
-        if(p == 0) /* upper bound*/                     \
-            return lower_tail ? _RIGHT_ : _LEFT_;       \
-        if(p == ML_NEGINF)                              \
-            return lower_tail ? _LEFT_ : _RIGHT_;       \
-    }                                                   \
-    else { /* !log_p */                                 \
-        if(p < 0 || p > 1)                              \
-            return ML_NAN;                          \
-        if(p == 0)                                      \
-            return lower_tail ? _LEFT_ : _RIGHT_;       \
-        if(p == 1)                                      \
-            return lower_tail ? _RIGHT_ : _LEFT_;       \
+    /* Use 0.5 - p + 0.5 to perhaps gain 1 bit of accuracy */
+    template<typename T>
+    inline T R_D_Lval(T p, bool lower_tail) {
+        return lower_tail ? (p) : (0.5 - (p) + 0.5);
     }
-// end dpq
+    template<typename T>
+    inline T R_D_Cval(T p, bool lower_tail) {
+        return lower_tail ? (0.5 - (p) + 0.5) : (p);
+    }
+    
+    /*#define R_DT_qIv(p)   R_D_Lval(R_D_qIv(p))             *  p  in qF ! */
+    template<typename T>
+    inline T R_DT_qIv(T p, bool log_p, bool lower_tail) {
+        if (log_p)
+            return lower_tail ? exp(p) : - boost::math::expm1(p);
+        return R_D_Lval(p, lower_tail);
+    }
+    /*#define R_DT_CIv(p)   R_D_Cval(R_D_qIv(p))             *  1 - p in qF */
+    template<typename T>
+    inline T R_DT_CIv(T p, bool log_p, bool lower_tail) {
+        if (log_p)
+            return lower_tail ? -boost::math::expm1(p) : exp(p);
+        return R_D_Cval(p, lower_tail);
+    }
 
 
-double qnorm5(double p, double mu, double sigma, int lower_tail, int log_p)
+double qnorm5(double p, double mu, double sigma, bool lower_tail, bool log_p)
 {
     double p_, q, r, val;
 
     if (ISNAN(p) || ISNAN(mu) || ISNAN(sigma))
-	return p + mu + sigma;
-    R_Q_P01_boundaries(p, ML_NEGINF, ML_POSINF);
+        return p + mu + sigma;
+    if (log_p) {
+        if(p > 0)
+            return ML_NAN;
+        if(p == 0) /* upper bound*/
+            return lower_tail ? ML_POSINF : ML_NEGINF;
+        if(p == ML_NEGINF)
+            return lower_tail ? ML_NEGINF : ML_POSINF;
+    }
+    else { /* !log_p */
+        if(p < 0 || p > 1)
+            return ML_NAN;
+        if(p == 0)
+            return lower_tail ? ML_NEGINF : ML_POSINF;
+        if(p == 1)
+            return lower_tail ? ML_POSINF : ML_NEGINF;
+    }
 
     if(sigma  < 0)	return ML_NAN;
     if(sigma == 0)	return mu;
 
-    p_ = R_DT_qIv(p);/* real lower_tail prob. p */
+    p_ = R_DT_qIv(p, log_p, lower_tail);/* real lower_tail prob. p */
     q = p_ - 0.5;
 
 #ifdef DEBUG_qnorm
@@ -142,7 +155,7 @@ double qnorm5(double p, double mu, double sigma, int lower_tail, int log_p)
 
 	/* r = min(p, 1-p) < 0.075 */
 	if (q > 0)
-	    r = R_DT_CIv(p);/* 1-p */
+	    r = R_DT_CIv(p, log_p, lower_tail);/* 1-p */
 	else
 	    r = p_;/* = R_DT_Iv(p) ^=  p */
 

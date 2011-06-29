@@ -51,7 +51,7 @@ namespace R {
  *      Algorithm AS 241: The Percentage Points of the Normal Distribution.
  *      Applied Statistics, 37, 477-484.
  */
-double qnorm5(double p, double mu, double sigma, int lower_tail, int log_p);
+double qnorm5(double p, double mu, double sigma, bool lower_tail, bool log_p);
 }
 
 #endif
