@@ -176,6 +176,7 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
         updateInfection(transmissionModel, ageYears);
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
+        // set _probTransmissionToMosquito to next time-step's value
         _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
     return false;

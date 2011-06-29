@@ -181,9 +181,11 @@ void Population::update1()
     // TODO: add some value to be used until old-enough humans are updated?
     Host::NeonatalMortality::update (population);
     
-    // This should be called before humans contract new infections in the simulation step.
-    // This needs the whole population (it is an approximation before all humans are updated).
-    _transmissionModel->vectorUpdate (population, populationSize);
+    // Should be called before Human::update().
+    // Vector: This needs the whole population (it is an approximation before all humans are updated).
+    // NonVector: Doesn't matter whether non-updated humans are included (value isn't used
+    // before all humans are updated).
+    _transmissionModel->update (population, populationSize);
 
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
@@ -231,9 +233,7 @@ void Population::update1()
         ++cumPop;
     }
     
-    // Doesn't matter whether non-updated humans are included (value isn't used
-    // before all humans are updated).
-    _transmissionModel->updateKappa (population);
+    _transmissionModel->updateSummaries();
 }
 
 

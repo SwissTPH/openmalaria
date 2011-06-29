@@ -96,6 +96,9 @@ public:
   }
   //@}
   
+  /// Update summary statistics. Call at end of time-step (after Human::update).
+  void updateSummaries ();
+  
   /** Set some summary items.
    *
    * Overriding functions should call this base version too. */
@@ -131,15 +134,11 @@ public:
    */
   virtual TimeStep initIterate ()=0;
   
-  /** Needs to be called each step of the simulation
+  /** Needs to be called each step of the simulation before Human::update().
    *
-   * Runs internal calculations of Vector model. */
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {};
-  
-  /** Needs to be called each step of the simulation
-   *
-   * Summarises infectiousness of humans and of mosquitoes. */
-  void updateKappa (const std::list<Host::Human>& population);
+   * Updates kappa (human infectiousness) for summaries and non-vector output,
+   * and when the vector model is used this updates mosquito populations. */
+  virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
@@ -186,8 +185,10 @@ protected:
    * to, in units of inoculations per day. */
   virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
   
-  /** Model-specific extensions to updateKappa(). */
-  virtual void modelUpdateKappa(double currentKappa) =0;
+  /** Needs to be called each time-step after Human::update() to update summary
+   * statististics related to transmission. Also returns kappa (the average
+   * human infectiousness weighted by availability to mosquitoes). */
+  double updateKappa (const std::list<Host::Human>& population);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
@@ -253,8 +254,8 @@ private:
   /// accumulator for timestep EIR of adults
   double tsAdultEntoInocs;
 
-  /// adult-only EIR from last time-step
-  double lastTsAdultEIR;
+  /// Adult-only EIR from this time-step
+  double tsAdultEIR;
 
   /** Per-timestep input EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
@@ -273,8 +274,7 @@ private:
 
   /** @brief Variables for reporting of entomological inoculations to humans.
    *
-   * inoculationsPer... arrays are checkpointed; timesStep... variables aren't
-   * since they're calculated per step. */
+   * inoculationsPerAgeGroup need checkpointing. */
   //@{
   /** The total number of inoculations per age group, summed over the
    * reporting period. */

@@ -182,8 +182,11 @@ public:
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
   
-  /// Calculate chance of a biting mosquito becoming infected
-  //TODO: per genotype? (for Tiago's resistance modelling)
+  /** Calculate chance of a biting mosquito becoming infected
+   * 
+   * Before update() is called, this refers to the value for this time-step.
+   * Afterwards, it refers to the value for the *next* time-step. */
+  //TODO: per genotype? (for LSTM's spread of resistance modelling)
   inline double probTransmissionToMosquito() const {
     return _probTransmissionToMosquito;
   }
@@ -269,7 +272,9 @@ private:
   /// True if human is included in a cohort.
   bool _inCohort;
   
-  /// Cached value of calcProbTransmissionToMosquito; checkpointed
+  /// Cached value of calcProbTransmissionToMosquito; checkpointed.
+  ///
+  /// After human update, contains value corresponding to next time-step.
   double _probTransmissionToMosquito;
   
 public: //lazy: give read access to these

@@ -48,11 +48,10 @@ public:
   virtual TimeStep expectedInitDuration ();
   virtual TimeStep initIterate ();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
+  virtual void update (const std::list<Host::Human>& population, int populationSize);
   
   virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
-  virtual void modelUpdateKappa(double currentKappa) {}
-
+  
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);

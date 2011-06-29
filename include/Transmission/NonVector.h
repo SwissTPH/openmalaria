@@ -60,8 +60,8 @@ public:
   
   virtual void uninfectVectors();
   
+  virtual void update (const std::list<Host::Human>& population, int populationSize);
   virtual double calculateEIR(PerHostTransmission& perHost, double ageYears);
-  virtual void modelUpdateKappa(double currentKappa);
   
 private:
 

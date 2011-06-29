@@ -168,7 +168,9 @@ void NonVectorTransmission::uninfectVectors(){
     laggedKappa.assign( laggedKappa.size(), 0.0 );
 }
 
-void NonVectorTransmission::modelUpdateKappa( double currentKappa ) {
+void NonVectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
+    double currentKappa = TransmissionModel::updateKappa( population );
+    
     if( simulationMode == equilibriumMode ){
         initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
     }

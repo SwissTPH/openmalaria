@@ -81,7 +81,7 @@ void TransmissionModel::ctsCbInputEIR (ostream& stream){
     stream<<'\t'<<initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
-    stream<<'\t'<<lastTsAdultEIR;
+    stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // updateKappa() has been called for this TimeStep::simulation, so this is the latest value in laggedKappa:
@@ -100,7 +100,7 @@ TransmissionModel::TransmissionModel() :
     _sumAnnualKappa(0.0),
     adultAge(PerHostTransmission::adultAge()),
     tsAdultEntoInocs(0.0),
-    lastTsAdultEIR(0.0),
+    tsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
     numTransmittingHumans(0),
@@ -132,7 +132,7 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
+double TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
     // We calculate kappa for output and non-vector model, and kappaByAge for
     // the shared graphics.
 
@@ -156,10 +156,7 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
         ++nByAge[ag.i()];
     }
 
-
-    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;
-    int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();
+    size_t lKMod = TimeStep::simulation % laggedKappa.size();	// now
     if( population.empty() ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -170,13 +167,20 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
         }
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
+    
+    return laggedKappa[lKMod];	// kappa now
+}
 
+void TransmissionModel::updateSummaries () {
+    //TODO: surely we don't need all of these!
+    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // now
+    int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;    // last time-step
+    size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
+    
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];
     if (tmod == 0) {
-        // if annualEIR == 0.0 (or an NaN), we just get some nonsense output like inf or nan.
-        // This is a better solution than printing a warning no-one will see and outputting 0.
-        _annualAverageKappa = _sumAnnualKappa / annualEIR;
+        _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
 
@@ -195,13 +199,12 @@ void TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
     }
     timeStepNumEntoInocs = 0;
 
-    lastTsAdultEIR = tsAdultEntoInocs / tsNumAdults;
+    tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
     tsAdultEntoInocs = 0.0;
     tsNumAdults = 0;
 
     surveyInputEIR += initialisationEIR[tmod];
-    surveySimulatedEIR += lastTsAdultEIR;
-    modelUpdateKappa(laggedKappa[lKMod]);
+    surveySimulatedEIR += tsAdultEIR;
 }
 
 double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
@@ -271,7 +274,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     _sumAnnualKappa & stream;
     adultAge & stream;
     tsAdultEntoInocs & stream;
-    lastTsAdultEIR & stream;
+    tsAdultEIR & stream;
     surveyInputEIR & stream;
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
@@ -294,7 +297,7 @@ void TransmissionModel::checkpoint (ostream& stream) {
     _sumAnnualKappa & stream;
     adultAge & stream;
     tsAdultEntoInocs & stream;
-    lastTsAdultEIR & stream;
+    tsAdultEIR & stream;
     surveyInputEIR & stream;
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
@@ -309,4 +312,5 @@ void TransmissionModel::checkpoint (ostream& stream) {
 }
 
 } }
+
 
