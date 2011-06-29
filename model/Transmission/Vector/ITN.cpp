@@ -127,7 +127,7 @@ void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, c
             cerr << "  holeFactor≤1\n";
         if( !(pow(PF,pmax)<=1.0) )
             cerr << "  insecticideFactor^"<<pmax<<"≤1\n";
-        if( !(HF*pow(PF*IF,pmax))<=1.0 )
+        if( !(HF*pow(PF*IF,pmax)<=1.0) )
             cerr << "  holeFactor×(insecticideFactor×interactionFactor)^"<<pmax<<"≤1\n";
         cerr.flush();
     }
@@ -246,7 +246,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
             msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
         if( !(PF+HF+(PF+IF)*pmax<=1.0) )
             msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
-        if( !(HF+(PF+IF)*pmax)>=0.0 )
+        if( !(HF+(PF+IF)*pmax>=0.0) )
             msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
         throw util::xml_scenario_error( msg.str() );
     }
