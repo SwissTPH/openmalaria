@@ -48,20 +48,18 @@
 
 
 #include <math.h>
-#include <float.h> /* DBL_MIN etc */
 
+#include <limits>
+#include <boost/math/special_functions/expm1.hpp>
 
 #ifdef _MSC_VER
 #define isnan(x) _isnan(x)
 #endif
 #define ISNAN(x) (isnan(x)!=0)
 
-#define ML_POSINF       (1.0 / 0.0)
-#define ML_NEGINF       ((-1.0) / 0.0)
-#define ML_NAN          (0.0 / 0.0)
-
-/* end standalone */
-#include <boost/math/special_functions/expm1.hpp>
+#define ML_NAN          std::numeric_limits<double>::quiet_NaN()
+#define ML_POSINF       std::numeric_limits<double>::infinity()
+#define ML_NEGINF       -std::numeric_limits<double>::infinity()
 
 namespace R {
 
