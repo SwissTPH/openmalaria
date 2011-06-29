@@ -140,7 +140,7 @@ enum SurveyMeasure {
      *
      * Units: inoculations per adult per timestep.
      */
-    Vector_EIR_Input = 35,
+    inputEIR = 35,
     /** Simulated EIR (EIR output by the transmission model)
      *
      * Units: inoculations per person per timestep (not per-adult:
@@ -148,7 +148,7 @@ enum SurveyMeasure {
      * this population-average figure ends up being smaller than if
      * all modelled humans were adults).
      */
-    Vector_EIR_Simulated = 36,
+    simulatedEIR = 36,
     //@}
     
     /// @brief EventScheduler reporting (additional to above)

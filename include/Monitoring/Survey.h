@@ -281,11 +281,11 @@ public:
   void set_Vector_Sv (string key, double v) {
     data_Vector_Sv[key] = v;
   }
-  void set_Vector_EIR_Input (double v) {
-    data_Vector_EIR_Input = v;
+  void setInputEIR (double v) {
+    _inputEIR = v;
   }
-  void set_Vector_EIR_Simulated (double v) {
-    data_Vector_EIR_Simulated = v;
+  void setSimulatedEIR (double v) {
+    _simulatedEIR = v;
   }
   
   /// Checkpointing
@@ -322,8 +322,8 @@ public:
     data_Vector_Nv & stream;
     data_Vector_Ov & stream;
     data_Vector_Sv & stream;
-    data_Vector_EIR_Input & stream;
-    data_Vector_EIR_Simulated & stream;
+    _inputEIR & stream;
+    _simulatedEIR & stream;
     _numClinical_RDTs & stream;
     _sumClinical_DrugUsage & stream;
     _sumClinical_DrugUsageIV & stream;
@@ -399,8 +399,8 @@ private:
     map<string,double> data_Vector_Nv;
     map<string,double> data_Vector_Ov;
     map<string,double> data_Vector_Sv;
-    double data_Vector_EIR_Input;
-    double data_Vector_EIR_Simulated;
+    double _inputEIR;
+    double _simulatedEIR;
     
     int _numClinical_RDTs;
     map<string,double> _sumClinical_DrugUsage;

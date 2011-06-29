@@ -37,8 +37,8 @@
       <option name="totalInfs" value="true"/>
       <option name="nNewInfections" value="true"/>
       <option name="innoculationsPerAgeGroup" value="true"/>
-      <option name="Vector_EIR_Input" value="true"/>
-      <option name="Vector_EIR_Simulated" value="true"/>
+      <option name="inputEIR" value="true"/>
+      <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>1</surveyTime>

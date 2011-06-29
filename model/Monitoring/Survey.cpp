@@ -82,8 +82,8 @@ class SurveyMeasureMap {
 	    codeMap["Vector_Nv"] = SM::Vector_Nv;
 	    codeMap["Vector_Ov"] = SM::Vector_Ov;
 	    codeMap["Vector_Sv"] = SM::Vector_Sv;
-	    codeMap["Vector_EIR_Input"] = SM::Vector_EIR_Input;
-	    codeMap["Vector_EIR_Simulated"] = SM::Vector_EIR_Simulated;
+	    codeMap["inputEIR"] = SM::inputEIR;
+	    codeMap["simulatedEIR"] = SM::simulatedEIR;
 	    codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
             codeMap["Clinical_DrugUsage"] = SM::Clinical_DrugUsage;
             codeMap["Clinical_DrugUsageIV"] = SM::Clinical_DrugUsageIV;
@@ -196,8 +196,8 @@ void Survey::allocate ()
 //   _kappaPerDayOfYear;
 //   _innoculationsPerAgeGroup;
     
-    data_Vector_EIR_Input =numeric_limits<double>::signaling_NaN() ;
-    data_Vector_EIR_Simulated = numeric_limits<double>::signaling_NaN();
+    _inputEIR =numeric_limits<double>::signaling_NaN() ;
+    _simulatedEIR = numeric_limits<double>::signaling_NaN();
     
     _numClinical_RDTs = 0;
     _numClinical_Microscopy = 0;
@@ -313,11 +313,11 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   if (active[SM::Vector_Sv]) {
     writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
   }
-  if (active[SM::Vector_EIR_Input]) {
-    writeValue (outputFile, SM::Vector_EIR_Input, survey, data_Vector_EIR_Input);
+  if (active[SM::inputEIR]) {
+    writeValue (outputFile, SM::inputEIR, survey, _inputEIR);
   }
-  if (active[SM::Vector_EIR_Simulated]) {
-    writeValue (outputFile, SM::Vector_EIR_Simulated, survey, data_Vector_EIR_Simulated);
+  if (active[SM::simulatedEIR]) {
+    writeValue (outputFile, SM::simulatedEIR, survey, _simulatedEIR);
   }
   if (active[SM::Clinical_RDTs]) {
       writeValue (outputFile, SM::Clinical_RDTs, survey, _numClinical_RDTs);

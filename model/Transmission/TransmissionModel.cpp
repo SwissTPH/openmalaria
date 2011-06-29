@@ -236,8 +236,8 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
       }
       duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
   }
-  survey.set_Vector_EIR_Input (surveyInputEIR / duration);
-  survey.set_Vector_EIR_Simulated (surveySimulatedEIR / duration);
+  survey.setInputEIR (surveyInputEIR / duration);
+  survey.setSimulatedEIR (surveySimulatedEIR / duration);
 
   surveyInputEIR = 0.0;
   surveySimulatedEIR = 0.0;

@@ -1934,6 +1934,23 @@ public class SchemaTranslator {
             return false;
         }
     }
+    
+    /* Vector_EIR_Input and Vector_EIR_Simulated renamed to inputEIR and simulatedEIR resp.
+     */
+    public Boolean translate28To29() {
+        Element monitoring = getChildElement(scenarioElement,"monitoring");
+        Element SurveyOptions = getChildElement(monitoring,"SurveyOptions");
+        List<Node> options = getChildNodes(SurveyOptions,"options");
+        for ( Node optionNode : options ) {
+            Element option = (Element) optionNode;
+            assert option != null;
+            if( option.getAttribute("name").equals("Vector_EIR_Input") ){
+                option.setAttribute("name", "inputEIR");
+            }else if( option.getAttribute("name").equals("Vector_EIR_Simulated") ){
+                option.setAttribute("name", "simulatedEIR");
+            }
+        }
+    }
 
     /**
      * This function is used to translate the 5-day timestep fitting
