@@ -137,11 +137,6 @@ public:
   
   /// @brief Small functions
   //@{
-  /// Get the survey age-group. Constant-time; returns result of last update.
-  inline const Monitoring::AgeGroup ageGroup() const {
-      return monitoringAgeGroup;
-  }
-  
   //! Get the age in years, based on current TimeStep::simulation.
   double getAgeInYears() const;
   

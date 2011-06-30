@@ -214,20 +214,20 @@ void Human::updateInterventionStatus(const OM::Population& population) {
 
 void Human::massVaccinate (const OM::Population&) {
     _vaccine.vaccinate();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (ageGroup(), 1);
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
 }
 void Human::ctsVaccinate (const OM::Population&) {
     if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
         _vaccine.vaccinate();
-        Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (ageGroup(), 1);
+        Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
     }
 }
 
 void Human::IPTiTreatment (const OM::Population&) {
-  withinHostModel->IPTiTreatment (ageGroup(), _inCohort);
+  withinHostModel->IPTiTreatment (getMonitoringAgeGroup(), _inCohort);
 }
 void Human::deployIptDose (const OM::Population&) {
-    withinHostModel->deployIptDose( ageGroup(), _inCohort );
+    withinHostModel->deployIptDose( getMonitoringAgeGroup(), _inCohort );
 }
 
 void Human::massDrugAdministration (const OM::Population&) {
@@ -236,21 +236,21 @@ void Human::massDrugAdministration (const OM::Population&) {
 
 void Human::massITN (const OM::Population& population){
     perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
 }
 void Human::ctsITN (const OM::Population& population){
     perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
 }
 
 void Human::massIRS (const OM::Population&) {
     perHostTransmission.setupIRS ();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
 }
 
 void Human::massVA (const OM::Population&) {
     perHostTransmission.setupVA ();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( ageGroup(), 1 );
+    Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
 bool Human::hasVaccineProtection(TimeStep maxInterventionAge) const{
@@ -284,11 +284,10 @@ void Human::summarize() {
     }
     
     Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( _inCohort ) );
-    Monitoring::AgeGroup ageGrp = ageGroup();
-    survey.reportHosts (ageGrp, 1);
-    bool patent = withinHostModel->summarize (survey, ageGrp);
-    infIncidence->summarize (survey, ageGrp);
-    clinicalModel->summarize (survey, ageGrp);
+    survey.reportHosts (getMonitoringAgeGroup(), 1);
+    bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
+    infIncidence->summarize (survey, getMonitoringAgeGroup());
+    clinicalModel->summarize (survey, getMonitoringAgeGroup());
     
     if( cohortFirstInfectionOnly && patent ){
         removeFromCohort();
@@ -302,14 +301,14 @@ void Human::addToCohort (const OM::Population&){
     // although episode reports still need to be flushed.
     flushReports();
     _inCohort = true;
-    Monitoring::Surveys.current->reportAddedToCohort( ageGroup(), 1 );
+    Monitoring::Surveys.current->reportAddedToCohort( getMonitoringAgeGroup(), 1 );
 }
 void Human::removeFromCohort(){
     if( _inCohort ){
         // Data should be flushed as with addToCohort().
         flushReports();
         _inCohort = false;
-        Monitoring::Surveys.current->reportRemovedFromCohort( ageGroup(), 1 );
+        Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
     }
 }
 

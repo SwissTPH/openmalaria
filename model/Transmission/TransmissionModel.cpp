@@ -151,7 +151,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
             ++numTransmittingHumans;
 
         // kappaByAge and nByAge are used in the screensaver only
-        Monitoring::AgeGroup ag = h->ageGroup();
+        Monitoring::AgeGroup ag = h->getMonitoringAgeGroup();
         kappaByAge[ag.i()] += t;
         ++nByAge[ag.i()];
     }
