@@ -100,7 +100,8 @@ private:
   vector<double> interventionEIR;
   
   /** When simulationMode == dynamicEIR, this is the annual cycle of kappa
-   * from the warmup phase and has length 1 year (in timesteps).
+   * from the warmup phase and has length 1 year (in timesteps). Index for this
+   * time-step is TimeStep::simulation % initialKappa.size().
    * 
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness). */

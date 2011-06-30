@@ -84,8 +84,8 @@ void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
-    // updateKappa() has been called for this TimeStep::simulation, so this is the latest value in laggedKappa:
-    stream<<'\t'<<laggedKappa[TimeStep::simulation % laggedKappa.size()];
+    // kappa from last time-step:
+    stream<<'\t'<<laggedKappa[(TimeStep::simulation - TimeStep(1)) % laggedKappa.size()];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -156,7 +156,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         ++nByAge[ag.i()];
     }
 
-    size_t lKMod = TimeStep::simulation1() % laggedKappa.size();	// now
+    size_t lKMod = TimeStep::simulation % laggedKappa.size();	// now
     if( population.empty() ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,12 +172,14 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
 }
 
 void TransmissionModel::updateSummaries () {
-    int tmod = TimeStep::simulation1() % TimeStep::stepsPerYear;   // now
-    size_t lKMod = TimeStep::simulation1() % laggedKappa.size();   // now
+    //TODO: surely we don't need all of these!
+    int tmod1 = TimeStep::simulation1() % TimeStep::stepsPerYear;   // now
+    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // also now, just with a different index
+    size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == 0) {
+    if (tmod1 == 0) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
@@ -201,7 +203,7 @@ void TransmissionModel::updateSummaries () {
     tsAdultEntoInocs = 0.0;
     tsNumAdults = 0;
 
-    surveyInputEIR += initialisationEIR[tmod];
+    surveyInputEIR += initialisationEIR[tmod1];
     surveySimulatedEIR += tsAdultEIR;
 }
 
@@ -224,7 +226,7 @@ double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, d
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setInfectiousnessToMosq(laggedKappa[TimeStep::simulation % laggedKappa.size()]);
+  survey.setInfectiousnessToMosq(laggedKappa[(TimeStep::simulation-TimeStep(1)) % laggedKappa.size()]); //this is the last value set
   survey.setAnnualAverageKappa(_annualAverageKappa);
 
   survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
