@@ -103,7 +103,7 @@ WithinHostModel::WithinHostModel () :
 }
 
 
-void WithinHostModel::clearInfections (bool) {
+void WithinHostModel::clearInfections (TimeStep now, bool) {
   clearAllInfections();
 }
 

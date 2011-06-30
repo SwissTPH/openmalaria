@@ -143,7 +143,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     numTransmittingHumans = 0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
+        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears1());
         sumWeight += t;
         t *= h->probTransmissionToMosquito();
         sumWt_kappa += t;
@@ -156,7 +156,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         ++nByAge[ag.i()];
     }
 
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();	// now
+    size_t lKMod = TimeStep::simulation1() % laggedKappa.size();	// now
     if( population.empty() ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,20 +172,18 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
 }
 
 void TransmissionModel::updateSummaries () {
-    //TODO: surely we don't need all of these!
-    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // now
-    int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;    // last time-step
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
+    int tmod = TimeStep::simulation1() % TimeStep::stepsPerYear;   // now
+    size_t lKMod = TimeStep::simulation1() % laggedKappa.size();   // now
     
     //Calculate time-weighted average of kappa
-    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];
+    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
     if (tmod == 0) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
 
     // Shared graphics: report infectiousness
-    if (TimeStep::simulation % 6 ==  0) {
+    if (TimeStep::simulation1() % 6 ==  0) {
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);

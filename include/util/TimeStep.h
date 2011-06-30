@@ -66,6 +66,11 @@ public:
 
     /** Simulation time step (0 at start of simulation). */
     static TimeStep simulation;
+    
+    /** Get simulation time + 1 (TODO: this is temporary) */
+    static inline TimeStep simulation1(){
+        return simulation+TimeStep(1);
+    }
 
     /** Timestep counter during the intervention period of the simulation.
     *

@@ -172,7 +172,7 @@ void NonVectorTransmission::update (const std::list<Host::Human>& population, in
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == equilibriumMode ){
-        initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
+        initialKappa[ TimeStep::simulation1() % initialKappa.size() ] = currentKappa;
     }
 }
 
@@ -183,7 +183,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   switch (simulationMode) {
     case equilibriumMode:
       //FIXME: figure out if it is correct that 1 is subtracted here and below but not elsewhere
-      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
+      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -191,14 +191,14 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
       eir = interventionEIR[TimeStep::interventionPeriod.asInt()];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
+      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
 	eir *=
-            laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()] /
-            initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
+            laggedKappa[(TimeStep::simulation1()-nspore) % laggedKappa.size()] /
+            initialKappa[(TimeStep::simulation1()-nspore) % TimeStep::stepsPerYear];
       }
       break;
     default:	// Anything else.. don't continue silently
@@ -208,8 +208,8 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()]
-	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
+	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation1()-nspore) % laggedKappa.size()]
+	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation1()-nspore) % TimeStep::stepsPerYear] << endl;
     throw util::traced_exception(msg.str(),util::Error::InitialKappa);
   }
 #endif

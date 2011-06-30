@@ -43,10 +43,10 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 
 // -----  Simple infection adders/removers  -----
 
-void DescriptiveWithinHostModel::newInfection() {
+void DescriptiveWithinHostModel::newInfection(TimeStep now) {
     ++PopulationStats::totalInfections;
     if (numInfs < MAX_INFECTIONS) {
-        infections.push_back(new DescriptiveInfection());
+        infections.push_back(new DescriptiveInfection(now));
         numInfs++;
         ++PopulationStats::allowedInfections;
     }
@@ -110,7 +110,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             timeStepMaxDensity = infStepMaxDens;
 
             totalDensity += (*iter)->getDensity();
-            if ((*iter)->getStartDate() == TimeStep::simulation-TimeStep(1)) {
+            if ((*iter)->getStartDate() == TimeStep::simulation1()-TimeStep(1)) {
                 _cumulativeh++;
             }
             (*iter)->determineDensityFinal ();

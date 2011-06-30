@@ -48,10 +48,10 @@ void Episode::flush() {
 
 void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
 {
-    if (TimeStep::simulation > (_time + healthSystemMemory)) {
+    if (TimeStep::simulation1() > (_time + healthSystemMemory)) {
         report ();
 
-        _time = TimeStep::simulation;
+        _time = TimeStep::simulation1();
         _surveyPeriod = Surveys.getSurveyNumber( inCohort );
         _ageGroup = ageGroup;
         _state = newState;

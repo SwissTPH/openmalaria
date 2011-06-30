@@ -36,7 +36,7 @@ public:
     static void init();
     
     /// Constructor
-    PennyInfection(uint32_t protID);
+    PennyInfection(TimeStep now, uint32_t protID);
     /// Resume from a checkpoint
     PennyInfection (istream& stream);
     /// Destructor
@@ -46,7 +46,7 @@ public:
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(){
-        size_t todayV = TimeStep::simulation % delta_V;
+        size_t todayV = TimeStep::simulation1() % delta_V;
         return seqDensities[todayV];
     }
 

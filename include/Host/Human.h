@@ -139,6 +139,7 @@ public:
   //@{
   //! Get the age in years, based on current TimeStep::simulation.
   double getAgeInYears() const;
+  double getAgeInYears1() const;
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}

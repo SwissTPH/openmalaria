@@ -48,7 +48,7 @@ public:
   //@{
   //! Constructor
   /*! \param lastSPdose Time interval of last SP Dose. */
-  DescriptiveIPTInfection(TimeStep lastSPdose);
+  DescriptiveIPTInfection(TimeStep now, TimeStep lastSPdose);
   DescriptiveIPTInfection (istream& stream);
   
   /** Destructor */

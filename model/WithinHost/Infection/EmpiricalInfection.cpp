@@ -58,8 +58,8 @@ double EmpiricalInfection::_extinctionLevel;
 double EmpiricalInfection::_overallMultiplier;
 
 
-CommonInfection* createEmpiricalInfection (uint32_t protID) {
-    return new EmpiricalInfection (protID, 1);
+CommonInfection* createEmpiricalInfection (TimeStep now, uint32_t protID) {
+    return new EmpiricalInfection (now, protID, 1);
 }
 CommonInfection* checkpointedEmpiricalInfection (istream& stream) {
     return new EmpiricalInfection (stream);
@@ -138,8 +138,8 @@ void EmpiricalInfection::init(){
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
-EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
-    CommonInfection(protID)
+EmpiricalInfection::EmpiricalInfection(TimeStep now, uint32_t protID, double growthRateMultiplier) :
+    CommonInfection(now, protID)
 {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time

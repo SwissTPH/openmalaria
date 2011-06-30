@@ -146,9 +146,10 @@ int Simulation::start(){
             
             // deploy interventions and update
             interventions->deploy( *population );
-            ++TimeStep::simulation;	//TODO: move to after update
             population->update1();
             
+            // both indecies are now zero-based (first time-step of sim/interv period is 0)
+            ++TimeStep::simulation;
             ++TimeStep::interventionPeriod;
             
             util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());

@@ -214,7 +214,7 @@ void Population::update1()
 
         //BEGIN Population size & age structure
         ++cumPop;
-        TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
+        TimeStep age = (TimeStep::simulation1() - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age) ...
         if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
@@ -229,7 +229,7 @@ void Population::update1()
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman (TimeStep::simulation);
+        newHuman (TimeStep::simulation1());
         //++nCounter;
         ++cumPop;
     }

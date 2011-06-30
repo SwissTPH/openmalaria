@@ -62,13 +62,13 @@ public:
   bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /// Create a new infection within this human
-  virtual void newInfection() =0;
+  virtual void newInfection(TimeStep now) =0;
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
    * uses IPT code to determine whether to clear all infections or do nothing
    * (isSevere is only used in the IPT case). */
-  virtual void clearInfections (bool isSevere);
+  virtual void clearInfections (TimeStep now, bool isSevere);
   
   /** Medicate drugs (wraps drug's medicate).
    *

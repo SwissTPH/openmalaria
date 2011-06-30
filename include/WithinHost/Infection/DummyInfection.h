@@ -35,7 +35,7 @@ public:
     /// For checkpointing (don't use for anything else)
     DummyInfection (istream& stream);
     //! Constructor
-    DummyInfection (uint32_t protID);
+    DummyInfection (TimeStep now, uint32_t protID);
     
     virtual ~DummyInfection () {}
   

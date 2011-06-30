@@ -51,8 +51,8 @@ void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlI
 
 // -----  non-static init/destruction  -----
 
-DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
-  DescriptiveInfection(), _SPattenuate(false)
+DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep now, TimeStep lastSPdose) :
+  DescriptiveInfection(now), _SPattenuate(false)
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
@@ -73,18 +73,18 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (TimeStep::simulation-lastSPdose > genotypes[proteome_ID].proph &&
-	TimeStep::simulation-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
+    if (now-lastSPdose > genotypes[proteome_ID].proph &&
+	now-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
       _SPattenuate=true;
     }
 }
 
 bool DescriptiveIPTInfection::eventSPClears (TimeStep _lastSPDose) {
-    if(TimeStep::simulation - _startdate < latentp)
+    if(TimeStep::simulation1() - _startdate < latentp)
 	return false;	// don't consider pre-patent infections
     
     return
-	(TimeStep::simulation - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
+	(TimeStep::simulation1() - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
 	&& (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR);
 }
 

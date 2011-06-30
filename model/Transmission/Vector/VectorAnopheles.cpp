@@ -404,7 +404,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 // Every TimeStep::interval days:
 void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail) {
-  if (TimeStep::simulation >= larvicidingEndStep) {
+  if (TimeStep::simulation1() >= larvicidingEndStep) {
     larvicidingEndStep = TimeStep::future;
     larvicidingIneffectiveness = 1.0;
   }
@@ -452,7 +452,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   double intP_dif = 0.0;
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears1(), invMeanPopAvail);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex)
           * host.probMosqResting(humanBase, sIndex);
@@ -481,7 +481,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses TimeStep::interval day (currently 5 day) time steps.
-  int firstDay = TimeStep::simulation.inDays();
+  int firstDay = TimeStep::simulation1().inDays();
   for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).

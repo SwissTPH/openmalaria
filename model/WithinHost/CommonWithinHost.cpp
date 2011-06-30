@@ -28,7 +28,7 @@ using namespace std;
 
 namespace OM { namespace WithinHost {
 
-CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
+CommonInfection* (* CommonWithinHost::createInfection) (TimeStep now, uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 
@@ -49,10 +49,10 @@ CommonWithinHost::~CommonWithinHost() {
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::newInfection(){
+void CommonWithinHost::newInfection(TimeStep now){
     ++PopulationStats::totalInfections;
   if (numInfs < MAX_INFECTIONS) {
-    infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
+    infections.push_back(createInfection (now, pkpdModel->new_proteome_ID ()));
     numInfs++;
     _cumulativeh++;
     ++PopulationStats::allowedInfections;

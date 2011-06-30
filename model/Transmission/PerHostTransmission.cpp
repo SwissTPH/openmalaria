@@ -80,9 +80,9 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophel
         alpha_i *= net.relativeAttractiveness(base.net);
     }
     if (timestepIRS >= TimeStep(0))
-        alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
+        alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation1() - timestepIRS, hetSampleIRS));
     if (timestepVA >= TimeStep(0))
-        alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
+        alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation1() - timestepVA, hetSampleVA));
 
     return alpha_i;
 }
@@ -99,14 +99,14 @@ double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& 
         pRest *= net.postprandialSurvivalFactor(base.net);
     }
     if (timestepIRS >= TimeStep(0))
-        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
+        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation1() - timestepIRS, hetSampleIRS));
     return pRest;
 }
 
-void PerHostTransmission::setupITN (const TransmissionModel& tm) {
+void PerHostTransmission::setupITN (TimeStep now, const TransmissionModel& tm) {
     const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
     if (vTM) {
-        net.deploy(vTM->getITNParams());
+        net.deploy(now, vTM->getITNParams());
     }
 }
 

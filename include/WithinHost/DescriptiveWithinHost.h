@@ -41,7 +41,7 @@ public:
   DescriptiveWithinHostModel();
   virtual ~DescriptiveWithinHostModel();
   
-  virtual void newInfection();
+  virtual void newInfection(TimeStep now);
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
   virtual void clearAllInfections();

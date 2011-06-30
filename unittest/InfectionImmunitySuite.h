@@ -32,7 +32,8 @@ class InfectionImmunitySuite : public CxxTest::TestSuite
 public:
     void setUp () {
 	UnittestUtil::Infection_init_5day ();
-	infection = new DummyInfection (0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
+        TimeStep::simulation = TimeStep(3);
+	infection = new DummyInfection (TimeStep::simulation1(), 0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
     }
     void tearDown () {
 	delete infection;

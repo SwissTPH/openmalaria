@@ -181,7 +181,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
     util::streamValidate( (newState << 16) & pgState );
     
-    if ( TimeStep::simulation == timeOfRecovery ) {
+    if ( TimeStep::simulation1() == timeOfRecovery ) {
 	if( pgState & Pathogenesis::DIRECT_DEATH ){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
@@ -216,14 +216,14 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             } else {
                 // previously healthy or UC: progress to severe
                 pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
-                caseStartTime = TimeStep::simulation;
+                caseStartTime = TimeStep::simulation1();
             }
         } else {
             // uncomplicated case (UC/UC2/NMF): is it new?
             if (pgState & Pathogenesis::SICK) {
                 // previously UC; nothing to do
             }else{
-                if( caseStartTime < TimeStep::simulation ) {
+                if( caseStartTime < TimeStep::simulation1() ) {
                     // new UC case
                     pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
                     
@@ -237,7 +237,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     assert(false);      // should have uVariate < 1 = cumDailyPrImmUCTS[len-1]
                     gotDelay:
                     // set start time: current time plus length of delay (days)
-                    caseStartTime = TimeStep::simulation + TimeStep(i);
+                    caseStartTime = TimeStep::simulation1() + TimeStep(i);
                 }
             }
         }
@@ -246,12 +246,12 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             _doomed = -TimeStep::interval; // start indirect mortality countdown
     }
     
-    if ( caseStartTime == TimeStep::simulation && pgState & Pathogenesis::RUN_CM_TREE ){
+    if ( caseStartTime == TimeStep::simulation1() && pgState & Pathogenesis::RUN_CM_TREE ){
         // OK, we're about to run the CM tree
         pgState = Pathogenesis::State (pgState & ~Pathogenesis::RUN_CM_TREE);
         
 	// If last treatment prescribed was in recent memory, consider second line.
-	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
+	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation1())
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
 	
 	if (pgState & Pathogenesis::MALARIA) {
@@ -265,7 +265,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
-	    timeLastTreatment = TimeStep::simulation;
+	    timeLastTreatment = TimeStep::simulation1();
             if( pgState & Pathogenesis::COMPLICATED ){
                 Monitoring::Surveys.getSurvey(human.getInCohort())
                     .reportTreatments3( human.getMonitoringAgeGroup(), 1 );
@@ -362,7 +362,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
 	if( (pgState & Pathogenesis::COMPLICATED)
 	    && !(pgState & Pathogenesis::DIRECT_DEATH)
-	    && (TimeStep::simulation < timeOfRecovery + extraDaysAtRisk)
+	    && (TimeStep::simulation1() < timeOfRecovery + extraDaysAtRisk)
 	) {
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
@@ -385,7 +385,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     
     // Start of case. Not necessarily start of sickness due to treatment-seeking
     // delays and travel time.
-    if( caseStartTime == TimeStep::simulation ){
+    if( caseStartTime == TimeStep::simulation1() ){
 	// Patients in hospital are removed from the transmission cycle.
 	// This should have an effect from the start of the next timestep.
 	// NOTE: This is not very accurate, but considered of little importance.
@@ -398,12 +398,12 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // exiting hospital are OK and medications terminating before the
 	    // end of hospitalisation shouldn't matter too much if the person
 	    // can't recieve new infections due to zero transmission in hospital.
-	    timeOfRecovery = TimeStep::simulation + complicatedCaseDuration;
+	    timeOfRecovery = TimeStep::simulation1() + complicatedCaseDuration;
 	    // Time should be adjusted to end of at-risk period when patient dies:
 	    if( pgState & Pathogenesis::DIRECT_DEATH )	// death may already have been determined
 		timeOfRecovery += extraDaysAtRisk;	// ATORWD (search keyword)
 	} else {
-	    timeOfRecovery = TimeStep::simulation + uncomplicatedCaseDuration;
+	    timeOfRecovery = TimeStep::simulation1() + uncomplicatedCaseDuration;
 	}
     }
     
@@ -429,7 +429,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	it = next;
     }
     
-    if( human.cohortFirstTreatmentOnly && timeLastTreatment == TimeStep::simulation ){
+    if( human.cohortFirstTreatmentOnly && timeLastTreatment == TimeStep::simulation1() ){
         human.removeFromCohort();
     }
     if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){

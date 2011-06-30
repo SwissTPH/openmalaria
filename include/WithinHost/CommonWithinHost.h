@@ -43,7 +43,7 @@ public:
     ~CommonWithinHost();
     
     
-    virtual void newInfection();
+    virtual void newInfection(TimeStep now);
     virtual void clearAllInfections();
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
@@ -60,7 +60,7 @@ public:
      * The first variant is for creating a new infection, the second for loading
      * one from a checkpoint. */
     //@{
-    static CommonInfection* (* createInfection) (uint32_t protID);
+    static CommonInfection* (* createInfection) (TimeStep now, uint32_t protID);
     static CommonInfection* (* checkpointedInfection) (istream& stream);
     //@}
     

@@ -85,7 +85,7 @@ private:
   }
   
     /** Return one over the mean availability of human population to mosquitoes. */
-    static double invMeanPopAvail (const std::list<Host::Human>& population, int populationSize);
+    static double invMeanPopAvail (bool plus1, const std::list<Host::Human>& population, int populationSize);
   
   void ctsCbN_v0 (ostream& stream);
   void ctsCbN_v (ostream& stream);

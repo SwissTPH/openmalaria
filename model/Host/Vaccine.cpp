@@ -127,7 +127,7 @@ PerHumanVaccine::PerHumanVaccine() :
         hetSampleTBV = Vaccine::TBV.decayFunc->hetSample();
 }
 
-void PerHumanVaccine::vaccinate() {
+void PerHumanVaccine::vaccinate(TimeStep now) {
     //Index to look up initial efficacy relevant for this dose.
     if (Vaccine::PEV.active)
         _initialPEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
@@ -139,7 +139,7 @@ void PerHumanVaccine::vaccinate() {
         _initialTBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
 
     ++_lastVaccineDose;
-    _timeLastVaccine = TimeStep::simulation;
+    _timeLastVaccine = now;
 }
 bool PerHumanVaccine::hasProtection(TimeStep maxInterventionAge)const{
     return _timeLastVaccine + maxInterventionAge > TimeStep::simulation;

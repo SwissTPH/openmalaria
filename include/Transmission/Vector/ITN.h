@@ -158,7 +158,7 @@ public:
         insecticideDecayHet & stream;
     }
     
-    void deploy(const ITNParams& params);
+    void deploy(TimeStep now, const ITNParams& params);
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
@@ -167,6 +167,9 @@ public:
     }
     inline double getInsecticideContent(const ITNParams& params)const{
         return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet);
+    }
+    inline double getInsecticideContent1(const ITNParams& params)const{
+        return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation1() - deployTime, insecticideDecayHet);
     }
     
     /// Call once per timestep to update holes
