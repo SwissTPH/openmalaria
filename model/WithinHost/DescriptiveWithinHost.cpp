@@ -110,7 +110,7 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             timeStepMaxDensity = infStepMaxDens;
 
             totalDensity += (*iter)->getDensity();
-            if ((*iter)->getStartDate() == TimeStep::simulation1()-TimeStep(1)) {
+            if ((*iter)->getStartDate() == TimeStep::simulation-TimeStep(1)) {
                 _cumulativeh++;
             }
             (*iter)->determineDensityFinal ();

@@ -37,7 +37,7 @@ public:
 	EmpiricalInfection::init();
 	util::random::seed (83);	// seed is unimportant, but must be fixed
         TimeStep::simulation = TimeStep(1);     // value isn't really important
-	infection = new EmpiricalInfection (TimeStep::simulation1(), 0xFFFFFFFF, 1);	// pkpdID (1st value) isn't important since we're not using drug model here
+	infection = new EmpiricalInfection (TimeStep::simulation, 0xFFFFFFFF, 1);	// pkpdID (1st value) isn't important since we're not using drug model here
         TimeStep::simulation = TimeStep(2);     // next time step
     }
     void tearDown () {

@@ -130,7 +130,7 @@ TimeStep DescriptiveInfection::infectionDuration() {
 void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
 {
     //Age of infection. (Blood stage infection starts latentp intervals later than inoculation.)
-    TimeStep infage = TimeStep::simulation1() - _startdate - latentp;
+    TimeStep infage = TimeStep::simulation - _startdate - latentp;
     if ( infage >= TimeStep(0)) {
         if ( infage < TimeStep(maxDur) ) {
             TimeStep iduration=_duration;

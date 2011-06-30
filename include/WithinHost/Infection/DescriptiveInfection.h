@@ -72,7 +72,7 @@ public:
     \return The interval before clearance.
   */
   bool expired () {
-    return TimeStep::simulation1() >= _startdate+_duration;
+    return TimeStep::simulation >= _startdate+_duration;
   }
   
   /** Determines parasite density of an individual infection (5-day timestep update)

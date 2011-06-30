@@ -45,7 +45,7 @@ public:
     * @param survivalFactor Density multiplier to introduce drug & vaccine effects
     * @returns True when the infection goes extinct. */
     inline bool update (double survivalFactor){
-	TimeStep ageOfInfection = TimeStep::simulation1() - _startdate - latentp;	// age in days
+	TimeStep ageOfInfection = TimeStep::simulation - _startdate - latentp;	// age in days
 	if( ageOfInfection < TimeStep(0) )
 	    return false;	// latent period (liver stage) — don't do anything
 	else

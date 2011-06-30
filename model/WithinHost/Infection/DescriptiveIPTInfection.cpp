@@ -80,7 +80,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep now, TimeStep lastSPdo
 }
 
 bool DescriptiveIPTInfection::eventSPClears (TimeStep _lastSPDose) {
-    if(TimeStep::simulation1() - _startdate < latentp)
+    if(TimeStep::simulation - _startdate < latentp)
 	return false;	// don't consider pre-patent infections
     
     return

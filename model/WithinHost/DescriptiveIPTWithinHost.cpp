@@ -175,7 +175,7 @@ bool DescriptiveIPTWithinHost::eventSPClears (DescriptiveInfection* inf){
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
   //Note: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
   if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeInfections > 0) {
-    if (_SPattenuationt > TimeStep::simulation1() && totalDensity < 10) {
+    if (_SPattenuationt > TimeStep::simulation && totalDensity < 10) {
       totalDensity = 10;
       _cumulativeY += 10;
     }

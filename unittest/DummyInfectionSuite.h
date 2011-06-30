@@ -37,7 +37,7 @@ public:
 	DummyInfection::init();
 	TimeStep::init( 1, 90.0 );
 	TimeStep::simulation = TimeStep(1);	// value isn't really important
-	infection = new DummyInfection (TimeStep::simulation1(), 0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
+	infection = new DummyInfection (TimeStep::simulation, 0xFFFFFFFF);	// pkpdID (1st value) isn't important since we're not using drug model here
         TimeStep::simulation = TimeStep(2);     // next time step
     }
     void tearDown () {

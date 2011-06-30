@@ -187,14 +187,14 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
 }
 
 void Human::addInfection(){
-    withinHostModel->newInfection(TimeStep::simulation);
+    withinHostModel->newInfection(TimeStep::simulation-TimeStep(1));    //FIXME: previously infections were introduced one time-step earlier — probably we want to change this
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int numInf = infIncidence->numNewInfections( *this, EIR );
     for (int i=1;i<=numInf; ++i) {
-        withinHostModel->newInfection(TimeStep::simulation1());
+        withinHostModel->newInfection(TimeStep::simulation);
     }
     
     // Cache total density for infectiousness calculations
