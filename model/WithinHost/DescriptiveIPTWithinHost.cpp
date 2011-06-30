@@ -60,7 +60,9 @@ void DescriptiveIPTWithinHost::init (const scnXml::IPTDescription& xmlIPTI) {
 }
 
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
-    _SPattenuationt(TimeStep::never), _lastSPDose (TimeStep::never), _lastIptiOrPlacebo (TimeStep::never),
+    _SPattenuationt(TimeStep::never),
+    _lastSPDose (TimeStep::never),
+    _lastIptiOrPlacebo (TimeStep::never),
     _cumulativeInfections(0)
 {
     if( iptiEffect == NO_IPT ){

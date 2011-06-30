@@ -79,8 +79,12 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
-  if (_dateOfBirth != TimeStep::simulation && (TimeStep::simulation > TimeStep(0) || _dateOfBirth > TimeStep::simulation))
+  if( _dateOfBirth != TimeStep::simulation &&
+      (TimeStep::simulation != TimeStep(0) || _dateOfBirth > TimeStep::simulation))
+  {
+    // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
     throw util::traced_exception ("Invalid date of birth!");
+  }
   
   _ylag.assign (_ylagLen, 0.0);
   
@@ -292,7 +296,7 @@ void Human::summarize() {
 }
 
 void Human::addToCohort (const OM::Population&){
-    assert( !_inCohort );
+    if( _inCohort ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
     // although episode reports still need to be flushed.
@@ -334,9 +338,8 @@ double Human::calcProbTransmissionToMosquito() const {
   // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
   // These values are one timestep more recent than that, however the calculated
   // value is not used until the next timestep when then ages would be correct.
-  // Add _ylagLen to make sure the value on the LHS of '%' is non-negative
-  // (C++ doesn't specify behaviour when it is.)
-  int firstIndex = _ylagLen + TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
+  // Min TimeStep::simulation is 20 days, so LHS of '%' operator is never negative.
+  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
   double x = beta1 * _ylag[firstIndex % _ylagLen]
            + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
            + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];

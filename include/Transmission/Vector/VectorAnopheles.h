@@ -60,7 +60,7 @@ public:
             transmissionModel(tm),
             humanBase(baseITNParams),
             partialEIR(0.0),
-            larvicidingEndStep (std::numeric_limits<int>::max()),
+            larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0),
             timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0)
     {}

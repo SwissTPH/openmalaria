@@ -53,8 +53,6 @@ Simulation::Simulation(util::Checksum ck) :
     OM::TimeStep::init(InputData().getModel().getParameters().getInterval(),
                        InputData().getDemography().getMaximumAgeYrs());
     
-    TimeStep::simulation = TimeStep( 0 );
-    
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
@@ -96,6 +94,8 @@ enum Phase {
 };
 
 int Simulation::start(){
+    TimeStep::simulation = TimeStep( 0 );
+    
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
     TimeStep humanWarmupLength = TimeStep::maxAgeIntervals;
@@ -137,24 +137,21 @@ int Simulation::start(){
             if (TimeStep::simulation == testCheckpointDieStep)
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
+            // do reporting (continuous and surveys)
             Continuous::update();
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
+            
+            // deploy interventions and update
             interventions->deploy( *population );
-            
-            // Simulation-time used to be 1-based (from Fortran implementation).
-            // It is now zero-based with regards to checkpoints but one-based
-            // with regards to everything else: rather messy.
-            ++TimeStep::simulation;
-            
-            // update
+            ++TimeStep::simulation;	//TODO: move to after update
             population->update1();
             
-            util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
+            ++TimeStep::interventionPeriod;
             
-            ++TimeStep::interventionPeriod;     // zero-based: zero on first time-step of intervention period
+            util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
         }
         
         ++phase;        // advance to next phase
