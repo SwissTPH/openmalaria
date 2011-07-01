@@ -167,16 +167,16 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
     if (ageOfInfection == TimeStep(0))
     {
         // assign initial densities (Y circulating, X sequestered)
-        size_t today = (TimeStep::simulation1() % delta_C);
+        size_t today = TimeStep::simulation % delta_C;
         cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
         _density = cirDensities[today];
-        today = (TimeStep::simulation1() % delta_V);
+        today = TimeStep::simulation % delta_V;
         seqDensities[today] = exp(random::gauss(mu_X,sigma_X));
     }
     else
     {
         // save yesterday's density (since getVariantSpecificSummation may reset it to zero)
-        size_t yesterdayV = (TimeStep::simulation1() - TimeStep(1)) % delta_V;
+        size_t yesterdayV = (TimeStep::simulation - TimeStep(1)) % delta_V;
         double seqDensityYesterday = seqDensities[yesterdayV];
         
         // The immune responses are represented by the variables
@@ -185,7 +185,7 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
         // R_Vx,    (probability that a parasite escapes control by clonal immune response)
         
         // innate immunity  
-        size_t yesterdayC = (TimeStep::simulation1() - TimeStep(1)) % delta_C;
+        size_t yesterdayC = (TimeStep::simulation - TimeStep(1)) % delta_C;
         double base_N = cirDensities[yesterdayC]/threshold_N;
         double base_Npow = pow(base_N,kappa_N);
         double R_Nx = (1.0-beta_N) / (1.0 + base_Npow) + beta_N;
@@ -230,11 +230,11 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
             seqDensity_new = 0.0;
         }
         
-        size_t todayC = TimeStep::simulation1() % delta_C;
+        size_t todayC = TimeStep::simulation % delta_C;
         cirDensities[todayC] = cirDensity_new;
         _density = cirDensities[todayC];
         
-        size_t todayV = TimeStep::simulation1() % delta_V;
+        size_t todayV = TimeStep::simulation % delta_V;
         seqDensities[todayV] = seqDensity_new;
     }
     
@@ -257,7 +257,7 @@ double PennyInfection::getVariantSpecificSummation() {
     }
     //The effective exposure is computed by adding in the delta_V-day lagged parasite density 
     //and decaying the previous value for the effective exposure with decay parameter rho_V
-    size_t index = (TimeStep::simulation1() % delta_V);	
+    size_t index = (TimeStep::simulation % delta_V);	
     variantSpecificSummation = (variantSpecificSummation * exp_negRho_V) + seqDensities[index];
     
     return variantSpecificSummation;
@@ -266,7 +266,7 @@ double PennyInfection::getVariantSpecificSummation() {
 double PennyInfection::getClonalSummation() {
     //The effective exposure is computed by adding in the delta_C-day lagged parasite density 
     //and decaying the previous value for the effective exposure with decay parameter rho_C
-    size_t index = (TimeStep::simulation1() % delta_C);	
+    size_t index = (TimeStep::simulation % delta_C);	
     clonalSummation = (clonalSummation * exp_negRho_C) + cirDensities[index];
     
     return clonalSummation;
