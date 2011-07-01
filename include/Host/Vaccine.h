@@ -106,13 +106,13 @@ public:
     bool hasProtection(TimeStep maxInterventionAge)const;
 
     inline double getPEVEfficacy()const {
-        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation1() - _timeLastVaccine, hetSamplePEV );
+        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSamplePEV );
     }
     inline double getBSVEfficacy()const {
-        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation1() - _timeLastVaccine, hetSampleBSV );
+        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleBSV );
     }
     inline double getTBVEfficacy()const {
-        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation1() - _timeLastVaccine, hetSampleTBV );
+        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleTBV );
     }
     
     /// @brief Hacks for R_0 deployment

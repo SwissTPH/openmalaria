@@ -218,7 +218,7 @@ void Human::massVaccinate (const OM::Population&) {
 }
 void Human::ctsVaccinate (const OM::Population&) {
     if ( _vaccine.doCtsVaccination( TimeStep::simulation1() - _dateOfBirth ) ){
-        _vaccine.vaccinate(TimeStep::simulation1());
+        _vaccine.vaccinate(TimeStep::simulation);
         Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
     }
 }
