@@ -187,7 +187,7 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
 }
 
 void Human::addInfection(){
-    withinHostModel->newInfection(TimeStep::simulation-TimeStep(1));    //FIXME: previously infections were introduced one time-step earlier — probably we want to change this
+    withinHostModel->newInfection(TimeStep::simulation);
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
