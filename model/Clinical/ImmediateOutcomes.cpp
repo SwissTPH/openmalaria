@@ -94,7 +94,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     }
 
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (TimeStep::simulation1(), latestReport.getState() == Pathogenesis::STATE_SEVERE);
+        human.withinHostModel->clearInfections (TimeStep::simulation, latestReport.getState() == Pathogenesis::STATE_SEVERE);
     }
 
     if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {

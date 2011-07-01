@@ -99,8 +99,8 @@ public:
   /// If individual hasn't dropped out, vaccinate & report EPI
   void ctsVaccinate (const OM::Population&);
   
-  void IPTiTreatment (const OM::Population&);
-  void deployIptDose (const OM::Population&);
+  void continuousIPT (const OM::Population&);
+  void timedIPT (const OM::Population&);
   
   /// Give human a new ITN via mass deployment
   void massITN (const OM::Population&);

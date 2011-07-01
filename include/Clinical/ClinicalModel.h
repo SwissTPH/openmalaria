@@ -97,8 +97,7 @@ public:
    * The four timesteps after a bout are not at risk of a further bout since
    * if one occured it would be considered the same bout.
    * 
-   * Only used for IPT, which can only be used with OldCaseManagement.
-   * In other cases, this can just return false. */
+   * Only supported by immediate outcomes model. */
   virtual bool notAtRisk() =0;
   
   virtual void massDrugAdministration(Human& human) =0;

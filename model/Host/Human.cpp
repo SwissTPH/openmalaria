@@ -222,11 +222,11 @@ void Human::ctsVaccinate (const OM::Population&) {
     }
 }
 
-void Human::IPTiTreatment (const OM::Population&) {
-  withinHostModel->IPTiTreatment (getMonitoringAgeGroup(), _inCohort);
+void Human::timedIPT (const OM::Population&) {
+  withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
 }
-void Human::deployIptDose (const OM::Population&) {
-    withinHostModel->deployIptDose( getMonitoringAgeGroup(), _inCohort );
+void Human::continuousIPT (const OM::Population&) {
+    withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
 }
 
 void Human::massDrugAdministration (const OM::Population&) {

@@ -97,10 +97,10 @@ public:
   
   ///@brief Only do anything when IPT is present:
   //@{
-  /// Conditionally set last SP dose
-  virtual void deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort) {}
-  /// Prescribe IPTi with probability compliance. Only called if IPT present.
-  virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Continuous deployment for IPT
+  virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Timed deployment for IPT
+  virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Last IPTi dose recent enough to give protection?
   virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   //@}

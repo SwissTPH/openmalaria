@@ -379,12 +379,12 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         // continuous deployments:
         typedef scnXml::IPT::ContinuousSequence::const_iterator CIt;
         for( CIt it = ipt.getContinuous().begin(); it != ipt.getContinuous().end(); ++it ){
-            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::deployIptDose ) );
+            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
         }
         // timed deployments:
         typedef scnXml::IPT::TimedSequence::const_iterator It;
         for( It it = ipt.getTimed().begin(); it != ipt.getTimed().end(); ++it ){
-            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::IPTiTreatment, &Host::Human::hasIPTiProtection ) );
+            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
         }
     }
     if( intervElt.getITN().present() ){
