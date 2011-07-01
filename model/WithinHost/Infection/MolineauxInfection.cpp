@@ -300,7 +300,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
 
     //Molineaux paper equation 6
-    size_t index = (TimeStep::simulation1() % 8)/2;	// 8 days ago has same index as today
+    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
     //note: sigma_decay = exp(-2*sigma)
     variantSpecificSummation = static_cast<float>((variantSpecificSummation * sigma_decay)+laggedP[index]);
     laggedP[index] = P;
@@ -311,7 +311,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
 double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 5
-    size_t index = (TimeStep::simulation1() % 8)/2;	// 8 days ago has same index as today
+    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
     //Note: rho is zero, so the decay here is unnecessary:
     variantTranscendingSummation = (variantTranscendingSummation /* * exp(-2.0*rho) */)+laggedPc[index];
 

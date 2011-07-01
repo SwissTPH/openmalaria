@@ -404,7 +404,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 // Every TimeStep::interval days:
 void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail) {
-  if (TimeStep::simulation1() >= larvicidingEndStep) {
+  if (TimeStep::simulation >= larvicidingEndStep) {
     larvicidingEndStep = TimeStep::future;
     larvicidingIneffectiveness = 1.0;
   }
