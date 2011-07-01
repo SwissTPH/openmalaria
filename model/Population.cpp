@@ -313,7 +313,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
 void Population::ctsNetsOwned (ostream& stream){
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
+        if( iter->perHostTransmission.getITN().isDeployed() )
             ++nNets;
     }
     stream << '\t' << nNets;
@@ -322,7 +322,7 @@ void Population::ctsNetHoleIndex (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+        if( iter->perHostTransmission.getITN().isDeployed() ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
         }
@@ -338,7 +338,7 @@ void Population::ctsNetInsecticideContent (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+        if( iter->perHostTransmission.getITN().isDeployed() ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(params);
         }

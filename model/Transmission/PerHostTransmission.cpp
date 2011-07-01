@@ -76,7 +76,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 // an if() when interventions aren't present.
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].entoAvailability;
-    if (net.timeOfDeployment() >= TimeStep(0)) {
+    if (net.isDeployed()) {
         alpha_i *= net.relativeAttractiveness(base.net);
     }
     if (timestepIRS >= TimeStep(0))
@@ -88,14 +88,14 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophel
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].probMosqBiting;
-    if (net.timeOfDeployment() >= TimeStep(0)) {
+    if (net.isDeployed()) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
     }
     return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].probMosqRest;
-    if (net.timeOfDeployment() >= TimeStep(0)) {
+    if (net.isDeployed()) {
         pRest *= net.postprandialSurvivalFactor(base.net);
     }
     if (timestepIRS >= TimeStep(0))

@@ -206,7 +206,6 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 void Human::updateInterventionStatus(const OM::Population& population) {
     if (TimeStep::interventionPeriod >= TimeStep(0)) {
         TimeStep ageTimeSteps = TimeStep::simulation1()-_dateOfBirth;
-        //HACK
         InterventionManager::getSingleton().deployCts(population, *this, ageTimeSteps, nextCtsDist);
     }
 }
@@ -239,7 +238,7 @@ void Human::massITN (const OM::Population& population){
     Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
 }
 void Human::ctsITN (const OM::Population& population){
-    perHostTransmission.setupITN (TimeStep::simulation1(), population.transmissionModel());
+    perHostTransmission.setupITN (TimeStep::simulation, population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
 }
 
@@ -260,7 +259,7 @@ bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
     return withinHostModel->hasIPTiProtection(maxInterventionAge);
 }
 bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
+    return perHostTransmission.getITN().ageLessThan(maxInterventionAge);
 }
 bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasIRSProtection(maxInterventionAge);

@@ -159,17 +159,17 @@ public:
     }
     
     void deploy(TimeStep now, const ITNParams& params);
-    inline TimeStep timeOfDeployment()const{
-        return deployTime;
+    inline bool isDeployed ()const{
+        return deployTime >= TimeStep(0);
+    }
+    inline bool ageLessThan(TimeStep maxInterventionAge)const{
+        return deployTime + maxInterventionAge > TimeStep::simulation;
     }
     inline double getHoleIndex()const{
         return holeIndex;
     }
     inline double getInsecticideContent(const ITNParams& params)const{
         return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet);
-    }
-    inline double getInsecticideContent1(const ITNParams& params)const{
-        return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation1() - deployTime, insecticideDecayHet);
     }
     
     /// Call once per timestep to update holes
