@@ -79,7 +79,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
-  if( _dateOfBirth != TimeStep::simulation1() &&
+  if( _dateOfBirth != TimeStep::simulation &&
       (TimeStep::simulation != TimeStep(0) || _dateOfBirth > TimeStep::simulation))
   {
     // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
@@ -167,7 +167,7 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    TimeStep ageTimeSteps = TimeStep::simulation1()-_dateOfBirth;
+    TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
     if (clinicalModel->isDead(ageTimeSteps))
         return true;
     
@@ -205,7 +205,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 
 void Human::updateInterventionStatus(const OM::Population& population) {
     if (TimeStep::interventionPeriod >= TimeStep(0)) {
-        TimeStep ageTimeSteps = TimeStep::simulation1()-_dateOfBirth;
+        TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
         InterventionManager::getSingleton().deployCts(population, *this, ageTimeSteps, nextCtsDist);
     }
 }
@@ -216,7 +216,7 @@ void Human::massVaccinate (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
 }
 void Human::ctsVaccinate (const OM::Population&) {
-    if ( _vaccine.doCtsVaccination( TimeStep::simulation1() - _dateOfBirth ) ){
+    if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
         _vaccine.vaccinate(TimeStep::simulation);
         Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
     }
@@ -268,11 +268,11 @@ bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);
 }
 
+double Human::getAgeInYearsm1() const{
+    return (TimeStep::simulation - _dateOfBirth - TimeStep(1)).inYears();
+}
 double Human::getAgeInYears() const{
     return (TimeStep::simulation - _dateOfBirth).inYears();
-}
-double Human::getAgeInYears1() const{
-    return (TimeStep::simulation1() - _dateOfBirth).inYears();
 }
 
 
@@ -325,7 +325,7 @@ double Human::calcProbTransmissionToMosquito() const {
   5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
   for 1-day timesteps to avoid having to design and analyse a new model.
   Description: AJTMH pp.32-33 */
-  TimeStep ageTimeSteps=TimeStep::simulation1()-_dateOfBirth;
+  TimeStep ageTimeSteps=TimeStep::simulation-_dateOfBirth;
   if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation1().inDays() <= 20)
     return 0.0;
   

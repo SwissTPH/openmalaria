@@ -154,7 +154,7 @@ void Population::createInitialHumans ()
     {
 	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
-	    newHuman (-iage);
+	    newHuman (-iage-TimeStep(1));	//FIXME
 	    ++cumulativePop;
 	}
     }
@@ -205,7 +205,8 @@ void Population::update1()
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
-		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
+                //BUG: but we don't extend warmup by exactly 1 year anymore do we?
+		TimeStep::intervalsPerYear + iter->getDateOfBirth() >= TimeStep(0)
 	    )) {
             iter->destroy();
             iter = population.erase (iter);
@@ -214,7 +215,7 @@ void Population::update1()
 
         //BEGIN Population size & age structure
         ++cumPop;
-        TimeStep age = (TimeStep::simulation1() - iter->getDateOfBirth());
+        TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age) ...
         if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
@@ -229,7 +230,7 @@ void Population::update1()
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman (TimeStep::simulation1());
+        newHuman (TimeStep::simulation);
         //++nCounter;
         ++cumPop;
     }
@@ -248,7 +249,7 @@ void Population::ctsHostDemography (ostream& stream){
     list<Host::Human>::reverse_iterator it = population.rbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.rend() && it->getAgeInYears() < ubound ){
+        while( it != population.rend() && it->getAgeInYearsm1() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -305,7 +306,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYearsm1());
         }
     }
     stream << '\t' << avail/nHumans;

@@ -143,7 +143,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     numTransmittingHumans = 0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears1());
+        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
         t *= h->probTransmissionToMosquito();
         sumWt_kappa += t;

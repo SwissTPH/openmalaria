@@ -138,8 +138,8 @@ public:
   /// @brief Small functions
   //@{
   //! Get the age in years, based on current TimeStep::simulation.
+  double getAgeInYearsm1() const;	//FIXME
   double getAgeInYears() const;
-  double getAgeInYears1() const;
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
@@ -259,7 +259,7 @@ private:
   /// set by initHumanParameters
   static int _ylagLen;
   
-  //!Date of birth, time step since start of warmup
+  /// Time of birth (TimeStep::simulation)
   TimeStep _dateOfBirth;
   
   /// The next continuous distribution in the series

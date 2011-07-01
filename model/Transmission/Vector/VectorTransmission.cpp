@@ -34,7 +34,7 @@ using namespace OM::util;
 double VectorTransmission::invMeanPopAvail (bool plus1, const std::list<Host::Human>& population, int populationSize) {
     double sumRelativeAvailability = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (plus1? h->getAgeInYears1() : h->getAgeInYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (plus1? h->getAgeInYears() : h->getAgeInYearsm1());
     }
     if( sumRelativeAvailability > 0.0 ){
         return populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
