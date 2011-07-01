@@ -97,7 +97,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         human.withinHostModel->clearInfections (TimeStep::simulation1(), latestReport.getState() == Pathogenesis::STATE_SEVERE);
     }
 
-    if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation1() ) {
+    if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {
         human.removeFromCohort();
     }
     if ( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ) {
@@ -118,12 +118,12 @@ bool ClinicalImmediateOutcomes::uncomplicatedEvent (
                          State( pgState & Pathogenesis::STATE_MALARIA )   // mask to SICK and MALARIA flags
                         );
 
-    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > TimeStep::simulation1())
+    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
                             ? Regimen::UC2 : Regimen::UC
                             ;
 
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
-        _tLastTreatment = TimeStep::simulation1();
+        _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
             Monitoring::Surveys.getSurvey(inCohort).reportTreatments1( ageGroup, 1 );
         if ( regimen == Regimen::UC2 )
@@ -192,7 +192,7 @@ bool ClinicalImmediateOutcomes::severeMalaria (
     double prandom = random::uniform_01();
 
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
-        _tLastTreatment = TimeStep::simulation1();
+        _tLastTreatment = TimeStep::simulation;
         Monitoring::Surveys.getSurvey(inCohort).reportTreatments3( ageGroup, 1 );
 
         State sevTreated = State (Pathogenesis::STATE_SEVERE | Pathogenesis::EVENT_IN_HOSPITAL);

@@ -54,6 +54,10 @@ public:
 
     ClinicalEventScheduler (double cF, double tSF);
     ~ClinicalEventScheduler ();
+    
+    virtual bool notAtRisk() {
+        return false;
+    }
 
     virtual void massDrugAdministration(Human& human);
 

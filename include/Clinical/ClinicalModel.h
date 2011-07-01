@@ -93,13 +93,13 @@ public:
    * infantDeaths arrays. */
   void updateInfantDeaths (TimeStep ageTimeSteps);
   
-  /** Used with IPT within host model to potentially skip summarizing.
-   *
-   * NOTE: Only used for IPT, which can only be used with OldCaseManagement.
-   * In other cases, this just returns false. */
-  virtual bool recentTreatment() {
-    return false;
-  }
+  /** Used with IPT within host model to potentially avoid further reports:
+   * The four timesteps after a bout are not at risk of a further bout since
+   * if one occured it would be considered the same bout.
+   * 
+   * Only used for IPT, which can only be used with OldCaseManagement.
+   * In other cases, this can just return false. */
+  virtual bool notAtRisk() =0;
   
   virtual void massDrugAdministration(Human& human) =0;
   
