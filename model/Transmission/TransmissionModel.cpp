@@ -78,7 +78,8 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+    // value from last time-step:
+    stream<<'\t'<<initialisationEIR[(TimeStep::simulation - TimeStep(1)) % TimeStep::stepsPerYear];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
@@ -172,14 +173,12 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
 }
 
 void TransmissionModel::updateSummaries () {
-    //TODO: surely we don't need all of these!
-    int tmod1 = TimeStep::simulation1() % TimeStep::stepsPerYear;   // now
-    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // also now, just with a different index
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
+    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;
+    size_t lKMod = TimeStep::simulation % laggedKappa.size();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod1 == 0) {
+    if (tmod == 0) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
@@ -203,7 +202,7 @@ void TransmissionModel::updateSummaries () {
     tsAdultEntoInocs = 0.0;
     tsNumAdults = 0;
 
-    surveyInputEIR += initialisationEIR[tmod1];
+    surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += tsAdultEIR;
 }
 
@@ -226,7 +225,8 @@ double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, d
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setInfectiousnessToMosq(laggedKappa[(TimeStep::simulation-TimeStep(1)) % laggedKappa.size()]); //this is the last value set
+  // report value from last time-step:
+  survey.setInfectiousnessToMosq(laggedKappa[(TimeStep::simulation-TimeStep(1)) % laggedKappa.size()]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
 
   survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.

@@ -138,6 +138,10 @@ int Simulation::start(){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
             // do reporting (continuous and surveys)
+            // Note that monitoring should only report things which happened
+            // before this time-step, so really this is a report from the end
+            // of the last time-step, and indicies may need to be adjusted
+            // accordingly.
             Continuous::update();
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
                 population->newSurvey();

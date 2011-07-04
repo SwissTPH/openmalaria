@@ -182,7 +182,6 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   double eir;
   switch (simulationMode) {
     case equilibriumMode:
-      //FIXME: figure out if it is correct that 1 is subtracted here and below but not elsewhere
       eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
       break;
     case transientEIRknown:

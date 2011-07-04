@@ -306,7 +306,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYearsm1());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYearsm1());	//FIXME: should be age during last time-step perhaps? Not quite clear from spec, but seems most logical since we only report events from then.
         }
     }
     stream << '\t' << avail/nHumans;

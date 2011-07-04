@@ -210,7 +210,7 @@ TimeStep VectorTransmission::initIterate () {
 double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
     host.update(_ITNParams);
     if (simulationMode == equilibriumMode){
-        return initialisationEIR[TimeStep::simulation1() % TimeStep::stepsPerYear]
+        return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{      // dynamicMode
         double simEIR = 0.0;
