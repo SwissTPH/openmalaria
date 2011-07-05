@@ -138,10 +138,6 @@ int Simulation::start(){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
             // do reporting (continuous and surveys)
-            // Note that monitoring should only report things which happened
-            // before this time-step, so really this is a report from the end
-            // of the last time-step, and indicies may need to be adjusted
-            // accordingly.
             Continuous::update();
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
                 population->newSurvey();
@@ -150,10 +146,9 @@ int Simulation::start(){
             
             // deploy interventions and update
             interventions->deploy( *population );
+            ++TimeStep::simulation;	//TODO: move to after update
             population->update1();
             
-            // both indecies are now zero-based (first time-step of sim/interv period is 0)
-            ++TimeStep::simulation;
             ++TimeStep::interventionPeriod;
             
             util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());

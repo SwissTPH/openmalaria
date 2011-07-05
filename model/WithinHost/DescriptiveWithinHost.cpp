@@ -43,10 +43,10 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 
 // -----  Simple infection adders/removers  -----
 
-void DescriptiveWithinHostModel::newInfection(TimeStep now) {
+void DescriptiveWithinHostModel::newInfection() {
     ++PopulationStats::totalInfections;
     if (numInfs < MAX_INFECTIONS) {
-        infections.push_back(new DescriptiveInfection(now));
+        infections.push_back(new DescriptiveInfection());
         numInfs++;
         ++PopulationStats::allowedInfections;
     }

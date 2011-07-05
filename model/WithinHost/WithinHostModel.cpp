@@ -103,14 +103,11 @@ WithinHostModel::WithinHostModel () :
 }
 
 
-void WithinHostModel::clearInfections (TimeStep now, bool) {
+void WithinHostModel::clearInfections (bool) {
   clearAllInfections();
 }
 
-void WithinHostModel::continuousIPT (Monitoring::AgeGroup, bool) {
-  throw util::xml_scenario_error (string ("Continuous IPT treatment when no IPT description is present in interventions"));
-}
-void WithinHostModel::timedIPT (Monitoring::AgeGroup, bool) {
+void WithinHostModel::IPTiTreatment (Monitoring::AgeGroup, bool) {
   throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 bool WithinHostModel::hasIPTiProtection (TimeStep maxInterventionAge) const {

@@ -180,7 +180,7 @@ public:
     virtual void deploy (OM::Population& population) {
         Population::HumanPop& popList = population.getList();
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth() - TimeStep(1) /*FIXME*/;
+            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     if( util::random::uniform_01() < coverage ){
@@ -232,7 +232,7 @@ public:
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally cohort
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth() - TimeStep(1) /*FIXME*/;
+            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->getInCohort() ){
                     total+=1;
@@ -379,12 +379,12 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         // continuous deployments:
         typedef scnXml::IPT::ContinuousSequence::const_iterator CIt;
         for( CIt it = ipt.getContinuous().begin(); it != ipt.getContinuous().end(); ++it ){
-            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
+            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::deployIptDose ) );
         }
         // timed deployments:
         typedef scnXml::IPT::TimedSequence::const_iterator It;
         for( It it = ipt.getTimed().begin(); it != ipt.getTimed().end(); ++it ){
-            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
+            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::IPTiTreatment, &Host::Human::hasIPTiProtection ) );
         }
     }
     if( intervElt.getITN().present() ){

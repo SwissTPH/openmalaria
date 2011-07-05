@@ -36,7 +36,7 @@ public:
     static void init();
     
     /// Constructor
-    PennyInfection(TimeStep now, uint32_t protID);
+    PennyInfection(uint32_t protID);
     /// Resume from a checkpoint
     PennyInfection (istream& stream);
     /// Destructor

@@ -158,12 +158,9 @@ public:
         insecticideDecayHet & stream;
     }
     
-    void deploy(TimeStep now, const ITNParams& params);
-    inline bool isDeployed ()const{
-        return deployTime >= TimeStep(0);
-    }
-    inline bool ageLessThan(TimeStep maxInterventionAge)const{
-        return deployTime + maxInterventionAge > TimeStep::simulation;
+    void deploy(const ITNParams& params);
+    inline TimeStep timeOfDeployment()const{
+        return deployTime;
     }
     inline double getHoleIndex()const{
         return holeIndex;

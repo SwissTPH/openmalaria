@@ -34,8 +34,8 @@ public:
 	Infection(stream)
     {}
     /// Per instance initialisation; create new inf.
-    CommonInfection(TimeStep now, uint32_t protID) :
-	Infection(now, protID)
+    CommonInfection(uint32_t protID) :
+	Infection(protID)
     {}
     virtual ~CommonInfection() {}
     //@}

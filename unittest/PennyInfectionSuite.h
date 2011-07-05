@@ -41,7 +41,7 @@ public:
         PennyInfection::init();
         TimeStep::simulation = TimeStep(7);     // value shouldn't be important
         util::random::seed( 1095 );
-        infection = new PennyInfection (TimeStep::simulation, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
+        infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
         delete infection;

@@ -187,18 +187,18 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
 }
 
 void Human::addInfection(){
-    withinHostModel->newInfection(TimeStep::simulation);
+    withinHostModel->newInfection();
 }
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int numInf = infIncidence->numNewInfections( *this, EIR );
     for (int i=1;i<=numInf; ++i) {
-        withinHostModel->newInfection(TimeStep::simulation);
+        withinHostModel->newInfection();
     }
     
     // Cache total density for infectiousness calculations
-    _ylag[TimeStep::simulation1().asInt()%_ylagLen]=withinHostModel->getTotalDensity();
+    _ylag[TimeStep::simulation.asInt()%_ylagLen]=withinHostModel->getTotalDensity();
     
     withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
 }
@@ -206,27 +206,28 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 void Human::updateInterventionStatus(const OM::Population& population) {
     if (TimeStep::interventionPeriod >= TimeStep(0)) {
         TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
+        //HACK
         InterventionManager::getSingleton().deployCts(population, *this, ageTimeSteps, nextCtsDist);
     }
 }
 
 
 void Human::massVaccinate (const OM::Population&) {
-    _vaccine.vaccinate(TimeStep::simulation);
+    _vaccine.vaccinate();
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
 }
 void Human::ctsVaccinate (const OM::Population&) {
     if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
-        _vaccine.vaccinate(TimeStep::simulation);
+        _vaccine.vaccinate();
         Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
     }
 }
 
-void Human::timedIPT (const OM::Population&) {
-  withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+void Human::IPTiTreatment (const OM::Population&) {
+  withinHostModel->IPTiTreatment (getMonitoringAgeGroup(), _inCohort);
 }
-void Human::continuousIPT (const OM::Population&) {
-    withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
+void Human::deployIptDose (const OM::Population&) {
+    withinHostModel->deployIptDose( getMonitoringAgeGroup(), _inCohort );
 }
 
 void Human::massDrugAdministration (const OM::Population&) {
@@ -234,11 +235,11 @@ void Human::massDrugAdministration (const OM::Population&) {
 }
 
 void Human::massITN (const OM::Population& population){
-    perHostTransmission.setupITN (TimeStep::simulation, population.transmissionModel());
+    perHostTransmission.setupITN (population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
 }
 void Human::ctsITN (const OM::Population& population){
-    perHostTransmission.setupITN (TimeStep::simulation, population.transmissionModel());
+    perHostTransmission.setupITN (population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
 }
 
@@ -259,7 +260,7 @@ bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
     return withinHostModel->hasIPTiProtection(maxInterventionAge);
 }
 bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getITN().ageLessThan(maxInterventionAge);
+    return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }
 bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasIRSProtection(maxInterventionAge);
@@ -268,9 +269,6 @@ bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);
 }
 
-double Human::getAgeInYearsm1() const{
-    return (TimeStep::simulation - _dateOfBirth - TimeStep(1)).inYears();
-}
 double Human::getAgeInYears() const{
     return (TimeStep::simulation - _dateOfBirth).inYears();
 }
@@ -279,7 +277,7 @@ double Human::getAgeInYears() const{
 void Human::summarize() {
     // 5-day only, compatibility option:
     if( util::ModelOptions::option( util::REPORT_ONLY_AT_RISK ) &&
-        clinicalModel->notAtRisk() ){
+        clinicalModel->recentTreatment() ){
         // This modifies the denominator to treat the 4*5 day intervals
         // after a bout as 'not at risk' to match the IPTi trials
         return;
@@ -326,7 +324,7 @@ double Human::calcProbTransmissionToMosquito() const {
   for 1-day timesteps to avoid having to design and analyse a new model.
   Description: AJTMH pp.32-33 */
   TimeStep ageTimeSteps=TimeStep::simulation-_dateOfBirth;
-  if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation1().inDays() <= 20)
+  if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20)
     return 0.0;
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
@@ -340,7 +338,7 @@ double Human::calcProbTransmissionToMosquito() const {
   // These values are one timestep more recent than that, however the calculated
   // value is not used until the next timestep when then ages would be correct.
   // Min TimeStep::simulation is 20 days, so LHS of '%' operator is never negative.
-  int firstIndex = TimeStep::simulation1().asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
+  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
   double x = beta1 * _ylag[firstIndex % _ylagLen]
            + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
            + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];

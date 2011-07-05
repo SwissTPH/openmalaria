@@ -182,7 +182,8 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   double eir;
   switch (simulationMode) {
     case equilibriumMode:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      //FIXME: figure out if it is correct that 1 is subtracted here and below but not elsewhere
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -190,7 +191,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
       eir = interventionEIR[TimeStep::interventionPeriod.asInt()];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.

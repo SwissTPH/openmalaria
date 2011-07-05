@@ -72,7 +72,7 @@ public:
     }
   
     /// Give individual a new ITN as of time timeStep.
-    void setupITN (TimeStep now, const TransmissionModel& tm);
+    void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
     inline void setupIRS () {
         if( IRSDecay.get() == 0 ){

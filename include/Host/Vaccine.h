@@ -101,7 +101,7 @@ public:
     }
 
     /** Update efficacies and the number of doses in this human. */
-    void vaccinate(TimeStep now);
+    void vaccinate();
     /// Has been vaccinated within considered effective duration?
     bool hasProtection(TimeStep maxInterventionAge)const;
 

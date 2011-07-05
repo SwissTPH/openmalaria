@@ -106,8 +106,8 @@ void DescriptiveInfection::init () {
 
 // -----  non-static init/destruction  -----
 
-DescriptiveInfection::DescriptiveInfection (TimeStep now) :
-        Infection(now, 0xFFFFFFFF),
+DescriptiveInfection::DescriptiveInfection () :
+        Infection(0xFFFFFFFF),
         _duration(infectionDuration())
 {
     assert( TimeStep::interval == 5 );

@@ -62,7 +62,7 @@ public:
     ClinicalImmediateOutcomes (double cF, double tSF);
     ~ClinicalImmediateOutcomes ();
 
-    virtual bool notAtRisk() {
+    inline bool recentTreatment() {
         return (TimeStep::simulation-_tLastTreatment >= TimeStep(1) &&
                 TimeStep::simulation-_tLastTreatment <= TimeStep(4));
     }

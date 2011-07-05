@@ -31,10 +31,10 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorTransmission::invMeanPopAvail (bool plus1, const std::list<Host::Human>& population, int populationSize) {
+double VectorTransmission::invMeanPopAvail (const std::list<Host::Human>& population, int populationSize) {
     double sumRelativeAvailability = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (plus1? h->getAgeInYears() : h->getAgeInYearsm1());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
     }
     if( sumRelativeAvailability > 0.0 ){
         return populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
@@ -128,7 +128,7 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
-    double iMPA = invMeanPopAvail(false, population, populationSize);
+    double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i) {
         species[i].setupNv0 (i, population, populationSize, iMPA);
     }
@@ -227,7 +227,7 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
     TransmissionModel::updateKappa( population );
     
-    double iMPA = invMeanPopAvail(true, population, populationSize);
+    double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
     }

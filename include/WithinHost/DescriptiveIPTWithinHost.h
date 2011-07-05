@@ -44,13 +44,16 @@ public:
   DescriptiveIPTWithinHost ();
   
   //! Create a new infection requires that the human is allocated and current
-  virtual void newInfection(TimeStep now);
+  virtual void newInfection();
   virtual void loadInfection(istream& stream);
   
   /// Conditionally clear all infections
-  virtual void clearInfections (TimeStep now, bool isSevere);
-  virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
+  virtual void clearInfections (bool isSevere);
+  /// Continuous intervention: give an IPTi dose
+  virtual void deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Prescribe IPTi with probability compliance. Only called if IPT present.
+  virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Last IPTi dose recent enough to give protection?
   virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   
 protected:

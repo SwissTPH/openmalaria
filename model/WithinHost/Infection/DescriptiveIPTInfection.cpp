@@ -51,8 +51,8 @@ void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlI
 
 // -----  non-static init/destruction  -----
 
-DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep now, TimeStep lastSPdose) :
-  DescriptiveInfection(now), _SPattenuate(false)
+DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
+  DescriptiveInfection(), _SPattenuate(false)
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
@@ -73,8 +73,8 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep now, TimeStep lastSPdo
     The time window starts after the prophylactic period ended (during the prophylactic
     period infections are cleared) and ends genotypeTolPeriod(iTemp%iData%gType%ID) time steps later.
     */
-    if (now-lastSPdose > genotypes[proteome_ID].proph &&
-	now-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
+    if (TimeStep::simulation-lastSPdose > genotypes[proteome_ID].proph &&
+	TimeStep::simulation-lastSPdose <= genotypes[proteome_ID].proph + genotypes[proteome_ID].tolPeriod){
       _SPattenuate=true;
     }
 }

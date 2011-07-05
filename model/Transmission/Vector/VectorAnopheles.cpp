@@ -298,7 +298,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
 
   for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
     const PerHostTransmission& host = h->perHostTransmission;
-    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYearsm1(), invMeanPopAvail);
+    double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
     leaveSeekingStateRate += prod;
     prod *= host.probMosqBiting(humanBase, sIndex);
     sumPFindBite += prod;
@@ -481,7 +481,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses TimeStep::interval day (currently 5 day) time steps.
-  int firstDay = TimeStep::simulation1().inDays();
+  int firstDay = TimeStep::simulation.inDays();
   for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).

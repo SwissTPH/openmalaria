@@ -123,8 +123,8 @@ const double Omega=0.00025;
 
 //@}
 
-CommonInfection* createPennyInfection (TimeStep now, uint32_t protID) {
-    return new PennyInfection (now, protID);
+CommonInfection* createPennyInfection (uint32_t protID) {
+    return new PennyInfection (protID);
 }
 
 CommonInfection* checkpointedPennyInfection (istream& stream) {
@@ -139,8 +139,8 @@ void PennyInfection::init() {
     CommonWithinHost::checkpointedInfection = &checkpointedPennyInfection;
 }
 
-PennyInfection::PennyInfection(TimeStep now, uint32_t protID):
-        CommonInfection(now, protID),
+PennyInfection::PennyInfection(uint32_t protID):
+        CommonInfection(protID),
         variantSpecificSummation(0),
         clonalSummation(0)
 {
@@ -167,10 +167,10 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
     if (ageOfInfection == TimeStep(0))
     {
         // assign initial densities (Y circulating, X sequestered)
-        size_t today = TimeStep::simulation % delta_C;
+        size_t today = (TimeStep::simulation % delta_C);
         cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
         _density = cirDensities[today];
-        today = TimeStep::simulation % delta_V;
+        today = (TimeStep::simulation % delta_V);
         seqDensities[today] = exp(random::gauss(mu_X,sigma_X));
     }
     else

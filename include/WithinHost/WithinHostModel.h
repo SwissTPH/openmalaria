@@ -62,13 +62,13 @@ public:
   bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /// Create a new infection within this human
-  virtual void newInfection(TimeStep now) =0;
+  virtual void newInfection() =0;
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
    * uses IPT code to determine whether to clear all infections or do nothing
    * (isSevere is only used in the IPT case). */
-  virtual void clearInfections (TimeStep now, bool isSevere);
+  virtual void clearInfections (bool isSevere);
   
   /** Medicate drugs (wraps drug's medicate).
    *
@@ -97,10 +97,10 @@ public:
   
   ///@brief Only do anything when IPT is present:
   //@{
-  /// Continuous deployment for IPT
-  virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  /// Timed deployment for IPT
-  virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
+  /// Conditionally set last SP dose
+  virtual void deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort) {}
+  /// Prescribe IPTi with probability compliance. Only called if IPT present.
+  virtual void IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Last IPTi dose recent enough to give protection?
   virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   //@}

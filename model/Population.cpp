@@ -154,7 +154,7 @@ void Population::createInitialHumans ()
     {
 	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
 	while (cumulativePop < targetPop) {
-	    newHuman (-iage-TimeStep(1));	//FIXME
+	    newHuman (-iage);
 	    ++cumulativePop;
 	}
     }
@@ -205,8 +205,7 @@ void Population::update1()
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
-                //BUG: but we don't extend warmup by exactly 1 year anymore do we?
-		TimeStep::intervalsPerYear + iter->getDateOfBirth() >= TimeStep(0)
+		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
 	    )) {
             iter->destroy();
             iter = population.erase (iter);
@@ -249,7 +248,7 @@ void Population::ctsHostDemography (ostream& stream){
     list<Host::Human>::reverse_iterator it = population.rbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.rend() && it->getAgeInYearsm1() < ubound ){
+        while( it != population.rend() && it->getAgeInYears() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -306,7 +305,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYearsm1());	//FIXME: should be age during last time-step perhaps? Not quite clear from spec, but seems most logical since we only report events from then.
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
         }
     }
     stream << '\t' << avail/nHumans;
@@ -314,7 +313,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
 void Population::ctsNetsOwned (ostream& stream){
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().isDeployed() )
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
             ++nNets;
     }
     stream << '\t' << nNets;
@@ -323,7 +322,7 @@ void Population::ctsNetHoleIndex (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().isDeployed() ){
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
         }
@@ -339,7 +338,7 @@ void Population::ctsNetInsecticideContent (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().isDeployed() ){
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(params);
         }

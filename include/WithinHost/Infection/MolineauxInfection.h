@@ -34,7 +34,7 @@ class MolineauxInfection : public CommonInfection {
 public:
 	MolineauxInfection (istream& stream);
 	    //! Constructor
-	MolineauxInfection(TimeStep now, uint32_t protID);
+	MolineauxInfection(uint32_t protID);
 
 	virtual ~MolineauxInfection () {};
 	static void init();

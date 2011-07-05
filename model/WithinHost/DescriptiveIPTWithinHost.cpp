@@ -73,11 +73,11 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 
 // -----  Simple infection adders/removers  -----
 
-void DescriptiveIPTWithinHost::newInfection(TimeStep now){
+void DescriptiveIPTWithinHost::newInfection(){
     ++PopulationStats::totalInfections;
   if (numInfs < MAX_INFECTIONS) {
     _cumulativeInfections++;
-    infections.push_back(new DescriptiveIPTInfection(now, _lastSPDose));
+    infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
     numInfs++;
     ++PopulationStats::allowedInfections;
   }
@@ -89,38 +89,38 @@ void DescriptiveIPTWithinHost::loadInfection(istream& stream){
 
 // -----  Events setting _lastSPDose  -----
 
-void DescriptiveIPTWithinHost::clearInfections (TimeStep now, bool isSevere) {
+void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
   TimeStep fortnight = TimeStep::fromDaysNearest(14.0);	// round to nearest
   if (isSevere) {
-  } else if(now-_lastIptiOrPlacebo <= fortnight) {
+  } else if(TimeStep::simulation-_lastIptiOrPlacebo <= fortnight) {
           // IPTi trials used quinine for fevers within 14 days of an ipti or placebo dose   
-  } else if(now-_lastSPDose <=  fortnight) {
+  } else if(TimeStep::simulation-_lastSPDose <=  fortnight) {
           /*
     second line used if fever within 14 days of SP dose (ipti or treatment)
           */
   } else if( iptiEffect ==  PLACEBO_SP ||  iptiEffect ==  IPT_SP) {
       // add 1 to delay start until next update since effect of SP already happened this time step
-    _lastSPDose=now+TimeStep(1);
+    _lastSPDose=TimeStep::simulation+TimeStep(1);
   } else if( iptiEffect ==  PLACEBO_CLEAR_INFECTIONS ||  iptiEffect ==  IPT_CLEAR_INFECTIONS) {
   } else if(iptiEffect >= IPT_SEASONAL_MIN && iptiEffect < IPT_MAX) {
       //TODO: this isn't SP then?
   } else {
       //TODO: what is this? Also SP?
       // add 1 to delay start until next update since effect of SP already happened this time step
-    _lastSPDose=now+TimeStep(1);
+    _lastSPDose=TimeStep::simulation+TimeStep(1);
     // SPAction will first act at the beginning of the next Global::interval
   }
   clearAllInfections();
 }
 
-void DescriptiveIPTWithinHost::continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort) {
+void DescriptiveIPTWithinHost::deployIptDose (Monitoring::AgeGroup ageGroup, bool inCohort) {
   // assumes 5-day intervals and Niakhar seasonality
   // These numbers, should have MAX = MIN + 18 (modulo 73).
   static int IPT_MIN_INTERVAL[9] = { 43, 49, 55, 61, 67, 37, 31, 25, 19 };
   static int IPT_MAX_INTERVAL[9] = { 61, 67,  0,  6, 12, 55, 49, 43, 31 };
   
   if (iptiEffect >= IPT_SEASONAL_MIN && iptiEffect <= IPT_SEASONAL_MAX) {
-    int yearInterval = TimeStep::simulation1() % TimeStep::stepsPerYear;
+    int yearInterval = TimeStep::simulation % TimeStep::stepsPerYear;
     int min = IPT_MIN_INTERVAL[iptiEffect-14];
     int max = IPT_MAX_INTERVAL[iptiEffect-14];
     // We're using modular arithmatic here, to represent a time period 5*18 days long.
@@ -133,10 +133,19 @@ void DescriptiveIPTWithinHost::continuousIPT (Monitoring::AgeGroup ageGroup, boo
     }
   }
   
-    timedIPT(ageGroup, inCohort);
+    _lastIptiOrPlacebo=TimeStep::simulation;
+    /*
+    iptiEffect denotes treatment or placebo group
+    and also the treatment given when sick (trial-dependent)
+    */
+    if (iptiEffect >= IPT_MIN) {
+        //TODO: is this SP?
+	_lastSPDose=TimeStep::simulation;
+	Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
+    }
 }
 
-void DescriptiveIPTWithinHost::timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort) {
+void DescriptiveIPTWithinHost::IPTiTreatment (Monitoring::AgeGroup ageGroup, bool inCohort) {
   //Set the last SP Dose given for the eligible humans - is this all we need to do?
   
   _lastIptiOrPlacebo = TimeStep::simulation;
@@ -144,7 +153,6 @@ void DescriptiveIPTWithinHost::timedIPT (Monitoring::AgeGroup ageGroup, bool inC
   // iptiEffect denotes treatment or placebo group
   // and also the treatment given when sick (trial-dependent)
   if (iptiEffect >= IPT_MIN){
-        //TODO: is this SP?
     _lastSPDose = TimeStep::simulation;
     Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
   }

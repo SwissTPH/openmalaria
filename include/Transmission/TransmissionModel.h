@@ -208,9 +208,7 @@ protected:
   /** Entomological inoculation rate for adults during the
    * pre-intervention phase.
    * 
-   * Length: time-steps per year
-   * 
-   * Index TimeStep::simulation % TimeStep::stepsPerYear corresponds to today.
+   * Length: Global::intervalsPerYear
    *
    * Units: infectious bites per adult per timestep
    *

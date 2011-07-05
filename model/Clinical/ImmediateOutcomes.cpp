@@ -65,7 +65,7 @@ void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
         return;
     }
     // We need to pass the is-severe state for the IPT code.
-    human.withinHostModel->clearInfections(TimeStep::simulation, latestReport.getState() == Pathogenesis::STATE_SEVERE);
+    human.withinHostModel->clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
     Monitoring::Surveys.getSurvey(human.getInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
 }
 
@@ -94,7 +94,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     }
 
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (TimeStep::simulation, latestReport.getState() == Pathogenesis::STATE_SEVERE);
+        human.withinHostModel->clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
     }
 
     if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {

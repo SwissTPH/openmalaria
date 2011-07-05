@@ -99,8 +99,8 @@ public:
   /// If individual hasn't dropped out, vaccinate & report EPI
   void ctsVaccinate (const OM::Population&);
   
-  void continuousIPT (const OM::Population&);
-  void timedIPT (const OM::Population&);
+  void IPTiTreatment (const OM::Population&);
+  void deployIptDose (const OM::Population&);
   
   /// Give human a new ITN via mass deployment
   void massITN (const OM::Population&);
@@ -138,7 +138,6 @@ public:
   /// @brief Small functions
   //@{
   //! Get the age in years, based on current TimeStep::simulation.
-  double getAgeInYearsm1() const;	//FIXME
   double getAgeInYears() const;
   
   //! Returns the date of birth
@@ -259,7 +258,7 @@ private:
   /// set by initHumanParameters
   static int _ylagLen;
   
-  /// Time of birth (TimeStep::simulation)
+  //!Date of birth, time step since start of warmup
   TimeStep _dateOfBirth;
   
   /// The next continuous distribution in the series

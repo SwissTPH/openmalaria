@@ -31,8 +31,8 @@ class Infection {
 public:
   static void init();
   
-  Infection (TimeStep now, uint32_t protID) :
-    _startdate(now),
+  Infection (uint32_t protID) :
+    _startdate(TimeStep::simulation),
     proteome_ID(protID),
     _density(0.0),
     _cumulativeExposureJ(0.0)

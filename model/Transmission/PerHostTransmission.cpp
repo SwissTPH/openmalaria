@@ -76,37 +76,37 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 // an if() when interventions aren't present.
 double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].entoAvailability;
-    if (net.isDeployed()) {
+    if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
     }
     if (timestepIRS >= TimeStep(0))
-        alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation1() - timestepIRS, hetSampleIRS));
+        alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
     if (timestepVA >= TimeStep(0))
-        alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation1() - timestepVA, hetSampleVA));
+        alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
 
     return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].probMosqBiting;
-    if (net.isDeployed()) {
+    if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
     }
     return P_B_i;
 }
 double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].probMosqRest;
-    if (net.isDeployed()) {
+    if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);
     }
     if (timestepIRS >= TimeStep(0))
-        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation1() - timestepIRS, hetSampleIRS));
+        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
     return pRest;
 }
 
-void PerHostTransmission::setupITN (TimeStep now, const TransmissionModel& tm) {
+void PerHostTransmission::setupITN (const TransmissionModel& tm) {
     const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
     if (vTM) {
-        net.deploy(now, vTM->getITNParams());
+        net.deploy(vTM->getITNParams());
     }
 }
 

@@ -59,7 +59,7 @@ public:
   ///@name CTOR & DTOR
   //@{
   //! Constructor
-  DescriptiveInfection (TimeStep now);
+  DescriptiveInfection ();
   /// Checkpoint loading constructor
   DescriptiveInfection (istream& stream);
   

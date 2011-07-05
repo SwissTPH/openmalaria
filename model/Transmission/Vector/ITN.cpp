@@ -268,9 +268,9 @@ double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, dou
     return survivalFactor;
 }
 
-void ITN::deploy(TimeStep now, const ITNParams& params) {
-    deployTime = now;
-    disposalTime = now + params.attritionOfNets->sampleAgeOfDecay();
+void ITN::deploy(const ITNParams& params) {
+    deployTime = TimeStep::simulation;
+    disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling

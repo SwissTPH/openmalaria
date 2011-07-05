@@ -41,7 +41,7 @@ public:
   /// For checkpointing (don't use for anything else)
   EmpiricalInfection(istream& stream);
   /// Per instance initialisation; create new inf.
-  EmpiricalInfection(TimeStep now, uint32_t protID, double growthRateMultiplier);
+  EmpiricalInfection(uint32_t protID, double growthRateMultiplier);
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to

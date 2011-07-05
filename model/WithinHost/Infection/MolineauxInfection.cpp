@@ -74,8 +74,8 @@ const int kappa_v=3;
 const double C=1.0;
 //@}
 
-CommonInfection* createMolineauxInfection (TimeStep now, uint32_t protID) {
-    return new MolineauxInfection (now, protID);
+CommonInfection* createMolineauxInfection (uint32_t protID) {
+    return new MolineauxInfection (protID);
 }
 
 CommonInfection* checkpointedMolineauxInfection (istream& stream) {
@@ -100,8 +100,8 @@ void MolineauxInfection::init() {
    }
 }
 
-MolineauxInfection::MolineauxInfection(TimeStep now, uint32_t protID):
-        CommonInfection(now, protID)
+MolineauxInfection::MolineauxInfection(uint32_t protID):
+        CommonInfection(protID)
 {
     for (size_t i=0;i<v; i++)
     {

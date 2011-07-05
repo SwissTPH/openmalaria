@@ -31,8 +31,8 @@
 
 namespace OM { namespace WithinHost {
     
-CommonInfection* createDummyInfection (TimeStep now, uint32_t protID) {
-    return new DummyInfection (now, protID);
+CommonInfection* createDummyInfection (uint32_t protID) {
+    return new DummyInfection (protID);
 }
 CommonInfection* checkpointedDummyInfection (istream& stream) {
     return new DummyInfection (stream);
@@ -43,8 +43,8 @@ void DummyInfection::init () {
     CommonWithinHost::checkpointedInfection = &checkpointedDummyInfection;
 }
 
-DummyInfection::DummyInfection (TimeStep now, uint32_t protID) :
-    CommonInfection(now, protID)
+DummyInfection::DummyInfection (uint32_t protID) :
+    CommonInfection(protID)
 {
     _density=16;	// increased by DH to avoid zeros in initialKappa
 }
