@@ -33,7 +33,7 @@ class ApproxEqual (object):
     def __init__(self, relPrec, absPrec):
         self.relPrecision = relPrec
         self.absPrecision = absPrec
-        self.totalRelDiff = 0.0
+        self.sumRelDiffs = 0.0
     
     # Careful with NaN, +/- inf and 0 values! Note: inf == inf
     # Check a and b are approximately equal. Return true if:
@@ -53,8 +53,14 @@ class ApproxEqual (object):
             tolerance = self.relPrecision * max(math.fabs(a),math.fabs(b))
             tolerance = max(tolerance, self.absPrecision)
             relDiff = math.fabs(a-b) / tolerance
-        self.totalRelDiff += relDiff
+        self.sumRelDiffs += relDiff
         return (relDiff < 1.0)
+    
+    def getTotalRelDiff(self):
+        # this value is for example increased (from 0) by 1/2 by every
+        # difference by an order of 2, as long as the values are larger
+        # than absPrecision. Each difference should add less than 1.
+        return self.sumRelDiffs * self.relPrecision
 
 # As ApproxEqual, but considers two NaNs or two pos./neg. infs "the same"
 class ApproxSame (ApproxEqual):
@@ -68,7 +74,7 @@ class ApproxSame (ApproxEqual):
             if copysign(1.0,a)==copysign(1.0,b):
                 return True
             else:
-                self.totalRelDiff += 1e10000
+                self.sumRelDiffs += 1e10000
                 return False
         else:
             return ApproxEqual.__call__(self,a,b)
@@ -111,7 +117,7 @@ class TestApproxEqual (unittest.TestCase):
         self.assert_ (not approxEqualRel (0.000001, 0.000000999999))
         self.assert_ (    approxEqualRel (0.000001, 0.0000009999995))
         approxEqual = ApproxEqual(0, 1e-11)
-        self.assert_ (approxEqual (approxEqualRel.totalRelDiff, 1.49999999994))
+        self.assert_ (approxEqual (approxEqualRel.sumRelDiffs, 1.49999999994))
 
 
 if __name__ == '__main__':

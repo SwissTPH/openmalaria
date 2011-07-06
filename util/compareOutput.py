@@ -120,6 +120,8 @@ ident is 1 if files are binary-equal."""
         print str(numMissing1) + " entries missing from first file, " + str(numMissing2) +" from second"
         ret = 3
     
+    maxDiffSum=0.0
+    maxAbsDiffSum=0.0
     for (k.a,absDiff) in perMeasureDiffAbsSum.iteritems():
         if not (absDiff <= 1e-6):   # handle NANs
             # standard division throws on divide-by-zero, which I don't want
@@ -132,21 +134,27 @@ ident is 1 if files are binary-equal."""
             diff=perMeasureDiffSum[k.a]
             sum1=perMeasureTotal1[k.a]
             sum2=perMeasureTotal2[k.a]
-            print "for measure "+str(k.a)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(div(diff,sum1))+"\t(abs diff)/sum: "+str(div(absDiff,sum1))
+            diffSum=div(diff,sum1)
+            maxDiffSum=max(maxDiffSum,math.fabs(diffSum))
+            absDiffSum=div(absDiff,sum1)
+            maxAbsDiffSum=max(maxAbsDiffSum,absDiffSum)
+            print "for measure "+str(k.a)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(diffSum)+"\t(abs diff)/sum: "+str(absDiffSum)
+    if maxDiffSum>0 or maxAbsDiffSum>0:
+        print "Max diff/sum:",maxDiffSum,"max (abs diff)/sum:",maxAbsDiffSum
     
-    # We print total relative diff here: 1.0 should mean roughly, one parameter is twice what it should be.
     if numDiffs == 0:
-        print "No significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+"), ok."
+        print "No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok."
         return ret,False
     else:
-        print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+ ")!\033[0;0m"
+        print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m"
         return 1,False
 
 # Test for options
 def evalOptions (args):
     parser = OptionParser(usage="Usage: %prog [options] logfile1 logfile2 [max different lines to print]",
-            description="""Scenarios to be run must be of the form scenarioXX.xml; if any are passed on the command line, XX is substituted for each given; if not then all files of the form scenario*.xml are run as test scenarios.
-You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
+            # damn reformatting into a single paragraph: this doesn't get printed very nicely when --help is invoked
+            description="""Compare logfile1 and logfile2 for differences, returning a measure of difference.
+See http://code.google.com/p/openmalaria/wiki/UtilsRunScripts#compareOutput.py for details on output.""")
     
     parser.add_option("-R","--rel-precision",
             action="store", dest="rel_precision", type="float",

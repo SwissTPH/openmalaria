@@ -315,8 +315,10 @@ class Plotter(object):
             if Keys.FILE in lines:
                 MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
             
-            # use to avoid reusing colours or white
-            lineColours=set('white')
+            # use to avoid reusing colours or white (and similar)
+            lineColours=set()
+            for colour in ['white','azure','floralwhite','ghostwhite','honeydew','ivory','snow','whitesmoke']:
+                lineColours.add(colour)
             
             if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
                 plotted=list()

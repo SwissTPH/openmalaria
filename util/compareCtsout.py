@@ -75,9 +75,9 @@ def sumsApproxEq (fn1,fn2):
             print "\033[0;31mSignificantly different:",t1[i],"; sums:",vec1[i],",",vec2[i]
             allApEq=False
     if allApEq:
-        print "No significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+"), ok."
+        print "No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok."
     else:
-        print "\033[1;31mSome significant differences (total relative diff: "+str(approxSame.totalRelDiff/1.e6)+ ")!\033[0;0m"
+        print "\033[1;31mSome significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m"
     return allApEq
 
 def main(fn1,fn2):
