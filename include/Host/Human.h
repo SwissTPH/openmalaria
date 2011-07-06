@@ -86,7 +86,7 @@ public:
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(const OM::Population&, Transmission::TransmissionModel* transmissionModel, bool doUpdate);
+  bool update(OM::Transmission::TransmissionModel* transmissionModel, bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -150,7 +150,16 @@ public:
   
   // crux for timed deployment as intervention up to some limit:
   inline bool getInCohort(TimeStep)const{ return _inCohort; }
+  /// Return true if human is a member of the cohort
   inline bool getInCohort()const{ return _inCohort; }
+  
+  /// Return the index of next continuous intervention to be deployed
+  inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
+  /// Increment then return index of next continuous intervention to deploy
+  inline uint32_t incrNextCtsDist() {
+      nextCtsDist += 1;
+      return nextCtsDist;
+  }
   //@}
   
   /// Return the current survey to use (depends on survey time and whether or
@@ -213,10 +222,6 @@ public:
   
 private:
     void updateInfection(Transmission::TransmissionModel*, double ageYears);
-    
-    /*! Apply interventions to this human if eligible. Calculate the remaining
-    efficacy of the latest vaccination if vaccinated before */
-    void updateInterventionStatus(const OM::Population&);
     
     double calcProbTransmissionToMosquito() const;
     

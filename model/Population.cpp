@@ -201,7 +201,7 @@ void Population::update1()
     --last;
     for (HumanIter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old:
-        if (iter->update (*this, _transmissionModel,
+        if (iter->update (_transmissionModel,
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
@@ -216,7 +216,8 @@ void Population::update1()
         ++cumPop;
         TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
 
-        // if (Actual number of people so far > target population size for this age) ...
+        // if (Actual number of people so far > target population size for this age)
+        // "outmigrate" some to maintain population shape
         if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
             --cumPop;
             iter->destroy();

@@ -544,23 +544,36 @@ void InterventionManager::deploy(OM::Population& population) {
         timed[nextTimed].deploy( population );
         nextTimed += 1;
     }
-}
-void InterventionManager::deployCts (const OM::Population& population, OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const{
+    
     // deploy continuous interventions
-    while( nextCtsDist < ctsIntervs.size() ){
-        if( ctsIntervs[nextCtsDist].ageTimesteps > ageTimesteps )
-            break;      // remaining intervs happen in future
-        // If interv for now, do it. (If we missed the time, ignore it.)
-        if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimesteps ){
-            if( ctsIntervs[nextCtsDist].begin < TimeStep::interventionPeriod && TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end ){
-                if( !ctsIntervs[nextCtsDist].cohortOnly || human.getInCohort() ){
-                    if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage){
-                        (human.*(ctsIntervs[nextCtsDist].deploy)) (population);
+    for( Population::HumanIter it = population.getList().begin();
+        it != population.getList().end(); ++it )
+    {
+        uint32_t nextCtsDist = it->getNextCtsDist();
+        TimeStep ageTimeSteps = TimeStep::simulation - it->getDateOfBirth();
+        // deploy continuous interventions
+        while( nextCtsDist < ctsIntervs.size() )
+        {
+            if( ctsIntervs[nextCtsDist].ageTimesteps > ageTimeSteps )
+                break;      // remaining intervs happen in future
+            // If interv for now, do it. (If we missed the time, ignore it.)
+            if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimeSteps )
+            {	//TODO: should this become <= then < ? Looks like it.
+                if( ctsIntervs[nextCtsDist].begin < TimeStep::interventionPeriod &&
+                    TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end )
+                {
+                    if( !ctsIntervs[nextCtsDist].cohortOnly || it->getInCohort() )
+                    {
+                        if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage)
+                        {
+                            // Call member function ctsIntervs[nextCtsDist].deploy
+                            ((*it).*(ctsIntervs[nextCtsDist].deploy)) (population);
+                        }
                     }
                 }
             }
+            nextCtsDist = it->incrNextCtsDist();
         }
-        ++nextCtsDist;
     }
 }
 

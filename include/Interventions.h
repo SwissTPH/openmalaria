@@ -64,7 +64,8 @@ public:
     bool cohortOnly;
     double coverage;
     // Member function pointer to the function (in Human) responsible for deploying intervention:
-    void (Host::Human::*deploy) (const OM::Population&);
+    typedef void (Host::Human::*DeploymentFunction) (const OM::Population&);
+    DeploymentFunction deploy;
 };
 
 /** Interface of a timed intervention. */
@@ -116,14 +117,11 @@ public:
     
     /** @brief Deploy interventions
      *
-     * Timed interventions are deployed for this timestep. */
-    void deploy (OM::Population& population);
-    /** Second part of deployment. Currently separate to avoid changing RNGs.
+     * Timed interventions are deployed for this timestep.
      * 
      * Continuous interventions are deployed as humans reach the target ages.
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
-    //FIXME: passing population AND calling from humans does not make sense
-    void deployCts (const OM::Population&, OM::Host::Human& human, TimeStep ageTimesteps, uint32_t& nextCtsDist) const;
+    void deploy (OM::Population& population);
     
 private:
     bitset<Interventions::SIZE> activeInterventions;

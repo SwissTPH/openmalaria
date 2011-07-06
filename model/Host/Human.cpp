@@ -161,7 +161,7 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(const OM::Population& population, Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
     if( doUpdate )
@@ -176,7 +176,6 @@ bool Human::update(const OM::Population& population, Transmission::TransmissionM
         double ageYears = ageTimeSteps.inYears();
         monitoringAgeGroup.update( ageYears );
         
-        updateInterventionStatus(population);
         updateInfection(transmissionModel, ageYears);
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
@@ -201,14 +200,6 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     _ylag[TimeStep::simulation.asInt()%_ylagLen]=withinHostModel->getTotalDensity();
     
     withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
-}
-
-void Human::updateInterventionStatus(const OM::Population& population) {
-    if (TimeStep::interventionPeriod >= TimeStep(0)) {
-        TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
-        //HACK
-        InterventionManager::getSingleton().deployCts(population, *this, ageTimeSteps, nextCtsDist);
-    }
 }
 
 
