@@ -144,12 +144,13 @@ int Simulation::start(){
                 Surveys.incrementSurveyPeriod();
             }
             
-            // deploy interventions and update
+            // deploy interventions
             interventions->deploy( *population );
-            ++TimeStep::simulation;	//TODO: move to after update
-            population->update1();
             
+            // update
+            ++TimeStep::simulation;
             ++TimeStep::interventionPeriod;
+            population->update1();
             
             util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
         }

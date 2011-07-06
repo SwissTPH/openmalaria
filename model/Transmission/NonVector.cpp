@@ -187,8 +187,8 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
-      // the interventionEIR array
-      eir = interventionEIR[TimeStep::interventionPeriod.asInt()];
+      // the interventionEIR array (why -1? See interventionEIR declaration)
+      eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
       break;
     case dynamicEIR:
       eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];

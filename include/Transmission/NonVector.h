@@ -95,8 +95,12 @@ private:
   TimeStep nspore;
   //@}
   
-  /// EIR per time interval during the intervention period
-  /// Units: inoculations per adult per timestep
+  /** EIR per time interval during the intervention period. Value at index
+   * TimeStep::interventionPeriod.asInt()-1 used each time-step: first value
+   * should be used for update in the first interval, which has
+   * TimeStep::interventionPeriod = 1.
+   * 
+   * Units: inoculations per adult per timestep */
   vector<double> interventionEIR;
   
   /** When simulationMode == dynamicEIR, this is the annual cycle of kappa

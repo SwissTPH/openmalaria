@@ -64,13 +64,27 @@ public:
      */
     static void init (int daysPerTimeStep, double maxAgeYears);
 
-    /** Simulation time step (0 at start of simulation). */
+    /** Simulation time step.
+     * 
+     * Set-up of populations occurs at time 0.
+     * 
+     * Each update occurs between time t-1 and t (where t is
+     * TimeStep::simulation), so the value of this variable during the first
+     * update is 1. */
     static TimeStep simulation;
 
     /** Timestep counter during the intervention period of the simulation.
     *
     * This is negative during initialization and is incremented from 0
-    * from the start of the intervention period. */
+    * from the start of the intervention period (once this period starts,
+    * TimeStep::interventionPeriod is always TimeStep::simulation - x, where
+    * x is the time at which the intervention period starts. Note that the value
+    * of x is not always known definitively before the intervention period is
+    * started.
+    * 
+    * Surveys happen according to times given in the XML, which is this
+    * variable's measure. The same is true for intervention times given in the
+    * XML. */
     static TimeStep interventionPeriod;
 
     ///@brief Variables read from XML configuration which remain constant after set up
