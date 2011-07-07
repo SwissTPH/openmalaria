@@ -79,12 +79,9 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
-  if( _dateOfBirth != TimeStep::simulation &&
-      (TimeStep::simulation != TimeStep(0) || _dateOfBirth > TimeStep::simulation))
-  {
-    // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-    throw util::traced_exception ("Invalid date of birth!");
-  }
+  // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
+  assert( _dateOfBirth == TimeStep::simulation ||
+      (TimeStep::simulation == TimeStep(0) && _dateOfBirth < TimeStep::simulation));
   
   _ylag.assign (_ylagLen, 0.0);
   
@@ -197,7 +194,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     }
     
     // Cache total density for infectiousness calculations
-    _ylag[TimeStep::simulation.asInt()%_ylagLen]=withinHostModel->getTotalDensity();
+    _ylag[TimeStep::simulation.asInt()%_ylagLen] = withinHostModel->getTotalDensity();
     
     withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
 }
@@ -315,8 +312,12 @@ double Human::calcProbTransmissionToMosquito() const {
   for 1-day timesteps to avoid having to design and analyse a new model.
   Description: AJTMH pp.32-33 */
   TimeStep ageTimeSteps=TimeStep::simulation-_dateOfBirth;
-  if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20)
+  if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
+    // We need at least 20 days history (_ylag) to calculate infectiousness;
+    // assume no infectiousness if we don't have this history.
+    // Note: human not updated on DOB so age must be >20 days.
     return 0.0;
+  }
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
   static const double beta1=1.0;
@@ -325,11 +326,9 @@ double Human::calcProbTransmissionToMosquito() const {
   static const double tau= 0.066;
   static const double mu= -8.1;
   
-  // Take weighted sum of total asexual blood stage density 10, 15 and 20 days before.
-  // These values are one timestep more recent than that, however the calculated
-  // value is not used until the next timestep when then ages would be correct.
-  // Min TimeStep::simulation is 20 days, so LHS of '%' operator is never negative.
-  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt()+1;
+  // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
+  // before. We have 20 days history, so following x%y operations are safe.
+  int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt() + 1;
   double x = beta1 * _ylag[firstIndex % _ylagLen]
            + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
            + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];

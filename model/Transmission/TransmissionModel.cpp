@@ -84,7 +84,7 @@ void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
-    // updateKappa() has been called for this TimeStep::simulation, so this is the latest value in laggedKappa:
+    // The latest time-step's kappa:
     stream<<'\t'<<laggedKappa[TimeStep::simulation % laggedKappa.size()];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
@@ -145,7 +145,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->probTransmissionToMosquito();
+        t *= h->probTransmissionToMosquito();	//TODO: this is the value for last time-step
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;
@@ -178,7 +178,7 @@ void TransmissionModel::updateSummaries () {
     size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
     
     //Calculate time-weighted average of kappa
-    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];
+    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];	//FIXME: should use tmod, not t1mod
     if (tmod == 0) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;

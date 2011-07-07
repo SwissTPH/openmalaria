@@ -52,10 +52,10 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
     for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
         double EIRdaily = std::max((double)daily[mpcday], minEIR);
         
-        // istep is the time period to which the day is assigned.  The result of the
-        // division is automatically rounded down to the next integer.
-        size_t i1 = (mpcday / TimeStep::interval) % TimeStep::stepsPerYear;
-        //EIR() is the sum of the EIRs assigned to the 73 different recurring time points
+        // Index 1 of initialisationEIR refers to the EIR during the first
+        // update, which is what the first value(s) of EIRDaily give us.
+        size_t i1 = (mpcday / TimeStep::interval /*FIXME + 1*/) % TimeStep::stepsPerYear;
+        
         nDays[i1]++;
         initialisationEIR[i1] += EIRdaily;
     }
@@ -183,7 +183,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
   switch (simulationMode) {
     case equilibriumMode:
       //FIXME: figure out if it is correct that 1 is subtracted here and below but not elsewhere
-      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];	//FIXME: add 1 to index
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -191,7 +191,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
       eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];
+      eir = initialisationEIR[(TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear];	//FIXME: add 1 to index
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.

@@ -49,7 +49,7 @@ public:
   
   /** Report an episode, its severity, and any outcomes it entails.
    *
-   * @param TimeStep::simulation Time of report (i.e. now)
+   * @param inCohort Whether or not individual is part of the cohort (if there is one)
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */

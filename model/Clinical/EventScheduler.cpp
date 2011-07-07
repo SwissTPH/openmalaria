@@ -412,7 +412,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
 	list<MedicateData>::iterator next = it;
 	++next;
-        if ( it->time < 1.0 ) { // Medicate today's medications
+        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){

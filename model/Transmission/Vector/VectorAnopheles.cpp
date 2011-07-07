@@ -38,7 +38,6 @@ namespace OM { namespace Transmission {
     
 string VectorAnopheles::initialise (
                                     const scnXml::AnophelesParams& anoph,
-                                    size_t sIndex,
                                     vector<double>& initialisationEIR,
                                     map<string, double>& nonHumansHostsPopulations,
                                     int populationSize
@@ -90,6 +89,7 @@ string VectorAnopheles::initialise (
 
   for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
   {
+      //TODO: tidy up. Doesn't look like we really need nonHumansHostsPopulations stored in this struct?
             double relativeEntoAvailability = nnh->relativeEntoAvailability;
             relativeEntoAvailabilitySum += relativeEntoAvailability;
 
@@ -110,7 +110,8 @@ string VectorAnopheles::initialise (
 
   // -----  EIR  -----
   FSCoeffic.resize (5);
-  vector<double> speciesEIR (TimeStep::stepsPerYear);
+  // EIR for this species, with index 0 refering to value over first interval
+  vector<double> speciesEIR (TimeStep::fromYears(1).inDays());
   
     if( anoph.getEIR().present() ){
         const scnXml::EIR& eirData = anoph.getEIR().get();
@@ -120,6 +121,8 @@ string VectorAnopheles::initialise (
         FSCoeffic[2] = eirData.getB1();
         FSCoeffic[3] = eirData.getA2();
         FSCoeffic[4] = eirData.getB2();
+        // According to spec, EIR for first day of year (rather than EIR at the
+        // exact start of the year) is generated with t=0 in Fourier series.
         EIRRotateAngle = eirData.getEIRRotateAngle();
     } else {
         assert( anoph.getMonthlyEIR().present() );      // XML loading code should enforce this
@@ -164,28 +167,29 @@ string VectorAnopheles::initialise (
         
         // The above places the value for the first month at angle 0, so
         // effectively the first month starts at angle -2*pi/24 radians.
-        // The first day's value should start 2*pi/(365*2) radians later, so
-        // we set EIRRotateAngle accordingly (rotate forward):
+        // The value for the first day of the year should start 2*pi/(365*2)
+        // radians later, so adjust EIRRotateAngle to compensate.
         EIRRotateAngle = M_PI * ( 1.0/12.0 - 1.0/365.0 );
         
         // Now we rescale to get an EIR of targetEIR.
         // Calculate current sum as is usually done.
         calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
-        sum = vectors::sum( speciesEIR ) * TimeStep::interval;
+        sum = vectors::sum( speciesEIR );
         // And scale:
         FSCoeffic[0] += log( targetEIR / sum );
     }
 
   // Calculate forced EIR for pre-intervention phase from FSCoeffic:
   calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
-  vectors::scale (speciesEIR, TimeStep::interval);        // input EIR is per-capita per-day, so scale to per-interval
   
   // Add to the TransmissionModel's EIR, used for the initalization phase:
-  for (int i = 0; i < TimeStep::stepsPerYear; ++i)
-    initialisationEIR[i] += speciesEIR[i];
+  for (int i = 0; i < TimeStep::fromYears(1).inDays(); ++i){
+    // index 1 of initialisationEIR corresponds to first period of year
+    initialisationEIR[(/*FIXME 1+*/i/TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
+  }
   
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
-    cout << "Annual (pre-scaled) EIR for "<<anoph.getMosquito()
+    cout << "Annual EIR for "<<anoph.getMosquito()
          << ": "<<vectors::sum( speciesEIR )<<endl;
   }
   
@@ -226,6 +230,7 @@ void VectorAnopheles::scaleEIR( double factor ){
 
 void VectorAnopheles::setPAs()
 {
+    //FIXME: tidy up
         initP_A  = 1.0 - mosqLaidEggsSameDayProp;
 
         if(!nonHumanHosts.empty())
@@ -273,7 +278,8 @@ double VectorAnopheles::getHumanEntoAvailability(int populationSize)
         * (-log(initP_A) / mosqSeekingDuration);
 }
 
-double VectorAnopheles::getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability)
+double VectorAnopheles::getNonHumanEntoAvailability(double populationSize,
+                                                    double relativeEntoAvailability)
 {
     return (1./(populationSize))
         * ((P_An*relativeEntoAvailability)/(1.-initP_A))
@@ -281,7 +287,10 @@ double VectorAnopheles::getNonHumanEntoAvailability(double populationSize, doubl
 }
 
 
-void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize, double invMeanPopAvail) {
+void VectorAnopheles::setupNv0 (size_t sIndex,
+                                const std::list<Host::Human>& population,
+                                int populationSize,
+                                double invMeanPopAvail) {
   // -----  N_v0, N_v, O_v, S_v  -----
   //BEGIN P_A, P_Ai, P_df, P_dif
   // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
@@ -306,8 +315,8 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
   }
   
   for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
-          leaveSeekingStateRate += nnh->entoAvailability;
-          intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
+    leaveSeekingStateRate += nnh->entoAvailability;
+    intP_df += nnh->entoAvailability * nnh->probMosqBitingAndResting();
     // Note: in model, we do the same for intP_dif, except in this case it's
     // multiplied by infectiousness of host to mosquito which is zero.
   }
@@ -338,7 +347,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex, const std::list<Host::Human>& pop
     P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
     //t in: sTime*TimeStep::interval..((sTime+1)*TimeStep::interval-1)
     int sTime = t / TimeStep::interval;
-    S_v[t] = forcedS_v[sTime % TimeStep::stepsPerYear];
+    S_v[t] = forcedS_v[sTime % TimeStep::stepsPerYear];	//FIXME: should index in days, not time-steps!
     N_v[t] = S_v[t] * initNvFromSv;
     O_v[t] = S_v[t] * initOvFromSv;
   }
@@ -403,8 +412,12 @@ bool VectorAnopheles::vectorInitIterate () {
 
 
 // Every TimeStep::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail) {
-  if (TimeStep::simulation >= larvicidingEndStep) {
+void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
+                                     int populationSize,
+                                     size_t sIndex,
+                                     bool isDynamic,
+                                     double invMeanPopAvail) {
+  if (TimeStep::simulation > larvicidingEndStep) {
     larvicidingEndStep = TimeStep::future;
     larvicidingIneffectiveness = 1.0;
   }
@@ -457,7 +470,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
     prod *= host.probMosqBiting(humanBase, sIndex)
           * host.probMosqResting(humanBase, sIndex);
     intP_df += prod;
-    intP_dif += prod * h->probTransmissionToMosquito();
+    intP_dif += prod * h->probTransmissionToMosquito(); //TODO: this is the value for last time-step
   }
 
   for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
@@ -481,6 +494,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population, i
   
   // The code within the for loop needs to run per-day, wheras the main
   // simulation uses TimeStep::interval day (currently 5 day) time steps.
+  //FIXME: TimeStep::simulation is the end of the period we're updating over, not the beginning!
   int firstDay = TimeStep::simulation.inDays();
   for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.

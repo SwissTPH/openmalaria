@@ -214,9 +214,9 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
     
-    // (TimeStep::simulation - timestepXXX) is the age of the intervention.
+    // (TimeStep::simulation - timestepXXX) is the age of the intervention in
+    // the new time-step (that being updated).
     // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
-    
     TimeStep timestepIRS;
     TimeStep timestepVA;
     

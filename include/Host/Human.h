@@ -188,8 +188,7 @@ public:
   
   /** Calculate chance of a biting mosquito becoming infected
    * 
-   * Before update() is called, this refers to the value for this time-step.
-   * Afterwards, it refers to the value for the *next* time-step. */
+   * After update() is called, this refers to the value for this time-step. */
   //TODO: per genotype? (for LSTM's spread of resistance modelling)
   inline double probTransmissionToMosquito() const {
     return _probTransmissionToMosquito;
@@ -255,9 +254,11 @@ private:
   /// Vaccines
   PerHumanVaccine _vaccine;
   
-  /** Total asexual blood stage density over last 20 days (need samples from 10, 15 and 20 days ago)
+  /** Total asexual blood stage density over last 20 days (uses samples from
+   * 10, 15 and 20 days ago).
    *
-   * _ylag[TimeStep::simulation % _ylagLen] corresponds to current time step. */
+   * _ylag[TimeStep::simulation % _ylagLen] corresponds to the density from the
+   * previous time step (once updateInfection has been called). */
   vector<double> _ylag;
   /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
   /// set by initHumanParameters

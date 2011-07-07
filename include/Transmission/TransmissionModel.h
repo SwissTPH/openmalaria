@@ -208,7 +208,13 @@ protected:
   /** Entomological inoculation rate for adults during the
    * pre-intervention phase.
    * 
-   * Length: Global::intervalsPerYear
+   * Length: time-steps per year
+   *
+   * Index TimeStep::simulation % TimeStep::stepsPerYear corresponds to the EIR
+   * acting on the current time-step: i.e. total inoculations since the
+   * previous time-step.
+   * Since time-step 0 is not calculated, initialisationEIR[0] is actually the
+   * last value used (to calculate the state at the start of the second year).
    *
    * Units: infectious bites per adult per timestep
    *

@@ -83,9 +83,15 @@ public:
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
      * 
-     * @param age Age of intervention/decayed property.
+     * @param age Age of intervention/decayed property during the time-step
+     *  for which values are now being calculated.
      * @param sample A DecayFuncHet value sampled for the intervention and
-     *  individual. */
+     *  individual.
+     * 
+     * NOTE: As it is, values are calculated for the end of the time-period
+     * being updated over. It would be more accurate to return the mean value
+     * over this period (from age-1 to age), but difference should be small for
+     * interventions being effective for a month or more. */
     virtual double eval(TimeStep age, DecayFuncHet sample) const =0;
     
     /** Sample a DecayFuncHet value (should be stored per individual). */

@@ -87,8 +87,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     species.resize (numSpecies, VectorAnopheles(this,&_ITNParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
-        string name = species[i].initialise (anophelesList[i], i,
-                                             initialisationEIR, nonHumanHostsPopulations, populationSize);
+        string name = species[i].initialise (anophelesList[i],
+                                             initialisationEIR,
+                                             nonHumanHostsPopulations,
+                                             populationSize);
         speciesIndex[name] = i;
     }
 

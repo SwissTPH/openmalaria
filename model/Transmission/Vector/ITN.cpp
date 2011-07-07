@@ -289,7 +289,9 @@ void ITN::deploy(const ITNParams& params) {
 
 void ITN::update(const ITNParams& params){
     if( deployTime != TimeStep::never ){
-        if( TimeStep::simulation >= disposalTime ){
+        // First use is at age 1, so don't remove until *after* disposalTime to
+        // get use over the full duration given by sampleAgeOfDecay().
+        if( TimeStep::simulation > disposalTime ){
             deployTime = TimeStep::never;
         }
         int newHoles = poisson( holeRate );

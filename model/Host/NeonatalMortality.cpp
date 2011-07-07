@@ -55,6 +55,8 @@ void NeonatalMortality::update (const list<Host::Human>& population) {
   int pCounter=0;	// number with patent infections, needed for prev in 20-25y
   
   for (std::list<Host::Human>::const_iterator iter = population.begin(); iter != population.end(); ++iter){
+    //NOTE: this is based on last time-step's parasite densities but this
+    // time-step's age, which is a bit strange (though not very significant).
     double ageYears = iter->getAgeInYears();
     // Note: since we're using a linked list, we have to iterate until we reach
     // the individuals we're interested in. Due to population structure, it's

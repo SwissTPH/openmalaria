@@ -125,7 +125,7 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     _doomed = DOOMED_INDIRECT;
     return;
   }
-  if(ageTimeSteps == TimeStep(1)) {
+  if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
       Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);

@@ -73,10 +73,14 @@ public:
     /** Called to initialise variables instead of a constructor.
      *
      * @param anoph Data structure from XML to use
-     * @param sIndex Index in VectorTransmission.species of this class.
-     * @param EIR In/out parameter: the EIR used for the pre-intervention phase. Units: inoculations.
+     * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
+     * @param nonHumanHostsPopulations Non-human hosts
+     * @param populationSize (Static) size of human population
      */
-    string initialise (const scnXml::AnophelesParams& anoph, size_t sIndex, vector<double>& EIR, map<string, double>& nonHumanHostsPopulations, int populationSize);
+    string initialise (const scnXml::AnophelesParams& anoph,
+                       vector<double>& initialisationEIR,
+                       map<string, double>& nonHumanHostsPopulations,
+                       int populationSize);
 
 
 
@@ -323,15 +327,17 @@ private:
      * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
      *
      * When calcFourierEIR is used to produce an EIR from this over 365
-     * (DAYS_IN_YEAR) elements, the resulting EIR has units of infectious bites
-     * per adult per day.
+     * (365) elements, the resulting EIR has units of
+     * infectious bites per adult per day.
      *
      * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
      * FSCoeffic[0] needs checkpointing, the rest doesn't. */
     vector<double> FSCoeffic;
 
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * Units: Animals per day. Length: Global::DAYS_IN_YEAR.
+     * Units: Animals per day. Length: 365. Index
+     * TimeStep::simulation % 365 is current value
+     * during each update.
      *
      * Should be checkpointed. */
     vector<double> mosqEmergeRate;
@@ -339,7 +345,7 @@ private:
     /* Parameters and partial (derived) parameters from model */
 
     /** @brief S_v used to force an EIR during vector init.
-     * Length: Global::DAYS_IN_YEAR
+     * Length: 365
      *
      * Should be checkpointed. */
     vector<double> forcedS_v;
@@ -347,7 +353,7 @@ private:
     /** Summary of S_v over the last five years, used by vectorInitIterate to
      * calculate scaling factor.
      *
-     * Length of annualS_v is Global::DAYS_IN_YEAR * 5. Checkpoint.
+     * Length of annualS_v is 365 * 5. Checkpoint.
      *
      * Units of both should be inoculations. */
     vector<double> quinquennialS_v;
@@ -448,7 +454,7 @@ private:
     /* Functions */
 
     /** This subroutine converts ShortArray to a vector<double> of length
-     * Global::DAYS_IN_YEAR by copying and duplicating elements to fill the gaps. */
+     * 365 by copying and duplicating elements to fill the gaps. */
     static vector<double> convertLengthToFullYear (vector<double>& ShortArray);
 
     /** Given an input sequence of Fourier coefficients, with odd length,

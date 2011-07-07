@@ -80,7 +80,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
             // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
             // included. Validity is debatable, but there's no point changing now.
             // (This does affect tests.)
-            effectiveTreatment = uncomplicatedEvent (pgState, ageYears, human.getMonitoringAgeGroup(), human.getInCohort());
+            effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
         }
 
         if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
@@ -90,7 +90,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
             human.withinHostModel->immunityPenalisation();
         }
     } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
-        effectiveTreatment = uncomplicatedEvent (pgState, ageYears, human.getMonitoringAgeGroup(), human.getInCohort());
+        effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
     }
 
     if (effectiveTreatment) {
@@ -110,7 +110,6 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 
 bool ClinicalImmediateOutcomes::uncomplicatedEvent (
     State pgState,
-    double ageYears,
     Monitoring::AgeGroup ageGroup,
     bool inCohort
 ) {
