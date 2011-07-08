@@ -51,7 +51,6 @@ private:
    * previous t. */
   static double _riskFromMaternalInfection;
   //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
-  //TODO: is this array write-only? What was it used for?
   static std::vector<double> _prevalenceByGestationalAge;
 };
 

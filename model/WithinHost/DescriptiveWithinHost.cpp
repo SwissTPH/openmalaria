@@ -110,12 +110,14 @@ void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BS
             timeStepMaxDensity = infStepMaxDens;
 
             totalDensity += (*iter)->getDensity();
-            //FIXME: why not increment immediately?
-            if ((*iter)->getStartDate() == TimeStep::simulation-TimeStep(1)) {
-                _cumulativeh++;
-            }
             (*iter)->determineDensityFinal ();
             _cumulativeY += TimeStep::interval*(*iter)->getDensity();
+            if ((*iter)->getStartDate() == TimeStep::simulation) {
+                // cumulativeh should only include infections which started
+                // before now, so we can't increment _cumulativeh when
+                // infection is created
+                _cumulativeh++;
+            }
 
             ++iter;
         }

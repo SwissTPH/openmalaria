@@ -54,7 +54,6 @@ void CommonWithinHost::newInfection(){
   if (numInfs < MAX_INFECTIONS) {
     infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
     numInfs++;
-    _cumulativeh++;
     ++PopulationStats::allowedInfections;
   }
   assert( numInfs == static_cast<int>(infections.size()) );
@@ -107,6 +106,12 @@ void CommonWithinHost::calculateDensities(double ageInYears, double BSVEfficacy)
     totalDensity += (*inf)->getDensity();
     timeStepMaxDensity = max(timeStepMaxDensity, (*inf)->getDensity());
     _cumulativeY += TimeStep::interval*(*inf)->getDensity();
+    if ((*inf)->getStartDate() == TimeStep::simulation) {
+        // cumulativeh should only include infections which started
+        // before now, so we can't increment _cumulativeh when
+        // infection is created
+        _cumulativeh++;
+    }
     
     ++inf;
   }

@@ -43,6 +43,7 @@ void Infection::init () {
 
 
 double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY) {
+  //Documentation: AJTMH pp22-23
   //effect of cumulative Parasite density (named Dy in AJTM)
   double dY;
   //effect of number of infections experienced since birth (named Dh in AJTM)
@@ -55,7 +56,6 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dH=1.0;
   } else {
     dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
-    //TODO: compare this with the asex paper
     dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);

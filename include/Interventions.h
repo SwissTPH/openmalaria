@@ -111,10 +111,6 @@ public:
         return activeInterventions[intervention];
     }
     
-    // Included for now as a HACK.
-    static void setSingleton(InterventionManager* im);
-    static const InterventionManager& getSingleton();
-    
     /** @brief Deploy interventions
      *
      * Timed interventions are deployed for this timestep.

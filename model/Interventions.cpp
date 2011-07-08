@@ -293,15 +293,6 @@ TimedMassIntervention* createTimedMassCumIntervention(
 
 // -----  InterventionManager  -----
 
-InterventionManager* interventionManager = 0;
-void InterventionManager::setSingleton(InterventionManager* im){
-    interventionManager = im;
-}
-const InterventionManager& InterventionManager::getSingleton(){
-    assert(interventionManager != 0);
-    return *interventionManager;
-}
-
 InterventionManager::InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population) :
     nextTimed(0)
 {

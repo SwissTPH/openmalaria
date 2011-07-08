@@ -104,7 +104,6 @@ private:
 	    double updateDensity (double survivalFactor, TimeStep ageOfInfection);
 	    double getVariantSpecificSummation();
 	};
-	//TODO: resizes may be slow; should check.
 	vector<Variant> variants;
 };
 
