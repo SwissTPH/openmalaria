@@ -144,13 +144,17 @@ namespace OM { namespace Monitoring {
 	}
     }
     void Continuous::finalise (){
+         if( ctsPeriod == 0 )
+             return;     // output disabled
 #ifndef WITHOUT_BOINC
         if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
             throw util::traced_exception (string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
         }
         ctsOStream.close();
         ifstream origFile(cts_filename.c_str());
-        assert(origFile.is_open());
+        if( !origFile.is_open() ){
+            throw util::traced_exception (string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
+        }
         ogzstream finalFile(compressedCtsoutName.c_str());
         finalFile << origFile.rdbuf();
 #endif

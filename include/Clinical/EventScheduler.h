@@ -54,6 +54,10 @@ public:
 
     ClinicalEventScheduler (double cF, double tSF);
     ~ClinicalEventScheduler ();
+    
+    virtual bool notAtRisk() {
+        throw util::traced_exception("notAtRisk: not supported by 1-day time-step models");
+    }
 
     virtual void massDrugAdministration(Human& human);
 

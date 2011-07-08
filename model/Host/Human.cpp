@@ -211,11 +211,11 @@ void Human::ctsVaccinate (const OM::Population&) {
     }
 }
 
-void Human::IPTiTreatment (const OM::Population&) {
-  withinHostModel->IPTiTreatment (getMonitoringAgeGroup(), _inCohort);
+void Human::continuousIPT (const OM::Population&) {
+    withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
 }
-void Human::deployIptDose (const OM::Population&) {
-    withinHostModel->deployIptDose( getMonitoringAgeGroup(), _inCohort );
+void Human::timedIPT (const OM::Population&) {
+  withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
 }
 
 void Human::massDrugAdministration (const OM::Population&) {
@@ -265,7 +265,7 @@ double Human::getAgeInYears() const{
 void Human::summarize() {
     // 5-day only, compatibility option:
     if( util::ModelOptions::option( util::REPORT_ONLY_AT_RISK ) &&
-        clinicalModel->recentTreatment() ){
+        clinicalModel->notAtRisk() ){
         // This modifies the denominator to treat the 4*5 day intervals
         // after a bout as 'not at risk' to match the IPTi trials
         return;
