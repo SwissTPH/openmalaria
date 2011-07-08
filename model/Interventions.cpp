@@ -244,11 +244,15 @@ public:
         
         double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
         if( propProtected < coverage ){
-            // In range (0,1]:
+            // Proportion propProtected are already covered, so need to
+            // additionally cover the proportion (coverage - propProtected),
+            // selected from the list unprotected.
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
-            for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+            for (vector<Host::Human*>::iterator iter = unprotected.begin();
+                 iter != unprotected.end(); ++iter)
+            {
                 if( util::random::uniform_01() < additionalCoverage ){
-                    ( (*iter).*intervention) (population);
+                    ( (**iter).*intervention) (population);
                 }
             }
         }
@@ -379,12 +383,12 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         // continuous deployments:
         typedef scnXml::IPT::ContinuousSequence::const_iterator CIt;
         for( CIt it = ipt.getContinuous().begin(); it != ipt.getContinuous().end(); ++it ){
-            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::deployIptDose ) );
+            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
         }
         // timed deployments:
         typedef scnXml::IPT::TimedSequence::const_iterator It;
         for( It it = ipt.getTimed().begin(); it != ipt.getTimed().end(); ++it ){
-            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::IPTiTreatment, &Host::Human::hasIPTiProtection ) );
+            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
         }
     }
     if( intervElt.getITN().present() ){
