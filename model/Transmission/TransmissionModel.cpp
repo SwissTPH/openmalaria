@@ -145,7 +145,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->probTransmissionToMosquito();	//TODO: this is the value for last time-step
+        t *= h->probTransmissionToMosquito();
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;
@@ -155,6 +155,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         kappaByAge[ag.i()] += t;
         ++nByAge[ag.i()];
     }
+
 
     size_t lKMod = TimeStep::simulation % laggedKappa.size();	// now
     if( population.empty() ){     // this is valid
@@ -168,14 +169,9 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    return laggedKappa[lKMod];	// kappa now
-}
-
-void TransmissionModel::updateSummaries () {
     //TODO: surely we don't need all of these!
     int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // now
     int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;    // last time-step
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();   // now
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];	//FIXME: should use tmod, not t1mod
@@ -205,6 +201,8 @@ void TransmissionModel::updateSummaries () {
 
     surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += tsAdultEIR;
+    
+    return laggedKappa[lKMod];  // kappa now
 }
 
 double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
@@ -312,5 +310,4 @@ void TransmissionModel::checkpoint (ostream& stream) {
 }
 
 } }
-
 

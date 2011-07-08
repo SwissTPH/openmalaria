@@ -176,7 +176,6 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         updateInfection(transmissionModel, ageYears);
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
-        // set _probTransmissionToMosquito to next time-step's value
         _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
     return false;

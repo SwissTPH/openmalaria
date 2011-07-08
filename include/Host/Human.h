@@ -273,9 +273,7 @@ private:
   /// True if human is included in a cohort.
   bool _inCohort;
   
-  /// Cached value of calcProbTransmissionToMosquito; checkpointed.
-  ///
-  /// After human update, contains value corresponding to next time-step.
+  /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
   
 public: //lazy: give read access to these

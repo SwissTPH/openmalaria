@@ -226,13 +226,14 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 
 
 // Every Global::interval days:
-void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
-    TransmissionModel::updateKappa( population );
-    
+void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
     double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
     }
+}
+void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
+    TransmissionModel::updateKappa( population );
 }
 
 void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){

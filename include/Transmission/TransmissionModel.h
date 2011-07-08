@@ -96,9 +96,6 @@ public:
   }
   //@}
   
-  /// Update summary statistics. Call at end of time-step (after Human::update).
-  void updateSummaries ();
-  
   /** Set some summary items.
    *
    * Overriding functions should call this base version too. */
@@ -136,8 +133,12 @@ public:
   
   /** Needs to be called each step of the simulation before Human::update().
    *
-   * Updates kappa (human infectiousness) for summaries and non-vector output,
-   * and when the vector model is used this updates mosquito populations. */
+   * when the vector model is used this updates mosquito populations. */
+  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {};
+  /** Needs to be called each time-step after Human::update().
+   * 
+   * Updates summary statistics related to transmission as well as the
+   * the non-vector model (when in use). */
   virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
@@ -260,7 +261,7 @@ private:
   /// accumulator for timestep EIR of adults
   double tsAdultEntoInocs;
 
-  /// Adult-only EIR from this time-step
+  /// Adult-only EIR over the last update
   double tsAdultEIR;
 
   /** Per-timestep input EIR summed over inter-survey period.
