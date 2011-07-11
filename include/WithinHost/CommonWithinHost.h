@@ -49,9 +49,7 @@ public:
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
     virtual void immuneSuppression();
     
-    /** Update densities for timestep (taking into account blood-stage vaccine
-     * and drug efficacies. */
-    virtual void calculateDensities (double ageInYears, double BSVEfficacy);
+    virtual void update (int nNewInfs, double ageInYears, double BSVEfficacy);
     
     /** \brief Factory functions to create infections.
      *

@@ -47,7 +47,7 @@ public:
   virtual void clearAllInfections();
   virtual void immuneSuppression();
   
-  virtual void calculateDensities(double ageInYears, double BSVEfficacy);
+  virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
   
 protected:
   virtual int countInfections (int& patentInfections);

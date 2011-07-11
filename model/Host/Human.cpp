@@ -188,14 +188,11 @@ void Human::addInfection(){
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int numInf = infIncidence->numNewInfections( *this, EIR );
-    for (int i=1;i<=numInf; ++i) {
-        withinHostModel->newInfection();
-    }
     
     // Cache total density for infectiousness calculations
     _ylag[TimeStep::simulation.asInt()%_ylagLen] = withinHostModel->getTotalDensity();
     
-    withinHostModel->calculateDensities(ageYears, _vaccine.getBSVEfficacy());
+    withinHostModel->update(numInf, ageYears, _vaccine.getBSVEfficacy());
 }
 
 

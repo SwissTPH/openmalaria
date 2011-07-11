@@ -80,11 +80,13 @@ public:
    */
   virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {}
 
-  /** Update the parasite densities of infections.
+  /** Add new infections and update the parasite densities of existing
+   * infections. Also update immune status.
    *
+   * @param nNewInfs Number of inoculations this time-step
    * @param ageInYears Age of human
    * @param BSVEfficacy Efficacy of blood-stage vaccine */
-  virtual void calculateDensities(double ageInYears, double BSVEfficacy) =0;
+  virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy) =0;
   
   bool parasiteDensityDetectible() const {
     return totalDensity > detectionLimit;

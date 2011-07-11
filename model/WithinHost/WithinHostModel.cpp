@@ -153,7 +153,7 @@ bool WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGrou
     survey.addToPatentInfections(ageGroup, patentInfections);
   }
   // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
-  // (and are applied after calculateDensities()); here we report the last calculated density.
+  // (and are applied after update()); here we report the last calculated density.
   if (parasiteDensityDetectible()) {
     survey.reportPatentHosts(ageGroup, 1);
     survey.addToLogDensity(ageGroup, log(totalDensity));

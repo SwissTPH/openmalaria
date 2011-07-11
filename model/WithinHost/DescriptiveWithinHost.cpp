@@ -77,7 +77,11 @@ void DescriptiveWithinHostModel::immuneSuppression() {
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::calculateDensities(double ageInYears, double BSVEfficacy) {
+void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+    for (int i=1;i<=nNewInfs; ++i) {
+        newInfection();
+    }
+    
     updateImmuneStatus ();
 
     totalDensity = 0.0;
