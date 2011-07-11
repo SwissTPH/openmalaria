@@ -41,7 +41,7 @@ public:
   DescriptiveWithinHostModel();
   virtual ~DescriptiveWithinHostModel();
   
-  virtual void newInfection();
+  virtual void importInfection();
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
   virtual void clearAllInfections();
@@ -50,6 +50,7 @@ public:
   virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
   
 protected:
+  virtual DescriptiveInfection* createInfection ();
   virtual int countInfections (int& patentInfections);
   
   ///@brief IPT extensions − empty otherwise

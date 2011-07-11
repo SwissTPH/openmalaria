@@ -55,6 +55,7 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dY=1.0;
     dH=1.0;
   } else {
+      //NOTE: multiplication is usually faster than division so could store inverse of the "star" parameters and multiply here:
     dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
     dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
   }

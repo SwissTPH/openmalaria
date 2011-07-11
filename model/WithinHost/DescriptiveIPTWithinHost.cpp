@@ -62,8 +62,7 @@ void DescriptiveIPTWithinHost::init (const scnXml::IPTDescription& xmlIPTI) {
 DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
     _SPattenuationt(TimeStep::never),
     _lastSPDose (TimeStep::never),
-    _lastIptiOrPlacebo (TimeStep::never),
-    _cumulativeInfections(0)
+    _lastIptiOrPlacebo (TimeStep::never)
 {
     if( iptiEffect == NO_IPT ){
         throw util::xml_scenario_error ("IPT_SP_MODEL requires IPTDescription");
@@ -73,15 +72,8 @@ DescriptiveIPTWithinHost::DescriptiveIPTWithinHost () :
 
 // -----  Simple infection adders/removers  -----
 
-void DescriptiveIPTWithinHost::newInfection(){
-    ++PopulationStats::totalInfections;
-  if (numInfs < MAX_INFECTIONS) {
-    _cumulativeInfections++;
-    infections.push_back(new DescriptiveIPTInfection(_lastSPDose));
-    numInfs++;
-    ++PopulationStats::allowedInfections;
-  }
-  assert( numInfs == static_cast<int>(infections.size()) );
+DescriptiveInfection* DescriptiveIPTWithinHost::createInfection () {
+    return new DescriptiveIPTInfection(_lastSPDose);
 }
 void DescriptiveIPTWithinHost::loadInfection(istream& stream){
     infections.push_back(new DescriptiveIPTInfection(stream));
@@ -166,7 +158,7 @@ bool DescriptiveIPTWithinHost::eventSPClears (DescriptiveInfection* inf){
 
 void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
   //Note: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
-  if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeInfections > 0) {
+  if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeh > 0) {
     if (_SPattenuationt > TimeStep::simulation && totalDensity < 10) {
       totalDensity = 10;
       _cumulativeY += 10;
@@ -194,14 +186,12 @@ void DescriptiveIPTWithinHost::checkpoint (istream& stream) {
     _SPattenuationt & stream;
     _lastSPDose & stream; 
     _lastIptiOrPlacebo & stream;
-    _cumulativeInfections & stream;
 }
 void DescriptiveIPTWithinHost::checkpoint (ostream& stream) {
     DescriptiveWithinHostModel::checkpoint (stream);
     _SPattenuationt & stream;
     _lastSPDose & stream; 
     _lastIptiOrPlacebo & stream;
-    _cumulativeInfections & stream;
 }
 
 } }

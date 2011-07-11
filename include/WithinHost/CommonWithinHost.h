@@ -43,7 +43,7 @@ public:
     ~CommonWithinHost();
     
     
-    virtual void newInfection();
+    virtual void importInfection();
     virtual void clearAllInfections();
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);

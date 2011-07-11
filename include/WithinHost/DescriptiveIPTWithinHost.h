@@ -43,8 +43,6 @@ public:
   
   DescriptiveIPTWithinHost ();
   
-  //! Create a new infection requires that the human is allocated and current
-  virtual void newInfection();
   virtual void loadInfection(istream& stream);
   
   /// Conditionally clear all infections
@@ -54,6 +52,8 @@ public:
   virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   
 protected:
+  virtual DescriptiveInfection* createInfection ();
+  
   virtual bool eventSPClears (DescriptiveInfection* inf);
   virtual void IPTattenuateAsexualMinTotalDensity ();
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf);
@@ -68,10 +68,6 @@ private:
   TimeStep _lastSPDose;
   /// Timestep of last IPTi or placebo dose given (TIMESTEP_NEVER if never given).
   TimeStep _lastIptiOrPlacebo;
-  
-  //!Cumulative number of infections since birth
-  //NOTE: we also have _cumulativeh; why both?
-  int _cumulativeInfections;
   
   /// @brief Static data set by initParameters
   //@{

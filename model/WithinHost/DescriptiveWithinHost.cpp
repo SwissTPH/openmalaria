@@ -18,15 +18,16 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#include <cassert>
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
+#include <cassert>
 
 using namespace std;
 
-namespace OM { namespace WithinHost {
+namespace OM {
+namespace WithinHost {
 
 // -----  Initialization  -----
 
@@ -43,87 +44,95 @@ DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
 
 // -----  Simple infection adders/removers  -----
 
-void DescriptiveWithinHostModel::newInfection() {
-    ++PopulationStats::totalInfections;
-    if (numInfs < MAX_INFECTIONS) {
-        infections.push_back(new DescriptiveInfection());
-        numInfs++;
-        ++PopulationStats::allowedInfections;
-    }
-    assert( numInfs == static_cast<int>(infections.size()) );
+DescriptiveInfection* DescriptiveWithinHostModel::createInfection () {
+    return new DescriptiveInfection();
 }
 void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
 }
 
 void DescriptiveWithinHostModel::clearAllInfections() {
-    std::list<DescriptiveInfection*>::iterator i;
-    for (i=infections.begin(); i != infections.end(); ++i) {
-        delete *i;
+    std::list<DescriptiveInfection*>::iterator inf;
+    for (inf=infections.begin(); inf != infections.end(); ++inf) {
+        delete *inf;
     }
     infections.clear();
     numInfs=0;
 }
 
 // -----  Interventions  -----
+
 void DescriptiveWithinHostModel::immuneSuppression() {
-    for (std::list<DescriptiveInfection*>::iterator it = infections.begin(); it != infections.end(); ++it) {
-        (*it)->immuneSuppression();
+    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        (*inf)->immuneSuppression();
     }
     _cumulativeh = 0.0;
     _cumulativeYlag = 0.0;
+}
+void DescriptiveWithinHostModel::importInfection(){
+    PopulationStats::totalInfections += 1;
+    if( numInfs < MAX_INFECTIONS ){
+        PopulationStats::allowedInfections += 1;
+        _cumulativeh += 1;
+        numInfs += 1;
+        infections.push_back(createInfection());
+    }
+    assert( numInfs == static_cast<int>(infections.size()) );
 }
 
 
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
-    for (int i=1;i<=nNewInfs; ++i) {
-        newInfection();
+    // Note: adding infections at the beginning of the update instead of the end
+    // shouldn't be significant since before latentp delay nothing is updated.
+    PopulationStats::totalInfections += nNewInfs;
+    nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
+    PopulationStats::allowedInfections += nNewInfs;
+    numInfs += nNewInfs;
+    assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
+    for ( int i=0; i<nNewInfs; ++i ) {
+        infections.push_back(createInfection());
     }
-    
+    assert( numInfs == static_cast<int>(infections.size()) );
+
     updateImmuneStatus ();
 
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
 
-    // Values of _cumulativeh/Y at beginning of step
-    // (values are adjusted for each infection)
+    // As in AJTMH p22, cumulativeh (X_h + 1) doesn't include infections added
+    // this time-step and cumulativeY only includes past densities.
     double cumulativeh=_cumulativeh;
     double cumulativeY=_cumulativeY;
+    _cumulativeh += nNewInfs;
 
-    std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-    while (iter != infections.end()) {
-        if ( (*iter)->expired() /* infection too old */
-                || eventSPClears(*iter) /* infection cleared by SP in IPT model */
+    std::list<DescriptiveInfection*>::iterator inf=infections.begin();
+    while (inf != infections.end()) {
+        if ( (*inf)->expired() /* infection too old */
+                || eventSPClears(*inf) /* infection cleared by SP in IPT model */
            ) {
-            delete *iter;
-            iter=infections.erase(iter);
+            delete *inf;
+            inf=infections.erase(inf);
             numInfs--;
         }
         else {
             // Should be: infStepMaxDens = 0.0, but has some history.
             // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
             double infStepMaxDens = timeStepMaxDensity;
-            (*iter)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
+            (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
 
-            IPTattenuateAsexualDensity (*iter);
+            IPTattenuateAsexualDensity (*inf);
 
             if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
                 infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
             timeStepMaxDensity = infStepMaxDens;
 
-            totalDensity += (*iter)->getDensity();
-            (*iter)->determineDensityFinal ();
-            _cumulativeY += TimeStep::interval*(*iter)->getDensity();
-            if ((*iter)->getStartDate() == TimeStep::simulation) {
-                // cumulativeh should only include infections which started
-                // before now, so we can't increment _cumulativeh when
-                // infection is created
-                _cumulativeh++;
-            }
+            totalDensity += (*inf)->getDensity();
+            (*inf)->determineDensityFinal ();
+            _cumulativeY += TimeStep::interval*(*inf)->getDensity();
 
-            ++iter;
+            ++inf;
         }
     }
     assert( numInfs == static_cast<int>(infections.size()) );
@@ -138,9 +147,9 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
     if (infections.empty()) return 0;
     patentInfections = 0;
-    for (std::list<DescriptiveInfection*>::iterator iter=infections.begin();
-            iter != infections.end(); ++iter) {
-        if ((*iter)->getDensity() > detectionLimit)
+    for (std::list<DescriptiveInfection*>::iterator inf=infections.begin();
+            inf != infections.end(); ++inf) {
+        if ((*inf)->getDensity() > detectionLimit)
             patentInfections++;
     }
     return infections.size();
@@ -152,7 +161,7 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
     WithinHostModel::checkpoint (stream);
     for (int i=0; i<numInfs; ++i) {
-        loadInfection(stream);	// create infections using a virtual function call
+        loadInfection(stream);  // create infections using a virtual function call
     }
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
@@ -162,4 +171,5 @@ void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     }
 }
 
-} }
+}
+}

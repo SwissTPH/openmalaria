@@ -62,7 +62,7 @@ public:
   bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
   
   /// Create a new infection within this human
-  virtual void newInfection() =0;
+  virtual void importInfection() =0;
   /** Conditionally clears all infections. Not used with the PK/PD model.
    *
    * If IPT isn't present, it just calls clearAllInfections(); otherwise it
