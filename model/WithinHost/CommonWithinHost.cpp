@@ -100,6 +100,13 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
     survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, timestepCumY);
     
+    if ((*inf)->getStartDate() == TimeStep::simulation) {
+        // cumulativeh should only include infections which started
+        // before now, so we can't increment _cumulativeh when
+        // infection is created
+        _cumulativeh++;
+    }
+    
     // We update the density, and if updateDensity returns true (parasites extinct) then remove the infection.
     if ((*inf)->update(survivalFactor)) {
 	delete *inf;
@@ -111,12 +118,6 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     totalDensity += (*inf)->getDensity();
     timeStepMaxDensity = max(timeStepMaxDensity, (*inf)->getDensity());
     _cumulativeY += TimeStep::interval*(*inf)->getDensity();
-    if ((*inf)->getStartDate() == TimeStep::simulation) {
-        // cumulativeh should only include infections which started
-        // before now, so we can't increment _cumulativeh when
-        // infection is created
-        _cumulativeh++;
-    }
     
     ++inf;
   }
