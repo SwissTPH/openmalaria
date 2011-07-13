@@ -99,7 +99,7 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
         if (status == GSL_SUCCESS)
             break;
     }
-    // Call again to set final value. NOTE: this changes previous results.
+    // Call again to set final value.
     wCalcRSS (minimizer->x, NULL);
     
     gsl_vector_free(initialValues);

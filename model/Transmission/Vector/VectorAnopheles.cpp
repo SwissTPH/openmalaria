@@ -185,7 +185,7 @@ string VectorAnopheles::initialise (
   // Add to the TransmissionModel's EIR, used for the initalization phase:
   for (int i = 0; i < TimeStep::fromYears(1).inDays(); ++i){
     // index 1 of initialisationEIR corresponds to first period of year
-    initialisationEIR[(/*FIXME 1+*/i/TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
+    initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
   }
   
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){

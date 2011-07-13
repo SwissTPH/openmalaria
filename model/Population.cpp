@@ -179,7 +179,8 @@ void Population::update1()
 {
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
-    // TODO: add some value to be used until old-enough humans are updated?
+    // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
+    // (until humans old enough to be pregnate get updated and can be infected).
     Host::NeonatalMortality::update (population);
     
     // This should be called before humans contract new infections in the simulation step.

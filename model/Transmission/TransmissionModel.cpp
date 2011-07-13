@@ -169,12 +169,10 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    //TODO: surely we don't need all of these!
     int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // now
-    int t1mod = (TimeStep::simulation-TimeStep(1)) % TimeStep::stepsPerYear;    // last time-step
     
     //Calculate time-weighted average of kappa
-    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[t1mod];	//FIXME: should use tmod, not t1mod
+    _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
     if (tmod == 0) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
