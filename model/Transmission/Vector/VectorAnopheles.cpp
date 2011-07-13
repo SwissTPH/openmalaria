@@ -60,9 +60,6 @@ string VectorAnopheles::initialise (
   
   minInfectedThreshold = mosq.getMinInfectedThreshold();
 
-
-  this->nonHumansHostsPopulations = nonHumansHostsPopulations;
-
   if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
     throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
   }
@@ -89,23 +86,21 @@ string VectorAnopheles::initialise (
 
   for (NonHumanHostsType::iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh)
   {
-      //TODO: tidy up. Doesn't look like we really need nonHumansHostsPopulations stored in this struct?
-            double relativeEntoAvailability = nnh->relativeEntoAvailability;
-            relativeEntoAvailabilitySum += relativeEntoAvailability;
-
-                map<string, double>::const_iterator nonHumanPopulationIter = this->nonHumansHostsPopulations.find(nnh->nonHumanHostName);
-                double nonHumanPopulationSize = 0.0;
-
-                if(nonHumanPopulationIter == this->nonHumansHostsPopulations.end())
-                        throw xml_scenario_error ("There is no population size defined for at least one non human host type, please check the scenario file. ");
-
-                nonHumanPopulationSize = (*nonHumanPopulationIter).second;
-                double entoAvailability = getNonHumanEntoAvailability(nonHumanPopulationSize,relativeEntoAvailability);
-                nnh->setEntoAvailability(entoAvailability);
+    double relativeEntoAvailability = nnh->relativeEntoAvailability;
+    relativeEntoAvailabilitySum += relativeEntoAvailability;
+    
+    map<string, double>::const_iterator nonHumanPopulationIter = nonHumansHostsPopulations.find(nnh->nonHumanHostName);
+    
+    if(nonHumanPopulationIter == nonHumansHostsPopulations.end())
+      throw xml_scenario_error ("There is no population size defined for at least one non human host type, please check the scenario file. ");
+    
+    double nonHumanPopulationSize = nonHumanPopulationIter->second;
+    double entoAvailability = getNonHumanEntoAvailability(nonHumanPopulationSize,relativeEntoAvailability);
+    nnh->setEntoAvailability(entoAvailability);
   }
 
-  if(!nonHumanHosts.empty()&&relativeEntoAvailabilitySum!=1.0)
-          throw xml_scenario_error ("The sum of all non human hosts types relative ento availabilities must be 1.0, please check the scenario file. ");
+  if(!nonHumanHosts.empty()&&!(relativeEntoAvailabilitySum>0.9999 && relativeEntoAvailabilitySum<1.0001))
+    throw xml_scenario_error ("The sum of all non human hosts types relative ento availabilities must be 1.0, please check the scenario file. ");
 
 
   // -----  EIR  -----

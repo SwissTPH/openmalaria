@@ -216,39 +216,40 @@ public:
     }
 
 private:
-    /** Sets the P_A parameters (see document "Parameter Values for Transmission model"
-     * (Chitnis, Smith and Schapira, 4.3.2010)).
+    /** Sets the P_A parameters
      *
-     *  initPA : Probability that a mosquito does not find a host and does not die in one night of searching
-     *  P_A1 : Probability that a mosquito encounters a human on a given night.
-     *  P_An : Probability that a mosquito encounters a non human host on a given night.
-     */
+     * Documentation: "Parameter Values for Transmission model"
+     * (Chitnis, Smith and Schapira, 4.3.2010) */
     void setPAs();
 
-    /** returns the human ento availability, calculated from PA, PA1, mosqSeekingDuration and population size.
+    /** Returns the human ento availability, calculated from PA, PA1,
+     * mosqSeekingDuration and population size.
      *
-     *  In previous versions the ento availability was to be explicitly given in the scenario. Because of the
-     *  dependence of the ento availability value with the population size, we had to change the ento availability
-     *  whenever we changed the population size.
+     * In previous versions the ento availability was to be explicitly given
+     * in the scenario. Because of the dependence of the ento availability
+     * value with the population size, we had to change the ento availability
+     * whenever we changed the population size.
      *
-     * @param human population size;
-     * @return human ento availability;
-     *
+     * @param populationSize human population size
+     * @return human ento availability
      */
     double getHumanEntoAvailability(int populationSize);
 
-    /** returns the non human ento availability for a given type of non human host,
-     *  calculated from init_PA, P_An, mosqSeekingDuration, population size and relativeEntoAvailability.
+    /** Returns the non human ento availability for a given type of non human
+     * host, calculated from init_PA, P_An, mosqSeekingDuration, population
+     * size and relativeEntoAvailability.
      *
-     *  In previous versions the ento availability was to be explicitly given in the scenario. Because of the
-     *  dependence of the ento availability value with the population size, we had to change the ento availability
-     *  whenever we changed the population size.
+     * In previous versions the ento availability was to be explicitly given
+     * in the scenario. Because of the dependence of the ento availability
+     * value with the population size, we had to change the ento availability
+     * whenever we changed the population size.
      *
-     *  If only one type of non human host is given in the scenario, then relativeEntoAvailability = 1.
+     * The sum of relativeEntoAvailability across all types of non-human host
+     * must be 1.
      *
-     * @param non human host population size;
-     * @return non human host ento availability;
-     *
+     * @param populationSize non human host population size
+     * @param relativeEntoAvailability availability of NNH relative to other NNHs
+     * @return non human host ento availability
      */
     double getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability);
 
@@ -264,9 +265,12 @@ private:
      * Read from XML by initialise; no need to checkpoint. */
     HostCategoryAnophelesHumans humanBase;
 
-    //TODO (GG): document like parameters below
+    /// Probability that a mosquito does not find a host and does not die in
+    /// one night of searching
     double initP_A;
+    /// Probability that a mosquito encounters a human on a given night
     double P_A1;
+    /// Probability that a mosquito encounters a non human host on a given night
     double P_An;
 
     /** Proportion of host-seeking parous mosquitoes that have laid eggs same day*/
@@ -446,9 +450,6 @@ private:
 
     /** Variables tracking data to be reported. */
     double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
-
-    /** map that has populations size as value and non human host type name as key */
-    map<string, double> nonHumansHostsPopulations;
 
 
     /* Functions */
