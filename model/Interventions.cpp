@@ -553,9 +553,9 @@ void InterventionManager::deploy(OM::Population& population) {
                 break;      // remaining intervs happen in future
             // If interv for now, do it. (If we missed the time, ignore it.)
             if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimeSteps )
-            {	//TODO: should this become <= then < ? Looks like it.
-                if( ctsIntervs[nextCtsDist].begin < TimeStep::interventionPeriod &&
-                    TimeStep::interventionPeriod <= ctsIntervs[nextCtsDist].end )
+            {
+                if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod &&
+                    TimeStep::interventionPeriod < ctsIntervs[nextCtsDist].end )
                 {
                     if( !ctsIntervs[nextCtsDist].cohortOnly || it->getInCohort() )
                     {
