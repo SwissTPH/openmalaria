@@ -92,7 +92,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for ( int n=nNewInfs; n>0; --n ) {
+    for ( int i=0; i<nNewInfs; ++i ) {
         infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
     }
     assert( numInfs == static_cast<int>(infections.size()) );

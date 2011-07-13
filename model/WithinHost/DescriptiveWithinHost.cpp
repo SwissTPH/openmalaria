@@ -107,38 +107,46 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     double cumulativeY=_cumulativeY;
     _cumulativeh += nNewInfs;
 
-    std::list<DescriptiveInfection*>::iterator inf=infections.begin();
-    while (inf != infections.end()) {
+    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+        //NOTE: it would be nice to combine this code with that in
+        // CommonWithinHost.cpp, but a few changes would be needed:
+        // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
+        // (couldn't support old parameterisations using buggy versions of code
+        // any more).
+        // IPT model would need to be overhauled; it might be possible to make
+        // a pseudo drug model and move SP code there and remove/generalise the
+        // rest.
         if ( (*inf)->expired() /* infection too old */
                 || eventSPClears(*inf) /* infection cleared by SP in IPT model */
            ) {
             delete *inf;
             inf=infections.erase(inf);
             numInfs--;
+            continue;
         }
-        else {
-            // Should be: infStepMaxDens = 0.0, but has some history.
-            // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
-            double infStepMaxDens = timeStepMaxDensity;
-            (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
+        
+        // Should be: infStepMaxDens = 0.0, but has some history.
+        // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
+        double infStepMaxDens = timeStepMaxDensity;
+        (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
 
-            IPTattenuateAsexualDensity (*inf);
+        IPTattenuateAsexualDensity (*inf);
 
-            if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
-                infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
-            timeStepMaxDensity = infStepMaxDens;
+        if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
+            infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
+        timeStepMaxDensity = infStepMaxDens;
 
-            totalDensity += (*inf)->getDensity();
-            (*inf)->determineDensityFinal ();
-            _cumulativeY += TimeStep::interval*(*inf)->getDensity();
+        totalDensity += (*inf)->getDensity();
+        (*inf)->determineDensityFinal ();
+        _cumulativeY += TimeStep::interval*(*inf)->getDensity();
 
-            ++inf;
-        }
+        ++inf;
     }
     assert( numInfs == static_cast<int>(infections.size()) );
+    util::streamValidate( totalDensity );
+    assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
 
     IPTattenuateAsexualMinTotalDensity();
-    util::streamValidate( totalDensity );
 }
 
 
