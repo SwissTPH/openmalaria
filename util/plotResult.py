@@ -110,6 +110,12 @@ combinedMeasures = [
     ('vector interventions',[(44,'mass ITNs','darkgreen'),(45,'EPI ITNs','green'),(46,'mass IRS','darkred'),(47,'mass deterrents','brown')]),
     ('cohort delta',[(50,'added','orange'),(51,'removed','blue')])
 ]
+appendMeasureNumber=None
+def measureNumber(m):
+    if appendMeasureNumber:
+        return " ("+str(m)+")"
+    else:
+        return ""
 def findMeasureGroup(m):
     for i in range(len(combinedMeasures)):
         for md in combinedMeasures[i][1]:
@@ -118,11 +124,11 @@ def findMeasureGroup(m):
     raise KeyError("measure "+str(m)+" not in combinedMeasures")
 def getMeasureLabel(mg,m):
     if mg is None:
-        return measureNames[m]+" ("+str(m)+")"
+        return measureNames[m]+measureNumber(m)
     else:
         for md in combinedMeasures[mg][1]:
             if m==md[0]:
-                return md[1]+" ("+str(m)+")"
+                return md[1]+measureNumber(m)
         raise KeyError("measure "+str(m)+" not in combinedMeasures["+str(mg)+"]")
 def getMeasureColour(mg,m):
     if mg is None:
@@ -150,6 +156,7 @@ def ensureUnique(colour,used):
     used.add(colour)
     return colour
 
+replaceFN=None
 class MultiKey(object):
     __slots__ = ["mg","m","s","g","f"]
     def __init__(self,measureGroup=None,measure=None,survey=None,group=None,fileName=None):
@@ -161,6 +168,7 @@ class MultiKey(object):
     def __and__(self,other):
         """Set each member from other is not set in self.
         Should complain if set in self and in other, but this is a bit unnecessary."""
+        assert isinstance(other,MultiKey)
         first=MultiKey(self.mg,self.m,self.s,self.g,self.f)
         if first.mg==None:
             first.mg=other.mg
@@ -192,6 +200,8 @@ class MultiKey(object):
         return [MultiKey(fileName=fl) for fl in files]
     @staticmethod
     def expand(r,x):
+        "r,x are expected to be lists of MultiKeys"
+        "this creates a list of all combinations of a&b for a in r and b in x"
         lx=len(x)
         assert lx>0, "expected len>0"
         r *= lx # shallow copy: all references point to same object
@@ -199,7 +209,7 @@ class MultiKey(object):
             r[i] = r[i] & x[i%lx]
     def __str__(self):
         return self.label(MultiKey(),True,None)
-    def label(self,base,replaceFN,valDict):
+    def label(self,base,valDict):
         r=""
         if self.m!=base.m:
             r=getMeasureLabel(self.mg,self.m)
@@ -223,11 +233,16 @@ class MultiKey(object):
 class Plotter(object):
     def __init__(self,keys):
         self.values=ValDict(keys)
+        self.showLegends = None
+        self.showTitle = None
+        self.showXLabel = None
+        self.showYLabel = None
+        self.horizSubBars = None
     def read(self,fileName,filterExpr,debugFilter):
         self.values.read(fileName,filterExpr,debugFilter)
         if len(self.values.getMeasures())==0:
             raise Exception("No data to plot (after filtering)!")
-    def plot(self,am,replaceFN,showLegends,s,g,f):
+    def plot(self,am,s,g,f):
         x_axis=Keys.NONE
         x_label=""
         if s=="x-axis":
@@ -264,11 +279,16 @@ class Plotter(object):
         else:
             MultiKey.expand(plots, MultiKey.fromMeasures(self.values.getMeasures()))
         if s=="plot":
-            # NOTE: probably not going to include measure 21
+            # NOTE: probably not going to include measure 21 — this doesn't include multiple surveys
             MultiKey.expand(plots, MultiKey.fromSurveys(self.values.getSurveys(0)))
         if g=="plot":
-            MultiKey.expand(plots, MultiKey.fromGroups(self.values.getAllGroups()))
+            # like MultiKey.expand, but only using those groups applicable to each measure
+            origplots=plots
+            plots=list()
+            for p in origplots:
+                plots += [p&b for b in MultiKey.fromGroups(self.values.getGroups(p.m))]
         if f=="plot":
+            # NOTE: we assume all files contain data over same measures, surveys and groups
             MultiKey.expand(plots, MultiKey.fromFiles(self.values.getFiles()))
         
         n=len(plots)
@@ -292,19 +312,7 @@ class Plotter(object):
                 x=self.values.getSurveys(m)
             #else x was set previously
             
-            subplot.set_title(plot.label(MultiKey(measure=plot.m),replaceFN,self.values))
-            # Don't set x-label: is always the same and gets in the way of title
-            #subplot.set_xlabel(x_label)
-            if am:
-                subplot.set_ylabel(combinedMeasures[plot.mg][0])
-                
-                pLines=[plot]
-                measures=measureGroups[plot.mg]
-                MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
-            else:
-                subplot.set_ylabel(getMeasureLabel(plot.mg,plot.m))
-                
-                pLines=[plot]
+            pLines=[plot]
             
             #TODO: colour is not unique for any key other than measures from measure groups
             # i.e. we need to somehow manipulate colours to make them unique
@@ -320,8 +328,36 @@ class Plotter(object):
             for colour in ['white','azure','floralwhite','ghostwhite','honeydew','ivory','snow','whitesmoke']:
                 lineColours.add(colour)
             
+            if self.showTitle:
+                """ This is an aglomeration of all information constant in the
+                plot. Unfortunately it's rather useless to show.
+                # Only include y-axis info if not shown on y-axis:
+                base=MultiKey(measure=plot.m) if self.showYLabel else MultiKey()
+                subplot.set_title(plot.label(base,self.values))
+                """
+                if am:
+                    measures=measureGroups[plot.mg]
+                    title="Measures "+str(measures[0])
+                    for m in measures[1:]:
+                        title += ", " + str(m)
+                else:
+                    title="Measure "+str(plot.m)
+                subplot.set_title(title)
+            if self.showXLabel:
+                subplot.set_xlabel(x_label)
+            if self.showYLabel:
+                if am:
+                    y_label=combinedMeasures[plot.mg][0]
+                else:
+                    y_label=getMeasureLabel(plot.mg,plot.m)
+                subplot.set_ylabel(y_label)
+            
+            plotted=list()
+            
             if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
-                plotted=list()
+                measures=measureGroups[plot.mg]
+                MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
+                
                 for pLine in pLines:
                     xKeys=[pLine]
                     if x_axis==Keys.SURVEY:
@@ -339,40 +375,97 @@ class Plotter(object):
                         print "x:",x
                         print "y:",y
                 
-                if showLegends and (am or len(plotted)>1):
-                    legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
-                    subplot.legend(plotted,legends,'upper right')
+                if self.showLegends and (am or len(plotted)>1):
+                    legends=[pLine.label(plot,self.values) for pLine in pLines]
+                    subplot.legend(plots,legends,'upper right')
             else: #one x-coord or non-numeric x-coords: draw a bar chart
                 plotted=list()
+                firstLine=None
+                firstStack=None
+                
                 xind=numpy.arange(len(x))
-                width=0.9/len(pLines)
-                xincr=0.0
+                propPlotUse=0.95
+                width=propPlotUse/len(pLines)
+                xincr=0.5*(1.0-propPlotUse)
+                
+                # each pLine has a vertical bar/stack for each x-position
                 for pLine in pLines:
-                    xKeys=[pLine]
-                    if x_axis==Keys.SURVEY:
-                        MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
-                    elif x_axis==Keys.GROUP:
-                        MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
-                    elif x_axis==Keys.FILE:
-                        MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
-                    y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
-                    colour=ensureUnique(getMeasureColour(pLine.mg,pLine.m),lineColours)
-                    try:
-                        plotted.append(subplot.bar(xind+xincr,y,width,color=colour))
-                    except ValueError,e:
-                        print "Bad plot values (script error):"
-                        print "x:",xind+xincr
-                        print "y:",y
+                    pLStack=[pLine]
+                    measures=measureGroups[plot.mg]
+                    MultiKey.expand(pLStack, MultiKey.fromMeasures(measures))
+                    
+                    if firstLine==None:
+                        firstLine=pLine
+                        firstStack=pLStack
+                    
+                    ytop=None
+                    probBarUse=0.8
+                    subwidth=width*probBarUse/len(measures)
+                    xsubincr=width*0.5*(1.0-probBarUse)
+                    lastPlotted=None
+                    # each bar is a stack of one or more items
+                    for pLSBlock in pLStack:
+                        # finally, we have several x-positions
+                        xKeys=[pLSBlock]
+                        if x_axis==Keys.SURVEY:
+                            MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
+                        elif x_axis==Keys.GROUP:
+                            MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
+                        elif x_axis==Keys.FILE:
+                            MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
+                        
+                        if ytop==None:
+                            ytop=[0.0 for k in xKeys]
+                        y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
+                        colour=getMeasureColour(pLSBlock.mg,pLSBlock.m)
+                        if not am:
+                            colour=ensureUnique(colour,lineColours)
+                        try:
+                            if self.horizSubBars:
+                                #multiple bars
+                                lastPlotted=subplot.bar(xind+xincr+xsubincr,y,subwidth,color=colour)
+                                for i in range(0,len(y)):
+                                    ytop[i]=max(ytop[i],y[i])
+                            else:
+                                #stack
+                                lastPlotted=subplot.bar(xind+xincr,y,width,color=colour,bottom=ytop)
+                                for i in range(0,len(y)):
+                                    ytop[i]+=y[i]
+                            xsubincr+=subwidth
+                            plotted.append(lastPlotted)
+                        except ValueError,e:
+                            print "Bad plot values (script error):"
+                            print "x:",xind+xincr
+                            print "y:",y
+                            print "ytop:",ytop
+                    
+                    if am:
+                        message=pLine.label(plot,self.values)
+                        lims=subplot.get_ylim()
+                        yincr=(lims[1]-lims[0])*0.02
+                        for i in range(0,len(ytop)):
+                            xl=xind[i]+xincr
+                            xc=xl+width/2.
+                            yc=ytop[i]+yincr
+                            if self.horizSubBars:
+                                subplot.errorbar(xc,yc,xerr=width*probBarUse*0.5,ecolor='black')
+                                yc+=yincr
+                            subplot.text(
+                                xc,
+                                yc,
+                                message,
+                                ha='center', va='bottom')
                     xincr+=width
                 
-                if showLegends and (am or len(plotted)>1):
-                    plots=[p[0] for p in plotted]
-                    legends=[pLine.label(plot,replaceFN,self.values) for pLine in pLines]
+                plots=[p[0] for p in plotted]
+                #if len(x)>1:
+                subplot.set_xticks(xind+0.5)
+                subplot.set_xticklabels(x)
+                subplot.set_xlim((0.0,float(len(x))))
+                
+                if self.showLegends and (am or len(plotted)>1):
+                    legends=[block.label(firstLine,self.values) for block in firstStack]
                     subplot.legend(plots,legends,'upper right')
-                if len(x)>1:
-                    subplot.set_xticks(xind+0.45)
-                    subplot.set_xticklabels(x)
-                subplot.set_xlim((-0.1,len(x)))
         
         plt.show()
 
@@ -398,10 +491,15 @@ assigned to the x-axis.""",version="%prog 0.1")
             choices=["none","x-axis","plot","line"],help="How to plot (age) groups")
     parser.add_option("-f","--file", action="store", type="choice", dest="f", default="plot",
             choices=["none","x-axis","plot","line"],help="How to plot outputs from different files")
-    parser.add_option("-n","--file-names", action="store_true", dest="fn", default=False,
+    parser.add_option("-n","--file-names", action="store_true", dest="fullNames", default=False,
             help="Use full file names instead of replacing with short versions")
-    parser.add_option("-l","--no-legends", action="store_true", dest="nl", default=False,
+    parser.add_option("-l","--no-legends", action="store_false", dest="legends", default=True,
             help="Turn off legends (sometimes they hide parts of the plots)")
+    parser.add_option("-L","--labels", action="store", type="choice", dest="labels", default="y",
+            choices=["","y","x","xy","t","ty","tx","txy"],
+            help="Show [t]itle, [x]-axis and/or [y]-axis labels: txy tx ty t xy x y or (none); default is xy")
+    parser.add_option("-b","--vertical-stack", action="store_false", dest="horizSubBars", default=True,
+            help="Where bar-plots need sub-divisions, use a vertical stack instead of horizontal sub-bars")
     
     (options, others) = parser.parse_args(args=args[1:])
     if len(others)==0:
@@ -427,10 +525,20 @@ assigned to the x-axis.""",version="%prog 0.1")
     
     plotter=Plotter(keys)
     
+    global appendMeasureNumber
+    appendMeasureNumber=not ('t' in options.labels)
+    global replaceFN
+    replaceFN = not options.fullNames
+    plotter.showLegends = options.legends
+    plotter.showTitle = 't' in options.labels
+    plotter.showXLabel = 'x' in options.labels
+    plotter.showYLabel = 'y' in options.labels
+    plotter.horizSubBars=options.horizSubBars
+    
     for output in others:
         plotter.read(output,options.filterExpr,options.debugFilter)
     
-    plotter.plot(options.am,not options.fn,not options.nl,options.s,options.g,options.f)
+    plotter.plot(options.am,options.s,options.g,options.f)
     
     return 0
 
