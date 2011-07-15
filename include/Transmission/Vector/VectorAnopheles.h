@@ -253,6 +253,25 @@ private:
      */
     double getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability);
 
+    /** This subroutine converts ShortArray to a vector<double> of length
+     * 365 by copying and duplicating elements to fill the gaps. */
+    static vector<double> convertLengthToFullYear (vector<double>& ShortArray);
+
+    /** Given an input sequence of Fourier coefficients, with odd length,
+     * calculate the exponential of the corresponding fourier series.
+     *
+     * Note: output is per-interval in tArray. When length is intervalsPerYear,
+     * you may want to scale the output by days-per-interval.
+     *
+     * @param tArray Array to fill with EIR values. Length should already be set.
+     * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).
+     * @param rAngle Angle to rotate EIR, in radians: [0,2π] */
+    static void calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle);
+
+    /// Shifts elements of rArray clockwise by rAngle.
+    static void rotateArray(vector<double>& rArray, double rAngle);
+
+    
     /** Reference back to TransmissionModel base. */
     const TransmissionModel* transmissionModel;
 
@@ -338,28 +357,32 @@ private:
      * FSCoeffic[0] needs checkpointing, the rest doesn't. */
     vector<double> FSCoeffic;
 
+    /** @brief Variables with annual periodicity.
+     * 
+     * These have length 365 (1 per day), with the first value (index 0)
+     * affecting the first day of the year (the end of which is time 1); with
+     * the 5-day time-step model values at indecies 0 through 4 are used when
+     * updating time-step 1. */
+    //@{
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * Units: Animals per day. Length: 365. Index
-     * TimeStep::simulation % 365 is current value
-     * during each update.
+     * 
+     * Units: Animals per day.
      *
      * Should be checkpointed. */
     vector<double> mosqEmergeRate;
 
-    /* Parameters and partial (derived) parameters from model */
-
-    /** @brief S_v used to force an EIR during vector init.
-     * Length: 365
+    /** S_v used to force an EIR during vector init.
      *
      * Should be checkpointed. */
     vector<double> forcedS_v;
+    //@}
 
     /** Summary of S_v over the last five years, used by vectorInitIterate to
      * calculate scaling factor.
      *
-     * Length of annualS_v is 365 * 5. Checkpoint.
+     * Length is 365 * 5. Checkpoint.
      *
-     * Units of both should be inoculations. */
+     * Units: inoculations. */
     vector<double> quinquennialS_v;
 
     /** Conversion factor from forcedS_v to mosqEmergeRate.
@@ -388,12 +411,17 @@ private:
      *
      * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod().
      *
-     * They should be checkpointed. */
+     * Values at index ((d-1) mod N_v_length) are used to derive the state of
+     * the population on day d. The state during days (t×(I-1)+1) through (t×I)
+     * where t is TimeStep::simulation and I is TimeStep::interval is what
+     * drives the transmission at time-step t.
+     * 
+     * These arrays should be checkpointed. */
     //@{
-    /** @brief Probability of a mosquito not finding a host one night. */
+    /** Probability of a mosquito not finding a host one night. */
     vector<double> P_A;
 
-    /** @brief P_df and P_dif per-day.
+    /** P_df and P_dif per-day.
      *
      * P_df is the probability of a mosquito finding a host and completing a
      * feeding cycle without being killed.
@@ -406,10 +434,10 @@ private:
      * the daily kappa values read from XML for validation purposes. */
     vector<double> P_df, P_dif;
 
-    /** Number of host-seeking mosquitos each day; respectively: the total number
-     * seeking, those seeking and infected, and those seeking and infective.
-     *
-     * Index for each day is day % N_v_length. */
+    /** Numbers of host-seeking mosquitos each day
+     * 
+     * N_v is the total number of host-seeking mosquitoes, O_v is those seeking
+     * and infected, and S_v is those seeking and infective (to humans). */
     vector<double> N_v, O_v, S_v;
     //@}
 
@@ -417,7 +445,8 @@ private:
      *
      * Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
      * Values are recalculated each step; only fArray[0] and
-     * ftauArray[0..mosqRestDuration] are stored across steps for optimisation.
+     * ftauArray[0..mosqRestDuration] are stored across steps for optimisation
+     * (reallocating each time they are needed would be slow).
      *
      * Length (fArray): EIPDuration - mosqRestDuration + 1 (θ_s - τ + 1)
      * Length (ftauArray): EIPDuration (θ_s)
@@ -451,26 +480,6 @@ private:
     /** Variables tracking data to be reported. */
     double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
 
-
-    /* Functions */
-
-    /** This subroutine converts ShortArray to a vector<double> of length
-     * 365 by copying and duplicating elements to fill the gaps. */
-    static vector<double> convertLengthToFullYear (vector<double>& ShortArray);
-
-    /** Given an input sequence of Fourier coefficients, with odd length,
-     * calculate the exponential of the corresponding fourier series.
-     *
-     * Note: output is per-interval in tArray. When length is intervalsPerYear,
-     * you may want to scale the output by days-per-interval.
-     *
-     * @param tArray Array to fill with EIR values. Length should already be set.
-     * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).
-     * @param rAngle Angle to rotate EIR, in radians: [0,2π] */
-    static void calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle);
-
-    /// Shifts elements of rArray clockwise by rAngle.
-    static void rotateArray(vector<double>& rArray, double rAngle);
 
     friend class VectorEmergenceSuite;
     friend class VectorAnophelesSuite;

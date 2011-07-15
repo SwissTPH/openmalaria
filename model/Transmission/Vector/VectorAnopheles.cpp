@@ -334,9 +334,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
         P_A[t] = intP_A;
         P_df[t] = intP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        //t in: sTime*TimeStep::interval..((sTime+1)*TimeStep::interval-1)
-        int sTime = t / TimeStep::interval;
-        S_v[t] = forcedS_v[sTime % TimeStep::stepsPerYear];     //FIXME: should index in days, not time-steps!
+        S_v[t] = forcedS_v[t];	// assume N_v_length ≤ 365
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
     }
@@ -483,8 +481,9 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses TimeStep::interval day (currently 5 day) time steps.
-    //FIXME: TimeStep::simulation is the end of the period we're updating over, not the beginning!
-    int firstDay = TimeStep::simulation.inDays();
+    // The transmission for time-step t depends on the state during days
+    // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
         // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
         // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
@@ -494,8 +493,9 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         size_t t    = dMod % N_v_length;
         size_t t1   = (dMod - 1) % N_v_length;
         size_t ttau = (dMod - mosqRestDuration) % N_v_length;
-        // Day of year and of 5-year cycles:
-        size_t dYear = (firstDay + i) % TimeStep::fromYears(1).inDays();
+        // Day of year and of 5-year cycles. Note that emergence during day 1
+        // comes from mosqEmergeRate[0], hence subtraction by 1.
+        size_t dYear1 = (firstDay + i - 1) % TimeStep::fromYears(1).inDays();
         size_t d5Year = (firstDay + i) % TimeStep::fromYears(5).inDays();
 
 
@@ -506,7 +506,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         P_dif[t] = intP_dif;
 
 
-        N_v[t] = mosqEmergeRate[dYear] * larvicidingIneffectiveness
+        N_v[t] = mosqEmergeRate[dYear1] * larvicidingIneffectiveness
                  + P_A[t1]  * N_v[t1]
                  + P_df[ttau] * N_v[ttau];
         O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
@@ -518,8 +518,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         // Set up array with n in 1..θ_s−1 for f_τ(dMod-n) (NDEMD eq. 1.7)
         size_t fProdEnd = 2*mosqRestDuration;
         for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-            ftauArray[n] =
-                ftauArray[n-1] * P_A[(dMod-n)%N_v_length];
+            size_t tn = (dMod-n)%N_v_length;
+            ftauArray[n] = ftauArray[n-1] * P_A[tn];
         }
         ftauArray[fProdEnd] += P_df[(dMod-fProdEnd)%N_v_length];
 
@@ -540,8 +540,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 
         // Set up array with n in 1..θ_s−τ for f(dMod-n) (NDEMD eq. 1.6)
         for (int n = 1; n <= mosqRestDuration; ++n) {
-            fArray[n] =
-                fArray[n-1] * P_A[(dMod-n)%N_v_length];
+            size_t tn = (dMod-n)%N_v_length;
+            fArray[n] = fArray[n-1] * P_A[tn];
         }
         fArray[mosqRestDuration] += P_df[ttau];
 
@@ -580,7 +580,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 
         partialEIR += S_v[t] * P_Ai_base;
 
-        timestep_N_v0 += mosqEmergeRate[dYear];
+        timestep_N_v0 += mosqEmergeRate[dYear1];
         timestep_N_v += N_v[t];
         timestep_O_v += O_v[t];
         timestep_S_v += S_v[t];
