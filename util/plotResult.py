@@ -85,8 +85,9 @@ measureNames = {
     54 : 'nAntibioticTreatments',
     }
 
-# for each combined measure, list included measures: id, name, colour
-# encompasses all measures
+# List of measure groups. Each includes name, boolean (true if use log scale),
+# and per-measure information. For each measure, list: id, name, colour
+#TODO: add log/linear scale info. But is this useful??
 combinedMeasures = [
     ('hosts',[(0,'all','black')]),
     ('infected hosts',[(1,'all','red'),(2,'expected','green'),(3,'patent','blue'),(43,'new','purple')]),
@@ -238,6 +239,7 @@ class Plotter(object):
         self.showXLabel = None
         self.showYLabel = None
         self.horizSubBars = None
+        self.scale=None
     def read(self,fileName,filterExpr,debugFilter):
         self.values.read(fileName,filterExpr,debugFilter)
         if len(self.values.getMeasures())==0:
@@ -296,10 +298,10 @@ class Plotter(object):
         d2=int(math.ceil(float(n)/float(d1)))
         
         fig = plt.figure(1)
-        i=1
+        plotNumber=1
         for plot in plots:
-            subplot = fig.add_subplot(d1,d2,i)
-            i+=1
+            subplot = fig.add_subplot(d1,d2,plotNumber)
+            plotNumber+=1
             
             m=plot.m
             if am:
@@ -351,6 +353,10 @@ class Plotter(object):
                 else:
                     y_label=getMeasureLabel(plot.mg,plot.m)
                 subplot.set_ylabel(y_label)
+            if self.scale=="log":
+                subplot.set_yscale('log')
+            elif self.scale=="auto":
+                pass#TODO
             
             plotted=list()
             
@@ -376,6 +382,7 @@ class Plotter(object):
                         print "y:",y
                 
                 if self.showLegends and (am or len(plotted)>1):
+                    plots=[p[0] for p in plotted]
                     legends=[pLine.label(plot,self.values) for pLine in pLines]
                     subplot.legend(plots,legends,'upper right')
             else: #one x-coord or non-numeric x-coords: draw a bar chart
@@ -447,7 +454,7 @@ class Plotter(object):
                             xl=xind[i]+xincr
                             xc=xl+width/2.
                             yc=ytop[i]+yincr
-                            if self.horizSubBars:
+                            if len(pLStack)>1:
                                 subplot.errorbar(xc,yc,xerr=width*probBarUse*0.5,ecolor='black')
                                 yc+=yincr
                             subplot.text(
@@ -500,6 +507,8 @@ assigned to the x-axis.""",version="%prog 0.1")
             help="Show [t]itle, [x]-axis and/or [y]-axis labels: txy tx ty t xy x y or (none); default is xy")
     parser.add_option("-b","--vertical-stack", action="store_false", dest="horizSubBars", default=True,
             help="Where bar-plots need sub-divisions, use a vertical stack instead of horizontal sub-bars")
+    parser.add_option("--scale",action="store",type="choice",dest="scale",default="auto",
+            choices=["auto","linear","log"],help="Set y-axis scale to linear, log or auto (currently auto does nothing)")
     
     (options, others) = parser.parse_args(args=args[1:])
     if len(others)==0:
@@ -534,6 +543,7 @@ assigned to the x-axis.""",version="%prog 0.1")
     plotter.showXLabel = 'x' in options.labels
     plotter.showYLabel = 'y' in options.labels
     plotter.horizSubBars=options.horizSubBars
+    plotter.scale=options.scale
     
     for output in others:
         plotter.read(output,options.filterExpr,options.debugFilter)
