@@ -361,8 +361,9 @@ class Plotter(object):
             plotted=list()
             
             if len(x)>1 and isinstance(x[0], Number): # draw an xy line chart
-                measures=measureGroups[plot.mg]
-                MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
+                if am:
+                    measures=measureGroups[plot.mg]
+                    MultiKey.expand(pLines, MultiKey.fromMeasures(measures))
                 
                 for pLine in pLines:
                     xKeys=[pLine]
@@ -398,8 +399,9 @@ class Plotter(object):
                 # each pLine has a vertical bar/stack for each x-position
                 for pLine in pLines:
                     pLStack=[pLine]
-                    measures=measureGroups[plot.mg]
-                    MultiKey.expand(pLStack, MultiKey.fromMeasures(measures))
+                    if am:
+                        measures=measureGroups[plot.mg]
+                        MultiKey.expand(pLStack, MultiKey.fromMeasures(measures))
                     
                     if firstLine==None:
                         firstLine=pLine
@@ -407,7 +409,7 @@ class Plotter(object):
                     
                     ytop=None
                     probBarUse=0.8
-                    subwidth=width*probBarUse/len(measures)
+                    subwidth=width*probBarUse/len(pLStack)
                     xsubincr=width*0.5*(1.0-probBarUse)
                     lastPlotted=None
                     # each bar is a stack of one or more items
