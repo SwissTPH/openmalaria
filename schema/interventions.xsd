@@ -293,8 +293,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
-            <xs:element name="anophelesParams" maxOccurs="unbounded" type="IRSDescription"/>
+            <xs:element name="decay" type="DecayFunction">
+              <xs:annotation>
+                <xs:documentation>
+                  Description of decay of IRS. Documentation: see DecayFunction type or
+                  http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+                </xs:documentation>
+                <xs:appinfo>name:Decay;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="anophelesParams" maxOccurs="unbounded" type="IRSDescription">
+              <xs:annotation>
+                <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
               <xs:annotation>
                 <xs:documentation>
@@ -324,7 +336,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="decay" type="DecayFunction">
+              <xs:annotation>
+                <xs:documentation>
+                  Description of decay of vector deterrent. Documentation: see DecayFunction type or
+                  http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+                </xs:documentation>
+                <xs:appinfo>name:Decay;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
             <xs:element name="anophelesParams" maxOccurs="unbounded" type="BaseInterventionDescription"/>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
               <xs:annotation>
@@ -706,7 +726,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="decay" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
-            Specification of decay of efficacy
+            Specification of decay of efficacy. Documentation: see DecayFunction type
+            or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
           <xs:appinfo>name:Decay of effect;</xs:appinfo>
         </xs:annotation>
@@ -714,12 +735,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="efficacyB" type="inputValue">
         <xs:annotation>
           <xs:documentation>
-            Measure of variation in vaccine efficacy
+            Measure of variation in vaccine efficacy: efficacy is sampled from
+            a beta distribution with efficacyB its beta parameter and its alpha
+            parameter fixed such that the mean is that given by initialEfficacy.
           </xs:documentation>
           <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="inputValue" />
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Mean efficacy values before decay (see efficacyB and decay parameter
+            descriptions for sampling and decay). The i-th value in this list
+            is used for the efficacy of the vaccine after the i-th dose. Where
+            more doses are given than there are values in this list, the last
+            value is repeated.
+          </xs:documentation>
+          <xs:appinfo>units:Proportion;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="vaccineType" use="required">
       <xs:annotation>
@@ -884,7 +918,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="insecticideDecay" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
-          Decay curve for insecticide content of nets.
+          Decay curve for insecticide content of nets. Documentation: see DecayFunction
+          type or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
           
           The distribution of decay rates over nets is covariant with the
           distribution of ripRate and holeRate over nets. This distribution is
@@ -902,6 +937,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>
           Specifies the rate at which nets are disposed of over time.
+          Documentation: see DecayFunction type or
+          http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
           
           In the current model, nets are disposed of randomly (no correlation
           with state of decay) such that the chance of each net surviving until
