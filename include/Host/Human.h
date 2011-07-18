@@ -79,7 +79,10 @@ public:
       nextCtsDist & stream;
   }
   //@}
-      
+  
+  /** Update infectiousness to mosquitoes. */
+  void updateInfectiousness();
+  
   /** Main human update.
    *
    * @param transmissionModel Pointer to transmission data.
@@ -186,9 +189,10 @@ public:
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
   
-  /** Calculate chance of a biting mosquito becoming infected
+  /** Return the infectiousness of this human to biting mosquitoes.
    * 
-   * After update() is called, this refers to the value for this time-step. */
+   * Returns the value for the last time-step on which updateInfectiousness
+   * has been called. */
   //TODO: per genotype? (for LSTM's spread of resistance modelling)
   inline double probTransmissionToMosquito() const {
     return _probTransmissionToMosquito;
@@ -221,8 +225,6 @@ public:
   
 private:
     void updateInfection(Transmission::TransmissionModel*, double ageYears);
-    
-    double calcProbTransmissionToMosquito() const;
     
     void clearInfection(WithinHost::Infection *iCurrent);
     

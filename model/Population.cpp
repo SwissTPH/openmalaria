@@ -183,6 +183,11 @@ void Population::update1()
     // (until humans old enough to be pregnate get updated and can be infected).
     Host::NeonatalMortality::update (population);
     
+    // Human::updateInfectiousness() needs to be updated before vectorUpdate()
+    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+        iter->updateInfectiousness();
+    }
+    
     // This should be called before humans contract new infections in the simulation step.
     // This needs the whole population (it is an approximation before all humans are updated).
     _transmissionModel->vectorUpdate (population, populationSize);

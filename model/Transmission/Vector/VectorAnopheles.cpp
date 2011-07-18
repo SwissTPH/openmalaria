@@ -457,7 +457,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
         intP_df += prod;
-        intP_dif += prod * h->probTransmissionToMosquito(); //TODO: this is the value for last time-step
+        intP_dif += prod * h->probTransmissionToMosquito();
     }
 
     for (NonHumanHostsType::const_iterator nnh = nonHumanHosts.begin(); nnh != nonHumanHosts.end(); ++nnh) {
@@ -567,7 +567,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
             // trying to simulate extremely low transmission, such as an R_0 case.
             if ( S_v[t] <= minInfectedThreshold ) { // infectious mosquito cut-off
                 S_v[t] = 0.0;
-                /* TODO: could report; these reports often occur too frequently, however
+                /* Note: could report; these reports often occur too frequently, however
                 if( S_v[t] != 0.0 ){        // potentially reduce reporting
                     cerr << TimeStep::simulation <<":\t S_v cut-off"<<endl;
                 } */

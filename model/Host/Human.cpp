@@ -176,7 +176,6 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         updateInfection(transmissionModel, ageYears);
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
-        _probTransmissionToMosquito = calcProbTransmissionToMosquito ();
     }
     return false;
 }
@@ -301,8 +300,7 @@ void Human::flushReports (){
     clinicalModel->flushReports();
 }
 
-
-double Human::calcProbTransmissionToMosquito() const {
+void Human::updateInfectiousness() {
   /* This model (often referred to as the gametocyte model) was designed for
   5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
   for 1-day timesteps to avoid having to design and analyse a new model.
@@ -312,7 +310,7 @@ double Human::calcProbTransmissionToMosquito() const {
     // We need at least 20 days history (_ylag) to calculate infectiousness;
     // assume no infectiousness if we don't have this history.
     // Note: human not updated on DOB so age must be >20 days.
-    return 0.0;
+    return;
   }
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
@@ -328,8 +326,10 @@ double Human::calcProbTransmissionToMosquito() const {
   double x = beta1 * _ylag[firstIndex % _ylagLen]
            + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
            + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];
-  if (x < 0.001)
-    return 0.0;
+  if (x < 0.001){
+    _probTransmissionToMosquito = 0.0;
+    return;
+  }
   
   double zval=(log(x)+mu)/sqrt(1.0/tau);
   double pone = gsl_cdf_ugaussian_P(zval);
@@ -339,9 +339,8 @@ double Human::calcProbTransmissionToMosquito() const {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  double ret = transmit*(1.0-_vaccine.getTBVEfficacy());
-  util::streamValidate( ret );
-  return ret;
+  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getTBVEfficacy());
+  util::streamValidate( _probTransmissionToMosquito );
 }
 
 } }
