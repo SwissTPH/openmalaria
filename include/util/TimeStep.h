@@ -50,7 +50,8 @@ class TimeStep {
         }
         friend class TimeStep;
     public:
-        // anyone can get value:
+        // anyone can get value
+        // (uses implicit cast, so no extra syntax needed to get value)
         inline operator T () const{
             return value;
         }

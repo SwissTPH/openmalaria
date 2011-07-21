@@ -22,9 +22,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/Vector/HostCategoryAnopheles.h"
-#include "Transmission/Vector/HostCategoryAnophelesNonHumans.h"
-#include "Transmission/Vector/HostCategoryAnophelesHumans.h"
+#include "Transmission/Vector/AnophelesHumanParams.h"
 #include "Transmission/PerHostTransmission.h"
 #include <list>
 #include <vector>
@@ -74,15 +72,13 @@ public:
      *
      * @param anoph Data structure from XML to use
      * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
-     * @param nonHumanHostsPopulations Non-human hosts
-     * @param populationSize (Static) size of human population
+     * @param nonHumanHostPopulations Size of each non-human population
+     * @param populationSize Size of human population (assumed constant)
      */
     string initialise (const scnXml::AnophelesParams& anoph,
                        vector<double>& initialisationEIR,
-                       map<string, double>& nonHumanHostsPopulations,
+                       map<string, double>& nonHumanHostPopulations,
                        int populationSize);
-
-
 
     /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
      * on the human population structure (when not loading from a checkpoint).
@@ -138,7 +134,7 @@ public:
                * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
     }
 
-    inline HostCategoryAnopheles& getHumanBase () {
+    inline const AnophelesHumanParams& getHumanBaseParams () {
         return humanBase;
     }
 
@@ -208,55 +204,52 @@ public:
         timestep_N_v & stream;
         timestep_O_v & stream;
         timestep_S_v & stream;
-        initP_A & stream;
-        P_A1 & stream;
-        P_An & stream;
         mosqLaidEggsSameDayProp & stream;
         probMosqSurvivalFeedingCycle & stream;
     }
 
 private:
-    /** Sets the P_A parameters
+    ///@brief Initialisation helper functions
+    //@{
+    /** Calculate availability rate of hosts (α_i) and death rate while seeking
+     * (µ_vA)
      *
      * Documentation: "Parameter Values for Transmission model"
-     * (Chitnis, Smith and Schapira, 4.3.2010) */
-    void setPAs();
-
-    /** Returns the human ento availability, calculated from PA, PA1,
-     * mosqSeekingDuration and population size.
-     *
-     * In previous versions the ento availability was to be explicitly given
-     * in the scenario. Because of the dependence of the ento availability
-     * value with the population size, we had to change the ento availability
-     * whenever we changed the population size.
-     *
-     * @param populationSize human population size
-     * @return human ento availability
+     * (Chitnis, Smith and Schapira, 4.3.2010)
+     * 
+     * @param anoph Data from XML
+     * @param nonHumanHostPopulations Size of each non-human population
+     * @param populationSize Size of the human population (assumed constant)
      */
-    double getHumanEntoAvailability(int populationSize);
+    void initAvailability(
+        const scnXml::AnophelesParams& anoph,
+        map<string, double>& nonHumanHostPopulations,
+        int populationSize);
 
-    /** Returns the non human ento availability for a given type of non human
-     * host, calculated from init_PA, P_An, mosqSeekingDuration, population
-     * size and relativeEntoAvailability.
-     *
-     * In previous versions the ento availability was to be explicitly given
-     * in the scenario. Because of the dependence of the ento availability
-     * value with the population size, we had to change the ento availability
-     * whenever we changed the population size.
-     *
-     * The sum of relativeEntoAvailability across all types of non-human host
-     * must be 1.
-     *
-     * @param populationSize non human host population size
-     * @param relativeEntoAvailability availability of NNH relative to other NNHs
-     * @return non human host ento availability
+    /** Calculates the human ento availability
+     * 
+     * Reference: Parameter Values for Transmission Model, Chitnis et al,
+     * September 2010 eqn (26).
+     * 
+     * @param N_i Human/non-human population size
+     * @param P_A Probability of mosquito not dying or finding a host while
+     *  seeking on a given night
+     * @param P_Ai Probability of mosquito finding a human/non-human host of
+     *  type i while seeking on a given night
+     * @return α_i, the rate at which mosquitoes encounter hosts of type i
+     *  while seeking
      */
-    double getNonHumanEntoAvailability(double populationSize, double relativeEntoAvailability);
+    double calcEntoAvailability(double N_i, double P_A, double P_Ai);
 
-    /** This subroutine converts ShortArray to a vector<double> of length
-     * 365 by copying and duplicating elements to fill the gaps. */
-    static vector<double> convertLengthToFullYear (vector<double>& ShortArray);
-
+    /** Called by initialise function to init variables directly related to EIR
+     * 
+     * @param anoph Data from XML
+     * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
+     */
+    void initEIR(
+        const scnXml::AnophelesParams& anoph,
+        vector<double>& initialisationEIR);
+    
     /** Given an input sequence of Fourier coefficients, with odd length,
      * calculate the exponential of the corresponding fourier series.
      *
@@ -267,10 +260,8 @@ private:
      * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).
      * @param rAngle Angle to rotate EIR, in radians: [0,2π] */
     static void calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle);
-
-    /// Shifts elements of rArray clockwise by rAngle.
-    static void rotateArray(vector<double>& rArray, double rAngle);
-
+    //@}
+    
     
     /** Reference back to TransmissionModel base. */
     const TransmissionModel* transmissionModel;
@@ -282,20 +273,13 @@ private:
      * descriptions.
      *
      * Read from XML by initialise; no need to checkpoint. */
-    HostCategoryAnophelesHumans humanBase;
+    AnophelesHumanParams humanBase;
 
-    /// Probability that a mosquito does not find a host and does not die in
-    /// one night of searching
-    double initP_A;
-    /// Probability that a mosquito encounters a human on a given night
-    double P_A1;
-    /// Probability that a mosquito encounters a non human host on a given night
-    double P_An;
-
-    /** Proportion of host-seeking parous mosquitoes that have laid eggs same day*/
+    /** Proportion of host-seeking parous mosquitoes that have laid eggs same
+     * day (A_0). */
     double mosqLaidEggsSameDayProp;
 
-    /** Probability that a mosquito survives a feeding cycle */
+    /** Probability that a mosquito survives a feeding cycle (P_f) */
     double probMosqSurvivalFeedingCycle;
 
     /** @brief Parameters which may vary per mosquito species
@@ -331,8 +315,12 @@ private:
      * an alternative. */
     double probMosqSurvivalOvipositing;
 
+    struct NHHParams {
+        double entoAvailability;        // α_i
+        double probCompleteCycle;       // α_i * P_B_i * P_C_i * P_D_i
+    };
     /** Non-human host data. Doesn't need checkpointing. */
-    NonHumanHostsType nonHumanHosts;
+    vector<NHHParams> nonHumans;
 
     /// Angle (in radians) to rotate series generated by FSCoeffic by, for EIR.
     double EIRRotateAngle;

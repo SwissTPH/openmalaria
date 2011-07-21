@@ -91,10 +91,6 @@ VectorAnopheles unit testing:
     runs VectorEmergence code
     validates emerge params
     prints out new scenario file
-  convertLengthToFullYear:
-    resizes an array
-  rotateArray:
-    offsets all element indicies by some x mod length
  */
 class VectorAnophelesSuite : public CxxTest::TestSuite
 {

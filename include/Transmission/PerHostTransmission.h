@@ -20,18 +20,16 @@
 #ifndef Hmod_PerHostTransmission
 #define Hmod_PerHostTransmission
 
-#include "util/random.h"
-#include "Transmission/Vector/HostCategoryAnophelesHumans.h"
 #include "Transmission/Vector/ITN.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
-#include "util/errors.h"
 #include <boost/shared_ptr.hpp>
 
 namespace OM { namespace Transmission {
     
 class HostMosquitoInteraction;
 class TransmissionModel;
+class AnophelesHumanParams;
 using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -74,19 +72,9 @@ public:
     /// Give individual a new ITN as of time timeStep.
     void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
-    inline void setupIRS () {
-        if( IRSDecay.get() == 0 ){
-            throw util::xml_scenario_error ("IRS intervention without description of decay");
-        }
-        timestepIRS = TimeStep::simulation;
-    }
+    void setupIRS ();
     /// Give individual a new VA intervention as of time timeStep.
-    inline void setupVA () {
-        if( VADecay.get() == 0 ){
-            throw util::xml_scenario_error ("Vector availability intervention without description of decay");
-        }
-        timestepVA = TimeStep::simulation;
-    }
+    void setupVA ();
     
     /// Is individual protected by IRS?
     inline bool hasIRSProtection(TimeStep maxInterventionAge)const{
@@ -151,13 +139,13 @@ public:
      * rate factors.)
      * 
      * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv ( const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
+    double entoAvailabilityHetVecItv( const AnophelesHumanParams& base, size_t speciesIndex ) const;
     
     /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
      *
      * Mean should be same as entoAvailabilityHetVecItv(). */
     inline double entoAvailabilityFull (
-        const HostCategoryAnophelesHumans& base,
+        const AnophelesHumanParams& base,
         size_t speciesIndex,
         double ageYears,
         double invMeanPopAvail
@@ -171,10 +159,10 @@ public:
     ///@brief Get killing effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
-    double probMosqBiting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
+    double probMosqBiting (const AnophelesHumanParams& base, size_t speciesIndex) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
-    double probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const;
+    double probMosqResting (const AnophelesHumanParams& base, size_t speciesIndex) const;
     /** Set true to remove human from transmission. Must set back to false
      * to restore transmission. */
     //@}
@@ -241,7 +229,7 @@ class HostMosquitoInteraction
 public:
     /** In lieu of a constructor initialises elements, using the passed base to
      * get baseline parameters. */
-    void initialise (HostCategoryAnopheles& base, double availabilityFactor);
+    void initialise (const AnophelesHumanParams& base, double availabilityFactor);
     
     /// Checkpointing
     template<class S>

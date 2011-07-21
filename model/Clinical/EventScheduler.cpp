@@ -163,6 +163,10 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {
 
 // -----  other methods  -----
 
+bool ClinicalEventScheduler::notAtRisk() {
+    throw util::traced_exception("notAtRisk: not supported by 1-day time-step models");
+}
+
 void ClinicalEventScheduler::massDrugAdministration(Human& human){
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.

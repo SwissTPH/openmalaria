@@ -76,10 +76,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
     const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
 
-    map<string, double> nonHumanHostsPopulations;
+    map<string, double> nonHumanHostPopulations;
 
     for (size_t i = 0; i<nonHumansList.size(); i++)
-        nonHumanHostsPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+        nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
 
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
@@ -89,7 +89,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
                                              initialisationEIR,
-                                             nonHumanHostsPopulations,
+                                             nonHumanHostPopulations,
                                              populationSize);
         speciesIndex[name] = i;
     }

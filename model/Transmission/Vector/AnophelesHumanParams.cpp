@@ -17,20 +17,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/HostCategoryAnopheles.h"
-#include "Transmission/Vector/HostCategoryAnophelesNonHumans.h"
+#include "Transmission/Vector/AnophelesHumanParams.h"
 #include "inputData.h"
 #include "util/errors.h"
 
 namespace OM { namespace Transmission {
 
-void HostCategoryAnophelesNonHumans::operator =(const scnXml::NonHumanHosts& nnh)
+void AnophelesHumanParams::operator =(const scnXml::Mosq& mosq)
 {
-	HostCategoryAnopheles::probMosqBiting = nnh.getMosqProbBiting();
-	HostCategoryAnopheles::probMosqFindRestSite = nnh.getMosqProbFindRestSite();
-	HostCategoryAnopheles::probMosqSurvivalResting = nnh.getMosqProbResting();
-	relativeEntoAvailability = nnh.getMosqRelativeEntoAvailability();
-	nonHumanHostName = nnh.getName();
+    probMosqBiting = mosq.getMosqProbBiting();
+    probMosqFindRestSite = mosq.getMosqProbFindRestSite();
+    probMosqSurvivalResting = mosq.getMosqProbResting();
+}
+
+void AnophelesHumanParams::setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
+    net.init( params, elt, proportionUse );
+}
+
+void AnophelesHumanParams::setIRSDescription (const scnXml::IRSDescription& irsDesc){
+    IRSDeterrency = irsDesc.getDeterrency().getValue();
+    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
+}
+
+void AnophelesHumanParams::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+    VADeterrency = vaDesc.getDeterrency().getValue();
 }
 
 }}

@@ -21,6 +21,7 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
+#include "util/random.h"
 
 namespace OM {
 namespace Clinical {

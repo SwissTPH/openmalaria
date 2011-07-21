@@ -19,7 +19,9 @@
 */
 #include "Transmission/PerHostTransmission.h"
 #include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/Vector/AnophelesHumanParams.h"
 #include "inputData.h"
+#include "util/errors.h"
 
 namespace OM {
 namespace Transmission {
@@ -45,7 +47,6 @@ void PerHostTransmission::setVADescription (const scnXml::VectorDeterrent& elt) 
     VADecay = DecayFunction::makeObject( elt.getDecay(), "VADecay" );
 }
 
-
 // -----  PerHostTransmission non-static -----
 
 PerHostTransmission::PerHostTransmission () :
@@ -64,8 +65,27 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
     if (vTM) {
         species.resize (vTM->numSpecies);
         for (size_t i = 0; i < vTM->numSpecies; ++i)
-            species[i].initialise (vTM->species[i].getHumanBase(), availabilityFactor);
+            species[i].initialise (vTM->species[i].getHumanBaseParams(), availabilityFactor);
     }
+}
+
+void PerHostTransmission::setupITN (const TransmissionModel& tm) {
+    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
+    if (vTM) {
+        net.deploy(vTM->getITNParams());
+    }
+}
+void PerHostTransmission::setupIRS () {
+    if( IRSDecay.get() == 0 ){
+        throw util::xml_scenario_error ("IRS intervention without description of decay");
+    }
+    timestepIRS = TimeStep::simulation;
+}
+void PerHostTransmission::setupVA () {
+    if( VADecay.get() == 0 ){
+        throw util::xml_scenario_error ("Vector availability intervention without description of decay");
+    }
+    timestepVA = TimeStep::simulation;
 }
 
 
@@ -74,7 +94,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
+double PerHostTransmission::entoAvailabilityHetVecItv (const AnophelesHumanParams& base, size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].entoAvailability;
     if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
@@ -86,14 +106,14 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const HostCategoryAnophel
 
     return alpha_i;
 }
-double PerHostTransmission::probMosqBiting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
+double PerHostTransmission::probMosqBiting (const AnophelesHumanParams& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].probMosqBiting;
     if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
     }
     return P_B_i;
 }
-double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& base, size_t speciesIndex) const {
+double PerHostTransmission::probMosqResting (const AnophelesHumanParams& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].probMosqRest;
     if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);
@@ -103,20 +123,11 @@ double PerHostTransmission::probMosqResting (const HostCategoryAnophelesHumans& 
     return pRest;
 }
 
-void PerHostTransmission::setupITN (const TransmissionModel& tm) {
-    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
-    if (vTM) {
-        net.deploy(vTM->getITNParams());
-    }
-}
-
 
 // ----- HostMosquitoInteraction non-static -----
 
-void HostMosquitoInteraction::initialise (HostCategoryAnopheles& base, double availabilityFactor)
+void HostMosquitoInteraction::initialise (const AnophelesHumanParams& base, double availabilityFactor)
 {
-    //TODO: vary to simulate heterogeneity
-
     entoAvailability = base.entoAvailability * availabilityFactor;
     probMosqBiting = base.probMosqBiting;
     probMosqRest = base.probMosqFindRestSite * base.probMosqSurvivalResting;
