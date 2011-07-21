@@ -91,9 +91,20 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
 }
 
+
+SimulationMode readMode(const string& str){
+    if(str=="forced")
+        return equilibriumMode;
+    else if(str=="dynamic")
+        return dynamicEIR;
+    else
+        // Note: originally 3 (transientEIRknown) could be specified; now it's
+        // set automatically.
+        throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
+}
 TransmissionModel::TransmissionModel() :
     simulationMode(equilibriumMode),
-    interventionMode(InputData().getEntomology().getMode()),
+    interventionMode(readMode(InputData().getEntomology().getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
@@ -107,12 +118,6 @@ TransmissionModel::TransmissionModel() :
     tsNumAdults(0),
     timeStepNumEntoInocs (0)
 {
-    if (interventionMode != equilibriumMode && interventionMode != dynamicEIR){
-        // Note: previously 3 was allowed -- but mode is set to 3 anyway when
-        // "intervention" EIR data is loaded, so 2 or 4 should be used here.
-        throw util::xml_scenario_error("mode attribute has invalid value (expected: 2 or 4)");
-    }
-
   initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);

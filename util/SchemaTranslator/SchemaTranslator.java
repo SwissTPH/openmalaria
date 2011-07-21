@@ -54,6 +54,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.ErrorHandler;
+
 
 public class SchemaTranslator {
 
@@ -61,7 +64,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 29;
+    static final int CURRENT_VERSION = 30;
 
     private static int _required_version = CURRENT_VERSION;
     private enum SchemaName {
@@ -182,6 +185,20 @@ public class SchemaTranslator {
         }
     }
 
+    static class STErrorHandler implements ErrorHandler {
+        public void fatalError( SAXParseException e )
+            throws SAXException {
+            System.err.println(e.toString());
+            throw e;
+        }
+        public void error( SAXParseException e ){
+            System.out.println(e.toString());
+        }
+        public void warning( SAXParseException e ) throws SAXException {
+            System.out.println(e.toString());
+        }
+    }
+
     private void validate(Document scenarioDocument, String schemaFileName,
                           String schemaDirectory) throws Exception {
         Document forValidation = (Document) scenarioDocument.cloneNode(true);
@@ -231,8 +248,13 @@ public class SchemaTranslator {
         // run from a command-line instead (java SchemaTranslator).
         Schema schema = factory.newSchema(xsdFile);
         Validator validator = schema.newValidator();
+        validator.setErrorHandler(new STErrorHandler());
         Source source = new DOMSource(forValidation);
-        validator.validate(source);
+        try{
+            validator.validate(source);
+        }catch(SAXParseException e){
+            // error already reported, so don't need to do anything
+        }
     }
 
     // Helper function to strip old white-space.
@@ -1935,23 +1957,75 @@ public class SchemaTranslator {
         }
     }
     
-    /* Vector_EIR_Input and Vector_EIR_Simulated renamed to inputEIR and simulatedEIR resp.
-     */
-    public Boolean translate28To29() {
-        Element monitoring = getChildElement(scenarioElement,"monitoring");
-        Element SurveyOptions = getChildElement(monitoring,"SurveyOptions");
-        List<Node> options = getChildNodes(SurveyOptions,"options");
-        for ( Node optionNode : options ) {
-            Element option = (Element) optionNode;
-            assert option != null;
-            if( option.getAttribute("name").equals("Vector_EIR_Input") ){
-                option.setAttribute("name", "inputEIR");
-            }else if( option.getAttribute("name").equals("Vector_EIR_Simulated") ){
-                option.setAttribute("name", "simulatedEIR");
+    /* Several vector attributes changed to elements.
+     * entomology mode attribute now takes keyword enumerations
+     * EIR survey measures changed name*/
+    public Boolean translate29To30() {
+        try{
+            Element mon = getChildElement(scenarioElement, "monitoring");
+            Element survOpt = getChildElement(mon, "SurveyOptions");
+            List<Node> opts = getChildNodes(survOpt, "option");
+            for( Node optNode : opts ){
+                Element opt = (Element) optNode;
+                if( opt.getAttribute("name").equals("Vector_EIR_Input") ){
+                    opt.setAttribute("name","inputEIR");
+                }else if( opt.getAttribute("name").equals("Vector_EIR_Simulated") ){
+                    opt.setAttribute("name","simulatedEIR");
+                }
             }
+            
+            Element ento = getChildElement(scenarioElement, "entomology");
+            int mode = Integer.parseInt(ento.getAttribute("mode"));
+            if(mode==2){
+                ento.setAttribute("mode","forced");
+            }else{
+                assert mode==4;
+                ento.setAttribute("mode","dynamic");
+            }
+            
+            Element vector = getChildElement(ento,"vector");
+            if(vector != null){
+                List<Node> anophs = getChildNodes(vector,"anopheles");
+                for( Node anophNode : anophs ){
+                    Element anoph = (Element)anophNode;
+                    assert anoph != null;
+                    Element mosq = getChildElement(anoph,"mosq");
+                    convertAttrToElement(mosq, "mosqRestDuration");
+                    convertAttrToElement(mosq, "extrinsicIncubationPeriod");
+                    convertAttrToElement(mosq, "mosqLaidEggsSameDayProportion");
+                    convertAttrToElement(mosq, "mosqSeekingDuration");
+                    convertAttrToElement(mosq, "mosqSurvivalFeedingCycleProbability");
+                    convertAttrToElement(mosq, "mosqProbBiting");
+                    convertAttrToElement(mosq, "mosqProbFindRestSite");
+                    convertAttrToElement(mosq, "mosqProbResting");
+                    convertAttrToElement(mosq, "mosqProbOvipositing");
+                    convertAttrToElement(mosq, "mosqHumanBloodIndex");
+                    
+                    List<Node> nhhs = getChildNodes(anoph,"nonHumanHosts");
+                    for( Node n : nhhs ){
+                        Element nhh = (Element)n;
+                        assert n!=null;
+                        convertAttrToElement(nhh, "mosqRelativeEntoAvailability");
+                        convertAttrToElement(nhh, "mosqProbBiting");
+                        convertAttrToElement(nhh, "mosqProbFindRestSite");
+                        convertAttrToElement(nhh, "mosqProbResting");
+                    }
+                }
+            }
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return false;
         }
     }
-
+    void convertAttrToElement(Element parent, String name){
+        Element elt = scenarioDocument.createElement(name);
+        elt.setAttribute("value",parent.getAttribute(name));
+        parent.removeAttribute(name);
+        parent.appendChild(elt);
+    }
+    
     /**
      * This function is used to translate the 5-day timestep fitting
      * scenarii to 1-day timestep fitting scenarii. Since we're using a fairly

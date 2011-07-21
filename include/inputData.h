@@ -104,7 +104,7 @@ namespace Params {
         /** Oldest which current code is potentially compatible with
         * (provided the scenario XML file references its schema version).
         */
-        static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 28;
+        static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 30;
         
 	InputDataType () : scenario(NULL) {}
 	

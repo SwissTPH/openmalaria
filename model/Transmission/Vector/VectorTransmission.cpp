@@ -98,7 +98,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     annualEIR = vectors::sum( initialisationEIR );
 
 
-    if( InputData().getEntomology().getMode() == equilibriumMode ) {
+    if( interventionMode == equilibriumMode ) {
         // We don't need these anymore (now we have initialisationEIR); free memory
         numSpecies = 0;
         species.clear();
@@ -237,7 +237,7 @@ void VectorTransmission::update (const std::list<Host::Human>& population, int p
 }
 
 void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
-    if( InputData().getEntomology().getMode() == equilibriumMode ){
+    if( interventionMode == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     double proportionUse = _ITNParams.init( elt );
@@ -253,7 +253,7 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     }
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
-    if( InputData().getEntomology().getMode() == equilibriumMode ){
+    if( interventionMode == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     PerHostTransmission::setIRSDescription (elt);
@@ -269,7 +269,7 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
     }
 }
 void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
-    if( InputData().getEntomology().getMode() == equilibriumMode ){
+    if( interventionMode == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     PerHostTransmission::setVADescription (elt);
@@ -286,7 +286,7 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
-    if( InputData().getEntomology().getMode() == equilibriumMode ){
+    if( interventionMode == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
     assert(false);

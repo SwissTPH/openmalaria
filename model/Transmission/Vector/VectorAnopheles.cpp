@@ -51,14 +51,14 @@ string VectorAnopheles::initialise (
 
     const scnXml::Mosq& mosq = anoph.getMosq();
 
-    mosqRestDuration = mosq.getMosqRestDuration();
-    EIPDuration = mosq.getExtrinsicIncubationPeriod();
+    mosqRestDuration = mosq.getMosqRestDuration().getValue();
+    EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
 
-    mosqSeekingDuration = mosq.getMosqSeekingDuration();
-    mosqLaidEggsSameDayProp = mosq.getMosqLaidEggsSameDayProportion();
+    mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
+    mosqLaidEggsSameDayProp = mosq.getMosqLaidEggsSameDayProportion().getValue();
 
-    probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing();
-    probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability();
+    probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
+    probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
 
     humanBase = mosq;
 
@@ -88,10 +88,10 @@ public:
     void operator= (const scnXml::NonHumanHosts& nnh)
     {
         name = nnh.getName();
-        relativeEntoAvailability = nnh.getMosqRelativeEntoAvailability();
-        probMosqBiting = nnh.getMosqProbBiting();
-        probMosqFindRestSite = nnh.getMosqProbFindRestSite();
-        probMosqSurvivalResting = nnh.getMosqProbResting();
+        relativeEntoAvailability = nnh.getMosqRelativeEntoAvailability().getValue();
+        probMosqBiting = nnh.getMosqProbBiting().getValue();
+        probMosqFindRestSite = nnh.getMosqProbFindRestSite().getValue();
+        probMosqSurvivalResting = nnh.getMosqProbResting().getValue();
     }
     
     double prodBCD() const{	// P_B_i * P_C_i * P_D_i
@@ -119,8 +119,8 @@ void VectorAnopheles::initAvailability(
         nonHumanElts[i] = otherHosts[i];
     }
     // read χ and P_E_i; these are only needed to calculate availability
-    double humanBloodIndex = anoph.getMosq().getMosqHumanBloodIndex();
-    double probMosqOvipositing = anoph.getMosq().getMosqProbOvipositing();
+    double humanBloodIndex = anoph.getMosq().getMosqHumanBloodIndex().getValue();
+    double probMosqOvipositing = anoph.getMosq().getMosqProbOvipositing().getValue();
     
     
     // -----  Calculate P_A, P_A1, P_A_n  -----

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="29" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="30" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -223,21 +223,21 @@
         <ripFactor value="0.4"/>
         <initialInsecticide mu="70" sigma="20"/>
         <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" k="2" function="smooth-compact"/>
+        <attritionOfNets L="12" function="smooth-compact" k="2"/>
         <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
         </anophelesParams>
         <anophelesParams mosquito="funestus">
-          <deterrency holeFactor="0.5" insecticideFactor="0.67" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
         </anophelesParams>
         <anophelesParams mosquito="arabiensis">
-          <deterrency holeFactor="0.5" insecticideFactor="0.1" interactionFactor="1.492537" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" insecticideFactor="0.604" interactionFactor="-0.424" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" insecticideFactor="0.55" interactionFactor="0" holeScalingFactor="0.1" insecticideScalingFactor="0.1"/>
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
         </anophelesParams>
       </description>
       <continuous coverage="0.95" targetAgeYrs="0.0833"/>
@@ -319,22 +319,70 @@
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>
   </healthSystem>
-  <entomology mode="4" name="Namawala">
+  <entomology mode="dynamic" name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <EIR EIRRotateAngle="0" a0="-5.835" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.001" mosqHumanBloodIndex="0.939" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.313"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.623"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.939"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <EIR EIRRotateAngle="0" a0="-4.852" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.001" mosqHumanBloodIndex="0.98" mosqLaidEggsSameDayProportion="0.616" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.611"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.616"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.611"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.98"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <EIR EIRRotateAngle="0" a0="-3.638" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
-        <mosq extrinsicIncubationPeriod="11" minInfectedThreshold="0.001" mosqHumanBloodIndex="0.871" mosqLaidEggsSameDayProportion="0.313" mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbOvipositing="0.88" mosqProbResting="0.99" mosqRestDuration="3" mosqSeekingDuration="0.33" mosqSurvivalFeedingCycleProbability="0.623"/>
-        <nonHumanHosts mosqProbBiting="0.95" mosqProbFindRestSite="0.95" mosqProbResting="0.99" mosqRelativeEntoAvailability="1.0" name="unprotectedAnimals"/>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.313"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.623"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.871"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
       </anopheles>
       <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
     </vector>

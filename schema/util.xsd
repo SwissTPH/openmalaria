@@ -195,4 +195,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="intValue">
+    <xs:attribute name="value" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>An integer value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
 </xs:schema>
