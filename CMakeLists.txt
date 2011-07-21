@@ -184,6 +184,7 @@ endif (OM_STREAM_VALIDATOR)
 add_subdirectory (contrib)
 add_subdirectory (schema)
 add_subdirectory (model)
+add_subdirectory (util/SchemaTranslator)
 add_dependencies (model schema)
 
 # -----  generate openMalaria  -----
