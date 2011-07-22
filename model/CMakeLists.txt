@@ -75,6 +75,7 @@ set (Model_CPP
   util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
   util/TimeStep.cpp
+  util/sampler.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

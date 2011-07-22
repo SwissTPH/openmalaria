@@ -211,6 +211,10 @@ double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
 double random::beta (double a, double b){
     return gsl_ran_beta (rng.gsl_generator,a,b);
 }
+double random::betaWithMean (double m, double b){
+    double a = m * b / (1.0 - m);
+    return beta(a,b);
+}
 
 int random::poisson(double lambda){
     if (!finite(lambda)) {

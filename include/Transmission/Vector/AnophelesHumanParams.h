@@ -21,6 +21,7 @@
 #define HOSTCATEGORYANOPHELESHUMANS_H_
 
 #include "Transmission/Vector/ITN.h"
+#include "util/sampler.h"
 
 namespace OM {
 namespace Transmission {
@@ -45,9 +46,9 @@ public:
      * parameters have been initialised.
      * 
      * This function doesn't need to exist, but helps make this fact obvious.
-     */
+      */
     inline void setEntoAvailability(double entoAvailability){
-        this->entoAvailability = entoAvailability;
+        this->entoAvailability.setMean( entoAvailability );
     }
     
     /** Set up vector-model intervention parameters. */
@@ -60,21 +61,22 @@ public:
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
      * 
-     * These parameters describe the mean of α_i, P_B_i, P_C_i and P_D_i. */
+     * These parameters describe the mean and heterogeneity of α_i, P_B_i,
+     * P_C_i and P_D_i across the human population. */
     //@{
     /** Availability rate (α_i) */
-    double entoAvailability;
+    util::LognormalSampler entoAvailability;
 
     /** Probability of mosquito successfully biting host (P_B_i) */
-    double probMosqBiting;
+    util::BetaSampler probMosqBiting;
 
     /** Probability of mosquito escaping human and finding a resting site without
      * dying, after biting the human (P_C_i). */
-    double probMosqFindRestSite;
+    util::BetaSampler probMosqFindRestSite;
 
     /** Probability of mosquito successfully resting after finding a resting site
      * (P_D_i). */
-    double probMosqSurvivalResting;
+    util::BetaSampler probMosqSurvivalResting;
     //@}
     
     /** @brief Intervention description parameters

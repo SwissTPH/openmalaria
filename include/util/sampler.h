@@ -22,8 +22,6 @@
 
 #include "Global.h"
 #include "schema/util.h"
-#include "util/random.h"
-#include <cmath>
 #include <limits>
 
 namespace OM { namespace util {
@@ -37,17 +35,11 @@ namespace OM { namespace util {
         NormalSample() : x(numeric_limits<double>::signaling_NaN()) {}
         
         /// convert sample to N(mu,sigma)
-        double asNormal( double mu, double sigma ){
-            return sigma*x + mu;
-        }
+        double asNormal( double mu, double sigma ) const;
         /// convert sample to lnN(mu,sigma)
-        double asLognormal( double mu, double sigma ){
-            return exp( sigma*x + mu );
-        }
+        double asLognormal( double mu, double sigma ) const;
         
-        static NormalSample generate() {
-            return NormalSample( random::gauss(0.0, 1.0) );
-        }
+        static NormalSample generate();
         
     private:
         NormalSample( double variate ) : x(variate) {}
@@ -69,19 +61,14 @@ namespace OM { namespace util {
          * @param m Mean of sampled variates
          * @param s Square-root of variance of sampled variates
          */
-        void setParams( double m, double s ){
-            mu = m;
-            sigma = s;
-        }
+        void setParams( double m, double s );
         /** As above, using an XML element. */
-        void setParams( const scnXml::NormalSample& elt ){
+        inline void setParams( const scnXml::NormalSample& elt ){
             setParams( elt.getMu(), elt.getSigma() );
         }
         
         /** Sample a value. */
-        inline double sample() const{
-            return random::gauss( mu, sigma );
-        }
+        double sample() const;
         
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
@@ -89,11 +76,11 @@ namespace OM { namespace util {
         }
         
         /// Return mu / mean of distribution
-        inline double getMu() {
+        inline double getMu() const{
             return mu;
         }
         /// Return sigma / standard deviation of distribution
-        inline double getSigma() {
+        inline double getSigma() const{
             return sigma;
         }
         
@@ -115,19 +102,16 @@ namespace OM { namespace util {
          * @param mean Mean of sampled variates
          * @param s Square-root of variance of logarithm of sampled variates
          */
-        void setParams( double mean, double s ){
-            mu = log(mean) - 0.5*s*s;
-            sigma = s;
-        }
+        void setParams( double mean, double s );
+        /** Set the mean, leave sigma unchanged. */
+        void setMean( double mean );
         /** As above, using an XML element. */
-        void setParams( const scnXml::LognormalSample& elt ){
+        inline void setParams( const scnXml::LognormalSample& elt ){
             setParams( elt.getMean(), elt.getSigma() );
         }
         
         /** Sample a value. */
-        inline double sample() const{
-            return random::log_normal( mu, sigma );
-        }
+        double sample() const;
         
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
@@ -136,6 +120,45 @@ namespace OM { namespace util {
         
     private:
         double mu, sigma;
+    };
+    
+    /** Sampler for beta distribution.
+     *
+     * Input may be alpha and beta or mean and variance. As a special case,
+     * variance zero is also supported, meaning return the mean. */
+    class BetaSampler {
+    public:
+        BetaSampler() :
+            a( numeric_limits<double>::signaling_NaN() ),
+            b( numeric_limits<double>::signaling_NaN() )
+        {}
+        
+        /** Set parameters: alpha, beta.
+         * 
+         * As a special case, when beta=0, alpha is interpreted as the mean and
+         * is returned without sampling. */
+        inline void setParams( double alpha, double beta ){
+            a=alpha;
+            b=beta;
+        }
+        
+        /** Set parameters: alpha and beta are calculated such that the mean
+         * and variance are as given. Variance may be zero, in which case the
+         * mean is returned directly without sampling. */
+        void setParamsMV( double mean, double variance );
+        
+        /** Set parameters from an XML element. */
+        void setParams( const scnXml::BetaMeanSample& elt ){
+            setParamsMV( elt.getMean(), elt.getVariance() );
+        }
+        
+        /** Sample a value. */
+        double sample() const;
+        
+    private:
+        //Note: if b is 0, then alpha is mean. Otherwise a and b are
+        //the expected (α,β) parameters to the beta distribution.
+        double a, b;
     };
     
 } }

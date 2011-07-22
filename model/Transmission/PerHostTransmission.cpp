@@ -128,9 +128,9 @@ double PerHostTransmission::probMosqResting (const AnophelesHumanParams& base, s
 
 void HostMosquitoInteraction::initialise (const AnophelesHumanParams& base, double availabilityFactor)
 {
-    entoAvailability = base.entoAvailability * availabilityFactor;
-    probMosqBiting = base.probMosqBiting;
-    probMosqRest = base.probMosqFindRestSite * base.probMosqSurvivalResting;
+    entoAvailability = base.entoAvailability.sample() * availabilityFactor;
+    probMosqBiting = base.probMosqBiting.sample();
+    probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
 }
 
 }

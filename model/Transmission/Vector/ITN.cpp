@@ -21,6 +21,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "R_nmath/qnorm.h"
+#include <cmath>
 
 namespace OM { namespace Transmission {
     using util::random::poisson;

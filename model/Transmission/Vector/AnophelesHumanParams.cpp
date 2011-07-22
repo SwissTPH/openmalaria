@@ -25,9 +25,10 @@ namespace OM { namespace Transmission {
 
 void AnophelesHumanParams::operator =(const scnXml::Mosq& mosq)
 {
-    probMosqBiting = mosq.getMosqProbBiting().getValue();
-    probMosqFindRestSite = mosq.getMosqProbFindRestSite().getValue();
-    probMosqSurvivalResting = mosq.getMosqProbResting().getValue();
+    entoAvailability.setParams( numeric_limits<double>::quiet_NaN(), mosq.getAvailabilityVariance().getValue() );
+    probMosqBiting.setParams( mosq.getMosqProbBiting() );
+    probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
+    probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
 }
 
 void AnophelesHumanParams::setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){

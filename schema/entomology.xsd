@@ -260,19 +260,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbBiting" type="inputValue">
+            <xs:element name="availabilityVariance" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>Variance in availability rate of humans to
+                mosquitoes. The mean rate is calculated based on other parameters.
+                </xs:documentation>
+                <xs:appinfo>name:Variance in human availability rate</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="mosqProbBiting" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito succesfully bites chosen host</xs:documentation>
                 <xs:appinfo>name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbFindRestSite" type="inputValue">
+            <xs:element name="mosqProbFindRestSite" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
                 <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbResting" type="inputValue">
+            <xs:element name="mosqProbResting" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
                 <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>

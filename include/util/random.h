@@ -55,6 +55,10 @@ namespace random {
     /** This function returns a random variate from the beta distribution. */
     double beta(double a, double b);
     
+    /** This function wraps beta(), setting b=b and a such that m is the mean
+     * of the distribution. */
+    double betaWithMean(double m, double b);
+    
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda);
     //@}

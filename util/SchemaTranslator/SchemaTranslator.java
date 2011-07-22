@@ -1995,9 +1995,12 @@ public class SchemaTranslator {
                     convertAttrToElement(mosq, "mosqLaidEggsSameDayProportion");
                     convertAttrToElement(mosq, "mosqSeekingDuration");
                     convertAttrToElement(mosq, "mosqSurvivalFeedingCycleProbability");
-                    convertAttrToElement(mosq, "mosqProbBiting");
-                    convertAttrToElement(mosq, "mosqProbFindRestSite");
-                    convertAttrToElement(mosq, "mosqProbResting");
+                    Element elt = scenarioDocument.createElement("availabilityVariance");
+                    elt.setAttribute("value","0");
+                    mosq.appendChild(elt);
+                    convertAttrToBetaMeanElt(mosq, "mosqProbBiting");
+                    convertAttrToBetaMeanElt(mosq, "mosqProbFindRestSite");
+                    convertAttrToBetaMeanElt(mosq, "mosqProbResting");
                     convertAttrToElement(mosq, "mosqProbOvipositing");
                     convertAttrToElement(mosq, "mosqHumanBloodIndex");
                     
@@ -2022,6 +2025,13 @@ public class SchemaTranslator {
     void convertAttrToElement(Element parent, String name){
         Element elt = scenarioDocument.createElement(name);
         elt.setAttribute("value",parent.getAttribute(name));
+        parent.removeAttribute(name);
+        parent.appendChild(elt);
+    }
+    void convertAttrToBetaMeanElt(Element parent, String name){
+        Element elt = scenarioDocument.createElement(name);
+        elt.setAttribute("mean",parent.getAttribute(name));
+        elt.setAttribute("variance","0");
         parent.removeAttribute(name);
         parent.appendChild(elt);
     }

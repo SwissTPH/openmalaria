@@ -46,10 +46,10 @@ double Vaccine::getEfficacy (int numPrevDoses)
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
     if (ime < 1.0) {
-        double a = efficacyB * ime / ( 1.0 - ime );
-        return random::beta (a, efficacyB);
-    } else
+        return random::betaWithMean (ime, efficacyB);
+    } else {
         return 1.0;
+    }
 }
 
 void Vaccine::init(const scnXml::Vaccine& xmlVaccine)

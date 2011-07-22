@@ -118,9 +118,14 @@ void VectorAnopheles::initAvailability(
     for (size_t i = 0; i < otherHosts.size(); ++i) {
         nonHumanElts[i] = otherHosts[i];
     }
-    // read χ and P_E_i; these are only needed to calculate availability
-    double humanBloodIndex = anoph.getMosq().getMosqHumanBloodIndex().getValue();
-    double probMosqOvipositing = anoph.getMosq().getMosqProbOvipositing().getValue();
+    // read χ, P_B_1, P_C_1, P_D_1 and P_E_1; χ and P_E_1 are only needed to
+    // calculate availability while the others are normally sampled.
+    const scnXml::Mosq& mosq = anoph.getMosq();
+    double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();
+    double probBiting = mosq.getMosqProbBiting().getMean();
+    double probFindRestSite = mosq.getMosqProbFindRestSite().getMean();
+    double probResting = mosq.getMosqProbResting().getMean();
+    double probOvipositing = mosq.getMosqProbOvipositing().getValue();
     
     
     // -----  Calculate P_A, P_A1, P_A_n  -----
@@ -142,19 +147,14 @@ void VectorAnopheles::initAvailability(
         // A_0 * P_f
         double pFedAndLaid = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
         // P_B_i * P_C_i * P_D_i * P_E_i (for average human)
-        double pBiteRestOviposit = humanBase.probMosqBiting
-                * humanBase.probMosqFindRestSite
-                * humanBase.probMosqSurvivalResting
-                * probMosqOvipositing;
+        double pBiteRestOviposit = probBiting * probFindRestSite * probResting * probOvipositing;
         P_A1 = pFedAndLaid / pBiteRestOviposit;
         P_Ah = 0.0;
     }else{
         // i.e. χ<1
         
         // let v = χ * P_D_1 * P_E_1; note that this is the average for humans
-        double v = humanBloodIndex
-                * humanBase.probMosqSurvivalResting
-                * probMosqOvipositing;
+        double v = humanBloodIndex * probResting * probOvipositing;
         // let chi1 = 1 - χ
         double chi1 = 1.0 - humanBloodIndex;
         
@@ -172,7 +172,7 @@ void VectorAnopheles::initAvailability(
             Sxi += nhh->relativeEntoAvailability;
             double u_i = nhh->relativeEntoAvailability * nhh->probMosqBiting * nhh->probMosqFindRestSite;
             Su += u_i;
-            double w_i = chi1 * nhh->probMosqSurvivalResting * probMosqOvipositing;
+            double w_i = chi1 * nhh->probMosqSurvivalResting * probOvipositing;
             Suvw += u_i * (v + w_i);
         }
         
@@ -187,7 +187,7 @@ void VectorAnopheles::initAvailability(
         // P_A1 = A_0 * P_f * χ * Su  ...
         P_A1 = (A0Pf * humanBloodIndex * Su) /
         // ...  over P_B_1 * P_C_1 * Suvw
-                (humanBase.probMosqBiting * humanBase.probMosqFindRestSite * Suvw);
+                (probBiting * probFindRestSite * Suvw);
         // and this one's as written
         P_Ah = (A0Pf * chi1) / Suvw;
     }

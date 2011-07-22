@@ -187,6 +187,34 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="BetaMeanSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a normal distribution, provided as mean and variance.
+        
+        Variates are sampled from Be(α,β) where α and β are determined from the
+        mean and variance as follows: let v be the variance and c=mean/(1-mean).
+        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
+      </xs:documentation>
+      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mean" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the beta distribution (must be in the open range (0,1)).
+        </xs:documentation>
+        <xs:appinfo>units:none;name:mean;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="variance" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+        <xs:appinfo>units:none;name:variance;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
   <xs:complexType name="inputValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>

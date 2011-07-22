@@ -735,9 +735,10 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <availabilityVariance value="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.939"/>
         </mosq>
@@ -756,9 +757,10 @@
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <availabilityVariance value="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.98"/>
         </mosq>
@@ -777,9 +779,10 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <availabilityVariance value="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.871"/>
         </mosq>
