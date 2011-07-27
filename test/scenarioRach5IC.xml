@@ -25,41 +25,41 @@
   </demography>
   <monitoring cohortOnly="false" name="Monthly Surveys">
     <continuous duringInit="false" period="1">
-      <option name="input EIR" value="false"/>
-      <option name="simulated EIR" value="false"/>
-      <option name="human infectiousness" value="false"/>
+      <option name="input EIR" value="true"/>
+      <option name="simulated EIR" value="true"/>
+      <option name="human infectiousness" value="true"/>
       <option name="N_v0" value="false"/>
-      <option name="immunity h" value="false"/>
-      <option name="immunity Y" value="false"/>
+      <option name="immunity h" value="true"/>
+      <option name="immunity Y" value="true"/>
       <option name="hosts" value="false"/>
       <option name="recent births" value="true"/>
     </continuous>
     <SurveyOptions>
-      <option name="nHost" value="false"/>
-      <option name="nPatent" value="false"/>
-      <option name="sumlogDens" value="false"/>
+      <option name="nHost" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="sumlogDens" value="true"/>
       <option name="nTransmit" value="false"/>
-      <option name="nTreatments1" value="false"/>
-      <option name="nTreatments2" value="false"/>
-      <option name="nTreatments3" value="false"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="false"/>
       <option name="nSevere" value="false"/>
       <option name="nSeq" value="false"/>
       <option name="nHospitalDeaths" value="false"/>
       <option name="nIndDeaths" value="false"/>
       <option name="nDirDeaths" value="false"/>
-      <option name="nEPIVaccinations" value="false"/>
-      <option name="nMassVaccinations" value="false"/>
+      <option name="nEPIVaccinations" value="true"/>
+      <option name="nMassVaccinations" value="true"/>
       <option name="nHospitalRecovs" value="false"/>
       <option name="nHospitalSeqs" value="false"/>
-      <option name="annAvgK" value="false"/>
+      <option name="annAvgK" value="true"/>
       <option name="Vector_Nv0" value="false"/>
       <option name="Vector_Nv" value="false"/>
       <option name="Vector_Ov" value="false"/>
       <option name="Vector_Sv" value="false"/>
       <option name="inputEIR" value="false"/>
       <option name="simulatedEIR" value="false"/>
-      <option name="nMassIRS" value="false"/>
+      <option name="nMassIRS" value="true"/>
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="200">
