@@ -33,6 +33,8 @@ class Human;
 }
 namespace Transmission {
 
+using namespace std;
+
 /** Per-species data for vector control.
  *
  * Data in this class is specific to the "species" of anopheles mosquito, where
@@ -48,14 +50,12 @@ namespace Transmission {
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
  * a heterogeneous host population" (3rd Oct. 2007). */
-
-using namespace std;
-
 class VectorAnopheles
 {
 public:
-    VectorAnopheles (const TransmissionModel* const tm, const ITNParams* baseITNParams) :
-            transmissionModel(tm),
+    ///@brief Initialisation and destruction
+    //@{
+    VectorAnopheles (const ITNParams* baseITNParams) :
             humanBase(baseITNParams),
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
@@ -63,12 +63,10 @@ public:
             timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0)
     {}
 
-    ///@brief Initialisation and destruction
-    //@{
-    /** Scale the internal EIR representation by factor. */
-    void scaleEIR( double factor );
-
-    /** Called to initialise variables instead of a constructor.
+    /** Called to initialise variables instead of a constructor. At this point,
+     * the size of the human population is known but that population has not
+     * yet been constructed. Called whether data is loaded from a check-point
+     * or not.
      *
      * @param anoph Data structure from XML to use
      * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
@@ -80,8 +78,12 @@ public:
                        map<string, double>& nonHumanHostPopulations,
                        int populationSize);
 
-    /** Initialise a few more variables (mosqEmergeRate, forcedS_v), which depend
-     * on the human population structure (when not loading from a checkpoint).
+    /** Scale the internal EIR representation by factor; used as part of
+     * initialisation. */
+    void scaleEIR( double factor );
+
+    /** Initialisation which must wait until a human population is available.
+     * This is only called when a checkpoint is not loaded.
      *
      * @param sIndex Index in VectorTransmission.species of this class.
      * @param population The human population
@@ -89,21 +91,39 @@ public:
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void setupNv0 (size_t sIndex, const std::list<Host::Human>& population, int populationSize, double invMeanPopAvail);
+    void setupNv0 (size_t sIndex,
+                   const std::list<Host::Human>& population,
+                   int populationSize,
+                   double invMeanPopAvail);
 
-    /** Called to free memory instead of a destructor. */
-    void destroy ();
+    /** Return base-line human parameters for the mosquito. */
+    inline const AnophelesHumanParams& getHumanBaseParams () {
+        return humanBase;
+    }
+
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+        humanBase.setITNDescription (params, elt, proportionUse);
+    }
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {
+        humanBase.setIRSDescription (irsDesc);
+    }
+    /** Set up intervention descriptions for humans, for this anopheles species. */
+    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+        humanBase.setVADescription (vaDesc);
+    }
 
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
     bool vectorInitIterate ();
-
-    /** Calls calMosqEmergeRate() and initialises arrays. */
-    //void initMainSimulation (size_t sIndex, const std::list<Host::Human>& population, int populationSize, vector<double>& kappa);
     //@}
-
+    
+    
+    ///@brief Functions called as part of usual per-timestep operations
+    //@{
     /** Called per time-step. Does most of calculation of EIR.
      *
      * @param population The human population; so we can sum up availability and
@@ -133,28 +153,19 @@ public:
                * host.entoAvailabilityHetVecItv (humanBase, sIndex)
                * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
     }
+    //@}
 
-    inline const AnophelesHumanParams& getHumanBaseParams () {
-        return humanBase;
-    }
 
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
-        humanBase.setITNDescription (params, elt, proportionUse);
-    }
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {
-        humanBase.setIRSDescription (irsDesc);
-    }
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-        humanBase.setVADescription (vaDesc);
-    }
-
+    ///@brief Functions called to deploy interventions
+    //@{
     void intervLarviciding (/*const scnXml::LarvicidingAnopheles&*/);
 
     void uninfectVectors();
+    //@}
 
+    
+    ///@brief Functions used in reporting
+    //@{
     inline double getLastN_v0 () {
         return timestep_N_v0;
     }
@@ -170,6 +181,8 @@ public:
 
     /// Write some per-species summary information.
     void summarize (const string speciesName, Monitoring::Survey& survey);
+    //@}
+    
 
     /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
@@ -204,9 +217,8 @@ public:
         timestep_N_v & stream;
         timestep_O_v & stream;
         timestep_S_v & stream;
-        mosqLaidEggsSameDayProp & stream;
-        probMosqSurvivalFeedingCycle & stream;
     }
+
 
 private:
     ///@brief Initialisation helper functions
@@ -263,10 +275,12 @@ private:
     //@}
     
     
-    /** Reference back to TransmissionModel base. */
-    const TransmissionModel* transmissionModel;
-
-    /** Baseline parameters which may be varied per host
+    // -----  Variable/constant parameters  -----
+    
+    /** Baseline parameters which may be varied per human host. The primary
+     * reason for wrapping these parameters in a struct is that these are the
+     * parameters which need to be passed to the PerHostTransmission code
+     * during calculations.
      *
      * Includes model parameters which may be varied per-individual to account
      * for interventions and innate resistances, and intervention effect
@@ -274,29 +288,18 @@ private:
      *
      * Read from XML by initialise; no need to checkpoint. */
     AnophelesHumanParams humanBase;
-
-    /** Proportion of host-seeking parous mosquitoes that have laid eggs same
-     * day (A_0). */
-    double mosqLaidEggsSameDayProp;
-
-    /** Probability that a mosquito survives a feeding cycle (P_f) */
-    double probMosqSurvivalFeedingCycle;
-
-    /** @brief Parameters which may vary per mosquito species
+    
+    
+    /** @brief Duration parameters for mosquito/parasite life-cycle
+     * 
+     * Currently these are all constant. In theory they could be made to vary
+     * seasonally, based on a fixed periodic cycle, though some code and
+     * possibly model changes would be needed to accomodate this.
+     * 
+     * All have units of days.
      *
-     * Read from XML by initialise; no need to checkpoint. */
+     * Set in initialise function from XML data; no need to checkpoint. */
     //@{
-    /** Death rate of mosquitoes while host-seeking (μ_vA).
-     *
-     * TODO: the model could be extended to allow this and mosqSeekingDuration to vary over the year.
-     *
-     * Unit: animals/day. */
-    double mosqSeekingDeathRate;
-
-    /** Duration of host-seeking per day; the maximum fraction of a day that a
-     * mosquito would spend seeking (θ_d). */
-    double mosqSeekingDuration;
-
     /** Duration of resting period for mosquito (τ).
      * Units: days. */
     int mosqRestDuration;
@@ -307,6 +310,38 @@ private:
     *
     * Doesn't need checkpointing. */
     int EIPDuration;
+
+    /** N_v_length-1 is the number of previous days for which some parameters are
+     * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
+     * the arrays need to be, but simplifies code with no real impact.
+     *
+     * Should equal EIPDuration + mosqRestDuration to allow values up to
+     * θ_s + τ - 1 days back, plus current day.
+     *
+     * Set by initialise; no need to checkpoint. */
+    int N_v_length;
+
+    /** Duration of host-seeking per day; the maximum fraction of a day that a
+     * mosquito would spend seeking (θ_d). */
+    double mosqSeekingDuration;
+    //@}
+    
+    
+    /** @brief Probabilities and rates associated with life-cycle model
+     * 
+     * These are calculated during initialisation and thereafter constant.
+     * 
+     * Rates have units of animals per day, probabilities have no units.
+     *
+     * All parameters are calculated during initialisation and in theory don't
+     * need checkpointing. */
+    //@{
+    /** Death rate of mosquitoes while host-seeking (μ_vA).
+     *
+     * TODO: the model could be extended to allow this and mosqSeekingDuration to vary over the year.
+     *
+     * Unit: animals/day. */
+    double mosqSeekingDeathRate;
 
     /** Probability of a mosquito successfully laying eggs given that it has
      * rested (P_E).
@@ -321,13 +356,16 @@ private:
     };
     /** Non-human host data. Doesn't need checkpointing. */
     vector<NHHParams> nonHumans;
-
-    /// Angle (in radians) to rotate series generated by FSCoeffic by, for EIR.
-    double EIRRotateAngle;
+    //@}
 
     /// If less than this many mosquitoes remain infected, transmission is interrupted.
     double minInfectedThreshold;
-    //@}
+
+    
+    ///@brief Descriptions of transmission, used primarily during warmup
+    //@{
+    /// Angle (in radians) to rotate series generated by FSCoeffic by, for EIR.
+    double EIRRotateAngle;
 
     /// Rotation angle (in radians) for emergence rate. Both offset for EIR given in XML file and
     /// offset needed to fit target EIR (delayed from emergence rate). Checkpoint.
@@ -345,25 +383,15 @@ private:
      * FSCoeffic[0] needs checkpointing, the rest doesn't. */
     vector<double> FSCoeffic;
 
-    /** @brief Variables with annual periodicity.
-     * 
-     * These have length 365 (1 per day), with the first value (index 0)
-     * affecting the first day of the year (the end of which is time 1); with
-     * the 5-day time-step model values at indecies 0 through 4 are used when
-     * updating time-step 1. */
-    //@{
-    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * 
-     * Units: Animals per day.
-     *
-     * Should be checkpointed. */
-    vector<double> mosqEmergeRate;
-
     /** S_v used to force an EIR during vector init.
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
      *
      * Should be checkpointed. */
     vector<double> forcedS_v;
-    //@}
 
     /** Summary of S_v over the last five years, used by vectorInitIterate to
      * calculate scaling factor.
@@ -384,16 +412,20 @@ private:
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
-
-    /** N_v_length-1 is the number of previous days for which some parameters are
-     * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
-     * the arrays need to be, but simplifies code with no real impact.
+    //@}
+    
+    
+    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
+     * 
+     * Units: Animals per day.
      *
-     * Should equal EIPDuration + mosqRestDuration to allow values up to
-     * θ_s + τ - 1 days back, plus current day.
-     *
-     * Set by initialise; no need to checkpoint. */
-    int N_v_length;
+     * Should be checkpointed. */
+    vector<double> mosqEmergeRate;
 
     /** @brief Parameter arrays N_v_length long.
      *
@@ -429,7 +461,10 @@ private:
     vector<double> N_v, O_v, S_v;
     //@}
 
-    /** @brief Used for calculations within advancePeriod. Only saved for optimisation.
+    
+    ///@brief Other variables storing state of model
+    //@{
+    /** Used for calculations within advancePeriod. Only saved for optimisation.
      *
      * Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
      * Values are recalculated each step; only fArray[0] and
@@ -440,23 +475,22 @@ private:
      * Length (ftauArray): EIPDuration (θ_s)
      *
      * Don't need to be checkpointed, but some values need to be initialised. */
-    //@{
     vector<double> fArray;
     vector<double> ftauArray;
-    //@}
-
-
+    
     /** Per time-step partial calculation of EIR.
     *
     * See comment in advancePeriod() for details of how the EIR is calculated.
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     double partialEIR;
+    //@}
+    
 
-    /** @brief Simple larviciding intervention.
+    /** @brief Intervention parameters
      *
      * Would need to be checkpointed for main simulation; not used during
-     * initialisation period (so can be reinitialised). */
+     * initialisation period (so could be reinitialised). */
     //@{
     /** Timestep at which larviciding effects dissappear. */
     TimeStep larvicidingEndStep;
@@ -465,10 +499,13 @@ private:
     double larvicidingIneffectiveness;
     //@}
 
+    
+    ///@brief Storage for summary data
+    //@{
     /** Variables tracking data to be reported. */
     double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
-
-
+    //@}
+    
     friend class VectorEmergenceSuite;
     friend class VectorAnophelesSuite;
 };

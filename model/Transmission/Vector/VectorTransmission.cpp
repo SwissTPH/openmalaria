@@ -84,7 +84,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, VectorAnopheles(this,&_ITNParams));
+    species.resize (numSpecies, VectorAnopheles(&_ITNParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -125,8 +125,6 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
 }
 VectorTransmission::~VectorTransmission () {
-    for (size_t i = 0; i < numSpecies; ++i)
-        species[i].destroy();
 }
 
 void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
@@ -312,7 +310,7 @@ void VectorTransmission::summarize (Monitoring::Survey& survey) {
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (this,&_ITNParams));
+    util::checkpoint::checkpoint (species, stream, VectorAnopheles (&_ITNParams));
 }
 void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

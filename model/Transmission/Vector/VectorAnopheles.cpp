@@ -55,10 +55,8 @@ string VectorAnopheles::initialise (
     EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
 
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
-    mosqLaidEggsSameDayProp = mosq.getMosqLaidEggsSameDayProportion().getValue();
 
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
-    probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
 
     humanBase = mosq;
 
@@ -121,6 +119,8 @@ void VectorAnopheles::initAvailability(
     // read χ, P_B_1, P_C_1, P_D_1 and P_E_1; χ and P_E_1 are only needed to
     // calculate availability while the others are normally sampled.
     const scnXml::Mosq& mosq = anoph.getMosq();
+    double mosqLaidEggsSameDayProp = mosq.getMosqLaidEggsSameDayProportion().getValue();
+    double probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
     double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();
     double probBiting = mosq.getMosqProbBiting().getMean();
     double probFindRestSite = mosq.getMosqProbFindRestSite().getMean();
@@ -413,8 +413,6 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     // All set up to drive simulation from forcedS_v
 }
 
-void VectorAnopheles::destroy () {
-}
 
 bool VectorAnopheles::vectorInitIterate () {
     // Try to match S_v against its predicted value. Don't try with N_v or O_v
@@ -577,6 +575,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         P_dif[t] = intP_dif;
 
 
+        //TODO: replace emergence with new formula: rho_p * (num pupae one day from emerging)
+        // second two lines don't change
         N_v[t] = mosqEmergeRate[dYear1] * larvicidingIneffectiveness
                  + P_A[t1]  * N_v[t1]
                  + P_df[ttau] * N_v[ttau];
