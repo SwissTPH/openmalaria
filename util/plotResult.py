@@ -504,7 +504,7 @@ assigned to the x-axis.""",version="%prog 0.1")
             help="Use full file names instead of replacing with short versions")
     parser.add_option("-l","--no-legends", action="store_false", dest="legends", default=True,
             help="Turn off legends (sometimes they hide parts of the plots)")
-    parser.add_option("-L","--labels", action="store", type="choice", dest="labels", default="y",
+    parser.add_option("-L","--labels", action="store", type="choice", dest="labels", default="txy",
             choices=["","y","x","xy","t","ty","tx","txy"],
             help="Show [t]itle, [x]-axis and/or [y]-axis labels: txy tx ty t xy x y or (none); default is xy")
     parser.add_option("-b","--vertical-stack", action="store_false", dest="horizSubBars", default=True,

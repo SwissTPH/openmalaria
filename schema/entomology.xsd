@@ -225,8 +225,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:choice>
       <xs:element name="mosq">
         <xs:annotation>
-          <xs:documentation>Vector species</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Vector Species;</xs:appinfo>
+          <xs:documentation>Parameters describing the feeding cycle and human
+          mosquito interaction of a single species of anopheles mosquito.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -307,9 +309,85 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
+      <xs:element name="lifeCycle">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters describing the life-cycle of this species of mosquito
+          </xs:documentation>
+          <xs:appinfo>name:Mosquito life cycle parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="eggStage" type="MosqStage">
+              <xs:annotation>
+                <xs:documentation>
+                  Parameters for the egg stage of development
+                </xs:documentation>
+                <xs:appinfo>name:Egg stage;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="larvalStage">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="MosqStage">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Parameters for the larval stage of development
+                      </xs:documentation>
+                      <xs:appinfo>name:Larval stage;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:sequence>
+                      <xs:element name="daily" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            List of parameters which apply during the larval
+                            stage of development. List length must equal stage
+                            duration, with first item corresponding to first
+                            24 hours after hatching, second item to hours
+                            24-48, and so on.
+                          </xs:documentation>
+                          <xs:appinfo>name:Daily development;</xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:attribute name="resourceUsage" type="xs:double" use="required">
+                            <xs:annotation>
+                              <xs:documentation>
+                                Parameters for the larval stage of development
+                              </xs:documentation>
+                              <xs:appinfo>name:Daily development;</xs:appinfo>
+                            </xs:annotation>
+                          </xs:attribute>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:sequence>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="pupalStage" type="MosqStage">
+              <xs:annotation>
+                <xs:documentation>
+                  Parameters for the pupal stage of development
+                </xs:documentation>
+                <xs:appinfo>name:Pupal stage;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="eggsLaidByOviposit" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                  The total number of (male and female) eggs laid by a female
+                  mosquito at the conclusion to a feeding cycle.
+                </xs:documentation>
+                <xs:appinfo>name:Eggs laid by ovipositing mosquito;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
         <xs:annotation>
-          <xs:documentation>Non human host parameters, per type of host (must match up with non-species-specific parameters).</xs:documentation>
+          <xs:documentation>Non human host parameters, per type of host (must
+          match up with non-species-specific parameters).</xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>

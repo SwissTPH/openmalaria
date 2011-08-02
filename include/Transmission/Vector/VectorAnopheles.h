@@ -252,7 +252,10 @@ private:
      *  while seeking
      */
     double calcEntoAvailability(double N_i, double P_A, double P_Ai);
-
+    
+    /** Initialises mosquito life-cycle parameters. */
+    void initMosqLifeCycle();
+    
     /** Called by initialise function to init variables directly related to EIR
      * 
      * @param anoph Data from XML
@@ -300,6 +303,18 @@ private:
      *
      * Set in initialise function from XML data; no need to checkpoint. */
     //@{
+    /** Duration of egg stage (time from laying until hatching) (θ_e).
+     * Units: days. */
+    int eggStageDuration;
+
+    /** Duration of larval stage (time from hatching until becoming a pupa)
+     * (θ_l). Units: days. */
+    int larvalStageDuration;
+
+    /** Duration of pupal stage (time from becoming a pupa until emerging as an
+     * adult) (θ_p). Units: days. */
+    int pupalStageDuration;
+
     /** Duration of resting period for mosquito (τ).
      * Units: days. */
     int mosqRestDuration;
@@ -310,7 +325,7 @@ private:
     *
     * Doesn't need checkpointing. */
     int EIPDuration;
-
+    
     /** N_v_length-1 is the number of previous days for which some parameters are
      * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
      * the arrays need to be, but simplifies code with no real impact.
@@ -327,11 +342,57 @@ private:
     //@}
     
     
-    /** @brief Probabilities and rates associated with life-cycle model
+    /** @brief Mosquito population-dynamics parameters
      * 
-     * These are calculated during initialisation and thereafter constant.
+     * Probabilities have no units; others have units specified.
+     *
+     * All parameters are calculated during initialisation and in theory don't
+     * need checkpointing. */
+    //@{
+    /** Probability of an egg which has been laid hatching (ρ_e ^ θ_e). */
+    double pSurvEggStage;
+    
+    /** Probability of a larva surviving one day, assuming no resource
+     * restrictions (ρ_l). */
+    double pSurvDayAsLarvae;
+    
+    /** Probability of a new pupa emerging as an adult (ρ_p ^ θ_p). */
+    double pSurvPupalStage;
+    
+    /** Mean number of female eggs laid when a mosquito oviposites. */
+    double fEggsLaidByOviposit;
+    
+    /** Resource usage of female larvae by age.
      * 
-     * Rates have units of animals per day, probabilities have no units.
+     * Length: θ_l. Index i corresponds to usage at age i days after hatching.
+     * 
+     * Units: usage/larva. Units of usage are not defined, but should be the
+     * same as that of resource availability. */
+    vector<double> larvaeResourceUsage;
+    
+    /** Resource availability to female larvae throughout the year. Note that
+     * since male larvae are not modelled, the proportion of resources used by
+     * males should not be included here.
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
+     *
+     * Units: not defined, but must match the unit of resource usage. */
+    vector<double> larvalResources;
+    
+    /** Effect of competition on larvae, per age (index i corresponds to age i
+     * days since hatching).
+     * 
+     * Length: larvalStageDuration */
+    vector<double> effectCompetitionOnLarvae;
+    //@}
+    
+    
+    /** @brief Inputs which are constant after simulation start
+     * 
+     * Probabilities have no units; others have units specified.
      *
      * All parameters are calculated during initialisation and in theory don't
      * need checkpointing. */
@@ -351,15 +412,19 @@ private:
     double probMosqSurvivalOvipositing;
 
     struct NHHParams {
-        double entoAvailability;        // α_i
-        double probCompleteCycle;       // α_i * P_B_i * P_C_i * P_D_i
+        // α_i
+        // rate: humans encountered per day
+        double entoAvailability;
+        // α_i * P_B_i * P_C_i * P_D_i
+        // units as for entoAvailability
+        double probCompleteCycle;
     };
     /** Non-human host data. Doesn't need checkpointing. */
     vector<NHHParams> nonHumans;
-    //@}
 
     /// If less than this many mosquitoes remain infected, transmission is interrupted.
     double minInfectedThreshold;
+    //@}
 
     
     ///@brief Descriptions of transmission, used primarily during warmup
@@ -464,6 +529,27 @@ private:
     
     ///@brief Other variables storing state of model
     //@{
+    /** Number of eggs laid per time-step (ϒ_e). Units: eggs.
+     * 
+     * Length: θ_e. Value at index (d mod θ_e) refers to the value θ_e days
+     * ago/at day d before/after update. */
+    vector<double> newEggs;
+    
+    /** Number of larvae per age of development. Units: larvae.
+     * 
+     * Length: θ_l. Value at index i refers to the number of larvae of age i.
+     * We don't store the number at age θ_l, since these are pupae.
+     *
+     * Unlike ϒ arrays, this only stores the state of the system from the
+     * last/this timestep before/after update. */
+    vector<double> numLarvae;
+    
+    /** Number of new pupae per time-step (ϒ_e). Units: pupae.
+     * 
+     * Length: θ_p. Value at index (d mod θ_p) refers to the value θ_p days
+     * ago/at day d before/after update. */
+    vector<double> newPupae;
+    
     /** Used for calculations within advancePeriod. Only saved for optimisation.
      *
      * Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
