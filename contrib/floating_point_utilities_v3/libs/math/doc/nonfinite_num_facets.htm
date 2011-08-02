@@ -1,0 +1,409 @@
+<html>
+	<HEAD>
+		<title>Facets for Infinity and NaN</title> 
+		<!--
+  == Copyright (c) 2006 Johan Råde
+  ==
+  == Distributed under the Boost Software License, Version 1.0.
+  == (See accompanying file LICENSE_1_0.txt
+  == or copy at http://www.boost.org/LICENSE_1_0.txt)
+  -->
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<LINK href="../../../boost.css" type="text/css" rel="stylesheet"></HEAD>
+	<body>
+		<IMG src="../../../boost.png">
+		<h1>Facets for Infinity and NaN</h1>
+		<H3>Contents</H3>
+		<ul>
+			<li>
+				<A href="#Introduction">Introduction</A>
+			<li>
+				<A href="#Synopsis">Synopsis</A>
+			<li>
+				<A href="#Reference">Reference</A>
+			<li>
+				<A href="#Examples">Examples</A>
+			<li>
+				<A href="#Portability">Portability</A>
+			<li>
+				<A href="#Rationale">Design Rationale</A>
+			<li>
+				<A href="#Acknowledgements">Acknowledgements</A></li></ul>
+		<hr>
+		<h2><a name="Introduction">Introduction</h2>
+		<H3>The Problem</H3>
+		<P>The C++98 standard does not specify how infinity and NaN are represented in text 
+			streams. As a result, different platforms use different string representations. 
+			This can cause undefined behavior when text files are moved between different 
+			platforms. Some platforms can not even&nbsp;parse their own output! For 
+			instance, the following test fails with MSVC&nbsp;7.1:</P>
+		<PRE>stringstream ss;
+double x = numeric_limits&lt;double&gt;::infinity();
+double y;
+ss &lt;&lt; x;
+ss &gt;&gt; y;
+assert(x == y);</PRE>
+		<H3>The Solution</H3>
+		<P>The facets <A href="#nonfinite_num_put"><code>nonfinite_num_put</code></A> and <A href="#nonfinite_num_get">
+				<code>nonfinite_num_get</code></A> format and parse all floating point 
+			numbers, including infinity and NaN, in a consistent and portable manner. The 
+			following test succeeds with&nbsp;MSVC&nbsp;7.1:</P>
+		<PRE>locale old_locale;
+locale tmp_locale(old_locale, new nonfinite_num_put&lt;char&gt;);
+locale new_locale(tmp_locale, new nonfinite_num_get&lt;char&gt;);
+  
+stringstream ss;
+ss.imbue(new_locale);
+
+double x = numeric_limits&lt;double&gt;::infinity();
+double y;
+ss &lt;&lt; x;
+ss &gt;&gt; y;
+assert(x == y);</PRE>
+		<H3><a name="C99">The C99 Standard</a></H3>
+		<P>The C99 standard does specify how&nbsp;infinity and NaN&nbsp;are 
+			formatted&nbsp;by <CODE>printf</CODE> and&nbsp;similar functions, 
+			and&nbsp;parsed by <CODE>scanf</CODE> and&nbsp;similar functions. The following 
+			string representations are used:<blockquote>
+				<TABLE border="1">
+					<TR>
+						<TH>
+							Number</TH>
+						<TH>
+							String</TH></TR>
+					<TR>
+						<TD>Positive infinity</TD>
+						<TD><CODE>inf, infinity</CODE>&nbsp;
+						</TD>
+					</TR>
+					<TR>
+						<TD>Positive NaN</TD>
+						<TD><CODE>nan, nan(...)</CODE>&nbsp;
+						</TD>
+					</TR>
+					<TR>
+						<TD>Negative infinity&nbsp;&nbsp;</TD>
+						<TD><CODE>-inf, -infinity&nbsp;&nbsp;</CODE></TD>
+					</TR>
+					<TR>
+						<TD>Negative NaN</TD>
+						<TD><CODE>-nan, -nan(...)</CODE></TD>
+					</TR>
+				</TABLE>
+			</blockquote>
+		<P>The numbers can be of type <CODE>float</CODE>, <CODE>double</CODE> and <CODE>long 
+				double</CODE>. An optional <code>+</code> sign can be used with positive 
+			numbers. The function <code>printf</code> and&nbsp;similar functions use all 
+			lower or all upper case. This is controlled with standard formatting flags. The 
+			function <code>scanf</code> and&nbsp;similar functions are case-insensitive. 
+			The dots in <CODE>nan(...)</CODE> stand for an arbitrary string. The meaning of 
+			that string is implementation dependent.&nbsp;(It can be used to convey extra 
+			information about the NaN.)</P>
+		<P>
+			This library&nbsp;uses the&nbsp;string representations specified by&nbsp;the 
+			C99 standard.
+			<HR>
+			<H2><A name="Synopsis">Synopsis</A></H2>
+			<H4>The header <EM>boost/math/nonfinite_num_facets.hpp</EM></H4>
+			<PRE>namespace boost {
+    namespace math {
+    
+        const int legacy;
+        const int signed_zero;
+        const int trap_infinity;
+        const int trap_nan;
+        
+        template&lt;
+            class CharType,
+            class OutputIterator = std::ostreambuf_iterator&lt;CharType&gt; 
+        &gt;
+        class nonfinite_num_put : public std::num_put&lt;CharType, OutputIterator&gt;
+        { 
+        public:
+            explicit nonfinite_num_put(int flags = 0);
+        };
+        
+        template&lt;
+            class CharType,
+            class InputIterator = std::istreambuf_iterator&lt;CharType&gt;
+        &gt;
+        class nonfinite_num_get : public std::num_get&lt;CharType, InputIterator&gt;
+        {
+        public:
+            explicit nonfinite_num_get(int flags = 0);
+        }; 
+        
+    }
+}</PRE>
+			<HR>
+			<H2><A name="Reference">Reference</A></H2>
+			<H3><a name="nonfinite_num_put">The Facet <code>nonfinite_num_put</code></a></H3>
+			<pre> template&lt;class CharType, class OutputIterator = std::ostreambuf_iterator&lt;CharType&gt; &gt; class nonfinite_num_put;</pre>
+		<P>The class <code>nonfinite_num_put&lt;CharType, OutputIterator&gt;</code> is 
+			derived from <code>std::num_put&lt;CharType, OutputIterator&gt;</code> .&nbsp;Thus 
+			it is a facet that formats numbers. The first template argument is the 
+			character type of the formatted strings, usually <code>char</code> or <code>wchar_t</code>. 
+			The second template argument is the type of iterator used to write the strings. 
+			It is required to be an output iterator. Usually the default is used. The 
+			public interface of the class consists of a single constructor only:</P>
+		<PRE> nonfinite_num_put(int flags = 0);</PRE>
+		<P>The&nbsp;<A href="#flags"><CODE>flags</CODE></A> argument is discussed below. 
+			The class template <CODE>nonfinite_num_put</CODE> is defined in the header <EM>boost/math/nonfinite_num_facets.hpp</EM>
+			and lives in the namespace <CODE>boost::math</CODE>
+		.
+		<P>Unlike the facet <code>std::num_put</code>,&nbsp;the facet <code>nonfinite_numput</code>
+			formats infinity and NaN in a consistent and portable manner. It uses the 
+			following string representations:<blockquote>
+				<TABLE id="Table2" border="1">
+					<TR>
+						<TH>
+							Number</TH>
+						<TH>
+							String</TH></TR>
+					<TR>
+						<TD>Positive infinity</TD>
+						<TD><code>inf</code></TD>
+					</TR>
+					<TR>
+						<TD>Positive NaN</TD>
+						<TD><code>nan</code></TD>
+					</TR>
+					<TR>
+						<TD>Negative infinity&nbsp;&nbsp;</TD>
+						<TD><code>-inf</code></TD>
+					</TR>
+					<TR>
+						<TD>Negative NaN</TD>
+						<TD><code>-nan</code></TD>
+					</TR>
+				</TABLE>
+			</blockquote>
+		<P>The numbers can be of type <CODE>float</CODE>, <CODE>double</CODE> and <CODE>long 
+				double</CODE>. The&nbsp;strings can be in all lower case or all upper case. 
+			An optional <code>+</code> sign can be used with positive numbers. 
+			This&nbsp;can be&nbsp;controlled with the <code>uppercase</code>, <code>lowercase</code>,
+			<code>showpos</code> and&nbsp;<code>noshowpos</code> manipulators.&nbsp;Formatting 
+			of integers, boolean values&nbsp;and finite floating point numbers is delegated 
+			to <CODE>std::num_put</CODE>.</P>
+		<H3><A name="nonfinite_num_get">The Facet <CODE>nonfinite_num_get</CODE></A></H3>
+		<PRE>template&lt;class CharType, class InputIterator = std::istreambuf_iterator&lt;CharType&gt; &gt; class nonfinite_num_get;</PRE>
+		<P>The class <code>nonfinite_num_get&lt;CharType, InputIterator&gt;</code> is 
+			derived from <code>std::num_get&lt;CharType, IntputIterator&gt;</code> .&nbsp;Thus 
+			it is a facet that parses strings that represent numbers. The first template 
+			argument is the character type of the strings, usually <code>char</code> or <code>wchar_t</code>. 
+			The second template argument is the type of iterator used to read the strings. 
+			It is required to be an input iterator. Usually the default is used. The public 
+			interface of the class consists of a single constructor only:</P>
+		<PRE> nonfinite_num_get(int flags = 0);</PRE>
+		<P>The&nbsp;<A href="#flags"><CODE>flags</CODE></A> argument is discussed below. 
+			The class template <CODE>nonfinite_num_get</CODE> &nbsp;is defined in the 
+			header <EM>boost/math/nonfinite_num_facets.hpp</EM> and lives in the namespace <CODE>
+				boost::math</CODE>.</P>
+		<P>Unlike the facet <code>std::num_get</code>, the facet <code>nonfinite_num_get</code>&nbsp;parses 
+			strings that represent&nbsp;infinity and NaN in a consistent and portable 
+			manner. It recognizes precisely the string representations&nbsp;specified by 
+			the <A href="#C99">C99 standard</A>:<blockquote>
+				<TABLE id="Table3" border="1">
+					<TR>
+						<TH>
+							Number</TH>
+						<TH>
+							String</TH></TR>
+					<TR>
+						<TD>Positive infinity</TD>
+						<TD><code>inf, infinity</code></TD>
+					</TR>
+					<TR>
+						<TD>Positive NaN</TD>
+						<TD><code>nan, nan(...)</code></TD>
+					</TR>
+					<TR>
+						<TD>Negative infinity&nbsp;&nbsp;</TD>
+						<TD><code>-inf, -infinity</code></TD>
+					</TR>
+					<TR>
+						<TD>Negative NaN</TD>
+						<TD><code>-nan, -nan(...)</code></TD>
+					</TR>
+				</TABLE>
+			</blockquote>
+		<P>The numbers can be of type <CODE>float</CODE>, <CODE>double</CODE> and <CODE>long 
+				double</CODE> . The facet is case-insensitive. An optional <code>+</code> sign 
+			can be used with positive numbers. The dots in <code>nan(...)</code> stand for 
+			an arbitrary string.&nbsp;Parsing of strings that represent&nbsp;integers, 
+			boolean values and finite floating point numbers is delegated to <code>std::num_get</code>.</P>
+		<P>When&nbsp;the facet parses a string that represents infinity on a&nbsp;platform 
+			that lacks infinity, then the fail bit of the stream is set. The same holds for 
+			NaN.</P>
+		<H3><a name="flags">Flags<a /></H3>
+		<P>The constructors for <code>nonfinite_num_put</code> and <code>nonfinite_num_get</code>
+			take an optional bit flags argument. There are four different bit flags:</P>
+		<ul>
+			<li>
+				<A href="#legacy"><code>legacy</code></A>
+			<li>
+				<A href="#signed_zero"><code>signed_zero</code></A>
+			<li>
+				<A href="#trap_infinity"><code>trap_infinity</code></A>
+			<li>
+				<A href="#trap_nan"><code>trap_nan</code></A></li></ul>
+		<P>They&nbsp;can be combined with operator <code>|</code>.</P>
+		<P>The flags&nbsp;are defined in the header <EM>boost/math/nonfinite_num_facets.hpp</EM>
+			and live in the namespace <CODE>boost::math</CODE>.</P>
+		<H4><a name="legacy"><code>legacy</code></a></H4>
+		<P>The <code>legacy</code> flag has no effect with <code>nonfinite_num_put</code>
+		.
+		<P>If the <code>legacy</code> flag is used with <code>nonfinite_num_get</code> , 
+			then the facet will recognize the following string representations of infinity 
+			and NaN:<blockquote>
+				<TABLE id="Table5" border="1">
+					<TR>
+						<TH>
+							Number</TH>
+						<TH>
+							String</TH></TR>
+					<TR>
+						<TD>Positive infinity</TD>
+						<TD><CODE>inf, infinity, </CODE><em>one</em><code>#inf</code></TD>
+					</TR>
+					<TR>
+						<TD>Positive NaN</TD>
+						<TD><CODE>nan, nan(...), nanq, nans, qnan, snan, </CODE><em>one</em><code>#ind, </code>
+							<em>one</em><code>#qnan, </code><em>one</em><code>#snan</code></TD>
+					</TR>
+					<TR>
+						<TD>Negative infinity&nbsp;&nbsp;</TD>
+						<TD><CODE>-inf, -infinity, -</CODE><EM>one</EM><CODE>#inf</CODE></CODE></TD>
+					</TR>
+					<TR>
+						<TD>Negative NaN</TD>
+						<TD><CODE>-nan, -nan(...), -nanq, -nans, -qnan, -snan, -</CODE><em>one</em><code>#ind, 
+								-</code> <em>one</em><code>#qnan, -</code><em>one</em><code>#snan</code></TD>
+					</TR>
+				</TABLE>
+			</blockquote>
+		<P>The numbers can be of type <CODE>float</CODE>, <CODE>double</CODE> and <CODE>long 
+				double</CODE>. The facet is case-insensitive. An optional <CODE>+</CODE> sign 
+			can be used with the positive values. The dots in <CODE>nan(...)</CODE> stand 
+			for an arbitrary string. <em>one</em> stands for any string that <code>std::num_get</code>
+			parses as the number <code>1.0</code>.</P>
+		<P>The list&nbsp;includes a number of non-standard string representations of 
+			infinity and NaN that are used by various existing implementations of the C++ 
+			standard library, and also string representations used by other programming 
+			languages.</P>
+		<H4><a name="signed_zero"><code>signed_zero</code></a></H4>
+		<P>If the <code>signed_zero</code> flag is used with <code>nonfinite_num_put</code>, 
+			then the facet will distinguish between positive and negative zero. It 
+			will&nbsp;format positive zero as "0" or "+0"&nbsp;and negative zero as "-0". 
+			The string representation of positive zero can be controlled with the <code>showpos</code>
+			and <code>noshowpos</code> manipulators.</P>
+		<P>The <code>signed_zero</code> flag has no effect with <code>nonfinite_num_get</code>. 
+			The facet <code>nonfinite_num_get</code> always&nbsp;parses "0" and "+0" as 
+			positive zero and "-0" as negative zero, and so do in fact most implementations 
+			of <code>std::num_get</code>.</P>
+		<H4><a name="trap_infinity"><code>trap_infinity</code></a></H4>
+		<P>If the <code>trap_infinity</code> flag is used with <code>nonfinite_num_put</code>, 
+			then the facet will throw an exception of type <code>std::ios_base::failure</code>
+			when an attempt is made to format&nbsp;positive or negative infinity. If the 
+			facet is called from a stream insertion operator, then the stream will catch 
+			that exception and set either&nbsp;its fail bit or its bad bit. Which bit is 
+			set is platform dependent.</P>
+		<P>If the <code>trap_infinity</code> flag is used with <code>nonfinite_num_get</code>, 
+			then the facet will set the fail bit of the stream&nbsp;when an attempt is made 
+			to&nbsp;parse&nbsp;a string that represents positive or negative infinity.</P>
+		<P>(See <A href="#Rationale">Design Rationale</A> below for a discussion of this 
+			inconsistency.)</P>
+		<H4><a name="trap_nan"><code>trap_nan</code></a></H4>
+		<P>Same as <code>trap_infinity</code>, but positive and negative&nbsp;NaN&nbsp;are 
+			trapped instead.</P>
+		<H2><a name="Examples">Examples</H2>
+		<H3>A simple example</H3>
+		<PRE>locale old_locale;
+locale tmp_locale(old_locale, new nonfinite_num_put&lt;char&gt;);
+locale new_locale(tmp_locale, new nonfinite_num_get&lt;char&gt;);
+
+stringstream ss;
+ss.imbue(new_locale);
+
+double x = numeric_limits&lt;double&gt;::infinity();
+ss &lt;&lt; x;
+
+double y;
+ss &gt;&gt; y;
+
+assert(x == y);</PRE>
+		<H3>Use with <code>lexical_cast</code></H3>
+		<P>To use the facets with lexical cast, one must set a global locale that contains 
+			the facets:</P>
+		<PRE>locale old_locale;
+locale tmp_locale(old_locale, new nonfinite_num_put&lt;char&gt;);
+locale new_locale(tmp_locale, new nonfinite_num_get&lt;char&gt;);
+locale::global(new_locale);
+
+double x = boost::lexical_cast&lt;double&gt;("inf");
+assert(x == std::numeric:limits&lt;double&gt;::infinity());
+
+string s = boost::lexical_cast&lt;string&gt;(numeric_limits&lt;double&gt;::infinity());
+assert(s == "inf");</PRE>
+		<H3>Use with serialization archives</H3>
+		<P>It is important that the same locale is used, when an archive is saved and when 
+			it is loaded. Otherwise, loading the archive may fail. By default, archives are 
+			saved and loaded with a classic C locale with a <code>boost::archive::codecvt_null</code>
+			facet added. Normally you do not have to worry about that. The constructors for 
+			the archive classes, as a side-effect,&nbsp;imbue the stream with&nbsp;such 
+			a&nbsp;locale. However, if you want to use the facets <code>nonfinite_num_put</code>
+			and <code>nonfinite_num_get</code> with archives, then you have to manage the 
+			locale manually. That is done by calling the archive constructor with the 
+			flag&nbsp; <code>boost::archive::no_codecvt</code>. Then the archive 
+			constructor&nbsp;will not&nbsp;imbue the&nbsp;stream with a new locale. The 
+			following code shows how to use <code>nonfinite_num_put</code> with a <code>text_oarchive</code>:</P>
+		<PRE>locale default_locale(locale::classic(), new boost::archive::codecvt_null&lt;char&gt;);
+locale my_locale(default_locale, new nonfinite_num_put&lt;char&gt;);
+
+ofstream ofs("test.txt");
+ofs.imbue(my_locale);
+
+boost::archive::text_oarchive oa(ofs, no_codecvt);
+
+double x = numeric_limits&lt;double&gt;::infinity();
+oa &amp; x;</PRE>
+		<P>The same method works with <code>nonfinite_num_get</code> &nbsp;and <code>text_iarchive</code>.</P>
+		<P>If you use the <code>trap_infinity</code> and <code>trap_nan</code> flags with a 
+			serialization archive, then you must set the exception&nbsp;mask of the 
+			stream.&nbsp;Serialization archives do not check the stream state.</P>
+		<HR>
+		<H2><a name="Portability">Portability</H2>
+		<P>This&nbsp;library uses the <A href="fpclassify.htm">floating point number 
+				classification</A> and <A href="signbit.htm">sign bit</A> libraries, and 
+			should work on all platforms where those&nbsp;libraries work. See the 
+			portability&nbsp;information for those libraries.
+		</P>
+		<H2><a name="Rationale">Design Rationale</H2>
+		<P>The flags are implemented as a const data member of the facet. Facets are 
+			reference counted, and locales can share facets. Therefore changing the flags 
+			of a facet&nbsp;would have effects that are hard to predict. An alternative 
+			design would be to implement the flags using <code>std::ios_base::xalloc</code> 
+			and <code>std::ios_base::iword</code>. Then one could safely modify the flags, 
+			and one could define manipulators that do so. &nbsp;However, for that to work 
+			with dynamically linked libraries, a cpp file would have to&nbsp;be added to 
+			the library. It may be more&nbsp;desirable to have a headers only library, than 
+			to have mutable flags and manipulators.
+		</P>
+		<P>The facet&nbsp;<CODE>nonfinite_num_put</CODE> throws an exception when the <code>trap_infinity</code>
+			or <code>trap_nan</code> flag is set and an attempt is made to 
+			format&nbsp;infinity or NaN. It would be better if the facet set the fail bit 
+			of the stream. However, facets derived from <CODE>std::num_put</CODE> do not 
+			have access to the stream state.</P>
+		<H2><a name="Acknowledgements"></a>Acknowledgements</H2>
+		<P>This library is based on a suggestion of Robert Ramey's. Paul Bristow educated 
+			me about the C99 standard. Many people on the Boost mailing lists contributed 
+			valuable ideas. Olivier Verdier tested the library.</P>
+		<P>
+			<hr>
+		<P>
+			<i>© Copyright Johan Råde 2006. Distributed under the Boost Software License, 
+				Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at 
+				http://www.boost.org/LICENSE_1_0.txt) </i>
+		</P>
+	</body>
+</html>

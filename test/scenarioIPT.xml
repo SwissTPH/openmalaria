@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" name="IPTi_seas_niak21_d4mo" schemaVersion="30" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+    <ageGroup lowerbound="0.0">
+      <group poppercent="3.474714994" upperbound="1"/>
+      <group poppercent="12.76004028" upperbound="5"/>
+      <group poppercent="14.52151394" upperbound="10"/>
+      <group poppercent="12.75565434" upperbound="15"/>
+      <group poppercent="10.83632374" upperbound="20"/>
+      <group poppercent="8.393312454" upperbound="25"/>
+      <group poppercent="7.001421452" upperbound="30"/>
+      <group poppercent="5.800587654" upperbound="35"/>
+      <group poppercent="5.102136612" upperbound="40"/>
+      <group poppercent="4.182561874" upperbound="45"/>
+      <group poppercent="3.339409351" upperbound="50"/>
+      <group poppercent="2.986112356" upperbound="55"/>
+      <group poppercent="2.555766582" upperbound="60"/>
+      <group poppercent="2.332763433" upperbound="65"/>
+      <group poppercent="1.77400255" upperbound="70"/>
+      <group poppercent="1.008525491" upperbound="75"/>
+      <group poppercent="0.74167341" upperbound="80"/>
+      <group poppercent="0.271863401" upperbound="85"/>
+      <group poppercent="0.161614642" upperbound="90"/>
+    </ageGroup>
+  </demography>
+  <monitoring name="Yearly Surveys">
+    <continuous duringInit="false" period="1">
+      <option name="input EIR" value="true"/>
+      <option name="simulated EIR" value="true"/>
+      <option name="human infectiousness" value="true"/>
+      <option name="hosts" value="true"/>
+    </continuous>
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="sumlogDens" value="true"/>
+      <option name="nTransmit" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="nUncomp" value="true"/>
+      <option name="nSevere" value="true"/>
+      <option name="nSeq" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+      <option name="nEPIVaccinations" value="true"/>
+      <option name="nMassVaccinations" value="true"/>
+      <option name="nHospitalRecovs" value="true"/>
+      <option name="nHospitalSeqs" value="true"/>
+      <option name="nIPTDoses" value="true"/>
+      <option name="annAvgK" value="true"/>
+    </SurveyOptions>
+    <surveys detectionLimit="40">
+      <surveyTime>1</surveyTime>
+      <surveyTime>19</surveyTime>
+      <surveyTime>37</surveyTime>
+      <surveyTime>55</surveyTime>
+      <surveyTime>74</surveyTime>
+      <surveyTime>92</surveyTime>
+      <surveyTime>110</surveyTime>
+      <surveyTime>128</surveyTime>
+      <surveyTime>147</surveyTime>
+      <surveyTime>165</surveyTime>
+      <surveyTime>183</surveyTime>
+      <surveyTime>201</surveyTime>
+      <surveyTime>220</surveyTime>
+      <surveyTime>238</surveyTime>
+      <surveyTime>256</surveyTime>
+      <surveyTime>274</surveyTime>
+      <surveyTime>293</surveyTime>
+      <surveyTime>311</surveyTime>
+      <surveyTime>329</surveyTime>
+      <surveyTime>347</surveyTime>
+      <surveyTime>366</surveyTime>
+      <surveyTime>384</surveyTime>
+      <surveyTime>402</surveyTime>
+      <surveyTime>420</surveyTime>
+      <surveyTime>439</surveyTime>
+      <surveyTime>457</surveyTime>
+      <surveyTime>475</surveyTime>
+      <surveyTime>493</surveyTime>
+      <surveyTime>512</surveyTime>
+      <surveyTime>530</surveyTime>
+      <surveyTime>548</surveyTime>
+      <surveyTime>566</surveyTime>
+      <surveyTime>585</surveyTime>
+      <surveyTime>603</surveyTime>
+      <surveyTime>621</surveyTime>
+      <surveyTime>639</surveyTime>
+      <surveyTime>658</surveyTime>
+      <surveyTime>676</surveyTime>
+      <surveyTime>694</surveyTime>
+      <surveyTime>712</surveyTime>
+      <surveyTime>731</surveyTime>
+      <surveyTime>749</surveyTime>
+      <surveyTime>767</surveyTime>
+      <surveyTime>785</surveyTime>
+      <surveyTime>804</surveyTime>
+      <surveyTime>822</surveyTime>
+      <surveyTime>840</surveyTime>
+      <surveyTime>858</surveyTime>
+      <surveyTime>877</surveyTime>
+      <surveyTime>895</surveyTime>
+      <surveyTime>913</surveyTime>
+      <surveyTime>931</surveyTime>
+      <surveyTime>950</surveyTime>
+      <surveyTime>968</surveyTime>
+      <surveyTime>986</surveyTime>
+      <surveyTime>1004</surveyTime>
+      <surveyTime>1023</surveyTime>
+      <surveyTime>1041</surveyTime>
+      <surveyTime>1059</surveyTime>
+      <surveyTime>1077</surveyTime>
+      <surveyTime>1096</surveyTime>
+      <surveyTime>1114</surveyTime>
+      <surveyTime>1132</surveyTime>
+      <surveyTime>1150</surveyTime>
+      <surveyTime>1169</surveyTime>
+      <surveyTime>1187</surveyTime>
+      <surveyTime>1205</surveyTime>
+      <surveyTime>1223</surveyTime>
+      <surveyTime>1242</surveyTime>
+      <surveyTime>1260</surveyTime>
+      <surveyTime>1278</surveyTime>
+      <surveyTime>1296</surveyTime>
+      <surveyTime>1315</surveyTime>
+      <surveyTime>1333</surveyTime>
+      <surveyTime>1351</surveyTime>
+      <surveyTime>1369</surveyTime>
+      <surveyTime>1388</surveyTime>
+      <surveyTime>1406</surveyTime>
+      <surveyTime>1424</surveyTime>
+      <surveyTime>1442</surveyTime>
+      <surveyTime>1461</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0.0">
+      <group upperbound="0.25"/>
+      <group upperbound="0.5"/>
+      <group upperbound="0.75"/>
+      <group upperbound="1"/>
+      <group upperbound="1.5"/>
+      <group upperbound="2"/>
+      <group upperbound="3"/>
+      <group upperbound="4"/>
+      <group upperbound="5"/>
+      <group upperbound="6"/>
+      <group upperbound="7"/>
+      <group upperbound="8"/>
+      <group upperbound="9"/>
+      <group upperbound="10"/>
+      <group upperbound="12"/>
+      <group upperbound="14"/>
+      <group upperbound="16"/>
+      <group upperbound="18"/>
+      <group upperbound="20"/>
+      <group upperbound="25"/>
+      <group upperbound="30"/>
+      <group upperbound="35"/>
+      <group upperbound="40"/>
+      <group upperbound="45"/>
+      <group upperbound="50"/>
+      <group upperbound="55"/>
+      <group upperbound="60"/>
+      <group upperbound="65"/>
+      <group upperbound="70"/>
+      <group upperbound="99"/>
+    </ageGroup>
+  </monitoring>
+  <interventions name="IPTi_seas_SP">
+    <IPT>
+      <description iptiEffect="18">
+        <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+        <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
+        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
+      </description>
+      <continuous coverage="0.95" targetAgeYrs="0.25"/>
+      <continuous coverage="0.95" targetAgeYrs="0.33"/>
+      <continuous coverage="0.95" targetAgeYrs="0.75"/>
+      <timed coverage=".8" time="7"/>
+      <timed coverage=".8" time="79"/>
+    </IPT>
+  </interventions>
+  <!-- Niakhar seasonality scaled to an EIR of 21 -->
+  <healthSystem>
+    <ImmediateOutcomes name="TanzaniaACTa">
+      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+      <initialACR>
+        <ACT value="1.0"/>
+        <QN value="1.0"/>
+        <selfTreatment value="0.0"/>
+      </initialACR>
+      <compliance>
+        <ACT value="1.00"/>
+        <selfTreatment value="1.0"/>
+      </compliance>
+      <nonCompliersEffective>
+        <ACT value="0"/>
+        <selfTreatment value="0"/>
+      </nonCompliersEffective>
+      <pSeekOfficialCareUncomplicated1 value="0.04"/>
+      <pSelfTreatUncomplicated value="0.0"/>
+      <pSeekOfficialCareUncomplicated2 value="0.04"/>
+      <pSeekOfficialCareSevere value="0.48"/>
+    </ImmediateOutcomes>
+    <CFR>
+      <group lowerbound="0" value="0.09189"/>
+      <group lowerbound="0.25" value="0.0810811"/>
+      <group lowerbound="0.75" value="0.0648649"/>
+      <group lowerbound="1.5" value="0.0689189"/>
+      <group lowerbound="2.5" value="0.0675676"/>
+      <group lowerbound="3.5" value="0.0297297"/>
+      <group lowerbound="4.5" value="0.0459459"/>
+      <group lowerbound="7.5" value="0.0945946"/>
+      <group lowerbound="12.5" value="0.1243243"/>
+      <group lowerbound="15" value="0.1378378"/>
+    </CFR>
+    <pSequelaeInpatient interpolation="none">
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="dynamic" name="niak21">
+    <nonVector eipDuration="10">
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">     .077263        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3652072        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .3230637        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .5126911        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">    .0070239        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">           0        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+      <EIRDaily origin="irregular">    .0632152        </EIRDaily>
+    </nonVector>
+  </entomology>
+  <!-- parameters 31052007 -->
+  <model>
+    <ModelOptions>
+      <option name="MAX_DENS_CORRECTION" value="false"/>
+      <option name="IPTI_SP_MODEL" value="true"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+      </availabilityToMosquitoes>
+    </human>
+    <parameters interval="5" iseed="0" latentp="3">
+      <parameter include="0" name=" '-ln(1-Sinf)' " number="1" value="0.050736"/>
+      <parameter include="0" name=" Estar " number="2" value="0.03247"/>
+      <parameter include="1" name=" Simm " number="3" value="0.1447"/>
+      <parameter include="1" name=" Xstar_p " number="4" value="2801.485664"/>
+      <parameter include="1" name=" gamma_p " number="5" value="2.061137"/>
+      <parameter include="1" name=" sigma2i " number="6" value="9.569774"/>
+      <parameter include="1" name=" CumulativeYstar " number="7" value="137595256.939881"/>
+      <parameter include="1" name=" CumulativeHstar " number="8" value="97.798358"/>
+      <parameter include="1" name=" '-ln(1-alpha_m)' " number="9" value="2.306627"/>
+      <parameter include="1" name=" decay_m " number="10" value="2.587184"/>
+      <parameter include="1" name=" sigma2_0 " number="11" value="0.656515"/>
+      <parameter include="1" name=" Xstar_v " number="12" value="0.918108"/>
+      <parameter include="1" name=" Ystar2 " number="13" value="9696.340451"/>
+      <parameter include="1" name=" alpha " number="14" value="157086.1001"/>
+      <parameter include="1" name=" Density bias (non Garki) " number="15" value="0.172355"/>
+      <parameter include="0" name=" No Use 1 " number="16" value="1"/>
+      <parameter include="1" name=" log oddsr CF community " number="17" value="0.729208"/>
+      <parameter include="1" name=" Indirect risk cofactor " number="18" value="0.017543"/>
+      <parameter include="1" name=" Non-malaria infant mortality " number="19" value="50.648162"/>
+      <parameter include="1" name=" Density bias (Garki) " number="20" value="4.784096"/>
+      <parameter include="1" name=" Severe Malaria Threshhold " number="21" value="346545.4089"/>
+      <parameter include="0" name=" Immunity Penalty " number="22" value="1"/>
+      <parameter include="0" name=" Immune effctor decay " number="23" value="0"/>
+      <parameter include="1" name=" comorbidity intercept " number="24" value="0.098975"/>
+      <parameter include="1" name=" Ystar half life " number="25" value="0.278909"/>
+      <parameter include="1" name=" Ystar1 " number="26" value="0.600517"/>
+      <parameter include="0" name=" Asexual decay " number="27" value="0"/>
+      <parameter include="1" name=" Ystar0 " number="28" value="328.056605"/>
+      <parameter include="1" name=" Idete multiplier " number="29" value="2.78614"/>
+      <parameter include="1" name=" critical age for comorbidity " number="30" value="0.115906"/>
+    </parameters>
+  </model>
+</scenario>

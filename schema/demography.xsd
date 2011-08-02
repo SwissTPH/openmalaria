@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!---HumanPopulationStructure-->
+  <xs:complexType name="demography">
+    <xs:sequence>
+      <xs:element name="ageGroup" type="ageGroupPerC">
+        <xs:annotation>
+          <xs:documentation>
+            List of age groups included in demography
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Age groups;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of demography data
+        </xs:documentation>
+        <xs:appinfo>units:string;name:Name of demography data;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="popSize" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>Population size</xs:documentation>
+        <xs:appinfo>units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Maximum age of simulated humans in years.
+        </xs:documentation>
+        <xs:appinfo>units:years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="growthRate" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Growth rate of human population.
+            (we should be able to implement this with non-zero values)
+        </xs:documentation>
+        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <!-- ageGroup -->
+  <xs:complexType name="ageGroupPerC">
+    <xs:annotation>
+      <xs:documentation>
+        List of age groups included in demography or surveys
+      </xs:documentation>
+      <xs:appinfo>units:List of elements;name:list of age groups;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC" />
+    </xs:sequence>
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Lower bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="groupBoundsPerC">
+    <xs:attribute name="poppercent" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Percentage of human population in age group
+        </xs:documentation>
+        <xs:appinfo>name:Percentage in age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="upperbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Upper bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>
