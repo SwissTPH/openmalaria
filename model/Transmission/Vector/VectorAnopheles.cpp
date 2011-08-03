@@ -591,7 +591,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         
         // num seeking mosquitos is: new adults + those which didn't find a host
         // yesterday + those who found a host tau days ago and survived cycle:
-        N_v[t] = newAdults
+        N_v[t] = /* TODO: temporarily force this use of mER instead of newAdults */ mosqEmergeRate[dYear1]
                  + P_A[t1]  * N_v[t1]
                  + P_df[ttau] * N_v[ttau];
         // similar for O_v, except new mosquitoes are those who were uninfected
