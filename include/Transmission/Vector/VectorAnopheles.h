@@ -24,6 +24,7 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/Vector/AnophelesHumanParams.h"
 #include "Transmission/PerHostTransmission.h"
+#include "Transmission/Vector/MosquitoLifeCycle.h"
 #include <list>
 #include <vector>
 
@@ -102,7 +103,9 @@ public:
     }
 
     /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+    inline void setITNDescription (const ITNParams& params,
+                        const scnXml::ITNDescription::AnophelesParamsType& elt,
+                        double proportionUse) {
         humanBase.setITNDescription (params, elt, proportionUse);
     }
     /** Set up intervention descriptions for humans, for this anopheles species. */
@@ -133,7 +136,11 @@ public:
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      * @param invMeanPopAvail 1 over mean population availability relative to an adult.
      */
-    void advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail);
+    void advancePeriod (const std::list<Host::Human>& population,
+                        int populationSize,
+                        size_t sIndex,
+                        bool isDynamic,
+                        double invMeanPopAvail);
 
     /** Returns the EIR calculated by advancePeriod().
      *
@@ -166,21 +173,27 @@ public:
     
     ///@brief Functions used in reporting
     //@{
-    inline double getLastN_v0 () {
+    inline double getLastN_v0 () const{
         return timestep_N_v0;
     }
-    inline double getLastN_v () {
+    inline double getLastN_v () const{
         return timestep_N_v;
     }
-    inline double getLastO_v () {
+    inline double getLastO_v () const{
         return timestep_O_v;
     }
-    inline double getLastS_v () {
+    inline double getLastS_v () const{
         return timestep_S_v;
+    }
+    inline double getResAvailability() const{
+        return lcParams.getResAvailability();
+    }
+    inline double getResRequirements() const{
+        return lcModel.getResRequirements( lcParams );
     }
 
     /// Write some per-species summary information.
-    void summarize (const string speciesName, Monitoring::Survey& survey);
+    void summarize (const string speciesName, Monitoring::Survey& survey) const;
     //@}
     
 
@@ -253,9 +266,6 @@ private:
      */
     double calcEntoAvailability(double N_i, double P_A, double P_Ai);
     
-    /** Initialises mosquito life-cycle parameters. */
-    void initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle );
-    
     /** Called by initialise function to init variables directly related to EIR
      * 
      * @param anoph Data from XML
@@ -303,18 +313,6 @@ private:
      *
      * Set in initialise function from XML data; no need to checkpoint. */
     //@{
-    /** Duration of egg stage (time from laying until hatching) (θ_e).
-     * Units: days. */
-    int eggStageDuration;
-
-    /** Duration of larval stage (time from hatching until becoming a pupa)
-     * (θ_l). Units: days. */
-    int larvalStageDuration;
-
-    /** Duration of pupal stage (time from becoming a pupa until emerging as an
-     * adult) (θ_p). Units: days. */
-    int pupalStageDuration;
-
     /** Duration of resting period for mosquito (τ).
      * Units: days. */
     int mosqRestDuration;
@@ -342,52 +340,8 @@ private:
     //@}
     
     
-    /** @brief Mosquito population-dynamics parameters
-     * 
-     * Probabilities have no units; others have units specified.
-     *
-     * All parameters are calculated during initialisation and in theory don't
-     * need checkpointing. */
-    //@{
-    /** Probability of an egg which has been laid hatching (ρ_e ^ θ_e). */
-    double pSurvEggStage;
-    
-    /** Probability of a larva surviving one day, assuming no resource
-     * restrictions (ρ_l). */
-    double pSurvDayAsLarvae;
-    
-    /** Probability of a new pupa emerging as an adult (ρ_p ^ θ_p). */
-    double pSurvPupalStage;
-    
-    /** Mean number of female eggs laid when a mosquito oviposites. */
-    double fEggsLaidByOviposit;
-    
-    /** Resource usage of female larvae by age.
-     * 
-     * Length: θ_l. Index i corresponds to usage at age i days after hatching.
-     * 
-     * Units: usage/larva. Units of usage are not defined, but should be the
-     * same as that of resource availability. */
-    vector<double> larvaeResourceUsage;
-    
-    /** Resource availability to female larvae throughout the year. Note that
-     * since male larvae are not modelled, the proportion of resources used by
-     * males should not be included here.
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     *
-     * Units: not defined, but must match the unit of resource usage. */
-    vector<double> larvalResources;
-    
-    /** Effect of competition on larvae, per age (index i corresponds to age i
-     * days since hatching).
-     * 
-     * Length: larvalStageDuration */
-    vector<double> effectCompetitionOnLarvae;
-    //@}
+    /// Mosquito population-dynamics parameters
+    MosqLifeCycleParams lcParams;
     
     
     /** @brief Inputs which are constant after simulation start
@@ -481,6 +435,7 @@ private:
     
     
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
+     * larvalResources is fitted to this.
      * 
      * Has annual periodicity: length is 365. First value (index 0) corresponds
      * to first day of year (1st Jan or something else if rebased). In 5-day
@@ -529,26 +484,7 @@ private:
     
     ///@brief Other variables storing state of model
     //@{
-    /** Number of eggs laid per time-step (ϒ_e). Units: eggs.
-     * 
-     * Length: θ_e. Value at index (d mod θ_e) refers to the value θ_e days
-     * ago/at day d before/after update. */
-    vector<double> newEggs;
-    
-    /** Number of larvae per age of development. Units: larvae.
-     * 
-     * Length: θ_l. Value at index i refers to the number of larvae of age i.
-     * We don't store the number at age θ_l, since these are pupae.
-     *
-     * Unlike ϒ arrays, this only stores the state of the system from the
-     * last/this timestep before/after update. */
-    vector<double> numLarvae;
-    
-    /** Number of new pupae per time-step (ϒ_e). Units: pupae.
-     * 
-     * Length: θ_p. Value at index (d mod θ_p) refers to the value θ_p days
-     * ago/at day d before/after update. */
-    vector<double> newPupae;
+    MosquitoLifeCycle lcModel;
     
     /** Used for calculations within advancePeriod. Only saved for optimisation.
      *

@@ -50,6 +50,7 @@ set (Model_CPP
   Transmission/Vector/VectorAnopheles.cpp
   Transmission/Vector/AnophelesHumanParams.cpp
   Transmission/Vector/ITN.cpp
+  Transmission/Vector/MosquitoLifeCycle.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp

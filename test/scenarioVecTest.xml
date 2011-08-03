@@ -36,6 +36,8 @@
       <option name="immunity Y" value="true"/>
       <option name="new infections" value="true"/>
       <option name="num transmitting humans" value="true"/>
+      <option name="resource availability" value="true"/>
+      <option name="resource requirements" value="true"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>

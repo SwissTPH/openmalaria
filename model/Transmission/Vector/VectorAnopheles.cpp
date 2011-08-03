@@ -70,7 +70,8 @@ string VectorAnopheles::initialise (
     
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
-    initMosqLifeCycle( anoph.getLifeCycle() );
+    lcParams.initMosqLifeCycle( anoph.getLifeCycle() );
+    lcModel.init( lcParams );
 
     initEIR( anoph, initialisationEIR );
     
@@ -228,45 +229,6 @@ double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai
     return (1.0 / N_i)
            * (P_Ai / (1.0-P_A))
            * (-log(P_A) / mosqSeekingDuration);
-}
-
-
-void VectorAnopheles::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle ){
-    // Simple constants stored in XML:
-    eggStageDuration = lifeCycle.getEggStage().getDuration();
-    larvalStageDuration = lifeCycle.getLarvalStage().getDuration();
-    pupalStageDuration = lifeCycle.getPupalStage().getDuration();
-    // we're only interested in female eggs, hence divide by 2:
-    fEggsLaidByOviposit = lifeCycle.getEggsLaidByOviposit().getValue() / 2.0;
-    //NOTE: store daily or whole-stage probability of survival?
-    pSurvEggStage = lifeCycle.getEggStage().getSurvival();
-    pSurvDayAsLarvae = pow( lifeCycle.getLarvalStage().getSurvival(), 1.0 / larvalStageDuration );
-    pSurvPupalStage = lifeCycle.getPupalStage().getSurvival();
-    
-    // constants varying by larval age; probably stored directly in XML:
-    larvaeResourceUsage.reserve( larvalStageDuration );
-    effectCompetitionOnLarvae.reserve( larvalStageDuration );
-    const scnXml::LarvalStage::DailySequence& larvDev = lifeCycle.getLarvalStage().getDaily();
-    for( scnXml::LarvalStage::DailyConstIterator it = larvDev.begin(); it!=larvDev.end(); ++it ){
-        larvaeResourceUsage.push_back( it->getResourceUsage() );
-        effectCompetitionOnLarvae.push_back( it->getEffectCompetition() );
-    }
-    
-    // complex derivation: annual resource availability to larvae
-    //TODO
-    //Method:
-    //specify as log of resource availability
-    //use GSL multi-dim minimiser
-    larvalResources.resize(365);
-    for( size_t i=0; i<365; ++i ){
-        larvalResources[i] = exp(sin(i*2.*M_PI/365.));
-    }
-    
-    // initialise
-    //TODO: check whether initialisation to zero is sufficient
-    newEggs.resize( eggStageDuration, 0.0 );
-    numLarvae.resize( larvalStageDuration, 0.0 );
-    newPupae.resize( pupalStageDuration, 0.0 );
 }
 
 
@@ -441,6 +403,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
+    lcParams.fitLarvalResourcesFromEmergence( lcModel, mosqEmergeRate );
 
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     for (int t = 0; t < N_v_length; ++t) {
@@ -502,6 +465,7 @@ bool VectorAnopheles::vectorInitIterate () {
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
+    lcParams.fitLarvalResourcesFromEmergence( lcModel, mosqEmergeRate );
 
     const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT) ||
@@ -618,34 +582,11 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         P_dif[t] = intP_dif;
         
         
-        // num newly emerging adults comes from num new pupae
-        // pupalStageDuration days ago:
-        double newAdults = pSurvPupalStage * newPupae[d % pupalStageDuration];
-        
-        // resource competition during last time-step (L(t) * gamma(t))
-        double resourceCompetition = 0.0;
-        for( int age=0; age<larvalStageDuration; ++age){
-            resourceCompetition += larvaeResourceUsage[age] * numLarvae[age];
-        }
-        resourceCompetition *= larvalResources[dYear1];
-        // num new pupae uses larval development formula based on num larvae
-        // which were one day away from becoming adults yesterday
-        newPupae[d % pupalStageDuration] =
-            pSurvDayAsLarvae * numLarvae[larvalStageDuration-1] /
-            ( 1.0 + resourceCompetition * effectCompetitionOnLarvae[larvalStageDuration-1] );
-        for( size_t age=larvalStageDuration-1;age>=1;--age ){
-            numLarvae[age] = pSurvDayAsLarvae * numLarvae[age-1] /
-            ( 1.0 + resourceCompetition * effectCompetitionOnLarvae[age-1] );
-        }
-        
-        // num new larvae comes from num eggs laid eggStageDuration days ago:
-        numLarvae[ 0 ] =
-            pSurvEggStage * newEggs[d % eggStageDuration];
-        
-        // num eggs laid depends on number of mosquitoes which completed a
-        // feeding & egg-laying cycle starting tau days ago:
-        newEggs[d % eggStageDuration] =
-            fEggsLaidByOviposit * P_df[ttau] * N_v[ttau];
+        // update life-cycle model
+        double newAdults = lcModel.updateEmergence( lcParams,
+                                                      P_df[ttau] * N_v[ttau],
+                                                      d, dYear1
+                                                    );
         
         
         // num seeking mosquitos is: new adults + those which didn't find a host
@@ -726,7 +667,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 
         partialEIR += S_v[t] * P_Ai_base;
 
-        timestep_N_v0 += mosqEmergeRate[dYear1];
+        timestep_N_v0 += newAdults;
         timestep_N_v += N_v[t];
         timestep_O_v += O_v[t];
         timestep_S_v += S_v[t];
@@ -747,7 +688,7 @@ void VectorAnopheles::uninfectVectors() {
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) {
+void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) const{
     survey.set_Vector_Nv0 (speciesName, timestep_N_v0/TimeStep::interval);
     survey.set_Vector_Nv (speciesName, timestep_N_v/TimeStep::interval);
     survey.set_Vector_Ov (speciesName, timestep_O_v/TimeStep::interval);

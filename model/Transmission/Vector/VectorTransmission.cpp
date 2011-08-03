@@ -60,6 +60,15 @@ void VectorTransmission::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastS_v()/TimeStep::interval;
 }
+void VectorTransmission::ctsCbResAvailability (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResAvailability()/TimeStep::interval;
+}
+void VectorTransmission::ctsCbResRequirements (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResRequirements()/TimeStep::interval;
+}
+
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     for ( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ) {
         if ( it->second == i )
@@ -67,7 +76,6 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     }
     throw util::traced_exception( "reverseLookup: key not found" );        // shouldn't ever happen
 }
-
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
     : initIterations(0), numSpecies(0)
 {
@@ -107,7 +115,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
 
 
     // -----  Continuous reporting  -----
-    ostringstream ctsNv0, ctsNv, ctsOv, ctsSv;
+    ostringstream ctsNv0, ctsNv, ctsOv, ctsSv, ctsRA, ctsRR;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
@@ -117,12 +125,16 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         ctsNv<<"\tN_v("<<name<<")";
         ctsOv<<"\tO_v("<<name<<")";
         ctsSv<<"\tS_v("<<name<<")";
+        ctsRA<<"\tres avail("<<name<<")";
+        ctsRR<<"\tres req("<<name<<")";
     }
     using Monitoring::Continuous;
     Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
     Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
     Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
+    Continuous::registerCallback( "resource availability", ctsRA.str(), MakeDelegate( this, &VectorTransmission::ctsCbResAvailability ) );
+    Continuous::registerCallback( "resource requirements", ctsRR.str(), MakeDelegate( this, &VectorTransmission::ctsCbResRequirements ) );
 }
 VectorTransmission::~VectorTransmission () {
 }
