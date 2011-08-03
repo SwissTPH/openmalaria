@@ -194,7 +194,7 @@ namespace OM { namespace Monitoring {
 	registered[optName] = s;
     }
     
-    void Continuous::update (){
+    void Continuous::report (){
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){

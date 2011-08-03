@@ -68,7 +68,7 @@ namespace OM { namespace Monitoring {
 	static void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
 	
 	/// Generate time-step's output. Called at beginning of timestep.
-	static void update ();
+	static void report ();
     };
 } }
 #endif
