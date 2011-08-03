@@ -70,7 +70,7 @@ string VectorAnopheles::initialise (
     
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
-    initMosqLifeCycle();
+    initMosqLifeCycle( anoph.getLifeCycle() );
 
     initEIR( anoph, initialisationEIR );
     
@@ -231,13 +231,13 @@ double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai
 }
 
 
-void VectorAnopheles::initMosqLifeCycle( lifeCycle ){
+void VectorAnopheles::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle ){
     // Simple constants stored in XML:
     eggStageDuration = lifeCycle.getEggStage().getDuration();
     larvalStageDuration = lifeCycle.getLarvalStage().getDuration();
     pupalStageDuration = lifeCycle.getPupalStage().getDuration();
     // we're only interested in female eggs, hence divide by 2:
-    fEggsLaidByOviposit = lifeCycle.getEggsLaidByOviposit() / 2.0;
+    fEggsLaidByOviposit = lifeCycle.getEggsLaidByOviposit().getValue() / 2.0;
     //NOTE: store daily or whole-stage probability of survival?
     pSurvEggStage = lifeCycle.getEggStage().getSurvival();
     pSurvDayAsLarvae = pow( lifeCycle.getLarvalStage().getSurvival(), 1.0 / larvalStageDuration );
@@ -246,8 +246,8 @@ void VectorAnopheles::initMosqLifeCycle( lifeCycle ){
     // constants varying by larval age; probably stored directly in XML:
     larvaeResourceUsage.reserve( larvalStageDuration );
     effectCompetitionOnLarvae.reserve( larvalStageDuration );
-    it = lifeCycle.getLarvaeDevelopment().begin();
-    for( ; it!=lifeCycle.getLarvaeDevelopment().end(); ++it ){
+    const scnXml::LarvalStage::DailySequence& larvDev = lifeCycle.getLarvalStage().getDaily();
+    for( scnXml::LarvalStage::DailyConstIterator it = larvDev.begin(); it!=larvDev.end(); ++it ){
         larvaeResourceUsage.push_back( it->getResourceUsage() );
         effectCompetitionOnLarvae.push_back( it->getEffectCompetition() );
     }
@@ -257,7 +257,10 @@ void VectorAnopheles::initMosqLifeCycle( lifeCycle ){
     //Method:
     //specify as log of resource availability
     //use GSL multi-dim minimiser
-    larvalResources;
+    larvalResources.resize(365);
+    for( size_t i=0; i<365; ++i ){
+        larvalResources[i] = exp(sin(i*2.*M_PI/365.));
+    }
     
     // initialise
     //TODO: check whether initialisation to zero is sufficient

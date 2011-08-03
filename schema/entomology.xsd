@@ -352,9 +352,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           <xs:attribute name="resourceUsage" type="xs:double" use="required">
                             <xs:annotation>
                               <xs:documentation>
-                                Parameters for the larval stage of development
+                                Resource usage over larval stage of development.
+                                Units are arbitrary.
                               </xs:documentation>
-                              <xs:appinfo>name:Daily development;</xs:appinfo>
+                              <xs:appinfo>name:Resource usage;units:X;</xs:appinfo>
+                            </xs:annotation>
+                          </xs:attribute>
+                          <xs:attribute name="effectCompetition" type="xs:double" use="required">
+                            <xs:annotation>
+                              <xs:documentation>
+                                Effect of competition over resources on development.
+                              </xs:documentation>
+                              <xs:appinfo>name:Effect competition;units:none;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                         </xs:complexType>
@@ -446,6 +455,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>Initial guess of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
         <xs:appinfo>units:Proportion;min:0;max:1;name:Initial guess of proportion of mosquitoes infectious (ρ_S);exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MosqStage">
+    <xs:annotation>
+      <xs:documentation>
+      Parameters associated with a mosquito development stage.
+      </xs:documentation>
+      <xs:appinfo>name:Mosquito development-stage parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="duration" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Duration of the stage (i.e. length of time mosquito is an
+        egg/larva/pupa).
+        </xs:documentation>
+        <xs:appinfo>name:Duration;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="survival" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Probability that mosquito survives this size (probability of egg
+        hatching, a larva becoming a pupa or a pupa emerging as an adult,
+        at the start of that stage).
+        </xs:documentation>
+        <xs:appinfo>name:Probability of survival;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

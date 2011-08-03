@@ -254,7 +254,7 @@ private:
     double calcEntoAvailability(double N_i, double P_A, double P_Ai);
     
     /** Initialises mosquito life-cycle parameters. */
-    void initMosqLifeCycle();
+    void initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle );
     
     /** Called by initialise function to init variables directly related to EIR
      * 
