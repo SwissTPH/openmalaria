@@ -21,6 +21,7 @@
 #define Hmod_MosqLifeCycle
 
 #include "Global.h"
+#include <vector>
 
 namespace scnXml {
     class LifeCycle;
@@ -44,14 +45,28 @@ public:
     inline double getResAvailability() const{
         return larvalResources[TimeStep::simulation % larvalResources.size()];
     }
+    inline int getTotalDuration() const{
+        return eggStageDuration + larvalStageDuration + pupalStageDuration;
+    }
     
     /** Fit larvalResources from mosqEmergeRate.
      * 
      * @param lcModel MosquitoLifeCycle state to start from
+     * @param P_df Average P_df value (assumed constant)
+     * @param P_A Average P_A value (assumed constant)
+     * @param start_day The day (d parameter in VectorAnopheles::advancePeriod)
+     * at which the next update should take place.
+     * @param mosqRestDuration The duration of a feeding cycle (τ)
+     * @param N_v_orig N_v array from VectorAnopheles (will be copied)
      * @param mosqEmergeRate 365-long array of desired emergence over year
      */
-    void fitLarvalResourcesFromEmergence( const MosquitoLifeCycle& lcModel,
-                                const std::vector<double>& mosqEmergeRate );
+    void fitLarvalResourcesFromEmergence(
+        const MosquitoLifeCycle& lcModel,
+        double P_df, double P_A,
+        size_t start_day, size_t mosqRestDuration,
+        const std::vector<double>& N_v_orig,
+        const std::vector<double>& mosqEmergeRate
+    );
     
 private:
     /** @brief Duration parameters for mosquito/parasite life-cycle
@@ -124,6 +139,7 @@ private:
     vector<double> effectCompetitionOnLarvae;
     //@}
     friend class MosquitoLifeCycle;
+    friend class CaptiveLCModel;
 };
 
 
@@ -134,7 +150,11 @@ private:
  */
 class MosquitoLifeCycle {
 public:
-    /** Initialise variables.
+    /** Initialise/reset state variables to 0.
+     * 
+     * Note that output of updateEmergence shouldn't be used before
+     * lcParams.getTotalDuration() updates have occurred after initialisation
+     * or reset.
      * 
      * @param lcParams Fixed parameters for the life-cycle model
      */

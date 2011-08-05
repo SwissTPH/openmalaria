@@ -71,6 +71,10 @@ vector<double> vectors::gsl2std (const gsl_vector* vec) {
   memcpy (&ret[0], vec->data, ret.size()*sizeof(double));
   return ret;
 }
+void vectors::gsl2std( const gsl_vector *vec, vector<double>& target ){
+  target.resize (vec->size);
+  memcpy (&target[0], vec->data, target.size()*sizeof(double));
+}
 
 
 gsl_vector* vectors::std2gsl (const vector<double>& vec, size_t length) {

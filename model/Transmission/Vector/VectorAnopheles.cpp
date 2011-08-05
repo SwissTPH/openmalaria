@@ -400,21 +400,22 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     FSCoeffic[0] += log (populationSize / sumPFindBite);
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
 
-    // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
-    mosqEmergeRate = forcedS_v;
-    vectors::scale (mosqEmergeRate, initNv0FromSv);
-    lcParams.fitLarvalResourcesFromEmergence( lcModel, mosqEmergeRate );
-
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     for (int t = 0; t < N_v_length; ++t) {
         P_A[t] = intP_A;
         P_df[t] = intP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        S_v[t] = forcedS_v[t];	// assume N_v_length ≤ 365
+        S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
     }
-
+    
+    // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
+    mosqEmergeRate = forcedS_v;
+    vectors::scale (mosqEmergeRate, initNv0FromSv);
+    // Basic estimate of larvalResources from mosqEmergeRate and human state
+    lcParams.fitLarvalResourcesFromEmergence( lcModel, intP_df, intP_A, 1, mosqRestDuration, N_v, mosqEmergeRate );
+    
     // All set up to drive simulation from forcedS_v
 }
 
@@ -465,7 +466,18 @@ bool VectorAnopheles::vectorInitIterate () {
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
-    lcParams.fitLarvalResourcesFromEmergence( lcModel, mosqEmergeRate );
+    // Find suitible larvalResources using intP_df and intP_A
+    //TODO: this is probably not the best way to get intP_df and intP_A
+    double intP_df = 0.0, intP_A = 0.0;
+    for (int t = 0; t < N_v_length; ++t) {
+        intP_df += P_df[t];
+        intP_A += P_A[t];
+    }
+    intP_df /= N_v_length;
+    intP_A /= N_v_length;
+    lcParams.fitLarvalResourcesFromEmergence( lcModel, intP_df, intP_A,
+                                              TimeStep::simulation.inDays() - TimeStep::interval + 1,
+                                              mosqRestDuration, N_v, mosqEmergeRate );
 
     const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT) ||
@@ -563,7 +575,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
         // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
         size_t d = i + firstDay;	// used with arrays of various lengths
-        size_t dMod = i + firstDay + N_v_length;
+        size_t dMod = d + N_v_length;
         assert (dMod >= (size_t)N_v_length);
         // Indecies for today, yesterday and mosqRestDuration days back:
         size_t t    = dMod % N_v_length;
@@ -571,8 +583,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         size_t ttau = (dMod - mosqRestDuration) % N_v_length;
         // Day of year and of 5-year cycles. Note that emergence during day 1
         // comes from mosqEmergeRate[0], hence subtraction by 1.
-        size_t dYear1 = (firstDay + i - 1) % TimeStep::fromYears(1).inDays();
-        size_t d5Year = (firstDay + i) % TimeStep::fromYears(5).inDays();
+        size_t dYear1 = (d - 1) % TimeStep::fromYears(1).inDays();
+        size_t d5Year = d % TimeStep::fromYears(5).inDays();
         
         
         // These only need to be calculated once per timestep, but should be

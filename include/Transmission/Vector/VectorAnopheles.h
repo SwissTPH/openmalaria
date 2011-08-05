@@ -313,7 +313,8 @@ private:
      *
      * Set in initialise function from XML data; no need to checkpoint. */
     //@{
-    /** Duration of resting period for mosquito (τ).
+    /** Duration of feeding cycle (equals duration of resting period) for
+     * mosquito (τ).
      * Units: days. */
     int mosqRestDuration;
 

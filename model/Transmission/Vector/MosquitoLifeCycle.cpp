@@ -19,7 +19,10 @@
 
 #include "Transmission/Vector/MosquitoLifeCycle.h"
 #include "schema/entomology.h"
+#include "util/vectors.h"
+#include "util/errors.h"
 #include <cmath>
+#include "gsl_multimin.h"
 
 namespace OM {
 namespace Transmission {
@@ -50,23 +53,181 @@ void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle 
     larvalResources.resize(365);
 }
 
+// Container to run life-cycle model with fixed human inputs
+struct CaptiveLCModel {
+    /** Store fixed parameters.
+     * 
+     * @param lcP Reference to MosqLifeCycleParams. This is updated with
+     * different resource availabilities as they are tested. Other parameters
+     * are not changed.
+     * @param Pdf Average P_df value (assumed constant)
+     * @param PA Average P_A value (assumed constant)
+     * @param sd The day (d parameter in VectorAnopheles::advancePeriod) at
+     * which the next update should take place.
+     * @param mRD The duration of a feeding cycle (τ)
+     * @param N_v_orig N_v array from VectorAnopheles (will be copied)
+     * @param mER Fixed emergence rate for forcing model and fitting target. Read-only.
+     */
+    CaptiveLCModel(
+        MosqLifeCycleParams& lcP,
+        double Pdf, double PA,
+        size_t sd, size_t mRD,
+        const std::vector<double>& N_v_orig,
+        const std::vector<double>& mER
+    ) :
+        lcParams( lcP ),
+        P_df( Pdf ), P_A( PA ),
+        start_day( sd ), mosqRestDuration( mRD ),
+        init_N_v( N_v_orig ), mosqEmergeRate( mER )
+    {
+    }
+    
+    /** Run captive model. Uses a warmup length of lcParams.getTotalDuration(),
+     * then a sampling duration of 365 intervals. */
+    void run( )
+    {
+        lcModel.init( lcParams );
+        
+        // We use average P_df and P_A values ad assume these are constant (in the
+        // full model they only vary dependent on human age, human heterogeneity
+        // and interventions (we assume there are no interventions).
+        size_t N_v_length = init_N_v.size();
+        // We take a copy of N_v.
+        vector<double> N_v = init_N_v;
+        
+        size_t sample_start = start_day + lcParams.getTotalDuration();
+        size_t end = sample_start + TimeStep::fromYears(1).inDays();
+        for( size_t d = start_day; d<end; ++d ){
+            size_t dMod = d + N_v_length;
+            assert (dMod >= (size_t)N_v_length);
+            // Indecies for today, yesterday and mosqRestDuration days back:
+            size_t t    = dMod % N_v_length;
+            size_t t1   = (dMod - 1) % N_v_length;
+            size_t ttau = (dMod - mosqRestDuration) % N_v_length;
+            // Day of year. Note that emergence during day 1
+            // comes from mosqEmergeRate[0], hence subtraction by 1.
+            size_t dYear1 = (d - 1) % TimeStep::fromYears(1).inDays();
+            
+            // update life-cycle model
+            double newAdults = lcModel.updateEmergence( lcParams,
+                                                        P_df * N_v[ttau],
+                                                        d, dYear1
+                                                        );
+            sampledEmergence[ dYear1 ] = newAdults;
+            
+            // num seeking mosquitos is: new adults + those which didn't find a host
+            // yesterday + those who found a host tau days ago and survived cycle:
+            // Note: we fit with forced emergence to avoid a fully-dynamic model
+            N_v[t] = mosqEmergeRate[dYear1]
+                    + P_A  * N_v[t1]
+                    + P_df * N_v[ttau];
+        }
+    }
+    
+    /** Sample: see how close the new resource rate regenerates our emergence
+     * rate.
+     */
+    double sampler( const gsl_vector *x ){
+        util::vectors::gsl2std( x, lcParams.larvalResources );
+        
+        sampledEmergence.resize( mosqEmergeRate.size() );
+        run();
+        double sumSquares = 0.0;
+        for( size_t i=0; i<sampledEmergence.size(); ++i ){
+            double diff = sampledEmergence[i] - mosqEmergeRate[i];
+            sumSquares += diff*diff;
+        }
+        return sumSquares;
+    }
+    
+private:
+    MosqLifeCycleParams& lcParams;
+    MosquitoLifeCycle lcModel;
+    double P_df, P_A;
+    size_t start_day, mosqRestDuration;
+    const std::vector<double>& init_N_v, mosqEmergeRate;
+    // A vector which is filled with sampled emergence values. Must be of
+    // length 1 year; first value corresponds to emergence sampled for 1st day
+    // of year.
+    std::vector<double> sampledEmergence;
+};
+
+double CaptiveLCModel_sampler_wrapper( const gsl_vector *x, void *params ){
+    CaptiveLCModel *clmp = static_cast<CaptiveLCModel *>( params );
+    return clmp->sampler( x );
+}
+
 void MosqLifeCycleParams::fitLarvalResourcesFromEmergence(
     const MosquitoLifeCycle& lcModel,
+    double P_df, double P_A,
+    size_t start_day, size_t mosqRestDuration,
+    const std::vector<double>& N_v_orig,
     const std::vector<double>& mosqEmergeRate )
 {
-    // make a copy of lcModel so we can simulate the mosquito life-cycle easily
-    MosquitoLifeCycle lc( lcModel );
+    CaptiveLCModel clm( *this, P_df, P_A, start_day, mosqRestDuration,
+                    N_v_orig, mosqEmergeRate );
     
-    //TODO: can we run model in isolation?
     //TODO: fit using gsl multi-minimiser
+    //TODO: maybe it's sensible to reduce the order of the system somehow — with a lower-fidelity curve or fourier series?
+    
+    
+    //TODO: calculate a sensible starting point. Currently I have no idea what to use, but maybe this can be some function of mosqEmergeRate?
+    gsl_vector *x = gsl_vector_alloc (mosqEmergeRate.size());
+    gsl_vector_set_all (x, 1.0);
+    
+    /* Set initial step sizes to 1 */
+    //TODO: investigate what this means! 1 comes from an example.
+    gsl_vector *step_size = gsl_vector_alloc (mosqEmergeRate.size());
+    gsl_vector_set_all (step_size, 1.0);
+    
+    /* Initialize method and iterate */
+    gsl_multimin_function minex_func;
+    minex_func.n = mosqEmergeRate.size();
+    minex_func.f = &CaptiveLCModel_sampler_wrapper;
+    minex_func.params = static_cast<void*>(&clm);
+    
+    gsl_multimin_fminimizer *s =
+        gsl_multimin_fminimizer_alloc (gsl_multimin_fminimizer_nmsimplex2, 2);
+    gsl_multimin_fminimizer_set (s, &minex_func, x, step_size);
+    
+    for( size_t iter=0; iter<100; ++iter ) {
+        int status = gsl_multimin_fminimizer_iterate(s);
+        if (status) {
+            if( status==GSL_ENOPROG ){
+                cout << "stopping iterations: can't improve" << endl;
+                break;
+            }else{
+                ostringstream msg;
+                msg << "stopping with error code " << gsl_strerror( status );
+                throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
+            }
+        }
+        
+        double size = gsl_multimin_fminimizer_size (s);
+        printf ("%5lu %10.3e %10.3e f() = %7.3f size = %.3f\n", 
+                iter,
+                gsl_vector_get (s->x, 0), 
+                gsl_vector_get (s->x, 1), 
+                s->fval, size);
+        
+        if( gsl_multimin_test_size (size, 1e-5) == GSL_SUCCESS){
+            cout<<"converged to minimum"<<endl;
+            break;
+        }
+    }
+    
+    gsl_vector_free(x);
+    gsl_vector_free(step_size);
+    gsl_multimin_fminimizer_free (s);
 }
 
 
 void MosquitoLifeCycle::init( const MosqLifeCycleParams& lcParams ){
-    //TODO: check whether initialisation to zero is sufficient
-    newEggs.resize( lcParams.eggStageDuration, 0.0 );
-    numLarvae.resize( lcParams.larvalStageDuration, 0.0 );
-    newPupae.resize( lcParams.pupalStageDuration, 0.0 );
+    // Shouldn't matter that values start at 0, since the outputs of this model
+    // aren't used before all zeros have been replaced.
+    newEggs.assign( lcParams.eggStageDuration, 0.0 );
+    numLarvae.assign( lcParams.larvalStageDuration, 0.0 );
+    newPupae.assign( lcParams.pupalStageDuration, 0.0 );
 }
 
 double MosquitoLifeCycle::getResRequirements( const MosqLifeCycleParams& lcParams ) const{

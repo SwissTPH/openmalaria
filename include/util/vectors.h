@@ -55,6 +55,8 @@ namespace OM { namespace util { namespace vectors {
   //@{
   /** Convert a gsl_vector to a std::vector<double>. */
   vector<double> gsl2std (const gsl_vector* vec);
+  /** Convert a gsl_vector to a possibly already allocated std::vector<double>. */
+  void gsl2std( const gsl_vector *vec, vector<double>& target );
   
   /** Convert a std::vector<double> to a gsl_vector (newly allocated).
    *
