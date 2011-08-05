@@ -219,7 +219,7 @@ double random::betaWithMean (double m, double b){
 int random::poisson(double lambda){
     if (!finite(lambda)) {
 	//This would lead to an inifinite loop in gsl_ran_poisson
-	throw traced_exception( "lambda is inf", Error::InfLambda );
+	throw TRACED_EXCEPTION( "lambda is inf", Error::InfLambda );
     }
     return gsl_ran_poisson (rng.gsl_generator, lambda);
 }

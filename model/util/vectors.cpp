@@ -75,7 +75,7 @@ vector<double> vectors::gsl2std (const gsl_vector* vec) {
 
 gsl_vector* vectors::std2gsl (const vector<double>& vec, size_t length) {
   if (vec.size() != length)
-    throw util::traced_exception ("vectorStd2Gsl: vec has incorrect length");
+    throw TRACED_EXCEPTION_DEFAULT ("vectorStd2Gsl: vec has incorrect length");
   gsl_vector* ret = gsl_vector_alloc (length);
   memcpy (ret->data, &vec[0], length * sizeof(double));
   return ret;

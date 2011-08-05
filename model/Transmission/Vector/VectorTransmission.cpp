@@ -74,7 +74,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
         if ( it->second == i )
             return it->first;
     }
-    throw util::traced_exception( "reverseLookup: key not found" );        // shouldn't ever happen
+    throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
     : initIterations(0), numSpecies(0)
@@ -208,7 +208,7 @@ TimeStep VectorTransmission::initIterate () {
         initIterations = -1;
     }
     if( initIterations > 10 ){
-        throw util::traced_exception("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
+        throw TRACED_EXCEPTION("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
     }
     
     // Time to let parameters settle after each iteration. I would expect one year

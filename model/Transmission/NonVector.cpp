@@ -118,7 +118,7 @@ TimeStep NonVectorTransmission::initIterate (){
         initialKappa[ i ] *= factor;
         // error check:
         if (!(initialKappa[i] > 0.0))     // if not positive
-            throw util::traced_exception ("initialKappa is invalid");
+            throw TRACED_EXCEPTION ("initialKappa is invalid", util::Error::InitialKappa);
     }
     
     return TimeStep(0); // nothing to do
@@ -210,7 +210,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
     msg << "Error: non-vect eir is: " << eir
 	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()]
 	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
-    throw util::traced_exception(msg.str(),util::Error::InitialKappa);
+    throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif
   return eir * perHost.relativeAvailabilityHetAge (ageYears);

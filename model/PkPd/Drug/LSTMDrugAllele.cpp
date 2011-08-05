@@ -116,7 +116,7 @@ double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, doubl
         const size_t max_iterations = 1000;     // 100 seems enough, but no harm in using a higher value
         gsl_integration_workspace *workspace = gsl_integration_workspace_alloc (max_iterations);
         if( gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps, max_iterations, qag_rule, workspace, &intfC, &err_eps) ){
-            throw util::traced_exception( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
+            throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
         }
         if( err_eps > 1e-8 ){
             cerr << "Warning in calcFactorIV: error epsilon is: "<<err_eps<<" (integral is "<<intfC<<")"<<endl;

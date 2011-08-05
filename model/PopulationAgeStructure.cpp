@@ -92,7 +92,7 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
     
     for (size_t iter = 0; iter < 100; ++iter) {
         if (gsl_multimin_fminimizer_iterate(minimizer))
-            throw util::traced_exception ("gsl_multimin_fminimizer_iterate failed",util::Error::GSL);
+            throw TRACED_EXCEPTION ("gsl_multimin_fminimizer_iterate failed",util::Error::GSL);
         
         double size = gsl_multimin_fminimizer_size (minimizer);
         int status = gsl_multimin_test_size (size, 1e-2);

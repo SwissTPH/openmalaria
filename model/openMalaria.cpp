@@ -23,6 +23,7 @@
 #include "Global.h"
 #include "Simulation.h"
 #include "util/CommandLine.h"
+#include "util/errors.h"
 
 #include <cstdio>
 #include <cerrno>
@@ -33,6 +34,8 @@ int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
     
     try {
+        OM::util::set_gsl_handler();
+        
         string scenario_name =
             OM::util::CommandLine::parse (argc, argv);
 	
