@@ -300,14 +300,14 @@ void VectorAnopheles::initEIR(
 
         // Now we rescale to get an EIR of targetEIR.
         // Calculate current sum as is usually done.
-        calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+        vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
         sum = vectors::sum( speciesEIR );
         // And scale:
         FSCoeffic[0] += log( targetEIR / sum );
     }
 
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
 
     // Add to the TransmissionModel's EIR, used for the initalization phase:
     for (int i = 0; i < TimeStep::fromYears(1).inDays(); ++i) {
@@ -398,7 +398,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
 
     // same as multiplying resultant eir since calcFourierEIR takes exp(...)
     FSCoeffic[0] += log (populationSize / sumPFindBite);
-    calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
 
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     for (int t = 0; t < N_v_length; ++t) {
@@ -462,7 +462,7 @@ bool VectorAnopheles::vectorInitIterate () {
     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
     FSRotateAngle -= rAngle;
-    calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
@@ -707,27 +707,6 @@ void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& s
     survey.set_Vector_Sv (speciesName, timestep_S_v/TimeStep::interval);
 }
 
-
-void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle) {
-    if (FC.size() % 2 == 0)
-        throw util::xml_scenario_error("The number of Fourier coefficents should be odd.");
-
-    // Frequency
-    double w = 2*M_PI / double(tArray.size());
-
-    // Number of Fourier Modes.
-    int Fn = (FC.size()-1)/2;
-
-    // Calculate inverse discrete Fourier transform
-    for (size_t t=0; t<tArray.size(); t++) {
-        double temp = FC[0];
-        double wt = w*t - rAngle;
-        for (int n=1;n<=Fn;n++) {
-            temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
-        }
-        tArray[t] = exp(temp);
-    }
-}
 
 }
 }

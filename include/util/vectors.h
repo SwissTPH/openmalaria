@@ -23,6 +23,8 @@
 #include "Global.h"
 #include <gsl/gsl_vector.h>
 
+/* Various utilities acting on vectors. */
+
 namespace OM { namespace util { namespace vectors {
 
   ///@brief Basic operations on std::vector
@@ -67,7 +69,19 @@ namespace OM { namespace util { namespace vectors {
   /// Ditto, but taking values from a double[].
   gsl_vector* std2gsl (const double* vec, size_t length);
   //@}
-
+  
+  /** Given an input sequence of Fourier coefficients, with odd length,
+   * calculate the exponential of the corresponding fourier series.
+   *
+   * Note: output is per-interval in tArray. When length is intervalsPerYear,
+   * you may want to scale the output by days-per-interval.
+   *
+   * @param tArray Array to fill with exponated values from Fourier series.
+   * Length should already be set.
+   * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...); can be any length
+   * so long as it is odd.
+   * @param rAngle Angle to rotate generated series by in radians: [0,2π] */
+  void calcExpFourierSeries (vector<double>& tArray, vector<double>& FC, double rAngle);
 }
 
 /// Utility to print a vector (operator must be in namespace)

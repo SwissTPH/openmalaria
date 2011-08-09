@@ -274,17 +274,6 @@ private:
     void initEIR(
         const scnXml::AnophelesParams& anoph,
         vector<double>& initialisationEIR);
-    
-    /** Given an input sequence of Fourier coefficients, with odd length,
-     * calculate the exponential of the corresponding fourier series.
-     *
-     * Note: output is per-interval in tArray. When length is intervalsPerYear,
-     * you may want to scale the output by days-per-interval.
-     *
-     * @param tArray Array to fill with EIR values. Length should already be set.
-     * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).
-     * @param rAngle Angle to rotate EIR, in radians: [0,2π] */
-    static void calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle);
     //@}
     
     
