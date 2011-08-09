@@ -80,6 +80,7 @@ def main(args):
         
         (options, others) = parser.parse_args(args=args[1:])
         if not len(others)==2:
+            parser.print_usage()
             raise Exception,"Expected 2 arguments"
         
         inlineSchema(others[0],others[1])
