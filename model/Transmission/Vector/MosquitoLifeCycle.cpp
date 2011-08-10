@@ -22,6 +22,7 @@
 #include "util/vectors.h"
 #include "util/errors.h"
 #include <cmath>
+#include <fstream>
 #include "gsl_multimin.h"
 
 namespace OM {
@@ -54,6 +55,9 @@ void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle 
     larvalResources.resize(365);
 }
 
+// forward declaration
+double CaptiveLCModel_sampler_wrapper( const gsl_vector *x, void *params );
+
 // Container to run life-cycle model with fixed human inputs
 struct CaptiveLCModel {
     /** Store fixed parameters.
@@ -81,11 +85,13 @@ struct CaptiveLCModel {
         start_day( sd ), mosqRestDuration( mRD ),
         init_N_v( N_v_orig ), mosqEmergeRate( mER )
     {
+        fout.open("MLC-fitting.csv");
+        fout<<"target\t"<<mosqEmergeRate<<'\n';
     }
     
     /** Run captive model. Uses a warmup length of lcParams.getTotalDuration(),
      * then a sampling duration of 365 intervals. */
-    void run( )
+    void simulate1Year()
     {
         lcModel.init( lcParams );
         
@@ -129,17 +135,91 @@ struct CaptiveLCModel {
      * rate.
      */
     double sampler( const gsl_vector *x ){
+        double scale_reduction = x->size / static_cast<double>( lcParams.larvalResources.size() );
+        for( size_t i=0,len=lcParams.larvalResources.size(); i<len; ++i ){
+            size_t index = static_cast<size_t>( i * scale_reduction );
+            lcParams.larvalResources[i] = gsl_vector_get(x, index);
+        }
         vectors::gsl2std( x, lcParams.larvalResources );
         // interpret x as a fourier series instead?
         
+        //TODO: fix this function. Doesn't appear to return sensible values/output is always the same.
+        //TODO: add option to fit shape of N_v instead of N_v0
+        //TODO: do we want to add an option to fit the shape of O_v/S_v/EIR? If
+        // so we need a human-infectiousness (kappa) input; perhaps this can be
+        // constant or sampled from humans while they are being exposed to
+        // forced EIR.
         sampledEmergence.resize( mosqEmergeRate.size() );
-        run();
+        simulate1Year();
         double sumSquares = 0.0;
         for( size_t i=0; i<sampledEmergence.size(); ++i ){
             double diff = sampledEmergence[i] - mosqEmergeRate[i];
             sumSquares += diff*diff;
         }
         return sumSquares;
+    }
+    
+    /** Run root-finding/minimisation algorithm.
+     *
+     * @param order The number of dimensions to try fitting at once. Must
+     * eventually be done with 365, but it may be faster to start with fewer.
+     */
+    void fit( int order ){
+        //TODO: calculate a sensible starting point. Currently I have no idea what to use, but maybe this can be some function of mosqEmergeRate?
+        gsl_vector *x = gsl_vector_alloc ( order );
+        gsl_vector_set_all (x, 0.01);
+        
+        // Set initial step size: it seems something like 1/200th of this is added/subtracted each step
+        gsl_vector *step_size = gsl_vector_alloc (order);
+        gsl_vector_set_all (step_size, 1);
+        
+        /* Initialize method and iterate */
+        gsl_multimin_function minex_func;
+        minex_func.n = order;
+        minex_func.f = &CaptiveLCModel_sampler_wrapper;
+        minex_func.params = static_cast<void*>(this);
+        
+        gsl_multimin_fminimizer *s =
+            gsl_multimin_fminimizer_alloc (gsl_multimin_fminimizer_nmsimplex2, order);
+        gsl_multimin_fminimizer_set (s, &minex_func, x, step_size);
+        
+        size_t iter;
+        bool success = false;
+        for( iter=0; iter<1000; ++iter ) {
+            int status = gsl_multimin_fminimizer_iterate(s);
+            if (status) {
+                if( status==GSL_ENOPROG ){
+                    cout << "stopping iterations: can't improve" << endl;
+                    break;
+                }else{
+                    ostringstream msg;
+                    msg << "stopping with error code " << gsl_strerror( status );
+                    throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
+                }
+            }
+            
+            double size = gsl_multimin_fminimizer_size (s);
+            /*
+            printf ("%5lu %10.3e %10.3e f() = %7.3f size = %.3f\n", 
+                    iter,
+                    gsl_vector_get (s->x, 0), 
+                    gsl_vector_get (s->x, 1), 
+                    s->fval, size);
+            */
+            if( gsl_multimin_test_size (size, 1e-5) == GSL_SUCCESS){
+                success = true;
+                break;
+            }
+        }
+        
+        gsl_vector_free(x);
+        gsl_vector_free(step_size);
+        gsl_multimin_fminimizer_free (s);
+        
+        cout<<"Fitting with dimension "<<order<<" in "<<iter<<" steps: "
+            <<(success ? "success" : "failure")
+            <<" (least squares: "<<s->fval<<")"<<endl;
+        fout<<iter<<'\t'<<s->fval<<'\t'<<sampledEmergence<<endl;
     }
     
 private:
@@ -152,8 +232,10 @@ private:
     // length 1 year; first value corresponds to emergence sampled for 1st day
     // of year.
     std::vector<double> sampledEmergence;
+    ofstream fout;
 };
 
+// helper function: GSL algorithms can only call global functions
 double CaptiveLCModel_sampler_wrapper( const gsl_vector *x, void *params ){
     CaptiveLCModel *clmp = static_cast<CaptiveLCModel *>( params );
     return clmp->sampler( x );
@@ -173,54 +255,10 @@ void MosqLifeCycleParams::fitLarvalResourcesFromEmergence(
     //TODO: maybe it's sensible to reduce the order of the system somehow — with a lower-fidelity curve or fourier series?
     //TODO: switch to fitting logarithm of values so we can guarantee we don't get negative resources
     
-    
-    //TODO: calculate a sensible starting point. Currently I have no idea what to use, but maybe this can be some function of mosqEmergeRate?
-    gsl_vector *x = gsl_vector_alloc (mosqEmergeRate.size());
-    gsl_vector_set_all (x, 1.0);
-    
-    // Set initial step size: it seems something like 1/200th of this is added/subtracted each step
-    gsl_vector *step_size = gsl_vector_alloc (mosqEmergeRate.size());
-    gsl_vector_set_all (step_size, 4.217);	// no special number, just not a simple multiple of 1
-    
-    /* Initialize method and iterate */
-    gsl_multimin_function minex_func;
-    minex_func.n = mosqEmergeRate.size();
-    minex_func.f = &CaptiveLCModel_sampler_wrapper;
-    minex_func.params = static_cast<void*>(&clm);
-    
-    gsl_multimin_fminimizer *s =
-        gsl_multimin_fminimizer_alloc (gsl_multimin_fminimizer_nmsimplex2, mosqEmergeRate.size());
-    gsl_multimin_fminimizer_set (s, &minex_func, x, step_size);
-    
-    for( size_t iter=0; iter<100000; ++iter ) {
-        int status = gsl_multimin_fminimizer_iterate(s);
-        if (status) {
-            if( status==GSL_ENOPROG ){
-                cout << "stopping iterations: can't improve" << endl;
-                break;
-            }else{
-                ostringstream msg;
-                msg << "stopping with error code " << gsl_strerror( status );
-                throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
-            }
-        }
-        
-        double size = gsl_multimin_fminimizer_size (s);
-        printf ("%5lu %10.3e %10.3e f() = %7.3f size = %.3f\n", 
-                iter,
-                gsl_vector_get (s->x, 0), 
-                gsl_vector_get (s->x, 1), 
-                s->fval, size);
-        
-        if( gsl_multimin_test_size (size, 1e-5) == GSL_SUCCESS){
-            cout<<"converged to minimum"<<endl;
-            break;
-        }
-    }
-    
-    gsl_vector_free(x);
-    gsl_vector_free(step_size);
-    gsl_multimin_fminimizer_free (s);
+    clm.fit( 1 );
+    clm.fit( 5 );
+    clm.fit( 73 );
+    clm.fit( 365 );
 }
 
 
