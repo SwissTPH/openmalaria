@@ -26,6 +26,7 @@
 
 namespace OM {
 namespace Transmission {
+using namespace OM::util;
 
 void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle ){
     // Simple constants stored in XML:
@@ -128,7 +129,8 @@ struct CaptiveLCModel {
      * rate.
      */
     double sampler( const gsl_vector *x ){
-        util::vectors::gsl2std( x, lcParams.larvalResources );
+        vectors::gsl2std( x, lcParams.larvalResources );
+        // interpret x as a fourier series instead?
         
         sampledEmergence.resize( mosqEmergeRate.size() );
         run();
@@ -169,16 +171,16 @@ void MosqLifeCycleParams::fitLarvalResourcesFromEmergence(
     
     //TODO: fit using gsl multi-minimiser
     //TODO: maybe it's sensible to reduce the order of the system somehow — with a lower-fidelity curve or fourier series?
+    //TODO: switch to fitting logarithm of values so we can guarantee we don't get negative resources
     
     
     //TODO: calculate a sensible starting point. Currently I have no idea what to use, but maybe this can be some function of mosqEmergeRate?
     gsl_vector *x = gsl_vector_alloc (mosqEmergeRate.size());
     gsl_vector_set_all (x, 1.0);
     
-    /* Set initial step sizes to 1 */
-    //TODO: investigate what this means! 1 comes from an example.
+    // Set initial step size: it seems something like 1/200th of this is added/subtracted each step
     gsl_vector *step_size = gsl_vector_alloc (mosqEmergeRate.size());
-    gsl_vector_set_all (step_size, 1.0);
+    gsl_vector_set_all (step_size, 4.217);	// no special number, just not a simple multiple of 1
     
     /* Initialize method and iterate */
     gsl_multimin_function minex_func;
@@ -187,10 +189,10 @@ void MosqLifeCycleParams::fitLarvalResourcesFromEmergence(
     minex_func.params = static_cast<void*>(&clm);
     
     gsl_multimin_fminimizer *s =
-        gsl_multimin_fminimizer_alloc (gsl_multimin_fminimizer_nmsimplex2, 2);
+        gsl_multimin_fminimizer_alloc (gsl_multimin_fminimizer_nmsimplex2, mosqEmergeRate.size());
     gsl_multimin_fminimizer_set (s, &minex_func, x, step_size);
     
-    for( size_t iter=0; iter<100; ++iter ) {
+    for( size_t iter=0; iter<100000; ++iter ) {
         int status = gsl_multimin_fminimizer_iterate(s);
         if (status) {
             if( status==GSL_ENOPROG ){
