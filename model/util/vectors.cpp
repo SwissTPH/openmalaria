@@ -30,10 +30,17 @@ void vectors::scale (vector<double>& vec, double a) {
     vec[i] *= a;
 }
 
-double vectors::sum (vector<double>& vec) {
+double vectors::sum (const vector<double>& vec) {
   double r = 0.0;
   for (size_t i = 0; i < vec.size(); ++i)
     r += vec[i];
+  return r;
+}
+
+double vectors::sum (const gsl_vector *vec) {
+  double r = 0.0;
+  for (size_t i = 0; i < vec->size; ++i)
+    r += gsl_vector_get( vec, i );
   return r;
 }
 

@@ -80,6 +80,7 @@ set (OM_CXXTEST_HEADERS
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
   PennyInfectionSuite.h
+  MosqLifeCycleSuite.h
 )
 
 #Appears to be problems with this on windows...

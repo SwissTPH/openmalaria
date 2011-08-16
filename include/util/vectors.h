@@ -33,7 +33,19 @@ namespace OM { namespace util { namespace vectors {
   void scale (vector<double>& vec, double a);
   
   /// Return sum of all elements
-  double sum (vector<double>& vec);
+  double sum (const vector<double>& vec);
+  
+  /// Return sum of all elements
+  double sum (const gsl_vector *vec);
+  
+  /// Return arithmetric mean
+  inline double mean (const vector<double>& vec){
+    return sum(vec) / vec.size();
+  }
+  /// Return arithmetric mean
+  inline double mean (const gsl_vector *vec){
+    return sum(vec) / vec->size;
+  }
   
   /// Add one vector into another (x += y)
   void addTo (vector<double>& x, vector<double>& y);

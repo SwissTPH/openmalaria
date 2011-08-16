@@ -56,6 +56,10 @@ namespace OM { namespace util {
             /** Outputs samples from the active interpolation methods of all
              * age-group data suitible for graphing. */
             SAMPLE_INTERPOLATIONS,
+            /** Show details of vector-parameter fitting.
+             * 
+             * The fitting methods used aren't guaranteed to work. If they don't, this output should help work out why. */
+            DEBUG_VECTOR_FITTING,
 	    NUM_OPTIONS
 	};
 	
