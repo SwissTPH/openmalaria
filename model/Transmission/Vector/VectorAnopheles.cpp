@@ -546,8 +546,6 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
     // Summed per day:
     partialEIR = 0.0;
 
-    timestep_N_v0 = 0.0, timestep_N_v = 0.0, timestep_O_v = 0.0, timestep_S_v = 0.0;
-
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses TimeStep::interval day (currently 5 day) time steps.
     // The transmission for time-step t depends on the state during days
@@ -650,11 +648,6 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         quinquennialS_v[d5Year] = S_v[t];
 
         partialEIR += S_v[t] * P_Ai_base;
-
-        timestep_N_v0 += mosqEmergeRate[dYear1];
-        timestep_N_v += N_v[t];
-        timestep_O_v += O_v[t];
-        timestep_S_v += S_v[t];
     }
 }
 
@@ -672,11 +665,41 @@ void VectorAnopheles::uninfectVectors() {
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
+double VectorAnopheles::getLastN_v0 (){
+    double timestep_N_v0 = 0.0;
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+        size_t dYear1 = (firstDay + i - 1) % TimeStep::fromYears(1).inDays();
+        timestep_N_v0 += mosqEmergeRate[dYear1];
+    }
+    return timestep_N_v0;
+}
+double VectorAnopheles::getLastVecStat ( VecStat vs ){
+    //Note: implementation isn't performance optimal but rather intended to
+    //keep code size low and have no overhead if not used.
+    vector<double> *array;
+    switch( vs ){
+        case PA: array = &P_A; break;
+        case PDF: array = &P_df; break;
+        case PDIF: array = &P_dif; break;
+        case NV: array = &N_v; break;
+        case OV: array = &O_v; break;
+        case SV: array = &S_v; break;
+        default: assert( false );
+    }
+    double val = 0.0;
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+        size_t t = (i + firstDay) % N_v_length;
+        val += (*array)[t];
+    }
+    return val;
+}
 void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) {
-    survey.set_Vector_Nv0 (speciesName, timestep_N_v0/TimeStep::interval);
-    survey.set_Vector_Nv (speciesName, timestep_N_v/TimeStep::interval);
-    survey.set_Vector_Ov (speciesName, timestep_O_v/TimeStep::interval);
-    survey.set_Vector_Sv (speciesName, timestep_S_v/TimeStep::interval);
+    survey.set_Vector_Nv0 (speciesName, getLastN_v0()/TimeStep::interval);
+    survey.set_Vector_Nv (speciesName, getLastVecStat(NV)/TimeStep::interval);
+    survey.set_Vector_Ov (speciesName, getLastVecStat(OV)/TimeStep::interval);
+    survey.set_Vector_Sv (speciesName, getLastVecStat(SV)/TimeStep::interval);
 }
 
 

@@ -59,8 +59,7 @@ public:
             humanBase(baseITNParams),
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
-            larvicidingIneffectiveness (1.0),
-            timestep_N_v0(0.0), timestep_N_v(0.0), timestep_O_v(0.0), timestep_S_v(0.0)
+            larvicidingIneffectiveness (1.0)
     {}
 
     /** Called to initialise variables instead of a constructor. At this point,
@@ -166,18 +165,12 @@ public:
     
     ///@brief Functions used in reporting
     //@{
-    inline double getLastN_v0 () {
-        return timestep_N_v0;
-    }
-    inline double getLastN_v () {
-        return timestep_N_v;
-    }
-    inline double getLastO_v () {
-        return timestep_O_v;
-    }
-    inline double getLastS_v () {
-        return timestep_S_v;
-    }
+    /// Get emergence during last time-step
+    double getLastN_v0 ();
+    enum VecStat { PA, PDF, PDIF, NV, OV, SV };
+    /// Get P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
+    /// @param vs PA, PDF, PDIF, NV, OV or SV
+    double getLastVecStat ( VecStat vs );
 
     /// Write some per-species summary information.
     void summarize (const string speciesName, Monitoring::Survey& survey);
@@ -213,10 +206,6 @@ public:
         partialEIR & stream;
         larvicidingEndStep & stream;
         larvicidingIneffectiveness & stream;
-        timestep_N_v0 & stream;
-        timestep_N_v & stream;
-        timestep_O_v & stream;
-        timestep_S_v & stream;
     }
 
 
@@ -499,13 +488,6 @@ private:
     double larvicidingIneffectiveness;
     //@}
 
-    
-    ///@brief Storage for summary data
-    //@{
-    /** Variables tracking data to be reported. */
-    double timestep_N_v0, timestep_N_v, timestep_O_v, timestep_S_v;
-    //@}
-    
     friend class VectorEmergenceSuite;
     friend class VectorAnophelesSuite;
 };
