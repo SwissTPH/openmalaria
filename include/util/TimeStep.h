@@ -65,6 +65,9 @@ public:
      */
     static void init (int daysPerTimeStep, double maxAgeYears);
 
+    /// Days in a year. Should be a multiple of interval.
+    enum { DAYS_IN_YEAR = 365 };
+    
     /** Simulation time step.
      * 
      * Set-up of populations occurs at time 0.

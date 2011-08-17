@@ -28,9 +28,6 @@
 namespace OM {
 namespace util {
 
-// Days in a year. Should be a multiple of interval.
-const int DAYS_IN_YEAR = 365;
-
 TimeStep::TimeStep() : _ts(-0x3FFFFFFF) {}
 TimeStep TimeStep::fromDaysNearest( double d ){
     return TimeStep( static_cast<int>(std::floor( d / interval + 0.5 )) );
