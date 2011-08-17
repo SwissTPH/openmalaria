@@ -142,8 +142,7 @@ protected:
   
   /** For summarizing:
    * @returns Total number of infections.
-   * @param patentInfections Out param: the number of patent infections
-	    (only set if return-value is non-zero). */
+   * @param patentInfections In-out param: incremented for every patent infection */
   virtual int countInfections (int& patentInfections) =0;
   
   virtual void checkpoint (istream& stream);

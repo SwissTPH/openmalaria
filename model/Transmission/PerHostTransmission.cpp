@@ -62,7 +62,7 @@ PerHostTransmission::PerHostTransmission () :
 void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
     VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
-    if (vTM) {
+    if (vTM != 0) {
         species.resize (vTM->numSpecies);
         for (size_t i = 0; i < vTM->numSpecies; ++i)
             species[i].initialise (vTM->species[i].getHumanBaseParams(), availabilityFactor);
@@ -71,7 +71,7 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
 
 void PerHostTransmission::setupITN (const TransmissionModel& tm) {
     const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
-    if (vTM) {
+    if (vTM != 0) {
         net.deploy(vTM->getITNParams());
     }
 }
