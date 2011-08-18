@@ -48,17 +48,29 @@ void VectorTransmission::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
 }
+void VectorTransmission::ctsCbP_A (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PA)/TimeStep::interval;
+}
+void VectorTransmission::ctsCbP_df (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDF)/TimeStep::interval;
+}
+void VectorTransmission::ctsCbP_dif (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDIF)/TimeStep::interval;
+}
 void VectorTransmission::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastN_v()/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::NV)/TimeStep::interval;
 }
 void VectorTransmission::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastO_v()/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::OV)/TimeStep::interval;
 }
 void VectorTransmission::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastS_v()/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
 }
 void VectorTransmission::ctsCbResAvailability (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
@@ -115,13 +127,16 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
 
 
     // -----  Continuous reporting  -----
-    ostringstream ctsNv0, ctsNv, ctsOv, ctsSv, ctsRA, ctsRR;
+    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif, ctsNv, ctsOv, ctsSv, ctsRA, ctsRR;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
         // Unfortunately, we need to reverse-lookup the name.
         const string& name = reverseLookup( speciesIndex, i );
         ctsNv0<<"\tN_v0("<<name<<")";
+        ctsPA<<"\tP_A("<<name<<")";
+        ctsPdf<<"\tP_df("<<name<<")";
+        ctsPdif<<"\tP_dif("<<name<<")";
         ctsNv<<"\tN_v("<<name<<")";
         ctsOv<<"\tO_v("<<name<<")";
         ctsSv<<"\tS_v("<<name<<")";
@@ -130,6 +145,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     }
     using Monitoring::Continuous;
     Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
+    Continuous::registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_A ) );
+    Continuous::registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_df ) );
+    Continuous::registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_dif ) );
     Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
     Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );

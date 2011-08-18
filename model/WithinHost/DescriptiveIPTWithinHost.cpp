@@ -150,7 +150,7 @@ bool DescriptiveIPTWithinHost::hasIPTiProtection (TimeStep maxInterventionAge) c
 
 bool DescriptiveIPTWithinHost::eventSPClears (DescriptiveInfection* inf){
   DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
-  assert (iptInf);	// code error if this is anything else
+  assert (iptInf != 0);	// code error if this is anything else
   return iptInf->eventSPClears(_lastSPDose);
 }
 
@@ -170,7 +170,7 @@ void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection*
   if (!(util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY))) return;
   
   DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
-  assert (iptInf);	// code error if this is anything else
+  assert (iptInf != 0);	// code error if this is anything else
   if (iptInf->doSPAttenuation()) {
     double attFact = iptInf->asexualAttenuation();
     timeStepMaxDensity *= attFact;

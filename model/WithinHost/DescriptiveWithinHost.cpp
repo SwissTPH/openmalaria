@@ -154,7 +154,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
 int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
     if (infections.empty()) return 0;
-    patentInfections = 0;
     for (std::list<DescriptiveInfection*>::iterator inf=infections.begin();
             inf != infections.end(); ++inf) {
         if ((*inf)->getDensity() > detectionLimit)

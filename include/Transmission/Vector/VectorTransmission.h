@@ -89,6 +89,9 @@ private:
     static double invMeanPopAvail (const std::list<Host::Human>& population, int populationSize);
   
   void ctsCbN_v0 (ostream& stream);
+  void ctsCbP_A (ostream& stream);
+  void ctsCbP_df (ostream& stream);
+  void ctsCbP_dif (ostream& stream);
   void ctsCbN_v (ostream& stream);
   void ctsCbO_v (ostream& stream);
   void ctsCbS_v (ostream& stream);
