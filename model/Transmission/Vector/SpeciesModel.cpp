@@ -47,23 +47,14 @@ string SpeciesModel::initialise (
     // -----  Set model variables  -----
     const scnXml::Mosq& mosq = anoph.getMosq();
 
-    mosqRestDuration = mosq.getMosqRestDuration().getValue();
-    EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
     humanBase = mosq;	// read human-specific parameters
-    minInfectedThreshold = mosq.getMinInfectedThreshold();
 
-    if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-        throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
-    }
-    N_v_length = EIPDuration + mosqRestDuration;
+    mosquitoTransmission.initialise( anoph );
     
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
-    lcParams.initMosqLifeCycle( anoph.getLifeCycle() );
-    lcModel.init( lcParams );
-
     initEIR( anoph, initialisationEIR );
     
     return anoph.getMosquito();
@@ -316,27 +307,9 @@ void SpeciesModel::initEIR(
     }
 
     // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
+    FSRotateAngle = EIRRotateAngle - (mosquitoTransmission.getEIPDuration()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
     initNv0FromSv = initNvFromSv * anoph.getPropInfected();       // temporarily use of initNv0FromSv
-
-    // -----  allocate memory  -----
-    // Set up fArray and ftauArray. Each step, all elements not set here are
-    // calculated, even if they aren't directly used in the end;
-    // however all calculated values are used in calculating the next value.
-    fArray.resize(EIPDuration-mosqRestDuration+1);
-    fArray[0] = 1.0;
-    ftauArray.resize(EIPDuration);
-    for (int i = 0; i < mosqRestDuration; ++i)
-        ftauArray[i] = 0.0;
-    ftauArray[mosqRestDuration] = 1.0;
-
-    N_v  .resize (N_v_length);
-    O_v  .resize (N_v_length);
-    S_v  .resize (N_v_length);
-    P_A  .resize (N_v_length);
-    P_df .resize (N_v_length);
-    P_dif.resize (N_v_length);
 
     quinquennialS_v.assign (TimeStep::DAYS_IN_YEAR * 5, 0.0);
     forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
@@ -362,7 +335,7 @@ void SpeciesModel::setupNv0 (size_t sIndex,
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
-    double intP_df = 0.0;
+    double tsP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const Transmission::PerHost& host = h->perHostTransmission;
@@ -370,40 +343,32 @@ void SpeciesModel::setupNv0 (size_t sIndex,
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
-        intP_df += prod * host.probMosqResting(humanBase, sIndex);
+        tsP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
-        intP_df += nhh->probCompleteCycle;
-        // Note: in model, we do the same for intP_dif, except in this case it's
+        tsP_df += nhh->probCompleteCycle;
+        // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
 
     // Probability of a mosquito not finding a host this day:
-    double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
+    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
     sumPFindBite *= P_Ai_base;
-    intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+    tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
     //END P_A, P_Ai, P_df, P_dif
 
 
     double initOvFromSv = initNv0FromSv;  // temporarily use of initNv0FromSv
-    initNv0FromSv = initNvFromSv * (1.0 - intP_A - intP_df);
+    initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
 
     // same as multiplying resultant eir since calcFourierEIR takes exp(...)
     FSCoeffic[0] += log (populationSize / sumPFindBite);
     vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
-
-    // Initialize per-day variables; S_v, N_v and O_v are only estimated
-    for (int t = 0; t < N_v_length; ++t) {
-        P_A[t] = intP_A;
-        P_df[t] = intP_df;
-        P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
-        N_v[t] = S_v[t] * initNvFromSv;
-        O_v[t] = S_v[t] * initOvFromSv;
-    }
+    
+    mosquitoTransmission.initState ( tsP_A, tsP_df );
     
 #if 0
 FIXME: do we not want this at all? Or still need some of this?
@@ -411,7 +376,7 @@ FIXME: do we not want this at all? Or still need some of this?
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Basic estimate of larvalResources from mosqEmergeRate and human state
-    lcParams.fitLarvalResourcesFromEmergence( lcModel, intP_df, intP_A, 1, mosqRestDuration, N_v, mosqEmergeRate );
+    lcParams.fitLarvalResourcesFromEmergence( lcModel, tsP_df, tsP_A, 1, mosqRestDuration, N_v, mosqEmergeRate );
 #endif
     // All set up to drive simulation from forcedS_v
 }
@@ -426,17 +391,17 @@ bool SpeciesModel::vectorInitIterate () {
     // * the value of S_v we want to fit to (forcedS_v)
     
     // find suitible annual larval resource availability:
-    // Find suitible larvalResources using intP_df and intP_A
-    //TODO: this is probably not the best way to get intP_df and intP_A
-    double intP_df = 0.0, intP_A = 0.0;
-    for (int t = 0; t < N_v_length; ++t) {
-        intP_df += P_df[t];
-        intP_A += P_A[t];
-    }
-    intP_df /= N_v_length;
-    intP_A /= N_v_length;
+    // Find suitible larvalResources using tsP_df and tsP_A
+    //TODO: this is probably not the best way to get tsP_df and tsP_A
     /* FIXME
-    lcParams.fitLarvalResourcesFromS_v( lcModel, intP_df, intP_A,
+    double tsP_df = 0.0, tsP_A = 0.0;
+    for (int t = 0; t < N_v_length; ++t) {
+        tsP_df += P_df[t];
+        tsP_A += P_A[t];
+    }
+    tsP_df /= N_v_length;
+    tsP_A /= N_v_length;
+    lcParams.fitLarvalResourcesFromS_v( lcModel, tsP_df, tsP_A,
                                               N_v_length, mosqRestDuration );
     ...
     
@@ -450,7 +415,6 @@ bool SpeciesModel::vectorInitIterate () {
 void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
-                                     bool isDynamic,
                                      double invMeanPopAvail) {
     if (TimeStep::simulation > larvicidingEndStep) {
         larvicidingEndStep = TimeStep::future;
@@ -496,36 +460,36 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
-    double intP_df = 0.0;
-    double intP_dif = 0.0;
+    double tsP_df = 0.0;
+    double tsP_dif = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
-        intP_df += prod;
-        intP_dif += prod * h->probTransmissionToMosquito();
+        tsP_df += prod;
+        tsP_dif += prod * h->probTransmissionToMosquito();
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
-        intP_df += nhh->probCompleteCycle;
-        // Note: in model, we do the same for intP_dif, except in this case it's
+        tsP_df += nhh->probCompleteCycle;
+        // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
 
     // Probability of a mosquito not finding a host this day:
-    double intP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - intP_A) / leaveSeekingStateRate;
+    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
 
-    intP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-    intP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
+    tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+    tsP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
 
     // Summed per day:
     partialEIR = 0.0;
     
-    timestep_N_v0 = 0.0;
+    mosquitoTransmission.resetTSStats();
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses TimeStep::interval day (currently 5 day) time steps.
@@ -533,159 +497,9 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
     // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
     int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
-        // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
-        size_t d = i + firstDay;	// used with arrays of various lengths
-        size_t dMod = d + N_v_length;
-        assert (dMod >= (size_t)N_v_length);
-        // Indecies for today, yesterday and mosqRestDuration days back:
-        size_t t    = dMod % N_v_length;
-        size_t t1   = (dMod - 1) % N_v_length;
-        size_t ttau = (dMod - mosqRestDuration) % N_v_length;
-        // Day of year and of 5-year cycles. Note that emergence during day 1
-        // comes from mosqEmergeRate[0], hence subtraction by 1.
-        size_t dYear1 = (d - 1) % TimeStep::DAYS_IN_YEAR;
-        size_t d5Year = d % (TimeStep::DAYS_IN_YEAR * 5);
-        
-        
-        // These only need to be calculated once per timestep, but should be
-        // present in each of the previous N_v_length - 1 positions of arrays.
-        P_A[t] = intP_A;
-        P_df[t] = intP_df;
-        P_dif[t] = intP_dif;
-        
-        
-        // update life-cycle model
-        double newAdults = lcModel.updateEmergence( lcParams,
-                                                      P_df[ttau] * N_v[ttau],
-                                                      d, dYear1
-                                                    );
-        
-        
-        // num seeking mosquitos is: new adults + those which didn't find a host
-        // yesterday + those who found a host tau days ago and survived cycle:
-        N_v[t] = newAdults
-                 + P_A[t1]  * N_v[t1]
-                 + P_df[ttau] * N_v[ttau];
-        // similar for O_v, except new mosquitoes are those who were uninfected
-        // tau days ago, started a feeding cycle then, survived and got infected:
-        O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
-                 + P_A[t1]  * O_v[t1]
-                 + P_df[ttau] * O_v[ttau];
-
-
-        //BEGIN S_v
-        // Set up array with n in 1..θ_s−1 for f_τ(dMod-n) (NDEMD eq. 1.7)
-        size_t fProdEnd = 2*mosqRestDuration;
-        for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-            size_t tn = (dMod-n)%N_v_length;
-            ftauArray[n] = ftauArray[n-1] * P_A[tn];
-        }
-        ftauArray[fProdEnd] += P_df[(dMod-fProdEnd)%N_v_length];
-
-        for (int n = fProdEnd+1; n < EIPDuration; ++n) {
-            size_t tn = (dMod-n)%N_v_length;
-            ftauArray[n] =
-                P_df[tn] * ftauArray[n - mosqRestDuration]
-                + P_A[tn] * ftauArray[n-1];
-        }
-
-        double sum = 0.0;
-        size_t ts = dMod - EIPDuration;
-        for (int l = 1; l < mosqRestDuration; ++l) {
-            size_t tsl = (ts - l) % N_v_length;       // index dMod - theta_s - l
-            sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * ftauArray[EIPDuration+l-mosqRestDuration];
-        }
-
-
-        // Set up array with n in 1..θ_s−τ for f(dMod-n) (NDEMD eq. 1.6)
-        for (int n = 1; n <= mosqRestDuration; ++n) {
-            size_t tn = (dMod-n)%N_v_length;
-            fArray[n] = fArray[n-1] * P_A[tn];
-        }
-        fArray[mosqRestDuration] += P_df[ttau];
-
-        fProdEnd = EIPDuration-mosqRestDuration;
-        for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-            size_t tn = (dMod-n)%N_v_length;
-            fArray[n] =
-                P_df[tn] * fArray[n - mosqRestDuration]
-                + P_A[tn] * fArray[n-1];
-        }
-
-
-        ts = ts % N_v_length;       // index dMod - theta_s
-        S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
-                 + sum
-                 + P_A[t1]*S_v[t1]
-                 + P_df[ttau]*S_v[ttau];
-
-
-        if ( isDynamic ) {
-            // We cut-off transmission when no more than X mosquitos are infected to
-            // allow true elimination in simulations. Unfortunately, it may cause problems with
-            // trying to simulate extremely low transmission, such as an R_0 case.
-            if ( S_v[t] <= minInfectedThreshold ) { // infectious mosquito cut-off
-                S_v[t] = 0.0;
-                /* Note: could report; these reports often occur too frequently, however
-                if( S_v[t] != 0.0 ){        // potentially reduce reporting
-                    cerr << TimeStep::simulation <<":\t S_v cut-off"<<endl;
-                } */
-            }
-        }
-        //END S_v
-
-
-        quinquennialS_v[d5Year] = S_v[t];
-
-        partialEIR += S_v[t] * P_Ai_base;
-        
-        timestep_N_v0 += newAdults;
+        partialEIR += mosquitoTransmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif ) * P_Ai_base;
     }
 }
-
-
-void SpeciesModel::intervLarviciding (/*const scnXml::LarvicidingAnopheles& elt*/) {
-    /*FIXME
-    cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
-    larvicidingIneffectiveness = 1 - elt.getEffectiveness();
-    larvicidingEndStep = TimeStep::simulation + TimeStep::fromDays(elt.getDuration());
-    */
-}
-void SpeciesModel::uninfectVectors() {
-    O_v.assign( O_v.size(), 0.0 );
-    S_v.assign( S_v.size(), 0.0 );
-    P_dif.assign( P_dif.size(), 0.0 );
-}
-
-double SpeciesModel::getLastVecStat ( VecStat vs ) const{
-    //Note: implementation isn't performance optimal but rather intended to
-    //keep code size low and have no overhead if not used.
-    const vector<double> *array;
-    switch( vs ){
-        case PA: array = &P_A; break;
-        case PDF: array = &P_df; break;
-        case PDIF: array = &P_dif; break;
-        case NV: array = &N_v; break;
-        case OV: array = &O_v; break;
-        case SV: array = &S_v; break;
-        default: assert( false );
-    }
-    double val = 0.0;
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t t = (i + firstDay) % N_v_length;
-        val += (*array)[t];
-    }
-    return val;
-}
-void SpeciesModel::summarize (const string speciesName, Monitoring::Survey& survey) const{
-    survey.set_Vector_Nv0 (speciesName, timestep_N_v0/TimeStep::interval);
-    survey.set_Vector_Nv (speciesName, getLastVecStat(NV)/TimeStep::interval);
-    survey.set_Vector_Ov (speciesName, getLastVecStat(OV)/TimeStep::interval);
-    survey.set_Vector_Sv (speciesName, getLastVecStat(SV)/TimeStep::interval);
-}
-
 
 }
 }

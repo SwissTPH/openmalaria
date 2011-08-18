@@ -50,6 +50,12 @@ public:
         return eggStageDuration + larvalStageDuration + pupalStageDuration;
     }
     
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        larvalResources & stream;
+    }
+    
     /** Fit larvalResources from mosqEmergeRate.
      * 
      * @param lcModel MosquitoLifeCycle state to start from
@@ -127,7 +133,10 @@ private:
      * time-step model values at indecies 0 through 4 are used to calculate the
      * state at time-step 1.
      *
-     * Units: not defined, but must match the unit of resource usage. */
+     * Units: not defined, but must match the unit of resource usage.
+     * 
+     * Note: this parameter needs to be checkpointed since it is calculated
+     * during init. */
     vector<double> larvalResources;
     
     /** Effect of competition on larvae, per age (index i corresponds to age i
@@ -180,6 +189,14 @@ public:
     double updateEmergence( const MosqLifeCycleParams& lcParams,
                             double nOvipositingMosqs,
                             size_t d, size_t dYear1 );
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        newEggs & stream;
+        numLarvae & stream;
+        newPupae & stream;
+    }
     
 private:
     /** Number of eggs laid per time-step (ϒ_e). Units: eggs.

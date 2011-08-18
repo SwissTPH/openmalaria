@@ -50,27 +50,27 @@ void VectorModel::ctsCbN_v0 (ostream& stream) {
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PA)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PA)/TimeStep::interval;
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PDF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PDF)/TimeStep::interval;
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PDIF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PDIF)/TimeStep::interval;
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::NV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::NV)/TimeStep::interval;
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::OV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::OV)/TimeStep::interval;
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::SV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SV)/TimeStep::interval;
 }
 void VectorModel::ctsCbResAvailability (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
@@ -262,7 +262,7 @@ void VectorModel::vectorUpdate (const std::list<Host::Human>& population, int po
     if( simulationMode == dynamicEIR ){
         double iMPA = invMeanPopAvail(population, populationSize);
         for (size_t i = 0; i < numSpecies; ++i){
-            species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
+            species[i].advancePeriod (population, populationSize, i, iMPA);
         }
     }
 }

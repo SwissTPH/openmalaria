@@ -51,6 +51,7 @@ set (Model_CPP
   Transmission/Vector/PerHost.cpp
   Transmission/Vector/ITN.cpp
   Transmission/Vector/MosquitoLifeCycle.cpp
+  Transmission/Vector/MosquitoTransmission.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp
