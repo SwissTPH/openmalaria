@@ -94,7 +94,7 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
 
 SimulationMode readMode(const string& str){
     if(str=="forced")
-        return equilibriumMode;
+        return forcedEIR;
     else if(str=="dynamic")
         return dynamicEIR;
     else
@@ -103,7 +103,7 @@ SimulationMode readMode(const string& str){
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
 TransmissionModel::TransmissionModel() :
-    simulationMode(equilibriumMode),
+    simulationMode(forcedEIR),
     interventionMode(readMode(InputData().getEntomology().getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),

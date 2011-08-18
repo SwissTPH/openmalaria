@@ -38,35 +38,36 @@ namespace Transmission {
     class PerHostTransmission;
 
 
-/** There are 3 simulation modes. */
+/** Variable describing current simulation mode. */
 enum SimulationMode {
-  /** Equilibrium mode
-   * 
-   * This is used for the warm-up period and if we want to separate direct
-   * effect of an intervention from indirect effects via transmission
-   * intensity. The seasonal pattern and intensity of the EIR do not change
-   * over years.
-   * 
-   * For the vector model, this runs most calculations dynamically but still
-   * forces the EIR. */
-  equilibriumMode = 2,
-  
-  /** Transient EIR known
-   * 
-   * This is used to simulate an intervention that changes EIR, and where we
-   * have measurements of the EIR over time during the intervention period. */
-  transientEIRknown = 3,
-  
-  /** EIR changes
-   * 
-   * The simulation is driven by the EIR which changes dynamically during the
-   * intervention phase as a function of the characteristics of the
-   * interventions.
-   * 
-   * Dependending on whether the Vector or NonVector model is in use, this EIR
-   * may be calculated from a mosquito emergence rate or be an input EIR
-   * scaled by the relative infectiousness of the humans. */
-  dynamicEIR = 4,
+    /** Initial mode. Indicates that initialisation still needs to happen (i.e.
+     * it is an error if this mode is still set when getEIR is called). */
+    preInit,
+    /** Equilibrium mode (i.e. just apply a fixed EIR)
+     * 
+     * This is used for the warm-up period and if we want to separate direct
+     * effect of an intervention from indirect effects via transmission
+     * intensity. The seasonal pattern and intensity of the EIR do not change
+     * over years.
+     * 
+     * In this mode vector calculations aren't run. */
+    forcedEIR,
+    /** Transient EIR known
+     * 
+     * This is used to simulate an intervention that changes EIR, and where we
+     * have measurements of the EIR over time during the intervention period.
+     */
+    transientEIRknown,
+    /** EIR changes
+     * 
+     * The simulation is driven by the EIR which changes dynamically during the
+     * intervention phase as a function of the characteristics of the
+     * interventions.
+     * 
+     * Dependending on whether the Vector or NonVector model is in use, this
+     * EIR may be calculated from a mosquito emergence rate or be an input EIR
+     * scaled by the relative infectiousness of the humans. */
+    dynamicEIR,
 };
 
 
@@ -87,7 +88,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize) {}
+  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize) =0;
   
   /// Checkpointing
   template<class S>

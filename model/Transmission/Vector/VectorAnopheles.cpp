@@ -48,25 +48,19 @@ string VectorAnopheles::initialise (
 )
 {
     // -----  Set model variables  -----
-
     const scnXml::Mosq& mosq = anoph.getMosq();
 
     mosqRestDuration = mosq.getMosqRestDuration().getValue();
     EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
-
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
-
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
-
-    humanBase = mosq;
-
+    humanBase = mosq;	// read human-specific parameters
     minInfectedThreshold = mosq.getMinInfectedThreshold();
 
     if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
         throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
     }
     N_v_length = EIPDuration + mosqRestDuration;
-
     
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
@@ -236,9 +230,13 @@ void VectorAnopheles::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
 ){
+    /* TODO: in future we want to accept FS inputs with any number of
+     * coefficients, monthly inputs with no/linear/Fourier smoothing, and
+     * possibly daily inputs. All should be converted to daily values. */
+    
     FSCoeffic.resize (5);
     // EIR for this species, with index 0 refering to value over first interval
-    vector<double> speciesEIR (TimeStep::fromYears(1).inDays());
+    vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
 
     if ( anoph.getEIR().present() ) {
         const scnXml::EIR& eirData = anoph.getEIR().get();
@@ -310,7 +308,7 @@ void VectorAnopheles::initEIR(
     vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
 
     // Add to the TransmissionModel's EIR, used for the initalization phase:
-    for (int i = 0; i < TimeStep::fromYears(1).inDays(); ++i) {
+    for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
         // index 1 of initialisationEIR corresponds to first period of year
         initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
     }
@@ -343,13 +341,13 @@ void VectorAnopheles::initEIR(
     P_df .resize (N_v_length);
     P_dif.resize (N_v_length);
 
-    quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
-    forcedS_v.resize (TimeStep::fromYears(1).inDays());
+    quinquennialS_v.assign (TimeStep::DAYS_IN_YEAR * 5, 0.0);
+    forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
+#if 0
     mosqEmergeRate.resize (TimeStep::fromYears(1).inDays()); // Only needs to be done here if loading from checkpoint
+#endif
 }
 
-
-// -----  Initialisation of model which is done after running the human warmup  -----
 
 void VectorAnopheles::setupNv0 (size_t sIndex,
                                 const std::list<Host::Human>& population,
@@ -410,62 +408,27 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
         O_v[t] = S_v[t] * initOvFromSv;
     }
     
+#if 0
+FIXME: do we not want this at all? Or still need some of this?
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Basic estimate of larvalResources from mosqEmergeRate and human state
     lcParams.fitLarvalResourcesFromEmergence( lcModel, intP_df, intP_A, 1, mosqRestDuration, N_v, mosqEmergeRate );
-    
+#endif
     // All set up to drive simulation from forcedS_v
 }
 
 
+// -----  Initialisation of model which is done after running the human warmup  -----
+
 bool VectorAnopheles::vectorInitIterate () {
-    // Try to match S_v against its predicted value. Don't try with N_v or O_v
-    // because the predictions will change - would be chasing a moving target!
-    // EIR comes directly from S_v, so should fit after we're done.
-
-    double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
-    //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-    if (!(factor > 1e-6 && factor < 1e6)) {
-        if ( vectors::sum(forcedS_v) == 0.0 ) {
-            return false;   // no EIR desired: nothing to do
-        }
-        cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
-        cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds (likely a code error)",util::Error::VectorFitting);
-    }
-
-    //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
-    // Adjusting mosqEmergeRate is the important bit. The rest should just
-    // bring things to a stable state quicker.
-    initNv0FromSv *= factor;
-    initNvFromSv *= factor;     //(not currently used)
-    vectors::scale (mosqEmergeRate, factor);
-    vectors::scale (N_v, factor);
-    // What factor exactly these should be scaled by isn't obvious; in any case
-    // they should reach stable values quickly.
-    vectors::scale (O_v, factor);
-    vectors::scale (S_v, factor);
-    vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
-
-    // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( TimeStep::fromYears(1).inDays(), 0.0 );
-    for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[i % TimeStep::fromYears(1).inDays()] =
-            quinquennialS_v[i] / 5.0;
-    }
-
-    // Once the amplitude is approximately correct, we try to find a
-    // rotation offset.
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-    //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    // annualS_v was already rotated by old value of FSRotateAngle, so increment:
-    FSRotateAngle -= rAngle;
-    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
-    // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = forcedS_v;
-    vectors::scale (mosqEmergeRate, initNv0FromSv);
+    // We now know/can get approximate values for:
+    // * human-vector interaction (P_df, P_A) (these were available previously)
+    // * human infectiousness (P_dif)
+    // * the value of S_v we want to fit to (forcedS_v)
+    
+    // find suitible annual larval resource availability:
     // Find suitible larvalResources using intP_df and intP_A
     //TODO: this is probably not the best way to get intP_df and intP_A
     double intP_df = 0.0, intP_A = 0.0;
@@ -475,13 +438,14 @@ bool VectorAnopheles::vectorInitIterate () {
     }
     intP_df /= N_v_length;
     intP_A /= N_v_length;
-    lcParams.fitLarvalResourcesFromEmergence( lcModel, intP_df, intP_A,
-                                              TimeStep::simulation.inDays() - TimeStep::interval + 1,
-                                              mosqRestDuration, N_v, mosqEmergeRate );
-
-    const double LIMIT = 0.1;
-    return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear);
+    /* FIXME
+    lcParams.fitLarvalResourcesFromS_v( lcModel, intP_df, intP_A,
+                                              N_v_length, mosqRestDuration );
+    ...
+    
+    // Set this and warm-up the vector model:
+    ... FIXME */
+    return false;
 }
 
 
@@ -583,8 +547,8 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         size_t ttau = (dMod - mosqRestDuration) % N_v_length;
         // Day of year and of 5-year cycles. Note that emergence during day 1
         // comes from mosqEmergeRate[0], hence subtraction by 1.
-        size_t dYear1 = (d - 1) % TimeStep::fromYears(1).inDays();
-        size_t d5Year = d % TimeStep::fromYears(5).inDays();
+        size_t dYear1 = (d - 1) % TimeStep::DAYS_IN_YEAR;
+        size_t d5Year = d % (TimeStep::DAYS_IN_YEAR * 5);
         
         
         // These only need to be calculated once per timestep, but should be
@@ -603,7 +567,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
         
         // num seeking mosquitos is: new adults + those which didn't find a host
         // yesterday + those who found a host tau days ago and survived cycle:
-        N_v[t] = /* TODO: temporarily force this use of mER instead of newAdults */ mosqEmergeRate[dYear1]
+        N_v[t] = newAdults
                  + P_A[t1]  * N_v[t1]
                  + P_df[ttau] * N_v[ttau];
         // similar for O_v, except new mosquitoes are those who were uninfected

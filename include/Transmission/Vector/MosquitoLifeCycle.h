@@ -54,18 +54,15 @@ public:
      * @param lcModel MosquitoLifeCycle state to start from
      * @param P_df Average P_df value (assumed constant)
      * @param P_A Average P_A value (assumed constant)
-     * @param start_day The day (d parameter in VectorAnopheles::advancePeriod)
-     * at which the next update should take place.
+     * @param N_v_length Parameter from VectorAnopheles
      * @param mosqRestDuration The duration of a feeding cycle (τ)
-     * @param N_v_orig N_v array from VectorAnopheles (will be copied)
-     * @param mosqEmergeRate 365-long array of desired emergence over year
      */
-    void fitLarvalResourcesFromEmergence(
+    void fitLarvalResourcesFromS_v(
         const MosquitoLifeCycle& lcModel,
         double P_df, double P_A,
-        size_t start_day, size_t mosqRestDuration,
-        const std::vector<double>& N_v_orig,
-        const std::vector<double>& mosqEmergeRate
+        size_t N_v_length, size_t mosqRestDuration,
+        vector<double>& annualP_dif,
+        vector<double>& targetS_v
     );
     
 private:

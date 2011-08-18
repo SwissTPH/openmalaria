@@ -106,7 +106,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     annualEIR = vectors::sum( initialisationEIR );
 
 
-    if( interventionMode == equilibriumMode ) {
+    if( interventionMode == forcedEIR ) {
         // We don't need these anymore (now we have initialisationEIR); free memory
         numSpecies = 0;
         species.clear();
@@ -144,16 +144,19 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
     for (size_t i = 0; i < numSpecies; ++i) {
         species[i].setupNv0 (i, population, populationSize, iMPA);
     }
+    simulationMode = forcedEIR;   // now we should be ready to start
 }
 
 
 void VectorTransmission::scaleEIR (double factor) {
+    //FIXME: this needs revision; rename XML elt to "overrideAnnualEIR"? Store annual EIR per species.
     for ( size_t i = 0; i < numSpecies; ++i )
         species[i].scaleEIR( factor );
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
 }
 void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
+    //FIXME: this needs revision; in fact it's completely redundant now but maybe re can re-use code to save resource availability?
     // XML values are exponentiated; so we add some factor to existing a0 values:
     double add_to_a0 = std::log( factor );
 
@@ -176,7 +179,7 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
 
 
 TimeStep VectorTransmission::minPreinitDuration () {
-    if ( interventionMode == equilibriumMode ) {
+    if ( interventionMode == forcedEIR ) {
         return TimeStep(0);
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
@@ -221,10 +224,11 @@ TimeStep VectorTransmission::initIterate () {
 
 double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
     host.update(_ITNParams);
-    if (simulationMode == equilibriumMode){
+    if (simulationMode == forcedEIR){
         return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
                * host.relativeAvailabilityHetAge (ageYears);
-    }else{      // dynamicMode
+    }else{
+        assert( simulationMode == dynamicEIR );
         double simEIR = 0.0;
         for (size_t i = 0; i < numSpecies; ++i) {
             simEIR += species[i].calculateEIR (i, host);
@@ -237,19 +241,24 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 
 // Every Global::interval days:
 void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
-    double iMPA = invMeanPopAvail(population, populationSize);
-    for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
+    if( simulationMode == dynamicEIR ){
+        double iMPA = invMeanPopAvail(population, populationSize);
+        for (size_t i = 0; i < numSpecies; ++i){
+            species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
+        }
     }
 }
 void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
     TransmissionModel::updateKappa( population );
 }
 
-void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+inline void assertIsDynamic( int interventionMode ){
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode");
     }
+}
+void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
+    assertIsDynamic( interventionMode );
     double proportionUse = _ITNParams.init( elt );
     typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -263,9 +272,7 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     }
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    assertIsDynamic( interventionMode );
     PerHostTransmission::setIRSDescription (elt);
     typedef scnXml::IRS::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -279,9 +286,7 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
     }
 }
 void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    assertIsDynamic( interventionMode );
     PerHostTransmission::setVADescription (elt);
     typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -296,9 +301,7 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    assertIsDynamic( interventionMode );
     assert(false);
     /*FIXME
     const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();

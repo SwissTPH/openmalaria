@@ -209,7 +209,9 @@ public:
         EIRRotateAngle & stream;
         FSRotateAngle & stream;
         FSCoeffic & stream;
+#if 0
         mosqEmergeRate & stream;
+#endif
         forcedS_v & stream;
         quinquennialS_v & stream;
         initNv0FromSv & stream;
@@ -423,7 +425,8 @@ private:
     double initNvFromSv;
     //@}
     
-    
+#if 0
+    NOTE: we don't want this anymore?
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
      * larvalResources is fitted to this.
      * 
@@ -436,6 +439,7 @@ private:
      *
      * Should be checkpointed. */
     vector<double> mosqEmergeRate;
+#endif
 
     /** @brief Parameter arrays N_v_length long.
      *

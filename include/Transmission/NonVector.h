@@ -35,6 +35,8 @@ public:
   NonVectorTransmission(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorTransmission();
   
+  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
+  
   virtual void scaleEIR (double factor);
   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   

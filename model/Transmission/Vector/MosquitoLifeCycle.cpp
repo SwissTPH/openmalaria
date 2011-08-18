@@ -106,7 +106,8 @@ enum CaptiveLCModelFitMethod {
     minimise, find_root
 };
 
-// Container to run life-cycle model with fixed human inputs
+/// Container to run life-cycle model with fixed human inputs and run fitting
+/// algorithms.
 struct CaptiveLCModel {
     /** Store fixed parameters.
      * 
@@ -115,23 +116,20 @@ struct CaptiveLCModel {
      * are not changed.
      * @param Pdf Average P_df value (assumed constant)
      * @param PA Average P_A value (assumed constant)
-     * @param sd The day (d parameter in VectorAnopheles::advancePeriod) at
-     * which the next update should take place.
+     * @param NvL N_v_length (as in VectorAnopheles class)
      * @param mRD The duration of a feeding cycle (τ)
-     * @param N_v_orig N_v array from VectorAnopheles (will be copied)
-     * @param mER Fixed emergence rate for forcing model and fitting target. Read-only.
      */
     CaptiveLCModel(
         MosqLifeCycleParams& lcP,
         double Pdf, double PA,
-        size_t sd, size_t mRD,
-        const std::vector<double>& N_v_orig,
-        const std::vector<double>& mER
+        size_t NvL, size_t mRD
     ) :
         lcParams( lcP ),
         P_df( Pdf ), P_A( PA ),
-        start_day( sd ), mosqRestDuration( mRD ),
-        init_N_v( N_v_orig ), mosqEmergeRate( mER )
+        N_v_length( NvL ),
+        mosqRestDuration( mRD ),
+        fitTarget( FT_NONE ),
+        target( 0 )
     {
         //WARNING: a bad initial value here can prevent the algorithm from working!
         //TODO: maybe initial guess should go in XML?
@@ -145,6 +143,36 @@ struct CaptiveLCModel {
         gsl_vector_free( buf );
     }
     
+    /** Set emergence-rate as target. */
+    void targetEmergenceRate( const vector<double>& emergeRate ){
+        assert( false && "need to check inputs to captive model" );
+        fitTarget = FT_EMERGENCE;
+        target = &emergeRate;
+    }
+    /** Set S_v as target. */
+    void targetS_v( const vector<double>& S_v ){
+        fitTarget = FT_S_V;
+        target = &S_v;
+    }
+    
+    /** Run fitting algorithms (root-finding or minimisation). */
+    void fit() {
+        //TODO: switch to fitting logarithm of values so we can guarantee we don't get negative resources
+        // But this doesn't appear to fit!
+        //TODO: find out which exceptions this throws when it can't fit, catch them, and use minimisation approach instead.
+        {
+            fit( 365, find_root );
+        }
+        fit( 1, minimise );
+        fit( 3, minimise );
+        fit( 10, minimise );
+        fit( 34, minimise );
+        fit( 112, minimise );
+        fit( 365, minimise );
+        copyBestLarvalResources();
+    }
+    
+private:
     /** Copy the best result to larval resources. fit(365) must have been
      * called previously to get the correct length. */
     inline void copyBestLarvalResources (){
@@ -246,22 +274,24 @@ struct CaptiveLCModel {
         }
     }
     
-private:
     /** Run captive model. Uses a warmup length of lcParams.getTotalDuration(),
      * then a sampling duration of 365 intervals. */
     void simulate1Year()
     {
         lcModel.init( lcParams );
+        size_t lastDDifferent;
         
+        //TODO: are fixed P_df and P_A values adequate? I *think* so but need to check.
+        //TODO: we need P_dif to get S_v which is definitely varies annually.
         // We use average P_df and P_A values ad assume these are constant (in the
         // full model they only vary dependent on human age, human heterogeneity
         // and interventions (we assume there are no interventions).
-        size_t N_v_length = init_N_v.size();
-        // We take a copy of N_v.
-        vector<double> N_v = init_N_v;
+        // TODO: I think we can just initialise this from 0 and same for O_v/S_v?
+        vector<double> N_v( N_v_length );
         
+        size_t start_day = 0;	// historical utility but possibly still useful
         size_t sample_start = start_day + lcParams.getTotalDuration();
-        size_t end = sample_start + TimeStep::fromYears(1).inDays();
+        size_t end = sample_start + 10*TimeStep::DAYS_IN_YEAR;
         for( size_t d = start_day; d<end; ++d ){
             size_t dMod = d + N_v_length;
             assert (dMod >= (size_t)N_v_length);
@@ -271,22 +301,41 @@ private:
             size_t ttau = (dMod - mosqRestDuration) % N_v_length;
             // Day of year. Note that emergence during day 1
             // comes from mosqEmergeRate[0], hence subtraction by 1.
-            size_t dYear1 = (d - 1) % TimeStep::fromYears(1).inDays();
+            size_t dYear1 = (d - 1) % TimeStep::DAYS_IN_YEAR;
             
             // update life-cycle model
+            //NOTE: dependence on N_v ttau days ago — without proper initialisation this requires warmup.
             double newAdults = lcModel.updateEmergence( lcParams,
                                                         P_df * N_v[ttau],
                                                         d, dYear1
                                                         );
-            sampledEmergence[ dYear1 ] = newAdults;
             
             // num seeking mosquitos is: new adults + those which didn't find a host
             // yesterday + those who found a host tau days ago and survived cycle:
-            // Note: we fit with forced emergence to avoid a fully-dynamic model
-            N_v[t] = mosqEmergeRate[dYear1]
+            N_v[t] = newAdults
                     + P_A  * N_v[t1]
                     + P_df * N_v[ttau];
+            
+            if( fitTarget == FT_EMERGENCE ){
+                samples[ dYear1 ] = newAdults;
+            }else if( fitTarget == FT_S_V ){
+                double s;       //FIXME: need to calculate S_v
+                if( samples[ dYear1 ] - s > 0.001 * max(samples[dYear1],s) )
+                    lastDDifferent = d;
+                samples[ dYear1 ] = s;
+                cout<<d<<'\t'<<s<<endl;
+                if( d - lastDDifferent >= TimeStep::DAYS_IN_YEAR ){
+                    cerr<<"completed first sample!"<<endl;
+                    exit(1);//FIXME: just want to stop here
+                    return;	// we're done
+                }
+            }else{
+                assert( false );
+            }
         }
+        
+        // if we get to here, for some reason the dynamic system never converged to a stable periodic orbit
+        throw TRACED_EXCEPTION( "larvae resource fitting: system doesn't converge to a stable orbit", Error::VectorFitting );
     }
     
     /** Sample: given descriptor for resource availability x, calculate
@@ -310,12 +359,12 @@ private:
         // so we need a human-infectiousness (kappa) input; perhaps this can be
         // constant or sampled from humans while they are being exposed to
         // forced EIR.
-        sampledEmergence.resize( mosqEmergeRate.size() );
+        samples.resize( TimeStep::DAYS_IN_YEAR );
         simulate1Year();
         
         double res = 0.0;
         for( size_t i=0; i < buf->size; ++i ){
-            double diff = sampledEmergence[i] - mosqEmergeRate[i];
+            double diff = samples[i] - (*target)[i];
             gsl_vector_set( buf, i, diff );
             res += diff*diff;
         }
@@ -325,7 +374,7 @@ private:
         
         if( !finite(res) ){
             ostringstream msg;
-            msg << "non-finite output with mean " << vectors::mean( sampledEmergence );
+            msg << "non-finite output with mean " << vectors::mean( samples );
             msg << "; mean input was " << vectors::mean( lcParams.larvalResources );
             throw TRACED_EXCEPTION( msg.str(), Error::VectorFitting );
         }
@@ -335,6 +384,7 @@ private:
     void copyToLarvalResources( const gsl_vector* input ){
         std::vector<double>& lr = lcParams.larvalResources;
         assert( input->size == lr.size() );
+        //TODO: invert (1/x) to help algorithm?
         for( size_t i=0; i<lr.size(); ++i )
             lr[i] = gsl_vector_get( input, i );
     }
@@ -342,12 +392,16 @@ private:
     MosqLifeCycleParams& lcParams;
     MosquitoLifeCycle lcModel;
     double P_df, P_A;
-    size_t start_day, mosqRestDuration;
-    const std::vector<double>& init_N_v, mosqEmergeRate;
-    // A vector which is filled with sampled emergence values. Must be of
-    // length 1 year; first value corresponds to emergence sampled for 1st day
-    // of year.
-    std::vector<double> sampledEmergence;
+    size_t N_v_length, mosqRestDuration;
+    enum FitTarget {
+        FT_NONE,	// none set yet
+        FT_EMERGENCE,
+        FT_S_V
+    } fitTarget;
+    const std::vector<double> *target;
+    // A vector which is filled with sampled values. Must be of length 1 year;
+    // first value corresponds to emergence sampled for 1st day of year.
+    std::vector<double> samples;
     gsl_vector *initial_guess;
     gsl_vector *buf;	// working memory, of length 365
     
@@ -373,29 +427,16 @@ double CaptiveLCModel_minimise_sampler( const gsl_vector *x, void *params ){
     return sumSquares;
 }
 
-void MosqLifeCycleParams::fitLarvalResourcesFromEmergence(
+void MosqLifeCycleParams::fitLarvalResourcesFromS_v(
     const MosquitoLifeCycle& lcModel,
     double P_df, double P_A,
-    size_t start_day, size_t mosqRestDuration,
-    const std::vector<double>& N_v_orig,
-    const std::vector<double>& mosqEmergeRate )
+    size_t N_v_length, size_t mosqRestDuration,
+    vector<double>& annualP_dif,
+    vector<double>& targetS_v )
 {
-    CaptiveLCModel clm( *this, P_df, P_A, start_day, mosqRestDuration,
-                    N_v_orig, mosqEmergeRate );
-    
-    //TODO: switch to fitting logarithm of values so we can guarantee we don't get negative resources
-    // But this doesn't appear to fit!
-    
-    clm.fit( 1, minimise );
-    clm.fit( 3, minimise );
-    clm.fit( 10, minimise );
-    clm.fit( 34, minimise );
-    clm.fit( 112, minimise );
-    clm.fit( 365, minimise );
-    //exit(1);
-    //clm.fit( 365, find_root );
-    clm.copyBestLarvalResources();
-    assert( larvalResources.size() == 365 );
+    CaptiveLCModel clm( *this, P_df, P_A, N_v_length, mosqRestDuration );
+    clm.targetS_v( targetS_v );
+    clm.fit();
 }
 
 
