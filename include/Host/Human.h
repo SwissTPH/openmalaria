@@ -20,7 +20,7 @@
 #define Hmod_human
 #include "Global.h"
 #include "Host/Vaccine.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
@@ -234,8 +234,8 @@ public:
    *
    * These contain various sub-models used by Humans. */
   //@{
-  /// Contains per-species vector data (VectorTransmission only).
-  Transmission::PerHostTransmission perHostTransmission;
+  /// Contains per-species vector data (VectorModel only).
+  Transmission::PerHost perHostTransmission;
   
   /// The WithinHostModel models parasite density and immunity
   WithinHost::WithinHostModel *withinHostModel;

@@ -20,9 +20,9 @@
 
 */
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/NonVector.h"
-#include "Transmission/Vector/VectorTransmission.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/NonVectorModel.h"
+#include "Transmission/VectorModel.h"
+#include "Transmission/PerHost.h"
 
 #include "inputData.h"
 #include "Monitoring/Continuous.h"
@@ -46,12 +46,12 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorTransmission(vectorData.get(), populationSize);
+    model = new VectorModel(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
-    model = new NonVectorTransmission(nonVectorData.get());
+    model = new NonVectorModel(nonVectorData.get());
   }
 
   if( entoData.getAnnualEIR().present() ){
@@ -109,7 +109,7 @@ TransmissionModel::TransmissionModel() :
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHostTransmission::adultAge()),
+    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
@@ -208,7 +208,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the

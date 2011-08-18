@@ -28,11 +28,11 @@
 #include <gsl/gsl_vector.h>
 
 
-namespace OM { namespace Transmission {
+namespace OM { namespace Transmission { namespace Vector {
     // this is a private function not declared in the header — but we can still test it
     void vector_scale_length( const gsl_vector *source, gsl_vector *target );
-} }
-using OM::Transmission::vector_scale_length;
+} } }
+using OM::Transmission::Vector::vector_scale_length;
 
 // just some different constants
 const double MLCS_a=5.23e-5, MLCS_b=9.4e12, MLCS_c=9.32, MLCS_d=9.34243e-2, MLCS_e=141.23;

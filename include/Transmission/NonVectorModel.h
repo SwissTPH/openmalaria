@@ -17,8 +17,8 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef Hmod_NonVectorTransmission
-#define Hmod_NonVectorTransmission
+#ifndef Hmod_NonVectorModel
+#define Hmod_NonVectorModel
 
 #include "TransmissionModel.h"
 
@@ -29,11 +29,11 @@ namespace scnXml {
 namespace OM { namespace Transmission {
     
 //! Base transmission model, as used in Phase A
-class NonVectorTransmission : public TransmissionModel { 
+class NonVectorModel : public TransmissionModel { 
 public:
 
-  NonVectorTransmission(const scnXml::NonVector& nonVectorData);
-  virtual ~NonVectorTransmission();
+  NonVectorModel(const scnXml::NonVector& nonVectorData);
+  virtual ~NonVectorModel();
   
   virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
   
@@ -64,7 +64,7 @@ public:
   
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {}
   virtual void update (const std::list<Host::Human>& population, int populationSize);
-  virtual double calculateEIR(PerHostTransmission& perHost, double ageYears);
+  virtual double calculateEIR(PerHost& perHost, double ageYears);
   
 private:
 

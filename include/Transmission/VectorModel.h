@@ -17,12 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorTransmission
-#define Hmod_VectorTransmission
+#ifndef Hmod_VectorModel
+#define Hmod_VectorModel
 
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorAnopheles.h"
+#include "Transmission/Vector/SpeciesModel.h"
 #include "Transmission/Vector/ITN.h"
 
 namespace scnXml {
@@ -31,11 +31,14 @@ namespace scnXml {
 
 namespace OM { namespace Transmission {
     
-//! Transmission models, Chitnis et al
-class VectorTransmission : public TransmissionModel {
+/** Transmission models, Chitnis et al.
+ * 
+ * This class contains code for species-independent components. Per-species
+ * code is in the Vector directory and namespace. */
+class VectorModel : public TransmissionModel {
 public:
-  VectorTransmission(const scnXml::Vector vectorData, int populationSize);
-  virtual ~VectorTransmission();
+  VectorModel(const scnXml::Vector vectorData, int populationSize);
+  virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
@@ -51,7 +54,7 @@ public:
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
   virtual void update (const std::list<Host::Human>& population, int populationSize);
 
-  virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
+  virtual double calculateEIR(PerHost& host, double ageYears); 
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
@@ -113,9 +116,9 @@ private:
   
   /** Per anopheles species data.
    *
-   * Array will be recreated by constructor, but some members of VectorAnopheles
+   * Array will be recreated by constructor, but some members of SpeciesModel
    * need to be checkpointed. */
-  vector<VectorAnopheles> species;
+  vector<Vector::SpeciesModel> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *
@@ -131,8 +134,8 @@ private:
   /** Parameters used by ITN model. */
   ITNParams _ITNParams;
   
-  friend class PerHostTransmission;
-  friend class VectorAnophelesSuite;
+  friend class PerHost;
+  friend class SpeciesModelSuite;
 };
 
 } }

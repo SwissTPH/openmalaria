@@ -17,9 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/VectorAnopheles.h"
-#include "Transmission/Vector/Nv0DelayFitting.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/Vector/SpeciesModel.h"
+#include "Transmission/PerHost.h"
 #include "Transmission/TransmissionModel.h"
 #include "Host/Human.h"
 
@@ -28,19 +27,17 @@
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_sf.h>
-#include <fstream>
-#include <ctime>
+#include <cmath>
 
 namespace OM {
 namespace Transmission {
+namespace Vector {
 using namespace OM::util;
 
 
 // -----  Initialisation of model, done before human warmup  ------
 
-string VectorAnopheles::initialise (
+string SpeciesModel::initialise (
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
     map<string, double>& nonHumanHostPopulations,
@@ -72,7 +69,7 @@ string VectorAnopheles::initialise (
     return anoph.getMosquito();
 }
 
-void VectorAnopheles::scaleEIR( double factor ) {
+void SpeciesModel::scaleEIR( double factor ) {
     FSCoeffic[0] += log( factor );
 }
 
@@ -100,7 +97,7 @@ public:
     double probMosqSurvivalResting;	// P_D_i
 };
 
-void VectorAnopheles::initAvailability(
+void SpeciesModel::initAvailability(
     const scnXml::AnophelesParams& anoph,
     map<string, double>& nonHumanHostPopulations,
     int populationSize)
@@ -218,7 +215,7 @@ void VectorAnopheles::initAvailability(
     mosqSeekingDeathRate = mu1 * mu2;
 }
 
-double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai)
+double SpeciesModel::calcEntoAvailability(double N_i, double P_A, double P_Ai)
 {
     return (1.0 / N_i)
            * (P_Ai / (1.0-P_A))
@@ -226,7 +223,7 @@ double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai
 }
 
 
-void VectorAnopheles::initEIR(
+void SpeciesModel::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
 ){
@@ -349,7 +346,7 @@ void VectorAnopheles::initEIR(
 }
 
 
-void VectorAnopheles::setupNv0 (size_t sIndex,
+void SpeciesModel::setupNv0 (size_t sIndex,
                                 const std::list<Host::Human>& population,
                                 int populationSize,
                                 double invMeanPopAvail) {
@@ -368,7 +365,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     double intP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        const PerHostTransmission& host = h->perHostTransmission;
+        const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
@@ -422,7 +419,7 @@ FIXME: do we not want this at all? Or still need some of this?
 
 // -----  Initialisation of model which is done after running the human warmup  -----
 
-bool VectorAnopheles::vectorInitIterate () {
+bool SpeciesModel::vectorInitIterate () {
     // We now know/can get approximate values for:
     // * human-vector interaction (P_df, P_A) (these were available previously)
     // * human infectiousness (P_dif)
@@ -450,7 +447,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 
 // Every TimeStep::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
+void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
                                      bool isDynamic,
@@ -502,7 +499,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
     double intP_df = 0.0;
     double intP_dif = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        const PerHostTransmission& host = h->perHostTransmission;
+        const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
@@ -648,20 +645,20 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 }
 
 
-void VectorAnopheles::intervLarviciding (/*const scnXml::LarvicidingAnopheles& elt*/) {
+void SpeciesModel::intervLarviciding (/*const scnXml::LarvicidingAnopheles& elt*/) {
     /*FIXME
     cerr << "This larviciding implementation isn't valid (according to NC)." << endl;
     larvicidingIneffectiveness = 1 - elt.getEffectiveness();
     larvicidingEndStep = TimeStep::simulation + TimeStep::fromDays(elt.getDuration());
     */
 }
-void VectorAnopheles::uninfectVectors() {
+void SpeciesModel::uninfectVectors() {
     O_v.assign( O_v.size(), 0.0 );
     S_v.assign( S_v.size(), 0.0 );
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-double VectorAnopheles::getLastVecStat ( VecStat vs ) const{
+double SpeciesModel::getLastVecStat ( VecStat vs ) const{
     //Note: implementation isn't performance optimal but rather intended to
     //keep code size low and have no overhead if not used.
     const vector<double> *array;
@@ -682,7 +679,7 @@ double VectorAnopheles::getLastVecStat ( VecStat vs ) const{
     }
     return val;
 }
-void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) const{
+void SpeciesModel::summarize (const string speciesName, Monitoring::Survey& survey) const{
     survey.set_Vector_Nv0 (speciesName, timestep_N_v0/TimeStep::interval);
     survey.set_Vector_Nv (speciesName, getLastVecStat(NV)/TimeStep::interval);
     survey.set_Vector_Ov (speciesName, getLastVecStat(OV)/TimeStep::interval);
@@ -690,5 +687,6 @@ void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& s
 }
 
 
+}
 }
 }

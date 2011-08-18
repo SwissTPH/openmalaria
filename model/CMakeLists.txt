@@ -44,11 +44,11 @@ set (Model_CPP
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
-  Transmission/NonVector.cpp
-  Transmission/PerHostTransmission.cpp
-  Transmission/Vector/VectorTransmission.cpp
-  Transmission/Vector/VectorAnopheles.cpp
-  Transmission/Vector/AnophelesHumanParams.cpp
+  Transmission/NonVectorModel.cpp
+  Transmission/VectorModel.cpp
+  Transmission/PerHost.cpp
+  Transmission/Vector/SpeciesModel.cpp
+  Transmission/Vector/PerHost.cpp
   Transmission/Vector/ITN.cpp
   Transmission/Vector/MosquitoLifeCycle.cpp
   

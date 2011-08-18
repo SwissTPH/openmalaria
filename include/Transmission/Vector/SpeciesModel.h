@@ -17,13 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorAnopheles
-#define Hmod_VectorAnopheles
+#ifndef Hmod_SpeciesModel
+#define Hmod_SpeciesModel
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/Vector/AnophelesHumanParams.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/Vector/PerHost.h"
+#include "Transmission/PerHost.h"
 #include "Transmission/Vector/MosquitoLifeCycle.h"
 #include <list>
 #include <vector>
@@ -33,30 +33,31 @@ namespace Host {
 class Human;
 }
 namespace Transmission {
+namespace Vector {
 
 using namespace std;
 
-/** Per-species data for vector control.
+/** Per-species part for vector transmission model.
  *
  * Data in this class is specific to the "species" of anopheles mosquito, where
  * species is used in a relaxed way to mean any variation of anopheles
  * mosquito, not just those types formally recognised as distinct species.
  *
- * A list of this class type is used by the VectorTransmission class to hold
+ * A list of this class type is used by the VectorModel class to hold
  * (potentially) species-specific per-population data.
  *
- * Instead of storing static variables in this class, store them in
- * the VectorTransmission class.
+ * Instead of storing static variables in this class, store them in the
+ * VectorModel class.
  *
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
  * a heterogeneous host population" (3rd Oct. 2007). */
-class VectorAnopheles
+class SpeciesModel
 {
 public:
     ///@brief Initialisation and destruction
     //@{
-    VectorAnopheles (const ITNParams* baseITNParams) :
+    SpeciesModel (const ITNParams* baseITNParams) :
             humanBase(baseITNParams),
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
@@ -86,7 +87,7 @@ public:
     /** Initialisation which must wait until a human population is available.
      * This is only called when a checkpoint is not loaded.
      *
-     * @param sIndex Index in VectorTransmission.species of this class.
+     * @param sIndex Index in VectorModel::species of this class.
      * @param population The human population
      * @param populationSize Number of humans (use instead of population.size())
      *
@@ -98,7 +99,7 @@ public:
                    double invMeanPopAvail);
 
     /** Return base-line human parameters for the mosquito. */
-    inline const AnophelesHumanParams& getHumanBaseParams () {
+    inline const Vector::PerHostBase& getHumanBaseParams () {
         return humanBase;
     }
 
@@ -147,15 +148,15 @@ public:
      * Could be extended to allow input EIR driven initialisation on a per-species
      * level instead of the whole simulation, but that doesn't appear worth doing.
      *
-     * @param sIndex Index of this in VectorTransmission.species
-     * @param host PerHostTransmission of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, PerHostTransmission& host) {
+     * @param sIndex Index of this in VectorModel::species
+     * @param host PerHost of the human requesting this EIR. */
+    double calculateEIR (size_t sIndex, Transmission::PerHost& host) {
         if ( partialEIR != partialEIR ) {
             cerr<<"partialEIR is not a number; "<<sIndex<<endl;
         }
         /* Calculates EIR per individual (hence N_i == 1).
          *
-         * See comment in VectorAnopheles.advancePeriod for method. */
+         * See comment in SpeciesModel.advancePeriod for method. */
         return partialEIR
                * host.entoAvailabilityHetVecItv (humanBase, sIndex)
                * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
@@ -276,7 +277,7 @@ private:
     
     /** Baseline parameters which may be varied per human host. The primary
      * reason for wrapping these parameters in a struct is that these are the
-     * parameters which need to be passed to the PerHostTransmission code
+     * parameters which need to be passed to the PerHost code
      * during calculations.
      *
      * Includes model parameters which may be varied per-individual to account
@@ -284,7 +285,7 @@ private:
      * descriptions.
      *
      * Read from XML by initialise; no need to checkpoint. */
-    AnophelesHumanParams humanBase;
+    Vector::PerHostBase humanBase;
     
     
     /** @brief Duration parameters for mosquito/parasite life-cycle
@@ -513,9 +514,10 @@ private:
     double timestep_N_v0;
     
     friend class VectorEmergenceSuite;
-    friend class VectorAnophelesSuite;
+    friend class SpeciesModelSuite;
 };
 
+}
 }
 }
 #endif

@@ -17,8 +17,8 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#include "Transmission/NonVector.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/NonVectorModel.h"
+#include "Transmission/PerHost.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/vectors.h"
@@ -31,12 +31,12 @@ namespace OM { namespace Transmission {
     namespace vectors = util::vectors;
 
 //static (class) variables
-const double NonVectorTransmission::totalInfectionrateVariance= 1.0;
-const double NonVectorTransmission::min_EIR_mult= 0.01;
+const double NonVectorModel::totalInfectionrateVariance= 1.0;
+const double NonVectorModel::min_EIR_mult= 0.01;
 
 const int nYearsWarmupData = 5;
 
-NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorData) :
+NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
   nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
 {
     laggedKappa.resize( nspore.asInt()+1, 0.0 );
@@ -71,18 +71,18 @@ NonVectorTransmission::NonVectorTransmission(const scnXml::NonVector& nonVectorD
     initialKappa.assign( TimeStep::fromYears(nYearsWarmupData).asInt(), 0.0 );
 }
 
-NonVectorTransmission::~NonVectorTransmission () {}
+NonVectorModel::~NonVectorModel () {}
 
-void NonVectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }
 
-void NonVectorTransmission::scaleEIR (double factor){
+void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
 }
-void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
+void NonVectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
     
@@ -94,17 +94,17 @@ void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) c
 }
 
 
-TimeStep NonVectorTransmission::minPreinitDuration (){
+TimeStep NonVectorModel::minPreinitDuration (){
     if( interventionMode == forcedEIR ){
         return TimeStep(0);
     }
     // nYearsWarmupData years for data collection, 50 years stabilization
     return TimeStep::fromYears(50) + TimeStep::fromYears(nYearsWarmupData);
 }
-TimeStep NonVectorTransmission::expectedInitDuration (){
+TimeStep NonVectorModel::expectedInitDuration (){
     return TimeStep(0);
 }
-TimeStep NonVectorTransmission::initIterate (){
+TimeStep NonVectorModel::initIterate (){
     simulationMode = interventionMode;
     if( simulationMode != dynamicEIR ){
         return TimeStep(0);
@@ -129,7 +129,7 @@ TimeStep NonVectorTransmission::initIterate (){
     return TimeStep(0); // nothing to do
 }
 
-void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorData) {
+void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
     // Note: requires TimeStep::interventionPeriod >= 0, but this can only be called in intervention period anyway.
   simulationMode = transientEIRknown;
   
@@ -163,18 +163,18 @@ void NonVectorTransmission::setTransientEIR (const scnXml::NonVector& nonVectorD
   annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
-void NonVectorTransmission::changeEIRIntervention (const scnXml::NonVector& ed) {
+void NonVectorModel::changeEIRIntervention (const scnXml::NonVector& ed) {
     setTransientEIR (ed);
 }
 
-void NonVectorTransmission::uninfectVectors(){
+void NonVectorModel::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
     // reset history of human infectivity, which scales dynamic EIR:
     laggedKappa.assign( laggedKappa.size(), 0.0 );
 }
 
-void NonVectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
@@ -183,7 +183,7 @@ void NonVectorTransmission::update (const std::list<Host::Human>& population, in
 }
 
 
-double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double ageYears){
+double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
@@ -224,7 +224,7 @@ double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double 
 
 // -----   Private functs ------
 
-double NonVectorTransmission::averageEIR (const scnXml::NonVector& nonVectorData) {
+double NonVectorModel::averageEIR (const scnXml::NonVector& nonVectorData) {
   // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
   double valaverageEIR=0.0;
   size_t i = 0;
@@ -238,13 +238,13 @@ double NonVectorTransmission::averageEIR (const scnXml::NonVector& nonVectorData
 
 // -----  checkpointing  -----
 
-void NonVectorTransmission::checkpoint (istream& stream) {
+void NonVectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     nspore & stream;
     interventionEIR & stream;
     initialKappa & stream;
 }
-void NonVectorTransmission::checkpoint (ostream& stream) {
+void NonVectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
     nspore & stream;
     interventionEIR & stream;

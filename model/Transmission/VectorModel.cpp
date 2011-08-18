@@ -17,7 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/VectorModel.h"
 #include "inputData.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
@@ -31,7 +31,7 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorTransmission::invMeanPopAvail (const std::list<Host::Human>& population, int populationSize) {
+double VectorModel::invMeanPopAvail (const std::list<Host::Human>& population, int populationSize) {
     double sumRelativeAvailability = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
         sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
@@ -44,39 +44,39 @@ double VectorTransmission::invMeanPopAvail (const std::list<Host::Human>& popula
     }
 }
 
-void VectorTransmission::ctsCbN_v0 (ostream& stream) {
+void VectorModel::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
 }
-void VectorTransmission::ctsCbP_A (ostream& stream) {
+void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PA)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PA)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbP_df (ostream& stream) {
+void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PDF)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbP_dif (ostream& stream) {
+void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDIF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::PDIF)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbN_v (ostream& stream) {
+void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::NV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::NV)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbO_v (ostream& stream) {
+void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::OV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::OV)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbS_v (ostream& stream) {
+void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SpeciesModel::SV)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbResAvailability (ostream& stream) {
+void VectorModel::ctsCbResAvailability (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getResAvailability()/TimeStep::interval;
 }
-void VectorTransmission::ctsCbResRequirements (ostream& stream) {
+void VectorModel::ctsCbResRequirements (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getResRequirements()/TimeStep::interval;
 }
@@ -88,7 +88,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     }
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
-VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int populationSize)
+VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     : initIterations(0), numSpecies(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
@@ -104,7 +104,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, VectorAnopheles(&_ITNParams));
+    species.resize (numSpecies, Vector::SpeciesModel(&_ITNParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -144,20 +144,20 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         ctsRR<<"\tres req("<<name<<")";
     }
     using Monitoring::Continuous;
-    Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
-    Continuous::registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_A ) );
-    Continuous::registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_df ) );
-    Continuous::registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_dif ) );
-    Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
-    Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
-    Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
-    Continuous::registerCallback( "resource availability", ctsRA.str(), MakeDelegate( this, &VectorTransmission::ctsCbResAvailability ) );
-    Continuous::registerCallback( "resource requirements", ctsRR.str(), MakeDelegate( this, &VectorTransmission::ctsCbResRequirements ) );
+    Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
+    Continuous::registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
+    Continuous::registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
+    Continuous::registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
+    Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
+    Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorModel::ctsCbO_v ) );
+    Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorModel::ctsCbS_v ) );
+    Continuous::registerCallback( "resource availability", ctsRA.str(), MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
+    Continuous::registerCallback( "resource requirements", ctsRR.str(), MakeDelegate( this, &VectorModel::ctsCbResRequirements ) );
 }
-VectorTransmission::~VectorTransmission () {
+VectorModel::~VectorModel () {
 }
 
-void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
     double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i) {
         species[i].setupNv0 (i, population, populationSize, iMPA);
@@ -166,14 +166,14 @@ void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int
 }
 
 
-void VectorTransmission::scaleEIR (double factor) {
+void VectorModel::scaleEIR (double factor) {
     //FIXME: this needs revision; rename XML elt to "overrideAnnualEIR"? Store annual EIR per species.
     for ( size_t i = 0; i < numSpecies; ++i )
         species[i].scaleEIR( factor );
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
 }
-void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
+void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
     //FIXME: this needs revision; in fact it's completely redundant now but maybe re can re-use code to save resource availability?
     // XML values are exponentiated; so we add some factor to existing a0 values:
     double add_to_a0 = std::log( factor );
@@ -196,7 +196,7 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
 }
 
 
-TimeStep VectorTransmission::minPreinitDuration () {
+TimeStep VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
         return TimeStep(0);
     }
@@ -204,11 +204,11 @@ TimeStep VectorTransmission::minPreinitDuration () {
     // 50 years seems a reasonable figure from a few tests
     return TimeStep::fromYears( 55 );
 }
-TimeStep VectorTransmission::expectedInitDuration (){
+TimeStep VectorModel::expectedInitDuration (){
     return TimeStep::fromYears( 1 );
 }
 
-TimeStep VectorTransmission::initIterate () {
+TimeStep VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
         return TimeStep(0); // no initialization to do
@@ -240,7 +240,7 @@ TimeStep VectorTransmission::initIterate () {
     return TimeStep::fromYears( 1 );
 }
 
-double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
+double VectorModel::calculateEIR(PerHost& host, double ageYears) {
     host.update(_ITNParams);
     if (simulationMode == forcedEIR){
         return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
@@ -258,7 +258,7 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 
 
 // Every Global::interval days:
-void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
     if( simulationMode == dynamicEIR ){
         double iMPA = invMeanPopAvail(population, populationSize);
         for (size_t i = 0; i < numSpecies; ++i){
@@ -266,7 +266,7 @@ void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population,
         }
     }
 }
-void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::update (const std::list<Host::Human>& population, int populationSize) {
     TransmissionModel::updateKappa( population );
 }
 
@@ -275,7 +275,7 @@ inline void assertIsDynamic( int interventionMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode");
     }
 }
-void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
+void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     assertIsDynamic( interventionMode );
     double proportionUse = _ITNParams.init( elt );
     typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
@@ -289,9 +289,9 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
         species[getSpeciesIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
     }
 }
-void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
+void VectorModel::setIRSDescription (const scnXml::IRS& elt){
     assertIsDynamic( interventionMode );
-    PerHostTransmission::setIRSDescription (elt);
+    PerHost::setIRSDescription (elt);
     typedef scnXml::IRS::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){
@@ -303,9 +303,9 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
         species[getSpeciesIndex(it->getMosquito())].setIRSDescription (*it);
     }
 }
-void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
+void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     assertIsDynamic( interventionMode );
-    PerHostTransmission::setVADescription (elt);
+    PerHost::setVADescription (elt);
     typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){
@@ -318,7 +318,7 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
     }
 }
 
-void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
+void VectorModel::intervLarviciding (const scnXml::Larviciding& anoph) {
     assertIsDynamic( interventionMode );
     assert(false);
     /*FIXME
@@ -327,12 +327,12 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
         species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
     */
 }
-void VectorTransmission::uninfectVectors() {
+void VectorModel::uninfectVectors() {
     for (size_t i = 0; i < numSpecies; ++i)
         species[i].uninfectVectors();
 }
 
-void VectorTransmission::summarize (Monitoring::Survey& survey) {
+void VectorModel::summarize (Monitoring::Survey& survey) {
     TransmissionModel::summarize (survey);
 
     for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
@@ -340,12 +340,12 @@ void VectorTransmission::summarize (Monitoring::Survey& survey) {
 }
 
 
-void VectorTransmission::checkpoint (istream& stream) {
+void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (&_ITNParams));
+    util::checkpoint::checkpoint (species, stream, Vector::SpeciesModel (&_ITNParams));
 }
-void VectorTransmission::checkpoint (ostream& stream) {
+void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
     species & stream;

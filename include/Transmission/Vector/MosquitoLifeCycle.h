@@ -29,6 +29,7 @@ namespace scnXml {
 
 namespace OM {
 namespace Transmission {
+namespace Vector {
 
 class MosquitoLifeCycle;
 
@@ -54,7 +55,7 @@ public:
      * @param lcModel MosquitoLifeCycle state to start from
      * @param P_df Average P_df value (assumed constant)
      * @param P_A Average P_A value (assumed constant)
-     * @param N_v_length Parameter from VectorAnopheles
+     * @param N_v_length Parameter from SpeciesModel
      * @param mosqRestDuration The duration of a feeding cycle (τ)
      */
     void fitLarvalResourcesFromS_v(
@@ -203,6 +204,7 @@ private:
     vector<double> newPupae;
 };
 
+}
 }
 }
 

@@ -23,7 +23,7 @@
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/VectorModel.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -337,7 +337,7 @@ void Population::ctsNetHoleIndex (ostream& stream){
     stream << '\t' << meanVar/nNets;
 }
 void Population::ctsNetInsecticideContent (ostream& stream){
-    const Transmission::VectorTransmission* vt = reinterpret_cast<Transmission::VectorTransmission*>(_transmissionModel);
+    const Transmission::VectorModel* vt = reinterpret_cast<Transmission::VectorModel*>(_transmissionModel);
     if( vt == 0 ){
         throw util::xml_scenario_error("mean insecticide content: invalid in non-vector mode!");
     }

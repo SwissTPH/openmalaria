@@ -17,9 +17,9 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#include "Transmission/PerHostTransmission.h"
-#include "Transmission/Vector/VectorTransmission.h"
-#include "Transmission/Vector/AnophelesHumanParams.h"
+#include "Transmission/PerHost.h"
+#include "Transmission/VectorModel.h"
+#include "Transmission/Vector/PerHost.h"
 #include "inputData.h"
 #include "util/errors.h"
 
@@ -27,29 +27,29 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-// -----  PerHostTransmission static  -----
+// -----  PerHost static  -----
 
-AgeGroupInterpolation* PerHostTransmission::relAvailAge = AgeGroupInterpolation::dummyObject();
-shared_ptr<DecayFunction> PerHostTransmission::IRSDecay;
-shared_ptr<DecayFunction> PerHostTransmission::VADecay;
+AgeGroupInterpolation* PerHost::relAvailAge = AgeGroupInterpolation::dummyObject();
+shared_ptr<DecayFunction> PerHost::IRSDecay;
+shared_ptr<DecayFunction> PerHost::VADecay;
 
-void PerHostTransmission::init () {
+void PerHost::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
 }
-void PerHostTransmission::cleanup () {
+void PerHost::cleanup () {
     AgeGroupInterpolation::freeObject( relAvailAge );
 }
 
-void PerHostTransmission::setIRSDescription (const scnXml::IRS& elt) {
+void PerHost::setIRSDescription (const scnXml::IRS& elt) {
     IRSDecay = DecayFunction::makeObject( elt.getDecay(), "IRSDecay" );
 }
-void PerHostTransmission::setVADescription (const scnXml::VectorDeterrent& elt) {
+void PerHost::setVADescription (const scnXml::VectorDeterrent& elt) {
     VADecay = DecayFunction::makeObject( elt.getDecay(), "VADecay" );
 }
 
-// -----  PerHostTransmission non-static -----
+// -----  PerHost non-static -----
 
-PerHostTransmission::PerHostTransmission () :
+PerHost::PerHost () :
         outsideTransmission(false),
         timestepIRS(TimeStep::never),
         timestepVA(TimeStep::never)
@@ -59,9 +59,9 @@ PerHostTransmission::PerHostTransmission () :
     if ( VADecay.get() != 0 )
         hetSampleVA = VADecay->hetSample();
 }
-void PerHostTransmission::initialise (TransmissionModel& tm, double availabilityFactor) {
+void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
-    VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
+    VectorModel* vTM = dynamic_cast<VectorModel*> (&tm);
     if (vTM != 0) {
         species.resize (vTM->numSpecies);
         for (size_t i = 0; i < vTM->numSpecies; ++i)
@@ -69,19 +69,19 @@ void PerHostTransmission::initialise (TransmissionModel& tm, double availability
     }
 }
 
-void PerHostTransmission::setupITN (const TransmissionModel& tm) {
-    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
+void PerHost::setupITN (const TransmissionModel& tm) {
+    const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
     if (vTM != 0) {
         net.deploy(vTM->getITNParams());
     }
 }
-void PerHostTransmission::setupIRS () {
+void PerHost::setupIRS () {
     if( IRSDecay.get() == 0 ){
         throw util::xml_scenario_error ("IRS intervention without description of decay");
     }
     timestepIRS = TimeStep::simulation;
 }
-void PerHostTransmission::setupVA () {
+void PerHost::setupVA () {
     if( VADecay.get() == 0 ){
         throw util::xml_scenario_error ("Vector availability intervention without description of decay");
     }
@@ -94,8 +94,8 @@ void PerHostTransmission::setupVA () {
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHostTransmission::entoAvailabilityHetVecItv (const AnophelesHumanParams& base, size_t speciesIndex) const {
-    double alpha_i = species[speciesIndex].entoAvailability;
+double PerHost::entoAvailabilityHetVecItv (const Vector::PerHostBase& base, size_t speciesIndex) const {
+    double alpha_i = species[speciesIndex].getEntoAvailability();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
     }
@@ -106,31 +106,21 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const AnophelesHumanParam
 
     return alpha_i;
 }
-double PerHostTransmission::probMosqBiting (const AnophelesHumanParams& base, size_t speciesIndex) const {
-    double P_B_i = species[speciesIndex].probMosqBiting;
+double PerHost::probMosqBiting (const Vector::PerHostBase& base, size_t speciesIndex) const {
+    double P_B_i = species[speciesIndex].getProbMosqBiting();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
     }
     return P_B_i;
 }
-double PerHostTransmission::probMosqResting (const AnophelesHumanParams& base, size_t speciesIndex) const {
-    double pRest = species[speciesIndex].probMosqRest;
+double PerHost::probMosqResting (const Vector::PerHostBase& base, size_t speciesIndex) const {
+    double pRest = species[speciesIndex].getProbMosqRest();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);
     }
     if (timestepIRS >= TimeStep(0))
         pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
     return pRest;
-}
-
-
-// ----- HostMosquitoInteraction non-static -----
-
-void HostMosquitoInteraction::initialise (const AnophelesHumanParams& base, double availabilityFactor)
-{
-    entoAvailability = base.entoAvailability.sample() * availabilityFactor;
-    probMosqBiting = base.probMosqBiting.sample();
-    probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
 }
 
 }

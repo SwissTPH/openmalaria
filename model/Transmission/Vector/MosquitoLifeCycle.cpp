@@ -28,6 +28,7 @@
 
 namespace OM {
 namespace Transmission {
+namespace Vector {
 using namespace OM::util;
 
 bool debugOutput = false;
@@ -116,7 +117,7 @@ struct CaptiveLCModel {
      * are not changed.
      * @param Pdf Average P_df value (assumed constant)
      * @param PA Average P_A value (assumed constant)
-     * @param NvL N_v_length (as in VectorAnopheles class)
+     * @param NvL N_v_length (as in SpeciesModel class)
      * @param mRD The duration of a feeding cycle (τ)
      */
     CaptiveLCModel(
@@ -489,5 +490,6 @@ double MosquitoLifeCycle::updateEmergence( const MosqLifeCycleParams& lcParams,
     return newAdults;
 }
 
+}
 }
 }
