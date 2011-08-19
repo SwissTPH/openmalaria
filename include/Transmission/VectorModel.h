@@ -42,7 +42,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
   virtual void scaleEIR (double factor);
   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;

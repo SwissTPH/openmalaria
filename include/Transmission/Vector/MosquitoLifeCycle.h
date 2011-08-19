@@ -59,14 +59,14 @@ public:
     /** Fit larvalResources from mosqEmergeRate.
      * 
      * @param lcModel MosquitoLifeCycle state to start from
-     * @param P_df Average P_df value (assumed constant)
      * @param P_A Average P_A value (assumed constant)
+     * @param P_df Average P_df value (assumed constant)
      * @param N_v_length Parameter from SpeciesModel
      * @param mosqRestDuration The duration of a feeding cycle (τ)
      */
     void fitLarvalResourcesFromS_v(
         const MosquitoLifeCycle& lcModel,
-        double P_df, double P_A,
+        double P_A, double P_df,
         size_t N_v_length, size_t mosqRestDuration,
         vector<double>& annualP_dif,
         vector<double>& targetS_v

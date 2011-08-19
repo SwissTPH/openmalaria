@@ -115,18 +115,18 @@ struct CaptiveLCModel {
      * @param lcP Reference to MosqLifeCycleParams. This is updated with
      * different resource availabilities as they are tested. Other parameters
      * are not changed.
-     * @param Pdf Average P_df value (assumed constant)
      * @param PA Average P_A value (assumed constant)
+     * @param Pdf Average P_df value (assumed constant)
      * @param NvL N_v_length (as in SpeciesModel class)
      * @param mRD The duration of a feeding cycle (τ)
      */
     CaptiveLCModel(
         MosqLifeCycleParams& lcP,
-        double Pdf, double PA,
+        double PA, double Pdf,
         size_t NvL, size_t mRD
     ) :
         lcParams( lcP ),
-        P_df( Pdf ), P_A( PA ),
+        P_A( PA ), P_df( Pdf ),
         N_v_length( NvL ),
         mosqRestDuration( mRD ),
         fitTarget( FT_NONE ),
@@ -392,7 +392,7 @@ private:
     
     MosqLifeCycleParams& lcParams;
     MosquitoLifeCycle lcModel;
-    double P_df, P_A;
+    double P_A, P_df;
     size_t N_v_length, mosqRestDuration;
     enum FitTarget {
         FT_NONE,	// none set yet
@@ -430,12 +430,12 @@ double CaptiveLCModel_minimise_sampler( const gsl_vector *x, void *params ){
 
 void MosqLifeCycleParams::fitLarvalResourcesFromS_v(
     const MosquitoLifeCycle& lcModel,
-    double P_df, double P_A,
+    double P_A, double P_df,
     size_t N_v_length, size_t mosqRestDuration,
     vector<double>& annualP_dif,
     vector<double>& targetS_v )
 {
-    CaptiveLCModel clm( *this, P_df, P_A, N_v_length, mosqRestDuration );
+    CaptiveLCModel clm( *this, P_A, P_df, N_v_length, mosqRestDuration );
     clm.targetS_v( targetS_v );
     clm.fit();
 }

@@ -157,10 +157,10 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
     double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].setupNv0 (i, population, populationSize, iMPA);
+        species[i].init2 (i, population, populationSize, iMPA);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }

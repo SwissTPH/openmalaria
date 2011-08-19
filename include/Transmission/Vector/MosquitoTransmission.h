@@ -24,6 +24,7 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/Vector/MosquitoLifeCycle.h"
 #include "schema/entomology.h"
+#include "limits"
 
 namespace OM {
 namespace Transmission {
@@ -43,6 +44,14 @@ enum VecStat { PA, PDF, PDIF, NV, OV, SV };
  */
 class MosquitoTransmission {
 public:
+    MosquitoTransmission() :
+        mosqRestDuration(0),
+        EIPDuration(0),
+        N_v_length(0),
+        minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
+        timestep_N_v0(0.0)
+    {}
+    
     /** Initialise parameters and variables.
      * 
      * This is only a fraction of parameter initialisation; see also
@@ -70,7 +79,9 @@ public:
     }
     
     /** (Re)-initialise some state variables. */
-    void initState ( double tsP_A, double tsP_df );
+    void initState ( double tsP_A, double tsP_df,
+                     double initNvFromSv, double initOvFromSv,
+                     vector<double>& forcedS_v );
     
     /** Update by one day (may be called multiple times for 1 time-step update).
      * 

@@ -67,17 +67,17 @@ void MosquitoTransmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     P_dif.resize (N_v_length);
 }
 
-void MosquitoTransmission::initState ( double tsP_A, double tsP_df ){
+void MosquitoTransmission::initState ( double tsP_A, double tsP_df,
+                                       double initNvFromSv, double initOvFromSv,
+                                       vector<double>& forcedS_v ){
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     for (int t = 0; t < N_v_length; ++t) {
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        /* FIXME
         S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
-        */
     }
 }
 

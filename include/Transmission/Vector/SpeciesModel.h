@@ -61,7 +61,6 @@ public:
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0)
-            //FIXME timestep_N_v0(0.0)
     {}
 
     /** Called to initialise variables instead of a constructor. At this point,
@@ -92,7 +91,7 @@ public:
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void setupNv0 (size_t sIndex,
+    void init2 (size_t sIndex,
                    const std::list<Host::Human>& population,
                    int populationSize,
                    double invMeanPopAvail);
@@ -349,7 +348,7 @@ private:
      * state at time-step 1.
      *
      * Should be checkpointed. */
-    vector<double> forcedS_v;	//TODO: do we want this?
+    vector<double> forcedS_v;
 
     /** Summary of S_v over the last five years, used by vectorInitIterate to
      * calculate scaling factor.
@@ -358,10 +357,11 @@ private:
      *
      * Units: inoculations. */
     vector<double> quinquennialS_v;	//TODO: do we still want this?
-
+    
+    //TODO: do these need to be stored? At the same time as P_A and P_df?
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
-     * Also has another temporary use between initialise and setupNv0 calls:
+     * Also has another temporary use between initialise and init2 calls:
      * "initOvFromSv" or  (ρ_O / ρ_S).
      *
      * Should be checkpointed. */
@@ -370,6 +370,12 @@ private:
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
+    
+    /** Values of P_A and P_df from initial population age structure. In theory
+     * these values are constant until interventions start to affect mosquitoes
+     * unless age structure varies due to low pop size or very high death
+     * rates. */
+    double initialP_A, initialP_df;
     //@}
     
 #if 0

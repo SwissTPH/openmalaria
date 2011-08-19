@@ -88,7 +88,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize) =0;
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
   
   /// Checkpointing
   template<class S>

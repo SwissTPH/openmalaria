@@ -319,12 +319,13 @@ void SpeciesModel::initEIR(
 }
 
 
-void SpeciesModel::setupNv0 (size_t sIndex,
+void SpeciesModel::init2 (size_t sIndex,
                                 const std::list<Host::Human>& population,
                                 int populationSize,
-                                double invMeanPopAvail) {
-    // -----  N_v0, N_v, O_v, S_v  -----
-    //BEGIN P_A, P_Ai, P_df, P_dif
+                                double invMeanPopAvail)
+{
+    // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
+    
     // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
     double leaveSeekingStateRate = mosqSeekingDeathRate;
 
@@ -335,7 +336,7 @@ void SpeciesModel::setupNv0 (size_t sIndex,
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
-    double tsP_df = 0.0;
+    initialP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const Transmission::PerHost& host = h->perHostTransmission;
@@ -343,35 +344,37 @@ void SpeciesModel::setupNv0 (size_t sIndex,
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
-        tsP_df += prod * host.probMosqResting(humanBase, sIndex);
+        initialP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
-        tsP_df += nhh->probCompleteCycle;
+        initialP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
 
     // Probability of a mosquito not finding a host this day:
-    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
+    initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+    double P_Ai_base = (1.0 - initialP_A) / leaveSeekingStateRate;
     sumPFindBite *= P_Ai_base;
-    tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-    //END P_A, P_Ai, P_df, P_dif
-
-
+    initialP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+    
+    
+    // -----  Calculate required S_v based on desired EIR  -----
+    
     double initOvFromSv = initNv0FromSv;  // temporarily use of initNv0FromSv
-    initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
+    initNv0FromSv = initNvFromSv * (1.0 - initialP_A - initialP_df);
 
     // same as multiplying resultant eir since calcFourierEIR takes exp(...)
     FSCoeffic[0] += log (populationSize / sumPFindBite);
     vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
     
-    mosquitoTransmission.initState ( tsP_A, tsP_df );
+    mosquitoTransmission.initState ( initialP_A, initialP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
+    //TODO: now we can store initOvFromSv and use it later to estimate resource requirements
 #if 0
-FIXME: do we not want this at all? Or still need some of this?
+NOTE: do we not want this at all? Or still need some of this?
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
@@ -386,27 +389,17 @@ FIXME: do we not want this at all? Or still need some of this?
 
 bool SpeciesModel::vectorInitIterate () {
     // We now know/can get approximate values for:
-    // * human-vector interaction (P_df, P_A) (these were available previously)
-    // * human infectiousness (P_dif)
+    // * human-vector interaction (P_df, P_A) (calculated in init2)
+    // * human infectiousness (P_dif) (needs to be sampled over year)
     // * the value of S_v we want to fit to (forcedS_v)
     
-    // find suitible annual larval resource availability:
     // Find suitible larvalResources using tsP_df and tsP_A
-    //TODO: this is probably not the best way to get tsP_df and tsP_A
-    /* FIXME
-    double tsP_df = 0.0, tsP_A = 0.0;
-    for (int t = 0; t < N_v_length; ++t) {
-        tsP_df += P_df[t];
-        tsP_A += P_A[t];
-    }
-    tsP_df /= N_v_length;
-    tsP_A /= N_v_length;
-    lcParams.fitLarvalResourcesFromS_v( lcModel, tsP_df, tsP_A,
+    /* FIXME: get P_dif from samples over year
+     * TODO: initialise with guessed values for N_v, O_v and S_v
+    lcParams.fitLarvalResourcesFromS_v( lcModel, initialP_df, initialP_A,
                                               N_v_length, mosqRestDuration );
-    ...
     
-    // Set this and warm-up the vector model:
-    ... FIXME */
+     * FIXME: run warmup and check resultant EIR */
     return false;
 }
 
@@ -453,9 +446,9 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
     */
 
 
-    //BEGIN P_A, P_Ai, P_df, P_dif
+    // -----  Calculate P_A, P_Ai, P_df, P_dif based on human pop  -----
+    
     // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
-
     double leaveSeekingStateRate = mosqSeekingDeathRate;
 
     // NC's non-autonomous model provides two methods for calculating P_df and

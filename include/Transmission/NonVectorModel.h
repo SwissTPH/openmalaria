@@ -35,7 +35,7 @@ public:
   NonVectorModel(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
   virtual void scaleEIR (double factor);
   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;

@@ -73,7 +73,7 @@ NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
 
 NonVectorModel::~NonVectorModel () {}
 
-void NonVectorModel::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }

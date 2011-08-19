@@ -162,7 +162,7 @@ void Population::createInitialHumans ()
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
     assert( TimeStep::simulation == TimeStep(0) );      // assumed below
-    _transmissionModel->setupNv0 (population, populationSize);
+    _transmissionModel->init2 (population, populationSize);
 }
 
 
