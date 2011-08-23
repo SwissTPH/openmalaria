@@ -38,8 +38,10 @@ void MosquitoTransmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     
     mosqRestDuration = mosq.getMosqRestDuration().getValue();
     EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
-    if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-        throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
+    if (1 > mosqRestDuration || mosqRestDuration*2 >= EIPDuration) {
+        //TODO: limit was EIPDuration >= mosqRestDuration >= 1
+        // but in usage of ftauArray this wasn't enough. Check why.
+        throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
     }
     N_v_length = EIPDuration + mosqRestDuration;
     
@@ -58,27 +60,31 @@ void MosquitoTransmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     for (int i = 0; i < mosqRestDuration; ++i)
         ftauArray[i] = 0.0;
     ftauArray[mosqRestDuration] = 1.0;
+}
 
+void MosquitoTransmission::initState ( double tsP_A, double tsP_df,
+                                       double initNvFromSv, double initOvFromSv,
+                                       const vector<double>& forcedS_v ){
     N_v  .resize (N_v_length);
     O_v  .resize (N_v_length);
     S_v  .resize (N_v_length);
     P_A  .resize (N_v_length);
     P_df .resize (N_v_length);
     P_dif.resize (N_v_length);
-}
-
-void MosquitoTransmission::initState ( double tsP_A, double tsP_df,
-                                       double initNvFromSv, double initOvFromSv,
-                                       vector<double>& forcedS_v ){
+    
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
+    assert( N_v_length <= forcedS_v.size() );
     for (int t = 0; t < N_v_length; ++t) {
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
+        //TODO: offset often won't be correct
+        S_v[t] = forcedS_v[t];
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
     }
+    
+    lifeCycle.init( lcParams );
 }
 
 double MosquitoTransmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif ){

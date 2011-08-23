@@ -20,6 +20,7 @@
 #include "Transmission/Vector/SpeciesModel.h"
 #include "Transmission/PerHost.h"
 #include "Transmission/TransmissionModel.h"
+#include "Transmission/Vector/ResourceFitter.h"
 #include "Host/Human.h"
 
 #include "inputData.h"
@@ -309,9 +310,9 @@ void SpeciesModel::initEIR(
     // Set other data used for mosqEmergeRate calculation:
     FSRotateAngle = EIRRotateAngle - (mosquitoTransmission.getEIPDuration()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
-    initNv0FromSv = initNvFromSv * anoph.getPropInfected();       // temporarily use of initNv0FromSv
+    initOvFromSv = initNvFromSv * anoph.getPropInfected();
 
-    quinquennialS_v.assign (TimeStep::DAYS_IN_YEAR * 5, 0.0);
+    quinquennialP_dif.assign (TimeStep::fromYears(5).asInt(), 0.0);
     forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
 #if 0
     mosqEmergeRate.resize (TimeStep::fromYears(1).inDays()); // Only needs to be done here if loading from checkpoint
@@ -363,7 +364,6 @@ void SpeciesModel::init2 (size_t sIndex,
     
     // -----  Calculate required S_v based on desired EIR  -----
     
-    double initOvFromSv = initNv0FromSv;  // temporarily use of initNv0FromSv
     initNv0FromSv = initNvFromSv * (1.0 - initialP_A - initialP_df);
 
     // same as multiplying resultant eir since calcFourierEIR takes exp(...)
@@ -372,7 +372,6 @@ void SpeciesModel::init2 (size_t sIndex,
     
     mosquitoTransmission.initState ( initialP_A, initialP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
-    //TODO: now we can store initOvFromSv and use it later to estimate resource requirements
 #if 0
 NOTE: do we not want this at all? Or still need some of this?
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
@@ -393,13 +392,17 @@ bool SpeciesModel::vectorInitIterate () {
     // * human infectiousness (P_dif) (needs to be sampled over year)
     // * the value of S_v we want to fit to (forcedS_v)
     
-    // Find suitible larvalResources using tsP_df and tsP_A
-    /* FIXME: get P_dif from samples over year
-     * TODO: initialise with guessed values for N_v, O_v and S_v
-    lcParams.fitLarvalResourcesFromS_v( lcModel, initialP_df, initialP_A,
-                                              N_v_length, mosqRestDuration );
+    // Find suitable larvalResources using tsP_df and tsP_A
+    // TODO: initialise with guessed values for N_v, O_v and S_v
     
-     * FIXME: run warmup and check resultant EIR */
+    ResourceFitter clm( mosquitoTransmission, initialP_A, initialP_df, initNvFromSv, initOvFromSv );
+    clm.targetS_vWithP_dif( forcedS_v, quinquennialP_dif );
+    clm.fit();
+    
+    quinquennialP_dif.resize( 0 );//TODO: frees mem?
+    
+    // FIXME: run warmup and check resultant EIR
+    throw TRACED_EXCEPTION_DEFAULT("TODO");
     return false;
 }
 
@@ -408,6 +411,7 @@ bool SpeciesModel::vectorInitIterate () {
 void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
+                                     bool isDynamic,
                                      double invMeanPopAvail) {
     if (TimeStep::simulation > larvicidingEndStep) {
         larvicidingEndStep = TimeStep::future;
@@ -455,16 +459,17 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
     // P_dif; here we assume that P_E is constant.
     double tsP_df = 0.0;
     double tsP_dif = 0.0;
+    double sum = 0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
         leaveSeekingStateRate += prod;
+        sum += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
         tsP_df += prod;
         tsP_dif += prod * h->probTransmissionToMosquito();
     }
-
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
         tsP_df += nhh->probCompleteCycle;
@@ -478,19 +483,23 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
 
     tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
     tsP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
-
-    // Summed per day:
-    partialEIR = 0.0;
     
-    mosquitoTransmission.resetTSStats();
-
-    // The code within the for loop needs to run per-day, wheras the main
-    // simulation uses TimeStep::interval day (currently 5 day) time steps.
-    // The transmission for time-step t depends on the state during days
-    // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        partialEIR += mosquitoTransmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif ) * P_Ai_base;
+    quinquennialP_dif[ TimeStep::simulation % TimeStep::fromYears(5).asInt() ] = tsP_dif;
+    
+    if( isDynamic || true ){//TODO: this is turned on during warmup only to enable P_dif reporting
+        // Summed per day:
+        partialEIR = 0.0;
+        
+        mosquitoTransmission.resetTSStats();
+        
+        // The code within the for loop needs to run per-day, wheras the main
+        // simulation uses TimeStep::interval day (currently 5 day) time steps.
+        // The transmission for time-step t depends on the state during days
+        // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
+        int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+        for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+            partialEIR += mosquitoTransmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif ) * P_Ai_base;
+        }
     }
 }
 

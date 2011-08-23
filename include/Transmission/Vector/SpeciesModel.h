@@ -138,6 +138,7 @@ public:
     void advancePeriod (const std::list<Host::Human>& population,
                         int populationSize,
                         size_t sIndex,
+                        bool isDynamic,
                         double invMeanPopAvail);
 
     /** Returns the EIR calculated by advancePeriod().
@@ -211,9 +212,12 @@ public:
         mosqEmergeRate & stream;
 #endif
         forcedS_v & stream;
-        quinquennialS_v & stream;
         initNv0FromSv & stream;
         initNvFromSv & stream;
+        initOvFromSv & stream;
+        initialP_A & stream;
+        initialP_df & stream;
+        quinquennialP_dif & stream;
         mosquitoTransmission & stream;
         partialEIR & stream;
         larvicidingEndStep & stream;
@@ -349,20 +353,9 @@ private:
      *
      * Should be checkpointed. */
     vector<double> forcedS_v;
-
-    /** Summary of S_v over the last five years, used by vectorInitIterate to
-     * calculate scaling factor.
-     *
-     * Length is 365 * 5. Checkpoint.
-     *
-     * Units: inoculations. */
-    vector<double> quinquennialS_v;	//TODO: do we still want this?
     
-    //TODO: do these need to be stored? At the same time as P_A and P_df?
+    //TODO: do we still need initNv0FromSv?
     /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     * Also has another temporary use between initialise and init2 calls:
-     * "initOvFromSv" or  (ρ_O / ρ_S).
      *
      * Should be checkpointed. */
     double initNv0FromSv;       ///< ditto
@@ -370,12 +363,22 @@ private:
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
+
+    /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
+     * Should be checkpointed. */
+    double initOvFromSv;
     
     /** Values of P_A and P_df from initial population age structure. In theory
      * these values are constant until interventions start to affect mosquitoes
      * unless age structure varies due to low pop size or very high death
      * rates. */
     double initialP_A, initialP_df;
+    
+    /** Summary of P_dif over the last five years, used by vectorInitIterate to
+     * estimate larvalResources.
+     *
+     * Length is TimeStep::stepsPerYear * 5. Checkpoint. */
+    vector<double> quinquennialP_dif;
     //@}
     
 #if 0

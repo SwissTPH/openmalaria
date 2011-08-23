@@ -146,7 +146,7 @@ private:
     vector<double> effectCompetitionOnLarvae;
     //@}
     friend class MosquitoLifeCycle;
-    friend class CaptiveLCModel;
+    friend class ResourceFitter;
 };
 
 

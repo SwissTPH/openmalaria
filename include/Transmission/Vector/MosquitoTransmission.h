@@ -78,10 +78,11 @@ public:
         timestep_N_v0 & stream;
     }
     
-    /** (Re)-initialise some state variables. */
+    /** (Re) allocate and initialise some state variables. Must be called
+     * before model is run. */
     void initState ( double tsP_A, double tsP_df,
                      double initNvFromSv, double initOvFromSv,
-                     vector<double>& forcedS_v );
+                     const vector<double>& forcedS_v );
     
     /** Update by one day (may be called multiple times for 1 time-step update).
      * 
@@ -89,7 +90,7 @@ public:
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
      * @param tsP_dif P_dif for this time-step
-     * @returns S_v
+     * @returns S_v for the next time-step
      */
     double update( size_t d, double tsP_A, double tsP_df, double tsP_dif );
     
@@ -99,7 +100,10 @@ public:
 
     void uninfectVectors();
     //@}
-
+    
+    inline MosqLifeCycleParams& getLCParams() {
+        return lcParams;
+    }
     inline int getEIPDuration() const {
         return EIPDuration;
     }

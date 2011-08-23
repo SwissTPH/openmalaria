@@ -234,10 +234,11 @@ TimeStep VectorModel::initIterate () {
     
     // Time to let parameters settle after each iteration. I would expect one year
     // to be enough (but I may be wrong).
-    if( needIterate ){
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);  // stabilization + 5 years data-collection time
-    }
-    return TimeStep::fromYears( 1 );
+    if( needIterate )
+        // stabilization + 5 years data-collection time:
+        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+    else
+        return TimeStep::fromYears( 1 );
 }
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
@@ -259,11 +260,9 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
-    if( simulationMode == dynamicEIR ){
-        double iMPA = invMeanPopAvail(population, populationSize);
-        for (size_t i = 0; i < numSpecies; ++i){
-            species[i].advancePeriod (population, populationSize, i, iMPA);
-        }
+    double iMPA = invMeanPopAvail(population, populationSize);
+    for (size_t i = 0; i < numSpecies; ++i){
+        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
     }
 }
 void VectorModel::update (const std::list<Host::Human>& population, int populationSize) {
