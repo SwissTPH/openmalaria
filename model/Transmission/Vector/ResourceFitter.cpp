@@ -32,12 +32,15 @@ using namespace OM::util;
 
 bool debugOutput = false;
 
-/** Assume slots in arrays correspond to interval [ i/l, (i+1)/l ) for slot i,
+/** @brief Change length of a vector with linear interpolation.
+ * @param source Original vector (not changed)
+ * @param target Vector to fill (should already be allocated)
+ * 
+ * Assume slots in arrays correspond to interval [ i/l, (i+1)/l ) for slot i,
  * where l is the length of the vector. Calculates the range each slot in the 
  * target array corresponds to in the source and integrates over this range.
  * 
- * Sum of target will not equal sum of source, but the mean value should be the
- * same. **/
+ * Algorithm should preserve mean of values in target and source. */
 void vector_scale_length( const gsl_vector *source, gsl_vector *target ){
     double sf = source->size / static_cast<double>( target->size );
     for( size_t ti=0; ti<target->size; ++ti ){
@@ -91,21 +94,24 @@ ResourceFitter::ResourceFitter( MosquitoTransmission mosqTrans,
                                 double PA, double Pdf,
                                 double iNvSv, double iOvSv
                               ) :
-    larvalResources( mosqTrans.getLCParams().larvalResources ),
+    invLarvalResources( mosqTrans.getLCParams().invLarvalResources ),
     mosquitoTransmission( mosqTrans ),
     P_A( PA ), P_df( Pdf ),
     initNvFromSv( iNvSv ), initOvFromSv( iOvSv ),
     fitTarget( FT_NONE ),
     target( 0 )
 {
-    //WARNING: a bad initial value here can prevent the algorithm from working!
-    //TODO: maybe initial guess should go in XML?
     // Set initial_guess.
     initial_guess = gsl_vector_alloc( 1 );
-    gsl_vector_set_all( initial_guess, 1e-5 );
-    buf = gsl_vector_alloc( larvalResources.size() );
+    gsl_vector_set_all( initial_guess, mosqTrans.getLCParams().estimatedLarvalResources );
+    buf = gsl_vector_alloc( invLarvalResources.size() );
     
     debugOutput = CommandLine::option( CommandLine::DEBUG_VECTOR_FITTING );
+    
+    cout << "P_A: "<<P_A<<endl;
+    cout << "P_df: "<<P_df<<endl;
+    cout << "initNvFromSv: "<<initNvFromSv<<endl;
+    cout << "initOvFromSv: "<<initOvFromSv<<endl;
 }
 ResourceFitter::~ResourceFitter() {
     gsl_vector_free( initial_guess );
@@ -118,6 +124,7 @@ double assertSimilarP_dif( double avg, double x, double tol ){
         cerr<<"avg: "<<avg<<"; x: "<<x<<"; tol: "<<tol<<endl;
         throw TRACED_EXCEPTION( "P_dif has not converged to a fixed annual periodic cycle during initialisation", Error::VectorWarmup );
     }
+    //TODO: we don't need to keep this:
     return max( xa/tol, tol/xa );
 }
 void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
@@ -141,8 +148,14 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
         maxTolNeeded = max( maxTolNeeded, thisTol );
         sumAnnualP_dif[ i/annualP_dif.size() ] += sampledP_dif[ i ];
     }
+    cout << "maxTolNeeded: "<<maxTolNeeded<<endl;
+    maxTolNeeded=0.0;
     for( size_t y=1; y< sumAnnualP_dif.size(); ++y )
-        assertSimilarP_dif( sumAnnualP_dif[0], sumAnnualP_dif[y], 2 );
+        maxTolNeeded += assertSimilarP_dif( sumAnnualP_dif[0], sumAnnualP_dif[y], 2 );
+    cout << "maxTolNeeded: "<<maxTolNeeded<<endl;
+    
+    cout << "P_dif: "<<annualP_dif<<endl;
+    cout << "init S_v: "<<S_v<<endl;
 }
 
 
@@ -157,18 +170,18 @@ void ResourceFitter::fit() {
     // But this doesn't appear to fit!
     //TODO: find out which exceptions this throws when it can't fit, catch them, and use minimisation approach instead.
     {
-        fit( 365, find_root );
+        fit( 365, find_root, 1000 );
     }
-    fit( 1, minimise );
-    fit( 3, minimise );
-    fit( 10, minimise );
-    fit( 34, minimise );
-    fit( 112, minimise );
-    fit( 365, minimise );
+    fit( 1, minimise, 1 );
+    fit( 3, minimise, 1 );
+    fit( 10, minimise, 1 );
+    fit( 34, minimise, 1 );
+    fit( 112, minimise, 1 );
+    fit( 365, minimise, 1 );
     copyBestLarvalResources();
 }
 
-void ResourceFitter::fit( size_t order, FitMethod method ){
+void ResourceFitter::fit( size_t order, FitMethod method, size_t maxIter ){
     assert( method == minimise || method == find_root );
     
     if( order != initial_guess->size ){
@@ -205,7 +218,7 @@ void ResourceFitter::fit( size_t order, FitMethod method ){
     enum FitStatus {
         in_progress, cant_improve, success
     } fit_status = in_progress;
-    for( iter=0; iter<5000000; ++iter ) {
+    for( iter=0; iter<maxIter; ++iter ) {
         int status = solver->iterate();
         if (status) {
             if( status==GSL_ENOPROG ){
@@ -256,18 +269,22 @@ void ResourceFitter::fit( size_t order, FitMethod method ){
     }
 }
 
+inline bool similar( double x, double y, double tol ){
+    double xy = x/y;
+    if( xy != xy )
+        throw TRACED_EXCEPTION( "nan in closed simulation", Error::VectorFitting );
+    return xy < tol && (1.0/tol) < xy;
+}
 void ResourceFitter::simulate1Year()
 {
     // reset state data so one run can't influence another
     assert( fitTarget == FT_S_V );      // because we use target as forcedS_v below:
     mosquitoTransmission.initState( P_A, P_df, initNvFromSv, initOvFromSv, *target );
     
-    //TODO: we need P_dif to get S_v which is definitely varies annually.
-    
     size_t end = 10*TimeStep::DAYS_IN_YEAR;
-    size_t lastDDifferent;
+    size_t lastDDifferent = 0;
     for( size_t d = 1; d<end; ++d ){
-        double S_v = mosquitoTransmission.update( d, P_A, P_df, annualP_dif[d%TimeStep::DAYS_IN_YEAR] );
+        double S_v = mosquitoTransmission.update( d, P_A, P_df, annualP_dif[d%TimeStep::DAYS_IN_YEAR], debugOutput );
         
         size_t dYear = d % TimeStep::DAYS_IN_YEAR;
         if( fitTarget == FT_EMERGENCE ){
@@ -275,11 +292,11 @@ void ResourceFitter::simulate1Year()
             // NOTE: should this have been (d-1)%daysinyear or just d%...?
             //samples[ dYear1 ] = newAdults;
         }else if( fitTarget == FT_S_V ){
-            if( samples[ dYear ] - S_v > 0.001 * max(samples[dYear], S_v) )
+            if( !similar( samples[ dYear ], S_v, 1.001 ) )
                 lastDDifferent = d;
             samples[ dYear ] = S_v;
-            cout<<d<<'\t'<<S_v<<endl;
             if( d - lastDDifferent >= TimeStep::DAYS_IN_YEAR ){
+                throw TRACED_EXCEPTION_DEFAULT("TODO");
                 return;     // we're done
             }
         }else{
@@ -294,18 +311,13 @@ void ResourceFitter::simulate1Year()
 void ResourceFitter::sampler( const gsl_vector *x ){
     for( size_t i=0; i<x->size; ++i )
         assert( finite( gsl_vector_get( x, i ) ) );
-    if( x->size == larvalResources.size() ){
+    if( x->size == invLarvalResources.size() ){
         copyToLarvalResources( x );
     }else{
         vector_scale_length( x, buf );
         copyToLarvalResources( buf );
     }
     
-    //TODO: add option to fit shape of N_v instead of N_v0
-    //TODO: do we want to add an option to fit the shape of O_v/S_v/EIR? If
-    // so we need a human-infectiousness (kappa) input; perhaps this can be
-    // constant or sampled from humans while they are being exposed to
-    // forced EIR.
     samples.resize( TimeStep::DAYS_IN_YEAR );
     simulate1Year();
     
@@ -322,18 +334,18 @@ void ResourceFitter::sampler( const gsl_vector *x ){
     if( !finite(res) ){
         ostringstream msg;
         msg << "non-finite output with mean " << vectors::mean( samples );
-        msg << "; mean input was " << vectors::mean( larvalResources );
+        msg << "; mean input was " << vectors::mean( invLarvalResources );
         throw TRACED_EXCEPTION( msg.str(), Error::VectorFitting );
     }
 }
 
 void ResourceFitter::copyToLarvalResources( const gsl_vector* input ){
-    assert( input->size == larvalResources.size() );
-    //TODO: invert (1/x) to help algorithm?
-    for( size_t i=0; i<larvalResources.size(); ++i )
-        larvalResources[i] = gsl_vector_get( input, i );
+    assert( input->size == invLarvalResources.size() );
+    // inverting larval resources may help fitting algorithm, so we do that here:
+    for( size_t i=0; i<invLarvalResources.size(); ++i )
+        invLarvalResources[i] = 1.0 / gsl_vector_get( input, i );
 }
-    
+
 }
 }
 }

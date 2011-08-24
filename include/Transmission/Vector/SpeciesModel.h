@@ -174,7 +174,7 @@ public:
     
     ///@brief Functions used in reporting
     //@{
-    /// Get emergence during last time-step
+    /// Get total emergence during last time-step
     inline double getLastN_v0 () const{
         return mosquitoTransmission.getLastN_v0();
     }

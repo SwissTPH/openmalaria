@@ -36,6 +36,7 @@ void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle 
     pSurvEggStage = lifeCycle.getEggStage().getSurvival();
     pSurvDayAsLarvae = std::pow( lifeCycle.getLarvalStage().getSurvival(), 1.0 / larvalStageDuration );
     pSurvPupalStage = lifeCycle.getPupalStage().getSurvival();
+    estimatedLarvalResources = lifeCycle.getEstimatedLarvalResources();
     
     // constants varying by larval age; probably stored directly in XML:
     larvaeResourceUsage.reserve( larvalStageDuration );
@@ -46,11 +47,19 @@ void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle 
         effectCompetitionOnLarvae.push_back( it->getEffectCompetition() );
     }
     
-    // complex derivation: annual resource availability to larvae
-    //NOTE: this is set by fitLarvalResourcesFromEmergence()
-    larvalResources.resize(365);
+    // This is set later, by ResourceFitter class.
+    invLarvalResources.resize(365);
 }
 
+double MosqLifeCycleParams::getResAvailability() const{
+    double val = 0.0;
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+        size_t t = (i + firstDay) % invLarvalResources.size();
+        val += 1.0 / invLarvalResources[t];
+    }
+    return val / TimeStep::interval;
+}
 
 void MosquitoLifeCycle::init( const MosqLifeCycleParams& lcParams ){
     // Shouldn't matter that values start at 0, since the outputs of this model
@@ -78,7 +87,7 @@ double MosquitoLifeCycle::updateEmergence( const MosqLifeCycleParams& lcParams,
     
     // resource competition during last time-step (L(t) * gamma(t))
     double resourceCompetition = getResRequirements( lcParams )
-        * lcParams.larvalResources[dYear1];
+        * lcParams.invLarvalResources[dYear1];
     // num new pupae uses larval development formula based on num larvae
     // which were one day away from becoming adults yesterday
     newPupae[d % lcParams.pupalStageDuration] =

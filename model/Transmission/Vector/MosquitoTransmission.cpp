@@ -87,7 +87,7 @@ void MosquitoTransmission::initState ( double tsP_A, double tsP_df,
     lifeCycle.init( lcParams );
 }
 
-double MosquitoTransmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif ){
+double MosquitoTransmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool printDebug ){
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
     size_t dMod = d + N_v_length;
@@ -186,12 +186,13 @@ double MosquitoTransmission::update( size_t d, double tsP_A, double tsP_df, doub
         } */
     }
     //END S_v
-
-
-    //FIXME quinquennialS_v[d5Year] = S_v[t];
+    
     
     timestep_N_v0 += newAdults;
-
+    
+    if( printDebug )
+        cerr<<"day "<<d<<":\temergence "<<newAdults<<",\tN_v "<<N_v[t]<<",\tS_v "<<S_v[t]<<endl;
+    
     return S_v[t];
 }
 
@@ -230,7 +231,7 @@ double MosquitoTransmission::getLastVecStat ( VecStat vs ) const{
         size_t t = (i + firstDay) % N_v_length;
         val += (*array)[t];
     }
-    return val;
+    return val / TimeStep::interval;
 }
 void MosquitoTransmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
     survey.set_Vector_Nv0 (speciesName, timestep_N_v0/TimeStep::interval);

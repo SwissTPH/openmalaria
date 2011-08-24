@@ -498,7 +498,7 @@ void SpeciesModel::advancePeriod (const std::list<Host::Human>& population,
         // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
         int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
         for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-            partialEIR += mosquitoTransmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif ) * P_Ai_base;
+            partialEIR += mosquitoTransmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, false ) * P_Ai_base;
         }
     }
 }

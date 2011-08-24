@@ -46,39 +46,39 @@ double VectorModel::invMeanPopAvail (const std::list<Host::Human>& population, i
 
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
+        stream << '\t' << species[i].getLastN_v0();
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::PA)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PA);
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::PDF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PDF);
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::PDIF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::PDIF);
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::NV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::NV);
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::OV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::OV);
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(Vector::SV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Vector::SV);
 }
 void VectorModel::ctsCbResAvailability (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getResAvailability()/TimeStep::interval;
+        stream << '\t' << species[i].getResAvailability();
 }
 void VectorModel::ctsCbResRequirements (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getResRequirements()/TimeStep::interval;
+        stream << '\t' << species[i].getResRequirements();
 }
 
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {

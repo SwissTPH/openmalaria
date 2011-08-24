@@ -391,6 +391,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:all>
+          <xs:attribute name="estimatedLarvalResources" type="xs:double" default="1e8">
+            <xs:annotation>
+              <xs:documentation>
+                An estimate of mean annual availability of resources to larvae.
+                Used to set the resource usage fitting algorithm going; if this
+                algorithm fails to fit the resource availability then tweaking
+                this parameter may help. In other cases tweaking this parameter
+                shouldn't be necessary.
+                
+                Default value is 10⁸ (1e8). Units are arbitrary but the same as
+                those used by the resourceUsage parameter.
+              </xs:documentation>
+              <xs:appinfo>name:Estimate of larval resources;units:X</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">

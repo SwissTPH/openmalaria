@@ -170,7 +170,7 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="1.0"/>
         </mosq>
-        <lifeCycle>
+        <lifeCycle estimatedLarvalResources="1e0">
           <eggStage duration="2" survival="0.9"/>
           <larvalStage duration="8" survival="0.7">
             <daily resourceUsage="0.3" effectCompetition="1.0"/>

@@ -90,9 +90,10 @@ public:
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
      * @param tsP_dif P_dif for this time-step
+     * @param printDebug Print some info to cerr
      * @returns S_v for the next time-step
      */
-    double update( size_t d, double tsP_A, double tsP_df, double tsP_dif );
+    double update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool printDebug );
     
     ///@brief Functions called to deploy interventions
     //@{
@@ -114,11 +115,11 @@ public:
     inline void resetTSStats() {
         timestep_N_v0 = 0.0;
     }
-    /// Get emergence during last time-step
+    /// Get total emergence during last time-step
     inline double getLastN_v0 () const{
         return timestep_N_v0;
     }
-    /// Get P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
+    /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs ) const;
     

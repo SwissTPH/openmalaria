@@ -43,9 +43,9 @@ public:
     /** Initialises mosquito life-cycle parameters. */
     void initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle );
     
-    inline double getResAvailability() const{
-        return larvalResources[TimeStep::simulation % larvalResources.size()];
-    }
+    /** Get larval resources available during the last time-step. Intended for
+     * reporting; not especially fast. */
+    double getResAvailability() const;
     inline int getTotalDuration() const{
         return eggStageDuration + larvalStageDuration + pupalStageDuration;
     }
@@ -53,7 +53,7 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        larvalResources & stream;
+        invLarvalResources & stream;
     }
     
     /** Fit larvalResources from mosqEmergeRate.
@@ -116,6 +116,9 @@ private:
     /** Mean number of female eggs laid when a mosquito oviposites. */
     double fEggsLaidByOviposit;
     
+    /** Initial larval resources guess used when fitting. */
+    double estimatedLarvalResources;
+    
     /** Resource usage of female larvae by age.
      * 
      * Length: θ_l. Index i corresponds to usage at age i days after hatching.
@@ -124,9 +127,10 @@ private:
      * same as that of resource availability. */
     vector<double> larvaeResourceUsage;
     
-    /** Resource availability to female larvae throughout the year. Note that
-     * since male larvae are not modelled, the proportion of resources used by
-     * males should not be included here.
+    /** @brief Measure of larval resources (1/γ)
+     * Inverse of resource availability to female larvae throughout the year.
+     * Note that since male larvae are not modelled, the proportion of
+     * resources used by males should not be included here.
      * 
      * Has annual periodicity: length is 365. First value (index 0) corresponds
      * to first day of year (1st Jan or something else if rebased). In 5-day
@@ -137,7 +141,7 @@ private:
      * 
      * Note: this parameter needs to be checkpointed since it is calculated
      * during init. */
-    vector<double> larvalResources;
+    vector<double> invLarvalResources;
     
     /** Effect of competition on larvae, per age (index i corresponds to age i
      * days since hatching).

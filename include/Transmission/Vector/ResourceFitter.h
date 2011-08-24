@@ -81,8 +81,9 @@ private:
      * only 365 is valid for root-finding (since otherwise a root may not exist);
      * in any case the last time this is called must be with order 365.
      * @param method Either minimise or find_root.
+     * @param maxIter The maximum number of iterations for the algorithm.
      */
-    void fit( size_t order, FitMethod method );
+    void fit( size_t order, FitMethod method, size_t maxIter );
     
     /** Run captive model. Uses a warmup length of lcParams.getTotalDuration(),
      * then a sampling duration of 365 intervals. */
@@ -98,10 +99,10 @@ private:
      */
     void sampler( const gsl_vector *x );
     
-    /** Copy the exponential of input to larvalResources. */
+    /** Copy the input to invLarvalResources, with appropriate transformations. */
     void copyToLarvalResources( const gsl_vector* input );
     
-    vector<double>& larvalResources;
+    vector<double>& invLarvalResources;
     MosquitoTransmission mosquitoTransmission;
     double P_A, P_df;
     double initNvFromSv, initOvFromSv;
