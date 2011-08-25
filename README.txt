@@ -25,6 +25,7 @@ unittest	Low-level testing: unittests for the model using cxxunit.
 util		Extra scripts associated with OpenMalaria.
 
 
-Scenario schema files:
-model/scenario.xsd	The latest schema file. Code is generated from this file.
-schema/scenario_*.xsd	Copies of all schema versions (see schema/policy.txt).
+Scenario schema files (see schema/policy.txt for details):
+schema/scenario.xsd : The latest (partial) schema file.
+schema/entomology.xsd, schema/demography.xsd, etc: components of the latest schema, included from scenario.xsd.
+schema/scenario_*.xsd : Copies of released schema versions, with all components inlined in the same file.
