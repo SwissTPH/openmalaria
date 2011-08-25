@@ -170,7 +170,7 @@
             <daily resourceUsage="1" effectCompetition="0.65"/>
           </larvalStage>
           <pupalStage duration="1" survival="0.95"/>
-          <eggsLaidByOviposit value="100"/>
+          <femaleEggsLaidByOviposit value="50"/>
         </lifeCycle>
       </anopheles>
     </vector>

@@ -31,7 +31,7 @@ void MosqLifeCycleParams::initMosqLifeCycle( const scnXml::LifeCycle& lifeCycle 
     larvalStageDuration = lifeCycle.getLarvalStage().getDuration();
     pupalStageDuration = lifeCycle.getPupalStage().getDuration();
     // we're only interested in female eggs, hence divide by 2:
-    fEggsLaidByOviposit = lifeCycle.getEggsLaidByOviposit().getValue() / 2.0;
+    fEggsLaidByOviposit = lifeCycle.getFemaleEggsLaidByOviposit().getValue();
     //NOTE: store daily or whole-stage probability of survival?
     pSurvEggStage = lifeCycle.getEggStage().getSurvival();
     pSurvDayAsLarvae = std::pow( lifeCycle.getLarvalStage().getSurvival(), 1.0 / larvalStageDuration );

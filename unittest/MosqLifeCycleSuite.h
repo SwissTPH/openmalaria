@@ -25,14 +25,17 @@
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include "Transmission/Vector/MosquitoLifeCycle.h"
+#include "schema/entomology.h"
 #include <gsl/gsl_vector.h>
+#include <fstream>
 
 
 namespace OM { namespace Transmission { namespace Vector {
-    // this is a private function not declared in the header — but we can still test it
+    // this is a private function of the ResourceFitter module not declared in
+    // the header — but we can still test it
     void vector_scale_length( const gsl_vector *source, gsl_vector *target );
 } } }
-using OM::Transmission::Vector::vector_scale_length;
+using namespace OM::Transmission::Vector;
 
 // just some different constants
 const double MLCS_a=5.23e-5, MLCS_b=9.4e12, MLCS_c=9.32, MLCS_d=9.34243e-2, MLCS_e=141.23;
@@ -41,6 +44,52 @@ class MosqLifeCycleSuite : public CxxTest::TestSuite
 {
 public:
     MosqLifeCycleSuite () {
+        double val;
+        ifstream str( "MLCS_EmergenceRateConstantRA.txt" );
+        assert( str.good() );
+        while( str >> val )
+            adultEmergenceConstRA.push_back( val );
+        str.close(); str.clear();
+        str.open( "MLCS_OvipositingAdultsConstantRA.txt" );
+        assert( str.good() );
+        while( str >> val )
+            ovipositingMosquitoesConstRA.push_back( val );
+        str.close(); str.clear();
+        str.open( "MLCS_EmergenceRatePeriodicRA.txt" );
+        assert( str.good() );
+        while( str >> val )
+            adultEmergencePeriodicRA.push_back( val );
+        str.close(); str.clear();
+        str.open( "MLCS_OvipositingAdultsPeriodicRA.txt" );
+        assert( str.good() );
+        while( str >> val )
+            ovipositingMosquitoesPeriodicRA.push_back( val );
+        str.close(); str.clear();
+        str.open( "MLCS_PeriodicResourceAvailability.txt" );
+        assert( str.good() );
+        while( str >> val )
+            periodicResourceAvailability.push_back( val );
+        
+        assert( adultEmergenceConstRA.size() == ovipositingMosquitoesConstRA.size() );
+        assert( adultEmergenceConstRA.size() == 1000 );	// can easily be changed
+        assert( adultEmergencePeriodicRA.size() == ovipositingMosquitoesPeriodicRA.size() );
+        assert( adultEmergencePeriodicRA.size() == 1000 ); // can easily be changed
+        assert( periodicResourceAvailability.size() == YEAR_LEN );
+        
+        scnXml::MosqStage eggStage( 2, 0.9 );
+        scnXml::LarvalStage larvalStage( 8, 0.7 );
+        scnXml::MosqStage pupalStage( 1, 0.95 );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.3, 1.0 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.4, 0.95 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.5, 0.9 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.6, 0.85 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.7, 0.8 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.8, 0.75 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 0.9, 0.7 ) );
+        larvalStage.getDaily().push_back( scnXml::Daily( 1.0, 0.65 ) );
+        scnXml::InputValue femaleEggsLaid( 50.0 );
+        scnXml::LifeCycle lcElt( eggStage, larvalStage, pupalStage, femaleEggsLaid );
+        lcParams.initMosqLifeCycle( lcElt );
     }
     ~MosqLifeCycleSuite () {
     }
@@ -108,7 +157,44 @@ public:
         gsl_vector_free( target );
     }
     
+    void testLifeCycleConstRA (){
+        lcParams.invLarvalResources.assign( 1, 1e-8 );
+        
+        MosquitoLifeCycle lcModel;
+        lcModel.init( lcParams );
+        // we start with 100,000 eggs and then run the model
+        lcModel.newEggs[0] = 100000.0;
+        
+        for( size_t d=1; d<adultEmergenceConstRA.size(); ++d ){
+            double emergence = lcModel.updateEmergence( lcParams, ovipositingMosquitoesConstRA[d], d, 0 );
+            TS_ASSERT_APPROX( emergence, adultEmergenceConstRA[d] );
+        }
+    }
+    
+    void testLifeCyclePeriodicRA (){
+        lcParams.invLarvalResources = periodicResourceAvailability;
+        
+        MosquitoLifeCycle lcModel;
+        lcModel.init( lcParams );
+        // we start with 100,000 eggs and then run the model
+        lcModel.newEggs[0] = 100000.0;
+        
+        for( size_t d=1; d<adultEmergencePeriodicRA.size(); ++d ){
+            double emergence = lcModel.updateEmergence( lcParams, ovipositingMosquitoesPeriodicRA[d], d, (d-1)%YEAR_LEN );
+            TS_ASSERT_APPROX( emergence, adultEmergencePeriodicRA[d] );
+            cout << emergence << endl;
+        }
+    }
+    
 private:
+    static const size_t YEAR_LEN = 365;
+    MosqLifeCycleParams lcParams;
+    vector<double> ovipositingMosquitoesConstRA;
+    vector<double> adultEmergenceConstRA;
+    vector<double> ovipositingMosquitoesPeriodicRA;
+    vector<double> adultEmergencePeriodicRA;
+    // we use the first value to calculate state at d=1
+    vector<double> periodicResourceAvailability;
 };
 
 #endif

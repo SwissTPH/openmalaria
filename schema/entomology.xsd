@@ -381,10 +381,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Pupal stage;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="eggsLaidByOviposit" type="inputValue">
+            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
               <xs:annotation>
                 <xs:documentation>
-                  The total number of (male and female) eggs laid by a female
+                  The total number of female eggs laid by a female
                   mosquito at the conclusion to a feeding cycle.
                 </xs:documentation>
                 <xs:appinfo>name:Eggs laid by ovipositing mosquito;</xs:appinfo>

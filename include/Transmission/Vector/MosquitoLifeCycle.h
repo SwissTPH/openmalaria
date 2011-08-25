@@ -27,6 +27,8 @@ namespace scnXml {
     class LifeCycle;
 }
 
+class MosqLifeCycleSuite;
+
 namespace OM {
 namespace Transmission {
 namespace Vector {
@@ -151,6 +153,7 @@ private:
     //@}
     friend class MosquitoLifeCycle;
     friend class ResourceFitter;
+    friend class MosqLifeCycleSuite;
 };
 
 
@@ -223,6 +226,8 @@ private:
      * Length: θ_p. Value at index (d mod θ_p) refers to the value θ_p days
      * ago/at day d before/after update. */
     vector<double> newPupae;
+    
+    friend class MosqLifeCycleSuite;
 };
 
 }
