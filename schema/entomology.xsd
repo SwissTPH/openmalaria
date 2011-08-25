@@ -141,44 +141,44 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
+            <xs:sequence>
+              <xs:element name="coeffic" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>
+                    A pair of Fourier series coefficients. The first element
+                    specifies a1 and b1, the second a2 and b2, etc. Any number
+                    (from 0 up) of pairs may be given.
+                  </xs:documentation>
+                  <xs:appinfo>name:Pair of Fourier coefficients;units:none;</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:attribute name="a" type="xs:double" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        a_n parameter of Fourier approximation to ln(EIR) for
+                        some natural number n.
+                      </xs:documentation>
+                      <xs:appinfo>name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute name="b" type="xs:double" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        b_n parameter of Fourier approximation to ln(EIR) for
+                        some natural number n.
+                      </xs:documentation>
+                      <xs:appinfo>name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
             <xs:attribute name="a0" type="xs:double" use="required">
               <xs:annotation>
                 <xs:documentation>
                   a0 parameter of Fourier approximation to ln(EIR)
                 </xs:documentation>
                 <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="a1" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  a1 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:a1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="b1" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  b1 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:b1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="a2" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  a2 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:a2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="b2" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  b2 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:b2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">

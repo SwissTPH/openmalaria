@@ -139,7 +139,11 @@
   <entomology mode="dynamic" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
+        <EIR EIRRotateAngle="0" a0="-0.926517">
+          <coeffic a="-0.692164" b="0.002098"/>
+          <coeffic a="0.401189" b="-0.375356"/>
+          <coeffic a="0" b="0"/> <!-- dummy for testing -->
+        </EIR>
         <mosq minInfectedThreshold="0.1">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
