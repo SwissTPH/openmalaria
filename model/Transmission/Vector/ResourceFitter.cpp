@@ -94,7 +94,7 @@ double ResourceFitter_minimise_sampler( const gsl_vector *x, void *params ){
     return sumSquares;
 }
 
-ResourceFitter::ResourceFitter( MosquitoTransmission mosqTrans,
+ResourceFitter::ResourceFitter( MosquitoTransmission& mosqTrans,
                                 double PA, double Pdf,
                                 double iNvSv, double iOvSv
                               ) :

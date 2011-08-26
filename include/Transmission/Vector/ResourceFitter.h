@@ -44,7 +44,7 @@ struct ResourceFitter {
      * @param iNvSv Scale factor for S_v to give an initial estimate of N_v
      * @param iOvSv Scale factor for S_v to give an initial estimate of O_v
      */
-    ResourceFitter( MosquitoTransmission mosqTrans,
+    ResourceFitter( MosquitoTransmission& mosqTrans,
                     double PA, double Pdf,
                     double iNvSv, double iOvSv );
     ~ResourceFitter();
