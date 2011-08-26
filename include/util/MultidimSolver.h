@@ -63,7 +63,10 @@ struct MultidimMinimiser : public MultidimSolver {
                        gsl_vector *x,
                        gsl_vector *step_size
     ){
-        gsl_multimin_function func = { function, n, params };
+        gsl_multimin_function func;
+        func.f = function;
+        func.n = n;
+        func.params = params;
         s = gsl_multimin_fminimizer_alloc( algorithm, n );
         gsl_multimin_fminimizer_set( s, &func, x, step_size );
     }
@@ -101,7 +104,10 @@ struct MultidimRootFinder : public MultidimSolver {
                        void *params,
                        gsl_vector *x
     ){
-        gsl_multiroot_function func = { function, n, params };
+        gsl_multiroot_function func;
+        func.f = function;
+        func.n = n;
+        func.params = params;
         s = gsl_multiroot_fsolver_alloc( algorithm, n );
         gsl_multiroot_fsolver_set( s, &func, x );
     }

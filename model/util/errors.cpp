@@ -42,7 +42,7 @@ traced_exception::traced_exception(const string& msg, const char *f, int l, int 
     base_exception(msg,code),
     file(f), line(l), start(s)
 {
-#ifdef __GNU_LIBRARY__
+#ifdef OM_GNU_STACK_TRACE
     // http://www.gnu.org/software/libc/manual/html_node/Backtraces.html
 // probably 100 is big enough
 #define MAX_STACK_SIZE 100
@@ -53,7 +53,7 @@ traced_exception::traced_exception(const string& msg, const char *f, int l, int 
 #endif
 }
 traced_exception::~traced_exception() throw(){
-#ifdef __GNU_LIBRARY__
+#ifdef OM_GNU_STACK_TRACE
     free (trace);
 #endif
 }
@@ -62,7 +62,9 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
     if( e.file != 0 )
         stream << ", starting from "<<e.file<<':'<<e.line;
     stream<<":\n";
-#ifdef __GNU_LIBRARY__
+#ifdef OM_NO_STACK_TRACE
+    stream << "backtrace capture disabled\n";
+#elif defined OM_GNU_STACK_TRACE
     // demangle output: http://gcc.gnu.org/onlinedocs/libstdc++/manual/ext_demangling.html
     // spec: http://www.ib.cnea.gov.ar/~oop/biblio/libstdc++/namespaceabi.html
     

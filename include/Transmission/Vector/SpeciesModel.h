@@ -212,7 +212,6 @@ public:
         mosqEmergeRate & stream;
 #endif
         forcedS_v & stream;
-        initNv0FromSv & stream;
         initNvFromSv & stream;
         initOvFromSv & stream;
         initialP_A & stream;
@@ -354,12 +353,6 @@ private:
      * Should be checkpointed. */
     vector<double> forcedS_v;
     
-    //TODO: do we still need initNv0FromSv?
-    /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     * Should be checkpointed. */
-    double initNv0FromSv;       ///< ditto
-
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;

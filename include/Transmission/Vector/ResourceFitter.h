@@ -49,6 +49,9 @@ struct ResourceFitter {
                     double iNvSv, double iOvSv );
     ~ResourceFitter();
     
+    // debugging function
+    void printState();
+    
     /** Set S_v as target and store P_dif needed to calculate S_v.
      *
      * @param S_v Densities of infectious biting mosquitoes over year; has
@@ -66,12 +69,6 @@ struct ResourceFitter {
     void fit();
     
 private:
-    /** Copy the best result to larval resources. fit(365) must have been
-     * called previously to get the correct length. */
-    inline void copyBestLarvalResources (){
-        copyToLarvalResources( initial_guess );
-    }
-    
     enum FitMethod {
         minimise, find_root
     };

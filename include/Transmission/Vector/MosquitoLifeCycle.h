@@ -58,7 +58,7 @@ public:
         invLarvalResources & stream;
     }
     
-    /** Fit larvalResources from mosqEmergeRate.
+    /** Fit larvalResources from S_v (which is derived from EIR).
      * 
      * @param lcModel MosquitoLifeCycle state to start from
      * @param P_A Average P_A value (assumed constant)
@@ -153,7 +153,7 @@ private:
     //@}
     friend class MosquitoLifeCycle;
     friend class ResourceFitter;
-    friend class MosqLifeCycleSuite;
+    friend class ::MosqLifeCycleSuite;
 };
 
 
@@ -227,7 +227,7 @@ private:
      * ago/at day d before/after update. */
     vector<double> newPupae;
     
-    friend class MosqLifeCycleSuite;
+    friend class ::MosqLifeCycleSuite;
 };
 
 }

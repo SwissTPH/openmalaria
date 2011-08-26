@@ -26,6 +26,8 @@
 #include "schema/entomology.h"
 #include "limits"
 
+class MosqLifeCycleSuite;
+
 namespace OM {
 namespace Transmission {
 namespace Vector {
@@ -235,6 +237,8 @@ private:
     
     /** Variables tracking data to be reported. */
     double timestep_N_v0;
+    
+    friend class ::MosqLifeCycleSuite;
 };
 
 }

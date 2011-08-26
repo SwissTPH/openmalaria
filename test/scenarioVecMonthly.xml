@@ -170,7 +170,7 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="1.0"/>
         </mosq>
-        <lifeCycle estimatedLarvalResources="1e0">
+        <lifeCycle estimatedLarvalResources="1e8">
           <eggStage duration="2" survival="0.9"/>
           <larvalStage duration="8" survival="0.7">
             <daily resourceUsage="0.3" effectCompetition="1.0"/>
@@ -183,7 +183,7 @@
             <daily resourceUsage="1" effectCompetition="0.65"/>
           </larvalStage>
           <pupalStage duration="1" survival="0.95"/>
-          <eggsLaidByOviposit value="100"/>
+          <femaleEggsLaidByOviposit value="50"/>
         </lifeCycle>
       </anopheles>
     </vector>

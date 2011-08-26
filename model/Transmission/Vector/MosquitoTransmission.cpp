@@ -73,7 +73,7 @@ void MosquitoTransmission::initState ( double tsP_A, double tsP_df,
     P_dif.resize (N_v_length);
     
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
-    assert( N_v_length <= forcedS_v.size() );
+    assert( N_v_length <= static_cast<int>(forcedS_v.size()) );
     for (int t = 0; t < N_v_length; ++t) {
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
@@ -99,7 +99,6 @@ double MosquitoTransmission::update( size_t d, double tsP_A, double tsP_df, doub
     // Day of year and of 5-year cycles. Note that emergence during day 1
     // comes from mosqEmergeRate[0], hence subtraction by 1.
     size_t dYear1 = (d - 1) % TimeStep::DAYS_IN_YEAR;
-    size_t d5Year = d % (TimeStep::DAYS_IN_YEAR * 5);
     
     
     // These only need to be calculated once per timestep, but should be

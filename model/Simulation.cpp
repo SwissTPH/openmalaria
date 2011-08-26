@@ -232,7 +232,7 @@ bool Simulation::isCheckpoint(){
 int readCheckpointNum () {
     ifstream checkpointFile;
     checkpointFile.open(CHECKPOINT, fstream::in);
-    int checkpointNum;
+    int checkpointNum=0;
     checkpointFile >> checkpointNum;
     checkpointFile.close();
     if (!checkpointFile)

@@ -31,6 +31,14 @@ using namespace std;
 #define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) );
 #define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ );
 
+// #define OM_NO_STACK_TRACE
+
+#ifdef OM_NO_STACK_TRACE
+// do nothing
+#elif defined __GNU_LIBRARY__
+#define OM_GNU_STACK_TRACE
+#endif
+
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
     
@@ -108,7 +116,7 @@ namespace OM { namespace util {
     private:
         const char *file;
         int line, start;
-#ifdef __GNU_LIBRARY__
+#ifdef OM_GNU_STACK_TRACE
         size_t length;
         char** trace;
 #endif

@@ -103,8 +103,10 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BIN
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # and these by MosqLifeCycleSuite:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_EmergenceRateConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_AdultMosqConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_OvipositingAdultsConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_EmergenceRatePeriodicRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_AdultMosqPeriodicRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_OvipositingAdultsPeriodicRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_PeriodicResourceAvailability.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
