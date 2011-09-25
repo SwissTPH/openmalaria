@@ -124,7 +124,11 @@
   <entomology mode="dynamic" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-0.926517" a1="-0.692164" a2="0.401189" b1="0.002098" b2="-0.375356"/>
+        <EIR EIRRotateAngle="0" a0="-0.926517">
+          <coeffic a="-0.692164" b="0.002098"/>
+          <coeffic a="0.401189" b="-0.375356"/>
+          <coeffic a="0" b="0"/> <!-- dummy for testing -->
+        </EIR>
         <mosq minInfectedThreshold="0.1">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
@@ -138,6 +142,21 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="1.0"/>
         </mosq>
+        <lifeCycle>
+          <eggStage duration="2" survival="0.9"/>
+          <larvalStage duration="8" survival="0.7">
+            <daily resourceUsage="0.3" effectCompetition="1.0"/>
+            <daily resourceUsage="0.4" effectCompetition="0.95"/>
+            <daily resourceUsage="0.5" effectCompetition="0.9"/>
+            <daily resourceUsage="0.6" effectCompetition="0.85"/>
+            <daily resourceUsage="0.7" effectCompetition="0.8"/>
+            <daily resourceUsage="0.8" effectCompetition="0.75"/>
+            <daily resourceUsage="0.9" effectCompetition="0.7"/>
+            <daily resourceUsage="1" effectCompetition="0.65"/>
+          </larvalStage>
+          <pupalStage duration="1" survival="0.95"/>
+          <femaleEggsLaidByOviposit value="50"/>
+        </lifeCycle>
       </anopheles>
     </vector>
   </entomology>

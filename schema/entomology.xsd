@@ -141,44 +141,44 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
+            <xs:sequence>
+              <xs:element name="coeffic" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                  <xs:documentation>
+                    A pair of Fourier series coefficients. The first element
+                    specifies a1 and b1, the second a2 and b2, etc. Any number
+                    (from 0 up) of pairs may be given.
+                  </xs:documentation>
+                  <xs:appinfo>name:Pair of Fourier coefficients;units:none;</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:attribute name="a" type="xs:double" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        a_n parameter of Fourier approximation to ln(EIR) for
+                        some natural number n.
+                      </xs:documentation>
+                      <xs:appinfo>name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:attribute>
+                  <xs:attribute name="b" type="xs:double" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        b_n parameter of Fourier approximation to ln(EIR) for
+                        some natural number n.
+                      </xs:documentation>
+                      <xs:appinfo>name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:attribute>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
             <xs:attribute name="a0" type="xs:double" use="required">
               <xs:annotation>
                 <xs:documentation>
                   a0 parameter of Fourier approximation to ln(EIR)
                 </xs:documentation>
                 <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="a1" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  a1 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:a1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="b1" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  b1 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:b1 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="a2" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  a2 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:a2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="b2" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  b2 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:b2 parameter of Fourier approximation to ln(EIR);</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
@@ -225,8 +225,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:choice>
       <xs:element name="mosq">
         <xs:annotation>
-          <xs:documentation>Vector species</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Vector Species;</xs:appinfo>
+          <xs:documentation>Parameters describing the feeding cycle and human
+          mosquito interaction of a single species of anopheles mosquito.
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -307,9 +309,109 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
+      <xs:element name="lifeCycle">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters describing the life-cycle of this species of mosquito
+          </xs:documentation>
+          <xs:appinfo>name:Mosquito life cycle parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="eggStage" type="MosqStage">
+              <xs:annotation>
+                <xs:documentation>
+                  Parameters for the egg stage of development
+                </xs:documentation>
+                <xs:appinfo>name:Egg stage;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="larvalStage">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="MosqStage">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Parameters for the larval stage of development
+                      </xs:documentation>
+                      <xs:appinfo>name:Larval stage;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:sequence>
+                      <xs:element name="daily" maxOccurs="unbounded">
+                        <xs:annotation>
+                          <xs:documentation>
+                            List of parameters which apply during the larval
+                            stage of development. List length must equal stage
+                            duration, with first item corresponding to first
+                            24 hours after hatching, second item to hours
+                            24-48, and so on.
+                          </xs:documentation>
+                          <xs:appinfo>name:Daily development;</xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                          <xs:attribute name="resourceUsage" type="xs:double" use="required">
+                            <xs:annotation>
+                              <xs:documentation>
+                                Resource usage over larval stage of development.
+                                Units are arbitrary.
+                              </xs:documentation>
+                              <xs:appinfo>name:Resource usage;units:X;</xs:appinfo>
+                            </xs:annotation>
+                          </xs:attribute>
+                          <xs:attribute name="effectCompetition" type="xs:double" use="required">
+                            <xs:annotation>
+                              <xs:documentation>
+                                Effect of competition over resources on development.
+                              </xs:documentation>
+                              <xs:appinfo>name:Effect competition;units:none;</xs:appinfo>
+                            </xs:annotation>
+                          </xs:attribute>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:sequence>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="pupalStage" type="MosqStage">
+              <xs:annotation>
+                <xs:documentation>
+                  Parameters for the pupal stage of development
+                </xs:documentation>
+                <xs:appinfo>name:Pupal stage;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                  The total number of female eggs laid by a female
+                  mosquito at the conclusion to a feeding cycle.
+                </xs:documentation>
+                <xs:appinfo>name:Eggs laid by ovipositing mosquito;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:all>
+          <xs:attribute name="estimatedLarvalResources" type="xs:double" default="1e8">
+            <xs:annotation>
+              <xs:documentation>
+                An estimate of mean annual availability of resources to larvae.
+                Used to set the resource usage fitting algorithm going; if this
+                algorithm fails to fit the resource availability then tweaking
+                this parameter may help. In other cases tweaking this parameter
+                shouldn't be necessary.
+                
+                Default value is 10⁸ (1e8). Units are arbitrary but the same as
+                those used by the resourceUsage parameter.
+              </xs:documentation>
+              <xs:appinfo>name:Estimate of larval resources;units:X</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
         <xs:annotation>
-          <xs:documentation>Non human host parameters, per type of host (must match up with non-species-specific parameters).</xs:documentation>
+          <xs:documentation>Non human host parameters, per type of host (must
+          match up with non-species-specific parameters).</xs:documentation>
           <xs:appinfo>units:List of elements;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
@@ -368,6 +470,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>Initial guess of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
         <xs:appinfo>units:Proportion;min:0;max:1;name:Initial guess of proportion of mosquitoes infectious (ρ_S);exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MosqStage">
+    <xs:annotation>
+      <xs:documentation>
+      Parameters associated with a mosquito development stage.
+      </xs:documentation>
+      <xs:appinfo>name:Mosquito development-stage parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="duration" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Duration of the stage (i.e. length of time mosquito is an
+        egg/larva/pupa).
+        </xs:documentation>
+        <xs:appinfo>name:Duration;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="survival" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Probability that mosquito survives this size (probability of egg
+        hatching, a larva becoming a pupa or a pupa emerging as an adult,
+        at the start of that stage).
+        </xs:documentation>
+        <xs:appinfo>name:Probability of survival;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -232,18 +232,22 @@ void VectorAnopheles::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
 ){
-    FSCoeffic.resize (5);
     // EIR for this species, with index 0 refering to value over first interval
     vector<double> speciesEIR (TimeStep::fromYears(1).inDays());
 
     if ( anoph.getEIR().present() ) {
         const scnXml::EIR& eirData = anoph.getEIR().get();
+        const scnXml::EIR::CoefficSequence& fsCoeffic = eirData.getCoeffic();
+        
+        FSCoeffic.resize (2*fsCoeffic.size() + 1);
 
         FSCoeffic[0] = eirData.getA0();
-        FSCoeffic[1] = eirData.getA1();
-        FSCoeffic[2] = eirData.getB1();
-        FSCoeffic[3] = eirData.getA2();
-        FSCoeffic[4] = eirData.getB2();
+        size_t i = 1;
+        for( scnXml::EIR::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ){
+            FSCoeffic[i] = it->getA();
+            FSCoeffic[i+1] = it->getB();
+            i+=2;
+        }
         // According to spec, EIR for first day of year (rather than EIR at the
         // exact start of the year) is generated with t=0 in Fourier series.
         EIRRotateAngle = eirData.getEIRRotateAngle();
