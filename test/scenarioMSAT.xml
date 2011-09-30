@@ -728,15 +728,18 @@
   <entomology annualEIR="20" mode="dynamic" name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-5.835" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+        <EIR EIRRotateAngle="0" a0="-5.835">
+          <coeffic a="0.8968" b="2.678"/>
+          <coeffic a="-0.4551" b="2.599"/>
+        </EIR>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <mosqProbBiting mean="0.95" variance="0"/>
           <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
@@ -750,15 +753,18 @@
         </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-4.852" a1="-4.546" a2="-0.2198" b1="2.252" b2="-0.00743"/>
+        <EIR EIRRotateAngle="0" a0="-4.852">
+          <coeffic a="-4.546" b="2.252"/>
+          <coeffic a="-0.2198" b="-0.00743"/>
+        </EIR>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <mosqProbBiting mean="0.95" variance="0"/>
           <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
@@ -772,15 +778,18 @@
         </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-3.638" a1="0.8968" a2="-0.4551" b1="2.678" b2="2.599"/>
+        <EIR EIRRotateAngle="0" a0="-3.638">
+          <coeffic a="0.8968" b="2.678"/>
+          <coeffic a="-0.4551" b="2.599"/>
+        </EIR>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <mosqProbBiting mean="0.95" variance="0"/>
           <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>

@@ -1959,7 +1959,10 @@ public class SchemaTranslator {
     
     /* Several vector attributes changed to elements.
      * entomology mode attribute now takes keyword enumerations
-     * EIR survey measures changed name*/
+     * EIR survey measures changed name
+     * EIR as Fourier coefficients can now use any odd number of coefficients.
+     * Added mosquito life-cycle parameters (optional, so not added here)
+     */
     public Boolean translate29To30() {
         try{
             Element mon = getChildElement(scenarioElement, "monitoring");
@@ -2012,6 +2015,22 @@ public class SchemaTranslator {
                         convertAttrToElement(nhh, "mosqProbBiting");
                         convertAttrToElement(nhh, "mosqProbFindRestSite");
                         convertAttrToElement(nhh, "mosqProbResting");
+                    }
+                    
+                    Element eir = getChildElement(anoph,"EIR");
+                    if( eir != null ){
+                        Element c1 = scenarioDocument.createElement("coeffic");
+                        c1.setAttribute("a",eir.getAttribute("a1"));
+                        c1.setAttribute("b",eir.getAttribute("b1"));
+                        eir.appendChild( c1 );
+                        Element c2 = scenarioDocument.createElement("coeffic");
+                        c2.setAttribute("a",eir.getAttribute("a2"));
+                        c2.setAttribute("b",eir.getAttribute("b2"));
+                        eir.appendChild( c2 );
+                        eir.removeAttribute("a1");
+                        eir.removeAttribute("b1");
+                        eir.removeAttribute("a2");
+                        eir.removeAttribute("b2");
                     }
                 }
             }

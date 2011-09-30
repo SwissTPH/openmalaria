@@ -239,14 +239,12 @@ void VectorAnopheles::initEIR(
         const scnXml::EIR& eirData = anoph.getEIR().get();
         const scnXml::EIR::CoefficSequence& fsCoeffic = eirData.getCoeffic();
         
-        FSCoeffic.resize (2*fsCoeffic.size() + 1);
+        FSCoeffic.reserve (2*fsCoeffic.size() + 1);
 
-        FSCoeffic[0] = eirData.getA0();
-        size_t i = 1;
+        FSCoeffic.push_back( eirData.getA0() );
         for( scnXml::EIR::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ){
-            FSCoeffic[i] = it->getA();
-            FSCoeffic[i+1] = it->getB();
-            i+=2;
+            FSCoeffic.push_back( it->getA() );
+            FSCoeffic.push_back( it->getB() );
         }
         // According to spec, EIR for first day of year (rather than EIR at the
         // exact start of the year) is generated with t=0 in Fourier series.

@@ -309,7 +309,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="lifeCycle">
+      <xs:element name="lifeCycle" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             Parameters describing the life-cycle of this species of mosquito

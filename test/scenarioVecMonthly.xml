@@ -24,24 +24,10 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <continuous period="1">
+    <continuous duringInit="false" period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
-      <option name="N_v0" value="true"/>
-      <option name="N_v" value="true"/>
-      <option name="O_v" value="true"/>
-      <option name="S_v" value="true"/>
-      <option name="P_A" value="true"/>
-      <option name="P_df" value="true"/>
-      <option name="P_dif" value="true"/>
-      <option name="immunity h" value="true"/>
-      <option name="immunity Y" value="true"/>
-      <option name="new infections" value="true"/>
-      <option name="num transmitting humans" value="true"/>
-      <option name="nets owned" value="true"/>
-      <option name="mean hole index"/>
-      <option name="mean insecticide content"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -163,8 +149,8 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <mosqProbBiting mean="0.95" variance="0"/>
           <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>
