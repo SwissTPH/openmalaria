@@ -107,6 +107,7 @@ public:
    * XML data is not touched. */
   virtual void scaleEIR (double factor) =0;
   
+#if 0
   /** Scale the EIR descriptions in the XML element.
    * This updates the XML, and not the EIR descriptions used for simulations.
    * In order for changes to be written back to the XML file,
@@ -115,6 +116,7 @@ public:
    * @param ed	Access to XML element to update.
    * @param factor	Multiplicative factor by which to scale EIR. */
   virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
+#endif
   
   /** How many intervals are needed for transmission initialization during the
    * "human" phase (before vector init)?

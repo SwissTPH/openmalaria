@@ -54,22 +54,15 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
     model = new NonVectorTransmission(nonVectorData.get());
   }
 
-  if( entoData.getAnnualEIR().present() ){
-      model->scaleEIR( entoData.getAnnualEIR().get() / model->annualEIR );
-      assert( vectors::approxEqual( model->annualEIR, entoData.getAnnualEIR().get() ) );
+  if( entoData.getScaledAnnualEIR().present() ){
+      model->scaleEIR( entoData.getScaledAnnualEIR().get() / model->annualEIR );
+      assert( vectors::approxEqual( model->annualEIR, entoData.getScaledAnnualEIR().get() ) );
   }
 
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
       //Note: after internal scaling (which doesn't imply exit)
       //but before external scaling.
       cout << "Total annual EIR: "<<model->annualEIR<<endl;
-  }
-  if( util::CommandLine::option( util::CommandLine::SET_ANNUAL_EIR ) ){
-      model->scaleXML_EIR(
-        InputData.getMutableScenario().getEntomology(),
-        util::CommandLine::getNewEIR() / model->annualEIR
-      );
-      InputData.documentChanged = true;
   }
 
   return model;

@@ -77,6 +77,7 @@ void NonVectorTransmission::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
 }
+#if 0
 void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
@@ -87,6 +88,7 @@ void NonVectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) c
 	*it = old * factor;
     }
 }
+#endif
 
 
 TimeStep NonVectorTransmission::minPreinitDuration (){

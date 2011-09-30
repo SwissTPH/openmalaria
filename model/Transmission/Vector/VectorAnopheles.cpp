@@ -232,31 +232,37 @@ void VectorAnopheles::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
 ){
+    const scnXml::Seasonality& seasonality = anoph.getSeasonality();
+    if( seasonality.getInput() != "EIR" ){
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
+        //TODO
+    }
     // EIR for this species, with index 0 refering to value over first interval
     vector<double> speciesEIR (TimeStep::fromYears(1).inDays());
 
-    if ( anoph.getEIR().present() ) {
-        const scnXml::EIR& eirData = anoph.getEIR().get();
-        const scnXml::EIR::CoefficSequence& fsCoeffic = eirData.getCoeffic();
+    if ( seasonality.getFourierSeries().present() ) {
+        const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
+        const scnXml::FourierSeries::CoefficSequence& fsCoeffic = seasFC.getCoeffic();
         
         FSCoeffic.reserve (2*fsCoeffic.size() + 1);
 
-        FSCoeffic.push_back( eirData.getA0() );
-        for( scnXml::EIR::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ){
+        FSCoeffic.push_back( 0.0 );     // value doesn't matter; EIR will be scaled
+        for( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ){
             FSCoeffic.push_back( it->getA() );
             FSCoeffic.push_back( it->getB() );
         }
         // According to spec, EIR for first day of year (rather than EIR at the
         // exact start of the year) is generated with t=0 in Fourier series.
-        EIRRotateAngle = eirData.getEIRRotateAngle();
-    } else {
-        assert( anoph.getMonthlyEIR().present() );      // XML loading code should enforce this
-        const scnXml::MonthlyEIR& eirData = anoph.getMonthlyEIR().get();
-
-        double targetEIR = eirData.getAnnualEIR();
+        EIRRotateAngle = seasFC.getEIRRotateAngle();
+    } else if( seasonality.getMonthlyValues().present() ) {
+        const scnXml::MonthlyValues& seasM = seasonality.getMonthlyValues().get();
+        if( seasM.getSmoothing() != "fourier" ){
+            throw util::xml_scenario_error("entomology.anopheles.seasonality.monthlyValues.smoothing: only fourier supported at the moment");
+            //TODO: should be easy to add no smoothing
+        }
 
         const size_t N_m = 12;
-        const scnXml::MonthlyEIR::ItemSequence seq = eirData.getItem();
+        const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
         assert( seq.size() == N_m );    // enforced by schema
         double months[N_m];
         double sum = 0.0;
@@ -295,14 +301,23 @@ void VectorAnopheles::initEIR(
         // The value for the first day of the year should start 2*pi/(365*2)
         // radians later, so adjust EIRRotateAngle to compensate.
         EIRRotateAngle = M_PI * ( 1.0/12.0 - 1.0/365.0 );
-
-        // Now we rescale to get an EIR of targetEIR.
-        // Calculate current sum as is usually done.
-        calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
-        sum = vectors::sum( speciesEIR );
-        // And scale:
-        FSCoeffic[0] += log( targetEIR / sum );
+    } else {
+        assert( seasonality.getDailyValues().present() );      // XML loading code should enforce this
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
+        //TODO
     }
+    
+    if( !seasonality.getAnnualEIR().present() ){
+        //TODO: work out when this is not required and implement code
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
+    }
+    double targetEIR = seasonality.getAnnualEIR().get();
+    
+    // Now we rescale to get an EIR of targetEIR.
+    // Calculate current sum as is usually done.
+    calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+    // And scale:
+    FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
 
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
     calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);

@@ -1959,6 +1959,7 @@ public class SchemaTranslator {
     
     /* Several vector attributes changed to elements.
      * entomology mode attribute now takes keyword enumerations
+     * entomology annualEIR attribute was renamed
      * EIR survey measures changed name
      * EIR as Fourier coefficients can now use any odd number of coefficients.
      * Added mosquito life-cycle parameters (optional, so not added here)
@@ -1984,6 +1985,10 @@ public class SchemaTranslator {
             }else{
                 assert mode==4;
                 ento.setAttribute("mode","dynamic");
+            }
+            if( ento.getAttributeNode("annualEIR") != null ){
+                ento.setAttribute("scaledAnnualEIR", ento.getAttribute("annualEIR") );
+                ento.removeAttribute("annualEIR");
             }
             
             Element vector = getChildElement(ento,"vector");
@@ -2017,20 +2022,65 @@ public class SchemaTranslator {
                         convertAttrToElement(nhh, "mosqProbResting");
                     }
                     
+                    Element seas = scenarioDocument.createElement("seasonality");
+                    seas.setAttribute("input","EIR");
+                    anoph.insertBefore(seas, anoph.getFirstChild());
+                    
                     Element eir = getChildElement(anoph,"EIR");
                     if( eir != null ){
+                        Element fS = scenarioDocument.createElement("fourierSeries");
+                        seas.appendChild(fS);
+                        
                         Element c1 = scenarioDocument.createElement("coeffic");
                         c1.setAttribute("a",eir.getAttribute("a1"));
                         c1.setAttribute("b",eir.getAttribute("b1"));
-                        eir.appendChild( c1 );
+                        fS.appendChild( c1 );
                         Element c2 = scenarioDocument.createElement("coeffic");
                         c2.setAttribute("a",eir.getAttribute("a2"));
                         c2.setAttribute("b",eir.getAttribute("b2"));
-                        eir.appendChild( c2 );
-                        eir.removeAttribute("a1");
-                        eir.removeAttribute("b1");
-                        eir.removeAttribute("a2");
-                        eir.removeAttribute("b2");
+                        fS.appendChild( c2 );
+                        
+                        fS.setAttribute("EIRRotateAngle", eir.getAttribute("EIRRotateAngle"));
+                        
+                        // calculate EIR so we can set annualEIR
+                        // code is basically copied from VectorAnopheles::calcFourierEIR(...)
+                        double annualEIR = 0.0;
+                        double a0 = Double.parseDouble(eir.getAttribute("a0"));
+                        double a1 = Double.parseDouble(eir.getAttribute("a1"));
+                        double b1 = Double.parseDouble(eir.getAttribute("b1"));
+                        double a2 = Double.parseDouble(eir.getAttribute("a2"));
+                        double b2 = Double.parseDouble(eir.getAttribute("b2"));
+                        double rAngle = Double.parseDouble(fS.getAttribute("EIRRotateAngle"));
+                        double w = 2*Math.PI / 365;
+                        
+                        int Fn = 2;
+                        for (int t=0; t<365; t++) {
+                            double temp = a0;
+                            double wt = w*t - rAngle;
+                            temp += a1*Math.cos(wt) + b1*Math.sin(wt);
+                            temp += a2*Math.cos(2*wt) + b2*Math.sin(2*wt);
+                            annualEIR += Math.exp(temp);
+                        }
+                        seas.setAttribute("annualEIR",Double.toString(annualEIR));
+                        
+                        anoph.removeChild( eir );
+                    }
+                    
+                    Element mE = getChildElement(anoph,"monthlyEIR");
+                    if( mE != null ){
+                        Element mV = scenarioDocument.createElement("monthlyValues");
+                        seas.appendChild(mV);
+                        seas.setAttribute("annualEIR", mE.getAttribute("annualEIR"));
+                        mV.setAttribute("smoothing","fourier");
+                        
+                        List<Node> items = getChildNodes(mE, "item");
+                        for(int i=0; i<items.size(); ++i){
+                            Element v = scenarioDocument.createElement("value");
+                            v.setTextContent(items.get(i).getTextContent());
+                            mV.appendChild(v);
+                        }
+                        
+                        anoph.removeChild(mE);
                     }
                 }
             }

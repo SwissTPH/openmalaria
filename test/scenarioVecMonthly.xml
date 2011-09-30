@@ -129,20 +129,22 @@
   <entomology mode="dynamic" name="Vector Test">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <monthlyEIR annualEIR="20">
-          <item>10</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-          <item>1</item>
-        </monthlyEIR>
+        <seasonality annualEIR="20" input="EIR">
+          <monthlyValues smoothing="fourier">
+            <value>10</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+            <value>1</value>
+          </monthlyValues>
+        </seasonality>
         <mosq minInfectedThreshold="0.1">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>

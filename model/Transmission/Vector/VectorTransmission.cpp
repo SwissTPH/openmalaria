@@ -159,6 +159,7 @@ void VectorTransmission::scaleEIR (double factor) {
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
 }
+#if 0
 void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
     // XML values are exponentiated; so we add some factor to existing a0 values:
     double add_to_a0 = std::log( factor );
@@ -179,6 +180,7 @@ void VectorTransmission::scaleXML_EIR (scnXml::EntoData& ed, double factor) cons
         }
     }
 }
+#endif
 
 
 TimeStep VectorTransmission::minPreinitDuration () {

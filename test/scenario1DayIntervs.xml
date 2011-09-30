@@ -250,7 +250,7 @@
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>
   </healthSystem>
-  <entomology annualEIR="52" mode="dynamic" name="Do">
+  <entomology mode="dynamic" name="Do" scaledAnnualEIR="52">
     <!-- starts 1st Mar-->
     <nonVector eipDuration="10">
       <EIRDaily origin="monthly">0.0738</EIRDaily>

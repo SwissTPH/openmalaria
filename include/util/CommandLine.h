@@ -51,8 +51,6 @@ namespace OM { namespace util {
 	    SKIP_SIMULATION,
 	    /** Print the annual EIR. */
 	    PRINT_ANNUAL_EIR,
-	    /** Scale EIR to a new annual level. */
-	    SET_ANNUAL_EIR,
             /** Outputs samples from the active interpolation methods of all
              * age-group data suitible for graphing. */
             SAMPLE_INTERPOLATIONS,
@@ -78,12 +76,6 @@ namespace OM { namespace util {
 	* Then passes the resulting (or original) path through
 	* BoincWrapper::resolveFile() and returns the result. */
 	static string lookupResource (const string& path);
-	
-	/** Get the new target annual EIR (only set if SET_ANNUAL_EIR option
-	 * is true). */
-	static inline double getNewEIR (){
-	    return newEIR;
-	}
 	
         /** Get the name of the output file. */
 	static inline string getOutputName (){
@@ -118,8 +110,7 @@ namespace OM { namespace util {
 	static bitset<NUM_OPTIONS> options;	// boolean options
 	static string resourcePath;
 	
-	static double newEIR;
-        //Output filename (for main output file "output.txt")
+	//Output filename (for main output file "output.txt")
 	static string outputName;
         static string ctsoutName;
 	

@@ -42,7 +42,7 @@ public:
   virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
   
   virtual void scaleEIR (double factor);
-  virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
+//   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
   virtual TimeStep minPreinitDuration ();
   virtual TimeStep expectedInitDuration ();

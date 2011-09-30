@@ -76,11 +76,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="annualEIR" type="xs:double" use="optional">
+    <xs:attribute name="scaledAnnualEIR" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
-          If set, overrides the annual EIR by scaling it to this level.
-          If ommitted, EIR levels are as specified elsewhere.
+          If set, the annual EIR (for all species of vector) is scaled to this
+          level; can be omitted if not needed.
         </xs:documentation>
         <xs:appinfo>units:Infectious bites per adult per year;name:Override annual EIR;</xs:appinfo>
       </xs:annotation>
@@ -128,101 +128,179 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description of input EIR for one vector;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:choice>
-        <xs:element name="EIR">
-          <xs:annotation>
-            <xs:documentation>
-              Description of target entomological inoculation rate as a
-              Fourier series. This is used to estimate a suitible vector
-              emergence rate. The annual (target) EIR is thus the exponent
-              of the fourier series with these parameters, with period
-              scaled to 365 days.
-            </xs:documentation>
-            <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="coeffic" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="seasonality">
+        <xs:annotation>
+          <xs:documentation>Some specifier for the seasonality of transmission
+          and optionally the level of annual transmission.</xs:documentation>
+          <xs:appinfo>name:Seasonality of transmission;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice>
+              <xs:element name="fourierSeries">
                 <xs:annotation>
                   <xs:documentation>
-                    A pair of Fourier series coefficients. The first element
-                    specifies a1 and b1, the second a2 and b2, etc. Any number
-                    (from 0 up) of pairs may be given.
+                    Seasonality is reproduced from the exponential of a fourier
+                    series specified by the following coefficients. Note that
+                    the a0 term is not needed; the annualEIR attribute of the
+                    seasonality element should be used to scale EIR instead.
                   </xs:documentation>
-                  <xs:appinfo>name:Pair of Fourier coefficients;units:none;</xs:appinfo>
+                  <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
-                  <xs:attribute name="a" type="xs:double" use="required">
+                  <xs:sequence>
+                    <xs:element name="coeffic" minOccurs="0" maxOccurs="unbounded">
+                      <xs:annotation>
+                        <xs:documentation>
+                          A pair of Fourier series coefficients. The first element
+                          specifies a1 and b1, the second a2 and b2, etc. Any number
+                          (from 0 up) of pairs may be given.
+                        </xs:documentation>
+                        <xs:appinfo>name:Pair of Fourier coefficients;units:none;</xs:appinfo>
+                      </xs:annotation>
+                      <xs:complexType>
+                        <xs:attribute name="a" type="xs:double" use="required">
+                          <xs:annotation>
+                            <xs:documentation>
+                              a_n parameter of Fourier approximation to ln(EIR) for
+                              some natural number n.
+                            </xs:documentation>
+                            <xs:appinfo>name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                          </xs:annotation>
+                        </xs:attribute>
+                        <xs:attribute name="b" type="xs:double" use="required">
+                          <xs:annotation>
+                            <xs:documentation>
+                              b_n parameter of Fourier approximation to ln(EIR) for
+                              some natural number n.
+                            </xs:documentation>
+                            <xs:appinfo>name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                          </xs:annotation>
+                        </xs:attribute>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
                     <xs:annotation>
                       <xs:documentation>
-                        a_n parameter of Fourier approximation to ln(EIR) for
-                        some natural number n.
+                        Rotation angle defining the origin of the Fourier approximation to ln (EIR)
                       </xs:documentation>
-                      <xs:appinfo>name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
-                    </xs:annotation>
-                  </xs:attribute>
-                  <xs:attribute name="b" type="xs:double" use="required">
-                    <xs:annotation>
-                      <xs:documentation>
-                        b_n parameter of Fourier approximation to ln(EIR) for
-                        some natural number n.
-                      </xs:documentation>
-                      <xs:appinfo>name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                      <xs:appinfo>units:radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                 </xs:complexType>
               </xs:element>
-            </xs:sequence>
-            <xs:attribute name="a0" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  a0 parameter of Fourier approximation to ln(EIR)
-                </xs:documentation>
-                <xs:appinfo>name:a0 parameter of Fourier approximation to ln(EIR);sweepable:true;</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-            <xs:attribute name="EIRRotateAngle" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>
-                  Rotation angle defining the origin of the Fourier approximation to ln (EIR)
-                </xs:documentation>
-                <xs:appinfo>units:radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="monthlyEIR">
-          <xs:annotation>
-            <xs:documentation>
-              Description of target entomological inoculation rate as monthly
-              values plus an annual override (monthly values are scaled to fit
-              the annual EIR described). This is used to estimate a suitible vector
-              emergence rate. The annual (target) EIR is derived from a Fourier
-              series fit to these monthly values (used as a smoothing factor).
-              List should contain twelve entries: January to December.
-            </xs:documentation>
-            <xs:appinfo>units:Infectious bites per adult per month;name:Monthly values for pre-intervention EIR;</xs:appinfo>
-          </xs:annotation>
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="item" minOccurs="12" maxOccurs="12" type="xs:double">
+              <xs:element name="monthlyValues">
                 <xs:annotation>
                   <xs:documentation>
-                    Inoculations per person per month
+                    Description of seasonality from monthly values. Multiple
+                    smoothing methods are possible (see smoothing attribute).
+                    
+                    List should contain twelve entries: January to December.
                   </xs:documentation>
-                  <xs:appinfo>units:Inoculations per person per month;name:Monthly pre-intervention EIR;</xs:appinfo>
+                  <xs:appinfo>name:List of montly values;</xs:appinfo>
                 </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="value" minOccurs="12" maxOccurs="12" type="xs:double">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Monthly value
+                        </xs:documentation>
+                        <xs:appinfo>units:(see "seasonality input" parameter);name:Monthly value;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute name="smoothing" use="required">
+                    <xs:annotation>
+                      <xs:documentation>
+                        How the monthly values are converted into a daily
+                        sequence of values:
+                        
+                        1) none: no smoothing (step function)
+                        
+                        2) fourier: a Fourier series (with terms up to a2/b2)
+                        is fit to the sequence of monthly values and used to
+                        generate a smoothed list of daily values.
+                      </xs:documentation>
+                      <xs:appinfo>name:Smoothing function;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:enumeration value="none" />
+                        <xs:enumeration value="fourier" />
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:attribute>
+                </xs:complexType>
               </xs:element>
-            </xs:sequence>
-            <xs:attribute name="annualEIR" type="xs:double" use="required">
-              <xs:annotation>
-                <xs:documentation>Scales the monthly values to give this annual innoculation rate.</xs:documentation>
-                <xs:appinfo>units:Infectious bites per adult per year;name:Annual EIR;min:0;</xs:appinfo>
-              </xs:annotation>
-            </xs:attribute>
-          </xs:complexType>
-        </xs:element>
-      </xs:choice>
+              <xs:element name="dailyValues">
+                <xs:annotation>
+                  <xs:documentation>
+                    Description of seasonality from daily values.
+                    
+                    List should contain 365 entries: 1st January to 31st December.
+                  </xs:documentation>
+                  <xs:appinfo>name:List of daily values;</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="value" minOccurs="365" maxOccurs="365" type="xs:double">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Daily value
+                        </xs:documentation>
+                        <xs:appinfo>units:(see "seasonality input" parameter);name:Daily value;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:sequence>
+          <xs:attribute name="input" use="required">
+            <xs:annotation>
+              <xs:documentation>Specify what seasonality measure is given.
+              
+              At the moment, only EIR is supported, but in the future, all the
+              below should be supported.
+              
+              EIR: seasonality of entomological inoculations is input.
+              Units: entomological inoculations per adult per annum.
+              
+              hostSeeking: seasonality of densities of flying host-seeking
+              mosquitoes is input (in the model this is notated N_v).
+              Units: mosquitoes.
+              
+              emergence: seasonality of emergence pupa into adults.
+              Units: mosquitoes.
+              
+              larvalResources: seasonality of larval resources. Units: X.
+              </xs:documentation>
+              <xs:appinfo>name:Seasonality input;</xs:appinfo>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="EIR" />
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="annualEIR" type="xs:double" use="optional">
+            <xs:annotation>
+              <xs:documentation>If this attribute is included, EIR for this
+              species is scaled to this level. Note that if the scaledAnnualEIR
+              attribute of the entomology element is also used, EIR is scaled
+              again, making this attribute the EIR relative to other species.
+              
+              With some seasonality inputs, this attribute is optional, in which
+              case (if scaledAnnualEIR is also not specified) transmission depends
+              on all parameters of the vector. With some seasonality inputs,
+              however, this parameter must be specified.</xs:documentation>
+              <xs:appinfo>name:Annual EIR;units:inoculations per adult per annum;min:0;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="mosq">
         <xs:annotation>
           <xs:documentation>Parameters describing the feeding cycle and human

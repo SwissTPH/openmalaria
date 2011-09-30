@@ -322,10 +322,12 @@
   <entomology mode="dynamic" name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-5.835">
-          <coeffic a="0.8968" b="2.678"/>
-          <coeffic a="-0.4551" b="2.599"/>
-        </EIR>
+        <seasonality annualEIR="24.826144381650714" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="0.8968" b="2.678"/>
+            <coeffic a="-0.4551" b="2.599"/>
+          </fourierSeries>
+        </seasonality>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
@@ -347,10 +349,12 @@
         </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-4.852">
-          <coeffic a="-4.546" b="2.252"/>
-          <coeffic a="-0.2198" b="-0.00743"/>
-        </EIR>
+        <seasonality annualEIR="77.00628873180102" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="-4.546" b="2.252"/>
+            <coeffic a="-0.2198" b="-0.00743"/>
+          </fourierSeries>
+        </seasonality>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>
@@ -372,10 +376,12 @@
         </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <EIR EIRRotateAngle="0" a0="-3.638">
-          <coeffic a="0.8968" b="2.678"/>
-          <coeffic a="-0.4551" b="2.599"/>
-        </EIR>
+        <seasonality annualEIR="223.38512656454782" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="0.8968" b="2.678"/>
+            <coeffic a="-0.4551" b="2.599"/>
+          </fourierSeries>
+        </seasonality>
         <mosq minInfectedThreshold="0.001">
           <mosqRestDuration value="3"/>
           <extrinsicIncubationPeriod value="11"/>

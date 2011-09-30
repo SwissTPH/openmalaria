@@ -35,7 +35,6 @@ namespace OM { namespace util {
     
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
-    double CommandLine::newEIR;
     string CommandLine::outputName;
     string CommandLine::ctsoutName;
     set<TimeStep> CommandLine::checkpoint_times;
@@ -51,7 +50,6 @@ namespace OM { namespace util {
 	options[COMPRESS_CHECKPOINTS] = true;	// turn on by default
 	
 	bool cloHelp = false, cloVersion = false, cloError = false;
-	newEIR = numeric_limits<double>::quiet_NaN();
 	string scenarioFile = "";
         outputName = "";
         ctsoutName = "";
@@ -100,12 +98,6 @@ namespace OM { namespace util {
                     options.set (SKIP_SIMULATION);
 		} else if (clo == "print-EIR") {
 		    options.set (PRINT_ANNUAL_EIR);
-                    options.set (SKIP_SIMULATION);
-		} else if (clo == "set-EIR") {
-		    if (newEIR == newEIR)	// initialised to NaN
-			throw cmd_exception ("--set-EIR already given");
-		    newEIR = lexical_cast<double>(parseNextArg (argc, argv, i));
-		    options.set (SET_ANNUAL_EIR);
                     options.set (SKIP_SIMULATION);
 		} else if (clo == "sample-interpolations") {
 		    options.set (SAMPLE_INTERPOLATIONS);
@@ -225,9 +217,6 @@ namespace OM { namespace util {
             << " -n --name NAME	Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt --ctsout ctsoutNAME.txt" <<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
-	    << "    --set-EIR LEVEL	Scale the input EIR to a new annual level (inocs./person/year)"<<endl
-	    << "			Note: updated XML file will be generated in working directory,"<<endl
-	    << "			and will have other, mostly insignificant, differences to original."<<endl
             << "    --sample-interpolations"<<endl
             << "			Output samples of all used age-group data according to active"<<endl
             << "			interpolation method and exit."<<endl
