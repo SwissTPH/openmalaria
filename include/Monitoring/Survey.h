@@ -227,6 +227,10 @@ public:
         _numMDAs[ageGroup.i()] += val;
         return *this;
     }
+    Survey& reportMassScreening (AgeGroup ageGroup, int val) {
+        _numMassScreenings[ageGroup.i()] += val;
+        return *this;
+    }
     Survey& reportNmfDeaths (AgeGroup ageGroup, int val) {
         _numNmfDeaths[ageGroup.i()] += val;
         return *this;
@@ -338,6 +342,7 @@ public:
     _numAddedToCohort & stream;
     _numRemovedFromCohort & stream;
     _numMDAs & stream;
+    _numMassScreenings & stream;
     _numNmfDeaths & stream;
     _numAntibioticTreatments & stream;
   }
@@ -391,6 +396,7 @@ private:
   vector<int> _numAddedToCohort;
   vector<int> _numRemovedFromCohort;
   vector<int> _numMDAs;
+  vector<int> _numMassScreenings;
   vector<int> _numNmfDeaths;
   vector<int> _numAntibioticTreatments;
   

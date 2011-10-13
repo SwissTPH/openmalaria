@@ -62,6 +62,7 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 // -----  other methods  -----
 
 void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
+    Monitoring::Surveys.getSurvey(human.getInCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
     if( !massTreatDiagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
         return;
     }

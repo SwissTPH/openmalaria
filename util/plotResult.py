@@ -83,6 +83,7 @@ measureNames = {
     52 : 'nMDAs',
     53 : 'nNmfDeaths',
     54 : 'nAntibioticTreatments',
+    55 : 'nMassScreenings'
     }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -106,10 +107,10 @@ combinedMeasures = [
     ('inoculations',[(30,'all','red')]),
     ('feeding vectors',[(31,'emergence - N_v0','green'),(32,'all - N_v','blue'),(33,'infected - O_v','purple'),(34,'infectious - S_v','red')]),
     ('EIR (innocs/pers/year)',[(35,'requested','orange'),(36,'simulated','red')]),
-    ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown')]),
+    ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown'),(55,'MSAT','orange')]),
     ('drug usage (mg)',[(40,'oral','blue'),(49,'intrevenous','orange')]),
     ('vector interventions',[(44,'mass ITNs','darkgreen'),(45,'EPI ITNs','green'),(46,'mass IRS','darkred'),(47,'mass deterrents','brown')]),
-    ('cohort delta',[(50,'added','orange'),(51,'removed','blue')])
+    ('cohort delta',[(50,'added','orange'),(51,'removed','blue')]),
 ]
 appendMeasureNumber=None
 def measureNumber(m):

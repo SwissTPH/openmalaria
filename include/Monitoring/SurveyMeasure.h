@@ -208,6 +208,10 @@ enum SurveyMeasure {
     /// Number of antibiotic treatments given
     nAntibioticTreatments = 54,
     
+    /** Report the number of screenings used in a mass screen-and-treat
+     * operation. */
+    nMassScreenings = 55,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

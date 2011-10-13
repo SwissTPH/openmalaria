@@ -483,6 +483,7 @@ void ESCaseManagement::massDrugAdministration(
         bool inCohort,
         Monitoring::AgeGroup ageGroup
 ){
+    Monitoring::Surveys.getSurvey(inCohort).reportMassScreening(ageGroup, 1);
     bool anyTreatment = executeTree( &mda, hostData, medicateQueue, inCohort ).second;
     if( anyTreatment ){
         Monitoring::Surveys.getSurvey(inCohort).reportMDA(ageGroup, 1);

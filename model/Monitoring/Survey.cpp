@@ -98,6 +98,7 @@ class SurveyMeasureMap {
             codeMap["nAddedToCohort"] = SM::nAddedToCohort;
             codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
             codeMap["nMDAs"] = SM::nMDAs;
+            codeMap["nMassScreenings"] = SM::nMassScreenings;
             codeMap["nNmfDeaths"] = SM::nNmfDeaths;
             codeMap["nAntibioticTreatments"] = SM::nAntibioticTreatments;
 	}
@@ -211,6 +212,7 @@ void Survey::allocate ()
     _numAddedToCohort.resize (numAgeGroups);
     _numRemovedFromCohort.resize (numAgeGroups);
     _numMDAs.resize (numAgeGroups);
+    _numMassScreenings.resize (numAgeGroups);
     _numNmfDeaths.resize (numAgeGroups);
     _numAntibioticTreatments.resize (numAgeGroups);
 }
@@ -360,6 +362,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::nMDAs]) {
       writePerAgeGroup (outputFile, SM::nMDAs, survey, _numMDAs);
+  }
+  if (active[SM::nMassScreenings]) {
+      writePerAgeGroup (outputFile, SM::nMassScreenings, survey, _numMassScreenings);
   }
   if (active[SM::nNmfDeaths]) {
     writePerAgeGroup (outputFile, SM::nNmfDeaths, survey, _numNmfDeaths);

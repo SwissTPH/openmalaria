@@ -72,6 +72,7 @@
       <option name="Clinical_Microscopy" value="true"/>
       <option name="Clinical_DrugUsageIV" value="true"/>
       <option name="nMDAs" value="true"/>
+      <option name="nMassScreenings" value="true"/>
       <option name="nAddedToCohort" value="true"/>
       <option name="nRemovedFromCohort" value="true"/>
       <option name="nNmfDeaths" value="true"/>
