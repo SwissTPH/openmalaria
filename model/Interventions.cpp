@@ -32,7 +32,7 @@ namespace OM {
 // -----  AgeIntervention  -----
 
 AgeIntervention::AgeIntervention(
-    const ::scnXml::AgeSpecific& elt, void(Host::Human::*func) (const OM::Population&)
+    const ::scnXml::ContinuousDeployment& elt, void(Host::Human::*func) (const OM::Population&)
 ) :
     begin( elt.getBegin() ),
     end( elt.getEnd() ),
@@ -91,7 +91,7 @@ public:
 
 class TimedChangeHSIntervention : public TimedIntervention {
 public:
-    TimedChangeHSIntervention( const scnXml::ChangeHS::TimedType& hs ) :
+    TimedChangeHSIntervention( const scnXml::ChangeHS::TimedDeploymentType& hs ) :
         TimedIntervention( TimeStep( hs.getTime() ) ),
         newHS( hs._clone() )
     {}
@@ -107,7 +107,7 @@ private:
 
 class TimedChangeEIRIntervention : public TimedIntervention {
 public:
-    TimedChangeEIRIntervention( const scnXml::ChangeEIR::TimedType& nv ) :
+    TimedChangeEIRIntervention( const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
         TimedIntervention( TimeStep( nv.getTime() ) ),
         newEIR( nv._clone() )
     {}
@@ -298,29 +298,29 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
 {
     if( intervElt.getChangeHS().present() ){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
-        if( chs.getTimed().size() > 0 ){
+        if( chs.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::CHANGE_HS, true);
             // timed deployments:
-            typedef scnXml::ChangeHS::TimedSequence::const_iterator It;
-            for( It it = chs.getTimed().begin(); it != chs.getTimed().end(); ++it ){
+            typedef scnXml::ChangeHS::TimedDeploymentSequence::const_iterator It;
+            for( It it = chs.getTimedDeployment().begin(); it != chs.getTimedDeployment().end(); ++it ){
                 timed.push_back( new TimedChangeHSIntervention( *it ) );
             }
         }
     }
     if( intervElt.getChangeEIR().present() ){
         const scnXml::ChangeEIR& eir = intervElt.getChangeEIR().get();
-        if( eir.getTimed().size() > 0 ){
+        if( eir.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::CHANGE_EIR, true);
             // timed deployments:
-            typedef scnXml::ChangeEIR::TimedSequence::const_iterator It;
-            for( It it = eir.getTimed().begin(); it != eir.getTimed().end(); ++it ){
+            typedef scnXml::ChangeEIR::TimedDeploymentSequence::const_iterator It;
+            for( It it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
                 timed.push_back( new TimedChangeEIRIntervention( *it ) );
             }
         }
     }
     if( intervElt.getMDA().present() ){
         const scnXml::MDA& mda = intervElt.getMDA().get();
-        if( mda.getTimed().size() > 0 ){
+        if( mda.getTimed().present() ){
             activeInterventions.set( Interventions::MDA, true );
             // read description:
             if( TimeStep::interval == 5 ){
@@ -341,28 +341,35 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
             }
             // timed deployments:
-            typedef scnXml::MDA::TimedSequence::const_iterator It;
-            for( It it = mda.getTimed().begin(); it != mda.getTimed().end(); ++it ){
+            const scnXml::MassList::DeploySequence& seq = mda.getTimed().get().getDeploy();
+            typedef scnXml::MassList::DeploySequence::const_iterator It;
+            for( It it = seq.begin(); it != seq.end(); ++it ){
                 timed.push_back( new TimedMassIntervention( *it, &Host::Human::massDrugAdministration ) );
             }
         }
     }
     if( intervElt.getVaccine().present() ){
         const scnXml::Vaccine& vacc = intervElt.getVaccine().get();
-        if( vacc.getContinuous().size() + vacc.getTimed().size() > 0 ){
+        if( vacc.getContinuous().present() || vacc.getTimed().present() ){
             activeInterventions.set (Interventions::VACCINE, true);
             // read descriptions:
             Host::Vaccine::init( vacc );
             // continuous deployments:
             // We let ctsVaccinate determine whether according to past vaccinations this dose should be administered
-            typedef scnXml::Vaccine::ContinuousSequence::const_iterator CIt;
-            for( CIt it = vacc.getContinuous().begin(); it != vacc.getContinuous().end(); ++it ){
-                ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsVaccinate ) );
+            if( vacc.getContinuous().present() ){
+                const scnXml::ContinuousList::DeploySequence& seq = vacc.getContinuous().get().getDeploy();
+                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
+                for( CIt it = seq.begin(); it != seq.end(); ++it ){
+                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsVaccinate ) );
+                }
             }
             // timed deployments:
-            typedef scnXml::Vaccine::TimedSequence::const_iterator It;
-            for( It it = vacc.getTimed().begin(); it != vacc.getTimed().end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massVaccinate, &Host::Human::hasVaccineProtection ) );
+            if( vacc.getTimed().present() ){
+                const scnXml::MassCumList::DeploySequence& seq = vacc.getTimed().get().getDeploy();
+                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+                for( It it = seq.begin(); it != seq.end(); ++it ){
+                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massVaccinate, &Host::Human::hasVaccineProtection ) );
+                }
             }
         }
     }
@@ -372,73 +379,93 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         activeInterventions.set (Interventions::IPTI, true);
         WithinHost::DescriptiveIPTWithinHost::init( ipt.getDescription() );
         // continuous deployments:
-        typedef scnXml::IPT::ContinuousSequence::const_iterator CIt;
-        for( CIt it = ipt.getContinuous().begin(); it != ipt.getContinuous().end(); ++it ){
-            ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
+        if( ipt.getContinuous().present() ){
+            const scnXml::ContinuousList::DeploySequence& seq = ipt.getContinuous().get().getDeploy();
+            typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
+            for( CIt it = seq.begin(); it != seq.end(); ++it ){
+                ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
+            }
         }
         // timed deployments:
-        typedef scnXml::IPT::TimedSequence::const_iterator It;
-        for( It it = ipt.getTimed().begin(); it != ipt.getTimed().end(); ++it ){
-            timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
+        if( ipt.getTimed().present() ){
+            const scnXml::MassCumList::DeploySequence& seq = ipt.getTimed().get().getDeploy();
+            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+            for( It it = seq.begin(); it != seq.end(); ++it ){
+                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
+            }
         }
     }
     if( intervElt.getITN().present() ){
         const scnXml::ITN& itn = intervElt.getITN().get();
-        if( itn.getTimed().size() + itn.getContinuous().size() > 0 ){
+        if( itn.getTimed().present() || itn.getContinuous().present() ){
             activeInterventions.set (Interventions::ITN, true);
             // read description
             population.transmissionModel().setITNDescription( itn.getDescription() );
             // continuous deployments:
-            typedef scnXml::ITN::ContinuousSequence::const_iterator CIt;
-            for( CIt it = itn.getContinuous().begin(); it != itn.getContinuous().end(); ++it ){
-                ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsITN ) );
+            if( itn.getContinuous().present() ){
+                const scnXml::ContinuousList::DeploySequence& seq = itn.getContinuous().get().getDeploy();
+                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
+                for( CIt it = seq.begin(); it != seq.end(); ++it ){
+                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsITN ) );
+                }
             }
             // timed deployments:
-            typedef scnXml::ITN::TimedSequence::const_iterator It;
-            for( It it = itn.getTimed().begin(); it != itn.getTimed().end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massITN, &Host::Human::hasITNProtection ) );
+            if( itn.getTimed().present() ){
+                const scnXml::MassCumList::DeploySequence& seq = itn.getTimed().get().getDeploy();
+                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+                for( It it = seq.begin(); it != seq.end(); ++it ){
+                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massITN, &Host::Human::hasITNProtection ) );
+                }
             }
         }
     }
     if( intervElt.getIRS().present() ){
         const scnXml::IRS& irs = intervElt.getIRS().get();
-        if( irs.getTimed().size() > 0 ){
+        if( irs.getTimed().present() ){
             activeInterventions.set (Interventions::IRS, true);
             // read description
             population.transmissionModel().setIRSDescription( irs );
             // timed deployments:
-            typedef scnXml::IRS::TimedSequence::const_iterator It;
-            for( It it = irs.getTimed().begin(); it != irs.getTimed().end(); ++it ){
+            const scnXml::MassCumList::DeploySequence& seq = irs.getTimed().get().getDeploy();
+            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+            for( It it = seq.begin(); it != seq.end(); ++it ){
                 timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massIRS, &Host::Human::hasIRSProtection ) );
             }
         }
     }
     if( intervElt.getVectorDeterrent().present() ){
         const scnXml::VectorDeterrent& va = intervElt.getVectorDeterrent().get();
-        if( va.getTimed().size() > 0 ){
+        if( va.getTimed().present() ){
             activeInterventions.set (Interventions::VEC_AVAIL, true);
             // read description
             population.transmissionModel().setVADescription( va );
             // timed deployments:
-            typedef scnXml::VectorDeterrent::TimedSequence::const_iterator It;
-            for( It it = va.getTimed().begin(); it != va.getTimed().end(); ++it ){
+            const scnXml::MassCumList::DeploySequence& seq = va.getTimed().get().getDeploy();
+            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+            for( It it = seq.begin(); it != seq.end(); ++it ){
                 timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massVA, &Host::Human::hasVAProtection ) );
             }
         }
     }
     if( intervElt.getCohort().present() ){
         const scnXml::Cohort& ch = intervElt.getCohort().get();
-        if( ch.getTimed().size() + ch.getContinuous().size() > 0 ){
+        if( ch.getTimed().present() || ch.getContinuous().present() ){
             activeInterventions.set (Interventions::COHORT, true);
             // continuous deployments:
-            typedef scnXml::Cohort::ContinuousSequence::const_iterator CIt;
-            for( CIt it = ch.getContinuous().begin(); it != ch.getContinuous().end(); ++it ){
-                ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::addToCohort ) );
+            if( ch.getContinuous().present() ){
+                const scnXml::ContinuousList::DeploySequence& seq = ch.getContinuous().get().getDeploy();
+                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
+                for( CIt it = seq.begin(); it != seq.end(); ++it ){
+                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::addToCohort ) );
+                }
             }
             // timed deployments:
-            typedef scnXml::Cohort::TimedSequence::const_iterator It;
-            for( It it = ch.getTimed().begin(); it != ch.getTimed().end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::addToCohort, &Host::Human::getInCohort ) );
+            if( ch.getTimed().present() ){
+                const scnXml::MassCumList::DeploySequence& seq = ch.getTimed().get().getDeploy();
+                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
+                for( It it = seq.begin(); it != seq.end(); ++it ){
+                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::addToCohort, &Host::Human::getInCohort ) );
+                }
             }
         }
     }
@@ -451,35 +478,36 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     }
     if( intervElt.getImmuneSuppression().present() ){
         const scnXml::ImmuneSuppression& elt = intervElt.getImmuneSuppression().get();
-        if( elt.getTimed().size() > 0 ){
+        if( elt.getTimed().present() ){
             activeInterventions.set (Interventions::IMMUNE_SUPPRESSION, true);
             // timed deployments:
-            typedef scnXml::ImmuneSuppression::TimedSequence::const_iterator It;
-            for( It it = elt.getTimed().begin(); it != elt.getTimed().end(); ++it ){
+            const scnXml::MassList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+            typedef scnXml::MassList::DeploySequence::const_iterator It;
+            for( It it = seq.begin(); it != seq.end(); ++it ){
                 timed.push_back( new TimedMassIntervention( *it, &Host::Human::immuneSuppression ) );
             }
         }
     }
     if( intervElt.getInsertR_0Case().present() ){
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
-        if( elt.getTimed().size() > 0 ){
+        if( elt.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::R_0_CASE, true);
             // uses vaccines but see note in Vaccine::initParameters()
             // activeInterventions.set (Interventions::VACCINE, true);
             // timed deployments:
-            typedef scnXml::InsertR_0Case::TimedSequence::const_iterator It;
-            for( It it = elt.getTimed().begin(); it != elt.getTimed().end(); ++it ){
+            typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
+            for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
                 timed.push_back( new TimedR_0Intervention( TimeStep( it->getTime() ) ) );
             }
         }
     }
     if( intervElt.getUninfectVectors().present() ){
         const scnXml::UninfectVectors& elt = intervElt.getUninfectVectors().get();
-        if( elt.getTimed().size() > 0 ){
+        if( elt.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::UNINFECT_VECTORS, true);
             // timed deployments:
-            typedef scnXml::UninfectVectors::TimedSequence::const_iterator It;
-            for( It it = elt.getTimed().begin(); it != elt.getTimed().end(); ++it ){
+            typedef scnXml::UninfectVectors::TimedDeploymentSequence::const_iterator It;
+            for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
                 timed.push_back( new TimedUninfectVectorsIntervention( TimeStep( it->getTime() ) ) );
             }
         }

@@ -62,7 +62,7 @@
   </monitoring>
   <interventions name="A2 Intervention">
     <changeEIR>
-      <timed eipDuration="10" time="0">
+      <timedDeployment eipDuration="10" time="0">
         <EIRDaily origin="interpolate">0.00219</EIRDaily>
         <EIRDaily origin="interpolate">0.00210</EIRDaily>
         <EIRDaily origin="interpolate">0.00202</EIRDaily>
@@ -635,17 +635,19 @@
         <EIRDaily origin="interpolate">0.00480</EIRDaily>
         <EIRDaily origin="interpolate">0.00480</EIRDaily>
         <EIRDaily origin="regression">0.00480</EIRDaily>
-      </timed>
+      </timedDeployment>
     </changeEIR>
     <MDA>
-      <timed coverage="1" maxAge="999" minAge="0" time="0"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="14"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="28"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="42"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="56"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="70"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="84"/>
-      <timed coverage="1" maxAge="999" minAge="0" time="98"/>
+      <timed>
+        <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="28"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="42"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="56"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="70"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
+        <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
+      </timed>
     </MDA>
   </interventions>
   <healthSystem>

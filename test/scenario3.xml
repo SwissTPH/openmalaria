@@ -66,9 +66,11 @@
         <infGenotype ACR="1.0" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
         <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
       </description>
-      <continuous coverage="0.99" targetAgeYrs="0.274"/>
-      <continuous coverage="0.95" targetAgeYrs="0.36987"/>
-      <continuous coverage="0.95" targetAgeYrs="0.79453"/>
+      <continuous>
+        <deploy coverage="0.99" targetAgeYrs="0.274"/>
+        <deploy coverage="0.95" targetAgeYrs="0.36987"/>
+        <deploy coverage="0.95" targetAgeYrs="0.79453"/>
+      </continuous>
     </IPT>
   </interventions>
   <!-- Namawala 1_16 -->

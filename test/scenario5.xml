@@ -188,13 +188,15 @@
         <initialEfficacy value="0.46"/>
         <initialEfficacy value="0.52"/>
       </description>
-      <continuous coverage="0.95" targetAgeYrs="0.0833"/>
-      <continuous coverage="0.95" targetAgeYrs="0.17"/>
-      <continuous coverage="0.99" targetAgeYrs="0.25"/>
-      <continuous coverage="0.99" targetAgeYrs="1.25"/>
-      <continuous coverage="0.99" targetAgeYrs="2.25"/>
-      <continuous coverage="0.99" targetAgeYrs="3.25"/>
-      <continuous coverage="0.99" targetAgeYrs="4.25"/>
+      <continuous>
+        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+        <deploy coverage="0.95" targetAgeYrs="0.17"/>
+        <deploy coverage="0.99" targetAgeYrs="0.25"/>
+        <deploy coverage="0.99" targetAgeYrs="1.25"/>
+        <deploy coverage="0.99" targetAgeYrs="2.25"/>
+        <deploy coverage="0.99" targetAgeYrs="3.25"/>
+        <deploy coverage="0.99" targetAgeYrs="4.25"/>
+      </continuous>
     </vaccine>
   </interventions>
   <healthSystem>

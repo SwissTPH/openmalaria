@@ -73,7 +73,7 @@
   </monitoring>
   <interventions name="Change to monitoring HS">
     <changeHS>
-      <timed time="0">
+      <timedDeployment time="0">
         <ImmediateOutcomes name="Test HS">
           <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
           <initialACR>
@@ -118,7 +118,7 @@
           <group lowerbound="0.0" value="0.0132"/>
           <group lowerbound="5.0" value="0.005"/>
         </pSequelaeInpatient>
-      </timed>
+      </timedDeployment>
     </changeHS>
   </interventions>
   <healthSystem>

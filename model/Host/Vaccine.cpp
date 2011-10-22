@@ -81,10 +81,11 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
     BSV.initVaccine (VdBSV);
     TBV.initVaccine (VdTBV);
 
-    _numberOfEpiDoses = xmlVaccine.getContinuous().size();
+    _numberOfEpiDoses = xmlVaccine.getContinuous().present() ?
+        xmlVaccine.getContinuous().get().getDeploy().size() : 0;
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
-        const scnXml::Vaccine::ContinuousSequence& cVS = xmlVaccine.getContinuous();
+        const scnXml::ContinuousList::DeploySequence& cVS = xmlVaccine.getContinuous().get().getDeploy();
         for (size_t i = 0;i < _numberOfEpiDoses; ++i) {
             if (i >= cVS.size()) {
                 ostringstream msg;

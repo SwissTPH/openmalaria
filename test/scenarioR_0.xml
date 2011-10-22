@@ -73,30 +73,38 @@
         <efficacyB value="1"/>
         <initialEfficacy value="1"/>
       </description>
-      <continuous coverage="1" targetAgeYrs="0.0137"/>
-      <timed coverage="1" time="73"/>
+      <continuous>
+        <deploy coverage="1" targetAgeYrs="0.0137"/>
+      </continuous>
+      <timed>
+        <deploy coverage="1" time="73"/>
+      </timed>
     </vaccine>
     <MDA>
-      <timed coverage="1" time="73"/>
-      <timed coverage="1" time="74"/>
-      <timed coverage="1" time="75"/>
-      <timed coverage="1" time="76"/>
-      <timed coverage="1" time="77"/>
-      <timed coverage="1" time="78"/>
+      <timed>
+        <deploy coverage="1" time="73"/>
+        <deploy coverage="1" time="74"/>
+        <deploy coverage="1" time="75"/>
+        <deploy coverage="1" time="76"/>
+        <deploy coverage="1" time="77"/>
+        <deploy coverage="1" time="78"/>
+      </timed>
     </MDA>
     <uninfectVectors>
-      <timed time="73"/>
-      <timed time="74"/>
-      <timed time="75"/>
-      <timed time="76"/>
-      <timed time="77"/>
-      <timed time="78"/>
+      <timedDeployment time="73"/>
+      <timedDeployment time="74"/>
+      <timedDeployment time="75"/>
+      <timedDeployment time="76"/>
+      <timedDeployment time="77"/>
+      <timedDeployment time="78"/>
     </uninfectVectors>
     <immuneSuppression>
-      <timed coverage="1" time="78"/>
+      <timed>
+        <deploy coverage="1" time="78"/>
+      </timed>
     </immuneSuppression>
     <insertR_0Case>
-      <timed time="146"/>
+      <timedDeployment time="146"/>
     </insertR_0Case>
   </interventions>
   <healthSystem>

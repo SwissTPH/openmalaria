@@ -174,11 +174,15 @@
         <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
         <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
       </description>
-      <continuous coverage="0.95" targetAgeYrs="0.25"/>
-      <continuous coverage="0.95" targetAgeYrs="0.33"/>
-      <continuous coverage="0.95" targetAgeYrs="0.75"/>
-      <timed coverage=".8" time="7"/>
-      <timed coverage=".8" time="79"/>
+      <continuous>
+        <deploy coverage="0.95" targetAgeYrs="0.25"/>
+        <deploy coverage="0.95" targetAgeYrs="0.33"/>
+        <deploy coverage="0.95" targetAgeYrs="0.75"/>
+      </continuous>
+      <timed>
+        <deploy coverage=".8" time="7"/>
+        <deploy coverage=".8" time="79"/>
+      </timed>
     </IPT>
   </interventions>
   <!-- Niakhar seasonality scaled to an EIR of 21 -->

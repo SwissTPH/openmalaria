@@ -165,14 +165,16 @@
           </treatment>
         </treatments>
       </description>
-      <timed coverage="0.85" time="1484"/>
-      <timed coverage="0.85" time="1849"/>
-      <timed coverage="0.85" time="2214"/>
-      <timed coverage="0.85" time="2579"/>
-      <timed coverage="0.85" time="2944"/>
-      <timed coverage="0.85" time="3309"/>
-      <timed coverage="0.85" time="3674"/>
-      <timed coverage="0.85" time="4039"/>
+      <timed>
+        <deploy coverage="0.85" time="1484"/>
+        <deploy coverage="0.85" time="1849"/>
+        <deploy coverage="0.85" time="2214"/>
+        <deploy coverage="0.85" time="2579"/>
+        <deploy coverage="0.85" time="2944"/>
+        <deploy coverage="0.85" time="3309"/>
+        <deploy coverage="0.85" time="3674"/>
+        <deploy coverage="0.85" time="4039"/>
+      </timed>
     </MDA>
     <ITN name="Extended ITNs">
       <description>
@@ -200,10 +202,12 @@
         </anophelesParams>
       </description>
       <!-- at 2, 6, 10 and 16 years -->
-      <timed coverage="0.20" time="146"/>
-      <timed coverage="0.20" time="438"/>
-      <timed coverage="0.20" time="730"/>
-      <timed coverage="0.20" time="1168"/>
+      <timed>
+        <deploy coverage="0.20" time="146"/>
+        <deploy coverage="0.20" time="438"/>
+        <deploy coverage="0.20" time="730"/>
+        <deploy coverage="0.20" time="1168"/>
+      </timed>
     </ITN>
     <importedInfections>
       <timed>

@@ -107,12 +107,14 @@
           </treatment>
         </treatments>
       </description>
-      <timed coverage="0.6" time="160"/>
-      <timed coverage="0.6" time="860"/>
-      <timed coverage="0.6" time="870"/>
-      <timed coverage="0.6" time="1580"/>
-      <timed coverage="0.6" time="1595"/>
-      <timed coverage="0.6" time="1610"/>
+      <timed>
+        <deploy coverage="0.6" time="160"/>
+        <deploy coverage="0.6" time="860"/>
+        <deploy coverage="0.6" time="870"/>
+        <deploy coverage="0.6" time="1580"/>
+        <deploy coverage="0.6" time="1595"/>
+        <deploy coverage="0.6" time="1610"/>
+      </timed>
     </MDA>
     <vaccine>
       <description vaccineType="PEV">
@@ -122,11 +124,13 @@
         <initialEfficacy value="0.64"/>
         <initialEfficacy value="0.8"/>
       </description>
-      <continuous coverage="0.95" targetAgeYrs="0.0833"/>
-      <continuous coverage="0.95" targetAgeYrs="0.17"/>
-      <continuous coverage="0.99" targetAgeYrs="0.25"/>
-      <continuous coverage="0.99" targetAgeYrs="2"/>
-      <continuous coverage="0.99" targetAgeYrs="5"/>
+      <continuous>
+        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+        <deploy coverage="0.95" targetAgeYrs="0.17"/>
+        <deploy coverage="0.99" targetAgeYrs="0.25"/>
+        <deploy coverage="0.99" targetAgeYrs="2"/>
+        <deploy coverage="0.99" targetAgeYrs="5"/>
+      </continuous>
     </vaccine>
   </interventions>
   <healthSystem>

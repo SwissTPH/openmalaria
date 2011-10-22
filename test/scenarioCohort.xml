@@ -92,11 +92,17 @@
           </treatment>
         </treatments>
       </description>
-      <timed coverage="0.6" time="730"/>
+      <timed>
+        <deploy coverage="0.6" time="730"/>
+      </timed>
     </MDA>
     <cohort>
-      <continuous coverage="0.05" targetAgeYrs="1.0"/>
-      <timed coverage="0.4" time="0"/>
+      <continuous>
+        <deploy coverage="0.05" targetAgeYrs="1.0"/>
+      </continuous>
+      <timed>
+        <deploy coverage="0.4" time="0"/>
+      </timed>
     </cohort>
   </interventions>
   <healthSystem>

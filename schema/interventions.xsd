@@ -17,7 +17,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
                   <xs:extension base="healthSystem">
@@ -65,7 +65,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
                   <xs:extension base="nonVector">
@@ -153,7 +153,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:complexType>
               </xs:element>
             </xs:choice>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="mass">
+            <xs:element minOccurs="0" name="timed" type="massList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed deployments of mass-drug-administration.
@@ -182,7 +182,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+            <xs:element minOccurs="0" name="continuous" type="continuousList">
               <xs:annotation>
                 <xs:documentation>List of ages at which vaccination takes place
                 (through EPI, post-natal and school-based programmes, etc.).
@@ -190,7 +190,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Age-based vaccination;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed mass vaccinations in the community
@@ -219,7 +219,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element maxOccurs="1" name="description" type="IPTDescription" />
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+            <xs:element minOccurs="0" name="continuous" type="continuousList">
               <xs:annotation>
                 <xs:documentation>List of ages at which IPTi/IPTc deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
@@ -227,7 +227,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Age-based IPT deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed IPTi/IPTc distribution
@@ -256,7 +256,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="description" type="ITNDescription"/>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+            <xs:element minOccurs="0" name="continuous" type="continuousList">
             <xs:annotation>
                 <xs:documentation>List of ages at which bed-net deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
@@ -264,7 +264,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Age-based bed-net deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed ITN deployment in the community
@@ -307,7 +307,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed IRS deployment in the community
@@ -346,7 +346,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
             <xs:element name="anophelesParams" maxOccurs="unbounded" type="BaseInterventionDescription"/>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
                   List of timed mosquito deterrent deployment in the community
@@ -374,14 +374,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="continuous" type="ageSpecific">
+            <xs:element minOccurs="0" name="continuous" type="continuousList">
               <xs:annotation>
                 <xs:documentation>List of ages at which cohort recruitment takes place.
                 </xs:documentation>
                 <xs:appinfo>name:Age-based cohort recruitment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massCum">
+            <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>List of times of mass cohort selection.
                 </xs:documentation>
@@ -476,7 +476,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="timed" type="mass" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="timed" type="massList" minOccurs="0"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -496,7 +496,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
@@ -531,7 +531,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="timed" minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
@@ -672,7 +672,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="ageSpecific">
+  <xs:complexType name="continuousList">
+    <xs:sequence>
+      <!-- Note: minimum is 1 to save an extra check in code. -->
+      <xs:element name="deploy" type="continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="continuousDeployment">
     <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -716,6 +722,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="massList">
+    <xs:sequence>
+      <!-- Note: minimum is 1 to save an extra check in code. -->
+      <xs:element name="deploy" type="mass" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="massCumList">
+    <xs:sequence>
+      <!-- Note: minimum is 1 to save an extra check in code. -->
+      <xs:element name="deploy" type="massCum" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="vaccineDescription">
     <xs:annotation>

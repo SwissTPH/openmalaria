@@ -60,7 +60,7 @@
   </monitoring>
   <interventions name="Change to monitoring HS">
     <changeHS>
-      <timed time="91">
+      <timedDeployment time="91">
         <EventScheduler>
           <uncomplicated>
             <decisions>
@@ -119,7 +119,7 @@
           <group lowerbound="0.0" value="0.0132"/>
           <group lowerbound="5.0" value="0.005"/>
         </pSequelaeInpatient>
-      </timed>
+      </timedDeployment>
     </changeHS>
   </interventions>
   <healthSystem>

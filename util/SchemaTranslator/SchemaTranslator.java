@@ -188,14 +188,14 @@ public class SchemaTranslator {
     static class STErrorHandler implements ErrorHandler {
         public void fatalError( SAXParseException e )
             throws SAXException {
-            System.err.println(e.toString());
+            System.err.println("Error: "+e.toString());
             throw e;
         }
         public void error( SAXParseException e ){
-            System.out.println(e.toString());
+            System.out.println("Error: "+e.toString());
         }
         public void warning( SAXParseException e ) throws SAXException {
-            System.out.println(e.toString());
+            System.out.println("Error: "+e.toString());
         }
     }
 
@@ -568,7 +568,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -652,7 +652,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -693,7 +693,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -815,7 +815,7 @@ public class SchemaTranslator {
             monitoring = getChildElement(scenarioElement, "monitoring");
             surveys = getChildElement(monitoring, "surveys");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
         int surveyFlags = Integer.parseInt(surveys
@@ -948,7 +948,7 @@ public class SchemaTranslator {
 
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1026,7 +1026,7 @@ public class SchemaTranslator {
             demography = getChildElement(scenarioElement, "demography");
             entoData = getChildElement(scenarioElement, "entoData");
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
 
@@ -1085,7 +1085,7 @@ public class SchemaTranslator {
 
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1195,7 +1195,7 @@ public class SchemaTranslator {
 
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1260,7 +1260,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1286,7 +1286,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1318,7 +1318,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1385,7 +1385,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1464,7 +1464,7 @@ public class SchemaTranslator {
             System.out.println("translated to 25");
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1528,7 +1528,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1848,7 +1848,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1952,7 +1952,7 @@ public class SchemaTranslator {
             }
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
@@ -1963,6 +1963,7 @@ public class SchemaTranslator {
      * EIR survey measures changed name
      * EIR as Fourier coefficients can now use any odd number of coefficients.
      * Added mosquito life-cycle parameters (optional, so not added here)
+     * timed elt of changeHS and changeEIR renamed to timedDeployment
      */
     public Boolean translate29To30() {
         try{
@@ -2085,9 +2086,146 @@ public class SchemaTranslator {
                 }
             }
             
+            Element intervs = getChildElement(scenarioElement,"interventions");
+            Element interv = getChildElement(intervs,"changeHS");
+            if(interv != null){
+                for( Node n : getChildNodes(interv,"timed") )
+                    scenarioDocument.renameNode( n, null, "timedDeployment" );
+            }
+            
+            interv = getChildElement(intervs,"changeEIR");
+            if(interv != null){
+                for( Node n : getChildNodes(interv,"timed") )
+                    scenarioDocument.renameNode( n, null, "timedDeployment" );
+            }
+            
+            interv = getChildElement(intervs,"MDA");
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"vaccine");
+            if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("continuous");
+                for( Node n : getChildNodes(interv, "continuous") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"IPT");
+            if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("continuous");
+                for( Node n : getChildNodes(interv, "continuous") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"ITN");
+            if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("continuous");
+                for( Node n : getChildNodes(interv, "continuous") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"IRS");
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"vectorDeterrent");
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"cohort");
+            if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("continuous");
+                for( Node n : getChildNodes(interv, "continuous") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"immuneSuppression");
+            if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
+                Element list  = scenarioDocument.createElement("timed");
+                for( Node n : getChildNodes(interv, "timed") ){
+                    list.appendChild(n);
+                    scenarioDocument.renameNode(n,null,"deploy");
+                }
+                interv.appendChild(list);
+            }
+            
+            interv = getChildElement(intervs,"insertR_0Case");
+            if(interv != null){
+                for( Node n : getChildNodes(interv,"timed") )
+                    scenarioDocument.renameNode( n, null, "timedDeployment" );
+            }
+            
+            interv = getChildElement(intervs,"uninfectVectors");
+            if(interv != null){
+                for( Node n : getChildNodes(interv,"timed") )
+                    scenarioDocument.renameNode( n, null, "timedDeployment" );
+            }
+            
             return true;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
+            System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
