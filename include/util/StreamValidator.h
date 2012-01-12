@@ -20,14 +20,26 @@
 #ifndef Hmod_StreamValidator
 #define Hmod_StreamValidator
 
+#include <boost/cstdint.hpp>
+
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
 #include "Global.h"
 #include <deque>
-#include <boost/functional/hash.hpp>
 #endif
 
 namespace OM { namespace util {
+    typedef boost::uint32_t SVType;
+    
+    // ———  Our cross-platform consistent-result hasing functions  ——
+    namespace CPCH {
+        SVType toSVType(boost::uint32_t x);
+        SVType toSVType(boost::int32_t x);
+        SVType toSVType(boost::uint64_t x);
+        SVType toSVType(boost::int64_t x);
+        SVType toSVType(float x);
+        SVType toSVType(double x);
+    }
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -73,18 +85,17 @@ namespace OM { namespace util {
 	/// Load a reference stream from file and switch to validation mode.
 	void loadStream( const string& path );
 	
-	/// Templated function to take a value, hash it, and call handle.
+	/** Templated function to take a value, hash it, and call handle.
+         * 
+         * We can't just use something like boost::hash because we want the
+         * result to be the same across platforms, builds, etc. */
 	template<class T>
 	void operator() (T value){
-	    // creating a copy for each use: probably not efficient
-	    // can provide specialized templates if necessary
-	    boost::hash<T> hash_func;
-	    
-	    handle( hash_func( value ) );
-	}
+            handle( CPCH::toSVType( value ) );
+        }
 	
 	/// Either store in reference stream or validate against reference stream.
-	void handle( size_t value );
+	void handle( SVType value );
 	
 	/// Checkpointing
 	template<class S>
@@ -101,12 +112,12 @@ namespace OM { namespace util {
 	bool storeMode;
 	
 	// Next position in the stream to read from (validation mode only).
-	deque<size_t>::iterator readIt;
+	deque<SVType>::iterator readIt;
 	
 	// Essentially we want to store a massive sequence of data in-memory
 	// (simplist with regard to checkpointing.) std::deque is probably an
 	// efficient way of doing this.
-	deque<size_t> stream;
+	deque<SVType> stream;
     };
     extern StreamValidatorType StreamValidator;
 

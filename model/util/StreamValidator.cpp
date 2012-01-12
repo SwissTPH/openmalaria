@@ -36,24 +36,31 @@ const char OM_SV_HEAD[5] = "OMSV";
 // These operators overload against others in the checkpoint namespace.
 // Putting these in the same namespace is an easy solution, if not very standard.
 namespace checkpoint {
-    // versions of checkpoint operator for deque,
-    // but with increased max length
+    // Versions of checkpoint operator for deque, but with increased max
+    // length. They also write length as a 32-bit unsigned integer; in theory
+    // size_t could be used for checkpointing but that's not really necessary.
     template<class T>
     void operator& (deque<T> x, ostream& stream) {
-	x.size() & stream;
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
+        // Write size as a uint32_t for cross-platform compatibility; first
+        // check size isn't greater than what a 32-bit uint can represent.
+        uint32_t size32 = x.size();
+        size_t size_check = size32;
+        if( size_check != x.size() )
+            throw traced_exception( "stream too long!" );
+        size32 & stream;       // write 32-bit unsigned int (size_t is platform dependent!)
+        BOOST_FOREACH (T& y, x) {
+            y & stream;
+        }
     }
     template<class T>
     void operator& (deque<T>& x, istream& stream) {
-	size_t l;
-	l & stream;
-	validateListSize (l, 1e8);
-	x.resize( l );
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
+        uint32_t size32;
+        size32 & stream; // read uint32_t, not whatever size_t is
+        validateListSize (size32, 100000000L);
+        x.resize( size32 );
+        BOOST_FOREACH (T& y, x) {
+            y & stream;
+        }
     }
 }
 
@@ -63,7 +70,9 @@ void StreamValidatorType::saveStream() {
 	if( !f_str.is_open() )
 	    throw traced_exception( "unable to write " OM_SV_FILE, Error::FileIO );
 	f_str.write( reinterpret_cast<const char*>(&OM_SV_HEAD), sizeof(char)*4 );
-	stream & f_str;	// use checkpointing operation
+        
+        stream & f_str;
+        
 	f_str.close();
     }else{
 	if( readIt != stream.end() )
@@ -81,7 +90,8 @@ void StreamValidatorType::loadStream( const string& path ){
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
 	throw traced_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
-    stream & f_str;	// checkpointing operator
+    
+    stream & f_str;
     
     f_str.ignore (numeric_limits<streamsize>::max()-1);	// skip to end of file
     if (f_str.gcount () != 0) {
@@ -95,7 +105,7 @@ void StreamValidatorType::loadStream( const string& path ){
     readIt = stream.begin();
 }
 
-void StreamValidatorType::handle( size_t value ){
+void StreamValidatorType::handle( SVType value ){
     if( storeMode ){
 	stream.push_back( value );
     }else{
@@ -123,6 +133,30 @@ void StreamValidatorType::checkpoint ( ostream& cp_str ) const{
 }
 
 StreamValidatorType StreamValidator;
+
+// ———  Our cross-platform consistent-result hasing functions  ——
+namespace CPCH {
+    SVType toSVType(boost::uint32_t x){
+        return static_cast<SVType>(x);
+    }
+    SVType toSVType(boost::int32_t x){
+        return static_cast<SVType>(x);
+    }
+    SVType toSVType(boost::uint64_t x){
+        return static_cast<SVType>(x);
+    }
+    SVType toSVType(boost::int64_t x){
+        return static_cast<SVType>(x);
+    }
+    //NOTE: hashing of floats and doubles isn't very good or fast:
+    SVType toSVType(float x){
+        return x*1e4f;
+    }
+    SVType toSVType(double x){
+        return x*1e4;
+    }
+}
+
 
 } }
 #endif
