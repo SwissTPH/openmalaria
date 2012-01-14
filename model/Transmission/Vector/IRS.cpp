@@ -189,9 +189,14 @@ IRS::IRS (const TransmissionModel& tm) :
     const VectorTransmission* vt = dynamic_cast<const VectorTransmission*>(&tm);
     if( vt != 0 ){
         const IRSParams& params = vt->getIRSParams();
+        if( params.insecticideDecay.get() == 0 )
+            return;     // no IRS
+        // Varience factor of decay is sampled once per human: human is assumed
+        // to account for most variance.
         if( params.simpleModel ){
-            if ( params.insecticideDecay.get() != 0 )
-                insecticideDecayHet = params.insecticideDecay->hetSample();
+            insecticideDecayHet = params.insecticideDecay->hetSample();
+        }else{
+            insecticideDecayHet = params.insecticideDecay->hetSample();
         }
     }
 }
@@ -205,9 +210,6 @@ void IRS::deploy(const IRSParams& params) {
             initialInsecticide = 0.0;	// avoid negative samples
         if( initialInsecticide > params.maxInsecticide )
             initialInsecticide = params.maxInsecticide;
-        
-        // TODO: shouldn't this be sampled per person, rather than per IRS (every time deployed)?
-        insecticideDecayHet = params.insecticideDecay->hetSample();
     }
 }
 

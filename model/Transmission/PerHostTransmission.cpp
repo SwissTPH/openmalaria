@@ -48,6 +48,7 @@ void PerHostTransmission::setVADescription (const scnXml::VectorDeterrent& elt) 
 PerHostTransmission::PerHostTransmission (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
         timestepVA(TimeStep::never),
+        net(tm),
         irs(tm)
 {
     if ( VADecay.get() != 0 )

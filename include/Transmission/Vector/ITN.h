@@ -31,6 +31,8 @@ namespace OM { namespace Transmission {
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
+    // forward declare:
+    class TransmissionModel;
 
 /** Constant parameters for extended ITN model. */
 class ITNParams {
@@ -136,14 +138,7 @@ private:
  */
 class ITN {
 public:
-    ITN () :
-        holeIndex( numeric_limits<double>::signaling_NaN() ),
-        initialInsecticide( numeric_limits<double>::signaling_NaN() ),
-        holeRate( numeric_limits<double>::signaling_NaN() ),
-        ripRate( numeric_limits<double>::signaling_NaN() )
-    {
-        nHoles = 0;
-    }
+    ITN (const TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>
