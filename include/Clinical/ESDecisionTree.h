@@ -51,6 +51,8 @@ struct ESHostData {
  *****************************************************************************/
 class ESDecisionTree {
     public:
+        virtual ~ESDecisionTree() {}
+        
 	/// Create a user-configured decision from xmlDc.
 	static ESDecisionTree* create (ESDecisionValueMap& dvm, const ::scnXml::HSESDecision& xmlDc);
 	
