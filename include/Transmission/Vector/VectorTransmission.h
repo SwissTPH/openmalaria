@@ -84,7 +84,9 @@ private:
     }
     return sIndex->second;
   }
-  
+    
+    /** Confirm simulationMode allows use of interventions; throw if not. */
+    void checkSimMode() const;
     /** Return one over the mean availability of human population to mosquitoes. */
     static double invMeanPopAvail (const std::list<Host::Human>& population, int populationSize);
   

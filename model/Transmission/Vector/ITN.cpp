@@ -57,9 +57,6 @@ void ITNAnophelesParams::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-inline bool inRange01( double x ){
-    return x>=0.0 && x<= 1.0;
-}
 ITNAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
     lHF( numeric_limits< double >::signaling_NaN() ),
     lPF( numeric_limits< double >::signaling_NaN() ),
@@ -97,11 +94,11 @@ void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, c
      * parameters, h and p will always be in the range [0,1] and p ≤ pmax.
      * We can then derive some bounds for HF and PF:
      *  log(HF) ≤ 0
-     *  log(PF)×pmax = log(PF^pmax) ≤ 0
+     *  log(PF)×pmax ≤ 0
      *  log(HF) + (log(PF)+log(IF))×pmax = log(HF×(PF×IF)^pmax) ≤ 0
-     * or equivalently
+     * or equivalently (assuming pmax>0):
      *  HF ∈ (0,1]
-     *  PF^pmax ∈ (0,1]
+     *  PF ∈ (0,1]
      *  HF×(PF×IF)^pmax ∈ (0,1]
      *
      * Weaker limits would not be sufficient, as with the argument for the
@@ -112,9 +109,9 @@ void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, c
     // mistake this kind of warning as indicating a problem.
     double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
     if( !( HF > 0.0 && PF > 0.0 && IF > 0.0 &&
-            HF <= 1.0 && pow(PF,pmax) <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
+            HF <= 1.0 && PF <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
     {
-        cerr << "Note: since the following bounds are not met, the ITN may make humans more\n";
+        cerr << "Note: since the following bounds are not met, the ITN could make humans more\n";
         cerr << "attractive to mosquitoes than they would be without a net.\n";
         cerr << "This note is only shown by non-BOINC executables.\n";
         cerr << "ITN.description.anophelesParams.deterrency: bounds not met:\n";
@@ -126,8 +123,8 @@ void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, c
             cerr << "  interactionFactor>0\n";
         if( !(HF<=1.0) )
             cerr << "  holeFactor≤1\n";
-        if( !(pow(PF,pmax)<=1.0) )
-            cerr << "  insecticideFactor^"<<pmax<<"≤1\n";
+        if( !(PF<=1.0) )
+            cerr << "  insecticideFactor≤1\n";
         if( !(HF*pow(PF*IF,pmax)<=1.0) )
             cerr << "  holeFactor×(insecticideFactor×interactionFactor)^"<<pmax<<"≤1\n";
         cerr.flush();
@@ -232,7 +229,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
     distribution greater than Pmax is 0.001. */
     double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
     if( !( BF+HF <= 1.0 && HF >= 0.0
-        && BF+PF*pmax <= 1.0 && PF*pmax >= 0.0
+        && BF+PF*pmax <= 1.0 && PF >= 0.0
         && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
     {
         ostringstream msg;
@@ -243,7 +240,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
             msg << " holeFactor≥0";
         if( !(BF+PF*pmax<=1.0) )
             msg << " baseFactor+"<<pmax<<"×insecticideFactor≤1";
-        if( !(PF*pmax>=0.0) )
+        if( !(PF>=0.0) )
             msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
         if( !(PF+HF+(PF+IF)*pmax<=1.0) )
             msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
@@ -263,9 +260,9 @@ double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, dou
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    assert( inRange01(killingEffect) );
+    assert( killingEffect <= 1.0 );
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    assert( inRange01(survivalFactor) );
+    assert( survivalFactor >= 0.0 );
     return survivalFactor;
 }
 
@@ -282,6 +279,7 @@ void ITN::deploy(const ITNParams& params) {
         initialInsecticide = params.maxInsecticide;
     
     // net rips and insecticide loss are assumed to co-vary dependent on handling of net
+    // TODO: shouldn't these be sampled per person, rather than per net (every time deployed)?
     util::NormalSample x = util::NormalSample::generate();
     holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
     ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;

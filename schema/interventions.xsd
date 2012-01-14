@@ -991,7 +991,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:annotation>
                 <xs:documentation>
                 Effect of net on survival mosquitoes as they seek to bite a human
-                after choosing that human relative to the same person not
+                after choosing that human, relative to the same person not
                 sleeping under a net. Parameterisations should take into
                 account that mosquitoes do not always bite indoors.
                 
@@ -1012,9 +1012,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:annotation>
                 <xs:documentation>
                 Effect of net on survival mosquitoes as they seek to escape from
-                a human host after a blood meal, relative to the same person
-                not sleeping under a net. Parameterisations should take into
-                account that mosquitoes do not always bite indoors.
+                a human host and rest after a blood meal, relative to the same
+                person not sleeping under a net. Parameterisations should take
+                into account that mosquitoes do not always bite indoors.
                 
                 Killing proportion is calculated as K = B + H×h + P×p + I×h×p
                 where B is the base (without net) probability of death,

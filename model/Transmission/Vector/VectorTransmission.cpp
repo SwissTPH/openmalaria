@@ -254,10 +254,14 @@ void VectorTransmission::update (const std::list<Host::Human>& population, int p
     TransmissionModel::updateKappa( population );
 }
 
-void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
+void VectorTransmission::checkSimMode() const{
     if( interventionMode == equilibriumMode ){
         throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
     }
+}
+
+void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
+    checkSimMode();
     double proportionUse = _ITNParams.init( elt );
     typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -271,9 +275,7 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     }
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    checkSimMode();
     PerHostTransmission::setIRSDescription (elt);
     typedef scnXml::IRS::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -287,9 +289,7 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
     }
 }
 void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    checkSimMode();
     PerHostTransmission::setVADescription (elt);
     typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
@@ -304,9 +304,7 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
 }
 
 void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
-    if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
-    }
+    checkSimMode();
     assert(false);
     /*FIXME
     const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();
