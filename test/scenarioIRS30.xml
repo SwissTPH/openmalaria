@@ -118,15 +118,18 @@
         <deploy coverage=".677" targetAgeYrs="0.0833"/>
       </continuous>
     </ITN>
-    <IRS name="Pyreth">
-      <simpleDescription>
-        <decay L="0.25" function="exponential"/>
+    <IRS name="new param">
+      <description>
+        <!-- New Parameterisation. To be checked. -->
+        <!-- Initial insecticide: units are mg/m²; any variance? -->
+        <initialInsecticide mu="1180" sigma="0"/>
+        <insecticideDecay L="0.15" function="exponential"/>
         <anophelesParams mosquito="gambiae_ss">
-          <deterrency value="0.1116"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.2772"/>
+          <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>
+          <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
+          <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
         </anophelesParams>
-      </simpleDescription>
+      </description>
       <timed>
         <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
         <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>

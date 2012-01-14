@@ -13,19 +13,24 @@ configure_file (
 
 # working tests (with checkpointing):
 set (OM_BOXTEST_NAMES
-  1 2 3 4 5 6 9 10 11 12 Molineaux
-  EffectiveDrug
-  IPT
-  VecTest VecFullTest NamawalaArabiensis
-  ESCMTest
-  Empirical
-  Cohort
-  VecMonthly
-  Penny
-  R_0
+  1 2 3 4 5 6 9 10 11 12
   1DayIntervs
+  Cohort
+  EffectiveDrug
+  Empirical
+  ESCMTest
   ESTS
+  IPT
+  IRS30
+  Molineaux
   MSAT
+  NamawalaArabiensis
+  Penny
+  Rach5IC
+  R_0
+  VecFullTest
+  VecTest
+  VecMonthly
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
