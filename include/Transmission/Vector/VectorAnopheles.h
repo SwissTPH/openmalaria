@@ -55,8 +55,8 @@ class VectorAnopheles
 public:
     ///@brief Initialisation and destruction
     //@{
-    VectorAnopheles (const ITNParams* baseITNParams) :
-            humanBase(baseITNParams),
+    VectorAnopheles (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
+            humanBase(baseITNParams,baseIRSParams),
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0)
@@ -100,24 +100,27 @@ public:
         return humanBase;
     }
 
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
-        humanBase.setITNDescription (params, elt, proportionUse);
-    }
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setIRSDescription (const scnXml::IRSDescription& irsDesc) {
-        humanBase.setIRSDescription (irsDesc);
-    }
-    /** Set up intervention descriptions for humans, for this anopheles species. */
-    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-        humanBase.setVADescription (vaDesc);
-    }
-
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
     bool vectorInitIterate ();
+    //@}
+
+    /** @brief Set up intervention descriptions for humans, for this anopheles species. */
+    //@{
+    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+        humanBase.setITNDescription (params, elt, proportionUse);
+    }
+    inline void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt) {
+        humanBase.setIRSDescription (params, elt);
+    }
+    inline void setIRSDescription (const IRSParams& params, const scnXml::IRSSimpleDescription::AnophelesParamsType& elt) {
+        humanBase.setIRSDescription (params, elt);
+    }
+    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+        humanBase.setVADescription (vaDesc);
+    }
     //@}
     
     

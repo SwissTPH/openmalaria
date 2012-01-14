@@ -21,6 +21,7 @@
 #define Hmod_PerHostTransmission
 
 #include "Transmission/Vector/ITN.h"
+#include "Transmission/Vector/IRS.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
@@ -48,13 +49,12 @@ public:
     /** Static cleanup. */
     static void cleanup ();
     
-    static void setIRSDescription (const scnXml::IRS& elt);
     static void setVADescription (const scnXml::VectorDeterrent& elt);
     //@}
     
     ///@brief Initialisation / checkpionting
     //@{
-    PerHostTransmission ();
+    PerHostTransmission (const Transmission::TransmissionModel& tm);
     void initialise (TransmissionModel& tm, double availabilityFactor);
     //@}
     
@@ -72,14 +72,10 @@ public:
     /// Give individual a new ITN as of time timeStep.
     void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
-    void setupIRS ();
+    void setupIRS (const TransmissionModel& tm);
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
     
-    /// Is individual protected by IRS?
-    inline bool hasIRSProtection(TimeStep maxInterventionAge)const{
-        return timestepIRS + maxInterventionAge > TimeStep::simulation;
-    }
     /// Is individual protected by a VA?
     inline bool hasVAProtection(TimeStep maxInterventionAge)const{
         return timestepVA + maxInterventionAge > TimeStep::simulation;
@@ -173,6 +169,10 @@ public:
     inline const ITN& getITN() const{
         return net;
     }
+    /// Get a reference to the IRS
+    inline const IRS& getIRS() const{
+        return irs;
+    }
     
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
@@ -186,9 +186,9 @@ public:
         species & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
-        timestepIRS & stream;
         timestepVA & stream;
         net & stream;
+        irs & stream;
     }
     //@}
     
@@ -205,19 +205,17 @@ private:
     // (TimeStep::simulation - timestepXXX) is the age of the intervention in
     // the new time-step (that being updated).
     // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
-    TimeStep timestepIRS;
     TimeStep timestepVA;
     
-    DecayFuncHet hetSampleIRS;
     DecayFuncHet hetSampleVA;
 
     ITN net;
+    IRS irs;
     
     static AgeGroupInterpolation* relAvailAge;
     
     // descriptions of decay of interventions
     // set if specific intervention is used
-    static shared_ptr<DecayFunction> IRSDecay;
     static shared_ptr<DecayFunction> VADecay;
 };
 

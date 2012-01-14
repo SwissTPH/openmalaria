@@ -31,13 +31,19 @@ void AnophelesHumanParams::operator =(const scnXml::Mosq& mosq)
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
 }
 
-void AnophelesHumanParams::setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
+void AnophelesHumanParams::setITNDescription (const ITNParams& params,
+        const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
     net.init( params, elt, proportionUse );
 }
 
-void AnophelesHumanParams::setIRSDescription (const scnXml::IRSDescription& irsDesc){
-    IRSDeterrency = irsDesc.getDeterrency().getValue();
-    IRSKillingEffect = irsDesc.getKillingEffect().getValue();
+void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
+        const scnXml::IRSDescription::AnophelesParamsType& elt){
+    irs.init( params, elt );
+}
+
+void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
+        const scnXml::IRSSimpleDescription::AnophelesParamsType& elt){
+    irs.init( params, elt );
 }
 
 void AnophelesHumanParams::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {

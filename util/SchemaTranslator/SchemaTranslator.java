@@ -1964,6 +1964,7 @@ public class SchemaTranslator {
      * EIR as Fourier coefficients can now use any odd number of coefficients.
      * Added mosquito life-cycle parameters (optional, so not added here)
      * timed elt of changeHS and changeEIR renamed to timedDeployment
+     * new IRS model: choice of old or new parameters
      */
     public Boolean translate29To30() {
         try{
@@ -2164,6 +2165,25 @@ public class SchemaTranslator {
             }
             
             interv = getChildElement(intervs,"IRS");
+            if( interv != null ){
+                if( /*TODO: use old or replace?*/ true ){
+                    Element desc = scenarioDocument.createElement("simpleDescription");
+                    desc.appendChild(getChildElement(interv,"decay"));
+                    for( Node n : getChildNodes(interv, "anophelesParams") ){
+                        Element e = (Element) n;
+                        assert( e != null );
+                        // leave "deterrency" alone, rename "killingEffect" and add pre-prandial:
+                        Element preprandial = scenarioDocument.createElement("preprandialKillingEffect");
+                        preprandial.setAttribute("value","0");
+                        Element postprandial = getChildElement(e, "killingEffect");
+                        e.insertBefore(preprandial, postprandial);
+                        scenarioDocument.renameNode(postprandial,null,"postprandialKillingEffect");
+                        // move under "simpleDescription":
+                        desc.appendChild(n);
+                    }
+                    interv.appendChild(desc);
+                }
+            }
             if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
                 Element list  = scenarioDocument.createElement("timed");
                 for( Node n : getChildNodes(interv, "timed") ){

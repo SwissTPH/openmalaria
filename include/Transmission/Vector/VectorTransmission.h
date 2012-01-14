@@ -59,14 +59,13 @@ public:
   virtual void intervLarviciding (const scnXml::Larviciding&);
   virtual void uninfectVectors();
   
-  inline const ITNParams& getITNParams () {
+  inline const ITNParams& getITNParams () const{
       return _ITNParams;
+  }
+  inline const IRSParams& getIRSParams() const{
+      return _IRSParams;
   }
   virtual void summarize (Monitoring::Survey& survey);
-  
-  inline const ITNParams& getITNParams() const{
-      return _ITNParams;
-  }
   
 protected:
     virtual void checkpoint (istream& stream);
@@ -128,8 +127,10 @@ private:
   map<string,size_t> speciesIndex;
   //@}
   
-  /** Parameters used by ITN model. */
+  /** Parameters used by ITN and IRS models. */
   ITNParams _ITNParams;
+  /** ditto */
+  IRSParams _IRSParams;
   
   friend class PerHostTransmission;
   friend class VectorAnophelesSuite;

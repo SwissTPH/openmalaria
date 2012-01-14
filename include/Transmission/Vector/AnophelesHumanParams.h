@@ -21,6 +21,7 @@
 #define HOSTCATEGORYANOPHELESHUMANS_H_
 
 #include "Transmission/Vector/ITN.h"
+#include "Transmission/Vector/IRS.h"
 #include "util/sampler.h"
 
 namespace OM {
@@ -32,10 +33,9 @@ namespace Transmission {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class AnophelesHumanParams {
 public:
-    AnophelesHumanParams(const ITNParams* baseITNParams) :
+    AnophelesHumanParams(const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
             net( baseITNParams ),
-            IRSDeterrency(numeric_limits< double >::signaling_NaN()),
-            IRSKillingEffect(numeric_limits< double >::signaling_NaN()),
+            irs( baseIRSParams ),
             VADeterrency(numeric_limits< double >::signaling_NaN())
     {}
     
@@ -51,12 +51,13 @@ public:
         this->entoAvailability.setMean( entoAvailability );
     }
     
-    /** Set up vector-model intervention parameters. */
+    /** @brief Set up vector-model intervention parameters. */
+    //@{
     void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
-    /** Set up vector-model intervention parameters. */
-    void setIRSDescription (const scnXml::IRSDescription& irsDesc);
-    /** Set up vector-model intervention parameters. */
+    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
+    void setIRSDescription (const IRSParams& params, const scnXml::IRSSimpleDescription::AnophelesParamsType& elt);
     void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
+    //@}
     
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
@@ -85,8 +86,7 @@ public:
      * elsewhere (by DecayFunction type). */
     //@{
     ITNAnophelesParams net;
-    double IRSDeterrency;
-    double IRSKillingEffect;
+    IRSAnophelesParams irs;
     double VADeterrency;
     //@}
 };

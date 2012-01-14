@@ -96,7 +96,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, VectorAnopheles(&_ITNParams));
+    species.resize (numSpecies, VectorAnopheles(&_ITNParams, &_IRSParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -267,7 +267,7 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){
         throw util::xml_scenario_error(
-            "ITNDescription.anophelesParams: must have one element for each mosquito species described in entomology"
+            "ITN.description.anophelesParams: must have one element for each mosquito species described in entomology"
         );
     }
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
@@ -276,16 +276,33 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
 }
 void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
     checkSimMode();
-    PerHostTransmission::setIRSDescription (elt);
-    typedef scnXml::IRS::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    if( ap.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "IRS.anophelesParams: must have one element for each mosquito species described in entomology"
-        );
-    }
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[getSpeciesIndex(it->getMosquito())].setIRSDescription (*it);
+    if( elt.getDescription().present() ){
+        _IRSParams.init( elt.getDescription().get() );
+        
+        typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
+        const AP& ap = elt.getDescription().get().getAnophelesParams();
+        if( ap.size() != numSpecies ){
+            throw util::xml_scenario_error(
+                "IRS.description.anophelesParams: must have one element for each mosquito species described in entomology"
+            );
+        }
+        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
+        }
+    }else{
+        assert( elt.getSimpleDescription().present() );   // choice: one or the other
+        _IRSParams.init( elt.getSimpleDescription().get() );
+        
+        typedef scnXml::IRSSimpleDescription::AnophelesParamsSequence AP;
+        const AP& ap = elt.getSimpleDescription().get().getAnophelesParams();
+        if( ap.size() != numSpecies ){
+            throw util::xml_scenario_error(
+                "IRS.simpleDescription.anophelesParams: must have one element for each mosquito species described in entomology"
+            );
+        }
+        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
+        }
     }
 }
 void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
@@ -328,7 +345,7 @@ void VectorTransmission::summarize (Monitoring::Survey& survey) {
 void VectorTransmission::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (&_ITNParams));
+    util::checkpoint::checkpoint (species, stream, VectorAnopheles (&_ITNParams, &_IRSParams));
 }
 void VectorTransmission::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

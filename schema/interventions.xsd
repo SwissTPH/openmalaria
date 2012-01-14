@@ -288,25 +288,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Description and deployment of indoor insecticide interventions
             (IRS, durable wall linings, insecticide-treated-paint, etc.)
+            
+            User must choose between using &lt;simpleDescription&gt; (the old
+            model, where effect decays directly) and &lt;description&gt; (the
+            new model where effect decays indirectly based on decay of insecticide).
           </xs:documentation>
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction">
-              <xs:annotation>
-                <xs:documentation>
-                  Description of decay of IRS. Documentation: see DecayFunction type or
-                  http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
-                </xs:documentation>
-                <xs:appinfo>name:Decay;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="anophelesParams" maxOccurs="unbounded" type="IRSDescription">
-              <xs:annotation>
-                <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+            <xs:choice>
+              <xs:element name="simpleDescription" type="IRSSimpleDescription"/>
+              <xs:element name="description" type="IRSDescription"/>
+            </xs:choice>
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
@@ -1035,6 +1029,85 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
+              <xs:appinfo>name:Mosquito species;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IRSSimpleDescription">
+    <xs:annotation>
+      <xs:documentation>
+        Description of effect for the simple model: IRS has three effects, whos
+        strength is calculated as the product of an input parameter and
+        "survival of effect", which is given by a decay function.
+      </xs:documentation>
+      <xs:appinfo>name:Description (simple, direct decay);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="decay" type="DecayFunction">
+        <xs:annotation>
+          <xs:documentation>
+            Description of decay of IRS. Documentation: see DecayFunction type or
+            http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+          </xs:documentation>
+          <xs:appinfo>name:Decay;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="anophelesParams" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="deterrency" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on attractiveness of humans to mosquitoes relative to
+                an unprotected adult human. Parameterisations should take into
+                account that mosquitoes do not always bite indoors.
+                
+                Attractiveness of the human is multiplied this factor times
+                survival of effect.
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="preprandialKillingEffect" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on survival mosquitoes as they seek to bite a human
+                after choosing that human, relative to the same person not
+                protected by IRS. Parameterisations should take into account
+                that mosquitoes do not always bite indoors. This parameter has
+                been added since some data shows IRS to have a preprandial
+                killing effect.
+                
+                Killing proportion is this factor multiplied by survival of effect.
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="postprandialKillingEffect" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on survival mosquitoes as they seek to escape from
+                a human host and rest after a blood meal, relative to the same
+                person not protected by IRS. Parameterisations should take
+                into account that mosquitoes do not always bite indoors.
+                
+                Killing proportion is this factor multiplied by survival of effect.
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="mosquito" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Name of the affected anopheles-mosquito species.
+              </xs:documentation>
               <xs:appinfo>name:Mosquito species</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
@@ -1042,16 +1115,111 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ITNDeterrency">
-    <xs:attribute name="holeFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Value expected to be at least 0. Negative values are not
-          necessarily invalid, but allow nets to increase transmission.
+  <xs:complexType name="IRSDescription">
+    <xs:annotation>
+      <xs:documentation>
+        Description of effect for the more complex and probably more realistic
+        Briet model: IRS has three effects, whos strength is calculated as a
+        function of surviving insecticide content.
+      </xs:documentation>
+      <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="initialInsecticide" type="NormalSample">
+        <xs:annotation>
+          <xs:documentation>
+          The insecticide concentration of IRS (at time of spraying) is
+          Gaussian distributed with mean "mu" and a standard deviation "sigma".
+          The standard deviation should be small relative to the mean to avoid
+          negative initial concentration. Any negative values sampled are set
+          to 0.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Hole factor;max:1</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
+          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="insecticideDecay" type="DecayFunction">
+        <xs:annotation>
+          <xs:documentation>
+          Decay curve for insecticide content of IRS. Documentation: see DecayFunction
+          type or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+        </xs:documentation>
+          <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="anophelesParams" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="deterrency" type="IRSDeterrency">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on attractiveness of humans to mosquitoes relative to
+                an unprotected adult human. Parameterisations should take into
+                account that mosquitoes do not always bite indoors.
+                
+                Attractiveness of the human is multiplied by exp(P×log(p))
+                where P is the insecticide factor,
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="preprandialKillingEffect" type="IRSKillingEffect">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on survival mosquitoes as they seek to bite a human
+                after choosing that human, relative to the same person not
+                protected by IRS. Parameterisations should take into account
+                that mosquitoes do not always bite indoors. This parameter has
+                been added since some data shows IRS to have a preprandial
+                killing effect.
+                
+                Killing proportion is calculated as K = B + P×p where B is the
+                base (without protection) probability of death, and P is the
+                insecticide factor,
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                
+                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="postprandialKillingEffect" type="IRSKillingEffect">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on survival mosquitoes as they seek to escape from
+                a human host and rest after a blood meal, relative to the same
+                person not protected by IRS. Parameterisations should take
+                into account that mosquitoes do not always bite indoors.
+                
+                Killing proportion is calculated as K = B + P×p where B is the
+                base (without protection) probability of death, and P is the
+                insecticide factor,
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                
+                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
+                </xs:documentation>
+                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="mosquito" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Name of the affected anopheles-mosquito species.
+              </xs:documentation>
+              <xs:appinfo>name:Mosquito species</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="IRSDeterrency">
     <xs:attribute name="insecticideFactor" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -1061,26 +1229,52 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="interactionFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          holeFactor + insecticideFactor + interactionFactor must not be greater
-          than 1, and is expected to be at least 0. A negative value is not
-          necessarily invalid, but allows nets to increase transmission.
-        </xs:documentation>
-        <xs:appinfo>units:none;name:Interaction factor;max:1</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:appinfo>units:none;name:Hole scaling factor;min:0</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
         <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="IRSKillingEffect">
+    <xs:complexContent>
+      <xs:extension base="IRSDeterrency">
+        <xs:attribute name="baseFactor" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ITNDeterrency">
+    <xs:complexContent>
+      <xs:extension base="IRSDeterrency">
+        <xs:attribute name="holeFactor" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Value expected to be at least 0. Negative values are not
+              necessarily invalid, but allow nets to increase transmission.
+            </xs:documentation>
+            <xs:appinfo>units:none;name:Hole factor;max:1</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="interactionFactor" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              holeFactor + insecticideFactor + interactionFactor must not be greater
+              than 1, and is expected to be at least 0. A negative value is not
+              necessarily invalid, but allows nets to increase transmission.
+            </xs:documentation>
+            <xs:appinfo>units:none;name:Interaction factor;max:1</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:appinfo>units:none;name:Hole scaling factor;min:0</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="ITNKillingEffect">
     <xs:complexContent>
@@ -1090,22 +1284,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="IRSDescription">
-    <xs:complexContent>
-      <xs:extension base="BaseInterventionDescription">
-        <xs:sequence>
-          <xs:element name="killingEffect" type="inputValue">
-            <xs:annotation>
-              <xs:documentation>
-              One minus this multiplies the survival rate of resting mosquitoes.
-            </xs:documentation>
-              <xs:appinfo>units:None;min:0;max:1;name:killing effect;</xs:appinfo>
-            </xs:annotation>
-          </xs:element>
-        </xs:sequence>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

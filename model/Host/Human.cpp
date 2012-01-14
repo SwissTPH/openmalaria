@@ -71,7 +71,7 @@ void Human::clear() {   // static clear
 
 // Create new human
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
-    perHostTransmission(),
+    perHostTransmission(tm),
     withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
@@ -226,8 +226,8 @@ void Human::ctsITN (const OM::Population& population){
     Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
 }
 
-void Human::massIRS (const OM::Population&) {
-    perHostTransmission.setupIRS ();
+void Human::massIRS (const OM::Population& population) {
+    perHostTransmission.setupIRS (population.transmissionModel());
     Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
 }
 
@@ -246,7 +246,7 @@ bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }
 bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.hasIRSProtection(maxInterventionAge);
+    return perHostTransmission.getIRS().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }
 bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);

@@ -30,7 +30,6 @@ using namespace OM::util;
 // -----  PerHostTransmission static  -----
 
 AgeGroupInterpolation* PerHostTransmission::relAvailAge = AgeGroupInterpolation::dummyObject();
-shared_ptr<DecayFunction> PerHostTransmission::IRSDecay;
 shared_ptr<DecayFunction> PerHostTransmission::VADecay;
 
 void PerHostTransmission::init () {
@@ -40,22 +39,17 @@ void PerHostTransmission::cleanup () {
     AgeGroupInterpolation::freeObject( relAvailAge );
 }
 
-void PerHostTransmission::setIRSDescription (const scnXml::IRS& elt) {
-    IRSDecay = DecayFunction::makeObject( elt.getDecay(), "IRSDecay" );
-}
 void PerHostTransmission::setVADescription (const scnXml::VectorDeterrent& elt) {
     VADecay = DecayFunction::makeObject( elt.getDecay(), "VADecay" );
 }
 
 // -----  PerHostTransmission non-static -----
 
-PerHostTransmission::PerHostTransmission () :
+PerHostTransmission::PerHostTransmission (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
-        timestepIRS(TimeStep::never),
-        timestepVA(TimeStep::never)
+        timestepVA(TimeStep::never),
+        irs(tm)
 {
-    if ( IRSDecay.get() != 0 )
-        hetSampleIRS = IRSDecay->hetSample();
     if ( VADecay.get() != 0 )
         hetSampleVA = VADecay->hetSample();
 }
@@ -75,11 +69,11 @@ void PerHostTransmission::setupITN (const TransmissionModel& tm) {
         net.deploy(vTM->getITNParams());
     }
 }
-void PerHostTransmission::setupIRS () {
-    if( IRSDecay.get() == 0 ){
-        throw util::xml_scenario_error ("IRS intervention without description of decay");
+void PerHostTransmission::setupIRS (const TransmissionModel& tm) {
+    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
+    if (vTM != 0) {
+        irs.deploy(vTM->getIRSParams());
     }
-    timestepIRS = TimeStep::simulation;
 }
 void PerHostTransmission::setupVA () {
     if( VADecay.get() == 0 ){
@@ -99,17 +93,21 @@ double PerHostTransmission::entoAvailabilityHetVecItv (const AnophelesHumanParam
     if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
     }
-    if (timestepIRS >= TimeStep(0))
-        alpha_i *= (1.0 - base.IRSDeterrency * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
-    if (timestepVA >= TimeStep(0))
+    if (irs.timeOfDeployment() >= TimeStep(0)) {
+        alpha_i *= irs.relativeAttractiveness(base.irs);
+    }
+    if (timestepVA >= TimeStep(0)) {
         alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
-
+    }
     return alpha_i;
 }
 double PerHostTransmission::probMosqBiting (const AnophelesHumanParams& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].probMosqBiting;
     if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
+    }
+    if (irs.timeOfDeployment() >= TimeStep(0)) {
+        P_B_i *= irs.preprandialSurvivalFactor(base.irs);
     }
     return P_B_i;
 }
@@ -118,8 +116,9 @@ double PerHostTransmission::probMosqResting (const AnophelesHumanParams& base, s
     if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);
     }
-    if (timestepIRS >= TimeStep(0))
-        pRest *= (1.0 - base.IRSKillingEffect * IRSDecay->eval (TimeStep::simulation - timestepIRS, hetSampleIRS));
+    if (irs.timeOfDeployment() >= TimeStep(0)) {
+        pRest *= irs.postprandialSurvivalFactor(base.irs);
+    }
     return pRest;
 }
 
