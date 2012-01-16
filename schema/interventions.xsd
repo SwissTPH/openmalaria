@@ -863,16 +863,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="usage" type="inputValue">
         <xs:annotation>
           <xs:documentation>
-          The proportion of the time during the night that humans use nets
-          while indoors (fixed parameter).
+          Usage of nets by humans, from 0 to 1.
           
           At the moment this is constant across humans and deterministic:
           relative attractiveness and survival factors are
-          base*(1-usage*m) + intervention_factor*usage*m
-          where m is the proportion of time mosquitoes bite while humans are
-          indoors.
+          base*(1-usage*propActing) + intervention_factor*usage*propActing.
+          
+          See also "propActing" (proportion of bits for which net acts).
         </xs:documentation>
-          <xs:appinfo>units:none;min:0;max:0;name:Usage level of nets by humans</xs:appinfo>
+          <xs:appinfo>units:none;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="holeRate" type="LognormalSample">
@@ -886,7 +885,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           with ripRate and insecticideDecay. (To be exact, a single Gaussian
           sample is taken, adjusted for each sigma then exponentiated.)
         </xs:documentation>
-          <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made</xs:appinfo>
+          <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="ripRate" type="LognormalSample">
@@ -902,7 +901,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           single Gaussian sample is taken, adjusted for the each and sigma
           then exponentiated.)
         </xs:documentation>
-          <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged</xs:appinfo>
+          <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="ripFactor" type="inputValue">
@@ -913,7 +912,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           The hole index of a net is h + F×x where h and x are the total numbers
           of holes and rips respectively and F is the rip factor.
         </xs:documentation>
-          <xs:appinfo>units:none;min:0;name:Rip factor</xs:appinfo>
+          <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="initialInsecticide" type="NormalSample">
@@ -924,7 +923,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           should be small relative to the mean to avoid negative initial
           concentration. Any negative values sampled are set to 0.
         </xs:documentation>
-          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide</xs:appinfo>
+          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="insecticideDecay" type="DecayFunction">
@@ -942,7 +941,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           variable is then exponentiated and multiplied by the required mean
           rate for the respective variable.
         </xs:documentation>
-          <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
+          <xs:appinfo>units:none;name:Decay of insecticide;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="attritionOfNets" type="DecayFunction">
@@ -959,7 +958,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           proportion of nets remaining in use should match this decay function
           over time.
         </xs:documentation>
-          <xs:appinfo>units:none;name:Attrition of nets</xs:appinfo>
+          <xs:appinfo>units:none;name:Attrition of nets;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="anophelesParams" maxOccurs="unbounded">
@@ -978,7 +977,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 respectively, h=exp(-holeIndex×holeScalingFactor) and
                 p=1−exp(-insecticideContent×insecticideScalingFactor).
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
@@ -999,7 +998,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                 B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="postprandialKillingEffect" type="ITNKillingEffect">
@@ -1020,7 +1019,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                 B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -1030,6 +1029,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
               <xs:appinfo>name:Mosquito species;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="propActive" type="xs:double" default="1">
+            <xs:annotation>
+              <xs:documentation>
+              The proportion of bites, when nets are in use, for which the net
+              has any action whatsoever on the mosquito.
+              
+              At the moment this is constant across humans and deterministic:
+              relative attractiveness and survival factors are
+              base*(1-usage*propActing) + intervention_factor*usage*propActing.
+              
+              See also "usage" (proportion of time nets are used by humans).
+            </xs:documentation>
+              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which net acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1109,6 +1123,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
               <xs:appinfo>name:Mosquito species</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="propActive" type="xs:double" default="1">
+            <xs:annotation>
+              <xs:documentation>
+              The proportion of bites for which the IRS
+              has any action whatsoever on the mosquito.
+              
+              At the moment this is constant across humans and deterministic:
+              relative attractiveness and survival factors are
+              base*(1-propActing) + intervention_factor*propActing.
+            </xs:documentation>
+              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1213,6 +1240,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
               <xs:appinfo>name:Mosquito species</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="propActive" type="xs:double" default="1">
+            <xs:annotation>
+              <xs:documentation>
+              The proportion of bites for which the IRS
+              has any action whatsoever on the mosquito.
+              
+              At the moment this is constant across humans and deterministic:
+              relative attractiveness and survival factors are
+              base*(1-propActing) + intervention_factor*propActing.
+            </xs:documentation>
+              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

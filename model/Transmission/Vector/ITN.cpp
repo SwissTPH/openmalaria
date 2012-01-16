@@ -55,8 +55,10 @@ void ITNAnophelesParams::init(
     _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
+    double propActive = elt.getPropActive();
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
-    proportionProtected = proportionUse;
+    assert( propActive >= 0.0 && propActive <= 1.0 );
+    proportionProtected = proportionUse * propActive;
     proportionUnprotected = 1.0 - proportionProtected;
 }
 

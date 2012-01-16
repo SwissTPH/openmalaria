@@ -230,17 +230,17 @@
         <initialInsecticide mu="70" sigma="20"/>
         <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
         <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
+        <anophelesParams mosquito="gambiae_ss" propActive="1">
           <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
           <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
           <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
         </anophelesParams>
-        <anophelesParams mosquito="funestus">
+        <anophelesParams mosquito="funestus" propActive="1">
           <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
           <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
           <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
         </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
+        <anophelesParams mosquito="arabiensis" propActive="1">
           <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
           <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
           <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
@@ -256,17 +256,17 @@
     <IRS name="DDT test">
       <simpleDescription>
         <decay L="0.5" function="exponential"/>
-        <anophelesParams mosquito="gambiae_ss">
+        <anophelesParams mosquito="gambiae_ss" propActive="1">
           <deterrency value="0.56"/>
           <preprandialKillingEffect value="0"/>
           <postprandialKillingEffect value="0.24"/>
         </anophelesParams>
-        <anophelesParams mosquito="funestus">
+        <anophelesParams mosquito="funestus" propActive="1">
           <deterrency value="0.56"/>
           <preprandialKillingEffect value="0"/>
           <postprandialKillingEffect value="0.24"/>
         </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
+        <anophelesParams mosquito="arabiensis" propActive="1">
           <deterrency value="0.56"/>
           <preprandialKillingEffect value="0"/>
           <postprandialKillingEffect value="0.24"/>

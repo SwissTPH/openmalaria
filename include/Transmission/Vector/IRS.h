@@ -59,7 +59,9 @@ private:
 class IRSAnophelesParams {
 public:
     IRSAnophelesParams( const IRSParams* b ) :
-        base( b )
+        base( b ),
+        proportionProtected( numeric_limits<double>::signaling_NaN() ),
+        proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
     void init(const IRSParams& params,
               const scnXml::IRSDescription::AnophelesParamsType& elt);
@@ -79,6 +81,11 @@ public:
     /// See ComponentParams::effect for a more detailed description.
     inline double postprandialSurvivalFactor( double insecticideContent )const{
         return _postprandialKillingEffect.survivalFactor( insecticideContent );
+    }
+    
+    /// Return x*proportionProtected + proportionUnprotected
+    inline double byProtection(double x) const{
+        return x*proportionProtected + proportionUnprotected;
     }
     
 private:
@@ -135,6 +142,8 @@ private:
         double invBaseSurvival; // stored for performance only
     };
     const IRSParams* base;
+    double proportionProtected;
+    double proportionUnprotected;
     RelativeAttractiveness _relativeAttractiveness;
     SurvivalFactor _preprandialKillingEffect;
     SurvivalFactor _postprandialKillingEffect;

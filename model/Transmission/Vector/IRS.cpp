@@ -49,6 +49,11 @@ void IRSAnophelesParams::init(
     _relativeAttractiveness.init( params, elt.getDeterrency() );
     _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
     _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
+    // Simpler version of ITN usage/action:
+    double propActive = elt.getPropActive();
+    assert( propActive >= 0.0 && propActive <= 1.0 );
+    proportionProtected = propActive;
+    proportionUnprotected = 1.0 - proportionProtected;
 }
 void IRSAnophelesParams::init(
     const IRSParams& params,
@@ -58,6 +63,11 @@ void IRSAnophelesParams::init(
     _relativeAttractiveness.oldDeterrency( elt.getDeterrency().getValue() );
     _preprandialKillingEffect.oldEffect( elt.getPreprandialKillingEffect().getValue() );
     _postprandialKillingEffect.oldEffect( elt.getPostprandialKillingEffect().getValue() );
+    // Simpler version of ITN usage/action:
+    double propActive = elt.getPropActive();
+    assert( propActive >= 0.0 && propActive <= 1.0 );
+    proportionProtected = propActive;
+    proportionUnprotected = 1.0 - proportionProtected;
 }
 
 inline bool inRange01( double x ){
@@ -214,30 +224,36 @@ void IRS::deploy(const IRSParams& params) {
 }
 
 double IRS::relativeAttractiveness(const IRSAnophelesParams& params) const{
+    double effect;
     if( params.base->simpleModel ){
-        return (1.0 - params._relativeAttractiveness.oldDeterrency() *
+        effect = (1.0 - params._relativeAttractiveness.oldDeterrency() *
             getEffectSurvival(*params.base));
     }else{
-        return params.relativeAttractiveness( getInsecticideContent(*params.base) );
+        effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
     }
+    return params.byProtection( effect );
 }
 
 double IRS::preprandialSurvivalFactor(const IRSAnophelesParams& params) const{
+    double effect;
     if( params.base->simpleModel ){
-        return (1.0 - params._preprandialKillingEffect.oldEffect() *
+        effect = (1.0 - params._preprandialKillingEffect.oldEffect() *
             getEffectSurvival(*params.base));
     }else{
-        return params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
+        effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
     }
+    return params.byProtection( effect );
 }
 
 double IRS::postprandialSurvivalFactor(const IRSAnophelesParams& params) const{
+    double effect;
     if( params.base->simpleModel ){
-        return (1.0 - params._postprandialKillingEffect.oldEffect() *
+        effect = (1.0 - params._postprandialKillingEffect.oldEffect() *
             getEffectSurvival(*params.base));
     }else{
-        return params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
+        effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
     }
+    return params.byProtection( effect );
 }
 
 } }

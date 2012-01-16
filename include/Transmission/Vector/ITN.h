@@ -66,17 +66,22 @@ public:
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _relativeAttractiveness.relativeAttractiveness( holeIndex, insecticideContent ) + proportionUnprotected;
+        return byProtection( _relativeAttractiveness.relativeAttractiveness( holeIndex, insecticideContent ) );
     }
     /// Get killing effect on mosquitoes before feeding.
     /// See ComponentParams::effect for a more detailed description.
     inline double preprandialSurvivalFactor( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _preprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) + proportionUnprotected;
+        return byProtection( _preprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) );
     }
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     inline double postprandialSurvivalFactor( double holeIndex, double insecticideContent )const{
-        return proportionProtected * _postprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) + proportionUnprotected;
+        return byProtection( _postprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) );
+    }
+    
+    /// Return x*proportionProtected + proportionUnprotected
+    inline double byProtection(double x) const{
+        return x*proportionProtected + proportionUnprotected;
     }
     
 private:
