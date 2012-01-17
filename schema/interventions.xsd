@@ -1333,7 +1333,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>units:None;min:0;max:1;name:Larviciding;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="duration" type="InputValueDouble">
+      <xs:element name="duration" type="inputValue">
         <xs:annotation>
           <xs:documentation>
                   Specifies how long the larviciding is effective

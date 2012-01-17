@@ -324,6 +324,13 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
     checkSimMode();
     
     const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();
+    
+    if( seq.size() != numSpecies ){
+        throw util::xml_scenario_error(
+            "larviciding.anopheles: must have one element for each mosquito species described in entomology"
+        );
+    }
+
     for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
         species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
     
