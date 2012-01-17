@@ -553,34 +553,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <!-- FIXME: this needs to be a list per time, or something -->
-            <xs:element name="anopheles" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:attribute name="mosquito" type="xs:string" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-                      Mosquito to be larvicided
-                    </xs:documentation>
-                    <xs:appinfo>name:Mosquito to be larvicided;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="effectiveness" type="xs:double" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-                      Proportional reduction in emergence rate
-                    </xs:documentation>
-                    <xs:appinfo>units:none;min:0;max:1;name:Proportionate reduction in emergence;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="duration" type="xs:int" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-                      Number of days for which the intervention is active.
-                    </xs:documentation>
-                    <xs:appinfo>units:days;min:0;max:inf;name:Duration of activity;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
+            <xs:element name="anopheles" maxOccurs="unbounded" type="LarvicidingInterventionDescription"/>
+            <xs:element minOccurs="0" name="timed" type="timedBaseList">
+              <xs:annotation>
+                <xs:documentation>
+                  List of timed mosquito larviding deployment
+                </xs:documentation>
+                <xs:appinfo>name:Larviciding deployment;</xs:appinfo>
+              </xs:annotation>
             </xs:element>
           </xs:sequence>
           <xs:attribute name="name" type="xs:string" use="optional">
@@ -598,6 +578,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
         <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="timedBase">
+    <xs:attribute name="time" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Time-step at which this intervention occurs, starting
+          from 0, the first intervention-period time-step.
+        </xs:documentation>
+        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -716,6 +707,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="timedBaseList">
+    <xs:sequence>
+      <!-- Note: minimum is 1 to save an extra check in code. -->
+      <xs:element name="deploy" type="timedBase" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="massList">
     <xs:sequence>
@@ -1327,6 +1324,41 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="LarvicidingInterventionDescription">
+    <xs:annotation>
+      <xs:documentation>
+        Descriptions of initial effectiveness of the effects of
+        larviciding interventions.
+      </xs:documentation>
+      <xs:appinfo>units:None;min:0;max:1;name:Larviciding;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="duration" type="InputValueDouble">
+        <xs:annotation>
+          <xs:documentation>
+                  Specifies how long the larviciding is effective
+                </xs:documentation>
+          <xs:appinfo>;units:time-steps;name:Duration;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectiveness" type="InputValueDouble">
+        <xs:annotation>
+          <xs:documentation>
+                  Give the proportion of larvae killed by the larviciding
+           </xs:documentation>
+          <xs:appinfo>units:None;min:0;max:1;name:Effectiveness;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the affected anopheles-mosquito species.
+        </xs:documentation>
+        <xs:appinfo>name:Mosquito species</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
   <xs:complexType name="BaseInterventionDescription">
     <xs:annotation>
       <xs:documentation>
@@ -1353,5 +1385,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="InputValueDouble">
+    <xs:attribute name="value" type="xs:double" use="required">
+    <xs:annotation>
+      <xs:documentation>
+	 Required Value double attribute 
+        </xs:documentation>
+	<xs:appinfo>name:Double Attribute</xs:appinfo>
+     </xs:annotation>
+     </xs:attribute>
   </xs:complexType>
 </xs:schema>

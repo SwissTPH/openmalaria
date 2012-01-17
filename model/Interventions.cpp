@@ -266,6 +266,21 @@ private:
     TimeStep maxInterventionAge;
 };
 
+class TimedLarvicideIntervention : public TimedIntervention {
+public:
+    TimedLarvicideIntervention( TimeStep deployTime, const scnXml::Larviciding& larviciding) :
+        TimedIntervention( deployTime ),
+        _larviciding(larviciding)
+	
+    {}
+    virtual void deploy (OM::Population& population) {
+      population.transmissionModel().intervLarviciding(_larviciding);
+    }
+    
+private:
+  scnXml::Larviciding _larviciding;
+};
+
 /** Create either a TimedMassCumIntervention or a TimedMassIntervention,
  * depending on whether the cumulativeWithMaxAge attribute is present.
  * 
@@ -513,14 +528,21 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         }
     }
     if( intervElt.getLarviciding().present() ){
-        throw util::xml_scenario_error("larviciding not currently supported");
-        /*
-        if (interv->getLarviciding().present()) {
-            _transmissionModel->intervLarviciding (interv->getLarviciding().get());
+      
+      const scnXml::Larviciding& elt = intervElt.getLarviciding().get();
+        
+      if (elt.getTimed().present() ) {
+
+	  activeInterventions.set ( Interventions::LARVICIDING, true );
+	  
+	  const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+	    
+            typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
+            for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                timed.push_back( new TimedLarvicideIntervention(TimeStep( it->getTime() ),intervElt.getLarviciding().get()) );
+            }
         }
-            if (it->getLarviciding().present())
-                activeInterventions.set (Interventions::LARVICIDING, true);
-        */
+        
     }
     
     // lists must be sorted, increasing
