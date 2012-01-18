@@ -331,8 +331,9 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
         );
     }
 
-    for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it)
+    for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it) {
         species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
+    }
     
 }
 void VectorTransmission::uninfectVectors() {

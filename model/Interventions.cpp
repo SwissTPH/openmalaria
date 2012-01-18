@@ -528,22 +528,20 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         }
     }
     if( intervElt.getLarviciding().present() ){
-      
-      const scnXml::Larviciding& elt = intervElt.getLarviciding().get();
-        
-      if (elt.getTimed().present() ) {
 
-	  activeInterventions.set ( Interventions::LARVICIDING, true );
-	  
-	  const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-	    
-            typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-            for ( It it = seq.begin(); it != seq.end(); ++it ) {
-                timed.push_back( new TimedLarvicideIntervention(TimeStep( it->getTime() ),intervElt.getLarviciding().get()) );
-            }
-        }
-        
-    }
+      const scnXml::Larviciding& elt = intervElt.getLarviciding().get();
+
+	if (elt.getTimed().present() ) {
+	    activeInterventions.set ( Interventions::LARVICIDING, true );
+
+	    const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+	    typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
+	    for ( It it = seq.begin(); it != seq.end(); ++it ) {
+		timed.push_back( new TimedLarvicideIntervention(TimeStep( it->getTime() ),intervElt.getLarviciding().get()) );
+	    }
+	}
+
+      }
     
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.

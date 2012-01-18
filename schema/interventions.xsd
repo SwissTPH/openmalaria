@@ -1333,7 +1333,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>units:None;min:0;max:1;name:Larviciding;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="duration" type="inputValue">
+      <xs:element name="duration" type="intValue">
         <xs:annotation>
           <xs:documentation>
                   Specifies how long the larviciding is effective
@@ -1341,7 +1341,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>;units:time-steps;name:Duration;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="effectiveness" type="InputValueDouble">
+      <xs:element name="effectiveness" type="inputValue">
         <xs:annotation>
           <xs:documentation>
                   Give the proportion of larvae killed by the larviciding
@@ -1385,15 +1385,5 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="InputValueDouble">
-    <xs:attribute name="value" type="xs:double" use="required">
-    <xs:annotation>
-      <xs:documentation>
-	 Required Value double attribute 
-        </xs:documentation>
-	<xs:appinfo>name:Double Attribute</xs:appinfo>
-     </xs:annotation>
-     </xs:attribute>
   </xs:complexType>
 </xs:schema>
