@@ -1,0 +1,58 @@
+The following are clearly incompatible.
+
+NEGATIVE_BINOMIAL_MASS_ACTION with LOGNORMAL_MASS_ACTION: they're versions of the same model-
+component.
+
+EMPIRICAL_WITHIN_HOST_MODEL with DUMMY_WITHIN_HOST_MODEL
+
+Heterogeneity options with other heterogeneity options including any of the same components.
+
+
+--------------------------------
+The following do have some reason for being incompatible, which may be resolvable.
+
+ANY_TRANS_HET (any HET components with transmission heterogeneity) with
+NEGATIVE_BINOMIAL_MASS_ACTION and LOGNORMAL_MASS_ACTION: both adjust the availability-to-mosquitoes
+factor. If these adjustments can be combined though they needn't be (see the following; currently
+they're multiplied but because of the incompatibility one must be 1.0):
+http://github.com/dhardy/openmalaria/blob/master/model/Host/Human.cpp#L137
+
+Heterogeneity options with other heterogeneity options not including the same components. In some
+cases this is allowed (any of the three individual hets together, which AR used), but in
+some cases it's not (one of the individual hets with the paired het of the other two components).
+I don't see a reason for this, but neither a reason for worrying about it.
+
+EMPIRICAL_WITHIN_HOST_MODEL has a requirement on INCLUDES_PKPD, though this isn't in principle
+required (to confirm in code).
+
+
+------------------------------------
+In the following one option is rendered irrelevant by another, which in a way is an incompatibility.
+They are included in the incompatibility check to prevent users from thinking they provide another
+model version, except for MAX_DENS_CORRECTION which is enabled by default.
+
+ATTENUATION_ASEXUAL_DENSITY with DUMMY_WITHIN_HOST_MODEL, INCLUDES_PK_PD
+(ATTENUATION_ASEXUAL_DENSITY only meaningful with IPT model which is incompatible with the others)
+
+INNATE_MAX_DENS with DUMMY_WITHIN_HOST_MODEL
+
+MAX_DENS_CORRECTION with DUMMY_WITHIN_HOST_MODEL, EMPIRICAL_WITHIN_HOST_MODEL (not marked incompatible)
+
+
+---------------------------------
+As further documentation, the following were once marked incompatible but neither TS nor DH can see
+why they need be incompatible.
+
+MUELLER_PRESENTATION_MODEL with NON_MALARIA_FEVERS
+Note: untested, but code looks OK with the combination.
+
+INCLUDES_PK_PD with PENALISATION_EPISODES
+Note: these (drug treatment modelling and immunity penalisation) aren't necessarily totally independant.
+
+PENALISATION_EPISODES with DUMMY_WITHIN_HOST_MODEL: the immunity code is now common to all within-
+host models so no longer relevant.
+
+INCLUDES_PK_PD with PENALISATION_EPISODES, MAX_DENS_CORRECTION, INNATE_MAX_DENS
+
+ANY_TRANS_HET (any HET components with transmission heterogeneity) with ATTENUATION_ASEXUAL_DENSITY,
+NO_PRE_ERYTHROCYTIC, MAX_DENS_CORRECTION

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<!-- Drug parameters — PK, PD and resistance -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="pharmacology">
+    <xs:sequence>
+      <xs:element name="drug" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Sequence of drug descriptions forming a library of drug parameters.
+            </xs:documentation>
+          <xs:appinfo>name:Library of drug parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="PD">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="allele" minOccurs="1" maxOccurs="unbounded">
+                    <xs:annotation>
+                      <xs:documentation>
+                          PD parameters per allele, plus initial frequency of each allele.
+                          
+                          Note: we assume a one-to-one correspondance of drugs to loci, hence each
+                          drug has an independent set of alleles here.
+                            </xs:documentation>
+                      <xs:appinfo>name:PD parameters per allele;</xs:appinfo>
+                    </xs:annotation>
+                    <xs:complexType>
+                      <xs:sequence>
+                        <xs:element name="initial_frequency" type="xs:double">
+                          <xs:annotation>
+                            <xs:documentation>
+                                Frequency, relative to the total frequency of all alleles for this drug/locus.
+                              </xs:documentation>
+                            <xs:appinfo>units:relative frequency;min:0;name:Relative frequency;</xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="max_killing_rate" type="xs:double">
+                          <xs:annotation>
+                            <xs:documentation>
+                                k1 — Maximal parasite killing rate.
+                              </xs:documentation>
+                            <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="IC50" type="xs:double">
+                          <xs:annotation>
+                            <xs:documentation>
+                                Half maximal effect concentration.
+                              </xs:documentation>
+                            <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                        <xs:element name="slope" type="xs:double">
+                          <xs:annotation>
+                            <xs:documentation>
+                                n — Slope of the concentration effect curve
+                              </xs:documentation>
+                            <xs:appinfo>units:no units;name:Slope of effect curve;</xs:appinfo>
+                          </xs:annotation>
+                        </xs:element>
+                      </xs:sequence>
+                      <xs:attribute name="name" use="required" type="xs:string" />
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="PK">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="negligible_concentration" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Concentration below which drug's effects are deemed negligible and can
+                          be removed from simulation.
+                        </xs:documentation>
+                      <xs:appinfo>units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="half_life" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Used to calculate elimination rate (which is: ln(2) / half_life).
+                        </xs:documentation>
+                      <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="vol_dist" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Volume of Distribution
+                        </xs:documentation>
+                      <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="abbrev" use="required" type="xs:string" />
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
