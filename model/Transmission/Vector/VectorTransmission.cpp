@@ -256,7 +256,8 @@ void VectorTransmission::update (const std::list<Host::Human>& population, int p
 
 void VectorTransmission::checkSimMode() const{
     if( interventionMode == equilibriumMode ){
-        throw xml_scenario_error("vector interventions can only be used in dynamic transmission mode (mode=4)");
+        throw xml_scenario_error("vector interventions can only be used in "
+            "dynamic transmission mode (mode=\"dynamic\")");
     }
 }
 
@@ -267,7 +268,8 @@ void VectorTransmission::setITNDescription (const scnXml::ITNDescription& elt){
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){
         throw util::xml_scenario_error(
-            "ITN.description.anophelesParams: must have one element for each mosquito species described in entomology"
+            "ITN.description.anophelesParams: must have one element for each "
+            "mosquito species described in entomology"
         );
     }
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
@@ -283,7 +285,8 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
         const AP& ap = elt.getDescription().get().getAnophelesParams();
         if( ap.size() != numSpecies ){
             throw util::xml_scenario_error(
-                "IRS.description.anophelesParams: must have one element for each mosquito species described in entomology"
+                "IRS.description.anophelesParams: must have one element for "
+                "each mosquito species described in entomology"
             );
         }
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
@@ -297,7 +300,8 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
         const AP& ap = elt.getSimpleDescription().get().getAnophelesParams();
         if( ap.size() != numSpecies ){
             throw util::xml_scenario_error(
-                "IRS.simpleDescription.anophelesParams: must have one element for each mosquito species described in entomology"
+                "IRS.simpleDescription.anophelesParams: must have one element "
+                "for each mosquito species described in entomology"
             );
         }
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
@@ -312,7 +316,8 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){
         throw util::xml_scenario_error(
-            "vectorDeterrent.anophelesParams: must have one element for each mosquito species described in entomology"
+            "vectorDeterrent.anophelesParams: must have one element for each "
+            "mosquito species described in entomology"
         );
     }
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
@@ -327,7 +332,8 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
     
     if( seq.size() != numSpecies ){
         throw util::xml_scenario_error(
-            "larviciding.anopheles: must have one element for each mosquito species described in entomology"
+            "larviciding.anopheles: must have one element for each mosquito "
+            "species described in entomology"
         );
     }
 

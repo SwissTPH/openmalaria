@@ -33,9 +33,8 @@
       <option name="immunity Y" value="true"/>
       <option name="new infections" value="true"/>
       <option name="num transmitting humans" value="true"/>
-      <option name="nets owned" value="true"/>
-      <option name="mean hole index"/>
-      <option name="mean insecticide content"/>
+      <option name="S_v" value="true"/>
+      <option name="simulated EIR"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>

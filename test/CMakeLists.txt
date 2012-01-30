@@ -31,6 +31,7 @@ set (OM_BOXTEST_NAMES
   VecFullTest
   VecTest
   VecMonthly
+  Larviciding
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

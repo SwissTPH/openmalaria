@@ -62,6 +62,12 @@ public:
       _cumulativeEIRa & stream;
   }
   
+  /// Static checkpointing
+  template<class S>
+  static void staticCheckpoint (S& stream){
+      ctsNewInfections & stream;
+  }
+  
 protected:
   /// Create a new model
   InfectionIncidenceModel ();

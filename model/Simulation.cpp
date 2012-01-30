@@ -103,7 +103,7 @@ int Simulation::start(){
         cerr << ") shorter than length of warm-up requested by" << endl;
         cerr << "transmission model (" << population->_transmissionModel->minPreinitDuration().inYears();
         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
-        cerr << "transmission (mode=2) or a longer life-span." << endl;
+        cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
     humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1) / TimeStep::stepsPerYear + 1);

@@ -66,12 +66,14 @@ void Population::clear()
 void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
+    Host::InfectionIncidenceModel::staticCheckpoint (stream);
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
+    Host::InfectionIncidenceModel::staticCheckpoint (stream);
     Clinical::ClinicalModel::staticCheckpoint (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
 }
