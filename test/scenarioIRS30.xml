@@ -33,6 +33,8 @@
       <option name="immunity Y" value="true"/>
       <option name="hosts" value="false"/>
       <option name="recent births" value="true"/>
+      <option name="IRS insecticide content" value="true"/>
+      <option name="IRS effects" value="true"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>

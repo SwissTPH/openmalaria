@@ -192,7 +192,7 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
 
 // ———  per-human data  ———
 IRS::IRS (const TransmissionModel& tm) :
-    initialInsecticide( numeric_limits<double>::signaling_NaN() )
+    initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
     //TODO: we shouldn't really have IRS data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?

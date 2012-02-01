@@ -137,7 +137,7 @@ int Simulation::start(){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
             // do reporting (continuous and surveys)
-            Continuous::update();
+            Continuous::update( *population );
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();

@@ -86,13 +86,19 @@ public:
     typedef list<Host::Human> HumanPop;
     /// Iterator type of population
     typedef HumanPop::iterator HumanIter;
+    /// Const iterator type of population
+    typedef HumanPop::const_iterator ConstHumanIter;
     
     /** Return the list of humans. */
     inline HumanPop& getList() {
         return population;
     }
+    /** Get const list */
+    inline const HumanPop& getList() const {
+        return population;
+    }
     /** Return the number of humans. */
-    inline int getSize() {
+    inline int getSize() const {
         return populationSize;
     }
     /** Return access to the transmission model. */
@@ -130,8 +136,6 @@ private:
     void ctsNetsOwned (ostream& stream);
     /// Delegate to print the mean hole index of all bed nets
     void ctsNetHoleIndex (ostream& stream);
-    /// Delegate to print the mean insecticide content of all bed nets
-    void ctsNetInsecticideContent (ostream& stream);
     
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);

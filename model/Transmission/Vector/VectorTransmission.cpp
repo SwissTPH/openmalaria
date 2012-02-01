@@ -72,6 +72,41 @@ void VectorTransmission::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
 }
+void VectorTransmission::ctsNetInsecticideContent (const Population& population, ostream& stream){
+    double meanVar = 0.0;
+    int n = 0;
+    for (Population::ConstHumanIter iter = population.getList().begin(),
+            end = population.getList().end(); iter != end; ++iter) {
+        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+            ++n;
+            meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
+        }
+    }
+    stream << '\t' << meanVar/n;
+}
+void VectorTransmission::ctsIRSInsecticideContent (const Population& population, ostream& stream) {
+    double totalInsecticide = 0.0;
+    for (Population::ConstHumanIter iter = population.getList().begin(),
+            end = population.getList().end(); iter != end; ++iter) {
+        totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
+    }
+    stream << '\t' << totalInsecticide / population.getSize();
+}
+void VectorTransmission::ctsIRSEffects (const Population& population, ostream& stream) {
+    for( size_t i = 0; i < numSpecies; ++i ){
+        const IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
+        double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
+        for (Population::ConstHumanIter iter = population.getList().begin(),
+                end = population.getList().end(); iter != end; ++iter) {
+            totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
+            totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
+            totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
+        }
+        stream << '\t' << totalRA / population.getSize()
+            << '\t' << totalPrePSF / population.getSize()
+            << '\t' << totalPostPSF / population.getSize();
+    }
+}
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     for ( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ) {
         if ( it->second == i )
@@ -119,7 +154,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
 
 
     // -----  Continuous reporting  -----
-    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif, ctsNv, ctsOv, ctsSv;
+    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif, ctsNv, ctsOv, ctsSv, ctsIRSEffects;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
@@ -132,6 +167,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         ctsNv<<"\tN_v("<<name<<")";
         ctsOv<<"\tO_v("<<name<<")";
         ctsSv<<"\tS_v("<<name<<")";
+        ctsIRSEffects<<"\tIRS rel attr ("<<name<<")"
+            <<"\tIRS preprand surv factor ("<<name<<")"
+            <<"\tIRS postprand surv factor ("<<name<<")";
     }
     using Monitoring::Continuous;
     Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v0 ) );
@@ -141,6 +179,18 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
     Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
+    Continuous::registerCallback( "mean insecticide content",
+        "\tmean insecticide content",
+        MakeDelegate( this, &VectorTransmission::ctsNetInsecticideContent ) );
+    // Mean IRS insecticide across whole population
+    Continuous::registerCallback( "IRS insecticide content",
+        "\tIRS insecticide content",
+        MakeDelegate( this, &VectorTransmission::ctsIRSInsecticideContent ) );
+    // Mean values of relative attractiveness, pre- and post-prandial survival
+    // IRS-induced factors of mosquitoes (i.e. only the portion of deterrent
+    // and killing effects attributable to IRS).
+    Continuous::registerCallback( "IRS effects", ctsIRSEffects.str(),
+        MakeDelegate( this, &VectorTransmission::ctsIRSEffects ) );
 }
 VectorTransmission::~VectorTransmission () {
 }

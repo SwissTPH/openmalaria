@@ -92,16 +92,25 @@ Population::Population()
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
-    Continuous::registerCallback( "host demography", ctsDemogTitle.str(), MakeDelegate( this, &Population::ctsHostDemography ) );
-    Continuous::registerCallback( "recent births", "\trecent births", MakeDelegate( this, &Population::ctsRecentBirths ) );
-    Continuous::registerCallback( "patent hosts", "\tpatent hosts", MakeDelegate( this, &Population::ctsPatentHosts ) );
-    Continuous::registerCallback( "immunity h", "\timmunity h", MakeDelegate( this, &Population::ctsImmunityh ) );
-    Continuous::registerCallback( "immunity Y", "\timmunity Y", MakeDelegate( this, &Population::ctsImmunityY ) );
-    Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y", MakeDelegate( this, &Population::ctsMedianImmunityY ) );
-    Continuous::registerCallback( "human age availability", "\thuman age availability", MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
-    Continuous::registerCallback( "nets owned", "\tnets owned", MakeDelegate( this, &Population::ctsNetsOwned ) );
-    Continuous::registerCallback( "mean hole index", "\tmean hole index", MakeDelegate( this, &Population::ctsNetHoleIndex ) );
-    Continuous::registerCallback( "mean insecticide content", "\tmean insecticide content", MakeDelegate( this, &Population::ctsNetInsecticideContent ) );
+    Continuous::registerCallback( "host demography", ctsDemogTitle.str(),
+        MakeDelegate( this, &Population::ctsHostDemography ) );
+    Continuous::registerCallback( "recent births", "\trecent births",
+        MakeDelegate( this, &Population::ctsRecentBirths ) );
+    Continuous::registerCallback( "patent hosts", "\tpatent hosts",
+        MakeDelegate( this, &Population::ctsPatentHosts ) );
+    Continuous::registerCallback( "immunity h", "\timmunity h",
+        MakeDelegate( this, &Population::ctsImmunityh ) );
+    Continuous::registerCallback( "immunity Y", "\timmunity Y",
+        MakeDelegate( this, &Population::ctsImmunityY ) );
+    Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y",
+        MakeDelegate( this, &Population::ctsMedianImmunityY ) );
+    Continuous::registerCallback( "human age availability",
+        "\thuman age availability",
+        MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
+    Continuous::registerCallback( "nets owned", "\tnets owned",
+        MakeDelegate( this, &Population::ctsNetsOwned ) );
+    Continuous::registerCallback( "mean hole index", "\tmean hole index",
+        MakeDelegate( this, &Population::ctsNetHoleIndex ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
 }
@@ -119,7 +128,8 @@ void Population::checkpoint (istream& stream)
     size_t popSize; // must be type of population.size()
     popSize & stream;
     if (popSize > size_t (populationSize))
-        throw util::checkpoint_error( (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
+        throw util::checkpoint_error(
+            (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
     for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
@@ -127,7 +137,8 @@ void Population::checkpoint (istream& stream)
         population.back() & stream;
     }
     if (population.size() != popSize)
-        throw util::checkpoint_error( (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
+        throw util::checkpoint_error(
+            (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
 }
 void Population::checkpoint (ostream& stream)
 {
@@ -334,22 +345,6 @@ void Population::ctsNetHoleIndex (ostream& stream){
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
-        }
-    }
-    stream << '\t' << meanVar/nNets;
-}
-void Population::ctsNetInsecticideContent (ostream& stream){
-    const Transmission::VectorTransmission* vt = reinterpret_cast<Transmission::VectorTransmission*>(_transmissionModel);
-    if( vt == 0 ){
-        throw util::xml_scenario_error("mean insecticide content: invalid in non-vector mode!");
-    }
-    const Transmission::ITNParams& params = vt->getITNParams();
-    double meanVar = 0.0;
-    int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
-            ++nNets;
-            meanVar += iter->perHostTransmission.getITN().getInsecticideContent(params);
         }
     }
     stream << '\t' << meanVar/nNets;

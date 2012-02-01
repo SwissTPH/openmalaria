@@ -96,6 +96,9 @@ private:
   void ctsCbN_v (ostream& stream);
   void ctsCbO_v (ostream& stream);
   void ctsCbS_v (ostream& stream);
+  void ctsNetInsecticideContent (const Population& population, ostream& stream);
+  void ctsIRSInsecticideContent (const Population& population, ostream& stream);
+  void ctsIRSEffects (const Population& population, ostream& stream);
   
   
     /// Number of iterations performed during initialization, or negative when done.
