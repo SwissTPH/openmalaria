@@ -93,7 +93,7 @@ public:
     void setupNv0 (size_t sIndex,
                    const std::list<Host::Human>& population,
                    int populationSize,
-                   double invMeanPopAvail);
+                   double meanPopAvail);
 
     /** Return base-line human parameters for the mosquito. */
     inline const AnophelesHumanParams& getHumanBaseParams () {
@@ -137,9 +137,9 @@ public:
      * @param populationSize Number of humans
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
-     * @param invMeanPopAvail 1 over mean population availability relative to an adult.
      */
-    void advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail);
+    void advancePeriod (const std::list<Host::Human>& population,
+        int populationSize, size_t sIndex, bool isDynamic);
 
     /** Returns the EIR calculated by advancePeriod().
      *

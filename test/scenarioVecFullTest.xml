@@ -36,7 +36,7 @@
       <option name="nets owned" value="true"/>
       <option name="mean hole index"/>
       <option name="mean insecticide content"/>
-      <option name="alpha_i" value="false"/>
+      <option name="alpha" value="true"/>
       <option name="P_B" value="false"/>
       <option name="P_C*P_D" value="false"/>
     </continuous>

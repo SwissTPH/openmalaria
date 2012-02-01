@@ -67,11 +67,11 @@ string VectorAnopheles::initialise (
     }
     N_v_length = EIPDuration + mosqRestDuration;
 
-    
+
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
 
     initEIR( anoph, initialisationEIR );
-    
+
     return anoph.getMosquito();
 }
 
@@ -91,16 +91,16 @@ public:
         probMosqFindRestSite = nnh.getMosqProbFindRestSite().getValue();
         probMosqSurvivalResting = nnh.getMosqProbResting().getValue();
     }
-    
-    double prodBCD() const{	// P_B_i * P_C_i * P_D_i
+
+    double prodBCD() const {    // P_B_i * P_C_i * P_D_i
         return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
     }
-    
+
     string name;        // name of host type
     double relativeEntoAvailability;            // ξ_i
-    double probMosqBiting;				// P_B_i
-    double probMosqFindRestSite;		// P_C_i
-    double probMosqSurvivalResting;	// P_D_i
+    double probMosqBiting;                              // P_B_i
+    double probMosqFindRestSite;                // P_C_i
+    double probMosqSurvivalResting;     // P_D_i
 };
 
 void VectorAnopheles::initAvailability(
@@ -109,7 +109,7 @@ void VectorAnopheles::initAvailability(
     int populationSize)
 {
     // -----  Read XML data  -----
-    
+
     const scnXml::AnophelesParams::NonHumanHostsSequence& otherHosts = anoph.getNonHumanHosts();
     vector<AnophelesNonHumanParams> nonHumanElts;
     nonHumanElts.resize (otherHosts.size());
@@ -126,12 +126,12 @@ void VectorAnopheles::initAvailability(
     double probFindRestSite = mosq.getMosqProbFindRestSite().getMean();
     double probResting = mosq.getMosqProbResting().getMean();
     double probOvipositing = mosq.getMosqProbOvipositing().getValue();
-    
-    
+
+
     // -----  Calculate P_A, P_A1, P_A_n  -----
     // Reference: Parameter Values for Transmission Model,
     // Chitnis et al. Sept 2010, equations (13), (14), (15).
-    
+
     // Probability that a mosquito does not find a host and does not die in
     // one night of searching (P_A)
     double initP_A  = 1.0 - mosqLaidEggsSameDayProp;
@@ -143,21 +143,21 @@ void VectorAnopheles::initAvailability(
 
     if (nonHumanElts.empty()) {
         // i.e. χ=1
-        
+
         // A_0 * P_f
         double pFedAndLaid = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
         // P_B_i * P_C_i * P_D_i * P_E_i (for average human)
         double pBiteRestOviposit = probBiting * probFindRestSite * probResting * probOvipositing;
         P_A1 = pFedAndLaid / pBiteRestOviposit;
         P_Ah = 0.0;
-    }else{
+    } else {
         // i.e. χ<1
-        
+
         // let v = χ * P_D_1 * P_E_1; note that this is the average for humans
         double v = humanBloodIndex * probResting * probOvipositing;
         // let chi1 = 1 - χ
         double chi1 = 1.0 - humanBloodIndex;
-        
+
         // Sxi is the sum of ξ_i across non-human hosts i
         double Sxi = 0.0;
         // let u_i = ξ_i * P_B_i * P_C_i
@@ -166,7 +166,7 @@ void VectorAnopheles::initAvailability(
         // let w_i = chi1 * P_D_i * P_E_i
         // Suvw is the sum of u_i*(v+w_i) across non-human hosts i
         double Suvw = 0.0;
-        
+
         typedef vector<AnophelesNonHumanParams>::const_iterator ItType;
         for (ItType nhh = nonHumanElts.begin(); nhh != nonHumanElts.end(); ++nhh) {
             Sxi += nhh->relativeEntoAvailability;
@@ -175,45 +175,45 @@ void VectorAnopheles::initAvailability(
             double w_i = chi1 * nhh->probMosqSurvivalResting * probOvipositing;
             Suvw += u_i * (v + w_i);
         }
-        
-        if ( !(Sxi>0.9999 && Sxi<1.0001) ){
+
+        if ( !(Sxi>0.9999 && Sxi<1.0001) ) {
             throw xml_scenario_error (
                 "The sum of the relative entomological availability (ξ_i) "
                 "across non-human hosts must be 1!"
             );
         }
-        
+
         double A0Pf = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
         // P_A1 = A_0 * P_f * χ * Su  ...
         P_A1 = (A0Pf * humanBloodIndex * Su) /
-        // ...  over P_B_1 * P_C_1 * Suvw
-                (probBiting * probFindRestSite * Suvw);
+               // ...  over P_B_1 * P_C_1 * Suvw
+               (probBiting * probFindRestSite * Suvw);
         // and this one's as written
         P_Ah = (A0Pf * chi1) / Suvw;
     }
-    
-    
+
+
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     humanBase.setEntoAvailability(
         calcEntoAvailability(populationSize, initP_A, P_A1));
-    
+
     nonHumans.resize(nonHumanElts.size());
-    for( size_t i=0; i<nonHumanElts.size(); ++i ){
+    for ( size_t i=0; i<nonHumanElts.size(); ++i ) {
         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(nonHumanElts[i].name);
-        if (pop == nonHumanHostPopulations.end()){
+        if (pop == nonHumanHostPopulations.end()) {
             throw xml_scenario_error ("There is no population size defined for "
-            "at least one non human host type, please check the scenario file.");
+                                      "at least one non human host type, please check the scenario file.");
         }
-        
+
         double nonHumanPopulationSize = pop->second;
         double entoAvailability = calcEntoAvailability(nonHumanPopulationSize,
-                                                       initP_A,
-                                                       P_Ah*nonHumanElts[i].relativeEntoAvailability);
-        
+                                  initP_A,
+                                  P_Ah*nonHumanElts[i].relativeEntoAvailability);
+
         nonHumans[i].entoAvailability = entoAvailability;
         nonHumans[i].probCompleteCycle = entoAvailability * nonHumanElts[i].prodBCD();
     }
-    
+
     // -----  Calculate death rate while seeking (µ_vA)  -----
     // since sum_i(ξ_i)=1, sum_k(P_A_k)=P_A1+P_Ah
     double mu1 = (1.0-initP_A-P_A1-P_Ah) / (1.-initP_A);
@@ -231,9 +231,9 @@ double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai
 void VectorAnopheles::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
-){
+) {
     const scnXml::Seasonality& seasonality = anoph.getSeasonality();
-    if( seasonality.getInput() != "EIR" ){
+    if ( seasonality.getInput() != "EIR" ) {
         throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
         //TODO
     }
@@ -243,20 +243,20 @@ void VectorAnopheles::initEIR(
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
         const scnXml::FourierSeries::CoefficSequence& fsCoeffic = seasFC.getCoeffic();
-        
+
         FSCoeffic.reserve (2*fsCoeffic.size() + 1);
 
         FSCoeffic.push_back( 0.0 );     // value doesn't matter; EIR will be scaled
-        for( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ){
+        for ( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
             FSCoeffic.push_back( it->getA() );
             FSCoeffic.push_back( it->getB() );
         }
         // According to spec, EIR for first day of year (rather than EIR at the
         // exact start of the year) is generated with t=0 in Fourier series.
         EIRRotateAngle = seasFC.getEIRRotateAngle();
-    } else if( seasonality.getMonthlyValues().present() ) {
+    } else if ( seasonality.getMonthlyValues().present() ) {
         const scnXml::MonthlyValues& seasM = seasonality.getMonthlyValues().get();
-        if( seasM.getSmoothing() != "fourier" ){
+        if ( seasM.getSmoothing() != "fourier" ) {
             throw util::xml_scenario_error("entomology.anopheles.seasonality.monthlyValues.smoothing: only fourier supported at the moment");
             //TODO: should be easy to add no smoothing
         }
@@ -306,17 +306,17 @@ void VectorAnopheles::initEIR(
         throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
         //TODO
     }
-    
-    if( !seasonality.getAnnualEIR().present() ){
+
+    if ( !seasonality.getAnnualEIR().present() ) {
         //TODO: work out when this is not required and implement code
         throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
     }
     double targetEIR = seasonality.getAnnualEIR().get();
-    
+
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
     calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
-    // And scale:
+    // And scale (also acts as a unit conversion):
     FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
 
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
@@ -367,15 +367,15 @@ void VectorAnopheles::initEIR(
 void VectorAnopheles::setupNv0 (size_t sIndex,
                                 const std::list<Host::Human>& population,
                                 int populationSize,
-                                double invMeanPopAvail) {
+                                double meanPopAvail) {
     // -----  N_v0, N_v, O_v, S_v  -----
     //BEGIN P_A, P_Ai, P_df, P_dif
     // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
     double leaveSeekingStateRate = mosqSeekingDeathRate;
 
-    // speciesEIR is average EIR per human over human population
-    // that is, 1/populationSize * sum_{i in population} (P_Ai * P_B_i)
-    // let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
+    // Input per-species EIR is the mean EIR experienced by a human adult.
+    // We use sumPFindBite below to get required S_v.
+    // Let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
     double sumPFindBite = 0.0;
 
     // NC's non-autonomous model provides two methods for calculating P_df and
@@ -384,7 +384,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const PerHostTransmission& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
@@ -409,8 +409,13 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     double initOvFromSv = initNv0FromSv;  // temporarily use of initNv0FromSv
     initNv0FromSv = initNvFromSv * (1.0 - intP_A - intP_df);
 
-    // same as multiplying resultant eir since calcFourierEIR takes exp(...)
-    FSCoeffic[0] += log (populationSize / sumPFindBite);
+    // We scale FSCoeffic to give us S_v instead of EIR. First we multiply
+    // input EIR by meanPopAvail to give us population average EIR instead of
+    // adult average EIR, then we divide by (sumPFindBite/populationSize) to
+    // get S_v.
+    // Log-values: adding log is same as exponentiating, multiplying and taking
+    // the log again.
+    FSCoeffic[0] += log (populationSize * meanPopAvail / sumPFindBite);
     calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
 
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
@@ -422,7 +427,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
         P_A[t] = intP_A;
         P_df[t] = intP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        S_v[t] = forcedS_v[t];	// assume N_v_length ≤ 365
+        S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
     }
@@ -488,8 +493,7 @@ bool VectorAnopheles::vectorInitIterate () {
 void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
-                                     bool isDynamic,
-                                     double invMeanPopAvail) {
+                                     bool isDynamic) {
     if (TimeStep::simulation > larvicidingEndStep) {
         larvicidingEndStep = TimeStep::future;
         larvicidingIneffectiveness = 1.0;
@@ -538,7 +542,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
     double intP_dif = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const PerHostTransmission& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), invMeanPopAvail);
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
@@ -679,7 +683,7 @@ void VectorAnopheles::uninfectVectors() {
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-double VectorAnopheles::getLastN_v0 (){
+double VectorAnopheles::getLastN_v0 () {
     double timestep_N_v0 = 0.0;
     int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {

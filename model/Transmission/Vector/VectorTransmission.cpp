@@ -31,19 +31,6 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorTransmission::invMeanPopAvail (const std::list<Host::Human>& population, int populationSize) {
-    double sumRelativeAvailability = 0.0;
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
-    }
-    if( sumRelativeAvailability > 0.0 ){
-        return populationSize / sumRelativeAvailability;     // 1 / mean-rel-avail
-    }else{
-        // value should be unimportant when no humans are available, though inf/nan is not acceptable
-        return 1.0;
-    }
-}
-
 void VectorTransmission::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
@@ -72,13 +59,13 @@ void VectorTransmission::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
 }
-void VectorTransmission::ctsCbAlpha_i (const Population& population, ostream& stream){
+void VectorTransmission::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
         const AnophelesHumanParams& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityHetVecItv( params, i );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
         }
         stream << '\t' << total / population.getSize();
     }
@@ -219,7 +206,7 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
     // availability to mosquitoes relative to other humans, excluding age factor
-    Continuous::registerCallback( "alpha_i", ctsAlpha.str(), MakeDelegate( this, &VectorTransmission::ctsCbAlpha_i ) );
+    Continuous::registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorTransmission::ctsCbAlpha ) );
     Continuous::registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_B ) );
     Continuous::registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_CD ) );
     Continuous::registerCallback( "mean insecticide content",
@@ -239,9 +226,16 @@ VectorTransmission::~VectorTransmission () {
 }
 
 void VectorTransmission::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
-    double iMPA = invMeanPopAvail(population, populationSize);
+    double sumRelativeAvailability = 0.0;
+    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+    }
+    assert( sumRelativeAvailability > 0 );
+//     cout << "pop size: " << populationSize << endl;
+//     cout << "avg. avail: " << sumRelativeAvailability / populationSize << endl;
+    
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].setupNv0 (i, population, populationSize, iMPA);
+        species[i].setupNv0 (i, population, populationSize, sumRelativeAvailability / populationSize);
     }
 }
 
@@ -338,9 +332,8 @@ double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYea
 
 // Every Global::interval days:
 void VectorTransmission::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
-    double iMPA = invMeanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR, iMPA);
+        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR);
     }
 }
 void VectorTransmission::update (const std::list<Host::Human>& population, int populationSize) {
