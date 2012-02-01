@@ -120,9 +120,8 @@
     </ITN>
     <IRS name="new param">
       <description>
-        <!-- New Parameterisation. To be checked. -->
-        <!-- Initial insecticide: units are mg/m²; any variance? -->
-        <initialInsecticide mu="1180" sigma="0"/>
+        <!-- Initial insecticide: units are μg/cm²; no variance here -->
+        <initialInsecticide mu="118" sigma="0"/>
         <insecticideDecay L="0.15" function="exponential"/>
         <anophelesParams mosquito="gambiae_ss">
           <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>

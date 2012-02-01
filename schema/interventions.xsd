@@ -1158,7 +1158,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           negative initial concentration. Any negative values sampled are set
           to 0.
         </xs:documentation>
-          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide</xs:appinfo>
+          <xs:appinfo>units:μg/cm²;min:0;name:Initial insecticide</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="insecticideDecay" type="DecayFunction">
