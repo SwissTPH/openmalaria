@@ -72,6 +72,39 @@ void VectorTransmission::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
 }
+void VectorTransmission::ctsCbAlpha_i (const Population& population, ostream& stream){
+    for( size_t i = 0; i < numSpecies; ++i){
+        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+        double total = 0.0;
+        for (Population::ConstHumanIter iter = population.getList().begin(),
+                end = population.getList().end(); iter != end; ++iter) {
+            total += iter->perHostTransmission.entoAvailabilityHetVecItv( params, i );
+        }
+        stream << '\t' << total / population.getSize();
+    }
+}
+void VectorTransmission::ctsCbP_B (const Population& population, ostream& stream){
+    for( size_t i = 0; i < numSpecies; ++i){
+        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+        double total = 0.0;
+        for (Population::ConstHumanIter iter = population.getList().begin(),
+                end = population.getList().end(); iter != end; ++iter) {
+            total += iter->perHostTransmission.probMosqBiting( params, i );
+        }
+        stream << '\t' << total / population.getSize();
+    }
+}
+void VectorTransmission::ctsCbP_CD (const Population& population, ostream& stream){
+    for( size_t i = 0; i < numSpecies; ++i){
+        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+        double total = 0.0;
+        for (Population::ConstHumanIter iter = population.getList().begin(),
+                end = population.getList().end(); iter != end; ++iter) {
+            total += iter->perHostTransmission.probMosqResting( params, i );
+        }
+        stream << '\t' << total / population.getSize();
+    }
+}
 void VectorTransmission::ctsNetInsecticideContent (const Population& population, ostream& stream){
     double meanVar = 0.0;
     int n = 0;
@@ -154,7 +187,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
 
 
     // -----  Continuous reporting  -----
-    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif, ctsNv, ctsOv, ctsSv, ctsIRSEffects;
+    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif,
+        ctsNv, ctsOv, ctsSv,
+        ctsAlpha, ctsPB, ctsPCD,
+        ctsIRSEffects;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
@@ -167,6 +203,9 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
         ctsNv<<"\tN_v("<<name<<")";
         ctsOv<<"\tO_v("<<name<<")";
         ctsSv<<"\tS_v("<<name<<")";
+        ctsAlpha<<"\talpha_i("<<name<<")";
+        ctsPB<<"\tP_B("<<name<<")";
+        ctsPCD<<"\tP_C*P_D("<<name<<")";
         ctsIRSEffects<<"\tIRS rel attr ("<<name<<")"
             <<"\tIRS preprand surv factor ("<<name<<")"
             <<"\tIRS postprand surv factor ("<<name<<")";
@@ -179,6 +218,10 @@ VectorTransmission::VectorTransmission (const scnXml::Vector vectorData, int pop
     Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorTransmission::ctsCbN_v ) );
     Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorTransmission::ctsCbO_v ) );
     Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorTransmission::ctsCbS_v ) );
+    // availability to mosquitoes relative to other humans, excluding age factor
+    Continuous::registerCallback( "alpha_i", ctsAlpha.str(), MakeDelegate( this, &VectorTransmission::ctsCbAlpha_i ) );
+    Continuous::registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_B ) );
+    Continuous::registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorTransmission::ctsCbP_CD ) );
     Continuous::registerCallback( "mean insecticide content",
         "\tmean insecticide content",
         MakeDelegate( this, &VectorTransmission::ctsNetInsecticideContent ) );
