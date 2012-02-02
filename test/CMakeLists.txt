@@ -25,6 +25,7 @@ set (OM_BOXTEST_NAMES
   Molineaux
   MSAT
   NamawalaArabiensis
+  NoInterv
   Penny
   Rach5IC
   R_0
