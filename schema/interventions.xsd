@@ -553,7 +553,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="anopheles" maxOccurs="unbounded" type="LarvicidingInterventionDescription"/>
+            <xs:element name="description">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="anopheles" maxOccurs="unbounded" type="LarvicidingDescAnoph"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
             <xs:element minOccurs="0" name="timed" type="timedBaseList">
               <xs:annotation>
                 <xs:documentation>
@@ -1324,7 +1330,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="LarvicidingInterventionDescription">
+  <xs:complexType name="LarvicidingDescAnoph">
     <xs:annotation>
       <xs:documentation>
         Descriptions of initial effectiveness of the effects of

@@ -164,7 +164,7 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    void intervLarviciding (const scnXml::LarvicidingInterventionDescription&);
+    void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
 
     void uninfectVectors();
     //@}

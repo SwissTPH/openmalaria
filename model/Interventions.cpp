@@ -270,15 +270,14 @@ class TimedLarvicideIntervention : public TimedIntervention {
 public:
     TimedLarvicideIntervention( TimeStep deployTime, const scnXml::Larviciding& larviciding) :
         TimedIntervention( deployTime ),
-        _larviciding(larviciding)
-	
+        description(larviciding.getDescription())
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().intervLarviciding(_larviciding);
+      population.transmissionModel().intervLarviciding(description);
     }
     
 private:
-  scnXml::Larviciding _larviciding;
+  scnXml::Larviciding::DescriptionType description;
 };
 
 /** Create either a TimedMassCumIntervention or a TimedMassIntervention,

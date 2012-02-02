@@ -251,7 +251,7 @@ void TransmissionModel::setIRSDescription (const scnXml::IRS&) {
 void TransmissionModel::setVADescription (const scnXml::VectorDeterrent&) {
   throw util::xml_scenario_error (viError);
 }
-void TransmissionModel::intervLarviciding (const scnXml::Larviciding&) {
+void TransmissionModel::intervLarviciding (const scnXml::Larviciding::DescriptionType&) {
   throw util::xml_scenario_error (viError);
 }
 

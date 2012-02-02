@@ -180,18 +180,20 @@
   </monitoring>
   <interventions name="Full Set">
     <larviciding>
-      <anopheles mosquito="gambiae_ss">
-        <duration value="365"/>
-        <effectiveness value="0.75"/>
-      </anopheles>
-      <anopheles mosquito="funestus">
-        <duration value="365"/>
-        <effectiveness value="0.75"/>
-      </anopheles>
-      <anopheles mosquito="arabiensis">
-        <duration value="365"/>
-        <effectiveness value="0.75"/>
-      </anopheles>
+      <description>
+        <anopheles mosquito="gambiae_ss">
+          <duration value="365"/>
+          <effectiveness value="0.75"/>
+        </anopheles>
+        <anopheles mosquito="funestus">
+          <duration value="365"/>
+          <effectiveness value="0.75"/>
+        </anopheles>
+        <anopheles mosquito="arabiensis">
+          <duration value="365"/>
+          <effectiveness value="0.75"/>
+        </anopheles>
+      </description>
       <timed>
         <deploy time="1"/>
         <deploy time="730"/>

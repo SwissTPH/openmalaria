@@ -56,7 +56,7 @@ public:
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
-  virtual void intervLarviciding (const scnXml::Larviciding&);
+  virtual void intervLarviciding (const scnXml::Larviciding::DescriptionType&);
   virtual void uninfectVectors();
   
   inline const ITNParams& getITNParams () const{

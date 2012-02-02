@@ -673,7 +673,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 }
 
 
-void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingInterventionDescription& elt) {
+void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
     larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
     larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
 }

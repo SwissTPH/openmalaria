@@ -411,10 +411,11 @@ void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
     }
 }
 
-void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
+void VectorTransmission::intervLarviciding (const scnXml::Larviciding::DescriptionType& desc) {
     checkSimMode();
     
-    const scnXml::Larviciding::AnophelesSequence& seq = anoph.getAnopheles();
+    typedef scnXml::Larviciding::DescriptionType::AnophelesSequence AnophSeq;
+    const AnophSeq& seq = desc.getAnopheles();
     
     if( seq.size() != numSpecies ){
         throw util::xml_scenario_error(
@@ -422,8 +423,9 @@ void VectorTransmission::intervLarviciding (const scnXml::Larviciding& anoph) {
             "species described in entomology"
         );
     }
-
-    for (scnXml::Larviciding::AnophelesSequence::const_iterator it = seq.begin(); it != seq.end(); ++it) {
+    
+    for (AnophSeq::const_iterator it = seq.begin();
+            it != seq.end(); ++it) {
         species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
     }
     
