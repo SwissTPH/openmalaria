@@ -367,27 +367,27 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
     if( elt.getDescription().present() ){
         _IRSParams.init( elt.getDescription().get() );
         
-        typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
+        typedef scnXml::IRSDescription_v1::AnophelesParamsSequence AP;
         const AP& ap = elt.getDescription().get().getAnophelesParams();
         if( ap.size() != numSpecies ){
             throw util::xml_scenario_error(
-                "IRS.description.anophelesParams: must have one element for "
-                "each mosquito species described in entomology"
+                "IRS.simpleDescription.anophelesParams: must have one element "
+                "for each mosquito species described in entomology"
             );
         }
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
             species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
         }
     }else{
-        assert( elt.getSimpleDescription().present() );   // choice: one or the other
-        _IRSParams.init( elt.getSimpleDescription().get() );
+        assert( elt.getDescription_v2().present() );   // choice: one or the other
+        _IRSParams.init( elt.getDescription_v2().get() );
         
-        typedef scnXml::IRSSimpleDescription::AnophelesParamsSequence AP;
-        const AP& ap = elt.getSimpleDescription().get().getAnophelesParams();
+        typedef scnXml::IRSDescription_v2::AnophelesParamsSequence AP;
+        const AP& ap = elt.getDescription_v2().get().getAnophelesParams();
         if( ap.size() != numSpecies ){
             throw util::xml_scenario_error(
-                "IRS.simpleDescription.anophelesParams: must have one element "
-                "for each mosquito species described in entomology"
+                "IRS.description.anophelesParams: must have one element for "
+                "each mosquito species described in entomology"
             );
         }
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {

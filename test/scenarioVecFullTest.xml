@@ -257,7 +257,7 @@
       </timed>
     </ITN>
     <IRS name="DDT test">
-      <simpleDescription>
+      <description>
         <decay L="0.5" function="exponential"/>
         <anophelesParams mosquito="gambiae_ss" propActive="1">
           <deterrency value="0.56"/>
@@ -274,7 +274,7 @@
           <preprandialKillingEffect value="0"/>
           <postprandialKillingEffect value="0.24"/>
         </anophelesParams>
-      </simpleDescription>
+      </description>
       <timed>
         <deploy coverage="0.95" time="7"/>
       </timed>

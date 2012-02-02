@@ -289,8 +289,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Description and deployment of indoor insecticide interventions
             (IRS, durable wall linings, insecticide-treated-paint, etc.)
             
-            User must choose between using &lt;simpleDescription&gt; (the old
-            model, where effect decays directly) and &lt;description&gt; (the
+            User must choose between using &lt;description&gt; (the old
+            model, where effect decays directly) and &lt;description_v2&gt; (the
             new model where effect decays indirectly based on decay of insecticide).
           </xs:documentation>
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
@@ -298,8 +298,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:choice>
-              <xs:element name="simpleDescription" type="IRSSimpleDescription"/>
-              <xs:element name="description" type="IRSDescription"/>
+              <xs:element name="description" type="IRSDescription_v1"/>
+              <xs:element name="description_v2" type="IRSDescription_v2"/>
             </xs:choice>
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
@@ -1047,7 +1047,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSSimpleDescription">
+  <xs:complexType name="IRSDescription_v1">
     <xs:annotation>
       <xs:documentation>
         Description of effect for the simple model: IRS has three effects, whos
@@ -1139,7 +1139,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSDescription">
+  <xs:complexType name="IRSDescription_v2">
     <xs:annotation>
       <xs:documentation>
         Description of effect for the more complex and probably more realistic

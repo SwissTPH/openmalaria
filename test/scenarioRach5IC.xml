@@ -119,14 +119,14 @@
       </continuous>
     </ITN>
     <IRS name="Pyreth">
-      <simpleDescription>
+      <description>
         <decay L="0.25" function="exponential"/>
         <anophelesParams mosquito="gambiae_ss">
           <deterrency value="0.1116"/>
           <preprandialKillingEffect value="0"/>
           <postprandialKillingEffect value="0.2772"/>
         </anophelesParams>
-      </simpleDescription>
+      </description>
       <timed>
         <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
         <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>

@@ -37,12 +37,11 @@ void AnophelesHumanParams::setITNDescription (const ITNParams& params,
 }
 
 void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSDescription::AnophelesParamsType& elt){
+        const scnXml::IRSDescription_v1::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-
 void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSSimpleDescription::AnophelesParamsType& elt){
+        const scnXml::IRSDescription_v2::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
 

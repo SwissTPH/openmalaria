@@ -54,8 +54,8 @@ public:
     /** @brief Set up vector-model intervention parameters. */
     //@{
     void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
-    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
-    void setIRSDescription (const IRSParams& params, const scnXml::IRSSimpleDescription::AnophelesParamsType& elt);
+    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription_v1::AnophelesParamsType& elt);
+    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription_v2::AnophelesParamsType& elt);
     void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
     //@}
     

@@ -115,11 +115,11 @@ public:
         humanBase.setITNDescription (params, elt, proportionUse);
     }
     inline void setIRSDescription (const IRSParams& params,
-            const scnXml::IRSDescription::AnophelesParamsType& elt) {
+            const scnXml::IRSDescription_v1::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
     inline void setIRSDescription (const IRSParams& params,
-            const scnXml::IRSSimpleDescription::AnophelesParamsType& elt) {
+            const scnXml::IRSDescription_v2::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
     inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {

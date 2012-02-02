@@ -121,7 +121,7 @@
       </continuous>
     </ITN>
     <IRS name="new param">
-      <description>
+      <description_v2>
         <!-- Initial insecticide: units are μg/cm²; no variance here -->
         <initialInsecticide mu="118" sigma="0"/>
         <insecticideDecay L="0.15" function="exponential"/>
@@ -130,7 +130,7 @@
           <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
           <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
         </anophelesParams>
-      </description>
+      </description_v2>
       <timed>
         <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
         <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>
