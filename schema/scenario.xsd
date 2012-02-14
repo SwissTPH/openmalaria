@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:include schemaLocation="demography.xsd"/>
+  <xs:include schemaLocation="monitoring.xsd"/>
+  <xs:include schemaLocation="interventions.xsd"/>
+  <xs:include schemaLocation="healthSystem.xsd"/>
+  <xs:include schemaLocation="pharmacology.xsd"/>
+  <xs:element name="scenario">
+    <xs:annotation>
+      <xs:documentation>Description of scenario</xs:documentation>
+      <xs:appinfo>units:List of elements;name:Scenario;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="demography" type="demography">
+          <xs:annotation>
+            <xs:documentation>
+              Description of demography
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Human age distribution;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="monitoring" type="monitoring">
+          <xs:annotation>
+            <xs:documentation>
+              Description of surveys
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Measures to be reported;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="interventions" type="interventions">
+          <xs:annotation>
+            <xs:documentation>
+              List of interventions. Generally these are either point-time
+              distributions of something to some subset of the population, or
+              continuous-time distribution targetting individuals when they
+              reach a certain age.
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Preventative interventions;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="healthSystem" type="healthSystem">
+          <xs:annotation>
+            <xs:documentation>
+              Description of health system.
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Health system description;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="entomology" type="entoData">
+          <xs:annotation>
+            <xs:documentation>
+              Description of entomological data
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Transmission and vector bionomics;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="pharmacology" type="pharmacology" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Drug model parameters
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="model">
+          <xs:annotation>
+            <xs:documentation>
+            Encapsulation of all parameters which describe the model according
+            to which fitting is done.
+            </xs:documentation>
+            <xs:appinfo>units:List of elements;name:Model options and parameters;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:all>
+              <xs:element name="ModelOptions" type="OptionSet">
+                <xs:annotation>
+                  <xs:documentation>
+                    All model options (bug fixes, choices between models, etc.).                    
+                    The list of recognised options can be found in the code at:
+                    include/util/ModelOptions.h and should also be in the wiki.
+                  </xs:documentation>
+                  <xs:appinfo>units:List of elements;name:Model Options;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="clinical" type="clinical" />
+              <xs:element name="human" type="human"/>
+              <xs:element name="parameters" type="parameters">
+                <xs:annotation>
+                  <xs:documentation>
+                    Parameters of the epidemiological model
+                  </xs:documentation>
+                  <xs:appinfo>units:List of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:all>
+          </xs:complexType>
+        </xs:element>
+      </xs:all>
+      <xs:attribute name="schemaVersion" type="xs:int" use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Version of xml schema. If not equal to the current version
+            an error is thrown. Use SchemaTranslator to update xml files.
+          </xs:documentation>
+          <xs:appinfo>name:Version of the xml schema;exposed:false;</xs:appinfo>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="analysisNo" type="xs:int" use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Unique identifier of scenario
+          </xs:documentation>
+          <xs:appinfo>units:Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="name" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Name of intervention
+          </xs:documentation>
+          <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="wuID" type="xs:int" use="required">
+        <xs:annotation>
+          <xs:documentation>
+            Work unit ID. Only used to validate
+            checkpointing, to prevent checkpoint cheats.
+          </xs:documentation>
+          <xs:appinfo>
+            units:Number;min:1;max:100000000;name:Work unit identifier;exposed:false;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  <!--Parameters-->
+  <xs:complexType name="parameter">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>Name of parameter</xs:documentation>
+        <xs:appinfo>units:string;name:Name of parameter;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="number" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Reference number of input parameter
+        </xs:documentation>
+        <xs:appinfo>units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>Parameter value</xs:documentation>
+        <xs:appinfo>units:Number;min:0;name:Parameter value;sweepable:true;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="include" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          True if parameter is to be sampled in optimization
+          runs. Not used in simulator app.
+        </xs:documentation>
+        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="parameters">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="parameter" type="parameter" />
+    </xs:sequence>
+    <xs:attribute name="interval" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>Simulation step</xs:documentation>
+        <xs:appinfo>units:Days;name:Simulation step;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="iseed" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>Seed for RNG</xs:documentation>
+        <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="latentp" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          pre-erythrocytic latent period, in time steps
+        </xs:documentation>
+        <xs:appinfo>units:Time steps;min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <!-- Host data -->
+  <xs:complexType name="human">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of host models.
+      </xs:documentation>
+      <xs:appinfo>name:Human;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="availabilityToMosquitoes" type="AgeGroupValues">
+        <xs:annotation>
+          <xs:documentation>
+            By age group data on availability of humans to mosquitoes relative
+            to an adult.
+          </xs:documentation>
+          <xs:appinfo>name:Availability to mosquitoes;units:None;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="weight" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            By age group data on human weight (mass).
+          </xs:documentation>
+          <xs:appinfo>name:Weight;units:kg;min:0</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="AgeGroupValues">
+              <xs:attribute name="multStdDev" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Each human is assigned a weight multiplier from a normal distribution
+                    with mean 1 and this standard deviation at birth. His/her weight
+                    is this multiplier times the mean from age distribution.
+                    A standard deviation of zero for no heterogeneity is valid; a rough
+                    value from Tanzanian data is 0.14.
+                  </xs:documentation>
+                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<!-- standard types used -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="OptionSet">
+    <xs:sequence>
+      <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+            Options define different model structures.
+                Option name. Must be one of a strictly defined set.
+                Options are not required to be listed if their default value is desired.
+              </xs:documentation>
+              <xs:appinfo>name:Model options required;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="value" type="xs:boolean" default="true">
+            <xs:annotation>
+              <xs:documentation>
+                Option value (true/false). Each option has a default value used
+                if the option is not listed (usually false but sometimes true).
+              </xs:documentation>
+            <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="doubleList">
+    <xs:sequence>
+      <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DecayFunction">
+    <xs:annotation>
+      <xs:documentation>
+        Specification of decay or survival of a parameter.
+      </xs:documentation>
+      <xs:appinfo>name:Decay or survival of a parameter</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="function" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Determines which decay function to use. Available decay functions,
+          for age t in years:
+          
+          constant: 1
+          
+          step: 1 for t less than L, otherwise 0
+          
+          linear: 1 - t/L for t less than L, otherwise 0
+          
+          exponential: exp( - t/L * log(2) )
+          
+          weibull: exp( -(t/L)^k * log(2) )
+          
+          hill: 1 / (1 + (t/L)^k)
+          
+          smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0
+        </xs:documentation>
+        <xs:appinfo>units:None;min:0;max:1;name:function;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="constant" />
+          <xs:enumeration value="step" />
+          <xs:enumeration value="linear" />
+          <xs:enumeration value="exponential" />
+          <xs:enumeration value="weibull" />
+          <xs:enumeration value="hill" />
+          <xs:enumeration value="smooth-compact" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="L" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Scale parameter of distribution. With the smooth-compact (smooth
+          function with compact support), step and linear functions, this is the
+          age at which the parameter has decayed to 0; with the other three
+          functions, this is the age at which the parameter has decayed to half
+          its original value. Not used for constant decay (though must be
+          specified anyway).
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="k" type="xs:double" default="1.0">
+      <xs:annotation>
+        <xs:documentation>
+          Shape parameter of distribution. If not specified, default value of
+          1 is used. Meaning depends on function; not used in some cases.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mu" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        If sigma is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution with mu and sigma as
+        specified. Both mu and sigma default to zero when not specified.
+        
+        The decay rate is multiplied by this variable (effectively, the
+        half-life is divided by it).
+        
+        Note that with m=0, the median of the variable and the median value of
+        L is unchanged, and thus the time at which the median decay amongst the
+        population of decaying objects reaches half (assuming exponential,
+        Weibull or Hill decay) is L. With m=-½σ² (negative half sigma squared)
+        the mean of the variable will be 1 and mean of the half-life L, but the
+        time at which mean decay of the population has reached half may not be
+        L.
+        </xs:documentation>
+        <xs:appinfo>min:0;name:μ (mu);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        If sigma is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution with mu and sigma as
+        specified. Both mu and sigma default to zero when not specified.
+        
+        The decay rate is multiplied by this variable (effectively, the
+        half-life is divided by it).
+        </xs:documentation>
+        <xs:appinfo>min:0;name:σ (sigma);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="LognormalSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a log-normal distribution.
+        
+        Variates are sampled as: X ~ log N( log(mean)-sigma²/2, sigma² ).
+      </xs:documentation>
+      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mean" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the lognormal distribution.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Sigma parameter of the lognormal distribution; sigma squared is the
+          variance of the log of samples.
+        </xs:documentation>
+        <xs:appinfo>name:sigma;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="NormalSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a normal distribution.
+        
+        Variates are sampled as: X ~ N( mu, sigma² ).
+      </xs:documentation>
+      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mu" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the normal distribution.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:mu;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="sigma" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:sigma;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="BetaMeanSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a normal distribution, provided as mean and variance.
+        
+        Variates are sampled from Be(α,β) where α and β are determined from the
+        mean and variance as follows: let v be the variance and c=mean/(1-mean).
+        Then we set α=cβ and β=((c+1)²v - c)/((c+1)³v).
+      </xs:documentation>
+      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mean" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the beta distribution (must be in the open range (0,1)).
+        </xs:documentation>
+        <xs:appinfo>units:none;name:mean;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="variance" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The standard deviation of variates.
+        </xs:documentation>
+        <xs:appinfo>units:none;name:variance;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="inputValue">
+    <xs:attribute name="value" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>A double-precision floating-point value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="intValue">
+    <xs:attribute name="value" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>An integer value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>

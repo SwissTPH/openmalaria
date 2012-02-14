@@ -1,0 +1,287 @@
+<html>
+	<HEAD>
+		<title>Floating Point Number Classification</title> 
+		<!--
+  == Copyright (c) 2006 Johan Råde
+  ==
+  == Distributed under the Boost Software License, Version 1.0.
+  == (See accompanying file LICENSE_1_0.txt
+  == or copy at http://www.boost.org/LICENSE_1_0.txt)
+  -->
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<LINK href="../../../boost.css" type="text/css" rel="stylesheet">
+	</HEAD>
+	<body>
+		<IMG src="../../../boost.png">
+		<h1>
+			Floating Point Number Classification</h1>
+		<H3>Contents</H3>
+		<UL>
+			<li>
+				<A href="#Introduction">Introduction</A>
+			<li>
+				<A href="#Synopsis">Synopsis</A>
+			<li>
+				<A href="#Reference">Reference</A>
+			<li>
+				<A href="#Portability">Portability</A>
+			<li>
+				<A href="#Acknowledgements">Acknowledgements</A></li></UL>
+		<hr>
+		<h2><a name="Introduction">Introduction</a></h2>
+		<P>
+			Under the <a href="http://en.wikipedia.org/wiki/IEEE_754">IEEE 754 standard</a>,&nbsp;floating 
+			point numbers&nbsp;are&nbsp;divided into five classes:
+		</P>
+		<UL>
+			<LI>
+			zero
+			<LI>
+			subnormal&nbsp;(denormalized)
+			<LI>
+			normal (normalized)
+			<LI>
+			negative&nbsp;and positive infinity
+			<LI>
+				NaN (not-a-number)</LI></UL>
+		<P>
+			This classification can also be applied to most non-IEEE 754 floating point 
+			formats that are used by modern microprocessors.<BR>
+			(In so called fast IEEE modes, only the zero and normal classes are present.)
+		</P>
+		<P>
+			TR1&nbsp;specifies function templates&nbsp;for classification of&nbsp;floating 
+			point&nbsp;numbers. This library implements these.&nbsp;
+		</P>
+		<HR>
+		<H2><A name="Synopsis">Synopsis</A></H2>
+		<H4>The header <EM>boost/math/fpclassify.hpp</EM></H4>
+		<P><PRE>#define FP_ZERO <EM>integer constant expression</EM>
+#define FP_SUBNORMAL <EM>integer constant expression</EM> 
+#define FP_NORMAL <EM>integer constant expression</EM> 
+#define FP_INFINITE <EM>integer constant expression</EM> 
+#define FP_NAN <EM>integer constant expression</EM>
+
+namespace boost {
+  namespace math {
+    
+    template&lt;class T&gt; int fpclassify(T x);
+    
+    template&lt;class T&gt; bool isfinite(T x);
+    template&lt;class T&gt; bool isinf(T x);
+    template&lt;class T&gt; bool isnan(T x);
+    template&lt;class T&gt; bool isnormal(T x);
+  }
+}</PRE>
+			<hr>
+			<H2><a name="Reference">Reference</a></H2>
+		<P>The macros and function templates&nbsp;are defined in the header <EM>boost/math/fpclassify.hpp.</EM>
+			The function templates&nbsp;live in the namespace <CODE>boost::math</CODE>.</P>
+		<H3><code>fpclassify</code></H3>
+		<blockquote>
+			<p><code>#define FP_ZERO <EM>integer constant expression</EM><br>
+					#define FP_SUBNORMAL <EM>integer constant expression</EM><br>
+					#define FP_NORMAL <EM>integer constant expression</EM><br>
+					#define FP_INFINITE <EM>integer constant expression</EM><br>
+					#define FP_NAN <EM>integer constant expression</EM><br>
+					<br>
+					template&lt;class T&gt; int fpclassify(T x);</code></p>
+			<P>
+				<STRONG>Requirements:</STRONG> <code>T</code> is <code>float</code>, <code>double</code>
+				or <code>long double</code><BR>
+				<STRONG>Return value:</STRONG> <code>FP_ZERO</code> if <code>x</code> is zero, <code>
+					FP_SUBNORMAL</code> if <code>x</code> is subnormal, <code>FP_NORMAL</code> if
+				<code>x</code> is normal, <code>FP_INFINITE</code> if <code>x</code> is 
+				negative or positive infinity, <code>FP_NAN</code> if <code>x</code> is NaN.
+				<BR>
+				<STRONG>Rationale:</STRONG> Follows TR1.
+			</P>
+		</blockquote>
+		<H3><code>isfinite</code></H3>
+		<blockquote>
+			<p><code>template&lt;class T&gt; bool isfinite(T x);</code></p>
+			<p>
+				<STRONG>Requirements:</STRONG> <code>T</code> is <code>float</code>, <code>double</code>
+				or <code>long double</code><BR>
+				<STRONG>Return value:</STRONG>&nbsp; <code>true</code> if <code>x</code> is 
+				finite (i.e. zero, subnormal or normal), <code>false</code> otherwise
+				<BR>
+				<STRONG>Rationale:</STRONG> Follows TR1.</p>
+		</blockquote>
+		<H3><code>isinf</code></H3>
+		<blockquote>
+			<p><code>template&lt;class T&gt; bool isinf(T x);</code></p>
+			<p>
+				<STRONG>Requirements:</STRONG> <code>T</code> is <code>float</code>, <code>double</code>
+				or <code>long double</code><BR>
+				<STRONG>Return value:</STRONG>&nbsp; <code>true</code> if <code>x</code> is 
+				negative or positive infinity, <code>false</code> otherwise<BR>
+				<STRONG>Rationale:</STRONG> Follows TR1.</p>
+		</blockquote>
+		<H3><code>isnan</code></H3>
+		<blockquote>
+			<p><code>template&lt;class T&gt; bool isnan(T x);</code></p>
+			<p>
+				<STRONG>Requirements:</STRONG> <code>T</code> is <code>float</code>, <code>double</code>
+				or <code>long double</code><BR>
+				<STRONG>Return value:</STRONG>&nbsp; <code>true</code> if <code>x</code> is 
+				NaN, <code>false</code> otherwise
+				<BR>
+				<STRONG>Rationale:</STRONG> Follows TR1.</p>
+		</blockquote>
+		<H3><code>isnormal</code></H3>
+		<blockquote>
+			<p><code>template&lt;class T&gt; bool isnormal(T x);</code></p>
+			<p>
+				<STRONG>Requirements:</STRONG> <code>T</code> is <code>float</code>, <code>double</code>
+				or <code>long double</code><BR>
+				<STRONG>Return value:</STRONG>&nbsp; <code>true</code> if <code>x</code> is 
+				normal, <code>false</code> otherwise
+				<BR>
+				<STRONG>Rationale:</STRONG> Follows TR1.</p>
+		</blockquote>
+		<P>The following table lists the return values&nbsp;of the&nbsp;above functions for 
+			arguments that belong to the different classes: <blockquote>
+				<table border="1" cellpadding="5" ID="Table1">
+					<tr>
+						<th>
+						</th>
+						<th>
+							Zero</th>
+						<th>
+							Subnormal</th>
+						<th>
+							Normal</th>
+						<th>
+							Infinity</th>
+						<th>
+							NaN</th>
+					</tr>
+					<tr>
+						<th>
+							<code>fpclassify</code></th>
+						<td>
+							<code>FP_ZERO</code></td>
+						<td><code>FP_SUBNORMAL</code></td>
+						<td><code>FP_NORMAL</code></td>
+						<td><code>FP_INFINITE</code></td>
+						<td><code>FP_NAN</code></td>
+					</tr>
+					<tr>
+						<th>
+							<code>isfinite</code></th>
+						<td>
+							<code>true</code></td>
+						<td><code>true</code></td>
+						<td><code>true</code></td>
+						<td><code>false</code></td>
+						<td><code>false</code></td>
+					</tr>
+					<tr>
+						<th>
+							<code>isinf</code></th>
+						<td>
+							<code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>true</code></td>
+						<td><code>false</code></td>
+					</tr>
+					<tr>
+						<th>
+							<code>isnan</code></th>
+						<td>
+							<code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>true</code></td>
+					</tr>
+					<tr>
+						<th>
+							<code>isnormal</code></th>
+						<td>
+							<code>false</code></td>
+						<td><code>false</code></td>
+						<td><code>true</code></td>
+						<td><code>false</code></td>
+						<td><code>false</code></td>
+					</tr>
+				</table>
+			</blockquote>
+			<hr>
+			<H2><a name="Portability">Portability</a></H2>
+		<P>The library supports the following binary floating point formats:</P>
+		<UL>
+			<LI>
+				<a href="http://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>
+			single precision
+			<LI>
+				<a href="http://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>
+			double precision
+			<LI>
+				<a href="http://en.wikipedia.org/wiki/IEEE_754">IEEE 754</a>
+			extended double precision with 15 exponent bits
+			<LI>
+			Intel extended double precision
+			<LI>
+			PowerPC extended double precision
+			<LI>
+				Motorola 68K extended double precision</LI></UL>
+		<P>The library does not support the VAX floating point formats.<BR>
+			(These are available on VMS, but the default on VMS is the IEEE 754 floating 
+			point formats.)</P>
+		<P>The main portability issues are:</P>
+		<UL>
+			<LI>
+			Unsupported floating point formats
+			<LI>
+				The library depends on the header <em>boost/detail/endian.hpp</em>
+			<LI>
+				Code such as&nbsp; <code>#if defined(__ia64) || defined(__ia64__) || 
+					defined(_M_IA64)</code>&nbsp; is used to determine the processor
+			</LI>
+		</UL>
+		<P>The library has passed all tests on the following platforms:</P>
+		<UL>
+			<LI>
+			Win32 / MSVC 7.1 / x86
+			<LI>
+			Win32 / Intel C++ 7.1, 8.1, 9.1 / x86
+			<LI>
+			Mac OS X / GCC 3.3, 4.0 / ppc
+			<LI>
+			Linux / Intel C++ 9.1 / x86, ia64
+			<LI>
+			Linux / GCC 3.3 / x86, x64, ia64, ppc, hppa, mips, m68k
+			<LI>
+			Linux / GCC 3.4 / x64
+			<LI>
+			HP-UX / aCC, GCC 4.1 / ia64
+			<LI>
+			HP-UX / aCC / hppa
+			<LI>
+			Tru64 / Compaq C++ 7.1 / alpha
+			<LI>
+			VMS / HP C++ 7.1 / alpha&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(in IEEE floating point 
+			mode)
+			<LI>
+				VMS / HP C++ 7.2 / ia64&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(in IEEE floating 
+				point mode)</LI></UL>
+		<P>If you need to report bugs in the library, please contact me at <A href="mailto:johan.rade@qlucore.com">
+				johan.rade@qlucore.com</A>.<BR>
+			(I do not always have time to read the Boost developer list.)<BR>
+			Also, run the <em>inspect.cpp</em> program in <em>libs/math/tools</em> and 
+			include the output with your bug report.</P>
+		<HR>
+		<H2><a name="Acknowledgements">Acknowledgements</a></H2>
+		<P>Håkan Ardö, Boris Gubenko, John Maddock, Markus Schöpflin and Olivier Verdier 
+			tested the library.<BR>
+			Martin Bonner, Peter Dimov and John Maddock provided valuable advice.
+		</P>
+		<hr>
+		<i>© Copyright Johan Råde 2007. Distributed under the Boost Software License, 
+			Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at 
+			http://www.boost.org/LICENSE_1_0.txt) </i></CODE>
+	</body>
+</html>
