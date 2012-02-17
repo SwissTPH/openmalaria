@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 #include "Transmission/PerHost.h"
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/VectorModel.h"
 #include "Transmission/Vector/PerHost.h"
 #include "inputData.h"
 #include "util/errors.h"
@@ -56,7 +56,7 @@ PerHost::PerHost (const Transmission::TransmissionModel& tm) :
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
-    VectorTransmission* vTM = dynamic_cast<VectorTransmission*> (&tm);
+    VectorModel* vTM = dynamic_cast<VectorModel*> (&tm);
     if (vTM != 0) {
         species.resize (vTM->numSpecies);
         for (size_t i = 0; i < vTM->numSpecies; ++i)
@@ -65,13 +65,13 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
 }
 
 void PerHost::setupITN (const TransmissionModel& tm) {
-    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
+    const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
     if (vTM != 0) {
         net.deploy(vTM->getITNParams());
     }
 }
 void PerHost::setupIRS (const TransmissionModel& tm) {
-    const VectorTransmission* vTM = dynamic_cast<const VectorTransmission*> (&tm);
+    const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
     if (vTM != 0) {
         irs.deploy(vTM->getIRSParams());
     }

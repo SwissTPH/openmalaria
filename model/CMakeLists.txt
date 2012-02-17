@@ -44,9 +44,9 @@ set (Model_CPP
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
-  Transmission/NonVector.cpp
+  Transmission/NonVectorModel.cpp
+  Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
-  Transmission/Vector/VectorTransmission.cpp
   Transmission/Vector/VectorAnopheles.cpp
   Transmission/Vector/PerHost.cpp
   Transmission/Vector/ITN.cpp

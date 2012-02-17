@@ -20,7 +20,7 @@
 #include "Transmission/Vector/ITN.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for ITN parameters not always being present.
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/VectorModel.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "R_nmath/qnorm.h"
@@ -280,7 +280,7 @@ ITN::ITN(const TransmissionModel& tm) :
 {
     //TODO: we shouldn't really have ITN data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorTransmission* vt = dynamic_cast<const VectorTransmission*>(&tm);
+    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
     if( vt != 0 ){
         const ITNParams& params = vt->getITNParams();
         if( params.insecticideDecay.get() == 0 )

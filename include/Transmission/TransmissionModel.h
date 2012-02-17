@@ -144,7 +144,7 @@ public:
   virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
-      throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
+      throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
   }
   
   /** Does per-timestep updates and returns the EIR (inoculation rate per host

@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorTransmission
-#define Hmod_VectorTransmission
+#ifndef Hmod_VectorModel
+#define Hmod_VectorModel
 
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
@@ -32,10 +32,10 @@ namespace scnXml {
 namespace OM { namespace Transmission {
     
 //! Transmission models, Chitnis et al
-class VectorTransmission : public TransmissionModel {
+class VectorModel : public TransmissionModel {
 public:
-  VectorTransmission(const scnXml::Vector vectorData, int populationSize);
-  virtual ~VectorTransmission();
+  VectorModel(const scnXml::Vector vectorData, int populationSize);
+  virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */

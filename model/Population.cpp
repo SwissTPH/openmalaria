@@ -23,7 +23,6 @@
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorTransmission.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"

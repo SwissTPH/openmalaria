@@ -20,8 +20,8 @@
 
 */
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/NonVector.h"
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/NonVectorModel.h"
+#include "Transmission/VectorModel.h"
 #include "Transmission/PerHost.h"
 
 #include "inputData.h"
@@ -46,12 +46,12 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorTransmission(vectorData.get(), populationSize);
+    model = new VectorModel(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
-    model = new NonVectorTransmission(nonVectorData.get());
+    model = new NonVectorModel(nonVectorData.get());
   }
 
   if( entoData.getScaledAnnualEIR().present() ){

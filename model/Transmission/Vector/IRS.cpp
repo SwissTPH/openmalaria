@@ -20,7 +20,7 @@
 #include "Transmission/Vector/IRS.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for IRS parameters not always being present.
-#include "Transmission/Vector/VectorTransmission.h"
+#include "Transmission/VectorModel.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "R_nmath/qnorm.h"
@@ -196,7 +196,7 @@ IRS::IRS (const TransmissionModel& tm) :
 {
     //TODO: we shouldn't really have IRS data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorTransmission* vt = dynamic_cast<const VectorTransmission*>(&tm);
+    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
     if( vt != 0 ){
         const IRSParams& params = vt->getIRSParams();
         if( params.insecticideDecay.get() == 0 )
