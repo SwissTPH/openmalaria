@@ -87,10 +87,12 @@ public:
      * @param sIndex Index in VectorTransmission.species of this class.
      * @param population The human population
      * @param populationSize Number of humans (use instead of population.size())
+     * @param meanPopAvail The mean availability of age-based relative
+     * availability of humans to mosquitoes across populations.
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void setupNv0 (size_t sIndex,
+    void init2 (size_t sIndex,
                    const std::list<Host::Human>& population,
                    int populationSize,
                    double meanPopAvail);

@@ -39,7 +39,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -83,6 +83,9 @@ private:
     }
     return sIndex->second;
   }
+    
+    /** Return the mean availability of human population to mosquitoes. */
+    static double meanPopAvail (const std::list<Host::Human>& population, int populationSize);
     
     /** Confirm simulationMode allows use of interventions; throw if not. */
     void checkSimMode() const;

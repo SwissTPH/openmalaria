@@ -73,6 +73,11 @@ NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
 
 NonVectorModel::~NonVectorModel () {}
 
+void NonVectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
+    // no set-up needed; just indicate we're ready to roll:
+    simulationMode = forcedEIR;
+}
+
 void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
@@ -92,7 +97,7 @@ void NonVectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
 
 
 TimeStep NonVectorModel::minPreinitDuration (){
-    if( interventionMode == equilibriumMode ){
+    if( interventionMode == forcedEIR ){
         return TimeStep(0);
     }
     // nYearsWarmupData years for data collection, 50 years stabilization
@@ -174,7 +179,7 @@ void NonVectorModel::uninfectVectors(){
 void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
-    if( simulationMode == equilibriumMode ){
+    if( simulationMode == forcedEIR ){
         initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
     }
 }
@@ -184,7 +189,7 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
-    case equilibriumMode:
+    case forcedEIR:
       eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
       break;
     case transientEIRknown:

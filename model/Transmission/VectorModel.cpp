@@ -31,6 +31,19 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
+double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int populationSize) {
+    double sumRelativeAvailability = 0.0;
+    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+    }
+    if( populationSize > 0 ){
+        return sumRelativeAvailability / populationSize;     // mean-rel-avail
+    }else{
+        // value should be unimportant when no humans are available, though inf/nan is not acceptable
+        return 1.0;
+    }
+}
+
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
@@ -165,7 +178,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     annualEIR = vectors::sum( initialisationEIR );
 
 
-    if( interventionMode == equilibriumMode ) {
+    if( interventionMode == forcedEIR ) {
         // We don't need these anymore (now we have initialisationEIR); free memory
         numSpecies = 0;
         species.clear();
@@ -225,18 +238,12 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::setupNv0 (const std::list<Host::Human>& population, int populationSize) {
-    double sumRelativeAvailability = 0.0;
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
-    }
-    assert( sumRelativeAvailability > 0 );
-//     cout << "pop size: " << populationSize << endl;
-//     cout << "avg. avail: " << sumRelativeAvailability / populationSize << endl;
-    
+void VectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
+    double mPA = meanPopAvail(population, populationSize);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].setupNv0 (i, population, populationSize, sumRelativeAvailability / populationSize);
+        species[i].init2 (i, population, populationSize, mPA);
     }
+    simulationMode = forcedEIR;   // now we should be ready to start
 }
 
 
@@ -271,7 +278,7 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 
 
 TimeStep VectorModel::minPreinitDuration () {
-    if ( interventionMode == equilibriumMode ) {
+    if ( interventionMode == forcedEIR ) {
         return TimeStep(0);
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
@@ -316,10 +323,11 @@ TimeStep VectorModel::initIterate () {
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
     host.update(_ITNParams);
-    if (simulationMode == equilibriumMode){
+    if (simulationMode == forcedEIR){
         return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
                * host.relativeAvailabilityHetAge (ageYears);
-    }else{      // dynamicMode
+    }else{
+        assert( simulationMode == dynamicEIR );
         double simEIR = 0.0;
         for (size_t i = 0; i < numSpecies; ++i) {
             simEIR += species[i].calculateEIR (i, host);
@@ -341,7 +349,7 @@ void VectorModel::update (const std::list<Host::Human>& population, int populati
 }
 
 void VectorModel::checkSimMode() const{
-    if( interventionMode == equilibriumMode ){
+    if( interventionMode != dynamicEIR ){
         throw xml_scenario_error("vector interventions can only be used in "
             "dynamic transmission mode (mode=\"dynamic\")");
     }

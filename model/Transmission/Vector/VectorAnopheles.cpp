@@ -364,7 +364,7 @@ void VectorAnopheles::initEIR(
 
 // -----  Initialisation of model which is done after running the human warmup  -----
 
-void VectorAnopheles::setupNv0 (size_t sIndex,
+void VectorAnopheles::init2 (size_t sIndex,
                                 const std::list<Host::Human>& population,
                                 int populationSize,
                                 double meanPopAvail) {
