@@ -30,10 +30,17 @@ void vectors::scale (vector<double>& vec, double a) {
     vec[i] *= a;
 }
 
-double vectors::sum (vector<double>& vec) {
+double vectors::sum (const vector<double>& vec) {
   double r = 0.0;
   for (size_t i = 0; i < vec.size(); ++i)
     r += vec[i];
+  return r;
+}
+
+double vectors::sum (const gsl_vector *vec) {
+  double r = 0.0;
+  for (size_t i = 0; i < vec->size; ++i)
+    r += gsl_vector_get( vec, i );
   return r;
 }
 
@@ -71,6 +78,10 @@ vector<double> vectors::gsl2std (const gsl_vector* vec) {
   memcpy (&ret[0], vec->data, ret.size()*sizeof(double));
   return ret;
 }
+void vectors::gsl2std( const gsl_vector *vec, vector<double>& target ){
+  target.resize (vec->size);
+  memcpy (&target[0], vec->data, target.size()*sizeof(double));
+}
 
 
 gsl_vector* vectors::std2gsl (const vector<double>& vec, size_t length) {
@@ -85,6 +96,27 @@ gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
   gsl_vector* ret = gsl_vector_alloc (length);
   memcpy (ret->data, vec, length * sizeof(double));
   return ret;
+}
+
+void vectors::calcExpFourierSeries (vector<double>& tArray, vector<double>& FC, double rAngle) {
+    if (FC.size() % 2 == 0)
+        throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
+
+    // Frequency
+    double w = 2*M_PI / double(tArray.size());
+
+    // Number of Fourier Modes.
+    int Fn = (FC.size()-1)/2;
+
+    // Calculate inverse discrete Fourier transform
+    for (size_t t=0; t<tArray.size(); t++) {
+        double temp = FC[0];
+        double wt = w*t - rAngle;
+        for (int n=1;n<=Fn;n++) {
+            temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
+        }
+        tArray[t] = exp(temp);
+    }
 }
 
 
