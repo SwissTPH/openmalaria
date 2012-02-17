@@ -135,7 +135,7 @@ protected:
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
    * @param withinHostModel WithinHostModel of human.
-   * @param hostTransmission PerHostTransmission of human.
+   * @param hostTransmission per-host transmission data of human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human. */
   virtual void doClinicalUpdate (Human& human, double ageYears) =0;

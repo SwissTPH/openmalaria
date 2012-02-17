@@ -17,36 +17,51 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/AnophelesHumanParams.h"
+#include "Transmission/Vector/PerHost.h"
 #include "inputData.h"
 #include "util/errors.h"
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+namespace Vector {
 
-void AnophelesHumanParams::operator =(const scnXml::Mosq& mosq)
+// ----- Per host, per species, non-static -----
+
+void PerHost::initialise (const PerHostBase& base, double availabilityFactor)
 {
-    entoAvailability.setParams( numeric_limits<double>::quiet_NaN(), mosq.getAvailabilityVariance().getValue() );
+    entoAvailability = base.entoAvailability.sample() * availabilityFactor;
+    probMosqBiting = base.probMosqBiting.sample();
+    probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
+}
+
+void PerHostBase::operator =(const scnXml::Mosq& mosq)
+{
+    entoAvailability.setParams( numeric_limits<double>::quiet_NaN(),
+                                mosq.getAvailabilityVariance().getValue() );
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
 }
 
-void AnophelesHumanParams::setITNDescription (const ITNParams& params,
-        const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse){
+void PerHostBase::setITNDescription (const ITNParams& params,
+                                     const scnXml::ITNDescription::AnophelesParamsType& elt,
+                                     double proportionUse){
     net.init( params, elt, proportionUse );
 }
 
-void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
+void PerHostBase::setIRSDescription (const IRSParams& params,
         const scnXml::IRSDescription_v1::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-void AnophelesHumanParams::setIRSDescription (const IRSParams& params,
+void PerHostBase::setIRSDescription (const IRSParams& params,
         const scnXml::IRSDescription_v2::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
 
-void AnophelesHumanParams::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
+void PerHostBase::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
     VADeterrency = vaDesc.getDeterrency().getValue();
 }
 
-}}
+}
+}
+}

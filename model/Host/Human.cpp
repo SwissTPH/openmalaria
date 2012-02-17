@@ -50,7 +50,7 @@ namespace OM { namespace Host {
 
 void Human::initHumanParameters () {    // static
     // Init models used by humans:
-    Transmission::PerHostTransmission::init();
+    Transmission::PerHost::init();
     InfectionIncidenceModel::init();
     WithinHost::WithinHostModel::init();
     Clinical::ClinicalModel::init();
@@ -63,7 +63,7 @@ void Human::initHumanParameters () {    // static
 
 void Human::clear() {   // static clear
   Clinical::ClinicalModel::cleanup();
-  Transmission::PerHostTransmission::cleanup();
+  Transmission::PerHost::cleanup();
 }
 
 
@@ -89,7 +89,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
   /* Human heterogeneity; affects:
    * _comorbidityFactor (stored in PathogenesisModel)
    * _treatmentSeekingFactor (stored in CaseManagementModel)
-   * availabilityFactor (stored in Transmission::PerHostTransmission)
+   * availabilityFactor (stored in Transmission::PerHost)
    */
   double _comorbidityFactor = 1.0;
   double _treatmentSeekingFactor = 1.0;

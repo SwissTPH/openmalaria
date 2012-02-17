@@ -18,7 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 #include "Transmission/NonVector.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/vectors.h"
@@ -180,7 +180,7 @@ void NonVectorTransmission::update (const std::list<Host::Human>& population, in
 }
 
 
-double NonVectorTransmission::calculateEIR(PerHostTransmission& perHost, double ageYears){
+double NonVectorTransmission::calculateEIR(PerHost& perHost, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {

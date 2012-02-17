@@ -26,14 +26,15 @@
 
 namespace OM {
 namespace Transmission {
+namespace Vector {
 
 /** Stores vector model data applicable between a category of host and a
  * mosquito species: intervention descriptions and model parameters.
  *
  * Parameters are read from XML, and the availability rate is adjusted. */
-class AnophelesHumanParams {
+class PerHostBase {
 public:
-    AnophelesHumanParams(const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
+    PerHostBase(const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
             net( baseITNParams ),
             irs( baseIRSParams ),
             VADeterrency(numeric_limits< double >::signaling_NaN())
@@ -91,7 +92,56 @@ public:
     //@}
 };
 
+/** Data needed for each human which is per-mosquito species. */
+class PerHost
+{
+public:
+    /** In lieu of a constructor initialises elements, using the passed base to
+     * get baseline parameters. */
+    void initialise (const PerHostBase& base, double availabilityFactor);
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        entoAvailability & stream;
+        probMosqBiting & stream;
+        probMosqRest & stream;
+    }
+    
+    /** Return the availability rate (α_i) of this human to mosquitoes. */
+    inline double getEntoAvailability() const {
+        return entoAvailability;
+    }
+    /** Return the probability of mosquito successfully biting host (P_B_i) */
+    inline double getProbMosqBiting() const {
+        return probMosqBiting;
+    }
+    /** Return the probability of mosquito escaping human and finding a resting
+     * site, then resting without dying, after biting the human (P_C_i * P_D_i). */
+    inline double getProbMosqRest() const {
+        return probMosqRest;
+    }
+    
+private:
+    ///@brief Rate/probabilities before interventions. See functions.
+    //@{
+    /** Availability rate of human to mosquitoes, including hetergeneity factor
+     * and base rate, but excluding age and intervention factors. */
+    double entoAvailability;
+    
+    /** Probability of mosquito successfully biting host (P_B_i) in the absense of
+     * interventions. */
+    double probMosqBiting;
+    
+    /** Probability of mosquito escaping human and finding a resting site, then
+     * resting without dying, after biting the human (P_C_i * P_D_i) in the
+     * absense of interventions. */
+    double probMosqRest;
+    //@}
+};
 
+
+}
 }
 }
 #endif /* HOSTCATEGORYANOPHELESHUMANS_H_ */

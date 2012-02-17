@@ -22,7 +22,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/NonVector.h"
 #include "Transmission/Vector/VectorTransmission.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 
 #include "inputData.h"
 #include "Monitoring/Continuous.h"
@@ -102,7 +102,7 @@ TransmissionModel::TransmissionModel() :
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHostTransmission::adultAge()),
+    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
@@ -201,7 +201,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the

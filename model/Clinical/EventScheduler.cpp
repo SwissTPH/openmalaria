@@ -22,7 +22,6 @@
 #include "inputData.h"
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Transmission/PerHostTransmission.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"

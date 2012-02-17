@@ -35,7 +35,7 @@
 namespace OM {
     class Summary;
 namespace Transmission {
-    class PerHostTransmission;
+    class PerHost;
 
 
 /** There are 3 simulation modes. */
@@ -161,7 +161,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
+  double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set ITN parameters. */
   virtual void setITNDescription ( const scnXml::ITNDescription&);
@@ -186,7 +186,7 @@ protected:
    *
    * @returns  The age- and heterogeneity-specific EIR an individual is exposed
    * to, in units of inoculations per day. */
-  virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
+  virtual double calculateEIR(PerHost& host, double ageYears) = 0; 
   
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average

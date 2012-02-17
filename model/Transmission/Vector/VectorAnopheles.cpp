@@ -19,7 +19,7 @@
 
 #include "Transmission/Vector/VectorAnopheles.h"
 #include "Transmission/Vector/Nv0DelayFitting.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 #include "Transmission/TransmissionModel.h"
 #include "Host/Human.h"
 
@@ -383,7 +383,7 @@ void VectorAnopheles::setupNv0 (size_t sIndex,
     double intP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        const PerHostTransmission& host = h->perHostTransmission;
+        const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
@@ -541,7 +541,7 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
     double intP_df = 0.0;
     double intP_dif = 0.0;
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
-        const PerHostTransmission& host = h->perHostTransmission;
+        const Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)

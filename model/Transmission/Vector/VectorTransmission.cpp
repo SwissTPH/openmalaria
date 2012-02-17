@@ -61,7 +61,7 @@ void VectorTransmission::ctsCbS_v (ostream& stream) {
 }
 void VectorTransmission::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+        const Vector::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -72,7 +72,7 @@ void VectorTransmission::ctsCbAlpha (const Population& population, ostream& stre
 }
 void VectorTransmission::ctsCbP_B (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+	const Vector::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -83,7 +83,7 @@ void VectorTransmission::ctsCbP_B (const Population& population, ostream& stream
 }
 void VectorTransmission::ctsCbP_CD (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-        const AnophelesHumanParams& params = species[i].getHumanBaseParams();
+	const Vector::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -314,7 +314,7 @@ TimeStep VectorTransmission::initIterate () {
     return TimeStep::fromYears( 1 );
 }
 
-double VectorTransmission::calculateEIR(PerHostTransmission& host, double ageYears) {
+double VectorTransmission::calculateEIR(PerHost& host, double ageYears) {
     host.update(_ITNParams);
     if (simulationMode == equilibriumMode){
         return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
@@ -397,7 +397,7 @@ void VectorTransmission::setIRSDescription (const scnXml::IRS& elt){
 }
 void VectorTransmission::setVADescription (const scnXml::VectorDeterrent& elt){
     checkSimMode();
-    PerHostTransmission::setVADescription (elt);
+    PerHost::setVADescription (elt);
     typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
     if( ap.size() != numSpecies ){

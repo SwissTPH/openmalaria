@@ -45,10 +45,10 @@ set (Model_CPP
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVector.cpp
-  Transmission/PerHostTransmission.cpp
+  Transmission/PerHost.cpp
   Transmission/Vector/VectorTransmission.cpp
   Transmission/Vector/VectorAnopheles.cpp
-  Transmission/Vector/AnophelesHumanParams.cpp
+  Transmission/Vector/PerHost.cpp
   Transmission/Vector/ITN.cpp
   Transmission/Vector/IRS.cpp
   

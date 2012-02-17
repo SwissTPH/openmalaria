@@ -22,8 +22,8 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/Vector/AnophelesHumanParams.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/Vector/PerHost.h"
+#include "Transmission/PerHost.h"
 #include <list>
 #include <vector>
 
@@ -96,7 +96,7 @@ public:
                    double meanPopAvail);
 
     /** Return base-line human parameters for the mosquito. */
-    inline const AnophelesHumanParams& getHumanBaseParams () {
+    inline const Vector::PerHostBase& getHumanBaseParams () {
         return humanBase;
     }
 
@@ -147,8 +147,8 @@ public:
      * level instead of the whole simulation, but that doesn't appear worth doing.
      *
      * @param sIndex Index of this in VectorTransmission.species
-     * @param host PerHostTransmission of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, PerHostTransmission& host) {
+     * @param host PerHost of the human requesting this EIR. */
+    double calculateEIR (size_t sIndex, Transmission::PerHost& host) {
         if ( partialEIR != partialEIR ) {
             cerr<<"partialEIR is not a number; "<<sIndex<<endl;
         }
@@ -275,7 +275,7 @@ private:
     
     /** Baseline parameters which may be varied per human host. The primary
      * reason for wrapping these parameters in a struct is that these are the
-     * parameters which need to be passed to the PerHostTransmission code
+     * parameters which need to be passed to the PerHost code
      * during calculations.
      *
      * Includes model parameters which may be varied per-individual to account
@@ -283,7 +283,7 @@ private:
      * descriptions.
      *
      * Read from XML by initialise; no need to checkpoint. */
-    AnophelesHumanParams humanBase;
+    Vector::PerHostBase humanBase;
     
     
     /** @brief Duration parameters for mosquito/parasite life-cycle

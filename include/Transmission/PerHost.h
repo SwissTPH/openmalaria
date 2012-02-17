@@ -17,20 +17,20 @@
  along with this program; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
-#ifndef Hmod_PerHostTransmission
-#define Hmod_PerHostTransmission
+#ifndef Hmod_PerHost
+#define Hmod_PerHost
 
+#include "Transmission/Vector/PerHost.h"
 #include "Transmission/Vector/ITN.h"
 #include "Transmission/Vector/IRS.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
     
-class HostMosquitoInteraction;
 class TransmissionModel;
-class AnophelesHumanParams;
 using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -39,7 +39,7 @@ using boost::shared_ptr;
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
  * Currently many members are public and directly accessed. */
-class PerHostTransmission
+class PerHost
 {
 public:
     /// @brief Static member functions
@@ -54,7 +54,7 @@ public:
     
     ///@brief Initialisation / checkpionting
     //@{
-    PerHostTransmission (const Transmission::TransmissionModel& tm);
+    PerHost (const Transmission::TransmissionModel& tm);
     void initialise (TransmissionModel& tm, double availabilityFactor);
     //@}
     
@@ -135,7 +135,7 @@ public:
      * rate factors.)
      * 
      * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv( const AnophelesHumanParams& base, size_t speciesIndex ) const;
+    double entoAvailabilityHetVecItv( const Vector::PerHostBase& base, size_t speciesIndex ) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -145,7 +145,7 @@ public:
      * by the average availability of the population, which was incorrectly done
      * in the past. */
     inline double entoAvailabilityFull (
-        const AnophelesHumanParams& base,
+        const Vector::PerHostBase& base,
         size_t speciesIndex,
         double ageYears
     ) const {
@@ -157,10 +157,10 @@ public:
     ///@brief Get killing effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
-    double probMosqBiting (const AnophelesHumanParams& base, size_t speciesIndex) const;
+    double probMosqBiting (const Vector::PerHostBase& base, size_t speciesIndex) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
-    double probMosqResting (const AnophelesHumanParams& base, size_t speciesIndex) const;
+    double probMosqResting (const Vector::PerHostBase& base, size_t speciesIndex) const;
     /** Set true to remove human from transmission. Must set back to false
      * to restore transmission. */
     //@}
@@ -195,7 +195,7 @@ public:
     //@}
     
 private:
-    vector<HostMosquitoInteraction> species;
+    vector<Vector::PerHost> species;
     
     // Determines whether human is outside transmission
     bool outsideTransmission;
@@ -221,41 +221,6 @@ private:
     static shared_ptr<DecayFunction> VADecay;
 };
 
-/** Data needed for each human which is per-mosquito species. */
-class HostMosquitoInteraction
-{
-    friend class PerHostTransmission;
-  
-public:
-    /** In lieu of a constructor initialises elements, using the passed base to
-     * get baseline parameters. */
-    void initialise (const AnophelesHumanParams& base, double availabilityFactor);
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        entoAvailability & stream;
-        probMosqBiting & stream;
-        probMosqRest & stream;
-    }
-    
-private:
-    ///@brief Rate/probabilities before interventions. See functions.
-    //@{
-    /** Availability rate of human to mosquitoes, including hetergeneity factor
-     * and base rate, but excluding age and intervention factors. */
-    double entoAvailability;
-    
-    /** Probability of mosquito successfully biting host (P_B_i) in the absense of
-     * interventions. */
-    double probMosqBiting;
-    
-    /** Probability of mosquito escaping human and finding a resting site, then
-     * resting without dying, after biting the human (P_C_i * P_D_i) in the
-     * absense of interventions. */
-    double probMosqRest;
-    //@}
-};
-
-} }
+}
+}
 #endif

@@ -62,7 +62,7 @@ public:
   
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {}
   virtual void update (const std::list<Host::Human>& population, int populationSize);
-  virtual double calculateEIR(PerHostTransmission& perHost, double ageYears);
+  virtual double calculateEIR(PerHost& perHost, double ageYears);
   
 private:
 

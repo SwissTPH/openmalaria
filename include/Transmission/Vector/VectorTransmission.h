@@ -51,7 +51,7 @@ public:
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
   virtual void update (const std::list<Host::Human>& population, int populationSize);
 
-  virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
+  virtual double calculateEIR(PerHost& host, double ageYears); 
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
@@ -136,7 +136,7 @@ private:
   /** ditto */
   IRSParams _IRSParams;
   
-  friend class PerHostTransmission;
+  friend class PerHost;
   friend class VectorAnophelesSuite;
 };
 
