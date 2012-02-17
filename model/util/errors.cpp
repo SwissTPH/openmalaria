@@ -21,6 +21,7 @@
 #include "util/errors.h"
 #include <ostream>
 #include <iostream>
+#include <gsl_errno.h>
 
 #ifdef __GNU_LIBRARY__
 #include <execinfo.h>
@@ -32,15 +33,16 @@
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
 
-base_exception::base_exception(const string& msg,int code) :
+base_exception::base_exception(const string& msg, int code) :
     runtime_error(msg),
     errCode(code)
 {}
 
-traced_exception::traced_exception(const string& msg,int code) :
-    base_exception(msg,code)
+traced_exception::traced_exception(const string& msg, const char *f, int l, int code, int s) :
+    base_exception(msg,code),
+    file(f), line(l), start(s)
 {
-#ifdef __GNU_LIBRARY__
+#ifdef OM_GNU_STACK_TRACE
     // http://www.gnu.org/software/libc/manual/html_node/Backtraces.html
 // probably 100 is big enough
 #define MAX_STACK_SIZE 100
@@ -51,28 +53,36 @@ traced_exception::traced_exception(const string& msg,int code) :
 #endif
 }
 traced_exception::~traced_exception() throw(){
-#ifdef __GNU_LIBRARY__
+#ifdef OM_GNU_STACK_TRACE
     free (trace);
 #endif
 }
 ostream& operator<<(ostream& stream, const traced_exception& e){
-#ifdef __GNU_LIBRARY__
+    stream<<"Call stack";
+    if( e.file != 0 )
+        stream << ", starting from "<<e.file<<':'<<e.line;
+    stream<<":\n";
+#ifdef OM_NO_STACK_TRACE
+    stream << "backtrace capture disabled\n";
+#elif defined OM_GNU_STACK_TRACE
     // demangle output: http://gcc.gnu.org/onlinedocs/libstdc++/manual/ext_demangling.html
     // spec: http://www.ib.cnea.gov.ar/~oop/biblio/libstdc++/namespaceabi.html
     
-    string binary;
-    // start from 1, since the first entry is the traced_exception ctor
-    for( size_t i=1; i<e.length; ++i ){
+    //string binary;
+    // Usually e.start=1: we skip the first frame (traced_exception constructor)
+    for( size_t i=e.start; i<e.length; ++i ){
         char *line = e.trace[i];
         char *lb = strchr(line, '(');
         char *plus = 0;
         char *rb = 0;
         char *demangled = 0;
         if( lb != 0 ){
+            /* Print out the path to the binary? Seems pointless.
             if( binary != string( line, lb-line ) ){
                 binary = string( line, lb-line );
                 stream << "in " << binary << ":\n";
             }
+            */
             *lb = '\0';
             plus = strchr(lb+1,'+');
             if( plus != 0 ){
@@ -106,7 +116,7 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
         stream << '\n';
     }
 #else
-    stream << "sorry, no trace\n";
+    stream << "sorry, no trace from this platform!\n";
 #endif
     return stream;
 }
@@ -116,11 +126,22 @@ xml_scenario_error::xml_scenario_error(const string& msg) :
 {}
 
 checkpoint_error::checkpoint_error(const string& msg) :
-    traced_exception(msg)
+    traced_exception(msg, 0, 0, Error::Checkpoint)
 {}
 
 cmd_exception::cmd_exception(const string& msg, int code) :
     base_exception(msg, code)
 {}
+
+void gsl_handler( const char *reason,
+                  const char *file,
+                  int line,
+                  int gsl_errno){
+    throw traced_exception(reason, file, line, Error::GSL, 2);
+}
+
+void set_gsl_handler() {
+    gsl_set_error_handler( &gsl_handler );
+}
    
 } }

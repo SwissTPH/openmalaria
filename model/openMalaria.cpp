@@ -23,6 +23,7 @@
 #include "Global.h"
 #include "Simulation.h"
 #include "util/CommandLine.h"
+#include "util/errors.h"
 
 #include <cstdio>
 #include <cerrno>
@@ -33,6 +34,8 @@ int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
     
     try {
+        OM::util::set_gsl_handler();
+        
         string scenario_name =
             OM::util::CommandLine::parse (argc, argv);
 	
@@ -64,27 +67,27 @@ int main(int argc, char* argv[]) {
             exitStatus = e.getCode();
         }
     } catch (const ::xsd::cxx::tree::exception<char>& e) {
-        cerr << "XSD Exception: " << e.what() << '\n' << e << endl;
+        cerr << "XSD error: " << e.what() << '\n' << e << endl;
         exitStatus = OM::util::Error::XSD;
     } catch (const OM::util::checkpoint_error& e) {
-        cerr << "Checkpoint exception: " << e.what() << endl;
+        cerr << "Checkpoint error: " << e.what() << endl;
         cerr << e << flush;
         exitStatus = e.getCode();
     } catch (const OM::util::traced_exception& e) {
-        cerr << "Exception: " << e.what() << endl;
+        cerr << "Error: " << e.what() << endl;
         cerr << e << flush;
         exitStatus = e.getCode();
     } catch (const OM::util::xml_scenario_error& e) {
         cerr << "Error in scenario XML file: " << e.what() << endl;
         exitStatus = e.getCode();
     } catch (const OM::util::base_exception& e) {
-        cerr << "Exception: " << e.what() << endl;
+        cerr << "Error: " << e.what() << endl;
         exitStatus = e.getCode();
     } catch (const exception& e) {
-        cerr << "Exception: " << e.what() << endl;
+        cerr << "Error: " << e.what() << endl;
         exitStatus = EXIT_FAILURE;
     } catch (...) {
-        cerr << "Unknown exception" << endl;
+        cerr << "Unknown error" << endl;
         exitStatus = EXIT_FAILURE;
     }
     

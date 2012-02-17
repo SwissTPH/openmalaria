@@ -75,7 +75,7 @@ PkPdModel* PkPdModel::createPkPdModel () {
         
 // 	return new HoshenPkPdModel ();
     }
-    throw util::traced_exception("bad PKPD model");
+    throw TRACED_EXCEPTION_DEFAULT("bad PKPD model");
 }
 
 

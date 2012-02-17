@@ -25,15 +25,30 @@
 
 using namespace std;
 
+/* Macros to ease use of traced_exception.
+ * msg should be obvious, and code is the program exit code.
+ */
+#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) );
+#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ );
+
+// #define OM_NO_STACK_TRACE
+
+#ifdef OM_NO_STACK_TRACE
+// do nothing
+#elif defined __GNU_LIBRARY__
+#define OM_GNU_STACK_TRACE
+#endif
+
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
     
     /** Different exit codes which may be used.
      * 
      * These are intended to categorise errors, not diagnose them. Always use
-     * error messages or stack traces to diagnose errors.
+     * error messages or stack traces to diagnose errors. (The only reason we
+     * don't just return 1 is that BOINC uses the codes to correlate errors.)
      * 
-     * We start exis codes at 64, as in /usr/include/sysexits.h; as far as I am
+     * We start exit codes at 64, as in /usr/include/sysexits.h; as far as I am
      * aware, linux is the only platform targetted which has such narrow ranges
      * of exit codes available (hence these codes should work on Windows and
      * Mac OS X too). */
@@ -83,12 +98,27 @@ namespace OM { namespace util {
     /** Extension of runtime_error which tries to get a stack trace. */
     class traced_exception : public base_exception {
     public:
-        explicit traced_exception(const string& msg, int code=Error::TracedDefault);
+        /** Create a stack-trace and store in this object.
+         * 
+         * @param msg Error message
+         * @param file File in which it occurred (may pass NULL)
+         * @param line Line of error (may pass 0)
+         * @param start Index of first stack frame of interest. 0 is this
+         * constructor, 1 the code creating this exception (usually the location
+         * of the problem, but sometimes an error handler), 2 the next frame etc.
+         * @param code Exit code.
+         * 
+         * See TRACED_EXCEPTION and TRACED_EXCEPTION_DEFAULT macros which
+         * reduce the number of arguments which need to be passed.
+         */
+        explicit traced_exception(const string& msg, const char *file, int line, int code=Error::TracedDefault, int start=1);
         virtual ~traced_exception() throw();
     private:
-#ifdef __GNU_LIBRARY__
-    size_t length;
-    char** trace;
+        const char *file;
+        int line, start;
+#ifdef OM_GNU_STACK_TRACE
+        size_t length;
+        char** trace;
 #endif
         friend ostream& operator<<(ostream& stream, const traced_exception& e);
     };
@@ -115,6 +145,9 @@ namespace OM { namespace util {
     public:
         explicit cmd_exception(const string& msg, int code=Error::CommandLine);
     };
+    
+    /** Set up a GSL handler to throw a traced exception. */
+    void set_gsl_handler();
     
 } }
 #endif

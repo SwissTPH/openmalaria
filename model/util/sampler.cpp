@@ -67,7 +67,7 @@ void BetaSampler::setParamsMV( double mean, double variance ){
         a = c*b;
     }else{
         if( variance != 0.0 ){
-            throw traced_exception("BetaSampler::setParamsMV: require variance ≥ 0");
+            throw TRACED_EXCEPTION_DEFAULT("BetaSampler::setParamsMV: require variance ≥ 0");
         }
         a = mean;
         b = 0.0;

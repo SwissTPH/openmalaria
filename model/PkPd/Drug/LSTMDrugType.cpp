@@ -54,7 +54,7 @@ void LSTMDrugType::addDrug(auto_ptr<LSTMDrugType> drug) {
     const string& abbrev = drug->abbreviation;
     // Check drug doesn't already exist
     if (available.find (abbrev) != available.end())
-        throw util::traced_exception (string ("Drug already in registry: ").append(abbrev));
+        throw TRACED_EXCEPTION_DEFAULT (string ("Drug already in registry: ").append(abbrev));
 
     available[ abbrev ] = drug.release();
 }
@@ -109,7 +109,7 @@ LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
     // update bit_start to next available bit:
     bit_start += n_bits;
     if (bit_start > 32)
-        throw util::traced_exception ("Implementation can't cope with this many alleles & drugs.");
+        throw TRACED_EXCEPTION_DEFAULT ("Implementation can't cope with this many alleles & drugs.");
 
     negligible_concentration = drugData.getPK().getNegligible_concentration();
     neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life();
