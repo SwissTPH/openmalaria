@@ -19,7 +19,7 @@
 */
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
-#include "Transmission/Vector/PerHost.h"
+#include "Transmission/Anopheles/PerHost.h"
 #include "inputData.h"
 #include "util/errors.h"
 
@@ -89,7 +89,7 @@ void PerHost::setupVA () {
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHost::entoAvailabilityHetVecItv (const Vector::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
@@ -102,7 +102,7 @@ double PerHost::entoAvailabilityHetVecItv (const Vector::PerHostBase& base, size
     }
     return alpha_i;
 }
-double PerHost::probMosqBiting (const Vector::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
@@ -112,7 +112,7 @@ double PerHost::probMosqBiting (const Vector::PerHostBase& base, size_t speciesI
     }
     return P_B_i;
 }
-double PerHost::probMosqResting (const Vector::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);

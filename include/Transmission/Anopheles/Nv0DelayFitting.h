@@ -30,7 +30,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+namespace Anopheles {
+
 namespace Nv0DelayFitting {
 template <class T>
 struct eDFunctor
@@ -104,6 +107,9 @@ T fit (double fcR, const vector<T>& fc, const vector<T>& samples)
   int digits = std::numeric_limits<T>::digits / 2;
   return -boost::math::tools::halley_iterate (eDFunctor<T>(fcR, fc, samples), guess, min, max, digits);
 }
+
 }
-} }
+}
+}
+}
 #endif

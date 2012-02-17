@@ -92,7 +92,7 @@ private:
     /// Checksum of scenario; also used for work-unit validation on checkpoint loading.
     util::Checksum cksum;
     
-    friend class VectorAnophelesSuite;
+    friend class AnophelesModelSuite;
 };
 
 }

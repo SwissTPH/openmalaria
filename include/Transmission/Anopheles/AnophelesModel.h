@@ -17,12 +17,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorAnopheles
-#define Hmod_VectorAnopheles
+#ifndef Hmod_AnophelesModel
+#define Hmod_AnophelesModel
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/Vector/PerHost.h"
+#include "Transmission/Anopheles/PerHost.h"
 #include "Transmission/PerHost.h"
 #include <list>
 #include <vector>
@@ -32,30 +32,34 @@ namespace Host {
 class Human;
 }
 namespace Transmission {
+namespace Anopheles {
+
+// enumeration of gettable stats for cts out
+enum VecStat { PA, PDF, PDIF, NV, OV, SV };
 
 using namespace std;
 
-/** Per-species data for vector control.
+/** Per-species part for vector transmission model.
  *
- * Data in this class is specific to the "species" of anopheles mosquito, where
+ * Data in this class is specific to a species of anopheles mosquito, where
  * species is used in a relaxed way to mean any variation of anopheles
  * mosquito, not just those types formally recognised as distinct species.
  *
- * A list of this class type is used by the VectorTransmission class to hold
+ * A list of this class type is used by the VectorModel class to hold
  * (potentially) species-specific per-population data.
  *
- * Instead of storing static variables in this class, store them in
- * the VectorTransmission class.
+ * Instead of storing static variables in this class, store them in the
+ * VectorModel class.
  *
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
  * a heterogeneous host population" (3rd Oct. 2007). */
-class VectorAnopheles
+class AnophelesModel
 {
 public:
     ///@brief Initialisation and destruction
     //@{
-    VectorAnopheles (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
+    AnophelesModel (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
             humanBase(baseITNParams,baseIRSParams),
             partialEIR(0.0),
             larvicidingEndStep (TimeStep::future),
@@ -84,7 +88,7 @@ public:
     /** Initialisation which must wait until a human population is available.
      * This is only called when a checkpoint is not loaded.
      *
-     * @param sIndex Index in VectorTransmission.species of this class.
+     * @param sIndex Index in VectorModel::species of this class.
      * @param population The human population
      * @param populationSize Number of humans (use instead of population.size())
      * @param meanPopAvail The mean availability of age-based relative
@@ -98,7 +102,7 @@ public:
                    double meanPopAvail);
 
     /** Return base-line human parameters for the mosquito. */
-    inline const Vector::PerHostBase& getHumanBaseParams () {
+    inline const Anopheles::PerHostBase& getHumanBaseParams () {
         return humanBase;
     }
 
@@ -148,7 +152,7 @@ public:
      * Could be extended to allow input EIR driven initialisation on a per-species
      * level instead of the whole simulation, but that doesn't appear worth doing.
      *
-     * @param sIndex Index of this in VectorTransmission.species
+     * @param sIndex Index of this in VectorModel::species
      * @param host PerHost of the human requesting this EIR. */
     double calculateEIR (size_t sIndex, Transmission::PerHost& host) {
         if ( partialEIR != partialEIR ) {
@@ -156,7 +160,7 @@ public:
         }
         /* Calculates EIR per individual (hence N_i == 1).
          *
-         * See comment in VectorAnopheles.advancePeriod for method. */
+         * See comment in AnophelesModel::advancePeriod for method. */
         return partialEIR
                * host.entoAvailabilityHetVecItv (humanBase, sIndex)
                * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
@@ -176,7 +180,6 @@ public:
     //@{
     /// Get emergence during last time-step
     double getLastN_v0 ();
-    enum VecStat { PA, PDF, PDIF, NV, OV, SV };
     /// Get P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs );
@@ -259,17 +262,6 @@ private:
     void initEIR(
         const scnXml::AnophelesParams& anoph,
         vector<double>& initialisationEIR);
-    
-    /** Given an input sequence of Fourier coefficients, with odd length,
-     * calculate the exponential of the corresponding fourier series.
-     *
-     * Note: output is per-interval in tArray. When length is intervalsPerYear,
-     * you may want to scale the output by days-per-interval.
-     *
-     * @param tArray Array to fill with EIR values. Length should already be set.
-     * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...).
-     * @param rAngle Angle to rotate EIR, in radians: [0,2π] */
-    static void calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle);
     //@}
     
     
@@ -285,7 +277,7 @@ private:
      * descriptions.
      *
      * Read from XML by initialise; no need to checkpoint. */
-    Vector::PerHostBase humanBase;
+    Anopheles::PerHostBase humanBase;
     
     
     /** @brief Duration parameters for mosquito/parasite life-cycle
@@ -498,9 +490,10 @@ private:
     //@}
 
     friend class VectorEmergenceSuite;
-    friend class VectorAnophelesSuite;
+    friend class AnophelesModelSuite;
 };
 
+}
 }
 }
 #endif

@@ -47,10 +47,10 @@ set (Model_CPP
   Transmission/NonVectorModel.cpp
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
-  Transmission/Vector/VectorAnopheles.cpp
-  Transmission/Vector/PerHost.cpp
-  Transmission/Vector/ITN.cpp
-  Transmission/Vector/IRS.cpp
+  Transmission/Anopheles/AnophelesModel.cpp
+  Transmission/Anopheles/PerHost.cpp
+  Transmission/ITN.cpp
+  Transmission/IRS.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp

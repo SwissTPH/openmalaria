@@ -50,31 +50,31 @@ void VectorModel::ctsCbN_v0 (ostream& stream) {
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PA)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::PA)/TimeStep::interval;
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDF)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::PDF)/TimeStep::interval;
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::PDIF)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF)/TimeStep::interval;
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::NV)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::NV)/TimeStep::interval;
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::OV)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::OV)/TimeStep::interval;
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastVecStat(VectorAnopheles::SV)/TimeStep::interval;
+	stream << '\t' << species[i].getLastVecStat(Anopheles::SV)/TimeStep::interval;
 }
 void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-        const Vector::PerHostBase& params = species[i].getHumanBaseParams();
+        const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -85,7 +85,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
 }
 void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-	const Vector::PerHostBase& params = species[i].getHumanBaseParams();
+	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -96,7 +96,7 @@ void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
 }
 void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-	const Vector::PerHostBase& params = species[i].getHumanBaseParams();
+	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -164,7 +164,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, VectorAnopheles(&_ITNParams, &_IRSParams));
+    species.resize (numSpecies, Anopheles::AnophelesModel(&_ITNParams, &_IRSParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -454,7 +454,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, VectorAnopheles (&_ITNParams, &_IRSParams));
+    util::checkpoint::checkpoint (species, stream, Anopheles::AnophelesModel (&_ITNParams, &_IRSParams));
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

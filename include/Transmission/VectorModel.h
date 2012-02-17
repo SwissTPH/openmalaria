@@ -22,8 +22,9 @@
 
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorAnopheles.h"
-#include "Transmission/Vector/ITN.h"
+#include "Transmission/Anopheles/AnophelesModel.h"
+#include "Transmission/ITN.h"
+#include "Transmission/IRS.h"
 
 namespace scnXml {
   class Vector;
@@ -31,7 +32,10 @@ namespace scnXml {
 
 namespace OM { namespace Transmission {
     
-//! Transmission models, Chitnis et al
+/** Transmission models, Chitnis et al.
+ * 
+ * This class contains code for species-independent components. Per-species
+ * code is in the Vector directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
   VectorModel(const scnXml::Vector vectorData, int populationSize);
@@ -121,7 +125,7 @@ private:
    *
    * Array will be recreated by constructor, but some members of VectorAnopheles
    * need to be checkpointed. */
-  vector<VectorAnopheles> species;
+  vector<Anopheles::AnophelesModel> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *

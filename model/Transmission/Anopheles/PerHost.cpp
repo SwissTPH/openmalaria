@@ -17,13 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/PerHost.h"
+#include "Transmission/Anopheles/PerHost.h"
 #include "inputData.h"
 #include "util/errors.h"
 
 namespace OM {
 namespace Transmission {
-namespace Vector {
+namespace Anopheles {
 
 // ----- Per host, per species, non-static -----
 

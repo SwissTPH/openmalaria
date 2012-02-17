@@ -160,8 +160,8 @@ private:
      *
      * The list of all humans, ordered from oldest to youngest. */
     HumanPop population;
-
-    friend class VectorAnophelesSuite;
+    
+    friend class AnophelesModelSuite;
 };
 
 }

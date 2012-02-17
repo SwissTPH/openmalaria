@@ -17,16 +17,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef HOSTCATEGORYANOPHELESHUMANS_H_
-#define HOSTCATEGORYANOPHELESHUMANS_H_
+#ifndef Hmod_Anopheles_PerHost
+#define Hmod_Anopheles_PerHost
 
-#include "Transmission/Vector/ITN.h"
-#include "Transmission/Vector/IRS.h"
+#include "Transmission/ITN.h"
+#include "Transmission/IRS.h"
 #include "util/sampler.h"
 
 namespace OM {
 namespace Transmission {
-namespace Vector {
+namespace Anopheles {
 
 /** Stores vector model data applicable between a category of host and a
  * mosquito species: intervention descriptions and model parameters.
@@ -144,4 +144,4 @@ private:
 }
 }
 }
-#endif /* HOSTCATEGORYANOPHELESHUMANS_H_ */
+#endif

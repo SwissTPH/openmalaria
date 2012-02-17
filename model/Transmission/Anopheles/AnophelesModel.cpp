@@ -17,8 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Vector/VectorAnopheles.h"
-#include "Transmission/Vector/Nv0DelayFitting.h"
+#include "Transmission/Anopheles/AnophelesModel.h"
+#include "Transmission/Anopheles/Nv0DelayFitting.h"
 #include "Transmission/PerHost.h"
 #include "Transmission/TransmissionModel.h"
 #include "Host/Human.h"
@@ -35,12 +35,13 @@
 
 namespace OM {
 namespace Transmission {
+namespace Anopheles {
 using namespace OM::util;
 
 
 // -----  Initialisation of model, done before human warmup  ------
 
-string VectorAnopheles::initialise (
+string AnophelesModel::initialise (
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
     map<string, double>& nonHumanHostPopulations,
@@ -75,7 +76,7 @@ string VectorAnopheles::initialise (
     return anoph.getMosquito();
 }
 
-void VectorAnopheles::scaleEIR( double factor ) {
+void AnophelesModel::scaleEIR( double factor ) {
     FSCoeffic[0] += log( factor );
 }
 
@@ -103,7 +104,7 @@ public:
     double probMosqSurvivalResting;     // P_D_i
 };
 
-void VectorAnopheles::initAvailability(
+void AnophelesModel::initAvailability(
     const scnXml::AnophelesParams& anoph,
     map<string, double>& nonHumanHostPopulations,
     int populationSize)
@@ -221,14 +222,15 @@ void VectorAnopheles::initAvailability(
     mosqSeekingDeathRate = mu1 * mu2;
 }
 
-double VectorAnopheles::calcEntoAvailability(double N_i, double P_A, double P_Ai)
+double AnophelesModel::calcEntoAvailability(double N_i, double P_A, double P_Ai)
 {
     return (1.0 / N_i)
            * (P_Ai / (1.0-P_A))
            * (-log(P_A) / mosqSeekingDuration);
 }
 
-void VectorAnopheles::initEIR(
+
+void AnophelesModel::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR
 ) {
@@ -238,7 +240,7 @@ void VectorAnopheles::initEIR(
         //TODO
     }
     // EIR for this species, with index 0 refering to value over first interval
-    vector<double> speciesEIR (TimeStep::fromYears(1).inDays());
+    vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
 
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
@@ -315,15 +317,15 @@ void VectorAnopheles::initEIR(
 
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
-    calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
     // And scale (also acts as a unit conversion):
     FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
 
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    calcFourierEIR (speciesEIR, FSCoeffic, EIRRotateAngle);
+    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
 
     // Add to the TransmissionModel's EIR, used for the initalization phase:
-    for (int i = 0; i < TimeStep::fromYears(1).inDays(); ++i) {
+    for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
         // index 1 of initialisationEIR corresponds to first period of year
         initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
     }
@@ -364,7 +366,7 @@ void VectorAnopheles::initEIR(
 
 // -----  Initialisation of model which is done after running the human warmup  -----
 
-void VectorAnopheles::init2 (size_t sIndex,
+void AnophelesModel::init2 (size_t sIndex,
                                 const std::list<Host::Human>& population,
                                 int populationSize,
                                 double meanPopAvail) {
@@ -416,7 +418,7 @@ void VectorAnopheles::init2 (size_t sIndex,
     // Log-values: adding log is same as exponentiating, multiplying and taking
     // the log again.
     FSCoeffic[0] += log (populationSize * meanPopAvail / sumPFindBite);
-    calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
 
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;
@@ -436,7 +438,7 @@ void VectorAnopheles::init2 (size_t sIndex,
 }
 
 
-bool VectorAnopheles::vectorInitIterate () {
+bool AnophelesModel::vectorInitIterate () {
     // Try to match S_v against its predicted value. Don't try with N_v or O_v
     // because the predictions will change - would be chasing a moving target!
     // EIR comes directly from S_v, so should fit after we're done.
@@ -478,7 +480,7 @@ bool VectorAnopheles::vectorInitIterate () {
     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
     FSRotateAngle -= rAngle;
-    calcFourierEIR (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
@@ -490,7 +492,7 @@ bool VectorAnopheles::vectorInitIterate () {
 
 
 // Every TimeStep::interval days:
-void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
+void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
                                      bool isDynamic) {
@@ -673,17 +675,17 @@ void VectorAnopheles::advancePeriod (const std::list<Host::Human>& population,
 }
 
 
-void VectorAnopheles::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
+void AnophelesModel::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
     larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
     larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
 }
-void VectorAnopheles::uninfectVectors() {
+void AnophelesModel::uninfectVectors() {
     O_v.assign( O_v.size(), 0.0 );
     S_v.assign( S_v.size(), 0.0 );
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-double VectorAnopheles::getLastN_v0 () {
+double AnophelesModel::getLastN_v0 () {
     double timestep_N_v0 = 0.0;
     int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
@@ -692,7 +694,7 @@ double VectorAnopheles::getLastN_v0 () {
     }
     return timestep_N_v0;
 }
-double VectorAnopheles::getLastVecStat ( VecStat vs ){
+double AnophelesModel::getLastVecStat ( VecStat vs ){
     //Note: implementation isn't performance optimal but rather intended to
     //keep code size low and have no overhead if not used.
     vector<double> *array;
@@ -713,34 +715,13 @@ double VectorAnopheles::getLastVecStat ( VecStat vs ){
     }
     return val;
 }
-void VectorAnopheles::summarize (const string speciesName, Monitoring::Survey& survey) {
+void AnophelesModel::summarize (const string speciesName, Monitoring::Survey& survey) {
     survey.set_Vector_Nv0 (speciesName, getLastN_v0()/TimeStep::interval);
     survey.set_Vector_Nv (speciesName, getLastVecStat(NV)/TimeStep::interval);
     survey.set_Vector_Ov (speciesName, getLastVecStat(OV)/TimeStep::interval);
     survey.set_Vector_Sv (speciesName, getLastVecStat(SV)/TimeStep::interval);
 }
 
-
-void VectorAnopheles::calcFourierEIR (vector<double>& tArray, vector<double>& FC, double rAngle) {
-    if (FC.size() % 2 == 0)
-        throw util::xml_scenario_error("The number of Fourier coefficents should be odd.");
-
-    // Frequency
-    double w = 2*M_PI / double(tArray.size());
-
-    // Number of Fourier Modes.
-    int Fn = (FC.size()-1)/2;
-
-    // Calculate inverse discrete Fourier transform
-    for (size_t t=0; t<tArray.size(); t++) {
-        double temp = FC[0];
-        double wt = w*t - rAngle;
-        for (int n=1;n<=Fn;n++) {
-            temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
-        }
-        tArray[t] = exp(temp);
-    }
 }
-
 }
 }
