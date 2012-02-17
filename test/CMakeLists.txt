@@ -37,7 +37,7 @@ set (OM_BOXTEST_NAMES
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
 # Disabled due to "in-progress" work: (none)
-# Use python script. There is also a shell-script, but it still uses python to validate results.
+# Use python script.
 if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NAMES})
     add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py ${TEST_NAME} -- --checkpoint)
@@ -45,4 +45,6 @@ if (PYTHON_EXECUTABLE)
   foreach (TEST_NAME ${OM_BOXTEST_NC_NAMES})
     add_test (${TEST_NAME} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/run.py -- ${TEST_NAME})
   endforeach (TEST_NAME)
+else (PYTHON_EXECUTABLE)
+  message(WARNING "Tests are disabled (Python is needed to run them)")
 endif (PYTHON_EXECUTABLE)
