@@ -46,7 +46,7 @@ if (OM_CXXTEST_GUI)
 endif (OM_CXXTEST_GUI)
 
 
-# For yaml-cpp: I did use this to read in data for the VectorAnopheles unittest.
+# For yaml-cpp: I did use this to read in data for the AnophelesModel unittest.
 # It's another not-the-easiest dependency to install, so maybe don't use it?
 #find_library (YAML_CPP_LIB NAMES yaml-cpp)
 #if (NOT YAML_CPP_LIB)
@@ -66,7 +66,7 @@ include_directories (
 )
 
 set (OM_CXXTEST_HEADERS
-  #VectorAnophelesSuite.h needs updating for vector model changes
+  #AnophelesModelSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
   #HoshenPkPdSuite.h
   LSTMPkPdSuite.h

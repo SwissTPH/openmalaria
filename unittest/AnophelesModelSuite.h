@@ -18,8 +18,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 */
 
-#ifndef Hmod_VectorAnophelesSuite
-#define Hmod_VectorAnophelesSuite
+#ifndef Hmod_AnophelesModelSuite
+#define Hmod_AnophelesModelSuite
 
 #include "Global.h"
 #include "configured/TestPaths.h"	// from config; but must be included from the build dir
@@ -32,8 +32,8 @@
 #include <xsd/cxx/tree/exceptions.hxx>
 
 #include "Host/Human.h"
-#include "Transmission/Vector/VectorTransmission.h"
-#include "Transmission/Vector/VectorAnopheles.h"
+#include "Transmission/VectorModel.h"
+#include "Transmission/Anopheles/AnophelesModel.h"
 #include "util/vectors.h"
 
 
@@ -72,14 +72,14 @@ WeibullDecayedValue yaml2WeibullDecayedValue (const YAML::Node& node) {
 
 
 // The assert we use in calculateEIR unittests. It tests vtm and species params against node.
-#   define TS_ASSERT_SPECIES_APPROX(node) VectorAnophelesSuite::doAssertSpecies(__FILE__,__LINE__, (node))
+#   define TS_ASSERT_SPECIES_APPROX(node) AnophelesModelSuite::doAssertSpecies(__FILE__,__LINE__, (node))
 
 
-/** Unit test for VectorAnopheles code.
+/** Unit test for AnophelesModel code.
  *
  * Possible tests to write:
  * 
-VectorAnopheles unit testing:
+AnophelesModel unit testing:
   initialise:
     read parameters from XML
     calculate EIR array from fourier series, rotate and add to return param
@@ -92,12 +92,12 @@ VectorAnopheles unit testing:
     validates emerge params
     prints out new scenario file
  */
-class VectorAnophelesSuite : public CxxTest::TestSuite
+class AnophelesModelSuite : public CxxTest::TestSuite
 {
 public:
-  VectorAnophelesSuite() {
+  AnophelesModelSuite() {
     Global::clResourcePath = UnittestSourceDir;
-    ifstream file(Global::lookupResource ("VectorAnophelesSuite.yaml").c_str());
+    ifstream file(Global::lookupResource ("AnophelesModelSuite.yaml").c_str());
     
     YAML::Parser parser(file);
     parser.GetNextDocument(doc);
@@ -119,7 +119,7 @@ public:
   void setUp () {
     try {
     // "unused" node, but it still checks element exists (confirming correct data file)
-    /*const YAML::Node& node =*/ doc["VectorAnophelesSuite"];
+    /*const YAML::Node& node =*/ doc["AnophelesModelSuite"];
     
     createDocument (UnittestScenario);
     Global::initGlobal();
@@ -132,7 +132,7 @@ public:
     simulation->simulationTime = simulationTime = 1;
     
     // No eir data is present in scenario.xml, so it should directly initialise all model parameters
-    vtm = dynamic_cast<VectorTransmission*> (simulation->_population->_transmissionModel);
+    vtm = dynamic_cast<VectorModel*> (simulation->_population->_transmissionModel);
     assert (vtm != NULL);
     assert (vtm->numSpecies == 1);
     species = &vtm->species[0];
@@ -273,8 +273,8 @@ private:
   YAML::Node doc;
   int simulationTime;
   Simulation *simulation;
-  VectorTransmission *vtm;
-  VectorAnopheles *species;
+  VectorModel *vtm;
+  AnophelesModel *species;
   list<Host::Human> *population;
 };
 
