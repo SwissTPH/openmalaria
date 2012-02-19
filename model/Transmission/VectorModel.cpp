@@ -304,7 +304,7 @@ TimeStep VectorModel::initIterate () {
     
     bool needIterate = false;
     for (size_t i = 0; i < numSpecies; ++i) {
-        needIterate = needIterate || species[i].vectorInitIterate ();
+        needIterate = needIterate || species[i].initIterate ();
     }
     if( needIterate == false ){
         initIterations = -1;

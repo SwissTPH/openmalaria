@@ -48,6 +48,8 @@ set (Model_CPP
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
+  Transmission/Anopheles/Transmission.cpp
+  Transmission/Anopheles/FixedEmergence.cpp
   Transmission/Anopheles/PerHost.cpp
   Transmission/ITN.cpp
   Transmission/IRS.cpp
