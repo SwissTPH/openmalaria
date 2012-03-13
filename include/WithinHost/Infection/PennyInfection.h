@@ -64,6 +64,9 @@ private:
     // delta_V := delay to variant specific antibody response in R_V^x (days) (value 6.3572 round to 6)  
     static const int delta_V=6;
     
+    static bool immune_threshold_gamma;
+    static bool update_density_gamma;
+    
     // Circulating densities, 1 to delta_C timesteps ago.
     // index (time mod delta_C) corresponds to delta_C timesteps ago.
     double cirDensities[delta_C];
@@ -81,6 +84,9 @@ private:
     double variantSpecificSummation;
     // tracked summation of densities with decay for clonal immunity (sigmoidal function)
     double clonalSummation;
+    
+    // 
+    
     
     // allow unittest to access private vars
     friend class ::PennyInfectionSuite;

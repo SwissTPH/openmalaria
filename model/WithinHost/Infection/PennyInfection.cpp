@@ -103,19 +103,36 @@ const double exp_negRho_V=exp(-rho_V);
 const double lambda_V=4.2119; 
 const double prob_lambda_V = 1.0 / lambda_V;
 
+/* distribution model paramters */
+bool PennyInfection::immune_threshold_gamma;
+bool PennyInfection::update_density_gamma;
 
 /* Parameters to assign infection dependent parameters */
 const double mu_Y=3.9700;
 const double sigma_Y=1.3436;
+const double a_Y = 8.7305;
+const double b_Y = 0.4547;
+
 const double mu_X=1.9969;
 const double sigma_X=0.7424;
+const double a_X=7.2350;
+const double b_X=0.2760;
+
 const double mu_TN=7.5872;
 const double sigma_TN=2.8977;
+const double a_TN = 6.8558;
+const double b_TN = 1.1067;
+
 const double mu_TC=5.5573;  
 const double sigma_TC=0.4068; 
+const double a_TC = 186.6233;
+const double b_TC = 0.0297;
+
 const double mu_TV=6.12898;  
 const double sigma_TV=1.3768;
- 
+const double a_TV = 19.8167;
+const double b_TV = 0.3093;
+
 /* Other infection parameters */
 const double m_rep=16.0; 
 const double Omega=0.00025;
@@ -137,6 +154,18 @@ void PennyInfection::init() {
 
     CommonWithinHost::createInfection = &createPennyInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedPennyInfection;
+
+    if(util::ModelOptions::option (util::IMMUNE_THRESHOLD_GAMMA)) {
+	immune_threshold_gamma = true;
+    } else {
+	immune_threshold_gamma = false;
+    }
+    
+    if(util::ModelOptions::option (util::UPDATE_DENSITY_GAMMA)) {
+	update_density_gamma = true;
+    } else {
+	update_density_gamma = false;
+    }
 }
 
 PennyInfection::PennyInfection(uint32_t protID):
@@ -145,14 +174,21 @@ PennyInfection::PennyInfection(uint32_t protID):
         clonalSummation(0)
 {
     // assign infection dependent immune thresholds
-    do 
-    {
-        double sample;
-        sample = random::gauss(mu_TN,sigma_TN);
-        threshold_N = exp(sample);
-        threshold_C = exp(random::gauss(mu_TC,sigma_TC));
-        threshold_V = exp(random::gauss(mu_TV,sigma_TV));
-    }while(threshold_N <= threshold_C || threshold_N <= threshold_V);
+    // using gamma distribution
+    if(immune_threshold_gamma) {
+      do {
+        threshold_N = exp(random::gamma(a_TN,b_TN));
+        threshold_C = exp(random::gamma(a_TC,b_TC));
+        threshold_V = exp(random::gamma(a_TV,b_TV));
+      } while(threshold_N <= threshold_C || threshold_N <= threshold_V);
+    } // using lognormal distribution
+    else {
+      do {
+        threshold_N = exp(random::gauss(mu_TN,sigma_TN));
+	threshold_C = exp(random::gauss(mu_TC,sigma_TC));
+	threshold_V = exp(random::gauss(mu_TV,sigma_TV));
+      } while(threshold_N <= threshold_C || threshold_N <= threshold_V);
+    }
     
     for(int i=0; i<delta_C; ++i){
         cirDensities[i] = 0.0;
@@ -168,10 +204,21 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
     {
         // assign initial densities (Y circulating, X sequestered)
         size_t today = (TimeStep::simulation % delta_C);
-        cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
+	
+	if(update_density_gamma) {
+	  cirDensities[today] = exp(random::gamma(a_Y,b_Y));
+	} else {
+	  cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
+	}
+	
         _density = cirDensities[today];
         today = (TimeStep::simulation % delta_V);
-        seqDensities[today] = exp(random::gauss(mu_X,sigma_X));
+	
+	if(update_density_gamma){
+	  seqDensities[today] = exp(random::gamma(a_X,b_X));
+	} else {
+	  seqDensities[today] = exp(random::gauss(mu_X,sigma_X));
+	}
     }
     else
     {
@@ -215,7 +262,14 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
         if (cirDensity_new < Omega) {
             cirDensity_new = 0.0;
         } else {
-            cirDensity_new = exp(random::gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;
+	    const double a_cirDens = pow(log(cirDensity_new),2)/pow(sigma_epsilon,2);
+	    const double b_cirDens = pow(sigma_epsilon,2)/log(cirDensity_new);
+	    
+	    if( update_density_gamma ) {
+		cirDensity_new = exp(random::gamma(a_cirDens,b_cirDens) ) * survivalFactor;
+	    } else {
+		cirDensity_new = exp(random::gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;
+	    }
             // please don't simplify this, we want more chance at ending infection
             if (cirDensity_new < Omega) {
                 cirDensity_new = 0.0;

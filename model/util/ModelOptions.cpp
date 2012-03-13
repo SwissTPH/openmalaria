@@ -63,6 +63,12 @@ namespace OM { namespace util {
             codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
             codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
             codeMap["REPORT_ONLY_AT_RISK"] = REPORT_ONLY_AT_RISK;
+	    
+	    codeMap["MEAN_DURATION_GAMMA"] = MEAN_DURATION_GAMMA;
+	    codeMap["FIRST_LOCAL_MAXIMUM_GAMMA"]=FIRST_LOCAL_MAXIMUM_GAMMA;
+	    codeMap["IMMUNE_THRESHOLD_GAMMA"]=IMMUNE_THRESHOLD_GAMMA;
+	    codeMap["UPDATE_DENSITY_GAMMA"]=UPDATE_DENSITY_GAMMA;
+	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -132,13 +138,33 @@ namespace OM { namespace util {
 	incompatibilities[DUMMY_WITHIN_HOST_MODEL]
             .set(PENNY_WITHIN_HOST_MODEL)
 	    .set(EMPIRICAL_WITHIN_HOST_MODEL)
-	    .set(MOLINEAUX_WITHIN_HOST_MODEL);
+	    .set(MOLINEAUX_WITHIN_HOST_MODEL)
+	    .set(MEAN_DURATION_GAMMA)
+	    .set(FIRST_LOCAL_MAXIMUM_GAMMA)
+	    .set(PARASITE_REPLICATION_GAMMA)
+	    .set(IMMUNE_THRESHOLD_GAMMA)
+	    .set(UPDATE_DENSITY_GAMMA);
+
 	incompatibilities[EMPIRICAL_WITHIN_HOST_MODEL]
             .set(MOLINEAUX_WITHIN_HOST_MODEL)
-            .set(PENNY_WITHIN_HOST_MODEL);
+            .set(PENNY_WITHIN_HOST_MODEL)
+	    .set(MEAN_DURATION_GAMMA)
+	    .set(FIRST_LOCAL_MAXIMUM_GAMMA)
+	    .set(PARASITE_REPLICATION_GAMMA)
+	    .set(IMMUNE_THRESHOLD_GAMMA)
+	    .set(UPDATE_DENSITY_GAMMA);
+	    
+	    
 	incompatibilities[MOLINEAUX_WITHIN_HOST_MODEL]
-            .set(PENNY_WITHIN_HOST_MODEL);
-	
+            .set(PENNY_WITHIN_HOST_MODEL)
+	    .set(IMMUNE_THRESHOLD_GAMMA)
+	    .set(UPDATE_DENSITY_GAMMA);
+	    
+	incompatibilities[PENNY_WITHIN_HOST_MODEL]
+	    .set(MEAN_DURATION_GAMMA)
+	    .set(FIRST_LOCAL_MAXIMUM_GAMMA)
+	    .set(PARASITE_REPLICATION_GAMMA);
+	    
 	incompatibilities[NON_MALARIA_FEVERS]
 	    .set(MUELLER_PRESENTATION_MODEL);
 	
@@ -167,7 +193,7 @@ namespace OM { namespace util {
 		bitset<NUM_OPTIONS> incompat = (optSet_bs & incompatibilities[i]);
 		for (int j = 0; j < NUM_OPTIONS; ++j) {
 		    if (incompat[j])
-			msg << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
+			msg << "\t" << codeMap.toString(OptionCodes(j)) << "=" << optSet_bs[j];
 		}
 		throw xml_scenario_error (msg.str());
 	    }
