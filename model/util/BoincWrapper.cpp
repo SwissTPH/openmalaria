@@ -122,7 +122,7 @@ namespace BoincWrapper {
     if (err) {
       stringstream t;
       t << "APP. boinc_resolve_filename_s failed with code: "<<err;
-      throw util::traced_exception (t.str(),util::Error::FileIO);	// can't call finish/exit here; need to free memory
+      throw TRACED_EXCEPTION(t.str(),util::Error::FileIO);	// can't call finish/exit here; need to free memory
     }
     return ret;
   }
@@ -181,7 +181,7 @@ Checksum Checksum::generate (istream& fileStream) {
     if (firstLen != bytes_read) {	// fileStream.tellg () returns -1 now, not what I'd expect
 	ostringstream msg;
 	msg << "Initialisation read error:\tfirst: "<<firstLen<<"\tsecond:"<<fileStream.tellg()<<"\tread:  "<<bytes_read;
-	throw util::traced_exception (msg.str(),Error::Checksum);
+	throw TRACED_EXCEPTION(msg.str(),Error::Checksum);
     }
     
     return output;
@@ -189,7 +189,7 @@ Checksum Checksum::generate (istream& fileStream) {
 void Checksum::writeToFile (string filename) {
     ifstream test (filename.c_str());
     if (test.is_open())
-	throw util::traced_exception ("File scenario.sum exists!",Error::Checksum);
+	throw TRACED_EXCEPTION("File scenario.sum exists!",Error::Checksum);
     
     // Use C file commands, since these have clearer behaviour with binary data:
     FILE *f = fopen( filename.c_str(), "wb" );
@@ -198,7 +198,7 @@ void Checksum::writeToFile (string filename) {
 	written=fwrite( data, 1, 16, f );
     fclose( f );
     if( written != 16 )
-	throw util::traced_exception("Error writing scenario.sum",Error::Checksum);
+	throw TRACED_EXCEPTION("Error writing scenario.sum",Error::Checksum);
 }
 #endif	// Without/with BOINC
 
