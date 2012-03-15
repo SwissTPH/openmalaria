@@ -1,0 +1,1016 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Mass screen-and-treat and ITNs" schemaVersion="30" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="test" popSize="100">
+    <ageGroup lowerbound="0.0">
+      <group poppercent="3.474714994" upperbound="1"/>
+      <group poppercent="12.76004028" upperbound="5"/>
+      <group poppercent="14.52151394" upperbound="10"/>
+      <group poppercent="12.75565434" upperbound="15"/>
+      <group poppercent="10.83632374" upperbound="20"/>
+      <group poppercent="8.393312454" upperbound="25"/>
+      <group poppercent="7.001421452" upperbound="30"/>
+      <group poppercent="5.800587654" upperbound="35"/>
+      <group poppercent="5.102136612" upperbound="40"/>
+      <group poppercent="4.182561874" upperbound="45"/>
+      <group poppercent="3.339409351" upperbound="50"/>
+      <group poppercent="2.986112356" upperbound="55"/>
+      <group poppercent="2.555766582" upperbound="60"/>
+      <group poppercent="2.332763433" upperbound="65"/>
+      <group poppercent="1.77400255" upperbound="70"/>
+      <group poppercent="1.008525491" upperbound="75"/>
+      <group poppercent="0.74167341" upperbound="80"/>
+      <group poppercent="0.271863401" upperbound="85"/>
+      <group poppercent="0.161614642" upperbound="90"/>
+    </ageGroup>
+  </demography>
+  <monitoring cohortOnly="false" name="Quarterly Surveys">
+    <continuous duringInit="false" period="6">
+      <option name="recent births" value="true"/>
+      <option name="S_v" value="true"/>
+      <option name="input EIR" value="false"/>
+      <option name="simulated EIR" value="true"/>
+      <option name="human infectiousness" value="true"/>
+      <option name="human age availability" value="true"/>
+      <option name="immunity h" value="true"/>
+      <option name="immunity Y" value="true"/>
+      <option name="new infections" value="true"/>
+      <option name="num transmitting humans" value="true"/>
+      <option name="nets owned" value="true"/>
+      <option name="mean hole index"/>
+      <option name="mean insecticide content"/>
+    </continuous>
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nInfect" value="true"/>
+      <option name="nExpectd" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="totalInfs" value="true"/>
+      <option name="nTransmit" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="nUncomp" value="true"/>
+      <option name="nSevere" value="true"/>
+      <option name="nSeq" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+      <option name="allCauseIMR" value="true"/>
+      <option name="annAvgK" value="true"/>
+      <option name="nNMFever" value="true"/>
+      <option name="innoculationsPerAgeGroup" value="true"/>
+      <option name="Vector_Nv0" value="true"/>
+      <option name="Vector_Nv" value="true"/>
+      <option name="Vector_Ov" value="true"/>
+      <option name="Vector_Sv" value="true"/>
+      <option name="inputEIR" value="true"/>
+      <option name="simulatedEIR" value="true"/>
+      <option name="nNewInfections" value="true"/>
+      <option name="Clinical_RDTs" value="true"/>
+      <option name="Clinical_DrugUsage" value="true"/>
+      <option name="nMassITNs" value="true"/>
+      <option name="Clinical_Microscopy" value="true"/>
+      <option name="Clinical_DrugUsageIV" value="true"/>
+      <option name="nMDAs" value="true"/>
+      <option name="nMassScreenings" value="true"/>
+      <option name="nAddedToCohort" value="true"/>
+      <option name="nRemovedFromCohort" value="true"/>
+      <option name="nNmfDeaths" value="true"/>
+    </SurveyOptions>
+    <surveys detectionLimit="40">
+      <!-- we don't actually need many for testing -->
+      <surveyTime>438</surveyTime>
+      <surveyTime>876</surveyTime>
+      <surveyTime>1314</surveyTime>
+      <surveyTime>1752</surveyTime>
+      <surveyTime>2190</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0">
+      <group upperbound="0.25"/>
+      <group upperbound="0.5"/>
+      <group upperbound="0.75"/>
+      <group upperbound="1"/>
+      <group upperbound="1.5"/>
+      <group upperbound="2"/>
+      <group upperbound="3"/>
+      <group upperbound="4"/>
+      <group upperbound="5"/>
+      <group upperbound="6"/>
+      <group upperbound="7"/>
+      <group upperbound="8"/>
+      <group upperbound="9"/>
+      <group upperbound="10"/>
+      <group upperbound="12"/>
+      <group upperbound="14"/>
+      <group upperbound="16"/>
+      <group upperbound="18"/>
+      <group upperbound="20"/>
+      <group upperbound="25"/>
+      <group upperbound="30"/>
+      <group upperbound="35"/>
+      <group upperbound="40"/>
+      <group upperbound="45"/>
+      <group upperbound="50"/>
+      <group upperbound="55"/>
+      <group upperbound="60"/>
+      <group upperbound="65"/>
+      <group upperbound="70"/>
+      <group upperbound="99"/>
+    </ageGroup>
+  </monitoring>
+  <interventions name="ITN and MSAT">
+    <MDA>
+      <description>
+        <decisions>
+          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
+            age(0-3): 0_3
+            age(3-9): 3_9
+            age(9-15): 9_15
+            age(15-inf): 15_inf
+          </decision>
+          <decision depends="" name="test" values="none,microscopy,RDT">
+             RDT
+          </decision>
+          <decision depends="result" name="treatment" values="none,AL_treat">
+              result(negative): none
+              result(positive): AL_treat
+              result(none): none
+          </decision>
+        </decisions>
+        <treatments>
+          <treatment name="AL_treat">
+            <schedule>
+              <medicate drug="AR" hour="0" mg="20"/>
+              <medicate drug="LU" hour="0" mg="120"/>
+              <medicate drug="AR" hour="8" mg="20"/>
+              <medicate drug="LU" hour="8" mg="120"/>
+              <medicate drug="AR" hour="24" mg="20"/>
+              <medicate drug="LU" hour="24" mg="120"/>
+              <medicate drug="AR" hour="36" mg="20"/>
+              <medicate drug="LU" hour="36" mg="120"/>
+              <medicate drug="AR" hour="48" mg="20"/>
+              <medicate drug="LU" hour="48" mg="120"/>
+              <medicate drug="AR" hour="60" mg="20"/>
+              <medicate drug="LU" hour="60" mg="120"/>
+            </schedule>
+            <modifier decision="age_AL">
+              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
+              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
+            </modifier>
+          </treatment>
+          <treatment name="none">
+            <schedule/>
+          </treatment>
+        </treatments>
+      </description>
+      <timed>
+        <deploy coverage="0.85" time="1484"/>
+        <deploy coverage="0.85" time="1849"/>
+        <deploy coverage="0.85" time="2214"/>
+        <deploy coverage="0.85" time="2579"/>
+        <deploy coverage="0.85" time="2944"/>
+        <deploy coverage="0.85" time="3309"/>
+        <deploy coverage="0.85" time="3674"/>
+        <deploy coverage="0.85" time="4039"/>
+      </timed>
+    </MDA>
+    <ITN name="Extended ITNs">
+      <description>
+        <usage value="0.8"/>
+        <holeRate mean=".9" sigma=".8"/>
+        <ripRate mean=".7" sigma=".8"/>
+        <ripFactor value="0.4"/>
+        <initialInsecticide mu="70" sigma="20"/>
+        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+        <attritionOfNets L="12" function="smooth-compact" k="2"/>
+        <anophelesParams mosquito="gambiae_ss">
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+        </anophelesParams>
+        <anophelesParams mosquito="funestus">
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+        </anophelesParams>
+        <anophelesParams mosquito="arabiensis">
+          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+        </anophelesParams>
+      </description>
+      <!-- at 2, 6, 10 and 16 years -->
+      <timed>
+        <deploy coverage="0.20" time="146"/>
+        <deploy coverage="0.20" time="438"/>
+        <deploy coverage="0.20" time="730"/>
+        <deploy coverage="0.20" time="1168"/>
+      </timed>
+    </ITN>
+    <importedInfections>
+      <timed>
+        <rate time="0" value="5"/>
+      </timed>
+    </importedInfections>
+  </interventions>
+  <healthSystem>
+    <EventScheduler>
+      <uncomplicated>
+        <decisions>
+          <decision depends="age" name="age5" values="under5,over5">
+            age(0-5): under5
+            age(5-inf): over5
+         </decision>
+          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
+            age(0-3): 0_3
+            age(3-9): 3_9
+            age(9-15): 9_15
+            age(15-inf): 15_inf
+          </decision>
+          <decision depends="case,p" name="provider" values="formal, community_health_worker, informal, none">
+            case(UC1){
+              p(0.2): formal
+              p(0): community_health_worker
+              p(0): informal
+              p(0.8): none 
+            }
+            case(UC2){
+              p(0.2): formal
+              p(0): community_health_worker
+              p(0): informal
+              p(0.8): none
+            }
+          </decision>
+          <decision depends="age5,provider,p" name="test" values="none,microscopy,RDT">
+            age5(under5){
+            provider(formal){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(community_health_worker){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(informal){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(none){
+              none
+            }
+            }
+            age5(over5){
+            provider(formal){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(community_health_worker){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(informal){
+              p(.82): none
+              p(0): microscopy
+              p(.18): RDT
+            }
+            provider(none){
+              none
+            }
+            }
+          </decision>
+          <decision depends="case,provider,result,p" name="treatment" values="AL_treat, none">
+            case(UC1){
+              provider(formal){
+                result(none){
+                  p(.5): AL_treat
+                  p(0.5): none
+            }
+                result(positive){
+                  p(.85): AL_treat
+                  p(0.15): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(community_health_worker){
+                result(none){
+                  p(.5): AL_treat
+                  p(0.5): none
+            }
+                result(positive){
+                  p(.85): AL_treat
+                  p(0.15): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(informal){
+                result(none){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(positive){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(none){
+                  none
+            }
+            }
+            case(UC2){
+            provider(formal){
+                result(none){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(positive){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(community_health_worker){
+                result(none){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(positive){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(informal){
+                result(none){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(positive){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+                result(negative){
+                  p(.15): AL_treat
+                  p(0.85): none
+            }
+            }
+            provider(none){
+                  none
+            }
+            }
+          </decision>
+          <decision depends="treatment,provider,test,result,p" name="adherence" values="full,missFirstDose,missLastDay">
+            treatment(AL_treat){
+              provider(formal){
+               test(none){
+                result(none){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(negative){
+                    full
+                    }
+                result(positive){
+                    full
+                    }
+                    }
+               test(microscopy){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+               test(RDT){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+                    }
+              provider(community_health_worker){
+               test(none){
+                result(none){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(negative){
+                    full
+                    }
+                result(positive){
+                    full
+                    }
+                    }
+               test(microscopy){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+               test(RDT){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+                    }
+              provider(informal){
+               test(none){
+                result(none){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(negative){
+                    full
+                    }
+                result(positive){
+                    full
+                    }
+                    }
+               test(microscopy){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+               test(RDT){
+                result(none){
+                    full
+                    }
+                result(negative){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                result(positive){
+                    p(.90): full
+                    p(0): missFirstDose
+                    p(.10): missLastDay
+                    }
+                    }
+                    }
+              provider(none):full
+                  }
+            treatment(none): full
+          </decision>
+          <decision depends="provider,p" name="quality" values="good, medium, poor">
+            provider(formal){
+              p(1.0): good
+              p(0): medium
+              p(0): poor
+            }
+            provider(community_health_worker){
+              p(1.0): good
+              p(0): medium
+              p(0): poor
+            }
+            provider(informal){
+              p(1.0): good
+              p(0): medium
+              p(0): poor
+            }
+            provider(none): good
+          </decision>
+        </decisions>
+        <treatments>
+          <treatment name="none">
+            <schedule/>
+          </treatment>
+          <treatment name="AL_treat">
+            <schedule>
+              <medicate drug="AR" hour="0" mg="20"/>
+              <medicate drug="LU" hour="0" mg="120"/>
+              <medicate drug="AR" hour="8" mg="20"/>
+              <medicate drug="LU" hour="8" mg="120"/>
+              <medicate drug="AR" hour="24" mg="20"/>
+              <medicate drug="LU" hour="24" mg="120"/>
+              <medicate drug="AR" hour="36" mg="20"/>
+              <medicate drug="LU" hour="36" mg="120"/>
+              <medicate drug="AR" hour="48" mg="20"/>
+              <medicate drug="LU" hour="48" mg="120"/>
+              <medicate drug="AR" hour="60" mg="20"/>
+              <medicate drug="LU" hour="60" mg="120"/>
+            </schedule>
+            <modifier decision="quality">
+              <multiplyQty effect="AR(1.0),LU(1.0)" value="good"/>
+              <multiplyQty effect="AR(0.6), LU(0.6)" value="medium"/>
+              <multiplyQty effect="AR(0.3), LU(0.3)" value="poor"/>
+            </modifier>
+            <modifier decision="adherence">
+              <selectTimeRange effect="AR(0-61),LU(0-61)" value="full"/>
+              <selectTimeRange effect="AR(1-61),LU(1-61)" value="missFirstDose"/>
+              <selectTimeRange effect="AR(0-47),LU(0-47)" value="missLastDay"/>
+            </modifier>
+            <modifier decision="age_AL">
+              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
+              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
+            </modifier>
+          </treatment>
+        </treatments>
+      </uncomplicated>
+      <complicated>
+        <decisions>
+          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
+            age(0-3): 0_3
+            age(3-9): 3_9
+            age(9-15): 9_15
+            age(15-inf): 15_inf
+          </decision>
+          <decision depends="age" name="age_AS" values="0_1, 1_4, 4_6, 6_9, 9_12, 12_15, 15_17, 17_inf">
+            age(0-1): 0_1
+            age(1-4): 1_4
+            age(4-6): 4_6
+            age(6-9): 6_9
+            age(9-12): 9_12
+            age(12-15): 12_15
+            age(15-17): 15_17
+            age(17-inf): 17_inf
+          </decision>
+          <decision depends="p" name="initial_provider" values="hospital, lower_level, none">
+             p(0.48): hospital
+             p(0): lower_level
+             p(0.52): none
+        </decision>
+          <decision depends="initial_provider,p" name="test" values="none,RDT,microscopy">
+             initial_provider(hospital){
+              p(0): none
+              p(0.75): RDT
+              p(0.25): microscopy
+              }
+             initial_provider(lower_level){
+              p(0.5): none
+              p(0.5): RDT
+              p(0): microscopy
+              }
+             initial_provider(none){
+              none
+              }
+        </decision>
+          <decision depends="initial_provider, p" name="referral" values="immediate, delayed, none">
+             initial_provider(hospital){
+              none
+              }
+              initial_provider(lower_level){
+              p(0.5): immediate
+              p(0.3): delayed
+              p(0.2): none
+              }
+              initial_provider(none){
+              none
+              }
+        </decision>
+          <decision depends="initial_provider, referral" name="hospitalisation" values="none, delayed, immediate">
+             initial_provider(hospital){
+              immediate
+              }
+              initial_provider(lower_level){
+                referral(none): none
+                referral(immediate): immediate
+                referral(delayed): delayed
+              }
+              initial_provider(none){
+              none
+              }
+        </decision>
+          <decision depends="hospitalisation,test" name="treatment" values="AS_sev,none">
+            hospitalisation(immediate){
+             AS_sev
+            }
+            hospitalisation(delayed){
+             AS_sev
+            }
+            hospitalisation(none){
+            none
+            }
+          </decision>
+        </decisions>
+        <treatments>
+          <treatment name="none">
+            <schedule/>
+          </treatment>
+          <treatment name="AS_sev">
+            <schedule>
+              <medicate drug="AS" hour="0" mg="1"/>
+              <medicate drug="AS" hour="12" mg="1"/>
+              <medicate drug="AS" hour="24" mg="1"/>
+              <medicate drug="AS" hour="48" mg="1"/>
+              <medicate drug="AS" hour="72" mg="1"/>
+              <medicate drug="AR" hour="84" mg="20"/>
+              <medicate drug="LU" hour="84" mg="120"/>
+              <medicate drug="AR" hour="96" mg="20"/>
+              <medicate drug="LU" hour="96" mg="120"/>
+              <medicate drug="AR" hour="108" mg="20"/>
+              <medicate drug="LU" hour="108" mg="120"/>
+              <medicate drug="AR" hour="120" mg="20"/>
+              <medicate drug="LU" hour="120" mg="120"/>
+              <medicate drug="AR" hour="132" mg="20"/>
+              <medicate drug="LU" hour="132" mg="120"/>
+              <medicate drug="AR" hour="144" mg="20"/>
+              <medicate drug="LU" hour="144" mg="120"/>
+            </schedule>
+            <modifier decision="age_AL">
+              <multiplyQty effect="AR(1.0), LU(1.0), AS(1)" value="0_3"/>
+              <multiplyQty effect="AR(2.0), LU(2.0), AS(1)" value="3_9"/>
+              <multiplyQty effect="AR(3.0), LU(3.0), AS(1)" value="9_15"/>
+              <multiplyQty effect="AR(4.0), LU(4.0), AS(1)" value="15_inf"/>
+            </modifier>
+            <modifier decision="age_AS">
+              <multiplyQty effect="AR(1), LU(1), AS(22)" value="0_1"/>
+              <multiplyQty effect="AR(1), LU(1), AS(29)" value="1_4"/>
+              <multiplyQty effect="AR(1), LU(1), AS(43)" value="4_6"/>
+              <multiplyQty effect="AR(1), LU(1), AS(50)" value="6_9"/>
+              <multiplyQty effect="AR(1), LU(1), AS(72)" value="9_12"/>
+              <multiplyQty effect="AR(1), LU(1), AS(101)" value="12_15"/>
+              <multiplyQty effect="AR(1), LU(1), AS(130)" value="15_17"/>
+              <multiplyQty effect="AR(1), LU(1), AS(144)" value="17_inf"/>
+            </modifier>
+            <modifier decision="hospitalisation">
+              <delay effect="AR(0),LU(0),AS(0)" value="none"/>
+              <delay effect="AR(0),LU(0),AS(0)" value="immediate"/>
+              <delay effect="AR(24),LU(24),AS(24)" value="delayed"/>
+            </modifier>
+          </treatment>
+        </treatments>
+      </complicated>
+      <ClinicalOutcomes>
+        <maxUCSeekingMemory>3</maxUCSeekingMemory>
+        <uncomplicatedCaseDuration>3</uncomplicatedCaseDuration>
+        <complicatedCaseDuration>6</complicatedCaseDuration>
+        <complicatedRiskDuration>6</complicatedRiskDuration>
+        <dailyPrImmUCTS>1.0</dailyPrImmUCTS>
+        <dailyPrImmUCTS>0</dailyPrImmUCTS>
+        <dailyPrImmUCTS>0</dailyPrImmUCTS>
+      </ClinicalOutcomes>
+    </EventScheduler>
+    <CFR>
+      <group lowerbound="0" value="0.09189"/>
+      <group lowerbound="0.25" value="0.0810811"/>
+      <group lowerbound="0.75" value="0.0648649"/>
+      <group lowerbound="1.5" value="0.0689189"/>
+      <group lowerbound="2.5" value="0.0675676"/>
+      <group lowerbound="3.5" value="0.0297297"/>
+      <group lowerbound="4.5" value="0.0459459"/>
+      <group lowerbound="7.5" value="0.0945946"/>
+      <group lowerbound="12.5" value="0.1243243"/>
+      <group lowerbound="15" value="0.1378378"/>
+    </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="dynamic" name="Namawala" scaledAnnualEIR="20">
+    <vector>
+      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+        <seasonality annualEIR="24.826144381650714" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="0.8968" b="2.678"/>
+            <coeffic a="-0.4551" b="2.599"/>
+          </fourierSeries>
+        </seasonality>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.313"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.623"/>
+          <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.939"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
+      </anopheles>
+      <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
+        <seasonality annualEIR="77.00628873180102" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="-4.546" b="2.252"/>
+            <coeffic a="-0.2198" b="-0.00743"/>
+          </fourierSeries>
+        </seasonality>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.616"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.611"/>
+          <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.98"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
+      </anopheles>
+      <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
+        <seasonality annualEIR="223.38512656454782" input="EIR">
+          <fourierSeries EIRRotateAngle="0">
+            <coeffic a="0.8968" b="2.678"/>
+            <coeffic a="-0.4551" b="2.599"/>
+          </fourierSeries>
+        </seasonality>
+        <mosq minInfectedThreshold="0.001">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.313"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.623"/>
+          <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="0.871"/>
+        </mosq>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <mosqProbBiting value="0.95"/>
+          <mosqProbFindRestSite value="0.95"/>
+          <mosqProbResting value="0.99"/>
+        </nonHumanHosts>
+      </anopheles>
+      <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
+    </vector>
+  </entomology>
+  <pharmacology>
+    <drug abbrev="AR">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>4</max_killing_rate>
+          <IC50>0.0023</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.000023</negligible_concentration>
+        <half_life>0.175</half_life>
+        <vol_dist>17.4</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="AS">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>4.6</max_killing_rate>
+          <IC50>0.0016</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.000016</negligible_concentration>
+        <half_life>0.042</half_life>
+        <vol_dist>2.75</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="DHQ">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>4.6</max_killing_rate>
+          <IC50>0.0009</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.000016</negligible_concentration>
+        <half_life>0.035</half_life>
+        <vol_dist>8</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="CQ">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.02</IC50>
+          <slope>1.6</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.00036</negligible_concentration>
+        <half_life>30.006</half_life>
+        <vol_dist>300</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="LU">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.100</IC50>
+          <slope>4</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.001</negligible_concentration>
+        <half_life>4.332</half_life>
+        <vol_dist>21</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="MQ">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.027</IC50>
+          <slope>5</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.005</negligible_concentration>
+        <half_life>13.078</half_life>
+        <vol_dist>20.8</vol_dist>
+      </PK>
+    </drug>
+    <drug abbrev="PQ">
+      <PD>
+        <allele name="sensitive">
+          <initial_frequency>1</initial_frequency>
+          <max_killing_rate>3.45</max_killing_rate>
+          <IC50>0.088</IC50>
+          <slope>6</slope>
+        </allele>
+      </PD>
+      <PK>
+        <negligible_concentration>0.005</negligible_concentration>
+        <half_life>23.105</half_life>
+        <vol_dist>150</vol_dist>
+      </PK>
+    </drug>
+  </pharmacology>
+  <model>
+    <ModelOptions>
+      <option name="MAX_DENS_CORRECTION" value="true"/>
+      <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
+      <option name="INCLUDES_PK_PD" value="true"/>
+      <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="14"/>
+    <!-- run id=740 parameterization id=243641 sampling date=2010-08-21 11:14:03 lossfunction=82.879291 -->
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+      </availabilityToMosquitoes>
+      <weight multStdDev="0.14">
+        <group lowerbound="0.0" value="13.9856718"/>
+        <group lowerbound="1.0" value="18.30372108"/>
+        <group lowerbound="2.0" value="21.745749"/>
+        <group lowerbound="3.0" value="24.25753512"/>
+        <group lowerbound="4.0" value="26.06595444"/>
+        <group lowerbound="5.0" value="28.48868784"/>
+        <group lowerbound="6.0" value="30.84202788"/>
+        <group lowerbound="7.0" value="33.48638244"/>
+        <group lowerbound="8.0" value="35.20335432"/>
+        <group lowerbound="9.0" value="37.19394024"/>
+        <group lowerbound="10.0" value="40.1368962"/>
+        <group lowerbound="11.0" value="42.00539916"/>
+        <group lowerbound="12.0" value="44.53731348"/>
+        <group lowerbound="13.0" value="46.77769728"/>
+        <group lowerbound="14.0" value="49.48396092"/>
+        <group lowerbound="15.0" value="54.36"/>
+        <group lowerbound="20.0" value="60.0"/>
+        <group lowerbound="20.0" value="60.0"/>
+      </weight>
+    </human>
+    <parameters interval="1" iseed="1" latentp="15">
+      <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
+      <parameter include="0" name="Estar" number="2" value="0.03247"/>
+      <parameter include="1" name="Simm" number="3" value="0.267285"/>
+      <parameter include="1" name="Xstar_p" number="4" value="759.314477"/>
+      <parameter include="1" name="gamma_p" number="5" value="1.708485"/>
+      <parameter include="0" name="sigma2i" number="6" value="0.0"/>
+      <parameter include="1" name="CumulativeYstar" number="7" value="54813976.2486"/>
+      <parameter include="1" name="CumulativeHstar" number="8" value="1699.033941"/>
+      <parameter include="1" name="'-ln(1-alpha_m)'" number="9" value="2.222015"/>
+      <parameter include="1" name="decay_m" number="10" value="2.240491"/>
+      <parameter include="1" name="sigma2_0" number="11" value="0.615029"/>
+      <parameter include="1" name="Xstar_v" number="12" value="0.938506"/>
+      <parameter include="1" name="Ystar2" number="13" value="5329.731586"/>
+      <parameter include="1" name="alpha" number="14" value="142601.91252"/>
+      <parameter include="1" name="Density bias (non Garki)" number="15" value="0.256318"/>
+      <parameter include="0" name="No Use 1" number="16" value="1.0"/>
+      <parameter include="1" name="log oddsr CF community" number="17" value="1.581369"/>
+      <parameter include="1" name="Indirect risk cofactor" number="18" value="0.01767"/>
+      <parameter include="1" name="Non-malaria infant mortality" number="19" value="51.904524"/>
+      <parameter include="1" name="Density bias (Garki)" number="20" value="3.826913"/>
+      <parameter include="1" name="Severe Malaria Threshhold" number="21" value="112390457.143"/>
+      <parameter include="0" name="Immunity Penalty" number="22" value="1.0"/>
+      <parameter include="0" name="Immune effector decay" number="23" value="0.0"/>
+      <parameter include="1" name="comorbidity intercept" number="24" value="0.00425"/>
+      <parameter include="1" name="Ystar half life" number="25" value="0.342198"/>
+      <parameter include="1" name="Ystar1" number="26" value="0.521995"/>
+      <parameter include="0" name="Asex immune decay" number="27" value="0.0"/>
+      <parameter include="1" name="Ystar0" number="28" value="546.452498"/>
+      <parameter include="1" name="Idete multiplier" number="29" value="3.209994"/>
+      <parameter include="1" name="critical age for comorbidity" number="30" value="0.005745"/>
+      <parameter include="1" name="v in 'Case Fatality Rate proposal'" number="33" value="0.0"/>
+      <parameter include="1" name="Molineaux first local max density mean" number="34" value="4.671987"/>
+      <parameter include="1" name="Molineaux first local max density sd" number="35" value="0.059724"/>
+      <parameter include="1" name="Diff positive days mean" number="36" value="2.013458"/>
+      <parameter include="1" name="Diff positive days sd" number="37" value="0.179451"/>
+      <parameter include="1" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.937431"/>
+    </parameters>
+  </model>
+</scenario>

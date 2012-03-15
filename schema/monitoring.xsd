@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:include schemaLocation="util.xsd"/>
+  <xs:complexType name="monitoring">
+    <xs:sequence>
+      <xs:element name="continuous" minOccurs="0">
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="OptionSet">
+              <xs:attribute name="period" type="xs:int" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Number of timesteps between reports.
+                  </xs:documentation>
+                  <xs:appinfo>
+                    units:Days;min:1;max:unbounded;name:Days between reports;
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="duringInit" type="xs:boolean" use="optional">
+                <xs:annotation>
+                  <xs:documentation>
+                    Also output during initialization. By default this is
+                    disabled (only intervention-period data is output). This
+                    should not be used for predictions, but can be useful for
+                    model validation.
+                    
+                    In this mode, 'simulation time' is output as the first
+                    column (in addition to 'timestep'), since 'timestep' is dis-
+                    continuous across the start of the intervention period.
+                  </xs:documentation>
+                  <xs:appinfo>
+                    units:Days;min:1;max:unbounded;name:During initialization;
+                  </xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="SurveyOptions" type="OptionSet">
+        <xs:annotation>
+          <xs:documentation>
+            List of all active survey options. See include/Survey.h for a list of
+            supported outputs. Should also be on the wiki.
+          </xs:documentation>
+          <xs:appinfo>name:Name of quantity;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="surveys">
+        <xs:annotation>
+          <xs:documentation>
+            List of survey times
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Survey times (time steps);</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="surveyTime" type="xs:int" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  Survey time; 0 means just before start of main sim and is a valid survey-point.
+                  Reported data is either from a point-time survey (immediate data) or is collected over the previous year (data from previous timesteps-per-year period).
+                  Simulation will end immediately after last survey is taken.
+                </xs:documentation>
+                <xs:appinfo>units:Number;min:0;name:Survey time;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="detectionLimit" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Limit above which a human's infection is reported as patent.
+              </xs:documentation>
+              <xs:appinfo>
+                units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;
+              </xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ageGroup" type="ageGroup">
+        <xs:annotation>
+          <xs:documentation>
+            List of age groups included in demography or surveys
+          </xs:documentation>
+          <xs:appinfo>units:List of elements;name:Age groups;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of monitoring data
+        </xs:documentation>
+        <xs:appinfo>units:string;name:Name of monitoring information;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="cohortOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, for many output measures, the output comes only from individuals
+          in the cohort; otherwise output is from the entire population.
+          
+          Does not need to be specified if no cohort-selecting "interventions"
+          are present.
+        </xs:documentation>
+        <xs:appinfo>name:Survey only cohort;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstBoutOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort at the start of the first episode
+          (start of a clinical bout) since they were recruited into the cohort.
+          This is intended for cohort studies that intend to measure time to
+          first episode, using active case detection.
+        </xs:documentation>
+        <xs:appinfo>name:Time to first episode only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstTreatmentOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort when they first seek
+          treatment since they were recruited into the cohort. This is intended
+          for cohort studies that intend to measure time to first episode,
+          using passive case detection.
+        </xs:documentation>
+        <xs:appinfo>name:Time to first treatment only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="firstInfectionOnly" type="xs:boolean" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If true, remove individuals from the cohort at completion of the first
+          survey in which they present with a patent infection since they were
+          recruited into the cohort. This intended for cohort studies that
+          intend to measure time to first infection, using active case detection.
+        </xs:documentation>
+        <xs:appinfo>name:Time to first infection only;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ageGroup">
+    <xs:annotation>
+      <xs:documentation>
+        List of age groups included in surveys
+      </xs:documentation>
+      <xs:appinfo>units:List of elements;name:list of age groups;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="group" type="groupBounds" />
+    </xs:sequence>
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Lower bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="groupBounds">
+    <xs:attribute name="upperbound" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Upper bound of age group
+        </xs:documentation>
+        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+</xs:schema>
