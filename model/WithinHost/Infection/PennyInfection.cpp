@@ -104,8 +104,8 @@ const double lambda_V=4.2119;
 const double prob_lambda_V = 1.0 / lambda_V;
 
 /* distribution model paramters */
-bool PennyInfection::immune_threshold_gamma;
-bool PennyInfection::update_density_gamma;
+bool PennyInfection::immune_threshold_gamma = false;
+bool PennyInfection::update_density_gamma = false;
 
 /* Parameters to assign infection dependent parameters */
 const double mu_Y=3.9700;
@@ -262,10 +262,10 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
         if (cirDensity_new < Omega) {
             cirDensity_new = 0.0;
         } else {
-	    const double a_cirDens = pow(log(cirDensity_new),2)/pow(sigma_epsilon,2);
-	    const double b_cirDens = pow(sigma_epsilon,2)/log(cirDensity_new);
 	    
 	    if( update_density_gamma ) {
+	      	double a_cirDens = pow(log(cirDensity_new),2)/pow(sigma_epsilon,2);
+		double b_cirDens = pow(sigma_epsilon,2)/log(cirDensity_new);
 		cirDensity_new = exp(random::gamma(a_cirDens,b_cirDens) ) * survivalFactor;
 	    } else {
 		cirDensity_new = exp(random::gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;
