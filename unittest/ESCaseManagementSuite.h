@@ -53,10 +53,10 @@ public:
 	xsd::cxx::tree::sequence<scnXml::HSESDecision, false> decisionSeq;
 	decisionSeq.push_back(
 	    scnXml::HSESDecision(
-		"treatment1",	// tree
+		"treatment_1",	// tree
 		"treatment",	// decision
 		"",	// depends
-		"treatment1"	// values
+		"treatment_1"	// values
 	    )
 	);
 	decisionSeq.push_back(
@@ -150,11 +150,11 @@ public:
 	modifierSeq.push_back( modSTR );
 	
 	// Treatment
-	scnXml::HSESTreatment treatment1( treatSched, "treatment1" );
-	treatment1.setModifier( modifierSeq );
+	scnXml::HSESTreatment treatment_1( treatSched, "treatment_1" );
+	treatment_1.setModifier( modifierSeq );
 	
 	scnXml::HSESTreatments treatments;
-	xsd::cxx::tree::sequence<scnXml::HSESTreatment, false> treatmentSeq( 1, treatment1 );
+	xsd::cxx::tree::sequence<scnXml::HSESTreatment, false> treatmentSeq( 1, treatment_1 );
 	treatments.setTreatment( treatmentSeq );
 	
 	// Final CaseManagement element
@@ -168,13 +168,13 @@ public:
     
     void testTreatments() {
 	// When we give all decisions, we should get the expected medications:
-	ESDecisionValue treatment1 = dMap.dvMap.get( "treatment", "treatment1" );	// has 3 treatments; A at time 0 and B at times 0,12
-	treatment1 |= dMap.dvMap.get( "modQty", "poor" );	// reduce quantities
-	treatment1 |= dMap.dvMap.get( "modD1", "5" );	// delay by 5 hours
-	treatment1 |= dMap.dvMap.get( "modD2", "B2" );	// delay B by 2 hours
-	treatment1 |= dMap.dvMap.get( "modSTR", "selective" );	// A-0 and B-12 should be kept (B-0 shouldn't, since delays should be added after selection)
+	ESDecisionValue treatment_1 = dMap.dvMap.get( "treatment", "treatment_1" );	// has 3 treatments; A at time 0 and B at times 0,12
+	treatment_1 |= dMap.dvMap.get( "modQty", "poor" );	// reduce quantities
+	treatment_1 |= dMap.dvMap.get( "modD1", "5" );	// delay by 5 hours
+	treatment_1 |= dMap.dvMap.get( "modD2", "B2" );	// delay B by 2 hours
+	treatment_1 |= dMap.dvMap.get( "modSTR", "selective" );	// A-0 and B-12 should be kept (B-0 shouldn't, since delays should be added after selection)
 	
-	const ESTreatmentSchedule& sched = dMap.getSchedule( treatment1 );
+	const ESTreatmentSchedule& sched = dMap.getSchedule( treatment_1 );
 	
 	list<MedicateData> medQueue;
 	sched.apply( medQueue );
