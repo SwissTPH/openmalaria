@@ -32,7 +32,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                         Name of this species of non human hosts (must match up
                         with those described per anopheles section).
                       </xs:documentation>
-                      <xs:appinfo>name:Species of alternative host;</xs:appinfo>
+                      <xs:appinfo>units:string;name:Species of alternative host;</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                   <xs:attribute name="number" type="xs:double" use="required">
@@ -40,6 +40,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:documentation>
                         Population size of this non-human host.
                       </xs:documentation>
+                      <xs:appinfo>units:Number;name:Population size of alternative host;</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                 </xs:complexType>
