@@ -20,7 +20,7 @@ def normalizeNewlines(string):
     return re.sub(r'(\r\n|\r|\n)', ' ', string)
 
 def formatElement(el,path):
-    if (el.find("{http://www.w3.org/2001/XMLSchema}annotation")):
+    if (el.find("{http://www.w3.org/2001/XMLSchema}annotation") is not None):
         splitPath=string.split(path,'/')
         #set default component to "scenario", i.e. write to the "Scenario" worksheet below
         component="scenario"
@@ -34,7 +34,11 @@ def formatElement(el,path):
         row=worksheets[component][1]
         sheet.write(row,0,string.lstrip(printPath,"/"))
         annotation=el.find("{http://www.w3.org/2001/XMLSchema}annotation")
-        docu=annotation.find("{http://www.w3.org/2001/XMLSchema}documentation").text
+        docuElem=annotation.find("{http://www.w3.org/2001/XMLSchema}documentation")
+        if (docuElem is not None):
+            docu=docuElem.text
+        else:
+            docu="TODO"
         content=string.strip(docu)
         sheet.write(row,1,normalizeNewlines(content),docu_xf)
         appInfo=string.strip(el.find("{http://www.w3.org/2001/XMLSchema}annotation").find("{http://www.w3.org/2001/XMLSchema}appinfo").text)
@@ -88,11 +92,11 @@ def main():
     initWorksheets("monitoring", "Monitoring")
     initWorksheets("interventions", "Interventions")
     initWorksheets("healthSystem", "HealthSystem")
-    initWorksheets("entoData", "EntoData")
-    initWorksheets("drugDescription", "DrugDescription")
+    initWorksheets("entomology", "Entomology")
+    initWorksheets("pharmacology", "Pharmacology")
     initWorksheets("model", "Model")
     tree = ElementTree()
-    tree.parse("../schema/scenario.xsd")
+    tree.parse("../schema/scenario_30.xsd")
     #we know that the first element in the schema defines scenario
     scenarioElement=tree.find("{http://www.w3.org/2001/XMLSchema}element")
     drillDown(scenarioElement,"",False)
