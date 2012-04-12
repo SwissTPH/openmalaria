@@ -252,7 +252,7 @@ double FixedEmergence::getLastN_v0 () const{
         size_t dYear1 = (firstDay + i - 1) % TimeStep::fromYears(1).inDays();
         timestep_N_v0 += mosqEmergeRate[dYear1];
     }
-    return timestep_N_v0;
+    return timestep_N_v0 / TimeStep::interval;
 }
 
 }

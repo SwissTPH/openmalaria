@@ -46,31 +46,31 @@ double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int 
 
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
+        stream << '\t' << species[i].getLastN_v0();
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PA)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PA);
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PDF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PDF);
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF);
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::NV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::NV);
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::OV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::OV);
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::SV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::SV);
 }
 void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
@@ -315,10 +315,11 @@ TimeStep VectorModel::initIterate () {
     
     // Time to let parameters settle after each iteration. I would expect one year
     // to be enough (but I may be wrong).
-    if( needIterate ){
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);  // stabilization + 5 years data-collection time
-    }
-    return TimeStep::fromYears( 1 );
+    if( needIterate )
+        // stabilization + 5 years data-collection time:
+        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+    else
+        return TimeStep::fromYears( 1 );
 }
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {

@@ -207,13 +207,13 @@ double Transmission::getLastVecStat ( VecStat vs ) const{
         size_t t = (i + firstDay) % N_v_length;
         val += (*array)[t];
     }
-    return val;
+    return val / TimeStep::interval;
 }
 void Transmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
-    survey.set_Vector_Nv0 (speciesName, emergence.getLastN_v0()/TimeStep::interval);
-    survey.set_Vector_Nv (speciesName, getLastVecStat(NV)/TimeStep::interval);
-    survey.set_Vector_Ov (speciesName, getLastVecStat(OV)/TimeStep::interval);
-    survey.set_Vector_Sv (speciesName, getLastVecStat(SV)/TimeStep::interval);
+    survey.set_Vector_Nv0 (speciesName, emergence.getLastN_v0());
+    survey.set_Vector_Nv (speciesName, getLastVecStat(NV));
+    survey.set_Vector_Ov (speciesName, getLastVecStat(OV));
+    survey.set_Vector_Sv (speciesName, getLastVecStat(SV));
 }
 
 }

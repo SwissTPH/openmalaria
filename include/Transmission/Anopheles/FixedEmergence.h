@@ -104,7 +104,7 @@ public:
     /// Start a larviciding intervention.
     void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
     
-    /// Get total emergence during last time-step
+    /// Get mean emergence during last time-step
     double getLastN_v0 () const;
     //@}
     
