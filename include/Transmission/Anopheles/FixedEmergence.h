@@ -104,8 +104,6 @@ public:
     /// Start a larviciding intervention.
     void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
     
-    /// Get mean emergence during last time-step
-    double getLastN_v0 () const;
     //@}
     
     /// Checkpointing
@@ -120,6 +118,7 @@ public:
         quinquennialS_v & stream;
         initNv0FromSv & stream;
         initNvFromSv & stream;
+        initOvFromSv & stream;
         larvicidingEndStep & stream;
         larvicidingIneffectiveness & stream;
     }
@@ -166,20 +165,24 @@ private:
      *
      * Units: inoculations. */
     vector<double> quinquennialS_v;
-
+    
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
+     *TODO: no longer true:
      * Also has another temporary use between initialise and setupNv0 calls:
      * "initOvFromSv" or  (ρ_O / ρ_S).
      *
      * Should be checkpointed. */
     double initNv0FromSv;       ///< ditto
-
+    
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
-    //@}
     
+    /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
+     * Should be checkpointed. */
+    double initOvFromSv;
+    //@}
     
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
      * 

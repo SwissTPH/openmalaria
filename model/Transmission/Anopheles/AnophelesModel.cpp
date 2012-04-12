@@ -226,7 +226,7 @@ void AnophelesModel::init2 (size_t sIndex,
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
-    double tsP_df = 0.0;
+    initialP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
@@ -234,21 +234,21 @@ void AnophelesModel::init2 (size_t sIndex,
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
-        tsP_df += prod * host.probMosqResting(humanBase, sIndex);
+        initialP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
-        tsP_df += nhh->probCompleteCycle;
+        initialP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
 
     // Probability of a mosquito not finding a host this day:
-    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
+    initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+    double P_Ai_base = (1.0 - initialP_A) / leaveSeekingStateRate;
     sumPFindBite *= P_Ai_base;
-    tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
+    initialP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
     
     
     // -----  Calculate required S_v based on desired EIR  -----
@@ -256,7 +256,7 @@ void AnophelesModel::init2 (size_t sIndex,
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence.init2( tsP_A, tsP_df, populationSize * meanPopAvail / sumPFindBite, transmission );
+    transmission.emergence.init2( initialP_A, initialP_df, populationSize * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }
@@ -334,16 +334,20 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
     tsP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
     
     
-    // Summed per day:
-    partialEIR = 0.0;
-    
-    // The code within the for loop needs to run per-day, wheras the main
-    // simulation uses TimeStep::interval day (currently 5 day) time steps.
-    // The transmission for time-step t depends on the state during days
-    // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
+    if( true ){//TODO: may use this condition soon...
+        // Summed per day:
+        partialEIR = 0.0;
+        
+        transmission.resetTSStats();
+        
+        // The code within the for loop needs to run per-day, wheras the main
+        // simulation uses TimeStep::interval day (currently 5 day) time steps.
+        // The transmission for time-step t depends on the state during days
+        // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
+        int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+        for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+            partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
+        }
     }
 }
 

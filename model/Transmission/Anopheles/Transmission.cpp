@@ -38,8 +38,10 @@ void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     
     mosqRestDuration = mosq.getMosqRestDuration().getValue();
     EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
-    if (1 > mosqRestDuration || mosqRestDuration > EIPDuration) {
-        throw util::xml_scenario_error ("Code expects EIPDuration >= mosqRestDuration >= 1");
+    if (1 > mosqRestDuration || mosqRestDuration*2 >= EIPDuration) {
+        //TODO: limit was EIPDuration >= mosqRestDuration >= 1
+        // but in usage of ftauArray this wasn't enough. Check why.
+        throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
     }
     N_v_length = EIPDuration + mosqRestDuration;
     
@@ -76,11 +78,12 @@ void Transmission::initState ( double tsP_A, double tsP_df,
     P_dif.resize (N_v_length);
     
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
+    assert( N_v_length <= static_cast<int>(forcedS_v.size()) );
     for (int t = 0; t < N_v_length; ++t) {
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        S_v[t] = forcedS_v[t];  // assume N_v_length ≤ 365
+        S_v[t] = forcedS_v[t];
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
     }
@@ -106,9 +109,15 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     P_dif[t] = tsP_dif;
     
     
-    N_v[t] = emergence.get( dYear1 )
+    double newAdults = emergence.get( dYear1 );
+    
+    // num seeking mosquitos is: new adults + those which didn't find a host
+    // yesterday + those who found a host tau days ago and survived cycle:
+    N_v[t] = newAdults
                 + P_A[t1]  * N_v[t1]
                 + P_df[ttau] * N_v[ttau];
+    // similar for O_v, except new mosquitoes are those who were uninfected
+    // tau days ago, started a feeding cycle then, survived and got infected:
     O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
                 + P_A[t1]  * O_v[t1]
                 + P_df[ttau] * O_v[ttau];
@@ -176,6 +185,18 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     
     emergence.updateS_v( d, S_v[t] );
     
+    timestep_N_v0 += newAdults;
+    
+    if( printDebug ){
+        cerr<<"day "<<d<<":\temergence "<<newAdults<<",\tN_v "<<N_v[t]<<",\tS_v "<<S_v[t]<<endl;
+        //cerr << "len: "<<N_v_length<<"\tdMod: "<<dMod<<"\tt: "<<t<<" "<<t1<<" "<<ttau<<"\tdYear1: "<<dYear1<<endl;
+/*        cerr<<"P_A\t"<<P_A[t]<<"\t"<<P_A[t1]<<"\t"<<P_A[ttau]<<endl;
+        cerr<<"P_df\t"<<P_df[t]<<"\t"<<P_df[t1]<<"\t"<<P_df[ttau]<<endl;
+        cerr<<"P_dif\t"<<P_dif[t]<<"\t"<<P_dif[t1]<<"\t"<<P_dif[ttau]<<endl;*/
+        cerr<<ftauArray<<endl;
+        cerr<<fArray<<endl;
+    }
+    
     return S_v[t];
 }
 
@@ -210,7 +231,7 @@ double Transmission::getLastVecStat ( VecStat vs ) const{
     return val / TimeStep::interval;
 }
 void Transmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
-    survey.set_Vector_Nv0 (speciesName, emergence.getLastN_v0());
+    survey.set_Vector_Nv0 (speciesName, getLastN_v0());
     survey.set_Vector_Nv (speciesName, getLastVecStat(NV));
     survey.set_Vector_Ov (speciesName, getLastVecStat(OV));
     survey.set_Vector_Sv (speciesName, getLastVecStat(SV));
