@@ -2950,7 +2950,7 @@
           <xs:documentation>
                   Specifies how long the larviciding is effective
                 </xs:documentation>
-          <xs:appinfo>;units:time-steps;name:Duration;</xs:appinfo>
+          <xs:appinfo>units:time-steps;name:Duration;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="effectiveness" type="inputValue">
