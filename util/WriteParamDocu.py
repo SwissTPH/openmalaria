@@ -41,7 +41,11 @@ def formatElement(el,path):
             docu="TODO"
         content=string.strip(docu)
         sheet.write(row,1,normalizeNewlines(content),docu_xf)
-        appInfo=string.strip(el.find("{http://www.w3.org/2001/XMLSchema}annotation").find("{http://www.w3.org/2001/XMLSchema}appinfo").text)
+        appInfoElem=el.find("{http://www.w3.org/2001/XMLSchema}annotation").find("{http://www.w3.org/2001/XMLSchema}appinfo")
+        if (appInfoElem is not None):
+            appInfo=string.strip(appInfoElem.text)
+        else:
+            appInfo="name:TODO"
         appInfoList=string.split(appInfo,";")[0:-1]
         for keyValue in appInfoList:
             splitPair=string.split(keyValue,":")
