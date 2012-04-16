@@ -11,7 +11,7 @@ from xml.etree.ElementTree import ElementTree
 import string
 import re
 
-appinfoOrder=['name','units','min','max','exposed','sweepable']
+appinfoOrder=['name','units','type','min','max','exposed','sweepable']
 docu_xf = easyxf('align: wrap on, vert centre')
 worksheets = {}
 
@@ -75,18 +75,20 @@ def initWorksheets(elementName,sheetName):
     sheet.col(1).width =15000
     sheet.col(2).width =6500
     sheet.col(3).width =4300
-    sheet.col(4).width =4500
-    sheet.col(5).width =4800
-    sheet.col(6).width =6000
-    sheet.col(7).width =5500
+    sheet.col(4).width =4300
+    sheet.col(5).width =4500
+    sheet.col(6).width =4800
+    sheet.col(7).width =6000
+    sheet.col(8).width =5500
     sheet.write(0,0,"Parameter name and path (in XML document)")
     sheet.write(0,1,"Parameter documentation       ")
     sheet.write(0,2,"Parameter name (in GUI)")
     sheet.write(0,3,"Parameter units")
-    sheet.write(0,4,"Parameter min value")
-    sheet.write(0,5,"Parameter max value")
-    sheet.write(0,6,"Parameter exposed in GUI")
-    sheet.write(0,7,"Parameter is sweepable")
+    sheet.write(0,4,"Parameter type")
+    sheet.write(0,5,"Parameter min value")
+    sheet.write(0,6,"Parameter max value")
+    sheet.write(0,7,"Parameter exposed in GUI")
+    sheet.write(0,8,"Parameter is sweepable")
     
 def main():
     global tree,book
