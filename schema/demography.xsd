@@ -9,9 +9,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="ageGroup" type="ageGroupPerC">
         <xs:annotation>
           <xs:documentation>
-            List of age groups included in demography
+            list of age groups included in demography
           </xs:documentation>
-          <xs:appinfo>type:List of Elements;name:Age groups;</xs:appinfo>
+          <xs:appinfo>type:list of Elements;name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -32,7 +32,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Maximum age of simulated humans in years.
+          Maximum age of simulated humans in years
         </xs:documentation>
         <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
       </xs:annotation>
@@ -51,9 +51,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="ageGroupPerC">
     <xs:annotation>
       <xs:documentation>
-        List of age groups included in demography or surveys
+        list of age groups included in demography or surveys
       </xs:documentation>
-      <xs:appinfo>type:List of elements;name:List of age groups;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC" />
