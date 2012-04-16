@@ -11,7 +11,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             List of age groups included in demography
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Age groups;</xs:appinfo>
+          <xs:appinfo>type:List of Elements;name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -20,13 +20,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Name of demography data
         </xs:documentation>
-        <xs:appinfo>units:string;name:Name of demography data;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name of demography data;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="popSize" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Population size</xs:documentation>
-        <xs:appinfo>units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
+        <xs:appinfo>type:integer;units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
@@ -34,7 +34,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Maximum age of simulated humans in years.
         </xs:documentation>
-        <xs:appinfo>units:years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="growthRate" type="xs:double" use="optional">
@@ -43,7 +43,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Growth rate of human population.
             (we should be able to implement this with non-zero values)
         </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
+        <xs:appinfo>type:double;units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -53,7 +53,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>
         List of age groups included in demography or surveys
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:list of age groups;</xs:appinfo>
+      <xs:appinfo>type:List of elements;name:List of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC" />
@@ -63,7 +63,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Lower bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Lower bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -73,7 +73,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Percentage of human population in age group
         </xs:documentation>
-        <xs:appinfo>name:Percentage in age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Percentage;min:0;max:100;name:Percentage in age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="upperbound" type="xs:double" use="required">
@@ -81,7 +81,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Upper bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Upper bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
