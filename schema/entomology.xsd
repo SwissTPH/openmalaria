@@ -13,13 +13,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               Description of transmission setting for models without vector control interventions
               (included for backward compatibility)
             </xs:documentation>
-            <xs:appinfo>type:List of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="vector">
           <xs:annotation>
             <xs:documentation>Parameters of the transmission model</xs:documentation>
-            <xs:appinfo>type:List of elements;name:Transmission setting (vector control enabled);</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Transmission setting (vector control enabled);</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
@@ -126,14 +126,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>Description of input EIR for
        one specific vector species in terms of a Fourier approximation
        to the ln of the EIR during the burn in period</xs:documentation>
-      <xs:appinfo>type:List of elements;name:Description of input EIR for one vector;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Description of input EIR for one vector;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="seasonality">
         <xs:annotation>
           <xs:documentation>Specifies the seasonality of transmission
           and optionally the level of annual transmission.</xs:documentation>
-          <xs:appinfo>type:List of elements;name:Seasonality of transmission;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Seasonality of transmission;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -242,7 +242,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     
                     List should contain 365 entries: 1st January to 31st December.
                   </xs:documentation>
-                  <xs:appinfo>type:List of elements;name:List of daily values;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:List of daily values;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
                   <xs:sequence>
@@ -307,7 +307,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>Parameters describing the feeding cycle and human
           mosquito interaction of a single species of anopheles mosquito.
           </xs:documentation>
-          <xs:appinfo>type:List of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -393,7 +393,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Parameters describing the life-cycle of this species of mosquito
           </xs:documentation>
-          <xs:appinfo>type:List of elements;name:Mosquito life cycle parameters;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Mosquito life cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -413,7 +413,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:documentation>
                         Parameters for the larval stage of development
                       </xs:documentation>
-                      <xs:appinfo>type:List of elements;name:Larval stage;</xs:appinfo>
+                      <xs:appinfo>type:list of elements;name:Larval stage;</xs:appinfo>
                     </xs:annotation>
                     <xs:sequence>
                       <xs:element name="daily" maxOccurs="unbounded">
@@ -457,7 +457,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:documentation>
                   Parameters for the pupal stage of development
                 </xs:documentation>
-                <xs:appinfo>type:List of elements;name:Pupal stage;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Pupal stage;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
@@ -491,7 +491,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>Non human host parameters, per type of host (must
           match up with non-species-specific parameters).</xs:documentation>
-          <xs:appinfo>type:List of elements; min:0; name:Alternative (non-human) host paramters;</xs:appinfo>
+          <xs:appinfo>type:list of elements; min:0; name:Alternative (non-human) host paramters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -557,7 +557,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>
       Parameters associated with a mosquito development stage.
       </xs:documentation>
-      <xs:appinfo>type:List of elements; name:Mosquito development-stage parameters;</xs:appinfo>
+      <xs:appinfo>type:list of elements; name:Mosquito development-stage parameters;</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="duration" type="xs:int" use="required">
       <xs:annotation>
