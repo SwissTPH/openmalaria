@@ -30,17 +30,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Probability that a non-malaria fever occurs given that no concurrent
                   malaria fever occurs.
                 </xs:documentation>
-                <xs:appinfo>name:P(NMF); type:double;units:None;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(NMF); type:double;unit:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
-                  Probability that a non-malaria fever needs treatment with
+                  Probability that a non-malarial fever requires treatment with
                   antibiotics (assuming fever is not induced by malaria, although
                   concurrent parasites may be present).
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | NMF);type:double;units:None;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | NMF);type:double;unit:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentMF" type="AgeGroupValues">
@@ -53,7 +53,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Meaning partially overlaps with separate model for comorbidity
                   given malaria.
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | MF);type:double;units:None;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | MF);type:double;unit:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -94,7 +94,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Case fatality rate (probability of an inpatient fatality from a
             bout of severe malaria, per age-group).
           </xs:documentation>
-          <xs:appinfo>type: list of elements;name:Case fatality rate in inpatients;</xs:appinfo>
+          <xs:appinfo>type: list of elements;name:Case fatality rate for inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSequelaeInpatient" type="AgeGroupValues">
@@ -103,7 +103,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             List of age-specific probabilities of sequelae in inpatients,
             during a severe bout of malaria.
           </xs:documentation>
-          <xs:appinfo>type: list of elements;name:Probabilities of sequelae in inpatients;</xs:appinfo>
+          <xs:appinfo>type: list of elements;unit:Dimensionless;name:Probabilities of sequelae in inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -159,7 +159,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Initial cure rate
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Proportion;min:0;max:1;name:Initial cure rate;</xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="compliance" type="treatmentDetails">
@@ -167,7 +167,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Adherence to treatment
           </xs:documentation>
-          <xs:appinfo>type:double;units:Probability;min:0;max:1;name:Adherence to treatment;</xs:appinfo>
+          <xs:appinfo>type:double;units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="nonCompliersEffective" type="treatmentDetails">
@@ -176,7 +176,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Effectiveness of treatment for non-compliant patients
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Probability;min:0;max:1;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSeekOfficialCareUncomplicated1" type="inputValue">
@@ -186,7 +186,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Probability;min:0;max:1;name:Probability that a patient with uncomplicated disease seeks official care immediately.
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -197,7 +197,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             disease will self-treat
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Probability;min:0;max:1;name:Probability that a patient with uncomplicated disease will self-treat.
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -208,7 +208,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Probability;min:0;max:1;name:Probability that a recurring patient seeks official care;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -219,7 +219,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             obtains appropriate care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Probability;min:0;max:1;name:Probability that a patient with severe disease obtains appropriate care;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -512,10 +512,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             The "drugs" attribute is a comma-separated list of all active ingredients administered in
             the base schedule (each must be listed once) and the content of this element is a comma-
             separated list of multipliers for each active ingredient, listed in the same order as in
-            the "drugs" attribute. E.g. with drugs="A,B" and content "0.5,1" the quantity of drug A is
+            the "drugs" attribute. For example, with drugs="A,B" and content="0.5,1" the quantity of drug A is
             halved while that of B is unchanged.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient multipliers;</xs:appinfo>
+          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient multipliers;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="delay" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
@@ -529,7 +529,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
             in the base schedule while drug B is administered 6 hours later than specified.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient delays;</xs:appinfo>
+          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient delays;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="selectTimeRange" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
@@ -545,7 +545,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
             administered if <![CDATA[x <= t < y]]>.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
+          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:choice>
@@ -580,12 +580,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>
           Does this affect the cost? If false, the effective drug usage (w.r.t.
-          cost) is unaffected by this modifier; if true it is. Defaults to true
+          cost)is unaffected by this modifier; if true it is. Defaults to true
           (if omitted).
           
           Is meaningless for delays.
         </xs:documentation>
-        <xs:appinfo>type:boolean;units:None;name:Affects cost(TRUE/FALSE);</xs:appinfo>
+        <xs:appinfo>type:boolean;units:None;name:Affects cost?;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -652,7 +652,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             
             For no delay, use one element with a value of 1.
           </xs:documentation>
-          <xs:appinfo>type:double;name:Daily probability of immediate treatment seeking for uncomplicated cases;units:None;min:0;max:1</xs:appinfo>
+          <xs:appinfo>type:double;name:Daily probability of immediate treatment seeking for uncomplicated cases;units:Dimensionless;min:0.0;max:1.0</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -688,7 +688,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             given that no malaria diagnostic was used but independent of need.
             Symbol: P₀.
           </xs:documentation>
-          <xs:appinfo>name:P(treatment|no diagnostic);units:none;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>name:P(treatment|no diagnostic);units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="effectNegativeTest" type="xs:double">
@@ -735,7 +735,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             death from a fever requiring antibiotic treatment given that no
             antibiotic treatment is received, per age-group).
           </xs:documentation>
-          <xs:appinfo>name:Case fatality rate;units:None;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>name:Case fatality rate;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="TreatmentEfficacy" type="xs:double">
@@ -744,7 +744,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Probability that treatment would prevent a death (i.e. CFR is
             multiplied by one minus this when treatment occurs).
           </xs:documentation>
-          <xs:appinfo>type:double;units:Probability;name:Treatment efficacy;units:none;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>type:double;units:Dimensionless;name:Treatment efficacy;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
