@@ -22,10 +22,13 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/Anopheles/FixedEmergence.h"
+#include "Transmission/Anopheles/EmergenceModel.h"
 #include "schema/entomology.h"
 
 #include <limits>
+#include <boost/shared_ptr.hpp>
+
+using boost::shared_ptr;
 
 namespace OM {
 namespace Transmission {
@@ -47,13 +50,7 @@ class Transmission {
 public:
     ///@brief initialisation functions
     //@{
-    Transmission() :
-        mosqRestDuration(0),
-        EIPDuration(0),
-        N_v_length(0),
-        minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
-        timestep_N_v0(0.0)
-    {}
+    Transmission();
     
     /** Initialise parameters and variables.
      * 
@@ -114,7 +111,7 @@ public:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        emergence & stream;
+        (*emergence) & stream;
         mosqRestDuration & stream;
         EIPDuration & stream;
         N_v_length & stream;
@@ -129,10 +126,10 @@ public:
         timestep_N_v0 & stream;
     }
     
-    /** @brief emergence and some EIR parts of the model
+    /** @brief Emergence model
      * 
-     * Code to calculate required emergence is here. */
-    FixedEmergence emergence;
+     * Code to calculate emergence of mosquitoes from water bodies goes here. */
+    shared_ptr<EmergenceModel> emergence;
     
 private:
     // -----  parameters (constant after initialisation)  -----

@@ -85,7 +85,7 @@ public:
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
     inline void scaleEIR( double factor ){
-        transmission.emergence.scaleEIR( factor );
+        transmission.emergence->scaleEIR( factor );
     }
     
     /** Initialisation which must wait until a human population is available.
@@ -114,7 +114,7 @@ public:
      *
      * @returns true if another iteration is needed. */
     inline bool initIterate (){
-        return transmission.emergence.initIterate(transmission);
+        return transmission.emergence->initIterate(transmission);
     }
     //@}
 
@@ -176,7 +176,7 @@ public:
     ///@brief Functions called to deploy interventions
     //@{
     inline void intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
-        transmission.emergence.intervLarviciding( elt );
+        transmission.emergence->intervLarviciding( elt );
     }
 
     inline void uninfectVectors() {

@@ -52,7 +52,7 @@ string AnophelesModel::initialise (
     
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
-    transmission.emergence.initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
+    transmission.emergence->initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
     
     return anoph.getMosquito();
 }
@@ -256,7 +256,7 @@ void AnophelesModel::init2 (size_t sIndex,
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence.init2( initialP_A, initialP_df, populationSize * meanPopAvail / sumPFindBite, transmission );
+    transmission.emergence->init2( initialP_A, initialP_df, populationSize * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }
@@ -267,7 +267,7 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
                                      int populationSize,
                                      size_t sIndex,
                                      bool isDynamic) {
-    transmission.emergence.update();
+    transmission.emergence->update();
     
     /* Largely equations correspond to Nakul Chitnis's model in
       "A mathematic model for the dynamics of malaria in

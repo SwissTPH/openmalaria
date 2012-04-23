@@ -31,6 +31,7 @@ namespace scnXml {
 }
 
 namespace OM { namespace Transmission {
+    using Anopheles::AnophelesModel;
     
 /** Transmission models, Chitnis et al.
  * 
@@ -125,7 +126,7 @@ private:
    *
    * Array will be recreated by constructor, but some members of AnophelesModel
    * need to be checkpointed. */
-  vector<Anopheles::AnophelesModel> species;
+  vector<AnophelesModel> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *

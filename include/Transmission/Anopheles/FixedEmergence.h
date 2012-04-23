@@ -21,6 +21,7 @@
 #define Hmod_Anopheles_FixedEmergence
 
 #include "Global.h"
+#include "Transmission/Anopheles/EmergenceModel.h"
 #include "schema/interventions.h"
 #include <vector>
 
@@ -41,7 +42,7 @@ class Transmission;
  * Larviciding intervention directly scales the number of mosquitoes emerging
  * by a number, usually in the range [0,1] (but larger than 1 is also valid).
  */
-class FixedEmergence
+class FixedEmergence : public EmergenceModel
 {
 public:
     ///@brief Initialisation and destruction
@@ -87,17 +88,10 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    inline double get( size_t dYear1 ){
-        //TODO: replace emergence with new formula: rho_p * (num pupae one day from emerging)
-        // second two lines don't change
-        return mosqEmergeRate[dYear1] * larvicidingIneffectiveness;
-    }
+    double get( size_t dYear1 ) const;
     
     /// Store S_v for day d. Used by initIterate().
-    inline void updateS_v( size_t d, double S_v ){
-        size_t d5Year = d % TimeStep::fromYears(5).inDays();
-        quinquennialS_v[d5Year] = S_v;
-    }
+    void updateStats( size_t d, double S_v );
     
     ///@brief Interventions and reporting
     //@{
@@ -105,6 +99,12 @@ public:
     void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
     
     //@}
+    
+protected:
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
+private:
     
     /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
@@ -122,9 +122,7 @@ public:
         larvicidingEndStep & stream;
         larvicidingIneffectiveness & stream;
     }
-
-
-private:
+    
     // -----  parameters (constant after initialisation)  -----
     
     ///@brief Descriptions of transmission, used primarily during warmup
