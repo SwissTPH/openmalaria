@@ -142,7 +142,7 @@ void FixedEmergence::initEIR(
     // Set other data used for mosqEmergeRate calculation:
     FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
-    initNv0FromSv = initNvFromSv * anoph.getPropInfected();       // temporarily use of initNv0FromSv
+    initOvFromSv = initNvFromSv * anoph.getPropInfected();
     
     // -----  allocate memory  -----
     quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
@@ -160,7 +160,6 @@ void FixedEmergence::scaleEIR( double factor ) {
 void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
     
-    double initOvFromSv = initNv0FromSv;  // temporarily use of initNv0FromSv
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
 
     // We scale FSCoeffic to give us S_v instead of EIR.
@@ -243,16 +242,6 @@ void FixedEmergence::update () {
 void FixedEmergence::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
     larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
     larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
-}
-
-double FixedEmergence::getLastN_v0 () const{
-    double timestep_N_v0 = 0.0;
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t dYear1 = (firstDay + i - 1) % TimeStep::fromYears(1).inDays();
-        timestep_N_v0 += mosqEmergeRate[dYear1];
-    }
-    return timestep_N_v0 / TimeStep::interval;
 }
 
 }

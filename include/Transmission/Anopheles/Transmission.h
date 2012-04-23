@@ -51,7 +51,8 @@ public:
         mosqRestDuration(0),
         EIPDuration(0),
         N_v_length(0),
-        minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() )     // requires config
+        minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
+        timestep_N_v0(0.0)
     {}
     
     /** Initialise parameters and variables.
@@ -66,10 +67,6 @@ public:
                      double initNvFromSv, double initOvFromSv,
                      const vector<double>& forcedS_v );
     
-    inline int getEIPDuration() const {
-        return EIPDuration;
-    }
-        
     /// Helper function for initialisation.
     void initIterateScale ( double factor );
     //@}
@@ -88,7 +85,22 @@ public:
     ///@brief Interventions and reporting
     //@{
     void uninfectVectors();
+    //@}
     
+    inline int getEIPDuration() const {
+        return EIPDuration;
+    }
+    
+    ///@brief Functions used in reporting
+    //@{
+    /// Reset per-time-step statistics before running time-step updates
+    inline void resetTSStats() {
+        timestep_N_v0 = 0.0;
+    }
+    /// Get mean emergence per day during last time-step
+    inline double getLastN_v0 () const{
+        return timestep_N_v0 / TimeStep::interval;
+    }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs ) const;
@@ -114,6 +126,7 @@ public:
         S_v & stream;
         fArray & stream;
         ftauArray & stream;
+        timestep_N_v0 & stream;
     }
     
     /** @brief emergence and some EIR parts of the model
@@ -213,6 +226,9 @@ private:
     vector<double> fArray;
     vector<double> ftauArray;
     //@}
+    
+    /** Variables tracking data to be reported. */
+    double timestep_N_v0;
 };
 
 }

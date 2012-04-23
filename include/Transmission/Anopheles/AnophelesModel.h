@@ -26,8 +26,10 @@
 #include "Transmission/PerHost.h"
 #include "Transmission/Anopheles/Transmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
+
 #include <list>
 #include <vector>
+#include <limits>
 
 namespace OM {
 namespace Host {
@@ -60,9 +62,11 @@ public:
     //@{
     AnophelesModel (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
             humanBase(baseITNParams,baseIRSParams),
-            partialEIR(0.0)
+            partialEIR(0.0),
+            initialP_A(numeric_limits<double>::quiet_NaN()),
+            initialP_df(numeric_limits<double>::quiet_NaN())
     {}
-
+    
     /** Called to initialise variables instead of a constructor. At this point,
      * the size of the human population is known but that population has not
      * yet been constructed. Called whether data is loaded from a check-point
@@ -185,7 +189,7 @@ public:
     //@{
     /// Get mean emergence during last time-step
     inline double getLastN_v0 () const{
-        return transmission.emergence.getLastN_v0();
+        return transmission.getLastN_v0();
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
@@ -209,6 +213,8 @@ public:
         probMosqSurvivalOvipositing & stream;
         transmission & stream;
         partialEIR & stream;
+        initialP_A & stream;
+        initialP_df & stream;
     }
 
 
@@ -316,6 +322,12 @@ private:
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     double partialEIR;
+    
+    /** Values of P_A and P_df from initial population age structure. In theory
+     * these values are constant until interventions start to affect mosquitoes
+     * unless age structure varies due to low pop size or very high death
+     * rates. */
+    double initialP_A, initialP_df;
 };
 
 }
