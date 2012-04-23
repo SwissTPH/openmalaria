@@ -237,6 +237,20 @@ void FixedEmergence::update () {
     }
 }
 
+double FixedEmergence::get( size_t dYear1 ) const {
+    //TODO: replace emergence with new formula: rho_p * (num pupae one day from emerging)
+    // second two lines don't change
+    return mosqEmergeRate[dYear1] * larvicidingIneffectiveness;
+}
+
+void FixedEmergence::updateStats( size_t d, double S_v ){
+    size_t d5Year = d % TimeStep::fromYears(5).inDays();
+    quinquennialS_v[d5Year] = S_v;
+}
+
+void FixedEmergence::checkpoint (istream& stream){ (*this) & stream; }
+void FixedEmergence::checkpoint (ostream& stream){ (*this) & stream; }
+
 // -----  Summary and intervention functions  -----
 
 void FixedEmergence::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {

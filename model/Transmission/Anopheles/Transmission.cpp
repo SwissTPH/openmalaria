@@ -19,6 +19,7 @@
 
 //TODO: trim includes
 #include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/FixedEmergence.h"
 #include "schema/entomology.h"
 #include "util/vectors.h"
 #include "util/errors.h"
@@ -31,7 +32,24 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
+Transmission::Transmission() :
+        mosqRestDuration(0),
+        EIPDuration(0),
+        N_v_length(0),
+        minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
+        timestep_N_v0(0.0)
+{
+    // Warning: don't allocate memory here. The whole instance will be
+    // bit-copied (see species.resize ... line in VectorModel constructor), so
+    // each copy would point to the same object.
+}
+
+
 void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
+    // TODO: optionally other models
+    emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
+    
+    
     // -----  Set model variables  -----
 
     const scnXml::Mosq& mosq = anoph.getMosq();
@@ -109,7 +127,7 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     P_dif[t] = tsP_dif;
     
     
-    double newAdults = emergence.get( dYear1 );
+    double newAdults = emergence->get( dYear1 );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
     // yesterday + those who found a host tau days ago and survived cycle:
@@ -183,7 +201,7 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     }
     //END S_v
     
-    emergence.updateS_v( d, S_v[t] );
+    emergence->updateStats( d, S_v[t] );
     
     timestep_N_v0 += newAdults;
     
