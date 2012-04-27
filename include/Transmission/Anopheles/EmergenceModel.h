@@ -85,9 +85,16 @@ public:
     /** Return the emergence for today, taking interventions like larviciding
      * into account.
      * 
-     * @param dYear1 Index for day of year (between 0 and 364)
+     * @param d The current day (exact value isn't important; it must be
+     * non-negative and incremented by one between calls).
+     * @param dYear1 The day of the year of the last calculated time-point.
+     * @param nOvipositing The number of adults which successfully
+     * oviposited this/last time-step. TODO: we're setting new value based on
+     * num ovipositing yesterday? That's not right.
+     * @returns The number of adults emerging between the last simulated time
+     * point and the one being calculated.
      */
-    virtual double get( size_t dYear1 ) const =0;
+    virtual double get( size_t d, size_t dYear1, double nOvipositing ) =0;
     
     /** Called at the end of each day's update to give the model data it needs
      * during initialisation.

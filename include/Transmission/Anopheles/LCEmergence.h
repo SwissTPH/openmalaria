@@ -17,11 +17,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_Anopheles_FixedEmergence
-#define Hmod_Anopheles_FixedEmergence
+#ifndef Hmod_Anopheles_LCEmergence
+#define Hmod_Anopheles_LCEmergence
 
 #include "Global.h"
 #include "Transmission/Anopheles/EmergenceModel.h"
+//TODO: should LifeCycle be integrated here?
+#include "Transmission/Anopheles/LifeCycle.h"
 #include "schema/interventions.h"
 #include <vector>
 
@@ -42,12 +44,12 @@ class Transmission;
  * Larviciding intervention directly scales the number of mosquitoes emerging
  * by a number, usually in the range [0,1] (but larger than 1 is also valid).
  */
-class FixedEmergence : public EmergenceModel
+class LCEmergence : public EmergenceModel
 {
 public:
     ///@brief Initialisation and destruction
     //@{
-    FixedEmergence() :
+    LCEmergence() :
             larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0)
     {}
@@ -113,12 +115,13 @@ private:
         EIRRotateAngle & stream;
         FSRotateAngle & stream;
         FSCoeffic & stream;
-        mosqEmergeRate & stream;
         forcedS_v & stream;
-        quinquennialS_v & stream;
+        quinquennialP_dif & stream;
         initNv0FromSv & stream;
         initNvFromSv & stream;
         initOvFromSv & stream;
+        lcParams & stream;
+        lifeCycle & stream;
         larvicidingEndStep & stream;
         larvicidingIneffectiveness & stream;
     }
@@ -145,7 +148,7 @@ private:
      * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
      * FSCoeffic[0] needs checkpointing, the rest doesn't. */
     vector<double> FSCoeffic;
-
+    
     /** S_v used to force an EIR during vector init.
      * 
      * Has annual periodicity: length is 365. First value (index 0) corresponds
@@ -156,14 +159,15 @@ private:
      * Should be checkpointed. */
     vector<double> forcedS_v;
     
-    /** Summary of S_v over the last five years, used by vectorInitIterate to
-     * calculate scaling factor.
+    /** Summary of P_dif over the last five years, used by vectorInitIterate to
+     * estimate larvalResources.
      *
-     * Length is 365 * 5. Checkpoint.
-     *
-     * Units: inoculations. */
-    vector<double> quinquennialS_v;
+     * Length is TimeStep::stepsPerYear * 5. Checkpoint. */
+    vector<double> quinquennialP_dif;
+    //@}
     
+    ///@brief More stuff (init only?)
+    //@{
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
      *TODO: no longer true:
@@ -182,19 +186,12 @@ private:
     double initOvFromSv;
     //@}
     
-    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     * 
-     * Units: Animals per day.
-     *
-     * Should be checkpointed. */
-    vector<double> mosqEmergeRate;
+    /// Parameters for life-cycle (excluding parasite transmission)
+    LifeCycleParams lcParams;
     
-
+    /// Mosquito life-cycle state
+    LifeCycle lifeCycle;
+    
     /** @brief Intervention parameters
      *
      * Would need to be checkpointed for main simulation; not used during

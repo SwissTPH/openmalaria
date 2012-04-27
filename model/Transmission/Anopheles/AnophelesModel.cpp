@@ -226,7 +226,7 @@ void AnophelesModel::init2 (size_t sIndex,
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
-    initialP_df = 0.0;
+    double initialP_df = 0.0;
 
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
@@ -243,9 +243,9 @@ void AnophelesModel::init2 (size_t sIndex,
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
-
+    
     // Probability of a mosquito not finding a host this day:
-    initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
+    double initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
     double P_Ai_base = (1.0 - initialP_A) / leaveSeekingStateRate;
     sumPFindBite *= P_Ai_base;
     initialP_df  *= P_Ai_base * probMosqSurvivalOvipositing;

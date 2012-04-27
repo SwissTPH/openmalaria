@@ -62,9 +62,7 @@ public:
     //@{
     AnophelesModel (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
             humanBase(baseITNParams,baseIRSParams),
-            partialEIR(0.0),
-            initialP_A(numeric_limits<double>::quiet_NaN()),
-            initialP_df(numeric_limits<double>::quiet_NaN())
+            partialEIR(0.0)
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,
@@ -213,8 +211,6 @@ public:
         probMosqSurvivalOvipositing & stream;
         transmission & stream;
         partialEIR & stream;
-        initialP_A & stream;
-        initialP_df & stream;
     }
 
 
@@ -322,12 +318,6 @@ private:
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     double partialEIR;
-    
-    /** Values of P_A and P_df from initial population age structure. In theory
-     * these values are constant until interventions start to affect mosquitoes
-     * unless age structure varies due to low pop size or very high death
-     * rates. */
-    double initialP_A, initialP_df;
 };
 
 }
