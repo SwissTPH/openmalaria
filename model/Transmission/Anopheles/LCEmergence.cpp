@@ -35,6 +35,11 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
+void LCEmergence::initLifeCycle(const scnXml::LifeCycle& lcData){
+    lcParams.initLifeCycle( lcData );
+    lifeCycle.init( lcParams );
+}
+
 void LCEmergence::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
@@ -162,6 +167,9 @@ void LCEmergence::scaleEIR( double factor ) {
 // -----  Initialisation of model which is done after creating initial humans  -----
 
 void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmission& transmission ){
+    initialP_A = tsP_A;
+    initialP_df = tsP_df;
+    
     // -----  Calculate required S_v based on desired EIR  -----
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
@@ -173,6 +181,8 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmiss
     vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
     
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+    //TODO: do we want to do this? already done?
+    lifeCycle.init( lcParams );
     
     //TODO: VLC merge
     //NOTE: do we not want this first part at all? Or still need some of this?
@@ -206,54 +216,24 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmiss
 
 bool LCEmergence::initIterate (Transmission& transmission) {
     cerr << "Warning: LCEmergence::initIterate not yet written!" << endl;
-#if 0
-    // Try to match S_v against its predicted value. Don't try with N_v or O_v
-    // because the predictions will change - would be chasing a moving target!
-    // EIR comes directly from S_v, so should fit after we're done.
-
-    double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
-    //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-    if (!(factor > 1e-6 && factor < 1e6)) {
-        if ( vectors::sum(forcedS_v) == 0.0 ) {
-            return false;   // no EIR desired: nothing to do
-        }
-        cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
-        cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds (likely a code error)",util::Error::VectorFitting);
-    }
-
-    //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
-    // Adjusting mosqEmergeRate is the important bit. The rest should just
-    // bring things to a stable state quicker.
-    initNv0FromSv *= factor;
-    initNvFromSv *= factor;     //(not currently used)
-    vectors::scale (mosqEmergeRate, factor);
-    transmission.initIterateScale (factor);
-    vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
-
-    // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( TimeStep::fromYears(1).inDays(), 0.0 );
-    for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[i % TimeStep::fromYears(1).inDays()] =
-            quinquennialS_v[i] / 5.0;
-    }
-
-    // Once the amplitude is approximately correct, we try to find a
-    // rotation offset.
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-    //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    // annualS_v was already rotated by old value of FSRotateAngle, so increment:
-    FSRotateAngle -= rAngle;
-    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
-    // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = forcedS_v;
-    vectors::scale (mosqEmergeRate, initNv0FromSv);
-
-    const double LIMIT = 0.1;
-    return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear);
-#endif
-    return false;       // FIXME
+    // We now know/can get approximate values for:
+    // * human-vector interaction (P_df, P_A) (calculated in init2)
+    // * human infectiousness (P_dif) (needs to be sampled over year)
+    // * the value of S_v we want to fit to (forcedS_v)
+    
+    // Find suitable larvalResources using tsP_df and tsP_A
+    // TODO: initialise with guessed values for N_v, O_v and S_v
+    
+    ResourceFitter clm( transmission, lcParams, initialP_A, initialP_df, initNvFromSv, initOvFromSv );
+    clm.targetS_vWithP_dif( forcedS_v, quinquennialP_dif );
+    clm.fit();
+    
+    //TODO: free mem? Currently can't because it's still written to.
+    //quinquennialP_dif.clear();
+    
+    // FIXME: run warmup and check resultant EIR
+    throw TRACED_EXCEPTION_DEFAULT("TODO");
+    return false;
 }
 
 
@@ -271,7 +251,9 @@ double LCEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     return emergence * larvicidingIneffectiveness;
 }
 
-void LCEmergence::updateStats( size_t d, double S_v ){
+void LCEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
+    size_t d5Year = d % TimeStep::fromYears(5).inDays();
+    quinquennialP_dif[d5Year] = tsP_dif;
 }
 
 void LCEmergence::checkpoint (istream& stream){ (*this) & stream; }

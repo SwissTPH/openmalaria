@@ -243,7 +243,7 @@ double FixedEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     return mosqEmergeRate[dYear1] * larvicidingIneffectiveness;
 }
 
-void FixedEmergence::updateStats( size_t d, double S_v ){
+void FixedEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
     size_t d5Year = d % TimeStep::fromYears(5).inDays();
     quinquennialS_v[d5Year] = S_v;
 }

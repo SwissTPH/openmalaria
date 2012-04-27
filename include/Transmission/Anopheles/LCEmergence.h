@@ -50,10 +50,15 @@ public:
     ///@brief Initialisation and destruction
     //@{
     LCEmergence() :
+            initialP_A(numeric_limits<double>::quiet_NaN()),
+            initialP_df(numeric_limits<double>::quiet_NaN()),
             larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0)
     {}
-
+    
+    /** Called to initialise life-cycle parameters from XML data. */
+    void initLifeCycle(const scnXml::LifeCycle& lcData);
+    
     /** Called by initialise function to init variables directly related to EIR
      * 
      * @param anoph Data from XML
@@ -93,13 +98,19 @@ public:
     double get( size_t d, size_t dYear1, double nOvipositing );
     
     /// Store S_v for day d. Used by initIterate().
-    void updateStats( size_t d, double S_v );
+    void updateStats( size_t d, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{
     /// Start a larviciding intervention.
     void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
     
+    double getResAvailability() const{
+        return lcParams.getResAvailability();
+    }
+    double getResRequirements() const{
+        return lifeCycle.getResRequirements( lcParams );
+    }
     //@}
     
 protected:
@@ -120,6 +131,8 @@ private:
         initNv0FromSv & stream;
         initNvFromSv & stream;
         initOvFromSv & stream;
+        initialP_A & stream;
+        initialP_df & stream;
         lcParams & stream;
         lifeCycle & stream;
         larvicidingEndStep & stream;
@@ -162,7 +175,11 @@ private:
     /** Summary of P_dif over the last five years, used by vectorInitIterate to
      * estimate larvalResources.
      *
-     * Length is TimeStep::stepsPerYear * 5. Checkpoint. */
+     * Length is 365 * 5. Checkpoint.
+     * 
+     * NOTE: technically, only a fifth as many values need to be stored since
+     * this only changes every five days. But that makes life more complicated.
+     */
     vector<double> quinquennialP_dif;
     //@}
     
@@ -184,6 +201,12 @@ private:
     /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
      * Should be checkpointed. */
     double initOvFromSv;
+    
+    /** Values of P_A and P_df from initial population age structure. In theory
+     * these values are constant until interventions start to affect mosquitoes
+     * unless age structure varies due to low pop size or very high death
+     * rates. */
+    double initialP_A, initialP_df;
     //@}
     
     /// Parameters for life-cycle (excluding parasite transmission)
