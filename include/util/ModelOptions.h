@@ -209,6 +209,12 @@ namespace OM { namespace util {
          * other outputs added after writing this. */
 	REPORT_ONLY_AT_RISK,
         
+        /** Turn on vector life-cycle model. Allows better larviciding and
+         * vector population dynamics modelling.
+         * 
+         * Requires vector model. */
+        VECTOR_LIFE_CYCLE_MODEL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

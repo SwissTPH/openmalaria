@@ -69,6 +69,7 @@ namespace OM { namespace util {
 	    codeMap["IMMUNE_THRESHOLD_GAMMA"]=IMMUNE_THRESHOLD_GAMMA;
 	    codeMap["UPDATE_DENSITY_GAMMA"]=UPDATE_DENSITY_GAMMA;
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
+            codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
