@@ -823,7 +823,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Prophylactic period
               </xs:documentation>
-              <xs:appinfo>type:integer; units=time-step;name:Prophylactic period;</xs:appinfo>
+              <xs:appinfo>type:integer; units:time-step;name:Prophylactic period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="tolPeriod" type="xs:int" use="required">
