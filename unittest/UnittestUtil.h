@@ -114,6 +114,10 @@ public:
         TimeStep::init( 5, 90.0 );
     }
     
+    static void MosqLifeCycle_init() {
+        util::ModelOptions::optSet = 1u<<util::VECTOR_LIFE_CYCLE_MODEL;
+    }
+    
     // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
     static void setTotalParasiteDensity (WithinHostModel& whm, double density) {
 	whm.totalDensity = density;

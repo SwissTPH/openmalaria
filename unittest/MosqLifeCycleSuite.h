@@ -207,9 +207,8 @@ public:
             TS_ASSERT_APPROX( emergence, adultEmergencePeriodicRA[d] );
         }
     }
-#if 0
     // These two tests are similar to the above, but include N_v code
-    void te stLifeCycleConstRA (){
+    void testLifeCycleConstRA (){
         // constant resource availability; in this case we need a vector 365 long
         lcp->invLarvalResources.assign( 365, 1e-8 );
         
@@ -226,6 +225,7 @@ public:
             TS_ASSERT_APPROX( mt.getLastN_v0(), adultEmergenceConstRA[d] );
         }
     }
+#if 0
     void te stLifeCyclePeriodicRA (){
         // annually-periodic resource availability
         mt.lcParams.invLarvalResources = periodicResourceAvailability;

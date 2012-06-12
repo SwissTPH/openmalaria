@@ -35,132 +35,19 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
-void LCEmergence::initLifeCycle(const scnXml::LifeCycle& lcData){
-    lcParams.initLifeCycle( lcData );
-    lifeCycle.init( lcParams );
-}
-
-void LCEmergence::initEIR(
-    const scnXml::AnophelesParams& anoph,
-    vector<double>& initialisationEIR,
-    int EIPDuration
-){
-    const scnXml::Seasonality& seasonality = anoph.getSeasonality();
-    if ( seasonality.getInput() != "EIR" ) {
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
-        //TODO
-    }
-    // EIR for this species, with index 0 refering to value over first interval
-    vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
-
-    if ( seasonality.getFourierSeries().present() ) {
-        const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
-        const scnXml::FourierSeries::CoefficSequence& fsCoeffic = seasFC.getCoeffic();
-
-        FSCoeffic.reserve (2*fsCoeffic.size() + 1);
-
-        FSCoeffic.push_back( 0.0 );     // value doesn't matter; EIR will be scaled
-        for ( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
-            FSCoeffic.push_back( it->getA() );
-            FSCoeffic.push_back( it->getB() );
-        }
-        // According to spec, EIR for first day of year (rather than EIR at the
-        // exact start of the year) is generated with t=0 in Fourier series.
-        EIRRotateAngle = seasFC.getEIRRotateAngle();
-    } else if ( seasonality.getMonthlyValues().present() ) {
-        const scnXml::MonthlyValues& seasM = seasonality.getMonthlyValues().get();
-        if ( seasM.getSmoothing() != "fourier" ) {
-            throw util::xml_scenario_error("entomology.anopheles.seasonality.monthlyValues.smoothing: only fourier supported at the moment");
-            //TODO: should be easy to add no smoothing
-        }
-
-        const size_t N_m = 12;
-        const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
-        assert( seq.size() == N_m );    // enforced by schema
-        double months[N_m];
-        double sum = 0.0;
-        for ( size_t i = 0; i < N_m; ++i ) {
-            months[i] = seq[i];
-            sum += months[i];
-        }
-        // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
-        double min = sum/1000.0;
-        for ( size_t i = 0; i < N_m; ++i ) {
-            if ( months[i] < min )
-                months[i] = min;
-        }
-
-        const double PI = 3.14159265;
-        const double w = 2.0 * PI / N_m;
-        FSCoeffic.assign( 5, 0.0 );
-
-        // Note: we use our values as the left-hand-side of our regions
-        for ( size_t i = 0; i < N_m; ++i ) {
-            double val = log( months[i] );
-            FSCoeffic[0] += val;
-            FSCoeffic[1] += val * cos( w*i );
-            FSCoeffic[2] += val * sin( w*i );
-            FSCoeffic[3] += val * cos( 2.0*w*i );
-            FSCoeffic[4] += val * sin( 2.0*w*i );
-        }
-        FSCoeffic[0] /=N_m;
-        FSCoeffic[1] *= 2.0 / N_m;
-        FSCoeffic[2] *= 2.0 / N_m;
-        FSCoeffic[3] *= 2.0 / N_m;
-        FSCoeffic[4] *= 2.0 / N_m;
-
-        // The above places the value for the first month at angle 0, so
-        // effectively the first month starts at angle -2*pi/24 radians.
-        // The value for the first day of the year should start 2*pi/(365*2)
-        // radians later, so adjust EIRRotateAngle to compensate.
-        EIRRotateAngle = M_PI * ( 1.0/12.0 - 1.0/365.0 );
-    } else {
-        assert( seasonality.getDailyValues().present() );      // XML loading code should enforce this
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
-        //TODO
-    }
-
-    if ( !seasonality.getAnnualEIR().present() ) {
-        //TODO: work out when this is not required and implement code
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
-    }
-    double targetEIR = seasonality.getAnnualEIR().get();
-
-    // Now we rescale to get an EIR of targetEIR.
-    // Calculate current sum as is usually done.
-    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
-    // And scale (also acts as a unit conversion):
-    FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
-
-    // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
-
-    // Add to the TransmissionModel's EIR, used for the initalization phase:
-    for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
-        // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
-    }
-
-    if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
-        cout << "Annual EIR for "<<anoph.getMosquito()
-             << ": "<<vectors::sum( speciesEIR )<<endl;
-    }
-
-    // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
-    initNvFromSv = 1.0 / anoph.getPropInfectious();
-    initOvFromSv = initNvFromSv * anoph.getPropInfected();
-    
-    // -----  allocate memory  -----
+LCEmergence::LCEmergence() :
+            initialP_A(numeric_limits<double>::quiet_NaN()),
+            initialP_df(numeric_limits<double>::quiet_NaN())
+{
     quinquennialP_dif.assign (TimeStep::fromYears(5).inDays(), 0.0);
-    forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
 #if 0
     mosqEmergeRate.resize (TimeStep::DAYS_IN_YEAR); // Only needs to be done here if loading from checkpoint
 #endif
 }
 
-void LCEmergence::scaleEIR( double factor ) {
-    FSCoeffic[0] += log( factor );
+void LCEmergence::initLifeCycle(const scnXml::LifeCycle& lcData){
+    lcParams.initLifeCycle( lcData );
+    lifeCycle.init( lcParams );
 }
 
 
@@ -235,14 +122,6 @@ bool LCEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-// Every TimeStep::interval days:
-void LCEmergence::update () {
-    if (TimeStep::simulation > larvicidingEndStep) {
-        larvicidingEndStep = TimeStep::future;
-        larvicidingIneffectiveness = 1.0;
-    }
-}
-
 double LCEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     double emergence = lifeCycle.updateEmergence(lcParams, nOvipositing, d, dYear1);
     //TODO
@@ -256,13 +135,6 @@ void LCEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
 
 void LCEmergence::checkpoint (istream& stream){ (*this) & stream; }
 void LCEmergence::checkpoint (ostream& stream){ (*this) & stream; }
-
-// -----  Summary and intervention functions  -----
-
-void LCEmergence::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
-    larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
-    larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
-}
 
 }
 }

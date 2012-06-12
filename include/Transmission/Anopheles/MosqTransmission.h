@@ -30,6 +30,8 @@
 
 using boost::shared_ptr;
 
+class MosqLifeCycleSuite;
+
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
@@ -56,7 +58,7 @@ public:
      * 
      * This is only a fraction of parameter initialisation; see also
      * AnophelesModel::initialise. */
-    void initialise ( const scnXml::AnophelesParams& anoph );
+    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::Mosq& mosq );
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
@@ -233,6 +235,8 @@ private:
     
     /** Variables tracking data to be reported. */
     double timestep_N_v0;
+    
+    friend class ::MosqLifeCycleSuite;
 };
 
 }

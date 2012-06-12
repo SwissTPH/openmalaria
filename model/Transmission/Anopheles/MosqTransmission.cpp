@@ -47,21 +47,21 @@ MosqTransmission::MosqTransmission() :
 }
 
 
-void MosqTransmission::initialise ( const scnXml::AnophelesParams& anoph ) {
+void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::Mosq& mosq ) {
     // TODO: optionally other models
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
-        if (!anoph.getLifeCycle().present())
-            throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with model parameters for each anopheles species");
+        if (!lcOpt.present())
+            throw util::xml_scenario_error(
+                "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
+                "model parameters for each anopheles species");
         emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
-        emergence->initLifeCycle( anoph.getLifeCycle().get() );
+        emergence->initLifeCycle( lcOpt.get() );
     }else
         emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
     
     
     // -----  Set model variables  -----
 
-    const scnXml::Mosq& mosq = anoph.getMosq();
-    
     mosqRestDuration = mosq.getMosqRestDuration().getValue();
     EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
     if (1 > mosqRestDuration || mosqRestDuration*2 >= EIPDuration) {
@@ -117,7 +117,8 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
     }
 }
 
-double MosqTransmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug ){
+double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
+                                 double tsP_dif, bool isDynamic, bool printDebug ){
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
     size_t dMod = d + N_v_length;
@@ -171,7 +172,8 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df, double t
     size_t ts = dMod - EIPDuration;
     for (int l = 1; l < mosqRestDuration; ++l) {
         size_t tsl = (ts - l) % N_v_length;       // index dMod - theta_s - l
-        sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) * ftauArray[EIPDuration+l-mosqRestDuration];
+        sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) *
+                ftauArray[EIPDuration+l-mosqRestDuration];
     }
 
 
