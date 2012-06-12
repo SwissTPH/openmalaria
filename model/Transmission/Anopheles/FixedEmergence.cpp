@@ -18,7 +18,7 @@
  */
 
 #include "Transmission/Anopheles/FixedEmergence.h"
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/Nv0DelayFitting.h"
 
 #include "util/vectors.h"
@@ -157,7 +157,7 @@ void FixedEmergence::scaleEIR( double factor ) {
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmission& transmission ){
+void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
@@ -180,7 +180,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transm
 
 // -----  Initialisation of model which is done after running the human warmup  -----
 
-bool FixedEmergence::initIterate (Transmission& transmission) {
+bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // Try to match S_v against its predicted value. Don't try with N_v or O_v
     // because the predictions will change - would be chasing a moving target!
     // EIR comes directly from S_v, so should fit after we're done.

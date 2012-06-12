@@ -21,7 +21,7 @@
 #define Hmod_Anopheles_ResourceFitter
 
 #include "Global.h"
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/LifeCycle.h"
 #include <gsl/gsl_vector.h>
 #include <boost/noncopyable.hpp>
@@ -40,7 +40,7 @@ double ResourceFitter_minimise_sampler( const gsl_vector *x, void *params );
 struct ResourceFitter : private boost::noncopyable {
     /** Store fixed parameters.
      * 
-     * @param mosqTrans Transmission object with parameters
+     * @param mosqTrans MosqTransmission object with parameters
      * @param lcParams Life cycle parameters. invLarvalResources member is set.
      * @param PA Average P_A value (assumed constant)
      * @param Pdf Average P_df value (assumed constant)
@@ -48,7 +48,7 @@ struct ResourceFitter : private boost::noncopyable {
      * @param iOvSv Scale factor for S_v to give an initial estimate of O_v
      * @param forceDebug If true, turn debugging on regardless of command-line
      */
-    ResourceFitter( const Transmission& mosqTrans,
+    ResourceFitter( const MosqTransmission& mosqTrans,
                     LifeCycleParams& lcParams,
                     double PA, double Pdf,
                     double iNvSv, double iOvSv,
@@ -109,7 +109,7 @@ private:
     void copyToLarvalResources( const gsl_vector* input );
     
     vector<double>& invLarvalResources;
-    Transmission transmission;
+    MosqTransmission transmission;
     double P_A, P_df;
     double initNvFromSv, initOvFromSv;
     enum FitTarget {

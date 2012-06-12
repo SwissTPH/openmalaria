@@ -24,7 +24,7 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/Anopheles/PerHost.h"
 #include "Transmission/PerHost.h"
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
 
 #include <list>
@@ -317,7 +317,7 @@ private:
     /** @brief transmission and life-cycle parts of model
      * 
      * Much of the core model is encapsulated here. */
-    Transmission transmission;
+    MosqTransmission transmission;
     
     /** Per time-step partial calculation of EIR.
     *

@@ -34,7 +34,7 @@ namespace Anopheles {
 using namespace std;
 
 // forward declare to avoid circular dependency:
-class Transmission;
+class MosqTransmission;
 
 /** Part of vector anopheles model, giving emergence of adult mosquitoes from
  * water bodies. This model fits annual (periodic) sequence to produce the
@@ -63,7 +63,7 @@ public:
      * 
      * @param anoph Data from XML
      * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
-     * @param EIPDuration parameter from Transmission (used for an estimation)
+     * @param EIPDuration parameter from MosqTransmission (used for an estimation)
      */
     void initEIR(
         const scnXml::AnophelesParams& anoph,
@@ -79,15 +79,15 @@ public:
      * @param tsP_A P_A for this time step.
      * @param tsP_df P_df for this time step.
      * @param EIRtoS_v multiplication factor to convert input EIR into required
-     * @param transmission reference to Transmission object
+     * @param transmission reference to MosqTransmission object
      * S_v. */
-    void init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmission& transmission );
+    void init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission );
     
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    bool initIterate (Transmission& transmission);
+    bool initIterate (MosqTransmission& transmission);
     //@}
     
     /// Update per time-step (for larviciding intervention).

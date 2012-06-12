@@ -27,7 +27,7 @@ namespace scnXml {
     class LifeCycle;
 }
 
-class LifeCycleSuite;
+class MosqLifeCycleSuite;
 
 namespace OM {
 namespace Transmission {
@@ -153,7 +153,7 @@ private:
     //@}
     friend class LifeCycle;
     friend class ResourceFitter;
-    friend class ::LifeCycleSuite;
+    friend class ::MosqLifeCycleSuite;
 };
 
 
@@ -227,7 +227,7 @@ private:
      * ago/at day d before/after update. */
     vector<double> newPupae;
     
-    friend class ::LifeCycleSuite;
+    friend class ::MosqLifeCycleSuite;
     friend class ResourceFitter;        // FIXME: this is temporary for debugging
 };
 

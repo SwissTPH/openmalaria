@@ -18,7 +18,7 @@
  */
 
 #include "Transmission/Anopheles/LCEmergence.h"
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/ResourceFitter.h"
 
 #include "util/vectors.h"
@@ -166,7 +166,7 @@ void LCEmergence::scaleEIR( double factor ) {
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmission& transmission ){
+void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ){
     initialP_A = tsP_A;
     initialP_df = tsP_df;
     
@@ -214,7 +214,7 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Transmiss
 
 // -----  Initialisation of model which is done after running the human warmup  -----
 
-bool LCEmergence::initIterate (Transmission& transmission) {
+bool LCEmergence::initIterate (MosqTransmission& transmission) {
     cerr << "Warning: LCEmergence::initIterate not yet written!" << endl;
     // We now know/can get approximate values for:
     // * human-vector interaction (P_df, P_A) (calculated in init2)

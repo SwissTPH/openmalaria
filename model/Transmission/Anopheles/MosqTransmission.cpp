@@ -18,7 +18,7 @@
  */
 
 //TODO: trim includes
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "Transmission/Anopheles/LCEmergence.h"
 #include "schema/entomology.h"
@@ -34,7 +34,7 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
-Transmission::Transmission() :
+MosqTransmission::MosqTransmission() :
         mosqRestDuration(0),
         EIPDuration(0),
         N_v_length(0),
@@ -47,7 +47,7 @@ Transmission::Transmission() :
 }
 
 
-void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
+void MosqTransmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     // TODO: optionally other models
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
         if (!anoph.getLifeCycle().present())
@@ -86,7 +86,7 @@ void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     ftauArray[mosqRestDuration] = 1.0;
 }
 
-void Transmission::initIterateScale ( double factor ){
+void MosqTransmission::initIterateScale ( double factor ){
     vectors::scale (N_v, factor);
     // What factor exactly these should be scaled by isn't obvious; in any case
     // they should reach stable values quickly.
@@ -94,7 +94,7 @@ void Transmission::initIterateScale ( double factor ){
     vectors::scale (S_v, factor);
 }
 
-void Transmission::initState ( double tsP_A, double tsP_df,
+void MosqTransmission::initState ( double tsP_A, double tsP_df,
                                        double initNvFromSv, double initOvFromSv,
                                        const vector<double>& forcedS_v ){
     N_v  .resize (N_v_length);
@@ -117,7 +117,7 @@ void Transmission::initState ( double tsP_A, double tsP_df,
     }
 }
 
-double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug ){
+double MosqTransmission::update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug ){
     // Warning: with x<0, x%y can be negative (depending on compiler); avoid x<0.
     // We add N_v_length so that ((dMod - x) >= 0) for (x <= N_v_length).
     size_t dMod = d + N_v_length;
@@ -232,13 +232,13 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
 
 // -----  Summary and intervention functions  -----
 
-void Transmission::uninfectVectors() {
+void MosqTransmission::uninfectVectors() {
     O_v.assign( O_v.size(), 0.0 );
     S_v.assign( S_v.size(), 0.0 );
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-double Transmission::getLastVecStat ( VecStat vs ) const{
+double MosqTransmission::getLastVecStat ( VecStat vs ) const{
     //Note: implementation isn't performance optimal but rather intended to
     //keep code size low and have no overhead if not used.
     const vector<double> *array;
@@ -259,7 +259,7 @@ double Transmission::getLastVecStat ( VecStat vs ) const{
     }
     return val / TimeStep::interval;
 }
-void Transmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
+void MosqTransmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
     survey.set_Vector_Nv0 (speciesName, getLastN_v0());
     survey.set_Vector_Nv (speciesName, getLastVecStat(NV));
     survey.set_Vector_Ov (speciesName, getLastVecStat(OV));

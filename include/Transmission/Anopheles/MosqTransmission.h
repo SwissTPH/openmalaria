@@ -46,11 +46,11 @@ enum VecStat { PA, PDF, PDIF, NV, OV, SV };
  * as well as translating between the (1- or 5-day) time-steps used by the
  * simulator and the 1-day time-step used by this model.
  */
-class Transmission {
+class MosqTransmission {
 public:
     ///@brief initialisation functions
     //@{
-    Transmission();
+    MosqTransmission();
     
     /** Initialise parameters and variables.
      * 
