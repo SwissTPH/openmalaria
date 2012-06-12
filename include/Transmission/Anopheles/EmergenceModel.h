@@ -97,8 +97,7 @@ public:
      * non-negative and incremented by one between calls).
      * @param dYear1 The day of the year of the last calculated time-point.
      * @param nOvipositing The number of adults which successfully
-     * oviposited this/last time-step. TODO: we're setting new value based on
-     * num ovipositing yesterday? That's not right.
+     * oviposited this/last time-step.
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated.
      */

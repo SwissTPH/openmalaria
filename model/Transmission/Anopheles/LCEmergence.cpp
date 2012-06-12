@@ -181,8 +181,6 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTrans
     vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
     
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
-    //TODO: do we want to do this? already done?
-    lifeCycle.init( lcParams );
     
     //TODO: VLC merge
     //NOTE: do we not want this first part at all? Or still need some of this?
