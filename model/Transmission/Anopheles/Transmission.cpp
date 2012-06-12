@@ -49,9 +49,12 @@ Transmission::Transmission() :
 
 void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     // TODO: optionally other models
-    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ))
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
+        if (!anoph.getLifeCycle().present())
+            throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with model parameters for each anopheles species");
         emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
-    else
+        emergence->initLifeCycle( anoph.getLifeCycle().get() );
+    }else
         emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
     
     
@@ -69,6 +72,7 @@ void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     N_v_length = EIPDuration + mosqRestDuration;
     
     minInfectedThreshold = mosq.getMinInfectedThreshold();
+    
     
     // -----  allocate memory  -----
     // Set up fArray and ftauArray. Each step, all elements not set here are
@@ -106,6 +110,7 @@ void Transmission::initState ( double tsP_A, double tsP_df,
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
+        //TODO: offset often won't be correct (comment from life-cycle code: is it true?)
         S_v[t] = forcedS_v[t];
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
@@ -207,7 +212,7 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     }
     //END S_v
     
-    emergence->updateStats( d, S_v[t] );
+    emergence->updateStats( d, tsP_dif, S_v[t] );
     
     timestep_N_v0 += newAdults;
     

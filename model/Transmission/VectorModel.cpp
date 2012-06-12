@@ -140,6 +140,16 @@ void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) 
             << '\t' << totalPostPSF / population.getSize();
     }
 }
+
+void VectorModel::ctsCbResAvailability (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResAvailability();
+}
+void VectorModel::ctsCbResRequirements (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResRequirements();
+}
+
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     for ( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ) {
         if ( it->second == i )
@@ -190,7 +200,8 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif,
         ctsNv, ctsOv, ctsSv,
         ctsAlpha, ctsPB, ctsPCD,
-        ctsIRSEffects;
+        ctsIRSEffects,
+        ctsRA, ctsRR;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
@@ -209,6 +220,8 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
         ctsIRSEffects<<"\tIRS rel attr ("<<name<<")"
             <<"\tIRS preprand surv factor ("<<name<<")"
             <<"\tIRS postprand surv factor ("<<name<<")";
+        ctsRA<<"\tres avail("<<name<<")";
+        ctsRR<<"\tres req("<<name<<")";
     }
     using Monitoring::Continuous;
     Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
@@ -234,6 +247,10 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     // and killing effects attributable to IRS).
     Continuous::registerCallback( "IRS effects", ctsIRSEffects.str(),
         MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
+    Continuous::registerCallback( "resource availability", ctsRA.str(),
+        MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
+    Continuous::registerCallback( "resource requirements", ctsRR.str(),
+        MakeDelegate( this, &VectorModel::ctsCbResRequirements ) );
 }
 VectorModel::~VectorModel () {
 }

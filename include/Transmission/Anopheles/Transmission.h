@@ -102,6 +102,13 @@ public:
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs ) const;
     
+    inline double getResAvailability() const{
+        return emergence->getResAvailability();
+    }
+    inline double getResRequirements() const{
+        return emergence->getResRequirements();
+    }
+    
     /// Write some per-species summary information.
     void summarize (const string speciesName, Monitoring::Survey& survey) const;
     //@}

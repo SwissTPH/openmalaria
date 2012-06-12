@@ -24,6 +24,7 @@
 #include "Transmission/Anopheles/EmergenceModel.h"
 #include "schema/interventions.h"
 #include <vector>
+#include <limits>
 
 namespace OM {
 namespace Transmission {
@@ -91,13 +92,19 @@ public:
     double get( size_t d, size_t dYear1, double nOvipositing );
     
     /// Store S_v for day d. Used by initIterate().
-    void updateStats( size_t d, double S_v );
+    void updateStats( size_t d, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{
     /// Start a larviciding intervention.
     void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
     
+    double getResAvailability() const {
+        return numeric_limits<double>::quiet_NaN();
+    }
+    double getResRequirements() const {
+        return numeric_limits<double>::quiet_NaN();
+    }
     //@}
     
 protected:

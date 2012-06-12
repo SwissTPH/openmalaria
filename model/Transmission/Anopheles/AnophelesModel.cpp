@@ -334,20 +334,18 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
     tsP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
     
     
-    if( true ){//TODO: may use this condition soon...
-        // Summed per day:
-        partialEIR = 0.0;
-        
-        transmission.resetTSStats();
-        
-        // The code within the for loop needs to run per-day, wheras the main
-        // simulation uses TimeStep::interval day (currently 5 day) time steps.
-        // The transmission for time-step t depends on the state during days
-        // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
-        int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-        for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-            partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
-        }
+    // Summed per day:
+    partialEIR = 0.0;
+    
+    transmission.resetTSStats();
+    
+    // The code within the for loop needs to run per-day, wheras the main
+    // simulation uses TimeStep::interval day (currently 5 day) time steps.
+    // The transmission for time-step t depends on the state during days
+    // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+        partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
     }
 }
 

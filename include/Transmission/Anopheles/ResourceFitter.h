@@ -64,7 +64,7 @@ struct ResourceFitter : private boost::noncopyable {
      * @param S_v Densities of infectious biting mosquitoes over year; has
      *  length 365.
      * @param sampledP_dif P_dif calculated per time-step over the last n years;
-     *  has length TimeStep::stepsPerYear * n for some integer n.
+     *  has length 365 * n for some integer n.
      */
     void targetS_vWithP_dif( const vector<double>& S_v,
                              const vector<double>& sampledP_dif );

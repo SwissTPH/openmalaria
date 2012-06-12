@@ -47,6 +47,14 @@ public:
     EmergenceModel() {}
     virtual ~EmergenceModel() {}
     
+    /** Called to initialise life-cycle parameters from XML data.
+     * 
+     * Default implementation throws an assertion: only call if the life cycle
+     * model is used. */
+    virtual void initLifeCycle(const scnXml::LifeCycle& lcData){
+        assert (false);
+    }
+    
     /** Called by initialise function to init variables directly related to EIR
      * 
      * @param anoph Data from XML
@@ -100,14 +108,18 @@ public:
      * during initialisation.
      * 
      * @param d Day counter of simulation
+     * @param tsP_dif Value of P_dif for this time-step
      * @param S_v Value of S_v for this day
      */
-    virtual void updateStats( size_t d, double S_v ) =0;
+    virtual void updateStats( size_t d, double tsP_dif, double S_v ) =0;
     
     ///@brief Interventions and reporting
     //@{
     /// Start a larviciding intervention.
     virtual void intervLarviciding (const scnXml::LarvicidingDescAnoph&) =0;
+    
+    virtual double getResAvailability() const =0;
+    virtual double getResRequirements() const =0;
     //@}
     
     /// Checkpointing

@@ -156,6 +156,7 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
     double maxTolNeeded = 0.0;
     for( size_t i=0; i<sampledP_dif.size(); ++i ){
         //TODO: increase tolerance
+        //FIXME: what is the point of this? We just set annualP_dif from sampledP_dif!!
         double thisTol = assertSimilarP_dif( annualP_dif[ i%annualP_dif.size() ], sampledP_dif[ i ], 2 );
         maxTolNeeded = max( maxTolNeeded, thisTol );
         sumAnnualP_dif[ i/annualP_dif.size() ] += sampledP_dif[ i ];
@@ -317,6 +318,8 @@ void ResourceFitter::simulate1Year()
     //transmission.initState( P_A, P_df, 0.0, 0.0, zeros );
     // we start with 100,000 eggs and then run the model
     //transmission.lifeCycle.newEggs[0] = 100000.0;
+    //FIXME: I think we need to re-init the life cycle model too?
+    //lifeCycle.init( lcParams );
     
     size_t end = 10*TimeStep::DAYS_IN_YEAR;
     size_t lastDDifferent = 0;

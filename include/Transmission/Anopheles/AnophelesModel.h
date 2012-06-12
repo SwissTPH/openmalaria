@@ -195,6 +195,13 @@ public:
         return transmission.getLastVecStat( vs );
     }
     
+    inline double getResAvailability() const{
+        return transmission.getResAvailability();
+    }
+    inline double getResRequirements() const{
+        return transmission.getResRequirements();
+    }
+
     /// Write some per-species summary information.
     inline void summarize (const string speciesName, Monitoring::Survey& survey) const {
         transmission.summarize( speciesName, survey );
