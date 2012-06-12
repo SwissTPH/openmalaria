@@ -20,6 +20,7 @@
 //TODO: trim includes
 #include "Transmission/Anopheles/Transmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
+#include "Transmission/Anopheles/LCEmergence.h"
 #include "schema/entomology.h"
 #include "util/vectors.h"
 #include "util/errors.h"
@@ -47,7 +48,10 @@ Transmission::Transmission() :
 
 void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     // TODO: optionally other models
-    emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
+    if( true )
+        emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
+    else
+        emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
     
     
     // -----  Set model variables  -----
@@ -127,13 +131,14 @@ double Transmission::update( size_t d, double tsP_A, double tsP_df, double tsP_d
     P_dif[t] = tsP_dif;
     
     
-    double newAdults = emergence->get( dYear1 );
+    double nOvipositing = P_df[ttau] * N_v[ttau];
+    double newAdults = emergence->get( d, dYear1, nOvipositing );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
     // yesterday + those who found a host tau days ago and survived cycle:
     N_v[t] = newAdults
                 + P_A[t1]  * N_v[t1]
-                + P_df[ttau] * N_v[ttau];
+                + nOvipositing;
     // similar for O_v, except new mosquitoes are those who were uninfected
     // tau days ago, started a feeding cycle then, survived and got infected:
     O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
