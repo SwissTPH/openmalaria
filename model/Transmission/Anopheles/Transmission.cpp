@@ -24,6 +24,7 @@
 #include "schema/entomology.h"
 #include "util/vectors.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 
 namespace OM {
 namespace Transmission {
@@ -48,10 +49,10 @@ Transmission::Transmission() :
 
 void Transmission::initialise ( const scnXml::AnophelesParams& anoph ) {
     // TODO: optionally other models
-    if( true )
-        emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
-    else
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ))
         emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
+    else
+        emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
     
     
     // -----  Set model variables  -----

@@ -30,6 +30,7 @@
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
 #include "util/vectors.h"
+#include "util/ModelOptions.h"
 
 #include <cmath>
 #include <cfloat>
@@ -51,6 +52,8 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ))
+        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL is only compatible with the vector model (non-vector data present).");
     model = new NonVectorModel(nonVectorData.get());
   }
 
