@@ -82,7 +82,11 @@ public:
         assert( adultEmergencePeriodicRA.size() == adultMosquitoesPeriodicRA.size() );
         assert( adultEmergencePeriodicRA.size() == 1000 ); // can easily be changed
         assert( periodicResourceAvailability.size() == YEAR_LEN );
-        
+    }
+    ~MosqLifeCycleSuite () {
+    }
+    
+    void setUp () {
         // We only actually need 3 values from mosqElt to initialise MosquitoTransmission class
         scnXml::InputValue nanIV( numeric_limits<double>::quiet_NaN() );
         scnXml::BetaMeanSample nanBMS( numeric_limits<double>::quiet_NaN(),
@@ -112,12 +116,8 @@ public:
         lcp = &lce->lcParams;
         lc = &lce->lifeCycle;
     }
-    ~MosqLifeCycleSuite () {
-    }
-    
-    void setUp () {
-    }
     void tearDown () {
+        mt.emergence.reset();
     }
     
     void testScaleVector1to1() {
@@ -207,6 +207,7 @@ public:
             TS_ASSERT_APPROX( emergence, adultEmergencePeriodicRA[d] );
         }
     }
+    
     // These two tests are similar to the above, but include N_v code
     void testLifeCycleConstRA (){
         // constant resource availability; in this case we need a vector 365 long
@@ -225,26 +226,24 @@ public:
             TS_ASSERT_APPROX( mt.getLastN_v0(), adultEmergenceConstRA[d] );
         }
     }
-#if 0
-    void te stLifeCyclePeriodicRA (){
+    void testLifeCyclePeriodicRA (){
         // annually-periodic resource availability
-        mt.lcParams.invLarvalResources = periodicResourceAvailability;
+        lcp->invLarvalResources = periodicResourceAvailability;
         
         vector<double> zeros( mt.N_v_length, 0.0 );
         mt.initState( P_A, P_df, 0.0, 0.0, zeros );
         // we start with 100,000 eggs and then run the model
-        mt.lifeCycle.newEggs[0] = 100000.0;
+        lc->newEggs[0] = 100000.0;
         
         for( size_t d=1; d<adultMosquitoesPeriodicRA.size(); ++d ){
             mt.resetTSStats();
-            mt.update( d, P_A, P_df, 0.0, false );
+            mt.update( d, P_A, P_df, 0.0, false, false );
             double N_v = mt.N_v[ d % mt.N_v_length ];
             TS_ASSERT_APPROX( N_v, adultMosquitoesPeriodicRA[d] );
             TS_ASSERT_APPROX( mt.getLastN_v0(), adultEmergencePeriodicRA[d] );
         }
     }
-    
-    void t estSimulateWithInfections (){
+    void testSimulateWithInfections (){
         /* NOTE: this is only for debugging
         // constant resource availability; in this case we need a vector 365 long
         mt.lcParams.invLarvalResources.assign( 365, 1e-8 );
@@ -257,11 +256,13 @@ public:
         */
     }
     
-    void te stFitting (){
+    // Test the fitting algorithm doesn't throw/assert false. No other tests
+    // at the moment.
+    void testFitting (){
         try{
             vector<double> fixedP_difVec( myP_dif, myP_dif + 365 );
             vector<double> fixedS_vVec( myS_v, myS_v + 365 );
-            ResourceFitter clm( mt, P_A, P_df, initNvFromSv, initOvFromSv, false );
+            ResourceFitter clm( mt, *lcp, P_A, P_df, initNvFromSv, initOvFromSv, false );
             clm.targetS_vWithP_dif( fixedS_vVec, fixedP_difVec );
             gsl_vector *x = gsl_vector_alloc( 1 );
             gsl_vector_set_all( x, 1e8 );
@@ -278,7 +279,6 @@ public:
             TS_ASSERT(false);
         }
     }
-#endif
     
 private:
     MosqTransmission mt;
