@@ -92,9 +92,11 @@ void EmergenceModel::initEIR(
         }
 
         FSCoeffic.assign( 5, 0.0 );
-        vectors::logDFT(months, FSCoeffic);
-        for (size_t i=1; i<FSCoeffic.size(); ++i)
-            FSCoeffic[i] *= 2;  // HACK to reproduce old results
+        //TODO: determine whether to use Fourier Series Coefficient method or
+        // Discrete Fourier Transform. Former is designed for integrals (which
+        // roughly what we have?), the latter for discrete values. DFT doesn't
+        // work well when number of intervals changes?
+        vectors::logFourierCoefficients(months, FSCoeffic);
 
         // The above places the value for the first month at angle 0, so
         // effectively the first month starts at angle -2*pi/24 radians.

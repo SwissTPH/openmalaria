@@ -98,6 +98,12 @@ gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
   return ret;
 }
 
+void vectors::logFourierCoefficients(const vector<double>& iArray, vector<double>& FC) {
+    logDFT(iArray, FC);
+    for (size_t i=1; i<FC.size(); ++i)
+        FC[i] *= 2;
+}
+
 // NOTE: could replace these algorithms with FFTs, but since these aren't
 // called in performance-critical code, the difference would be insignificant.
 void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
@@ -131,6 +137,8 @@ void vectors::expIDFT (std::vector< double >& tArray, const std::vector< double 
     double w = 2.0 * M_PI / T2;
     
     // Calculate inverse discrete Fourier transform
+    // TODO: This may not interpolate sensibly. See for example
+    // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
     for (size_t t = 0; t < T2; ++t) {
         double temp = FC[0];
         double wt = w*t - rAngle;

@@ -90,7 +90,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
 
     // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( TimeStep::fromYears(1).inDays(), 0.0 );
+    vector<double> avgAnnualS_v( TimeStep::DAYS_IN_YEAR, 0.0 );
     for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
         avgAnnualS_v[i % TimeStep::fromYears(1).inDays()] =
             quinquennialS_v[i] / 5.0;

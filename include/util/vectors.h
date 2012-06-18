@@ -86,6 +86,14 @@ namespace OM { namespace util { namespace vectors {
   gsl_vector* std2gsl (const double* vec, size_t length);
   //@}
   
+  /** Calculate Fourier Series coefficients for log values; slightly different
+   * method to (log) DFT.
+   * 
+   * @param iArray Integrals of inputs on curve.
+   * @param FC Fourier Series coefficients.
+   */
+  void logFourierCoefficients(const vector<double>& iArray, vector<double>& FC);
+  
   /** Calculate what is essentially a discrete Fourier transform of log values.
    * 
    * Encoding is slightly different:
