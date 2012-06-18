@@ -78,7 +78,7 @@ void EmergenceModel::initEIR(
         const size_t N_m = 12;
         const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
         assert( seq.size() == N_m );    // enforced by schema
-        double months[N_m];
+        vector<double> months(N_m);
         double sum = 0.0;
         for ( size_t i = 0; i < N_m; ++i ) {
             months[i] = seq[i];
@@ -91,24 +91,10 @@ void EmergenceModel::initEIR(
                 months[i] = min;
         }
 
-        const double PI = 3.14159265;
-        const double w = 2.0 * PI / N_m;
         FSCoeffic.assign( 5, 0.0 );
-
-        // Note: we use our values as the left-hand-side of our regions
-        for ( size_t i = 0; i < N_m; ++i ) {
-            double val = log( months[i] );
-            FSCoeffic[0] += val;
-            FSCoeffic[1] += val * cos( w*i );
-            FSCoeffic[2] += val * sin( w*i );
-            FSCoeffic[3] += val * cos( 2.0*w*i );
-            FSCoeffic[4] += val * sin( 2.0*w*i );
-        }
-        FSCoeffic[0] /=N_m;
-        FSCoeffic[1] *= 2.0 / N_m;
-        FSCoeffic[2] *= 2.0 / N_m;
-        FSCoeffic[3] *= 2.0 / N_m;
-        FSCoeffic[4] *= 2.0 / N_m;
+        vectors::logDFT(months, FSCoeffic);
+        for (size_t i=1; i<FSCoeffic.size(); ++i)
+            FSCoeffic[i] *= 2;  // HACK to reproduce old results
 
         // The above places the value for the first month at angle 0, so
         // effectively the first month starts at angle -2*pi/24 radians.
@@ -118,7 +104,7 @@ void EmergenceModel::initEIR(
     } else {
         assert( seasonality.getDailyValues().present() );      // XML loading code should enforce this
         throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
-        //TODO
+        //TODO: can we encode as a Fourier series without smoothing?
     }
 
     if ( !seasonality.getAnnualEIR().present() ) {
@@ -126,22 +112,23 @@ void EmergenceModel::initEIR(
         throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
     }
     double targetEIR = seasonality.getAnnualEIR().get();
-
+    
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
-    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
+    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
     // And scale (also acts as a unit conversion):
     FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
-
+    
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    vectors::calcExpFourierSeries (speciesEIR, FSCoeffic, EIRRotateAngle);
-
-    // Add to the TransmissionModel's EIR, used for the initalization phase:
+    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
+    
+    // Add to the TransmissionModel's EIR, used for the initalization phase.
+    // Note: sum stays the same, units changes to per-timestep.
     for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
         // index 1 of initialisationEIR corresponds to first period of year
         initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
     }
-
+    
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
         cout << "Annual EIR for "<<anoph.getMosquito()
              << ": "<<vectors::sum( speciesEIR )<<endl;

@@ -50,7 +50,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTr
     // Log-values: adding log is same as exponentiating, multiplying and taking
     // the log again.
     FSCoeffic[0] += log( EIRtoS_v);
-    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
@@ -102,7 +102,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
     FSRotateAngle -= rAngle;
-    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);

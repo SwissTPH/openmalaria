@@ -81,6 +81,7 @@ set (OM_CXXTEST_HEADERS
   DecayFunctionSuite.h
   PennyInfectionSuite.h
   MosqLifeCycleSuite.h
+  UtilVectorsSuite.h
 )
 
 #Appears to be problems with this on windows...

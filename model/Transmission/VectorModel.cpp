@@ -183,7 +183,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
                                              populationSize);
         speciesIndex[name] = i;
     }
-
+    
     // Calculate total annual EIR
     annualEIR = vectors::sum( initialisationEIR );
 

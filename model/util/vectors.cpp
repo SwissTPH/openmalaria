@@ -98,22 +98,44 @@ gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
   return ret;
 }
 
-void vectors::calcExpFourierSeries (vector<double>& tArray, vector<double>& FC, double rAngle) {
+// NOTE: could replace these algorithms with FFTs, but since these aren't
+// called in performance-critical code, the difference would be insignificant.
+void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
+    if (FC.size() > 2*iArray.size() || FC.size() % 2 == 0)
+        throw TRACED_EXCEPTION_DEFAULT("Require DFT FC.size() to be 2*n-1 for n<=iArray.size()");
+    
+    size_t T = iArray.size();
+    size_t N = (FC.size() + 1) / 2;
+    
+    double w = 2.0 * M_PI / T;
+    FC.assign(FC.size(), 0.0);
+    
+    for (size_t t = 0; t < T; ++t) {
+        double val = log( iArray[t] );
+        FC[0] += val;
+        for (size_t n = 1; n < N; ++n ){
+            FC[2*n-1] += val * cos(w*n*t);
+            FC[2*n  ] += val * sin(w*n*t);
+        }
+    }
+    scale(FC, 1.0 / T);
+}
+
+void vectors::expIDFT (std::vector< double >& tArray, const std::vector< double >& FC, double rAngle) {
     if (FC.size() % 2 == 0)
         throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
-
-    // Frequency
-    double w = 2*M_PI / double(tArray.size());
-
-    // Number of Fourier Modes.
-    int Fn = (FC.size()-1)/2;
-
+    
+    size_t T2 = tArray.size();
+    size_t N = (FC.size() + 1) / 2;
+    
+    double w = 2.0 * M_PI / T2;
+    
     // Calculate inverse discrete Fourier transform
-    for (size_t t=0; t<tArray.size(); t++) {
+    for (size_t t = 0; t < T2; ++t) {
         double temp = FC[0];
         double wt = w*t - rAngle;
-        for (int n=1;n<=Fn;n++) {
-            temp = temp + FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
+        for (size_t n = 1; n < N; ++n) {
+            temp += FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
         }
         tArray[t] = exp(temp);
     }

@@ -65,7 +65,7 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTrans
     // Log-values: adding log is same as exponentiating, multiplying and taking
     // the log again.
     FSCoeffic[0] += log( EIRtoS_v);
-    vectors::calcExpFourierSeries (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     

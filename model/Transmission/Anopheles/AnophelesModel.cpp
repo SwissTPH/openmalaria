@@ -50,8 +50,10 @@ string AnophelesModel::initialise (
 
     transmission.initialise( anoph.getLifeCycle(), anoph.getMosq() );
     
+    // Uses anoph.getNonHumanHosts() and anoph.getMosq():
     initAvailability( anoph, nonHumanHostPopulations, populationSize );
     
+    // Uses anoph.getSeasonality() and three attributes:
     transmission.emergence->initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
     
     return anoph.getMosquito();

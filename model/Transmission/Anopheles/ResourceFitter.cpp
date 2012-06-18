@@ -32,6 +32,7 @@ using namespace OM::util;
 
 bool debugOutput = false;
 
+//TODO: better to use DFT?
 /** @brief Change length of a vector with linear interpolation.
  * @param source Original vector (not changed)
  * @param target Vector to fill (should already be allocated)

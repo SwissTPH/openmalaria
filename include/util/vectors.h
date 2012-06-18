@@ -86,18 +86,32 @@ namespace OM { namespace util { namespace vectors {
   gsl_vector* std2gsl (const double* vec, size_t length);
   //@}
   
-  /** Given an input sequence of Fourier coefficients, with odd length,
-   * calculate the exponential of the corresponding fourier series.
-   *
-   * Note: output is per-interval in tArray. When length is intervalsPerYear,
-   * you may want to scale the output by days-per-interval.
+  /** Calculate what is essentially a discrete Fourier transform of log values.
+   * 
+   * Encoding is slightly different:
+   *  FC[0] is the real component of the first component of the frequency
+   *  domain over T, while FC[2*n-1], FC[2*n] are the real and complex
+   * components of component n over T. (I.e. the first imaginary component,
+   * which is always zero, is not stored, and all components are divided by T).
+   * 
+   * @param iArray Input values; a vector of size T.
+   * @param FC Output values. Should already be allocated, with length
+   *    2*N-1 for 1 ≤ N ≤ T. */
+  void logDFT(const vector<double>& iArray, vector<double>& FC);
+  
+  /** The inverse of logDFT (or an approximation, when N&lt;T or
+   * tArray.size() ≠ T). Result may also be rotated.
+   * 
+   * (This was called calcExpFourierSeries, and does essentially the same
+   * thing.)
    *
    * @param tArray Array to fill with exponated values from Fourier series.
-   * Length should already be set.
+   * Length should already be set. Need not have the same length as the
+   * array used to calculate FC.
    * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...); can be any length
    * so long as it is odd.
    * @param rAngle Angle to rotate generated series by in radians: [0,2π] */
-  void calcExpFourierSeries (vector<double>& tArray, vector<double>& FC, double rAngle);
+  void expIDFT (vector<double>& tArray, const vector<double>& FC, double rAngle);
 }
 
 /// Utility to print a vector (operator must be in namespace)
