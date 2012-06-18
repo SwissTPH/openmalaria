@@ -61,9 +61,32 @@
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>1</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>366</surveyTime>
+      <surveyTime>6</surveyTime>
+      <surveyTime>12</surveyTime>
+      <surveyTime>18</surveyTime>
+      <surveyTime>24</surveyTime>
+      <surveyTime>30</surveyTime>
+      <surveyTime>36</surveyTime>
+      <surveyTime>42</surveyTime>
+      <surveyTime>48</surveyTime>
+      <surveyTime>54</surveyTime>
+      <surveyTime>60</surveyTime>
+      <surveyTime>66</surveyTime>
+      <surveyTime>72</surveyTime>
+      <surveyTime>79</surveyTime>
+      <surveyTime>85</surveyTime>
+      <surveyTime>91</surveyTime>
+      <surveyTime>97</surveyTime>
+      <surveyTime>103</surveyTime>
+      <surveyTime>109</surveyTime>
+      <surveyTime>115</surveyTime>
+      <surveyTime>121</surveyTime>
+      <surveyTime>127</surveyTime>
+      <surveyTime>133</surveyTime>
+      <surveyTime>139</surveyTime>
+      <surveyTime>145</surveyTime>
+      <surveyTime>151</surveyTime>
+      <surveyTime>157</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>
@@ -146,12 +169,12 @@
         <seasonality annualEIR="20" input="EIR">
           <monthlyValues smoothing="fourier">
             <value>10</value>
-            <value>1</value>
-            <value>1</value>
-            <value>1</value>
-            <value>1</value>
-            <value>1</value>
-            <value>1</value>
+            <value>8</value>
+            <value>6</value>
+            <value>6</value>
+            <value>4</value>
+            <value>3</value>
+            <value>2</value>
             <value>1</value>
             <value>1</value>
             <value>1</value>
