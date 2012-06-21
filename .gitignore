@@ -9,6 +9,5 @@ util/SchemaTranslator/translatedScenarios
 util/.metadata
 util/SchemaTranslator/*.class
 .sconsign.dblite
-build
-rel-build
+build*/
 lib
