@@ -224,6 +224,13 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
 	cerr << TimeStep::simulation <<":\t S_v cut-off"<<endl;
             } */
         }
+        
+        // Also allow elimination of mosquitoes.
+        // TODO: parameters in XML? Fixed OK?
+        if (N_v[t] <= 1.0)
+            N_v[t] = 0.0;
+        if (O_v[t] <= 1.0)
+            O_v[t] = 0.0;
     }
     //END S_v
     
