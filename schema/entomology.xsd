@@ -487,6 +487,47 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
+      <xs:element name="simpleMPD" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters describing the simple mosquito population dynamics model.
+            
+            This is a simpler version of the life-cycle model, requiring less
+            parameters and with much simpler initialisation.
+          </xs:documentation>
+          <xs:appinfo>type:list of elements;name:Simple Mosq-Pop-Dynamics parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="developmentDuration" type="intValue">
+              <xs:annotation>
+                <xs:documentation>
+                Duration from egg laying to emergence in days.
+                </xs:documentation>
+                <xs:appinfo>type:integer; units: Days; name:Duration; min:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="developmentSurvival" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                Probability that mosquito survives from the egg being laid to emergence,
+                given no resouce limitations (no density constraints).
+                </xs:documentation>
+                <xs:appinfo>type:double; units:Proportion; name:Probability of survival; min:0; max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                  The total number of female eggs laid by a female
+                  mosquito at the conclusion to a feeding cycle.
+                </xs:documentation>
+                <xs:appinfo>type:integer; units: Eggs per feeding cycle; name:Eggs laid by ovipositing mosquito;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="nonHumanHosts" maxOccurs="unbounded" minOccurs="0">
         <xs:annotation>
           <xs:documentation>Non human host parameters, per type of host (must

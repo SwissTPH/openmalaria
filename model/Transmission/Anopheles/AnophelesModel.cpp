@@ -48,7 +48,7 @@ string AnophelesModel::initialise (
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
     humanBase = mosq;	// read human-specific parameters
 
-    transmission.initialise( anoph.getLifeCycle(), anoph.getMosq() );
+    transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
     
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
     initAvailability( anoph, nonHumanHostPopulations, populationSize );

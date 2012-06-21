@@ -72,8 +72,8 @@ public:
     
     /** Latter part of AnophelesModel::init2.
      *
-     * @param tsP_A P_A for this time step.
-     * @param tsP_df P_df for this time step.
+     * @param tsP_A P_A for initialisation; assumed constant when there are no interventions
+     * @param tsP_df P_df for initialisation; assumed constant when there are no interventions
      * @param EIRtoS_v multiplication factor to convert input EIR into required
      * @param transmission reference to MosqTransmission object
      * S_v. */

@@ -52,8 +52,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
-    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ))
-        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL is only compatible with the vector model (non-vector data present).");
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
+        util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL ))
+        throw util::xml_scenario_error("VECTOR_*_MODEL is only compatible with the vector model (and non-vector data is present).");
     model = new NonVectorModel(nonVectorData.get());
   }
 

@@ -20,7 +20,7 @@
 //TODO: trim includes
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
-#include "Transmission/Anopheles/LCEmergence.h"
+#include "Transmission/Anopheles/SimpleMPDEmergence.h"
 #include "schema/entomology.h"
 #include "util/vectors.h"
 #include "util/errors.h"
@@ -47,15 +47,28 @@ MosqTransmission::MosqTransmission() :
 }
 
 
-void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::Mosq& mosq ) {
-    // TODO: optionally other models
+void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt,
+                                    const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt,
+                                    const scnXml::Mosq& mosq ) {
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
+        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
+            "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
+        /*TODO
+         * Note: this model is older than SimpleMPD and more complicated.
+         * Difficulties are in parameterisation and estimation of resources.
         if (!lcOpt.present())
             throw util::xml_scenario_error(
                 "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
                 "model parameters for each anopheles species");
         emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
         emergence->initLifeCycle( lcOpt.get() );
+        */
+    }else if (util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL )){
+        if (!simpleMPDOpt.present())
+            throw util::xml_scenario_error(
+                "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
+                "model parameters for each anopheles species");
+        emergence = shared_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
     }else
         emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
     
@@ -214,6 +227,8 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
     }
     //END S_v
     
+    //TODO: it should be possible to merge this call with emergence->get()
+    // (S_v can be calculated before N_v).
     emergence->updateStats( d, tsP_dif, S_v[t] );
     
     timestep_N_v0 += newAdults;

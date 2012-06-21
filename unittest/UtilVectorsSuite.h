@@ -23,7 +23,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "ExtraAsserts.h"
-#include "MosqLifeCycleSuite.h"
 
 #include "util/vectors.h"
 
@@ -33,10 +32,9 @@ class UtilVectorsSuite : public CxxTest::TestSuite
 {
 public:
     void testInversion() {
-        // myS_v is some data borrowed from another test
-        vector<double> input( myS_v, myS_v + 365 );
-//         const double data[] = { 10, 8, 6, 6, 4, 3, 2, 1, 1, 1, 1, 1 };
-//         vector<double> input( data, data+6 );
+        // Some test data. Could be any sequence.
+        const double data[] = { 10, 8, 6, 6, 4, 3, 2, 1, 1, 1, 1, 1 };
+        vector<double> input( data, data+6 );
 //         cout << '\n' << input << endl;
         vector<double> freqDomain( input.size() * 2 - 1 );
         vectors::logDFT( input, freqDomain );

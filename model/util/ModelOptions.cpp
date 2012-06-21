@@ -70,6 +70,7 @@ namespace OM { namespace util {
 	    codeMap["UPDATE_DENSITY_GAMMA"]=UPDATE_DENSITY_GAMMA;
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
+            codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {

@@ -215,6 +215,12 @@ namespace OM { namespace util {
          * Requires vector model. */
         VECTOR_LIFE_CYCLE_MODEL,
         
+        /** Turn on the simple mosquito population dynamics model (simpler
+         * version of life-cycle model).
+         * 
+         * Requires vector model. */
+        VECTOR_SIMPLE_MPD_MODEL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

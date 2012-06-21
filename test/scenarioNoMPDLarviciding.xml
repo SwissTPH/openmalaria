@@ -46,14 +46,10 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
       <option name="nHospitalDeaths" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
-      <option name="nEPIVaccinations" value="true"/>
-      <option name="nMassVaccinations" value="true"/>
       <option name="nHospitalRecovs" value="true"/>
-      <option name="nHospitalSeqs" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="Vector_Nv0" value="true"/>
       <option name="Vector_Nv" value="true"/>
@@ -260,6 +256,12 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.939"/>
         </mosq>
+        <simpleMPD>
+          <!-- Values are made up, not from field data! -->
+          <developmentDuration value="11"/>
+          <developmentSurvival value="0.6"/>
+          <femaleEggsLaidByOviposit value="50"/>
+        </simpleMPD>
         <nonHumanHosts name="unprotectedAnimals">
           <mosqRelativeEntoAvailability value="1.0"/>
           <mosqProbBiting value="0.95"/>
@@ -287,6 +289,12 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.98"/>
         </mosq>
+        <simpleMPD>
+          <!-- Values are made up, not from field data! -->
+          <developmentDuration value="11"/>
+          <developmentSurvival value="0.6"/>
+          <femaleEggsLaidByOviposit value="50"/>
+        </simpleMPD>
         <nonHumanHosts name="unprotectedAnimals">
           <mosqRelativeEntoAvailability value="1.0"/>
           <mosqProbBiting value="0.95"/>
@@ -314,6 +322,12 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.871"/>
         </mosq>
+        <simpleMPD>
+          <!-- Values are made up, not from field data! -->
+          <developmentDuration value="11"/>
+          <developmentSurvival value="0.6"/>
+          <femaleEggsLaidByOviposit value="50"/>
+        </simpleMPD>
         <nonHumanHosts name="unprotectedAnimals">
           <mosqRelativeEntoAvailability value="1.0"/>
           <mosqProbBiting value="0.95"/>
@@ -327,6 +341,7 @@
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
+      <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>

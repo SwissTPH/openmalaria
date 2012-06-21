@@ -87,7 +87,7 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
     
     // resource competition during last time-step (L(t) * gamma(t))
     double resourceCompetition = getResRequirements( lcParams )
-        * lcParams.invLarvalResources[dYear1];
+        * lcParams.invLarvalResources[dYear1];  // TODO: scale for larviciding here
     // num new pupae uses larval development formula based on num larvae
     // which were one day away from becoming adults yesterday
     newPupae[d % lcParams.pupalStageDuration] =

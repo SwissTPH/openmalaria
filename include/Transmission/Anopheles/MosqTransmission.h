@@ -58,7 +58,7 @@ public:
      * 
      * This is only a fraction of parameter initialisation; see also
      * AnophelesModel::initialise. */
-    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::Mosq& mosq );
+    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt, const scnXml::Mosq& mosq );
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
@@ -103,6 +103,10 @@ public:
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs ) const;
+    
+    inline double getMosqRestDuration() const {
+        return mosqRestDuration;
+    }
     
     inline double getResAvailability() const{
         return emergence->getResAvailability();
