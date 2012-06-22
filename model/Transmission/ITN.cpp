@@ -316,9 +316,18 @@ double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeInde
 double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
         double holeIndex, double insecticideContent )const
 {
+    // This is essentially a combination of the relative attractiveness as used
+    // by IRS and a killing factor.
+    
+    // Note that an alternative, simpler, model could have been used, but was
+    // not for consistency with other models. Alternative (here we don't take
+    // the logarithm of PF):
+    // pEnt = 1 - PFEntering × insecticideComponent
+    
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScalingEntering);
     double pEnt = exp( lPFEntering*insecticideComponent );
     assert( pEnt >= 0.0 );
+    
     double pAtt = pAttacking.survivalFactor( holeIndex, insecticideContent );
     return pEnt * pAtt;
 }
