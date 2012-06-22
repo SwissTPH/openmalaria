@@ -72,9 +72,9 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Initialise nOvipositingDelayed
-    size_t y1 = TimeStep::DAYS_IN_YEAR,
+    int y1 = TimeStep::DAYS_IN_YEAR,
         tau = transmission.getMosqRestDuration();
-    for (size_t t=0; t<developmentDuration; ++t){
+    for (int t=0; t<developmentDuration; ++t){
         nOvipositingDelayed[(t+tau+developmentDuration) % developmentDuration] =
             tsP_df * initNvFromSv * forcedS_v[t];
     }
@@ -84,7 +84,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Used when calculating invLarvalResources (but not a hard constraint):
     assert(tau+developmentDuration <= y1);
-    for( size_t t=0; t<mosqEmergeRate.size(); ++t ){
+    for( int t=0; t<(int)mosqEmergeRate.size(); ++t ){
         double yt = fEggsLaidByOviposit * tsP_df * initNvFromSv *
             forcedS_v[(t + y1 - tau - developmentDuration) % y1];
         invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
