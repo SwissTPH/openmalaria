@@ -161,6 +161,8 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 // -----  Summary and intervention functions  -----
 
 void EmergenceModel::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
+    // Note: intervention acts first on time-step following deployment. It is
+    // disabled by update() _after_ it's last effective day.
     larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
     larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
 }
