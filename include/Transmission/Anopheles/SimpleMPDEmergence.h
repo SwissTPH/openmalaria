@@ -81,9 +81,7 @@ public:
     
     ///@brief Interventions and reporting
     //@{
-    double getResAvailability() const {
-        return numeric_limits<double>::quiet_NaN();
-    }
+    double getResAvailability() const;
     double getResRequirements() const {
         return numeric_limits<double>::quiet_NaN();
     }

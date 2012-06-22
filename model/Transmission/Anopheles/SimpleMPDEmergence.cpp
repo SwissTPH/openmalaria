@@ -189,6 +189,16 @@ void SimpleMPDEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
     quinquennialS_v[d5Year] = S_v;
 }
 
+double SimpleMPDEmergence::getResAvailability() const {
+    int start = TimeStep::simulation.inDays() - TimeStep::interval;
+    double total = 0;
+    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
+        size_t dYear1 = (start + i) % TimeStep::DAYS_IN_YEAR;
+        total += 1.0 / invLarvalResources[dYear1];
+    }
+    return total / TimeStep::interval;
+}
+
 void SimpleMPDEmergence::checkpoint (istream& stream){ (*this) & stream; }
 void SimpleMPDEmergence::checkpoint (ostream& stream){ (*this) & stream; }
 

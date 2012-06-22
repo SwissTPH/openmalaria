@@ -27,7 +27,7 @@
     <continuous period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
-      <option name="human infectiousness" value="true"/>
+      <option name="N_v" value="true"/>
       <option name="N_v0" value="true"/>
       <option name="immunity h" value="true"/>
       <option name="immunity Y" value="true"/>
@@ -35,6 +35,7 @@
       <option name="num transmitting humans" value="true"/>
       <option name="S_v" value="true"/>
       <option name="simulated EIR"/>
+      <option name="resource availability"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -176,23 +177,32 @@
   </monitoring>
   <interventions name="Full Set">
     <larviciding>
+      <!-- Example larviciding (made up values) -->
       <description>
         <anopheles mosquito="gambiae_ss">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
+          <duration value="18"/>
+          <effectiveness value=".8"/>
         </anopheles>
         <anopheles mosquito="funestus">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
+          <duration value="18"/>
+          <effectiveness value=".8"/>
         </anopheles>
         <anopheles mosquito="arabiensis">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
+          <duration value="18"/>
+          <effectiveness value=".8"/>
         </anopheles>
       </description>
       <timed>
-        <deploy time="1"/>
-        <deploy time="730"/>
+        <!-- Varied times of deployment with two-year breaks -->
+        <deploy time="0"/>
+        <deploy time="155"/>
+        <deploy time="310"/>
+        <deploy time="465"/>
+        <deploy time="620"/>
+        <deploy time="775"/>
+        <deploy time="931"/>
+        <deploy time="1086"/>
+        <deploy time="1241"/>
       </timed>
     </larviciding>
   </interventions>
