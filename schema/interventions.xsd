@@ -967,22 +967,66 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="anophelesParams" maxOccurs="unbounded">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="ITNDeterrency">
-              <xs:annotation>
-                <xs:documentation>
-                Effect of net on attractiveness of humans to mosquitoes relative to
-                an unprotected adult human. Parameterisations should take into
-                account that mosquitoes do not always bite indoors.
-                
-                Attractiveness of the human is multiplied by
-                exp(log(H)×h + log(P)×p + log(I)×h×p
-                where H, P and I are the hole, insecticide and interaction factors
-                respectively, h=exp(-holeIndex×holeScalingFactor) and
-                p=1−exp(-insecticideContent×insecticideScalingFactor).
-                </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+            <xs:choice>
+              <xs:element name="deterrency" type="ITNDeterrency">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on attractiveness of humans to mosquitoes relative to
+                  an unprotected adult human. Parameterisations should take into
+                  account that mosquitoes do not always bite indoors.
+                  
+                  Attractiveness of the human is multiplied by
+                  exp(log(H)×h + log(P)×p + log(I)×h×p
+                  where H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=exp(-holeIndex×holeScalingFactor) and
+                  p=1−exp(-insecticideContent×insecticideScalingFactor).
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="twoStageDeterrency">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on attractiveness of humans to mosquitoes relative to
+                  an unprotected adult human. Parameterisations should take into
+                  account that mosquitoes do not always bite indoors.
+                  
+                  This deterrency model multiplies human attractiveness by
+                  pEnt×pAtt.
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:all>
+                    <xs:element name="entering" type="IRSDeterrency">
+                      <xs:annotation>
+                        <xs:documentation>
+                          pEnt represents the relative probability of entering due to
+                          ITNs: pEnt = exp(log(P)×p) where P is the insecticide
+                          factor and 
+                          p=1−exp(-insecticideContent×insecticideScalingFactor).
+                        </xs:documentation>
+                        <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="attacking" type="ITNKillingEffect">
+                      <xs:annotation>
+                        <xs:documentation>
+                          pAtt represents the relative probability of attacking a human
+                          after entering a house due to ITNs (i.e. of feeding/dying vs.
+                          flying off): pAtt = B + H×h + P×p + I×h×p
+                          where B is the base (without net) probability; H, P and
+                          I are the hole, insecticide and interaction factors
+                          respectively, h=exp(-holeIndex×holeScalingFactor) and
+                          p=1−exp(-insecticideContent×insecticideScalingFactor).
+                        </xs:documentation>
+                        <xs:appinfo>units:dimensionless;name:RA (attacking)</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:all>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
             <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
               <xs:annotation>
                 <xs:documentation>
