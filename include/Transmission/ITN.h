@@ -60,13 +60,8 @@ public:
     ITNAnophelesParams( const ITNParams* b ) :
         base( b ),
         proportionProtected( numeric_limits<double>::signaling_NaN() ),
-        proportionUnprotected( numeric_limits<double>::signaling_NaN() ),
-        _relativeAttractiveness(0)
+        proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
-    ~ITNAnophelesParams(){
-        if (_relativeAttractiveness != 0)
-            delete _relativeAttractiveness;
-    }
     void init(const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
@@ -111,6 +106,8 @@ private:
     };
     class RelativeAttractiveness {
     public:
+        virtual ~RelativeAttractiveness() {}
+        
         /** Calculate effect. Positive is interpreted as having a positive effect
         * (thus decreasing availability or survival) and negative as having a
         * negative effect. Effect is not bounded, though it tends to
@@ -121,6 +118,8 @@ private:
     };
     class RADeterrency : public RelativeAttractiveness {
     public:
+        virtual ~RADeterrency() {}
+        
         /** Set parameters.
          * 
          * It is checked that input parameters lie in a range such that
@@ -136,6 +135,8 @@ private:
     };
     class RATwoStageDeterrency : public RelativeAttractiveness {
     public:
+        virtual ~RATwoStageDeterrency() {}
+        
         /** Set parameters.
          * 
          * It is checked that input parameters lie in a range such that
@@ -153,7 +154,7 @@ private:
     const ITNParams* base;
     double proportionProtected;
     double proportionUnprotected;
-    RelativeAttractiveness *_relativeAttractiveness;
+    shared_ptr<RelativeAttractiveness> _relativeAttractiveness;
     SurvivalFactor _preprandialKillingEffect;
     SurvivalFactor _postprandialKillingEffect;
     

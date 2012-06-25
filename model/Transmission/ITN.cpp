@@ -50,13 +50,11 @@ void ITNAnophelesParams::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse)
 {
-    if (_relativeAttractiveness != 0)
-        delete _relativeAttractiveness;
     if (elt.getDeterrency().present())
-        _relativeAttractiveness = new RADeterrency( params, elt.getDeterrency().get() );
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RADeterrency( params, elt.getDeterrency().get() ));
     else{
         assert (elt.getTwoStageDeterrency().present());
-        _relativeAttractiveness = new RATwoStageDeterrency( params, elt.getTwoStageDeterrency().get() );
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RATwoStageDeterrency( params, elt.getTwoStageDeterrency().get() ));
     }
     _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), "ITN.description.anophelesParams.preprandialKillingFactor" );
     _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), "ITN.description.anophelesParams.postprandialKillingFactor" );
