@@ -258,7 +258,7 @@ void MosqTransmission::uninfectVectors() {
 double MosqTransmission::getLastVecStat ( VecStat vs ) const{
     //Note: implementation isn't performance optimal but rather intended to
     //keep code size low and have no overhead if not used.
-    const vector<double> *array;
+    const vector<double> *array = 0;
     switch( vs ){
         case PA: array = &P_A; break;
         case PDF: array = &P_df; break;
