@@ -327,7 +327,8 @@ double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
     assert( pEnt >= 0.0 );
     
     double pAtt = pAttacking.survivalFactor( holeIndex, insecticideContent );
-    return pEnt * pAtt;
+    // normalise: must have 1 when no insecticide and no net (infinite holes):
+    return pEnt * pAtt / pAttacking.getBF();
 }
 double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);

@@ -992,7 +992,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   account that mosquitoes do not always bite indoors.
                   
                   This deterrency model multiplies human attractiveness by
-                  pEnt×pAtt.
+                  pEnt×pAtt divided by a base factor to normalise the output to
+                  1 when there are no nets.
                   </xs:documentation>
                   <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
                 </xs:annotation>

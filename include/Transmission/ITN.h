@@ -99,6 +99,8 @@ private:
          * prandial killing. Should be bounded to [0,1] and tend to 1 as the
          * net ages. */
         double survivalFactor( double holeIndex, double insecticideContent )const;
+        
+        inline double getBF() const { return BF; }
     private:
         double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
         double holeScaling, insecticideScaling;
