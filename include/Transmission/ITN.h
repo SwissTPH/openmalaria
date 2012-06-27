@@ -95,12 +95,13 @@ private:
          * survival factor between 0 and 1. */
         void init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName);
         
+        /** Part of survival factor, used by new ITN deterrency model. */
+        double rel_pAtt( double holeIndex, double insecticideContent )const;
         /** Calculate additional survival factor imposed by nets on pre-/post-
          * prandial killing. Should be bounded to [0,1] and tend to 1 as the
          * net ages. */
         double survivalFactor( double holeIndex, double insecticideContent )const;
         
-        inline double getBF() const { return BF; }
     private:
         double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
         double holeScaling, insecticideScaling;

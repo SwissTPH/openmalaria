@@ -157,7 +157,10 @@ ITNAnophelesParams::RATwoStageDeterrency::RATwoStageDeterrency(
     if( !( PF > 0.0) ){
         ostringstream msg;
         msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: expected insecticideFactor to be positive.";
-        throw util::xml_scenario_error( msg.str() );
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
     }
     
     /* We need to ensure the relative availability is non-negative. However,
@@ -301,7 +304,10 @@ void ITNAnophelesParams::SurvivalFactor::init(const OM::Transmission::ITNParams&
             msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
         if( !(HF+(PF+IF)*pmax>=0.0) )
             msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
-        throw util::xml_scenario_error( msg.str() );
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
     }
 }
 double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
@@ -326,9 +332,16 @@ double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
     double pEnt = exp( lPFEntering*insecticideComponent );
     assert( pEnt >= 0.0 );
     
-    double pAtt = pAttacking.survivalFactor( holeIndex, insecticideContent );
+    double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
     // normalise: must have 1 when no insecticide and no net (infinite holes):
-    return pEnt * pAtt / pAttacking.getBF();
+    return pEnt * rel_pAtt;
+}
+double ITNAnophelesParams::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
+    double holeComponent = exp(-holeIndex*holeScaling);
+    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
+    double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
+    assert( pAtt <= 1.0 );
+    return pAtt / BF;
 }
 double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
