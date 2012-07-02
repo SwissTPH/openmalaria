@@ -314,7 +314,10 @@ double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeInde
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
-    assert( relAvail>=0.0 );
+    //TODO: limits
+    //assert( relAvail>=0.0 );
+    if (relAvail < 0)
+        relAvail = 0.0;
     return relAvail;
 }
 double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
@@ -334,22 +337,31 @@ double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
     
     double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
     // normalise: must have 1 when no insecticide and no net (infinite holes):
+    //TODO: limits
+    if (pEnt * rel_pAtt < 0.0)
+        return 0.0;
     return pEnt * rel_pAtt;
 }
 double ITNAnophelesParams::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    assert( pAtt <= 1.0 );
+    //TODO: limits
+    //assert( pAtt <= 1.0 );
     return pAtt / BF;
 }
 double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    assert( killingEffect <= 1.0 );
+    //assert( killingEffect <= 1.0 );
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    assert( survivalFactor >= 0.0 );
+    //TODO: limits
+    //assert( survivalFactor >= 0.0 );
+    if (survivalFactor < 0.0)
+        return 0.0;
+    else if (survivalFactor > 1.0)
+        return 1.0;
     return survivalFactor;
 }
 

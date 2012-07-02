@@ -182,7 +182,10 @@ double IRSAnophelesParams::RelativeAttractiveness::relativeAttractiveness(
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lPF*insecticideComponent );
-    assert( relAvail>=0.0 );
+    //TODO: limits
+    //assert( relAvail>=0.0 );
+    if (relAvail < 0.0)
+        return 0.0;
     return relAvail;
 }
 double IRSAnophelesParams::SurvivalFactor::survivalFactor(
@@ -191,7 +194,12 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + PF*insecticideComponent;
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    assert( survivalFactor>=0.0 );
+    //TODO: limits
+    //assert( survivalFactor >= 0.0 );
+    if (survivalFactor < 0.0)
+        return 0.0;
+    else if (survivalFactor > 1.0)
+        return 1.0;
     return survivalFactor;
 }
 
