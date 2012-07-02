@@ -89,7 +89,7 @@ void InfectionIncidenceModel::init () {
     cerr << "Warning: will use heterogeneity workaround." << endl;
   
   using Monitoring::Continuous;
-  Continuous::registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
+  Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
 }
 
 

@@ -84,31 +84,31 @@ Population::Population()
     : populationSize (InputData().getDemography().getPopSize())
 {
     using Monitoring::Continuous;
-    Continuous::registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
+    Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     // Age groups are currently hard-coded.
     ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
     ostringstream ctsDemogTitle;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
-    Continuous::registerCallback( "host demography", ctsDemogTitle.str(),
+    Continuous.registerCallback( "host demography", ctsDemogTitle.str(),
         MakeDelegate( this, &Population::ctsHostDemography ) );
-    Continuous::registerCallback( "recent births", "\trecent births",
+    Continuous.registerCallback( "recent births", "\trecent births",
         MakeDelegate( this, &Population::ctsRecentBirths ) );
-    Continuous::registerCallback( "patent hosts", "\tpatent hosts",
+    Continuous.registerCallback( "patent hosts", "\tpatent hosts",
         MakeDelegate( this, &Population::ctsPatentHosts ) );
-    Continuous::registerCallback( "immunity h", "\timmunity h",
+    Continuous.registerCallback( "immunity h", "\timmunity h",
         MakeDelegate( this, &Population::ctsImmunityh ) );
-    Continuous::registerCallback( "immunity Y", "\timmunity Y",
+    Continuous.registerCallback( "immunity Y", "\timmunity Y",
         MakeDelegate( this, &Population::ctsImmunityY ) );
-    Continuous::registerCallback( "median immunity Y", "\tmedian immunity Y",
+    Continuous.registerCallback( "median immunity Y", "\tmedian immunity Y",
         MakeDelegate( this, &Population::ctsMedianImmunityY ) );
-    Continuous::registerCallback( "human age availability",
+    Continuous.registerCallback( "human age availability",
         "\thuman age availability",
         MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
-    Continuous::registerCallback( "nets owned", "\tnets owned",
+    Continuous.registerCallback( "nets owned", "\tnets owned",
         MakeDelegate( this, &Population::ctsNetsOwned ) );
-    Continuous::registerCallback( "mean hole index", "\tmean hole index",
+    Continuous.registerCallback( "mean hole index", "\tmean hole index",
         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);

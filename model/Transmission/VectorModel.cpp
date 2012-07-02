@@ -224,32 +224,32 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
         ctsRR<<"\tres req("<<name<<")";
     }
     using Monitoring::Continuous;
-    Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
-    Continuous::registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
-    Continuous::registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
-    Continuous::registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
-    Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
-    Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorModel::ctsCbO_v ) );
-    Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorModel::ctsCbS_v ) );
+    Continuous.registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
+    Continuous.registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
+    Continuous.registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
+    Continuous.registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
+    Continuous.registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
+    Continuous.registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorModel::ctsCbO_v ) );
+    Continuous.registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorModel::ctsCbS_v ) );
     // availability to mosquitoes relative to other humans, excluding age factor
-    Continuous::registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
-    Continuous::registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
-    Continuous::registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
-    Continuous::registerCallback( "mean insecticide content",
+    Continuous.registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
+    Continuous.registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
+    Continuous.registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
+    Continuous.registerCallback( "mean insecticide content",
         "\tmean insecticide content",
         MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
     // Mean IRS insecticide across whole population
-    Continuous::registerCallback( "IRS insecticide content",
+    Continuous.registerCallback( "IRS insecticide content",
         "\tIRS insecticide content",
         MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
     // Mean values of relative attractiveness, pre- and post-prandial survival
     // IRS-induced factors of mosquitoes (i.e. only the portion of deterrent
     // and killing effects attributable to IRS).
-    Continuous::registerCallback( "IRS effects", ctsIRSEffects.str(),
+    Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
         MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
-    Continuous::registerCallback( "resource availability", ctsRA.str(),
+    Continuous.registerCallback( "resource availability", ctsRA.str(),
         MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
-    Continuous::registerCallback( "resource requirements", ctsRR.str(),
+    Continuous.registerCallback( "resource requirements", ctsRR.str(),
         MakeDelegate( this, &VectorModel::ctsCbResRequirements ) );
 }
 VectorModel::~VectorModel () {

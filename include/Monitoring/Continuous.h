@@ -35,25 +35,28 @@ namespace OM { namespace Monitoring {
      *  (1) frequency of and which data is output should be controllable
      *  (2) format should be compatible with LiveGraph and (German) Excel.
      */
-    class Continuous {
+    class ContinuousType {
     public:
+        // frees memory
+        ~ContinuousType();        
+        
 	/** Load XML description of options. If resuming from a checkpoint,
 	 * append to output; if not, make sure it's not there (on boinc we
 	 * assume we shouldn't overwrite existing files for security reasons).
 	 * 
 	 * Callbacks should be registered before init() is called. */
-	static void init (bool isCheckpoint);
+	void init (bool isCheckpoint);
         
         /** When compiled in BOINC mode, this copies data to the final
          * compressing output file. Otherwise it does nothing. */
-        static void finalise ();
-	
-	/** @brief Checkpointing functions */
-	//@{
-	static void staticCheckpoint (ostream& stream);
-	static void staticCheckpoint (istream& stream);
-	//@}
-	
+        void finalise();
+        
+        /// Checkpointing
+        template<class S>
+        void operator& (S& stream) {
+            checkpoint (stream);
+        }
+        
 	/** Register a callback function which produces output.
 	 *
 	 * This function will be called to generate output, if enabled in XML.
@@ -66,13 +69,18 @@ namespace OM { namespace Monitoring {
 	 * @param outputCb A callback function, which when called, outputs its
 	 * data to the passed stream, with each entry preceeded by '\t'.
 	 */
-        static void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
+        void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
         /// As above, except that the called delegate is passed a reference to the Population object
-        static void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const Population&, ostream&>);
+        void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const Population&, ostream&>);
 	
 	/// Generate time-step's output. Called at beginning of timestep.
         /// Passed population since some callbacks use this to generate output.
-	static void update (const Population& population);
+	void update (const Population& population);
+        
+    private:
+        void checkpoint(ostream& stream);
+        void checkpoint(istream& stream);
     };
+    extern ContinuousType Continuous;
 } }
 #endif
