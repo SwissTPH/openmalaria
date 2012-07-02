@@ -32,6 +32,7 @@ set (OM_BOXTEST_NAMES
   VecFullTest
   VecTest
   VecMonthly
+  SimpleMPDTest
   NoMPDLarviciding
   SimpleMPDLarviciding
 )
