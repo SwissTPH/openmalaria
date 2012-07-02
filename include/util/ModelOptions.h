@@ -231,30 +231,40 @@ namespace OM { namespace util {
     public:
 	/** Return true if given option (from OptionCodes) is active. */
 	static inline bool option(OptionCodes code) {
-	    /* Performance:
-	    using bitset<>::operator[] constructs and returns some kind of
-	    reference. It's slow! bitset<>::test() isn't much better, hence
-	    reverted to integer binary ops (1/8th time). (Also note: this was
-	    the only use of bitset<> with significant performance impact.)
-	    */
-	    return (optSet & (1<<code)) != 0u;
+	    return optArray[code];
 	}
 	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
 	 * TRIPLE_HET are active. */
 	static inline bool anyTransHet () {
-	    static const uint32_t anyHet = 1<<TRANS_HET | 1<<COMORB_TRANS_HET | 1<<TRANS_TREAT_HET | 1<<TRIPLE_HET;
-	    return (optSet & anyHet) != 0u;
+            return optArray[TRANS_HET] || optArray[COMORB_TRANS_HET] ||
+                optArray[TRANS_TREAT_HET] || optArray[TRIPLE_HET];
 	}
 	
 	/// Set options from XML file.
         /// Relies on Global::init() already having been called.
 	static void init ();
-	
+        
     private:
+        // Reset opts to default. Used by unit tests.
+        static inline void reset() {
+            optArray.assign(NUM_OPTIONS, false);
+            optArray[MAX_DENS_CORRECTION] = true;
+        }
+        static inline void set(OptionCodes code) {
+            optArray[code] = true;
+        }
+        
 	/** Model options.
 	 *
-	 * Default value set by init(). */
-	static uint32_t optSet;
+	 * Default value set by init().
+         *
+         * Space-wise, using an int for each bit is very inefficient. But
+         * that's irrelevant compared to the size of the program!
+         * 
+         * TODO: performance is not as good as using a uint32_t (which is now
+         * too small). Maybe use uint64_t?
+         */
+	static vector<bool> optArray;
 	
 	friend class ::UnittestUtil;	// Note: class is in base namespace
     };

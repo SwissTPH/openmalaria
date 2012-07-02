@@ -341,7 +341,7 @@
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
-      <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
+      <option name="VECTOR_SIMPLE_MPD_MODEL" value="false"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
