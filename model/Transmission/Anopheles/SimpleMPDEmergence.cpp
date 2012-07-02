@@ -34,7 +34,9 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
-SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) {
+SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
+    initNv0FromSv( numeric_limits<double>::quiet_NaN() )
+{
     quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
     quinquennialOvipositing.assign (TimeStep::fromYears(5).inDays(), 0.0);
     mosqEmergeRate.assign (TimeStep::DAYS_IN_YEAR, 0.0);
@@ -75,7 +77,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     int y1 = TimeStep::DAYS_IN_YEAR,
         tau = transmission.getMosqRestDuration();
     for (int t=0; t<developmentDuration; ++t){
-        nOvipositingDelayed[(t+tau+developmentDuration) % developmentDuration] =
+        nOvipositingDelayed[(t+tau) % developmentDuration] =
             tsP_df * initNvFromSv * forcedS_v[t];
     }
     

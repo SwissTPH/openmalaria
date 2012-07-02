@@ -35,6 +35,10 @@ using namespace OM::util;
 // -----  Initialisation of model, done before human warmup  ------
 
 EmergenceModel::EmergenceModel() :
+            EIRRotateAngle(numeric_limits<double>::quiet_NaN()),
+            FSRotateAngle(numeric_limits<double>::quiet_NaN()),
+            initNvFromSv(numeric_limits<double>::quiet_NaN()),
+            initOvFromSv(numeric_limits<double>::quiet_NaN()),
             larvicidingEndStep (TimeStep::future),
             larvicidingIneffectiveness (1.0)
 {

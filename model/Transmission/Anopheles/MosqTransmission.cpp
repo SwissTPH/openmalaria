@@ -25,6 +25,7 @@
 #include "util/vectors.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
+#include "util/StreamValidator.h"
 
 namespace OM {
 namespace Transmission {
@@ -153,6 +154,7 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
     
     double nOvipositing = P_df[ttau] * N_v[ttau];
     double newAdults = emergence->get( d, dYear1, nOvipositing );
+    util::streamValidate( newAdults );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
     // yesterday + those who found a host tau days ago and survived cycle:
