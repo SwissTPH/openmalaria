@@ -53,7 +53,8 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    // add ...size() to make sure LHS of % is non-negative:
+    int firstDay = invLarvalResources.size() + TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
         size_t t = (i + firstDay) % invLarvalResources.size();
         val += 1.0 / invLarvalResources[t];

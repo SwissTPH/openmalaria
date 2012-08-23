@@ -1,6 +1,6 @@
 ##	##
 simulation time	timestep	input EIR	simulated EIR	human infectiousness	N_v0(gambiae_ss)	N_v(gambiae_ss)	O_v(gambiae_ss)	S_v(gambiae_ss)	immunity h	immunity Y	new infections	num transmitting humans	res avail(gambiae_ss)	res req(gambiae_ss)
-0	-1073741823	1.53596	0	0	0	3779.07	294.767	79.3605	0	0	0	0	1296.13	nan
+0	-1073741823	1.53596	0	0	0	3779.07	294.767	79.3605	0	0	0	0	834.016	nan
 1	-1073741822	1.44137	-nan	0	454.08	4109.93	241.106	64.9132	0.02	0	2	0	775.263	nan
 2	-1073741821	1.34459	-nan	0	424.569	4052.78	158.322	42.6253	0.04	0	2	0	723.834	nan
 3	-1073741820	1.24957	-nan	0	399.502	3931.86	103.915	27.9772	0.05	0	1	0	680.573	nan
