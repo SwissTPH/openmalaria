@@ -271,7 +271,8 @@ double MosqTransmission::getLastVecStat ( VecStat vs ) const{
         default: assert( false );
     }
     double val = 0.0;
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
+    // add N_v_length to make sure LHS of % below is non-negative:
+    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1 + N_v_length;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
         size_t t = (i + firstDay) % N_v_length;
         val += (*array)[t];
