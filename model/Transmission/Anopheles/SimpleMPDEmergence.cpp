@@ -173,6 +173,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 
 
 double SimpleMPDEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
+    assert( d >= 0 );   // used as LHS of % below
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
@@ -187,12 +188,14 @@ double SimpleMPDEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
 }
 
 void SimpleMPDEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
+    assert( d >= 0 );   // used as LHS of % below
     size_t d5Year = d % TimeStep::fromYears(5).inDays();
     quinquennialS_v[d5Year] = S_v;
 }
 
 double SimpleMPDEmergence::getResAvailability() const {
-    int start = TimeStep::simulation.inDays() - TimeStep::interval;
+    // add one year to make sure LHS of % is non-negative:
+    int start = TimeStep::DAYS_IN_YEAR + TimeStep::simulation.inDays() - TimeStep::interval;
     double total = 0;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
         size_t dYear1 = (start + i) % TimeStep::DAYS_IN_YEAR;
