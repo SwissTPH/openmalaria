@@ -190,7 +190,7 @@ double LCEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
 }
 
 void LCEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = d % TimeStep::fromYears(5).inDays();
+    size_t d5Year = moda(d, TimeStep::fromYears(5).inDays());
     quinquennialP_dif[d5Year] = tsP_dif;
 }
 

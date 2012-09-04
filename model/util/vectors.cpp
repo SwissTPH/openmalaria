@@ -107,7 +107,7 @@ void vectors::logFourierCoefficients(const vector<double>& iArray, vector<double
 // NOTE: could replace these algorithms with FFTs, but since these aren't
 // called in performance-critical code, the difference would be insignificant.
 void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
-    if (FC.size() > 2*iArray.size() || FC.size() % 2 == 0)
+    if (FC.size() > 2*iArray.size() || mod_nn(FC.size(), 2) == 0)
         throw TRACED_EXCEPTION_DEFAULT("Require DFT FC.size() to be 2*n-1 for n<=iArray.size()");
     
     size_t T = iArray.size();
@@ -128,7 +128,7 @@ void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
 }
 
 void vectors::expIDFT (std::vector< double >& tArray, const std::vector< double >& FC, double rAngle) {
-    if (FC.size() % 2 == 0)
+    if (mod_nn(FC.size(), 2) == 0)
         throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     
     size_t T2 = tArray.size();

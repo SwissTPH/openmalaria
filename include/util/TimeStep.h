@@ -1,7 +1,7 @@
 /*
  This file is part of OpenMalaria.
 
- Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,10 +21,7 @@
 #ifndef Hmod_TimeStep
 #define Hmod_TimeStep
 
-#ifndef Hmod_Global
-#error "Please include Global.h not TimeStep.h directly."
-// otherwise "using ..." declaration in Global.h won't work
-#endif
+#include "util/mod.h"
 
 #include <iostream>
 #include <cassert>
@@ -170,13 +167,6 @@ public:
     inline TimeStep operator+( const TimeStep rhs )const {
         return TimeStep( _ts + rhs._ts );
     }
-    // returns an int since common usage is to get an array index
-    inline int operator%( int rhs )const {
-        return  _ts % rhs;
-    }
-    inline TimeStep operator%( TimeStep rhs )const {
-        return  TimeStep( _ts % rhs._ts );
-    }
     // scale the TimeStep by a double, rounding to nearest
     inline TimeStep operator*( double rhs )const {
         return TimeStep( static_cast<int>(_ts * rhs + 0.5) );
@@ -216,10 +206,28 @@ public:
     }
     
     friend std::ostream& operator<<( std::ostream&, const TimeStep );
+    friend int mod_nn( const TimeStep, int );
+    friend int mod( const TimeStep, int );
+    friend TimeStep mod_nn( const TimeStep, const TimeStep );
+    friend TimeStep mod( const TimeStep, const TimeStep );
 };
 
 inline std::ostream& operator<<( std::ostream& stream, const TimeStep ts ){
     return( stream << ts._ts );
+}
+
+// returns an int since common usage is to get an array index
+inline int mod_nn( const TimeStep ts, int rhs ) {
+    return util::mod_nn(ts._ts, rhs);
+}
+inline int mod( const TimeStep ts, int rhs ) {
+    return util::mod(ts._ts, rhs);
+}
+inline TimeStep mod_nn( const TimeStep lhs, const TimeStep rhs ){
+    return TimeStep(util::mod_nn(lhs._ts, rhs._ts));
+}
+inline TimeStep mod( const TimeStep lhs, const TimeStep rhs ){
+    return TimeStep(util::mod(lhs._ts, rhs._ts));
 }
 
 }

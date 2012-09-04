@@ -31,16 +31,22 @@
 #define NOMINMAX
 #endif
 
+// unit32_t and similar, mostly for compatibility with MSVC:
 #include <boost/cstdint.hpp>
 
+// Checkpointing and time-step operations are used _everywhere_:
 #include "util/checkpoint.h"
+#include "util/mod.h"
 #include "util/TimeStep.h"
 
 namespace OM {
+
 using boost::uint32_t;
 
-using namespace OM::util::checkpoint;
-using OM::util::TimeStep;
-}
+using namespace util::checkpoint;
+using util::TimeStep;
+using util::mod;
+using util::mod_nn;
 
+}
 #endif

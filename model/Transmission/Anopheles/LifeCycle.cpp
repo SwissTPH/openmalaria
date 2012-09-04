@@ -53,10 +53,9 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
-    // add ...size() to make sure LHS of % is non-negative:
     int firstDay = invLarvalResources.size() + TimeStep::simulation.inDays() - TimeStep::interval + 1;
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t t = (i + firstDay) % invLarvalResources.size();
+        size_t t = mod(i + firstDay, invLarvalResources.size());
         val += 1.0 / invLarvalResources[t];
     }
     return val / TimeStep::interval;
@@ -84,14 +83,14 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
     // num newly emerging adults comes from num new pupae
     // pupalStageDuration days ago:
     double newAdults =
-        lcParams.pSurvPupalStage * newPupae[d % lcParams.pupalStageDuration];
+        lcParams.pSurvPupalStage * newPupae[mod_pp(d, lcParams.pupalStageDuration)];
     
     // resource competition during last time-step (L(t) * gamma(t))
     double resourceCompetition = getResRequirements( lcParams )
         * lcParams.invLarvalResources[dYear1];  // TODO: scale for larviciding here
     // num new pupae uses larval development formula based on num larvae
     // which were one day away from becoming adults yesterday
-    newPupae[d % lcParams.pupalStageDuration] =
+    newPupae[mod_pp(d, lcParams.pupalStageDuration)] =
         lcParams.pSurvDayAsLarvae * numLarvae[lcParams.larvalStageDuration-1] /
         ( 1.0 + resourceCompetition * lcParams.effectCompetitionOnLarvae[lcParams.larvalStageDuration-1] );
     for( size_t age=lcParams.larvalStageDuration-1;age>=1;--age ){
@@ -101,11 +100,11 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
     
     // num new larvae comes from num eggs laid eggStageDuration days ago:
     numLarvae[ 0 ] =
-        lcParams.pSurvEggStage * newEggs[d % lcParams.eggStageDuration];
+        lcParams.pSurvEggStage * newEggs[mod_pp(d, lcParams.eggStageDuration)];
     
     // num eggs laid depends on number of mosquitoes which completed a
     // feeding & egg-laying cycle starting tau days ago:
-    newEggs[d % lcParams.eggStageDuration] =
+    newEggs[mod_pp(d, lcParams.eggStageDuration)] =
         lcParams.fEggsLaidByOviposit * nOvipositingMosqs;
     
     return newAdults;

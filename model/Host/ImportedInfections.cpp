@@ -64,7 +64,7 @@ void ImportedInfections::import( Population& population ){
     assert( TimeStep::interventionPeriod >= TimeStep(0) );
     TimeStep now = TimeStep::interventionPeriod;
     if( period > TimeStep(0) ){
-        now = now % period;
+        now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){
         lastIndex = 0;  // gone round in a loop: back to start of period

@@ -248,7 +248,7 @@ void Simulation::writeCheckpoint(){
     if (isCheckpoint()) {
         oldCheckpointNum = readCheckpointNum();
         // Get next checkpoint number:
-        checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
+        checkpointNum = mod_nn(oldCheckpointNum + 1, NUM_CHECKPOINTS);
     }
     
     {   // Open the next checkpoint file for writing:

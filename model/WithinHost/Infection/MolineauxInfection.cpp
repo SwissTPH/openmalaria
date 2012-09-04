@@ -301,7 +301,7 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
 
     // if t+2: The new variant is now expressed. For already extinct
     // variants this doesn't matter, since initP = 0 for those variants.
-    if (P==0 && ageOfInfection%2==0)
+    if (P==0 && mod_nn(ageOfInfection, 2)==0)
     {
         P = initP;
     }
@@ -338,7 +338,7 @@ bool MolineauxInfection::updateDensity(double survivalFactor, TimeStep ageOfInfe
     {
         // if the infection isn't extinct and t = t+2
         // then the growthRateMultiplier is adapted for t+3 and t+4
-        if (ageOfInfection%2==0)
+        if (mod_nn(ageOfInfection, 2)==0)
         {
             updateGrowthRateMultiplier();
         }
@@ -356,7 +356,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
 
     //Molineaux paper equation 6
-    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
     //note: sigma_decay = exp(-2*sigma)
     variantSpecificSummation = static_cast<float>((variantSpecificSummation * sigma_decay)+laggedP[index]);
     laggedP[index] = P;
@@ -367,7 +367,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
 double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 5
-    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
     //Note: rho is zero, so the decay here is unnecessary:
     variantTranscendingSummation = (variantTranscendingSummation /* * exp(-2.0*rho) */)+laggedPc[index];
 

@@ -259,7 +259,7 @@ private:
   /** Total asexual blood stage density over last 20 days (uses samples from
    * 10, 15 and 20 days ago).
    *
-   * _ylag[TimeStep::simulation % _ylagLen] corresponds to the density from the
+   * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
    * previous time step (once updateInfection has been called). */
   vector<double> _ylag;
   /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.

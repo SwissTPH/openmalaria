@@ -214,7 +214,7 @@ protected:
    * 
    * Length: time-steps per year
    *
-   * Index TimeStep::simulation % TimeStep::stepsPerYear corresponds to the EIR
+   * Index mod(TimeStep::simulation, TimeStep::stepsPerYear) corresponds to the EIR
    * acting on the current time-step: i.e. total inoculations since the
    * previous time-step.
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the

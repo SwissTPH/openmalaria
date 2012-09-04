@@ -66,7 +66,7 @@ void vector_scale_length( const gsl_vector *source, gsl_vector *target ){
             double wSum = wStart + wEnd + (iEnd - iStart - 1);
             // Note: iEnd *may* be source->size; all other indecies will be smaller
             double wVal = wStart*gsl_vector_get(source, iStart) +
-                wEnd*gsl_vector_get(source, iEnd % source->size);
+                wEnd*gsl_vector_get(source, mod_pp(iEnd, source->size));
             for( size_t i = iStart+1; i<iEnd; ++i ){
                 wVal += gsl_vector_get(source, i);
             }
@@ -146,9 +146,9 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
     target = S_v;
     
     annualP_dif.assign( TimeStep::DAYS_IN_YEAR, 0 );
-    assert( sampledP_dif.size() % annualP_dif.size() == 0 );
+    assert( mod_pp(sampledP_dif.size(), annualP_dif.size()) == 0 );
     for( size_t i=0; i<sampledP_dif.size(); ++i )
-        annualP_dif[ i%annualP_dif.size() ] += sampledP_dif[ i ];
+        annualP_dif[ mod_pp(i, annualP_dif.size()) ] += sampledP_dif[ i ];
     double factor = static_cast<double>(annualP_dif.size()) / static_cast<double>(sampledP_dif.size());
     for( size_t i=0; i<annualP_dif.size(); ++i )
         annualP_dif[ i ] *= factor;
@@ -158,7 +158,7 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
     for( size_t i=0; i<sampledP_dif.size(); ++i ){
         //TODO: increase tolerance
         //FIXME: what is the point of this? We just set annualP_dif from sampledP_dif!!
-        double thisTol = assertSimilarP_dif( annualP_dif[ i%annualP_dif.size() ], sampledP_dif[ i ], 2 );
+        double thisTol = assertSimilarP_dif( annualP_dif[ mod_pp(i, annualP_dif.size()) ], sampledP_dif[ i ], 2 );
         maxTolNeeded = max( maxTolNeeded, thisTol );
         sumAnnualP_dif[ i/annualP_dif.size() ] += sampledP_dif[ i ];
     }
@@ -325,12 +325,11 @@ void ResourceFitter::simulate1Year()
     size_t end = 10*TimeStep::DAYS_IN_YEAR;
     size_t lastDDifferent = 0;
     for( size_t d = 1; d<end; ++d ){
-        double S_v = transmission.update( d, P_A, P_df, annualP_dif[d%TimeStep::DAYS_IN_YEAR], false, debugOutput );
+        size_t dYear = mod_pp(d, TimeStep::DAYS_IN_YEAR);
+        double S_v = transmission.update( d, P_A, P_df, annualP_dif[dYear], false, debugOutput );
         
-        size_t dYear = d % TimeStep::DAYS_IN_YEAR;
         if( fitTarget == FT_EMERGENCE ){
             assert(false);
-            // NOTE: should this have been (d-1)%daysinyear or just d%...?
             //samples[ dYear1 ] = newAdults;
         }else if( fitTarget == FT_S_V ){
             if( !similar( samples[ dYear ], S_v, 1.001 ) )

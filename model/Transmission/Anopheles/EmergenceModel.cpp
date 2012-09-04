@@ -132,7 +132,7 @@ void EmergenceModel::initEIR(
     // Note: sum stays the same, units changes to per-timestep.
     for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
         // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
+        initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
     }
     
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {

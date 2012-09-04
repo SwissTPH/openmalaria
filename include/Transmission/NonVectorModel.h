@@ -112,7 +112,7 @@ private:
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness).
    * 
-   * In either case, TimeStep::simulation % initialKappa.size() is the index
+   * In either case, mod(TimeStep::simulation, initialKappa.size()) is the index
    * for the current infectiousness during updates. */
   vector<double> initialKappa; 
 };

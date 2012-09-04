@@ -235,10 +235,10 @@ namespace OM { namespace Monitoring {
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){
-            if( TimeStep::interventionPeriod < TimeStep(0) || TimeStep::interventionPeriod % ctsPeriod != 0 )
+            if( TimeStep::interventionPeriod < TimeStep(0) || mod_nn(TimeStep::interventionPeriod, ctsPeriod) != 0 )
                 return;
         } else {
-            if( TimeStep::simulation % ctsPeriod != 0 )
+            if( mod_nn(TimeStep::simulation, ctsPeriod) != 0 )
                 return;
             ctsOStream << TimeStep::simulation << '\t';
         }

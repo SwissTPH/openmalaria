@@ -92,7 +92,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // average annual period of S_v over 5 years
     vector<double> avgAnnualS_v( TimeStep::DAYS_IN_YEAR, 0.0 );
     for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[i % TimeStep::fromYears(1).inDays()] =
+        avgAnnualS_v[mod_nn(i, TimeStep::fromYears(1).inDays())] =
             quinquennialS_v[i] / 5.0;
     }
 
@@ -119,7 +119,7 @@ double FixedEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
 }
 
 void FixedEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = d % TimeStep::fromYears(5).inDays();
+    size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());
     quinquennialS_v[d5Year] = S_v;
 }
 

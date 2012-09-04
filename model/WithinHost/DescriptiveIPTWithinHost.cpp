@@ -112,7 +112,7 @@ void DescriptiveIPTWithinHost::continuousIPT (Monitoring::AgeGroup ageGroup, boo
   static int IPT_MAX_INTERVAL[9] = { 61, 67,  0,  6, 12, 55, 49, 43, 31 };
   
   if (iptiEffect >= IPT_SEASONAL_MIN && iptiEffect <= IPT_SEASONAL_MAX) {
-    int yearInterval = TimeStep::simulation % TimeStep::stepsPerYear;
+    int yearInterval = mod_nn(TimeStep::simulation, TimeStep::stepsPerYear);
     int min = IPT_MIN_INTERVAL[iptiEffect-14];
     int max = IPT_MAX_INTERVAL[iptiEffect-14];
     // We're using modular arithmatic here, to represent a time period 5*18 days long.

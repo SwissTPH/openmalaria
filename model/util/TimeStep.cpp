@@ -50,7 +50,7 @@ TimeStep TimeStep::interventionPeriod( TimeStep::never );
 
 void TimeStep::init( int daysPerTimeStep, double maxAgeYears ) {
     interval = daysPerTimeStep;
-    if (DAYS_IN_YEAR % interval != 0) {
+    if (mod_nn(DAYS_IN_YEAR, interval) != 0) {
         throw util::xml_scenario_error( "Global::DAYS_IN_YEAR not a multiple of interval" );
     }else if (maxAgeYears < 1.0){
         throw util::xml_scenario_error( "maximumAgeYrs must be at least 1" );

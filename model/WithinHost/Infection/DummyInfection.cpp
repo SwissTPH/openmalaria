@@ -53,7 +53,7 @@ bool DummyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
     const double GROWTH_RATE = 8.0;
     const double PARASITE_THRESHOLD = 1;
     
-    _density = (int(_density*GROWTH_RATE) % 20000) * survivalFactor;
+    _density = (mod_nn(int(_density*GROWTH_RATE), 20000)) * survivalFactor;
     _cumulativeExposureJ += TimeStep::interval * _density;
     
     if (_density < PARASITE_THRESHOLD) {

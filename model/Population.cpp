@@ -310,7 +310,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
     }
     sort( list.begin(), list.end() );
     double x;
-    if( populationSize % 2 == 0 ){
+    if( mod_nn(populationSize, 2) == 0 ){
         size_t i = populationSize / 2;
         x = (list[i-1]+list[i])/2.0;
     }else{

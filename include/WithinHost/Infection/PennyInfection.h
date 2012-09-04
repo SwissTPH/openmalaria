@@ -46,7 +46,7 @@ public:
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(){
-        size_t todayV = TimeStep::simulation % delta_V;
+        size_t todayV = mod_nn(TimeStep::simulation, delta_V);
         return seqDensities[todayV];
     }
 

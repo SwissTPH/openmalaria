@@ -342,7 +342,7 @@ TimeStep VectorModel::initIterate () {
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
     host.update(_ITNParams);
     if (simulationMode == forcedEIR){
-        return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
+        return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );

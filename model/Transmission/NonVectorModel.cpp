@@ -115,9 +115,9 @@ TimeStep NonVectorModel::initIterate (){
     // initialKappa is used in calculateEIR
     size_t yearLen = TimeStep::fromYears(1).asInt();
     assert( initialKappa.size() >= yearLen );
-    assert( initialKappa.size() % yearLen == 0 );
+    assert( mod_nn(initialKappa.size(), yearLen) == 0 );
     for( size_t i=yearLen; i<initialKappa.size(); ++i ){
-        initialKappa[ i % yearLen ] += initialKappa[ i ];
+        initialKappa[mod_nn(i , yearLen )] += initialKappa[ i ];
     }
     double factor = static_cast<double>(yearLen) / static_cast<double>(initialKappa.size());
     initialKappa.resize( yearLen );
@@ -180,7 +180,7 @@ void NonVectorModel::update (const std::list<Host::Human>& population, int popul
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
-        initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
+        initialKappa[mod_nn(TimeStep::simulation , initialKappa.size() )] = currentKappa;
     }
 }
 
@@ -190,7 +190,7 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   double eir;
   switch (simulationMode) {
     case forcedEIR:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -198,14 +198,14 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
       eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
 	eir *=
-            laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()] /
-            initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
+            laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())] /
+            initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)];
       }
       break;
     default:	// Anything else.. don't continue silently
@@ -215,8 +215,8 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()]
-	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
+	<< "\nlaggedKappa:\t" << laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())]
+	<< "\ninitialKappa:\t" << initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)] << endl;
     throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif
