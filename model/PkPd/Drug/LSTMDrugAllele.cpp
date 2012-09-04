@@ -130,7 +130,7 @@ double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, doubl
         key.C1 = C0;
         key.drugFactor = 1.0 / exp( intfC );
         bool inserted = cachedIV.insert( key ).second;
-        assert( inserted );
+        if (inserted != true) assert( false );  // avoid unused variable warning
         
         return key.drugFactor;
     }
