@@ -46,11 +46,19 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTr
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
 
-    // We scale FSCoeffic to give us S_v instead of EIR.
-    // Log-values: adding log is same as exponentiating, multiplying and taking
-    // the log again.
-    FSCoeffic[0] += log( EIRtoS_v);
-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
+    if (inputMode == INPUT_EIR){
+        // We scale FSCoeffic to give us S_v instead of EIR.
+        // Log-values: adding log is same as exponentiating, multiplying and taking
+        // the log again.
+        FSCoeffic[0] += log( EIRtoS_v);
+        vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
+    }else if (inputMode == INPUT_N_V){
+        
+        //FIXME: set forcedS_v
+        throw runtime_error("not implemented: seasonality input as hostSeeking");
+    }else{
+        throw runtime_error("not implemented: seasonality input mode");
+    }
     
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     

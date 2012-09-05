@@ -263,8 +263,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:annotation>
               <xs:documentation>Specify what seasonality measure is given.
               
-              At the moment, only EIR is supported, but in the future, all the
-              below should be supported.
+              At the moment, only EIR and hostSeeking are supported. Others
+              may be added in the future.
               
               EIR: seasonality of entomological inoculations is input.
               Units: entomological inoculations per adult per annum.

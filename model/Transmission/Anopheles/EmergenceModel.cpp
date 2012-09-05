@@ -45,19 +45,17 @@ EmergenceModel::EmergenceModel() :
     forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
 }
 
-void EmergenceModel::initEIR(
-    const scnXml::AnophelesParams& anoph,
-    vector<double>& initialisationEIR,
-    int EIPDuration
-){
-    const scnXml::Seasonality& seasonality = anoph.getSeasonality();
-    if ( seasonality.getInput() != "EIR" ) {
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
-        //TODO
-    }
-    // EIR for this species, with index 0 refering to value over first interval
-    vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
-
+/** Helper function for initEIR:
+ * reads the seasonality data from the input file in and outputs FSCoeffic
+ * and EIRRotateAngle.
+ * 
+ * Encapsulated as a separate function to clearly limit inputs and outputs to
+ * these three references. */
+void readSeasonality( const scnXml::Seasonality& seasonality,
+                      vector<double>& FSCoeffic, double& EIRRotateAngle ){
+    // these are outputs only:
+    FSCoeffic.clear(); EIRRotateAngle = numeric_limits<double>::quiet_NaN();
+    
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
         const scnXml::FourierSeries::CoefficSequence& fsCoeffic = seasFC.getCoeffic();
@@ -112,34 +110,65 @@ void EmergenceModel::initEIR(
         throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
         //TODO: can we encode as a Fourier series without smoothing?
     }
+}
 
+void EmergenceModel::initEIR(
+    const scnXml::AnophelesParams& anoph,
+    vector<double>& initialisationEIR,
+    int EIPDuration
+){
+    const scnXml::Seasonality& seasonality = anoph.getSeasonality();
+    if ( seasonality.getInput() == "EIR" )
+        inputMode = INPUT_EIR;
+    else if (seasonality.getInput() == "hostSeeking")
+        inputMode = INPUT_N_V;
+    else {
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR or hostSeeking");
+        //TODO
+    }
+    
     if ( !seasonality.getAnnualEIR().present() ) {
-        //TODO: work out when this is not required and implement code
-        throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
+        //Note: was intended as optional; for now it's compulsary so leave?
+        //Or provide alternatives (i.e. no scaling of flying vectors/resources)?
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required");
     }
     double targetEIR = seasonality.getAnnualEIR().get();
     
+    readSeasonality( seasonality, FSCoeffic, EIRRotateAngle );
+    
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
-    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
-    // And scale (also acts as a unit conversion):
-    FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
     
-    // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
-    
-    // Add to the TransmissionModel's EIR, used for the initalization phase.
-    // Note: sum stays the same, units changes to per-timestep.
-    for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
-        // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
+    if (inputMode == INPUT_EIR){
+        // EIR for this species, with index 0 refering to value over first interval
+        vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
+        vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
+        // And scale (also acts as a unit conversion):
+        FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
+        
+        // Calculate forced EIR for pre-intervention phase from FSCoeffic:
+        vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
+        
+        // Add to the TransmissionModel's EIR, used for the initalization phase.
+        // Note: sum stays the same, units changes to per-timestep.
+        for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
+            // index 1 of initialisationEIR corresponds to first period of year
+            initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
+        }
+        
+        //TODO for other inputModes (independent of inputMode?)
+        if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
+            cout << "Annual EIR for "<<anoph.getMosquito()
+                << ": "<<vectors::sum( speciesEIR )<<endl;
+        }
+    }else if (inputMode == INPUT_N_V){
+        //FIXME: adjust FSCoeffic[0] (if necessary)
+        //FIXME: set initialisationEIR somehow (or don't use it?)
+        throw runtime_error("not implemented: seasonality input as hostSeeking");
+    }else{
+        throw runtime_error("not implemented: seasonality input mode");
     }
     
-    if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
-        cout << "Annual EIR for "<<anoph.getMosquito()
-             << ": "<<vectors::sum( speciesEIR )<<endl;
-    }
-
     // Set other data used for mosqEmergeRate calculation:
     FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
