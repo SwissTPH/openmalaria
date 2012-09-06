@@ -82,7 +82,14 @@ namespace OM { namespace util {
     // but gives some idea what codes make sense to use.
     BOOST_STATIC_ASSERT( Error::Max <= 113 );
     
-    /** Base OpenMalaria exception class. */
+    /** Base OpenMalaria exception class.
+     * 
+     * Throw this directly for an error not fitting one of the below
+     * subclasses.
+     * 
+     * When throwing this or a subclass, give a message which should be
+     * informative and clear from a user-perspective, unless the result is a
+     * code error. In this case use traced_exception. */
     class base_exception : public runtime_error {
     public:
         // for common errors, specify a unique TRACED_DEFAULT to help segregate
@@ -95,7 +102,11 @@ namespace OM { namespace util {
         int errCode;
     };
     
-    /** Extension of runtime_error which tries to get a stack trace. */
+    /** Extension of base_exception which tries to get a stack trace. Also
+     * prints a message indicating that this is likely a code error.
+     * 
+     * Should be used when catching code errors to get extra debugging
+     * information. */
     class traced_exception : public base_exception {
     public:
         /** Create a stack-trace and store in this object.
@@ -125,7 +136,10 @@ namespace OM { namespace util {
     /// Print trace to stream (a series of lines, each with \\n appended)
     ostream& operator<<(ostream& stream, const traced_exception& e);
     
-    /** Thrown to indicate an error in the scenario.xml file.  */
+    /** Thrown to indicate an error in the scenario.xml file.
+     * 
+     * Since such errors are always user-input errors, collecting a stack
+     * trace doesn't help. Just provide a useful message! */
     class xml_scenario_error : public base_exception {
     public:
         explicit xml_scenario_error(const string& msg);

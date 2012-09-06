@@ -69,7 +69,7 @@ void StreamValidatorType::saveStream() {
     if( storeMode ){
 	ofstream f_str( OM_SV_FILE, ios::out | ios::binary );
 	if( !f_str.is_open() )
-	    throw TRACED_EXCEPTION( "unable to write " OM_SV_FILE, Error::FileIO );
+	    throw util::base_exception( "unable to write " OM_SV_FILE, Error::FileIO );
 	f_str.write( reinterpret_cast<const char*>(&OM_SV_HEAD), sizeof(char)*4 );
         
         stream & f_str;
@@ -86,11 +86,11 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw TRACED_EXCEPTION( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
+	throw util::base_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw TRACED_EXCEPTION( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
+	throw util::base_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
     
     stream & f_str;
     
@@ -98,9 +98,9 @@ void StreamValidatorType::loadStream( const string& path ){
     if (f_str.gcount () != 0) {
 	ostringstream msg;
 	msg << file<<" has " << f_str.gcount() << " bytes remaining." << endl;
-	throw TRACED_EXCEPTION (msg.str(), Error::FileIO);
+	throw util::base_exception (msg.str(), Error::FileIO);
     } else if (f_str.fail())
-	throw TRACED_EXCEPTION ("StreamValidator load error", Error::FileIO);
+	throw util::base_exception ("StreamValidator load error", Error::FileIO);
     
     f_str.close();
     readIt = stream.begin();

@@ -432,7 +432,7 @@ namespace OM { namespace Clinical {
         map_cum_p_t::const_iterator it = map_cum_p.find (input);
         if (it == map_cum_p.end()){
             // All possible input combinations should be in map_cum_p
-            throw TRACED_EXCEPTION_DEFAULT( "ESDecisionRandom: input combination not found in map (code error)" );
+            throw TRACED_EXCEPTION_DEFAULT( "ESDecisionRandom: input combination not found in map" );
         }
         double sample = 0.5;
         size_t i = 0;
@@ -461,7 +461,7 @@ namespace OM { namespace Clinical {
 	map_cum_p_t::const_iterator it = map_cum_p.find (input);
 	if (it == map_cum_p.end()){
 	    // All possible input combinations should be in map_cum_p
-	    throw TRACED_EXCEPTION_DEFAULT( "ESDecisionRandom: input combination not found in map (code error)" );
+	    throw TRACED_EXCEPTION_DEFAULT( "ESDecisionRandom: input combination not found in map" );
 	}
 	double sample = random::uniform_01 ();
 	size_t i = 0;

@@ -112,7 +112,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
         }
         cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
         cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds (likely a code error)",util::Error::VectorFitting);
+        throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
     }
 
     //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
