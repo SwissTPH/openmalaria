@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Schema for OpenMalaria input documents
-Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
@@ -805,17 +805,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="freq" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                Frequency of parasite genotype
+                Frequency of parasite genotype as a proportion (total of all genotypes
+                must add to 1).
               </xs:documentation>
-              <xs:appinfo>type:double;name:Frequency;</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Frequency;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="ACR" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                Adequate clinical response (proportion)
+                Adequate clinical response (probability of effective cure)
               </xs:documentation>
-              <xs:appinfo>type:double; units: dimensionless; min:0, max:1.0;name:ACR;</xs:appinfo>
+              <xs:appinfo>units:dimensionless; min:0; max:1;name:ACR;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="proph" type="xs:int" use="required">
@@ -823,7 +824,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Prophylactic period
               </xs:documentation>
-              <xs:appinfo>type:integer; units:time-step;name:Prophylactic period;</xs:appinfo>
+              <xs:appinfo>units:time-step;name:Prophylactic period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="tolPeriod" type="xs:int" use="required">
@@ -831,15 +832,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Tolerance period
               </xs:documentation>
-              <xs:appinfo>units:time-step;type:integer; name:Tolerance period;</xs:appinfo>
+              <xs:appinfo>units:time steps;name:Tolerance period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="atten" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                Tolerance period
+                Attenuation factor (i.e. divisor for density during period of effect)
               </xs:documentation>
-              <xs:appinfo>units:time-step;type:double;name:Tolerance period;</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:1;max:inf;name:Tolerance period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
