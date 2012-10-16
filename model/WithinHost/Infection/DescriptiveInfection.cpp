@@ -113,12 +113,16 @@ DescriptiveInfection::DescriptiveInfection () :
 }
 
 TimeStep DescriptiveInfection::infectionDuration() {
-    double meanlogdur=5.1300001144409179688;
-    //Std of the logduration
-    double sdlogdur=0.80000001192092895508;
-    double dur=random::log_normal(meanlogdur, sdlogdur);
-    //TODO: no, +1 day -1 TS doesn't cancel out. Why do we have this?
-    // What should we have?
+    //TODO: move values to XML.
+    double dur_mean = 5.1300001144409179688;
+    double dur_sigma = 0.80000001192092895508;
+    double dur=random::log_normal(dur_mean, dur_sigma);
+    
+    //TODO:
+    // Model did say infection is cleared on day dur+1 converted to a time-step
+    // ((1+floor(dur))/TimeStep::interval); now it says the last interval is:
+    // floor((1+dur)/TimeStep::interval)-1 = floor((dur+1-interval)/interval)
+    // Is this reasonable, or should we change?
     return TimeStep::fromDays(1.0+dur) - TimeStep(1);
 }
 
@@ -148,7 +152,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         
         // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
         // Note that in published and current implementations Dx is zero.
-        //WARNING: new form is equivalent but due to FP arithmatic results may not be exactly the same:
         _density = pow(_density, immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
         
         //Perturb _density using a lognormal
@@ -163,7 +166,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         double meanlog = log(_density) - stdlog*stdlog / 2.0;
         if (stdlog > 0.0000001) {
             // Calculate the expected density on the day of sampling:
-            //WARNING: this code change WILL change results:
             _density = random::log_normal(meanlog, stdlog);
             // Calculate additional samples for T-1 days (T=TimeStep::interval):
             if (TimeStep::interval > 1) {
@@ -181,7 +183,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
             }
             timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
         }
-        // WARNING: this change actually changes behaviour (hopefully only in very rare cases):
         if (timeStepMaxDensity > maxDens && notPrintedMDWarning){
             cerr << "TSMD hit limit:\t" << _density << ",\t" << timeStepMaxDensity << endl;
             notPrintedMDWarning = false;
