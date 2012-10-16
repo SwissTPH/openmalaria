@@ -110,6 +110,8 @@ protected:
     // Arbitrary predetermined maximum duration of the infection
     TimeStep _duration; 
     
+    bool notPrintedMDWarning;
+    
 private:
     /// @brief Static parameters set by init()
     //@{

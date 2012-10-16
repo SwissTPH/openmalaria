@@ -106,7 +106,8 @@ void DescriptiveInfection::init () {
 
 DescriptiveInfection::DescriptiveInfection () :
         Infection(0xFFFFFFFF),
-        _duration(infectionDuration())
+        _duration(infectionDuration()),
+        notPrintedMDWarning(true)
 {
     assert( TimeStep::interval == 5 );
 }
@@ -182,11 +183,13 @@ void DescriptiveInfection::determineDensities(double ageInYears,
             _density = random::sampleFromLogNormal(random::uniform_01(), meanlog, stdlog);
             timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
         }
-        if (_density > maxDens || timeStepMaxDensity > maxDens) {
-            cerr << "MD lim: " << _density << ", " << timeStepMaxDensity << endl;
-            _density = maxDens;
-            timeStepMaxDensity = _density;
+        // WARNING: this change actually changes behaviour (hopefully only in very rare cases):
+        if (timeStepMaxDensity > maxDens && notPrintedMDWarning){
+            cerr << "TSMD hit limit:\t" << _density << ",\t" << timeStepMaxDensity << endl;
+            notPrintedMDWarning = false;
         }
+        _density = min(_density, maxDens);
+        timeStepMaxDensity = min(timeStepMaxDensity, maxDens);
     }
     
     // WARNING: if MAX_DENS_CORRECTION is off, infections not yet at the blood
@@ -207,19 +210,22 @@ void DescriptiveInfection::determineDensities(double ageInYears,
 
 //Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
 void DescriptiveInfection::determineDensityFinal () {
-    _density = std::min(maxDens, _density);
     _cumulativeExposureJ += TimeStep::interval * _density;
 }
 
+
+// ———  checkpointing  ———
 
 DescriptiveInfection::DescriptiveInfection (istream& stream) :
         Infection(stream), _duration(TimeStep::never)
 {
     _duration & stream;
+    notPrintedMDWarning & stream;
 }
 void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
     _duration & stream;
+    notPrintedMDWarning & stream;
 }
 
 }
