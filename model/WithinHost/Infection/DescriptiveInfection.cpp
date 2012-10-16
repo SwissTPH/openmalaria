@@ -162,11 +162,11 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         */
         double meanlog = log(_density) - stdlog*stdlog / 2.0;
         if (stdlog > 0.0000001) {
+            // Calculate the expected density on the day of sampling:
+            //WARNING: this code change WILL change results:
+            _density = random::log_normal(meanlog, stdlog);
+            // Calculate additional samples for T-1 days (T=TimeStep::interval):
             if (TimeStep::interval > 1) {
-                /*
-                sample the maximum density over the T-1 remaining days in the
-                time interval, (where T is the duration of the time interval)
-                */
                 double normp = pow(random::uniform_01(), 1.0 / (TimeStep::interval-1));
                 /*
                 To mimic sampling T-1 repeated values, we transform the sampling
@@ -179,8 +179,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
                 */
                 timeStepMaxDensity = random::sampleFromLogNormal(normp, meanlog, stdlog);
             }
-            //calculate the expected density on the day of sampling
-            _density = random::sampleFromLogNormal(random::uniform_01(), meanlog, stdlog);
             timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
         }
         // WARNING: this change actually changes behaviour (hopefully only in very rare cases):
