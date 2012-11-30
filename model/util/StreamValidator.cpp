@@ -25,6 +25,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/format.hpp>
+#include <boost/static_assert.hpp>
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -137,23 +138,56 @@ StreamValidatorType StreamValidator;
 // ———  Our cross-platform consistent-result hasing functions  ——
 namespace CPCH {
     SVType toSVType(boost::uint32_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        return x;
     }
     SVType toSVType(boost::int32_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        union {
+            boost::int32_t asS32;
+            boost::uint32_t asU32;
+        };
+        asS32 = x;
+        return asU32;
     }
     SVType toSVType(boost::uint64_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            boost::uint64_t asU64;
+            boost::uint32_t asU32[2];
+        };
+        asU64 = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
     SVType toSVType(boost::int64_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            boost::int64_t asS64;
+            boost::uint32_t asU32[2];
+        };
+        asS64 = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
-    //NOTE: hashing of floats and doubles isn't very good or fast:
+    //NOTE: not correct code in general, but probably OK on current platforms.
+    //Also not guaranteed to produce the same result on all platforms (but will
+    //it?).
     SVType toSVType(float x){
-        return x*1e4f;
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        union {
+            float asFloat;
+            boost::uint32_t asU32;
+        };
+        asFloat = x;
+        return asU32;
     }
     SVType toSVType(double x){
-        return x*1e4;
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            double asDouble;
+            boost::uint32_t asU32[2];
+        };
+        asDouble = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
 }
 
