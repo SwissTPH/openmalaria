@@ -32,17 +32,17 @@
  * runs simulation. */
 int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
+    string scenarioFile;
     
     try {
         OM::util::set_gsl_handler();
         
-        string scenario_name =
-            OM::util::CommandLine::parse (argc, argv);
+        scenarioFile = OM::util::CommandLine::parse (argc, argv);
 	
         OM::util::BoincWrapper::init();
 	
-        scenario_name = OM::util::CommandLine::lookupResource (scenario_name);
-        OM::util::Checksum cksum = OM::InputData.createDocument(scenario_name);
+        scenarioFile = OM::util::CommandLine::lookupResource (scenarioFile);
+        OM::util::Checksum cksum = OM::InputData.createDocument(scenarioFile);
 	
 	OM::Simulation simulation (cksum);	// constructor runs; various initialisations
 	
@@ -74,11 +74,17 @@ int main(int argc, char* argv[]) {
         cerr << e << flush;
         exitStatus = e.getCode();
     } catch (const OM::util::traced_exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Code error: " << e.what() << endl;
         cerr << e << flush;
+#ifdef WITHOUT_BOINC
+        // Don't print this on BOINC, because if it's a problem we should find
+        // it anyway!
+        cerr << "This is likely an error in the C++ code. Please report!" << endl;
+#endif
         exitStatus = e.getCode();
     } catch (const OM::util::xml_scenario_error& e) {
-        cerr << "Error in scenario XML file: " << e.what() << endl;
+        cerr << "Error: " << e.what() << endl;
+        cerr << "In: " << scenarioFile << endl;
         exitStatus = e.getCode();
     } catch (const OM::util::base_exception& e) {
         cerr << "Error: " << e.what() << endl;

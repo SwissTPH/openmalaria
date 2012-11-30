@@ -305,7 +305,7 @@ public:
 		if (pending.empty ())	// good, we're done
 		    break;
 		// else: some elements had unresolved dependencies; this should already have been caught by addRequires though
-		throw TRACED_EXCEPTION_DEFAULT("ESCaseManagement: didn't catch all dependencies (code error)");
+		throw TRACED_EXCEPTION_DEFAULT("ESCaseManagement: didn't catch all dependencies");
 	    }
 	    //cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
 	    if (required.count( it->second ) == 0) {
@@ -427,7 +427,7 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )
 	    return *ret;
-	throw TRACED_EXCEPTION_DEFAULT( "a required modifier decision's output is unexpected (code error)" );
+	throw TRACED_EXCEPTION_DEFAULT( "a required modifier decision's output is unexpected" );
     }
     
     ostringstream msg;

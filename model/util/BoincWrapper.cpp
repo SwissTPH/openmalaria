@@ -190,7 +190,7 @@ Checksum Checksum::generate (istream& fileStream) {
 void Checksum::writeToFile (string filename) {
     ifstream test (filename.c_str());
     if (test.is_open())
-	throw TRACED_EXCEPTION("File scenario.sum exists!",Error::Checksum);
+	throw util::base_exception("File scenario.sum exists!",Error::Checksum);
     
     // Use C file commands, since these have clearer behaviour with binary data:
     FILE *f = fopen( filename.c_str(), "wb" );
@@ -199,7 +199,7 @@ void Checksum::writeToFile (string filename) {
 	written=fwrite( data, 1, 16, f );
     fclose( f );
     if( written != 16 )
-	throw TRACED_EXCEPTION("Error writing scenario.sum",Error::Checksum);
+	throw util::base_exception("Error writing scenario.sum",Error::Checksum);
 }
 #endif	// Without/with BOINC
 
