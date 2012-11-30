@@ -1,6 +1,6 @@
 /* This file is part of OpenMalaria.
  *
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
  *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ using namespace std;
 /* Macros to ease use of traced_exception.
  * msg should be obvious, and code is the program exit code.
  */
-#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) );
-#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ );
+#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
+#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ )
 
 // #define OM_NO_STACK_TRACE
 
@@ -38,6 +38,9 @@ using namespace std;
 #elif defined __GNU_LIBRARY__
 #define OM_GNU_STACK_TRACE
 #endif
+
+// Macro to make checking XML inputs easier
+#define XML_ASSERT( cond, msg ) if(!(cond)) throw OM::util::xml_scenario_error(msg)
 
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {

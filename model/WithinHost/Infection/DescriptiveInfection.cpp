@@ -1,23 +1,21 @@
-/*
- This file is part of OpenMalaria.
-
- Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
-*/
+/* This file is part of OpenMalaria.
+ *
+ * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ *
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "WithinHost/Infection/DescriptiveInfection.h"
 #include "inputData.h"
@@ -26,44 +24,46 @@
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
-#include <algorithm>
+
 #include <sstream>
-#include <string.h>
-#include <stdexcept>
+#include <string>
 #include <cmath>
+#include <fstream>
 
 namespace OM {
 namespace WithinHost {
 using namespace util;
-//static (class) variables
 
-double DescriptiveInfection::meanLogParasiteCount[maxDur][maxDur];
+// static class variables (see description in header file):
+double DescriptiveInfection::meanLogParasiteCount[numDurations][numDurations];
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
 
-// -----  static init/clear -----
+// ———  static init/clear ———
 
 void DescriptiveInfection::init () {
-    if (TimeStep::interval != 5)
+    // Error checks
+    if (TimeStep::interval != 5){
+        // To support non-5-day time-step models, either different data would
+        // be needed or times need to be adjusted when accessing
+        // meanLogParasiteCount. Probably the rest would be fine.
         throw util::xml_scenario_error ("DescriptiveInfection only supports using an interval of 5");
+    }
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
         throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
-
+    
+    // Read parameters
     sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);
     xNuStar=InputData.getParameter(Params::X_NU_STAR);
-    //File name of file with empirical parasite densities.
-    string densities_filename;
-    densities_filename = util::CommandLine::lookupResource ("densities.csv");
-
-    fstream f_MTherapyDensities(densities_filename.c_str(),ios::in);
-
-    if (!f_MTherapyDensities.is_open()) {
-        //If File cannot be accessed:
-        cerr << "file not found: densities.csv" << endl;
-        exit(-1);
+    
+    // Read file empirical parasite densities
+    string densities_filename = util::CommandLine::lookupResource ("densities.csv");
+    ifstream f_MTherapyDensities( densities_filename.c_str() );
+    if( !f_MTherapyDensities.good() ){
+        throw util::base_exception( string("Cannot read ").append(densities_filename), util::Error::FileIO );
     }
-
+    
     //read header of file (unused)
     string csvLine;
     getline(f_MTherapyDensities,csvLine);
@@ -99,72 +99,76 @@ void DescriptiveInfection::init () {
         }
 
     }
-
-    f_MTherapyDensities.close();
 }
 
 
-// -----  non-static init/destruction  -----
+// ———  non-static init/destruction  ———
 
 DescriptiveInfection::DescriptiveInfection () :
         Infection(0xFFFFFFFF),
-        _duration(infectionDuration())
+        _duration(infectionDuration()),
+        notPrintedMDWarning(true)
 {
     assert( TimeStep::interval == 5 );
 }
 
-DescriptiveInfection::~DescriptiveInfection() {
-}
-
-
-// -----  other  -----
-
 TimeStep DescriptiveInfection::infectionDuration() {
-    double meanlogdur=5.1300001144409179688;
-    //Std of the logduration
-    double sdlogdur=0.80000001192092895508;
-    double dur=random::log_normal(meanlogdur, sdlogdur);
-    return TimeStep::fromDays(1.0+dur);
+    //TODO: move values to XML.
+    double dur_mean = 5.1300001144409179688;
+    double dur_sigma = 0.80000001192092895508;
+    double dur=random::log_normal(dur_mean, dur_sigma);
+    
+    //TODO:
+    // Model did say infection is cleared on day dur+1 converted to a time-step
+    // ((1+floor(dur))/TimeStep::interval); now it says the last interval is:
+    // floor((1+dur)/TimeStep::interval)-1 = floor((dur+1-interval)/interval)
+    // Is this reasonable, or should we change?
+    return TimeStep::fromDays(1.0+dur) - TimeStep(1);
 }
 
-void DescriptiveInfection::determineDensities(double ageInYears, double cumulativeh, double cumulativeY, double &timeStepMaxDensity, double innateImmSurvFact, double BSVEfficacy)
-{
-    //Age of infection. (Blood stage infection starts latentp intervals later than inoculation.)
-    TimeStep infage = TimeStep::simulation - _startdate - latentp;
-    if ( infage >= TimeStep(0)) {
-        if ( infage < TimeStep(maxDur) ) {
-            TimeStep iduration=_duration;
-            if ( iduration > TimeStep(maxDur))
-                iduration = TimeStep(maxDur);
 
-            _density=exp(meanLogParasiteCount[infage.asInt()][iduration.asInt() - 1]);
-        } else {
-            _density=exp(meanLogParasiteCount[maxDur-1][maxDur-1]);
-        }
-        if (_density < 1.0)
-            _density=1.0;
-	
-        /*
-        The expected parasite density in the non naive host.
-        As regards the second term in AJTM p.9 eq. 9, in published and current implementations Dx is zero.
-        */
-        _density = exp(log(_density) * immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
+// ———  time-step updates  ———
+
+void DescriptiveInfection::determineDensities(double ageInYears,
+                                              double cumulativeh,
+                                              double cumulativeY,
+                                              double &timeStepMaxDensity,
+                                              double innateImmSurvFact,
+                                              double BSVEfficacy)
+{
+    // Age of blood stage infection (starts latentp intervals after inoculation):
+    TimeStep infage = TimeStep::simulation - _startdate - latentp;
+    if ( infage < TimeStep(0)) {
+        _density = 0.0;
+        // Bug fix (on by default but originally omitted):
+        if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
+            timeStepMaxDensity = 0.0;
+    }else{
+        timeStepMaxDensity = 0.0;
+        
+        int infAge = min (infage.asInt(), maxDuration.asInt());
+        int infDur = min (_duration.asInt(), maxDuration.asInt());
+        _density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
+        
+        // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
+        // Note that in published and current implementations Dx is zero.
+        _density = pow(_density, immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
+        
         //Perturb _density using a lognormal
         double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));
         double stdlog = sqrt(varlog);
+        
         /*
         This code samples from a log normal distribution with mean equal to the predicted density
         n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
         the log of the predicted density.  If we really did the latter then this bias correction is not needed.
         */
         double meanlog = log(_density) - stdlog*stdlog / 2.0;
-        timeStepMaxDensity = 0.0;
         if (stdlog > 0.0000001) {
+            // Calculate the expected density on the day of sampling:
+            _density = random::log_normal(meanlog, stdlog);
+            // Calculate additional samples for T-1 days (T=TimeStep::interval):
             if (TimeStep::interval > 1) {
-                /*
-                sample the maximum density over the T-1 remaining days in the
-                time interval, (where T is the duration of the time interval)
-                */
                 double normp = pow(random::uniform_01(), 1.0 / (TimeStep::interval-1));
                 /*
                 To mimic sampling T-1 repeated values, we transform the sampling
@@ -177,32 +181,23 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
                 */
                 timeStepMaxDensity = random::sampleFromLogNormal(normp, meanlog, stdlog);
             }
-            //calculate the expected density on the day of sampling
-            _density = random::sampleFromLogNormal(random::uniform_01(), meanlog, stdlog);
             timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
         }
-        if (_density > maxDens || timeStepMaxDensity > maxDens) {
-            cerr << "MD lim: " << _density << ", " << timeStepMaxDensity << endl;
-            _density = maxDens;
-            timeStepMaxDensity = _density;
+        if (timeStepMaxDensity > maxDens && notPrintedMDWarning){
+            cerr << "TSMD hit limit:\t" << _density << ",\t" << timeStepMaxDensity << endl;
+            notPrintedMDWarning = false;
         }
-    }
-    else {
-        _density = 0.0;
-	// This option used to be MAX_DENS_RESET. Since it makes no sense without
-	// MAX_DENS_CORRECTION and only makes a difference with it if INNATE_MAX_DENS is also
-	// used (where its absense would cause very wierd behaviour), the option has been combined.
-	if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
-	    timeStepMaxDensity = 0.0;
+        _density = min(_density, maxDens);
+        timeStepMaxDensity = min(timeStepMaxDensity, maxDens);
     }
     
-    /* TODO: the code below should be above, at the end of the if(infage>=0) block.
-	* This changes output if MAX_DENS_CORRECTION isn't used, and since the
-	* absense of this option explicitly implies previous results should be
-	* generated, this fix is not employed. */
+    // WARNING: if MAX_DENS_CORRECTION is off, infections not yet at the blood
+    // stage could result in BSVEfficacy and potentially innateImmSurvFact
+    // being applied to timeStepMaxDensity more than once in some cases.
+    
     //Compute the proportion of parasites remaining after innate blood stage effect
     _density *= innateImmSurvFact;
-    // INNATE_MAX_DENS is a bug-fix:
+    // INNATE_MAX_DENS bug-fix: initially this wasn't enabled, now TODO
     if (util::ModelOptions::option (util::INNATE_MAX_DENS))
 	timeStepMaxDensity *= innateImmSurvFact;
     
@@ -214,19 +209,22 @@ void DescriptiveInfection::determineDensities(double ageInYears, double cumulati
 
 //Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
 void DescriptiveInfection::determineDensityFinal () {
-    _density = std::min(maxDens, _density);
     _cumulativeExposureJ += TimeStep::interval * _density;
 }
 
+
+// ———  checkpointing  ———
 
 DescriptiveInfection::DescriptiveInfection (istream& stream) :
         Infection(stream), _duration(TimeStep::never)
 {
     _duration & stream;
+    notPrintedMDWarning & stream;
 }
 void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
     _duration & stream;
+    notPrintedMDWarning & stream;
 }
 
 }
