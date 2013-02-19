@@ -46,7 +46,7 @@ namespace checkpoint {
         uint32_t size32 = x.size();
         size_t size_check = size32;
         if( size_check != x.size() )
-            throw traced_exception( "stream too long!" );
+            throw TRACED_EXCEPTION_DEFAULT( "stream too long!" );
         size32 & stream;       // write 32-bit unsigned int (size_t is platform dependent!)
         BOOST_FOREACH (T& y, x) {
             y & stream;
@@ -68,7 +68,7 @@ void StreamValidatorType::saveStream() {
     if( storeMode ){
 	ofstream f_str( OM_SV_FILE, ios::out | ios::binary );
 	if( !f_str.is_open() )
-	    throw traced_exception( "unable to write " OM_SV_FILE, Error::FileIO );
+	    throw TRACED_EXCEPTION( "unable to write " OM_SV_FILE, Error::FileIO );
 	f_str.write( reinterpret_cast<const char*>(&OM_SV_HEAD), sizeof(char)*4 );
         
         stream & f_str;
@@ -85,11 +85,11 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw traced_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
+	throw TRACED_EXCEPTION( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw traced_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
+	throw TRACED_EXCEPTION( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
     
     stream & f_str;
     
@@ -97,9 +97,9 @@ void StreamValidatorType::loadStream( const string& path ){
     if (f_str.gcount () != 0) {
 	ostringstream msg;
 	msg << file<<" has " << f_str.gcount() << " bytes remaining." << endl;
-	throw traced_exception (msg.str(), Error::FileIO);
+	throw TRACED_EXCEPTION (msg.str(), Error::FileIO);
     } else if (f_str.fail())
-	throw traced_exception ("StreamValidator load error", Error::FileIO);
+	throw TRACED_EXCEPTION ("StreamValidator load error", Error::FileIO);
     
     f_str.close();
     readIt = stream.begin();
@@ -112,7 +112,7 @@ void StreamValidatorType::handle( SVType value ){
 	if( value != *readIt ){
 	    // Attach a debugger with a breakpoint here to get the backtrace,
 	    // if the one caught by traced_exception isn't enough.
-	    throw traced_exception ("StreamValidator: out of sync!");
+	    throw TRACED_EXCEPTION_DEFAULT ("StreamValidator: out of sync!");
 	}
 	++readIt;
     }

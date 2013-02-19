@@ -113,10 +113,10 @@ int Simulation::start(){
         + Surveys.getFinalTimestep() + TimeStep( 1 );   // MAIN_PHASE: surveys; +1 to let final survey run
     
     if (isCheckpoint()) {
-        Continuous::init( true );
+        Continuous.init( true );
         readCheckpoint();
     } else {
-        Continuous::init( false );
+        Continuous.init( false );
         population->createInitialHumans();
     }
     // Set to either a checkpointing timestep or min int value. We only need to
@@ -137,7 +137,7 @@ int Simulation::start(){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             
             // do reporting (continuous and surveys)
-            Continuous::update( *population );
+            Continuous.update( *population );
             if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
@@ -207,7 +207,7 @@ int Simulation::start(){
     
     population->flushReports();        // ensure all Human instances report past events
     Surveys.writeSummaryArrays();
-    Continuous::finalise();
+    Continuous.finalise();
     
     // Write scenario checksum, only if simulation completed.
     cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
@@ -330,7 +330,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
         util::CommandLine::staticCheckpoint (stream);
         Population::staticCheckpoint (stream);
         Surveys & stream;
-        Continuous::staticCheckpoint (stream);
+        Continuous & stream;
 #       ifdef OM_STREAM_VALIDATOR
         util::StreamValidator & stream;
 #       endif
@@ -383,7 +383,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
     Surveys & stream;
-    Continuous::staticCheckpoint (stream);
+    Continuous & stream;
 # ifdef OM_STREAM_VALIDATOR
     util::StreamValidator & stream;
 # endif

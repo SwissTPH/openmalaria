@@ -66,7 +66,7 @@ public:
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
-        return byProtection( _relativeAttractiveness.relativeAttractiveness( holeIndex, insecticideContent ) );
+        return byProtection( _relativeAttractiveness->relativeAttractiveness( holeIndex, insecticideContent ) );
     }
     /// Get killing effect on mosquitoes before feeding.
     /// See ComponentParams::effect for a more detailed description.
@@ -85,29 +85,6 @@ public:
     }
     
 private:
-    class RelativeAttractiveness {
-    public:
-        RelativeAttractiveness();
-        
-        /** Set parameters.
-         * 
-         * It is checked that input parameters lie in a range such that
-         * the relative availability is always in the range (0,1] — that is,
-         * the deterrent can never be perfect, but can have zero effect. */
-        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNDeterrency& elt);
-        
-        /** Calculate effect. Positive is interpreted as having a positive effect
-        * (thus decreasing availability or survival) and negative as having a
-        * negative effect. Effect is not bounded, though it tends to
-        * zero as holeIndex becomes large and insecticideContent tends to zero,
-        * and parameters should be defined such that it is always in the
-        * range [0,1]. */
-        double relativeAttractiveness( double holeIndex, double insecticideContent )const;
-        
-    protected:
-        double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
-        double holeScaling, insecticideScaling;
-    };
     class SurvivalFactor {
     public:
         SurvivalFactor();
@@ -116,21 +93,71 @@ private:
          * 
          * It is checked that parameters lie in a suitible range, giving a
          * survival factor between 0 and 1. */
-        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, bool postPrandial);
+        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName);
         
+        /** Part of survival factor, used by new ITN deterrency model. */
+        double rel_pAtt( double holeIndex, double insecticideContent )const;
         /** Calculate additional survival factor imposed by nets on pre-/post-
          * prandial killing. Should be bounded to [0,1] and tend to 1 as the
          * net ages. */
         double survivalFactor( double holeIndex, double insecticideContent )const;
+        
     private:
-        double BF, HF, PF, IF;	// base, hole, insecticide and interaction factors
+        double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
         double holeScaling, insecticideScaling;
         double invBaseSurvival; // stored for performance only
+    };
+    class RelativeAttractiveness {
+    public:
+        virtual ~RelativeAttractiveness() {}
+        
+        /** Calculate effect. Positive is interpreted as having a positive effect
+        * (thus decreasing availability or survival) and negative as having a
+        * negative effect. Effect is not bounded, though it tends to
+        * zero as holeIndex becomes large and insecticideContent tends to zero,
+        * and parameters should be defined such that it is always in the
+        * range [0,1]. */
+        virtual double relativeAttractiveness( double holeIndex, double insecticideContent )const =0;
+    };
+    class RADeterrency : public RelativeAttractiveness {
+    public:
+        virtual ~RADeterrency() {}
+        
+        /** Set parameters.
+         * 
+         * It is checked that input parameters lie in a range such that
+         * the relative availability is always in the range (0,1] — that is,
+         * the deterrent can never be perfect, but can have zero effect. */
+        RADeterrency(const OM::Transmission::ITNParams& params, const scnXml::ITNDeterrency& elt);
+        
+        virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
+        
+    protected:
+        double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
+        double holeScaling, insecticideScaling;
+    };
+    class RATwoStageDeterrency : public RelativeAttractiveness {
+    public:
+        virtual ~RATwoStageDeterrency() {}
+        
+        /** Set parameters.
+         * 
+         * It is checked that input parameters lie in a range such that
+         * the relative availability is always in the range (0,1] — that is,
+         * the deterrent can never be perfect, but can have zero effect. */
+        RATwoStageDeterrency(const OM::Transmission::ITNParams& params, const scnXml::TwoStageDeterrency& elt);
+        
+        virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
+        
+    protected:
+        double lPFEntering;      // log of insecticide factor
+        double insecticideScalingEntering;
+        SurvivalFactor pAttacking;
     };
     const ITNParams* base;
     double proportionProtected;
     double proportionUnprotected;
-    RelativeAttractiveness _relativeAttractiveness;
+    shared_ptr<RelativeAttractiveness> _relativeAttractiveness;
     SurvivalFactor _preprandialKillingEffect;
     SurvivalFactor _postprandialKillingEffect;
     

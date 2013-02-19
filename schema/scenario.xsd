@@ -11,7 +11,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:element name="scenario">
     <xs:annotation>
       <xs:documentation>Description of scenario</xs:documentation>
-      <xs:appinfo>units:List of elements;name:Scenario;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Scenario;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
       <xs:all>
@@ -20,7 +20,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of demography
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Human age distribution;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="monitoring" type="monitoring">
@@ -28,7 +28,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of surveys
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Measures to be reported;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="interventions" type="interventions">
@@ -39,7 +39,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               continuous-time distribution targetting individuals when they
               reach a certain age.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Preventative interventions;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="healthSystem" type="healthSystem">
@@ -47,7 +47,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of health system.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Health system description;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="entomology" type="entoData">
@@ -55,7 +55,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of entomological data
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Transmission and vector bionomics;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="pharmacology" type="pharmacology" minOccurs="0">
@@ -63,7 +63,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Drug model parameters
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="model">
@@ -72,7 +72,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Encapsulation of all parameters which describe the model according
             to which fitting is done.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Model options and parameters;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Model options and parameters;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:all>
@@ -83,7 +83,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     The list of recognised options can be found in the code at:
                     include/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
-                  <xs:appinfo>units:List of elements;name:Model Options;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
               <xs:element name="clinical" type="clinical" />
@@ -93,7 +93,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:documentation>
                     Parameters of the epidemiological model
                   </xs:documentation>
-                  <xs:appinfo>units:List of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:all>
@@ -114,7 +114,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Unique identifier of scenario
           </xs:documentation>
-          <xs:appinfo>units:Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
+          <xs:appinfo>type:integer; units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
@@ -123,14 +123,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Name of intervention
           </xs:documentation>
-          <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+          <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="wuID" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>
-            Work unit ID. Only used to validate
-            checkpointing, to prevent checkpoint cheats.
+            Work unit ID. Only used to validate checkpointing, to prevent checkpoint cheats.
           </xs:documentation>
           <xs:appinfo>
             units:Number;min:1;max:100000000;name:Work unit identifier;exposed:false;
@@ -152,7 +151,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Reference number of input parameter
         </xs:documentation>
-        <xs:appinfo>units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
+        <xs:appinfo>type:boolean;units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="value" type="xs:double" use="required">
@@ -167,7 +166,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           True if parameter is to be sampled in optimization
           runs. Not used in simulator app.
         </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
+        <xs:appinfo>type:Boolean;units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -208,8 +207,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="availabilityToMosquitoes" type="AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
-            By age group data on availability of humans to mosquitoes relative
-            to an adult.
+            Availability of humans to mosquitoes relative to an adult, categorized by age group
           </xs:documentation>
           <xs:appinfo>name:Availability to mosquitoes;units:None;min:0;max:1;</xs:appinfo>
         </xs:annotation>
@@ -233,7 +231,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     A standard deviation of zero for no heterogeneity is valid; a rough
                     value from Tanzanian data is 0.14.
                   </xs:documentation>
-                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
+                  <xs:appinfo>type:double;name:Standard deviation;units:None;min:0</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>

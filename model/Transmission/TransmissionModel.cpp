@@ -30,6 +30,7 @@
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
 #include "util/vectors.h"
+#include "util/ModelOptions.h"
 
 #include <cmath>
 #include <cfloat>
@@ -51,6 +52,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
+        util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL ))
+        throw util::xml_scenario_error("VECTOR_*_MODEL is only compatible with the vector model (and non-vector data is present).");
     model = new NonVectorModel(nonVectorData.get());
   }
 
@@ -120,10 +124,10 @@ TransmissionModel::TransmissionModel() :
   noOfAgeGroupsSharedMem = std::max(Monitoring::AgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
 
   using Monitoring::Continuous;
-  Continuous::registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
-  Continuous::registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
-  Continuous::registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
-  Continuous::registerCallback( "num transmitting humans", "\tnum transmitting humans", MakeDelegate( this, &TransmissionModel::ctsCbNumTransmittingHumans ) );
+  Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
+  Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
+  Continuous.registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
+  Continuous.registerCallback( "num transmitting humans", "\tnum transmitting humans", MakeDelegate( this, &TransmissionModel::ctsCbNumTransmittingHumans ) );
 }
 
 TransmissionModel::~TransmissionModel () {

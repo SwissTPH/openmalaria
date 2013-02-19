@@ -46,31 +46,31 @@ double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int 
 
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-        stream << '\t' << species[i].getLastN_v0()/TimeStep::interval;
+        stream << '\t' << species[i].getLastN_v0();
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PA)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PA);
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PDF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PDF);
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF);
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::NV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::NV);
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::OV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::OV);
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
     for (size_t i = 0; i < numSpecies; ++i)
-	stream << '\t' << species[i].getLastVecStat(Anopheles::SV)/TimeStep::interval;
+        stream << '\t' << species[i].getLastVecStat(Anopheles::SV);
 }
 void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
@@ -140,6 +140,16 @@ void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) 
             << '\t' << totalPostPSF / population.getSize();
     }
 }
+
+void VectorModel::ctsCbResAvailability (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResAvailability();
+}
+void VectorModel::ctsCbResRequirements (ostream& stream) {
+    for (size_t i = 0; i < numSpecies; ++i)
+        stream << '\t' << species[i].getResRequirements();
+}
+
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     for ( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ) {
         if ( it->second == i )
@@ -164,7 +174,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, Anopheles::AnophelesModel(&_ITNParams, &_IRSParams));
+    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -173,7 +183,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
                                              populationSize);
         speciesIndex[name] = i;
     }
-
+    
     // Calculate total annual EIR
     annualEIR = vectors::sum( initialisationEIR );
 
@@ -190,7 +200,8 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif,
         ctsNv, ctsOv, ctsSv,
         ctsAlpha, ctsPB, ctsPCD,
-        ctsIRSEffects;
+        ctsIRSEffects,
+        ctsRA, ctsRR;
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i) {
@@ -209,31 +220,37 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
         ctsIRSEffects<<"\tIRS rel attr ("<<name<<")"
             <<"\tIRS preprand surv factor ("<<name<<")"
             <<"\tIRS postprand surv factor ("<<name<<")";
+        ctsRA<<"\tres avail("<<name<<")";
+        ctsRR<<"\tres req("<<name<<")";
     }
     using Monitoring::Continuous;
-    Continuous::registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
-    Continuous::registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
-    Continuous::registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
-    Continuous::registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
-    Continuous::registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
-    Continuous::registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorModel::ctsCbO_v ) );
-    Continuous::registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorModel::ctsCbS_v ) );
+    Continuous.registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
+    Continuous.registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
+    Continuous.registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
+    Continuous.registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
+    Continuous.registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
+    Continuous.registerCallback( "O_v", ctsOv.str(), MakeDelegate( this, &VectorModel::ctsCbO_v ) );
+    Continuous.registerCallback( "S_v", ctsSv.str(), MakeDelegate( this, &VectorModel::ctsCbS_v ) );
     // availability to mosquitoes relative to other humans, excluding age factor
-    Continuous::registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
-    Continuous::registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
-    Continuous::registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
-    Continuous::registerCallback( "mean insecticide content",
+    Continuous.registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
+    Continuous.registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
+    Continuous.registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
+    Continuous.registerCallback( "mean insecticide content",
         "\tmean insecticide content",
         MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
     // Mean IRS insecticide across whole population
-    Continuous::registerCallback( "IRS insecticide content",
+    Continuous.registerCallback( "IRS insecticide content",
         "\tIRS insecticide content",
         MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
     // Mean values of relative attractiveness, pre- and post-prandial survival
     // IRS-induced factors of mosquitoes (i.e. only the portion of deterrent
     // and killing effects attributable to IRS).
-    Continuous::registerCallback( "IRS effects", ctsIRSEffects.str(),
+    Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
         MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
+    Continuous.registerCallback( "resource availability", ctsRA.str(),
+        MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
+    Continuous.registerCallback( "resource requirements", ctsRR.str(),
+        MakeDelegate( this, &VectorModel::ctsCbResRequirements ) );
 }
 VectorModel::~VectorModel () {
 }
@@ -315,10 +332,11 @@ TimeStep VectorModel::initIterate () {
     
     // Time to let parameters settle after each iteration. I would expect one year
     // to be enough (but I may be wrong).
-    if( needIterate ){
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);  // stabilization + 5 years data-collection time
-    }
-    return TimeStep::fromYears( 1 );
+    if( needIterate )
+        // stabilization + 5 years data-collection time:
+        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+    else
+        return TimeStep::fromYears( 1 );
 }
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
@@ -454,7 +472,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, Anopheles::AnophelesModel (&_ITNParams, &_IRSParams));
+    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams));
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

@@ -83,7 +83,10 @@ void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, c
     if( !( PF > 0.0) ){
         ostringstream msg;
         msg << "IRS.description.anophelesParams.relativeAvailability: expected insecticideFactor to be positive.";
-        throw util::xml_scenario_error( msg.str() );
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
     }
     
     /* We need to ensure the relative availability is non-negative. However,
@@ -168,7 +171,10 @@ void IRSAnophelesParams::SurvivalFactor::init(const IRSParams& params, const scn
         msg << "IRS.description.anophelesParams." << (postPrandial?"post":"pre")
             << "killingFactor: expected insecticideFactor≥0, baseFactor+"
             <<pmax<<"×insecticideFactor≤1";
-        throw util::xml_scenario_error( msg.str() );
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
     }
 }
 double IRSAnophelesParams::RelativeAttractiveness::relativeAttractiveness(
@@ -176,7 +182,10 @@ double IRSAnophelesParams::RelativeAttractiveness::relativeAttractiveness(
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lPF*insecticideComponent );
-    assert( relAvail>=0.0 );
+    //TODO: limits
+    //assert( relAvail>=0.0 );
+    if (relAvail < 0.0)
+        return 0.0;
     return relAvail;
 }
 double IRSAnophelesParams::SurvivalFactor::survivalFactor(
@@ -185,7 +194,12 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + PF*insecticideComponent;
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    assert( survivalFactor>=0.0 );
+    //TODO: limits
+    //assert( survivalFactor >= 0.0 );
+    if (survivalFactor < 0.0)
+        return 0.0;
+    else if (survivalFactor > 1.0)
+        return 1.0;
     return survivalFactor;
 }
 
