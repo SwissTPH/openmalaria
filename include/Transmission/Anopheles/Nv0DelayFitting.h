@@ -30,14 +30,17 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+namespace Anopheles {
+
 namespace Nv0DelayFitting {
 template <class T>
 struct eDFunctor
 {
   eDFunctor(double r, const vector<T>& fc_, const vector<T>& samples_) : p(samples_.size()), fcR(r), fc(fc_), logSamples(samples_) {
     if (fc.size() % 2 == 0)
-      throw util::traced_exception("The number of Fourier coefficents should be odd.");
+      throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     w = 2*M_PI / T(p);
     fn = (fc.size()-1)/2;
     BOOST_FOREACH (T& sample, logSamples) {
@@ -104,6 +107,9 @@ T fit (double fcR, const vector<T>& fc, const vector<T>& samples)
   int digits = std::numeric_limits<T>::digits / 2;
   return -boost::math::tools::halley_iterate (eDFunctor<T>(fcR, fc, samples), guess, min, max, digits);
 }
+
 }
-} }
+}
+}
+}
 #endif

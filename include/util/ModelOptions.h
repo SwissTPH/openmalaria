@@ -156,6 +156,23 @@ namespace OM { namespace util {
         /** Use Penny infection model. */
         PENNY_WITHIN_HOST_MODEL,
         // @}
+	
+	/** @brief Selection of gamma distribution for Molineaux or Penny within host models
+	 */
+	//@{
+	/** Use Gamma distribution for mean duration (Molineaux model) */
+	MEAN_DURATION_GAMMA,
+	/** Use Gamma distribution for first local maximum (Molineaux model) */
+	FIRST_LOCAL_MAXIMUM_GAMMA,
+	/** Use Gamma distribution for first local maximum (Molineaux model) */
+	PARASITE_REPLICATION_GAMMA,
+	
+	/** Use Gamma distribution for immune threshold (Penny model) */
+	IMMUNE_THRESHOLD_GAMMA,
+	
+	/** Use Gamma distribution for update density (Penny model) */
+	UPDATE_DENSITY_GAMMA,
+	//@}
         
 	/** Use the Garki density bias instead of the default one in the detection limit.
 	 *

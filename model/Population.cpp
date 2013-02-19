@@ -23,7 +23,6 @@
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorTransmission.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -175,7 +174,7 @@ void Population::createInitialHumans ()
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
     assert( TimeStep::simulation == TimeStep(0) );      // assumed below
-    _transmissionModel->setupNv0 (population, populationSize);
+    _transmissionModel->init2 (population, populationSize);
 }
 
 

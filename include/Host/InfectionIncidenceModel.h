@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 
 namespace OM { namespace Host {
     class Human;
@@ -100,7 +100,7 @@ public:
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans);
+  virtual double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans);
   
   double susceptibility ();
   
@@ -154,7 +154,7 @@ public:
   HeterogeneityWorkaroundII () {}
   virtual ~HeterogeneityWorkaroundII() {}
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans);
 };
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
@@ -162,7 +162,7 @@ public:
   virtual ~NegBinomMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
@@ -170,7 +170,7 @@ public:
   virtual ~LogNormalMAII() {}
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&);
+  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&);
 };
 
 } }

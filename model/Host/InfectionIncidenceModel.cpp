@@ -21,7 +21,7 @@
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/Human.h"
 #include "inputData.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/PerHost.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
@@ -134,9 +134,10 @@ double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
 double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
     // given BaselineAvailabilityShapeParam = sqrt (log (1 + variance/mean²))
     // and baseAvailability = mean, this is a draw from the log-normal distribution.
-    if( baseAvailability != 1.0 )
+    if( baseAvailability != 1.0 ){
         // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
-        throw util::traced_exception("LogNormalMAII::getAvailabilityFactor");
+        throw TRACED_EXCEPTION_DEFAULT("LogNormalMAII::getAvailabilityFactor");
+    }
   return random::log_normal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
 		     BaselineAvailabilityShapeParam);
 }
@@ -146,22 +147,22 @@ void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring:
 }
 
 
-double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
+double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/TimeStep::interval*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission& phTrans) {
+double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/(TimeStep::interval*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&) {
+double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   return random::gamma(InfectionrateShapeParam,
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
-double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHostTransmission&) {
+double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
@@ -190,7 +191,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   if (!finite(effectiveEIR)) {
     ostringstream out;
     out << "effectiveEIR is not finite: " << effectiveEIR << endl;
-    throw util::traced_exception (out.str(), util::Error::EffectiveEIR);
+    throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
@@ -215,11 +216,12 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
     human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
     ctsNewInfections += n;
     return n;
-  } else if (expectedNumInfections != expectedNumInfections)	// check for not-a-number
+  }
+  if (expectedNumInfections != expectedNumInfections){	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
-      throw util::traced_exception( "numNewInfections: NaN", util::Error::NumNewInfections );
-  else
-    return 0;
+      throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );
+  }
+  return 0;
 }
 
 } }

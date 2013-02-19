@@ -20,9 +20,9 @@
 
 */
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/NonVector.h"
-#include "Transmission/Vector/VectorTransmission.h"
-#include "Transmission/PerHostTransmission.h"
+#include "Transmission/NonVectorModel.h"
+#include "Transmission/VectorModel.h"
+#include "Transmission/PerHost.h"
 
 #include "inputData.h"
 #include "Monitoring/Continuous.h"
@@ -46,12 +46,12 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorTransmission(vectorData.get(), populationSize);
+    model = new VectorModel(vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
-    model = new NonVectorTransmission(nonVectorData.get());
+    model = new NonVectorModel(nonVectorData.get());
   }
 
   if( entoData.getScaledAnnualEIR().present() ){
@@ -87,7 +87,7 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
 
 SimulationMode readMode(const string& str){
     if(str=="forced")
-        return equilibriumMode;
+        return forcedEIR;
     else if(str=="dynamic")
         return dynamicEIR;
     else
@@ -96,13 +96,13 @@ SimulationMode readMode(const string& str){
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
 TransmissionModel::TransmissionModel() :
-    simulationMode(equilibriumMode),
+    simulationMode(forcedEIR),
     interventionMode(readMode(InputData().getEntomology().getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHostTransmission::adultAge()),
+    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
@@ -162,7 +162,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
             msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
-            throw util::traced_exception(msg.str(),util::Error::SumWeight);
+            throw TRACED_EXCEPTION(msg.str(),util::Error::SumWeight);
         }
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
@@ -201,7 +201,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (OM::Transmission::PerHostTransmission& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
@@ -229,7 +229,7 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   double duration = (TimeStep::simulation-lastSurveyTime).asInt();
   if( duration == 0.0 ){
       if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-          throw util::traced_exception( "non-zero EIR over zero duration??" );
+          throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
       }
       duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
   }

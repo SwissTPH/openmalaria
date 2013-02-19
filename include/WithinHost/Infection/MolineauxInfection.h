@@ -62,10 +62,18 @@ private:
 
 	///@brief static variables red from parameters
 	//@{
-	/// mean and sd of the first local maximum density
-	static double mean_first_local_max, sd_first_local_max;
-	/// mean and sd of the difference between last positive and first positive days
-	static double mean_diff_pos_days, sd_diff_pos_days;
+	/// depends on lognormal/gamma distribution for first_local_max
+	static bool first_local_maximum_gamma;
+	/// mean/shape and sd/scale of the first local maximum density for lognormal/gamma distribution
+	static double mean_shape_first_local_max, sd_scale_first_local_max;
+	
+	/// depends on between lognormal/gamma distribution for mean_duration diff_pos_days
+	static bool mean_duration_gamma;
+	/// mean/shape and sd/scale of the difference between last positive and first positive days for lognormal/gamma distribution
+	static double mean_shape_diff_pos_days, sd_scale_diff_pos_days;
+	
+	/// boolean choosing between gamma and lognormal distribution for equation 11
+	static bool multi_factor_gamma;
 	//@}
 	
 	/** @brief q^(i+1) array

@@ -35,38 +35,39 @@
 namespace OM {
     class Summary;
 namespace Transmission {
-    class PerHostTransmission;
+    class PerHost;
 
 
-/** There are 3 simulation modes. */
+/** Variable describing current simulation mode. */
 enum SimulationMode {
-  /** Equilibrium mode
-   * 
-   * This is used for the warm-up period and if we want to separate direct
-   * effect of an intervention from indirect effects via transmission
-   * intensity. The seasonal pattern and intensity of the EIR do not change
-   * over years.
-   * 
-   * For the vector model, this runs most calculations dynamically but still
-   * forces the EIR. */
-  equilibriumMode = 2,
-  
-  /** Transient EIR known
-   * 
-   * This is used to simulate an intervention that changes EIR, and where we
-   * have measurements of the EIR over time during the intervention period. */
-  transientEIRknown = 3,
-  
-  /** EIR changes
-   * 
-   * The simulation is driven by the EIR which changes dynamically during the
-   * intervention phase as a function of the characteristics of the
-   * interventions.
-   * 
-   * Dependending on whether the Vector or NonVector model is in use, this EIR
-   * may be calculated from a mosquito emergence rate or be an input EIR
-   * scaled by the relative infectiousness of the humans. */
-  dynamicEIR = 4,
+    /** Initial mode. Indicates that initialisation still needs to happen (i.e.
+     * it is an error if this mode is still set when getEIR is called). */
+    preInit,
+    /** Equilibrium mode (i.e. just apply a fixed EIR)
+     * 
+     * This is used for the warm-up period and if we want to separate direct
+     * effect of an intervention from indirect effects via transmission
+     * intensity. The seasonal pattern and intensity of the EIR do not change
+     * over years.
+     * 
+     * In this mode vector calculations aren't run. */
+    forcedEIR,
+    /** Transient EIR known
+     * 
+     * This is used to simulate an intervention that changes EIR, and where we
+     * have measurements of the EIR over time during the intervention period.
+     */
+    transientEIRknown,
+    /** EIR changes
+     * 
+     * The simulation is driven by the EIR which changes dynamically during the
+     * intervention phase as a function of the characteristics of the
+     * interventions.
+     * 
+     * Dependending on whether the Vector or NonVector model is in use, this
+     * EIR may be calculated from a mosquito emergence rate or be an input EIR
+     * scaled by the relative infectiousness of the humans. */
+    dynamicEIR,
 };
 
 
@@ -87,7 +88,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize) {}
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
   
   /// Checkpointing
   template<class S>
@@ -144,7 +145,7 @@ public:
   virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
-      throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorTransmission model!");
+      throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
   }
   
   /** Does per-timestep updates and returns the EIR (inoculation rate per host
@@ -161,7 +162,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (PerHostTransmission& host, double ageYears, Monitoring::AgeGroup ageGroup);
+  double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set ITN parameters. */
   virtual void setITNDescription ( const scnXml::ITNDescription&);
@@ -186,7 +187,7 @@ protected:
    *
    * @returns  The age- and heterogeneity-specific EIR an individual is exposed
    * to, in units of inoculations per day. */
-  virtual double calculateEIR(PerHostTransmission& host, double ageYears) = 0; 
+  virtual double calculateEIR(PerHost& host, double ageYears) = 0; 
   
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average

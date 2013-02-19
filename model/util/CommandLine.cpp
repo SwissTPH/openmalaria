@@ -130,6 +130,8 @@ namespace OM { namespace util {
 		    options[COMPRESS_CHECKPOINTS] = b;
 		} else if (clo == "checkpoint-duplicates") {
 		    options.set (TEST_DUPLICATE_CHECKPOINTS);
+                } else if (clo == "debug-vector-fitting") {
+                    options.set (DEBUG_VECTOR_FITTING);
 #	ifdef OM_STREAM_VALIDATOR
 		} else if (clo == "stream-validator") {
 		    if (sVFile.size())
@@ -214,9 +216,10 @@ namespace OM { namespace util {
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
             << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
             << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
-            << " -n --name NAME	Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt --ctsout ctsoutNAME.txt" <<endl
+            << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
+            << "			--ctsout ctsoutNAME.txt" <<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
-	    << "    --print-EIR	Print the annual EIR (of each species in vector mode) and exit." << endl
+	    << "    --print-EIR		Print the annual EIR (of each species in vector mode) and exit." << endl
             << "    --sample-interpolations"<<endl
             << "			Output samples of all used age-group data according to active"<<endl
             << "			interpolation method and exit."<<endl
@@ -231,6 +234,10 @@ namespace OM { namespace util {
 	    << "			identical to that read." <<endl
 	    << "    --compress-checkpoints=boolean" << endl
 	    << "			Set checkpoint compression on or off. Default is on." <<endl
+	    << "    --debug-vector-fitting"<<endl
+	    << "			Show details of vector-parameter fitting. The fitting methods used" <<endl
+	    << "			aren't guaranteed to work. If they don't, this output should help"<<endl
+            << "			work out why."<<endl
 #	ifdef OM_STREAM_VALIDATOR
 	    << "    --stream-validator PATH" <<endl
 	    << "			Use StreamValidator to validate against reference file PATH." <<endl

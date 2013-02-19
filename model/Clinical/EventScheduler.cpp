@@ -22,7 +22,6 @@
 #include "inputData.h"
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
-#include "Transmission/PerHostTransmission.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -164,7 +163,7 @@ ClinicalEventScheduler::~ClinicalEventScheduler() {
 // -----  other methods  -----
 
 bool ClinicalEventScheduler::notAtRisk() {
-    throw util::traced_exception("notAtRisk: not supported by 1-day time-step models");
+    throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
 }
 
 void ClinicalEventScheduler::massDrugAdministration(Human& human){

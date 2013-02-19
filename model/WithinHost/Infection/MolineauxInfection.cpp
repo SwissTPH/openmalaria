@@ -38,10 +38,15 @@ namespace WithinHost {
 
 using namespace OM::util;
 
-double MolineauxInfection::mean_first_local_max;
-double MolineauxInfection::sd_first_local_max;
-double MolineauxInfection::mean_diff_pos_days;
-double MolineauxInfection::sd_diff_pos_days;
+double MolineauxInfection::mean_shape_first_local_max = std::numeric_limits<double>::signaling_NaN();
+double MolineauxInfection::sd_scale_first_local_max  = std::numeric_limits<double>::signaling_NaN();
+double MolineauxInfection::mean_shape_diff_pos_days  = std::numeric_limits<double>::signaling_NaN();
+double MolineauxInfection::sd_scale_diff_pos_days  = std::numeric_limits<double>::signaling_NaN();
+
+bool MolineauxInfection::first_local_maximum_gamma = false;
+bool MolineauxInfection::mean_duration_gamma = false;
+bool MolineauxInfection::multi_factor_gamma  = false;
+
 double MolineauxInfection::qPow[v];
 
 /** @brief The static variables (double)
@@ -63,8 +68,12 @@ const double rho=0.0;
 const double beta=0.01;
 const double sProb=0.02;
 const double q=0.3;
+
 const double mu_m=16.0;
 const double sigma_m=10.4;
+const double shape_m=2.4;
+const double scale_m=6.8;
+
 const double k_c=0.2;
 const double k_m=0.04;
 const double Pstar_v=30.0;
@@ -88,11 +97,37 @@ void MolineauxInfection::init() {
 
     CommonWithinHost::createInfection = &createMolineauxInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
-
-    mean_first_local_max = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
-    sd_first_local_max = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
-    mean_diff_pos_days = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
-    sd_diff_pos_days = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+    
+    mean_shape_first_local_max = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
+    sd_scale_first_local_max = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+    
+    mean_shape_diff_pos_days = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
+    sd_scale_diff_pos_days = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+    
+    
+    // with gamma distribution shape and scale parameters has to be recalculated 
+    if (util::ModelOptions::option (util::FIRST_LOCAL_MAXIMUM_GAMMA)) {
+	first_local_maximum_gamma = true;
+	mean_shape_first_local_max = pow(mean_shape_first_local_max,2)/pow(sd_scale_first_local_max,2);
+	sd_scale_first_local_max = pow(sd_scale_first_local_max,2)/mean_shape_first_local_max;
+    } else {
+        first_local_maximum_gamma = false;
+    }
+    
+    // with gamma distribution shape and scale parameters has to be recalculated
+    if(util::ModelOptions::option (util::MEAN_DURATION_GAMMA)) {
+	mean_duration_gamma = true;
+	mean_shape_diff_pos_days = pow(mean_shape_diff_pos_days,2)/pow(sd_scale_diff_pos_days,2);
+	sd_scale_diff_pos_days = pow(sd_scale_diff_pos_days,2)/mean_shape_diff_pos_days;
+    } else {
+	mean_duration_gamma = false;
+    }
+    
+    if(util::ModelOptions::option (util::PARASITE_REPLICATION_GAMMA)) {
+	multi_factor_gamma = true;
+    } else {
+	multi_factor_gamma = false;
+    }
 
    for(int i=0;i<50;i++)
    {
@@ -106,12 +141,18 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
     for (size_t i=0;i<v; i++)
     {
         m[i] = 0.0;
+	// Molineaux paper, equation 11
+	if( multi_factor_gamma ) {
+	  while (m[i]<1.0) {    
+	    m[i]=static_cast<float>(random::gamma(shape_m,scale_m));
+	  }
+	} else {
+	  while (m[i]<1.0) {    
+	    m[i]=static_cast<float>(random::gauss(mu_m, sigma_m));
 
-        // Molineaux paper, equation 11
-        while (m[i]<1.0)
-        {
-            m[i]=static_cast<float>(random::gauss(mu_m, sigma_m));
-        }
+	  }
+	}
+        
     }
 
     for (size_t tau=0; tau<taus;tau++)
@@ -123,9 +164,24 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
     variants.resize(1);
     variants[0].P = 0.1f;
     variantTranscendingSummation = 0.0;
-
-    Pstar_c = static_cast<float>(k_c*pow(random::gauss(mean_first_local_max,sd_first_local_max),10.0));
-    Pstar_m = static_cast<float>(k_m*pow(random::gauss(mean_diff_pos_days,sd_diff_pos_days),10.0));
+    
+    
+    // sampling first local maximum
+    // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
+    if( first_local_maximum_gamma ) {
+	Pstar_c = static_cast<float>(k_c*pow(random::gamma(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
+    } else {
+	Pstar_c = static_cast<float>(k_c*pow(random::gauss(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
+    }
+    
+    // sampling duration
+    // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
+    if( mean_duration_gamma ) {
+	  Pstar_m = static_cast<float>(k_m*pow(random::gamma(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
+    } else {
+	  Pstar_m = static_cast<float>(k_m*pow(random::gauss(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
+    }
+    
 }
 
 MolineauxInfection::Variant::Variant () :

@@ -44,13 +44,15 @@ set (Model_CPP
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
-  Transmission/NonVector.cpp
-  Transmission/PerHostTransmission.cpp
-  Transmission/Vector/VectorTransmission.cpp
-  Transmission/Vector/VectorAnopheles.cpp
-  Transmission/Vector/AnophelesHumanParams.cpp
-  Transmission/Vector/ITN.cpp
-  Transmission/Vector/IRS.cpp
+  Transmission/NonVectorModel.cpp
+  Transmission/VectorModel.cpp
+  Transmission/PerHost.cpp
+  Transmission/Anopheles/AnophelesModel.cpp
+  Transmission/Anopheles/Transmission.cpp
+  Transmission/Anopheles/FixedEmergence.cpp
+  Transmission/Anopheles/PerHost.cpp
+  Transmission/ITN.cpp
+  Transmission/IRS.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp

@@ -17,13 +17,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_VectorTransmission
-#define Hmod_VectorTransmission
+#ifndef Hmod_VectorModel
+#define Hmod_VectorModel
 
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
-#include "Transmission/Vector/VectorAnopheles.h"
-#include "Transmission/Vector/ITN.h"
+#include "Transmission/Anopheles/AnophelesModel.h"
+#include "Transmission/ITN.h"
+#include "Transmission/IRS.h"
 
 namespace scnXml {
   class Vector;
@@ -31,15 +32,18 @@ namespace scnXml {
 
 namespace OM { namespace Transmission {
     
-//! Transmission models, Chitnis et al
-class VectorTransmission : public TransmissionModel {
+/** Transmission models, Chitnis et al.
+ * 
+ * This class contains code for species-independent components. Per-species
+ * code is in the Vector directory and namespace. */
+class VectorModel : public TransmissionModel {
 public:
-  VectorTransmission(const scnXml::Vector vectorData, int populationSize);
-  virtual ~VectorTransmission();
+  VectorModel(const scnXml::Vector vectorData, int populationSize);
+  virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void setupNv0 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -51,7 +55,7 @@ public:
   virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
   virtual void update (const std::list<Host::Human>& population, int populationSize);
 
-  virtual double calculateEIR(PerHostTransmission& host, double ageYears); 
+  virtual double calculateEIR(PerHost& host, double ageYears); 
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
@@ -83,6 +87,9 @@ private:
     }
     return sIndex->second;
   }
+    
+    /** Return the mean availability of human population to mosquitoes. */
+    static double meanPopAvail (const std::list<Host::Human>& population, int populationSize);
     
     /** Confirm simulationMode allows use of interventions; throw if not. */
     void checkSimMode() const;
@@ -118,7 +125,7 @@ private:
    *
    * Array will be recreated by constructor, but some members of VectorAnopheles
    * need to be checkpointed. */
-  vector<VectorAnopheles> species;
+  vector<Anopheles::AnophelesModel> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *
@@ -136,7 +143,7 @@ private:
   /** ditto */
   IRSParams _IRSParams;
   
-  friend class PerHostTransmission;
+  friend class PerHost;
   friend class VectorAnophelesSuite;
 };
 

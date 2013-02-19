@@ -142,7 +142,7 @@ namespace OM { namespace Monitoring {
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
-		util::traced_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
+		throw TRACED_EXCEPTION (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
             }
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
@@ -171,12 +171,12 @@ namespace OM { namespace Monitoring {
              return;     // output disabled
 #ifndef WITHOUT_BOINC
         if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
-            throw util::traced_exception (string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
+            throw TRACED_EXCEPTION(string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
         }
         ctsOStream.close();
         ifstream origFile(cts_filename.c_str());
         if( !origFile.is_open() ){
-            throw util::traced_exception (string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
+            throw TRACED_EXCEPTION(string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
         }
         ogzstream finalFile(compressedCtsoutName.c_str());
         finalFile << origFile.rdbuf();

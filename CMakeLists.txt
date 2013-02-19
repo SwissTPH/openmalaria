@@ -68,6 +68,9 @@ find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
 
+
+# Find Boost:
+
 # suggested on windows: install boost such that paths are:
 # C:\Program Files\boost\boost_VER\boost\config.hpp
 # Add versions greater than 1.38 here:
@@ -110,6 +113,9 @@ See: http://boost-spirit.com/home/articles/spirit2-1-release/using-spirit-v2-1-w
 else(Boost_FOUND)
     message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
 endif(Boost_FOUND)
+
+
+# Find BOINC:
 
 option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
 if (OM_BOINC_INTEGRATION)
