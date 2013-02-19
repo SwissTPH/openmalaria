@@ -89,9 +89,19 @@ namespace OM { namespace Monitoring {
     int ctsPeriod = 0;
     bool duringInit = false;
     
+    
+    ContinuousType Continuous;
+    
+    ContinuousType::~ContinuousType (){
+        // free memory
+        toReport.clear();
+        for( registered_t::iterator it = registered.begin(); it != registered.end(); ++it )
+            delete it->second;
+   }
+   
     /* Initialise: enable outputs registered and requested in XML.
      * Search for Continuous::registerCallback to see outputs available. */
-    void Continuous::init (bool isCheckpoint) {
+    void ContinuousType::init (bool isCheckpoint) {
 	const scnXml::Monitoring::ContinuousOptional& ctsOpt =
 	    InputData().getMonitoring().getContinuous();
 	if( ctsOpt.present() == false ) {
@@ -166,7 +176,8 @@ namespace OM { namespace Monitoring {
 	    streamOff = ctsOStream.tellp() - streamStart;
 	}
     }
-    void Continuous::finalise (){
+   
+   void ContinuousType::finalise() {
          if( ctsPeriod == 0 )
              return;     // output disabled
 #ifndef WITHOUT_BOINC
@@ -181,19 +192,14 @@ namespace OM { namespace Monitoring {
         ogzstream finalFile(compressedCtsoutName.c_str());
         finalFile << origFile.rdbuf();
 #endif
-        
-        // free memory
-        toReport.clear();
-        for( registered_t::iterator it = registered.begin(); it != registered.end(); ++it )
-            delete it->second;
     }
-    void Continuous::staticCheckpoint (ostream& stream){
+    void ContinuousType::checkpoint (ostream& stream){
         if( ctsPeriod == 0 )
             return;	// output disabled
 	
 	streamOff & stream;
     }
-    void Continuous::staticCheckpoint (istream& stream){
+    void ContinuousType::checkpoint (istream& stream){
         if( ctsPeriod == 0 )
             return;	// output disabled
 	
@@ -214,18 +220,18 @@ namespace OM { namespace Monitoring {
 	    throw util::checkpoint_error ("Continuous: resume error (bad pos/file)");
     }
     
-    void Continuous::registerCallback (string optName, string titles,
+    void ContinuousType::registerCallback (string optName, string titles,
             fastdelegate::FastDelegate1<ostream&> outputCb){
         assert(registered.count(optName) == 0); // name clash/registered twice?
 	registered[optName] = new Callback1( titles, outputCb );
     }
-    void Continuous::registerCallback (string optName, string titles,
+    void ContinuousType::registerCallback (string optName, string titles,
             fastdelegate::FastDelegate2<const Population&,ostream&> outputCb){
         assert(registered.count(optName) == 0); // name clash/registered twice?
         registered[optName] = new Callback2Pop( titles, outputCb );
     }
     
-    void Continuous::update (const Population& population){
+    void ContinuousType::update (const Population& population){
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){

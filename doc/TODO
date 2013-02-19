@@ -1,0 +1,11 @@
+Give larviciding a decay function and more detailed effects description (if necessary).
+
+replace #include "inputData.h" everywhere by the minimum required part of the schema.
+
+Check for redundant variables in:
+    quinquennialS_v / P_diff (both used?)
+    initOvFromSv / initNv0FromSv
+    initialP_A, initialP_df
+    mosqEmergeRate
+
+Does Transmission::update need isDynamic parameter?

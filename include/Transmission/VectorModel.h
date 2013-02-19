@@ -31,11 +31,12 @@ namespace scnXml {
 }
 
 namespace OM { namespace Transmission {
+    using Anopheles::AnophelesModel;
     
 /** Transmission models, Chitnis et al.
  * 
  * This class contains code for species-independent components. Per-species
- * code is in the Vector directory and namespace. */
+ * code is in the Anopheles directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
   VectorModel(const scnXml::Vector vectorData, int populationSize);
@@ -107,6 +108,8 @@ private:
   void ctsNetInsecticideContent (const Population& population, ostream& stream);
   void ctsIRSInsecticideContent (const Population& population, ostream& stream);
   void ctsIRSEffects (const Population& population, ostream& stream);
+  void ctsCbResAvailability (ostream& stream);
+  void ctsCbResRequirements (ostream& stream);
   
   
     /// Number of iterations performed during initialization, or negative when done.
@@ -123,9 +126,9 @@ private:
   
   /** Per anopheles species data.
    *
-   * Array will be recreated by constructor, but some members of VectorAnopheles
+   * Array will be recreated by constructor, but some members of AnophelesModel
    * need to be checkpointed. */
-  vector<Anopheles::AnophelesModel> species;
+  vector<AnophelesModel> species;
   
   /** A map of anopheles species/variant name to an index in species.
    *
@@ -144,7 +147,7 @@ private:
   IRSParams _IRSParams;
   
   friend class PerHost;
-  friend class VectorAnophelesSuite;
+  friend class AnophelesModelSuite;
 };
 
 } }

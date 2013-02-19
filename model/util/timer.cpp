@@ -25,6 +25,7 @@
 #else
 #include <cstdio>	// perror
 #include <pthread.h>
+#include <unistd.h>     // sleep
 #endif
 
 #include "util/timer.h"

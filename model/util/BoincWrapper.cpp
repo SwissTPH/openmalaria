@@ -37,7 +37,7 @@
 #include "boinc_api.h"
 #include "diagnostics.h"
 #include "md5.h"
-#include "lib/filesys.h"
+#include "filesys.h"    // lib/filesys.h if not installed
 #include <sstream>
 #endif
 
@@ -150,9 +150,10 @@ namespace BoincWrapper {
   }
 }
 Checksum Checksum::generate (istream& fileStream) {
+    fileStream.clear ();        // clear EOF flag (must happen before tellg/seekg)
     streampos firstLen = fileStream.tellg ();
     fileStream.seekg (0);
-    fileStream.clear ();	// now reset to beginning; we can read it again without reopening it
+    // now reset to beginning; we can read it again without reopening it
     
     // Code copied from boinc/lib/md5_file.cpp: md5_file()
     // and modified to work with an input stream (so we only open the input file once).

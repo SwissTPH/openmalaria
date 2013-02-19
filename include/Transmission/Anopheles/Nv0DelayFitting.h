@@ -53,6 +53,8 @@ struct eDFunctor
     T f = 0.0, df = 0.0, ddf = 0.0;
     
     // Calculate inverse discrete Fourier transform
+    // TODO: This may not interpolate sensibly. See for example
+    // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
     for (size_t t=0; t<p; ++t) {
       T wt = w*t+fcR+d;
       T val = fc[0], dval = 0.0, ddval = 0.0;

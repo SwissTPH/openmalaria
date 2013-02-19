@@ -24,10 +24,12 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/Anopheles/PerHost.h"
 #include "Transmission/PerHost.h"
-#include "Transmission/Anopheles/Transmission.h"
+#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
+
 #include <list>
 #include <vector>
+#include <limits>
 
 namespace OM {
 namespace Host {
@@ -62,7 +64,7 @@ public:
             humanBase(baseITNParams,baseIRSParams),
             partialEIR(0.0)
     {}
-
+    
     /** Called to initialise variables instead of a constructor. At this point,
      * the size of the human population is known but that population has not
      * yet been constructed. Called whether data is loaded from a check-point
@@ -81,7 +83,7 @@ public:
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
     inline void scaleEIR( double factor ){
-        transmission.emergence.scaleEIR( factor );
+        transmission.emergence->scaleEIR( factor );
     }
     
     /** Initialisation which must wait until a human population is available.
@@ -110,7 +112,7 @@ public:
      *
      * @returns true if another iteration is needed. */
     inline bool initIterate (){
-        return transmission.emergence.initIterate(transmission);
+        return transmission.emergence->initIterate(transmission);
     }
     //@}
 
@@ -172,7 +174,7 @@ public:
     ///@brief Functions called to deploy interventions
     //@{
     inline void intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
-        transmission.emergence.intervLarviciding( elt );
+        transmission.emergence->intervLarviciding( elt );
     }
 
     inline void uninfectVectors() {
@@ -183,16 +185,23 @@ public:
     
     ///@brief Functions used in reporting
     //@{
-    /// Get total emergence during last time-step
+    /// Get mean emergence during last time-step
     inline double getLastN_v0 () const{
-        return transmission.emergence.getLastN_v0();
+        return transmission.getLastN_v0();
     }
-    /// Get P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
+    /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     inline double getLastVecStat ( VecStat vs ) const{
         return transmission.getLastVecStat( vs );
     }
     
+    inline double getResAvailability() const{
+        return transmission.getResAvailability();
+    }
+    inline double getResRequirements() const{
+        return transmission.getResRequirements();
+    }
+
     /// Write some per-species summary information.
     inline void summarize (const string speciesName, Monitoring::Survey& survey) const {
         transmission.summarize( speciesName, survey );
@@ -308,7 +317,7 @@ private:
     /** @brief transmission and life-cycle parts of model
      * 
      * Much of the core model is encapsulated here. */
-    Transmission transmission;
+    MosqTransmission transmission;
     
     /** Per time-step partial calculation of EIR.
     *

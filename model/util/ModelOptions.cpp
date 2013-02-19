@@ -27,7 +27,7 @@
 #include <iostream>
 
 namespace OM { namespace util {
-    uint32_t ModelOptions::optSet;
+    vector<bool> ModelOptions::optArray;
     
     // Utility: converts option strings to codes and back
     class OptionCodeMap {
@@ -69,6 +69,8 @@ namespace OM { namespace util {
 	    codeMap["IMMUNE_THRESHOLD_GAMMA"]=IMMUNE_THRESHOLD_GAMMA;
 	    codeMap["UPDATE_DENSITY_GAMMA"]=UPDATE_DENSITY_GAMMA;
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
+            codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
+            codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -240,13 +242,12 @@ namespace OM { namespace util {
             }
         }
 	
-	// Convert from bitset to more performant integer with binary operations
-	// Note: use bitset up to now to restrict use of binary operators to
-	// where it has significant performance benefits.
-	optSet = 0;
+	// Convert from bitset to array. Bitset used purely for historical
+	// reasons; optArray because its faster.
+	optArray.assign( NUM_OPTIONS, false );
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs[i])
-		optSet |= (1<<i);
+		optArray[i] = true;
 	}
     }
     

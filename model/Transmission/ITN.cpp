@@ -50,9 +50,14 @@ void ITNAnophelesParams::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse)
 {
-    _relativeAttractiveness.init( params, elt.getDeterrency() );
-    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
-    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
+    if (elt.getDeterrency().present())
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RADeterrency( params, elt.getDeterrency().get() ));
+    else{
+        assert (elt.getTwoStageDeterrency().present());
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RATwoStageDeterrency( params, elt.getTwoStageDeterrency().get() ));
+    }
+    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), "ITN.description.anophelesParams.preprandialKillingFactor" );
+    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), "ITN.description.anophelesParams.postprandialKillingFactor" );
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();
@@ -62,14 +67,13 @@ void ITNAnophelesParams::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-ITNAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
+ITNAnophelesParams::RADeterrency::RADeterrency(const ITNParams& params, const scnXml::ITNDeterrency& elt) :
     lHF( numeric_limits< double >::signaling_NaN() ),
     lPF( numeric_limits< double >::signaling_NaN() ),
     lIF( numeric_limits< double >::signaling_NaN() ),
     holeScaling( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
-{}
-void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, const scnXml::ITNDeterrency& elt){
+{
     double HF = elt.getHoleFactor();
     double PF = elt.getInsecticideFactor();
     double IF = elt.getInteractionFactor();
@@ -139,6 +143,55 @@ void ITNAnophelesParams::RelativeAttractiveness::init(const ITNParams& params, c
     lPF = log( PF );
     lIF = log( IF );
 }
+ITNAnophelesParams::RATwoStageDeterrency::RATwoStageDeterrency(
+        const OM::Transmission::ITNParams& params,
+        const scnXml::TwoStageDeterrency& elt) :
+    lPFEntering( numeric_limits< double >::signaling_NaN() ),
+    insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
+{
+    //TODO: this is just a copy from IRSAnophelesParams::RelativeAttractiveness::init
+    // It should be possible to abstract out a lot of this code.
+    
+    double PF = elt.getEntering().getInsecticideFactor();
+    insecticideScalingEntering = elt.getEntering().getInsecticideScalingFactor();
+    if( !( PF > 0.0) ){
+        ostringstream msg;
+        msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: expected insecticideFactor to be positive.";
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
+    }
+    
+    /* We need to ensure the relative availability is non-negative. However,
+     * since it's an exponentiated value, it always will be.
+     * 
+     * If we don't want ITNs to be able to increase transmission, the following
+     * limits could also be applied. In general, however, there is no reason
+     * ITNs couldn't make individuals more attractive to mosquitoes.
+     * 
+     * To ensure relative availability is at most one: relative availability is
+     *  exp( log(PF)*p ) = PF^p
+     * where PF is the insecticide factor, with p∈[0,1] defined as:
+     *  p=1−exp(-insecticideContent*insecticideScalingFactor).
+     * We therefore just need PF ≤ 1. */
+#ifdef WITHOUT_BOINC
+    // Print out a warning if ITNs may increase transmission, but only in
+    // non-BOINC mode, since it is not unreasonable and volunteers often
+    // mistake this kind of warning as indicating a problem.
+    if( !( PF <= 1.0 ) ) {
+        cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
+        cerr << "attractive to mosquitoes than they would be without IRS.\n";
+        cerr << "This note is only shown by non-BOINC executables.\n";
+        cerr << "IRS.description.anophelesParams.deterrency: bounds not met:\n";
+        cerr << "  0<insecticideFactor≤1\n";
+        cerr.flush();
+    }
+#endif
+    lPFEntering = log( PF );
+    
+    pAttacking.init( params, elt.getAttacking(), "ITN.description.anophelesParams.twoStageDeterrency.attacking" );
+}
 ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
     HF( numeric_limits< double >::signaling_NaN() ),
@@ -148,7 +201,7 @@ ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scnXml::ITNKillingEffect& elt, bool postPrandial){
+void ITNAnophelesParams::SurvivalFactor::init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -158,12 +211,12 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
     invBaseSurvival = 1.0 / (1.0 - BF);
     if( !( BF >= 0.0 && BF < 1.0) ){
         ostringstream msg;
-        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: expected baseFactor to be in range [0,1]";
+        msg << eltName << ": expected baseFactor to be in range [0,1]";
         throw util::xml_scenario_error( msg.str() );
     }
     if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
         ostringstream msg;
-        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: expected scaling factors to be non-negative";
+        msg << eltName << ": expected scaling factors to be non-negative";
         throw util::xml_scenario_error( msg.str() );
     }
     
@@ -238,7 +291,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
         && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
     {
         ostringstream msg;
-        msg << "ITN.description.anophelesParams." << (postPrandial?"post":"pre") << "killingFactor: bounds not met:";
+        msg << eltName << ": bounds not met:";
         if( !(BF+HF<=1.0) )
             msg << " baseFactor+holeFactor≤1";
         if( !(HF>=0.0) )
@@ -251,23 +304,64 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
             msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
         if( !(HF+(PF+IF)*pmax>=0.0) )
             msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
-        throw util::xml_scenario_error( msg.str() );
+        //TODO: These constraints were required. But they're too strong.
+        // Now need to work out which should still be imposed.
+        cerr << msg.str() << endl;
+        //throw util::xml_scenario_error( msg.str() );
     }
 }
-double ITNAnophelesParams::RelativeAttractiveness::relativeAttractiveness( double holeIndex, double insecticideContent )const {
+double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
-    assert( relAvail>=0.0 );
+    //TODO: limits
+    //assert( relAvail>=0.0 );
+    if (relAvail < 0)
+        relAvail = 0.0;
     return relAvail;
+}
+double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
+        double holeIndex, double insecticideContent )const
+{
+    // This is essentially a combination of the relative attractiveness as used
+    // by IRS and a killing factor.
+    
+    // Note that an alternative, simpler, model could have been used, but was
+    // not for consistency with other models. Alternative (here we don't take
+    // the logarithm of PF):
+    // pEnt = 1 - PFEntering × insecticideComponent
+    
+    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScalingEntering);
+    double pEnt = exp( lPFEntering*insecticideComponent );
+    assert( pEnt >= 0.0 );
+    
+    double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
+    // normalise: must have 1 when no insecticide and no net (infinite holes):
+    //TODO: limits
+    if (pEnt * rel_pAtt < 0.0)
+        return 0.0;
+    return pEnt * rel_pAtt;
+}
+double ITNAnophelesParams::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
+    double holeComponent = exp(-holeIndex*holeScaling);
+    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
+    double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
+    //TODO: limits
+    //assert( pAtt <= 1.0 );
+    return pAtt / BF;
 }
 double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    assert( killingEffect <= 1.0 );
+    //assert( killingEffect <= 1.0 );
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    assert( survivalFactor >= 0.0 );
+    //TODO: limits
+    //assert( survivalFactor >= 0.0 );
+    if (survivalFactor < 0.0)
+        return 0.0;
+    else if (survivalFactor > 1.0)
+        return 1.0;
     return survivalFactor;
 }
 
