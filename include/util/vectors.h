@@ -23,6 +23,10 @@
 #include "Global.h"
 #include <gsl/gsl_vector.h>
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 /* Various utilities acting on vectors. */
 
 namespace OM { namespace util { namespace vectors {
