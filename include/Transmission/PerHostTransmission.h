@@ -137,18 +137,20 @@ public:
      * Assume mean is human-to-vector availability rate factor. */
     double entoAvailabilityHetVecItv( const AnophelesHumanParams& base, size_t speciesIndex ) const;
     
-    /** Convenience version of entoAvailabilityPartial()*getRelativeAvailability()
+    /** Availability rate of human to mosquitoes (α_i). Equals 
+     * entoAvailabilityHetVecItv()*getRelativeAvailability().
      *
-     * Mean should be same as entoAvailabilityHetVecItv(). */
+     * To be clear, this includes effects from HetVecItc (het, interv, availability
+     * rate) as well as age (avail. relative to an adult). It does not divide
+     * by the average availability of the population, which was incorrectly done
+     * in the past. */
     inline double entoAvailabilityFull (
         const AnophelesHumanParams& base,
         size_t speciesIndex,
-        double ageYears,
-        double invMeanPopAvail
+        double ageYears
     ) const {
         return entoAvailabilityHetVecItv (base, speciesIndex)
-            * relativeAvailabilityAge (ageYears)
-            * invMeanPopAvail;
+            * relativeAvailabilityAge (ageYears);
     }
     //@}
     
@@ -240,14 +242,17 @@ public:
 private:
     ///@brief Rate/probabilities before interventions. See functions.
     //@{
-    /** Availability rate (α_i) */
+    /** Availability rate of human to mosquitoes, including hetergeneity factor
+     * and base rate, but excluding age and intervention factors. */
     double entoAvailability;
     
-    /** Probability of mosquito successfully biting host (P_B_i) */
+    /** Probability of mosquito successfully biting host (P_B_i) in the absense of
+     * interventions. */
     double probMosqBiting;
     
     /** Probability of mosquito escaping human and finding a resting site, then
-     * resting without dying, after biting the human (P_C_i * P_D_i). */
+     * resting without dying, after biting the human (P_C_i * P_D_i) in the
+     * absense of interventions. */
     double probMosqRest;
     //@}
 };

@@ -25,12 +25,14 @@ set (OM_BOXTEST_NAMES
   Molineaux
   MSAT
   NamawalaArabiensis
+  NoInterv
   Penny
   Rach5IC
   R_0
   VecFullTest
   VecTest
   VecMonthly
+  Larviciding
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

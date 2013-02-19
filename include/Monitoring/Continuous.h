@@ -21,6 +21,7 @@
 #define Hmod_Output_Continuous
 
 #include "Global.h"
+#include "Population.h"
 #include <FastDelegate.h>
 #include <string>
 
@@ -65,10 +66,13 @@ namespace OM { namespace Monitoring {
 	 * @param outputCb A callback function, which when called, outputs its
 	 * data to the passed stream, with each entry preceeded by '\t'.
 	 */
-	static void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
+        static void registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&>);
+        /// As above, except that the called delegate is passed a reference to the Population object
+        static void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const Population&, ostream&>);
 	
 	/// Generate time-step's output. Called at beginning of timestep.
-	static void update ();
+        /// Passed population since some callbacks use this to generate output.
+	static void update (const Population& population);
     };
 } }
 #endif

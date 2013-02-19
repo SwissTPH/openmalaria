@@ -56,7 +56,7 @@ public:
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRS&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
-  virtual void intervLarviciding (const scnXml::Larviciding&);
+  virtual void intervLarviciding (const scnXml::Larviciding::DescriptionType&);
   virtual void uninfectVectors();
   
   inline const ITNParams& getITNParams () const{
@@ -86,9 +86,7 @@ private:
     
     /** Confirm simulationMode allows use of interventions; throw if not. */
     void checkSimMode() const;
-    /** Return one over the mean availability of human population to mosquitoes. */
-    static double invMeanPopAvail (const std::list<Host::Human>& population, int populationSize);
-  
+    
   void ctsCbN_v0 (ostream& stream);
   void ctsCbP_A (ostream& stream);
   void ctsCbP_df (ostream& stream);
@@ -96,6 +94,12 @@ private:
   void ctsCbN_v (ostream& stream);
   void ctsCbO_v (ostream& stream);
   void ctsCbS_v (ostream& stream);
+  void ctsCbAlpha (const Population& population, ostream& stream);
+  void ctsCbP_B (const Population& population, ostream& stream);
+  void ctsCbP_CD (const Population& population, ostream& stream);
+  void ctsNetInsecticideContent (const Population& population, ostream& stream);
+  void ctsIRSInsecticideContent (const Population& population, ostream& stream);
+  void ctsIRSEffects (const Population& population, ostream& stream);
   
   
     /// Number of iterations performed during initialization, or negative when done.

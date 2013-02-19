@@ -33,6 +33,8 @@
       <option name="immunity Y" value="true"/>
       <option name="hosts" value="false"/>
       <option name="recent births" value="true"/>
+      <option name="IRS insecticide content" value="true"/>
+      <option name="IRS effects" value="true"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -119,17 +121,16 @@
       </continuous>
     </ITN>
     <IRS name="new param">
-      <description>
-        <!-- New Parameterisation. To be checked. -->
-        <!-- Initial insecticide: units are mg/m²; any variance? -->
-        <initialInsecticide mu="1180" sigma="0"/>
+      <description_v2>
+        <!-- Initial insecticide: units are μg/cm²; no variance here -->
+        <initialInsecticide mu="118" sigma="0"/>
         <insecticideDecay L="0.15" function="exponential"/>
         <anophelesParams mosquito="gambiae_ss">
           <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>
           <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
           <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
         </anophelesParams>
-      </description>
+      </description_v2>
       <timed>
         <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
         <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>

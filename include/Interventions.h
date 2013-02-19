@@ -53,7 +53,8 @@ namespace Interventions {
 /** Age-based (continuous) deployment. */
 class AgeIntervention {
 public:
-    AgeIntervention( const ::scnXml::ContinuousDeployment& elt, void(Host::Human::*func) (const OM::Population&) );
+    AgeIntervention( const ::scnXml::ContinuousDeployment& elt,
+        void(Host::Human::*func) (const OM::Population&) );
     
     inline bool operator< (const AgeIntervention& that) const{
         return this->ageTimesteps < that.ageTimesteps;

@@ -55,14 +55,37 @@ namespace OM { namespace Monitoring {
     streampos streamStart;
     
     // List of all registered callbacks (not used after init() runs)
-    struct Callback {
-	string titles;
-	FastDelegate1<ostream&> cb;
+    class Callback {
+    protected:
+        Callback( const string& t ) : titles(t) {}
+    public:
+        virtual ~Callback() {}
+        string titles;
+        virtual void call( const Population&, ostream& ) =0;
     };
-    map<string,Callback> registered;
+    class Callback1 : public Callback {
+	FastDelegate1<ostream&> cb;
+    public:
+        Callback1( const string& t, FastDelegate1<ostream&> outputCb ) :
+            Callback(t), cb( outputCb ) {}
+        virtual void call( const Population&, ostream& stream ){
+            cb( stream );
+        }
+    };
+    class Callback2Pop : public Callback {
+        FastDelegate2<const Population&,ostream&> cb;
+    public:
+        Callback2Pop( const string& t, FastDelegate2<const Population&,ostream&> outputCb ) :
+            Callback(t), cb( outputCb ) {}
+        virtual void call( const Population& pop, ostream& stream ){
+            cb( pop, stream );
+        }
+    };
+    typedef map<string,Callback*> registered_t;
+    registered_t registered;
     
     // List that we report.
-    vector< FastDelegate1<ostream&> > toReport;
+    vector< Callback* > toReport;
     int ctsPeriod = 0;
     bool duringInit = false;
     
@@ -99,11 +122,11 @@ namespace OM { namespace Monitoring {
 	if( isCheckpoint ){
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
 	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
-		map<string,Callback>::const_iterator reg_it = registered.find( it->getName() );
+		registered_t::const_iterator reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
 		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
 		if( it->getValue() ){
-		    toReport.push_back( reg_it->second.cb );
+		    toReport.push_back( reg_it->second );
 		}
 	    }
 	    
@@ -131,12 +154,12 @@ namespace OM { namespace Monitoring {
 	    ctsOStream << "timestep";
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
 	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
-		map<string,Callback>::const_iterator reg_it = registered.find( it->getName() );
+		registered_t::const_iterator reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
 		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
 		if( it->getValue() ){
-		    ctsOStream << reg_it->second.titles;
-		    toReport.push_back( reg_it->second.cb );
+		    ctsOStream << reg_it->second->titles;
+		    toReport.push_back( reg_it->second );
 		}
 	    }
 	    ctsOStream << lineEnd << flush;
@@ -158,6 +181,11 @@ namespace OM { namespace Monitoring {
         ogzstream finalFile(compressedCtsoutName.c_str());
         finalFile << origFile.rdbuf();
 #endif
+        
+        // free memory
+        toReport.clear();
+        for( registered_t::iterator it = registered.begin(); it != registered.end(); ++it )
+            delete it->second;
     }
     void Continuous::staticCheckpoint (ostream& stream){
         if( ctsPeriod == 0 )
@@ -186,15 +214,18 @@ namespace OM { namespace Monitoring {
 	    throw util::checkpoint_error ("Continuous: resume error (bad pos/file)");
     }
     
-    void Continuous::registerCallback (string optName, string titles, fastdelegate::FastDelegate1<ostream&> outputCb){
-	Callback s;
-	s.titles = titles;
-	s.cb = outputCb;
-	assert(registered.count(optName) == 0);	// name clash/registered twice?
-	registered[optName] = s;
+    void Continuous::registerCallback (string optName, string titles,
+            fastdelegate::FastDelegate1<ostream&> outputCb){
+        assert(registered.count(optName) == 0); // name clash/registered twice?
+	registered[optName] = new Callback1( titles, outputCb );
+    }
+    void Continuous::registerCallback (string optName, string titles,
+            fastdelegate::FastDelegate2<const Population&,ostream&> outputCb){
+        assert(registered.count(optName) == 0); // name clash/registered twice?
+        registered[optName] = new Callback2Pop( titles, outputCb );
     }
     
-    void Continuous::update (){
+    void Continuous::update (const Population& population){
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){
@@ -210,7 +241,7 @@ namespace OM { namespace Monitoring {
 	
 	ctsOStream << TimeStep::interventionPeriod;
 	for( size_t i = 0; i < toReport.size(); ++i )
-	    (toReport[i])( ctsOStream );
+	    toReport[i]->call( population, ctsOStream );
 	// We must flush often to avoid temporarily outputting partial lines
 	// (resulting in incorrect real-time graphs).
 	ctsOStream << lineEnd << flush;

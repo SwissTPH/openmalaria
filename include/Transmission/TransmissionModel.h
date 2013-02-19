@@ -170,7 +170,7 @@ public:
   /** Set vector deterrent parameters. */
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   /** Set the larviciding intervention params. */
-  virtual void intervLarviciding (const scnXml::Larviciding&);
+  virtual void intervLarviciding (const scnXml::Larviciding::DescriptionType&);
   
   /** Remove all current infections to mosquitoes, such that without re-
    * infection, humans will then be exposed to zero EIR. */

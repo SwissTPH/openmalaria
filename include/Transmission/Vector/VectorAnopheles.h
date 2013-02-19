@@ -93,7 +93,7 @@ public:
     void setupNv0 (size_t sIndex,
                    const std::list<Host::Human>& population,
                    int populationSize,
-                   double invMeanPopAvail);
+                   double meanPopAvail);
 
     /** Return base-line human parameters for the mosquito. */
     inline const AnophelesHumanParams& getHumanBaseParams () {
@@ -109,13 +109,17 @@ public:
 
     /** @brief Set up intervention descriptions for humans, for this anopheles species. */
     //@{
-    inline void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse) {
+    inline void setITNDescription (const ITNParams& params,
+            const scnXml::ITNDescription::AnophelesParamsType& elt,
+            double proportionUse) {
         humanBase.setITNDescription (params, elt, proportionUse);
     }
-    inline void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt) {
+    inline void setIRSDescription (const IRSParams& params,
+            const scnXml::IRSDescription_v1::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
-    inline void setIRSDescription (const IRSParams& params, const scnXml::IRSSimpleDescription::AnophelesParamsType& elt) {
+    inline void setIRSDescription (const IRSParams& params,
+            const scnXml::IRSDescription_v2::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
     inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
@@ -133,9 +137,9 @@ public:
      * @param populationSize Number of humans
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
-     * @param invMeanPopAvail 1 over mean population availability relative to an adult.
      */
-    void advancePeriod (const std::list<Host::Human>& population, int populationSize, size_t sIndex, bool isDynamic, double invMeanPopAvail);
+    void advancePeriod (const std::list<Host::Human>& population,
+        int populationSize, size_t sIndex, bool isDynamic);
 
     /** Returns the EIR calculated by advancePeriod().
      *
@@ -160,7 +164,7 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    void intervLarviciding (const scnXml::LarvicidingInterventionDescription&);
+    void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
 
     void uninfectVectors();
     //@}

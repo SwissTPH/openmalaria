@@ -38,10 +38,10 @@ namespace OM { namespace Transmission {
 class IRSParams {
 public:
     IRSParams() : simpleModel(false), maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
-    /** Set parameters for the new model from elt. */
-    void init( const scnXml::IRSDescription& elt);
     /** Set parameters for the old model from elt. Don't call both! */
-    void init( const scnXml::IRSSimpleDescription& elt);
+    void init( const scnXml::IRSDescription_v1& elt);
+    /** Set parameters for the new model from elt. */
+    void init( const scnXml::IRSDescription_v2& elt);
     
 private:
     // If true, use the older model with direct decay of effect; otherwise,
@@ -64,9 +64,9 @@ public:
         proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
     void init(const IRSParams& params,
-              const scnXml::IRSDescription::AnophelesParamsType& elt);
+              const scnXml::IRSDescription_v1::AnophelesParamsType& elt);
     void init(const IRSParams& params,
-              const scnXml::IRSSimpleDescription::AnophelesParamsType& elt);
+              const scnXml::IRSDescription_v2::AnophelesParamsType& elt);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAttractiveness( double insecticideContent )const{

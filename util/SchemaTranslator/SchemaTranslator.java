@@ -2167,7 +2167,7 @@ public class SchemaTranslator {
             interv = getChildElement(intervs,"IRS");
             if( interv != null ){
                 if( /*TODO: use old or replace?*/ true ){
-                    Element desc = scenarioDocument.createElement("simpleDescription");
+                    Element desc = scenarioDocument.createElement("description");
                     desc.appendChild(getChildElement(interv,"decay"));
                     for( Node n : getChildNodes(interv, "anophelesParams") ){
                         Element e = (Element) n;
@@ -2178,7 +2178,7 @@ public class SchemaTranslator {
                         Element postprandial = getChildElement(e, "killingEffect");
                         e.insertBefore(preprandial, postprandial);
                         scenarioDocument.renameNode(postprandial,null,"postprandialKillingEffect");
-                        // move under "simpleDescription":
+                        // move under "description":
                         desc.appendChild(n);
                     }
                     interv.appendChild(desc);

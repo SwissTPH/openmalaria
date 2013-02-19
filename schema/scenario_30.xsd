@@ -1895,8 +1895,8 @@
             Description and deployment of indoor insecticide interventions
             (IRS, durable wall linings, insecticide-treated-paint, etc.)
             
-            User must choose between using &lt;simpleDescription&gt; (the old
-            model, where effect decays directly) and &lt;description&gt; (the
+            User must choose between using &lt;description&gt; (the old
+            model, where effect decays directly) and &lt;description_v2&gt; (the
             new model where effect decays indirectly based on decay of insecticide).
           </xs:documentation>
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
@@ -1904,8 +1904,8 @@
         <xs:complexType>
           <xs:sequence>
             <xs:choice>
-              <xs:element name="simpleDescription" type="IRSSimpleDescription"/>
-              <xs:element name="description" type="IRSDescription"/>
+              <xs:element name="description" type="IRSDescription_v1"/>
+              <xs:element name="description_v2" type="IRSDescription_v2"/>
             </xs:choice>
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
@@ -2159,7 +2159,13 @@
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" name="anopheles" type="LarvicidingInterventionDescription"/>
+            <xs:element name="description">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element maxOccurs="unbounded" name="anopheles" type="LarvicidingDescAnoph"/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
             <xs:element minOccurs="0" name="timed" type="timedBaseList">
               <xs:annotation>
                 <xs:documentation>
@@ -2653,7 +2659,7 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSSimpleDescription">
+  <xs:complexType name="IRSDescription_v1">
     <xs:annotation>
       <xs:documentation>
         Description of effect for the simple model: IRS has three effects, whos
@@ -2745,7 +2751,7 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSDescription">
+  <xs:complexType name="IRSDescription_v2">
     <xs:annotation>
       <xs:documentation>
         Description of effect for the more complex and probably more realistic
@@ -2764,7 +2770,7 @@
           negative initial concentration. Any negative values sampled are set
           to 0.
         </xs:documentation>
-          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide</xs:appinfo>
+          <xs:appinfo>units:μg/cm²;min:0;name:Initial insecticide</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="insecticideDecay" type="DecayFunction">
@@ -2930,7 +2936,7 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="LarvicidingInterventionDescription">
+  <xs:complexType name="LarvicidingDescAnoph">
     <xs:annotation>
       <xs:documentation>
         Descriptions of initial effectiveness of the effects of
