@@ -9,3 +9,9 @@ Check for redundant variables in:
     mosqEmergeRate
 
 Does Transmission::update need isDynamic parameter?
+
+Cross-species competition:
+Olivier's model: Funestus and Arabiensis larvae shouldn't compete with each
+other at all, while indoor-biting and outdoor-biting Arabiensis larvae should
+compete for the same resources. Should extend SimpleMPD model to allow this.
+
