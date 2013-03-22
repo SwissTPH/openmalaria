@@ -131,8 +131,11 @@ TimeStep NonVectorModel::initIterate (){
     return TimeStep(0); // nothing to do
 }
 
-void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
-    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be called in intervention period anyway.
+void NonVectorModel::changeEIRIntervention (
+        const scnXml::NonVector& nonVectorData)
+{
+    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be
+    // called in intervention period anyway.
   simulationMode = transientEIRknown;
   
   if (nspore != TimeStep::fromDays( nonVectorData.getEipDuration() ))
@@ -142,7 +145,8 @@ void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
   vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
   if (daily.size() < static_cast<size_t>(Monitoring::Surveys.getFinalTimestep().inDays()+1)) {
-    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
+        << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
     throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
@@ -163,10 +167,6 @@ void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
   // I've no idea what this should be, so until someone asks it can be NaN.
   // It was -9.99 and later 0.0. It could of course be recalculated from interventionEIR.
   annualEIR = numeric_limits<double>::quiet_NaN();
-}
-
-void NonVectorModel::changeEIRIntervention (const scnXml::NonVector& ed) {
-    setTransientEIR (ed);
 }
 
 void NonVectorModel::uninfectVectors(){
@@ -215,8 +215,11 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t" << laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())]
-	<< "\ninitialKappa:\t" << initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)] << endl;
+	<< "\nlaggedKappa:\t"
+        << laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())]
+	<< "\ninitialKappa:\t"
+        << initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)]
+        << endl;
     throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif

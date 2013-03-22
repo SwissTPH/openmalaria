@@ -56,8 +56,6 @@ public:
    * assuming that the annual cycle repeated during the pre-intervention period
    * 
    * Similar calculation to that used during initialization. */
-  void setTransientEIR (const scnXml::NonVector& nonVectorData); 
-  
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
   virtual void uninfectVectors();
