@@ -132,6 +132,11 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
     }
 }
 
+void MosqTransmission::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt ){
+    emergence->initVectorPopInterv( elt );
+}
+
+
 double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
                                  double tsP_dif, bool isDynamic, bool printDebug ){
     // We add N_v_length so that we can use mod_nn() instead of mod().

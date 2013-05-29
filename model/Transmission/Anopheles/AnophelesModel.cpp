@@ -264,6 +264,10 @@ void AnophelesModel::init2 (size_t sIndex,
     // All set up to drive simulation from forcedS_v
 }
 
+void AnophelesModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt ){
+    transmission.initVectorPopInterv( elt );
+}
+
 
 // Every TimeStep::interval days:
 void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,

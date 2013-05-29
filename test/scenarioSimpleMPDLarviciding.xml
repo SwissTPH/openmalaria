@@ -176,20 +176,18 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <larviciding>
+    <vectorPop name="larviciding">
       <!-- Example larviciding (made up values) -->
       <description>
         <anopheles mosquito="gambiae_ss">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
+          <!-- 80% effective larviciding for 18 (=0.246...*73) (5-day) timesteps -->
+          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
         </anopheles>
         <anopheles mosquito="funestus">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
+          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
         </anopheles>
         <anopheles mosquito="arabiensis">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
+          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
         </anopheles>
       </description>
       <timed>
@@ -204,7 +202,7 @@
         <deploy time="1086"/>
         <deploy time="1241"/>
       </timed>
-    </larviciding>
+    </vectorPop>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

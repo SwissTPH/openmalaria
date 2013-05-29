@@ -267,18 +267,14 @@ private:
     TimeStep maxInterventionAge;
 };
 
-class TimedLarvicideIntervention : public TimedIntervention {
+class TimedVectorPopIntervention : public TimedIntervention {
 public:
-    TimedLarvicideIntervention( TimeStep deployTime, const scnXml::Larviciding& larviciding) :
-        TimedIntervention( deployTime ),
-        description(larviciding.getDescription())
+    TimedVectorPopIntervention( TimeStep deployTime) :
+        TimedIntervention( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().intervLarviciding(description);
+      population.transmissionModel().deployVectorPopInterv();
     }
-    
-private:
-  scnXml::Larviciding::DescriptionType description;
 };
 
 /** Create either a TimedMassCumIntervention or a TimedMassIntervention,
@@ -527,21 +523,19 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }
         }
     }
-    if( intervElt.getLarviciding().present() ){
-
-      const scnXml::Larviciding& elt = intervElt.getLarviciding().get();
-
-	if (elt.getTimed().present() ) {
-	    activeInterventions.set ( Interventions::LARVICIDING, true );
-
-	    const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-	    typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-	    for ( It it = seq.begin(); it != seq.end(); ++it ) {
-		timed.push_back( new TimedLarvicideIntervention(TimeStep( it->getTime() ),intervElt.getLarviciding().get()) );
-	    }
-	}
-
-      }
+    if( intervElt.getVectorPop().present() ){
+      const scnXml::VectorPopIntervention& elt = intervElt.getVectorPop().get();
+        if (elt.getTimed().present() ) {
+            activeInterventions.set ( Interventions::LARVICIDING, true );
+            population._transmissionModel->initVectorPopInterv( elt.getDescription() );
+            
+            const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+            typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
+            for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                timed.push_back( new TimedVectorPopIntervention(TimeStep( it->getTime() )) );
+            }
+        }
+    }
     
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.

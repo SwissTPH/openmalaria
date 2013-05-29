@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "schema/interventions.h"
+#include "util/DecayFunction.h"
 #include <vector>
 
 namespace OM {
@@ -66,6 +67,9 @@ public:
         const scnXml::AnophelesParams& anoph,
         vector<double>& initialisationEIR,
         int EIPDuration );
+    
+    /** Set up the non-host-specific interventions. */
+    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt );
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
@@ -115,8 +119,8 @@ public:
     
     ///@brief Interventions and reporting
     //@{
-    /// Start a larviciding intervention.
-    void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
+    /// Start an intervention affecting the vector population.
+    void deployVectorPopInterv ();
     
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;
@@ -125,10 +129,23 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
+        EIRRotateAngle & stream;
+        FSRotateAngle & stream;
+        FSCoeffic & stream;
+        forcedS_v & stream;
+        initNvFromSv & stream;
+        initOvFromSv & stream;
+        emergenceIntervDecayHet & stream;
+        emergenceIntervDeployTime & stream;
+        emergenceSurvival & stream;
         checkpoint (stream);
     }
     
 protected:
+    /** Return the proportion of emerging larvae to survive intervention
+     * effects. Should be between 0 and 1. */
+    inline double interventionSurvival() const{ return emergenceSurvival; }
+    
     virtual void checkpoint (istream& stream) =0;
     virtual void checkpoint (ostream& stream) =0;
     
@@ -180,11 +197,16 @@ protected:
      * Would need to be checkpointed for main simulation; not used during
      * initialisation period (so could be reinitialised). */
     //@{
-    /** Timestep at which larviciding effects dissappear. */
-    TimeStep larvicidingEndStep;
-    /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
-     * this parameter. */
-    double larvicidingIneffectiveness;
+    /** Description of decay of effects on emergence. */
+    static auto_ptr<util::DecayFunction> emergenceIntervDecay;
+    /** Initial larviciding effectiveness, from 0 (no effect) to 1 (zero emergence). */
+    static double emergenceIntervInitialEffectiveness;
+    /** Description of larviciding decay. */
+    util::DecayFuncHet emergenceIntervDecayHet;
+    /** Time of larviciding deployment. */
+    TimeStep emergenceIntervDeployTime;
+    /// Cache parameter updated by update()
+    double emergenceSurvival;   // survival with regards to intervention effects
     //@}
 };
 

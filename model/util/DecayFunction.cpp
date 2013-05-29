@@ -71,7 +71,7 @@ public:
     DecayFuncHet hetSample (NormalSample) const{
         return DecayFuncHet();
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
+    double eval(double effectiveAge) const{
         return 1.0;
     }
     TimeStep sampleAgeOfDecay () const{
@@ -89,8 +89,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0;
         }else{
@@ -117,8 +116,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0 - effectiveAge;
         }else{
@@ -148,8 +146,7 @@ public:
     double getBaseTMult() const{
         return negInvLambda;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         return exp( effectiveAge );
     }
     
@@ -172,8 +169,7 @@ public:
     double getBaseTMult() const{
         return constOverLambda;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         return exp( -pow(effectiveAge, k) );
     }
     
@@ -197,8 +193,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
@@ -221,8 +216,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return exp( k - k / (1.0 - pow(effectiveAge, 2.0)) );
         }else{

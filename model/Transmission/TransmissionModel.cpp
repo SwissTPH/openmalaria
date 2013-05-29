@@ -243,20 +243,6 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   lastSurveyTime = TimeStep::simulation;
 }
 
-const char* viError = "vector interventions require vector model";
-void TransmissionModel::setITNDescription (const scnXml::ITNDescription&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::setIRSDescription (const scnXml::IRS&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::setVADescription (const scnXml::VectorDeterrent&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::intervLarviciding (const scnXml::Larviciding::DescriptionType&) {
-  throw util::xml_scenario_error (viError);
-}
-
 
 // -----  checkpointing  -----
 

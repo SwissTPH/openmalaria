@@ -78,6 +78,11 @@ void NonVectorModel::init2 (const std::list<Host::Human>& population, int popula
     simulationMode = forcedEIR;
 }
 
+const char* viError = "vector model interventions can not be used with the non-vector model";
+void NonVectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt ) {
+    throw util::xml_scenario_error( viError );
+}
+
 void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
@@ -174,6 +179,19 @@ void NonVectorModel::uninfectVectors(){
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
     // reset history of human infectivity, which scales dynamic EIR:
     laggedKappa.assign( laggedKappa.size(), 0.0 );
+}
+
+void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::setIRSDescription (const scnXml::IRS&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::deployVectorPopInterv () {
+  throw util::xml_scenario_error (viError);
 }
 
 void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {

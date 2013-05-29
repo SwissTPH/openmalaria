@@ -544,46 +544,45 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="larviciding">
-        <xs:annotation>
-          <xs:documentation>
-            Simple larviciding intervention description.
-          </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Simple larviciding intervention;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="description">
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="anopheles" maxOccurs="unbounded" type="LarvicidingDescAnoph"/>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-            <xs:element minOccurs="0" name="timed" type="timedBaseList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed mosquito larviding deployment
-                </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Larviciding deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:element minOccurs="0" name="vectorPop" type="VectorPopIntervention"/>
     </xs:all>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
         <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="VectorPopIntervention">
+    <xs:annotation>
+      <xs:documentation>
+        An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+      </xs:documentation>
+      <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="description">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="anopheles" maxOccurs="unbounded" type="VectorPopDescAnoph"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="timed" type="timedBaseList">
+        <xs:annotation>
+          <xs:documentation>
+            List of timed vector population intervention deployment
+          </xs:documentation>
+          <xs:appinfo>type:list of elements;name:Vector population intervention deployment;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of intervention (e.g. larviciding, sugar bait).
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1376,29 +1375,36 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="LarvicidingDescAnoph">
+  <xs:complexType name="DecayAndInitialProp">
+    <xs:complexContent>
+      <xs:extension base="DecayFunction">
+        <xs:attribute name="initialProp" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial probability or proportion</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="VectorPopDescAnoph">
     <xs:annotation>
       <xs:documentation>
         Descriptions of initial effectiveness of the effects of
-        larviciding interventions.
+        vector population interventions.
       </xs:documentation>
-      <xs:appinfo>units:dimensionless;min:0;max:1;name:Larviciding;</xs:appinfo>
+      <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="duration" type="intValue">
+      <!-- TODO: other effects -->
+      <xs:element name="emergence" type="DecayAndInitialProp" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
-                  Specifies how long the larviciding is effective
-                </xs:documentation>
-          <xs:appinfo>units:time-steps;name:Duration;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="effectiveness" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>
-                  Give the proportion of larvae killed by the larviciding
+            Describe an effect on emergence of pupa into adults: this value is the
+            proportion of emerging pupa which are killed by this intervention.
+            
+            This can be used as a crude way of modelling larviciding.
            </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Effectiveness;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

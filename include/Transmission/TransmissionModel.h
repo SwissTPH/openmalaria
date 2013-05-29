@@ -90,6 +90,9 @@ public:
    * information from the human population structure. */
   virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
   
+  /** Set up vector population interventions. */
+  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt ) =0;
+  
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
@@ -165,13 +168,13 @@ public:
   double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set ITN parameters. */
-  virtual void setITNDescription ( const scnXml::ITNDescription&);
+  virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set IRS parameters. */
-  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setIRSDescription (const scnXml::IRS&) =0;
   /** Set vector deterrent parameters. */
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
+  virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
   /** Set the larviciding intervention params. */
-  virtual void intervLarviciding (const scnXml::Larviciding::DescriptionType&);
+  virtual void deployVectorPopInterv () =0;
   
   /** Remove all current infections to mosquitoes, such that without re-
    * infection, humans will then be exposed to zero EIR. */

@@ -179,7 +179,7 @@ double SimpleMPDEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
     double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d, developmentDuration)];
-    double emergence = larvicidingIneffectiveness * probPreadultSurvival * yt /
+    double emergence = interventionSurvival() * probPreadultSurvival * yt /
         (1.0 + invLarvalResources[dYear1] * yt);
     nOvipositingDelayed[mod_nn(d, developmentDuration)] = nOvipositing;
     size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());

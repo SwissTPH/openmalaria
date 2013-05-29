@@ -116,7 +116,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
 double FixedEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     // Simple model: fixed emergence scaled by larviciding
-    return mosqEmergeRate[dYear1] * larvicidingIneffectiveness;
+    return mosqEmergeRate[dYear1] * interventionSurvival();
 }
 
 void FixedEmergence::updateStats( size_t d, double tsP_dif, double S_v ){

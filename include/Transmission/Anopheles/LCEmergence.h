@@ -99,20 +99,12 @@ private:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        EIRRotateAngle & stream;
-        FSRotateAngle & stream;
-        FSCoeffic & stream;
-        forcedS_v & stream;
         quinquennialP_dif & stream;
         initNv0FromSv & stream;
-        initNvFromSv & stream;
-        initOvFromSv & stream;
         initialP_A & stream;
         initialP_df & stream;
         lcParams & stream;
         lifeCycle & stream;
-        larvicidingEndStep & stream;
-        larvicidingIneffectiveness & stream;
     }
     
     // -----  parameters (constant after initialisation)  -----

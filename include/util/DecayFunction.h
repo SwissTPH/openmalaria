@@ -92,9 +92,15 @@ public:
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    virtual double eval(TimeStep age, DecayFuncHet sample) const =0;
+    inline double eval(TimeStep age, DecayFuncHet sample) const {
+        return eval(age.asInt() * sample.getTMult());
+    }
     
-    /** Sample a DecayFuncHet value (should be stored per individual). */
+    /** Sample a DecayFuncHet value (should be stored per individual).
+     * 
+     * Note that a DecayFuncHet is needed to call eval() even if heterogeneity
+     * is not wanted. If sigma = 0 then the random number stream will not be
+     * touched. */
     virtual DecayFuncHet hetSample () const =0;
     
     /** Generate a DecayFuncHet value from an existing sample. */
@@ -112,6 +118,9 @@ public:
     
 protected:
     DecayFunction() {}
+    // Protected version. Note that the het sample parameter is needed even
+    // when heterogeneity is not used so don't try calling this without that.
+    virtual double eval(double ageTS) const =0;
 };
 
 } }

@@ -32,6 +32,8 @@ namespace Transmission {
 namespace Anopheles {
 using namespace OM::util;
 
+double EmergenceModel::emergenceIntervInitialEffectiveness = 0.0;
+auto_ptr<DecayFunction> EmergenceModel::emergenceIntervDecay;
 
 // -----  Initialisation of model, done before human warmup  ------
 
@@ -40,8 +42,8 @@ EmergenceModel::EmergenceModel() :
             FSRotateAngle(numeric_limits<double>::quiet_NaN()),
             initNvFromSv(numeric_limits<double>::quiet_NaN()),
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
-            larvicidingEndStep (TimeStep::future),
-            larvicidingIneffectiveness (1.0)
+            emergenceIntervDeployTime(TimeStep::never),
+            emergenceSurvival(1.0)
 {
     forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
 }
@@ -154,9 +156,12 @@ void EmergenceModel::scaleEIR( double factor ) {
 
 // Every TimeStep::interval days:
 void EmergenceModel::update () {
-    if (TimeStep::simulation > larvicidingEndStep) {
-        larvicidingEndStep = TimeStep::future;
-        larvicidingIneffectiveness = 1.0;
+    if( emergenceIntervDecay.get() != 0 /* nullptr */ ){
+        emergenceSurvival = 1.0 - emergenceIntervInitialEffectiveness *
+            emergenceIntervDecay->eval(
+                TimeStep::simulation - emergenceIntervDeployTime,
+                emergenceIntervDecayHet
+            );
     }
 }
 
@@ -165,12 +170,25 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 
 // -----  Summary and intervention functions  -----
 
-void EmergenceModel::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
+void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt ){
+    if( elt.getEmergence().present() ){
+        const scnXml::DecayAndInitialProp& emergeElt = elt.getEmergence().get();
+        emergenceIntervDecay = DecayFunction::makeObject(emergeElt, "emergence");
+        emergenceIntervInitialEffectiveness = emergeElt.getInitialProp();
+    }
+}
+
+void EmergenceModel::deployVectorPopInterv () {
     // Note: intervention acts first on time-step following deployment. It is
     // disabled by update() _after_ it's last effective day.
-    larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
-    larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
+    if( emergenceIntervDecay.get() != 0 /* nullptr */ ){        // if there is an emergence effect
+        // first effect tomorrow so don't change today
+        // This at least is consistent with previous results and gives the correct number of time steps of deployment
+        emergenceIntervDeployTime = TimeStep::simulation + TimeStep(1);
+        emergenceIntervDecayHet = emergenceIntervDecay->hetSample();
+    }
 }
+
 
 }
 }
