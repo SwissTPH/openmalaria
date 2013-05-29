@@ -101,7 +101,7 @@ namespace Params {
     class InputDataType {
     public:
         /// Current schema version.
-        static const int SCHEMA_VERSION = 30;
+        static const int SCHEMA_VERSION = 31;
         /** Oldest which current code is potentially compatible with
         * (provided the scenario XML file references its schema version).
         */
