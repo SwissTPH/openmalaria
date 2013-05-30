@@ -544,7 +544,23 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="vectorPop" type="VectorPopIntervention"/>
+      <xs:element minOccurs="0" name="vectorPop">
+        <xs:annotation>
+          <xs:documentation>A list of parameterisations of generic vector host-inspecific interventions.</xs:documentation>
+          <xs:appinfo>name:Vector population intervention;units:List of elements;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <!-- Note: the ONLY reason for this list being wrapped with the
+            extra "vectorPop" element is that XSD 1.0 only allows unrepeated
+            elements in an "all" section or multiple in a "sequence" section.
+            Using the latter would invalidate existing XMLs and cause excess.
+            confusion. XSD 1.1 does not have this limitation but still has
+            limited support. -->
+            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="VectorPopIntervention"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:all>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -557,6 +573,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:annotation>
       <xs:documentation>
         An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+        
+        Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
       </xs:documentation>
       <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
     </xs:annotation>

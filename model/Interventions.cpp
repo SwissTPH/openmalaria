@@ -269,12 +269,15 @@ private:
 
 class TimedVectorPopIntervention : public TimedIntervention {
 public:
-    TimedVectorPopIntervention( TimeStep deployTime) :
-        TimedIntervention( deployTime )
+    TimedVectorPopIntervention( TimeStep deployTime, size_t instance ) :
+        TimedIntervention( deployTime ),
+        inst(instance)
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().deployVectorPopInterv();
+      population.transmissionModel().deployVectorPopInterv(inst);
     }
+private:
+    size_t inst;
 };
 
 /** Create either a TimedMassCumIntervention or a TimedMassIntervention,
@@ -524,15 +527,21 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         }
     }
     if( intervElt.getVectorPop().present() ){
-      const scnXml::VectorPopIntervention& elt = intervElt.getVectorPop().get();
-        if (elt.getTimed().present() ) {
-            activeInterventions.set ( Interventions::LARVICIDING, true );
-            population._transmissionModel->initVectorPopInterv( elt.getDescription() );
-            
-            const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-            typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-            for ( It it = seq.begin(); it != seq.end(); ++it ) {
-                timed.push_back( new TimedVectorPopIntervention(TimeStep( it->getTime() )) );
+        typedef scnXml::VectorPop::InterventionSequence SeqT;
+        const SeqT& seq = intervElt.getVectorPop().get().getIntervention();
+        size_t instance = 0;
+        for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
+            const scnXml::VectorPopIntervention& elt = *it;
+            if (elt.getTimed().present() ) {
+                activeInterventions.set ( Interventions::VECTOR_POP, true );
+                population._transmissionModel->initVectorPopInterv( elt.getDescription(), instance );
+                
+                const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+                typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
+                for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                    timed.push_back( new TimedVectorPopIntervention(TimeStep( it->getTime() ), instance) );
+                }
+                instance++;
             }
         }
     }

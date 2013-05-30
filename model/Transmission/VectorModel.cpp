@@ -264,7 +264,7 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt ) {
+void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
     typedef scnXml::VectorPopIntervention::DescriptionType::AnophelesSequence AS;
     const AS& as = elt.getAnopheles();
     if( as.size() != numSpecies ){
@@ -274,7 +274,7 @@ void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::Desc
         );
     }
     for( AS::const_iterator it = as.begin(); it != as.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].initVectorPopInterv ( *it );
+        species[getSpeciesIndex(it->getMosquito())].initVectorPopInterv ( *it, instance );
     }
 }
 
@@ -452,11 +452,11 @@ void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     }
 }
 
-void VectorModel::deployVectorPopInterv () {
+void VectorModel::deployVectorPopInterv (size_t instance) {
     checkSimMode();
     
     for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
-        it->deployVectorPopInterv();
+        it->deployVectorPopInterv(instance);
     }
 }
 void VectorModel::uninfectVectors() {

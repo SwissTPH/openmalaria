@@ -79,7 +79,7 @@ void NonVectorModel::init2 (const std::list<Host::Human>& population, int popula
 }
 
 const char* viError = "vector model interventions can not be used with the non-vector model";
-void NonVectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt ) {
+void NonVectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
     throw util::xml_scenario_error( viError );
 }
 
@@ -190,7 +190,7 @@ void NonVectorModel::setIRSDescription (const scnXml::IRS&) {
 void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::deployVectorPopInterv () {
+void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }
 

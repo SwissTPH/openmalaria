@@ -104,7 +104,8 @@ public:
                    double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
-    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt );
+    inline void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+        transmission.initVectorPopInterv( elt, instance ); }
     
     /** Return base-line human parameters for the mosquito. */
     inline const Anopheles::PerHostBase& getHumanBaseParams () {
@@ -177,8 +178,8 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    inline void deployVectorPopInterv () {
-        transmission.emergence->deployVectorPopInterv();
+    inline void deployVectorPopInterv (size_t instance) {
+        transmission.emergence->deployVectorPopInterv(instance);
     }
 
     inline void uninfectVectors() {

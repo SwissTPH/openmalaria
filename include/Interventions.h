@@ -43,7 +43,7 @@ namespace Interventions {
         VEC_AVAIL,
         IMMUNE_SUPPRESSION,
         COHORT,
-        LARVICIDING,
+        VECTOR_POP,
         R_0_CASE,
         IMPORTED_INFECTIONS,
         UNINFECT_VECTORS,

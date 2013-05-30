@@ -176,31 +176,51 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vectorPop name="larviciding">
-      <!-- Example larviciding (made up values) -->
-      <description>
-        <anopheles mosquito="gambiae_ss">
-          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
-        </anopheles>
-        <anopheles mosquito="funestus">
-          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
-        </anopheles>
-        <anopheles mosquito="arabiensis">
-          <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
-        </anopheles>
-      </description>
-      <timed>
-        <!-- Varied times of deployment with two-year breaks -->
-        <deploy time="0"/>
-        <deploy time="155"/>
-        <deploy time="310"/>
-        <deploy time="465"/>
-        <deploy time="620"/>
-        <deploy time="775"/>
-        <deploy time="931"/>
-        <deploy time="1086"/>
-        <deploy time="1241"/>
-      </timed>
+    <vectorPop>
+      <intervention name="larviciding">
+        <!-- Example larviciding (made up values) -->
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+          <anopheles mosquito="funestus">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+          <anopheles mosquito="arabiensis">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+        </description>
+        <timed>
+          <!-- Varied times of deployment with two-year breaks -->
+          <deploy time="0"/>
+          <deploy time="155"/>
+          <deploy time="465"/>
+          <deploy time="620"/>
+          <deploy time="775"/>
+          <deploy time="1241"/>
+        </timed>
+      </intervention>
+      <intervention name="larviciding">
+        <!-- second intervention with other deploy times: since configuration
+        is the same, results should be identical to having all deployments
+        within a single "intervention" element. -->
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+          <anopheles mosquito="funestus">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+          <anopheles mosquito="arabiensis">
+            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+          </anopheles>
+        </description>
+        <timed>
+          <deploy time="310"/>
+          <deploy time="931"/>
+          <deploy time="1086"/>
+        </timed>
+      </intervention>
     </vectorPop>
   </interventions>
   <healthSystem>

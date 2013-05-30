@@ -37,7 +37,7 @@ public:
   
   virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt );
+  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -63,7 +63,7 @@ public:
   virtual void setITNDescription ( const scnXml::ITNDescription&);
   virtual void setIRSDescription (const scnXml::IRS&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
-  virtual void deployVectorPopInterv ();
+  virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();
   

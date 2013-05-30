@@ -91,7 +91,7 @@ public:
   virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
   
   /** Set up vector population interventions. */
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt ) =0;
+  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) =0;
   
   /// Checkpointing
   template<class S>
@@ -173,8 +173,12 @@ public:
   virtual void setIRSDescription (const scnXml::IRS&) =0;
   /** Set vector deterrent parameters. */
   virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
-  /** Set the larviciding intervention params. */
-  virtual void deployVectorPopInterv () =0;
+  /** Set the larviciding intervention params.
+   *
+   * Instance: the index of this instance of the intervention. Each instance
+   * has it's own parameterisation. 0 <= instance < N where N is the number of
+   * instances. */
+  virtual void deployVectorPopInterv (size_t instance) =0;
   
   /** Remove all current infections to mosquitoes, such that without re-
    * infection, humans will then be exposed to zero EIR. */

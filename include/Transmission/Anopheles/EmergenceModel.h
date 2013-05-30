@@ -25,6 +25,7 @@
 #include "schema/interventions.h"
 #include "util/DecayFunction.h"
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -69,7 +70,7 @@ public:
         int EIPDuration );
     
     /** Set up the non-host-specific interventions. */
-    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt );
+    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
@@ -120,7 +121,7 @@ public:
     ///@brief Interventions and reporting
     //@{
     /// Start an intervention affecting the vector population.
-    void deployVectorPopInterv ();
+    void deployVectorPopInterv (size_t instance);
     
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;
@@ -135,8 +136,7 @@ public:
         forcedS_v & stream;
         initNvFromSv & stream;
         initOvFromSv & stream;
-        emergenceIntervDecayHet & stream;
-        emergenceIntervDeployTime & stream;
+        emergence & stream;
         emergenceSurvival & stream;
         checkpoint (stream);
     }
@@ -197,14 +197,26 @@ protected:
      * Would need to be checkpointed for main simulation; not used during
      * initialisation period (so could be reinitialised). */
     //@{
-    /** Description of decay of effects on emergence. */
-    static auto_ptr<util::DecayFunction> emergenceIntervDecay;
-    /** Initial larviciding effectiveness, from 0 (no effect) to 1 (zero emergence). */
-    static double emergenceIntervInitialEffectiveness;
-    /** Description of larviciding decay. */
-    util::DecayFuncHet emergenceIntervDecayHet;
-    /** Time of larviciding deployment. */
-    TimeStep emergenceIntervDeployTime;
+    struct EmergenceInterv {
+        EmergenceInterv() :
+                initialEffectiveness(0.0),
+                deployTime(TimeStep::never) {}
+        /** Description of decay of effects on emergence. */
+        //C++11: could use unique_ptr and implement move support
+        boost::shared_ptr<util::DecayFunction> decay;
+        /** Initial larviciding effectiveness, from 0 (no effect) to 1 (zero emergence). */
+        double initialEffectiveness;
+        /** Description of larviciding decay. */
+        util::DecayFuncHet decayHet;
+        /** Time of larviciding deployment. */
+        TimeStep deployTime;
+        template<class S>
+        void operator& (S& stream) {
+            decayHet & stream;
+            deployTime & stream;
+        }
+    };
+    vector<EmergenceInterv> emergence;
     /// Cache parameter updated by update()
     double emergenceSurvival;   // survival with regards to intervention effects
     //@}
