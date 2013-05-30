@@ -153,14 +153,8 @@ void EmergenceModel::scaleEIR( double factor ) {
 // Every TimeStep::interval days:
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
-    for( size_t i = 0; i < emergence.size(); ++i ){
-        if( emergence[i].decay.get() != 0 /* nullptr */ ){
-            double decayCoeffic = emergence[i].decay->eval(
-                    TimeStep::simulation - emergence[i].deployTime,
-                    emergence[i].decayHet );
-            emergenceSurvival *= 1.0 - emergence[i].initialEffectiveness * decayCoeffic;
-        }
-    }
+    for( size_t i = 0; i < emergence.size(); ++i )
+        emergenceSurvival *= 1.0 - emergence[i].current_value( TimeStep::simulation );
 }
 
 void EmergenceModel::checkpoint (istream& stream){ (*this) & stream; }
@@ -173,24 +167,18 @@ void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt,
     if( emergence.size() <= instance ){
         emergence.resize( instance+1 );
     }
-    if( elt.getEmergence().present() ){
-        const scnXml::DecayAndInitialProp& emergeElt = elt.getEmergence().get();
-        emergence[instance].decay = DecayFunction::makeObject(emergeElt, "emergence");
-        emergence[instance].initialEffectiveness = emergeElt.getInitialProp();
+    if( elt.getEmergenceReduction().present() ){
+        const scnXml::EmergenceReduction& elt2 = elt.getEmergenceReduction().get();
+        emergence[instance].set (elt2.getInitial(), elt2.getDecay(), "emergence");
     }
 }
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
     assert( 0 <= instance && instance < emergence.size() && emergence.size() == emergence.size() );
     
-    // Note: intervention acts first on time-step following deployment. It is
-    // disabled by update() _after_ it's last effective day.
-    if( emergence[instance].decay.get() != 0 /* nullptr */ ){        // if there is an emergence effect
-        // first effect tomorrow so don't change today
-        // This at least is consistent with previous results and gives the correct number of time steps of deployment
-        emergence[instance].deployTime = TimeStep::simulation + TimeStep(1);
-        emergence[instance].decayHet = emergence[instance].decay->hetSample();
-    }
+    // Note: intervention acts first on time-step following (+1) deployment.
+    // This at least is consistent with previous results and gives the correct number of time steps of deployment
+    emergence[instance].deploy( TimeStep::simulation + TimeStep(1) );
 }
 
 

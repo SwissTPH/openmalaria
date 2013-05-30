@@ -182,13 +182,19 @@
         <description>
           <anopheles mosquito="gambiae_ss">
             <!-- 80% effective larviciding for 18 (=0.246...*73) (5-day) timesteps -->
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
         </description>
         <timed>

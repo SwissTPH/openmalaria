@@ -23,9 +23,8 @@
 
 #include "Global.h"
 #include "schema/interventions.h"
-#include "util/DecayFunction.h"
+#include "util/SimpleDecayingValue.h"
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -197,26 +196,8 @@ protected:
      * Would need to be checkpointed for main simulation; not used during
      * initialisation period (so could be reinitialised). */
     //@{
-    struct EmergenceInterv {
-        EmergenceInterv() :
-                initialEffectiveness(0.0),
-                deployTime(TimeStep::never) {}
-        /** Description of decay of effects on emergence. */
-        //C++11: could use unique_ptr and implement move support
-        boost::shared_ptr<util::DecayFunction> decay;
-        /** Initial larviciding effectiveness, from 0 (no effect) to 1 (zero emergence). */
-        double initialEffectiveness;
-        /** Description of larviciding decay. */
-        util::DecayFuncHet decayHet;
-        /** Time of larviciding deployment. */
-        TimeStep deployTime;
-        template<class S>
-        void operator& (S& stream) {
-            decayHet & stream;
-            deployTime & stream;
-        }
-    };
-    vector<EmergenceInterv> emergence;
+    /// Description of killing effect on emerging pupae
+    vector<util::SimpleDecayingValue> emergence;
     /// Cache parameter updated by update()
     double emergenceSurvival;   // survival with regards to intervention effects
     //@}

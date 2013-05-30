@@ -181,13 +181,19 @@
         <!-- Example larviciding (made up values) -->
         <description>
           <anopheles mosquito="gambiae_ss">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
         </description>
         <timed>
@@ -206,13 +212,19 @@
         within a single "intervention" element. -->
         <description>
           <anopheles mosquito="gambiae_ss">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
-            <emergence initialProp="0.8" function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
           </anopheles>
         </description>
         <timed>

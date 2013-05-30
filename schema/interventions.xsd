@@ -575,6 +575,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
         
         Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
+        
+        Each instance may have multiple deployments. In this case the effects of each instance
+        are independent (effects are combined) but the effects of multiple deployments of a single
+        instance are not independent (only the latest deployment has any effect).
       </xs:documentation>
       <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
     </xs:annotation>
@@ -1393,17 +1397,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="DecayAndInitialProp">
-    <xs:complexContent>
-      <xs:extension base="DecayFunction">
-        <xs:attribute name="initialProp" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial probability or proportion</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
   <xs:complexType name="VectorPopDescAnoph">
     <xs:annotation>
       <xs:documentation>
@@ -1414,7 +1407,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:annotation>
     <xs:sequence>
       <!-- TODO: other effects -->
-      <xs:element name="emergence" type="DecayAndInitialProp" minOccurs="0">
+      <xs:element name="emergenceReduction" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             Describe an effect on emergence of pupa into adults: this value is the
@@ -1424,6 +1417,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
            </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
         </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="decay" type="DecayFunction"/>
+          </xs:sequence>
+          <xs:attribute name="initial" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial proportion reduction</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
       </xs:element>
     </xs:sequence>
     <xs:attribute name="mosquito" type="xs:string" use="required">
