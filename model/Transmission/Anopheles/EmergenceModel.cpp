@@ -163,18 +163,20 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 // -----  Summary and intervention functions  -----
 
 void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
-    assert( emergence.size() == emergence.size() && instance >= 0 );
-    if( emergence.size() <= instance ){
+    assert( instance >= 0 );
+    if( emergence.size() <= instance )
         emergence.resize( instance+1 );
-    }
+    
     if( elt.getEmergenceReduction().present() ){
         const scnXml::EmergenceReduction& elt2 = elt.getEmergenceReduction().get();
-        emergence[instance].set (elt2.getInitial(), elt2.getDecay(), "emergence");
+        if( elt2.getInitial() < 0.0 || elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "emergenceReduction intervention: initial effect must be in range [0,1]" );
+        emergence[instance].set (elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
 }
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
-    assert( 0 <= instance && instance < emergence.size() && emergence.size() == emergence.size() );
+    assert( 0 <= instance && instance < emergence.size() );
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment

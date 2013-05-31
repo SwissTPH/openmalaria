@@ -73,6 +73,11 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)) {
+        if( factor > 1e6 && vectors::sum(quinquennialS_v) < 1e-3 ){
+            throw util::base_exception("Simulated S_v is approx 0 (i.e.\
+ mosquitoes are not infectious, before interventions). Simulator cannot handle this; perhaps\
+ increase EIR or change the entomology model.", util::Error::VectorFitting);
+        }
         if ( vectors::sum(forcedS_v) == 0.0 ) {
             return false;   // no EIR desired: nothing to do
         }

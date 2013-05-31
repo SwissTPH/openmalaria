@@ -27,6 +27,7 @@
 #include "Transmission/PerHost.h"
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
+#include "util/SimpleDecayingValue.h"
 
 #include <list>
 #include <vector>
@@ -104,8 +105,7 @@ public:
                    double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
-    inline void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
-        transmission.initVectorPopInterv( elt, instance ); }
+    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
     
     /** Return base-line human parameters for the mosquito. */
     inline const Anopheles::PerHostBase& getHumanBaseParams () {
@@ -178,9 +178,7 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    inline void deployVectorPopInterv (size_t instance) {
-        transmission.emergence->deployVectorPopInterv(instance);
-    }
+    void deployVectorPopInterv (size_t instance);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();
@@ -222,6 +220,8 @@ public:
         mosqSeekingDuration & stream;
         probMosqSurvivalOvipositing & stream;
         transmission & stream;
+        seekingDeathRateIntervs & stream;
+        probDeathOvipositingIntervs & stream;
         partialEIR & stream;
     }
 
@@ -323,6 +323,18 @@ private:
      * 
      * Much of the core model is encapsulated here. */
     MosqTransmission transmission;
+    
+    /** @brief Intervention parameters */
+    //@{
+    /** Interventions affecting death rate while seeking (parameters + state)
+     * 
+     * Value is increase in death rate (so multiply rate by 1 + this). */
+    vector<util::SimpleDecayingValue> seekingDeathRateIntervs;
+    /** Interventions affecting probability of dying while ovipositing (pre laying of eggs) (parameters + state)
+     * 
+     * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
+    vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
+    //@}
     
     /** Per time-step partial calculation of EIR.
     *

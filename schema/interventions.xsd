@@ -1405,8 +1405,48 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
-      <!-- TODO: other effects -->
+    <xs:all>
+      <xs:element name="seekingDeathRateIncrease" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal, give 0.2).
+           </xs:documentation>
+          <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="decay" type="DecayFunction"/>
+          </xs:sequence>
+          <xs:attribute name="initial" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:appinfo>units:dimensionless;min:0;max:inf;name:Initial proportion increase</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="probDeathOvipositing" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Describe an effect of increased mortality while ovipositing
+            due to this intervention. Enter the probability of dying due to
+            this intervention.
+           </xs:documentation>
+          <xs:appinfo>units:dimensionless;name:Proportion ovipositing mosquitoes killed;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="decay" type="DecayFunction"/>
+          </xs:sequence>
+          <xs:attribute name="initial" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial probability of killing</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="emergenceReduction" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -1428,7 +1468,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-    </xs:sequence>
+    </xs:all>
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
