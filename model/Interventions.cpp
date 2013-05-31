@@ -506,6 +506,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::R_0_CASE, true);
+            Host::Vaccine::verifyEnabledForR_0();
             // uses vaccines but see note in Vaccine::initParameters()
             // activeInterventions.set (Interventions::VACCINE, true);
             // timed deployments:

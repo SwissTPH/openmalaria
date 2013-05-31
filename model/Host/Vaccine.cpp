@@ -43,7 +43,9 @@ double Vaccine::getEfficacy (int numPrevDoses)
     if (numPrevDoses >= (int) initialMeanEfficacy.size())
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
-    if (ime < 1.0) {
+    if (ime == 0.0){
+        return 0.0;
+    } else if (ime < 1.0) {
         return random::betaWithMean (ime, efficacyB);
     } else {
         return 1.0;
@@ -93,6 +95,11 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
             targetAgeTStep[i] = TimeStep::fromYears( cVS[i].getTargetAgeYrs() );
         }
     }
+}
+
+void Vaccine::verifyEnabledForR_0 (){
+    if( !PEV.active || !TBV.active )
+        throw util::xml_scenario_error("PEV and TBV vaccines must have a description to use the insertR_0Case intervention");
 }
 
 void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)

@@ -68,6 +68,11 @@
   </monitoring>
   <interventions name="Full Set">
     <vaccine>
+      <description vaccineType="PEV">
+        <decay L="0.0" function="constant"/>
+        <efficacyB value="0"/>
+        <initialEfficacy value="0"/>
+      </description>
       <description vaccineType="TBV">
         <decay L="0.0" function="constant"/>
         <efficacyB value="1"/>

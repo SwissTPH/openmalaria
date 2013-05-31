@@ -43,7 +43,9 @@ namespace util {
 class DecayFuncHet {
     double tMult;
 public:
-    DecayFuncHet() : tMult( numeric_limits<double>::quiet_NaN() ) {}
+    /** Default value: should make all eval() calls return 0 (i.e. infinitely
+     * old deployment). */
+    DecayFuncHet() : tMult( numeric_limits<double>::infinity() ) {}
     
     inline double getTMult() const{
         return tMult;
@@ -56,6 +58,7 @@ public:
     }
     
     friend class BaseHetDecayFunction;
+    friend class ConstantDecayFunction;
  };
 
 /** An interface for a few types of decay function (some of which may also be

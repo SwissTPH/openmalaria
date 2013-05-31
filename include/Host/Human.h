@@ -124,10 +124,7 @@ public:
   void addInfection();
   
   /// Add PEV and remove TBV (vaccines) from human
-  inline void R_0Vaccines() {
-      _vaccine.setInitialPEV( 1.0 );
-      _vaccine.setInitialTBV( 0.0 );
-  }
+  inline void R_0Vaccines() { _vaccine.specialR_0(); }
   //@}
   
   ///@brief Functions to check coverage by interventions

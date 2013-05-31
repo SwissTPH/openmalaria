@@ -45,6 +45,9 @@ public:
     /// Set parameters from xml (only called if vaccines are used)
     static void init (const scnXml::Vaccine& xmlVaccine);
     
+    /// Special for R_0: check is set up correctly or throw xml_scenario_error
+    static void verifyEnabledForR_0 ();
+    
 private:
     /*! Common to all vaccine types. Number of vaccine doses that are given
      * either through EPI or as EPI Boosters. */
@@ -115,16 +118,13 @@ public:
         return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleTBV );
     }
     
-    /// @brief Hacks for R_0 deployment
-    //@{
-    inline void setInitialPEV( double effic ) {
-	_initialPEVEfficacy = effic;
+    /// Hack for R_0 experiment: make current human the infection source
+    inline void specialR_0(){
+        assert( Vaccine::PEV.active && Vaccine::TBV.active );
+	_initialPEVEfficacy = 1.0;
+        _initialTBVEfficacy = 0.0;
     }
-    inline void setInitialTBV( double effic ) {
-        _initialTBVEfficacy = effic;
-    }
-    //@}
-
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {

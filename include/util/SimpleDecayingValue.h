@@ -58,7 +58,7 @@ public:
     /** Get the value (0 if before any deployment or after complete decay,
      * also 0 if no decay function or initial value was set,
      * otherwise between zero and the inital value). */
-    inline double current_value (TimeStep time){
+    inline double current_value (TimeStep time) const{
         if( decay.get() == 0 ) return 0.0;  // decay wasn't set: the always return 0
         
         return initial * decay->eval( time - deploy_t, het );

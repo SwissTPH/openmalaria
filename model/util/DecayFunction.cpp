@@ -66,12 +66,19 @@ public:
 class ConstantDecayFunction : public DecayFunction {
 public:
     DecayFuncHet hetSample () const{
-        return DecayFuncHet();
+        DecayFuncHet ret;
+        ret.tMult = 1.0;
+        return ret;
     }
-    DecayFuncHet hetSample (NormalSample) const{
-        return DecayFuncHet();
+    DecayFuncHet hetSample (NormalSample sample) const{
+        return hetSample();
     }
+    
     double eval(double effectiveAge) const{
+        // Note: we now require all decay functions to return 0 when time > 0
+        // and the DecayFuncHet is default-constructed. So const *after deployment*.
+        if( effectiveAge == numeric_limits<double>::infinity() )
+            return 0.0;
         return 1.0;
     }
     TimeStep sampleAgeOfDecay () const{
@@ -98,7 +105,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep::never;
+        return TimeStep( std::floor(1.0 / invL + 0.5) /* C++11: std::round */ );
     }
     
 private:
@@ -138,24 +145,24 @@ class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
+        invLambda( log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
     {
-        util::streamValidate(negInvLambda);
+        util::streamValidate(invLambda);
     }
     
     double getBaseTMult() const{
-        return negInvLambda;
+        return invLambda;
     }
     double eval(double effectiveAge) const{
-        return exp( effectiveAge );
+        return exp( -effectiveAge );
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest(log(random::uniform_01())/negInvLambda);
+        return TimeStep::fromNearest(-log(random::uniform_01())/invLambda);
     }
     
 private:
-    double negInvLambda;
+    double invLambda;
 };
 
 class WeibullDecayFunction : public BaseHetDecayFunction {
