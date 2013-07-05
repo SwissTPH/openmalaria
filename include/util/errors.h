@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -28,8 +29,8 @@ using namespace std;
 /* Macros to ease use of traced_exception.
  * msg should be obvious, and code is the program exit code.
  */
-#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) );
-#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ );
+#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
+#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ )
 
 // #define OM_NO_STACK_TRACE
 
@@ -38,6 +39,9 @@ using namespace std;
 #elif defined __GNU_LIBRARY__
 #define OM_GNU_STACK_TRACE
 #endif
+
+// Macro to make checking XML inputs easier
+#define XML_ASSERT( cond, msg ) if(!(cond)) throw OM::util::xml_scenario_error(msg)
 
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
@@ -82,7 +86,14 @@ namespace OM { namespace util {
     // but gives some idea what codes make sense to use.
     BOOST_STATIC_ASSERT( Error::Max <= 113 );
     
-    /** Base OpenMalaria exception class. */
+    /** Base OpenMalaria exception class.
+     * 
+     * Throw this directly for an error not fitting one of the below
+     * subclasses.
+     * 
+     * When throwing this or a subclass, give a message which should be
+     * informative and clear from a user-perspective, unless the result is a
+     * code error. In this case use traced_exception. */
     class base_exception : public runtime_error {
     public:
         // for common errors, specify a unique TRACED_DEFAULT to help segregate
@@ -95,7 +106,11 @@ namespace OM { namespace util {
         int errCode;
     };
     
-    /** Extension of runtime_error which tries to get a stack trace. */
+    /** Extension of base_exception which tries to get a stack trace. Also
+     * prints a message indicating that this is likely a code error.
+     * 
+     * Should be used when catching code errors to get extra debugging
+     * information. */
     class traced_exception : public base_exception {
     public:
         /** Create a stack-trace and store in this object.
@@ -125,7 +140,10 @@ namespace OM { namespace util {
     /// Print trace to stream (a series of lines, each with \\n appended)
     ostream& operator<<(ostream& stream, const traced_exception& e);
     
-    /** Thrown to indicate an error in the scenario.xml file.  */
+    /** Thrown to indicate an error in the scenario.xml file.
+     * 
+     * Since such errors are always user-input errors, collecting a stack
+     * trace doesn't help. Just provide a useful message! */
     class xml_scenario_error : public base_exception {
     public:
         explicit xml_scenario_error(const string& msg);

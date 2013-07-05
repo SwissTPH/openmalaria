@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 #ifndef Hmod_NonVectorModel
 #define Hmod_NonVectorModel
 
@@ -37,6 +37,8 @@ public:
   
   virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
+  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance );
+  
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
@@ -56,9 +58,12 @@ public:
    * assuming that the annual cycle repeated during the pre-intervention period
    * 
    * Similar calculation to that used during initialization. */
-  void setTransientEIR (const scnXml::NonVector& nonVectorData); 
-  
   virtual void changeEIRIntervention (const scnXml::NonVector&);
+  
+  virtual void setITNDescription ( const scnXml::ITNDescription&);
+  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setVADescription (const scnXml::VectorDeterrent&);
+  virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();
   
@@ -112,7 +117,7 @@ private:
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness).
    * 
-   * In either case, TimeStep::simulation % initialKappa.size() is the index
+   * In either case, mod(TimeStep::simulation, initialKappa.size()) is the index
    * for the current infectiousness during updates. */
   vector<double> initialKappa; 
 };

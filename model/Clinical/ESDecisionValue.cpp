@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "Clinical/ESDecisionValue.h"
 #include "util/errors.h"
@@ -51,7 +51,7 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
 	// so n = ceil (log_2 (l))
 	uint32_t n_bits = (uint32_t)std::ceil( log( double(values.size()) ) / log( 2.0 ) );
 	if( n_bits + next_bit >= sizeof(next_bit) * 8 )	// (only valid on 8-bit-per-byte architectures)
-	    throw TRACED_EXCEPTION_DEFAULT ("ESDecisionValue design: insufficient bits");
+	    throw TRACED_EXCEPTION_DEFAULT ("ESDecisionValue: insufficient bits");
 	
 	// Now we've got enough bits to represent all outcomes, starting at next_bit
 	// Zero always means "missing value", so text starts at our first non-zero value:
@@ -93,14 +93,15 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
     
     return dec_pair.first->second.first;
 }
+//TODO: improve error messages (e.g. include section)
 ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& value) const {
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end())
-	throw TRACED_EXCEPTION_DEFAULT ((boost::format("ESDecisionValueMap::get(): no decision %1%") %decision).str());
+	throw util::xml_scenario_error ((boost::format("ESDecisionValueMap::get(): no decision %1%") %decision).str());
     
     value_map_t::const_iterator it2 = it->second.second.find (value);
     if (it2 == it->second.second.end())
-	throw TRACED_EXCEPTION_DEFAULT ((boost::format("ESDecisionValueMap::get(): no value %1%(%2%)") %decision %value).str());
+	throw util::xml_scenario_error ((boost::format("ESDecisionValueMap::get(): no value %1%(%2%)") %decision %value).str());
     
     //cout << "ESDecisionValueMap::get ("<<decision<<", "<<value<<"): "<<it2->second.id<<endl;
     return it2->second;
@@ -108,7 +109,7 @@ ESDecisionValue ESDecisionValueMap::get (const string& decision, const string& v
 tuple< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValueMap::getDecision (const string& decision) const {
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end ())
-	throw TRACED_EXCEPTION_DEFAULT ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
+	throw util::xml_scenario_error ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
     return tuple<
       ESDecisionValue,
       const ESDecisionValueMap::value_map_t&
@@ -117,7 +118,7 @@ tuple< ESDecisionValue, const ESDecisionValueMap::value_map_t& > ESDecisionValue
 ESDecisionValue ESDecisionValueMap::getDecisionMask (const string& decision) const {
     id_map_type::const_iterator it = id_map.find (decision);
     if (it == id_map.end ())
-	throw TRACED_EXCEPTION_DEFAULT ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
+	throw util::xml_scenario_error ((boost::format ("ESDecisionValueMap: no decision %1%") %decision).str());
     return it->second.first;
 }
 

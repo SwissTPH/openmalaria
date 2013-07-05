@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #ifndef Hmod_TransmissionModel 
 #define Hmod_TransmissionModel 
@@ -89,6 +89,9 @@ public:
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
   virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
+  
+  /** Set up vector population interventions. */
+  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) =0;
   
   /// Checkpointing
   template<class S>
@@ -165,13 +168,17 @@ public:
   double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Set ITN parameters. */
-  virtual void setITNDescription ( const scnXml::ITNDescription&);
+  virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set IRS parameters. */
-  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setIRSDescription (const scnXml::IRS&) =0;
   /** Set vector deterrent parameters. */
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
-  /** Set the larviciding intervention params. */
-  virtual void intervLarviciding (const scnXml::Larviciding::DescriptionType&);
+  virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
+  /** Set the larviciding intervention params.
+   *
+   * Instance: the index of this instance of the intervention. Each instance
+   * has it's own parameterisation. 0 <= instance < N where N is the number of
+   * instances. */
+  virtual void deployVectorPopInterv (size_t instance) =0;
   
   /** Remove all current infections to mosquitoes, such that without re-
    * infection, humans will then be exposed to zero EIR. */
@@ -214,7 +221,7 @@ protected:
    * 
    * Length: time-steps per year
    *
-   * Index TimeStep::simulation % TimeStep::stepsPerYear corresponds to the EIR
+   * Index mod(TimeStep::simulation, TimeStep::stepsPerYear) corresponds to the EIR
    * acting on the current time-step: i.e. total inoculations since the
    * previous time-step.
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the

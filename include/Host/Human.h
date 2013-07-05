@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,10 +124,7 @@ public:
   void addInfection();
   
   /// Add PEV and remove TBV (vaccines) from human
-  inline void R_0Vaccines() {
-      _vaccine.setInitialPEV( 1.0 );
-      _vaccine.setInitialTBV( 0.0 );
-  }
+  inline void R_0Vaccines() { _vaccine.specialR_0(); }
   //@}
   
   ///@brief Functions to check coverage by interventions
@@ -259,7 +257,7 @@ private:
   /** Total asexual blood stage density over last 20 days (uses samples from
    * 10, 15 and 20 days ago).
    *
-   * _ylag[TimeStep::simulation % _ylagLen] corresponds to the density from the
+   * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
    * previous time step (once updateInfection has been called). */
   vector<double> _ylag;
   /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.

@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -263,6 +264,37 @@ void AnophelesModel::init2 (size_t sIndex,
     // All set up to drive simulation from forcedS_v
 }
 
+void AnophelesModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+    transmission.initVectorPopInterv( elt, instance );
+    
+    assert( instance >= 0 );
+    if( seekingDeathRateIntervs.size() <= instance )
+        seekingDeathRateIntervs.resize( instance+1 );
+    if( probDeathOvipositingIntervs.size() <= instance )
+        probDeathOvipositingIntervs.resize( instance+1 );
+    
+    if( elt.getSeekingDeathRateIncrease().present() ){
+        const scnXml::SeekingDeathRateIncrease& elt2 = elt.getSeekingDeathRateIncrease().get();
+        if( elt2.getInitial() < 0.0 )
+            throw util::xml_scenario_error( "seekingDeathRateIncrease intervention: initial effect must be non-negative" );
+        seekingDeathRateIntervs[instance].set (elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
+    }
+    if( elt.getProbDeathOvipositing().present() ){
+        const scnXml::ProbDeathOvipositing& elt2 = elt.getProbDeathOvipositing().get();
+        if( elt2.getInitial() < 0.0 || elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "probDeathOvipositing intrevention: initial effect must be in range [0,1]" );
+        probDeathOvipositingIntervs[instance].set (elt2.getInitial(), elt2.getDecay(), "probDeathOvipositing");
+    }
+}
+
+void AnophelesModel::deployVectorPopInterv (size_t instance){
+    transmission.emergence->deployVectorPopInterv(instance);
+    // do same as in above function (of EmergenceModel)
+    assert( 0 <= instance && instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
+    seekingDeathRateIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
+    probDeathOvipositingIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
+}
+
 
 // Every TimeStep::interval days:
 void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
@@ -306,6 +338,10 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
     
     // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
     double leaveSeekingStateRate = mosqSeekingDeathRate;
+    for( vector<util::SimpleDecayingValue>::const_iterator it=seekingDeathRateIntervs.begin();
+        it != seekingDeathRateIntervs.end(); ++it ){
+        leaveSeekingStateRate *= 1.0 + it->current_value( TimeStep::simulation );
+    }
 
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
@@ -332,8 +368,13 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
     double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
     double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
 
-    tsP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-    tsP_dif *= P_Ai_base * probMosqSurvivalOvipositing;
+    double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
+    for( vector<util::SimpleDecayingValue>::const_iterator it=probDeathOvipositingIntervs.begin();
+        it != probDeathOvipositingIntervs.end(); ++it ){
+        baseP_df *= 1.0 - it->current_value( TimeStep::simulation );
+    }
+    tsP_df  *= baseP_df;
+    tsP_dif *= baseP_df;
     
     
     // Summed per day:

@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -186,7 +187,7 @@ void Human::addInfection(){
 
 void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
     // Cache total density for infectiousness calculations
-    _ylag[TimeStep::simulation.asInt()%_ylagLen] = withinHostModel->getTotalDensity();
+    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = withinHostModel->getTotalDensity();
     
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
@@ -321,11 +322,11 @@ void Human::updateInfectiousness() {
   static const double mu= -8.1;
   
   // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
-  // before. We have 20 days history, so following x%y operations are safe.
+  // before. We have 20 days history, so use mod_nn:
   int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt() + 1;
-  double x = beta1 * _ylag[firstIndex % _ylagLen]
-           + beta2 * _ylag[(firstIndex-TimeStep::intervalsPer5Days.asInt()) % _ylagLen]
-           + beta3 * _ylag[(firstIndex-2*TimeStep::intervalsPer5Days.asInt()) % _ylagLen];
+  double x = beta1 * _ylag[mod_nn(firstIndex, _ylagLen)]
+           + beta2 * _ylag[mod_nn(firstIndex-TimeStep::intervalsPer5Days.asInt(), _ylagLen)]
+           + beta3 * _ylag[mod_nn(firstIndex-2*TimeStep::intervalsPer5Days.asInt(), _ylagLen)];
   if (x < 0.001){
     _probTransmissionToMosquito = 0.0;
     return;

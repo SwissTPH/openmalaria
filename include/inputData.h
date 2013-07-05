@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,7 +101,7 @@ namespace Params {
     class InputDataType {
     public:
         /// Current schema version.
-        static const int SCHEMA_VERSION = 30;
+        static const int SCHEMA_VERSION = 31;
         /** Oldest which current code is potentially compatible with
         * (provided the scenario XML file references its schema version).
         */

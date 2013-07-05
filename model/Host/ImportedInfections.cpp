@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +65,7 @@ void ImportedInfections::import( Population& population ){
     assert( TimeStep::interventionPeriod >= TimeStep(0) );
     TimeStep now = TimeStep::interventionPeriod;
     if( period > TimeStep(0) ){
-        now = now % period;
+        now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){
         lastIndex = 0;  // gone round in a loop: back to start of period

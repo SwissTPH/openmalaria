@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
-
- Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #ifndef Hmod_DecayFunction
 #define Hmod_DecayFunction
@@ -43,7 +43,9 @@ namespace util {
 class DecayFuncHet {
     double tMult;
 public:
-    DecayFuncHet() : tMult( numeric_limits<double>::quiet_NaN() ) {}
+    /** Default value: should make all eval() calls return 0 (i.e. infinitely
+     * old deployment). */
+    DecayFuncHet() : tMult( numeric_limits<double>::infinity() ) {}
     
     inline double getTMult() const{
         return tMult;
@@ -56,6 +58,7 @@ public:
     }
     
     friend class BaseHetDecayFunction;
+    friend class ConstantDecayFunction;
  };
 
 /** An interface for a few types of decay function (some of which may also be
@@ -92,9 +95,15 @@ public:
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    virtual double eval(TimeStep age, DecayFuncHet sample) const =0;
+    inline double eval(TimeStep age, DecayFuncHet sample) const {
+        return eval(age.asInt() * sample.getTMult());
+    }
     
-    /** Sample a DecayFuncHet value (should be stored per individual). */
+    /** Sample a DecayFuncHet value (should be stored per individual).
+     * 
+     * Note that a DecayFuncHet is needed to call eval() even if heterogeneity
+     * is not wanted. If sigma = 0 then the random number stream will not be
+     * touched. */
     virtual DecayFuncHet hetSample () const =0;
     
     /** Generate a DecayFuncHet value from an existing sample. */
@@ -112,6 +121,9 @@ public:
     
 protected:
     DecayFunction() {}
+    // Protected version. Note that the het sample parameter is needed even
+    // when heterogeneity is not used so don't try calling this without that.
+    virtual double eval(double ageTS) const =0;
 };
 
 } }

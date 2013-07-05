@@ -1,25 +1,26 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "WithinHost/Infection/DescriptiveIPTInfection.h"
 #include "util/random.h"
+#include "util/errors.h"
 
 namespace OM { namespace WithinHost {
      using namespace OM::util;
@@ -36,16 +37,29 @@ void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlI
   
   double genotypeCumFreq = 0.0;
   for (scnXml::IPTDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
-    genotypeCumFreq += it->getFreq();
-    genotypes.push_back( GenotypeData(
-        genotypeCumFreq,
-        TimeStep(it->getTolPeriod()), TimeStep(it->getProph()),
-        it->getACR(), it->getAtten()
-    ) );
+    genotypes.push_back( GenotypeData(it, genotypeCumFreq) );
   }
   assert( genotypes.size() == genotypesData.size() );
+  // Note: this assertion is new; problem wouldn't have been detected
+  // previously. Arguably frequencies should be scaled but the old
+  // implementation didn't do this; don't change behaviour now.
+  XML_ASSERT(0.99 <= genotypeCumFreq && genotypeCumFreq <= 1.01,
+             "IPT.description.infGenotype.freq: sum across genotypes not equal to 1");
   genotypes[genotypes.size()-1].cumFreq = 1.0;	// make sure.. for random draws
   // (otherwise we rely on specification with XML and floating-point arithmatic)
+}
+
+DescriptiveIPTInfection::GenotypeData::GenotypeData (
+    scnXml::IPTDescription::InfGenotypeConstIterator iter, double& cumFreq) :
+    tolPeriod(TimeStep(iter->getTolPeriod())),
+    proph(TimeStep(iter->getProph())),
+    ACR(iter->getACR()), atten(iter->getAtten())
+{
+    cumFreq += iter->getFreq();
+    this->cumFreq = cumFreq;
+    XML_ASSERT(0.0 <= iter->getFreq() && iter->getFreq() <= 1.0, "IPT.description.infGenotype.freq: not in range [0,1]");
+    XML_ASSERT(0.0 <= ACR && ACR <= 1.0, "IPT.description.infGenotype.ACR: not in range [0,1]");
+    XML_ASSERT(1.0 <= atten, "IPT.description.infGenotype.atten: not in range [1,inf)");
 }
 
 

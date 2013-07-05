@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
-
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 #ifndef Hmod_Vaccine
 #define Hmod_Vaccine
 
@@ -44,6 +44,9 @@ public:
     // Static:
     /// Set parameters from xml (only called if vaccines are used)
     static void init (const scnXml::Vaccine& xmlVaccine);
+    
+    /// Special for R_0: check is set up correctly or throw xml_scenario_error
+    static void verifyEnabledForR_0 ();
     
 private:
     /*! Common to all vaccine types. Number of vaccine doses that are given
@@ -115,16 +118,13 @@ public:
         return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleTBV );
     }
     
-    /// @brief Hacks for R_0 deployment
-    //@{
-    inline void setInitialPEV( double effic ) {
-	_initialPEVEfficacy = effic;
+    /// Hack for R_0 experiment: make current human the infection source
+    inline void specialR_0(){
+        assert( Vaccine::PEV.active && Vaccine::TBV.active );
+	_initialPEVEfficacy = 1.0;
+        _initialTBVEfficacy = 0.0;
     }
-    inline void setInitialTBV( double effic ) {
-        _initialTBVEfficacy = effic;
-    }
-    //@}
-
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {

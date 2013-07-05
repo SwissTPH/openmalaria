@@ -1,21 +1,22 @@
 /* This file is part of OpenMalaria.
-*
-* Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-*
-* OpenMalaria is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or (at
-* your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but
-* WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "Global.h"
 #include "Monitoring/Continuous.h"
@@ -152,7 +153,7 @@ namespace OM { namespace Monitoring {
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
-		throw TRACED_EXCEPTION (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
+		throw util::base_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
             }
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
@@ -182,12 +183,12 @@ namespace OM { namespace Monitoring {
              return;     // output disabled
 #ifndef WITHOUT_BOINC
         if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
-            throw TRACED_EXCEPTION(string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
+            throw util::base_exception(string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
         }
         ctsOStream.close();
         ifstream origFile(cts_filename.c_str());
         if( !origFile.is_open() ){
-            throw TRACED_EXCEPTION(string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
+            throw util::base_exception(string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
         }
         ogzstream finalFile(compressedCtsoutName.c_str());
         finalFile << origFile.rdbuf();
@@ -235,10 +236,10 @@ namespace OM { namespace Monitoring {
         if( ctsPeriod == 0 )
             return;	// output disabled
         if( !duringInit ){
-            if( TimeStep::interventionPeriod < TimeStep(0) || TimeStep::interventionPeriod % ctsPeriod != 0 )
+            if( TimeStep::interventionPeriod < TimeStep(0) || mod_nn(TimeStep::interventionPeriod, ctsPeriod) != 0 )
                 return;
         } else {
-            if( TimeStep::simulation % ctsPeriod != 0 )
+            if( mod_nn(TimeStep::simulation, ctsPeriod) != 0 )
                 return;
             ctsOStream << TimeStep::simulation << '\t';
         }

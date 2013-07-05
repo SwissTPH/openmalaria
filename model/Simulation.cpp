@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +62,8 @@ Simulation::Simulation(util::Checksum ck) :
     Surveys.init();
     Population::init();
     population = auto_ptr<Population>(new Population);
-    interventions = auto_ptr<InterventionManager>( new InterventionManager( InputData().getInterventions(), *population ) );
+    interventions = auto_ptr<InterventionManager>(
+        new InterventionManager( InputData().getInterventions(), *population ) );
     Surveys.initCohortOnly( *interventions );
     
     workUnitIdentifier = InputData().getWuID();
@@ -101,16 +103,19 @@ int Simulation::start(){
     if( humanWarmupLength < population->_transmissionModel->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
         cerr << ") shorter than length of warm-up requested by" << endl;
-        cerr << "transmission model (" << population->_transmissionModel->minPreinitDuration().inYears();
+        cerr << "transmission model ("
+            << population->_transmissionModel->minPreinitDuration().inYears();
         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
-    humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1) / TimeStep::stepsPerYear + 1);
+    humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1)
+            / TimeStep::stepsPerYear + 1);
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()
-        + Surveys.getFinalTimestep() + TimeStep( 1 );   // MAIN_PHASE: surveys; +1 to let final survey run
+        // plus MAIN_PHASE: survey period plus one TS for last survey
+        + Surveys.getFinalTimestep() + TimeStep( 1 );
     
     if (isCheckpoint()) {
         Continuous.init( true );
@@ -121,7 +126,8 @@ int Simulation::start(){
     }
     // Set to either a checkpointing timestep or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    TimeStep testCheckpointStep = util::CommandLine::getNextCheckpointTime( TimeStep::simulation );
+    TimeStep testCheckpointStep =
+            util::CommandLine::getNextCheckpointTime( TimeStep::simulation );
     TimeStep testCheckpointDieStep = testCheckpointStep;        // kill program at same time
     
     // phase loop
@@ -151,7 +157,8 @@ int Simulation::start(){
             ++TimeStep::interventionPeriod;
             population->update1();
             
-            util::BoincWrapper::reportProgress (double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
+            util::BoincWrapper::reportProgress (
+                double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
         }
         
         ++phase;        // advance to next phase
@@ -180,7 +187,8 @@ int Simulation::start(){
         }
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-            TimeStep phase_mid = TimeStep::simulation + TimeStep( (simPeriodEnd - TimeStep::simulation).asInt() / 2 );
+            TimeStep phase_mid =
+                    TimeStep::simulation + TimeStep( (simPeriodEnd - TimeStep::simulation).asInt() / 2 );
             // Don't checkpoint 0-length phases or do mid-phase checkpointing
             // when timed checkpoints were specified, and don't checkpoint
             // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
@@ -248,7 +256,7 @@ void Simulation::writeCheckpoint(){
     if (isCheckpoint()) {
         oldCheckpointNum = readCheckpointNum();
         // Get next checkpoint number:
-        checkpointNum = (oldCheckpointNum + 1) % NUM_CHECKPOINTS;
+        checkpointNum = mod_nn(oldCheckpointNum + 1, NUM_CHECKPOINTS);
     }
     
     {   // Open the next checkpoint file for writing:

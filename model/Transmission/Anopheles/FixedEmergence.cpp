@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -72,12 +73,17 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)) {
+        if( factor > 1e6 && vectors::sum(quinquennialS_v) < 1e-3 ){
+            throw util::base_exception("Simulated S_v is approx 0 (i.e.\
+ mosquitoes are not infectious, before interventions). Simulator cannot handle this; perhaps\
+ increase EIR or change the entomology model.", util::Error::VectorFitting);
+        }
         if ( vectors::sum(forcedS_v) == 0.0 ) {
             return false;   // no EIR desired: nothing to do
         }
         cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
         cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds (likely a code error)",util::Error::VectorFitting);
+        throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
     }
 
     //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
@@ -92,7 +98,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // average annual period of S_v over 5 years
     vector<double> avgAnnualS_v( TimeStep::DAYS_IN_YEAR, 0.0 );
     for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[i % TimeStep::fromYears(1).inDays()] =
+        avgAnnualS_v[mod_nn(i, TimeStep::fromYears(1).inDays())] =
             quinquennialS_v[i] / 5.0;
     }
 
@@ -115,11 +121,11 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
 double FixedEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     // Simple model: fixed emergence scaled by larviciding
-    return mosqEmergeRate[dYear1] * larvicidingIneffectiveness;
+    return mosqEmergeRate[dYear1] * interventionSurvival();
 }
 
 void FixedEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = d % TimeStep::fromYears(5).inDays();
+    size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());
     quinquennialS_v[d5Year] = S_v;
 }
 

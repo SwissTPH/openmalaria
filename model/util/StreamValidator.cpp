@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <boost/format.hpp>
+#include <boost/static_assert.hpp>
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -68,7 +70,7 @@ void StreamValidatorType::saveStream() {
     if( storeMode ){
 	ofstream f_str( OM_SV_FILE, ios::out | ios::binary );
 	if( !f_str.is_open() )
-	    throw TRACED_EXCEPTION( "unable to write " OM_SV_FILE, Error::FileIO );
+	    throw util::base_exception( "unable to write " OM_SV_FILE, Error::FileIO );
 	f_str.write( reinterpret_cast<const char*>(&OM_SV_HEAD), sizeof(char)*4 );
         
         stream & f_str;
@@ -85,11 +87,11 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw TRACED_EXCEPTION( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
+	throw util::base_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw TRACED_EXCEPTION( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
+	throw util::base_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
     
     stream & f_str;
     
@@ -97,9 +99,9 @@ void StreamValidatorType::loadStream( const string& path ){
     if (f_str.gcount () != 0) {
 	ostringstream msg;
 	msg << file<<" has " << f_str.gcount() << " bytes remaining." << endl;
-	throw TRACED_EXCEPTION (msg.str(), Error::FileIO);
+	throw util::base_exception (msg.str(), Error::FileIO);
     } else if (f_str.fail())
-	throw TRACED_EXCEPTION ("StreamValidator load error", Error::FileIO);
+	throw util::base_exception ("StreamValidator load error", Error::FileIO);
     
     f_str.close();
     readIt = stream.begin();
@@ -137,23 +139,56 @@ StreamValidatorType StreamValidator;
 // ———  Our cross-platform consistent-result hasing functions  ——
 namespace CPCH {
     SVType toSVType(boost::uint32_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        return x;
     }
     SVType toSVType(boost::int32_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        union {
+            boost::int32_t asS32;
+            boost::uint32_t asU32;
+        };
+        asS32 = x;
+        return asU32;
     }
     SVType toSVType(boost::uint64_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            boost::uint64_t asU64;
+            boost::uint32_t asU32[2];
+        };
+        asU64 = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
     SVType toSVType(boost::int64_t x){
-        return static_cast<SVType>(x);
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            boost::int64_t asS64;
+            boost::uint32_t asU32[2];
+        };
+        asS64 = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
-    //NOTE: hashing of floats and doubles isn't very good or fast:
+    //NOTE: not correct code in general, but probably OK on current platforms.
+    //Also not guaranteed to produce the same result on all platforms (but will
+    //it?).
     SVType toSVType(float x){
-        return x*1e4f;
+        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        union {
+            float asFloat;
+            boost::uint32_t asU32;
+        };
+        asFloat = x;
+        return asU32;
     }
     SVType toSVType(double x){
-        return x*1e4;
+        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        union {
+            double asDouble;
+            boost::uint32_t asU32[2];
+        };
+        asDouble = x;
+        return asU32[0] ^ asU32[1];     // XOR two parts together
     }
 }
 

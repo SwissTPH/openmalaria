@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ESDecisionTree.h"
@@ -305,7 +305,7 @@ public:
 		if (pending.empty ())	// good, we're done
 		    break;
 		// else: some elements had unresolved dependencies; this should already have been caught by addRequires though
-		throw TRACED_EXCEPTION_DEFAULT("ESCaseManagement: didn't catch all dependencies (code error)");
+		throw TRACED_EXCEPTION_DEFAULT("ESCaseManagement: didn't catch all dependencies");
 	    }
 	    //cout << "Considering " << (*it)->decision << " with " << (*it)->depends.size()<<" dependencies"<<endl;
 	    if (required.count( it->second ) == 0) {
@@ -427,7 +427,7 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 	ESTreatmentSchedule* ret = it->second->getSchedule( outcome );
 	if( ret != NULL )
 	    return *ret;
-	throw TRACED_EXCEPTION_DEFAULT( "a required modifier decision's output is unexpected (code error)" );
+	throw TRACED_EXCEPTION_DEFAULT( "a required modifier decision's output is unexpected" );
     }
     
     ostringstream msg;

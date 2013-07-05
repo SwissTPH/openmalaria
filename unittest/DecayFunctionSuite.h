@@ -52,7 +52,11 @@ public:
     void testConstant () {
         dfElt.setFunction( "constant" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        // First test: with a default-constructed DecayFuncHet and positive age, result should be zero
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        // Second test: with an appropriately sampled helper value, we should get the results we want
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(730), dHet ), 1.0 );
     }
@@ -60,7 +64,9 @@ public:
     void testStep () {
         dfElt.setFunction( "step" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
@@ -69,7 +75,9 @@ public:
     void testLinear () {
         dfElt.setFunction( "linear" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.4 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
@@ -78,7 +86,9 @@ public:
     void testExponential () {
         dfElt.setFunction( "exponential" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.65975394736842108 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.25 );
@@ -96,7 +106,9 @@ public:
     void testHill () {
         dfElt.setFunction( "hill" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.6936673684210527 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.24805074736842106 );
@@ -105,7 +117,9 @@ public:
     void testSmoothCompact () {
         dfElt.setFunction( "smooth-compact" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet;
+        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.40656965789473687 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );

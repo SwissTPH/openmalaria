@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -266,18 +267,17 @@ private:
     TimeStep maxInterventionAge;
 };
 
-class TimedLarvicideIntervention : public TimedIntervention {
+class TimedVectorPopIntervention : public TimedIntervention {
 public:
-    TimedLarvicideIntervention( TimeStep deployTime, const scnXml::Larviciding& larviciding) :
+    TimedVectorPopIntervention( TimeStep deployTime, size_t instance ) :
         TimedIntervention( deployTime ),
-        description(larviciding.getDescription())
+        inst(instance)
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().intervLarviciding(description);
+      population.transmissionModel().deployVectorPopInterv(inst);
     }
-    
 private:
-  scnXml::Larviciding::DescriptionType description;
+    size_t inst;
 };
 
 /** Create either a TimedMassCumIntervention or a TimedMassIntervention,
@@ -506,6 +506,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
             activeInterventions.set (Interventions::R_0_CASE, true);
+            Host::Vaccine::verifyEnabledForR_0();
             // uses vaccines but see note in Vaccine::initParameters()
             // activeInterventions.set (Interventions::VACCINE, true);
             // timed deployments:
@@ -526,21 +527,25 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }
         }
     }
-    if( intervElt.getLarviciding().present() ){
-
-      const scnXml::Larviciding& elt = intervElt.getLarviciding().get();
-
-	if (elt.getTimed().present() ) {
-	    activeInterventions.set ( Interventions::LARVICIDING, true );
-
-	    const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-	    typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-	    for ( It it = seq.begin(); it != seq.end(); ++it ) {
-		timed.push_back( new TimedLarvicideIntervention(TimeStep( it->getTime() ),intervElt.getLarviciding().get()) );
-	    }
-	}
-
-      }
+    if( intervElt.getVectorPop().present() ){
+        typedef scnXml::VectorPop::InterventionSequence SeqT;
+        const SeqT& seq = intervElt.getVectorPop().get().getIntervention();
+        size_t instance = 0;
+        for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
+            const scnXml::VectorPopIntervention& elt = *it;
+            if (elt.getTimed().present() ) {
+                activeInterventions.set ( Interventions::VECTOR_POP, true );
+                population._transmissionModel->initVectorPopInterv( elt.getDescription(), instance );
+                
+                const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+                typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
+                for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                    timed.push_back( new TimedVectorPopIntervention(TimeStep( it->getTime() ), instance) );
+                }
+                instance++;
+            }
+        }
+    }
     
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.

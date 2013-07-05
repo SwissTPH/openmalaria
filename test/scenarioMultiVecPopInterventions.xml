@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="30" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="vectorpopinterv" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -27,7 +27,7 @@
     <continuous period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
-      <option name="human infectiousness" value="true"/>
+      <option name="N_v" value="true"/>
       <option name="N_v0" value="true"/>
       <option name="immunity h" value="true"/>
       <option name="immunity Y" value="true"/>
@@ -35,6 +35,7 @@
       <option name="num transmitting humans" value="true"/>
       <option name="S_v" value="true"/>
       <option name="simulated EIR"/>
+      <option name="resource availability"/>
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -46,14 +47,10 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
       <option name="nHospitalDeaths" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
-      <option name="nEPIVaccinations" value="true"/>
-      <option name="nMassVaccinations" value="true"/>
       <option name="nHospitalRecovs" value="true"/>
-      <option name="nHospitalSeqs" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="Vector_Nv0" value="true"/>
       <option name="Vector_Nv" value="true"/>
@@ -179,26 +176,83 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <larviciding>
-      <description>
-        <anopheles mosquito="gambiae_ss">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
-        </anopheles>
-        <anopheles mosquito="funestus">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
-        </anopheles>
-        <anopheles mosquito="arabiensis">
-          <duration value="365"/>
-          <effectiveness value="0.75"/>
-        </anopheles>
-      </description>
-      <timed>
-        <deploy time="1"/>
-        <deploy time="730"/>
-      </timed>
-    </larviciding>
+    <vectorPop>
+      <!-- Example with two different interventions. Deployment of the two is
+        independent and effects combine if simultaneously active. -->
+      <intervention name="larviciding">
+        <!-- Example larviciding (made up values) -->
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="funestus">
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="arabiensis">
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+        </description>
+        <timed>
+          <!-- Varied times of deployment with two-year breaks -->
+          <deploy time="0"/>
+          <deploy time="155"/>
+          <deploy time="465"/>
+          <deploy time="620"/>
+          <deploy time="775"/>
+          <deploy time="1241"/>
+        </timed>
+      </intervention>
+      <intervention name="multiIntervention">
+        <!-- Example larviciding plus increased mortality while seeking and ovipositing -->
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <!-- Any of the effects listed here can be removed. Each has independent decay. -->
+            <seekingDeathRateIncrease initial="1">
+              <decay function="exponential" L="0.4"/>
+            </seekingDeathRateIncrease>
+            <probDeathOvipositing initial="0.1">
+              <decay function="step" L="0.2"/>
+            </probDeathOvipositing>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="funestus">
+            <seekingDeathRateIncrease initial="1">
+              <decay function="exponential" L="0.4"/>
+            </seekingDeathRateIncrease>
+            <probDeathOvipositing initial="0.1">
+              <decay function="step" L="0.2"/>
+            </probDeathOvipositing>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="arabiensis">
+            <seekingDeathRateIncrease initial="1">
+              <decay function="exponential" L="0.4"/>
+            </seekingDeathRateIncrease>
+            <probDeathOvipositing initial="0.1">
+              <decay function="step" L="0.2"/>
+            </probDeathOvipositing>
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+        </description>
+        <timed>
+          <deploy time="310"/>
+          <deploy time="931"/>
+          <deploy time="1086"/>
+        </timed>
+      </intervention>
+    </vectorPop>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

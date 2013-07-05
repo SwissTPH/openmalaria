@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -97,18 +98,10 @@ private:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        EIRRotateAngle & stream;
-        FSRotateAngle & stream;
-        FSCoeffic & stream;
         mosqEmergeRate & stream;
-        forcedS_v & stream;
         quinquennialS_v & stream;
         quinquennialOvipositing & stream;
         initNv0FromSv & stream;
-        initNvFromSv & stream;
-        initOvFromSv & stream;
-        larvicidingEndStep & stream;
-        larvicidingIneffectiveness & stream;
         developmentDuration & stream;
         probPreadultSurvival & stream;
         fEggsLaidByOviposit & stream;

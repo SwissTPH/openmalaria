@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -31,7 +32,6 @@ namespace Transmission {
 namespace Anopheles {
 using namespace OM::util;
 
-
 // -----  Initialisation of model, done before human warmup  ------
 
 EmergenceModel::EmergenceModel() :
@@ -39,8 +39,7 @@ EmergenceModel::EmergenceModel() :
             FSRotateAngle(numeric_limits<double>::quiet_NaN()),
             initNvFromSv(numeric_limits<double>::quiet_NaN()),
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
-            larvicidingEndStep (TimeStep::future),
-            larvicidingIneffectiveness (1.0)
+            emergenceSurvival(1.0)
 {
     forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
 }
@@ -132,7 +131,7 @@ void EmergenceModel::initEIR(
     // Note: sum stays the same, units changes to per-timestep.
     for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
         // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[(1 + i / TimeStep::interval) % TimeStep::stepsPerYear] += speciesEIR[i];
+        initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
     }
     
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
@@ -153,10 +152,9 @@ void EmergenceModel::scaleEIR( double factor ) {
 
 // Every TimeStep::interval days:
 void EmergenceModel::update () {
-    if (TimeStep::simulation > larvicidingEndStep) {
-        larvicidingEndStep = TimeStep::future;
-        larvicidingIneffectiveness = 1.0;
-    }
+    emergenceSurvival = 1.0;
+    for( size_t i = 0; i < emergence.size(); ++i )
+        emergenceSurvival *= 1.0 - emergence[i].current_value( TimeStep::simulation );
 }
 
 void EmergenceModel::checkpoint (istream& stream){ (*this) & stream; }
@@ -164,12 +162,27 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 
 // -----  Summary and intervention functions  -----
 
-void EmergenceModel::intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
-    // Note: intervention acts first on time-step following deployment. It is
-    // disabled by update() _after_ it's last effective day.
-    larvicidingIneffectiveness = 1 - elt.getEffectiveness().getValue();
-    larvicidingEndStep = TimeStep::simulation + TimeStep(elt.getDuration().getValue());
+void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+    assert( instance >= 0 );
+    if( emergence.size() <= instance )
+        emergence.resize( instance+1 );
+    
+    if( elt.getEmergenceReduction().present() ){
+        const scnXml::EmergenceReduction& elt2 = elt.getEmergenceReduction().get();
+        if( elt2.getInitial() < 0.0 || elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "emergenceReduction intervention: initial effect must be in range [0,1]" );
+        emergence[instance].set (elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
+    }
 }
+
+void EmergenceModel::deployVectorPopInterv (size_t instance) {
+    assert( 0 <= instance && instance < emergence.size() );
+    
+    // Note: intervention acts first on time-step following (+1) deployment.
+    // This at least is consistent with previous results and gives the correct number of time steps of deployment
+    emergence[instance].deploy( TimeStep::simulation + TimeStep(1) );
+}
+
 
 }
 }

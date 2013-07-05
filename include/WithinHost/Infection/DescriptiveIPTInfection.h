@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #ifndef Hmod_DescriptiveIPTInfection
 #define Hmod_DescriptiveIPTInfection
@@ -50,9 +50,6 @@ public:
   /*! \param lastSPdose Time interval of last SP Dose. */
   DescriptiveIPTInfection(TimeStep lastSPdose);
   DescriptiveIPTInfection (istream& stream);
-  
-  /** Destructor */
-  virtual ~DescriptiveIPTInfection() {}
   //@}
   
   /** The event that the last SP dose clears parasites. */
@@ -63,7 +60,10 @@ public:
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   TimeStep getAsexualAttenuationEndDate () {
-    return _startdate + TimeStep(static_cast<int>(_duration.asInt() * genotypes[proteome_ID].atten));	//FIXME: should probably add latentp
+      //NOTE: +1 added to _duration to keep same behaviour after adjusting
+      // value of _duration by one everywhere in a code review.
+      //NOTE: why does attenuation end date depend on the infection duration?
+    return _startdate + TimeStep(static_cast<int>((_duration.asInt() + 1) * genotypes[proteome_ID].atten));
   }
   
 protected:
@@ -77,8 +77,7 @@ private:
   //!genotype can be accessed via arrays in mod_intervention.
   //!(e.g. freq = mod_intervention.GenotypeFreq(iTemp%iData%gType%ID)
   struct GenotypeData {
-      GenotypeData(double cF, TimeStep tP, TimeStep p, double acr, double at) :
-        cumFreq(cF), tolPeriod(tP), proph(p), ACR(acr), atten(at) {}
+    GenotypeData(scnXml::IPTDescription::InfGenotypeConstIterator iter, double& cumFreq);
     //!freq: Probability of being infected by this specific genotype
     double cumFreq;
     //!tolperiod: time window of tolerance period

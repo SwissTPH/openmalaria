@@ -1,22 +1,22 @@
-/*
-This file is part of OpenMalaria.
-
-Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
-OpenMalaria is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 /*This model refers to the paper:
  *PENNY et al  (2011). The potential effects of blood stage vaccines on the within-host dynamics of Plasmodium Falciparum */
@@ -46,7 +46,7 @@ public:
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(){
-        size_t todayV = TimeStep::simulation % delta_V;
+        size_t todayV = mod_nn(TimeStep::simulation, delta_V);
         return seqDensities[todayV];
     }
 

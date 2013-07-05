@@ -70,7 +70,7 @@ def findFile (*names):
         if newest is None or os.path.getmtime(path) > os.path.getmtime(newest):
             newest=path
             return newest
- 
+
 class ElementHandler(xml.sax.handler.ContentHandler):
     def ElementHandler():
         self.schema = None
@@ -100,11 +100,18 @@ def linkOrCopy (src, dest):
     else:
         shutil.copy2(src, dest)
 
-# Run, with file "scenario"+name+".xml"
+# Run, with file "scenario"+name+".xml" (or just "name")
 def runScenario(options,omOptions,name):
     scenarioSrc=os.path.abspath(os.path.join(testSrcDir,"scenario%s.xml" % name))
+    tmpprefix=name
+    compare=True
     if not os.path.isfile(scenarioSrc):
-        raise RunError('No such scenario file '+scenarioSrc+'!')
+        if os.path.isfile(name):
+            scenarioSrc=os.path.abspath(name)
+            tmpprefix=os.path.basename(name)
+            compare=False
+        else:
+            raise RunError('No such scenario file '+scenarioSrc+' or '+name+'!')
     schemaName=getSchemaName(scenarioSrc)
     scenarioSchema=os.path.abspath(os.path.join(testSrcDir,'../schema',schemaName))
     if not os.path.isfile(scenarioSchema):
@@ -125,7 +132,7 @@ def runScenario(options,omOptions,name):
         return 0
     
     # Run from a temporary directory, so checkpoint files won't conflict
-    simDir = tempfile.mkdtemp(prefix=name+'-', dir=testBuildDir)
+    simDir = tempfile.mkdtemp(prefix=tmpprefix+'-', dir=testBuildDir)
     outputFile=os.path.join(simDir,"output.txt")
     outputGzFile=os.path.join(simDir,"output.txt.gz")
     ctsoutFile=os.path.join(simDir,"ctsout.txt")
@@ -140,7 +147,7 @@ def runScenario(options,omOptions,name):
     linkOrCopy (scenarioSchema, scenario_xsd)
     
     if options.logging:
-        print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33mscenario%s.xml" % name
+        print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33m%s" % scenarioSrc
     
     startTime=lastTime=time.time()
     # While no output.txt file and cmd exits successfully:
@@ -188,7 +195,7 @@ def runScenario(options,omOptions,name):
                 os.remove(f)
     
     # Compare outputs:
-    if ret == 0:
+    if ret == 0 and compare:
         # ctsout.txt (this output is optional):
         if os.path.isfile(ctsoutFile):
             origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
@@ -263,7 +270,7 @@ def evalOptions (args):
     args = args[:omArgsBegin]
     
     parser = OptionParser(usage="Usage: %prog [options] [-- openMalaria options] [scenarios]",
-			description="""Scenarios to be run must be of the form scenarioXX.xml; if any are passed on the command line, XX is substituted for each given; if not then all files of the form scenario*.xml are run as test scenarios.
+			description="""Scenarios to be run are normally of the form scenarioXX.xml and in the OM_BASE/test directory; names given on the command line may either substitute XX (and be looked up relative to this directory) or may be given in full (relative to the current directory). If no names are mentioned then all files of the form scenario*.xml from the OM_BASE/test directory are run.
 You can pass options to openMalaria by first specifying -- (to end options passed from the script); for example: %prog 5 -- --print-model""")
     
     parser.add_option("-q","--quiet",

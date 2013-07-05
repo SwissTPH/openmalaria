@@ -1,30 +1,27 @@
-/*
- This file is part of OpenMalaria.
-
- Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #ifndef Hmod_TimeStep
 #define Hmod_TimeStep
 
-#ifndef Hmod_Global
-#error "Please include Global.h not TimeStep.h directly."
-// otherwise "using ..." declaration in Global.h won't work
-#endif
+#include "util/mod.h"
 
 #include <iostream>
 #include <cassert>
@@ -170,13 +167,6 @@ public:
     inline TimeStep operator+( const TimeStep rhs )const {
         return TimeStep( _ts + rhs._ts );
     }
-    // returns an int since common usage is to get an array index
-    inline int operator%( int rhs )const {
-        return  _ts % rhs;
-    }
-    inline TimeStep operator%( TimeStep rhs )const {
-        return  TimeStep( _ts % rhs._ts );
-    }
     // scale the TimeStep by a double, rounding to nearest
     inline TimeStep operator*( double rhs )const {
         return TimeStep( static_cast<int>(_ts * rhs + 0.5) );
@@ -216,10 +206,28 @@ public:
     }
     
     friend std::ostream& operator<<( std::ostream&, const TimeStep );
+    friend int mod_nn( const TimeStep, int );
+    friend int mod( const TimeStep, int );
+    friend TimeStep mod_nn( const TimeStep, const TimeStep );
+    friend TimeStep mod( const TimeStep, const TimeStep );
 };
 
 inline std::ostream& operator<<( std::ostream& stream, const TimeStep ts ){
     return( stream << ts._ts );
+}
+
+// returns an int since common usage is to get an array index
+inline int mod_nn( const TimeStep ts, int rhs ) {
+    return util::mod_nn(ts._ts, rhs);
+}
+inline int mod( const TimeStep ts, int rhs ) {
+    return util::mod(ts._ts, rhs);
+}
+inline TimeStep mod_nn( const TimeStep lhs, const TimeStep rhs ){
+    return TimeStep(util::mod_nn(lhs._ts, rhs._ts));
+}
+inline TimeStep mod( const TimeStep lhs, const TimeStep rhs ){
+    return TimeStep(util::mod(lhs._ts, rhs._ts));
 }
 
 }

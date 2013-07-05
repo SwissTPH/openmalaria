@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -26,6 +27,7 @@
 #include "Transmission/PerHost.h"
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
+#include "util/SimpleDecayingValue.h"
 
 #include <list>
 #include <vector>
@@ -102,6 +104,9 @@ public:
                    int populationSize,
                    double meanPopAvail);
     
+    /** Set up the non-host-specific interventions. */
+    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
+    
     /** Return base-line human parameters for the mosquito. */
     inline const Anopheles::PerHostBase& getHumanBaseParams () {
         return humanBase;
@@ -173,9 +178,7 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    inline void intervLarviciding (const scnXml::LarvicidingDescAnoph& elt) {
-        transmission.emergence->intervLarviciding( elt );
-    }
+    void deployVectorPopInterv (size_t instance);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();
@@ -217,6 +220,8 @@ public:
         mosqSeekingDuration & stream;
         probMosqSurvivalOvipositing & stream;
         transmission & stream;
+        seekingDeathRateIntervs & stream;
+        probDeathOvipositingIntervs & stream;
         partialEIR & stream;
     }
 
@@ -318,6 +323,18 @@ private:
      * 
      * Much of the core model is encapsulated here. */
     MosqTransmission transmission;
+    
+    /** @brief Intervention parameters */
+    //@{
+    /** Interventions affecting death rate while seeking (parameters + state)
+     * 
+     * Value is increase in death rate (so multiply rate by 1 + this). */
+    vector<util::SimpleDecayingValue> seekingDeathRateIntervs;
+    /** Interventions affecting probability of dying while ovipositing (pre laying of eggs) (parameters + state)
+     * 
+     * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
+    vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
+    //@}
     
     /** Per time-step partial calculation of EIR.
     *

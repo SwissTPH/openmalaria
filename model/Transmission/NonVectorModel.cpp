@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
 #include "inputData.h"
@@ -78,6 +78,11 @@ void NonVectorModel::init2 (const std::list<Host::Human>& population, int popula
     simulationMode = forcedEIR;
 }
 
+const char* viError = "vector model interventions can not be used with the non-vector model";
+void NonVectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
+    throw util::xml_scenario_error( viError );
+}
+
 void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
@@ -115,9 +120,9 @@ TimeStep NonVectorModel::initIterate (){
     // initialKappa is used in calculateEIR
     size_t yearLen = TimeStep::fromYears(1).asInt();
     assert( initialKappa.size() >= yearLen );
-    assert( initialKappa.size() % yearLen == 0 );
+    assert( mod_nn(initialKappa.size(), yearLen) == 0 );
     for( size_t i=yearLen; i<initialKappa.size(); ++i ){
-        initialKappa[ i % yearLen ] += initialKappa[ i ];
+        initialKappa[mod_nn(i , yearLen )] += initialKappa[ i ];
     }
     double factor = static_cast<double>(yearLen) / static_cast<double>(initialKappa.size());
     initialKappa.resize( yearLen );
@@ -131,8 +136,11 @@ TimeStep NonVectorModel::initIterate (){
     return TimeStep(0); // nothing to do
 }
 
-void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
-    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be called in intervention period anyway.
+void NonVectorModel::changeEIRIntervention (
+        const scnXml::NonVector& nonVectorData)
+{
+    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be
+    // called in intervention period anyway.
   simulationMode = transientEIRknown;
   
   if (nspore != TimeStep::fromDays( nonVectorData.getEipDuration() ))
@@ -142,7 +150,8 @@ void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
   vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
   if (daily.size() < static_cast<size_t>(Monitoring::Surveys.getFinalTimestep().inDays()+1)) {
-    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
+    cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
+        << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
     throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
@@ -165,10 +174,6 @@ void NonVectorModel::setTransientEIR (const scnXml::NonVector& nonVectorData) {
   annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
-void NonVectorModel::changeEIRIntervention (const scnXml::NonVector& ed) {
-    setTransientEIR (ed);
-}
-
 void NonVectorModel::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
@@ -176,11 +181,24 @@ void NonVectorModel::uninfectVectors(){
     laggedKappa.assign( laggedKappa.size(), 0.0 );
 }
 
+void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::setIRSDescription (const scnXml::IRS&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::deployVectorPopInterv (size_t instance) {
+  throw util::xml_scenario_error (viError);
+}
+
 void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
-        initialKappa[ TimeStep::simulation % initialKappa.size() ] = currentKappa;
+        initialKappa[mod_nn(TimeStep::simulation , initialKappa.size() )] = currentKappa;
     }
 }
 
@@ -190,7 +208,7 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   double eir;
   switch (simulationMode) {
     case forcedEIR:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -198,14 +216,14 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
       eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
       if (TimeStep::interventionPeriod >= TimeStep(0)) {
 	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
 	eir *=
-            laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()] /
-            initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear];
+            laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())] /
+            initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)];
       }
       break;
     default:	// Anything else.. don't continue silently
@@ -215,8 +233,11 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
   if (!finite(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t" << laggedKappa[(TimeStep::simulation-nspore) % laggedKappa.size()]
-	<< "\ninitialKappa:\t" << initialKappa[(TimeStep::simulation-nspore) % TimeStep::stepsPerYear] << endl;
+	<< "\nlaggedKappa:\t"
+        << laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())]
+	<< "\ninitialKappa:\t"
+        << initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)]
+        << endl;
     throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif

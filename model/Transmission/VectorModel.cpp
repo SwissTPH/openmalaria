@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -263,6 +264,20 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
+void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
+    typedef scnXml::VectorPopIntervention::DescriptionType::AnophelesSequence AS;
+    const AS& as = elt.getAnopheles();
+    if( as.size() != numSpecies ){
+        throw util::xml_scenario_error(
+            "vectorPop.description: must have one element for each "
+            "mosquito species described in entomology"
+        );
+    }
+    for( AS::const_iterator it = as.begin(); it != as.end(); ++it ){
+        species[getSpeciesIndex(it->getMosquito())].initVectorPopInterv ( *it, instance );
+    }
+}
+
 
 void VectorModel::scaleEIR (double factor) {
     for ( size_t i = 0; i < numSpecies; ++i )
@@ -342,7 +357,7 @@ TimeStep VectorModel::initIterate () {
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
     host.update(_ITNParams);
     if (simulationMode == forcedEIR){
-        return initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear]
+        return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );
@@ -437,24 +452,12 @@ void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     }
 }
 
-void VectorModel::intervLarviciding (const scnXml::Larviciding::DescriptionType& desc) {
+void VectorModel::deployVectorPopInterv (size_t instance) {
     checkSimMode();
     
-    typedef scnXml::Larviciding::DescriptionType::AnophelesSequence AnophSeq;
-    const AnophSeq& seq = desc.getAnopheles();
-    
-    if( seq.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "larviciding.anopheles: must have one element for each mosquito "
-            "species described in entomology"
-        );
+    for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
+        it->deployVectorPopInterv(instance);
     }
-    
-    for (AnophSeq::const_iterator it = seq.begin();
-            it != seq.end(); ++it) {
-        species[getSpeciesIndex(it->getMosquito())].intervLarviciding(*it);
-    }
-    
 }
 void VectorModel::uninfectVectors() {
     for (size_t i = 0; i < numSpecies; ++i)

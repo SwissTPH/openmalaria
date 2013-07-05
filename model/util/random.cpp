@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -194,18 +195,15 @@ double random::log_normal (double mu, double sigma){
 }
 
 double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
-    // Used for performance reasons. Calling GLS LOG_NORMAL 5 times is 50% slower.
+    // Used for performance reasons. Calling GSL's log_normal 5 times is 50% slower.
     
     double zval = gsl_cdf_ugaussian_Pinv (normp);
-    /*
-    Why not zval=W_UGAUSS?
-    where normp is distributed uniformly over [0,1],
-    zval is distributed like a standard normal distribution
-    where normp has been transformed by raising to the power of 1/(T-1) 
-    zval is distributed like a uniform gauss	times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
-    distr. function of a uniform gauss
-    */
-    return exp(meanlog+stdlog*((float)zval));
+    // Where normp is distributed uniformly over [0,1], this acts like a sample
+    // from the log normal. Where normp has been transformed by raising the
+    // uniform sample to the power of 1/(T-1), zval is distributed like a
+    // uniform gauss times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
+    // distr. function of a uniform gauss:
+    return exp(meanlog+stdlog*zval);
 }
 
 double random::beta (double a, double b){

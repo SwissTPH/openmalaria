@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="30" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -176,35 +176,41 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <larviciding>
-      <!-- Example larviciding (made up values) -->
-      <description>
-        <anopheles mosquito="gambiae_ss">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
-        </anopheles>
-        <anopheles mosquito="funestus">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
-        </anopheles>
-        <anopheles mosquito="arabiensis">
-          <duration value="18"/>
-          <effectiveness value=".8"/>
-        </anopheles>
-      </description>
-      <timed>
-        <!-- Varied times of deployment with two-year breaks -->
-        <deploy time="0"/>
-        <deploy time="155"/>
-        <deploy time="310"/>
-        <deploy time="465"/>
-        <deploy time="620"/>
-        <deploy time="775"/>
-        <deploy time="931"/>
-        <deploy time="1086"/>
-        <deploy time="1241"/>
-      </timed>
-    </larviciding>
+    <vectorPop>
+      <intervention name="larviciding">
+        <!-- Example larviciding (made up values) -->
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <!-- 80% effective larviciding for 18 (=0.246...*73) (5-day) timesteps -->
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="funestus">
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+          <anopheles mosquito="arabiensis">
+            <emergenceReduction initial="0.8">
+              <decay function="step" L="0.2465753424657534"/>
+            </emergenceReduction>
+          </anopheles>
+        </description>
+        <timed>
+          <!-- Varied times of deployment with two-year breaks -->
+          <deploy time="0"/>
+          <deploy time="155"/>
+          <deploy time="310"/>
+          <deploy time="465"/>
+          <deploy time="620"/>
+          <deploy time="775"/>
+          <deploy time="931"/>
+          <deploy time="1086"/>
+          <deploy time="1241"/>
+        </timed>
+      </intervention>
+    </vectorPop>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

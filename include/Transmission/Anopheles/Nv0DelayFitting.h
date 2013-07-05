@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@
 #include <boost/tr1/tuple.hpp>  // import for compatibility with both boost 1.42 and 1.45
 
 #include "util/errors.h"
+#include "Global.h"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -39,7 +41,7 @@ template <class T>
 struct eDFunctor
 {
   eDFunctor(double r, const vector<T>& fc_, const vector<T>& samples_) : p(samples_.size()), fcR(r), fc(fc_), logSamples(samples_) {
-    if (fc.size() % 2 == 0)
+    if (mod_nn(fc.size(), 2u) == 0)
       throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     w = 2*M_PI / T(p);
     fn = (fc.size()-1)/2;

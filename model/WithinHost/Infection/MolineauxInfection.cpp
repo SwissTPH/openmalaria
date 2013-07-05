@@ -1,22 +1,22 @@
-/*
-This file is part of OpenMalaria.
-
-Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
-OpenMalaria is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at
-your option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/CommonWithinHost.h"
@@ -301,7 +301,7 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
 
     // if t+2: The new variant is now expressed. For already extinct
     // variants this doesn't matter, since initP = 0 for those variants.
-    if (P==0 && ageOfInfection%2==0)
+    if (P==0 && mod_nn(ageOfInfection, 2)==0)
     {
         P = initP;
     }
@@ -338,7 +338,7 @@ bool MolineauxInfection::updateDensity(double survivalFactor, TimeStep ageOfInfe
     {
         // if the infection isn't extinct and t = t+2
         // then the growthRateMultiplier is adapted for t+3 and t+4
-        if (ageOfInfection%2==0)
+        if (mod_nn(ageOfInfection, 2)==0)
         {
             updateGrowthRateMultiplier();
         }
@@ -356,7 +356,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
 
     //Molineaux paper equation 6
-    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
     //note: sigma_decay = exp(-2*sigma)
     variantSpecificSummation = static_cast<float>((variantSpecificSummation * sigma_decay)+laggedP[index]);
     laggedP[index] = P;
@@ -367,7 +367,7 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
 double MolineauxInfection::getVariantTranscendingSummation() {
 
     //Molineaux paper equation 5
-    size_t index = (TimeStep::simulation % 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
     //Note: rho is zero, so the decay here is unnecessary:
     variantTranscendingSummation = (variantTranscendingSummation /* * exp(-2.0*rho) */)+laggedPc[index];
 

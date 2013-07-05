@@ -1,22 +1,22 @@
-/*
- This file is part of OpenMalaria.
- 
- Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- 
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
- 
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- 
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 
 #include "util/DecayFunction.h"
 #include "util/errors.h"
@@ -66,12 +66,19 @@ public:
 class ConstantDecayFunction : public DecayFunction {
 public:
     DecayFuncHet hetSample () const{
-        return DecayFuncHet();
+        DecayFuncHet ret;
+        ret.tMult = 1.0;
+        return ret;
     }
-    DecayFuncHet hetSample (NormalSample) const{
-        return DecayFuncHet();
+    DecayFuncHet hetSample (NormalSample sample) const{
+        return hetSample();
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
+    
+    double eval(double effectiveAge) const{
+        // Note: we now require all decay functions to return 0 when time > 0
+        // and the DecayFuncHet is default-constructed. So const *after deployment*.
+        if( effectiveAge == numeric_limits<double>::infinity() )
+            return 0.0;
         return 1.0;
     }
     TimeStep sampleAgeOfDecay () const{
@@ -89,8 +96,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0;
         }else{
@@ -99,7 +105,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep::never;
+        return TimeStep( std::floor(1.0 / invL + 0.5) /* C++11: std::round */ );
     }
     
 private:
@@ -117,8 +123,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return 1.0 - effectiveAge;
         }else{
@@ -140,25 +145,24 @@ class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        negInvLambda( -log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
+        invLambda( log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
     {
-        util::streamValidate(negInvLambda);
+        util::streamValidate(invLambda);
     }
     
     double getBaseTMult() const{
-        return negInvLambda;
+        return invLambda;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
-        return exp( effectiveAge );
+    double eval(double effectiveAge) const{
+        return exp( -effectiveAge );
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest(log(random::uniform_01())/negInvLambda);
+        return TimeStep::fromNearest(-log(random::uniform_01())/invLambda);
     }
     
 private:
-    double negInvLambda;
+    double invLambda;
 };
 
 class WeibullDecayFunction : public BaseHetDecayFunction {
@@ -172,8 +176,7 @@ public:
     double getBaseTMult() const{
         return constOverLambda;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         return exp( -pow(effectiveAge, k) );
     }
     
@@ -197,8 +200,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
@@ -221,8 +223,7 @@ public:
     double getBaseTMult() const{
         return invL;
     }
-    double eval(TimeStep age, DecayFuncHet sample) const{
-        double effectiveAge = age.asInt() * sample.getTMult();
+    double eval(double effectiveAge) const{
         if( effectiveAge < 1.0 ){
             return exp( k - k / (1.0 - pow(effectiveAge, 2.0)) );
         }else{

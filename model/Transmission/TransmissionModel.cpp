@@ -1,24 +1,22 @@
-/*
-
- This file is part of OpenMalaria.
-
- Copyright (C) 2005,2006,2007,2008 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
-
- OpenMalaria is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or (at
- your option) any later version.
-
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program; if not, write to the Free Software
- Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-
-*/
+/* This file is part of OpenMalaria.
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
+ * OpenMalaria is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/VectorModel.h"
@@ -75,14 +73,14 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[TimeStep::simulation % TimeStep::stepsPerYear];
+    stream<<'\t'<<initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // The latest time-step's kappa:
-    stream<<'\t'<<laggedKappa[TimeStep::simulation % laggedKappa.size()];
+    stream<<'\t'<<laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -159,7 +157,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     }
 
 
-    size_t lKMod = TimeStep::simulation % laggedKappa.size();	// now
+    size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
     if( population.empty() ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -171,7 +169,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = TimeStep::simulation % TimeStep::stepsPerYear;   // now
+    int tmod = mod_nn(TimeStep::simulation, TimeStep::stepsPerYear);   // now
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
@@ -181,7 +179,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     }
 
     // Shared graphics: report infectiousness
-    if (TimeStep::simulation % 6 ==  0) {
+    if (mod_nn(TimeStep::simulation, 6) ==  0) {
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);
@@ -224,7 +222,7 @@ double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYea
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setInfectiousnessToMosq(laggedKappa[TimeStep::simulation % laggedKappa.size()]);
+  survey.setInfectiousnessToMosq(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
 
   survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
@@ -243,20 +241,6 @@ void TransmissionModel::summarize (Monitoring::Survey& survey) {
   surveyInputEIR = 0.0;
   surveySimulatedEIR = 0.0;
   lastSurveyTime = TimeStep::simulation;
-}
-
-const char* viError = "vector interventions require vector model";
-void TransmissionModel::setITNDescription (const scnXml::ITNDescription&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::setIRSDescription (const scnXml::IRS&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::setVADescription (const scnXml::VectorDeterrent&) {
-  throw util::xml_scenario_error (viError);
-}
-void TransmissionModel::intervLarviciding (const scnXml::Larviciding::DescriptionType&) {
-  throw util::xml_scenario_error (viError);
 }
 
 

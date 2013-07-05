@@ -1,17 +1,18 @@
 /* This file is part of OpenMalaria.
- *
- * Copyright (C) 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
- *
+ * 
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
  * your option) any later version.
- *
+ * 
  * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
@@ -22,6 +23,7 @@
 
 #include "Global.h"
 #include "schema/interventions.h"
+#include "util/SimpleDecayingValue.h"
 #include <vector>
 
 namespace OM {
@@ -65,6 +67,9 @@ public:
         const scnXml::AnophelesParams& anoph,
         vector<double>& initialisationEIR,
         int EIPDuration );
+    
+    /** Set up the non-host-specific interventions. */
+    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
@@ -114,8 +119,8 @@ public:
     
     ///@brief Interventions and reporting
     //@{
-    /// Start a larviciding intervention.
-    void intervLarviciding (const scnXml::LarvicidingDescAnoph&);
+    /// Start an intervention affecting the vector population.
+    void deployVectorPopInterv (size_t instance);
     
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;
@@ -124,10 +129,22 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
+        EIRRotateAngle & stream;
+        FSRotateAngle & stream;
+        FSCoeffic & stream;
+        forcedS_v & stream;
+        initNvFromSv & stream;
+        initOvFromSv & stream;
+        emergence & stream;
+        emergenceSurvival & stream;
         checkpoint (stream);
     }
     
 protected:
+    /** Return the proportion of emerging larvae to survive intervention
+     * effects. Should be between 0 and 1. */
+    inline double interventionSurvival() const{ return emergenceSurvival; }
+    
     virtual void checkpoint (istream& stream) =0;
     virtual void checkpoint (ostream& stream) =0;
     
@@ -179,11 +196,10 @@ protected:
      * Would need to be checkpointed for main simulation; not used during
      * initialisation period (so could be reinitialised). */
     //@{
-    /** Timestep at which larviciding effects dissappear. */
-    TimeStep larvicidingEndStep;
-    /** One-minus larviciding effectiveness. I.e. emergence rate is multiplied by
-     * this parameter. */
-    double larvicidingIneffectiveness;
+    /// Description of killing effect on emerging pupae
+    vector<util::SimpleDecayingValue> emergence;
+    /// Cache parameter updated by update()
+    double emergenceSurvival;   // survival with regards to intervention effects
     //@}
 };
 

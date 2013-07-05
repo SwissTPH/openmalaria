@@ -1,6 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -310,7 +311,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
     }
     sort( list.begin(), list.end() );
     double x;
-    if( populationSize % 2 == 0 ){
+    if( mod_nn(populationSize, 2) == 0 ){
         size_t i = populationSize / 2;
         x = (list[i-1]+list[i])/2.0;
     }else{
