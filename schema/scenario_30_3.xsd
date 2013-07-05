@@ -7,7 +7,7 @@
   <xs:element name="scenario">
     <xs:annotation>
       <xs:documentation>Description of scenario</xs:documentation>
-      <xs:appinfo>units:List of elements;name:Scenario;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Scenario;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
       <xs:all>
@@ -16,7 +16,7 @@
             <xs:documentation>
               Description of demography
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Human age distribution;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="monitoring" type="monitoring">
@@ -24,7 +24,7 @@
             <xs:documentation>
               Description of surveys
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Measures to be reported;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="interventions" type="interventions">
@@ -35,7 +35,7 @@
               continuous-time distribution targetting individuals when they
               reach a certain age.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Preventative interventions;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="healthSystem" type="healthSystem">
@@ -43,7 +43,7 @@
             <xs:documentation>
               Description of health system.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Health system description;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="entomology" type="entoData">
@@ -51,7 +51,7 @@
             <xs:documentation>
               Description of entomological data
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Transmission and vector bionomics;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element minOccurs="0" name="pharmacology" type="pharmacology">
@@ -59,7 +59,7 @@
             <xs:documentation>
               Drug model parameters
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="model">
@@ -68,7 +68,7 @@
             Encapsulation of all parameters which describe the model according
             to which fitting is done.
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Model options and parameters;</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Model options and parameters;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:all>
@@ -79,7 +79,7 @@
                     The list of recognised options can be found in the code at:
                     include/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
-                  <xs:appinfo>units:List of elements;name:Model Options;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
               <xs:element name="clinical" type="clinical"/>
@@ -89,7 +89,7 @@
                   <xs:documentation>
                     Parameters of the epidemiological model
                   </xs:documentation>
-                  <xs:appinfo>units:List of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:all>
@@ -110,7 +110,7 @@
           <xs:documentation>
             Unique identifier of scenario
           </xs:documentation>
-          <xs:appinfo>units:Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
+          <xs:appinfo>type:integer; units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
@@ -119,14 +119,13 @@
           <xs:documentation>
             Name of intervention
           </xs:documentation>
-          <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+          <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="wuID" type="xs:int" use="required">
         <xs:annotation>
           <xs:documentation>
-            Work unit ID. Only used to validate
-            checkpointing, to prevent checkpoint cheats.
+            Work unit ID. Only used to validate checkpointing, to prevent checkpoint cheats.
           </xs:documentation>
           <xs:appinfo>
             units:Number;min:1;max:100000000;name:Work unit identifier;exposed:false;
@@ -148,7 +147,7 @@
         <xs:documentation>
           Reference number of input parameter
         </xs:documentation>
-        <xs:appinfo>units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
+        <xs:appinfo>type:boolean;units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="value" type="xs:double" use="required">
@@ -163,7 +162,7 @@
           True if parameter is to be sampled in optimization
           runs. Not used in simulator app.
         </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
+        <xs:appinfo>type:Boolean;units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -204,8 +203,7 @@
       <xs:element name="availabilityToMosquitoes" type="AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
-            By age group data on availability of humans to mosquitoes relative
-            to an adult.
+            Availability of humans to mosquitoes relative to an adult, categorized by age group
           </xs:documentation>
           <xs:appinfo>name:Availability to mosquitoes;units:None;min:0;max:1;</xs:appinfo>
         </xs:annotation>
@@ -229,7 +227,7 @@
                     A standard deviation of zero for no heterogeneity is valid; a rough
                     value from Tanzanian data is 0.14.
                   </xs:documentation>
-                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
+                  <xs:appinfo>type:double;name:Standard deviation;units:None;min:0</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
@@ -245,9 +243,9 @@
       <xs:element name="ageGroup" type="ageGroupPerC">
         <xs:annotation>
           <xs:documentation>
-            List of age groups included in demography
+            list of age groups included in demography
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Age groups;</xs:appinfo>
+          <xs:appinfo>type:list of Elements;name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -256,21 +254,21 @@
         <xs:documentation>
           Name of demography data
         </xs:documentation>
-        <xs:appinfo>units:string;name:Name of demography data;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name of demography data;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="popSize" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Population size</xs:documentation>
-        <xs:appinfo>units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
+        <xs:appinfo>type:integer;units:Count;min:1;max:100000;name:Population size;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="maximumAgeYrs" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Maximum age of simulated humans in years.
+          Maximum age of simulated humans in years
         </xs:documentation>
-        <xs:appinfo>units:years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of simulated humans;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="growthRate" type="xs:double" use="optional">
@@ -279,7 +277,7 @@
           Growth rate of human population.
             (we should be able to implement this with non-zero values)
         </xs:documentation>
-        <xs:appinfo>units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
+        <xs:appinfo>type:double;units:Number;min:0;max:0;name:Growth rate of human population;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -287,9 +285,9 @@
   <xs:complexType name="ageGroupPerC">
     <xs:annotation>
       <xs:documentation>
-        List of age groups included in demography or surveys
+        list of age groups included in demography or surveys
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:list of age groups;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC"/>
@@ -299,7 +297,7 @@
         <xs:documentation>
           Lower bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Lower bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -309,7 +307,7 @@
         <xs:documentation>
           Percentage of human population in age group
         </xs:documentation>
-        <xs:appinfo>name:Percentage in age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Percentage;min:0;max:100;name:Percentage in age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="upperbound" type="xs:double" use="required">
@@ -317,7 +315,7 @@
         <xs:documentation>
           Upper bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Upper bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -326,20 +324,17 @@
   <xs:complexType name="clinical">
     <xs:annotation>
       <xs:documentation>
-        Description of clinical parameters.
-        
-        This is related to the health-system description, but contains data
-        which can't be changed as part of an intervention and is not restricted
-        to treatment.
+        Description of clinical parameters that are related to the health-system description, but which contain data
+        that cannot be changed as part of an intervention and that are not restricted to treatment.
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Description of clinical parameters;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Description of clinical parameters;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element minOccurs="0" name="NonMalariaFevers">
         <xs:complexType>
           <xs:annotation>
             <xs:documentation>
-              Description of non-malaria fever incidence. Non-malaria fevers
+              Description of the incidence of non-malaria fever. Non-malaria fevers
               are only modelled if the NON_MALARIA_FEVERS option is used.
             </xs:documentation>
             <xs:appinfo>name:Non-malaria fevers;</xs:appinfo>
@@ -351,17 +346,17 @@
                   Probability that a non-malaria fever occurs given that no concurrent
                   malaria fever occurs.
                 </xs:documentation>
-                <xs:appinfo>name:P(NMF);units:none;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(NMF); type:double;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
-                  Probability that a non-malaria fever needs treatment with
+                  Probability that a non-malarial fever requires treatment with
                   antibiotics (assuming fever is not induced by malaria, although
                   concurrent parasites may be present).
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | NMF);units:none;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | NMF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentMF" type="AgeGroupValues">
@@ -370,11 +365,11 @@
                   Probability that a malaria fever needs treatment with
                   antibiotics (assuming fever is induced by malaria, although
                   concurrent bacteria may be present).
-                  
+                   
                   Meaning partially overlaps with separate model for comorbidity
                   given malaria.
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | MF);units:none;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | MF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -387,7 +382,7 @@
           Follow-up period during which a recurrence is
           considered to be a treatment failure
         </xs:documentation>
-        <xs:appinfo>units:Time steps;min:1;max:100;name:Follow-up period during which recurrence is treated as a failure;</xs:appinfo>
+        <xs:appinfo>type: integer; units:Time steps;min:1;max:100;name:Follow-up period during which recurrence is treated as a failure;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -402,7 +397,7 @@
         Health system data is here defined as data used to decide on a treatment
         strategy, given a case requiring treatment.
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Case management system;</xs:appinfo>
+      <xs:appinfo>type: list of elements;name:Case management system;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
@@ -415,16 +410,16 @@
             Case fatality rate (probability of an inpatient fatality from a
             bout of severe malaria, per age-group).
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Case fatality rate in inpatients;</xs:appinfo>
+          <xs:appinfo>type: list of elements;name:Case fatality rate for inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSequelaeInpatient" type="AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
-            List of age specific probabilities of sequelae in inpatients,
-            during a severe bout.
+            List of age-specific probabilities of sequelae in inpatients,
+            during a severe bout of malaria.
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Probabilities of sequelae in inpatients;</xs:appinfo>
+          <xs:appinfo>type: list of elements;units:Dimensionless;name:Probabilities of sequelae in inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -436,15 +431,15 @@
         Tediosi et al case management model (Case management as
         described in AJTMH 75 (suppl 2) pp90-103).
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Case Management (Tediosi et al);</xs:appinfo>
+      <xs:appinfo>type: list of elements;name:Case Management (Tediosi et al);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="drugRegimen">
         <xs:annotation>
           <xs:documentation>
-            Description of drug regimen
+            Description of drug regimen.
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Description of drug regimen;</xs:appinfo>
+          <xs:appinfo>type: list of elements;name:Description of drug regimen;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:attribute name="firstLine" type="xs:string" use="required">
@@ -452,7 +447,7 @@
               <xs:documentation>
                 Code for first line drug
               </xs:documentation>
-              <xs:appinfo>units:Drug code;name:First line drug;</xs:appinfo>
+              <xs:appinfo>type:string;units:Drug code;name:First line drug;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="secondLine" type="xs:string" use="required">
@@ -460,7 +455,7 @@
               <xs:documentation>
                 Code for second line drug
               </xs:documentation>
-              <xs:appinfo>units:Drug code;name:Second line drug;</xs:appinfo>
+              <xs:appinfo>type:string;units:Drug code;name:Second line drug;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="inpatient" type="xs:string" use="required">
@@ -469,7 +464,7 @@
                 Code for drug used for treating
                 inpatients
               </xs:documentation>
-              <xs:appinfo>units:Drug code;name:Drug use for treating inpatients;</xs:appinfo>
+              <xs:appinfo>type:string;units:Drug code;name:Drug use for treating inpatients;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -480,7 +475,7 @@
             Initial cure rate
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Initial cure rate;</xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="compliance" type="treatmentDetails">
@@ -488,16 +483,16 @@
           <xs:documentation>
             Adherence to treatment
           </xs:documentation>
-          <xs:appinfo>units:Proportion;min:0;max:1;name:Adherence to treatment;</xs:appinfo>
+          <xs:appinfo>type:double;units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="nonCompliersEffective" type="treatmentDetails">
         <xs:annotation>
           <xs:documentation>
-            Effectiveness of treatment of non compliers
+            Effectiveness of treatment for non-compliant patients
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSeekOfficialCareUncomplicated1" type="inputValue">
@@ -507,7 +502,7 @@
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Probability that a patient with uncomplicated disease seeks official care immediately;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -515,10 +510,10 @@
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with uncomplicated
-            disease self-treats
+            disease will self-treat
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Probability that a patient with uncomplicated disease self-treats;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -529,7 +524,7 @@
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Probability that a recurring patient seeks official care;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -540,7 +535,7 @@
             obtains appropriate care
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;name:Probability that a patient with severe disease obtains appropriate care;
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -550,7 +545,7 @@
         <xs:documentation>
           Name of health system
         </xs:documentation>
-        <xs:appinfo>units:string;name:Case Management model;</xs:appinfo>
+        <xs:appinfo>type:string;name:Case Management model;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -559,7 +554,7 @@
       <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="inputValue">
         <xs:annotation>
           <xs:documentation>Chloroquine</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Chloroquine;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Chloroquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="SP" type="inputValue">
@@ -567,13 +562,13 @@
           <xs:documentation>
             Sulphadoxine-pyrimethamine
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Sulphadoxine-pyrimethamine;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="inputValue">
         <xs:annotation>
           <xs:documentation>Amodiaquine</xs:documentation>
-          <xs:appinfo>units:List of elements;name:Amodiaquine</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Amodiaquine</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="inputValue">
@@ -581,7 +576,7 @@
           <xs:documentation>
             Sulphadoxine-pyrimethamine/Amodiaquine
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="inputValue">
@@ -589,13 +584,13 @@
           <xs:documentation>
             Artemisinine combination therapy
           </xs:documentation>
-          <xs:appinfo>units:List of elements;</xs:appinfo>
+          <xs:appinfo>type: list of elements; name: Artemisinine combination therapy</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="QN" type="inputValue">
         <xs:annotation>
           <xs:documentation>Quinine</xs:documentation>
-          <xs:appinfo>units:List of elements;</xs:appinfo>
+          <xs:appinfo>type:list of elements name:Quinine ;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="selfTreatment" type="inputValue">
@@ -604,7 +599,7 @@
             Probability of self-treatment
           </xs:documentation>
           <xs:appinfo>
-            units:Proportion;min:0;max:1;
+            type:double;units:Dimensionless;min:0;max:1name:P(self-treat);
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -623,7 +618,7 @@
       <xs:documentation>
         A set of decisions and a set of treatments.
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Set of decisions;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Set of decisions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="decisions" type="HSESDecisions"/>
@@ -665,7 +660,7 @@
   <xs:complexType name="HSESDecision">
     <xs:annotation>
       <xs:documentation>
-        A decision describes how to choose between a set of values.
+        A decision describes rules for choosing between a set of values.
         
         Lexically, it can contain symbols matching &quot;[_\.a-zA-Z0-9]+&quot;, round brackets: (),
         braces: {} and colons. Whitespace is ignored except to separate symbols.
@@ -677,17 +672,17 @@
         BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
         OUTCOME, DECISION, VALUE := SYMBOL
         
-        For each BRANCH_SET each BRANCH must have the same DECISION. This
+        For each BRANCH_SET each BRANCH must result in the same DECISION. The
         DECISION must be one of the dependencies mentioned in &quot;depends&quot;. This
         may be:
         * another decision, in which case the VALUE immediately following in
           brackets must correspond to one of its output values. The BRANCH_SET immediately
           containing this BRANCH must represent each output value of the same decision
           exactly once, and no parent BRANCH_SET may be for the same DECISION.
-        * &quot;p&quot;: this indicates a probabilistic decision. In this case the value is a
+        * &quot;p&quot;: this entry indicates a probabilistic decision. Where the value is a
           probability, the sum of all values for the BRANCH_SET must be 1 and the decision
           must be associated directly with OUTCOMEs (not sub-TREEs).
-        * &quot;age&quot;: this indicates an age-test. The VALUE must have the form &quot;a-b&quot;,
+        * &quot;age&quot;: this entry indicates an age-test. The VALUE must have the form &quot;a-b&quot;,
           indicating that this branch will be taken for individuals aged such
           that <![CDATA[a <= age < b]]>, where a,b are non-negative real numbers
           or the special value &quot;inf&quot;, and <![CDATA[a <= b]]>. All VALUEs in the
@@ -707,18 +702,18 @@
               &quot;[_a-zA-Z0-9]+&quot;; that is it can only contain letters, digits and _ characters
               (no spaces, punctuation, etc.).
             </xs:documentation>
-            <xs:appinfo>name:Name of decision;</xs:appinfo>
+            <xs:appinfo>type:string;name:Name of decision;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="depends" type="xs:string" use="required">
           <xs:annotation>
             <xs:documentation>
               A comma-separated list of decisions that must have already been evaluated before
-              this decision can be evaluated. Can be empty. Each must be hard-coded or
+              the current decision can be evaluated. May be empty. Each decision must be hard-coded or
               described here. Can include the special decisions &quot;p&quot; and &quot;age&quot;,
               though &quot;age&quot; cannot be combined with any other dependency.
             </xs:documentation>
-            <xs:appinfo>name:Preceding decisions;</xs:appinfo>
+            <xs:appinfo>type: comma-separated list of elements; name:Preceding decisions;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="values" type="xs:string" use="required">
@@ -728,7 +723,7 @@
               The name of each value must be of the same form as decision names (i.e.
               only contain letters, digits and _ characters).
             </xs:documentation>
-            <xs:appinfo>name:Outcome values;</xs:appinfo>
+            <xs:appinfo>type: comma-separated list of elements; name:Outcome values;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -740,7 +735,7 @@
         A list of drug treatment tables. Each should have a name corresponding to
         one of the &quot;drug&quot; decision's values.
       </xs:documentation>
-      <xs:appinfo>units:string;name:List of treatment tables;</xs:appinfo>
+      <xs:appinfo>type:string;name:List of treatment tables;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="treatment" type="HSESTreatment"/>
@@ -749,10 +744,10 @@
   <xs:complexType name="HSESTreatment">
     <xs:annotation>
       <xs:documentation>
-        A description of a base treatment schedule along with modifiers to handle
+        A description of a base treatment schedule that includes modifiers to handle
         delays, quality variations, etc.
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Description of a base treatment schedule;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Description of a base treatment schedule;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="schedule" type="HSESTreatmentSchedule"/>
@@ -770,9 +765,9 @@
   <xs:complexType name="HSESTreatmentSchedule">
     <xs:annotation>
       <xs:documentation>
-        The base (unmodified) schedule of drugs administered for this treatment.
+        The base (unmodified)schedule of drugs administered for this treatment.
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Base schedule of drugs for this treatment;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Base schedule of drugs for this treatment;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="medicate" type="medicate"/>
@@ -784,13 +779,13 @@
         <xs:documentation>
       Abbreviated name of drug compound
         </xs:documentation>
-        <xs:appinfo>units:string;name:drug;</xs:appinfo>
+        <xs:appinfo>type:string;name:drug;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="mg" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>Quantity of drug compound</xs:documentation>
-        <xs:appinfo>units:mg;name:drug dose;</xs:appinfo>
+        <xs:appinfo>type:double;units:mg;name:drug dose;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="hour" type="xs:double" use="required">
@@ -799,7 +794,7 @@
         Number of hours past start of timestep this drug dose is administered
         at (first dose should be at hour 0).
       </xs:documentation>
-        <xs:appinfo>units:hours;min:0;name:time of administration;</xs:appinfo>
+        <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="duration" type="xs:double" use="optional">
@@ -807,9 +802,9 @@
         <xs:documentation>
         If this attribute is given, use IV administration instead of orally.
         
-        Specifies the number of hours over which the dose is administered.
+        Specifies the number of hours during which the dose is administered.
       </xs:documentation>
-        <xs:appinfo>units:hours;min:0;name:duration of administration;</xs:appinfo>
+        <xs:appinfo>type:double;units:Hours;min:0;name:Duration of administration;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -833,10 +828,10 @@
             The &quot;drugs&quot; attribute is a comma-separated list of all active ingredients administered in
             the base schedule (each must be listed once) and the content of this element is a comma-
             separated list of multipliers for each active ingredient, listed in the same order as in
-            the &quot;drugs&quot; attribute. E.g. with drugs=&quot;A,B&quot; and content &quot;0.5,1&quot; the quantity of drug A is
+            the &quot;drugs&quot; attribute. For example, with drugs=&quot;A,B&quot; and content=&quot;0.5,1&quot; the quantity of drug A is
             halved while that of B is unchanged.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient multipliers;</xs:appinfo>
+          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient multipliers;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="delay" type="HSESTreatmentModifierEffect">
@@ -850,7 +845,7 @@
             the &quot;drugs&quot; attribute. E.g. with drugs=&quot;A,B&quot; and content &quot;0,6&quot;, drug A is administered as
             in the base schedule while drug B is administered 6 hours later than specified.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient delays;</xs:appinfo>
+          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient delays;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="selectTimeRange" type="HSESTreatmentModifierEffect">
@@ -866,7 +861,7 @@
             interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
             administered if <![CDATA[x <= t < y]]>.
           </xs:documentation>
-          <xs:appinfo>units:Comma separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
+          <xs:appinfo>type:Comma-separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:choice>
@@ -875,7 +870,7 @@
         <xs:documentation>
           Specifies the decision that this modifier acts on.
         </xs:documentation>
-        <xs:appinfo>units:string;</xs:appinfo>
+        <xs:appinfo>units:string;name:Decision</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -885,7 +880,7 @@
         <xs:documentation>
           Specifies a value of the decision to act on.
         </xs:documentation>
-        <xs:appinfo>units:string;name:value of decision;</xs:appinfo>
+        <xs:appinfo>type:string;name:Value of decision;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="effect" type="xs:string" use="required">
@@ -894,19 +889,19 @@
           Comma-separated list of the effect the modifier has on each drug, in
           the form DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
         </xs:documentation>
-            <xs:appinfo>units:string;name:List of drugs affected;</xs:appinfo>
+            <xs:appinfo>type:comma-separated list of strings;name:List of drugs affected;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="affectsCost" type="xs:boolean" use="optional">
       <xs:annotation>
         <xs:documentation>
           Does this affect the cost? If false, the effective drug usage (w.r.t.
-          cost) is unaffected by this modifier; if true it is. Defaults to true
+          cost)is unaffected by this modifier; if true it is. Defaults to true
           (if omitted).
           
           Is meaningless for delays.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Affects cost?;</xs:appinfo>
+        <xs:appinfo>type:boolean;units:None;name:Affects cost?;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -921,29 +916,29 @@
       <xs:element name="maxUCSeekingMemory" type="xs:int">
         <xs:annotation>
           <xs:documentation>
-            Maximum number of timesteps (including first of case) an individual will
-            remember they are sick before resetting.
+            Maximum number of timesteps (including first day of case) that an individual with an uncomplicated case of
+            malaria will remember he/she was sick before resetting. 
           </xs:documentation>
-          <xs:appinfo>name:Max UC treatment-seeking memory;units:days;min:0;max:unbounded</xs:appinfo>
+          <xs:appinfo>type:integer;name:Max UC treatment-seeking memory;units:Days;min:0;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="uncomplicatedCaseDuration" type="xs:int">
         <xs:annotation>
           <xs:documentation>
-            Fixed length of an uncomplicated case of malarial/non-malarial
+            Fixed length of an uncomplicated case of malarial or non-malarial
             sickness (from treatment seeking until return to life-as-usual).
             Usually 3.
           </xs:documentation>
-          <xs:appinfo>name:Uncomplicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>type:integer;name:Uncomplicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="complicatedCaseDuration" type="xs:int">
         <xs:annotation>
           <xs:documentation>
-            Fixed length of a complicated/severe case of malaria
+            Fixed length of a complicated or severe case of malaria
             (from treatment seeking until return to life-as-usual).
           </xs:documentation>
-          <xs:appinfo>name:Complicated case duration;units:days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>type:integer;name:Complicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="complicatedRiskDuration" type="xs:int">
@@ -953,13 +948,13 @@
             or complicated case of malaria. Cannot be greater than the duration
             of a complicated case or less than 1 day.
           </xs:documentation>
-          <xs:appinfo>name:Complicated risk duration;units:days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>type:integer;name:Complicated risk duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
        <xs:element maxOccurs="unbounded" name="dailyPrImmUCTS" type="xs:double">
         <xs:annotation>
           <xs:documentation>
-            It is sometimes desirable to model delays to treatment seeking in
+            It is sometimes desirable to model delays to treatment-seeking in
             uncomplicated cases. While treatment of drugs can be delayed within
             case management trees to provide a similar effect, this doesn't
             delay any of the decisions, including diagnostics using the current
@@ -973,7 +968,7 @@
             
             For no delay, use one element with a value of 1.
           </xs:documentation>
-          <xs:appinfo>name:Daily probability of immediate treatment seeking for uncomplicated cases;units:none;min:0;max:1</xs:appinfo>
+          <xs:appinfo>type:double;name:Daily probability of immediate treatment seeking for uncomplicated cases;units:Dimensionless;min:0.0;max:1.0</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1009,7 +1004,7 @@
             given that no malaria diagnostic was used but independent of need.
             Symbol: P₀.
           </xs:documentation>
-          <xs:appinfo>name:P(treatment|no diagnostic);units:none;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>name:P(treatment|no diagnostic);units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="effectNegativeTest" type="xs:double">
@@ -1046,7 +1041,7 @@
             a provider untrained in NMF diagnosis) on the odds ratio of
             receiving antibiotics. Symbol: exp(β₄)
           </xs:documentation>
-          <xs:appinfo>name:Effect of informal provider;</xs:appinfo>
+          <xs:appinfo>type:double;name:Effect of informal provider;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="CFR" type="AgeGroupValues">
@@ -1056,7 +1051,7 @@
             death from a fever requiring antibiotic treatment given that no
             antibiotic treatment is received, per age-group).
           </xs:documentation>
-          <xs:appinfo>name:Case fatality rate;units:none;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>name:Case fatality rate;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="TreatmentEfficacy" type="xs:double">
@@ -1065,7 +1060,7 @@
             Probability that treatment would prevent a death (i.e. CFR is
             multiplied by one minus this when treatment occurs).
           </xs:documentation>
-          <xs:appinfo>name:Treatment efficacy;units:none;min:0;max:1;</xs:appinfo>
+          <xs:appinfo>type:double;units:Dimensionless;name:Treatment efficacy;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1124,7 +1119,7 @@
           2. linear: straight lines (on an age vs. value graph) are used to
           interpolate data points.
         </xs:documentation>
-        <xs:appinfo>name:interpolation;units:none;</xs:appinfo>
+        <xs:appinfo>name:interpolation;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
@@ -1156,7 +1151,7 @@
                   The minimum density at which parasites can be detected. If 0,
                   the test outcome is always positive.
                 </xs:documentation>
-                <xs:appinfo>name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
+                <xs:appinfo>type:double;name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
           </xs:complexType>
@@ -1192,7 +1187,7 @@
                 <xs:documentation>
                   The density at which the test outcome has a 50% chance of being positive.
                 </xs:documentation>
-                <xs:appinfo>name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
+                <xs:appinfo>type:double;name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="specificity" type="xs:double" use="required">
@@ -1200,7 +1195,7 @@
                 <xs:documentation>
                   The probability of a positive test outcome in the absense of parasites.
                 </xs:documentation>
-                <xs:appinfo>name:Specificity;units:none;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>type:double;units:Dimensionless;name:Specificity;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
           </xs:complexType>
@@ -1450,7 +1445,7 @@
                     Number of timesteps between reports.
                   </xs:documentation>
                   <xs:appinfo>
-                    units:Days;min:1;max:unbounded;name:Days between reports;
+                    type:integer;units:Days;min:1;max:unbounded;name:Days between reports;
                   </xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
@@ -1467,7 +1462,7 @@
                     continuous across the start of the intervention period.
                   </xs:documentation>
                   <xs:appinfo>
-                    units:Days;min:1;max:unbounded;name:During initialization;
+                    type:boolean;units:Days;min:1;max:unbounded;name:During initialization;
                   </xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
@@ -1481,7 +1476,7 @@
             List of all active survey options. See include/Survey.h for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
-          <xs:appinfo>name:Name of quantity;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Name of quantity;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="surveys">
@@ -1489,7 +1484,7 @@
           <xs:documentation>
             List of survey times
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Survey times (time steps);</xs:appinfo>
+          <xs:appinfo>units:list of elements;name:Survey times (time steps);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -1497,10 +1492,11 @@
               <xs:annotation>
                 <xs:documentation>
                   Survey time; 0 means just before start of main sim and is a valid survey-point.
-                  Reported data is either from a point-time survey (immediate data) or is collected over the previous year (data from previous timesteps-per-year period).
+                  Reported data is either from a point-time survey (immediate data) or is collected 
+                  over the previous year(data from previous timesteps-per-year period).
                   Simulation will end immediately after last survey is taken.
                 </xs:documentation>
-                <xs:appinfo>units:Number;min:0;name:Survey time;</xs:appinfo>
+                <xs:appinfo>type:integer;units:Number;min:0;name:Survey time;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -1510,7 +1506,7 @@
                 Limit above which a human's infection is reported as patent.
               </xs:documentation>
               <xs:appinfo>
-                units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;
+                type:double;units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;
               </xs:appinfo>
             </xs:annotation>
           </xs:attribute>
@@ -1521,7 +1517,7 @@
           <xs:documentation>
             List of age groups included in demography or surveys
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Age groups;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -1530,7 +1526,7 @@
         <xs:documentation>
           Name of monitoring data
         </xs:documentation>
-        <xs:appinfo>units:string;name:Name of monitoring information;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name of monitoring information;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="cohortOnly" type="xs:boolean" use="optional">
@@ -1575,7 +1571,7 @@
           recruited into the cohort. This intended for cohort studies that
           intend to measure time to first infection, using active case detection.
         </xs:documentation>
-        <xs:appinfo>name:Time to first infection only;</xs:appinfo>
+        <xs:appinfo>type:boolean;name:Time to first infection only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1584,7 +1580,7 @@
       <xs:documentation>
         List of age groups included in surveys
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:list of age groups;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group" type="groupBounds"/>
@@ -1594,7 +1590,7 @@
         <xs:documentation>
           Lower bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1604,7 +1600,7 @@
         <xs:documentation>
           Upper bound of age group
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1640,7 +1636,7 @@
                           Time-step at which this replacement occurs, starting
                           from 0, the first intervention-period time-step.
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>type:integer;name:Time;units:time-steps;min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -1653,7 +1649,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1689,7 +1685,7 @@
                           Time-step at which this replacement occurs, starting
                           from 0, the first intervention-period time-step.
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>type:integer;name:Time;units:time-steps;min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -1702,7 +1698,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1731,7 +1727,7 @@
                     
                     Drugs are administered whenever the test outcome is positive.
                   </xs:documentation>
-                  <xs:appinfo>name:Diagnostic (5-day);</xs:appinfo>
+                  <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
               <xs:element minOccurs="0" name="description">
@@ -1743,7 +1739,7 @@
                     and screen-and-treat. Number of treatments given can be
                     reported by the nMDAs option.
                   </xs:documentation>
-                  <xs:appinfo>name:Diagnostic and treatment (1-day);</xs:appinfo>
+                  <xs:appinfo>type:string;name:Diagnostic and treatment (1-day);</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
                   <xs:complexContent>
@@ -1751,7 +1747,7 @@
                       <xs:attribute name="name" type="xs:string" use="optional">
                         <xs:annotation>
                           <xs:documentation>Name of set of interventions</xs:documentation>
-                          <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
+                          <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
                         </xs:annotation>
                       </xs:attribute>
                     </xs:extension>
@@ -1764,7 +1760,7 @@
                 <xs:documentation>
                   List of timed deployments of mass-drug-administration.
                 </xs:documentation>
-                <xs:appinfo>name:Mass administration;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Mass administration;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -1773,7 +1769,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1793,15 +1789,15 @@
                 <xs:documentation>List of ages at which vaccination takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 </xs:documentation>
-                <xs:appinfo>name:Age-based vaccination;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Age-based vaccination;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
-                  List of timed mass vaccinations in the community
+                  List of timed mass vaccinations in the communitsy
                 </xs:documentation>
-                <xs:appinfo>name:Mass vaccination;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Mass vaccination;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -1810,7 +1806,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1830,7 +1826,7 @@
                 <xs:documentation>List of ages at which IPTi/IPTc deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 </xs:documentation>
-                <xs:appinfo>name:Age-based IPT deployment;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Age-based IPT deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="timed" type="massCumList">
@@ -1847,7 +1843,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1867,13 +1863,13 @@
                 <xs:documentation>List of ages at which bed-net deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 </xs:documentation>
-                <xs:appinfo>name:Age-based bed-net deployment;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Age-based bed-net deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
-                  List of timed ITN deployment in the community
+                  List of timed ITN deployment in the communitsy
                 </xs:documentation>
                 <xs:appinfo>name:Mass ITN deployment;</xs:appinfo>
               </xs:annotation>
@@ -1884,7 +1880,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1910,7 +1906,7 @@
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
-                  List of timed IRS deployment in the community
+                  List of timed IRS deployment in the communitsy
                 </xs:documentation>
                 <xs:appinfo>name:Mass IRS deployment;</xs:appinfo>
               </xs:annotation>
@@ -1921,7 +1917,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1949,7 +1945,7 @@
             <xs:element minOccurs="0" name="timed" type="massCumList">
               <xs:annotation>
                 <xs:documentation>
-                  List of timed mosquito deterrent deployment in the community
+                  List of timed mosquito deterrent deployment in the communitsy
                 </xs:documentation>
                 <xs:appinfo>name:Mass deployment;</xs:appinfo>
               </xs:annotation>
@@ -1960,7 +1956,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1994,7 +1990,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2058,7 +2054,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2066,7 +2062,7 @@
       <xs:element minOccurs="0" name="immuneSuppression">
         <xs:annotation>
           <xs:documentation>
-            Removes all exposure-related immunity gained over time by hosts
+            Removes all exposure-related immunitsy gained over time by hosts
             without removing infections.
             
             Hypothetical, but potentially useful to simulate scenarios with
@@ -2084,7 +2080,7 @@
         <xs:annotation>
           <xs:documentation>
             Used to simulate R_0. First, infections should be eliminated,
-            immunity removed, and the population given an effective transmission-
+            immunitsy removed, and the population given an effective transmission-
             blocking vaccine (not done by this intervention). Then this
             intervention may be used to: pick one human, infect him, administer
             a fully effective Preerythrocytic vaccine and remove
@@ -2171,7 +2167,7 @@
                 <xs:documentation>
                   List of timed mosquito larviding deployment
                 </xs:documentation>
-                <xs:appinfo>name:Larviciding deployment;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Larviciding deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -2180,7 +2176,7 @@
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2189,7 +2185,7 @@
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
-        <xs:appinfo>units:string;name:Intervention;</xs:appinfo>
+        <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2219,7 +2215,7 @@
         <xs:documentation>
           Maximum age of eligible individuals (defaults to 100)
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute default="0" name="minAge" type="xs:double">
@@ -2227,7 +2223,7 @@
         <xs:documentation>
           Minimum age of eligible individuals (defaults to 0)
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
+        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="coverage" type="xs:double" use="required">
@@ -2235,7 +2231,7 @@
         <xs:documentation>
           Coverage of intervention
         </xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute default="false" name="cohort" type="xs:boolean">
@@ -2243,7 +2239,7 @@
         <xs:documentation>
           Restrict distribution to chosen cohort.
         </xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2289,7 +2285,7 @@
         <xs:documentation>
           Coverage of intervention
         </xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Proportion covered;</xs:appinfo>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion covered;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute default="false" name="cohort" type="xs:boolean">
@@ -2297,7 +2293,7 @@
         <xs:documentation>
           Restrict distribution to chosen cohort (default: false).
         </xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Cohort only;</xs:appinfo>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute default="0" name="begin" type="xs:int">
@@ -2372,7 +2368,7 @@
             more doses are given than there are values in this list, the last
             value is repeated.
           </xs:documentation>
-          <xs:appinfo>units:Proportion;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -2392,7 +2388,7 @@
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>Name of vaccine</xs:documentation>
-        <xs:appinfo>units:string;name:Vaccine;</xs:appinfo>
+        <xs:appinfo>type:string;name:Vaccine;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2405,7 +2401,7 @@
               <xs:documentation>
                 Name of age specific intervention
               </xs:documentation>
-              <xs:appinfo>units:string;name:Age specific intervention;</xs:appinfo>
+              <xs:appinfo>type:string;name:Age specific intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="freq" type="xs:double" use="required">
@@ -2413,7 +2409,7 @@
               <xs:documentation>
                 Frequency of parasite genotype
               </xs:documentation>
-              <xs:appinfo>name:Frequency;</xs:appinfo>
+              <xs:appinfo>type:double;name:Frequency;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="ACR" type="xs:double" use="required">
@@ -2421,7 +2417,7 @@
               <xs:documentation>
                 Adequate clinical response (proportion)
               </xs:documentation>
-              <xs:appinfo>name:ACR;</xs:appinfo>
+              <xs:appinfo>type:double; units: dimensionless; min:0, max:1.0;name:ACR;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="proph" type="xs:int" use="required">
@@ -2429,7 +2425,7 @@
               <xs:documentation>
                 Prophylactic period
               </xs:documentation>
-              <xs:appinfo>name:Prophylactic period;</xs:appinfo>
+              <xs:appinfo>type:integer; units:time-step;name:Prophylactic period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="tolPeriod" type="xs:int" use="required">
@@ -2437,7 +2433,7 @@
               <xs:documentation>
                 Tolerance period
               </xs:documentation>
-              <xs:appinfo>name:Tolerance period;</xs:appinfo>
+              <xs:appinfo>units:time-step;type:integer; name:Tolerance period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="atten" type="xs:double" use="required">
@@ -2445,7 +2441,7 @@
               <xs:documentation>
                 Tolerance period
               </xs:documentation>
-              <xs:appinfo>name:Tolerance period;</xs:appinfo>
+              <xs:appinfo>units:time-step;type:double;name:Tolerance period;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2454,13 +2450,13 @@
     <xs:attribute name="iptiEffect" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Description of ipti effect</xs:documentation>
-        <xs:appinfo>units:List of Elementes;name:Description of ipti effect;</xs:appinfo>
+        <xs:appinfo>type:list of elements;name:Description of ipti effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>Name of IPT intervention</xs:documentation>
-        <xs:appinfo>units:string;name:IPT name;</xs:appinfo>
+        <xs:appinfo>type:string;name:IPT name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2480,7 +2476,7 @@
           
           See also &quot;propActing&quot; (proportion of bits for which net acts).
         </xs:documentation>
-          <xs:appinfo>units:none;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="holeRate" type="LognormalSample">
@@ -2567,28 +2563,73 @@
           proportion of nets remaining in use should match this decay function
           over time.
         </xs:documentation>
-          <xs:appinfo>units:none;name:Attrition of nets;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;name:Attrition of nets;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="unbounded" name="anophelesParams">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="ITNDeterrency">
-              <xs:annotation>
-                <xs:documentation>
-                Effect of net on attractiveness of humans to mosquitoes relative to
-                an unprotected adult human. Parameterisations should take into
-                account that mosquitoes do not always bite indoors.
-                
-                Attractiveness of the human is multiplied by
-                exp(log(H)×h + log(P)×p + log(I)×h×p
-                where H, P and I are the hole, insecticide and interaction factors
-                respectively, h=exp(-holeIndex×holeScalingFactor) and
-                p=1−exp(-insecticideContent×insecticideScalingFactor).
-                </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+            <xs:choice>
+              <xs:element name="deterrency" type="ITNDeterrency">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on attractiveness of humans to mosquitoes relative to
+                  an unprotected adult human. Parameterisations should take into
+                  account that mosquitoes do not always bite indoors.
+                  
+                  Attractiveness of the human is multiplied by
+                  exp(log(H)×h + log(P)×p + log(I)×h×p
+                  where H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=exp(-holeIndex×holeScalingFactor) and
+                  p=1−exp(-insecticideContent×insecticideScalingFactor).
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="twoStageDeterrency">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on attractiveness of humans to mosquitoes relative to
+                  an unprotected adult human. Parameterisations should take into
+                  account that mosquitoes do not always bite indoors.
+                  
+                  This deterrency model multiplies human attractiveness by
+                  pEnt×pAtt divided by a base factor to normalise the output to
+                  1 when there are no nets.
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:all>
+                    <xs:element name="entering" type="IRSDeterrency">
+                      <xs:annotation>
+                        <xs:documentation>
+                          pEnt represents the relative probability of entering due to
+                          ITNs: pEnt = exp(log(P)×p) where P is the insecticide
+                          factor and 
+                          p=1−exp(-insecticideContent×insecticideScalingFactor).
+                        </xs:documentation>
+                        <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                    <xs:element name="attacking" type="ITNKillingEffect">
+                      <xs:annotation>
+                        <xs:documentation>
+                          pAtt represents the relative probability of attacking a human
+                          after entering a house due to ITNs (i.e. of feeding/dying vs.
+                          flying off): pAtt = B + H×h + P×p + I×h×p
+                          where B is the base (without net) probability; H, P and
+                          I are the hole, insecticide and interaction factors
+                          respectively, h=exp(-holeIndex×holeScalingFactor) and
+                          p=1−exp(-insecticideContent×insecticideScalingFactor).
+                        </xs:documentation>
+                        <xs:appinfo>units:dimensionless;name:RA (attacking)</xs:appinfo>
+                      </xs:annotation>
+                    </xs:element>
+                  </xs:all>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
             <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
               <xs:annotation>
                 <xs:documentation>
@@ -2607,7 +2648,7 @@
                 To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                 B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="postprandialKillingEffect" type="ITNKillingEffect">
@@ -2628,7 +2669,7 @@
                 To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                 B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -2652,7 +2693,7 @@
               
               See also &quot;usage&quot; (proportion of time nets are used by humans).
             </xs:documentation>
-              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which net acts;</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which net acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2694,7 +2735,7 @@
                 Attractiveness of the human is multiplied this factor times
                 survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="preprandialKillingEffect" type="inputValue">
@@ -2709,7 +2750,7 @@
                 
                 Killing proportion is this factor multiplied by survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="postprandialKillingEffect" type="inputValue">
@@ -2722,7 +2763,7 @@
                 
                 Killing proportion is this factor multiplied by survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -2744,7 +2785,7 @@
               relative attractiveness and survival factors are
               base*(1-propActing) + intervention_factor*propActing.
             </xs:documentation>
-              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2799,7 +2840,7 @@
                 where P is the insecticide factor,
                 p=1−exp(-insecticideContent×insecticideScalingFactor).
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="preprandialKillingEffect" type="IRSKillingEffect">
@@ -2820,7 +2861,7 @@
                 Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="postprandialKillingEffect" type="IRSKillingEffect">
@@ -2839,7 +2880,7 @@
                 Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:none;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -2848,7 +2889,7 @@
               <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species</xs:appinfo>
+              <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute default="1" name="propActive" type="xs:double">
@@ -2861,7 +2902,7 @@
               relative attractiveness and survival factors are
               base*(1-propActing) + intervention_factor*propActing.
             </xs:documentation>
-              <xs:appinfo>units:none;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
+              <xs:appinfo>type:double;units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -2875,12 +2916,12 @@
           Value expected to be at least 0. Negative values are not
           necessarily invalid, but allow nets to increase transmission.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
+        <xs:appinfo>type:double;units:none;name:Insecticide factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
+        <xs:appinfo>type:double;units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2889,7 +2930,7 @@
       <xs:extension base="IRSDeterrency">
         <xs:attribute name="baseFactor" type="xs:double" use="required">
           <xs:annotation>
-            <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>
+            <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -2930,7 +2971,7 @@
       <xs:extension base="ITNDeterrency">
         <xs:attribute name="baseFactor" type="xs:double" use="required">
           <xs:annotation>
-            <xs:appinfo>units:none;name:Probability of mosquito death without intervention</xs:appinfo>
+            <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -2942,7 +2983,7 @@
         Descriptions of initial effectiveness of the effects of
         larviciding interventions.
       </xs:documentation>
-      <xs:appinfo>units:None;min:0;max:1;name:Larviciding;</xs:appinfo>
+      <xs:appinfo>units:dimensionless;min:0;max:1;name:Larviciding;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="duration" type="intValue">
@@ -2958,7 +2999,7 @@
           <xs:documentation>
                   Give the proportion of larvae killed by the larviciding
            </xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Effectiveness;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Effectiveness;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -2967,7 +3008,7 @@
         <xs:documentation>
           Name of the affected anopheles-mosquito species.
         </xs:documentation>
-        <xs:appinfo>name:Mosquito species</xs:appinfo>
+        <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -2977,7 +3018,7 @@
         Descriptions of initial effectiveness of each of the effects of
         interventions. Decay is specified by a separate element (ITNDecay etc.)
       </xs:documentation>
-      <xs:appinfo>units:None;min:0;max:1;name:Deterrency;</xs:appinfo>
+      <xs:appinfo>units:dimensionless;min:0;max:1;name:Deterrency;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="deterrency" type="inputValue">
@@ -2985,7 +3026,7 @@
           <xs:documentation>
                   One minus this multiplies the host's availability.
                 </xs:documentation>
-          <xs:appinfo>units:None;min:0;max:1;name:Deterrency;</xs:appinfo>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Deterrency;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -2994,7 +3035,7 @@
         <xs:documentation>
           Name of the affected anopheles-mosquito species.
         </xs:documentation>
-        <xs:appinfo>name:Mosquito species</xs:appinfo>
+        <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -3009,13 +3050,13 @@
               Description of transmission setting for models without vector control interventions
               (included for backward compatibility)
             </xs:documentation>
-            <xs:appinfo>units:List of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
+            <xs:appinfo>type:list of elements;name:Transmission setting (vector control not enabled);</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="vector">
           <xs:annotation>
-            <xs:documentation>Parameters of the transmission model.</xs:documentation>
-            <xs:appinfo>units:List of elements;name:Transmission setting (vector control enabled);</xs:appinfo>
+            <xs:documentation>Parameters of the transmission model</xs:documentation>
+            <xs:appinfo>type:list of elements;name:Transmission setting (vector control enabled);</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
@@ -3028,7 +3069,7 @@
                         Name of this species of non human hosts (must match up
                         with those described per anopheles section).
                       </xs:documentation>
-                      <xs:appinfo>name:Species of alternative host;</xs:appinfo>
+                      <xs:appinfo>type:string;name:Species of alternative host;</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                   <xs:attribute name="number" type="xs:double" use="required">
@@ -3036,6 +3077,7 @@
                       <xs:documentation>
                         Population size of this non-human host.
                       </xs:documentation>
+                      <xs:appinfo>type:double;units:Number;name:Population size of alternative host species;</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                 </xs:complexType>
@@ -3050,7 +3092,7 @@
         <xs:documentation>
           Name of entomology data
         </xs:documentation>
-        <xs:appinfo>units:string;name:Entomology dataset;</xs:appinfo>
+        <xs:appinfo>type:string;name:Entomology dataset name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="mode" use="required">
@@ -3078,7 +3120,7 @@
           If set, the annual EIR (for all species of vector) is scaled to this
           level; can be omitted if not needed.
         </xs:documentation>
-        <xs:appinfo>units:Infectious bites per adult per year;name:Override annual EIR;</xs:appinfo>
+        <xs:appinfo>type:double;units:Infectious bites per adult per year;name:Override annual EIR;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -3089,7 +3131,7 @@
     <xs:attribute name="eipDuration" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>The duration of sporogony in days</xs:documentation>
-        <xs:appinfo>name:Duration of sporogony (days);</xs:appinfo>
+        <xs:appinfo>type:integer;units:Days;name:Duration of sporogony;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -3097,12 +3139,12 @@
     <xs:annotation>
       <xs:documentation>
       In the non-vector model, EIR is input as a sequence of daily values.
-      There must be at least a years' worth of entries (365), and if there
+      There must be at least one years' worth of entries (365), and if there
       are more, values are wrapped and averaged (i.e. value for first day
       of year is taken as the mean of values for days 0, 365+0, 2*365+0,
       etc.).
       </xs:documentation>
-      <xs:appinfo>units:Infectious bites per adult per day;name:Daily Entomological Inoculation Rate;exposed:false;</xs:appinfo>
+      <xs:appinfo>type:double;units:Infectious bites per adult per day;name:Daily Entomological Inoculation Rate;exposed:false;</xs:appinfo>
     </xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:double">
@@ -3110,7 +3152,7 @@
           <xs:annotation>
             <xs:documentation>
             </xs:documentation>
-            <xs:appinfo>name:Time origin of EIR sequence;exposed:false;</xs:appinfo>
+            <xs:appinfo>type:string;name:Time origin of EIR sequence;exposed:false;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
@@ -3121,14 +3163,14 @@
       <xs:documentation>Description of input EIR for
        one specific vector species in terms of a Fourier approximation
        to the ln of the EIR during the burn in period</xs:documentation>
-      <xs:appinfo>name:Description of input EIR for one vector;</xs:appinfo>
+      <xs:appinfo>type:list of elements;name:Description of input EIR for one vector;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="seasonality">
         <xs:annotation>
-          <xs:documentation>Some specifier for the seasonality of transmission
+          <xs:documentation>Specifies the seasonality of transmission
           and optionally the level of annual transmission.</xs:documentation>
-          <xs:appinfo>name:Seasonality of transmission;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Seasonality of transmission;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
@@ -3141,7 +3183,7 @@
                     the a0 term is not needed; the annualEIR attribute of the
                     seasonality element should be used to scale EIR instead.
                   </xs:documentation>
-                  <xs:appinfo>units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
+                  <xs:appinfo>type:double;units:Infectious bites per adult per day;name:Fourier approximation to pre-intervention EIR;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
                   <xs:sequence>
@@ -3152,7 +3194,7 @@
                           specifies a1 and b1, the second a2 and b2, etc. Any number
                           (from 0 up) of pairs may be given.
                         </xs:documentation>
-                        <xs:appinfo>name:Pair of Fourier coefficients;units:none;</xs:appinfo>
+                        <xs:appinfo>name:Pair of Fourier coefficients;type:double;</xs:appinfo>
                       </xs:annotation>
                       <xs:complexType>
                         <xs:attribute name="a" type="xs:double" use="required">
@@ -3161,7 +3203,7 @@
                               a_n parameter of Fourier approximation to ln(EIR) for
                               some natural number n.
                             </xs:documentation>
-                            <xs:appinfo>name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                            <xs:appinfo>type:double;name:a_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
                           </xs:annotation>
                         </xs:attribute>
                         <xs:attribute name="b" type="xs:double" use="required">
@@ -3170,7 +3212,7 @@
                               b_n parameter of Fourier approximation to ln(EIR) for
                               some natural number n.
                             </xs:documentation>
-                            <xs:appinfo>name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
+                            <xs:appinfo>type:double;name:b_n parameter of Fourier approximation to ln(EIR);</xs:appinfo>
                           </xs:annotation>
                         </xs:attribute>
                       </xs:complexType>
@@ -3181,7 +3223,7 @@
                       <xs:documentation>
                         Rotation angle defining the origin of the Fourier approximation to ln (EIR)
                       </xs:documentation>
-                      <xs:appinfo>units:radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
+                      <xs:appinfo>type:double;units:Radians;name:Rotation angle defining the origin of the Fourier approximation to ln (EIR);</xs:appinfo>
                     </xs:annotation>
                   </xs:attribute>
                 </xs:complexType>
@@ -3194,7 +3236,7 @@
                     
                     List should contain twelve entries: January to December.
                   </xs:documentation>
-                  <xs:appinfo>name:List of montly values;</xs:appinfo>
+                  <xs:appinfo>name:List of monthly values;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
                   <xs:sequence>
@@ -3215,11 +3257,11 @@
                         
                         1) none: no smoothing (step function)
                         
-                        2) fourier: a Fourier series (with terms up to a2/b2)
+                        2) Fourier: a Fourier series (with terms up to a2/b2)
                         is fit to the sequence of monthly values and used to
                         generate a smoothed list of daily values.
                       </xs:documentation>
-                      <xs:appinfo>name:Smoothing function;</xs:appinfo>
+                      <xs:appinfo>type:string;name:Smoothing function;</xs:appinfo>
                     </xs:annotation>
                     <xs:simpleType>
                       <xs:restriction base="xs:string">
@@ -3237,7 +3279,7 @@
                     
                     List should contain 365 entries: 1st January to 31st December.
                   </xs:documentation>
-                  <xs:appinfo>name:List of daily values;</xs:appinfo>
+                  <xs:appinfo>type:list of elements;name:List of daily values;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
                   <xs:sequence>
@@ -3292,7 +3334,7 @@
               case (if scaledAnnualEIR is also not specified) transmission depends
               on all parameters of the vector. With some seasonality inputs,
               however, this parameter must be specified.</xs:documentation>
-              <xs:appinfo>name:Annual EIR;units:inoculations per adult per annum;min:0;</xs:appinfo>
+              <xs:appinfo>type:double;name:Annual EIR;units:Inoculations per adult per annum;min:0;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -3302,38 +3344,38 @@
           <xs:documentation>Parameters describing the feeding cycle and human
           mosquito interaction of a single species of anopheles mosquito.
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Mosquito feeding cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
             <xs:element name="mosqRestDuration" type="intValue">
               <xs:annotation>
                 <xs:documentation>name:Duration of the resting period of the vector (days);</xs:documentation>
-                <xs:appinfo>name:Duration of the resting period of the vector (days);</xs:appinfo>
+                <xs:appinfo>type:integer;units:Days;name:Duration of the resting period of the vector;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="extrinsicIncubationPeriod" type="intValue">
               <xs:annotation>
                 <xs:documentation>name:Extrinsic incubation period (days)</xs:documentation>
-                <xs:appinfo>name:Extrinsic incubation period (days);</xs:appinfo>
+                <xs:appinfo>type:integer;units:Days;name:Extrinsic incubation period;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqLaidEggsSameDayProportion" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Proportion of mosquitoes host seeking on same day as ovipositing</xs:documentation>
-                <xs:appinfo>name:Proportion of mosquitoes host seeking on same day as ovipositing;</xs:appinfo>
+                <xs:appinfo>type:double;units:Proportion;name:Proportion of mosquitoes host seeking on same day as ovipositing;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqSeekingDuration" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Duration of the host-seeking period of the vector (days)</xs:documentation>
-                <xs:appinfo>name:Duration of the host-seeking period of the vector (days);</xs:appinfo>
+                <xs:appinfo>type:double;units:Days;name:Duration of the host-seeking period of the vector;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqSurvivalFeedingCycleProbability" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito survives the feeding cycle</xs:documentation>
-                <xs:appinfo>name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
+                <xs:appinfo>type:double;units:Proportion;name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="availabilityVariance" type="inputValue">
@@ -3347,19 +3389,19 @@
             <xs:element name="mosqProbBiting" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito succesfully bites chosen host</xs:documentation>
-                <xs:appinfo>name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
+                <xs:appinfo>type:BetaMeanSample;name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbFindRestSite" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
-                <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
+                <xs:appinfo>type:BetaMeanSample;name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbResting" type="BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
-                <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
+                <xs:appinfo>type:BetaMeanSample;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbOvipositing" type="inputValue">
@@ -3371,14 +3413,14 @@
             <xs:element name="mosqHumanBloodIndex" type="inputValue">
               <xs:annotation>
                 <xs:documentation>The proportion of resting mosquitoes which fed on human blood during the last feed.</xs:documentation>
-                <xs:appinfo>name:Human blood index;</xs:appinfo>
+                <xs:appinfo>type:double;units:Proportion;name:Human blood index;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:all>
           <xs:attribute name="minInfectedThreshold" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>If less than this many mosquitoes remain infected, transmission is interrupted.</xs:documentation>
-              <xs:appinfo>name:Min infected threshold;min:0;</xs:appinfo>
+              <xs:appinfo>type:double;name:Mininum infected threshold for mosquitos;min:0;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -3388,7 +3430,7 @@
           <xs:documentation>
             Parameters describing the life-cycle of this species of mosquito
           </xs:documentation>
-          <xs:appinfo>name:Mosquito life cycle parameters;</xs:appinfo>
+          <xs:appinfo>type:list of elements;name:Mosquito life cycle parameters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -3408,7 +3450,7 @@
                       <xs:documentation>
                         Parameters for the larval stage of development
                       </xs:documentation>
-                      <xs:appinfo>name:Larval stage;</xs:appinfo>
+                      <xs:appinfo>type:list of elements;name:Larval stage;</xs:appinfo>
                     </xs:annotation>
                     <xs:sequence>
                       <xs:element maxOccurs="unbounded" name="daily">
@@ -3426,10 +3468,10 @@
                           <xs:attribute name="resourceUsage" type="xs:double" use="required">
                             <xs:annotation>
                               <xs:documentation>
-                                Resource usage over larval stage of development.
+                                Resource usage during larval stage of development.
                                 Units are arbitrary.
                               </xs:documentation>
-                              <xs:appinfo>name:Resource usage;units:X;</xs:appinfo>
+                              <xs:appinfo>type:double;name:Resource usage;units:X;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                           <xs:attribute name="effectCompetition" type="xs:double" use="required">
@@ -3437,7 +3479,7 @@
                               <xs:documentation>
                                 Effect of competition over resources on development.
                               </xs:documentation>
-                              <xs:appinfo>name:Effect competition;units:none;</xs:appinfo>
+                              <xs:appinfo>type:double;name:Effect of competition;units:none;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                         </xs:complexType>
@@ -3452,7 +3494,7 @@
                 <xs:documentation>
                   Parameters for the pupal stage of development
                 </xs:documentation>
-                <xs:appinfo>name:Pupal stage;</xs:appinfo>
+                <xs:appinfo>type:list of elements;name:Pupal stage;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
@@ -3461,7 +3503,7 @@
                   The total number of female eggs laid by a female
                   mosquito at the conclusion to a feeding cycle.
                 </xs:documentation>
-                <xs:appinfo>name:Eggs laid by ovipositing mosquito;</xs:appinfo>
+                <xs:appinfo>type:integer; units: Eggs per feeding cycle; name:Eggs laid by ovipositing mosquito;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:all>
@@ -3469,24 +3511,65 @@
             <xs:annotation>
               <xs:documentation>
                 An estimate of mean annual availability of resources to larvae.
-                Used to set the resource usage fitting algorithm going; if this
+                Used to get the resource usage fitting algorithm going; if the
                 algorithm fails to fit the resource availability then tweaking
                 this parameter may help. In other cases tweaking this parameter
                 shouldn't be necessary.
                 
-                Default value is 10⁸ (1e8). Units are arbitrary but the same as
+                Default value is 10⁸ (1e8). Units are arbitrary but must be the same as
                 those used by the resourceUsage parameter.
               </xs:documentation>
-              <xs:appinfo>name:Estimate of larval resources;units:X</xs:appinfo>
+              <xs:appinfo>units: see resourceUsage; type: double;name:Estimate of larval resources;units:X</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="simpleMPD">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters describing the simple mosquito population dynamics model.
+            
+            This is a simpler version of the life-cycle model, requiring less
+            parameters and with much simpler initialisation.
+          </xs:documentation>
+          <xs:appinfo>type:list of elements;name:Simple Mosq-Pop-Dynamics parameters;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="developmentDuration" type="intValue">
+              <xs:annotation>
+                <xs:documentation>
+                Duration from egg laying to emergence in days.
+                </xs:documentation>
+                <xs:appinfo>type:integer; units: Days; name:Duration; min:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="developmentSurvival" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                Probability that mosquito survives from the egg being laid to emergence,
+                given no resouce limitations (no density constraints).
+                </xs:documentation>
+                <xs:appinfo>type:double; units:Proportion; name:Probability of survival; min:0; max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
+              <xs:annotation>
+                <xs:documentation>
+                  The total number of female eggs laid by a female
+                  mosquito at the conclusion to a feeding cycle.
+                </xs:documentation>
+                <xs:appinfo>type:integer; units: Eggs per feeding cycle; name:Eggs laid by ovipositing mosquito;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:all>
         </xs:complexType>
       </xs:element>
       <xs:element maxOccurs="unbounded" minOccurs="0" name="nonHumanHosts">
         <xs:annotation>
           <xs:documentation>Non human host parameters, per type of host (must
           match up with non-species-specific parameters).</xs:documentation>
-          <xs:appinfo>units:List of elements;</xs:appinfo>
+          <xs:appinfo>type:list of elements; min:0; name:Alternative (non-human) host paramters;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:all>
@@ -3497,32 +3580,32 @@
                   non-human hosts; the sum of this across all non-human hosts
                   must be 1.
                 </xs:documentation>
-                <xs:appinfo>name:Relative availability of non-human host (ξ_i);</xs:appinfo>
+                <xs:appinfo>units:Proportion;type:double; name:Relative availability of non-human host (ξ_i);</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbBiting" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully biting host</xs:documentation>
-                <xs:appinfo>name:Probability of mosquito successfully biting host;</xs:appinfo>
+                <xs:appinfo>units:Proportion;type:double;name:Probability of mosquito successfully biting host;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbFindRestSite" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
-                <xs:appinfo>name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
+                <xs:appinfo>units:Proportion;type:double;name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbResting" type="inputValue">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
-                <xs:appinfo>name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
+                <xs:appinfo>units:Proportion;type:double;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:all>
           <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Identifier for this category of non-human hosts</xs:documentation>
-              <xs:appinfo>name:Identifier for this category of non-human hosts;</xs:appinfo>
+              <xs:appinfo>type:string;name:Identifier for this category of non-human hosts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -3531,19 +3614,19 @@
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Identifier for this anopheles species</xs:documentation>
-        <xs:appinfo>name:Identifier for this anopheles species;</xs:appinfo>
+        <xs:appinfo>type:string;name:Identifier for this anopheles species;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="propInfected" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>Initial guess of the proportion of mosquitoes which are infected, o: O_v(t) = o*N_v(t). Only used as a starting value.</xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Initial guess of proportion of mosquitoes infected (ρ_O);exposed:false;</xs:appinfo>
+        <xs:appinfo>units:Proportion;min:0;max:1;name:Initial estimate of proportion of mosquitoes infected (ρ_O);exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="propInfectious" type="xs:double" use="required">
       <xs:annotation>
-        <xs:documentation>Initial guess of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
-        <xs:appinfo>units:Proportion;min:0;max:1;name:Initial guess of proportion of mosquitoes infectious (ρ_S);exposed:false;</xs:appinfo>
+        <xs:documentation>Initial estimate of the proportion of mosquitoes which are infectious, s: S_v(t) = s*N_v(t). Used as a starting value and then fit.</xs:documentation>
+        <xs:appinfo>units:Proportion;min:0;max:1;name:Initial estimate of proportion of mosquitoes infectious (ρ_S);exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -3552,7 +3635,7 @@
       <xs:documentation>
       Parameters associated with a mosquito development stage.
       </xs:documentation>
-      <xs:appinfo>name:Mosquito development-stage parameters;</xs:appinfo>
+      <xs:appinfo>type:list of elements; name:Mosquito development-stage parameters;</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="duration" type="xs:int" use="required">
       <xs:annotation>
@@ -3560,7 +3643,7 @@
         Duration of the stage (i.e. length of time mosquito is an
         egg/larva/pupa).
         </xs:documentation>
-        <xs:appinfo>name:Duration;</xs:appinfo>
+        <xs:appinfo>type:integer; units: Days; name:Duration;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="survival" type="xs:double" use="required">
@@ -3570,7 +3653,7 @@
         hatching, a larva becoming a pupa or a pupa emerging as an adult,
         at the start of that stage).
         </xs:documentation>
-        <xs:appinfo>name:Probability of survival;</xs:appinfo>
+        <xs:appinfo>type:double; units:Proportion; name:Probability of survival;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -3606,7 +3689,7 @@
                             <xs:documentation>
                                 Frequency, relative to the total frequency of all alleles for this drug/locus.
                               </xs:documentation>
-                            <xs:appinfo>units:relative frequency;min:0;name:Relative frequency;</xs:appinfo>
+                            <xs:appinfo>type:double; units:dimensionless;min:0;name:Relative frequency;</xs:appinfo>
                           </xs:annotation>
                         </xs:element>
                         <xs:element name="max_killing_rate" type="xs:double">
@@ -3614,7 +3697,7 @@
                             <xs:documentation>
                                 k1 — Maximal parasite killing rate.
                               </xs:documentation>
-                            <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
+                            <xs:appinfo>type:double;units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
                           </xs:annotation>
                         </xs:element>
                         <xs:element name="IC50" type="xs:double">
@@ -3622,7 +3705,7 @@
                             <xs:documentation>
                                 Half maximal effect concentration.
                               </xs:documentation>
-                            <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
+                            <xs:appinfo>type:double;units:mg/l;min:0;name:IC50;</xs:appinfo>
                           </xs:annotation>
                         </xs:element>
                         <xs:element name="slope" type="xs:double">
@@ -3630,7 +3713,7 @@
                             <xs:documentation>
                                 n — Slope of the concentration effect curve
                               </xs:documentation>
-                            <xs:appinfo>units:no units;name:Slope of effect curve;</xs:appinfo>
+                            <xs:appinfo>type:double:units:dimensionless;name:Slope of effect curve;</xs:appinfo>
                           </xs:annotation>
                         </xs:element>
                       </xs:sequence>
@@ -3649,7 +3732,7 @@
                           Concentration below which drug's effects are deemed negligible and can
                           be removed from simulation.
                         </xs:documentation>
-                      <xs:appinfo>units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
+                      <xs:appinfo>type:double;units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="half_life" type="xs:double">
@@ -3657,7 +3740,7 @@
                       <xs:documentation>
                           Used to calculate elimination rate (which is: ln(2) / half_life).
                         </xs:documentation>
-                      <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
+                      <xs:appinfo>type:double;units:days;min:0;name:drug half-life;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="vol_dist" type="xs:double">
@@ -3665,7 +3748,7 @@
                       <xs:documentation>
                           Volume of Distribution
                         </xs:documentation>
-                      <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
+                      <xs:appinfo>type:double;units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:sequence>
