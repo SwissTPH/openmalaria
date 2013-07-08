@@ -68,8 +68,9 @@ namespace OM { namespace util {
 	
 	/** @brief Bug fixes in Descriptive & DescriptiveIPT within-host models.
 	*
-	* Really, the code makes more sense if all these are used. But, they are
-	* not always used in order to preserve consistant results.
+      * For new parameterisations, both MAX_DENS_CORRECTION and INNATE_MAX_DENS
+      * should be used. When using parameter sets from an old fitting run which
+      * didn't originally use these options, turn them off for consistency.
 	* 
 	* MAX_DENS_RESET is not used since it is unneeded when MAX_DENS_CORRECTION
 	* is present and wouldn't make sense when not. */

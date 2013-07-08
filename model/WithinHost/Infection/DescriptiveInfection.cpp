@@ -198,7 +198,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
     
     //Compute the proportion of parasites remaining after innate blood stage effect
     _density *= innateImmSurvFact;
-    // INNATE_MAX_DENS bug-fix: initially this wasn't enabled, now TODO
+    // INNATE_MAX_DENS bug-fix: initially this wasn't enabled. In new scenarios it is by default.
     if (util::ModelOptions::option (util::INNATE_MAX_DENS))
 	timeStepMaxDensity *= innateImmSurvFact;
     
