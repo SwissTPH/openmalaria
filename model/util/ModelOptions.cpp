@@ -100,6 +100,7 @@ namespace OM { namespace util {
 	// State of all default options:
 	bitset<NUM_OPTIONS> defaultOptSet;
 	defaultOptSet.set (MAX_DENS_CORRECTION);
+        defaultOptSet.set (INNATE_MAX_DENS);
 	
 	// Set optSet to defaults, then override any given in the XML file:
 	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
@@ -205,7 +206,7 @@ namespace OM { namespace util {
         if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
         
-        if( TimeStep::interval != 1 ){
+        if( TimeStep::interval == 5 ){
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
                 .set( DUMMY_WITHIN_HOST_MODEL )
@@ -222,14 +223,10 @@ namespace OM { namespace util {
                     throw xml_scenario_error (msg.str());
                 }
             }
-        }
-        if( TimeStep::interval != 5){
+        }else if( TimeStep::interval == 1 ){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
                 .set( ATTENUATION_ASEXUAL_DENSITY )
-                /* This is only relevant to 5-day, but enabled by default.
-                .set( MAX_DENS_CORRECTION ) */
-                .set( INNATE_MAX_DENS )
                 .set( IPTI_SP_MODEL )
                 .set( REPORT_ONLY_AT_RISK );
             
@@ -240,6 +237,10 @@ namespace OM { namespace util {
                     throw xml_scenario_error (msg.str());
                 }
             }
+        }else{
+            ostringstream msg;
+            msg << "Timestep interval set to " << TimeStep::interval << " days but only 1 and 5 days are supported.";
+            throw xml_scenario_error (msg.str());
         }
 	
 	// Convert from bitset to array. Bitset used purely for historical

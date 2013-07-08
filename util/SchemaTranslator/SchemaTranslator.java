@@ -17,45 +17,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import org.w3c.dom.*;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.ErrorHandler;
+import java.io.*;
+import java.lang.reflect.Method;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class SchemaTranslator {
@@ -64,7 +45,7 @@ public class SchemaTranslator {
     Document scenarioDocument;
     Element scenarioElement;
 
-    static final int CURRENT_VERSION = 30;
+    static final int CURRENT_VERSION = 31;
 
     private static int _required_version = CURRENT_VERSION;
     private enum SchemaName {
@@ -117,14 +98,20 @@ public class SchemaTranslator {
 
     public static double Standard_RELATIVE_ENTO_AV = 1.0;
     public static double Standard_NHH_NUMBER = 1.0;
+    
+    static class DocException extends Exception{
+        public DocException( String msg ){
+            super(msg);
+        }
+    }
 
     /** Returns all direct children of node with name name.
      *
      * Note: not the same as getElementsByTagName(), which finds all descendants. */
     public static List<Node> getChildNodes( Node node, String name ) {
-        ArrayList<Node> r = new ArrayList<Node>();
         NodeList children = node.getChildNodes();
         int l = children.getLength();
+        ArrayList<Node> r = new ArrayList<Node>();
         for ( int i = 0; i < l; ++i ) {
             if ( name.equals( children.item(i).getNodeName() ) )
                 r.add( children.item(i) );
@@ -136,10 +123,10 @@ public class SchemaTranslator {
      * As a compromise between compatibility and safety, this will throw if
      * there is more one sub-element with given name, but return null if there
      * are no elements with the given name. */
-    public static Element getChildElement( Node node, String name )throws Exception {
+    public static Element getChildElement( Node node, String name )throws DocException {
         List<Node> elts = getChildNodes( node, name );
         if ( elts.size() > 1 )
-            throw new Exception( "Expected "+node.getNodeName()+" not to have more than one sub-element with name "+name );
+            throw new DocException( "Expected "+node.getNodeName()+" not to have more than one sub-element with name "+name );
         else if ( elts.size() == 1 )
             return (Element) elts.get(0);
         else
@@ -150,7 +137,7 @@ public class SchemaTranslator {
      * If parent has a single existing element by name name, return that.
      * If it has none, create one and append it, then return it. Multiple
      * existing children by this name are not expected. */
-    private Element getOrCreateSubElt(Element parent, String name)throws Exception {
+    private Element getOrCreateSubElt(Element parent, String name)throws DocException {
         Element child = getChildElement(parent,name);
         if (child==null) {
             child = scenarioDocument.createElement(name);
@@ -159,7 +146,7 @@ public class SchemaTranslator {
         return child;
     }
     /** Check whether scenario uses a particular model option. */
-    public boolean usesOption( String name )throws Exception {
+    public boolean usesOption( String name )throws DocException {
         Element opts = (Element) scenarioElement.getElementsByTagName("ModelOptions").item(0);
         assert opts != null;
         for ( Node n : getChildNodes(opts,"option") ) {
@@ -567,7 +554,7 @@ public class SchemaTranslator {
                 }
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -651,7 +638,7 @@ public class SchemaTranslator {
                 }
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -692,7 +679,7 @@ public class SchemaTranslator {
                 .println("New attributes propInfected and propInfectious created with default values - please correct (for each anopheles section)!");
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -814,7 +801,7 @@ public class SchemaTranslator {
         try {
             monitoring = getChildElement(scenarioElement, "monitoring");
             surveys = getChildElement(monitoring, "surveys");
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -947,7 +934,7 @@ public class SchemaTranslator {
             clinical.setAttributeNode(healthSystemMemory);
 
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1025,7 +1012,7 @@ public class SchemaTranslator {
         try {
             demography = getChildElement(scenarioElement, "demography");
             entoData = getChildElement(scenarioElement, "entoData");
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1084,7 +1071,7 @@ public class SchemaTranslator {
             }
 
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1194,7 +1181,7 @@ public class SchemaTranslator {
             }
 
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1239,7 +1226,7 @@ public class SchemaTranslator {
                 // has always been used, apart from where zero sequelae is desired.
                 pSeqGroupValue = new double[] { 0.0132, 0.005 };
             }
-            if ( pSeqGroupLBound.length != pSeqGroupValue.length ) throw new Exception("length mismatch!");
+            if ( pSeqGroupLBound.length != pSeqGroupValue.length ) throw new DocException("length mismatch!");
             Element pSeqGroups = scenarioDocument.createElement("pSequelaeInpatient");
             for (int i = 0; i < pSeqGroupValue.length; ++i) {
                 Element group = scenarioDocument.createElement("group");
@@ -1259,7 +1246,7 @@ public class SchemaTranslator {
                 group.setAttribute("value",val);
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1285,7 +1272,7 @@ public class SchemaTranslator {
                 elt = next;
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1317,7 +1304,7 @@ public class SchemaTranslator {
                 }
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1384,7 +1371,7 @@ public class SchemaTranslator {
                 weight.setAttribute("multStdDev","0.14");   // rough figure from Tanzanian data
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1463,7 +1450,7 @@ public class SchemaTranslator {
 
             System.out.println("translated to 25");
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -1527,12 +1514,12 @@ public class SchemaTranslator {
                 return false;
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
     }
-    private boolean t26VecInterv (Element iDescs,List<Node> anophs, String descriptionElt, String decayElt) throws Exception {
+    private boolean t26VecInterv (Element iDescs,List<Node> anophs, String descriptionElt, String decayElt) throws DocException {
         class VIDesc {
             String function, L, k, initial;
         }
@@ -1820,8 +1807,6 @@ public class SchemaTranslator {
                             }
                             newElt = getOrCreateSubElt(interventions,"importedInfections");
 
-                            double stepsPerYear = 365.0 / Integer.parseInt(getChildElement(getChildElement(scenarioElement,"model"),"parameters").getAttribute("interval"));
-
                             Element timedII=getOrCreateSubElt(newElt,"timed");
                             List<Node> prevII=getChildNodes(timedII,"rate");
                             Element IINow;
@@ -1832,7 +1817,7 @@ public class SchemaTranslator {
                                 timedII.appendChild(IINow);
                                 IINow.setAttribute("time",intervTime);
                             }
-                            IINow.setAttribute("value",Double.toString(Double.parseDouble(oldElt.getTextContent())*stepsPerYear));
+                            IINow.setAttribute("value",Double.toString(Double.parseDouble(oldElt.getTextContent())*getStepsPerYear()));
                             // Now set the rate back to zero next time step, since this is what the old model did
                             Element IINext = scenarioDocument.createElement("rate");
                             timedII.appendChild(IINext);
@@ -1847,10 +1832,14 @@ public class SchemaTranslator {
                 interventions.removeChild(timed);
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
+    }
+
+    private double getStepsPerYear() throws DocException{
+        return 365.0 / Integer.parseInt(getChildElement(getChildElement(scenarioElement,"model"),"parameters").getAttribute("interval"));
     }
 
     /* ITN description changed. While Oliver has drawn up plans for how to
@@ -1951,7 +1940,7 @@ public class SchemaTranslator {
                 }
             }
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -2054,8 +2043,7 @@ public class SchemaTranslator {
                         double b2 = Double.parseDouble(eir.getAttribute("b2"));
                         double rAngle = Double.parseDouble(fS.getAttribute("EIRRotateAngle"));
                         double w = 2*Math.PI / 365;
-                        
-                        int Fn = 2;
+
                         for (int t=0; t<365; t++) {
                             double temp = a0;
                             double wt = w*t - rAngle;
@@ -2244,7 +2232,7 @@ public class SchemaTranslator {
             }
             
             return true;
-        } catch (Exception e) {
+        } catch (DocException e) {
             System.err.println("Error: "+e.getMessage());
             return false;
         }
@@ -2261,6 +2249,72 @@ public class SchemaTranslator {
         elt.setAttribute("variance","0");
         parent.removeAttribute(name);
         parent.appendChild(elt);
+    }
+    
+    /* Changes for Schema 31:
+    * 
+    * INNATE_MAX_DENS now defaults to true, but old scenarios have this explicitly set to false if not previously set to avoid changing results.
+    * Larviciding -> vectorPop generic intervention
+    */
+    public Boolean translate30To31() {
+        try{
+            Element model = getChildElement(scenarioElement, "model");
+            Element modelOpts = getChildElement(model, "ModelOptions");
+            if( !containsOption( modelOpts, "INNATE_MAX_DENS") ){
+                Element maxDensOpt = scenarioDocument.createElement("option");
+                maxDensOpt.setAttribute("name","INNATE_MAX_DENS");
+                maxDensOpt.setAttribute("value","false");
+                modelOpts.appendChild(maxDensOpt);
+            }
+
+            Element intervs = getChildElement(scenarioElement, "interventions");
+            Element larv = getChildElement( intervs, "larviciding" );
+            if( larv != null ){
+                // create new "vectorPop" parent
+                Element vectorPop = scenarioDocument.createElement( "vectorPop" );
+                intervs.appendChild( vectorPop );
+                vectorPop.appendChild( larv );
+                // set "name" attribute to name of larv elt if present otherwise insert a name
+                Attr oldName = larv.getAttributeNode( "name" );
+                String name = (oldName == null ? "simple larviciding" : oldName.getValue()) + " translated from schema 30";
+                larv.setAttribute( "name", name );
+                // update desc
+                Element desc = getChildElement( larv, "description" );
+                List<Node> anophs = getChildNodes( desc, "anopheles" );
+                for( Node anoph : anophs ){
+                    Element elt = (Element) anoph;
+                    Element dur = getChildElement( elt, "duration" );
+                    Element eff = getChildElement( elt, "effectiveness" );
+                    String durStr = dur.getAttribute( "value" );
+                    String effStr = eff.getAttribute( "value" );
+                    elt.removeChild( dur );
+                    elt.removeChild( eff );
+                    Element er = scenarioDocument.createElement( "emergenceReduction" );
+                    elt.appendChild( er );
+                    er.setAttribute( "initial", effStr );
+                    Element decay = scenarioDocument.createElement( "decay" );
+                    er.appendChild( decay );
+                    decay.setAttribute( "function", "step" );
+                    double durDbl = Double.parseDouble( durStr ) / getStepsPerYear();
+                    decay.setAttribute( "L", Double.toString( durDbl ) );
+                }
+                scenarioDocument.renameNode( larv, "", "intervention" );
+            }
+            return true;
+        } catch (DocException e) {
+            System.err.println("Error: "+e.getMessage());
+            return false;
+        }
+    }
+    private boolean containsOption( Element options, String name ){
+        List<Node> opts = getChildNodes(options, "option");
+        for( Node optNode : opts ){
+            Element opt = (Element) optNode;
+            if( opt.getAttribute("name").equals(name) ){
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

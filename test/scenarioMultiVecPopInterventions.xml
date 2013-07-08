@@ -184,17 +184,17 @@
         <description>
           <anopheles mosquito="gambiae_ss">
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
         </description>
@@ -214,35 +214,35 @@
           <anopheles mosquito="gambiae_ss">
             <!-- Any of the effects listed here can be removed. Each has independent decay. -->
             <seekingDeathRateIncrease initial="1">
-              <decay function="exponential" L="0.4"/>
+              <decay L="0.4" function="exponential"/>
             </seekingDeathRateIncrease>
             <probDeathOvipositing initial="0.1">
-              <decay function="step" L="0.2"/>
+              <decay L="0.2" function="step"/>
             </probDeathOvipositing>
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
             <seekingDeathRateIncrease initial="1">
-              <decay function="exponential" L="0.4"/>
+              <decay L="0.4" function="exponential"/>
             </seekingDeathRateIncrease>
             <probDeathOvipositing initial="0.1">
-              <decay function="step" L="0.2"/>
+              <decay L="0.2" function="step"/>
             </probDeathOvipositing>
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
             <seekingDeathRateIncrease initial="1">
-              <decay function="exponential" L="0.4"/>
+              <decay L="0.4" function="exponential"/>
             </seekingDeathRateIncrease>
             <probDeathOvipositing initial="0.1">
-              <decay function="step" L="0.2"/>
+              <decay L="0.2" function="step"/>
             </probDeathOvipositing>
             <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
         </description>

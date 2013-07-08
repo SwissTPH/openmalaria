@@ -177,23 +177,22 @@
   </monitoring>
   <interventions name="Full Set">
     <vectorPop>
-      <intervention name="larviciding">
+      <intervention name="simple larviciding translated from schema 30">
         <!-- Example larviciding (made up values) -->
         <description>
           <anopheles mosquito="gambiae_ss">
-            <!-- 80% effective larviciding for 18 (=0.246...*73) (5-day) timesteps -->
-            <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial=".8">
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="funestus">
-            <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial=".8">
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
           <anopheles mosquito="arabiensis">
-            <emergenceReduction initial="0.8">
-              <decay function="step" L="0.2465753424657534"/>
+            <emergenceReduction initial=".8">
+              <decay L="0.2465753424657534" function="step"/>
             </emergenceReduction>
           </anopheles>
         </description>
@@ -359,6 +358,7 @@
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+      <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <human>
