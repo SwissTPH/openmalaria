@@ -51,6 +51,9 @@ void ITNAnophelesParams::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse)
 {
+    if( _relativeAttractiveness.get() != 0 ){
+        throw util::unimplemented_exception( "multiple ITN interventions" );
+    }
     if (elt.getDeterrency().present())
         _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RADeterrency( params, elt.getDeterrency().get() ));
     else{

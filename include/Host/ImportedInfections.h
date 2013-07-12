@@ -45,7 +45,7 @@ namespace OM { namespace Host {
          *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
          *  is then used to predict if an human has imported the infection in the
          *  population or not. A maximum of one infection can be imported per
-         * intervention.
+         *  person.
          * 
          * @param pop The Population class encapsulating all humans */
         void import( Population& pop );

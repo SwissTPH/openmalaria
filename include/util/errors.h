@@ -22,7 +22,9 @@
 #define OM_util_errors
 
 #include <stdexcept>
+#include <vector>
 #include <boost/static_assert.hpp>
+#include <string.h>
 
 using namespace std;
 
@@ -79,6 +81,7 @@ namespace OM { namespace util {
         SumWeight,
         VectorFitting,
         InfLambda,
+        NotImplemented,
         Max
     }; }
     
@@ -99,11 +102,34 @@ namespace OM { namespace util {
         // for common errors, specify a unique TRACED_DEFAULT to help segregate
         // errors in BOINC server summaries; otherwise leave the default
         explicit base_exception(const string& msg, int code=Error::Default);
+        /** Get the classification. This should be some value of the
+         * Error::ErrorCodes enum. */
         inline int getCode() const{
             return errCode;
         }
+        /** Get the message. Use this as opposed to what() to enable overriding
+         * (without dealing with the messy details of how exactly each standard
+         * library defines what()). */
+        virtual const char* message() const{
+            return what();
+        }
     private:
         int errCode;
+    };
+    
+    /** Extension of base_exception for not-yet-implemented features. */
+    class unimplemented_exception : public base_exception {
+    public:
+        explicit unimplemented_exception(const string& msg);
+        
+        /** Complete the error message.
+         *
+         * Warning: this function is not very robust. References to the
+         * returned result should not survive beyond a second call to this
+         * function (from any unimplemented_exception object). */
+        virtual const char* message() const;
+        static vector<char> msg_buf;
+        static const string msg_pre;
     };
     
     /** Extension of base_exception which tries to get a stack trace. Also

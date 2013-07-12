@@ -78,6 +78,12 @@ IRSAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
+void IRSAnophelesParams::RelativeAttractiveness::oldDeterrency(double d){
+    if( lPF == lPF ){
+        throw util::unimplemented_exception( "multiple IRS interventions" );
+    }
+    lPF = d;
+}
 void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, const scnXml::IRSDeterrency& elt){
     double PF = elt.getInsecticideFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
@@ -115,7 +121,8 @@ void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, c
         cerr.flush();
     }
 #endif
-    lPF = log( PF );
+    // this just sets lPF, checking it wasn't set before
+    oldDeterrency( log( PF ) );
 }
 IRSAnophelesParams::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),

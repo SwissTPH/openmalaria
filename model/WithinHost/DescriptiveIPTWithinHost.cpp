@@ -39,6 +39,10 @@ DescriptiveIPTWithinHost::IPTiEffects DescriptiveIPTWithinHost::iptiEffect = NO_
 // -----  init  -----
 
 void DescriptiveIPTWithinHost::init (const scnXml::IPTDescription& xmlIPTI) {
+    if( iptiEffect != NO_IPT ){
+        throw util::unimplemented_exception( "multiple IPT interventions" );
+    }
+    
   if( !util::ModelOptions::option( IPTI_SP_MODEL ) ){
       throw util::xml_scenario_error ("IPTI interventions require IPT_SP_MODEL option");
   }

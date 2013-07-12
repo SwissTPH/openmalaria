@@ -96,7 +96,7 @@ private:
         
         // for the old model: use lPF instead as the deterrency
         inline double oldDeterrency() const { return lPF; }
-        inline void oldDeterrency(double d) { lPF = d; }
+        void oldDeterrency(double d);
         
         /** Set parameters.
          * 
